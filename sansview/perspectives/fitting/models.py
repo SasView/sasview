@@ -162,7 +162,11 @@ class ModelManager:
     plugins=[]
     ## Event owner (guiframe)
     event_owner = None
-    
+    def __init__(self):
+        """
+        """
+        self._getModelList()
+        
     def _getModelList(self):
         """
         List of models we want to make available by default
@@ -551,6 +555,11 @@ class ModelManager:
         return dictionary of models for fitpanel use 
         
         """
+        self.model_combobox.set_list("Shapes", self.shape_list)
+        self.model_combobox.set_list("Shape-Independent", self.shape_indep_list)
+        self.model_combobox.set_list("Structure Factors", self.struct_list)
+        self.model_combobox.set_list("Customized Models", self.plugins)
+        self.model_combobox.set_list("P(Q)*S(Q)", self.multiplication_factor)
         self.model_combobox.set_list("multiplication", self.multiplication_factor)
         self.model_combobox.set_list("Multi-Functions", self.multi_func_list)
         return self.model_combobox

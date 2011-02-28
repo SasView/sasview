@@ -14,6 +14,7 @@ class Calc2D(CalcThread):
     and I(qx, qy) = I(-qx, -qy) is assumed.
     """
     def __init__(self, x, y, data,model,smearer,qmin, qmax,qstep,
+                 id ,
                  completefn = None,
                  updatefn   = None,
                  yieldtime  = 0.01,
@@ -30,6 +31,7 @@ class Calc2D(CalcThread):
         self.x = x
         self.y = y
         self.data= data
+        self.page_id = id
         # the model on to calculate
         self.model = model
         self.smearer = smearer#(data=self.data,model=self.model)
@@ -114,14 +116,15 @@ class Calc2D(CalcThread):
         output[index_model] = value 
 
         elapsed = time.time()-self.starttime
-        self.complete( image = output,
-                       data = self.data , 
-                       model = self.model,
-                       elapsed = elapsed,
-                       index = index_model,
-                       qmin = self.qmin,
-                       qmax = self.qmax,
-                       qstep = self.qstep )
+        self.complete(image=output,
+                       data=self.data, 
+                       id=self.page_id,
+                       model=self.model,
+                       elapsed=elapsed,
+                       index=index_model,
+                       qmin=self.qmin,
+                       qmax=self.qmax,
+                       qstep=self.qstep)
         
 
 class Calc1D(CalcThread):
@@ -129,6 +132,7 @@ class Calc1D(CalcThread):
     Compute 1D data
     """
     def __init__(self, x, model,
+                 id,
                  data=None,
                  qmin=None,
                  qmax=None,
@@ -149,6 +153,7 @@ class Calc1D(CalcThread):
         self.qmin= qmin
         self.qmax= qmax
         self.model = model
+        self.page_id = id
         self.smearer= smearer
         self.starttime = 0
         
@@ -171,6 +176,7 @@ class Calc1D(CalcThread):
         elapsed = time.time() - self.starttime
        
         self.complete(x=self.x[index], y=output[index], 
+                      id=self.page_id,
                       elapsed=elapsed,index=index, model=self.model,
                                         data=self.data)
         

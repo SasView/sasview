@@ -10,20 +10,19 @@ class FitProblem:
         contains information about data and model to fit
         """
         ## data used for fitting
-        self.fit_data=None
+        self.fit_data = None
+        self.theory_data = None
         ## the current model
         self.model = None
         self.model_index = None
         ## if 1 this fit problem will be selected to fit , if 0 
         ## it will not be selected for fit
-        self.schedule=0
+        self.schedule = 0
         ##list containing parameter name and value
-        self.list_param=[]
+        self.list_param = []
         ## smear object to smear or not data1D
-        self.smearer= None
-        ## same as fit_data but with more info for plotting
-        ## axis unit info and so on see plottables definition
-        self.plotted_data=None
+        self.smearer = None
+        self.fit_tab_caption = ''
         ## fitting range
         self.qmin = None
         self.qmax = None
@@ -39,6 +38,7 @@ class FitProblem:
             model = self.model.clone()
         obj.model = model
         obj.fit_data = copy.deepcopy(self.fit_data)
+        obj.theory_data = copy.deepcopy(self.theory_data)
         obj.model = copy.deepcopy(self.model)
         obj.schedule = copy.deepcopy(self.schedule)
         obj.list_param = copy.deepcopy(self.list_param)
@@ -102,24 +102,24 @@ class FitProblem:
         """
         return self.model_index
     
-    def add_plotted_data(self,data):
+    def set_theory_data(self, data):
         """ 
         save a copy of the data select to fit
         
         :param data: data selected
         
         """
-        self.plotted_data = data
+        self.theory_data = data
         
 
-    def get_plotted_data(self):
+    def get_theory_data(self):
         """
         :return: list of data dList
         
         """
-        return self.plotted_data
+        return self.theory_data
 
-    def add_fit_data(self,data):
+    def set_fit_data(self,data):
         """ 
         save a copy of the data select to fit
         
@@ -180,4 +180,15 @@ class FitProblem:
         clear constraint info
         """
         self.list_param=[]
+        
+    def set_fit_tab_caption(self, caption):
+        """
+        """
+        self.fit_tab_caption = str(caption)
+        
+    def get_fit_tab_caption(self):
+        """
+        """
+        return self.fit_tab_caption
+   
    

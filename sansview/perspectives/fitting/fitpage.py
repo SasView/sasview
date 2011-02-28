@@ -37,11 +37,11 @@ class FitPage(BasicPage):
         on fit Panel window.
     """
     
-    def __init__(self,parent, page_info):
+    def __init__(self,parent, color='rand'):
         """ 
         Initialization of the Panel
         """
-        BasicPage.__init__(self, parent, page_info)
+        BasicPage.__init__(self, parent, color=color)
  
         ## draw sizer
         self._fill_datainfo_sizer()
@@ -50,14 +50,7 @@ class FitPage(BasicPage):
         self._fill_model_sizer( self.sizer1)
         self._get_defult_custom_smear()
         self._fill_range_sizer() 
-        
-        if self.data is None:
-            self.formfactorbox.Disable()
-            self.structurebox.Disable()
-        else:
-            self.smearer = smear_selection(self.data, self.model)
-            if self.smearer ==None:
-                self.enable_smearer.Disable()
+        self._set_smear(self.data)
         ## to update the panel according to the fit engine type selected
         self.Bind(EVT_FITTER_TYPE,self._on_engine_change)
         self.Bind(EVT_FIT_STOP,self._on_fit_complete)
@@ -157,7 +150,9 @@ class FitPage(BasicPage):
                     item[6].Show(True)
         self.Layout()
         self.Refresh()
-
+    
+  
+        
     def _fill_range_sizer(self):
         """
         Fill the sizer containing the plotting range
@@ -266,8 +261,8 @@ class FitPage(BasicPage):
         self.Npts_total  =  BGTextCtrl(self, -1, "-", size=(75,20), style=0)
         self.Npts_total.SetToolTipString(" Total Npts : total number of data points")
         box_description_1= wx.StaticText(self, -1,'    Chi2/Npts')
-        box_description_2= wx.StaticText(self, -1,'  Npts')
-        box_description_3= wx.StaticText(self, -1,'  Total Npts')
+        box_description_2= wx.StaticText(self, -1,'Fitted Npts')
+        box_description_3= wx.StaticText(self, -1,'Data Npts')
         box_description_4= wx.StaticText(self, -1,' ')
         
         
@@ -356,10 +351,73 @@ class FitPage(BasicPage):
                 #self.enable_smearer.Disable() 
         else: self._show_smear_sizer()
         boxsizer_range.Add(self.sizer_set_masking)
-            
-        #Set sizer for Fitting section
-        self._set_range_sizer( title=title,box_sizer=boxsizer_range, object1=sizer_chi2, object= sizer_fit)
+         #2D data? default
+        is_2Ddata = False
         
+        #check if it is 2D data
+        if self.data.__class__.__name__ == 'Data2D':
+            is_2Ddata = True
+            
+        self.sizer5.Clear(True)
+     
+        self.qmin_tcrl  = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),
+                                          style=wx.TE_PROCESS_ENTER,
+                                    text_enter_callback = self._onQrangeEnter)
+        self.qmin_tcrl.SetValue(str(self.qmin_x))
+        self.qmin_tcrl.SetToolTipString("Minimun value of Q in linear scale.")
+     
+        self.qmax  = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),
+                                          style=wx.TE_PROCESS_ENTER,
+                                        text_enter_callback=self._onQrangeEnter)
+        self.qmax.SetValue(str(self.qmax_x))
+        self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
+        
+        self.theory_npts_tcrtl  = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20), 
+                        style=wx.TE_PROCESS_ENTER, 
+                        text_enter_callback=self._onQrangeEnter)
+        self.theory_npts_tcrtl.SetValue(format_number(self.npts_x))
+        self.theory_npts_tcrtl.SetToolTipString("Number of point to plot.")
+        id = wx.NewId()
+        self.reset_qrange =wx.Button(self,id,'Reset',size=(77,20))
+      
+        self.reset_qrange.Bind(wx.EVT_BUTTON, self.on_reset_clicked,id=id)
+        self.reset_qrange.SetToolTipString("Reset Q range to the default values")
+     
+        sizer_horizontal=wx.BoxSizer(wx.HORIZONTAL)
+        sizer= wx.GridSizer(2, 5,0, 0)
+
+        self.btEditMask = wx.Button(self,wx.NewId(),'Editor', size=(88,23))
+        self.btEditMask.Bind(wx.EVT_BUTTON, self._onMask,id= self.btEditMask.GetId())
+        self.btEditMask.SetToolTipString("Edit Mask.")
+        self.EditMask_title = wx.StaticText(self, -1, ' Masking(2D)')
+
+        sizer.Add(wx.StaticText(self, -1, 'Q range'))     
+        sizer.Add(wx.StaticText(self, -1, ' Min[1/A]'))
+        sizer.Add(wx.StaticText(self, -1, ' Max[1/A]'))
+        sizer.Add(wx.StaticText(self, -1, ' Theory Npts'))
+        sizer.Add(self.EditMask_title)
+        sizer.Add(self.reset_qrange)   
+        sizer.Add(self.qmin_tcrl)
+        sizer.Add(self.qmax)
+        sizer.Add(self.theory_npts_tcrtl)
+        sizer.Add(self.btEditMask)
+        boxsizer_range.Add(sizer_chi2) 
+        boxsizer_range.Add((10,10))
+        boxsizer_range.Add(sizer)
+        
+        boxsizer_range.Add((10,15))
+        boxsizer_range.Add(sizer_fit)
+        if is_2Ddata:
+            self.btEditMask.Enable()  
+            self.EditMask_title.Enable() 
+        else:
+            self.btEditMask.Disable()  
+            self.EditMask_title.Disable()
+        ## save state
+        self.save_current_state()
+        self.sizer5.Add(boxsizer_range,0, wx.EXPAND | wx.ALL, 10)
+        self.sizer5.Layout()
+
     def _fill_datainfo_sizer(self):
         """
         fill sizer 0 with data info
@@ -384,7 +442,9 @@ class FitPage(BasicPage):
                 y = max(math.fabs(self.data.ymin), math.fabs(self.data.ymax))
                 ## Maximum value of data  
                 data_max = math.sqrt(x*x + y*y)
-        
+            ## set q range to plot
+            self.qmin_x = data_min
+            self.qmax_x = data_max
         box_description= wx.StaticBox(self, -1, 'Data')
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         #----------------------------------------------------------
@@ -415,9 +475,7 @@ class FitPage(BasicPage):
         sizer_range.Add(wx.StaticText(self, -1, "Max: "),0, wx.LEFT, 10)
         sizer_range.Add(self.maximum_q,0, wx.LEFT, 10)
 
-        ## set q range to plot
-        self.qmin_x = data_min
-        self.qmax_x = data_max
+     
 
         boxsizer1.Add(sizer_data,0, wx.ALL, 10)
         boxsizer1.Add(sizer_range, 0 , wx.LEFT, 10)
@@ -799,8 +857,8 @@ class FitPage(BasicPage):
         Allow to fit
         """
         #make sure all parameter values are updated.
-        if self.check_invalid_panel():
-            return
+        #if self.check_invalid_panel():
+        #    return
         if self.model ==None:
             msg="Please select a Model first..."
             wx.MessageBox(msg, 'Info')
@@ -827,11 +885,11 @@ class FitPage(BasicPage):
 
         # Remove or do not allow fitting on the Q=0 point, especially 
         # when y(q=0)=None at x[0].         
-        self.qmin_x = float(self.qmin.GetValue())
+        self.qmin_x = float(self.qmin_tcrl.GetValue())
         self.qmax_x = float( self.qmax.GetValue())
-        self._manager._reset_schedule_problem( value=0)
-        self._manager.schedule_for_fit( value=1,page=self,fitproblem =None) 
-        self._manager.set_fit_range(page= self,qmin= self.qmin_x, 
+        self._manager._reset_schedule_problem(id=self.id, value=0)
+        self._manager.schedule_for_fit(id=id,value=1,page=self,fitproblem =None) 
+        self._manager.set_fit_range(id=self.id,qmin= self.qmin_x, 
                                    qmax= self.qmax_x)
         
         #single fit 
@@ -888,38 +946,35 @@ class FitPage(BasicPage):
             self._set_bookmark_flag(True)
             self._set_save_flag(True)
             # Reset smearer, model and data
-            self.set_data(self.data)
-            # update smearer sizer
-            self.onSmear(None)
+            self._set_smear(self.data)
             try:
+                # update smearer sizer
+                self.onSmear(None)
                 temp_smear = None
                 if self.enable_smearer.GetValue():
                     # Set the smearer environments
-                    temp_smear= self.smearer
-                #self.compute_chisqr(temp_smear)
+                    temp_smear = self.smearer
             except:
                 ## error occured on chisqr computation
                 pass
             ## event to post model to fit to fitting plugins
             (ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
-            if self.data is not None and \
-                    self.data.__class__.__name__ !="Data2D":
-                ## set smearing value whether or not 
-                #    the data contain the smearing info
-                evt = ModelEventbox(model = self.model, 
-                                        smearer = temp_smear, 
-                                        qmin = float(self.qmin_x),
-                                     qmax = float(self.qmax_x)) 
-            else:   
-                 evt = ModelEventbox(model = self.model)
-          
-            self._manager._on_model_panel(evt = evt)
+           
+            ## set smearing value whether or not 
+            #    the data contain the smearing info
+            evt = ModelEventbox(model=self.model, 
+                                        smearer=temp_smear, 
+                                        qmin=float(self.qmin_x),
+                                        id=self.id,
+                                     qmax=float(self.qmax_x)) 
+   
+            self._manager._on_model_panel(evt=evt)
             self.state.model = self.model.clone()
             self.state.model.name = self.model.name
             if event is not None:
                 self._draw_model()
-        if event !=None:
-            #self._undo.Enable(True)
+        if event != None:
+            
             ## post state to fit panel
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event) 
@@ -964,8 +1019,10 @@ class FitPage(BasicPage):
                         flag = flag or flag1
                 elif self.data.__class__.__name__ !="Data2D":
                     self._manager.set_smearer(smearer=temp_smearer, 
+                                              id=self.id,
                                              qmin= float(self.qmin_x),
-                                            qmax= float(self.qmax_x)) 
+                                            qmax= float(self.qmax_x),
+                                            draw=True) 
                 if flag:   
                     #self.compute_chisqr(smearer= temp_smearer)
         
@@ -991,8 +1048,8 @@ class FitPage(BasicPage):
         """
         Check validity of value enter in the parameters range field
         """
-        if self.check_invalid_panel():
-            return
+        #if self.check_invalid_panel():
+        #    return
         tcrtl= event.GetEventObject()
         #Clear msg if previously shown.
         msg= ""
@@ -1024,8 +1081,8 @@ class FitPage(BasicPage):
         """
         Check validity of value enter in the Q range field
         """
-        if self.check_invalid_panel():
-            return
+        #if self.check_invalid_panel():
+        #    return
         tcrtl= event.GetEventObject()
         #Clear msg if previously shown.
         msg= ""
@@ -1038,8 +1095,8 @@ class FitPage(BasicPage):
                 tcrtl.SetBackgroundColour(wx.WHITE)
 
                 # If qmin and qmax have been modified, update qmin and qmax
-                if self._validate_qrange( self.qmin, self.qmax):
-                    tempmin = float(self.qmin.GetValue())
+                if self._validate_qrange( self.qmin_tcrl, self.qmax):
+                    tempmin = float(self.qmin_tcrl.GetValue())
                     if tempmin != self.qmin_x:
                         self.qmin_x = tempmin
                     tempmax = float(self.qmax.GetValue())
@@ -1076,9 +1133,11 @@ class FitPage(BasicPage):
                     #self.Npts_fit.SetValue(str(len(self.data.mask)))
                     self.set_npts2fit() 
             else:
-                index_data = ((self.qmin_x <= self.data.x)& \
-                              (self.data.x <= self.qmax_x))
-                self.Npts_fit.SetValue(str(len(self.data.x[index_data])))
+                if self.data is not None:
+                    
+                    index_data = ((self.qmin_x <= self.data.x)& \
+                                  (self.data.x <= self.qmax_x))
+                    self.Npts_fit.SetValue(str(len(self.data.x[index_data])))
 
            
         else:
@@ -1372,29 +1431,39 @@ class FitPage(BasicPage):
             msg = ' Please consider your Q range, too.'
             self.panel.ShowMessage(msg)
         
+    def _set_smear(self, data):
+        """
+        """
+        if data is None:
+            return
+        self.smearer = smear_selection(self.data, self.model)
+        self.disable_smearer.SetValue(True)
+        if self.smearer == None:
+            self.enable_smearer.Disable()
+        else:
+            self.enable_smearer.Enable()
+            
     def set_data(self, data):
         """
         reset the current data 
         """
+        flag = False
+        if self.data is None and data is not None:
+            self.window_name = str(data.name)
+            ## Title to appear on top of the window
+            self.window_caption = str(data.name)
+            flag = True
         self.data = data
         if self.data is None:
             data_min = ""
             data_max = ""
             data_name = ""
-            self.formfactorbox.Disable()
-            self.structurebox.Disable()
             self._set_bookmark_flag(False)
             self._set_save_flag(False)
         else:
             self._set_bookmark_flag(True)
             self._set_save_flag(True)
-            self.smearer = smear_selection(self.data, self.model)
-            self.disable_smearer.SetValue(True)
-            if self.smearer == None:
-                self.enable_smearer.Disable()
-            else:
-                self.enable_smearer.Enable()
-            
+            self._set_smear(data)
             # more disables for 2D
             if self.data.__class__.__name__ =="Data2D":
                 self.slit_smearer.Disable()
@@ -1433,13 +1502,16 @@ class FitPage(BasicPage):
         self.qmax_x = data_max
         self.minimum_q.SetValue(str(data_min))
         self.maximum_q.SetValue(str(data_max))
-        self.qmin.SetValue(str(data_min))
+        self.qmin_tcrl.SetValue(str(data_min))
         self.qmax.SetValue(str(data_max))
-        self.qmin.SetBackgroundColour("white")
+        self.qmin_tcrl.SetBackgroundColour("white")
         self.qmax.SetBackgroundColour("white")
         self.state.data = data
         self.state.qmin = self.qmin_x
         self.state.qmax = self.qmax_x
+        #update model plot with new data information
+        if flag:
+            self._draw_model()
         
     def reset_page(self, state,first=False):
         """
@@ -1472,6 +1544,8 @@ class FitPage(BasicPage):
         :Note: This is for Park where chi2 is not normalized by Npts of fit
         
         """
+        if self.data is None:
+            return
         npts2fit = 0
         qmin,qmax = self.get_range()
         if self.data.__class__.__name__ =="Data2D": 
@@ -1652,8 +1726,8 @@ class FitPage(BasicPage):
                      
         """
 
-        if self.check_invalid_panel():
-            return
+        #if self.check_invalid_panel():
+        #    return
         if self.model ==None:
             self.disable_smearer.SetValue(True)
             msg="Please select a Model first..."
@@ -1798,8 +1872,10 @@ class FitPage(BasicPage):
             get_pin_min.SetBackgroundColour("white")
             get_pin_max.SetBackgroundColour("white")
         ## set smearing value whether or not the data contain the smearing info
-        self._manager.set_smearer(smearer=self.current_smearer, qmin= \
-                                 float(self.qmin_x),qmax= float(self.qmax_x))
+        self._manager.set_smearer(smearer=self.current_smearer,
+                                 qmin=float(self.qmin_x),
+                                 qmax= float(self.qmax_x),
+                                 id=self.id)
         return msg
         
     def update_pinhole_smear(self):
@@ -1829,8 +1905,8 @@ class FitPage(BasicPage):
         are compute when fitting
         """
  
-        if self.check_invalid_panel():
-            return
+        #if self.check_invalid_panel():
+        #    return
 
         if self.model ==None:
             self.disable_smearer.SetValue(True)
@@ -1968,8 +2044,10 @@ class FitPage(BasicPage):
         self.current_smearer = smear_selection(data, self.model)
         #temp_smearer = self.current_smearer
         ## set smearing value whether or not the data contain the smearing info
-        self._manager.set_smearer(smearer=self.current_smearer, qmin= \
-                                 float(self.qmin_x), qmax= float(self.qmax_x)) 
+        self._manager.set_smearer(smearer=self.current_smearer, 
+                                 qmin=float(self.qmin_x), 
+                                 qmax= float(self.qmax_x),
+                                 id=self.id) 
         return msg
     
     def update_slit_smear(self):
@@ -2000,8 +2078,9 @@ class FitPage(BasicPage):
         """
         if event != None: 
             event.Skip()    
-        if self.check_invalid_panel():
+        if self.data is None:
             return
+        
         if self.model == None:
             self.disable_smearer.SetValue(True)
             msg="Please select a Model first..."
@@ -2012,7 +2091,7 @@ class FitPage(BasicPage):
         
         # Need update param values
         self._update_paramv_on_fit()
-              
+        
         temp_smearer = None
         self._get_smear_info()
         
@@ -2053,9 +2132,9 @@ class FitPage(BasicPage):
         self.sizer_set_smearer.Layout()
         self.Layout()
         ## set smearing value whether or not the data contain the smearing info
-        self._manager.set_smearer(smearer=temp_smearer, qmin= float(self.qmin_x),
-                                     qmax= float(self.qmax_x)) 
-
+        self._manager.set_smearer(id=self.id, smearer=temp_smearer, qmin= float(self.qmin_x),
+                        qmax= float(self.qmax_x), draw=True) 
+        
         ##Calculate chi2
         #self.compute_chisqr(smearer= temp_smearer)
         

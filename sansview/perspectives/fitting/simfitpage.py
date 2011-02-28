@@ -49,12 +49,12 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
         ##Font size
         self.SetWindowVariant(variant = FONT_VARIANT)
-        
+        self.id = None
         self.parent = parent
         ## store page_finder
         self.page_finder = page_finder
         ## list contaning info to set constraint 
-        ## look like self.constraint_dict[page]= page 
+        ## look like self.constraint_dict[page_id]= page 
         self.constraint_dict={}
         ## item list  self.constraints_list=[combobox1, combobox2,=,textcrtl, button ]
         self.constraints_list=[]
@@ -134,8 +134,8 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         if self.show_constraint.GetValue():
             self._set_constraint()
         ## get the fit range of very fit problem        
-        for page, value in self.page_finder.iteritems():
-            qmin, qmax= page.get_range()
+        for id, value in self.page_finder.iteritems():
+            qmin, qmax= self.page_finder[id].get_range()
             value.set_range(qmin, qmax)
         ## model was actually selected from this page to be fit
         if len(self.model_toFit) >= 1 :
@@ -161,8 +161,8 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
         check all models names
         """
-        self.model_toFit=[] 
-        if self.cb1.GetValue()==True:
+        self.model_toFit = [] 
+        if self.cb1.GetValue()== True:
             for item in self.model_list:
                 item[0].SetValue(True)
                 self.model_toFit.append(item)
@@ -269,8 +269,8 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             return
         for item in self.model_toFit:
             model = item[3]
-            page= item[2]
-            self.constraint_dict[page] = model
+            page_id= item[2]
+            self.constraint_dict[page_id] = model
                    
     def _display_constraint(self, event):
         """
@@ -332,7 +332,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         btRemove.Bind(wx.EVT_BUTTON, self.onRemove,id= btRemove.GetId())
         btRemove.SetToolTipString("Remove constraint.")
        
-        for page,model in self.constraint_dict.iteritems():
+        for id,model in self.constraint_dict.iteritems():
             ## check if all parameters have been selected for constraint
             ## then do not allow add constraint on parameters
             model_cbox.Append( str(model.name), model)
@@ -363,8 +363,8 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         """
         hide buttons related constraint 
         """  
-        for page in  self.page_finder.iterkeys():
-            self.page_finder[page].clear_model_param()
+        for id in  self.page_finder.iterkeys():
+            self.page_finder[id].clear_model_param()
                
         self.nb_constraint =0     
         self.constraint_dict={}
@@ -538,14 +538,14 @@ class SimultaneousFitPage(wx.ScrolledWindow):
                 msg= " Constraint will be ignored!. missing parameters in combobox"
                 msg+= " to set constraint! "
                 wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
-            for page , value in self.constraint_dict.iteritems():
+            for id, value in self.constraint_dict.iteritems():
                 if model == value:
                     if constraint == "":
                         msg= " Constraint will be ignored!. missing value in textcrtl"
                         msg+= " to set constraint! "
                         wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
                         constraint = None
-                    self.page_finder[page].set_model_param(param,constraint)
+                    self.page_finder[id].set_model_param(param,constraint)
                     break
     
     def _fill_sizer_model_list(self,sizer):
@@ -574,31 +574,46 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         data_used.SetBackgroundColour('grey')
         sizer.Add(data_used,(iy, ix),(1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-        
-        for page, value in self.page_finder.iteritems():
+        ix += 1 
+        tab_used = wx.StaticText(self, -1, '  Fit Tab')
+        tab_used.SetBackgroundColour('grey')
+        sizer.Add(tab_used,(iy, ix),(1,1),
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+        for id, value in self.page_finder.iteritems():
             try:
                 ix = 0
                 iy += 1 
                 model = value.get_model()
-                cb = wx.CheckBox(self, -1, str(model.name))
+                name = '_'
+                if model is not None:
+                    name = str(model.name)
+                cb = wx.CheckBox(self, -1, name)
                 cb.SetValue(False)
+                cb.Enable(model is not None)
                 sizer.Add( cb,( iy,ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                 wx.EVT_CHECKBOX(self, cb.GetId(), self.check_model_name)
-                
                 ix += 2 
                 type = model.__class__.__name__
                 model_type = wx.StaticText(self, -1, str(type))
                 sizer.Add(model_type,( iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                
-                ix += 1 
                 data = value.get_fit_data()
-                data_used= wx.StaticText(self, -1, str(data.name))
+                name = '-'
+                if data is not None:
+                    name = str(data.name)
+                data_used = wx.StaticText(self, -1, name)
+                ix += 1 
                 sizer.Add(data_used,( iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    
+                ix += 1 
+                caption = value.get_fit_tab_caption()
+                tab_caption_used= wx.StaticText(self, -1, str(caption))
+                sizer.Add(tab_caption_used,( iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 
-                self.model_list.append([cb,value,page,model])
+                self.model_list.append([cb,value,id,model])
                 
             except:
-                pass
+                raise
+                #pass
         iy += 1
         sizer.Add((20,20),( iy,ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         sizer.Layout()    

@@ -20,8 +20,8 @@ from pagestate import PageState
 (NextStateEvent, EVT_NEXT_STATE)   = wx.lib.newevent.NewEvent()
 
 _BOX_WIDTH = 76
-_QMIN_DEFAULT = 0.001
-_QMAX_DEFAULT = 0.13
+_QMIN_DEFAULT = 0.0005
+_QMAX_DEFAULT = 0.5
 _NPTS_DEFAULT = 50
 #Control panel width 
 if sys.platform.count("darwin")==0:
@@ -32,17 +32,19 @@ else:
     PANEL_WIDTH = 500
     FONT_VARIANT = 1
     ON_MAC = True
-    
+
+
+
 class BasicPage(ScrolledPanel, PanelBase):
     """
     This class provide general structure of  fitpanel page
     """
      ## Internal name for the AUI manager
-    window_name = "Basic Page"
+    window_name = "Fit Page"
     ## Title to appear on top of the window
-    window_caption = "Basic page "
+    window_caption = "Fit Page "
     
-    def __init__(self, parent, page_info, **kwargs):
+    def __init__(self, parent,color='blue', **kwargs):
         """
         """
         ScrolledPanel.__init__(self, parent, **kwargs)
@@ -50,7 +52,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.SetupScrolling()
         #Set window's font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
-       
+      
+        self.SetBackgroundColour(color)
         ## parent of the page
         self.parent = parent
         ## manager is the fitting plugin
@@ -61,10 +64,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## data
         self.data = None
         self.mask = None
+        self.id = None
         ## Q range
-        self.qmax_x = None
-        self.qmin_x = None
-        self.num_points= _NPTS_DEFAULT
+        self.qmax_x = _QMAX_DEFAULT
+        self.qmin_x = _QMIN_DEFAULT
+        self.npts_x = _NPTS_DEFAULT
         ## total number of point: float
         self.npts = None
         ## default fitengine type
@@ -85,8 +89,8 @@ class BasicPage(ScrolledPanel, PanelBase):
    
         self.state = PageState(parent=parent)
         ## dictionary containing list of models
-        self.model_list_box = None
-        self.set_page_info(page_info=page_info)
+        self.model_list_box = {}
+       
         ## Data member to store the dispersion object created
         self._disp_obj_dict = {}
         ## selected parameters to apply dispersion
@@ -135,21 +139,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.saved_states = {} 
         ## Create context menu for page
         self.popUpMenu = wx.Menu()
-        #id = wx.NewId()
-        #self._undo = wx.MenuItem(self.popUpMenu,id, "Undo",
-        #"cancel the previous action")
-        #self.popUpMenu.AppendItem(self._undo)
-        #self._undo.Enable(False)
-        #wx.EVT_MENU(self, id, self.onUndo)
-        
-        #id = wx.NewId()
-        #self._redo = wx.MenuItem(self.popUpMenu,id,"Redo",
-        #" Restore the previous action")
-        #self.popUpMenu.AppendItem(self._redo)
-        #self._redo.Enable(False)
-        #wx.EVT_MENU(self, id, self.onRedo)       
-        #self.popUpMenu.AppendSeparator()
-        #if sys.platform.count("win32")>0:        
+    
         id = wx.NewId()
         self._keep = wx.MenuItem(self.popUpMenu,id,"BookMark",
                                  " Keep the panel status to recall it later")
@@ -173,6 +163,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         
         ## layout
         self.set_layout()
+        
+    
         
     def on_set_focus(self, event):
         """
@@ -304,7 +296,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Cancel the previous action
         """
-        #print "enable undo"
         event = PreviousStateEvent(page = self)
         wx.PostEvent(self.parent, event)
         
@@ -312,7 +303,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Restore the previous action cancelled 
         """
-        #print "enable redo"
         event = NextStateEvent(page= self)
         wx.PostEvent(self.parent, event)
     
@@ -393,6 +383,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         self.model_list_box = dict
         self.state.model_list_box = self.model_list_box
+        self.initialize_combox()
         
     def initialize_combox(self): 
         """
@@ -1253,9 +1244,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Reset the plotting range to a given state
         """
-        if self.check_invalid_panel():
-            return
-        self.qmin.SetValue(str(state.qmin))
+        # if self.check_invalid_panel():
+        #    return
+        self.qmin_tctrl.SetValue(str(state.qmin))
         self.qmax.SetValue(str(state.qmax)) 
 
     def _save_typeOfmodel(self):
@@ -1280,8 +1271,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         self.state.qmin = self.qmin_x
         self.state.qmax = self.qmax_x 
-        if self.npts != None:
-            self.state.npts = self.num_points
+        self.state.npts = self.npts_x
             
     def _onparamEnter_helper(self):
         """
@@ -1311,8 +1301,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
-            if self._validate_qrange(self.qmin, self.qmax):
-                tempmin = float(self.qmin.GetValue())
+            if self._validate_qrange(self.qmin_tcrl, self.qmax):
+                tempmin = float(self.qmin_tcrl.GetValue())
                 if tempmin != self.qmin_x:
                     self.qmin_x = tempmin
                     is_modified = True
@@ -1366,9 +1356,9 @@ class BasicPage(ScrolledPanel, PanelBase):
              # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
-            self.fitrange = self._validate_qrange(self.qmin, self.qmax)
+            self.fitrange = self._validate_qrange(self.qmin_tcrl, self.qmax)
             if self.fitrange:
-                tempmin = float(self.qmin.GetValue())
+                tempmin = float(self.qmin_tcrl.GetValue())
                 if tempmin != self.qmin_x:
                     self.qmin_x = tempmin
                 tempmax = float(self.qmax.GetValue())
@@ -1384,12 +1374,15 @@ class BasicPage(ScrolledPanel, PanelBase):
                     elif self.pinhole_smearer.GetValue():
                         flag = self.update_pinhole_smear()
                     else:
-                        self._manager.set_smearer_nodraw(smearer=temp_smearer,
+                        self._manager.set_smearer(smearer=temp_smearer,
+                                                  id=self.id,
                                                      qmin=float(self.qmin_x),
-                                                      qmax=float(self.qmax_x))
+                                                      qmax=float(self.qmax_x),
+                                                      draw=False)
                 elif not self._is_2D():
                     self._manager.set_smearer(smearer=temp_smearer,
                                               qmin=float(self.qmin_x),
+                                              id=self.id, 
                                                  qmax= float(self.qmax_x))
                     index_data = ((self.qmin_x <= self.data.x)&\
                                   (self.data.x <= self.qmax_x))
@@ -1645,20 +1638,20 @@ class BasicPage(ScrolledPanel, PanelBase):
         The method will use the data member from the model page
         to build a call to the fitting perspective manager.
         """
-        if self.check_invalid_panel():
-            return
+        #if self.check_invalid_panel():
+        #    return
         if self.model !=None:
             temp_smear=None
             if hasattr(self, "enable_smearer"):
                 if not self.disable_smearer.GetValue():
                     temp_smear= self.current_smearer
-            
             self._manager.draw_model(self.model, 
                                     data=self.data,
                                     smearer= temp_smear,
                                     qmin=float(self.qmin_x), 
                                     qmax=float(self.qmax_x),
-                                    qstep= float(self.num_points),
+                                    qstep= float(self.npts_x),
+                                    id=self.id,
                                     enable2D=self.enable2D)
         
     def _set_model_sizer(self,sizer, box_sizer, title="", object=None):
@@ -1842,9 +1835,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Show combox box associate with type of model selected
         """
-        if self.check_invalid_panel():
-            self.shape_rbutton.SetValue(True)
-            return
+        #if self.check_invalid_panel():
+        #    self.shape_rbutton.SetValue(True)
+        #    return
 
         self._show_combox_helper()
         self._on_select_model(event=None)
@@ -1870,8 +1863,63 @@ class BasicPage(ScrolledPanel, PanelBase):
                     name = model.name
                 combobox.Append(name,models)
         return 0
-
+    
     def _onQrangeEnter(self, event):
+        """
+        Check validity of value enter in the Q range field
+        
+        """
+        tcrtl = event.GetEventObject()
+        #Clear msg if previously shown.
+        msg = ""
+        wx.PostEvent(self.parent, StatusEvent(status=msg))
+        # Flag to register when a parameter has changed.
+        is_modified = False
+        if tcrtl.GetValue().lstrip().rstrip() != "":
+            try:
+                value = float(tcrtl.GetValue())
+                tcrtl.SetBackgroundColour(wx.WHITE)
+                # If qmin and qmax have been modified, update qmin and qmax
+                if self._validate_qrange(self.qmin_tcrl, self.qmax):
+                    tempmin = float(self.qmin_tcrl.GetValue())
+                    if tempmin != self.qmin_x:
+                        self.qmin_x = tempmin
+                    tempmax = float(self.qmax.GetValue())
+                    if tempmax != self.qmax_x:
+                        self.qmax_x = tempmax
+                else:
+                    tcrtl.SetBackgroundColour("pink")
+                    msg = "Model Error:wrong value entered : %s" % sys.exc_value
+                    wx.PostEvent(self.parent, StatusEvent(status=msg))
+                    return 
+            except:
+                tcrtl.SetBackgroundColour("pink")
+                msg = "Model Error:wrong value entered : %s" % sys.exc_value
+                wx.PostEvent(self.parent, StatusEvent(status=msg))
+                return 
+            #Check if # of points for theory model are valid(>0).
+            if self.npts != None:
+                if check_float(self.npts):
+                    temp_npts = float(self.npts.GetValue())
+                    if temp_npts !=  self.num_points:
+                        self.num_points = temp_npts
+                        is_modified = True
+                else:
+                    msg = "Cannot Plot :No npts in that Qrange!!!  "
+                    wx.PostEvent(self.parent, StatusEvent(status=msg))
+        else:
+           tcrtl.SetBackgroundColour("pink")
+           msg = "Model Error:wrong value entered!!!"
+           wx.PostEvent(self.parent, StatusEvent(status=msg))
+        #self._undo.Enable(True)
+        self.save_current_state()
+        event = PageInfoEvent(page=self)
+        wx.PostEvent(self.parent, event)
+        self.state_change = False
+        #Draw the model for a different range
+        self._draw_model()
+                   
+    def _theory_qrange_enter(self, event):
         """
         Check validity of value enter in the Q range field
         """
@@ -1888,27 +1936,27 @@ class BasicPage(ScrolledPanel, PanelBase):
                 tcrtl.SetBackgroundColour(wx.WHITE)
 
                 # If qmin and qmax have been modified, update qmin and qmax
-                if self._validate_qrange( self.qmin, self.qmax):
-                    tempmin = float(self.qmin.GetValue())
-                    if tempmin != self.qmin_x:
-                        self.qmin_x = tempmin
-                    tempmax = float(self.qmax.GetValue())
+                if self._validate_qrange(self.theory_qmin, self.theory_qmax):
+                    tempmin = float(self.theory_qmin.GetValue())
+                    if tempmin != self.theory_qmin_x:
+                        self.theory_qmin_x = tempmin
+                    tempmax = float(self.theory_qmax.GetValue())
                     if tempmax != self.qmax_x:
-                        self.qmax_x = tempmax
+                        self.theory_qmax_x = tempmax
                 else:
                     tcrtl.SetBackgroundColour("pink")
                     msg= "Model Error:wrong value entered : %s"% sys.exc_value
-                    wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                    wx.PostEvent(self._manager.parent, StatusEvent(status = msg ))
                     return  
             except:
                 tcrtl.SetBackgroundColour("pink")
                 msg= "Model Error:wrong value entered : %s"% sys.exc_value
-                wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                wx.PostEvent(self._manager.parent, StatusEvent(status = msg ))
                 return 
             #Check if # of points for theory model are valid(>0).
-            if self.npts != None:
-                if check_float(self.npts):
-                    temp_npts = float(self.npts.GetValue())
+            if self.theory_npts != None:
+                if check_float(self.theory_npts):
+                    temp_npts = float(self.theory_npts.GetValue())
                     if temp_npts !=  self.num_points:
                         self.num_points = temp_npts
                         is_modified = True
@@ -1917,7 +1965,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
         else:
            tcrtl.SetBackgroundColour("pink")
-           msg= "Model Error:wrong value entered!!!"
+           msg = "Model Error:wrong value entered!!!"
            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
         #self._undo.Enable(True)
         self.save_current_state()
@@ -2067,15 +2115,15 @@ class BasicPage(ScrolledPanel, PanelBase):
         radius= numpy.sqrt( self.data.qx_data * self.data.qx_data + 
                             self.data.qy_data * self.data.qy_data )
         #get unmasked index
-        index_data = (float(self.qmin.GetValue()) <= radius) & \
+        index_data = (float(self.qmin_tcrl.GetValue()) <= radius) & \
                         (radius <= float(self.qmax.GetValue()))
         index_data = (index_data) & (self.data.mask) 
         index_data = (index_data) & (numpy.isfinite(self.data.data))
 
         if len(index_data[index_data]) < 10:
             # change the color pink.
-            self.qmin.SetBackgroundColour("pink")
-            self.qmin.Refresh()
+            self.qmin_tcrl.SetBackgroundColour("pink")
+            self.qmin_tcrl.Refresh()
             self.qmax.SetBackgroundColour("pink")
             self.qmax.Refresh()
             msg= "Cannot Plot :No or too little npts in that data range!!!  "
@@ -2187,8 +2235,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         when the user selects No,the combo box disappears.
         Redraw the model with the default dispersity (Gaussian)
         """
-        if self.check_invalid_panel():
-            return 
+        #if self.check_invalid_panel():
+        #    return 
         ## On selction if no model exists.
         if self.model ==None:
             self.disable_disp.SetValue(True)
@@ -2411,81 +2459,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## post state to fit panel
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
-        
-    def _set_range_sizer(self, title, box_sizer=None, object1=None,object=None):
-        """
-        Fill the Q range sizer
-        """
-        #2D data? default
-        is_2Ddata = False
-        
-        #check if it is 2D data
-        if self.data.__class__.__name__ == 'Data2D':
-            is_2Ddata = True
-            
-        self.sizer5.Clear(True)
-        #--------------------------------------------------------------
-        if box_sizer == None:
-            box_description= wx.StaticBox(self, -1,str(title))
-            boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
-        else:
-            #for MAC
-            boxsizer1 = box_sizer
-
-        self.qmin    = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER,
-                                            text_enter_callback = self._onQrangeEnter)
-        self.qmin.SetValue(str(self.qmin_x))
-        self.qmin.SetToolTipString("Minimun value of Q in linear scale.")
-     
-        self.qmax    = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),style=wx.TE_PROCESS_ENTER,
-                                            text_enter_callback = self._onQrangeEnter)
-        self.qmax.SetValue(str(self.qmax_x))
-        self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
-        
-        id = wx.NewId()
-        self.reset_qrange =wx.Button(self,id,'Reset',size=(77,20))
-      
-        self.reset_qrange.Bind(wx.EVT_BUTTON, self.on_reset_clicked,id=id)
-        self.reset_qrange.SetToolTipString("Reset Q range to the default values")
-     
-        sizer_horizontal=wx.BoxSizer(wx.HORIZONTAL)
-        sizer= wx.GridSizer(2, 4,2, 6)
-
-        self.btEditMask = wx.Button(self,wx.NewId(),'Editor', size=(88,23))
-        self.btEditMask.Bind(wx.EVT_BUTTON, self._onMask,id= self.btEditMask.GetId())
-        self.btEditMask.SetToolTipString("Edit Mask.")
-        self.EditMask_title = wx.StaticText(self, -1, ' Masking(2D)')
-
-        sizer.Add(wx.StaticText(self, -1, '    Q range'))     
-        sizer.Add(wx.StaticText(self, -1, ' Min[1/A]'))
-        sizer.Add(wx.StaticText(self, -1, ' Max[1/A]'))
-        sizer.Add(self.EditMask_title)
-        sizer.Add(self.reset_qrange)   
-        
-        sizer.Add(self.qmin)
-        sizer.Add(self.qmax)
-        sizer.Add(self.btEditMask)
-       
-        if object1!=None:
-            
-            boxsizer1.Add(object1) 
-            boxsizer1.Add((10,10))
-        boxsizer1.Add(sizer)
-        if object!=None:
-            boxsizer1.Add((10,15))
-            boxsizer1.Add(object)
-        if is_2Ddata:
-            self.btEditMask.Enable()  
-            self.EditMask_title.Enable() 
-        else:
-            self.btEditMask.Disable()  
-            self.EditMask_title.Disable()
-        ## save state
-        self.save_current_state()
-        #----------------------------------------------------------------
-        self.sizer5.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
-        self.sizer5.Layout()
-
+   
     def _lay_out(self):
         """
         returns self.Layout
@@ -2510,8 +2484,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         On 'Reset' button  for Q range clicked
         """
         flag = True
-        if self.check_invalid_panel():
-            return
+        #if self.check_invalid_panel():
+        #    return
         ##For 3 different cases: Data2D, Data1D, and theory
         if self.data.__class__.__name__ == "Data2D":
             data_min= 0
@@ -2551,7 +2525,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
         else:
             # set relative text ctrs.
-            self.qmin.SetValue(str(self.qmin_x))
+            self.qmin_tcrl.SetValue(str(self.qmin_x))
             self.qmax.SetValue(str(self.qmax_x))
             self.set_npts2fit()
             # At this point, some button and variables satatus (disabled?) should be checked 
@@ -2568,29 +2542,23 @@ class BasicPage(ScrolledPanel, PanelBase):
         #Re draw plot
         self._draw_model()
 
-
     def on_model_help_clicked(self,event):
         """
         on 'More details' button
         """
         from help_panel import  HelpWindow
-        import sans.models as models 
         
-        # Get models help model_function path
-        path = models.get_data_path(media='media')
-        model_path = os.path.join(path,"model_functions.html")
         if self.model == None:
             name = 'FuncHelp'
         else:
             name = self.model.origin_name
 
-        frame = HelpWindow(None, -1,  pageToOpen=model_path)    
+        frame = HelpWindow(None, -1,  pageToOpen="media/model_functions.html")    
         frame.Show(True)
         if frame.rhelp.HasAnchor(name):
             frame.rhelp.ScrollToAnchor(name)
         else:
            msg= "Model does not contains an available description "
            msg +="Please try searching in the Help window"
-           wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))      
-                    
+           wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))                    
                 

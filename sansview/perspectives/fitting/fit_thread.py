@@ -9,7 +9,6 @@ class FitThread(CalcThread):
                   fn,
                    handler,
                   pars=None,
-                 cpage=None,
                  completefn = None,
                  updatefn   = None,
                  yieldtime  = 0.01,
@@ -22,7 +21,6 @@ class FitThread(CalcThread):
         self.parent = parent
         self.handler = handler
         self.fitter = fn
-        self.cpage= cpage
         self.pars = pars
         self.starttime = 0
         self.updatefn = updatefn
@@ -48,8 +46,7 @@ class FitThread(CalcThread):
             result = self.fitter.fit(handler=self.handler, curr_thread=self)
             self.updatefn()
             self.complete(result= result,
-                          pars = self.pars,
-                          cpage= self.cpage)
+                          pars = self.pars)
            
         except KeyboardInterrupt, msg:
             # Thread was interrupted, just proceed and re-raise.
