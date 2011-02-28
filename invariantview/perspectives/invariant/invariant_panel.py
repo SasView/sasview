@@ -363,6 +363,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 self._manager.plot_theory(data=extrapolated_data,
                                            name="Low-Q extrapolation")
             except:
+                raise
                 self.inv_container.qstar_low = "ERROR"
                 self.inv_container.qstar_low_err = "ERROR"
                 self._manager.plot_theory(name="Low-Q extrapolation")
@@ -392,6 +393,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 self._manager.plot_theory(data=high_out_data,
                                            name="High-Q extrapolation")
             except:
+                raisee
                 self.inv_container.qstar_high = "ERROR"
                 self.inv_container.qstar_high_err = "ERROR"
                 self._manager.plot_theory(name="High-Q extrapolation")

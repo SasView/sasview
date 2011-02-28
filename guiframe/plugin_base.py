@@ -142,7 +142,7 @@ class PluginBase:
         return []
         
     
-    def get_context_menu(self, graph=None):
+    def get_context_menu(self, plotpanel=None):
         """
         This method is optional.
     
@@ -150,7 +150,7 @@ class PluginBase:
         get_context_menu method will be called to give you a 
         chance to add a menu item to the context menu.
         
-        A ref to a Graph object is passed so that you can
+        A ref to a plotpanel object is passed so that you can
         investigate the plot content and decide whether you
         need to add items to the context menu.  
         

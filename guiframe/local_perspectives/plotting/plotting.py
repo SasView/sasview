@@ -16,6 +16,8 @@ import sys
 from sans.guiframe.events import EVT_NEW_PLOT
 from sans.guiframe.events import StatusEvent 
 from sans.guiframe.plugin_base import PluginBase
+from sans.guiframe.dataFitting import Data1D
+from sans.guiframe.dataFitting import Data2D
 
 class Plugin(PluginBase):
     """
@@ -27,7 +29,14 @@ class Plugin(PluginBase):
       
         ## Plot panels
         self.plot_panels = []
-       
+        self.new_plot_panels = {}
+        self._panel_on_focus = None
+     
+    def set_panel_on_focus(self, panel):
+        """
+        """
+        self._panel_on_focus = panel
+        
     def is_always_active(self):
         """
         return True is this plugin is always active even if the user is 
@@ -75,76 +84,81 @@ class Plugin(PluginBase):
         :param event: EVT_NEW_PLOT event
         
         """
+        if hasattr(event, 'remove'):
+            group_id = event.group_id
+            id = event.id
+            if group_id in self.new_plot_panels.keys():
+                panel = self.new_plot_panels[group_id]
+                panel.remove_data_by_id(id=id)
+            else:
+                msg = "Panel with GROUP_ID: %s canot be located" % str(group_id)
+                raise ValueError, msg
+            return
         # Check whether we already have a graph with the same units
         # as the plottable we just received. 
-        is_available = False
-        for panel in self.plot_panels:
-            if event.plot._xunit == panel.graph.prop["xunit_base"] \
-            and event.plot._yunit == panel.graph.prop["yunit_base"]:
-                if hasattr(event.plot, "group_id"):
-                    ## if same group_id used the same panel to plot
-                    if not event.plot.group_id == None \
-                        and event.plot.group_id == panel.group_id:
-                        is_available = True
-                        panel._onEVT_1DREPLOT(event)
-                        self.parent.show_panel(panel.uid)   
-                else:
-                    # Check that the plot panel has no group ID
-                    ## Use a panel with group_id ==None to plot
-                    if panel.group_id == None:
-                        is_available = True
-                        panel._onEVT_1DREPLOT(event)
-                        self.parent.show_panel(panel.uid)
-        # Create a new plot panel if none was available        
-        if not is_available:
-            #print"event.plot",hasattr(event.plot,'data')
-            if not hasattr(event.plot, 'data'):
+        data = event.plot
+        
+        group_id_list = data.group_id
+        group_id = None
+        if group_id_list:
+            group_id = group_id_list[len(group_id_list)-1]
+        if group_id in self.new_plot_panels.keys():
+            panel = self.new_plot_panels[group_id]
+            _, x_unit =  data.get_xaxis()
+            _, y_unit =  data.get_yaxis()
+           
+            if x_unit != panel.graph.prop["xunit"] \
+                or  y_unit != panel.graph.prop["yunit"]:
+                msg = "Cannot add %s" % str(data.name)
+                msg += " to panel %s\n" % str(panel.window_caption)
+                msg += "Please edit %s's units, labels" % str(data.name)
+                raise ValueError, msg
+            else:
+                panel.plot_data( data)
+                self.parent.show_panel(panel.uid)   
+        else:
+            # Create a new plot panel if none was available        
+            if issubclass(data.__class__, Data1D):
                 from Plotter1D import ModelPanel1D
                 ## get the data representation label of the data to plot
                 ## when even the user select "change scale"
-                if hasattr(event.plot, "xtransform"):
-                    xtransform = event.plot.xtransform
-                else:
-                    xtransform = None
-                    
-                if hasattr(event.plot, "ytransform"):
-                    ytransform = event.plot.ytransform
-                else:
-                    ytransform = None
+                xtransform = data.xtransform
+                ytransform = data.ytransform
                 ## create a plotpanel for 1D Data
                 new_panel = ModelPanel1D(self.parent, -1, xtransform=xtransform,
                          ytransform=ytransform, style=wx.RAISED_BORDER)
-            else:
+                new_panel.set_manager(self)
+                new_panel.group_id = group_id
+            elif issubclass(data.__class__, Data2D):
                 ##Create a new plotpanel for 2D data
                 from Plotter2D import ModelPanel2D
-                if hasattr(event.plot, "scale"):
-                    scale = event.plot.scale
-                else:
-                    scale = 'log'
+                scale = data.scale
                 new_panel = ModelPanel2D(self.parent, id = -1,
                                     data2d=event.plot, scale = scale, 
                                     style=wx.RAISED_BORDER)
+                new_panel.set_manager(self)
+                new_panel.group_id = group_id
+            else:
+                msg = "Plotting received unexpected"
+                msg += " data type : %s" % str(data.__class__)
+                raise ValueError, msg
             ## Set group ID if available
             ## Assign data properties to the new create panel
-            group_id_str = ''
-            if hasattr(event.plot, "group_id"):
-                if not event.plot.group_id == None:
-                    new_panel.group_id = event.plot.group_id
-                    group_id_str = ' [%s]' % event.plot.group_id
-            if hasattr(event, "title"):
-                new_panel.window_caption = event.title
-                new_panel.window_name = event.title
+            title = data.title
+            new_panel.window_caption = title
+            new_panel.window_name = title
             event_id = self.parent.popup_panel(new_panel)
             #remove the default item in the menu
-            if len(self.plot_panels) == 0:
+            if len(self.new_plot_panels) == 0:
                 self.menu.RemoveItem(self.menu.FindItemByPosition(0))
             self.menu.Append(event_id, new_panel.window_caption, 
                              "Show %s plot panel" % new_panel.window_caption)
             # Set UID to allow us to reference the panel later
             new_panel.uid = event_id
             # Ship the plottable to its panel
-            new_panel._onEVT_1DREPLOT(event)
-            self.plot_panels.append(new_panel)        
+            new_panel.plot_data(data)
+            self.plot_panels.append(new_panel)       
+            self.new_plot_panels[new_panel.group_id] = new_panel
             
         return
-        
+   

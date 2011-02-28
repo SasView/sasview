@@ -73,8 +73,9 @@ class SansView():
             invariant_plug = module.Plugin(standalone=False)
             self.gui.add_perspective(invariant_plug)
         except:
-            logging.error("SansView: could not find Invariant plug-in module") 
-            logging.error(sys.exc_value)  
+            raise
+            #logging.error("SansView: could not find Invariant plug-in module") 
+            #logging.error(sys.exc_value)  
         
         #Calculator perspective   
         try:
@@ -84,7 +85,7 @@ class SansView():
         except:
             logging.error("SansView: could not find Calculator plug-in module")
             logging.error(sys.exc_value)  
-            
+        """    
         # theory perspective
         try:
             import sans.perspectives.theory as module    
@@ -92,7 +93,8 @@ class SansView():
             self.gui.add_perspective(theory_plug)
         except:
             logging.error("SansView: could not find theory plug-in module")
-            logging.error(sys.exc_value)  
+            logging.error(sys.exc_value) 
+        """ 
             
         # Fitting perspective
         import perspectives.fitting as module    

@@ -430,16 +430,17 @@ class ViewerFrame(wx.Frame):
                                   MinimizeButton().
                                   Hide())        
       
-    def get_context_menu(self, graph=None):
+    def get_context_menu(self, plotpanel=None):
         """
         Get the context menu items made available 
         by the different plug-ins. 
         This function is used by the plotting module
         """
+        if plotpanel is None:
+            return
         menu_list = []
         for item in self.plugins:
-            if hasattr(item, "get_context_menu"):
-                menu_list.extend(item.get_context_menu(graph))
+            menu_list.extend(item.get_context_menu(plotpanel=plotpanel))
         return menu_list
         
     def popup_panel(self, p):

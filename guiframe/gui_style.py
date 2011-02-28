@@ -32,6 +32,7 @@ class GUIFRAME_ID:
     PREVIEW_ID = wx.NewId()
     PRINT_ID = wx.NewId()
     CURRENT_APPLICATION = wx.NewId()
+    CURVE_SYMBOL_NUM = 13
     
 class GUIFRAME_ICON:
     PATH = get_data_path(media='images')

@@ -23,14 +23,12 @@ import math
 import numpy
 import pylab
 from sans.guiframe.dataFitting import Data1D
-from sans.guiframe.dataFitting import Theory1D
 from sans.guiframe.events import NewPlotEvent
-from sans.guiframe.events import StatusEvent    
-
+from sans.guiframe.events import StatusEvent 
+from sans.guiframe.gui_style import GUIFRAME_ID   
 from sans.pr.invertor import Invertor
 from DataLoader.loader import Loader
-from DataLoader.data_info import Data1D as LoaderData1D
-import DataLoader
+
 from pr_widgets import load_error 
 from sans.guiframe.plugin_base import PluginBase
 
@@ -40,10 +38,6 @@ PR_LOADED_LABEL    = r"$P_{loaded}(r)$"
 IQ_DATA_LABEL      = r"$I_{obs}(q)$"
 IQ_FIT_LABEL       = r"$I_{fit}(q)$"
 IQ_SMEARED_LABEL   = r"$I_{smeared}(q)$"
-
-#import wx.lib
-#(NewPrFileEvent, EVT_PR_FILE) = wx.lib.newevent.NewEvent()
-
 
 
 class Plugin(PluginBase):
@@ -102,7 +96,6 @@ class Plugin(PluginBase):
         self._default_Iq  = {}
         
         # Associate the inversion state reader with .prv files
-        from DataLoader.loader import Loader
         from inversion_state import Reader
          
         # Create a CanSAS/Pr reader
@@ -165,8 +158,7 @@ class Plugin(PluginBase):
                                         title=self.current_plottable.title))
             self.control_panel.set_state(state)
         except:
-            raise
-            #logging.error("prview.set_state: %s" % sys.exc_value)
+            logging.error("prview.set_state: %s" % sys.exc_value)
 
   
     def help(self, evt):
@@ -187,10 +179,6 @@ class Plugin(PluginBase):
         """
         """
         from sans.pr.invertor import Invertor
-            
-        from danse.common.plottools import Data1D as PlotData1D
-        from danse.common.plottools import Theory1D as Theory1D
-        
         # Generate P(r) for sphere
         radius = 60.0
         d_max  = 2*radius
@@ -219,14 +207,19 @@ class Plugin(PluginBase):
         out, cov = pr.pr_fit()
         for i in range(len(out)):
             print "%g +- %g" % (out[i], math.sqrt(cov[i][i]))
-
+        
         # Show input P(r)
-        new_plot = PlotData1D(pr.x, pr.y, dy=pr.err)
+        title = "Pr"
+        new_plot = Data1D(pr.x, pr.y, dy=pr.err)
         new_plot.name = "P_{obs}(r)"
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
-        print "_fit_pr"
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Pr"))
+        group_id = "P_{obs}(r)"
+        if group_id not in new_plot.group_id:
+            new_plot.group_id.append(group_id)
+        new_plot.id = "P_{obs}(r)"
+        new_plot.title = title
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
 
         # Show P(r) fit
         self.show_pr(out, pr)
@@ -238,7 +231,6 @@ class Plugin(PluginBase):
     def show_shpere(self, x, radius=70.0, x_range=70.0):
         """
         """
-        from danse.common.plottools import Theory1D as PlotTheory1D
         # Show P(r)
         y_true = numpy.zeros(len(x))
 
@@ -250,7 +242,8 @@ class Plugin(PluginBase):
         y_true = y_true/sum_true*x_range/len(x)
         
         # Show the theory P(r)
-        new_plot = PlotTheory1D(x, y_true)
+        new_plot = Data1D(x, y_true)
+        new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         new_plot.name = "P_{true}(r)"
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
@@ -271,8 +264,6 @@ class Plugin(PluginBase):
     def show_iq(self, out, pr, q=None):
         """
         """  
-        from danse.common.plottools import Theory1D as PlotTheory1D
-
         qtemp = pr.x
         if not q==None:
             qtemp = q
@@ -303,17 +294,21 @@ class Plugin(PluginBase):
                 err[i] = 1.0
                 print "Error getting error", value, x[i]
                 
-        new_plot = PlotTheory1D(x, y)
+        new_plot = Data1D(x, y)
+        new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         new_plot.name = IQ_FIT_LABEL
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
-        
         title = "I(q)"
+        new_plot.title = title
+        
         # If we have a group ID, use it
         if pr.info.has_key("plot_group_id"):
-            new_plot.group_id = pr.info["plot_group_id"]
-            title = pr.info["plot_group_id"]
-            
+            if len( pr.info["plot_group_id"]) > 0:
+                index =  len( pr.info["plot_group_id"]) - 1
+                new_plot.group_id.append( pr.info["plot_group_id"][index])
+        new_plot.id = IQ_FIT_LABEL
+        #new_plot.group_id.append(2)
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
         
         # If we have used slit smearing, plot the smeared I(q) too
@@ -330,13 +325,20 @@ class Plugin(PluginBase):
                     err[i] = 1.0
                     print "Error getting error", value, x[i]
                     
-            new_plot = Theory1D(x, y)
+            new_plot = Data1D(x, y)
+            new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
             new_plot.name = IQ_SMEARED_LABEL
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
             # If we have a group ID, use it
             if pr.info.has_key("plot_group_id"):
-                new_plot.group_id = pr.info["plot_group_id"]
+                if len( pr.info["plot_group_id"]) > 0:
+                    index =  len( pr.info["plot_group_id"]) - 1
+                    new_plot.group_id.append( pr.info["plot_group_id"][index])
+           
+            new_plot.id = IQ_SMEARED_LABEL
+            new_plot.title = title
+            #new_plot.group_id.append(2)
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
         
         
@@ -358,9 +360,6 @@ class Plugin(PluginBase):
     def show_pr(self, out, pr, cov=None):
         """
         """     
-        from danse.common.plottools import Data1D as PlotData1D 
-        from danse.common.plottools import Theory1D as PlotTheory1D
-        
         # Show P(r)
         x = pylab.arange(0.0, pr.d_max, pr.d_max/self._pr_npts)
     
@@ -393,13 +392,15 @@ class Plugin(PluginBase):
             dy = dy/pmax
         
         if cov2==None:
-            new_plot = PlotTheory1D(x, y)
+            new_plot = Data1D(x, y)
+            new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         else:
-            new_plot = PlotData1D(x, y, dy=dy)
+            new_plot = Data1D(x, y, dy=dy)
         new_plot.name = PR_FIT_LABEL
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
         new_plot.title = "P(r) fit"
+        new_plot.id = PR_FIT_LABEL
         # Make sure that the plot is linear
         new_plot.xtransform = "x"
         new_plot.ytransform = "y"                 
@@ -562,7 +563,7 @@ class Plugin(PluginBase):
         else:
             return 0.0
 
-    def get_context_menu(self, graph=None):
+    def get_context_menu(self, plotpanel=None):
         """
         Get the context menu items available for P(r)
         
@@ -571,44 +572,40 @@ class Plugin(PluginBase):
         :return: a list of menu items with call-back function
         
         """
+        graph = plotpanel.graph
         # Look whether this Graph contains P(r) data
-        #if graph.selected_plottable==IQ_DATA_LABEL:
-        for item in graph.plottables:
-            if item.name == PR_FIT_LABEL:
-                #add_data_hint = "Load a data file and display it on this plot"
-                #["Add P(r) data",add_data_hint , self._on_add_data],
-                change_n_hint = "Change the number of"
-                change_n_hint += " points on the P(r) output"
-                change_n_label = "Change number of P(r) points"
-                m_list = [[change_n_label, change_n_hint , self._on_pr_npts]]
+        if graph.selected_plottable not in plotpanel.plots:
+            return []
+        item = plotpanel.plots[graph.selected_plottable]
+        if item.id == PR_FIT_LABEL:
+            #add_data_hint = "Load a data file and display it on this plot"
+            #["Add P(r) data",add_data_hint , self._on_add_data],
+            change_n_hint = "Change the number of"
+            change_n_hint += " points on the P(r) output"
+            change_n_label = "Change number of P(r) points"
+            m_list = [[change_n_label, change_n_hint , self._on_pr_npts]]
 
-                if self._scale_output_unity or self._normalize_output:
-                    hint = "Let the output P(r) keep the scale of the data"
-                    m_list.append(["Disable P(r) scaling", hint, 
-                                   self._on_disable_scaling])
-                if not self._scale_output_unity:
-                    m_list.append(["Scale P_max(r) to unity", 
-                                   "Scale P(r) so that its maximum is 1", 
-                                   self._on_scale_unity])
-                if not self._normalize_output:
-                    m_list.append(["Normalize P(r) to unity", 
-                                   "Normalize the integral of P(r) to 1", 
-                                   self._on_normalize])
-                    
-                return m_list
-                #return [["Add P(r) data", 
-                #"Load a data file and display it on this plot",
-                # self._on_add_data],
-                #       ["Change number of P(r) points",
-                # "Change the number of points on the P(r) output",
-                # self._on_pr_npts]]
-
-            elif item.name == graph.selected_plottable:
-	            #TODO: we might want to check that the units are 
-	            #     consistent with I(q) before allowing this menu item
-                if not self.standalone and \
-                issubclass(item.__class__, DataLoader.data_info.Data1D):
-                    return [["Compute P(r)", 
+            if self._scale_output_unity or self._normalize_output:
+                hint = "Let the output P(r) keep the scale of the data"
+                m_list.append(["Disable P(r) scaling", hint, 
+                               self._on_disable_scaling])
+            if not self._scale_output_unity:
+                m_list.append(["Scale P_max(r) to unity", 
+                               "Scale P(r) so that its maximum is 1", 
+                               self._on_scale_unity])
+            if not self._normalize_output:
+                m_list.append(["Normalize P(r) to unity", 
+                               "Normalize the integral of P(r) to 1", 
+                               self._on_normalize])
+                
+            return m_list
+             
+        elif item.id in [PR_LOADED_LABEL, IQ_DATA_LABEL, IQ_FIT_LABEL,
+                          IQ_SMEARED_LABEL]:
+            return []
+        elif item.id == graph.selected_plottable:
+	       if not self.standalone and issubclass(item.__class__, Data1D):
+                return [["Compute P(r)", 
                              "Compute P(r) from distribution", 
                              self._on_context_inversion]]      
                 
@@ -656,7 +653,13 @@ class Plugin(PluginBase):
             sum *= self._added_plots[plot].x[npts-1]/npts
             y = self._added_plots[plot].y/sum
             
-            new_plot = Theory1D(self._added_plots[plot].x, y)
+            new_plot = Data1D(self._added_plots[plot].x, y)
+            new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
+            index  = len(self._added_plots[plot].group_id) - 1
+            if group_id not in new_plot.group_id:
+                new_plot.group_id.append(group_id)
+            new_plot.id = self._added_plots[plot].id
+            new_plot.title = self._added_plots[plot].title
             new_plot.name = self._added_plots[plot].name
             new_plot.xaxis("\\rm{r}", 'A')
             new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
@@ -685,7 +688,8 @@ class Plugin(PluginBase):
                     _max = y
             y = self._added_plots[plot].y/_max
             
-            new_plot = Theory1D(self._added_plots[plot].x, y)
+            new_plot = Data1D(self._added_plots[plot].x, y)
+            new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
             new_plot.name = self._added_plots[plot].name
             new_plot.xaxis("\\rm{r}", 'A')
             new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
@@ -735,9 +739,9 @@ class Plugin(PluginBase):
             return
         
         filename = os.path.basename(path)
-        
-        #new_plot = Data1D(x, y, dy=err)
-        new_plot = Theory1D(x, y)
+
+        new_plot = Data1D(x, y)
+        new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         new_plot.name = filename
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
@@ -862,7 +866,9 @@ class Plugin(PluginBase):
             new_plot.name = IQ_DATA_LABEL
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
-            #new_plot.group_id = "test group"
+            if pr.info.has_key("plot_group_id"):
+                new_plot.group_id.append(pr.info["plot_group_id"])
+            new_plot.id = IQ_DATA_LABEL
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
                 
         # Show I(q) fit
@@ -883,11 +889,9 @@ class Plugin(PluginBase):
         :param reset: if True all other plottables will be cleared
         
         """
-        print "show_data", data.name
         #if path is not None:
         if data is not None:
             try:
-                #pr = self._create_file_pr(path)
                 pr = self._create_file_pr(data)
             except:
                 status = "Problem reading data: %s" % sys.exc_value
@@ -901,22 +905,22 @@ class Plugin(PluginBase):
             self.pr = pr
        
         # Make a plot of I(q) data
-        if self.pr.err==None:
-            new_plot = Theory1D(self.pr.x, self.pr.y)
+        if self.pr.err == None:
+            new_plot = Data1D(self.pr.x, self.pr.y)
+            new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         else:
             new_plot = Data1D(self.pr.x, self.pr.y, dy=self.pr.err)
         new_plot.name = IQ_DATA_LABEL
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.interactive = True
-        #new_plot.group_id = "test group"
+        new_plot.group_id.append(IQ_DATA_LABEL)
+        new_plot.id = IQ_DATA_LABEL
+        new_plot.title = "I(q)"
         wx.PostEvent(self.parent, 
                      NewPlotEvent(plot=new_plot, title="I(q)", reset=reset))
         
         self.current_plottable = new_plot
-        self.current_plottable.group_id = IQ_DATA_LABEL
-        
-        
         # Get Q range
         self.control_panel.q_min = self.pr.x.min()
         self.control_panel.q_max = self.pr.x.max()
@@ -1020,7 +1024,9 @@ class Plugin(PluginBase):
         
         # Keep track of the plot window title to ensure that
         # we can overlay the plots
-        if hasattr(self.current_plottable, "group_id"):
+        if self.current_plottable.group_id:
+            index = len(self.current_plottable.group_id) - 1
+            group_id = self.current_plottable.group_id[index]
             pr.info["plot_group_id"] = self.current_plottable.group_id
         
         # Fill in errors if none were provided
@@ -1328,7 +1334,7 @@ class Plugin(PluginBase):
             dlg = DataDialog(data_list=data_list, text=msg)
             if dlg.ShowModal() == wx.ID_OK:
                 data = dlg.get_data()
-                if issubclass(data.__class__, LoaderData1D):
+                if issubclass(data.__class__, Data1D):
                     self.control_panel._change_file(evt=None, data=data)
                 else:    
                     msg = "Pr cannot be computed for data of "
@@ -1336,7 +1342,7 @@ class Plugin(PluginBase):
                     wx.PostEvent(self.parent, 
                              StatusEvent(status=msg, info='error'))
         elif len(data_list) == 1:
-            if issubclass(data_list[0].__class__, LoaderData1D):
+            if issubclass(data_list[0].__class__, Data1D):
                 self.control_panel._change_file(evt=None, data=data_list[0])
             else:
                 msg = "Pr cannot be computed for"

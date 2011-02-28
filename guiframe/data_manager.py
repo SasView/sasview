@@ -22,6 +22,8 @@ import DataLoader.data_info as DataInfo
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
   
+import wx
+
 class DataManager(object):
     """
     Manage a list of data
@@ -76,9 +78,9 @@ class DataManager(object):
         ## allow to highlight data when plotted
         new_plot.interactive = True
         ## when 2 data have the same id override the 1 st plotted
-        new_plot.id = name
+        new_plot.id = wx.NewId()
         ##group_id specify on which panel to plot this data
-        new_plot.group_id = name
+        new_plot.group_id = [wx.NewId()]
         new_plot.is_data = True
         new_plot.path = path
         ##post data to plot
@@ -150,7 +152,6 @@ class DataManager(object):
     def append_theory(self, data_id, theory):
         """
         """
-        print "append theory", self.stored_data, data_id
         if data_id in self.stored_data:
             data_state = self.stored_data[data_id]
             data_state.set_theory(theory)

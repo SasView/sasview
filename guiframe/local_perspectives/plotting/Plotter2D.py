@@ -22,6 +22,7 @@ from sans.guiframe.events import EVT_NEW_PLOT
 from sans.guiframe.events import EVT_SLICER_PARS
 from sans.guiframe.events import StatusEvent 
 from sans.guiframe.events import NewPlotEvent
+from sans.guiframe.events import PanelOnFocusEvent
 from sans.guiframe.events import SlicerEvent
 from sans.guiframe.utils import PanelMenu
 from binder import BindArtist
@@ -121,6 +122,22 @@ class ModelPanel2D(ModelPanel1D):
         self.default_zmin_ctl = self.zmin_2D
         self.default_zmax_ctl = self.zmax_2D
        
+    def onLeftDown(self, event): 
+        """
+        left button down and ready to drag
+        
+        """
+        # Check that the LEFT button was pressed
+        if event.button == 1:
+            self.leftdown = True
+            ax = event.inaxes
+            if ax != None:
+                self.xInit, self.yInit = event.xdata, event.ydata
+        self.plottable_selected(self.data2D.id)
+       
+        self._manager.set_panel_on_focus(self)
+        wx.PostEvent(self.parent, PanelOnFocusEvent(panel=self))
+        
     def add_toolbar(self):
         """
         add toolbar
@@ -137,7 +154,7 @@ class ModelPanel2D(ModelPanel1D):
         # update the axes menu on the toolbar
         self.toolbar.update()
          
-    def _onEVT_1DREPLOT(self, event):
+    def plot_data(self, data):
         """
         Data is ready to be displayed
         
@@ -148,53 +165,16 @@ class ModelPanel2D(ModelPanel1D):
         :param event: data event
         """
         ## Update self.data2d with the current plot
-        self.data2D = event.plot
-        
-        #TODO: Check for existence of plot attribute
-        
-        # Check whether this is a replot. If we ask for a replot
-        # and the plottable no longer exists, ignore the event.
-        if hasattr(event, "update") and event.update == True \
-            and event.plot.name not in self.plots.keys():
-            return
-        if hasattr(event, "reset"):
-            self._reset()
-        is_new = True
-        if event.plot.name in self.plots.keys():
-            # Check whether the class of plottable changed
-            if not event.plot.__class__ == self.plots[event.plot.name].__class__:
-                #overwrite a plottable using the same name
-                self.graph.delete(self.plots[event.plot.name])
-            else:
-                # plottable is already draw on the panel
-                is_new = False
-           
-        if is_new:
-            # a new plottable overwrites a plotted one  using the same id
-            for plottable in self.plots.itervalues():
-                if hasattr(event.plot,"id"):
-                    if event.plot.id == plottable.id:
-                        self.graph.delete(plottable)
-            
-            self.plots[event.plot.name] = event.plot
-            self.graph.add(self.plots[event.plot.name])
+        self.data2D = data
+        if data.id in self.plots.keys():
+            #replace
+            self.graph.replace(data)
+            self.plots[data.id] = data
         else:
-            # Update the plottable with the new data
-            
-            #TODO: we should have a method to do this, 
-            #      something along the lines of:
-            #      plottable1.update_data_from_plottable(plottable2)
-            
-            self.plots[event.plot.name].xmin = event.plot.xmin
-            self.plots[event.plot.name].xmax = event.plot.xmax
-            self.plots[event.plot.name].ymin = event.plot.ymin
-            self.plots[event.plot.name].ymax = event.plot.ymax
-            self.plots[event.plot.name].data = event.plot.data
-            self.plots[event.plot.name].qx_data = event.plot.qx_data
-            self.plots[event.plot.name].qy_data = event.plot.qy_data
-            self.plots[event.plot.name].err_data = event.plot.err_data
+            self.plots[data.id] = data
+            self.graph.add(self.plots[data.id]) 
             # update qmax with the new xmax of data plotted
-            self.qmax = event.plot.xmax
+            self.qmax = data.xmax
             
         self.slicer = None
         # Check axis labels
@@ -203,13 +183,13 @@ class ModelPanel2D(ModelPanel1D):
                 
         #data2D: put 'Pixel (Number)' for axis title and unit in case of having no detector info and none in _units
         if len(self.data2D.detector) < 1: 
-            if len(event.plot._xunit) < 1 and len(event.plot._yunit) < 1:
-                event.plot._xaxis = '\\rm{x}'
-                event.plot._yaxis = '\\rm{y}'
-                event.plot._xunit = 'pixel'
-                event.plot._yunit = 'pixel'
-        self.graph.xaxis(event.plot._xaxis, event.plot._xunit)
-        self.graph.yaxis(event.plot._yaxis, event.plot._yunit)
+            if len(data._xunit) < 1 and len(data._yunit) < 1:
+                data._xaxis = '\\rm{x}'
+                data._yaxis = '\\rm{y}'
+                data._xunit = 'pixel'
+                data._yunit = 'pixel'
+        self.graph.xaxis(data._xaxis, data._xunit)
+        self.graph.yaxis(data._yaxis, data._yunit)
         self.graph.title(self.data2D.name)
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
@@ -251,7 +231,7 @@ class ModelPanel2D(ModelPanel1D):
         slicerpop.AppendSeparator()
         if len(self.data2D.detector) == 1:        
             
-            item_list = self.parent.get_context_menu(self.graph)
+            item_list = self.parent.get_context_menu(self)
             if (not item_list == None) and (not len(item_list) == 0):
                 for item in item_list:
                     try:

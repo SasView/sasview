@@ -17,17 +17,13 @@ import wx
 import copy
 import logging
 
-from DataLoader.data_info import Data1D as LoaderData1D
-from sans.guiframe.dataFitting import Theory1D
-from sans.guiframe.dataFitting import Data1D
 
+from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.events import NewPlotEvent
-from sans.guiframe.events import ERR_DATA
+from sans.guiframe.gui_style import GUIFRAME_ID
 from .invariant_state import Reader as reader
 from DataLoader.loader import Loader
 from .invariant_panel import InvariantPanel
-#from sans.guiframe.events import EVT_INVSTATE_UPDATE
-
 from sans.guiframe.plugin_base import PluginBase
 
 class Plugin(PluginBase):
@@ -79,10 +75,6 @@ class Plugin(PluginBase):
         """
         ## Save a reference to the parent
         self.parent = parent
-        #add error back to the data
-        self.parent.Bind(ERR_DATA, self._on_data_error)
-        #self.parent.Bind(EVT_INVSTATE_UPDATE, self.on_set_state_helper)
-        
         self.invariant_panel = InvariantPanel(parent=self.parent)
         self.invariant_panel.set_manager(manager=self)
         self.perspective.append(self.invariant_panel.window_name)  
@@ -95,7 +87,7 @@ class Plugin(PluginBase):
         # Return the list of panels
         return [self.invariant_panel]
   
-    def get_context_menu(self, graph=None):
+    def get_context_menu(self, plotpanel=None):
         """
         This method is optional.
     
@@ -116,76 +108,46 @@ class Plugin(PluginBase):
         
         :return: a list of menu items with call-back function
         """
-        self.graph = graph
+        graph = plotpanel.graph
         invariant_option = "Compute invariant"
         invariant_hint = "Will displays the invariant panel for"
         invariant_hint += " futher computation"
-       
-        for item in self.graph.plottables:
-            if item.name == graph.selected_plottable :
-                if issubclass(item.__class__, LoaderData1D):
-           
-                    if item.name != "$I_{obs}(q)$" and \
-                        item.name != " $P_{fit}(r)$":
-                        if hasattr(item, "group_id"):
-                            return [[invariant_option, 
-                                        invariant_hint, 
+        
+        if graph.selected_plottable not in plotpanel.plots:
+            return []
+        data = plotpanel.plots[graph.selected_plottable]
+        
+        if not issubclass(data.__class__, Data1D):
+            name = data.__class__.__name__
+            msg = "Invariant use only Data1D got: [%s] " % str(name)
+            raise ValueError, msg 
+        
+        if data.name != "$I_{obs}(q)$" and  data.name != " $P_{fit}(r)$":
+           return [[invariant_option, invariant_hint, 
                                         self._compute_invariant]]
-        return []   
+        return []
 
-    def copy_data(self, item, dy=None):
-        """
-        receive a data 1D and the list of errors on dy
-        and create a new data1D data
-        """
-        id = None
-        if hasattr(item,"id"):
-            id = item.id
-
-        data = Data1D(x=item.x, y=item.y, dx=None, dy=None)
-        data.copy_from_datainfo(item)
-        item.clone_without_data(clone=data)    
-        data.dy = dy
-        data.name = item.name
-        data.title = item.title
-        
-        ## allow to highlight data when plotted
-        data.interactive = item.interactive
-        ## when 2 data have the same id override the 1 st plotted
-        data.id = id
-        data.group_id = item.group_id
-        return data
-    
-    def _on_data_error(self, event):
-        """
-        receives and event from plotting plu-gins to store the data name and 
-        their errors of y coordinates for 1Data hide and show error
-        """
-        self.err_dy = event.err_dy
-        
     def _compute_invariant(self, event):    
         """
         Open the invariant panel to invariant computation
         """
         self.panel = event.GetEventObject()
         Plugin.on_perspective(self, event=event)
-        for plottable in self.panel.graph.plottables:
-            if plottable.name == self.panel.graph.selected_plottable:
-                ## put the errors values back to the model if the errors 
-                ## were hiden before sending them to the fit engine
-                if len(self.err_dy) > 0:
-                    dy = plottable.dy
-                    if plottable.name in  self.err_dy.iterkeys():
-                        dy = self.err_dy[plottable.name]
-                    data = self.copy_data(plottable, dy)
-                else:
-                    data = plottable
-                self.compute_helper(data=data)
+        id = self.panel.graph.selected_plottable
+        data = self.panel.plots[self.panel.graph.selected_plottable]
+        if data is None:
+            return
+        if not issubclass(data.__class__, Data1D):
+            name = data.__class__.__name__
+            msg = "Invariant use only Data1D got: [%s] " % str(name)
+            raise ValueError, msg 
+        self.compute_helper(data=data)
                 
     def set_data(self, data_list):
         """
         receive a list of data and compute invariant
         """
+        data = None
         if len(data_list) > 1:
             msg = "invariant panel does not allow multiple data!\n"
             msg += "Please select one.\n"
@@ -193,28 +155,23 @@ class Plugin(PluginBase):
             dlg = DataDialog(data_list=data_list, text=msg)
             if dlg.ShowModal() == wx.ID_OK:
                 data = dlg.get_data()
-                if issubclass(data.__class__, LoaderData1D):
-                    wx.PostEvent(self.parent, NewPlotEvent(plot=data_list[0],
-                                               title=data_list[0].title))
-                    self.compute_helper(data_list[0])
-                else:    
-                    msg = "invariant cannot be computed for data of "
-                    msg += "type %s" % (data_list[0].__class__.__name__)
-                    wx.PostEvent(self.parent, 
-                             StatusEvent(status=msg, info='error'))
         elif len(data_list) == 1:
-            if issubclass(data_list[0].__class__, LoaderData1D):
-                wx.PostEvent(self.parent, NewPlotEvent(plot=data_list[0],
-                                               title=data_list[0].title))
-                self.compute_helper(data_list[0])
-            else:
-                msg = "invariant cannot be computed for"
-                msg += " data of type %s" % (data_list[0].__class__.__name__)
-                wx.PostEvent(self.parent, 
-                             StatusEvent(status=msg, info='error'))
-            
-            
+            data = data_list[0]
+        if data is None:
+            return
+        if issubclass(data.__class__, Data1D):
+            wx.PostEvent(self.parent, NewPlotEvent(plot=data,
+                                       title=data.title))
+            self.compute_helper(data)
+        else:    
+            msg = "invariant cannot be computed for data of "
+            msg += "type %s" % (data.__class__.__name__)
+            wx.PostEvent(self.parent, 
+                     StatusEvent(status=msg, info='error'))
+    
     def clear_panel(self):
+        """
+        """
         self.invariant_panel.clear_panel()
         
     def compute_helper(self, data):
@@ -310,24 +267,34 @@ class Plugin(PluginBase):
         """
         #import copy
         if data is None:
-            new_plot = Theory1D(x=[], y=[], dy=None)
+            id = str(self.__data.id) + name
+            self.__data.group_id
+            wx.PostEvent(self.parent, NewPlotEvent(id=id,
+                                               group_id=group_id,
+                                               remove=true))
+            return
+    
+        new_plot = Data1D(x=[], y=[], dy=None)
+        new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
+        scale = self.invariant_panel.get_scale()
+        background = self.invariant_panel.get_background()
+        
+        if scale != 0:
+            # Put back the sacle and bkg for plotting
+            data.y = (data.y + background)/scale
+            new_plot = Data1D(x=data.x, y=data.y, dy=None)
+            new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         else:
-            scale = self.invariant_panel.get_scale()
-            background = self.invariant_panel.get_background()
-            
-            if scale != 0:
-                # Put back the sacle and bkg for plotting
-                data.y = (data.y + background)/scale
-                new_plot = Theory1D(x=data.x, y=data.y, dy=None)
-            else:
-                msg = "Scale can not be zero."
-                raise ValueError, msg
-
+            msg = "Scale can not be zero."
+            raise ValueError, msg
+        if len(new_plot.x)== 0 :
+            return
+        
         new_plot.name = name
         new_plot.xaxis(self.__data._xaxis, self.__data._xunit)
         new_plot.yaxis(self.__data._yaxis, self.__data._yunit)
         new_plot.group_id = self.__data.group_id
-        new_plot.id = self.__data.id + name
+        new_plot.id = str(self.__data.id) + name
         new_plot.title = self.__data.title
         # Save theory_data in a state
         if data != None:

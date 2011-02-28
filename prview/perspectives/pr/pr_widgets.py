@@ -26,7 +26,7 @@ class PrTextCtrl(wx.TextCtrl):
         wx.TextCtrl.__init__(self, *args, **kwds)
         
         ## Set to True when the mouse is clicked while the whole string is selected
-        full_selection = False
+        self.full_selection = False
         ## Call back for EVT_SET_FOCUS events
         _on_set_focus_callback = None
         # Bind appropriate events
