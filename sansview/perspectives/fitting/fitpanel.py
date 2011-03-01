@@ -148,7 +148,7 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
                     panel.save_current_state() 
                     page_is_opened = True
             if not page_is_opened:
-                panel = self.add_fit_page(data=state.data)
+                panel = self._manager.add_fit_page(data=state.data)
                 # add data associated to the page created
                 if panel is not None:  
                     self._manager.store_page(page=panel.id, data=state.data)
@@ -280,6 +280,7 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
                 return page
         
         page = self.add_empty_page()
+        pos = self.GetPageIndex(page)
         page.id = wx.NewId()
         page.set_data(data)
         self.SetPageText(pos, str(data.name))
@@ -327,7 +328,7 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         Delete the given page from the notebook
         """
         #remove hint page
-        if selected_page.id == self.hint_page.id:
+        if selected_page == self.hint_page:
             return
         ## removing sim_page
         if selected_page == self.sim_page :
@@ -367,7 +368,7 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
             #Don't return any panel is the exact same page is created
             
             if selected_page.id == id:
-                del self.opened_pages[type]
+                del self.opened_pages[selected_page.id]
                 break 
      
   
