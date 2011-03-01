@@ -429,7 +429,14 @@ class CircularAverage(object):
         data = data2D.data[numpy.isfinite(data2D.data)]
         q_data = data2D.q_data[numpy.isfinite(data2D.data)]
         err_data = data2D.err_data[numpy.isfinite(data2D.data)]
-   
+        dq_data = None
+        if data2D.dqx_data != None and data2D.dqy_data != None:
+            dq_data = data2D.dqx_data[numpy.isfinite(data2D.data)] * \
+                        data2D.dqx_data[numpy.isfinite(data2D.data)]
+            dq_data += data2D.dqy_data[numpy.isfinite(data2D.data)] * \
+                        data2D.dqy_data[numpy.isfinite(data2D.data)]
+            dq_data = numpy.sqrt(dq_data)
+            
         q_data_max = numpy.max(q_data)
 
         if len(data2D.q_data) == None:
@@ -443,6 +450,7 @@ class CircularAverage(object):
         x  = numpy.zeros(nbins)
         y  = numpy.zeros(nbins)
         err_y = numpy.zeros(nbins)
+        err_x = numpy.zeros(nbins)
         y_counts = numpy.zeros(nbins)
 
         for npt in range(len(data)):          
@@ -473,27 +481,42 @@ class CircularAverage(object):
                 err_y[i_q] += frac * frac * data_n
             else:
                 err_y[i_q] += frac * frac * err_data[npt] * err_data[npt]
+            if dq_data != None:
+                err_x[i_q] += frac * frac * dq_data[npt] * dq_data[npt]
+            else:
+                err_x = None
             y_counts[i_q]  += frac
         
-        ## x should be the center value of each bins        
-        x = qbins + self.bin_width / 2  
-        
+        # We take the center of ring area, not radius.  
+        # This is more accurate than taking the radial center of ring.
+        x = (qbins + self.bin_width) * (qbins + self.bin_width)
+        x += qbins * qbins
+        x = x / 2.0
+        x = numpy.sqrt(x)
         # Average the sums       
         for n in range(nbins):
             if err_y[n] < 0: err_y[n] = -err_y[n]
             err_y[n] = math.sqrt(err_y[n])
-                      
+            if err_x != None:
+                err_x[n] = math.sqrt(err_x[n])
+            
         err_y = err_y / y_counts
+        err_y[err_y==0] = numpy.average(err_y)
         y    = y / y_counts
         idx = (numpy.isfinite(y)) & (numpy.isfinite(x)) 
-        
+        if err_x != None:
+            d_x = err_x[idx] / y_counts[idx]
+        else:
+            d_x = None
+
         if not idx.any(): 
             msg = "Average Error: No points inside ROI to average..." 
             raise ValueError, msg
+        
         #elif len(y[idx])!= nbins:
         #    print "resulted",nbins- len(y[idx])
         #,"empty bin(s) due to tight binning..."
-        return Data1D(x=x[idx], y=y[idx], dy=err_y[idx])
+        return Data1D(x=x[idx], y=y[idx], dy=err_y[idx], dx=d_x)
     
 
 class Ring(object):
@@ -721,11 +744,20 @@ class _Sector:
         err_data = data2D.err_data[numpy.isfinite(data2D.data)]
         qx_data = data2D.qx_data[numpy.isfinite(data2D.data)] 
         qy_data = data2D.qy_data[numpy.isfinite(data2D.data)]
-        
+        dq_data = None
+        # dx (smear) data
+        if data2D.dqx_data != None and data2D.dqy_data != None:
+            dq_data = data2D.dqx_data[numpy.isfinite(data2D.data)] * \
+                        data2D.dqx_data[numpy.isfinite(data2D.data)]
+            dq_data += data2D.dqy_data[numpy.isfinite(data2D.data)] * \
+                        data2D.dqy_data[numpy.isfinite(data2D.data)]
+            dq_data = numpy.sqrt(dq_data)
+            
         #set space for 1d outputs
         x        = numpy.zeros(self.nbins)
         y        = numpy.zeros(self.nbins)
-        y_err    = numpy.zeros(self.nbins)         
+        y_err    = numpy.zeros(self.nbins)   
+        x_err    = numpy.zeros(self.nbins)      
         y_counts = numpy.zeros(self.nbins)
                       
         # Get the min and max into the region: 0 <= phi < 2Pi
@@ -796,37 +828,51 @@ class _Sector:
             ## Get the total y          
             y[i_bin] += frac * data_n
 
-            if err_data == None or err_data[n] == 0.0:
+            if err_data[n] == None or err_data[n] == 0.0:
                 if data_n < 0:
                     data_n = -data_n
                 y_err[i_bin] += frac * frac * data_n
             else:
                 y_err[i_bin] += frac * frac * err_data[n] * err_data[n]
+                
+            if dq_data != None:
+                x_err[i_bin] += frac * frac * dq_data[n] * dq_data[n]
+            else:
+                x_err = None
             y_counts[i_bin] += frac
    
         # Organize the results
         for i in range(self.nbins):
             y[i] = y[i] / y_counts[i]
             y_err[i] = math.sqrt(y_err[i]) / y_counts[i]
-            
+            if x_err != None:
+                x_err[i] = math.sqrt(x_err[i]) / y_counts[i]
             # The type of averaging: phi,q2, or q
             # Calculate x[i]should be at the center of the bin
             if run.lower()=='phi':               
                 x[i] = (self.phi_max - self.phi_min) / self.nbins * \
                     (1.0 * i + 0.5) + self.phi_min
             else:
-                x[i] = (self.r_max - self.r_min) / self.nbins * \
-                    (1.0 * i + 0.5) + self.r_min
+                # We take the center of ring area, not radius.  
+                # This is more accurate than taking the radial center of ring.
+                delta_r = (self.r_max - self.r_min) / self.nbins
+                r_inner = self.r_min + delta_r * i
+                r_outer = r_inner + delta_r
+                x[i] = math.sqrt((r_inner * r_inner + r_outer * r_outer) / 2)
                 
+        y_err[y_err==0] = numpy.average(y_err)        
         idx = (numpy.isfinite(y) & numpy.isfinite(y_err))
-        
+        if x_err != None:
+            d_x = x_err[idx]
+        else:
+            d_x = None
         if not idx.any():
             msg = "Average Error: No points inside sector of ROI to average..." 
             raise ValueError, msg
         #elif len(y[idx])!= self.nbins:
         #    print "resulted",self.nbins- len(y[idx]),
         #"empty bin(s) due to tight binning..."
-        return Data1D(x=x[idx], y=y[idx], dy=y_err[idx])
+        return Data1D(x=x[idx], y=y[idx], dy=y_err[idx], dx=d_x)
                 
 class SectorPhi(_Sector):
     """

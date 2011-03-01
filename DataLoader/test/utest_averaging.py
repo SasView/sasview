@@ -70,23 +70,25 @@ class Averaging(unittest.TestCase):
         """
             Test sector averaging
         """
-        r = SectorPhi(r_min=self.qmin, r_max=3*self.qmin, phi_min=0, phi_max=math.pi*2.0)
+        r = SectorPhi(r_min=self.qmin, r_max=3*self.qmin, 
+                      phi_min=0, phi_max=math.pi*2.0)
         r.nbins_phi = 20
         o = r(self.data)
-        for i in range(20):
+        for i in range(7):
             self.assertEqual(o.y[i], 1.0)
             
             
     def test_sectorphi_partial(self):
         """
         """
-        phi_max = 1.5
-        r = SectorPhi(r_min=self.qmin, r_max=3*self.qmin, phi_min=0, phi_max=phi_max)
+        phi_max = math.pi * 1.5
+        r = SectorPhi(r_min=self.qmin, r_max=3*self.qmin, 
+                      phi_min=0, phi_max=phi_max)
         self.assertEqual(r.phi_max, phi_max)
         r.nbins_phi = 20
         o = r(self.data)
         self.assertEqual(r.phi_max, phi_max)
-        for i in range(20):
+        for i in range(17):
             self.assertEqual(o.y[i], 1.0)
             
             
