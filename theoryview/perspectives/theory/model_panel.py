@@ -273,7 +273,7 @@ class ModelPanel(BasicPage, PanelBase):
                                 poly_text +=  "0 and 1\n"
                                 poly_text += "Sigma for angles: \n"
                                 poly_text += "It is the STD (ratio*mean)"
-                                poly_text += " of the distribution.\n " % item
+                                poly_text += " of the distribution.\n " 
                             
                                 values.SetToolTipString(poly_text)
                                 first_orient = False 
