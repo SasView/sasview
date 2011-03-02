@@ -137,6 +137,8 @@ class Reader:
 
         #Read Header and find the dimensions of 2D data
         line_num = 0
+        # Old version NIST files: 0
+        ver = 0
         for line in lines:      
             line_num += 1
             ## Reading the header applies only to IGOR/NIST 2D q_map data files
@@ -187,9 +189,12 @@ class Reader:
 
             if line.count("BCENT") > 0:
                 isCenter = True
-                       
+            # Check version
+            if line.count("Data columns") > 0:
+                if line.count("err(I)") > 0:
+                    ver = 1
             # Find data start
-            if line.count("Data columns") or line.count("ASCII data") > 0:
+            if line.count("ASCII data") > 0:
                 dataStarted = True
                 continue
 
@@ -228,7 +233,7 @@ class Reader:
         # Change it(string) into float
         #data_list = map(float,data_list)
         data_list1 = map(check_point,data_list)
-      
+
         # numpy array form
         data_array = numpy.array(data_list1)
         # Redimesion based on the row_num and col_num, 
@@ -238,27 +243,29 @@ class Reader:
         except:
             msg = "red2d_reader: Can't read this file: Not a proper file format"
             raise ValueError, msg
-        
         ## Get the all data: Let's HARDcoding; Todo find better way
         # Defaults
         dqx_data = numpy.zeros(0)
         dqy_data = numpy.zeros(0)
+        err_data = numpy.ones(row_num)
         qz_data = numpy.zeros(row_num)
         mask = numpy.ones(row_num,dtype=bool)
         # Get from the array
         qx_data = data_point[0]
         qy_data = data_point[1]
         data = data_point[2]
-        if col_num > 3: qz_data = data_point[3]
-        if col_num > 4: dqx_data = data_point[4]
-        if col_num > 5: dqy_data = data_point[5]
-        if col_num > 6: mask[data_point[6] < 1] = False
+        if ver == 1:
+            if col_num > (2 + ver): err_data = data_point[(2 + ver)]
+        if col_num > (3 + ver): qz_data = data_point[(3 + ver)]
+        if col_num > (4 + ver): dqx_data = data_point[(4 + ver)]
+        if col_num > (5 + ver): dqy_data = data_point[(5 + ver)]
+        #if col_num > (6 + ver): mask[data_point[(6 + ver)] < 1] = False
         q_data = numpy.sqrt(qx_data*qx_data+qy_data*qy_data+qz_data*qz_data)
            
         # Extra protection(it is needed for some data files): 
         # If all mask elements are False, put all True
         if not mask.any(): mask[mask==False] = True   
-            
+  
         # Store limits of the image in q space
         xmin    = numpy.min(qx_data)
         xmax    = numpy.max(qx_data)
@@ -297,7 +304,12 @@ class Reader:
         #Store data in outputs  
         #TODO: Check the lengths 
         output.data     = data
-        output.err_data = numpy.sqrt(numpy.abs(data))
+        if (err_data == 1).all():
+            output.err_data = numpy.sqrt(numpy.abs(data))
+            output.err_data[output.err_data == 0.0] = 1.0
+        else:
+            output.err_data = err_data
+            
         output.qx_data  = qx_data
         output.qy_data  = qy_data             
         output.q_data   = q_data
@@ -325,9 +337,24 @@ class Reader:
             # if no dqx_data, do not pass dqy_data.
             #(1 axis dq is not supported yet).
             if len(dqy_data) == len(qy_data) and dqy_data.any()!=0:
-                output.dqx_data = dqx_data
-                output.dqy_data = dqy_data
-        
+                # Currently we do not support dq parr, perp.
+                # tranfer the comp. to cartesian coord. for newer version.
+                if ver == 1:
+                    diag = numpy.sqrt(qx_data * qx_data + qy_data * qy_data)
+                    cos_th = qx_data / diag
+                    sin_th = qy_data / diag
+                    output.dqx_data = numpy.sqrt((dqx_data * cos_th) * \
+                                                 (dqx_data * cos_th) \
+                                                 + ( dqy_data * sin_th) * \
+                                                  ( dqy_data * sin_th))
+                    output.dqy_data = numpy.sqrt((dqx_data * sin_th) * \
+                                                 (dqx_data * sin_th) \
+                                                 + ( dqy_data * cos_th) * \
+                                                  ( dqy_data * cos_th))
+                else:
+                    output.dqx_data = dqx_data
+                    output.dqy_data = dqy_data
+
         # Units of axes
         if data_conv_q is not None:
             output.xaxis("\\rm{Q_{x}}", output.Q_unit)
