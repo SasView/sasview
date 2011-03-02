@@ -75,6 +75,9 @@ class Plugin(PluginBase):
         """show plug-in panel"""
         pass
     
+    #def _on_plot_event(self, event):
+    #     return profile(self.tested_on_plot_event, event)
+    
     def _on_plot_event(self, event):
         """
         A new plottable is being shipped to the plotting plug-in.
@@ -161,4 +164,19 @@ class Plugin(PluginBase):
             self.new_plot_panels[new_panel.group_id] = new_panel
             
         return
+
+def profile(fn, *args, **kw):
+    import cProfile, pstats, os
+    global call_result
+    def call():
+        global call_result
+        call_result = fn(*args, **kw)
+    cProfile.runctx('call()', dict(call=call), {}, 'profile.txt')
+    stats = pstats.Stats('profile.txt')
+    stats.sort_stats('time')
+    #stats.sort_stats('calls')
+    stats.print_stats()
+    #os.unlink('profile.out')
+    return call_result
+
    

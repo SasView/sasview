@@ -116,9 +116,12 @@ class DataManager(object):
                 msg = "Data manager already stores %s" % str(data.name)
                 msg += ""
                 logging.info(msg)
-            data_state = DataState(data)
+                self.stored_data[data.id].data = data
+                data_state = self.stored_data[data.id]
+            else:
+                data_state = DataState(data)
+                self.stored_data[data.id] = data_state
             self._selected_data[data.id] = data_state
-            self.stored_data[data.id] = data_state
       
     def set_auto_plot(self, flag=False):
         """

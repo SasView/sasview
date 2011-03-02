@@ -32,7 +32,8 @@ class Data1D(PlotData1D, LoadData1D):
         self.xtransform = None
         self.ytransform = None
         self.title = ""
-    
+        self.scale = None
+        
     def copy_from_datainfo(self, data1d):
         """
         copy values of Data1D of type DataLaoder.Data_info
@@ -106,6 +107,7 @@ class Theory1D(PlotTheory1D, LoadData1D):
         self.xtransform = None
         self.ytransform = None
         self.title = ""
+        self.scale = None
     
     def copy_from_datainfo(self, data1d):
         """
@@ -175,10 +177,13 @@ class Data2D(PlotData2D, LoadData2D):
                             dqx_data=dqx_data, dqy_data=dqy_data,
                             q_data=q_data, mask=mask)
         self.id = None
+        self.group_id = []
+        self.is_data = True
         self.path = None
+        self.xtransform = None
+        self.ytransform = None
         self.title = ""
         self.scale = None
-        self.group_id = []
         
     def copy_from_datainfo(self, data2d):
         """

@@ -38,14 +38,14 @@ from DataLoader.data_info import Process
 from DataLoader.data_info import Aperture
 from lxml import etree
 import xml.dom.minidom
-from DataLoader.readers.cansas_reader import Reader as CansasReader
+
 has_converter = True
 try:
     from data_util.nxsunit import Converter
 except:
     has_converter = False
 
-CANSAS_NS = "cansas1d/1.0"
+STATE_NS = "State/1.0"
 
 def write_node(doc, parent, name, value, attr={}):
     """
@@ -75,7 +75,7 @@ def get_content(location, node):
     
     :return: Element, or None
     """
-    nodes = node.xpath(location, namespaces={'ns': CANSAS_NS})
+    nodes = node.xpath(location, namespaces={'ns': STATE_NODE})
     
     if len(nodes)>0:
         return nodes[0]
@@ -89,7 +89,7 @@ def get_float(location, node):
     :param location: xpath location
     :param node: node to start at
     """
-    nodes = node.xpath(location, namespaces={'ns': CANSAS_NS})
+    nodes = node.xpath(location, namespaces={'ns': STATE_NODE})
     
     value = None
     attr = {}
@@ -98,7 +98,7 @@ def get_float(location, node):
             value = float(nodes[0].text)   
         except:
             # Could not pass, skip and return None
-            msg = "cansas_reader.get_float: could not "
+            msg = "state_reader.get_float: could not "
             msg += " convert '%s' to float" % nodes[0].text
             logging.error(msg)
         if nodes[0].get('unit') is not None:
@@ -106,9 +106,9 @@ def get_float(location, node):
     return value, attr
 
             
-class Reader1D(CansasReader):
+class Reader1D:
     """
-    Class to load cansas 1D XML files
+    read state of a plugin  and available data 
     
     :Dependencies:
         The CanSas reader requires PyXML 0.8.4 or later.
@@ -124,7 +124,6 @@ class Reader1D(CansasReader):
     ext = []  
     
     def __init__(self):
-        CansasReader.__init__(self)
         ## List of errors
         self.errors = []
     
@@ -154,7 +153,7 @@ class Reader1D(CansasReader):
                 root = tree.getroot()
                 
                 entry_list = root.xpath('/ns:SASroot/ns:SASentry',
-                                         namespaces={'ns': CANSAS_NS})
+                                         namespaces={'ns': STATE_NODE})
                 
                 for entry in entry_list:
                     self.errors = []
@@ -195,7 +194,7 @@ class Reader1D(CansasReader):
         self._store_content('ns:Title', dom, 'title', data_info)
         
         # Look up run number   
-        nodes = dom.xpath('ns:Run', namespaces={'ns': CANSAS_NS})
+        nodes = dom.xpath('ns:Run', namespaces={'ns': STATE_NODE})
         for item in nodes:    
             if item.text is not None:
                 value = item.text.strip()
@@ -209,7 +208,7 @@ class Reader1D(CansasReader):
                              data_info)
 
         # Notes
-        note_list = dom.xpath('ns:SASnote', namespaces={'ns': CANSAS_NS})
+        note_list = dom.xpath('ns:SASnote', namespaces={'ns': STATE_NODE})
         for note in note_list:
             try:
                 if note.text is not None:
@@ -217,7 +216,7 @@ class Reader1D(CansasReader):
                     if len(note_value) > 0:
                         data_info.notes.append(note_value)
             except:
-                err_mess = "cansas_reader.read: error processing"
+                err_mess = "state_reader.read: error processing"
                 err_mess += " entry notes\n  %s" % sys.exc_value
                 self.errors.append(err_mess)
                 logging.error(err_mess)
@@ -237,7 +236,7 @@ class Reader1D(CansasReader):
                      dom, 'temperature', data_info.sample)
         
         nodes = dom.xpath('ns:SASsample/ns:details', 
-                          namespaces={'ns': CANSAS_NS})
+                          namespaces={'ns': STATE_NODE})
         for item in nodes:
             try:
                 if item.text is not None:
@@ -245,7 +244,7 @@ class Reader1D(CansasReader):
                     if len(detail_value) > 0:
                         data_info.sample.details.append(detail_value)
             except:
-                err_mess = "cansas_reader.read: error processing "
+                err_mess = "state_reader.read: error processing "
                 err_mess += " sample details\n  %s" % sys.exc_value
                 self.errors.append(err_mess)
                 logging.error(err_mess)
@@ -298,7 +297,7 @@ class Reader1D(CansasReader):
         
         # Collimation info ###################
         nodes = dom.xpath('ns:SASinstrument/ns:SAScollimation', 
-                          namespaces={'ns': CANSAS_NS})
+                          namespaces={'ns': STATE_NODE})
         for item in nodes:
             collim = Collimation()
             if item.get('name') is not None:
@@ -306,7 +305,7 @@ class Reader1D(CansasReader):
             self._store_float('ns:length', item, 'length', collim)  
             
             # Look for apertures
-            apert_list = item.xpath('ns:aperture', namespaces={'ns': CANSAS_NS})
+            apert_list = item.xpath('ns:aperture', namespaces={'ns': STATE_NODE})
             for apert in apert_list:
                 aperture =  Aperture()
                 
@@ -330,7 +329,7 @@ class Reader1D(CansasReader):
         
         # Detector info ######################
         nodes = dom.xpath('ns:SASinstrument/ns:SASdetector',
-                           namespaces={'ns': CANSAS_NS})
+                           namespaces={'ns': STATE_NODE})
         for item in nodes:
             
             detector = Detector()
@@ -372,14 +371,14 @@ class Reader1D(CansasReader):
             data_info.detector.append(detector)    
 
         # Processes info ######################
-        nodes = dom.xpath('ns:SASprocess', namespaces={'ns': CANSAS_NS})
+        nodes = dom.xpath('ns:SASprocess', namespaces={'ns': STATE_NODE})
         for item in nodes:
             process = Process()
             self._store_content('ns:name', item, 'name', process)
             self._store_content('ns:date', item, 'date', process)
             self._store_content('ns:description', item, 'description', process)
             
-            term_list = item.xpath('ns:term', namespaces={'ns': CANSAS_NS})
+            term_list = item.xpath('ns:term', namespaces={'ns': STATE_NODE})
             for term in term_list:
                 try:
                     term_attr = {}
@@ -389,13 +388,13 @@ class Reader1D(CansasReader):
                         term_attr['value'] = term.text.strip()
                         process.term.append(term_attr)
                 except:
-                    err_mess = "cansas_reader.read: error processing "
+                    err_mess = "state_reader.read: error processing "
                     err_mess += " process term\n  %s" % sys.exc_value
                     self.errors.append(err_mess)
                     logging.error(err_mess)
             
             note_list = item.xpath('ns:SASprocessnote', 
-                                   namespaces={'ns': CANSAS_NS})
+                                   namespaces={'ns': STATE_NODE})
             for note in note_list:
                 if note.text is not None:
                     process.notes.append(note.text.strip())
@@ -404,13 +403,13 @@ class Reader1D(CansasReader):
             
             
         # Data info ######################
-        nodes = dom.xpath('ns:SASdata', namespaces={'ns': CANSAS_NS})
+        nodes = dom.xpath('ns:SASdata', namespaces={'ns': STATE_NODE})
         if len(nodes) > 1:
             msg = "CanSAS reader is not compatible with multiple"
             msg += " SASdata entries"
             raise RuntimeError, msg
         
-        nodes = dom.xpath('ns:SASdata/ns:Idata', namespaces={'ns': CANSAS_NS})
+        nodes = dom.xpath('ns:SASdata/ns:Idata', namespaces={'ns': STATE_NODE})
 
         x  = numpy.zeros(0)
         y  = numpy.zeros(0)
@@ -633,8 +632,22 @@ class Reader1D(CansasReader):
             if datainfo.dy != None and len(datainfo.dy) >= i:
                 write_node(doc, pt, "Idev", datainfo.dy[i],
                             {'unit':datainfo.y_unit})
-
+        #data gui info
+        gui_info = doc.createElement("DataInfoGui")
         
+        write_node(doc, gui_info, "group_id", 'group_id')
+        for item in datainfo.group_id:
+            write_node(doc, gui_info, "group_id", str(item))
+        write_node(doc, gui_info, "name", datainfo.name)
+        write_node(doc, gui_info, "id", datainfo.id)
+        write_node(doc, gui_info, "group_id", datainfo.groud_id)
+        write_node(doc, gui_info, "name", datainfo.name)
+        write_node(doc, gui_info, "is_data", datainfo.is_data)
+        write_node(doc, gui_info, "xtransform", datainfo.xtransform)
+        write_node(doc, gui_info, "scale", datainfo.scale)
+        write_node(doc, gui_info, "ytransform", datainfo.ytransform)
+        write_node(doc, gui_info, "path", datainfo.path)
+        node.appendChild(gui_info)
         # Sample info
         sample = doc.createElement("SASsample")
         if datainfo.sample.name is not None:
@@ -921,9 +934,9 @@ class Reader1D(CansasReader):
 
            
 
-class Reader2D(CansasReader):
+class Reader2D:
     """
-    Class to load a .fitv fitting file
+    Class to load a basic guiframe state
     """
     ## File type
     type_name = "Fitting"
@@ -1153,7 +1166,7 @@ class Reader2D(CansasReader):
         # the data we just wrote
         return doc, entry_node
    
-    def _parse_state(self, entry):
+    def _parse_state(self, entry, NODE_NAME= 'state'):
         """
         Read a fit result from an XML node
         
@@ -1165,7 +1178,7 @@ class Reader2D(CansasReader):
         state = None   
         # Locate the P(r) node
         try:
-            nodes = entry.xpath('ns:%s' % FITTING_NODE_NAME, namespaces={'ns': CANSAS_NS})
+            nodes = entry.xpath('ns:%s' % NODE_NAME, namespaces={'ns': STATE_NODE})
             if nodes !=[]:
                 # Create an empty state
                 state =  PageState()
@@ -1186,7 +1199,7 @@ class Reader2D(CansasReader):
         :return: Data1D/Data2D object
         
         """
-        node = dom.xpath('ns:data_class', namespaces={'ns': CANSAS_NS})
+        node = dom.xpath('ns:data_class', namespaces={'ns': STATE_NODE})
         if not node or node[0].text.lstrip().rstrip() != "Data2D":
             return CansasReader._parse_entry(self, dom)
         
@@ -1197,7 +1210,7 @@ class Reader2D(CansasReader):
         self._store_content('ns:Title', dom, 'title', data_info)
         
         # Look up run number   
-        nodes = dom.xpath('ns:Run', namespaces={'ns': CANSAS_NS})
+        nodes = dom.xpath('ns:Run', namespaces={'ns': STATE_NODE})
         for item in nodes:    
             if item.text is not None:
                 value = item.text.strip()
@@ -1210,7 +1223,7 @@ class Reader2D(CansasReader):
         self._store_content('ns:SASinstrument/ns:name', dom, 'instrument', data_info)
 
         # Notes
-        note_list = dom.xpath('ns:SASnote', namespaces={'ns': CANSAS_NS})
+        note_list = dom.xpath('ns:SASnote', namespaces={'ns': STATE_NODE})
         for note in note_list:
             try:
                 if note.text is not None:
@@ -1218,7 +1231,7 @@ class Reader2D(CansasReader):
                     if len(note_value) > 0:
                         data_info.notes.append(note_value)
             except:
-                err_mess = "cansas_reader.read: error processing entry notes\n  %s" % sys.exc_value
+                err_mess = "state_reader.read: error processing entry notes\n  %s" % sys.exc_value
                 self.errors.append(err_mess)
                 logging.error(err_mess)
         
@@ -1236,7 +1249,7 @@ class Reader2D(CansasReader):
         self._store_float('ns:SASsample/ns:temperature', 
                      dom, 'temperature', data_info.sample)
         
-        nodes = dom.xpath('ns:SASsample/ns:details', namespaces={'ns': CANSAS_NS})
+        nodes = dom.xpath('ns:SASsample/ns:details', namespaces={'ns': STATE_NODE})
         for item in nodes:
             try:
                 if item.text is not None:
@@ -1244,7 +1257,7 @@ class Reader2D(CansasReader):
                     if len(detail_value) > 0:
                         data_info.sample.details.append(detail_value)
             except:
-                err_mess = "cansas_reader.read: error processing sample details\n  %s" % sys.exc_value
+                err_mess = "state_reader.read: error processing sample details\n  %s" % sys.exc_value
                 self.errors.append(err_mess)
                 logging.error(err_mess)
         
@@ -1295,7 +1308,7 @@ class Reader2D(CansasReader):
                      dom, 'beam_size.z', data_info.source)    
         
         # Collimation info ###################
-        nodes = dom.xpath('ns:SASinstrument/ns:SAScollimation', namespaces={'ns': CANSAS_NS})
+        nodes = dom.xpath('ns:SASinstrument/ns:SAScollimation', namespaces={'ns': STATE_NODE})
         for item in nodes:
             collim = Collimation()
             if item.get('name') is not None:
@@ -1303,7 +1316,7 @@ class Reader2D(CansasReader):
             self._store_float('ns:length', item, 'length', collim)  
             
             # Look for apertures
-            apert_list = item.xpath('ns:aperture', namespaces={'ns': CANSAS_NS})
+            apert_list = item.xpath('ns:aperture', namespaces={'ns': STATE_NODE})
             for apert in apert_list:
                 aperture =  Aperture()
                 
@@ -1326,7 +1339,7 @@ class Reader2D(CansasReader):
             data_info.collimation.append(collim)
         
         # Detector info ######################
-        nodes = dom.xpath('ns:SASinstrument/ns:SASdetector', namespaces={'ns': CANSAS_NS})
+        nodes = dom.xpath('ns:SASinstrument/ns:SASdetector', namespaces={'ns': STATE_NODE})
         for item in nodes:
             
             detector = Detector()
@@ -1359,14 +1372,14 @@ class Reader2D(CansasReader):
             data_info.detector.append(detector)    
 
         # Processes info ######################
-        nodes = dom.xpath('ns:SASprocess', namespaces={'ns': CANSAS_NS})
+        nodes = dom.xpath('ns:SASprocess', namespaces={'ns': STATE_NODE})
         for item in nodes:
             process = Process()
             self._store_content('ns:name', item, 'name', process)
             self._store_content('ns:date', item, 'date', process)
             self._store_content('ns:description', item, 'description', process)
             
-            term_list = item.xpath('ns:term', namespaces={'ns': CANSAS_NS})
+            term_list = item.xpath('ns:term', namespaces={'ns': STATE_NODE})
             for term in term_list:
                 try:
                     term_attr = {}
@@ -1376,11 +1389,11 @@ class Reader2D(CansasReader):
                         term_attr['value'] = term.text.strip()
                         process.term.append(term_attr)
                 except:
-                    err_mess = "cansas_reader.read: error processing process term\n  %s" % sys.exc_value
+                    err_mess = "state_reader.read: error processing process term\n  %s" % sys.exc_value
                     self.errors.append(err_mess)
                     logging.error(err_mess)
             
-            note_list = item.xpath('ns:SASprocessnote', namespaces={'ns': CANSAS_NS})
+            note_list = item.xpath('ns:SASprocessnote', namespaces={'ns': STATE_NODE})
             for note in note_list:
                 if note.text is not None:
                     process.notes.append(note.text.strip())
@@ -1389,7 +1402,7 @@ class Reader2D(CansasReader):
             
             
         # Data info ######################
-        nodes = dom.xpath('ns:SASdata', namespaces={'ns': CANSAS_NS})
+        nodes = dom.xpath('ns:SASdata', namespaces={'ns': STATE_NODE})
         if len(nodes)>1:
             raise RuntimeError, "CanSAS reader is not compatible with multiple SASdata entries"
        
@@ -1438,7 +1451,7 @@ class Reader2D(CansasReader):
                     # Check the format version number
                     # Specifying the namespace will take care of the file format version 
                     root = tree.getroot()
-                    entry_list = root.xpath('ns:SASentry', namespaces={'ns': CANSAS_NS})
+                    entry_list = root.xpath('ns:SASentry', namespaces={'ns': STATE_NODE})
                     for entry in entry_list:   
                         try:
                             sas_entry = self._parse_entry(entry)
@@ -1586,7 +1599,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.ERROR,
                         format='%(asctime)s %(levelname)s %(message)s',
-                        filename='cansas_reader.log',
+                        filename='state_reader.log',
                         filemode='w')
     reader = Reader()
     print reader.read("../test/cansas1d.xml")

@@ -22,7 +22,7 @@ class DataState(object):
         self.data = data
         self.name = ""
         self.path = None
-        self.theory_list = []
+        self.theory_list = {}
         self.state_list = []
         self.message = ""
         
@@ -51,7 +51,7 @@ class DataState(object):
     def set_theory(self, theory):
         """
         """
-        self.theory_list.append(theory)
+        self.theory_list[theory.id] = theory
         
     def get_theory(self):
         return self.theory_list
