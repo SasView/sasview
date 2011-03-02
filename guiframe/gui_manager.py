@@ -1204,7 +1204,6 @@ class ViewerFrame(wx.Frame):
             #if not pane.IsShown():
             pane.Show(False)
             self._mgr.Update()
-            #self.__gui_style = self.__gui_style | GUIFRAME.MANAGER_ON
             self.__gui_style = self.__gui_style & (~GUIFRAME.MANAGER_ON)
             self._data_panel_menu.SetText('Data Explorer ON')
  
@@ -1218,15 +1217,17 @@ class ViewerFrame(wx.Frame):
         if self._data_manager is not None:
             self._data_manager.add_data(data_list)
             avalaible_data = self._data_manager.get_all_data()
-
+        
+        # set data in the data panel
+        if self._data_panel is not None:
+            data_state = self._data_manager.get_selected_data()
+            self._data_panel.load_data_list(data_state)
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style == GUIFRAME.MANAGER_ON:
+            #wait for button press from the data panel to set_data 
             if self._data_panel is not None:
-                data_state = self._data_manager.get_selected_data()
-                self._data_panel.load_data_list(data_state)
                 self._mgr.GetPane(self._data_panel.window_name).Show(True)
-                self._mgr.Update()
-                #wait for button press from the data panel to send data
+                self._mgr.Update() 
         else:
             #automatically send that to the current perspective
             self.set_data(data_list)
