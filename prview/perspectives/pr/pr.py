@@ -144,7 +144,10 @@ class Plugin(PluginBase):
             
             datainfo.meta_data['prstate'].file = data.meta_data['prstate'].file[0:max_char] +' [' + time_str + ']'
             data.filename = data.meta_data['prstate'].file
-             
+            # TODO:
+            #remove this call when state save all information about the gui data
+            # such as ID , Group_ID, etc...
+            #make self.current_plottable = datainfo directly
             self.current_plottable = self.parent.create_gui_data(data,None)
             self.current_plottable.group_id = data.meta_data['prstate'].file
             
