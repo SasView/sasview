@@ -69,7 +69,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.define_panel_structure()
         self.layout_selection()
         self.layout_data_list()
-        self.layout_theory_list()
         self.layout_button()
         self.layout_batch()
    
@@ -80,9 +79,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         w, h = self.parent.GetSize()
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
         self.sizer1 = wx.BoxSizer(wx.VERTICAL)
-        self.sizer1.SetMinSize((w/12, h*1/5))
-        self.sizer6 = wx.BoxSizer(wx.VERTICAL)
-        self.sizer6.SetMinSize((w/12, h*1/5))
+        self.sizer1.SetMinSize((w/12, h*2/5))
+      
         self.sizer2 = wx.BoxSizer(wx.VERTICAL)
         self.sizer3 = wx.GridBagSizer(5,5)
         self.sizer4 = wx.BoxSizer(wx.HORIZONTAL)
@@ -90,7 +88,6 @@ class DataPanel(ScrolledPanel, PanelBase):
        
         self.vbox.Add(self.sizer5, 0,wx.EXPAND|wx.ALL,10)
         self.vbox.Add(self.sizer1, 0,wx.EXPAND|wx.ALL,0)
-        self.vbox.Add(self.sizer6, 0,wx.EXPAND|wx.ALL,0)
         self.vbox.Add(self.sizer2, 0,wx.EXPAND|wx.ALL,10)
         self.vbox.Add(self.sizer3, 0,wx.EXPAND|wx.ALL,10)
         self.vbox.Add(self.sizer4, 0,wx.EXPAND|wx.ALL,10)
@@ -285,17 +282,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer1.Add(label, 0, wx.LEFT, 10)
         self.sizer1.Add(self.tree_ctrl,1, wx.EXPAND|wx.ALL, 10)
         
-    def layout_theory_list(self):
-        """
-        Add a listcrtl in the panel
-        """
-        self.tree_ctrl_theory = DataTreeCtrl(parent=self)
-        self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_CHECKED, self.on_check_item)
-        self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_RIGHT_CLICK, self.on_right_click)
-        label = wx.StaticText(self, -1, "CREATED DATA")
-        label.SetForegroundColour('blue')
-        self.sizer6.Add(label, 0, wx.LEFT, 10)
-        self.sizer6.Add(self.tree_ctrl_theory,1, wx.EXPAND|wx.ALL, 10)
 
     def on_right_click(self, event):
         """
@@ -349,15 +335,16 @@ class DataPanel(ScrolledPanel, PanelBase):
             path = dstate.get_path() 
             theory_list = dstate.get_theory()
             data_child = None
+            
             if theory_list:
-                for theory_id,theory in theory_list:
+                for theory_id,theory in theory_list.iteritems():
                     for item in self.list_cb_data:
                         data_id, data_class = self.tree_ctrl.GetItemPyData(item) 
                         if data_id == data.id:
                             data_child = item
                             for process in data.process:
                                 theory_child = self.tree_ctrl.FindItem(data_child,
-                                                                "Available Theories"),
+                                                                "CREATED DATA"),
                                 if theory is not None:
                                     av_theory_child =self.tree_ctrl.AppendItem(theory_child,
                                             theory.name,ct_type=1, 
@@ -484,9 +471,9 @@ class DataFrame(wx.Frame):
     #  tied to any perspective
     ALWAYS_ON = True
     
-    def __init__(self, parent=None, owner=None, manager=None,size=(600, 800),
+    def __init__(self, parent=None, owner=None, manager=None,size=(400, 800),
                          list_of_perspective=[],list=[], *args, **kwds):
-        #kwds['size'] = size
+        kwds['size'] = size
         kwds['id'] = -1
         kwds['title']= "Loaded Data"
         wx.Frame.__init__(self, parent=parent, *args, **kwds)
@@ -494,7 +481,7 @@ class DataFrame(wx.Frame):
         self.owner = owner
         self.manager = manager
         self.panel = DataPanel(parent=self, 
-                               size=size,
+                               #size=size,
                                list_of_perspective=list_of_perspective)
      
     def load_data_list(self, list=[]):
@@ -597,7 +584,7 @@ if __name__ == "__main__":
         data_list['3']=dstate
         
         window = DataFrame(list=data_list)
-        window.load_data_list(list=data_list)
+        #window.load_data_list(list=data_list)
         window.layout_perspective(list_of_perspective=list_of_perspective)
         window.Show(True)
     except:
