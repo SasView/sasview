@@ -709,12 +709,12 @@ class Plugin(PluginBase):
                                                   reset= True)
                     break
     
-    def _reset_schedule_problem(self, value=0):
+    def _reset_schedule_problem(self, id, value=0):
         """
         unschedule or schedule all fitproblem to be fit
         """
-        for fitproblem in self.page_finder.values():
-            fitproblem.schedule_tofit(value)
+        for page_id in self.page_finder.keys():
+            self.page_finder[id].schedule_tofit(value)
             
     def _fit_helper(self, pars, value, id, title="Single Fit " ):
         """
