@@ -1,7 +1,7 @@
 import wx
 from wx import StatusBar as wxStatusB
 from wx.lib import newevent
-(MessageEvent, EVT_MESSAGE) = newevent.NewEvent()
+
 #numner of fields of the status bar 
 NB_FIELDS = 4
 #position of the status bar's fields
@@ -46,7 +46,7 @@ class Console(wx.Frame):
         wx.Frame.__init__(self, parent=parent, *args, **kwds)
         self.panel = ConsolePanel(self)
         self.panel.set_message(status=status)
-        self.Bind(EVT_MESSAGE, self.set_message)
+        wx.EVT_CLOSE(self, self.Close)
         self.Show(True)
         
     def set_multiple_messages(self, messages=[]):
@@ -56,10 +56,15 @@ class Console(wx.Frame):
             for status in messages:
                 self.panel.set_message(status)
                 
-    def set_message(self, event):
+    def set_message(self, message):
         """
         """
-        self.panel.set_message(event.status)
+        self.panel.set_message(str(message))
+        
+    def Close(self, event):
+        """
+        """
+        self.Hide()
         
 class StatusBar(wxStatusB):
     """
@@ -93,6 +98,7 @@ class StatusBar(wxStatusB):
         self.bitmap_bt_console.SetToolTipString(console_hint)
         self.bitmap_bt_console.Bind(wx.EVT_BUTTON, self._onMonitor,
                                             id=self.bitmap_bt_console.GetId())
+        
         self.reposition()
         ## Current progress value of the bar 
         self.nb_start = 0
@@ -100,6 +106,9 @@ class StatusBar(wxStatusB):
         self.nb_stop = 0
         self.frame = None
         self.list_msg = []
+        self.frame = Console(parent=self)
+        self.frame.set_multiple_messages(self.list_msg)
+        self.frame.Hide()
         self.progress = 0      
         self.timer = wx.Timer(self, -1) 
         self.timer_stop = wx.Timer(self, -1) 
@@ -144,14 +153,10 @@ class StatusBar(wxStatusB):
         self.list_msg.append(text)
         icon_bmp = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_TOOLBAR)
         self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
-        try:
-            if self.frame is not None and self.frame.IsShown():
-                event = MessageEvent()
-                event.status = text
-                wx.PostEvent(self.frame, event)
-        except:
-            return
-            
+      
+        if self.frame is not None :
+            self.frame.set_message(text)
+        
     def PopStatusText(self, *args, **kwds):
         """
         Override status bar 
@@ -233,7 +238,8 @@ class StatusBar(wxStatusB):
         """
         if hasattr(event, "status"):
             self.SetStatusText(str(event.status))
-            
+       
+ 
     def set_gauge(self, event):
         """
         change the state of the gauge according the state of the current job
@@ -285,8 +291,6 @@ class StatusBar(wxStatusB):
         """
         Pop up a frame with messages sent to the status bar
         """
-        self.frame = Console(parent=self)
-        self.frame.set_multiple_messages(self.list_msg)
         self.frame.Show(True)
         
         
