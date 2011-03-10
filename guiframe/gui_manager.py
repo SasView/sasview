@@ -430,6 +430,42 @@ class ViewerFrame(wx.Frame):
                                   MinimizeButton().
                                   Hide())        
       
+    def append_theory(self, data_id, theory, state=None):
+        """
+        """
+        data_state = self._data_manager.append_theory(data_id=data_id, 
+                                                      theory=theory,
+                                                      state=state)
+        self._data_panel.load_data_list(data_state)
+        
+    def update_data(self, prev_data, new_data):
+        """
+        """
+        prev_id, data_state = self._data_manager.update_data(prev_data=prev_data, 
+                                       new_data=new_data)
+        self._data_panel.remove_by_id(prev_id)
+        self._data_panel.load_data_list(data_state)
+       
+        
+    def freeze(self, data_id, theory_id):
+        """
+        """
+        data_state_list = self._data_manager.freeze_theory(data_id=data_id, 
+                                                theory_id=theory_id)
+        
+        self._data_panel.load_data_list(list=data_state_list)
+        for data_state in data_state_list:
+            theory_list = data_state.get_theory()
+            for new_plot in theory_list:
+                wx.PostEvent(self, NewplotEvent(plot=new_plot,
+                                             title=new_plot.title))
+        
+    def delete_data(self, data):
+        """
+        """
+        self._current_perspective.delete_data(data)
+        
+    
     def get_context_menu(self, plotpanel=None):
         """
         Get the context menu items made available 
@@ -1206,7 +1242,12 @@ class ViewerFrame(wx.Frame):
             self._mgr.Update()
             self.__gui_style = self.__gui_style & (~GUIFRAME.MANAGER_ON)
             self._data_panel_menu.SetText('Data Explorer ON')
- 
+    
+    def add_data_helper(self, data_list):
+        """
+        """
+        self._data_manager.add_data(data_list)
+        
     def add_data(self, data_list):
         """
         receive a list of data . store them its data manager if possible
@@ -1214,14 +1255,10 @@ class ViewerFrame(wx.Frame):
         """
         #send a list of available data to plotting plugin
         avalaible_data = []
+        theory_list = []
         if self._data_manager is not None:
             self._data_manager.add_data(data_list)
             avalaible_data = self._data_manager.get_all_data()
-        
-        # set data in the data panel
-        if self._data_panel is not None:
-            data_state = self._data_manager.get_selected_data()
-            self._data_panel.load_data_list(data_state)
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style == GUIFRAME.MANAGER_ON:
             #wait for button press from the data panel to set_data 
@@ -1231,7 +1268,12 @@ class ViewerFrame(wx.Frame):
         else:
             #automatically send that to the current perspective
             self.set_data(data_list)
-                
+       
+         # set data in the data panel
+        if self._data_panel is not None:
+            data_state = self._data_manager.get_selected_data()
+            self._data_panel.load_data_list(data_state)
+           
     def get_data_from_panel(self, data_id, plot=False,append=False):
         """
         receive a list of data key retreive the data from data manager and set 
@@ -1289,15 +1331,7 @@ class ViewerFrame(wx.Frame):
             wx.PostEvent(self, NewPlotEvent(plot=new_plot,
                                                   title=str(new_plot.title)))
             
-    def add_theory(self, data_id, theory):
-        """
-        """
-        self._data_manager.append_theory(data_id, theory)
-        style = self.__gui_style & GUIFRAME.MANAGER_ON
-        if style == GUIFRAME.MANAGER_ON:
-            if self._data_panel is not None:
-                data_state = self._data_manager.get_by_id([data_id])
-                self._data_panel.load_data_list(data_state)
+  
                 
     def remove_data(self, data_id, theory_id=None, delete_all=True):
         """

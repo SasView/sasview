@@ -45,6 +45,7 @@ class PanelBase:
         self._drag_flag = False
         self._reset_flag = False
         self._has_changed = False
+        self.group_id = None
         
         self.Bind(wx.EVT_LEFT_DOWN, self.on_set_focus)
         self.Bind(wx.EVT_TEXT_ENTER, self.on_set_focus)

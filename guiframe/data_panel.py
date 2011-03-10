@@ -58,8 +58,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.list_of_data = list
         self.list_of_perspective = list_of_perspective
         self.list_rb_perspectives= []
-        self.list_cb_data =[]
-        self.list_cb_theory =[]
+        self.list_cb_data = {}
+        self.list_cb_theory = {}
+        
         self.owner = None
         self.do_layout()
        
@@ -180,7 +181,8 @@ class DataPanel(ScrolledPanel, PanelBase):
             return 
         option = self.selection_cbox.GetString(pos)
         for item in self.list_cb_data:
-            data_id, data_class = self.tree_ctrl.GetItemPyData(item) 
+            data_ctrl, _, _ = item
+            data_id, data_class = self.tree_ctrl.GetItemPyData(dta_ctrl) 
             if option == 'Select all Data':
                 self.tree_ctrl.CheckItem(item, True) 
             elif option == 'Unselect all Data':
@@ -189,10 +191,10 @@ class DataPanel(ScrolledPanel, PanelBase):
                 if data_class == 'Data1D':
                     self.tree_ctrl.CheckItem(item, True) 
             elif option == 'Unselect all Data 1D':
-                if data_class in ['Data1D', 'Theory1D']:
+                if data_class == 'Data1D':
                     self.tree_ctrl.CheckItem(item, False) 
             elif option == 'Select all Data 1D':
-                if data_class == ['Data1D', 'Theory1D']:
+                if data_class == 'Data1D':
                     self.tree_ctrl.CheckItem(item, True) 
             elif option == 'Select all Data 2D':
                 if data_class == 'Data2D':
@@ -223,6 +225,10 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_plot.SetToolTipString("To trigger plotting")
         wx.EVT_BUTTON(self, self.bt_plot.GetId(), self.on_plot)
         
+        self.bt_freeze = wx.Button(self, wx.NewId(), "Freeze")
+        self.bt_freeze.SetToolTipString("To trigger freeze")
+        wx.EVT_BUTTON(self, self.bt_freeze.GetId(), self.on_freeze)
+        
         self.bt_remove = wx.Button(self, wx.NewId(), "Remove Data")
         self.bt_remove.SetToolTipString("Remove data from the application")
         wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
@@ -249,6 +255,10 @@ class DataPanel(ScrolledPanel, PanelBase):
         ix = 0          
         iy += 1 
         self.sizer3.Add(self.bt_plot,( iy, ix),(1,1),  
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        ix = 0          
+        iy += 1 
+        self.sizer3.Add(self.bt_freeze,( iy, ix),(1,1),  
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix = 0          
         iy += 1 
@@ -316,92 +326,180 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         item = event.GetItem()
         name = self.tree_ctrl.GetItemText(item)
-  
+    
     def load_data_list(self, list):
         """
-        
+        add need data with its theory under the tree
         """
         if not list:
             return
         
-        for dstate in list.values():
+        for state_id, dstate in list.iteritems():
             data = dstate.get_data()
             if data is None:
-                data_name = str(data)
-                data_class = "unkonwn"
+                data_name = "Unkonwn"
+                data_class = "Unkonwn"
+                path = "Unkonwn"
+                process_list = []
+                data_id = "Unkonwn"
             else:
                 data_name = data.name
-            data_class = data.__class__.__name__
-            path = dstate.get_path() 
+                data_class = data.__class__.__name__
+                path = dstate.get_path() 
+                process_list = data.process
+                data_id = data.id
             theory_list = dstate.get_theory()
-            data_child = None
-            
-            if theory_list:
-                for theory_id,theory in theory_list.iteritems():
-                    for item in self.list_cb_data:
-                        data_id, data_class = self.tree_ctrl.GetItemPyData(item) 
-                        if data_id == data.id:
-                            data_child = item
-                            for process in data.process:
-                                theory_child = self.tree_ctrl.FindItem(data_child,
-                                                                "CREATED DATA"),
-                                if theory is not None:
-                                    av_theory_child =self.tree_ctrl.AppendItem(theory_child,
-                                            theory.name,ct_type=1, 
-                                            data=(theory_id, theory))
-                                    self.list_cb_theory.append(av_theory_child)
-                                    av_theory_child_info =self.tree_ctrl.AppendItem(av_theory_child,
-                                                             'info')
-                                    for process in theory.process:
-                                        info_time_child = self.tree_ctrl.AppendItem(av_theory_child_info,
-                                                 process.__str__())
-                           
-                        break
-            if data_child is None:
-                data_child = self.tree_ctrl.InsertItem(self.tree_ctrl.root,0,
-                                            data_name, ct_type=1, 
-                                            data=(data.id, data_class))
-                cb_data = self.tree_ctrl.GetFirstChild(self.tree_ctrl.root) 
-                item, id = cb_data
-                item.Check(True)
-                self.list_cb_data.append(item)                         
-                data_info_child =self.tree_ctrl.AppendItem(data_child, 'info')#,
-                                                            #wnd=data_info_txt)
-                info_class_child =self.tree_ctrl.AppendItem(data_info_child, 
-                                                            'Type: %s'%data_class)
-                path_class_child =self.tree_ctrl.AppendItem(data_info_child,
-                                                             'Path: %s'%str(path))
-                for process in data.process:
-                    info_time_child =self.tree_ctrl.AppendItem(data_info_child,process.__str__())
-                theory_child =self.tree_ctrl.AppendItem(data_child, "Available Theories")
+            if state_id not in self.list_cb_data:
+                #new state
+                data_c = self.tree_ctrl.InsertItem(self.tree_ctrl.root,0,
+                                                   data_name, ct_type=1, 
+                                     data=(data_id, data_class, state_id))
+                data_c.Check(True)
+                d_i_c = self.tree_ctrl.AppendItem(data_c, 'Info')
+                i_c_c = self.tree_ctrl.AppendItem(d_i_c, 
+                                              'Type: %s' % data_class)
+                p_c_c = self.tree_ctrl.AppendItem(d_i_c,
+                                              'Path: %s' % str(path))
+                d_p_c = self.tree_ctrl.AppendItem(d_i_c, 'Process')
                 
-                if  theory_list:
-                    theory = theory_list[len(theory_list)-1]
-                    if theory is not None:
-                        av_theory_child =self.tree_ctrl.AppendItem(theory_child,
-                                                    theory.name,ct_type=1)
-                        self.list_cb_theory.append(av_theory_child)
-                        av_theory_child_info =self.tree_ctrl.AppendItem(av_theory_child,
-                                                         'info')
-                        for process in theory.process:
-                            info_time_child =self.tree_ctrl.AppendItem(av_theory_child_info,
-                                             process.__str__())
-                   
+                for process in process_list:
+                    i_t_c = self.tree_ctrl.AppendItem(d_p_c,
+                                                      process.__str__())
+                theory_child = self.tree_ctrl.AppendItem(data_c, "THEORIES")
+               
+                self.list_cb_data[state_id] = [data_c, 
+                                               d_i_c,
+                                               i_c_c,
+                                                p_c_c,
+                                                 d_p_c,
+                                                 theory_child]
+            else:
+                data_ctrl_list =  self.list_cb_data[state_id]
+                #This state is already display replace it contains
+                data_c, d_i_c, i_c_c, p_c_c, d_p_c, t_c = data_ctrl_list
+                self.tree_ctrl.SetItemText(data_c, data_name) 
+                temp = (data_id, data_class, state_id)
+                self.tree_ctrl.SetItemPyData(data_c, temp) 
+                self.tree_ctrl.SetItemText(i_c_c, 'Type: %s' % data_class)
+                self.tree_ctrl.SetItemText(p_c_c, 'Path: %s' % str(path)) 
+                self.tree_ctrl.DeleteChildren(d_p_c) 
+                for process in process_list:
+                    i_t_c = self.tree_ctrl.AppendItem(d_p_c,
+                                                      process.__str__())
+            self.append_theory(state_id, theory_list)
+                  
+   
+    def append_theory(self, state_id, theory_list):
+        """
+        append theory object under data from a state of id = state_id
+        replace that theory if  already displayed
+        """
+        if not theory_list:
+            return 
+        if state_id not in self.list_cb_data.keys():
+            msg = "Invalid state ID : %s requested for theory" % str(state_id)
+            raise ValueError, msg
+            
+        item = self.list_cb_data[state_id]
+        data_c, _, _, _, _, theory_child = item
+        data_id, _, _ = self.tree_ctrl.GetItemPyData(data_c) 
+        
+        if data_id in self.list_cb_theory.keys():
+            #update current list of theory for this data
+            theory_list_ctrl = self.list_cb_theory[data_id]
+
+            for theory_id, item in theory_list.iteritems():
+                theory_data, _ = item
+                if theory_data is None:
+                    name = "Unknown"
+                    theory_class = "Unknown"
+                    theory_id = "Unknown"
+                    temp = (None, None, None)
+                else:
+                    name = theory_data.name
+                    theory_class = theory_data.__class__.__name__
+                    theory_id = theory_data.id
+                    temp = (theory_id, theory_class, state_id)
+                if theory_id not in theory_list_ctrl:
+                    #add new theory
+                    t_child = self.tree_ctrl.AppendItem(theory_child,
+                                                    name, ct_type=1, data=temp)
+                    t_i_c = self.tree_ctrl.AppendItem(t_child, 'Info')
+                    i_c_c = self.tree_ctrl.AppendItem(t_i_c, 
+                                                  'Type: %s' % theory_class)
+                    t_p_c = self.tree_ctrl.AppendItem(t_i_c, 'Process')
+                    
+                    for process in theory_data.process:
+                        i_t_c = self.tree_ctrl.AppendItem(t_p_c,
+                                                          process.__str__())
+                    theory_list_ctrl[theory_id] = [t_child, 
+                                                   i_c_c, 
+                                                   t_p_c]
+                else:
+                    #replace theory
+                    t_child, i_c_c, t_p_c = theory_list_ctrl[theory_id]
+                    self.tree_ctrl.SetItemText(t_child, name) 
+                    self.tree_ctrl.SetItemPyData(t_child, temp) 
+                    self.tree_ctrl.SetItemText(i_c_c, 'Type: %s' % theory_class) 
+                    self.tree_ctrl.DeleteChildren(t_p_c) 
+                    for process in theory_data.process:
+                        i_t_c = self.tree_ctrl.AppendItem(t_p_c,
+                                                          process.__str__())
+              
+        else:
+            #data didn't have a theory associated it before
+            theory_list_ctrl = {}
+            for theory_id, item in theory_list.iteritems():
+                theory_data, _ = item
+                if theory_data is not None:
+                    theory_class = theory_data.__class__.__name__
+                    
+                    t_child = self.tree_ctrl.AppendItem(theory_child,
+                            theory_data.name, ct_type=1, 
+                            data=(theory_data.id, theory_class, state_id))
+                    t_i_c = self.tree_ctrl.AppendItem(t_child, 'Info')
+                    i_c_c = self.tree_ctrl.AppendItem(t_i_c, 
+                                                  'Type: %s' % theory_class)
+                    t_p_c = self.tree_ctrl.AppendItem(t_i_c, 'Process')
+                    
+                    for process in theory_data.process:
+                        i_t_c = self.tree_ctrl.AppendItem(t_p_c,
+                                                          process.__str__())
+            
+                    theory_list_ctrl[theory_id] = [t_child, i_c_c, t_p_c]
+            self.list_cb_theory[data_id] = theory_list_ctrl
+            
+    
     def set_data_helper(self):
         """
         """
         data_to_plot = []
-        for item in self.list_cb_data:
+        for value in self.list_cb_data.values():
+            item, _, _, _, _, _ = value
             if item.IsChecked():
-               data_id, data_class = self.tree_ctrl.GetItemPyData(item) 
+               data_id, _, _ = self.tree_ctrl.GetItemPyData(item) 
                data_to_plot.append(data_id)
         theory_to_plot = []
-        for item in self.list_cb_theory:
-            if item.IsChecked():
-                data_id, data_class = self.tree_ctrl.GetItemPyData(item)
-                theory_to_plot.append(data_id)
+        for theory_dict in self.list_cb_theory.values():
+            for key, value in theory_dict.iteritems():
+                item, _, _ = value
+                if item.IsChecked():
+                    theory_id, _, _ = self.tree_ctrl.GetItemPyData(item)
+                    theory_to_plot.append(theory_id)
         return data_to_plot, theory_to_plot
     
+    def remove_by_id(self, id):
+        """
+        """
+        for item in self.list_cb_data.values():
+            data_c, _, _, _, _, theory_child = item
+            data_id, _, state_id = self.tree_ctrl.GetItemPyData(data_c) 
+            if id == data_id:
+                self.tree_ctrl.Delete(data_c)
+                del self.list_cb_data[state_id]
+                del self.list_cb_theory[data_id]
+                print "went here"
+      
     def on_remove(self, event):
         """
         remove data from application
@@ -440,6 +538,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         self.post_helper(plot=True)
        
+    def on_freeze(self, event):
+        """
+        """
+        data_to_plot, theory_to_plot = self.set_data_helper()
+        self.parent.freeze(data_id=data_to_plot, theory_id=theory_to_plot)
+        
     def set_active_perspective(self, name):
         """
         set the active perspective
@@ -456,10 +560,11 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         """
         data_to_plot, theory_to_plot = self.set_data_helper()
-      
         if self.parent is not None:
             self.parent.get_data_from_panel(data_id=data_to_plot, plot=plot,
                                             append=append)
+            
+    
 
 
 class DataFrame(wx.Frame):
@@ -494,6 +599,8 @@ class DataFrame(wx.Frame):
         """
         """
         self.panel.layout_perspective(list_of_perspective=list_of_perspective)
+    
+    
         
     
 from dataFitting import Data1D
@@ -511,8 +618,8 @@ class State():
 def set_data_state(data, path, theory, state):
     dstate = DataState(data=data)
     dstate.set_path(path=path)
-    dstate.set_theory(theory)
-    dstate.set_state(state)
+    dstate.set_theory(theory, state)
+  
     return dstate
 """'
 data_list = [1:('Data1', 'Data1D', '07/01/2010', "theory1d", "state1"), 
@@ -527,27 +634,28 @@ if __name__ == "__main__":
     try:
         list_of_perspective = [('perspective2', False), ('perspective1', True)]
         data_list = {}
+        # state 1
         data = Data1D()
         data.name = "data1"
         data.id = 1
-        #data.append_process()
-        #process = data.process[len(data.process)-1]
-        #process.data = "07/01/2010"
+        data.append_empty_process()
+        process = data.process[len(data.process)-1]
+        process.data = "07/01/2010"
         theory = Theory1D()
         theory.id = 34
-        theory.pseudo_name = "theory1"
+        theory.name = "theory1"
         path = "path1"
         state = State()
         data_list['1']=set_data_state(data, path,theory, state)
-        
+        #state 2
         data = Data1D()
         data.name = "data2"
         data.id = 76
         theory = Theory1D()
         theory.id = 78
         theory.name = "CoreShell 07/24/25"
-        theory.pseudo_name = "CoreShell"
         path = "path2"
+        #state3
         state = State()
         data_list['2']=set_data_state(data, path,theory, state)
         data = Data1D()
@@ -555,41 +663,52 @@ if __name__ == "__main__":
         data.name = "data2"
         theory = Theory1D()
         theory.name = "CoreShell"
-        theory.pseudo_name = "CoreShell"
         theory.id = 4
-        #theory.append_process()
-        #process = theory.process[len(theory.process)-1]
-        #process.description = "this is my description"
+        theory.append_empty_process()
+        process = theory.process[len(theory.process)-1]
+        process.description = "this is my description"
         path = "path3"
-        #data.append_process()
-        #process = data.process[len(data.process)-1]
-        #process.data = "07/22/2010"
+        data.append_empty_process()
+        process = data.process[len(data.process)-1]
+        process.data = "07/22/2010"
         data_list['4']=set_data_state(data, path,theory, state)
-        
+        #state 4
+        temp_data_list = {}
+        data.name = "data5 erasing data2"
+        temp_data_list['4'] = set_data_state(data, path,theory, state)
+        #state 5
         data = Data2D()
         data.name = "data3"
         data.id = 5
-        #data.append_process()
-        #process = data.process[len(data.process)-1]
-        #process.data = "07/01/2010"
+        data.append_empty_process()
+        process = data.process[len(data.process)-1]
+        process.data = "07/01/2010"
         theory = Theory1D()
-        theory.pseudo_name = "Cylinder"
+        theory.name = "Cylinder"
         path = "path2"
         state = State()
         dstate= set_data_state(data, path,theory, state)
         theory = Theory1D()
         theory.id = 6
-        theory.pseudo_name = "Sphere"
+        theory.name = "CoreShell"
         dstate.set_theory(theory)
-        data_list['3']=dstate
+        theory = Theory1D()
+        theory.id = 6
+        theory.name = "CoreShell replacing coreshell in data3"
+        dstate.set_theory(theory)
+        data_list['3'] = dstate
+        #state 6
+        data_list['6']=set_data_state(None, path,theory, state)
         
         window = DataFrame(list=data_list)
-        #window.load_data_list(list=data_list)
-        window.layout_perspective(list_of_perspective=list_of_perspective)
+        window.load_data_list(list=data_list)
+        #window.layout_perspective(list_of_perspective=list_of_perspective)
         window.Show(True)
+        window.load_data_list(list=temp_data_list)
     except:
         #raise
         print "error",sys.exc_value
+        
     app.MainLoop()  
     
     

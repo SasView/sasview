@@ -9,6 +9,8 @@
 ################################################################################
 """
 """
+import copy
+
 
 class DataState(object):
     """
@@ -23,13 +25,54 @@ class DataState(object):
         self.name = ""
         self.path = None
         self.theory_list = {}
-        self.state_list = []
         self.message = ""
+        self.id = None
+        
+    def __str__(self):
+        _str  = ""
+        _str += "State with ID : %s \n" % str(self.id)
+        if self.data is not None:
+            _str += "Data name : %s \n" % str(self.data.name)
+            _str += "Data ID : %s \n" % str(self.data.id)
+        else:
+            _str += "Data: %s \n" % str(self.data)
+            
+        if self.theory_list:
+            _str += "Theories available: \n"
+            for id, item in self.theory_list.iteritems():
+                theory_data, theory_state = item
+                _str += "Theory name : %s \n" % str(theory_data.name)
+                _str += "Theory ID : %s \n" % str(id)
+        else:
+            for key , value in self.theory_list.iteritems():
+                theory_data, theory_state = value
+                _str += "Theory with ID : %s \n" % str(key)
+                _str += str(theory_data)
+                _str += str(theory_state)
+        return _str
+        
+    def clone(self):
+        obj = DataState(copy.deepcopy(self.data))
+        obj.parent = self.parent
+        obj.name = self.name 
+        obj.path = self.path 
+        obj.message = self.message
+        obj.id = self.id
+        for id, item in self.theory_list.iteritems():
+            theory_data, theory_state = item
+            state = None
+            if theory_state is not None:
+                state = theory_state.clone()
+            obj.theory_list[id] = [copy.deepcopy(theory_data), 
+                                   state]
+        return obj
         
     def set_name(self, name):
         self.name = name
+        
     def get_name(self):
         return self.name
+    
     def set_data(self, data):
         self.data = data
         
@@ -48,22 +91,13 @@ class DataState(object):
         """
         return self.path
     
-    def set_theory(self, theory):
+    def set_theory(self, theory_data, theory_state=None):
         """
         """
-        self.theory_list[theory.id] = theory
+        self.theory_list[theory_data.id] = [theory_data, theory_state]
         
     def get_theory(self):
         return self.theory_list
-    
-    def set_state(self, state):
-        """
-        """
-        #self.theory_list.append(state)
-        return
-        
-    def get_state(self):
-        return self.state_list
     
     def get_message(self):
         """

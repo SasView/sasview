@@ -16,13 +16,15 @@ Data_manager  make these new data available for all other perspectives.
 """
 import logging
 import os
+import wx
+import copy 
+
 from sans.guiframe.data_state import DataState
 from sans.guiframe.utils import parse_name
 import DataLoader.data_info as DataInfo
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
   
-import wx
 
 class DataManager(object):
     """
@@ -41,6 +43,16 @@ class DataManager(object):
         self.message = ""
         self.data_name_dict = {}
       
+    def __str__(self):
+        _str  = ""
+        _str += "No of states  is %s \n" % str(len(self.stored_data))
+        n_count = 0
+        for  value in self.stored_data.values():
+            n_count += 1 
+            _str += "State No %s \n"  % str(n_count)
+            _str += str(value) + "\n"
+        return _str
+        
     def create_gui_data(self, data, path=None):
         """
         Receive data from loader and create a data to use for guiframe
@@ -120,22 +132,23 @@ class DataManager(object):
                 data_state = self.stored_data[data.id]
             else:
                 data_state = DataState(data)
+                data_state.id = wx.NewId()
                 self.stored_data[data.id] = data_state
             self._selected_data[data.id] = data_state
-      
-    def set_auto_plot(self, flag=False):
-        """
-        When flag is true the data is plotted automatically
-        """
-        self._auto_set_data = flag
+  
         
-    def set_auto_set_data(self, flag=False):
+    def update_data(self, prev_data, new_data):
         """
-        When flag is true the data is send to the current perspective
-        automatically
         """
-        self._auto_set_data = flag
-        
+        if prev_data.id not in self.stored_data.keys():
+            return {}
+        data_state = self.stored_data[prev_data.id] 
+        self.stored_data[new_data.id]  = data_state.clone()
+        self.stored_data[new_data.id].data = new_data
+        if prev_data.id in self.stored_data.keys():
+            del self.stored_data[prev_data.id] 
+        return prev_data.id, {new_data.id: self.stored_data[new_data.id]}
+    
     def get_message(self):
         """
         return message
@@ -152,20 +165,69 @@ class DataManager(object):
                 self._selected_data[id] = self.stored_data[id]
         return self._selected_data
     
-    def append_theory(self, data_id, theory):
+    def append_theory(self, data_id, theory, state=None):
+        """
+        """
+        data_state = self.stored_data[data_id]
+        data_state.set_theory(theory_data=theory, 
+                              theory_state=state)
+        return {data_id: self.stored_data[data_id]}
+            
+    def freeze_theory(self, data_id, theory_id):
+        """
+        """
+        new_data_state = []
+        for d_id in data_id:
+            if d_id in self.stored_data:
+                data_state = self.stored_data[d_id]
+                theory_list = data_state.get_theory()
+                for t_id in theory_id:
+                    if t_id in theory_list.keys():
+                        theory = theory_list[t_id]
+                        new_theory = copy.deepcopy(theory)
+                        new_theory.id  = wx.NewId()
+                        data_state.append_theory(new_theory)
+                        theory_list.append(new_theory)
+                        new_data_state.append(data_state)
+                        msg = "Theory with ID %s " % str(theory_id)
+                        msg += "couldn't not be frozen" 
+                        raise ValueError, msg
+        return new_data_state
+                    
+            
+    def delete_data(self, data_id, theory_id=None, delete_all=False):
+        """
+        """
+        if data_id in self.stored_data.keys():
+            data_state = self.stored_data[data_id]
+            if data_state.data.name in self.data_name_dict:
+                del self.data_name_dict[data_state.data.name]
+            del self.stored_data[data_id]
+        if data_id in self._selected_data.keys():
+            data_state = self._selected_data[data_id]
+            if data_state.data.name in self.data_name_dict:
+                del self.data_name_dict[data_state.data.name]
+            del self._selected_data[data_id]
+        
+        self.delete_theory(self, data_id, theory_id)
+        if delete_all:
+            self._selected_data = {}
+            self.stored_data = {}
+            self.data_name_dict = {}
+            
+    def delete_theory(self, data_id, theory_id):
         """
         """
         if data_id in self.stored_data:
             data_state = self.stored_data[data_id]
-            data_state.set_theory(theory)
-            
-    def delete_data(self, data_id, theory_id, delete_all):
-        """
-        """
-        if data_id in self.stored_data:
-            del self.stored_data[data_id]
+            theory_list = data_state.get_theory()
+            if theory_id in theory_list.key():
+                del theory_list[theory_id]
         if data_id in self._selected_data:
-            del self._selected_data
+            data_state = self._selected_data[data_id]
+            theory_list = data_state.get_theory()
+            if theory_id in theory_list.key():
+                del theory_list[theory_id]
             
     def delete_by_id(self, id_list=None):
         """
