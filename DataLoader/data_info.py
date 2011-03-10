@@ -461,7 +461,7 @@ class DataInfo:
         ## Loading errors
         self.errors = []        
         
-    def add_process(self):
+    def append_empty_process(self):
         """
         """
         self.process.append(Process())
