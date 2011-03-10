@@ -466,16 +466,14 @@ class FitPage(BasicPage):
         sizer_range.Add( text4_3 ,0, wx.RIGHT, 10)
         self.minimum_q = BGTextCtrl(self, -1, size=(_BOX_WIDTH,20))
         self.minimum_q.SetValue(str(data_min))
-        #self.minimum_q.SetEditable(False)
         self.maximum_q = BGTextCtrl(self, -1,size=(_BOX_WIDTH,20))
         self.maximum_q.SetValue(str(data_max))
-        #self.maximum_q.SetEditable(False)
         sizer_range.Add(wx.StaticText(self, -1, "Min: "),0, wx.LEFT, 10)
         sizer_range.Add(self.minimum_q,0, wx.LEFT, 10)
         sizer_range.Add(wx.StaticText(self, -1, "Max: "),0, wx.LEFT, 10)
         sizer_range.Add(self.maximum_q,0, wx.LEFT, 10)
         id = wx.NewId()
-        self.model_view = wx.Button(self, id,'View 2D', size=(80, 23))
+        self.model_view = wx.Button(self, id,"Switch to 2D", size=(80, 23))
         self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D, id=id)
         hint = "toggle view of model from 1D to 2D  or 2D from 1D"
         self.model_view.SetToolTipString(hint)
@@ -1473,6 +1471,7 @@ class FitPage(BasicPage):
                 self.slit_smearer.Disable()
                 self.default_mask = copy.deepcopy(self.data.mask)
                 
+                
             self.formfactorbox.Enable()
             self.structurebox.Enable()
             data_name = self.data.name
@@ -1489,6 +1488,7 @@ class FitPage(BasicPage):
                 self.btEditMask.Disable()  
                 self.EditMask_title.Disable()
             else:
+                
                 ## Minimum value of data 
                 data_min = 0
                 x = max(math.fabs(self.data.xmin), math.fabs(self.data.xmax)) 
@@ -1513,8 +1513,17 @@ class FitPage(BasicPage):
         self.state.data = data
         self.state.qmin = self.qmin_x
         self.state.qmax = self.qmax_x
+       
         #update model plot with new data information
         if flag:
+            #set model view button
+            if self.data.__class__.__name__ == "Data2D":
+                self.enable2D = True
+                self.model_view.SetLabel("2D Mode")
+            else:
+                self.enable2D = False
+                self.model_view.SetLabel("1D Mode")
+            self.model_view.Disable()
             self._draw_model()
         
     def reset_page(self, state,first=False):
@@ -2625,11 +2634,11 @@ class FitPage(BasicPage):
         """
         toggle view of model from 1D to 2D  or 2D from 1D
         """
-        if self.model_view.GetLabelText() == "View 2D":
-            self.model_view.SetLabel("View 1D")
+        if self.model_view.GetLabelText() == "Switch to 2D":
+            self.model_view.SetLabel("Switch to 1D")
             self.enable2D = True
         else:
-            self.model_view.SetLabel("View 2D")
+            self.model_view.SetLabel("Switch to 2D")
             self.enable2D = False
         self._draw_model()
 
