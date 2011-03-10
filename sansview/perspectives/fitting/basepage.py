@@ -1645,7 +1645,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             if hasattr(self, "enable_smearer"):
                 if not self.disable_smearer.GetValue():
                     temp_smear= self.current_smearer
-            print "_draw_model", self.enable2D
+            toggle_mode_on = self.model_view.IsEnabled()
             self._manager.draw_model(self.model, 
                                     data=self.data,
                                     smearer= temp_smear,
@@ -1653,6 +1653,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                                     qmax=float(self.qmax_x),
                                     qstep= float(self.npts_x),
                                     id=self.id,
+                                    toggle_mode_on=toggle_mode_on, 
                                     state = self.state,
                                     enable2D=self.enable2D)
         

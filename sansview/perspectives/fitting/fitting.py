@@ -454,6 +454,7 @@ class Plugin(PluginBase):
     def draw_model(self, model, id, data=None, smearer=None,
                    enable1D=True, enable2D=False,
                    state=None,
+                   toggle_mode_on=False,
                    qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
         """
         Draw model.
@@ -479,6 +480,7 @@ class Plugin(PluginBase):
                                smearer=smearer,
                                qmin=qmin,
                                qmax=qmax, 
+                               toggle_mode_on=toggle_mode_on,
                                state=state,
                                qstep=qstep)
         else:     
@@ -491,6 +493,7 @@ class Plugin(PluginBase):
                                 qmin=qmin,
                                 qmax=qmax,
                                 state=state,
+                                toggle_mode_on=toggle_mode_on,
                                 qstep=qstep)
             
     def onFit(self):
@@ -1087,7 +1090,8 @@ class Plugin(PluginBase):
         theory.id = str(id) + "Mode2D"
   
                 
-    def _complete1D(self, x,y, id, elapsed,index,model,state=None, data=None):
+    def _complete1D(self, x,y, id, elapsed,index,model,
+                    toggle_mode_on=False,state=None, data=None):
         """
         Complete plotting 1D data
         """ 
@@ -1121,13 +1125,17 @@ class Plugin(PluginBase):
                     new_plot.group_id.append(group_id)
                 new_plot.is_data = False 
             new_plot.id =  str(id) + " Model1D"  
+            print "new_plot.id", new_plot.id
             #find if this theory was already plotted and replace that plot given
             #the same id
             if id in self.page_finder:
                 theory_data = self.page_finder[id].get_theory_data()
                 if theory_data is not None:
                     temp_id = theory_data.id
+                    print "theory_data id", temp_id
                     new_plot.id = temp_id
+            if toggle_mode_on:
+                new_plot.id =  str(id) + " Model"  
             new_plot.name = model.name + " ["+ str(model.__class__.__name__)+ "]"
             new_plot.xaxis(_xaxis, _xunit)
             new_plot.yaxis(_yaxis, _yunit)
@@ -1140,6 +1148,7 @@ class Plugin(PluginBase):
                 data_id = data.id
             self.parent.append_theory(data_id=data_id, 
                                           theory=new_plot, state=state)
+            
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                             title= str(new_plot.title)))
             current_pg = self.fit_panel.get_page_by_id(id)
@@ -1165,46 +1174,46 @@ class Plugin(PluginBase):
         #self.calc_thread.ready(0.01)
     
     def _complete2D(self, image, data, model, id,  elapsed, index, qmin,
-                     qmax, state=None,qstep=DEFAULT_NPTS):
+                     qmax, toggle_mode_on=False,state=None,qstep=DEFAULT_NPTS):
         """
         Complete get the result of modelthread and create model 2D
         that can be plot.
         """
         err_image = numpy.zeros(numpy.shape(image))
        
-        theory= Data2D(image=image, err_image=err_image)
-        theory.name = model.name
+        new_plot= Data2D(image=image, err_image=err_image)
+        new_plot.name = model.name
         
         if data is None:
-            self._fill_default_model2D(theory=theory, 
+            self._fill_default_model2D(theory=new_plot, 
                                        qmax=qmax, 
                                        id=id,
                                        qstep=qstep,
                                         qmin= qmin)
            
         else:
-            theory.id = str(id) + "Model2D"
-            theory.group_id = str(id) + "Model2D"
+            new_plot.id = str(id) + " Model2D"
+            new_plot.group_id = str(id) + " Model2D"
          
-            theory.x_bins = data.x_bins
-            theory.y_bins = data.y_bins
-            theory.detector = data.detector
-            theory.source = data.source
-            theory.is_data = False 
-            theory.qx_data = data.qx_data
-            theory.qy_data = data.qy_data
-            theory.q_data = data.q_data
+            new_plot.x_bins = data.x_bins
+            new_plot.y_bins = data.y_bins
+            new_plot.detector = data.detector
+            new_plot.source = data.source
+            new_plot.is_data = False 
+            new_plot.qx_data = data.qx_data
+            new_plot.qy_data = data.qy_data
+            new_plot.q_data = data.q_data
             #numpy.zeros(len(data.err_data))#data.err_data
-            theory.err_data = err_image
-            theory.mask = data.mask
+            new_plot.err_data = err_image
+            new_plot.mask = data.mask
             ## plot boundaries
-            theory.ymin = data.ymin
-            theory.ymax = data.ymax
-            theory.xmin = data.xmin
-            theory.xmax = data.xmax
-        theory.name = model.name + " ["+ str(model.__class__.__name__)+ "]"
-        theory.title = "Analytical model 2D "
-        theory_data = deepcopy(theory)
+            new_plot.ymin = data.ymin
+            new_plot.ymax = data.ymax
+            new_plot.xmin = data.xmin
+            new_plot.xmax = data.xmax
+        new_plot.name = model.name + " ["+ str(model.__class__.__name__)+ "]"
+        new_plot.title = "Analytical model 2D "
+        theory_data = deepcopy(new_plot)
         theory_data.name = "Unknown"
         self.page_finder[id].set_theory_data(theory_data)
         
@@ -1215,11 +1224,12 @@ class Plugin(PluginBase):
         else:
             data_id = data.id
         self.parent.append_theory(data_id=data_id, 
-                                          theory=theory, state=state)
-            
+                                          theory=new_plot, state=state)
+        if toggle_mode_on:
+            new_plot.id = str(id) + " Model"      
         ## plot
-        wx.PostEvent(self.parent, NewPlotEvent(plot=theory,
-                         title=theory.title))
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
+                         title=new_plot.title))
         # Chisqr in fitpage
         current_pg = self.fit_panel.get_page_by_id(id)
         wx.PostEvent(current_pg,
@@ -1230,6 +1240,7 @@ class Plugin(PluginBase):
     def _draw_model2D(self, model, id, data=None, smearer=None,
                       description=None, enable2D=False,
                       state=None,
+                      toggle_mode_on=False,
                       qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX,
                        qstep=DEFAULT_NPTS):
         """
@@ -1279,6 +1290,7 @@ class Plugin(PluginBase):
                                     qmin=qmin,
                                     qmax=qmax,
                                     qstep=qstep,
+                                    toggle_mode_on=toggle_mode_on,
                                     state=state,
                                     completefn=self._complete2D,
                                     updatefn=self._update2D)
@@ -1293,6 +1305,7 @@ class Plugin(PluginBase):
     def _draw_model1D(self, model, id, data=None, smearer=None,
                 qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, 
                 state=None,
+                toggle_mode_on=False,
                 qstep=DEFAULT_NPTS, enable1D=True):
         """
         Draw model 1D from loaded data1D
@@ -1330,6 +1343,7 @@ class Plugin(PluginBase):
                                   qmax=qmax,
                                   smearer=smearer,
                                   state=state,
+                                  toggle_mode_on=toggle_mode_on,
                                   completefn=self._complete1D,
                                   updatefn=self._update1D)
             self.calc_1D.queue()

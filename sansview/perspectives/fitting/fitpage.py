@@ -1523,6 +1523,7 @@ class FitPage(BasicPage):
             else:
                 self.enable2D = False
                 self.model_view.SetLabel("1D Mode")
+                
             self.model_view.Disable()
             self._draw_model()
         

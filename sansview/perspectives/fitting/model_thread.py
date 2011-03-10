@@ -16,6 +16,7 @@ class Calc2D(CalcThread):
     def __init__(self, x, y, data,model,smearer,qmin, qmax,qstep,
                  id ,
                  state=None,
+                 toggle_mode_on=False,
                  completefn = None,
                  updatefn   = None,
                  yieldtime  = 0.01,
@@ -28,7 +29,7 @@ class Calc2D(CalcThread):
         self.qmin= qmin
         self.qmax= qmax
         self.qstep= qstep
-
+        self.toggle_mode_on = toggle_mode_on
         self.x = x
         self.y = y
         self.data= data
@@ -123,6 +124,7 @@ class Calc2D(CalcThread):
                        id=self.page_id,
                        model=self.model,
                        state=self.state,
+                       toggle_mode_on=self.toggle_mode_on,
                        elapsed=elapsed,
                        index=index_model,
                        qmin=self.qmin,
@@ -140,6 +142,7 @@ class Calc1D(CalcThread):
                  qmin=None,
                  qmax=None,
                  smearer=None,
+                 toggle_mode_on=False,
                  state=None,
                  completefn = None,
                  updatefn   = None,
@@ -153,13 +156,14 @@ class Calc1D(CalcThread):
                  yieldtime,
                  worktime)
         self.x = numpy.array(x)
-        self.data= data
-        self.qmin= qmin
-        self.qmax= qmax
+        self.data = data
+        self.qmin = qmin
+        self.qmax = qmax
         self.model = model
+        self.toggle_mode_on = toggle_mode_on
         self.state = state
         self.page_id = id
-        self.smearer= smearer
+        self.smearer = smearer
         self.starttime = 0
         
     def compute(self):
@@ -183,6 +187,7 @@ class Calc1D(CalcThread):
         self.complete(x=self.x[index], y=output[index], 
                       id=self.page_id,
                       state=self.state,
+                      toggle_mode_on=self.toggle_mode_on,
                       elapsed=elapsed,index=index, model=self.model,
                                         data=self.data)
         
