@@ -116,6 +116,7 @@ class ConsoleUpdate(FitHandler):
         msg = " Updating fit ...\n result:\n %s \n"%self.result.__str__()
         wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                               type="progress"))
+        time.sleep(0.01)
         
     def starting_fit(self):
         """
