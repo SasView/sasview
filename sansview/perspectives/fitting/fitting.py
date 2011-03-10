@@ -593,7 +593,7 @@ class Plugin(PluginBase):
         group_id = data.group_id[len(data.group_id)-1]
         wx.PostEvent(self.parent, NewPlotEvent(id=id,
                                                    group_id=group_id,
-                                                   remove=True))
+                                                   action='remove'))
            
     def store_data(self, id, data=None, caption=None):
         """
@@ -651,8 +651,7 @@ class Plugin(PluginBase):
                     group_id = theory_data.group_id[len(theory_data.group_id)-1]
                     if group_id not in data.group_id:
                         data.group_id.append(group_id)
-            self.parent.update_data(prev_data=theory_data, new_data=data)
-                    
+            self.parent.update_data(prev_data=theory_data, new_data=data)       
         self.store_data(id=page.id, data=data, caption=page.window_name)
         if self.sim_page is not None:
             self.sim_page.draw_page()
@@ -1086,8 +1085,10 @@ class Plugin(PluginBase):
         theory.xmax = xmax
         theory.ymin = ymin 
         theory.ymax = ymax 
-        theory.group_id = str(id) + "Model2D"
-        theory.id = str(id) + "Mode2D"
+        group_id = str(id) + " Model2D"
+        if group_id not in theory.group_id:
+            theory.group_id.append(group_id)
+        theory.id = str(id) + " Model2D"
   
                 
     def _complete1D(self, x,y, id, elapsed,index,model,
@@ -1125,20 +1126,24 @@ class Plugin(PluginBase):
                     new_plot.group_id.append(group_id)
                 new_plot.is_data = False 
             new_plot.id =  str(id) + " Model1D"  
-            print "new_plot.id", new_plot.id
+            
             #find if this theory was already plotted and replace that plot given
             #the same id
             if id in self.page_finder:
                 theory_data = self.page_finder[id].get_theory_data()
                 if theory_data is not None:
                     temp_id = theory_data.id
-                    print "theory_data id", temp_id
                     new_plot.id = temp_id
-            if toggle_mode_on:
-                new_plot.id =  str(id) + " Model"  
+             
             new_plot.name = model.name + " ["+ str(model.__class__.__name__)+ "]"
             new_plot.xaxis(_xaxis, _xunit)
             new_plot.yaxis(_yaxis, _yunit)
+            if toggle_mode_on:
+                new_plot.id =  str(id) + " Model" 
+                wx.PostEvent(self.parent, 
+                             NewPlotEvent(group_id=str(id) + " Model2D",
+                                               action="Hide"))
+                print "toggle model on  -->1d"
             self.page_finder[id].set_theory_data(new_plot)
             if data is None:
                 theory_data = self.page_finder[id].get_theory_data()
@@ -1146,6 +1151,7 @@ class Plugin(PluginBase):
                 data_id = theory_data.id
             else:
                 data_id = data.id
+           
             self.parent.append_theory(data_id=data_id, 
                                           theory=new_plot, state=state)
             
@@ -1193,7 +1199,9 @@ class Plugin(PluginBase):
            
         else:
             new_plot.id = str(id) + " Model2D"
-            new_plot.group_id = str(id) + " Model2D"
+            group_id = str(id) + " Model2D"
+            if group_id not in new_plot.group_id:
+                new_plot.group_id.append(group_id)
          
             new_plot.x_bins = data.x_bins
             new_plot.y_bins = data.y_bins
@@ -1215,6 +1223,11 @@ class Plugin(PluginBase):
         new_plot.title = "Analytical model 2D "
         theory_data = deepcopy(new_plot)
         theory_data.name = "Unknown"
+        if toggle_mode_on:
+            new_plot.id = str(id) + " Model"      
+            wx.PostEvent(self.parent, 
+                             NewPlotEvent(group_id=str(id) + " Model1D",
+                                               action="Hide"))
         self.page_finder[id].set_theory_data(theory_data)
         
         if data is None:
@@ -1223,13 +1236,12 @@ class Plugin(PluginBase):
             data_id = theory_data.id
         else:
             data_id = data.id
+        
         self.parent.append_theory(data_id=data_id, 
                                           theory=new_plot, state=state)
-        if toggle_mode_on:
-            new_plot.id = str(id) + " Model"      
         ## plot
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
-                         title=new_plot.title))
+                                               title=new_plot.title))
         # Chisqr in fitpage
         current_pg = self.fit_panel.get_page_by_id(id)
         wx.PostEvent(current_pg,
