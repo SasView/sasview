@@ -269,7 +269,6 @@ class Plugin(PluginBase):
             selected_data_list = data_list
         for data in selected_data_list:
             self.add_fit_page(data=data)
-        
             wx.PostEvent(self.parent, NewPlotEvent(plot=data, 
                                                    title=str(data.title)))
             
@@ -660,10 +659,9 @@ class Plugin(PluginBase):
                     group_id = str(page.id) + " Model2D"
                     if group_id in theory_data.group_id:
                         theory_data.group_id.remove(group_id)
-                        theory_data.group_id.append(wx.NewId())
-                    group_id = theory_data.group_id[len(theory_data.group_id)-1]
-                    if group_id not in data.group_id:
-                        data.group_id.append(group_id)
+                    data_group_id = theory_data.group_id[len(theory_data.group_id)-1]
+                    if data_group_id not in data.group_id:
+                        data.group_id.append(data_group_id)
                     wx.PostEvent(self.parent, 
                              NewPlotEvent(group_id=group_id,
                                                action="delete"))
@@ -1150,8 +1148,7 @@ class Plugin(PluginBase):
             if id in self.page_finder:
                 theory_data = self.page_finder[id].get_theory_data()
                 if theory_data is not None:
-                    temp_id = theory_data.id
-                    new_plot.id = temp_id
+                    new_plot.id = theory_data.id
              
             new_plot.name = model.name + " ["+ str(model.__class__.__name__)+ "]"
             new_plot.xaxis(_xaxis, _xunit)
