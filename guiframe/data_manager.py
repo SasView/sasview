@@ -141,7 +141,7 @@ class DataManager(object):
         """
         """
         if prev_data.id not in self.stored_data.keys():
-            return {}
+            return None, {}
         data_state = self.stored_data[prev_data.id] 
         self.stored_data[new_data.id]  = data_state.clone()
         self.stored_data[new_data.id].data = new_data

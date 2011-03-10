@@ -9,6 +9,8 @@ from distutils.sysconfig import get_python_lib
 import os
 import sys
 
+if len(sys.argv) == 1:
+    sys.argv.append('install') 
     
 path = os.path.join(os.getcwd(), 'local_perspectives')
 package_dir = { "sans.guiframe":".",

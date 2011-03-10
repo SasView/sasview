@@ -498,8 +498,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                 self.tree_ctrl.Delete(data_c)
                 del self.list_cb_data[state_id]
                 del self.list_cb_theory[data_id]
-                print "went here"
-      
+              
     def on_remove(self, event):
         """
         remove data from application

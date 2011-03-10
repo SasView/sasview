@@ -933,7 +933,21 @@ class ViewerFrame(wx.Frame):
                 # Hide default panel
                 self._mgr.GetPane(self.panels["default"].window_name).Hide()
             self._mgr.Update()
-    
+            
+    def hide_panel(self, uid):
+        """
+        hide panel
+        """
+        ID = str(uid)
+        config.printEVT("hide_panel: %s" % ID)
+        if ID in self.panels.keys():
+            if self._mgr.GetPane(self.panels[ID].window_name).IsShown():
+                self._mgr.GetPane(self.panels[ID].window_name).Hide()
+                # Hide default panel
+                self._mgr.GetPane(self.panels["default"].window_name).Hide()
+            self._mgr.Update()
+            print "gui_manager  hide_panel"
+            
     def clear_panel(self):
         """
         """
@@ -1388,7 +1402,7 @@ class ViewerFrame(wx.Frame):
         self.__gui_style &= (~GUIFRAME.FIXED_PANEL)
         self.__gui_style |= GUIFRAME.FLOATING_PANEL
         for p in self.panels.values():
-            plot_panel = self._plotting_plugin.plot_panels
+            plot_panel = self._plotting_plugin.plot_panels.values()
             for p in self.panels.values():
                 if p in plot_panel:
                     self._popup_floating_panel(p)
@@ -1401,7 +1415,7 @@ class ViewerFrame(wx.Frame):
         self.__gui_style |= GUIFRAME.FIXED_PANEL
         plot_panel = []
         if self._plotting_plugin is not None:
-            plot_panel = self._plotting_plugin.plot_panels
+            plot_panel = self._plotting_plugin.plot_panels.values()
             for p in self.panels.values():
                 if p in plot_panel:
                     self._popup_fixed_panel(p)
