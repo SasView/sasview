@@ -1645,6 +1645,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             if hasattr(self, "enable_smearer"):
                 if not self.disable_smearer.GetValue():
                     temp_smear= self.current_smearer
+            print "_draw_model", self.enable2D
             self._manager.draw_model(self.model, 
                                     data=self.data,
                                     smearer= temp_smear,

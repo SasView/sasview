@@ -469,7 +469,7 @@ class Plugin(PluginBase):
         :param qstep: number of step to divide the x and y-axis
              
         """
-        if data.__class__.__name__ != "Data2D":    
+        if data.__class__.__name__ == "Data1D" or not enable2D:    
             ## draw model 1D with no loaded data
             
             self._draw_model1D(model=model, 

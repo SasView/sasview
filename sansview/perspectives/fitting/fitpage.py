@@ -19,7 +19,7 @@ from sans.guiframe.utils import format_number,check_float
 (FitStopEvent, EVT_FIT_STOP)   = wx.lib.newevent.NewEvent()
 (Chi2UpdateEvent, EVT_CHI2_UPDATE)   = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 76
-_DATA_BOX_WIDTH = 300
+_DATA_BOX_WIDTH = 366
 SMEAR_SIZE_L = 0.005
 SMEAR_SIZE_H = 0.006
 
@@ -474,8 +474,12 @@ class FitPage(BasicPage):
         sizer_range.Add(self.minimum_q,0, wx.LEFT, 10)
         sizer_range.Add(wx.StaticText(self, -1, "Max: "),0, wx.LEFT, 10)
         sizer_range.Add(self.maximum_q,0, wx.LEFT, 10)
-
-     
+        id = wx.NewId()
+        self.model_view = wx.Button(self, id,'View 2D', size=(80, 23))
+        self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D, id=id)
+        hint = "toggle view of model from 1D to 2D  or 2D from 1D"
+        self.model_view.SetToolTipString(hint)
+        sizer_range.Add(self.model_view,0, wx.LEFT, 10)
 
         boxsizer1.Add(sizer_data,0, wx.ALL, 10)
         boxsizer1.Add(sizer_range, 0 , wx.LEFT, 10)
@@ -2617,6 +2621,17 @@ class FitPage(BasicPage):
         self.Refresh()
         self.SetupScrolling()
         
+    def _onModel2D(self, event):
+        """
+        toggle view of model from 1D to 2D  or 2D from 1D
+        """
+        if self.model_view.GetLabelText() == "View 2D":
+            self.model_view.SetLabel("View 1D")
+            self.enable2D = True
+        else:
+            self.model_view.SetLabel("View 2D")
+            self.enable2D = False
+        self._draw_model()
 
 class BGTextCtrl(wx.TextCtrl):
     """
@@ -2641,57 +2656,3 @@ class BGTextCtrl(wx.TextCtrl):
         """ 
         pass
  
-"""
-Example: ::   
-    
-    class HelpWindow(wx.Frame):
-        def __init__(self, parent, id, title):
-            wx.Frame.__init__(self, parent, id, title, size=(570, 400))
-           
-            from sans.models.CylinderModel import CylinderModel
-            model = CylinderModel()
-           
-            from danse.common.plottools.plottables import Data1D
-            data= Data1D(x=[1,2], y=[3,4], dy=[0.1, 0,1])
-        
-            from fitpanel import PageInfo
-            myinfo = PageInfo(self,  model, data=data )
-            
-            ## add data
-            
-            from models import ModelList
-            mylist= ModelList()
-    
-            from sans.models.SphereModel import SphereModel
-            from sans.models.SquareWellStructure import SquareWellStructure
-            from sans.models.DebyeModel import DebyeModel
-            from sans.models.LineModel import LineModel
-            name= "shapes"
-            list1= [SphereModel]
-            mylist.set_list( name, list1)
-            
-            name= "Shape-independent"
-            list1= [DebyeModel]
-            mylist.set_list( name, list1)
-            
-            name= "Structure Factors"
-            list1= [SquareWellStructure]
-            mylist.set_list( name, list1)
-            
-            name= "Added models"
-            list1= [LineModel]
-            mylist.set_list( name, list1)
-            
-            myinfo.model_list_box = mylist.get_list()
-            
-            self.page = FitPage(self, myinfo) 
-            
-            self.Centre()
-            self.Show(True)
-     
-    if __name__=="__main__":
-        app = wx.App()
-        HelpWindow(None, -1, 'HelpWindow')
-        app.MainLoop()
-"""
-            
