@@ -339,7 +339,7 @@ class Reader:
             if len(dqy_data) == len(qy_data) and dqy_data.any()!=0:
                 # Currently we do not support dq parr, perp.
                 # tranfer the comp. to cartesian coord. for newer version.
-                if ver == 1:
+                if ver != 1:
                     diag = numpy.sqrt(qx_data * qx_data + qy_data * qy_data)
                     cos_th = qx_data / diag
                     sin_th = qy_data / diag
