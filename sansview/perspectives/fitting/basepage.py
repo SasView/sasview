@@ -1652,6 +1652,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                                     qmax=float(self.qmax_x),
                                     qstep= float(self.npts_x),
                                     id=self.id,
+                                    state = self.state,
                                     enable2D=self.enable2D)
         
     def _set_model_sizer(self,sizer, box_sizer, title="", object=None):

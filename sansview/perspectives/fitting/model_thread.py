@@ -15,6 +15,7 @@ class Calc2D(CalcThread):
     """
     def __init__(self, x, y, data,model,smearer,qmin, qmax,qstep,
                  id ,
+                 state=None,
                  completefn = None,
                  updatefn   = None,
                  yieldtime  = 0.01,
@@ -32,6 +33,7 @@ class Calc2D(CalcThread):
         self.y = y
         self.data= data
         self.page_id = id
+        self.state = None
         # the model on to calculate
         self.model = model
         self.smearer = smearer#(data=self.data,model=self.model)
@@ -120,6 +122,7 @@ class Calc2D(CalcThread):
                        data=self.data, 
                        id=self.page_id,
                        model=self.model,
+                       state=self.state,
                        elapsed=elapsed,
                        index=index_model,
                        qmin=self.qmin,
@@ -137,6 +140,7 @@ class Calc1D(CalcThread):
                  qmin=None,
                  qmax=None,
                  smearer=None,
+                 state=None,
                  completefn = None,
                  updatefn   = None,
                  yieldtime  = 0.01,
@@ -153,6 +157,7 @@ class Calc1D(CalcThread):
         self.qmin= qmin
         self.qmax= qmax
         self.model = model
+        self.state = state
         self.page_id = id
         self.smearer= smearer
         self.starttime = 0
@@ -177,6 +182,7 @@ class Calc1D(CalcThread):
        
         self.complete(x=self.x[index], y=output[index], 
                       id=self.page_id,
+                      state=self.state,
                       elapsed=elapsed,index=index, model=self.model,
                                         data=self.data)
         

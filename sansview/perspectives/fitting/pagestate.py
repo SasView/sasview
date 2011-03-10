@@ -328,7 +328,7 @@ class PageState(object):
             rep += "maximum value : %s \n"%str(item[6][1])
             rep += "parameter unit: %s\n\n"%str(item[7])
         return rep
-    
+ 
     def __repr__(self):
         """ 
         output string for printing
