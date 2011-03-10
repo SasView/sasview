@@ -248,7 +248,8 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         panel.id = wx.NewId()
         panel.populate_box(dict=self.model_list_box)
         panel.set_manager(self._manager)
-        self.AddPage(panel, panel.window_name, select=True)
+        caption = str(panel.window_name) + " " + str(self._manager.index_model)
+        self.AddPage(panel, caption, select=True)
         self.opened_pages[panel.id] = panel
         return panel 
    
@@ -275,6 +276,7 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
                     self.SetPageText(pos, str(data.name))
                     self.SetSelection(pos)
                     return page
+                
             elif page.get_data().id == data.id:
                 msg = "Data already existing in the fitting panel"
                 wx.PostEvent(self._manager.parent, 
@@ -288,6 +290,7 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         page.set_data(data)
         self.SetPageText(pos, str(data.name))
         self.opened_pages[page.id] = page
+        
         return page
        
     def _onGetstate(self, event):

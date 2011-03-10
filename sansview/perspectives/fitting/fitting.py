@@ -92,7 +92,7 @@ class Plugin(PluginBase):
         self.model2D_id = None
         #keep reference of the simultaneous fit page
         self.sim_page = None
-   
+        self.index_model = 0
         #Create a reader for fit page's state
         self.state_reader = None 
         self._extensions = '.fitv'
@@ -636,7 +636,6 @@ class Plugin(PluginBase):
         given a data, ask to the fitting panel to create a new fitting page,
         get this page and store it into the page_finder of this plug-in
         """
-        
         page = self.fit_panel.set_data(data)
         page_caption = page.window_name
         #append Data1D to the panel containing its theory
@@ -654,6 +653,7 @@ class Plugin(PluginBase):
                     wx.PostEvent(self.parent, 
                              NewPlotEvent(group_id=group_id,
                                                action="delete"))
+                    self.parent.update_data(prev_data=theory_data, new_data=data)      
             else:
                 if theory_data is not None:
                     group_id = str(page.id) + " Model2D"
@@ -665,8 +665,7 @@ class Plugin(PluginBase):
                     wx.PostEvent(self.parent, 
                              NewPlotEvent(group_id=group_id,
                                                action="delete"))
-            
-            self.parent.update_data(prev_data=theory_data, new_data=data)       
+                    self.parent.update_data(prev_data=theory_data, new_data=data)       
         self.store_data(id=page.id, data=data, caption=page.window_name)
         if self.sim_page is not None:
             self.sim_page.draw_page()
@@ -994,6 +993,7 @@ class Plugin(PluginBase):
         qmin = evt.qmin
         qmax = evt.qmax
         smearer = evt.smearer
+        
         if model == None:
             return
        
@@ -1169,10 +1169,11 @@ class Plugin(PluginBase):
            
             self.parent.append_theory(data_id=data_id, 
                                           theory=new_plot, state=state)
-            
-            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
-                                            title= str(new_plot.title)))
             current_pg = self.fit_panel.get_page_by_id(id)
+            title = new_plot.title
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
+                                            title= str(title)))
+            
             wx.PostEvent(current_pg,
                 Chi2UpdateEvent(output=self._cal_chisqr(data=data,
                                                         id=id,
@@ -1254,11 +1255,11 @@ class Plugin(PluginBase):
         
         self.parent.append_theory(data_id=data_id, 
                                           theory=new_plot, state=state)
-        ## plot
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
-                                               title=new_plot.title))
-        # Chisqr in fitpage
         current_pg = self.fit_panel.get_page_by_id(id)
+        title = new_plot.title
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
+                                               title=title))
+        # Chisqr in fitpage
         wx.PostEvent(current_pg,
             Chi2UpdateEvent(output=self._cal_chisqr(data=data, id=id, index=index)))
         msg = "Plot 2D complete !"
