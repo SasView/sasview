@@ -209,7 +209,7 @@ class _Slab(object):
             #frac = 1 
             
             #TODO: find better definition of x[i_q] based on q_data
-            x[i_q] = min + (i_q + 1) * self.bin_width / 2.0
+            x[i_q] += frac * q_value#min + (i_q + 1) * self.bin_width / 2.0
             y[i_q] += frac * data[npts]
             
             if err_data == None or err_data[npts] == 0.0:
@@ -225,7 +225,7 @@ class _Slab(object):
           
         err_y = err_y / y_counts
         y    = y / y_counts
-        
+        x    = x / y_counts
         idx = (numpy.isfinite(y) & numpy.isfinite(x)) 
         
         if not idx.any(): 
@@ -425,20 +425,55 @@ class CircularAverage(object):
         
         :return: Data1D object
         """
-        # Get data
+        # Get data W/ finite values
         data = data2D.data[numpy.isfinite(data2D.data)]
         q_data = data2D.q_data[numpy.isfinite(data2D.data)]
+        qx_data = data2D.qx_data[numpy.isfinite(data2D.data)]
         err_data = data2D.err_data[numpy.isfinite(data2D.data)]
+        
         dq_data = None
+        
+        # Get the dq for resolution averaging
         if data2D.dqx_data != None and data2D.dqy_data != None:
-            dq_data = data2D.dqx_data[numpy.isfinite(data2D.data)] * \
-                        data2D.dqx_data[numpy.isfinite(data2D.data)]
-            dq_data += data2D.dqy_data[numpy.isfinite(data2D.data)] * \
-                        data2D.dqy_data[numpy.isfinite(data2D.data)]
+            # The pinholes and det. pix contribution present 
+            # in both direction of the 2D which must be subtracted when
+            # converting to 1D: dq_overlap should calculated ideally at
+            # q = 0. Note This method works on only pinhole geometry. 
+            # Extrapolate dqx(r) and dqy(phi) at q = 0, and take an average.
+            z_max = max(data2D.q_data)
+            z_min = min(data2D.q_data)
+            x_max = data2D.dqx_data[data2D.q_data[z_max]]
+            x_min = data2D.dqx_data[data2D.q_data[z_min]]    
+            y_max = data2D.dqy_data[data2D.q_data[z_max]]
+            y_min = data2D.dqy_data[data2D.q_data[z_min]]          
+            # Find qdx at q = 0
+            dq_overlap_x = (x_min * z_max - x_max * z_min) / (z_max - z_min)
+            # when extrapolation goes wrong
+            if dq_overlap_x > min(data2D.dqx_data):
+                dq_overlap_x = min(data2D.dqx_data)
+            dq_overlap_x *= dq_overlap_x 
+            # Find qdx at q = 0
+            dq_overlap_y = (y_min * z_max - y_max * z_min) / (z_max - z_min)
+            # when extrapolation goes wrong
+            if dq_overlap_y > min(data2D.dqy_data):
+                dq_overlap_y = min(data2D.dqy_data)
+            # get dq at q=0.
+            dq_overlap_y *= dq_overlap_y
+
+            dq_overlap = numpy.sqrt((dq_overlap_x + dq_overlap_y)/2.0)
+            # Final protection of dq
+            if dq_overlap < 0:
+                dq_overlap = y_min
+            dqx_data = data2D.dqx_data[numpy.isfinite(data2D.data)]
+            dqy_data = data2D.dqy_data[numpy.isfinite(data2D.data)] - dq_overlap
+            # def; dqx_data = dq_r dqy_data = dq_phi
+            # Convert dq 2D to 1D here
+            dqx = dqx_data * dqx_data            
+            dqy = dqy_data * dqy_data
+            dq_data = numpy.add(dqx, dqy)
             dq_data = numpy.sqrt(dq_data)
             
-        q_data_max = numpy.max(q_data)
-
+        #q_data_max = numpy.max(q_data)
         if len(data2D.q_data) == None:
             msg = "Circular averaging: invalid q_data: %g" % data2D.q_data
             raise RuntimeError, msg
@@ -474,7 +509,8 @@ class CircularAverage(object):
             if i_q == nbins:  
                 i_q = nbins -1              
             y[i_q] += frac * data_n
-
+            # Take dqs from data to get the q_average
+            x[i_q] += frac * q_value
             if err_data == None or err_data[npt] == 0.0:
                 if data_n < 0:
                     data_n = -data_n
@@ -482,27 +518,26 @@ class CircularAverage(object):
             else:
                 err_y[i_q] += frac * frac * err_data[npt] * err_data[npt]
             if dq_data != None:
-                err_x[i_q] += frac * frac * dq_data[npt] * dq_data[npt]
+                # To be consistent with dq calculation in 1d reduction, 
+                # we need just the averages (not quadratures) because 
+                # it should not depend on the number of the q points 
+                # in the qr bins.
+                err_x[i_q] += frac * dq_data[npt]
             else:
                 err_x = None
             y_counts[i_q]  += frac
         
-        # We take the center of ring area, not radius.  
-        # This is more accurate than taking the radial center of ring.
-        x = (qbins + self.bin_width) * (qbins + self.bin_width)
-        x += qbins * qbins
-        x = x / 2.0
-        x = numpy.sqrt(x)
         # Average the sums       
         for n in range(nbins):
             if err_y[n] < 0: err_y[n] = -err_y[n]
             err_y[n] = math.sqrt(err_y[n])
-            if err_x != None:
-                err_x[n] = math.sqrt(err_x[n])
+            #if err_x != None:
+            #    err_x[n] = math.sqrt(err_x[n])
             
         err_y = err_y / y_counts
         err_y[err_y==0] = numpy.average(err_y)
         y    = y / y_counts
+        x    = x / y_counts
         idx = (numpy.isfinite(y)) & (numpy.isfinite(x)) 
         if err_x != None:
             d_x = err_x[idx] / y_counts[idx]
@@ -513,9 +548,6 @@ class CircularAverage(object):
             msg = "Average Error: No points inside ROI to average..." 
             raise ValueError, msg
         
-        #elif len(y[idx])!= nbins:
-        #    print "resulted",nbins- len(y[idx])
-        #,"empty bin(s) due to tight binning..."
         return Data1D(x=x[idx], y=y[idx], dy=err_y[idx], dx=d_x)
     
 
@@ -745,12 +777,44 @@ class _Sector:
         qx_data = data2D.qx_data[numpy.isfinite(data2D.data)] 
         qy_data = data2D.qy_data[numpy.isfinite(data2D.data)]
         dq_data = None
-        # dx (smear) data
+            
+        # Get the dq for resolution averaging
         if data2D.dqx_data != None and data2D.dqy_data != None:
-            dq_data = data2D.dqx_data[numpy.isfinite(data2D.data)] * \
-                        data2D.dqx_data[numpy.isfinite(data2D.data)]
-            dq_data += data2D.dqy_data[numpy.isfinite(data2D.data)] * \
-                        data2D.dqy_data[numpy.isfinite(data2D.data)]
+            # The pinholes and det. pix contribution present 
+            # in both direction of the 2D which must be subtracted when
+            # converting to 1D: dq_overlap should calculated ideally at
+            # q = 0. 
+            # Extrapolate dqy(perp) at q = 0
+            z_max = max(data2D.q_data)
+            z_min = min(data2D.q_data)
+            x_max = data2D.dqx_data[data2D.q_data[z_max]]
+            x_min = data2D.dqx_data[data2D.q_data[z_min]]    
+            y_max = data2D.dqy_data[data2D.q_data[z_max]]
+            y_min = data2D.dqy_data[data2D.q_data[z_min]]          
+            # Find qdx at q = 0
+            dq_overlap_x = (x_min * z_max - x_max * z_min) / (z_max - z_min)
+            # when extrapolation goes wrong
+            if dq_overlap_x > min(data2D.dqx_data):
+                dq_overlap_x = min(data2D.dqx_data)
+            dq_overlap_x *= dq_overlap_x 
+            # Find qdx at q = 0
+            dq_overlap_y = (y_min * z_max - y_max * z_min) / (z_max - z_min)
+            # when extrapolation goes wrong
+            if dq_overlap_y > min(data2D.dqy_data):
+                dq_overlap_y = min(data2D.dqy_data)
+            # get dq at q=0.
+            dq_overlap_y *= dq_overlap_y
+
+            dq_overlap = numpy.sqrt((dq_overlap_x + dq_overlap_y) / 2.0)  
+            if dq_overlap < 0:
+                dq_overlap = y_min
+            dqx_data = data2D.dqx_data[numpy.isfinite(data2D.data)]
+            dqy_data = data2D.dqy_data[numpy.isfinite(data2D.data)] - dq_overlap
+            # def; dqx_data = dq_r dqy_data = dq_phi
+            # Convert dq 2D to 1D here
+            dqx = dqx_data * dqx_data            
+            dqy = dqy_data * dqy_data
+            dq_data = numpy.add(dqx, dqy)
             dq_data = numpy.sqrt(dq_data)
             
         #set space for 1d outputs
@@ -827,7 +891,7 @@ class _Sector:
                 
             ## Get the total y          
             y[i_bin] += frac * data_n
-
+            x[i_bin] += frac * q_value
             if err_data[n] == None or err_data[n] == 0.0:
                 if data_n < 0:
                     data_n = -data_n
@@ -836,7 +900,11 @@ class _Sector:
                 y_err[i_bin] += frac * frac * err_data[n] * err_data[n]
                 
             if dq_data != None:
-                x_err[i_bin] += frac * frac * dq_data[n] * dq_data[n]
+                # To be consistent with dq calculation in 1d reduction, 
+                # we need just the averages (not quadratures) because 
+                # it should not depend on the number of the q points 
+                # in the qr bins.
+                x_err[i_bin] += frac * dq_data[n]
             else:
                 x_err = None
             y_counts[i_bin] += frac
@@ -845,8 +913,7 @@ class _Sector:
         for i in range(self.nbins):
             y[i] = y[i] / y_counts[i]
             y_err[i] = math.sqrt(y_err[i]) / y_counts[i]
-            if x_err != None:
-                x_err[i] = math.sqrt(x_err[i]) / y_counts[i]
+
             # The type of averaging: phi,q2, or q
             # Calculate x[i]should be at the center of the bin
             if run.lower()=='phi':               
@@ -855,15 +922,15 @@ class _Sector:
             else:
                 # We take the center of ring area, not radius.  
                 # This is more accurate than taking the radial center of ring.
-                delta_r = (self.r_max - self.r_min) / self.nbins
-                r_inner = self.r_min + delta_r * i
-                r_outer = r_inner + delta_r
-                x[i] = math.sqrt((r_inner * r_inner + r_outer * r_outer) / 2)
-                
+                #delta_r = (self.r_max - self.r_min) / self.nbins
+                #r_inner = self.r_min + delta_r * i
+                #r_outer = r_inner + delta_r
+                #x[i] = math.sqrt((r_inner * r_inner + r_outer * r_outer) / 2)
+                x[i] = x[i] / y_counts[i]
         y_err[y_err==0] = numpy.average(y_err)        
         idx = (numpy.isfinite(y) & numpy.isfinite(y_err))
         if x_err != None:
-            d_x = x_err[idx]
+            d_x = x_err[idx] / y_counts[idx]
         else:
             d_x = None
         if not idx.any():
