@@ -19,6 +19,9 @@ from sans.guiframe.plugin_base import PluginBase
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
 
+DEFAULT_MENU_ITEM_LABEL = "No plot available"
+DEFAULT_MENU_ITEM_ID = wx.NewId()
+
 class Plugin(PluginBase):
     """
     Plug-in class to be instantiated by the GUI manager
@@ -30,6 +33,7 @@ class Plugin(PluginBase):
         ## Plot panels
         self.plot_panels = {}
         self._panel_on_focus = None
+        self.menu_default_id = None
      
     def set_panel_on_focus(self, panel):
         """
@@ -53,8 +57,7 @@ class Plugin(PluginBase):
         
         """
         self.menu = wx.Menu()
-        
-        self.menu.Append(wx.NewId(), "No plot available", 
+        self.menu.Append(DEFAULT_MENU_ITEM_ID, DEFAULT_MENU_ITEM_LABEL, 
                              "No plot available")
         self.menu.FindItemByPosition(0).Enable(False)
         return [(self.menu, "Plot")]
@@ -94,7 +97,6 @@ class Plugin(PluginBase):
         if group_id in self.plot_panels.keys():
             panel = self.plot_panels[group_id]
             self.parent.hide_panel(panel.uid)
-            print "plotting hide_panel"
             return True
         return False
     
@@ -111,7 +113,10 @@ class Plugin(PluginBase):
         event_id = self.parent.popup_panel(new_panel)
         #remove the default item in the menu
         if len(self.plot_panels) == 0:
-            self.menu.RemoveItem(self.menu.FindItemByPosition(0))
+            pos = self.menu.FindItem(DEFAULT_MENU_ITEM_LABEL)
+            if pos != -1:
+                self.menu.Delete(DEFAULT_MENU_ITEM_ID)
+           
         self.menu.Append(event_id, new_panel.window_caption, 
                          "Show %s plot panel" % new_panel.window_caption)
         # Set UID to allow us to reference the panel later
@@ -119,7 +124,7 @@ class Plugin(PluginBase):
         # Ship the plottable to its panel
         new_panel.plot_data(data) 
         self.plot_panels[new_panel.group_id] = new_panel
-        print "self.plot_panels.keys()", self.plot_panels.keys()
+        
         
     def create_1d_panel(self, data, group_id):
         """
@@ -171,6 +176,18 @@ class Plugin(PluginBase):
             panel.plot_data( data)
             self.parent.show_panel(panel.uid)   
     
+    def delete_panel(self, group_id):
+        """
+        """
+        if group_id in self.plot_panels.keys():
+            panel = self.plot_panels[group_id]
+            #remove menu item
+            self.menu.Delete(panel.uid)
+            self.parent.delete_panel(panel.uid)
+            del self.plot_panels[group_id]
+            return True
+        return False
+    
     def _on_plot_event(self, event):
         """
         A new plottable is being shipped to the plotting plug-in.
@@ -180,7 +197,6 @@ class Plugin(PluginBase):
         :param event: EVT_NEW_PLOT event
         
         """
-        
         if hasattr(event, 'action'):
             group_id = event.group_id
             #remove data from panel
@@ -189,7 +205,9 @@ class Plugin(PluginBase):
                 return self.remove_plot(group_id, id)
             if event.action.lower() == 'hide':
                 return self.hide_panel(group_id)
-           
+            if event.action.lower() == 'delete':
+                return self.delete_panel(group_id)
+                
         data = event.plot
         group_id_list = data.group_id
         group_id = None
