@@ -2217,13 +2217,14 @@ class BasicPage(ScrolledPanel, PanelBase):
                         is_modified = True
             try:     
                 value= float(item[2].GetValue())
-      
+                item[2].SetBackgroundColour("white")
                 # If the value of the parameter has changed,
                 # +update the model and set the is_modified flag
                 if value != self.model.getParam(name) and numpy.isfinite(value):
                     self.model.setParam(name,value)
                     is_modified = True   
             except:
+                item[2].SetBackgroundColour("pink")
                 msg = "Wrong Fit parameter value entered "
                 wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
                 
