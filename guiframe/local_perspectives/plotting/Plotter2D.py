@@ -14,6 +14,7 @@ import wx
 import sys
 import os
 import math
+import numpy
 import pylab
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
@@ -219,6 +220,10 @@ class ModelPanel2D(ModelPanel1D):
         id = wx.NewId()
         slicerpop.Append(id,'&Print Preview', 'image preview for print')
         wx.EVT_MENU(self, id, self.onPrinterPreview)
+
+        id = wx.NewId()
+        slicerpop.Append(id, '&Copy to Clipboard', 'Copy to the clipboard')
+        wx.EVT_MENU(self, id, self.OnCopyFigureMenu)
         
         # saving data
         plot = self.data2D
@@ -403,6 +408,9 @@ class ModelPanel2D(ModelPanel1D):
         :param event: wx.menu event
         
         """
+        # Find the best number of bins
+        npt = math.sqrt(len(self.data2D.data[numpy.isfinite(self.data2D.data)]))
+        npt = math.floor(npt)
         from DataLoader.manipulations import CircularAverage
         ## compute the maximum radius of data2D
         self.qmax = max(math.fabs(self.data2D.xmax), 
@@ -411,7 +419,7 @@ class ModelPanel2D(ModelPanel1D):
                         math.fabs(self.data2D.ymin))
         self.radius = math.sqrt(math.pow(self.qmax, 2)+ math.pow(self.ymax, 2)) 
         ##Compute beam width
-        bin_width = (self.qmax + self.qmax)/100
+        bin_width = (self.qmax + self.qmax)/npt
         ## Create data1D circular average of data2D
         Circle = CircularAverage(r_min=0, r_max=self.radius, 
                                  bin_width=bin_width)
@@ -425,7 +433,8 @@ class ModelPanel2D(ModelPanel1D):
             dxw = circ.dxw
         else:
             dxw = None
-        new_plot = Data1D(x=circ.x, y=circ.y, dy=circ.dy)
+
+        new_plot = Data1D(x=circ.x, y=circ.y, dy=circ.dy, dx=circ.dx)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
         new_plot.name = "Circ avg " + self.data2D.name
