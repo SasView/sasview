@@ -268,10 +268,13 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
             #check if the selected data existing in the fitpanel
             pos = self.GetPageIndex(page)
             if page.get_data() is None:
-                page.set_data(data)
-                self.SetPageText(pos, str(data.name))
-                self.SetSelection(pos)
-                return page
+                enable2D = page.get_view_mode()
+                if (data.__class__.__name__ == "Data2D" and enable2D)\
+                or (data.__class__.__name__ == "Data1D" and not enable2D):
+                    page.set_data(data)
+                    self.SetPageText(pos, str(data.name))
+                    self.SetSelection(pos)
+                    return page
             elif page.get_data().id == data.id:
                 msg = "Data already existing in the fitting panel"
                 wx.PostEvent(self._manager.parent, 

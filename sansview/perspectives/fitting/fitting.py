@@ -269,6 +269,7 @@ class Plugin(PluginBase):
             selected_data_list = data_list
         for data in selected_data_list:
             self.add_fit_page(data=data)
+        
             wx.PostEvent(self.parent, NewPlotEvent(plot=data, 
                                                    title=str(data.title)))
             
@@ -644,13 +645,29 @@ class Plugin(PluginBase):
         
         if page.id in self.page_finder:
             theory_data = self.page_finder[page.id].get_theory_data()
+            
             if issubclass(data.__class__, Data2D):
                 data.group_id.append(wx.NewId())
+                if theory_data is not None:
+                    group_id = str(page.id) + " Model1D"
+                    if group_id in theory_data.group_id:
+                        theory_data.group_id.remove(group_id)
+                    wx.PostEvent(self.parent, 
+                             NewPlotEvent(group_id=group_id,
+                                               action="delete"))
             else:
                 if theory_data is not None:
+                    group_id = str(page.id) + " Model2D"
+                    if group_id in theory_data.group_id:
+                        theory_data.group_id.remove(group_id)
+                        theory_data.group_id.append(wx.NewId())
                     group_id = theory_data.group_id[len(theory_data.group_id)-1]
                     if group_id not in data.group_id:
                         data.group_id.append(group_id)
+                    wx.PostEvent(self.parent, 
+                             NewPlotEvent(group_id=group_id,
+                                               action="delete"))
+            
             self.parent.update_data(prev_data=theory_data, new_data=data)       
         self.store_data(id=page.id, data=data, caption=page.window_name)
         if self.sim_page is not None:
@@ -1116,6 +1133,7 @@ class Plugin(PluginBase):
                 group_id = data.group_id[len(data.group_id)-1]
                 if group_id not in new_plot.group_id:
                     new_plot.group_id.append(group_id)
+               
             else:
                 _xaxis, _xunit = "\\rm{Q}", 'A^{-1}'
                 _yaxis, _yunit = "\\rm{Intensity} ", "cm^{-1}"
@@ -1143,7 +1161,7 @@ class Plugin(PluginBase):
                 wx.PostEvent(self.parent, 
                              NewPlotEvent(group_id=str(id) + " Model2D",
                                                action="Hide"))
-                print "toggle model on  -->1d"
+                
             self.page_finder[id].set_theory_data(new_plot)
             if data is None:
                 theory_data = self.page_finder[id].get_theory_data()

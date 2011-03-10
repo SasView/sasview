@@ -19,7 +19,7 @@ from sans.guiframe.utils import format_number,check_float
 (FitStopEvent, EVT_FIT_STOP)   = wx.lib.newevent.NewEvent()
 (Chi2UpdateEvent, EVT_CHI2_UPDATE)   = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 76
-_DATA_BOX_WIDTH = 366
+_DATA_BOX_WIDTH = 300
 SMEAR_SIZE_L = 0.005
 SMEAR_SIZE_H = 0.006
 
@@ -472,13 +472,6 @@ class FitPage(BasicPage):
         sizer_range.Add(self.minimum_q,0, wx.LEFT, 10)
         sizer_range.Add(wx.StaticText(self, -1, "Max: "),0, wx.LEFT, 10)
         sizer_range.Add(self.maximum_q,0, wx.LEFT, 10)
-        id = wx.NewId()
-        self.model_view = wx.Button(self, id,"Switch to 2D", size=(80, 23))
-        self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D, id=id)
-        hint = "toggle view of model from 1D to 2D  or 2D from 1D"
-        self.model_view.SetToolTipString(hint)
-        sizer_range.Add(self.model_view,0, wx.LEFT, 10)
-
         boxsizer1.Add(sizer_data,0, wx.ALL, 10)
         boxsizer1.Add(sizer_range, 0 , wx.LEFT, 10)
         #------------------------------------------------------------
@@ -499,10 +492,89 @@ class FitPage(BasicPage):
         self.model_help =wx.Button(self,id,'Details', size=(80,23))
         self.model_help.Bind(wx.EVT_BUTTON, self.on_model_help_clicked,id=id)
         self.model_help.SetToolTipString("Model Function Help")
+        id = wx.NewId()
+        self.model_view = wx.Button(self, id,"Switch to 2D", size=(80, 23))
+        self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D, id=id)
+        hint = "toggle view of model from 1D to 2D  or 2D from 1D"
+        self.model_view.SetToolTipString(hint)
+      
+        self.shape_rbutton = wx.RadioButton(self, -1, 'Shapes', style=wx.RB_GROUP)
+        self.shape_indep_rbutton = wx.RadioButton(self, -1, "Shape-Independent")
+        self.struct_rbutton = wx.RadioButton(self, -1, "Structure Factor ")
+        self.plugin_rbutton = wx.RadioButton(self, -1, "Customized Models")
+                
+        self.Bind(wx.EVT_RADIOBUTTON, self._show_combox,
+                            id= self.shape_rbutton.GetId()) 
+        self.Bind(wx.EVT_RADIOBUTTON, self._show_combox,
+                            id= self.shape_indep_rbutton.GetId()) 
+        self.Bind(wx.EVT_RADIOBUTTON, self._show_combox,
+                            id= self.struct_rbutton.GetId()) 
+        self.Bind(wx.EVT_RADIOBUTTON, self._show_combox,
+                            id= self.plugin_rbutton.GetId())  
+        #MAC needs SetValue
+        self.shape_rbutton.SetValue(True)
+      
+        sizer_radiobutton = wx.GridSizer(2, 3, 5, 5)
+        sizer_radiobutton.Add(self.shape_rbutton)
+        sizer_radiobutton.Add(self.shape_indep_rbutton)
+        #sizer_radiobutton.Add((5, 5))
+        sizer_radiobutton.Add(self.model_view,1, wx.LEFT, 20)
+        sizer_radiobutton.Add(self.plugin_rbutton)
+        sizer_radiobutton.Add(self.struct_rbutton)
+        #sizer_radiobutton.Add((5, 5))
+        sizer_radiobutton.Add(self.model_help,1, wx.LEFT, 20)
         
-        ## class base method  to add view 2d button    
-        self._set_model_sizer(sizer=sizer, box_sizer=boxsizer1, 
-                              title="Model",object=self.model_help )   
+        sizer_selection = wx.BoxSizer(wx.HORIZONTAL)
+        mutifactor_selection = wx.BoxSizer(wx.HORIZONTAL)
+        
+        self.text1 = wx.StaticText(self,-1,"" )
+        self.text2 = wx.StaticText(self,-1,"P(Q)*S(Q)" )
+        self.mutifactor_text = wx.StaticText( self,-1,"No. of Shells: ")
+        self.mutifactor_text1 = wx.StaticText( self,-1,"" )
+        self.show_sld_button = wx.Button( self,-1,"Show SLD Profile" )
+        self.show_sld_button.Bind(wx.EVT_BUTTON,self._on_show_sld)
+
+        self.formfactorbox = wx.ComboBox(self, -1,style=wx.CB_READONLY)
+        if self.model!= None:
+            self.formfactorbox.SetValue(self.model.name)
+        self.structurebox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        self.multifactorbox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        self.initialize_combox()
+        wx.EVT_COMBOBOX(self.formfactorbox, -1, self._on_select_model)
+        wx.EVT_COMBOBOX(self.structurebox, -1, self._on_select_model)
+        wx.EVT_COMBOBOX(self.multifactorbox, -1, self._on_select_model)
+        ## check model type to show sizer
+        if self.model !=None:
+            self._set_model_sizer_selection(self.model)
+        
+        sizer_selection.Add(self.text1)
+        sizer_selection.Add((5, 5))
+        sizer_selection.Add(self.formfactorbox)
+        sizer_selection.Add((5, 5))
+        sizer_selection.Add(self.text2)
+        sizer_selection.Add((5, 5))
+        sizer_selection.Add(self.structurebox)
+       
+        mutifactor_selection.Add((10,5))
+        mutifactor_selection.Add(self.mutifactor_text)
+        mutifactor_selection.Add(self.multifactorbox)
+        mutifactor_selection.Add((5, 5))
+        mutifactor_selection.Add(self.mutifactor_text1)
+        mutifactor_selection.Add((10, 5))
+        mutifactor_selection.Add(self.show_sld_button)
+
+       
+        boxsizer1.Add(sizer_radiobutton)
+        boxsizer1.Add((10, 10))
+        boxsizer1.Add(sizer_selection)
+        boxsizer1.Add((10, 10))
+        boxsizer1.Add(mutifactor_selection)
+        
+        self._set_multfactor_combobox()
+        self.multifactorbox.SetSelection(1)
+        self.show_sld_button.Hide()
+        sizer.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
+        sizer.Layout()
         
     def _set_sizer_dispersion(self, dispersity):
         """
@@ -1445,6 +1517,12 @@ class FitPage(BasicPage):
         else:
             self.enable_smearer.Enable()
             
+    def get_view_mode(self):
+        """
+        return True if the panel allow 2D or False if 1D
+        """
+        return self.enable2D
+    
     def set_data(self, data):
         """
         reset the current data 
@@ -2629,8 +2707,7 @@ class FitPage(BasicPage):
         self.sizer3.Layout()
         self.Layout()
         self.Refresh()
-        self.SetupScrolling()
-        
+     
     def _onModel2D(self, event):
         """
         toggle view of model from 1D to 2D  or 2D from 1D
