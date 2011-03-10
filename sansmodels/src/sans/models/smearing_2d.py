@@ -13,7 +13,7 @@ import math
 SIGMA_ZERO = 1.0e-010
 ## Limit of how many sigmas to be covered for the Gaussian smearing
 # default: 2.5 to cover 98.7% of Gaussian
-LIMIT = 2.5
+LIMIT = 3.0
 ## Defaults
 R_BIN = {'Xhigh':10.0, 'High':5.0,'Med':5.0,'Low':3.0}
 PHI_BIN ={'Xhigh':20.0,'High':12.0,'Med':6.0,'Low':4.0}   
@@ -24,7 +24,7 @@ class Smearer2D:
     """
      
     def __init__(self, data=None, model=None, index=None, 
-                 limit=LIMIT, accuracy='Low'):
+                 limit=LIMIT, accuracy='Low', coords='polar'):
         """
         Assumption: equally spaced bins in dq_r, dq_phi space.
         
@@ -33,6 +33,7 @@ class Smearer2D:
         :param index: 1d array with len(data) to define the range of the calculation: elements are given as True or False
         :param nr: number of bins in dq_r-axis
         :param nphi: number of bins in dq_phi-axis
+        :param coord: coordinates [string], 'polar' or 'cartesian'
         """
         ## data
         self.data = data
@@ -47,6 +48,7 @@ class Smearer2D:
         ## maximum nsigmas
         self.limit = limit
         self.index = index
+        self.coords = coords
         self.smearer = True
         
         
@@ -60,6 +62,8 @@ class Smearer2D:
             return None
         self.qx_data = self.data.qx_data[self.index]
         self.qy_data = self.data.qy_data[self.index]
+        self.q_data = self.data.q_data[self.index]
+        # Here dqx and dqy mean dq_parr and dq_perp
         self.dqx_data = self.data.dqx_data[self.index]
         self.dqy_data = self.data.dqy_data[self.index]
         self.phi_data = numpy.arctan(self.qx_data/self.qy_data)
@@ -112,27 +116,35 @@ class Smearer2D:
     
     def get_value(self):
         """
-        Over sampling of r_nbins times phi_nbins, calculate Gaussian weights, then find smeared intensity
+        Over sampling of r_nbins times phi_nbins, calculate Gaussian weights, 
+        then find smeared intensity
         For the default values, this is equivalent (but by using numpy array 
         the speed optimized by a factor of ten)to the following: ::
        
        
-            Remove the singular points if exists
-            self.dqx_data[self.dqx_data==0]=SIGMA_ZERO
-            self.dqy_data[self.dqy_data==0]=SIGMA_ZERO
-            
-            for phi in range(0,4):
-                for r in range(0,5):
-                    n = (phi)*5+(r)
-                    r = r+0.25
-                    dphi = phi*2.0*math.pi/4.0 + numpy.arctan(self.qy_data[index_model]/self.dqy_data[index_model]/self.qx_data[index_model]*/self.dqx_data[index_model])
-                    dq = r*sqrt( self.dqx_data[index_model]*self.dqx_data[index_model] \
-                        + self.dqy_data[index_model]*self.dqy_data[index_model] )
-                    #integrant of exp(-0.5*r*r) r dr at each bins : The integration may not need.
-                    weight_res[n] = e^{(-0.5*((r-0.25)*(r-0.25)))}- e^{(-0.5*((r-0.25)*(r-0.25)))}
-                    #if phi != 0 and r != 0:
-                    qx_res = numpy.append(qx_res,self.qx_data[index_model]+ dq * cos(dphi))
-                    qy_res = numpy.append(qy_res,self.qy_data[index_model]+ dq * sin(dphi))
+        Remove the singular points if exists
+        self.dqx_data[self.dqx_data==0]=SIGMA_ZERO
+        self.dqy_data[self.dqy_data==0]=SIGMA_ZERO
+        
+        for phi in range(0,4):
+            for r in range(0,5):
+                n = (phi)*5+(r)
+                r = r+0.25
+                dphi = phi*2.0*math.pi/4.0 + numpy.arctan( \
+                        self.qy_data[index_model]/self.dqy_data[index_model]/ \
+                        self.qx_data[index_model]*/self.dqx_data[index_model])
+                dq = r*sqrt( self.dqx_data[index_model]*\
+                        self.dqx_data[index_model] \
+                    + self.dqy_data[index_model]*self.dqy_data[index_model] )
+                #integrant of exp(-0.5*r*r) r dr at each bins : 
+                The integration may not need.
+                weight_res[n] = e^{(-0.5*((r-0.25)*(r-0.25)))}- \
+                                e^{(-0.5*((r-0.25)*(r-0.25)))}
+                #if phi != 0 and r != 0:
+                qx_res = numpy.append(qx_res,self.qx_data[index_model]+ \
+                                                            dq * cos(dphi))
+                qy_res = numpy.append(qy_res,self.qy_data[index_model]+ \
+                                                            dq * sin(dphi))
                     
         Then compute I(qx_res,qy_res) and do weighted averaging. 
         
@@ -144,8 +156,9 @@ class Smearer2D:
         if numpy.all(numpy.fabs(self.dqx_data <= 1.1e-10)) and \
                         numpy.all(numpy.fabs(self.dqy_data <= 1.1e-10)):
             self.smearer = False
+  
         if self.smearer == False:
-            return self.model.evalDistribution([self.qx_data,self.qy_data]) 
+            return self.model.evalDistribution([self.qx_data, self.qy_data]) 
 
         nr = self.nr[self.accuracy]
         nphi = self.nphi[self.accuracy]
@@ -155,42 +168,71 @@ class Smearer2D:
         len_datay = len(self.qy_data)
 
         # Number of bins in the dqr direction (polar coordinate of dqx and dqy)
-        bin_size = self.limit/nr
-        # Total number of bins = # of bins in dq_r-direction times # of bins in dq_phi-direction
+        bin_size = self.limit / nr
+        # Total number of bins = # of bins 
+        # in dq_r-direction times # of bins in dq_phi-direction
         n_bins = nr * nphi
         # Mean values of dqr at each bins ,starting from the half of bin size
-        r = bin_size/2.0+numpy.arange(nr)*bin_size
+        r = bin_size / 2.0 + numpy.arange(nr) * bin_size
         # mean values of qphi at each bines
         phi = numpy.arange(nphi)
-        dphi = phi*2.0*math.pi/nphi
+        dphi = phi * 2.0 * math.pi / nphi
         dphi = dphi.repeat(nr)
-        ## Transform to polar coordinate, and set dphi at each data points ; 1d array
-        dphi = dphi.repeat(len_data)+numpy.arctan(self.qy_data*self.dqx_data/self.qx_data/self.dqy_data).repeat(n_bins).reshape(len_data,n_bins).transpose().flatten()
-        ## Find Gaussian weight for each dq bins: The weight depends only on r-direction (The integration may not need)
-        weight_res = numpy.exp(-0.5*((r-bin_size/2.0)*(r-bin_size/2.0)))-numpy.exp(-0.5*((r+bin_size/2.0)*(r+bin_size/2.0)))
-        weight_res = weight_res.repeat(nphi).reshape(nr,nphi).transpose().flatten()
+
+        ## Transform to polar coordinate, 
+        #  and set dphi at each data points ; 1d array
+        dphi = dphi.repeat(len_data)
+        q_phi = self.qy_data / self.qx_data
+        
+        # Starting angle is different between polar and cartesian coordinates.
+        #if self.coords != 'polar':
+        #    dphi += numpy.arctan( q_phi * self.dqx_data/ \
+        #                     self.dqy_data).repeat(n_bins).reshape(len_data,\
+        #                                        n_bins).transpose().flatten()
+
+        # The angle (phi) of the original q point
+        q_phi = numpy.arctan(q_phi).repeat(n_bins).reshape(len_data,\
+                                                n_bins).transpose().flatten()
+        ## Find Gaussian weight for each dq bins: The weight depends only 
+        #  on r-direction (The integration may not need)
+        weight_res = numpy.exp(-0.5 * ((r - bin_size / 2.0) * \
+                                    (r - bin_size / 2.0)))- \
+                                    numpy.exp(-0.5 * ((r + bin_size / 2.0 ) *\
+                                    (r + bin_size / 2.0)))
+        weight_res /= numpy.sum(weight_res)
+        weight_res = weight_res.repeat(nphi).reshape(nr, nphi)
+
+        weight_res = weight_res.transpose().flatten()
         
         ## Set dr for all dq bins for averaging
         dr = r.repeat(nphi).reshape(nr,nphi).transpose().flatten()
         ## Set dqr for all data points
         dqx = numpy.outer(dr,self.dqx_data).flatten()
         dqy = numpy.outer(dr,self.dqy_data).flatten()
-        qx = self.qx_data.repeat(n_bins).reshape(len_data,n_bins).transpose().flatten()
-        qy = self.qy_data.repeat(n_bins).reshape(len_data,n_bins).transpose().flatten()
 
-        
-        ## Over-sampled qx_data and qy_data.
-        qx_res = qx+ dqx*numpy.cos(dphi)
-        qy_res = qy+ dqy*numpy.sin(dphi)
-        
+        qx = self.qx_data.repeat(n_bins).reshape(len_data,\
+                                             n_bins).transpose().flatten()
+        qy = self.qy_data.repeat(n_bins).reshape(len_data,\
+                                             n_bins).transpose().flatten()
+
+        # The polar needs rotation by -q_phi
+        if self.coords == 'polar':
+            qx_res = qx + (dqx*numpy.cos(dphi) * numpy.cos(-q_phi) +\
+                           dqy*numpy.sin(dphi) * numpy.sin(-q_phi))
+            qy_res = qy + (-dqx*numpy.cos(dphi) * numpy.sin(-q_phi) +\
+                           dqy*numpy.sin(dphi) * numpy.cos(-q_phi))
+        else:
+            qx_res = qx +  dqx*numpy.cos(dphi)
+            qy_res = qx +  dqy*numpy.sin(dphi)
+
         ## Evaluate all points
-        val = self.model.evalDistribution([qx_res,qy_res]) 
+        val = self.model.evalDistribution([qx_res, qy_res]) 
 
         ## Reshape into 2d array to use numpy weighted averaging
         value_res= val.reshape(n_bins,len(self.qx_data))
 
         ## Averaging with Gaussian weighting: normalization included.
-        value =numpy.average(value_res,axis=0,weights=weight_res)
+        value =numpy.average(value_res,axis=0, weights=weight_res)
 
         ## Return the smeared values in the range of self.index
         return value
@@ -198,7 +240,7 @@ class Smearer2D:
 if __name__ == '__main__':
     ## Test w/ 2D linear function
     x = 0.001*numpy.arange(1,11)
-    dx = numpy.ones(len(x))*0.001
+    dx = numpy.ones(len(x))*0.0003
     y = 0.001*numpy.arange(1,11)
     dy = numpy.ones(len(x))*0.001
     z = numpy.ones(10)
@@ -213,6 +255,7 @@ if __name__ == '__main__':
     out.qy_data = y
     out.dqx_data = dx
     out.dqy_data = dy
+    out.q_data = numpy.sqrt(dx * dx + dy * dy)
     index = numpy.ones(len(x), dtype = bool)
     out.mask = index
     from sans.models.LineModel import LineModel
@@ -224,12 +267,21 @@ if __name__ == '__main__':
     value = smear.get_value()
     ## All data are ones, so the smeared should also be ones.
     print "Data length =",len(value)
-    print " 2D linear function, I = 0 + 1*qx*qy"
-    print " Gaussian weighted averaging on a 2D linear function will provides the results same as without the averaging."
+    print " 2D linear function, I = 0 + 1*qy"
+    text = " Gaussian weighted averaging on a 2D linear function will "
+    text += "provides the results same as without the averaging."
+    print text
     print "qx_data", "qy_data", "I_nonsmear", "I_smeared"
     for ind in range(len(value)):
         print x[ind],y[ind],model.evalDistribution([x,y])[ind], value[ind]
-  
+        
+"""
+for i in range(len(qx_res)/(128*128)):
+    k = i * 128*128 +64
+
+    print qx_res[k]-qqx[k], qy_res[k]-qqy[k]
+print qqx[64],qqy[64]
+""" 
 """    
 if __name__ == '__main__':
     ## Another Test w/ constant function
