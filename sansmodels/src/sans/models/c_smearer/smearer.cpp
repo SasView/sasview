@@ -264,12 +264,13 @@ void SlitSmearer :: compute_matrix(){
 						// The fabs below are not necessary but in case: the weight should never be imaginary.
 						// At the edge of each sub_width. weight += u(at q_high bin) - u(0), where u(0) = 0,
 						// and weighted by (2.0* npts_w -1.0)once for each q.
-						if (q == q_j) {
-							if (k==0)
-								(*weights)[i*nbins+j] += (sqrt(fabs((q_high)*(q_high)-q_shift * q_shift)))/q_0 * (2.0*double(npts_w)-1.0);
+						//if (q == q_j) {
+						if (q_low <= q_shift && q_high > q_shift) {
+							//if (k==0)
+								(*weights)[i*nbins+j] += (sqrt(fabs((q_high)*(q_high)-q_shift * q_shift)))/q_0;// * (2.0*double(npts_w)-1.0);
 						}
 						// For the rest of sub_width. weight += u(at q_high bin) - u(at q_low bin)
-						else if (u > 0.0){
+						else{// if (u > 0.0){
 							(*weights)[i*nbins+j] += (sqrt(fabs((q_high)*(q_high)- q_shift * q_shift))-sqrt(fabs((q_low)*(q_low)- q_shift * q_shift)))/q_0 ;
 						}
 					}
@@ -297,7 +298,7 @@ void QSmearer :: compute_matrix(){
 
 			// Compute the fraction of the Gaussian contributing
 			// to the q_j bin between q_jmin and q_jmax
-			double value =  erf( (q_jmax-q)/(sqrt(2.0)*width[i]) );
+			long double value =  erf( (q_jmax-q)/(sqrt(2.0)*width[i]) );
         	value -= erf( (q_jmin-q)/(sqrt(2.0)*width[i]) );
         	(*weights)[i*nbins+j] += value;
 		}
