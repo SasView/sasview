@@ -100,16 +100,17 @@ class Plugin(PluginBase):
             return True
         return False
     
-    def create_panel_helper(self, new_panel, data, group_id):
+    def create_panel_helper(self, new_panel, data, group_id, title=None):
         """
         """
          ## Set group ID if available
         ## Assign data properties to the new create panel
         new_panel.set_manager(self)
         new_panel.group_id = group_id
-        title = data.title
+        if title is None:
+            title = data.title
         new_panel.window_caption = title
-        new_panel.window_name = title
+        new_panel.window_name = data.title
         event_id = self.parent.popup_panel(new_panel)
         #remove the default item in the menu
         if len(self.plot_panels) == 0:
@@ -207,6 +208,9 @@ class Plugin(PluginBase):
                 return self.hide_panel(group_id)
             if event.action.lower() == 'delete':
                 return self.delete_panel(group_id)
+        title = None
+        if hasattr(event, 'title'):
+            title = event.title
                 
         data = event.plot
         group_id_list = data.group_id
@@ -224,7 +228,7 @@ class Plugin(PluginBase):
                 new_panel = self.create_1d_panel(data, group_id)
             else:
                 new_panel = self.create_2d_panel(data, group_id)
-            self.create_panel_helper(new_panel, data, group_id)
+            self.create_panel_helper(new_panel, data, group_id, title)
             
         return
    
