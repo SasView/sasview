@@ -271,7 +271,7 @@ class Plugin(PluginBase):
             self.__data.group_id
             wx.PostEvent(self.parent, NewPlotEvent(id=id,
                                                group_id=group_id,
-                                               remove=true))
+                                               action='Remove'))
             return
     
         new_plot = Data1D(x=[], y=[], dy=None)
@@ -303,7 +303,8 @@ class Plugin(PluginBase):
                 self.invariant_panel.state.theory_lowQ = copy.deepcopy(new_plot)
             elif name_head[0] == 'High':
                 self.invariant_panel.state.theory_highQ =copy.deepcopy(new_plot)
-
+            
+        self.parent.append_theory(data_id=self.__data.id, theory=new_plot)
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                                title=self.__data.title))
         
