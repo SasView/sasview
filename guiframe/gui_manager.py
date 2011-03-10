@@ -946,8 +946,18 @@ class ViewerFrame(wx.Frame):
                 # Hide default panel
                 self._mgr.GetPane(self.panels["default"].window_name).Hide()
             self._mgr.Update()
-            print "gui_manager  hide_panel"
             
+    def delete_panel(self, uid):
+        """
+        delete panel given uid
+        """
+        ID = str(uid)
+        config.printEVT("delete_panel: %s" % ID)
+        if ID in self.panels.keys():
+            self._mgr.DetachPane(self.panels[ID])
+            del self.panels[ID]
+            self._mgr.Update()
+      
     def clear_panel(self):
         """
         """
