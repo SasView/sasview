@@ -77,7 +77,7 @@ def _findModels(dir):
     """
     """
     # List of plugin objects
-    plugins = []
+    plugins = {}
     # Go through files in plug-in directory
     try:
         list = os.listdir(dir)
@@ -94,7 +94,7 @@ def _findModels(dir):
                     if hasattr(module, "Model"):
                         try:
                             if _check_plugin(module.Model, name)!=None:
-                                plugins.append(module.Model)
+                                plugins[name] = module.Model
                         except:
                             msg="Error accessing Model"
                             msg+="in %s\n  %s %s\n" % (name,
@@ -149,22 +149,23 @@ class ModelManager:
     ## dictionary of other
     struct_factor_dict = {}
     ##list of form factors
-    shape_list =[]
+    shape_list = []
     ## independent shape model list
     shape_indep_list = []
     ##list of structure factors 
-    struct_list= []
+    struct_list = []
     ##list of model allowing multiplication
-    multiplication_factor=[]
+    multiplication_factor = []
     ##list of multifunctional shapes
-    multi_func_list =[]
+    multi_func_list = []
     ## list of added models
-    plugins=[]
+    plugins = []
     ## Event owner (guiframe)
     event_owner = None
     def __init__(self):
         """
         """
+        self.stored_plugins = {}
         self._getModelList()
         
     def _getModelList(self):
@@ -387,13 +388,26 @@ class ModelManager:
         self.multi_func_list.append(ReflectivityIIModel)
     
         #Looking for plugins
-        self.plugins = findModels()
-        self._get_multifunc_models()
+        self.stored_plugins = findModels()
+        self.plugins = self.stored_plugins.values()
         self.plugins.append(ReflectivityModel)
         self.plugins.append(ReflectivityIIModel)
+        self._get_multifunc_models()
+       
         return 0
 
     
+    def update(self):
+        """
+        """
+        new_plugins = findModels()
+        for name, plug in  new_plugins.iteritems():
+            if name not in self.stored_plugins.keys():
+                self.stored_plugins[name] = plug
+                self.plugins.append(plug)
+        self.model_combobox.set_list("Customized Models", self.plugins)
+        return self.model_combobox.get_list()
+        
     def populate_menu(self, modelmenu, event_owner):
         """
         Populate a menu with our models
@@ -562,7 +576,7 @@ class ModelManager:
         self.model_combobox.set_list("P(Q)*S(Q)", self.multiplication_factor)
         self.model_combobox.set_list("multiplication", self.multiplication_factor)
         self.model_combobox.set_list("Multi-Functions", self.multi_func_list)
-        return self.model_combobox
+        return self.model_combobox.get_list()
     
   
         

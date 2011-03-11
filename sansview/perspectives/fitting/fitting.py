@@ -255,10 +255,12 @@ class Plugin(PluginBase):
         """
         return True
     
-    def set_data(self, data_list):
+    def set_data(self, data_list=None, theory_list=None):
         """
         receive a list of data to fit
         """
+        if data_list is None:
+            data_list = []
         selected_data_list = []
         if len(data_list) > MAX_NBR_DATA :
             from fitting_widgets import DataDialog
@@ -1162,7 +1164,7 @@ class Plugin(PluginBase):
             self.page_finder[id].set_theory_data(new_plot)
             if data is None:
                 theory_data = self.page_finder[id].get_theory_data()
-                self.parent.add_data_helper(data_list=[theory_data])
+                self.parent.add_data_helper({theory_data.id:theory_data})
                 data_id = theory_data.id
             else:
                 data_id = data.id
@@ -1248,7 +1250,7 @@ class Plugin(PluginBase):
         
         if data is None:
             theory_data = self.page_finder[id].get_theory_data()
-            self.parent.add_data_helper(data_list=[theory_data])
+            self.parent.add_data_helper({theory_data.id:theory_data})
             data_id = theory_data.id
         else:
             data_id = data.id

@@ -1052,6 +1052,7 @@ class FitPage(BasicPage):
             ## post state to fit panel
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event) 
+        #
       
       
     def _onparamEnter(self,event):

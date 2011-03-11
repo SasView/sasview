@@ -1711,6 +1711,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Fill panel's combo box according to the type of model selected
         """
+        self.model_list_box = self.parent.update_model_list()
         if self.shape_rbutton.GetValue():
             ##fill the combobox with form factor list
             self.structurebox.SetSelection(0)
@@ -1761,7 +1762,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param list: contains item to fill the combox
             item must model class
         """
-        st = time.time()
         for models in list:
             model= models()
             name = model.__class__.__name__

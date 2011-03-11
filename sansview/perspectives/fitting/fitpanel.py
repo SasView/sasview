@@ -41,7 +41,7 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         self.event_owner = None
         #dictionary of miodel {model class name, model class}
         self.menu_mng = models.ModelManager()
-        self.model_list_box = self.menu_mng.get_model_list().get_list()
+        self.model_list_box = self.menu_mng.get_model_list()
         #pageClosedEvent = fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING 
         self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING , self.on_close_page)
          ## save the title of the last page tab added
@@ -59,6 +59,13 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         #add default pages
         self.add_default_pages()
     
+    def update_model_list(self):
+        """
+        """
+        self.model_list_box = self.menu_mng.update()
+        return self.model_list_box
+        
+        
     def get_page_by_id(self, id):  
         """
         """
