@@ -143,11 +143,13 @@ class Plugin(PluginBase):
             raise ValueError, msg 
         self.compute_helper(data=data)
                 
-    def set_data(self, data_list):
+    def set_data(self, data_list=None, theory_list=None):
         """
         receive a list of data and compute invariant
         """
         data = None
+        if data_list is None:
+            data_list = []
         if len(data_list) > 1:
             msg = "invariant panel does not allow multiple data!\n"
             msg += "Please select one.\n"
