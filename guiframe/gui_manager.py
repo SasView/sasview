@@ -430,22 +430,22 @@ class ViewerFrame(wx.Frame):
                                   MinimizeButton().
                                   Hide())        
       
-    def append_theory(self, data_id, theory, state=None):
-        """
-        """
-        data_state = self._data_manager.append_theory(data_id=data_id, 
-                                                      theory=theory,
-                                                      state=state)
-        self._data_panel.load_data_list(data_state)
-        
     def update_data(self, prev_data, new_data):
         """
         """
         prev_id, data_state = self._data_manager.update_data(prev_data=prev_data, 
                                        new_data=new_data)
+        
         self._data_panel.remove_by_id(prev_id)
         self._data_panel.load_data_list(data_state)
-       
+        
+    def update_theory(self, data_id, theory, state=None):
+        """
+        """ 
+        data_state = self._data_manager.update_theory(data_id=data_id, 
+                                         theory=theory,
+                                         state=state)  
+        self._data_panel.load_data_list(data_state)
         
     def freeze(self, data_id, theory_id):
         """
@@ -1270,19 +1270,26 @@ class ViewerFrame(wx.Frame):
     def add_data_helper(self, data_list):
         """
         """
-        self._data_manager.add_data(data_list)
+        if self._data_manager is not None:
+            self._data_manager.add_data(data_list)
         
     def add_data(self, data_list):
         """
-        receive a list of data . store them its data manager if possible
-        determine if data was be plot of send to data perspectives
+        receive a dictionary of data from loader
+        store them its data manager if possible
+        send to data the current active perspective if the data panel 
+        is not active. 
+        :param data_list: dictionary of data's ID and value Data
         """
-        #send a list of available data to plotting plugin
-        avalaible_data = []
-        theory_list = []
-        if self._data_manager is not None:
-            self._data_manager.add_data(data_list)
-            avalaible_data = self._data_manager.get_all_data()
+        #Store data into manager
+        self.add_data_helper(data_list)
+        # set data in the data panel
+        if self._data_panel is not None:
+            data_state = self._data_manager.get_data_state(data_list.keys())
+            self._data_panel.load_data_list(data_state)
+        #if the data panel is shown wait for the user to press a button 
+        #to send data to the current perspective. if the panel is not
+        #show  automatically send the data to the current perspective
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style == GUIFRAME.MANAGER_ON:
             #wait for button press from the data panel to set_data 
@@ -1291,51 +1298,45 @@ class ViewerFrame(wx.Frame):
                 self._mgr.Update() 
         else:
             #automatically send that to the current perspective
-            self.set_data(data_list)
+            self.set_data(data_id=data_list.keys())
        
-         # set data in the data panel
-        if self._data_panel is not None:
-            data_state = self._data_manager.get_selected_data()
-            self._data_panel.load_data_list(data_state)
-           
-    def get_data_from_panel(self, data_id, plot=False,append=False):
-        """
-        receive a list of data key retreive the data from data manager and set 
-        then to the current perspective
-        """
-        data_dict = self._data_manager.get_by_id(data_id)
-        data_list = []
-        for data_state in data_dict.values():
-            data_list.append(data_state.data)
-        if plot:
-            self.plot_data(data_list, append=append)
-        else:
-            #sent data to active application
-            self.set_data(data_list=data_list)
-       
-        
-    def set_data(self, data_list):
+    def set_data(self, data_id): 
         """
         set data to current perspective
         """
+        list_data, _ = self._data_manager.get_by_id(data_id)
+        if self._current_perspective is not None:
+            self._current_perspective.set_data(list_data)
+        else:
+            msg = "Guiframe does not have a current perspective"
+            logging.info(msg)
+            
+    def set_theory(self, state_id, theory_id=None):
+        """
+        """
+        _, list_theory = self._data_manager.get_by_id(state_id, theory_id)
         if self._current_perspective is not None:
             try:
-                self._current_perspective.set_data(data_list)
+                self._current_perspective.set_theory(list_theory)
             except:
-                msg = str(sys.exc_value)
+                msg = "Guiframe set_theory: \n" + str(sys.exc_value)
+                logging.info(msg)
                 wx.PostEvent(self, StatusEvent(status=msg, info="error"))
         else:
             msg = "Guiframe does not have a current perspective"
             logging.info(msg)
             
-    def plot_data(self, data_list, append=False):
+    def plot_data(self,  state_id, data_id=None,
+                  theory_id=None, append=False):
         """
         send a list of data to plot
         """
-        if not data_list:
-            message = "Please check data to plot or append"
-            wx.PostEvent(self, StatusEvent(status=message, info='warning'))
-            return 
+        data_list, _ = self._data_manager.get_by_id(data_id)
+        _, temp_list_theory = self._data_manager.get_by_id(state_id, theory_id)
+        for item in temp_list_theory:
+            theory_data, theory_state = item
+            data_list.append(theory_data)
+        GROUP_ID = wx.NewId()
         for new_plot in data_list:
             if append:
                 if self.panel_on_focus is None or \
@@ -1346,14 +1347,19 @@ class ViewerFrame(wx.Frame):
                                                    info='warning'))
                     return 
                 else:
-                    if self.enable_add_data(new_plot) and \
-                    hasattr(self.panel_on_focus, 'group_id'):
-                        new_plot.group_id.append(self.panel_on_focus.group_id)
+                    if self.enable_add_data(new_plot):
+                        new_plot.group_id = self.panel_on_focus.group_id
+                    else:
+                        message = "Only 1D Data can be append to plot panel\n"
+                        message += "%s will be plot separetly\n" %str(new_plot.name)
+                        wx.PostEvent(self, StatusEvent(status=message, 
+                                                   info='warning'))
             else:
                 #if not append then new plot
-                new_plot.group_id.append(wx.NewId())
+                new_plot.group_id = GROUP_ID
+            title = "PLOT " + str(new_plot.title)
             wx.PostEvent(self, NewPlotEvent(plot=new_plot,
-                                                  title=str(new_plot.title)))
+                                                  title=title))
             
   
                 

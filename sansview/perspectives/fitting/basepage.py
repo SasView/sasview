@@ -945,7 +945,110 @@ class BasicPage(ScrolledPanel, PanelBase):
             wx.MessageBox(msg, 'Info')
             return  True
         
-           
+    def set_model_state(self, state):
+        """
+        reset page given a model state
+        """
+        self.disp_cb_dict = state.disp_cb_dict
+        self.disp_list = state.disp_list
+      
+        ## set the state of the radio box
+        self.shape_rbutton.SetValue(state.shape_rbutton )
+        self.shape_indep_rbutton.SetValue(state.shape_indep_rbutton)
+        self.struct_rbutton.SetValue(state.struct_rbutton)
+        self.plugin_rbutton.SetValue(state.plugin_rbutton)
+        
+        ## fill model combobox
+        self._show_combox_helper()
+        #select the current model
+        self.formfactorbox.Select(int(state.formfactorcombobox))
+        self.structurebox.SetSelection(state.structurecombobox )
+        if state.multi_factor != None:
+            self.multifactorbox.SetSelection(state.multi_factor)
+            
+         ## reset state of checkbox,textcrtl  and  regular parameters value
+        self._reset_parameters_state(self.orientation_params_disp,
+                                     state.orientation_params_disp)
+        self._reset_parameters_state(self.orientation_params,
+                                     state.orientation_params)
+        self._reset_parameters_state(self.str_parameters,
+                                     state.str_parameters)
+        self._reset_parameters_state(self.parameters,state.parameters)
+         ## display dispersion info layer        
+        self.enable_disp.SetValue(state.enable_disp)
+        self.disable_disp.SetValue(state.disable_disp)
+        
+        if hasattr(self, "disp_box"):
+            
+            self.disp_box.SetSelection(state.disp_box) 
+            n= self.disp_box.GetCurrentSelection()
+            dispersity= self.disp_box.GetClientData(n)
+            name = dispersity.__name__     
+
+            self._set_dipers_Param(event=None)
+       
+            if name == "ArrayDispersion":
+                
+                for item in self.disp_cb_dict.keys():
+                    
+                    if hasattr(self.disp_cb_dict[item], "SetValue") :
+                        self.disp_cb_dict[item].SetValue(\
+                                                    state.disp_cb_dict[item])
+                        # Create the dispersion objects
+                        from sans.models.dispersion_models import ArrayDispersion
+                        disp_model = ArrayDispersion()
+                        if hasattr(state,"values")and\
+                                 self.disp_cb_dict[item].GetValue() == True:
+                            if len(state.values)>0:
+                                self.values=state.values
+                                self.weights=state.weights
+                                disp_model.set_weights(self.values,
+                                                        state.weights)
+                            else:
+                                self._reset_dispersity()
+                        
+                        self._disp_obj_dict[item] = disp_model
+                        # Set the new model as the dispersion object 
+                        #for the selected parameter
+                        self.model.set_dispersion(item, disp_model)
+                    
+                        self.model._persistency_dict[item] = \
+                                                [state.values, state.weights]
+                    
+            else:
+                keys = self.model.getParamList()
+                for item in keys:
+                    if item in self.disp_list and \
+                        not self.model.details.has_key(item):
+                        self.model.details[item] = ["", None, None]
+                for k,v in self.state.disp_cb_dict.iteritems():
+                    self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
+                    self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
+         ## smearing info  restore
+        if hasattr(self, "enable_smearer"):
+            ## set smearing value whether or not the data 
+            #contain the smearing info
+            self.enable_smearer.SetValue(state.enable_smearer)
+            self.disable_smearer.SetValue(state.disable_smearer)
+            self.onSmear(event=None)           
+        self.pinhole_smearer.SetValue(state.pinhole_smearer)
+        self.slit_smearer.SetValue(state.slit_smearer)
+        ## we have two more options for smearing
+        if self.pinhole_smearer.GetValue(): self.onPinholeSmear(event=None)
+        elif self.slit_smearer.GetValue(): self.onSlitSmear(event=None)
+       
+        ## reset state of checkbox,textcrtl  and dispersity parameters value
+        self._reset_parameters_state(self.fittable_param,state.fittable_param)
+        self._reset_parameters_state(self.fixed_param,state.fixed_param)
+        
+        ## draw the model with previous parameters value
+        self._onparamEnter_helper()
+        self.select_param(event=None) 
+        #Save state_fit
+        self.save_current_state_fit()
+        self._lay_out()
+        self.Refresh()
+        
     def reset_page_helper(self, state):
         """
         Use page_state and change the state of existing page

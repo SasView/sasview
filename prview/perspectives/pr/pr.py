@@ -218,9 +218,7 @@ class Plugin(PluginBase):
         new_plot.name = "P_{obs}(r)"
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
-        group_id = "P_{obs}(r)"
-        if group_id not in new_plot.group_id:
-            new_plot.group_id.append(group_id)
+        new_plot.group_id = "P_{obs}(r)"
         new_plot.id = "P_{obs}(r)"
         new_plot.title = title
         self.parent.append_theory(data_id=self.current_plottable.id,
@@ -254,9 +252,7 @@ class Plugin(PluginBase):
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
         new_plot.id = "P_{true}(r)"
-        group_id = "P_{true}(r)"
-        if group_id not in new_plot.group_id:
-            new_plot.group_id.append(group_id)
+        new_plot.group_id = "P_{true}(r)"
         self.parent.append_theory(data_id=self.current_plottable.id,
                                        theory=new_plot)
         #Put this call in plottables/guitools    
@@ -315,9 +311,7 @@ class Plugin(PluginBase):
         
         # If we have a group ID, use it
         if pr.info.has_key("plot_group_id"):
-            if len( pr.info["plot_group_id"]) > 0:
-                index =  len( pr.info["plot_group_id"]) - 1
-                new_plot.group_id.append( pr.info["plot_group_id"][index])
+            new_plot.group_id = pr.info["plot_group_id"]
         new_plot.id = IQ_FIT_LABEL
         self.parent.append_theory(data_id=self.current_plottable.id,
                                        theory=new_plot)
@@ -344,10 +338,7 @@ class Plugin(PluginBase):
             new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
             # If we have a group ID, use it
             if pr.info.has_key("plot_group_id"):
-                if len( pr.info["plot_group_id"]) > 0:
-                    index =  len( pr.info["plot_group_id"]) - 1
-                    new_plot.group_id.append( pr.info["plot_group_id"][index])
-           
+              new_plot.group_id = pr.info["plot_group_id"]
             new_plot.id = IQ_SMEARED_LABEL
             new_plot.title = title
             self.parent.append_theory(data_id=self.current_plottable.id,
@@ -417,9 +408,7 @@ class Plugin(PluginBase):
         # Make sure that the plot is linear
         new_plot.xtransform = "x"
         new_plot.ytransform = "y"  
-        group_id = "P(r) fit"
-        if group_id not in new_plot.group_id:
-            new_plot.group_id.append(group_id)   
+        new_plot.group_id = "P(r) fit"
         self.parent.append_theory(data_id=self.current_plottable.id,
                                        theory=new_plot)            
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="P(r) fit"))
@@ -673,9 +662,7 @@ class Plugin(PluginBase):
             
             new_plot = Data1D(self._added_plots[plot].x, y)
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
-            index  = len(self._added_plots[plot].group_id) - 1
-            if group_id not in new_plot.group_id:
-                new_plot.group_id.append(group_id)
+            new_plot.group_id = self._added_plots[plot].group_id
             new_plot.id = self._added_plots[plot].id
             new_plot.title = self._added_plots[plot].title
             new_plot.name = self._added_plots[plot].name
@@ -887,7 +874,7 @@ class Plugin(PluginBase):
             new_plot.xaxis("\\rm{Q}", 'A^{-1}')
             new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
             if pr.info.has_key("plot_group_id"):
-                new_plot.group_id.append(pr.info["plot_group_id"])
+                new_plot.group_id = pr.info["plot_group_id"]
             new_plot.id = IQ_DATA_LABEL
             self.parent.append_theory(data_id=self.current_plottable.id,
                                        theory=new_plot)
@@ -936,7 +923,7 @@ class Plugin(PluginBase):
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.interactive = True
-        new_plot.group_id.append(IQ_DATA_LABEL)
+        new_plot.group_id = IQ_DATA_LABEL 
         new_plot.id = IQ_DATA_LABEL
         new_plot.title = "I(q)"
         self.parent.append_theory(data_id=self.current_plottable.id,
@@ -1048,10 +1035,7 @@ class Plugin(PluginBase):
         
         # Keep track of the plot window title to ensure that
         # we can overlay the plots
-        if self.current_plottable.group_id:
-            index = len(self.current_plottable.group_id) - 1
-            group_id = self.current_plottable.group_id[index]
-            pr.info["plot_group_id"] = self.current_plottable.group_id
+        pr.info["plot_group_id"] = self.current_plottable.group_id
         
         # Fill in errors if none were provided
         err = self.current_plottable.dy
@@ -1349,34 +1333,36 @@ class Plugin(PluginBase):
      
         return [self.control_panel]
     
-    def set_data(self, data_list=None, theory_list=None):
+    def set_data(self, data_list=None):
         """
         receive a list of data to compute pr
         """
         if data_list is None:
             data_list = []
-        if len(data_list) > 1:
-            msg = "Pr panel does not allow multiple Data.\n"
-            msg += "Please select one!\n"
-            from pr_widgets import DataDialog
-            dlg = DataDialog(data_list=data_list, text=msg)
-            if dlg.ShowModal() == wx.ID_OK:
-                data = dlg.get_data()
-                if issubclass(data.__class__, Data1D):
-                    self.control_panel._change_file(evt=None, data=data)
-                else:    
-                    msg = "Pr cannot be computed for data of "
-                    msg += "type %s" % (data_list[0].__class__.__name__)
-                    wx.PostEvent(self.parent, 
-                             StatusEvent(status=msg, info='error'))
-        elif len(data_list) == 1:
-            if issubclass(data_list[0].__class__, Data1D):
-                self.control_panel._change_file(evt=None, data=data_list[0])
+        if len(data_list) >= 1:
+            if len(data_list) == 1:
+                data = data_list[0]
             else:
-                msg = "Pr cannot be computed for"
-                msg += " data of type %s" % (data_list[0].__class__.__name__)
+                msg = "Pr panel does not allow multiple Data.\n"
+                msg += "Please select one!\n"
+                from pr_widgets import DataDialog
+                dlg = DataDialog(data_list=data_list, text=msg)
+                if dlg.ShowModal() == wx.ID_OK:
+                    data = dlg.get_data()
+            if data is None:
+                return
+            if issubclass(data.__class__, Data1D):
+                try:
+                    self.control_panel._change_file(evt=None, data=data)
+                except:
+                     msg = "Prview Set_data: " + str(sys.exc_value)
+                     wx.PostEvent(self.parent, StatusEvent(status=msg,
+                                                            info="error"))
+            else:    
+                msg = "Pr cannot be computed for data of "
+                msg += "type %s" % (data_list[0].__class__.__name__)
                 wx.PostEvent(self.parent, 
-                             StatusEvent(status=msg, info='error'))
+                         StatusEvent(status=msg, info='error'))
         else:
             msg = "Pr contain no data"
             wx.PostEvent(self.parent, StatusEvent(status=msg, info='warning'))

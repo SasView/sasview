@@ -409,7 +409,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             theory_list_ctrl = self.list_cb_theory[data_id]
 
             for theory_id, item in theory_list.iteritems():
-                theory_data, _ = item
+                theory_data, theory_state = item
                 if theory_data is None:
                     name = "Unknown"
                     theory_class = "Unknown"
@@ -419,6 +419,8 @@ class DataPanel(ScrolledPanel, PanelBase):
                     name = theory_data.name
                     theory_class = theory_data.__class__.__name__
                     theory_id = theory_data.id
+                    if theory_state is not None:
+                        name = theory_state.model.name
                     temp = (theory_id, theory_class, state_id)
                 if theory_id not in theory_list_ctrl:
                     #add new theory
@@ -450,12 +452,16 @@ class DataPanel(ScrolledPanel, PanelBase):
             #data didn't have a theory associated it before
             theory_list_ctrl = {}
             for theory_id, item in theory_list.iteritems():
-                theory_data, _ = item
+                theory_data, theory_state = item
                 if theory_data is not None:
+                    name = theory_data.name
                     theory_class = theory_data.__class__.__name__
-                    
+                    theory_id = theory_data.id
+                    if theory_state is not None:
+                        name = theory_state.model.name 
+                    temp = (theory_id, theory_class, state_id)
                     t_child = self.tree_ctrl.AppendItem(theory_child,
-                            theory_data.name, ct_type=1, 
+                            name, ct_type=1, 
                             data=(theory_data.id, theory_class, state_id))
                     t_i_c = self.tree_ctrl.AppendItem(t_child, 'Info')
                     i_c_c = self.tree_ctrl.AppendItem(t_i_c, 
@@ -474,19 +480,24 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         """
         data_to_plot = []
+        state_to_plot = []
+        theory_to_plot = []
         for value in self.list_cb_data.values():
             item, _, _, _, _, _ = value
             if item.IsChecked():
-               data_id, _, _ = self.tree_ctrl.GetItemPyData(item) 
+               data_id, _, state_id = self.tree_ctrl.GetItemPyData(item) 
                data_to_plot.append(data_id)
-        theory_to_plot = []
+               if state_id not in state_to_plot:
+                   state_to_plot.append(state_id)
         for theory_dict in self.list_cb_theory.values():
             for key, value in theory_dict.iteritems():
                 item, _, _ = value
                 if item.IsChecked():
-                    theory_id, _, _ = self.tree_ctrl.GetItemPyData(item)
+                    theory_id, _, state_id = self.tree_ctrl.GetItemPyData(item)
                     theory_to_plot.append(theory_id)
-        return data_to_plot, theory_to_plot
+                    if state_id not in state_to_plot:
+                        state_to_plot.append(state_id)
+        return data_to_plot, theory_to_plot, state_to_plot
     
     def remove_by_id(self, id):
         """
@@ -523,25 +534,35 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         Get all select data and set them to the current active perspetive
         """
-        self.post_helper(plot=False)
-       
+        data_id, theory_id, state_id = self.set_data_helper()
+        self.parent.set_data(data_id)
+        self.parent.set_data(state_id=state_id, theory_id=theory_id)
+        
     def on_append_plot(self, event=None):
         """
         append plot to plot panel on focus
         """
-        self.post_helper(plot=True, append=True)
+        data_id, theory_id, state_id = self.set_data_helper()
+        self.parent.plot_data(data_id=data_id,  
+                              state_id=state_id,
+                              theory_id=theory_id,
+                              append=True)
    
     def on_plot(self, event=None):
         """
         Send a list of data names to plot
         """
-        self.post_helper(plot=True)
+        data_id, theory_id, state_id = self.set_data_helper()
+        self.parent.plot_data(data_id=data_id,  
+                              state_id=state_id,
+                              theory_id=theory_id,
+                              append=False)
        
     def on_freeze(self, event):
         """
         """
-        data_to_plot, theory_to_plot = self.set_data_helper()
-        self.parent.freeze(data_id=data_to_plot, theory_id=theory_to_plot)
+        _, theory_id, state_id = self.set_data_helper()
+        self.parent.freeze(state_id=state_id, theory_id=theory_id)
         
     def set_active_perspective(self, name):
         """
@@ -554,15 +575,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         set the plot panel on focus
         """
         self.tctrl_plotpanel.SetLabel(str(name))
-        
-    def post_helper(self, plot=False, append=False):
-        """
-        """
-        data_to_plot, theory_to_plot = self.set_data_helper()
-        if self.parent is not None:
-            self.parent.get_data_from_panel(data_id=data_to_plot, plot=plot,
-                                            append=append)
-            
+ 
     
 
 

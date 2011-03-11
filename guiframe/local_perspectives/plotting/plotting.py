@@ -107,6 +107,8 @@ class Plugin(PluginBase):
         ## Assign data properties to the new create panel
         new_panel.set_manager(self)
         new_panel.group_id = group_id
+        if group_id not in data.list_group_id:
+            data.list_group_id.append(group_id)
         if title is None:
             title = data.title
         new_panel.window_caption = title
@@ -213,10 +215,7 @@ class Plugin(PluginBase):
             title = event.title
                 
         data = event.plot
-        group_id_list = data.group_id
-        group_id = None
-        if group_id_list:
-            group_id = group_id_list[len(group_id_list)-1]
+        group_id = data.group_id
             
         if group_id in self.plot_panels.keys():
             #update a panel graph 

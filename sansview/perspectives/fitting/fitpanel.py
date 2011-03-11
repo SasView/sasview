@@ -100,6 +100,15 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
             selected_page = self.GetPage(pos)
             return selected_page.get_data()
     
+    def set_model_state(state):
+        """
+        receive a state to reset the model in the current page
+        """
+        pos = self.GetSelection()
+        if pos != -1:
+            selected_page = self.GetPage(pos)
+            selected_page.set_model_state(state)
+            
     def get_state(self):
         """
          return the state of the current selected page

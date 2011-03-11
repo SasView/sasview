@@ -138,7 +138,7 @@ class Plugin(PluginBase):
         """
         message = ""
         log_msg = ''
-        output = []
+        output = {}
         error_message = ""
         for p_file in path:
             basename  = os.path.basename(p_file)
@@ -155,10 +155,10 @@ class Plugin(PluginBase):
                 if temp.__class__.__name__ == "list":
                     for item in temp:
                         data = self.parent.create_gui_data(item, p_file)
-                        output.append(data)
+                        output[data.id] = data
                 else:
                     data = self.parent.create_gui_data(temp, p_file)
-                    output.append(data)
+                    output[data.id] = data
                 message = "Loading Data..." + str(p_file) + "\n"
                 self.load_update(output=output, message=message)
             except:
@@ -188,7 +188,7 @@ class Plugin(PluginBase):
                                               type="stop"))
         if error_message != "":
             self.load_error(error_message)
-        self.parent.add_data(output)
+        self.parent.add_data(data_list=output)
    
     
         

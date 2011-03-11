@@ -1,3 +1,4 @@
+import copy 
 
 class FitProblem:
     """  
@@ -31,7 +32,7 @@ class FitProblem:
         """
         copy fitproblem
         """
-        import copy 
+        
         obj          = FitProblem()
         model= None
         if self.model!=None:
@@ -109,9 +110,8 @@ class FitProblem:
         :param data: data selected
         
         """
-        self.theory_data = data
-        
-
+        self.theory_data = copy.deepcopy(data)
+      
     def get_theory_data(self):
         """
         :return: list of data dList

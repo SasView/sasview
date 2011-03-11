@@ -205,10 +205,19 @@ class PluginBase:
         """
         update state
         """
-    def set_data(self, data_list):
+    def set_data(self, data_list=None):
         """
         receive a list of data and use it in the current perspective
+       
         """
+    def set_theory(self, theory_list=None):
+        """
+        :param theory_list: list of information 
+            related to available theory state
+        """
+        msg = "%s plugin: does not support import theory" % str(self.sub_menu)
+        raise ValueError, msg 
+    
     def on_set_state_helper(self, event):
         """
         update state

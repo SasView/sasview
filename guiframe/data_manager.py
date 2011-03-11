@@ -38,7 +38,6 @@ class DataManager(object):
         :param auto_set_data: if True the datamanager sends to the current
         perspective
         """
-        self._selected_data = {}
         self.stored_data = {}
         self.message = ""
         self.data_name_dict = {}
@@ -122,20 +121,17 @@ class DataManager(object):
         """
         receive a list of 
         """
-        self._selected_data = {}
-        for data in data_list:
-            if data.id  in self.stored_data:
+        for id, data in data_list.iteritems():
+            if id  in self.stored_data:
                 msg = "Data manager already stores %s" % str(data.name)
                 msg += ""
                 logging.info(msg)
-                self.stored_data[data.id].data = data
-                data_state = self.stored_data[data.id]
+                data_state = self.stored_data[id]
             else:
                 data_state = DataState(data)
                 data_state.id = wx.NewId()
-                self.stored_data[data.id] = data_state
-            self._selected_data[data.id] = data_state
-  
+                self.stored_data[id] = data_state
+    
         
     def update_data(self, prev_data, new_data):
         """
@@ -149,29 +145,42 @@ class DataManager(object):
             del self.stored_data[prev_data.id] 
         return prev_data.id, {new_data.id: self.stored_data[new_data.id]}
     
+    def update_theory(self, data_id, theory, state=None):
+        """
+        """
+        if data_id in self.stored_data.keys():
+            data_state = self.stored_data[data_id] 
+            data_state.set_theory(theory_data=theory, theory_state=state)
+            return {data_id: self.stored_data[data_id]}
+        return {}
+    
     def get_message(self):
         """
         return message
         """
         return self.message
     
-    def get_by_id(self, id_list=None):
+    def get_by_id(self, data_id, theory_id=None):
         """
         get a list of data given a list of id
         """
-        self._selected_data = {}
-        for id in id_list:
-            if id in self.stored_data:
-                self._selected_data[id] = self.stored_data[id]
-        return self._selected_data
+        _selected_data = []
+        _selected_theory_list = []
+        if data_id is None:
+            return
+        for d_id in data_id:
+            if d_id in self.stored_data:
+                data_state = self.stored_data[d_id]
+                data = data_state.data
+                _selected_data.append(data)
+                theory_list = data_state.get_theory()
+                if theory_id is not None:
+                    for t_id in theory_id:
+                        if t_id in theory_list.keys():
+                            _selected_theory_list.append(theory_list[t_id])
+        return _selected_data, _selected_theory_list
     
-    def append_theory(self, data_id, theory, state=None):
-        """
-        """
-        data_state = self.stored_data[data_id]
-        data_state.set_theory(theory_data=theory, 
-                              theory_state=state)
-        return {data_id: self.stored_data[data_id]}
+   
             
     def freeze_theory(self, data_id, theory_id):
         """
@@ -203,15 +212,9 @@ class DataManager(object):
             if data_state.data.name in self.data_name_dict:
                 del self.data_name_dict[data_state.data.name]
             del self.stored_data[data_id]
-        if data_id in self._selected_data.keys():
-            data_state = self._selected_data[data_id]
-            if data_state.data.name in self.data_name_dict:
-                del self.data_name_dict[data_state.data.name]
-            del self._selected_data[data_id]
         
         self.delete_theory(self, data_id, theory_id)
         if delete_all:
-            self._selected_data = {}
             self.stored_data = {}
             self.data_name_dict = {}
             
@@ -223,11 +226,7 @@ class DataManager(object):
             theory_list = data_state.get_theory()
             if theory_id in theory_list.key():
                 del theory_list[theory_id]
-        if data_id in self._selected_data:
-            data_state = self._selected_data[data_id]
-            theory_list = data_state.get_theory()
-            if theory_id in theory_list.key():
-                del theory_list[theory_id]
+        
             
     def delete_by_id(self, id_list=None):
         """
@@ -236,19 +235,18 @@ class DataManager(object):
         for id in id_list:
             if id in self.stored_data:
                 del self.stored_data[id]
-            if id  in self._selected_data:
-                del self._selected_data[id]
+         
     
     def get_by_name(self, name_list=None):
         """
         return a list of data given a list of data names
         """
-        self._selected_data = {}
+        _selected_data = {}
         for selected_name in name_list:
             for id, data_state in self.stored_data.iteritems():
                 if data_state.data.name == selected_name:
-                    self._selected_data[id] = data_state
-        return self._selected_data
+                    _selected_data[id] = data_state.data
+        return _selected_data
     
     def delete_by_name(self, name_list=None):
         """
@@ -260,11 +258,15 @@ class DataManager(object):
                     del self._selected_data[id]
                     del self.stored_data[data.id]
 
-    def get_selected_data(self):
+    def get_data_state(self, data_id):
         """
         Send list of selected data
         """
-        return self._selected_data
+        _selected_data_state = {}
+        for id in data_id:
+            if id in self.stored_data.keys():
+                _selected_data_state[id] = self.stored_data[id]
+        return _selected_data_state
     
     def get_all_data(self):
         """

@@ -16,12 +16,9 @@ import sys
 import wx
 import logging
 import numpy
-#import math
 import string
 import time
-#import thread
 from copy import deepcopy
-
 import models
 import fitpage
 
@@ -35,7 +32,6 @@ from sans.guiframe.events import EVT_REMOVE_DATA
 from sans.guiframe.events import EVT_SLICER_PARS_UPDATE
 from sans.guiframe.gui_style import GUIFRAME_ID
 from sans.guiframe.plugin_base import PluginBase 
-
 
 from .console import ConsoleUpdate
 from .fitproblem import FitProblem
@@ -255,7 +251,7 @@ class Plugin(PluginBase):
         """
         return True
     
-    def set_data(self, data_list=None, theory_list=None):
+    def set_data(self, data_list=None):
         """
         receive a list of data to fit
         """
@@ -269,10 +265,27 @@ class Plugin(PluginBase):
                 selected_data_list = dlg.get_data()
         else:
             selected_data_list = data_list
-        for data in selected_data_list:
-            self.add_fit_page(data=data)
-            wx.PostEvent(self.parent, NewPlotEvent(plot=data, 
-                                                   title=str(data.title)))
+        try:
+            for data in selected_data_list:
+                self.add_fit_page(data=data)
+                wx.PostEvent(self.parent, NewPlotEvent(plot=data, 
+                                                       title=str(data.title)))
+        except:
+            msg = "Fitting Set_data: " + str(sys.exc_value)
+            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
+            
+    def set_theory(self,  theory_list=None):
+        """
+        """
+        #set the model state for a given theory_state:
+        for item in theory_list:
+            try:
+                _, theory_state = item
+                self.fit_panel.set_model_state(theory_state)
+            except:
+                msg = "Fitting: cannot deal with the theory received"
+                logging.error("set_theory " + msg + "\n" + str(sys.exc_value))
+                wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
             
     def set_state(self, state=None, datainfo=None, format=None):
         """
@@ -592,7 +605,7 @@ class Plugin(PluginBase):
             id = data.id + name
         if theory:
             id = data.id 
-        group_id = data.group_id[len(data.group_id)-1]
+        group_id = data.group_id
         wx.PostEvent(self.parent, NewPlotEvent(id=id,
                                                    group_id=group_id,
                                                    action='remove'))
@@ -642,16 +655,12 @@ class Plugin(PluginBase):
         page_caption = page.window_name
         #append Data1D to the panel containing its theory
         #if theory already plotted
-        
         if page.id in self.page_finder:
             theory_data = self.page_finder[page.id].get_theory_data()
-            
             if issubclass(data.__class__, Data2D):
-                data.group_id.append(wx.NewId())
+                data.group_id = wx.NewId()
                 if theory_data is not None:
                     group_id = str(page.id) + " Model1D"
-                    if group_id in theory_data.group_id:
-                        theory_data.group_id.remove(group_id)
                     wx.PostEvent(self.parent, 
                              NewPlotEvent(group_id=group_id,
                                                action="delete"))
@@ -659,15 +668,12 @@ class Plugin(PluginBase):
             else:
                 if theory_data is not None:
                     group_id = str(page.id) + " Model2D"
-                    if group_id in theory_data.group_id:
-                        theory_data.group_id.remove(group_id)
-                    data_group_id = theory_data.group_id[len(theory_data.group_id)-1]
-                    if data_group_id not in data.group_id:
-                        data.group_id.append(data_group_id)
+                    data.group_id = theory_data.group_id
                     wx.PostEvent(self.parent, 
                              NewPlotEvent(group_id=group_id,
                                                action="delete"))
-                    self.parent.update_data(prev_data=theory_data, new_data=data)       
+                    self.parent.update_data(prev_data=theory_data, new_data=data)   
+              
         self.store_data(id=page.id, data=data, caption=page.window_name)
         if self.sim_page is not None:
             self.sim_page.draw_page()
@@ -724,7 +730,7 @@ class Plugin(PluginBase):
                 id,fitproblem = value
                 if name !="Model":
                     data= fitproblem.get_fit_data()
-                    page = self.fit_panel.add_fit_page(data= data,reset=True)
+                    page = self.fit_panel.add_fit_page(data=data, reset=True)
                     if fitproblem != None:
                         self.page_finder[id] = fitproblem
                         if self.sim_page != None:
@@ -1102,12 +1108,9 @@ class Plugin(PluginBase):
         theory.xmax = xmax
         theory.ymin = ymin 
         theory.ymax = ymax 
-        group_id = str(id) + " Model2D"
-        if group_id not in theory.group_id:
-            theory.group_id.append(group_id)
+        theory.group_id = str(id) + " Model2D"
         theory.id = str(id) + " Model2D"
   
-                
     def _complete1D(self, x,y, id, elapsed,index,model,
                     toggle_mode_on=False,state=None, data=None):
         """
@@ -1125,23 +1128,17 @@ class Plugin(PluginBase):
                 if id in self.page_finder:
                     theory_data = self.page_finder[id].get_theory_data()
                     if theory_data is not None:
-                        group_id = theory_data.group_id[len(theory_data.group_id)-1]
-                        if group_id not in data.group_id:
-                            data.group_id.append(group_id)
+                       data.group_id = theory_data.group_id
                 #data is plotted before the theory, then take its group_id
                 #assign to the new theory
-                group_id = data.group_id[len(data.group_id)-1]
-                if group_id not in new_plot.group_id:
-                    new_plot.group_id.append(group_id)
+                new_plot.group_id = data.group_id
                
             else:
                 _xaxis, _xunit = "\\rm{Q}", 'A^{-1}'
                 _yaxis, _yunit = "\\rm{Intensity} ", "cm^{-1}"
                 new_plot.title = "Analytical model 1D "
                 #find a group id to plot theory without data
-                group_id =  str(id) + " Model1D"  
-                if group_id not in new_plot.group_id:
-                    new_plot.group_id.append(group_id)
+                new_plot.group_id =  str(id) + " Model1D"  
                 new_plot.is_data = False 
             new_plot.id =  str(id) + " Model1D"  
             
@@ -1160,17 +1157,20 @@ class Plugin(PluginBase):
                 wx.PostEvent(self.parent, 
                              NewPlotEvent(group_id=str(id) + " Model2D",
                                                action="Hide"))
-                
+           
             self.page_finder[id].set_theory_data(new_plot)
+            theory_data = self.page_finder[id].get_theory_data()
             if data is None:
-                theory_data = self.page_finder[id].get_theory_data()
+                name = "Data generates by Fitting "
+                theory_data.name = name
                 self.parent.add_data_helper({theory_data.id:theory_data})
                 data_id = theory_data.id
             else:
                 data_id = data.id
            
-            self.parent.append_theory(data_id=data_id, 
-                                          theory=new_plot, state=state)
+            self.parent.update_theory(data_id=data_id, 
+                                       theory=theory_data,
+                                       state=state)     
             current_pg = self.fit_panel.get_page_by_id(id)
             title = new_plot.title
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
@@ -1217,10 +1217,7 @@ class Plugin(PluginBase):
            
         else:
             new_plot.id = str(id) + " Model2D"
-            group_id = str(id) + " Model2D"
-            if group_id not in new_plot.group_id:
-                new_plot.group_id.append(group_id)
-         
+            new_plot.group_id = str(id) + " Model2D"
             new_plot.x_bins = data.x_bins
             new_plot.y_bins = data.y_bins
             new_plot.detector = data.detector
@@ -1246,17 +1243,19 @@ class Plugin(PluginBase):
             wx.PostEvent(self.parent, 
                              NewPlotEvent(group_id=str(id) + " Model1D",
                                                action="Hide"))
-        self.page_finder[id].set_theory_data(theory_data)
         
+        self.page_finder[id].set_theory_data(new_plot)
+        theory_data = self.page_finder[id].get_theory_data()
         if data is None:
-            theory_data = self.page_finder[id].get_theory_data()
+            name = "Data generates by Fitting "
+            theory_data.name = name
             self.parent.add_data_helper({theory_data.id:theory_data})
             data_id = theory_data.id
         else:
             data_id = data.id
-        
-        self.parent.append_theory(data_id=data_id, 
-                                          theory=new_plot, state=state)
+        self.parent.update_theory(data_id=data_id, 
+                                       theory=theory_data,
+                                       state=state)  
         current_pg = self.fit_panel.get_page_by_id(id)
         title = new_plot.title
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,

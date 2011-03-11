@@ -143,28 +143,34 @@ class Plugin(PluginBase):
             raise ValueError, msg 
         self.compute_helper(data=data)
                 
-    def set_data(self, data_list=None, theory_list=None):
+    def set_data(self, data_list=None):
         """
         receive a list of data and compute invariant
         """
         data = None
         if data_list is None:
             data_list = []
-        if len(data_list) > 1:
-            msg = "invariant panel does not allow multiple data!\n"
-            msg += "Please select one.\n"
-            from invariant_widgets import DataDialog
-            dlg = DataDialog(data_list=data_list, text=msg)
-            if dlg.ShowModal() == wx.ID_OK:
-                data = dlg.get_data()
-        elif len(data_list) == 1:
-            data = data_list[0]
-        if data is None:
-            return
-        if issubclass(data.__class__, Data1D):
-            wx.PostEvent(self.parent, NewPlotEvent(plot=data,
-                                       title=data.title))
-            self.compute_helper(data)
+        if len(data_list) >= 1:
+            if len(data_list) == 1:
+                data = data_list[0]
+            else:
+                msg = "invariant panel does not allow multiple data!\n"
+                msg += "Please select one.\n"
+                from invariant_widgets import DataDialog
+                dlg = DataDialog(data_list=data_list, text=msg)
+                if dlg.ShowModal() == wx.ID_OK:
+                    data = dlg.get_data()
+            if data is None:
+                return
+            if issubclass(data.__class__, Data1D):
+                wx.PostEvent(self.parent, NewPlotEvent(plot=data,
+                                           title=data.title))
+                try:
+                    self.compute_helper(data)
+                except:
+                    msg = "Prview Set_data: " + str(sys.exc_value)
+                    wx.PostEvent(self.parent, StatusEvent(status=msg,
+                                                                info="error"))
         else:    
             msg = "invariant cannot be computed for data of "
             msg += "type %s" % (data.__class__.__name__)
@@ -229,9 +235,6 @@ class Plugin(PluginBase):
             data.name = name
             data.filename = name
             data = self.parent.create_gui_data(data,None)
-            #self.__data = datainfo
-            #self.__data.group_id = data.filename
-            #self.__data.id = datainfo.filename
             self.__data = data
             wx.PostEvent(self.parent, NewPlotEvent(plot=self.__data,
                                         reset=True, title=self.__data.title))
@@ -270,7 +273,7 @@ class Plugin(PluginBase):
         #import copy
         if data is None:
             id = str(self.__data.id) + name
-            self.__data.group_id
+            group_id = self.__data.group_id
             wx.PostEvent(self.parent, NewPlotEvent(id=id,
                                                group_id=group_id,
                                                action='Remove'))

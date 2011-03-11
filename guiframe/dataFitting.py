@@ -26,7 +26,8 @@ class Data1D(PlotData1D, LoadData1D):
         PlotData1D.__init__(self, x, y, dx, dy)
         LoadData1D.__init__(self, x, y, dx, dy)
         self.id = None
-        self.group_id = []
+        self.list_group_id = []
+        self.group_id = None
         self.is_data = True
         self.path = None
         self.xtransform = None
@@ -101,7 +102,8 @@ class Theory1D(PlotTheory1D, LoadData1D):
         PlotTheory1D.__init__(self, x, y, dy)
         LoadData1D.__init__(self, x, y, dy)
         self.id = None
-        self.group_id = []
+        self.list_group_id = []
+        self.group_id = None
         self.is_data = True
         self.path = None
         self.xtransform = None
@@ -177,7 +179,8 @@ class Data2D(PlotData2D, LoadData2D):
                             dqx_data=dqx_data, dqy_data=dqy_data,
                             q_data=q_data, mask=mask)
         self.id = None
-        self.group_id = []
+        self.list_group_id = []
+        self.group_id = None
         self.is_data = True
         self.path = None
         self.xtransform = None
