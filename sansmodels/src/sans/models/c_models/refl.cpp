@@ -144,7 +144,11 @@ double ReflModel :: operator()(double q) {
  * @return: function value
  */
 double ReflModel :: operator()(double qx, double qy) {
-	double q = sqrt(qx*qx + qy*qy);
+	// For 2D set qy as q, ignoring qx.
+	double q = qy;//sqrt(qx*qx + qy*qy);
+	if (q < 0.0){
+		return 0.0;
+	}
 	return (*this).operator()(q);
 }
 
