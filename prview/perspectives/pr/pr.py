@@ -157,6 +157,7 @@ class Plugin(PluginBase):
             
             # Load the P(r) results
             #state = self.state_reader.get_state()
+            self.parent.add_data(data_list=[self.current_plottable])
             wx.PostEvent(self.parent, NewPlotEvent(plot=self.current_plottable,
                                         title=self.current_plottable.title))
             self.control_panel.set_state(state)
@@ -222,6 +223,8 @@ class Plugin(PluginBase):
             new_plot.group_id.append(group_id)
         new_plot.id = "P_{obs}(r)"
         new_plot.title = title
+        self.parent.append_theory(data_id=self.current_plottable.id,
+                                       theory=new_plot)
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
 
         # Show P(r) fit
@@ -250,7 +253,12 @@ class Plugin(PluginBase):
         new_plot.name = "P_{true}(r)"
         new_plot.xaxis("\\rm{r}", 'A')
         new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
-        
+        new_plot.id = "P_{true}(r)"
+        group_id = "P_{true}(r)"
+        if group_id not in new_plot.group_id:
+            new_plot.group_id.append(group_id)
+        self.parent.append_theory(data_id=self.current_plottable.id,
+                                       theory=new_plot)
         #Put this call in plottables/guitools    
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Sphere P(r)"))
        
@@ -311,7 +319,8 @@ class Plugin(PluginBase):
                 index =  len( pr.info["plot_group_id"]) - 1
                 new_plot.group_id.append( pr.info["plot_group_id"][index])
         new_plot.id = IQ_FIT_LABEL
-        #new_plot.group_id.append(2)
+        self.parent.append_theory(data_id=self.current_plottable.id,
+                                       theory=new_plot)
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
         
         # If we have used slit smearing, plot the smeared I(q) too
@@ -341,7 +350,8 @@ class Plugin(PluginBase):
            
             new_plot.id = IQ_SMEARED_LABEL
             new_plot.title = title
-            #new_plot.group_id.append(2)
+            self.parent.append_theory(data_id=self.current_plottable.id,
+                                       theory=new_plot)
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
         
         
@@ -406,7 +416,12 @@ class Plugin(PluginBase):
         new_plot.id = PR_FIT_LABEL
         # Make sure that the plot is linear
         new_plot.xtransform = "x"
-        new_plot.ytransform = "y"                 
+        new_plot.ytransform = "y"  
+        group_id = "P(r) fit"
+        if group_id not in new_plot.group_id:
+            new_plot.group_id.append(group_id)   
+        self.parent.append_theory(data_id=self.current_plottable.id,
+                                       theory=new_plot)            
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="P(r) fit"))
         
         return x, pr.d_max
@@ -666,7 +681,8 @@ class Plugin(PluginBase):
             new_plot.name = self._added_plots[plot].name
             new_plot.xaxis("\\rm{r}", 'A')
             new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
-            
+            self.parent.append_theory(data_id=self.current_plottable.id,
+                                       theory=new_plot)        
             wx.PostEvent(self.parent, 
                          NewPlotEvent(plot=new_plot, update=True,
                                          title=self._added_plots[plot].name))
@@ -696,7 +712,8 @@ class Plugin(PluginBase):
             new_plot.name = self._added_plots[plot].name
             new_plot.xaxis("\\rm{r}", 'A')
             new_plot.yaxis("\\rm{P(r)} ","cm^{-3}")
-            
+            self.parent.append_theory(data_id=self.current_plottable.id,
+                                       theory=new_plot)        
             wx.PostEvent(self.parent, 
                          NewPlotEvent(plot=new_plot, update=True,
                                 title=self._added_plots[plot].name))        
@@ -872,6 +889,8 @@ class Plugin(PluginBase):
             if pr.info.has_key("plot_group_id"):
                 new_plot.group_id.append(pr.info["plot_group_id"])
             new_plot.id = IQ_DATA_LABEL
+            self.parent.append_theory(data_id=self.current_plottable.id,
+                                       theory=new_plot)
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
                 
         # Show I(q) fit
@@ -920,6 +939,8 @@ class Plugin(PluginBase):
         new_plot.group_id.append(IQ_DATA_LABEL)
         new_plot.id = IQ_DATA_LABEL
         new_plot.title = "I(q)"
+        self.parent.append_theory(data_id=self.current_plottable.id,
+                                       theory=new_plot)        
         wx.PostEvent(self.parent, 
                      NewPlotEvent(plot=new_plot, title="I(q)", reset=reset))
         
@@ -1262,6 +1283,8 @@ class Plugin(PluginBase):
         new_plot.name = "I_{obs}(q)"
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+        self.parent.append_theory(data_id=self.current_plottable.id,
+                                       theory=new_plot)
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
         # Show I(q) fit
         self.show_iq(out, self.pr)
@@ -1326,10 +1349,12 @@ class Plugin(PluginBase):
      
         return [self.control_panel]
     
-    def set_data(self, data_list):
+    def set_data(self, data_list=None, theory_list=None):
         """
         receive a list of data to compute pr
         """
+        if data_list is None:
+            data_list = []
         if len(data_list) > 1:
             msg = "Pr panel does not allow multiple Data.\n"
             msg += "Please select one!\n"

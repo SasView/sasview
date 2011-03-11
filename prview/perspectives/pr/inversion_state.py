@@ -408,8 +408,6 @@ class Reader(CansasReader):
         #self.call_back(state)
         return None
     
-    def get_state(self):
-        return self.state
     def _parse_prstate(self, entry):
         """
         Read a p(r) inversion result from an XML node
