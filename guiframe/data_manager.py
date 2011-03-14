@@ -185,23 +185,23 @@ class DataManager(object):
     def freeze_theory(self, data_id, theory_id):
         """
         """
-        new_data_state = []
+        selected_theory = {}
         for d_id in data_id:
             if d_id in self.stored_data:
                 data_state = self.stored_data[d_id]
                 theory_list = data_state.get_theory()
                 for t_id in theory_id:
                     if t_id in theory_list.keys():
-                        theory = theory_list[t_id]
-                        new_theory = copy.deepcopy(theory)
+                        theory_data, theory_state = theory_list[t_id]
+                        new_theory = copy.deepcopy(theory_data)
                         new_theory.id  = wx.NewId()
-                        data_state.append_theory(new_theory)
-                        theory_list.append(new_theory)
-                        new_data_state.append(data_state)
+                        selected_theory[new_theory.id] = DataState(new_theory)
+                        self.stored_data[new_theory.id] = selected_theory[new_theory.id]
+                    else:
                         msg = "Theory with ID %s " % str(theory_id)
                         msg += "couldn't not be frozen" 
                         raise ValueError, msg
-        return new_data_state
+        return selected_theory
                     
             
     def delete_data(self, data_id, theory_id=None, delete_all=False):

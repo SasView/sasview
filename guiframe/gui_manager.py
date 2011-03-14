@@ -454,10 +454,9 @@ class ViewerFrame(wx.Frame):
                                                 theory_id=theory_id)
         
         self._data_panel.load_data_list(list=data_state_list)
-        for data_state in data_state_list:
-            theory_list = data_state.get_theory()
-            for new_plot in theory_list:
-                wx.PostEvent(self, NewplotEvent(plot=new_plot,
+        for data_state in data_state_list.values():
+            new_plot = data_state.get_data()
+            wx.PostEvent(self, NewPlotEvent(plot=new_plot,
                                              title=new_plot.title))
         
     def delete_data(self, data):
@@ -1339,8 +1338,7 @@ class ViewerFrame(wx.Frame):
         GROUP_ID = wx.NewId()
         for new_plot in data_list:
             if append:
-                if self.panel_on_focus is None or \
-                    not self.enable_add_data(new_plot):
+                if self.panel_on_focus is None:
                     message = "cannot append plot. No plot panel on focus!"
                     message += "please click on any available plot to set focus"
                     wx.PostEvent(self, StatusEvent(status=message, 
@@ -1467,6 +1465,8 @@ class ViewerFrame(wx.Frame):
         """
         Enable append data on a plot panel
         """
+        if self.panel_on_focus not in self._plotting_plugin.plot_panels.values():
+            return
         is_theory = len(self.panel_on_focus.plots) <= 1 and \
             self.panel_on_focus.plots.values()[0].__class__.__name__ == "Theory1D"
             

@@ -52,7 +52,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         ScrolledPanel.__init__(self, parent=parent, *args, **kwds)
         PanelBase.__init__(self)
         self.SetupScrolling()
-      
+        self.all_data1d = True
         self.parent = parent
         self.manager = manager
         self.list_of_data = list
@@ -285,7 +285,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         Add a listcrtl in the panel
         """
         self.tree_ctrl = DataTreeCtrl(parent=self)
-        self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKED, self.on_check_item)
+        self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKING, self.on_check_item)
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_RIGHT_CLICK, self.on_right_click)
         label = wx.StaticText(self, -1, "LOADED DATA")
         label.SetForegroundColour('blue')
@@ -321,12 +321,33 @@ class DataPanel(ScrolledPanel, PanelBase):
         pos = self.ScreenToClient(pos)
         self.PopupMenu(self.popUpMenu, pos) 
       
+  
     def on_check_item(self, event):
         """
         """
         item = event.GetItem()
-        name = self.tree_ctrl.GetItemText(item)
-    
+        item.Check(not item.IsChecked()) 
+        self.enable_button(item)
+        event.Skip()
+        
+    def enable_button(self, item):
+        """
+        """
+        _, data_class, _= self.tree_ctrl.GetItemPyData(item) 
+        if item.IsChecked():
+            self.all_data1d &= (data_class != "Data2D")
+            if self.all_data1d:
+                self.bt_freeze.Enable()
+            else:
+                self.bt_freeze.Disable()
+        else:
+            self.all_data1d |= True
+            self.all_data1d &= (data_class != "Data2D")
+            if self.all_data1d:
+                self.bt_freeze.Enable()
+            else:
+                self.bt_freeze.Disable()
+               
     def load_data_list(self, list):
         """
         add need data with its theory under the tree
@@ -355,6 +376,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                                                    data_name, ct_type=1, 
                                      data=(data_id, data_class, state_id))
                 data_c.Check(True)
+                self.enable_button(data_c)
                 d_i_c = self.tree_ctrl.AppendItem(data_c, 'Info')
                 i_c_c = self.tree_ctrl.AppendItem(d_i_c, 
                                               'Type: %s' % data_class)
@@ -387,7 +409,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                     i_t_c = self.tree_ctrl.AppendItem(d_p_c,
                                                       process.__str__())
             self.append_theory(state_id, theory_list)
-                  
+            
    
     def append_theory(self, state_id, theory_list):
         """
@@ -419,8 +441,8 @@ class DataPanel(ScrolledPanel, PanelBase):
                     name = theory_data.name
                     theory_class = theory_data.__class__.__name__
                     theory_id = theory_data.id
-                    if theory_state is not None:
-                        name = theory_state.model.name
+                    #if theory_state is not None:
+                    #    name = theory_state.model.name
                     temp = (theory_id, theory_class, state_id)
                 if theory_id not in theory_list_ctrl:
                     #add new theory
@@ -434,6 +456,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                     for process in theory_data.process:
                         i_t_c = self.tree_ctrl.AppendItem(t_p_c,
                                                           process.__str__())
+                    t_child.Bind(wx.EVT_TREE_CHECK, self.check_item)
                     theory_list_ctrl[theory_id] = [t_child, 
                                                    i_c_c, 
                                                    t_p_c]
@@ -457,8 +480,8 @@ class DataPanel(ScrolledPanel, PanelBase):
                     name = theory_data.name
                     theory_class = theory_data.__class__.__name__
                     theory_id = theory_data.id
-                    if theory_state is not None:
-                        name = theory_state.model.name 
+                    #if theory_state is not None:
+                    #    name = theory_state.model.name 
                     temp = (theory_id, theory_class, state_id)
                     t_child = self.tree_ctrl.AppendItem(theory_child,
                             name, ct_type=1, 
@@ -475,7 +498,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                     theory_list_ctrl[theory_id] = [t_child, i_c_c, t_p_c]
             self.list_cb_theory[data_id] = theory_list_ctrl
             
-    
+   
     def set_data_helper(self):
         """
         """
@@ -562,7 +585,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         """
         _, theory_id, state_id = self.set_data_helper()
-        self.parent.freeze(state_id=state_id, theory_id=theory_id)
+        self.parent.freeze(data_id=state_id, theory_id=theory_id)
         
     def set_active_perspective(self, name):
         """
@@ -647,23 +670,23 @@ if __name__ == "__main__":
         list_of_perspective = [('perspective2', False), ('perspective1', True)]
         data_list = {}
         # state 1
-        data = Data1D()
-        data.name = "data1"
+        data = Data2D()
+        data.name = "data2"
         data.id = 1
         data.append_empty_process()
         process = data.process[len(data.process)-1]
         process.data = "07/01/2010"
-        theory = Theory1D()
+        theory = Data2D()
         theory.id = 34
         theory.name = "theory1"
         path = "path1"
         state = State()
         data_list['1']=set_data_state(data, path,theory, state)
         #state 2
-        data = Data1D()
+        data = Data2D()
         data.name = "data2"
         data.id = 76
-        theory = Theory1D()
+        theory = Data2D()
         theory.id = 78
         theory.name = "CoreShell 07/24/25"
         path = "path2"
