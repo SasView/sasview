@@ -447,12 +447,21 @@ class ViewerFrame(wx.Frame):
                                          state=state)  
         self._data_panel.load_data_list(data_state)
         
+    def onfreeze(self, theory_id):
+        """
+        """
+        data_state_list = self._data_manager.freeze(theory_id)
+        self._data_panel.load_data_list(list=data_state_list)
+        for data_state in data_state_list.values():
+            new_plot = data_state.get_data()
+            wx.PostEvent(self, NewPlotEvent(plot=new_plot,
+                                             title=new_plot.title))
+        
     def freeze(self, data_id, theory_id):
         """
         """
         data_state_list = self._data_manager.freeze_theory(data_id=data_id, 
                                                 theory_id=theory_id)
-        
         self._data_panel.load_data_list(list=data_state_list)
         for data_state in data_state_list.values():
             new_plot = data_state.get_data()

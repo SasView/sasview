@@ -181,7 +181,12 @@ class DataManager(object):
         return _selected_data, _selected_theory_list
     
    
-            
+           
+    def freeze(self, theory_id):
+        """
+        """
+        return self.freeze_theory(self.stored_data.keys(), theory_id)
+        
     def freeze_theory(self, data_id, theory_id):
         """
         """
@@ -195,6 +200,7 @@ class DataManager(object):
                         theory_data, theory_state = theory_list[t_id]
                         new_theory = copy.deepcopy(theory_data)
                         new_theory.id  = wx.NewId()
+                        new_theory.is_data = True
                         selected_theory[new_theory.id] = DataState(new_theory)
                         self.stored_data[new_theory.id] = selected_theory[new_theory.id]
                     else:

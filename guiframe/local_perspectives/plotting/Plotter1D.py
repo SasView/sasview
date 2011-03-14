@@ -271,6 +271,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._slicerpop.Append(id, '&Print image', 'Print image')
         if self.graph.selected_plottable in self.plots:
             plot = self.plots[self.graph.selected_plottable]
+            if not plot.is_data:
+                id = wx.NewId()
+                self._slicerpop.Append(id, '&Freeze', 'Freeze')
+                wx.EVT_MENU(self, id, self.onFreeze)
             id = wx.NewId()
             name = plot.name
             self._slicerpop.Append(id, "&Save points")
@@ -306,6 +310,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
         pos = self.ScreenToClient(pos)
         self.PopupMenu(self._slicerpop, pos)
      
+    def onFreeze(self, event):
+        """
+        """
+        plot = self.plots[self.graph.selected_plottable]
+        self.parent.onfreeze([plot.id])
+        
     def onChangeSymbol(self, event):
         """
         """
