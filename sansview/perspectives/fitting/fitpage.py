@@ -1070,7 +1070,8 @@ class FitPage(BasicPage):
         flag = False
         self.fitrange = True
         #get event object
-        tcrtl= event.GetEventObject()
+        tcrtl = event.GetEventObject()
+        
         wx.PostEvent(self._manager.parent, StatusEvent(status=" \
                                 updating ... ",type="update"))
         #Clear msg if previously shown.

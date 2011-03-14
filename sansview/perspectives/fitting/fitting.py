@@ -1118,6 +1118,7 @@ class Plugin(PluginBase):
         """ 
         try:
             new_plot = Data1D(x=x, y=y)
+            new_plot.is_data = False
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
             if data != None:
                 _xaxis, _xunit = data.get_xaxis() 
@@ -1139,7 +1140,6 @@ class Plugin(PluginBase):
                 new_plot.title = "Analytical model 1D "
                 #find a group id to plot theory without data
                 new_plot.group_id =  str(id) + " Model1D"  
-                new_plot.is_data = False 
             new_plot.id =  str(id) + " Model1D"  
             
             #find if this theory was already plotted and replace that plot given
@@ -1234,6 +1234,7 @@ class Plugin(PluginBase):
             new_plot.ymax = data.ymax
             new_plot.xmin = data.xmin
             new_plot.xmax = data.xmax
+        new_plot.is_data = False
         new_plot.name = model.name + " ["+ str(model.__class__.__name__)+ "]"
         new_plot.title = "Analytical model 2D "
         theory_data = deepcopy(new_plot)

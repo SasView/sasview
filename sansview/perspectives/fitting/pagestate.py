@@ -160,7 +160,8 @@ class PageState(object):
         self.enable2D = False
         # model on which the fit would be performed
         self.model = model
-       
+        #list of process done to model
+        self.process = []
         #fit page manager 
         self.manager = None
         #Store the parent of this panel parent
