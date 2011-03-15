@@ -268,8 +268,13 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         self.AddPage(panel, caption, select=True)
         self.opened_pages[panel.id] = panel
         return panel 
-   
     
+    def delete_data(self, data):
+        """
+        Delete the given data
+        """
+        if data is None:
+            return None
     def set_data(self, data):
         """ 
         Add a fitting page on the notebook contained by fitpanel

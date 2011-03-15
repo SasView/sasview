@@ -251,6 +251,12 @@ class Plugin(PluginBase):
         """
         return True
     
+    def delete_data(data):
+        """
+        delete  the given data from panel
+        """
+        self.fit_panel.delete_data(data)
+        
     def set_data(self, data_list=None):
         """
         receive a list of data to fit
