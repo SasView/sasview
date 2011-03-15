@@ -930,14 +930,17 @@ class FitPage(BasicPage):
         """
         Allow to fit
         """
-        #make sure all parameter values are updated.
-        #if self.check_invalid_panel():
-        #    return
-        if self.model ==None:
-            msg="Please select a Model first..."
+        if self.data is None:
+            msg = "Please select a Data first..."
             wx.MessageBox(msg, 'Info')
             wx.PostEvent(self._manager.parent, StatusEvent(status=\
-                            "Fit: %s"%msg))
+                            "Fit: %s" % msg))
+            return
+        if self.model is None:
+            msg = "Please select a Model first..."
+            wx.MessageBox(msg, 'Info')
+            wx.PostEvent(self._manager.parent, StatusEvent(status=\
+                            "Fit: %s" % msg))
             return
 
         flag = self._update_paramv_on_fit() 
@@ -962,7 +965,7 @@ class FitPage(BasicPage):
         self.qmin_x = float(self.qmin_tcrl.GetValue())
         self.qmax_x = float( self.qmax.GetValue())
         self._manager._reset_schedule_problem(id=self.id, value=0)
-        self._manager.schedule_for_fit(id=id,value=1,page=self,fitproblem =None) 
+        self._manager.schedule_for_fit(id=id,value=1, fitproblem =None) 
         self._manager.set_fit_range(id=self.id,qmin= self.qmin_x, 
                                    qmax= self.qmax_x)
         
