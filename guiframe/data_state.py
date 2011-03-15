@@ -94,8 +94,7 @@ class DataState(object):
         """
         self.theory_list[theory_data.id] = [theory_data, theory_state]
         data, state = self.theory_list.values()[0]
-        print "self.theory_list",theory_data.id, data.y[1]
-        
+       
     def get_theory(self):
         return self.theory_list
     
