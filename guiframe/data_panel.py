@@ -496,7 +496,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                                                           process.__str__())
             
                     theory_list_ctrl[theory_id] = [t_child, i_c_c, t_p_c]
-            self.list_cb_theory[data_id] = theory_list_ctrl
+                self.list_cb_theory[data_id] = theory_list_ctrl
             
    
     def set_data_helper(self):
@@ -537,21 +537,27 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         remove data from application
         """
-        data_to_remove, theory_to_remove = self.set_data_helper()
-        for item in self.list_cb_data:
-            if item.IsChecked()and \
-                self.tree_ctrl.GetItemText(item) in data_to_remove:
-                self.tree_ctrl.Delete(item)
-        for item in self.list_cb_theory:
-            if item.IsChecked()and \
-                self.tree_ctrl.GetItemText(item) in theory_to_remove:
-                self.tree_ctrl.Delete(item)
-        delete_all = False
-        if data_to_remove:
-            delete_all = True
+        data_to_remove, theory_to_remove, _ = self.set_data_helper()
+        data_key = []
+        theory_key = []
+        for key, item in self.list_cb_data.iteritems():
+            data_c, d_i_c, i_c_c, p_c_c, d_p_c, t_c = item
+            if data_c.IsChecked():
+                self.tree_ctrl.Delete(data_c)
+                data_key.append(key)
+                
+        for key, theory_dict in self.list_cb_theory.iteritems():
+            for  value in theory_dict.values():
+                item, _, _ = value
+                if item.IsChecked():
+                    self.tree_ctrl.Delete(item)
+                    theory_key.append(key)
+        for key in data_key:
+            del self.list_cb_data[key]
+        for key in theory_key:
+            del self.list_cb_theory[key]
         self.parent.remove_data(data_id=data_to_remove,
-                                  theory_id=theory_to_remove,
-                                  delete_all=delete_all)
+                                  theory_id=theory_to_remove)
         
     def on_import(self, event=None):
         """

@@ -1375,7 +1375,7 @@ class ViewerFrame(wx.Frame):
             
   
                 
-    def remove_data(self, data_id, theory_id=None, delete_all=True):
+    def remove_data(self, data_id, theory_id=None):
         """
         Delete data state if data_id is provide
         delete theory created with data of id data_id if theory_id is provide
@@ -1383,8 +1383,7 @@ class ViewerFrame(wx.Frame):
         else delete theory
         """
         self._data_manager.delete_data(data_id=data_id, 
-                                       theory_id=theory_id, 
-                                       delete_all=delete_all)
+                                       theory_id=theory_id)
         for plug in self.plugins:
             plug.delete_data(data_id)
             

@@ -218,7 +218,7 @@ class DataManager(object):
                 del self.data_name_dict[data_state.data.name]
             del self.stored_data[data_id]
         
-        self.delete_theory(self, data_id, theory_id)
+        self.delete_theory(data_id, theory_id)
         if delete_all:
             self.stored_data = {}
             self.data_name_dict = {}
@@ -226,11 +226,12 @@ class DataManager(object):
     def delete_theory(self, data_id, theory_id):
         """
         """
-        if data_id in self.stored_data:
-            data_state = self.stored_data[data_id]
-            theory_list = data_state.get_theory()
-            if theory_id in theory_list.key():
-                del theory_list[theory_id]
+        for d_id in data_id:
+            if d_id in self.stored_data:
+                data_state = self.stored_data[d_id]
+                theory_list = data_state.get_theory()
+                if theory_id in theory_list.keys():
+                    del theory_list[theory_id]
         
             
     def delete_by_id(self, id_list=None):
