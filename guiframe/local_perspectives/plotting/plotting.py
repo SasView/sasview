@@ -179,14 +179,25 @@ class Plugin(PluginBase):
             panel.plot_data( data)
             self.parent.show_panel(panel.uid)   
     
+    def delete_menu_item(self, name, uid):
+        """
+        """
+        #remove menu item
+        pos = self.menu.FindItem(name) 
+        if pos != -1:
+            self.menu.Delete(uid)
+        if self.menu.GetMenuItemCount() == 0:
+            self.menu.Append(DEFAULT_MENU_ITEM_ID, DEFAULT_MENU_ITEM_LABEL, 
+                             "No plot available")
+            self.menu.FindItemByPosition(0).Enable(False)
+        
     def delete_panel(self, group_id):
         """
         """
         if group_id in self.plot_panels.keys():
             panel = self.plot_panels[group_id]
             #remove menu item
-            self.menu.Delete(panel.uid)
-            self.parent.delete_panel(panel.uid)
+            self.delete_menu_item(panel.window_caption, panel.uid)
             del self.plot_panels[group_id]
             return True
         return False

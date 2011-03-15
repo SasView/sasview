@@ -137,16 +137,21 @@ class ModelPanel1D(PlotPanel, PanelBase):
             data =  self.plots[id]
             self.graph.delete(data)
             data_manager = self._manager.parent.get_data_manager()
-            data_list = data_manager.get_by_id(id_list=[id])
-            data = data_list.values()[0].data
-            data.group_id.remove(self.group_id)
+            data_list, theory_list = data_manager.get_by_id(id_list=[id])
+            
+            if id in data_list.keys():
+                data = data_list[id]
+            else:
+                data = theory_list[id]
+           
             del self.plots[id]
-                 
             self.graph.render(self)
             self.subplot.figure.canvas.draw_idle()    
+            event = RemoveDataEvent(data=data)
+            wx.PostEvent(self.parent, event)
             if len(self.graph.plottables) == 0:
-                print "_onRemove: graph is empty must be destroyed"
-           
+                #onRemove: graph is empty must be the panel must be destroyed
+                self.parent.delete_panel(self.uid)
         else:
             msg = "Attempt to remove an unexisting plot with ID %s " % str(id)
             raise ValueError, msg
@@ -216,12 +221,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         if self.graph.selected_plottable in self.plots.keys():
             selected_plot = self.plots[self.graph.selected_plottable]
             id = self.graph.selected_plottable
-            self.remove_data_by_id( id)
-            event = RemoveDataEvent(data=selected_plot)
-            wx.PostEvent(self.parent, event)
-            self.graph.delete(selected_plot)
-            del selected_plot
-       
+            self.remove_data_by_id(id)
+            
     def onContextMenu(self, event):
         """
         1D plot context menu
@@ -275,6 +276,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 id = wx.NewId()
                 self._slicerpop.Append(id, '&Freeze', 'Freeze')
                 wx.EVT_MENU(self, id, self.onFreeze)
+            #else:
+            id = wx.NewId()
+            self._slicerpop.Append(id, '&Linear Fit')
+            wx.EVT_MENU(self, id, self.onFitting)
             id = wx.NewId()
             name = plot.name
             self._slicerpop.Append(id, "&Save points")
@@ -296,9 +301,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self._slicerpop.AppendSeparator()
             # Option to hide
             #TODO: implement functionality to hide a plottable (legend click)
-        id = wx.NewId()
-        self._slicerpop.Append(id, '&Linear Fit')
-        wx.EVT_MENU(self, id, self.onFitting)
+        
         
         id = wx.NewId()
         self._slicerpop.Append(id, '&Change scale')

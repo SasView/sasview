@@ -454,6 +454,7 @@ class ViewerFrame(wx.Frame):
         self._data_panel.load_data_list(list=data_state_list)
         for data_state in data_state_list.values():
             new_plot = data_state.get_data()
+            
             wx.PostEvent(self, NewPlotEvent(plot=new_plot,
                                              title=new_plot.title))
         
@@ -961,8 +962,12 @@ class ViewerFrame(wx.Frame):
         """
         ID = str(uid)
         config.printEVT("delete_panel: %s" % ID)
+        
         if ID in self.panels.keys():
-            self._mgr.DetachPane(self.panels[ID])
+            panel = self.panels[ID]
+            self._plotting_plugin.delete_panel(panel.group_id)
+            self._mgr.DetachPane(panel)
+            panel.Destroy()
             del self.panels[ID]
             self._mgr.Update()
       
@@ -1314,7 +1319,7 @@ class ViewerFrame(wx.Frame):
         """
         list_data, _ = self._data_manager.get_by_id(data_id)
         if self._current_perspective is not None:
-            self._current_perspective.set_data(list_data)
+            self._current_perspective.set_data(list_data.values())
         else:
             msg = "Guiframe does not have a current perspective"
             logging.info(msg)
@@ -1322,10 +1327,10 @@ class ViewerFrame(wx.Frame):
     def set_theory(self, state_id, theory_id=None):
         """
         """
-        _, list_theory = self._data_manager.get_by_id(state_id, theory_id)
+        _, list_theory = self._data_manager.get_by_id(theory_id)
         if self._current_perspective is not None:
             try:
-                self._current_perspective.set_theory(list_theory)
+                self._current_perspective.set_theory(list_theory.values())
             except:
                 msg = "Guiframe set_theory: \n" + str(sys.exc_value)
                 logging.info(msg)
@@ -1340,10 +1345,10 @@ class ViewerFrame(wx.Frame):
         send a list of data to plot
         """
         data_list, _ = self._data_manager.get_by_id(data_id)
-        _, temp_list_theory = self._data_manager.get_by_id(state_id, theory_id)
-        for item in temp_list_theory:
+        _, temp_list_theory = self._data_manager.get_by_id(theory_id)
+        for item in temp_list_theory.values():
             theory_data, theory_state = item
-            data_list.append(theory_data)
+            data_list.values().append(theory_data)
         GROUP_ID = wx.NewId()
         for new_plot in data_list:
             if append:

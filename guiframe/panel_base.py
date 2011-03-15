@@ -25,6 +25,7 @@ class PanelBase:
     #window_caption = "Welcome panel"
     ## Flag to tell the AUI manager to put this panel in the center pane
     group_id = None
+    uid = None
     
     def __init__(self, parent=None):
         """

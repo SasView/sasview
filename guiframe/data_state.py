@@ -37,18 +37,16 @@ class DataState(object):
         else:
             _str += "Data: %s \n" % str(self.data)
             
+        _str += "Theories available: %s \n" % len(self.theory_list)
         if self.theory_list:
-            _str += "Theories available: \n"
             for id, item in self.theory_list.iteritems():
                 theory_data, theory_state = item
                 _str += "Theory name : %s \n" % str(theory_data.name)
                 _str += "Theory ID : %s \n" % str(id)
-        else:
-            for key , value in self.theory_list.iteritems():
-                theory_data, theory_state = value
-                _str += "Theory with ID : %s \n" % str(key)
+                _str += "Theory info: \n"
                 _str += str(theory_data)
-                _str += str(theory_state)
+                #_str += "Theory info: \n"
+                #_str += str(theory_state)
         return _str
         
     def clone(self):
@@ -95,6 +93,8 @@ class DataState(object):
         """
         """
         self.theory_list[theory_data.id] = [theory_data, theory_state]
+        data, state = self.theory_list.values()[0]
+        print "self.theory_list",theory_data.id, data.y[1]
         
     def get_theory(self):
         return self.theory_list

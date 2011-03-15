@@ -161,26 +161,24 @@ class DataManager(object):
         """
         return self.message
     
-    def get_by_id(self, data_id, theory_id=None):
+    def get_by_id(self, id_list=None):
         """
-        get a list of data given a list of id
         """
-        _selected_data = []
-        _selected_theory_list = []
-        if data_id is None:
+        _selected_data = {}
+        _selected_theory_list = {}
+        if id_list is None:
             return
-        for d_id in data_id:
-            if d_id in self.stored_data:
+        for d_id in self.stored_data:
+            for search_id in id_list:
                 data_state = self.stored_data[d_id]
                 data = data_state.data
-                _selected_data.append(data)
                 theory_list = data_state.get_theory()
-                if theory_id is not None:
-                    for t_id in theory_id:
-                        if t_id in theory_list.keys():
-                            _selected_theory_list.append(theory_list[t_id])
+                if search_id == d_id:
+                    _selected_data[search_id] = data
+                if search_id in theory_list.keys():
+                     _selected_theory_list[search_id] = theory_list[search_id]
+                   
         return _selected_data, _selected_theory_list
-    
    
            
     def freeze(self, theory_id):
