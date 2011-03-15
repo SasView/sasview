@@ -91,9 +91,10 @@ class DataManager(object):
         ## when 2 data have the same id override the 1 st plotted
         new_plot.id = wx.NewId()
         ##group_id specify on which panel to plot this data
-        new_plot.group_id = [wx.NewId()]
+        new_plot.group_id = wx.NewId()
         new_plot.is_data = True
         new_plot.path = path
+        new_plot.list_group_id = []
         ##post data to plot
         # plot data
         return new_plot
