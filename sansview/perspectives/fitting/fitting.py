@@ -251,7 +251,7 @@ class Plugin(PluginBase):
         """
         return True
     
-    def delete_data(data):
+    def delete_data(self, data):
         """
         delete  the given data from panel
         """
