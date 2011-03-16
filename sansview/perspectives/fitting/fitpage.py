@@ -42,7 +42,7 @@ class FitPage(BasicPage):
         Initialization of the Panel
         """
         BasicPage.__init__(self, parent, color=color)
- 
+       
         ## draw sizer
         self._fill_datainfo_sizer()
         # get smear info from data
@@ -965,7 +965,7 @@ class FitPage(BasicPage):
         self.qmin_x = float(self.qmin_tcrl.GetValue())
         self.qmax_x = float( self.qmax.GetValue())
         self._manager._reset_schedule_problem(id=self.id, value=0)
-        self._manager.schedule_for_fit(id=id,value=1, fitproblem =None) 
+        self._manager.schedule_for_fit(id=self.id,value=1, fitproblem =None) 
         self._manager.set_fit_range(id=self.id,qmin= self.qmin_x, 
                                    qmax= self.qmax_x)
         
@@ -1055,8 +1055,7 @@ class FitPage(BasicPage):
             ## post state to fit panel
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event) 
-        #
-      
+        self.SetupScrolling()
       
     def _onparamEnter(self,event):
         """ 

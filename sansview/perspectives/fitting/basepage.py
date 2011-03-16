@@ -479,6 +479,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## saving the state of enable dispersity button
         self.state.enable_disp= self.enable_disp.GetValue()
         self.state.disable_disp= self.disable_disp.GetValue()
+        self.SetupScrolling()
 
     def select_disp_angle(self, event): 
         """
@@ -2384,6 +2385,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         
         self.sizer4_4.Layout()
         self.sizer4.Layout()
+        self.SetupScrolling()
     
     def _set_sizer_arraydispersion(self):
         """
