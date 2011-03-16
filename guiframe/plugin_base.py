@@ -69,6 +69,13 @@ class PluginBase:
         """
         return True
     
+    def is_in_use(self, data_id):
+        """
+        get a  data id and return true or false if the data 
+        is currently in use the current plugin
+        """
+        return False
+    
     def delete_data(self, data_id):
         """
         Delete all references of data which id are in data_list. 

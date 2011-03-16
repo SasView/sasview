@@ -1382,10 +1382,23 @@ class ViewerFrame(wx.Frame):
         if delete all true: delete the all state
         else delete theory
         """
-        self._data_manager.delete_data(data_id=data_id, 
-                                       theory_id=theory_id)
         for plug in self.plugins:
             plug.delete_data(data_id)
+        total_plot_list = []
+        data_list, _ = self._data_manager.get_by_id(data_id)
+        _, temp_list_theory = self._data_manager.get_by_id(theory_id)
+        total_plot_list = data_list.values()
+        for item in temp_list_theory.values():
+            theory_data, theory_state = item
+            total_plot_list.append(theory_data)
+        for new_plot in total_plot_list:
+            id = new_plot.id
+            for group_id in new_plot.list_group_id:
+                wx.PostEvent(self, NewPlotEvent(id=id,
+                                                   group_id=group_id,
+                                                   action='remove'))
+        self._data_manager.delete_data(data_id=data_id, 
+                                       theory_id=theory_id)
             
         
     def set_current_perspective(self, perspective):

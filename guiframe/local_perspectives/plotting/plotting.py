@@ -176,6 +176,8 @@ class Plugin(PluginBase):
             msg += "Please edit %s's units, labels" % str(data.name)
             raise ValueError, msg
         else:
+            if panel.group_id not in data.list_group_id:
+                data.list_group_id.append(panel.group_id)
             panel.plot_data( data)
             self.parent.show_panel(panel.uid)   
     
@@ -239,6 +241,6 @@ class Plugin(PluginBase):
             else:
                 new_panel = self.create_2d_panel(data, group_id)
             self.create_panel_helper(new_panel, data, group_id, title)
-            
+        print "_on_plot_event", data.list_group_id
         return
    

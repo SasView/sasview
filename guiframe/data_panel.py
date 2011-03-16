@@ -507,10 +507,11 @@ class DataPanel(ScrolledPanel, PanelBase):
         for value in self.list_cb_data.values():
             item, _, _, _, _, _ = value
             if item.IsChecked():
-               data_id, _, state_id = self.tree_ctrl.GetItemPyData(item) 
-               data_to_plot.append(data_id)
-               if state_id not in state_to_plot:
-                   state_to_plot.append(state_id)
+                data_id, _, state_id = self.tree_ctrl.GetItemPyData(item)
+                data_to_plot.append(data_id)
+                if state_id not in state_to_plot:
+                    state_to_plot.append(state_id)
+           
         for theory_dict in self.list_cb_theory.values():
             for key, value in theory_dict.iteritems():
                 item, _, _ = value
@@ -534,27 +535,38 @@ class DataPanel(ScrolledPanel, PanelBase):
               
     def on_remove(self, event):
         """
-        remove data from application
+        Get a list of item checked and remove them from the treectrl
+        Ask the parent to remove reference to this item 
         """
         data_to_remove, theory_to_remove, _ = self.set_data_helper()
         data_key = []
         theory_key = []
-        for key, item in self.list_cb_data.iteritems():
+        #remove  data from treectrl
+        for d_key, item in self.list_cb_data.iteritems():
             data_c, d_i_c, i_c_c, p_c_c, d_p_c, t_c = item
             if data_c.IsChecked():
                 self.tree_ctrl.Delete(data_c)
-                data_key.append(key)
-                
-        for key, theory_dict in self.list_cb_theory.iteritems():
-            for  value in theory_dict.values():
+                data_key.append(d_key)
+                if d_key in self.list_cb_theory.keys():
+                    theory_list_ctrl = self.list_cb_theory[d_key]
+                    theory_to_remove += theory_list_ctrl.keys()
+        # Remove theory from treectrl       
+        for t_key, theory_dict in self.list_cb_theory.iteritems():
+            for  key, value in theory_dict.iteritems():
                 item, _, _ = value
                 if item.IsChecked():
                     self.tree_ctrl.Delete(item)
                     theory_key.append(key)
+        #Remove data and related theory references
         for key in data_key:
             del self.list_cb_data[key]
+            if key in theory_key:
+                del self.list_cb_theory[key]
+        #remove theory  references independently of data
         for key in theory_key:
-            del self.list_cb_theory[key]
+            for t_key, theory_dict in self.list_cb_theory.iteritems():
+                del theory_dict[key]
+            
         self.parent.remove_data(data_id=data_to_remove,
                                   theory_id=theory_to_remove)
         
