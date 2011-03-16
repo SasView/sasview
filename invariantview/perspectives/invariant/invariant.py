@@ -176,7 +176,13 @@ class Plugin(PluginBase):
             msg += "type %s" % (data.__class__.__name__)
             wx.PostEvent(self.parent, 
                      StatusEvent(status=msg, info='error'))
-    
+    def delete_data(self, data_id):
+        """
+        """
+        for id in data_id:
+            if id == self.__data.id:
+                self.clear_panel()
+                
     def clear_panel(self):
         """
         """
