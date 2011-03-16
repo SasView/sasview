@@ -152,9 +152,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
             if len(self.graph.plottables) == 0:
                 #onRemove: graph is empty must be the panel must be destroyed
                 self.parent.delete_panel(self.uid)
-        else:
-            msg = "Attempt to remove an unexisting plot with ID %s " % str(id)
-            raise ValueError, msg
         
     def plot_data(self, data):
         """

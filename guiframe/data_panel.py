@@ -456,7 +456,6 @@ class DataPanel(ScrolledPanel, PanelBase):
                     for process in theory_data.process:
                         i_t_c = self.tree_ctrl.AppendItem(t_p_c,
                                                           process.__str__())
-                    t_child.Bind(wx.EVT_TREE_CHECK, self.check_item)
                     theory_list_ctrl[theory_id] = [t_child, 
                                                    i_c_c, 
                                                    t_p_c]

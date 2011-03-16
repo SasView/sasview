@@ -1344,13 +1344,15 @@ class ViewerFrame(wx.Frame):
         """
         send a list of data to plot
         """
+        total_plot_list = []
         data_list, _ = self._data_manager.get_by_id(data_id)
         _, temp_list_theory = self._data_manager.get_by_id(theory_id)
+        total_plot_list = data_list.values()
         for item in temp_list_theory.values():
             theory_data, theory_state = item
-            data_list.values().append(theory_data)
+            total_plot_list.append(theory_data)
         GROUP_ID = wx.NewId()
-        for new_plot in data_list:
+        for new_plot in total_plot_list:
             if append:
                 if self.panel_on_focus is None:
                     message = "cannot append plot. No plot panel on focus!"
@@ -1373,8 +1375,6 @@ class ViewerFrame(wx.Frame):
             wx.PostEvent(self, NewPlotEvent(plot=new_plot,
                                                   title=title))
             
-  
-                
     def remove_data(self, data_id, theory_id=None):
         """
         Delete data state if data_id is provide
