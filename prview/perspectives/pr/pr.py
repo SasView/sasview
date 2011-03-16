@@ -95,6 +95,7 @@ class Plugin(PluginBase):
         ## List of added P(r) plots
         self._added_plots = {}
         self._default_Iq  = {}
+        self.list_plot_id = []
         
         # Associate the inversion state reader with .prv files
         from inversion_state import Reader
@@ -109,6 +110,17 @@ class Plugin(PluginBase):
         # Log startup
         logging.info("Pr(r) plug-in started")
         
+    def delete_data(self, data_id):
+        """
+        delete the data association with prview
+        """
+        if self.calc_thread is not None and self.calc_thread.isrunning():
+            msg = "Data in use in Prview\n"
+        if self.estimation_thread is not None and \
+            self.estimation_thread.isrunning():
+             msg = "Data in use in Prview\n"
+        self.control_panel.clear_panel()
+       
     def get_data(self):
         """
         """
@@ -155,7 +167,6 @@ class Plugin(PluginBase):
             # Make sure the user sees the P(r) panel after loading
             #self.parent.set_perspective(self.perspective)  
             self.on_perspective(event=None)   
-            
             # Load the P(r) results
             #state = self.state_reader.get_state()
             self.parent.add_data(data_list=[self.current_plottable])

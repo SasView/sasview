@@ -708,7 +708,13 @@ class InversionControl(ScrolledPanel, PanelBase):
             print "InversionControl._on_accept_nterms: %s" % sys.exc_value
             pass
         
-    def on_reset(self, event):
+    def clear_panel(self):
+        """
+        """
+        self.plot_data.SetValue("")
+        self.on_reset(event=None)
+        
+    def on_reset(self, event=None):
         """
         Resets inversion parameters
         """
@@ -746,7 +752,8 @@ class InversionControl(ScrolledPanel, PanelBase):
             self.alpha_estimate_ctl.Enable(False)
             
             dataset = self.plot_data.GetValue()
-            self._manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc, 
+            if dataset.strip() != "":
+                self._manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc, 
                                                  d_max=dmax,
                                                  q_min=qmin, q_max=qmax,
                                                  bck=has_bck, 
