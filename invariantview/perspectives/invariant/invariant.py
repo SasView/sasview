@@ -309,7 +309,7 @@ class Plugin(PluginBase):
             elif name_head[0] == 'High':
                 self.invariant_panel.state.theory_highQ =copy.deepcopy(new_plot)
             
-        self.parent.append_theory(data_id=self.__data.id, theory=new_plot)
+        self.parent.update_theory(data_id=self.__data.id, theory=new_plot)
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                                title=self.__data.title))
         
