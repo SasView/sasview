@@ -241,6 +241,6 @@ class Plugin(PluginBase):
             else:
                 new_panel = self.create_2d_panel(data, group_id)
             self.create_panel_helper(new_panel, data, group_id, title)
-        print "_on_plot_event", data.list_group_id
+      
         return
    
