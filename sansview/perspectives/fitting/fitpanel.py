@@ -156,7 +156,7 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         """
         page_is_opened = False
         if state is not None:
-            for id, panel in self.opened_pages.values():
+            for id, panel in self.opened_pages.iteritems():
                 #Don't return any panel is the exact same page is created
                 if id == panel.id:
                     # the page is still opened

@@ -66,6 +66,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.mask = None
         self.id = None
         ## Q range
+        self.qmin = None
+        self.qmax = None
         self.qmax_x = _QMAX_DEFAULT
         self.qmin_x = _QMIN_DEFAULT
         self.npts_x = _NPTS_DEFAULT
@@ -1350,7 +1352,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         # if self.check_invalid_panel():
         #    return
-        self.qmin_tctrl.SetValue(str(state.qmin))
+        self.qmin.SetValue(str(state.qmin))
         self.qmax.SetValue(str(state.qmax)) 
 
     def _save_typeOfmodel(self):
@@ -1405,8 +1407,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
-            if self._validate_qrange(self.qmin_tcrl, self.qmax):
-                tempmin = float(self.qmin_tcrl.GetValue())
+            if self._validate_qrange(self.qmin, self.qmax):
+                tempmin = float(self.qmin.GetValue())
                 if tempmin != self.qmin_x:
                     self.qmin_x = tempmin
                     is_modified = True
@@ -1460,9 +1462,9 @@ class BasicPage(ScrolledPanel, PanelBase):
              # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
             # set the is_modified flag to True
-            self.fitrange = self._validate_qrange(self.qmin_tcrl, self.qmax)
+            self.fitrange = self._validate_qrange(self.qmin, self.qmax)
             if self.fitrange:
-                tempmin = float(self.qmin_tcrl.GetValue())
+                tempmin = float(self.qmin.GetValue())
                 if tempmin != self.qmin_x:
                     self.qmin_x = tempmin
                 tempmax = float(self.qmax.GetValue())
@@ -1891,8 +1893,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 value = float(tcrtl.GetValue())
                 tcrtl.SetBackgroundColour(wx.WHITE)
                 # If qmin and qmax have been modified, update qmin and qmax
-                if self._validate_qrange(self.qmin_tcrl, self.qmax):
-                    tempmin = float(self.qmin_tcrl.GetValue())
+                if self._validate_qrange(self.qmin, self.qmax):
+                    tempmin = float(self.qmin.GetValue())
                     if tempmin != self.qmin_x:
                         self.qmin_x = tempmin
                     tempmax = float(self.qmax.GetValue())
@@ -2126,15 +2128,15 @@ class BasicPage(ScrolledPanel, PanelBase):
         radius= numpy.sqrt( self.data.qx_data * self.data.qx_data + 
                             self.data.qy_data * self.data.qy_data )
         #get unmasked index
-        index_data = (float(self.qmin_tcrl.GetValue()) <= radius) & \
+        index_data = (float(self.qmin.GetValue()) <= radius) & \
                         (radius <= float(self.qmax.GetValue()))
         index_data = (index_data) & (self.data.mask) 
         index_data = (index_data) & (numpy.isfinite(self.data.data))
 
         if len(index_data[index_data]) < 10:
             # change the color pink.
-            self.qmin_tcrl.SetBackgroundColour("pink")
-            self.qmin_tcrl.Refresh()
+            self.qmin.SetBackgroundColour("pink")
+            self.qmin.Refresh()
             self.qmax.SetBackgroundColour("pink")
             self.qmax.Refresh()
             msg= "Cannot Plot :No or too little npts in that data range!!!  "
@@ -2538,7 +2540,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
         else:
             # set relative text ctrs.
-            self.qmin_tcrl.SetValue(str(self.qmin_x))
+            self.qmin.SetValue(str(self.qmin_x))
             self.qmax.SetValue(str(self.qmax_x))
             self.set_npts2fit()
             # At this point, some button and variables satatus (disabled?) should be checked 

@@ -336,17 +336,20 @@ class Plugin(PluginBase):
                 data = self.parent.create_gui_data(state.data)
                 
                 data.group_id = state.data.group_id
-                self.parent.add_data(data_list=[data])
+                self.parent.add_data(data_list={data.id:data})
                 wx.PostEvent(self.parent, NewPlotEvent(plot=data,
                                         title=data.title))
+                #need to be fix later make sure we are sendind guiframe.data
+                #to panel
+                state.data = data
                 page = self.fit_panel.set_state(state)   
             else:
-                self.parent.add_data(data_list=[data])
-                wx.PostEvent(self.parent, NewPlotEvent(plot=data,
-                                        title=data.title))
                 #just set data because set_state won't work
                 data = self.parent.create_gui_data(state.data)
                 data.group_id = state.data.group_id
+                self.parent.add_data(data_list={data.id:data})
+                wx.PostEvent(self.parent, NewPlotEvent(plot=data,
+                                        title=data.title))
                 self.add_fit_page(data)
                 caption = panel.window_name
                 self.store_data(page=panel.id, data=data, caption=caption)

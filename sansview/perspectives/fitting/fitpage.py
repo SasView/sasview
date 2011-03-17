@@ -360,11 +360,11 @@ class FitPage(BasicPage):
             
         self.sizer5.Clear(True)
      
-        self.qmin_tcrl  = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),
+        self.qmin  = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),
                                           style=wx.TE_PROCESS_ENTER,
                                     text_enter_callback = self._onQrangeEnter)
-        self.qmin_tcrl.SetValue(str(self.qmin_x))
-        self.qmin_tcrl.SetToolTipString("Minimun value of Q in linear scale.")
+        self.qmin.SetValue(str(self.qmin_x))
+        self.qmin.SetToolTipString("Minimun value of Q in linear scale.")
      
         self.qmax  = self.ModelTextCtrl(self, -1,size=(_BOX_WIDTH,20),
                                           style=wx.TE_PROCESS_ENTER,
@@ -397,7 +397,7 @@ class FitPage(BasicPage):
         sizer.Add(wx.StaticText(self, -1, ' Theory Npts'))
         sizer.Add(self.EditMask_title)
         sizer.Add(self.reset_qrange)   
-        sizer.Add(self.qmin_tcrl)
+        sizer.Add(self.qmin)
         sizer.Add(self.qmax)
         sizer.Add(self.theory_npts_tcrtl)
         sizer.Add(self.btEditMask)
@@ -962,7 +962,7 @@ class FitPage(BasicPage):
 
         # Remove or do not allow fitting on the Q=0 point, especially 
         # when y(q=0)=None at x[0].         
-        self.qmin_x = float(self.qmin_tcrl.GetValue())
+        self.qmin_x = float(self.qmin.GetValue())
         self.qmax_x = float( self.qmax.GetValue())
         self._manager._reset_schedule_problem(id=self.id, value=0)
         self._manager.schedule_for_fit(id=self.id,value=1, fitproblem =None) 
@@ -1173,8 +1173,8 @@ class FitPage(BasicPage):
                 tcrtl.SetBackgroundColour(wx.WHITE)
 
                 # If qmin and qmax have been modified, update qmin and qmax
-                if self._validate_qrange( self.qmin_tcrl, self.qmax):
-                    tempmin = float(self.qmin_tcrl.GetValue())
+                if self._validate_qrange( self.qmin, self.qmax):
+                    tempmin = float(self.qmin.GetValue())
                     if tempmin != self.qmin_x:
                         self.qmin_x = tempmin
                     tempmax = float(self.qmax.GetValue())
@@ -1588,9 +1588,9 @@ class FitPage(BasicPage):
         self.qmax_x = data_max
         self.minimum_q.SetValue(str(data_min))
         self.maximum_q.SetValue(str(data_max))
-        self.qmin_tcrl.SetValue(str(data_min))
+        self.qmin.SetValue(str(data_min))
         self.qmax.SetValue(str(data_max))
-        self.qmin_tcrl.SetBackgroundColour("white")
+        self.qmin.SetBackgroundColour("white")
         self.qmax.SetBackgroundColour("white")
         self.state.data = data
         self.state.qmin = self.qmin_x
