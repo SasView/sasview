@@ -180,28 +180,28 @@ class DataPanel(ScrolledPanel, PanelBase):
         if pos == wx.NOT_FOUND:
             return 
         option = self.selection_cbox.GetString(pos)
-        for item in self.list_cb_data:
-            data_ctrl, _, _ = item
-            data_id, data_class = self.tree_ctrl.GetItemPyData(dta_ctrl) 
+        for item in self.list_cb_data.values():
+            data_ctrl, _, _, _,_, _ = item
+            data_id, data_class, _ = self.tree_ctrl.GetItemPyData(data_ctrl) 
             if option == 'Select all Data':
-                self.tree_ctrl.CheckItem(item, True) 
+                self.tree_ctrl.CheckItem(data_ctrl, True) 
             elif option == 'Unselect all Data':
-                self.tree_ctrl.CheckItem(item, False)
+                self.tree_ctrl.CheckItem(data_ctrl, False)
             elif option == 'Select all Data 1D':
                 if data_class == 'Data1D':
-                    self.tree_ctrl.CheckItem(item, True) 
+                    self.tree_ctrl.CheckItem(data_ctrl, True) 
             elif option == 'Unselect all Data 1D':
                 if data_class == 'Data1D':
-                    self.tree_ctrl.CheckItem(item, False) 
+                    self.tree_ctrl.CheckItem(data_ctrl, False) 
             elif option == 'Select all Data 1D':
                 if data_class == 'Data1D':
-                    self.tree_ctrl.CheckItem(item, True) 
+                    self.tree_ctrl.CheckItem(data_ctrl, True) 
             elif option == 'Select all Data 2D':
                 if data_class == 'Data2D':
-                    self.tree_ctrl.CheckItem(item, True) 
+                    self.tree_ctrl.CheckItem(data_ctrl, True) 
             elif option == 'Unselect all Data 2D':
                 if data_class == 'Data2D':
-                    self.tree_ctrl.CheckItem(item, False) 
+                    self.tree_ctrl.CheckItem(data_ctrl, False) 
                
     def on_set_active_perspective(self, event):
         """
