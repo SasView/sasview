@@ -169,7 +169,8 @@ class Plugin(PluginBase):
             self.on_perspective(event=None)   
             # Load the P(r) results
             #state = self.state_reader.get_state()
-            self.parent.add_data(data_list=[self.current_plottable])
+            data_dict = {self.current_plottable.id:self.current_plottable}
+            self.parent.add_data(data_list=data_dict)
             wx.PostEvent(self.parent, NewPlotEvent(plot=self.current_plottable,
                                         title=self.current_plottable.title))
             self.control_panel.set_state(state)
