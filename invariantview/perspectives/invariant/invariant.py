@@ -244,8 +244,8 @@ class Plugin(PluginBase):
             self.__data = data
             wx.PostEvent(self.parent, NewPlotEvent(plot=self.__data,
                                         reset=True, title=self.__data.title))
-            #temp_state = copy.deepcopy(state)
-            #temp_state = self.state_reader.get_state()
+            data_dict = {self.__data.id:self.__data}
+            self.parent.add_data(data_list=data_dict)
             # set state
             self.invariant_panel.is_state_data = True
             
