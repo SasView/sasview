@@ -45,8 +45,7 @@ class DataState(object):
                 _str += "Theory ID : %s \n" % str(id)
                 _str += "Theory info: \n"
                 _str += str(theory_data)
-                #_str += "Theory info: \n"
-                #_str += str(theory_state)
+               
         return _str
         
     def clone(self):

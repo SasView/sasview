@@ -16,7 +16,6 @@ Data_manager  make these new data available for all other perspectives.
 """
 import logging
 import os
-import wx
 import copy 
 
 from sans.guiframe.data_state import DataState
@@ -24,7 +23,7 @@ from sans.guiframe.utils import parse_name
 import DataLoader.data_info as DataInfo
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
-  
+import time
 
 class DataManager(object):
     """
@@ -41,6 +40,8 @@ class DataManager(object):
         self.stored_data = {}
         self.message = ""
         self.data_name_dict = {}
+        self.count = 0
+        self.list_of_id = []
       
     def __str__(self):
         _str  = ""
@@ -57,7 +58,7 @@ class DataManager(object):
         Receive data from loader and create a data to use for guiframe
         """
         
-        if issubclass(DataInfo.Data2D, data.__class__):
+        if issubclass(Data2D, data.__class__):
             new_plot = Data2D(image=None, err_image=None) 
         else: 
             new_plot = Data1D(x=[], y=[], dx=None, dy=None)
@@ -89,9 +90,9 @@ class DataManager(object):
         ## allow to highlight data when plotted
         new_plot.interactive = True
         ## when 2 data have the same id override the 1 st plotted
-        new_plot.id = wx.NewId()
+        new_plot.id = time.time()
         ##group_id specify on which panel to plot this data
-        new_plot.group_id = wx.NewId()
+        new_plot.group_id = time.time()
         new_plot.is_data = True
         new_plot.path = path
         new_plot.list_group_id = []
@@ -130,7 +131,7 @@ class DataManager(object):
                 data_state = self.stored_data[id]
             else:
                 data_state = DataState(data)
-                data_state.id = wx.NewId()
+                data_state.id = time.time()
                 self.stored_data[id] = data_state
     
         
@@ -198,7 +199,7 @@ class DataManager(object):
                     if t_id in theory_list.keys():
                         theory_data, theory_state = theory_list[t_id]
                         new_theory = copy.deepcopy(theory_data)
-                        new_theory.id  = wx.NewId()
+                        new_theory.id  = time.time()
                         new_theory.is_data = True
                         selected_theory[new_theory.id] = DataState(new_theory)
                         self.stored_data[new_theory.id] = selected_theory[new_theory.id]
