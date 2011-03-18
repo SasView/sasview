@@ -7,11 +7,13 @@ simple fit with scipy optimizer.
 """
 
 import numpy 
+import sys
 from scipy import optimize
 
 from sans.fit.AbstractFitEngine import FitEngine
 from sans.fit.AbstractFitEngine import SansAssembly
-#from sans.fit.AbstractFitEngine import FitAbort
+from sans.fit.AbstractFitEngine import FitAbort
+
 
 class fitresult(object):
     """
@@ -97,6 +99,7 @@ class ScipyFit(FitEngine):
         self.fit_arrange_dict = {}
         self.param_list = []
         self.curr_thread = None
+        self.result = None
     #def fit(self, *args, **kw):
     #    return profile(self._fit, *args, **kw)
 
@@ -121,35 +124,48 @@ class ScipyFit(FitEngine):
         # Concatenate dList set (contains one or more data)before fitting
         data = listdata
         self.curr_thread = curr_thread
-        result = fitresult(model=model, param_list=self.param_list)
-        if handler is not None:
-            handler.set_result(result=result)
+        self.result = fitresult(model=model, param_list=self.param_list)
+        self.handler = handler
+        if self.handler is not None:
+            self.handler.set_result(result=self.result)
         #try:
-        functor = SansAssembly(self.param_list, model, data, handler=handler,
-                         fitresult=result, curr_thread= self.curr_thread)
-        out, cov_x, _, mesg, success = optimize.leastsq(functor,
+        functor = SansAssembly(self.param_list, model, data, handler=self.handler,
+                         fitresult=self.result, curr_thread= self.curr_thread)
+    
+        try:
+            out, cov_x, _, mesg, success = optimize.leastsq(functor,
                                             model.get_params(self.param_list),
                                                     ftol = 0.001,
                                                     full_output=1,
                                                     warning=True)
-  
+        except:
+            if sys.last_type == FitAbort:
+                if self.handler is not None:
+                    msg = "Fit Stop!"
+                    #self.handler.error(msg)
+                    self.result = self.handler.get_result()
+                    return self.result
+            else:
+                raise 
+       
         chisqr = functor.chisq()
         if cov_x is not None and numpy.isfinite(cov_x).all():
             stderr = numpy.sqrt(numpy.diag(cov_x))
         else:
             stderr = None
-
-        if not (numpy.isnan(out).any()) and (cov_x != None):
-            result.fitness = chisqr
-            result.stderr  = stderr
-            result.pvec = out
-            result.success = success
-            if q is not None:
-                q.put(result)
-                return q
-            return result
+        
+        if (out is not None) and not (numpy.isnan(out).any()) \
+            and (cov_x != None):
+            self.result.fitness = chisqr
+            self.result.stderr  = stderr
+            self.result.pvec = out
+            self.result.success = success
         else:  
-            raise ValueError, "SVD did not converge" + str(mesg)
+            msg = "SVD did not converge " + str(mesg)
+            #handler.error(msg)
+        return self.result
+
+       
     
 
 

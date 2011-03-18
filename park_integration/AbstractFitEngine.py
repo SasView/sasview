@@ -402,7 +402,6 @@ class FitAbort(Exception):
     """
     Exception raise to stop the fit
     """
-    #print"Creating fit abort Exception"
 
 
 class SansAssembly:
@@ -449,22 +448,20 @@ class SansAssembly:
         :param params: value of parameters to fit
         
         """
-        #import thread
         self.model.set_params(self.paramlist,params)
         self.res = self.data.residuals(self.model.eval)
         if self.fitresult is not None and  self.handler is not None:
             self.fitresult.set_model(model=self.model)
-            #fitness = self.chisq(params=params)
             fitness = self.chisq()
+            self.fitresult.pvec = params
             self.fitresult.set_fitness(fitness=fitness)
             self.handler.set_result(result=self.fitresult)
-            self.handler.update_fit()
-        
-        #if self.curr_thread != None :
-        #    try:
-        #        self.curr_thread.isquit()
-        #    except:
-        #        raise FitAbort,"stop leastsqr optimizer"    
+            #self.handler.update_fit()
+            if self.curr_thread != None :
+                try:
+                    self.curr_thread.isquit()
+                except:
+                    raise FitAbort,"stop leastsqr optimizer"        
         return self.res
     
 class FitEngine:

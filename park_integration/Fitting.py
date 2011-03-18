@@ -51,11 +51,8 @@ class Fit:
 
     def fit(self, q=None, handler=None, curr_thread=None):
         """Perform the fit """
-        #try:
         return self._engine.fit(q, handler, curr_thread=curr_thread)
-        #except:
-        #    raise
-    
+     
     def set_model(self, model, id, pars=[], constraints=[]):
         """
         store a model model to fit at the position id of the fit engine
