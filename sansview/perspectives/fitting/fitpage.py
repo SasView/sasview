@@ -12,11 +12,6 @@ from DataLoader.data_info import Data1D
 from sans.guiframe.events import StatusEvent   
 from sans.guiframe.utils import format_number,check_float
 
-
-
-## event to know the selected fit engine
-(FitterTypeEvent, EVT_FITTER_TYPE)   = wx.lib.newevent.NewEvent()
-(FitStopEvent, EVT_FIT_STOP)   = wx.lib.newevent.NewEvent()
 (Chi2UpdateEvent, EVT_CHI2_UPDATE)   = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 76
 _DATA_BOX_WIDTH = 300
@@ -51,21 +46,16 @@ class FitPage(BasicPage):
         self._get_defult_custom_smear()
         self._fill_range_sizer() 
         self._set_smear(self.data)
-        ## to update the panel according to the fit engine type selected
-        self.Bind(EVT_FITTER_TYPE,self._on_engine_change)
-        self.Bind(EVT_FIT_STOP,self._on_fit_complete)
         self.Bind(EVT_CHI2_UPDATE, self.on_complete_chisqr)
         self._set_bookmark_flag(False)
         self._set_save_flag(False)
 
-    def _on_fit_complete(self, event):
+    def _on_fit_complete(self):
         """
         When fit is complete ,reset the fit button label.
         """
-        #self.btFit.SetLabel("Fit")
-        #self.btFit.Unbind(event=wx.EVT_BUTTON, id=self.btFit.GetId())
-        #self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._onFit,id=self.btFit.GetId())
-        pass
+        self.btFit.SetLabel("Fit")
+        self.bind_fit_button()
         
     def _is_2D(self):
         """
@@ -74,28 +64,26 @@ class FitPage(BasicPage):
         :return: True or False
         
         """
-        
         if self.data.__class__.__name__ =="Data2D":
             return True
         return False
             
-    def _on_engine_change(self, event):
+    def _on_engine_change(self, name):
         """
-        get an event containing the current name of the fit engine type
-        
-        :param event: FitterTypeEvent containing  the name of the current engine
-        
+        get the current name of the fit engine type
+         and update the panel accordingly
         """
-        self.engine_type = event.type
+        
+        self.engine_type = str(name)
         self.state.engine_type = self.engine_type
-        if len(self.parameters)==0:
+        if len(self.parameters) == 0:
             self.Layout()
             return
-        if event.type =="park":
-            self.btFit.SetLabel("Fit")
-
+        #if self.engine_type =="park":
+        #    self.btFit.SetLabel("Fit")
+        #    self.bind_fit_button()
         for item in self.parameters:
-            if event.type =="scipy" :
+            if self.engine_type =="scipy" :
                 item[5].SetValue("")
                 item[5].Hide()
                 item[6].SetValue("")
@@ -109,8 +97,10 @@ class FitPage(BasicPage):
                 self.text2_min.Show(True)
                 self.text2_max.Show(True)
         for item in self.fittable_param:
-            if item[5]!=None and item[6]!=None and not item in self.orientation_params_disp:
-                if event.type =="scipy" and not item in self.orientation_params:
+            if item[5]!=None and item[6]!=None and not \
+                item in self.orientation_params_disp:
+                if self.engine_type =="scipy" and \
+                    not item in self.orientation_params:
                     item[5].SetValue("")
                     item[5].Hide()
                     item[6].SetValue("")
@@ -129,7 +119,8 @@ class FitPage(BasicPage):
             
         for item in self.orientation_params:
             if item[5]!=None and item[6]!=None:
-                if event.type =="scipy" or self.data.__class__.__name__ !="Data2D":
+                if self.engine_type =="scipy" or \
+                self.data.__class__.__name__ !="Data2D":
                     item[5].SetValue("")
                     item[5].Hide()
                     item[6].SetValue("")
@@ -140,7 +131,8 @@ class FitPage(BasicPage):
                     
         for item in self.orientation_params_disp:         
             if item[5]!=None and item[6]!=None:
-                if event.type =="scipy" or self.data.__class__.__name__ !="Data2D":
+                if self.engine_type =="scipy" or \
+                    self.data.__class__.__name__ !="Data2D":
                     item[5].SetValue("")
                     item[5].Hide()
                     item[6].SetValue("")
@@ -150,7 +142,7 @@ class FitPage(BasicPage):
                     item[6].Show(True)
         self.Layout()
         self.Refresh()
-    
+        
   
         
     def _fill_range_sizer(self):
@@ -964,36 +956,42 @@ class FitPage(BasicPage):
         # when y(q=0)=None at x[0].         
         self.qmin_x = float(self.qmin.GetValue())
         self.qmax_x = float( self.qmax.GetValue())
-        self._manager._reset_schedule_problem(id=self.id, value=0)
-        self._manager.schedule_for_fit(id=self.id,value=1, fitproblem =None) 
-        self._manager.set_fit_range(id=self.id,qmin= self.qmin_x, 
+        self._manager._reset_schedule_problem(value=0)
+        self._manager.schedule_for_fit(uid=self.uid,value=1, fitproblem =None) 
+        self._manager.set_fit_range(uid=self.uid,qmin= self.qmin_x, 
                                    qmax= self.qmax_x)
         
         #single fit 
         self._manager.onFit()
-        ## allow stopping the fit 
-        #if self.engine_type=="scipy":
-        #    self.btFit.SetLabel("Stop")
-        #    self.btFit.Unbind(event=wx.EVT_BUTTON, id= self.btFit.GetId())
-        #    self.btFit.Bind(event= wx.EVT_BUTTON, 
-        #            handler=self._StopFit, id=self.btFit.GetId())
-        #else:
-        #    self.btFit.SetLabel("Fit")
-        #    self.btFit.Bind(event= wx.EVT_BUTTON, 
-        #                handler=self._onFit, id=self.btFit.GetId())
+        self.btFit.SetLabel("Stop")
+        self.bind_fit_button()
            
+    def bind_fit_button(self):
+        """
+        bind the fit button to either fit handler or stop fit handler
+        """
+        self.btFit.Unbind(event=wx.EVT_BUTTON, id= self.btFit.GetId())
+        if self.btFit.GetLabel().lower() == "stop":
+            self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._StopFit,
+                             id=self.btFit.GetId())
+        elif self.btFit.GetLabel().lower() == "fit":
+            self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._onFit, 
+                            id=self.btFit.GetId())
+        else:
+            msg = "FitPage: fit button has unknown label"
+            raise ValuerError, msg
+        self._manager._reset_schedule_problem(value=0)
+          
+
     def _StopFit(self, event):
         """
         Stop fit 
         """
-        self.btFit.SetLabel("Fit")
-        if self.engine_type=="scipy":
-            self._manager.stop_fit()
-        self.btFit.Unbind(event=wx.EVT_BUTTON, id=self.btFit.GetId())
-        self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._onFit,
-                        id=self.btFit.GetId())
-        
-            
+        #if self.engine_type=="scipy":
+        self._manager.stop_fit(self.uid)
+        self._manager._reset_schedule_problem(value=0)
+        self._on_fit_complete()
+         
     def _on_select_model(self, event=None): 
         """
         call back for model selection
@@ -1032,8 +1030,9 @@ class FitPage(BasicPage):
                     # Set the smearer environments
                     temp_smear = self.smearer
             except:
+                raise
                 ## error occured on chisqr computation
-                pass
+                #pass
             ## event to post model to fit to fitting plugins
             (ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
            
@@ -1042,7 +1041,7 @@ class FitPage(BasicPage):
             evt = ModelEventbox(model=self.model, 
                                         smearer=temp_smear, 
                                         qmin=float(self.qmin_x),
-                                        id=self.id,
+                                        uid=self.uid,
                                      qmax=float(self.qmax_x)) 
    
             self._manager._on_model_panel(evt=evt)
@@ -1074,8 +1073,8 @@ class FitPage(BasicPage):
         #get event object
         tcrtl = event.GetEventObject()
         
-        wx.PostEvent(self._manager.parent, StatusEvent(status=" \
-                                updating ... ",type="update"))
+        #wx.PostEvent(self._manager.parent, StatusEvent(status=" \
+        #                        updating ... ",type="update"))
         #Clear msg if previously shown.
         msg= ""
         wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
@@ -1097,7 +1096,7 @@ class FitPage(BasicPage):
                         flag = flag or flag1
                 elif self.data.__class__.__name__ !="Data2D":
                     self._manager.set_smearer(smearer=temp_smearer, 
-                                              id=self.id,
+                                              uid=self.uid,
                                              qmin= float(self.qmin_x),
                                             qmax= float(self.qmax_x),
                                             draw=True) 
@@ -2228,7 +2227,7 @@ class FitPage(BasicPage):
         self.sizer_set_smearer.Layout()
         self.Layout()
         ## set smearing value whether or not the data contain the smearing info
-        self._manager.set_smearer(id=self.id, smearer=temp_smearer, qmin= float(self.qmin_x),
+        self._manager.set_smearer(uid=self.uid, smearer=temp_smearer, qmin= float(self.qmin_x),
                         qmax= float(self.qmax_x), draw=True) 
         
         ##Calculate chi2

@@ -14,7 +14,7 @@ class Calc2D(CalcThread):
     and I(qx, qy) = I(-qx, -qy) is assumed.
     """
     def __init__(self, x, y, data,model,smearer,qmin, qmax,qstep,
-                 id ,
+                 page_id ,
                  state=None,
                  toggle_mode_on=False,
                  completefn = None,
@@ -33,7 +33,7 @@ class Calc2D(CalcThread):
         self.x = x
         self.y = y
         self.data= data
-        self.page_id = id
+        self.page_id = page_id
         self.state = None
         # the model on to calculate
         self.model = model
@@ -121,7 +121,7 @@ class Calc2D(CalcThread):
         elapsed = time.time()-self.starttime
         self.complete(image=output,
                        data=self.data, 
-                       id=self.page_id,
+                       page_id=self.page_id,
                        model=self.model,
                        state=self.state,
                        toggle_mode_on=self.toggle_mode_on,
@@ -137,7 +137,7 @@ class Calc1D(CalcThread):
     Compute 1D data
     """
     def __init__(self, x, model,
-                 id,
+                 page_id,
                  data=None,
                  qmin=None,
                  qmax=None,
@@ -162,7 +162,7 @@ class Calc1D(CalcThread):
         self.model = model
         self.toggle_mode_on = toggle_mode_on
         self.state = state
-        self.page_id = id
+        self.page_id = page_id
         self.smearer = smearer
         self.starttime = 0
         
@@ -185,7 +185,7 @@ class Calc1D(CalcThread):
         elapsed = time.time() - self.starttime
        
         self.complete(x=self.x[index], y=output[index], 
-                      id=self.page_id,
+                      page_id=self.page_id,
                       state=self.state,
                       toggle_mode_on=self.toggle_mode_on,
                       elapsed=elapsed,index=index, model=self.model,

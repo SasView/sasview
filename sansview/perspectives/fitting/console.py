@@ -17,7 +17,8 @@ class ConsoleUpdate(FitHandler):
     """Number of seconds between progress updates"""
     improvement_delta = 5
     """Number of seconds between improvement updates"""
-    def __init__(self,parent, quiet=False,progress_delta=60,improvement_delta=5):
+    def __init__(self, parent, manager=None,
+                 quiet=False,progress_delta=60,improvement_delta=5):
         """
         If quiet is true, only print out final summary, not progress and
         improvements.
@@ -26,6 +27,7 @@ class ConsoleUpdate(FitHandler):
         
         """
         self.parent= parent
+        self.manager = manager
         self.progress_time = time.time()
         self.progress_percent = 0
         self.improvement_time = self.progress_time
@@ -51,8 +53,8 @@ class ConsoleUpdate(FitHandler):
             self.isbetter = False
             self.improvement_time = t
             
-            wx.PostEvent(self.parent, StatusEvent(status=\
-             "%d%% complete ..."%(p),type="progress"))
+            #wx.PostEvent(self.parent, StatusEvent(status=\
+            # "%d%% complete ..."%(p),type="progress"))
        
         # Update percent complete
         dp = p-self.progress_percent
@@ -62,22 +64,22 @@ class ConsoleUpdate(FitHandler):
             if 1 <= dp <= 2:
                 self.progress_percent = p
                 self.progress_time = t
-                wx.PostEvent(self.parent, StatusEvent(status=\
-                                                      "%d%% complete ..."%(p),
-                                                      type="progress"))
+                #wx.PostEvent(self.parent, StatusEvent(status=\
+                #                                      "%d%% complete ..."%(p),
+                #                                      type="progress"))
        
             elif 2 < dp <= 5:
                 if p//5 != self.progress_percent//5:
-                    wx.PostEvent(self.parent, StatusEvent(status=\
-                       "%d%% complete ..."%(5*(p//5)),type="progress"))
+                    #wx.PostEvent(self.parent, StatusEvent(status=\
+                    #   "%d%% complete ..."%(5*(p//5)),type="progress"))
                     self.progress_percent = p
                     self.progress_time = t
             else:
                 if p//10 != self.progress_percent//10:
                     self.progress_percent = p
                     self.progress_time = t
-                    wx.PostEvent(self.parent, StatusEvent(status=\
-                   "%d%% complete ..."%(10*(p//10)),type="progress"))
+                    #wx.PostEvent(self.parent, StatusEvent(status=\
+                   #"%d%% complete ..."%(10*(p//10)),type="progress"))
         
     def improvement(self):
         """
@@ -92,10 +94,10 @@ class ConsoleUpdate(FitHandler):
         """
         if self.isbetter:
             self.result.print_summary()
-        message = "fit Error"
-        message = str(msg)+ " \n %s"%self.result.__str__()
-        wx.PostEvent(self.parent, StatusEvent(status=message,
-                                              info="error", type="stop"))
+        #message = "fit Error"
+        #message = str(msg)+ " \n %s"%self.result.__str__()
+        #wx.PostEvent(self.parent, StatusEvent(status=message,
+        #                                      info="error", type="stop"))
             
     def finalize(self):
         """
@@ -109,24 +111,32 @@ class ConsoleUpdate(FitHandler):
         if self.isbetter:
             self.result.print_summary()
             
+        
     def update_fit(self, msg=""):
         """
         """
-        self.elapsed_time = time.time() - self.elapsed_time
-        msg = " Updating fit ...\n result:\n %s \n"%self.result.__str__()
-        wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
-                                              type="progress"))
-        time.sleep(0.01)
+        #self.elapsed_time = time.time() - self.elapsed_time
+        #msg = " Updating fit ...\n result:\n %s \n"%self.result.__str__()
+        #wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
+        #                                  type="progress"))
+        #if self.manager is not None:
+        #    self.manager.update_fit(msg=msg, result=self.result)
+        #time.sleep(0.01)
         
     def starting_fit(self):
         """
         """
-        wx.PostEvent(self.parent, StatusEvent(status="Starting the Fit...",
-                                        info="info",type="progress"))
+        #wx.PostEvent(self.parent, StatusEvent(status="Starting the Fit...",
+        #                                info="info",type="progress"))
         
     def set_result(self, result):
         """
         """
         self.result = result
+    
+    def get_result(self):
+        """
+        """
+        return self.result
         
     

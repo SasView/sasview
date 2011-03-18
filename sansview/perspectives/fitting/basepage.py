@@ -64,7 +64,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## data
         self.data = None
         self.mask = None
-        self.id = None
+        self.uid = None
         ## Q range
         self.qmin = None
         self.qmax = None
@@ -1447,8 +1447,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.fitrange = True
         is_modified = False
 
-        wx.PostEvent(self._manager.parent, StatusEvent(status=" \
-        updating ... ",type="update"))
+        #wx.PostEvent(self._manager.parent, StatusEvent(status=" \
+        #updating ... ",type="update"))
 
         ##So make sure that update param values on_Fit.
         #self._undo.Enable(True)
@@ -1481,14 +1481,14 @@ class BasicPage(ScrolledPanel, PanelBase):
                         flag = self.update_pinhole_smear()
                     else:
                         self._manager.set_smearer(smearer=temp_smearer,
-                                                  id=self.id,
+                                                  uid=self.uid,
                                                      qmin=float(self.qmin_x),
                                                       qmax=float(self.qmax_x),
                                                       draw=False)
                 elif not self._is_2D():
                     self._manager.set_smearer(smearer=temp_smearer,
                                               qmin=float(self.qmin_x),
-                                              id=self.id, 
+                                              uid=self.uid, 
                                                  qmax= float(self.qmax_x))
                     index_data = ((self.qmin_x <= self.data.x)&\
                                   (self.data.x <= self.qmax_x))
@@ -1758,7 +1758,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                                     qmin=float(self.qmin_x), 
                                     qmax=float(self.qmax_x),
                                     qstep= float(self.npts_x),
-                                    id=self.id,
+                                    page_id=self.uid,
                                     toggle_mode_on=toggle_mode_on, 
                                     state = self.state,
                                     enable2D=self.enable2D)

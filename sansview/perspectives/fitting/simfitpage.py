@@ -64,6 +64,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         self.model_toFit=[]
         ## number of constraint
         self.nb_constraint= 0
+        self.id = wx.NewId()
         ## draw page
         self.define_page_structure()
         self.draw_page()
@@ -139,7 +140,7 @@ class SimultaneousFitPage(wx.ScrolledWindow):
             value.set_range(qmin, qmax)
         ## model was actually selected from this page to be fit
         if len(self.model_toFit) >= 1 :
-            self.manager._reset_schedule_problem( value=0)
+            self.manager._reset_schedule_problem(value=0)
             for item in self.model_list:
                 if item[0].GetValue():
                     self.manager.schedule_for_fit( value=1,fitproblem =item[1]) 

@@ -7,6 +7,7 @@ import wx.lib.flatnotebook as fnb
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.events import PanelOnFocusEvent
 from sans.guiframe.events import StatusEvent
+
 import basepage
 import models
 _BOX_WIDTH = 80
@@ -50,15 +51,29 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         self.opened_pages = {}
         #page of simultaneous fit 
         self.sim_page = None
+        self.fit_engine_type = "scipy"
         ## get the state of a page
         self.Bind(basepage.EVT_PAGE_INFO, self._onGetstate)
         self.Bind(basepage.EVT_PREVIOUS_STATE, self._onUndo)
         self.Bind(basepage.EVT_NEXT_STATE, self._onRedo)
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_page_changing)
-       
+      
         #add default pages
         self.add_default_pages()
     
+    def _on_engine_change(self, name='scipy'):
+        """
+        """
+        for panel in self.opened_pages.values():
+            self.set_engine_helper(panel=panel, name=name)
+            
+    def set_engine_helper(self, panel, name='scipy'):
+        """
+        """
+        self.fit_engine_type = name
+        if panel != self.sim_page:
+            panel._on_engine_change(name=self.fit_engine_type)
+                
     def update_model_list(self):
         """
         """
@@ -66,14 +81,14 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         return self.model_list_box
         
         
-    def get_page_by_id(self, id):  
+    def get_page_by_id(self, uid):  
         """
         """
-        if id not in self.opened_pages:
-            msg = "Fitpanel cannot find ID: %s in self.opened_pages" % str(id)
+        if uid not in self.opened_pages:
+            msg = "Fitpanel cannot find ID: %s in self.opened_pages" % str(uid)
             raise ValueError, msg
         else:
-            return self.opened_pages[id]
+            return self.opened_pages[uid]
         
     def on_page_changing(self, event):
         """
@@ -156,9 +171,9 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         """
         page_is_opened = False
         if state is not None:
-            for id, panel in self.opened_pages.iteritems():
+            for uid, panel in self.opened_pages.iteritems():
                 #Don't return any panel is the exact same page is created
-                if id == panel.id:
+                if uid == panel.uid:
                     # the page is still opened
                     panel.reset_page(state=state)
                     panel.save_current_state() 
@@ -167,7 +182,7 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
                 panel = self._manager.add_fit_page(data=state.data)
                 # add data associated to the page created
                 if panel is not None:  
-                    self._manager.store_page(page=panel.id, data=state.data)
+                    self._manager.store_page(page=panel.uid, data=state.data)
                     panel.reset_page(state=state)
                     panel.save_current_state()
                     
@@ -249,7 +264,7 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         from simfitpage import SimultaneousFitPage
         page_finder= self._manager.get_page_finder()
         self.sim_page = SimultaneousFitPage(self,page_finder=page_finder, id=-1)
-        self.sim_page.id = wx.NewId()
+        self.sim_page.uid = wx.NewId()
         self.AddPage(self.sim_page,"Simultaneous Fit", True)
         self.sim_page.set_manager(self._manager)
         return self.sim_page
@@ -261,12 +276,13 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         """
         from fitpage import FitPage
         panel = FitPage(parent=self)
-        panel.id = wx.NewId()
+        panel.uid = wx.NewId()
         panel.populate_box(dict=self.model_list_box)
         panel.set_manager(self._manager)
         caption = str(panel.window_name) + " " + str(self._manager.index_model)
         self.AddPage(panel, caption, select=True)
-        self.opened_pages[panel.id] = panel
+        self.opened_pages[panel.uid] = panel
+        self.set_engine_helper(panel=panel)
         return panel 
     
     def delete_data(self, data):
@@ -307,10 +323,9 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         
         page = self.add_empty_page()
         pos = self.GetPageIndex(page)
-        page.id = wx.NewId()
         page.set_data(data)
         self.SetPageText(pos, str(data.name))
-        self.opened_pages[page.id] = page
+        self.opened_pages[page.uid] = page
         
         return page
        
@@ -319,19 +334,19 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         copy the state of a page
         """
         page = event.page
-        if page.id in self.fit_page_name:
-           self.fit_page_name[page.id].appendItem(page.createMemento()) 
+        if page.uid in self.fit_page_name:
+           self.fit_page_name[page.uid].appendItem(page.createMemento()) 
             
     def _onUndo(self, event ):
         """
         return the previous state of a given page is available
         """
         page = event.page 
-        if page.id in self.fit_page_name:
-            if self.fit_page_name[page.id].getCurrentPosition()==0:
+        if page.uid in self.fit_page_name:
+            if self.fit_page_name[page.uid].getCurrentPosition()==0:
                 state = None
             else:
-                state = self.fit_page_name[page.id].getPreviousItem()
+                state = self.fit_page_name[page.uid].getPreviousItem()
                 page._redo.Enable(True)
             page.reset_page(state)
         
@@ -340,14 +355,14 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         return the next state available
         """       
         page = event.page 
-        if page.id in self.fit_page_name:
-            length= len(self.fit_page_name[page.id])
-            if self.fit_page_name[page.id].getCurrentPosition()== length -1:
+        if page.uid in self.fit_page_name:
+            length= len(self.fit_page_name[page.uid])
+            if self.fit_page_name[page.uid].getCurrentPosition()== length -1:
                 state = None
                 page._redo.Enable(False)
                 page._redo.Enable(True)
             else:
-                state =self.fit_page_name[page.id].getNextItem()
+                state =self.fit_page_name[page.uid].getNextItem()
             page.reset_page(state)  
                  
     def _close_helper(self, selected_page):
@@ -375,11 +390,11 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
             flag = False
         if selected_page in page_finder:
             #Delete the name of the page into the list of open page
-            for id, list in self.opened_pages.iteritems():
+            for uid, list in self.opened_pages.iteritems():
                 #Don't return any panel is the exact same page is created
                 
-                if flag and selected_page.id == id:
-                    self._manager.remove_plot(id, theory=False)
+                if flag and selected_page.uid == uid:
+                    self._manager.remove_plot(uid, theory=False)
                     break 
             del page_finder[selected_page]
         ##remove the check box link to the model name of this page (selected_page)
@@ -391,11 +406,11 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
             pass
                 
         #Delete the name of the page into the list of open page
-        for id, list in self.opened_pages.iteritems():
+        for uid, list in self.opened_pages.iteritems():
             #Don't return any panel is the exact same page is created
             
-            if selected_page.id == id:
-                del self.opened_pages[selected_page.id]
+            if selected_page.uid == uid:
+                del self.opened_pages[selected_page.uid]
                 break 
      
   

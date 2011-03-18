@@ -22,6 +22,7 @@ from copy import deepcopy
 import models
 import fitpage
 
+
 from DataLoader.loader import Loader
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.dataFitting import Data1D
@@ -66,7 +67,7 @@ class Plugin(PluginBase):
         # reference to the current running thread
         self.calc_2D = None
         self.calc_1D = None
-        self.calc_fit = None
+        self.fit_thread_list = {}
         
         # Start with a good default
         self.elapsed = 0.022
@@ -277,8 +278,9 @@ class Plugin(PluginBase):
                 wx.PostEvent(self.parent, NewPlotEvent(plot=data, 
                                                        title=str(data.title)))
         except:
-            msg = "Fitting Set_data: " + str(sys.exc_value)
-            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
+            raise
+            #msg = "Fitting Set_data: " + str(sys.exc_value)
+            #wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
             
     def set_theory(self,  theory_list=None):
         """
@@ -377,13 +379,13 @@ class Plugin(PluginBase):
         """
         self.state_reader.write(filename=filepath, fitstate=fitstate)
         
-    def set_fit_range(self, id, qmin, qmax):
+    def set_fit_range(self, uid, qmin, qmax):
         """
         Set the fitting range of a given page
         """
-        self.page_finder[id].set_range(qmin=qmin, qmax=qmax)
+        self.page_finder[uid].set_range(qmin=qmin, qmax=qmax)
                     
-    def schedule_for_fit(self,value=0, id=None,fitproblem =None):  
+    def schedule_for_fit(self,value=0, uid=None,fitproblem =None):  
         """
         Set the fit problem field to 0 or 1 to schedule that problem to fit.
         Schedule the specified fitproblem or get the fit problem related to 
@@ -396,7 +398,7 @@ class Plugin(PluginBase):
         if fitproblem !=None:
             fitproblem.schedule_tofit(value)
         else:
-            self.page_finder[id].schedule_tofit(value)
+            self.page_finder[uid].schedule_tofit(value)
           
     def get_page_finder(self):
         """
@@ -415,9 +417,9 @@ class Plugin(PluginBase):
         :note: expecting park used for fit.
          
         """  
-        sim_page_id = self.sim_page.id
-        for id, value in self.page_finder.iteritems():
-            if id != sim_page_id:
+        sim_page_id = self.sim_page.uid
+        for uid, value in self.page_finder.iteritems():
+            if uid != sim_page_id:
                 list = value.get_model()
                 model = list[0]
                 if model.name == modelname:
@@ -443,39 +445,49 @@ class Plugin(PluginBase):
                 param_name=param_names[1]                    
             return model_name,param_name
         
-    def stop_fit(self):
+    def stop_fit(self, uid):
         """
         Stop the fit engine
         """
-        if self.calc_fit!= None and self.calc_fit.isrunning():
-            self.calc_fit.stop()
-            wx.PostEvent(self.parent, StatusEvent(status="Fitting  \
-                is cancelled" , type="stop"))
+        if uid in self.fit_thread_list.keys():
+            calc_fit = self.fit_thread_list[uid]
+            if calc_fit is not  None and calc_fit.isrunning():
+                calc_fit.stop()
+                msg = "Fit stop!"
+                wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
+        #set the fit button label of page when fit stop is trigger from
+        #simultaneous fit pane
+        if  self.sim_page is not None and uid == self.sim_page.uid:
+            for uid, value in self.page_finder.iteritems():
+                if value.get_scheduled() == 1:
+                    if uid in self.fit_panel.opened_pages.keys():
+                        panel = self.fit_panel.opened_pages[uid]
+                        panel. _on_fit_complete()
   
-    def set_smearer(self, id, smearer, qmin=None, qmax=None, draw=True):
+    def set_smearer(self, uid, smearer, qmin=None, qmax=None, draw=True):
         """
         Get a smear object and store it to a fit problem
         
         :param smearer: smear object to allow smearing data
         
         """   
-        if id not in self.page_finder.keys():
-            msg = "Cannot find ID: %s in page_finder" % str(id)
+        if uid not in self.page_finder.keys():
+            msg = "Cannot find ID: %s in page_finder" % str(uid)
             raise ValueError, msg
-        self.page_finder[id].set_smearer(smearer)
+        self.page_finder[uid].set_smearer(smearer)
         if draw:
             ## draw model 1D with smeared data
-            data =  self.page_finder[id].get_fit_data()
-            model = self.page_finder[id].get_model()
+            data =  self.page_finder[uid].get_fit_data()
+            model = self.page_finder[uid].get_model()
             if model is None:
                 return
             ## if user has already selected a model to plot
             ## redraw the model with data smeared
-            smear = self.page_finder[id].get_smearer()
-            self.draw_model(model=model, data=data, id=id, smearer=smear,
+            smear = self.page_finder[uid].get_smearer()
+            self.draw_model(model=model, data=data, page_id=uid, smearer=smear,
                 qmin=qmin, qmax=qmax)
 
-    def draw_model(self, model, id, data=None, smearer=None,
+    def draw_model(self, model, page_id, data=None, smearer=None,
                    enable1D=True, enable2D=False,
                    state=None,
                    toggle_mode_on=False,
@@ -499,7 +511,7 @@ class Plugin(PluginBase):
             
             self._draw_model1D(model=model, 
                                data=data,
-                               id=id,
+                               page_id=page_id,
                                enable1D=enable1D, 
                                smearer=smearer,
                                qmin=qmin,
@@ -510,7 +522,7 @@ class Plugin(PluginBase):
         else:     
             ## draw model 2D with no initial data
              self._draw_model2D(model=model,
-                                id=id,
+                                page_id=page_id,
                                 data=data,
                                 enable2D=enable2D,
                                 smearer=smearer,
@@ -526,7 +538,7 @@ class Plugin(PluginBase):
         """
         ##  count the number of fitproblem schedule to fit 
         fitproblem_count = 0
-        for value in self.page_finder.itervalues():
+        for value in self.page_finder.values():
             if value.get_scheduled() == 1:
                 fitproblem_count += 1
                 
@@ -537,7 +549,7 @@ class Plugin(PluginBase):
         self.fitproblem_count = fitproblem_count  
           
         from sans.fit.Fitting import Fit
-        self.fitter = Fit(self._fit_engine)
+        fitter = Fit(self._fit_engine)
         
         if self._fit_engine == "park":
             engineType = "Simultaneous Fit"
@@ -546,22 +558,27 @@ class Plugin(PluginBase):
             
         fproblemId = 0
         self.current_pg = None
-        for id, value in self.page_finder.iteritems():
+        list_page_id = []
+        for page_id, value in self.page_finder.iteritems():
             try:
                 if value.get_scheduled() == 1:
                     #Get list of parameters name to fit
                     pars = []
                     templist = []
-                    page = self.fit_panel.get_page_by_id(id)
+                    
+                    page = self.fit_panel.get_page_by_id(page_id)
                     templist = page.get_param_list()
                     for element in templist:
                         name = str(element[1])
                         pars.append(name)
                     #Set Engine  (model , data) related to the page on 
                     self._fit_helper(value=value, pars=pars,
-                                      id=fproblemId, title=engineType) 
+                                     fitter=fitter,
+                                      fitproblem_id=fproblemId,
+                                      title=engineType) 
+                    list_page_id.append(page_id)
                     fproblemId += 1 
-                    self.current_page_id = page
+                    current_page_id = page_id
             except:
                 raise
                 #msg= "%s error: %s" % (engineType, sys.exc_value)
@@ -572,26 +589,31 @@ class Plugin(PluginBase):
         #if self.calc_fit!= None and self.calc_fit.isrunning():
         #    self.calc_fit.stop()
          #Handler used for park engine displayed message
-        handler = ConsoleUpdate(parent=self.parent,improvement_delta=0.1)
+        handler = ConsoleUpdate(parent=self.parent,
+                                manager=self,
+                                improvement_delta=0.1)
+        
         ## perform single fit
         if fitproblem_count == 1:
             calc_fit = FitThread(parent=self.parent,
                                     handler = handler,
-                                    fn=self.fitter,
+                                    fn=fitter,
                                    pars=pars,
-                                   updatefn=handler.update_fit,
+                                   page_id=list_page_id,
                                    completefn=self._single_fit_completed)
         else:
+            current_page_id = self.sim_page.uid
             ## Perform more than 1 fit at the time
             calc_fit = FitThread(parent=self.parent,
                                 handler=handler,
-                                    fn= self.fitter,
-                                   completefn= self._simul_fit_completed,
-                                  updatefn=handler.update_fit)
-        
+                                    fn=fitter,
+                                    page_id=list_page_id,
+                                   completefn= self._simul_fit_completed)
+        self.fit_thread_list[current_page_id] = calc_fit
         calc_fit.queue()
         self.ready_fit(calc_fit=calc_fit)
       
+            
     def ready_fit(self, calc_fit):
         """
         Ready for another fit
@@ -602,24 +624,24 @@ class Plugin(PluginBase):
         else:
             time.sleep(0.4)
             
-    def remove_plot(self, id, theory=False):
+    def remove_plot(self, uid, theory=False):
         """
         remove model plot when a fit page is closed
         """
-        fitproblem = self.page_finder[id]
+        fitproblem = self.page_finder[uid]
         data = fitproblem.get_fit_data()
         model = fitproblem.get_model()
-        id = None
+        plot_id = None
         if model is not None:
-            id = data.id + name
+            plot_id = data.id + name
         if theory:
-            id = data.id 
+            plot_id = data.id 
         group_id = data.group_id
-        wx.PostEvent(self.parent, NewPlotEvent(id=id,
+        wx.PostEvent(self.parent, NewPlotEvent(id=plot_id,
                                                    group_id=group_id,
                                                    action='remove'))
            
-    def store_data(self, id, data=None, caption=None):
+    def store_data(self, uid, data=None, caption=None):
         """
         Helper to save page reference into the plug-in
         
@@ -627,10 +649,10 @@ class Plugin(PluginBase):
         
         """
         #create a fitproblem storing all link to data,model,page creation
-        if not id in self.page_finder.keys():
-            self.page_finder[id] = FitProblem()
-        self.page_finder[id].set_fit_data(data)
-        self.page_finder[id].set_fit_tab_caption(caption)
+        if not uid in self.page_finder.keys():
+            self.page_finder[uid] = FitProblem()
+        self.page_finder[uid].set_fit_data(data)
+        self.page_finder[uid].set_fit_tab_caption(caption)
         
     def on_add_new_page(self, event=None):
         """
@@ -641,7 +663,7 @@ class Plugin(PluginBase):
             page_caption = page.window_name
             # add data associated to the page created
             if page != None:  
-                self.store_data(id=page.id, caption=page_caption,
+                self.store_data(uid=page.uid, caption=page_caption,
                                 data=page.get_data())
                 wx.PostEvent(self.parent, StatusEvent(status="Page Created",
                                                info="info"))
@@ -664,26 +686,26 @@ class Plugin(PluginBase):
         page_caption = page.window_name
         #append Data1D to the panel containing its theory
         #if theory already plotted
-        if page.id in self.page_finder:
-            theory_data = self.page_finder[page.id].get_theory_data()
+        if page.uid in self.page_finder:
+            theory_data = self.page_finder[page.uid].get_theory_data()
             if issubclass(data.__class__, Data2D):
                 data.group_id = wx.NewId()
                 if theory_data is not None:
-                    group_id = str(page.id) + " Model1D"
+                    group_id = str(page.uid) + " Model1D"
                     wx.PostEvent(self.parent, 
                              NewPlotEvent(group_id=group_id,
                                                action="delete"))
                     self.parent.update_data(prev_data=theory_data, new_data=data)      
             else:
                 if theory_data is not None:
-                    group_id = str(page.id) + " Model2D"
+                    group_id = str(page.uid) + " Model2D"
                     data.group_id = theory_data.group_id
                     wx.PostEvent(self.parent, 
                              NewPlotEvent(group_id=group_id,
                                                action="delete"))
                     self.parent.update_data(prev_data=theory_data, new_data=data)   
               
-        self.store_data(id=page.id, data=data, caption=page.window_name)
+        self.store_data(uid=page.uid, data=data, caption=page.window_name)
         if self.sim_page is not None:
             self.sim_page.draw_page()
             
@@ -708,13 +730,12 @@ class Plugin(PluginBase):
         """    
         if event is None or event.data is None:
             return
-       
         if hasattr(event.data,"is_data"):
             if not event.data.is_data or \
-                event.data.__class__.__name__=="Data1D":
+                event.data.__class__.__name__ == "Data1D":
                 self.fit_panel.close_page_with_data(event.data) 
         
-    def _add_page_onmenu(self, name,fitproblem=None):
+    def _add_page_onmenu(self, name, fitproblem=None):
         """
         Add name of a closed page of fitpanel in a menu 
         """
@@ -728,7 +749,7 @@ class Plugin(PluginBase):
             event_id = wx.NewId()
             self.menu1.Append(event_id, name, "Show %s fit panel" % name)
             self.closed_page_dict[name]= [event_id, fitproblem]
-            wx.EVT_MENU(self.parent,event_id,  self._open_closed_page)
+            wx.EVT_MENU(self.parent, event_id, self._open_closed_page)
         
     def _open_closed_page(self, event):    
         """
@@ -736,12 +757,12 @@ class Plugin(PluginBase):
         """
         for name, value in self.closed_page_dict.iteritems():
             if event.GetId() in value:
-                id,fitproblem = value
+                uid,fitproblem = value
                 if name !="Model":
                     data= fitproblem.get_fit_data()
                     page = self.fit_panel.add_fit_page(data=data, reset=True)
                     if fitproblem != None:
-                        self.page_finder[id] = fitproblem
+                        self.page_finder[uid] = fitproblem
                         if self.sim_page != None:
                             self.sim_page.draw_page()
                             
@@ -751,14 +772,14 @@ class Plugin(PluginBase):
                                                   reset= True)
                     break
     
-    def _reset_schedule_problem(self, id, value=0):
+    def _reset_schedule_problem(self, value=0):
         """
         unschedule or schedule all fitproblem to be fit
         """
         for page_id in self.page_finder.keys():
-            self.page_finder[id].schedule_tofit(value)
+            self.page_finder[page_id].schedule_tofit(value)
             
-    def _fit_helper(self, pars, value, id, title="Single Fit " ):
+    def _fit_helper(self, pars, value, fitproblem_id,fitter, title="Single Fit " ):
         """
         helper for fitting
         """
@@ -766,7 +787,7 @@ class Plugin(PluginBase):
         model = value.get_model()
         smearer = value.get_smearer()
         qmin, qmax = value.get_range()
-        self.fit_id = id
+        self.fit_id = fitproblem_id
         #Create list of parameters for fitting used
         templist = []
        
@@ -782,13 +803,13 @@ class Plugin(PluginBase):
                         listOfConstraint.append((item[0],item[1]))
                    
             #Do the single fit
-            self.fitter.set_model(model, self.fit_id,
+            fitter.set_model(model, self.fit_id,
                                    pars, constraints=listOfConstraint)
             
-            self.fitter.set_data(data=metadata, id=self.fit_id,
+            fitter.set_data(data=metadata, id=self.fit_id,
                                  smearer=smearer, qmin=qmin, qmax=qmax)
            
-            self.fitter.select_problem_for_fit(id=self.fit_id,
+            fitter.select_problem_for_fit(id=self.fit_id,
                                                value=value.get_scheduled())
             value.clear_model_param()
         except:
@@ -813,7 +834,12 @@ class Plugin(PluginBase):
                 data = plottable
                 self.add_fit_page(data=data)
             
-    def _single_fit_completed(self,result, pars, elapsed=None):
+    def update_fit(self, result=None, msg=""):
+        """
+        """
+        print "update_fit result", result
+        
+    def _single_fit_completed(self, result, pars, page_id, elapsed=None):
         """
         Display fit result on one page of the notebook.
         
@@ -825,7 +851,7 @@ class Plugin(PluginBase):
           
         """     
         try:
-            if result ==None:
+            if result == None:
                 msg= "Simple Fitting Stop !!!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg,info="warning",
                                                       type="stop"))
@@ -837,29 +863,29 @@ class Plugin(PluginBase):
                 wx.PostEvent(self.parent, 
                              StatusEvent(status=msg, type="stop"))
                 return
-            page_id = None
-            for id, value in self.page_finder.iteritems():   
-                if value.get_scheduled()==1:
-                    model = value.get_model()
-                    page_id = id
-                    break
-            param_name = []
-            i = 0
-            for name in pars:
-                param_name.append(name)
-                
-            cpage = self.fit_panel.get_page_by_id(page_id)
-            cpage.onsetValues(result.fitness, 
-                              param_name, result.pvec,result.stderr)
+            for uid in page_id:
+                value = self.page_finder[uid]   
+                model = value.get_model()
+                page_id = uid
+                    
+                param_name = []
+                for name in pars:
+                    param_name.append(name)
+                    
+                cpage = self.fit_panel.get_page_by_id(uid)
+                cpage.onsetValues(result.fitness, 
+                                  param_name, result.pvec,result.stderr)
+                cpage._on_fit_complete()
            
         except:
-            msg = "Single Fit completed but Following"
-            msg += " error occurred:%s" % sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
-                                                  type="stop"))
+            raise
+            #msg = "Single Fit completed but Following"
+            #msg += " error occurred:%s" % sys.exc_value
+            #wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
+            #                                      type="stop"))
             return
        
-    def _simul_fit_completed(self, result, pars=None, elapsed=None):
+    def _simul_fit_completed(self, result, page_id,pars=None, elapsed=None):
         """
         Parameter estimation completed, 
         display the results to the user
@@ -868,49 +894,51 @@ class Plugin(PluginBase):
         :param elapsed: computation time
         
         """
+        if page_id is None:
+            page_id = []
         ## fit more than 1 model at the same time 
         try:
             msg = "" 
-            if result ==None:
-                msg= "Complex Fitting Stop !!!"
-                wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
+            if result == None:
+                msg = "Complex Fitting Stop !!!"
+                wx.PostEvent(self.parent, StatusEvent(status=msg,
+                                                      type="stop"))
                 return
-            if not numpy.isfinite(result.fitness) or numpy.any(result.pvec ==None )or not numpy.all(numpy.isfinite(result.pvec) ):
+            if not numpy.isfinite(result.fitness) or \
+                numpy.any(result.pvec == None) or not \
+                numpy.all(numpy.isfinite(result.pvec)):
                 msg= "Simultaneous Fitting did not converge!!!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
                 return
               
-            for id, value in self.page_finder.iteritems():   
-                if value.get_scheduled() == 1:
-                    model = value.get_model()
-                    data =  value.get_fit_data()
-                    small_param_name = []
-                    small_out = []
-                    small_cov = []
-                    i = 0
-                    #Separate result in to data corresponding to each page
-                    for p in result.parameters:
-                        model_name,param_name = self.split_string(p.name)  
-                        if model.name == model_name:
-                            p_name= model.name+"."+param_name
-                            if p.name == p_name:      
-                                if p.value != None and numpy.isfinite(p.value):
-                                    small_out.append(p.value )
-                                    small_param_name.append(param_name)
-                                    small_cov.append(p.stderr)
-
-                    # Display result on each page 
-                    cpage = self.fit_panel.get_page_by_id(id)
-                    cpage.onsetValues(result.fitness,
-                                      small_param_name,
-                                      small_out,small_cov)
+            for uid in page_id:   
+                value = self.page_finder[uid]
+                model = value.get_model()
+                data =  value.get_fit_data()
+                small_param_name = []
+                small_out = []
+                small_cov = []
+                #Separate result in to data corresponding to each page
+                for p in result.parameters:
+                    model_name, param_name = self.split_string(p.name)  
+                    if model.name == model_name:
+                        p_name= model.name+"."+param_name
+                        if p.name == p_name:      
+                            if p.value != None and numpy.isfinite(p.value):
+                                small_out.append(p.value)
+                                small_param_name.append(param_name)
+                                small_cov.append(p.stderr)
+                # Display result on each page 
+                cpage = self.fit_panel.get_page_by_id(uid)
+                cpage.onsetValues(result.fitness,
+                                  small_param_name,
+                                  small_out,small_cov)
+                cpage._on_fit_complete()
         except:
-            raise
-            #msg= "Simultaneous Fit completed"
-            #msg +=" but Following error occurred:%s"%sys.exc_value
-            #wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
-            #return 
-             
+            msg = "Simultaneous Fit completed"
+            msg += " but Following error occurred:%s" % sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
+   
     def _on_show_panel(self, event):
         """
         """
@@ -991,12 +1019,8 @@ class Plugin(PluginBase):
         msg = "Engine set to: %s" % self._fit_engine
         wx.PostEvent(self.parent, 
                      StatusEvent(status=msg))
-        ## Bind every open fit page with a newevent to 
-        #know the current fitting engine
-        #import fitpage
-        event = fitpage.FitterTypeEvent()
-        event.type = self._fit_engine
-        wx.PostEvent(self.fit_panel, event)
+        ## send the current engine type to fitpanel
+        self.fit_panel._on_engine_change(name=self._fit_engine)
        
     def _on_model_panel(self, evt):
         """
@@ -1006,7 +1030,7 @@ class Plugin(PluginBase):
         
         """
         model = evt.model
-        id = evt.id 
+        uid = evt.uid 
         qmin = evt.qmin
         qmax = evt.qmax
         smearer = evt.smearer
@@ -1014,14 +1038,14 @@ class Plugin(PluginBase):
         if model == None:
             return
        
-        if self.page_finder[id].get_model() is None:
+        if self.page_finder[uid].get_model() is None:
             model.name = "M" + str(self.index_model)
             self.index_model += 1  
         else:
-            model.name = self.page_finder[id].get_model().name
+            model.name = self.page_finder[uid].get_model().name
         # save the name containing the data name with the appropriate model
-        self.page_finder[id].set_model(model)
-        self.page_finder[id].set_range(qmin=qmin, qmax=qmax)
+        self.page_finder[uid].set_model(model)
+        self.page_finder[uid].set_range(qmin=qmin, qmax=qmax)
         if self.sim_page is not None:
             self.sim_page.draw_page()
         
@@ -1029,12 +1053,12 @@ class Plugin(PluginBase):
         """
         Update the output of plotting model 1D
         """
-        msg = "Plot updating ... "
-        wx.PostEvent(self.parent, StatusEvent(status=msg,type="update"))
-        self.ready_fit()
+        #msg = "Plot updating ... "
+        #wx.PostEvent(self.parent, StatusEvent(status=msg,type="update"))
+        #self.ready_fit()
         #self.calc_thread.ready(0.01)
     
-    def _fill_default_model2D(self, theory,id, qmax,qstep, qmin=None):
+    def _fill_default_model2D(self, theory, page_id, qmax,qstep, qmin=None):
         """
         fill Data2D with default value 
         
@@ -1117,10 +1141,10 @@ class Plugin(PluginBase):
         theory.xmax = xmax
         theory.ymin = ymin 
         theory.ymax = ymax 
-        theory.group_id = str(id) + " Model2D"
-        theory.id = str(id) + " Model2D"
+        theory.group_id = str(page_id) + " Model2D"
+        theory.id = str(page_id) + " Model2D"
   
-    def _complete1D(self, x,y, id, elapsed,index,model,
+    def _complete1D(self, x,y, page_id, elapsed,index,model,
                     toggle_mode_on=False,state=None, data=None):
         """
         Complete plotting 1D data
@@ -1135,8 +1159,8 @@ class Plugin(PluginBase):
                 new_plot.title = data.name
                 #if the theory is already plotted use the same group id 
                 #to replot
-                if id in self.page_finder:
-                    theory_data = self.page_finder[id].get_theory_data()
+                if page_id in self.page_finder:
+                    theory_data = self.page_finder[page_id].get_theory_data()
                     if theory_data is not None:
                        data.group_id = theory_data.group_id
                 #data is plotted before the theory, then take its group_id
@@ -1148,27 +1172,27 @@ class Plugin(PluginBase):
                 _yaxis, _yunit = "\\rm{Intensity} ", "cm^{-1}"
                 new_plot.title = "Analytical model 1D "
                 #find a group id to plot theory without data
-                new_plot.group_id =  str(id) + " Model1D"  
-            new_plot.id =  str(id) + " Model1D"  
+                new_plot.group_id =  str(page_id) + " Model1D"  
+            new_plot.id =  str(page_id) + " Model1D"  
             
             #find if this theory was already plotted and replace that plot given
             #the same id
-            if id in self.page_finder:
-                theory_data = self.page_finder[id].get_theory_data()
-                if theory_data is not None:
-                    new_plot.id = theory_data.id
+            
+            theory_data = self.page_finder[page_id].get_theory_data()
+            if theory_data is not None:
+                new_plot.id = theory_data.id
              
             new_plot.name = model.name + " ["+ str(model.__class__.__name__)+ "]"
             new_plot.xaxis(_xaxis, _xunit)
             new_plot.yaxis(_yaxis, _yunit)
             if toggle_mode_on:
-                new_plot.id =  str(id) + " Model" 
+                new_plot.id =  str(page_id) + " Model" 
                 wx.PostEvent(self.parent, 
-                             NewPlotEvent(group_id=str(id) + " Model2D",
+                             NewPlotEvent(group_id=str(page_id) + " Model2D",
                                                action="Hide"))
            
-            self.page_finder[id].set_theory_data(new_plot)
-            theory_data = self.page_finder[id].get_theory_data()
+            self.page_finder[page_id].set_theory_data(new_plot)
+            theory_data = self.page_finder[page_id].get_theory_data()
             if data is None:
                 name = "Data generates by Fitting "
                 theory_data.name = name
@@ -1180,14 +1204,14 @@ class Plugin(PluginBase):
             self.parent.update_theory(data_id=data_id, 
                                        theory=theory_data,
                                        state=state)     
-            current_pg = self.fit_panel.get_page_by_id(id)
+            current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                             title= str(title)))
             
             wx.PostEvent(current_pg,
                 Chi2UpdateEvent(output=self._cal_chisqr(data=data,
-                                                        id=id,
+                                                        page_id=page_id,
                                                         index=index)))
             msg = "Plot 1D  complete !"
             wx.PostEvent( self.parent, StatusEvent(status=msg, type="stop" ))
@@ -1201,12 +1225,12 @@ class Plugin(PluginBase):
         """
         Update the output of plotting model
         """
-        wx.PostEvent(self.parent, StatusEvent(status="Plot \
+        #wx.PostEvent(self.parent, StatusEvent(status="Plot \
         #updating ... ", type="update"))
-        self.ready_fit()
+        #self.ready_fit()
         #self.calc_thread.ready(0.01)
     
-    def _complete2D(self, image, data, model, id,  elapsed, index, qmin,
+    def _complete2D(self, image, data, model, page_id,  elapsed, index, qmin,
                      qmax, toggle_mode_on=False,state=None,qstep=DEFAULT_NPTS):
         """
         Complete get the result of modelthread and create model 2D
@@ -1220,13 +1244,13 @@ class Plugin(PluginBase):
         if data is None:
             self._fill_default_model2D(theory=new_plot, 
                                        qmax=qmax, 
-                                       id=id,
+                                       page_id=page_id,
                                        qstep=qstep,
                                         qmin= qmin)
            
         else:
-            new_plot.id = str(id) + " Model2D"
-            new_plot.group_id = str(id) + " Model2D"
+            new_plot.id = str(page_id) + " Model2D"
+            new_plot.group_id = str(page_id) + " Model2D"
             new_plot.x_bins = data.x_bins
             new_plot.y_bins = data.y_bins
             new_plot.detector = data.detector
@@ -1249,13 +1273,13 @@ class Plugin(PluginBase):
         theory_data = deepcopy(new_plot)
         theory_data.name = "Unknown"
         if toggle_mode_on:
-            new_plot.id = str(id) + " Model"      
+            new_plot.id = str(page_id) + " Model"      
             wx.PostEvent(self.parent, 
-                             NewPlotEvent(group_id=str(id) + " Model1D",
+                             NewPlotEvent(group_id=str(page_id) + " Model1D",
                                                action="Hide"))
         
-        self.page_finder[id].set_theory_data(new_plot)
-        theory_data = self.page_finder[id].get_theory_data()
+        self.page_finder[page_id].set_theory_data(new_plot)
+        theory_data = self.page_finder[page_id].get_theory_data()
         if data is None:
             name = "Data generates by Fitting "
             theory_data.name = name
@@ -1266,17 +1290,19 @@ class Plugin(PluginBase):
         self.parent.update_theory(data_id=data_id, 
                                        theory=theory_data,
                                        state=state)  
-        current_pg = self.fit_panel.get_page_by_id(id)
+        current_pg = self.fit_panel.get_page_by_id(page_id)
         title = new_plot.title
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                                title=title))
         # Chisqr in fitpage
         wx.PostEvent(current_pg,
-            Chi2UpdateEvent(output=self._cal_chisqr(data=data, id=id, index=index)))
+            Chi2UpdateEvent(output=self._cal_chisqr(data=data,
+                                                     page_id=page_id,
+                                                     index=index)))
         msg = "Plot 2D complete !"
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
     
-    def _draw_model2D(self, model, id, data=None, smearer=None,
+    def _draw_model2D(self, model, page_id, data=None, smearer=None,
                       description=None, enable2D=False,
                       state=None,
                       toggle_mode_on=False,
@@ -1302,7 +1328,7 @@ class Plugin(PluginBase):
                                num=qstep,
                                endpoint=True)
         if model is None:
-            msg = "Panel with ID: %s does not contained model" % str(id)
+            msg = "Panel with ID: %s does not contained model" % str(page_id)
             raise ValueError, msg
         ## use data info instead
         if data is not None:
@@ -1324,15 +1350,15 @@ class Plugin(PluginBase):
                                     y=y,
                                     model=model, 
                                     data=data,
-                                    id=id,
+                                    page_id=page_id,
                                     smearer=smearer,
                                     qmin=qmin,
                                     qmax=qmax,
                                     qstep=qstep,
                                     toggle_mode_on=toggle_mode_on,
                                     state=state,
-                                    completefn=self._complete2D,
-                                    updatefn=self._update2D)
+                                    completefn=self._complete2D)#,
+                                    #updatefn=self._update2D)
             self.calc_2D.queue()
 
         except:
@@ -1341,7 +1367,7 @@ class Plugin(PluginBase):
             #msg += " %s" % sys.exc_value
             #wx.PostEvent(self.parent, StatusEvent(status=msg))
 
-    def _draw_model1D(self, model, id, data=None, smearer=None,
+    def _draw_model1D(self, model, page_id, data=None, smearer=None,
                 qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, 
                 state=None,
                 toggle_mode_on=False,
@@ -1377,14 +1403,14 @@ class Plugin(PluginBase):
             self.calc_1D = Calc1D(x=x,
                                   data=data,
                                   model=model,
-                                  id=id, 
+                                  page_id=page_id, 
                                   qmin=qmin,
                                   qmax=qmax,
                                   smearer=smearer,
                                   state=state,
                                   toggle_mode_on=toggle_mode_on,
-                                  completefn=self._complete1D,
-                                  updatefn=self._update1D)
+                                  completefn=self._complete1D)#,
+                                  #updatefn=self._update1D)
             self.calc_1D.queue()
 
         except:
@@ -1392,7 +1418,7 @@ class Plugin(PluginBase):
             msg += " %s" % sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg))
 
-    def _cal_chisqr(self, id, data=None, index=None): 
+    def _cal_chisqr(self, page_id, data=None, index=None): 
         """
         Get handy Chisqr using the output from draw1D and 2D, 
         instead of calling expansive CalcChisqr in guithread
@@ -1410,7 +1436,7 @@ class Plugin(PluginBase):
             # get rid of zero error points
             index = index & (data.err_data != 0)  
             fn = data.data[index] 
-            theory_data = self.page_finder[id].get_theory_data()
+            theory_data = self.page_finder[page_id].get_theory_data()
             gn = theory_data.data[index]
             en = data.err_data[index]
         else:
@@ -1425,7 +1451,7 @@ class Plugin(PluginBase):
                 dy = data.dy
                 dy[dy==0] = 1  
             fn = data.y[index] 
-            theory_data = self.page_finder[id].get_theory_data()
+            theory_data = self.page_finder[page_id].get_theory_data()
             gn = theory_data.y
             en = dy[index]
         # residual
