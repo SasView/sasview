@@ -16,10 +16,12 @@ class DataState(object):
     """
      Store information about data
     """
-    def __init__(self, data, parent=None):
+    def __init__(self, data, theory_data=None, model=None, parent=None):
         """
         
         """
+        self.model = model
+        self.theory_data = theory_data
         self.parent = parent
         self.data = data
         self.name = ""
@@ -35,7 +37,12 @@ class DataState(object):
             _str += "Data name : %s \n" % str(self.data.name)
             _str += "Data ID : %s \n" % str(self.data.id)
         else:
-            _str += "Data: %s \n" % str(self.data)
+            _str += "Theory Data: %s \n" % str(self.theory_data)
+        if self.theory_data is not None:
+            _str += "Data name : %s \n" % str(self.theory_data.name)
+            _str += "Theory Data ID : %s \n" % str(self.theory_data.id)
+        else:
+            _str += "Theory Data: %s \n" % str(self.theory_data)
             
         _str += "Theories available: %s \n" % len(self.theory_list)
         if self.theory_list:
@@ -72,6 +79,26 @@ class DataState(object):
     
     def set_data(self, data):
         self.data = data
+        
+    def set_theory_data(self, theory_data):
+        """
+        """
+        self.theory_data = theory_data
+        
+    def get_theory_data(self):
+        """
+        """
+        return self.theory_data
+        
+    def set_model(self, model):
+        """
+        """
+        self.model = model
+        
+    def get_model(self):
+        """
+        """
+        return self.model
         
     def get_data(self):
         return self.data

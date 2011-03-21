@@ -241,15 +241,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._slicerpop.Append(id, '&Print Preview', 'image preview for print')
         wx.EVT_MENU(self, id, self.onPrinterPreview)
         
-        symbol_menu = wx.Menu()
-        for label in self._symbol_labels:
-            id = wx.NewId()
-            symbol_menu.Append(id, str(label), str(label))
-            wx.EVT_MENU(self, id, self.onChangeSymbol)
-        id = wx.NewId()
-        self._slicerpop.AppendMenu(id,'&Modify Symbol',  symbol_menu)
-        self._slicerpop.AppendSeparator()
-        
+       
         #add menu of other plugins
         item_list = self.parent.get_context_menu(self)
         if (not item_list == None) and (not len(item_list) == 0):
@@ -273,6 +265,14 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 id = wx.NewId()
                 self._slicerpop.Append(id, '&Freeze', 'Freeze')
                 wx.EVT_MENU(self, id, self.onFreeze)
+            symbol_menu = wx.Menu()
+            for label in self._symbol_labels:
+                id = wx.NewId()
+                symbol_menu.Append(id, str(label), str(label))
+                wx.EVT_MENU(self, id, self.onChangeSymbol)
+            id = wx.NewId()
+            self._slicerpop.AppendMenu(id,'&Modify Symbol',  symbol_menu)
+            self._slicerpop.AppendSeparator()
             #else:
             id = wx.NewId()
             self._slicerpop.Append(id, '&Linear Fit')

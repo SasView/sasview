@@ -286,30 +286,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         self.tree_ctrl = DataTreeCtrl(parent=self)
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKING, self.on_check_item)
-        self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_RIGHT_CLICK, self.on_right_click)
-        label = wx.StaticText(self, -1, "LOADED DATA")
-        label.SetForegroundColour('blue')
-        self.sizer1.Add(label, 0, wx.LEFT, 10)
         self.sizer1.Add(self.tree_ctrl,1, wx.EXPAND|wx.ALL, 10)
-        
-
-    def on_right_click(self, event):
-        """
-        """
-        ## Create context menu for data 
-        self.popUpMenu = wx.Menu()
-        msg = "Edit %s"%str(self.tree_ctrl.GetItemText(event.GetItem()))
-        id = wx.NewId()
-        self.edit_data_mitem = wx.MenuItem(self.popUpMenu,id,msg,
-                                 "Edit meta data")
-        wx.EVT_MENU(self, id, self.on_edit_data)
-        self.popUpMenu.AppendItem(self.edit_data_mitem)
-        self.Bind(wx.EVT_CONTEXT_MENU, self.onContextMenu)
-        
-    def on_edit_data(self, event):
-        """
-        """
-        print "editing data"
         
     def onContextMenu(self, event): 
         """
