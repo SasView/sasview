@@ -1970,7 +1970,7 @@ class FitPage(BasicPage):
         self._manager.set_smearer(smearer=self.current_smearer,
                                  qmin=float(self.qmin_x),
                                  qmax= float(self.qmax_x),
-                                 id=self.id)
+                                 uid=self.uid)
         return msg
         
     def update_pinhole_smear(self):
