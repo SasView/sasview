@@ -4,7 +4,7 @@ import time
 from data_util.calcthread import CalcThread
 import sys
 import numpy,math
-from DataLoader.smearing_2d import Smearer2D
+from sans.models.smearing_2d import Smearer2D
 
 class Calc2D(CalcThread):
     """

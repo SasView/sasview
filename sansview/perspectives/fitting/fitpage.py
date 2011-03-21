@@ -21,7 +21,7 @@ SMEAR_SIZE_H = 0.006
 import basepage
 from basepage import BasicPage
 from basepage import PageInfoEvent
-from DataLoader.qsmearing import smear_selection
+from sans.models.qsmearing import smear_selection
 
 class FitPage(BasicPage):
     """
