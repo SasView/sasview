@@ -9,7 +9,7 @@ from sans.guiframe.plugin_base import PluginBase
 class DummyView(gui_manager.ViewApp):
     """
     """
-    PROG_SPLASH_PATH = None
+    #PROG_SPLASH_PATH = None
     STYLE = GUIFRAME.SINGLE_APPLICATION
     
 class TestPlugin(PluginBase):
@@ -124,3 +124,4 @@ class SansView():
 
 if __name__ == "__main__": 
     sansview = SansView()
+    

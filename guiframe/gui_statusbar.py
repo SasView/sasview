@@ -47,7 +47,7 @@ class Console(wx.Frame):
         self.panel = ConsolePanel(self)
         self.panel.set_message(status=status)
         wx.EVT_CLOSE(self, self.Close)
-        self.Show(True)
+        
         
     def set_multiple_messages(self, messages=[]):
         """

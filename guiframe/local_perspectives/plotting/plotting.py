@@ -86,9 +86,18 @@ class Plugin(PluginBase):
             panel = self.plot_panels[group_id]
             panel.remove_data_by_id(id=id)
             return True
-        else:
-            msg = "Panel with GROUP_ID: %s cannot be located" % str(group_id)
-            raise ValueError, msg
+        return False
+        
+    def clear_panel(self, group_id):
+        """
+        clear the graph
+        """
+        if group_id in self.plot_panels.keys():
+            panel = self.plot_panels[group_id]
+            panel.graph.reset()
+            return True
+        return False
+            
         
     def hide_panel(self, group_id):
         """
@@ -169,8 +178,13 @@ class Plugin(PluginBase):
         # as the plottable we just received. 
         _, x_unit =  data.get_xaxis()
         _, y_unit =  data.get_yaxis()
-        if x_unit != panel.graph.prop["xunit"] \
-            or  y_unit != panel.graph.prop["yunit"]:
+        flag_x = (panel.graph.prop["xunit"] is not None) and \
+                    (panel.graph.prop["xunit"].strip() != "") and\
+                    (x_unit != panel.graph.prop["xunit"])
+        flag_y = (panel.graph.prop["yunit"] is not None) and \
+                    (panel.graph.prop["yunit"].strip() != "") and\
+                    (x_unit != panel.graph.prop["yunit"])
+        if (flag_x and flag_y):
             msg = "Cannot add %s" % str(data.name)
             msg += " to panel %s\n" % str(panel.window_caption)
             msg += "Please edit %s's units, labels" % str(data.name)
@@ -223,6 +237,9 @@ class Plugin(PluginBase):
                 return self.hide_panel(group_id)
             if event.action.lower() == 'delete':
                 return self.delete_panel(group_id)
+            if event.action.lower() == "clear":
+                return self.clear_panel(group_id)
+            
         title = None
         if hasattr(event, 'title'):
             title = event.title

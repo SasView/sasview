@@ -817,33 +817,13 @@ class ViewerFrame(wx.Frame):
         self._edit_menu.Append(GUIFRAME_ID.REDO_ID, '&Redo', 
                                'Redo the previous action')
         wx.EVT_MENU(self, GUIFRAME_ID.REDO_ID, self.on_redo_panel)
-        #self._edit_menu.AppendSeparator()
-        #self._edit_menu.Append(GUIFRAME_ID.BOOKMARK_ID, '&Bookmark', 
-        #                       'bookmark current panel')
-        #wx.EVT_MENU(self, GUIFRAME_ID.BOOKMARK_ID, self.append_bookmark)
-        self._edit_menu.Append(GUIFRAME_ID.SAVE_ID, '&Save As', 
-                               'Save current panel into file')
-        wx.EVT_MENU(self, GUIFRAME_ID.SAVE_ID, self.on_save_panel)
         self._edit_menu.AppendSeparator()
-        self._edit_menu.Append(GUIFRAME_ID.PREVIEW_ID, '&Print Preview',
+        self._edit_menu.Append(GUIFRAME_ID.PREVIEW_ID, '&Report',
                                'Preview current panel')
         wx.EVT_MENU(self, GUIFRAME_ID.PREVIEW_ID, self.on_preview_panel)
         self._edit_menu.Append(GUIFRAME_ID.PRINT_ID, '&Print',
                                'Print current panel')
         wx.EVT_MENU(self, GUIFRAME_ID.PRINT_ID, self.on_print_panel)
-        self._edit_menu.AppendSeparator()
-        self._edit_menu.Append(GUIFRAME_ID.ZOOM_ID, '&Zoom',
-                               'Zoom current panel')
-        wx.EVT_MENU(self, GUIFRAME_ID.ZOOM_ID, self.on_zoom_panel)
-        self._edit_menu.Append(GUIFRAME_ID.ZOOM_IN_ID, '&Zoom In',
-                               'Zoom in current panel')
-        wx.EVT_MENU(self, GUIFRAME_ID.ZOOM_IN_ID, self.on_zoom_in_panel)
-        self._edit_menu.Append(GUIFRAME_ID.ZOOM_OUT_ID, '&Zoom Out', 
-                               'Zoom out current panel')
-        wx.EVT_MENU(self, GUIFRAME_ID.ZOOM_OUT_ID, self.on_zoom_out_panel)
-        self._edit_menu.Append(GUIFRAME_ID.DRAG_ID, '&Drag',
-                               'Drag current panel')
-        wx.EVT_MENU(self, GUIFRAME_ID.DRAG_ID, self.on_drag_panel)
         self._edit_menu.Append(GUIFRAME_ID.RESET_ID, '&Reset', 
                                'Reset current panel')
         wx.EVT_MENU(self, GUIFRAME_ID.RESET_ID, self.on_reset_panel)
@@ -1519,36 +1499,18 @@ class ViewerFrame(wx.Frame):
             self._edit_menu.Enable(GUIFRAME_ID.UNDO_ID, flag)
             flag = self.panel_on_focus.get_redo_flag()
             self._edit_menu.Enable(GUIFRAME_ID.REDO_ID, flag)
-            #flag = self.panel_on_focus.get_bookmark_flag()
-            #self._edit_menu.Enable(GUIFRAME_ID.BOOKMARK_ID, flag)
-            flag = self.panel_on_focus.get_save_flag()
-            self._edit_menu.Enable(GUIFRAME_ID.SAVE_ID, flag)
             flag = self.panel_on_focus.get_print_flag()
             self._edit_menu.Enable(GUIFRAME_ID.PRINT_ID, flag)
             flag = self.panel_on_focus.get_preview_flag()
             self._edit_menu.Enable(GUIFRAME_ID.PREVIEW_ID, flag)
-            flag = self.panel_on_focus.get_zoom_flag()
-            self._edit_menu.Enable(GUIFRAME_ID.ZOOM_ID, flag)
-            flag = self.panel_on_focus.get_zoom_in_flag()
-            self._edit_menu.Enable(GUIFRAME_ID.ZOOM_IN_ID, flag)
-            flag = self.panel_on_focus.get_zoom_out_flag()
-            self._edit_menu.Enable(GUIFRAME_ID.ZOOM_OUT_ID, flag)
-            flag = self.panel_on_focus.get_drag_flag()
-            self._edit_menu.Enable(GUIFRAME_ID.DRAG_ID, flag)
             flag = self.panel_on_focus.get_reset_flag()
             self._edit_menu.Enable(GUIFRAME_ID.RESET_ID, flag)
         else:
             flag = False
             self._edit_menu.Enable(GUIFRAME_ID.UNDO_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.REDO_ID, flag)
-            #self._edit_menu.Enable(GUIFRAME_ID.BOOKMARK_ID, flag)
-            self._edit_menu.Enable(GUIFRAME_ID.SAVE_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.PRINT_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.PREVIEW_ID, flag)
-            self._edit_menu.Enable(GUIFRAME_ID.ZOOM_ID, flag)
-            self._edit_menu.Enable(GUIFRAME_ID.ZOOM_IN_ID, flag)
-            self._edit_menu.Enable(GUIFRAME_ID.ZOOM_OUT_ID, flag)
-            self._edit_menu.Enable(GUIFRAME_ID.DRAG_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.RESET_ID, flag)
             
     def on_undo_panel(self, event=None):
@@ -1736,6 +1698,10 @@ class ViewApp(wx.App):
     TITLE = config.__appname__
     PROG_SPLASH_PATH = PROG_SPLASH_SCREEN
     STYLE = GUIFRAME.SINGLE_APPLICATION
+    SPLASH_WIDTH = 500
+    SPLASH_HEIGHT = 300
+    SPLASH_MAX_DISPLAY_TIME = 3000 #3 sec
+    
     def OnInit(self):
         """
         """
@@ -1751,16 +1717,25 @@ class ViewApp(wx.App):
         if self.PROG_SPLASH_PATH is not None and \
             os.path.isfile(self.PROG_SPLASH_PATH):
             try:
-                self.display_splash_screen(parent=self.frame, path=self.PROG_SPLASH_PATH)   
+                s_screen = self.display_splash_screen(parent=self.frame, path=self.PROG_SPLASH_PATH)   
             except:
-                msg = "Cannot display splash screen\n"
-                msg += str (sys.exc_value)
-                logging.error(msg)
-        self.frame.Show(True)
+                try: 
+                    self.frame.Show()
+                except:
+                    
+                    msg = "Cannot display splash screen\n"
+                    msg += str (sys.exc_value)
+                    #raise
+                    logging.error(msg)
+        else:
+            self.frame.Show()
+        
 
         if hasattr(self.frame, 'special'):
             self.frame.special.SetCurrent()
         self.SetTopWindow(self.frame)
+        import time
+        
         return True
     
     def set_manager(self, manager):
@@ -1824,13 +1799,14 @@ class ViewApp(wx.App):
         # Return the suggested position and size for the application frame.
         return (xpos, ypos), (min(x, window_width), min(y, window_height))
     
-    def display_splash_screen(self, parent, path=PROG_SPLASH_SCREEN):
+    def display_splash_screen(self, parent, 
+                              path=PROG_SPLASH_SCREEN):
         """Displays the splash screen.  It will exactly cover the main frame."""
 
         # Prepare the picture.  On a 2GHz intel cpu, this takes about a second.
         x, y = parent.GetSizeTuple()
         image = wx.Image(path, wx.BITMAP_TYPE_PNG)
-        image.Rescale(x, y, wx.IMAGE_QUALITY_HIGH)
+        image.Rescale(self.SPLASH_WIDTH, self.SPLASH_HEIGHT, wx.IMAGE_QUALITY_HIGH)
         bm = image.ConvertToBitmap()
 
         # Create and show the splash screen.  It will disappear only when the
@@ -1842,27 +1818,29 @@ class ViewApp(wx.App):
         #
         # Note that on Linux, the timeout appears to occur immediately in which
         # case the splash screen disappears upon entering the event loop.
-        wx.SplashScreen(bitmap=bm,
-                        splashStyle=(wx.SPLASH_CENTRE_ON_PARENT|
-                                     wx.SPLASH_TIMEOUT|
-                                     wx.STAY_ON_TOP),
-                        milliseconds=4000,
+        s_screen = wx.SplashScreen(bitmap=bm,
+                         splashStyle=(wx.SPLASH_TIMEOUT|
+                                              wx.SPLASH_CENTRE_ON_SCREEN),
+                                 style=(wx.SIMPLE_BORDER|
+                                        wx.FRAME_NO_TASKBAR|
+                                        wx.STAY_ON_TOP),
+                                        
+                        milliseconds=self.SPLASH_MAX_DISPLAY_TIME,
                         parent=parent,
                         id=wx.ID_ANY)
 
-        # Keep the splash screen up a minimum amount of time for non-Windows
-        # systems.  This is a workaround for Linux and possibly MacOS that
-        # appear to ignore the splash screen timeout option.
-        if '__WXMSW__' not in wx.PlatformInfo:
-            if len(sys.argv) > 1 and '--time' in sys.argv[1:]:
-                log_time("Starting sleep of 2 secs")
-            time.sleep(2)
-
-        # A call to wx.Yield does not appear to be required.  If used on
-        # Windows, the cursor changes from 'busy' to 'ready' before the event
-        # loop is reached which is not desirable.  On Linux it seems to have
-        # no effect.
-        #wx.Yield()
+        s_screen.Bind(wx.EVT_CLOSE, self.on_close_splash_screen)
+        s_screen.Show()
+        return s_screen
+        
+        
+    def on_close_splash_screen(self, event):
+        """
+        """
+        self.frame.Show(True)
+        event.Skip()
+      
+      
 
         
 

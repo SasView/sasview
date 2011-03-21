@@ -37,37 +37,12 @@ class GUIToolBar(Tbar):
         """
         tbar_size = (22, 22)
         button_type =  wx.ITEM_NORMAL
-        save_im = GUIFRAME_ICON.SAVE_ICON
-        save_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
-        save_bmp = save_im.ConvertToBitmap()
-        #disable_save_bmp = clear_image(save_im).ConvertToBitmap()
-        disable_save_bmp = wx.NullBitmap
-        self.AddLabelTool(GUIFRAME_ID.SAVE_ID, 'Save', save_bmp, 
-                          disable_save_bmp,button_type, shortHelp='Save')
+      
         self.AddSeparator()
         zoom_in_im = GUIFRAME_ICON.ZOOM_IN_ICON
         zoom_in_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
         zoom_in_bmp = zoom_in_im.ConvertToBitmap()
         #disable_zoom_in_bmp = clear_image(zoom_in_im).ConvertToBitmap()
-        disable_zoom_in_bmp = wx.NullBitmap
-        self.AddLabelTool(GUIFRAME_ID.ZOOM_IN_ID, 'Zoom In', zoom_in_bmp,
-                   disable_zoom_in_bmp, button_type,'Zoom In')
-        self.AddSeparator()
-        zoom_out_im = GUIFRAME_ICON.ZOOM_OUT_ICON
-        zoom_out_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
-        zoom_out_bmp = zoom_out_im.ConvertToBitmap()
-        #disable_zoom_out_bmp = clear_image(zoom_out_im).ConvertToBitmap()
-        disable_zoom_out_bmp = wx.NullBitmap
-        self.AddLabelTool(GUIFRAME_ID.ZOOM_OUT_ID, 'Zoom Out', zoom_out_bmp,
-                   disable_zoom_out_bmp, button_type,'Zoom Out')
-        self.AddSeparator()
-        zoom_im = GUIFRAME_ICON.ZOOM_ICON
-        zoom_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
-        zoom_bmp = zoom_im.ConvertToBitmap()
-        #disable_zoom_bmp = clear_image(zoom_im).ConvertToBitmap()
-        disable_zoom_bmp = wx.NullBitmap
-        self.AddLabelTool(GUIFRAME_ID.ZOOM_ID, 'Zoom', zoom_bmp,
-                   disable_zoom_bmp, button_type,'Zoom In')
         self.AddSeparator()
         reset_im = GUIFRAME_ICON.RESET_ICON
         reset_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
@@ -80,10 +55,6 @@ class GUIToolBar(Tbar):
         drag_im = GUIFRAME_ICON.DRAG_ICON
         drag_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
         drag_bmp = drag_im.ConvertToBitmap()
-        #disable_drag_bmp = clear_image(drag_im).ConvertToBitmap()
-        disable_drag_bmp = wx.NullBitmap
-        self.AddLabelTool(GUIFRAME_ID.DRAG_ID, 'Drag', drag_bmp,
-                   disable_drag_bmp, button_type,'Drag')
         self.AddSeparator()
         report_im = GUIFRAME_ICON.REPORT_ICON
         report_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
@@ -157,16 +128,6 @@ class GUIToolBar(Tbar):
                              id=GUIFRAME_ID.REDO_ID)
             self.parent.Bind(wx.EVT_TOOL, self.parent.on_undo_panel,
                              id=GUIFRAME_ID.UNDO_ID)
-            self.parent.Bind(wx.EVT_TOOL, self.parent.on_save_panel,
-                             id=GUIFRAME_ID.SAVE_ID)
-            self.parent.Bind(wx.EVT_TOOL, self.parent.on_zoom_in_panel,
-                             id=GUIFRAME_ID.ZOOM_IN_ID)
-            self.parent.Bind(wx.EVT_TOOL, self.parent.on_zoom_out_panel,
-                             id=GUIFRAME_ID.ZOOM_OUT_ID)
-            self.parent.Bind(wx.EVT_TOOL, self.parent.on_zoom_panel,
-                             id=GUIFRAME_ID.ZOOM_ID)
-            self.parent.Bind(wx.EVT_TOOL, self.parent.on_drag_panel,
-                             id=GUIFRAME_ID.DRAG_ID)
             self.parent.Bind(wx.EVT_TOOL, self.parent.on_reset_panel,
                              id=GUIFRAME_ID.RESET_ID)
             self.parent.Bind(wx.EVT_TOOL, self.parent.on_preview_panel,
@@ -187,12 +148,7 @@ class GUIToolBar(Tbar):
             self.EnableTool(GUIFRAME_ID.PRINT_ID, False)
             self.EnableTool(GUIFRAME_ID.UNDO_ID,False)
             self.EnableTool(GUIFRAME_ID.REDO_ID, False)
-            self.EnableTool(GUIFRAME_ID.ZOOM_ID, False)
-            self.EnableTool(GUIFRAME_ID.ZOOM_IN_ID, False)
-            self.EnableTool(GUIFRAME_ID.ZOOM_OUT_ID, False)
             self.EnableTool(GUIFRAME_ID.PREVIEW_ID, False)
-            self.EnableTool(GUIFRAME_ID.SAVE_ID, False)
-            self.EnableTool(GUIFRAME_ID.DRAG_ID, False)
             self.EnableTool(GUIFRAME_ID.RESET_ID, False)
             self._bookmark_bt.Disable()
             
@@ -200,12 +156,7 @@ class GUIToolBar(Tbar):
             self.EnableTool(GUIFRAME_ID.PRINT_ID, panel.get_print_flag())
             self.EnableTool(GUIFRAME_ID.UNDO_ID, panel.get_undo_flag())
             self.EnableTool(GUIFRAME_ID.REDO_ID, panel.get_redo_flag())
-            self.EnableTool(GUIFRAME_ID.ZOOM_ID, panel.get_zoom_flag())
-            self.EnableTool(GUIFRAME_ID.ZOOM_IN_ID, panel.get_zoom_in_flag())
-            self.EnableTool(GUIFRAME_ID.ZOOM_OUT_ID, panel.get_zoom_out_flag())
             self.EnableTool(GUIFRAME_ID.PREVIEW_ID, panel.get_preview_flag())
-            self.EnableTool(GUIFRAME_ID.SAVE_ID, panel.get_save_flag())
-            self.EnableTool(GUIFRAME_ID.DRAG_ID, panel.get_drag_flag())
             self.EnableTool(GUIFRAME_ID.RESET_ID, panel.get_reset_flag())
             self._bookmark_bt.Enable(panel.get_bookmark_flag())
         self.Realize()
