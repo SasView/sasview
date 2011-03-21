@@ -1301,7 +1301,7 @@ class Plugin(PluginBase):
             logging.info("Prview : ntemrs Not estimate yet")
             pass
         
-        self.current_plottable = panel.plots[dataset]
+        self.current_plottable = panel.plots[panel.graph.selected_plottable]
         self.control_panel.plotname = dataset
         #self.control_panel.nfunc = self.nfunc
         self.control_panel.d_max = self.max_length
