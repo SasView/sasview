@@ -38,6 +38,9 @@ PR_LOADED_LABEL    = r"$P_{loaded}(r)$"
 IQ_DATA_LABEL      = r"$I_{obs}(q)$"
 IQ_FIT_LABEL       = r"$I_{fit}(q)$"
 IQ_SMEARED_LABEL   = r"$I_{smeared}(q)$"
+GROUP_ID_IQ_DATA = r"$I_{obs}(q)$"
+GROUP_ID_PR_FIT = r"$P_{fit}(r)$"
+
 
 
 class Plugin(PluginBase):
@@ -326,6 +329,7 @@ class Plugin(PluginBase):
             new_plot.group_id = pr.info["plot_group_id"]
         new_plot.id = IQ_FIT_LABEL
         self.parent.update_theory(data_id=self.data_id, theory=new_plot)
+        
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
         
         # If we have used slit smearing, plot the smeared I(q) too
@@ -417,7 +421,7 @@ class Plugin(PluginBase):
         # Make sure that the plot is linear
         new_plot.xtransform = "x"
         new_plot.ytransform = "y"  
-        new_plot.group_id = "P(r) fit"
+        new_plot.group_id = GROUP_ID_PR_FIT
         self.parent.update_theory(data_id=self.data_id, theory=new_plot)    
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="P(r) fit"))
         return x, pr.d_max
@@ -919,9 +923,9 @@ class Plugin(PluginBase):
         new_plot.xaxis("\\rm{Q}", 'A^{-1}')
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         new_plot.interactive = True
-        new_plot.group_id = IQ_DATA_LABEL 
+        new_plot.group_id = GROUP_ID_IQ_DATA
         new_plot.id = self.data_id
-        new_plot.title = "I(q)"    
+        new_plot.title = "I(q)"   
         wx.PostEvent(self.parent, 
                      NewPlotEvent(plot=new_plot, title="I(q)", reset=reset))
         
@@ -1275,9 +1279,7 @@ class Plugin(PluginBase):
         # If we have more than one displayed plot, make the user choose
         if len(panel.plots) > 1 and \
             panel.graph.selected_plottable in panel.plots:
-            dataset = panel.graph.selected_plottable
-        elif len(panel.plots) == 1:
-            dataset = panel.plots.keys()[0]
+            dataset = panel.plots[panel.graph.selected_plottable].name
         else:
             logging.info("Prview Error: No data is available")
             return
@@ -1345,6 +1347,10 @@ class Plugin(PluginBase):
                 return
             if issubclass(data.__class__, Data1D):
                 try:
+                    wx.PostEvent(self.parent, NewPlotEvent(action='remove',
+                                                group_id=GROUP_ID_IQ_DATA, 
+                                                id=self.data_id))
+                                              
                     self.data_id = data.id
                     self.control_panel._change_file(evt=None, data=data)
                 except:
