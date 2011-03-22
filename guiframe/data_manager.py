@@ -119,21 +119,7 @@ class DataManager(object):
             name = name + " [" + str(self.data_name_dict[name]) + "]"
         return name
     
-    def add_theory_data(self, data_list):
-        """
-        """
-        for id, data in data_list.iteritems():
-            if id  in self.stored_data:
-                msg = "Data manager already stores %s" % str(data.name)
-                msg += ""
-                logging.info(msg)
-                data_state = self.stored_data[id]
-                data_state.theory_data = data
-            else:
-                data_state = DataState(theory_data=data)
-                data_state.id = data.id
-                self.stored_data[id] = data_state
-                
+  
     def add_data(self, data_list):
         """
         receive a list of 
@@ -150,7 +136,6 @@ class DataManager(object):
                 data_state.id = id
                 self.stored_data[id] = data_state
     
-        
     def update_data(self, prev_data, new_data):
         """
         """
@@ -163,14 +148,21 @@ class DataManager(object):
             del self.stored_data[prev_data.id] 
         return prev_data.id, {new_data.id: self.stored_data[new_data.id]}
     
-    def update_theory(self, data_id, theory, state=None):
+    def update_theory(self, theory, data_id=None, state=None):
         """
         """
-        if data_id in self.stored_data.keys():
-            data_state = self.stored_data[data_id] 
-            data_state.set_theory(theory_data=theory, theory_state=state)
-            return {data_id: self.stored_data[data_id]}
-        return {}
+        uid = data_id
+        if data_id is None and theory is not None:
+            uid = theory.id
+        if uid in self.stored_data.keys():
+             data_state = self.stored_data[uid] 
+        else:
+            data_state = DataState()
+        data_state.uid = uid
+        data_state.set_theory(theory_data=theory, theory_state=state)
+        self.stored_data[uid] = data_state
+        return {uid: self.stored_data[uid]}
+       
     
     def get_message(self):
         """

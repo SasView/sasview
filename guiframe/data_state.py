@@ -16,12 +16,10 @@ class DataState(object):
     """
      Store information about data
     """
-    def __init__(self, data, theory_data=None, model=None, parent=None):
+    def __init__(self, data=None, parent=None):
         """
         
         """
-        self.model = model
-        self.theory_data = theory_data
         self.parent = parent
         self.data = data
         self.name = ""
@@ -78,29 +76,14 @@ class DataState(object):
         return self.name
     
     def set_data(self, data):
+        """
+        """
         self.data = data
-        
-    def set_theory_data(self, theory_data):
-        """
-        """
-        self.theory_data = theory_data
-        
-    def get_theory_data(self):
-        """
-        """
-        return self.theory_data
-        
-    def set_model(self, model):
-        """
-        """
-        self.model = model
-        
-    def get_model(self):
-        """
-        """
-        return self.model
-        
+  
+   
     def get_data(self):
+        """
+        """
         return self.data
     
     def set_path(self, path):
