@@ -52,6 +52,7 @@ class HelpWindow(wx.Frame):
         # get the media path
         path = models.get_data_path(media='media')
         self.path = os.path.join(path,"model_functions.html")
+        self.path_sm = os.path.join(path,"smear_computation.html")
                     
         page1="""<html>
             <body>
@@ -70,9 +71,10 @@ class HelpWindow(wx.Frame):
             <li><a href ="media/model_use_help.html" target ="showframe">Visualize Model</a><br></li>
             <li><a href ="media/averaging_help.html" target ="showframe">Data Averaging</a><br></li>
             <li><a href ="%s" target ="showframe">Model Functions</a><br></li>
+            <li><a href ="%s" target ="showframe">Smear Computation</a><br></li>
             </ul>
             </body>
-            </html>""" % self.path
+            </html>""" % (self.path, self.path_sm)
         
         self.rhelp.SetPage(page1)
         self.lhelp.SetPage(page)
