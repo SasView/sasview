@@ -199,7 +199,8 @@ class Smearer2D:
                                     (r - bin_size / 2.0)))- \
                                     numpy.exp(-0.5 * ((r + bin_size / 2.0 ) *\
                                     (r + bin_size / 2.0)))
-        weight_res /= numpy.sum(weight_res)
+        # No needs of normalization here.
+        #weight_res /= numpy.sum(weight_res)
         weight_res = weight_res.repeat(nphi).reshape(nr, nphi)
 
         weight_res = weight_res.transpose().flatten()
@@ -217,13 +218,14 @@ class Smearer2D:
 
         # The polar needs rotation by -q_phi
         if self.coords == 'polar':
-            qx_res = qx + (dqx*numpy.cos(dphi) * numpy.cos(-q_phi) +\
+            q_r = numpy.sqrt(qx * qx + qy * qy)
+            qx_res = ((dqx*numpy.cos(dphi) + q_r) * numpy.cos(-q_phi) +\
                            dqy*numpy.sin(dphi) * numpy.sin(-q_phi))
-            qy_res = qy + (-dqx*numpy.cos(dphi) * numpy.sin(-q_phi) +\
+            qy_res = (-(dqx*numpy.cos(dphi) + q_r) * numpy.sin(-q_phi) +\
                            dqy*numpy.sin(dphi) * numpy.cos(-q_phi))
         else:
             qx_res = qx +  dqx*numpy.cos(dphi)
-            qy_res = qx +  dqy*numpy.sin(dphi)
+            qy_res = qy +  dqy*numpy.sin(dphi)
 
         ## Evaluate all points
         val = self.model.evalDistribution([qx_res, qy_res]) 
