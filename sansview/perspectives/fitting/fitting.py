@@ -1192,17 +1192,13 @@ class Plugin(PluginBase):
                                                action="Hide"))
            
             self.page_finder[page_id].set_theory_data(new_plot)
-            theory_data = self.page_finder[page_id].get_theory_data()
             if data is None:
-                name = "Data generates by Fitting "
-                theory_data.name = name
-                self.parent.add_data_helper({theory_data.id:theory_data})
-                data_id = theory_data.id
+                data_id = new_plot.id
             else:
                 data_id = data.id
            
             self.parent.update_theory(data_id=data_id, 
-                                       theory=theory_data,
+                                       theory=new_plot,
                                        state=state)     
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
@@ -1279,16 +1275,12 @@ class Plugin(PluginBase):
                                                action="Hide"))
         
         self.page_finder[page_id].set_theory_data(new_plot)
-        theory_data = self.page_finder[page_id].get_theory_data()
         if data is None:
-            name = "Data generates by Fitting "
-            theory_data.name = name
-            self.parent.add_data_helper({theory_data.id:theory_data})
-            data_id = theory_data.id
+            data_id = new_plot.id
         else:
             data_id = data.id
         self.parent.update_theory(data_id=data_id, 
-                                       theory=theory_data,
+                                       theory=new_plot,
                                        state=state)  
         current_pg = self.fit_panel.get_page_by_id(page_id)
         title = new_plot.title
