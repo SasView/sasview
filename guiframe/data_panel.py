@@ -22,14 +22,24 @@ from sans.guiframe.panel_base import PanelBase
 PANEL_WIDTH = 200
 #PANEL_HEIGHT = 560
 PANEL_HEIGHT = 800
+STYLE_FLAG = wx.SUNKEN_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|\
+                    wx.WANTS_CHARS|CT.TR_HAS_VARIABLE_ROW_HEIGHT
+                    
+                    
 class DataTreeCtrl(CT.CustomTreeCtrl):
     """
     Check list control to be used for Data Panel
     """
     def __init__(self, parent,*args, **kwds):
         #agwstyle is introduced in wx.2.8.11
-        kwds['agwStyle']= wx.SUNKEN_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|   \
-                    wx.WANTS_CHARS|CT.TR_HAS_VARIABLE_ROW_HEIGHT
+        try:
+            kwds['agwStyle'] = STYLE_FLAG
+        except:
+            try:
+                kwds['style'] = STYLE_FLAG
+            except:
+                raise
+        
         CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
         self.root = self.AddRoot("Available Data")
         
@@ -282,7 +292,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer4.AddMany([(self.rb_single_mode,0, wx.ALL,5),
                             (self.rb_batch_mode,0, wx.ALL,5)])
       
-    def layout_data_list(self):
+    def old_layout_data_list(self):
         """
         Add a listcrtl in the panel
         """
@@ -292,7 +302,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.theory_root = self.tree_ctrl.InsertItem(self.tree_ctrl.root,0,
                                                    "THEORIES", ct_type=0)
     
-    def new_layout_data_list(self):
+    def layout_data_list(self):
         """
         Add a listcrtl in the panel
         """
@@ -402,9 +412,9 @@ class DataPanel(ScrolledPanel, PanelBase):
                         i_t_c = self.tree_ctrl.AppendItem(d_p_c,
                                                           process.__str__())
             self.append_theory(state_id, theory_list)
-            
+        
    
-    def append_theory(self, state_id, theory_list):
+    def old_append_theory(self, state_id, theory_list):
         """
         append theory object under data from a state of id = state_id
         replace that theory if  already displayed
@@ -421,7 +431,7 @@ class DataPanel(ScrolledPanel, PanelBase):
              self.append_theory_helper(root=root, 
                                        state_id=state_id, 
                                        theory_list=theory_list)
-    def new_append_theory(self, state_id, theory_list):
+    def append_theory(self, state_id, theory_list):
         """
         append theory object under data from a state of id = state_id
         replace that theory if  already displayed
@@ -430,17 +440,19 @@ class DataPanel(ScrolledPanel, PanelBase):
             return 
         if state_id not in self.list_cb_data.keys():
             root = self.tree_ctrl_theory.root
+            tree = self.tree_ctrl_theory
         else:
             item = self.list_cb_data[state_id]
             data_c, _, _, _, _, _ = item
             root = data_c
+            tree = self.tree_ctrl
         if root is not None:
-             self.append_theory_helper(root=root, 
+             self.append_theory_helper(tree=tree, root=root, 
                                        state_id=state_id, 
                                        theory_list=theory_list)
       
       
-    def append_theory_helper(self, root, state_id, theory_list):
+    def append_theory_helper(self, tree, root, state_id, theory_list):
         """
         """
         if state_id in self.list_cb_theory.keys():
@@ -463,15 +475,15 @@ class DataPanel(ScrolledPanel, PanelBase):
                     temp = (theory_id, theory_class, state_id)
                 if theory_id not in theory_list_ctrl:
                     #add new theory
-                    t_child = self.tree_ctrl.AppendItem(root,
+                    t_child = tree.AppendItem(root,
                                                     name, ct_type=1, data=temp)
-                    t_i_c = self.tree_ctrl.AppendItem(t_child, 'Info')
-                    i_c_c = self.tree_ctrl.AppendItem(t_i_c, 
+                    t_i_c = tree.AppendItem(t_child, 'Info')
+                    i_c_c = tree.AppendItem(t_i_c, 
                                                   'Type: %s' % theory_class)
-                    t_p_c = self.tree_ctrl.AppendItem(t_i_c, 'Process')
+                    t_p_c = tree.AppendItem(t_i_c, 'Process')
                     
                     for process in theory_data.process:
-                        i_t_c = self.tree_ctrl.AppendItem(t_p_c,
+                        i_t_c = tree.AppendItem(t_p_c,
                                                           process.__str__())
                     theory_list_ctrl[theory_id] = [t_child, 
                                                    i_c_c, 
@@ -479,12 +491,12 @@ class DataPanel(ScrolledPanel, PanelBase):
                 else:
                     #replace theory
                     t_child, i_c_c, t_p_c = theory_list_ctrl[theory_id]
-                    self.tree_ctrl.SetItemText(t_child, name) 
-                    self.tree_ctrl.SetItemPyData(t_child, temp) 
-                    self.tree_ctrl.SetItemText(i_c_c, 'Type: %s' % theory_class) 
-                    self.tree_ctrl.DeleteChildren(t_p_c) 
+                    tree.SetItemText(t_child, name) 
+                    tree.SetItemPyData(t_child, temp) 
+                    tree.SetItemText(i_c_c, 'Type: %s' % theory_class) 
+                    tree.DeleteChildren(t_p_c) 
                     for process in theory_data.process:
-                        i_t_c = self.tree_ctrl.AppendItem(t_p_c,
+                        i_t_c = tree.AppendItem(t_p_c,
                                                           process.__str__())
               
         else:
@@ -499,21 +511,22 @@ class DataPanel(ScrolledPanel, PanelBase):
                     #if theory_state is not None:
                     #    name = theory_state.model.name 
                     temp = (theory_id, theory_class, state_id)
-                    t_child = self.tree_ctrl.AppendItem(root,
+                    t_child = tree.AppendItem(root,
                             name, ct_type=1, 
                             data=(theory_data.id, theory_class, state_id))
-                    t_i_c = self.tree_ctrl.AppendItem(t_child, 'Info')
-                    i_c_c = self.tree_ctrl.AppendItem(t_i_c, 
+                    t_i_c = tree.AppendItem(t_child, 'Info')
+                    i_c_c = tree.AppendItem(t_i_c, 
                                                   'Type: %s' % theory_class)
-                    t_p_c = self.tree_ctrl.AppendItem(t_i_c, 'Process')
+                    t_p_c = tree.AppendItem(t_i_c, 'Process')
                     
                     for process in theory_data.process:
-                        i_t_c = self.tree_ctrl.AppendItem(t_p_c,
+                        i_t_c = tree.AppendItem(t_p_c,
                                                           process.__str__())
             
                     theory_list_ctrl[theory_id] = [t_child, i_c_c, t_p_c]
                 #self.list_cb_theory[data_id] = theory_list_ctrl
                 self.list_cb_theory[state_id] = theory_list_ctrl
+        
             
    
     def set_data_helper(self):
