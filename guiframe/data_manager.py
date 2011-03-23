@@ -211,10 +211,7 @@ class DataManager(object):
                         new_theory.is_data = True
                         selected_theory[new_theory.id] = DataState(new_theory)
                         self.stored_data[new_theory.id] = selected_theory[new_theory.id]
-                    else:
-                        msg = "Theory with ID %s " % str(t_id)
-                        msg += "couldn't not be frozen" 
-                        raise ValueError, msg
+
         return selected_theory
                     
             

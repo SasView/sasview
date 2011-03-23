@@ -99,6 +99,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         """
         select_txt = wx.StaticText(self, -1, 'Selection Options')
+        select_txt.SetForegroundColour('blue')
         self.selection_cbox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
         list_of_options = ['Select all Data',
                             'Unselect all Data',
@@ -289,7 +290,24 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer1.Add(self.tree_ctrl,1, wx.EXPAND|wx.ALL, 10)
         self.theory_root = self.tree_ctrl.InsertItem(self.tree_ctrl.root,0,
                                                    "THEORIES", ct_type=0)
-        
+    
+    def new_layout_data_list(self):
+        """
+        Add a listcrtl in the panel
+        """
+        tree_ctrl_label = wx.StaticText(self, -1, "Data")
+        tree_ctrl_label.SetForegroundColour('blue')
+        self.tree_ctrl = DataTreeCtrl(parent=self)
+        self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKING, self.on_check_item)
+        tree_ctrl_theory_label = wx.StaticText(self, -1, "Theory")
+        tree_ctrl_theory_label.SetForegroundColour('blue')
+        self.tree_ctrl_theory = DataTreeCtrl(parent=self)
+        self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_CHECKING, self.on_check_item)
+        self.sizer1.Add(tree_ctrl_label, 0, wx.LEFT, 10)
+        self.sizer1.Add(self.tree_ctrl, 1, wx.EXPAND|wx.ALL, 10)
+        self.sizer1.Add(tree_ctrl_theory_label, 0,  wx.LEFT, 10)
+        self.sizer1.Add(self.tree_ctrl_theory, 1, wx.EXPAND|wx.ALL, 10)
+           
     def onContextMenu(self, event): 
         """
         Retrieve the state selected state
@@ -402,6 +420,24 @@ class DataPanel(ScrolledPanel, PanelBase):
              self.append_theory_helper(root=root, 
                                        state_id=state_id, 
                                        theory_list=theory_list)
+    def new_append_theory(self, state_id, theory_list):
+        """
+        append theory object under data from a state of id = state_id
+        replace that theory if  already displayed
+        """
+        if not theory_list:
+            return 
+        if state_id not in self.list_cb_data.keys():
+            root = self.tree_ctrl_theory.root
+        else:
+            item = self.list_cb_data[state_id]
+            data_c, _, _, _, _, _ = item
+            root = data_c
+        if root is not None:
+             self.append_theory_helper(root=root, 
+                                       state_id=state_id, 
+                                       theory_list=theory_list)
+      
       
     def append_theory_helper(self, root, state_id, theory_list):
         """
