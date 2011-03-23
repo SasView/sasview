@@ -27,6 +27,7 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
     Check list control to be used for Data Panel
     """
     def __init__(self, parent,*args, **kwds):
+        #agwstyle is introduced in wx.2.8.11
         kwds['agwStyle']= wx.SUNKEN_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|   \
                     wx.WANTS_CHARS|CT.TR_HAS_VARIABLE_ROW_HEIGHT
         CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
