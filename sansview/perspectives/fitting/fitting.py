@@ -1193,10 +1193,9 @@ class Plugin(PluginBase):
            
             self.page_finder[page_id].set_theory_data(new_plot)
             if data is None:
-                data_id = new_plot.id
+                data_id = None
             else:
                 data_id = data.id
-           
             self.parent.update_theory(data_id=data_id, 
                                        theory=new_plot,
                                        state=state)     
@@ -1276,7 +1275,7 @@ class Plugin(PluginBase):
         
         self.page_finder[page_id].set_theory_data(new_plot)
         if data is None:
-            data_id = new_plot.id
+            data_id = None
         else:
             data_id = data.id
         self.parent.update_theory(data_id=data_id, 
