@@ -287,6 +287,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.tree_ctrl = DataTreeCtrl(parent=self)
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKING, self.on_check_item)
         self.sizer1.Add(self.tree_ctrl,1, wx.EXPAND|wx.ALL, 10)
+        self.theory_root = self.tree_ctrl.InsertItem(self.tree_ctrl.root,0,
+                                                   "THEORIES", ct_type=0)
         
     def onContextMenu(self, event): 
         """
@@ -334,57 +336,52 @@ class DataPanel(ScrolledPanel, PanelBase):
         
         for state_id, dstate in list.iteritems():
             data = dstate.get_data()
-            if data is None:
-                data_name = "Unkonwn"
-                data_class = "Unkonwn"
-                path = "Unkonwn"
-                process_list = []
-                data_id = "Unkonwn"
-            else:
+            theory_list = dstate.get_theory()
+            if data is not None:
                 data_name = data.name
                 data_class = data.__class__.__name__
                 path = dstate.get_path() 
                 process_list = data.process
                 data_id = data.id
-            theory_list = dstate.get_theory()
-            if state_id not in self.list_cb_data:
-                #new state
-                data_c = self.tree_ctrl.InsertItem(self.tree_ctrl.root,0,
-                                                   data_name, ct_type=1, 
-                                     data=(data_id, data_class, state_id))
-                data_c.Check(True)
-                self.enable_button(data_c)
-                d_i_c = self.tree_ctrl.AppendItem(data_c, 'Info')
-                i_c_c = self.tree_ctrl.AppendItem(d_i_c, 
-                                              'Type: %s' % data_class)
-                p_c_c = self.tree_ctrl.AppendItem(d_i_c,
-                                              'Path: %s' % str(path))
-                d_p_c = self.tree_ctrl.AppendItem(d_i_c, 'Process')
                 
-                for process in process_list:
-                    i_t_c = self.tree_ctrl.AppendItem(d_p_c,
-                                                      process.__str__())
-                theory_child = self.tree_ctrl.AppendItem(data_c, "THEORIES")
-               
-                self.list_cb_data[state_id] = [data_c, 
-                                               d_i_c,
-                                               i_c_c,
-                                                p_c_c,
-                                                 d_p_c,
-                                                 theory_child]
-            else:
-                data_ctrl_list =  self.list_cb_data[state_id]
-                #This state is already display replace it contains
-                data_c, d_i_c, i_c_c, p_c_c, d_p_c, t_c = data_ctrl_list
-                self.tree_ctrl.SetItemText(data_c, data_name) 
-                temp = (data_id, data_class, state_id)
-                self.tree_ctrl.SetItemPyData(data_c, temp) 
-                self.tree_ctrl.SetItemText(i_c_c, 'Type: %s' % data_class)
-                self.tree_ctrl.SetItemText(p_c_c, 'Path: %s' % str(path)) 
-                self.tree_ctrl.DeleteChildren(d_p_c) 
-                for process in process_list:
-                    i_t_c = self.tree_ctrl.AppendItem(d_p_c,
-                                                      process.__str__())
+                if state_id not in self.list_cb_data:
+                    #new state
+                    data_c = self.tree_ctrl.InsertItem(self.tree_ctrl.root,0,
+                                                       data_name, ct_type=1, 
+                                         data=(data_id, data_class, state_id))
+                    data_c.Check(True)
+                    self.enable_button(data_c)
+                    d_i_c = self.tree_ctrl.AppendItem(data_c, 'Info')
+                    i_c_c = self.tree_ctrl.AppendItem(d_i_c, 
+                                                  'Type: %s' % data_class)
+                    p_c_c = self.tree_ctrl.AppendItem(d_i_c,
+                                                  'Path: %s' % str(path))
+                    d_p_c = self.tree_ctrl.AppendItem(d_i_c, 'Process')
+                    
+                    for process in process_list:
+                        i_t_c = self.tree_ctrl.AppendItem(d_p_c,
+                                                          process.__str__())
+                    theory_child = self.tree_ctrl.AppendItem(data_c, "THEORIES")
+                   
+                    self.list_cb_data[state_id] = [data_c, 
+                                                   d_i_c,
+                                                   i_c_c,
+                                                    p_c_c,
+                                                     d_p_c,
+                                                     theory_child]
+                else:
+                    data_ctrl_list =  self.list_cb_data[state_id]
+                    #This state is already display replace it contains
+                    data_c, d_i_c, i_c_c, p_c_c, d_p_c, t_c = data_ctrl_list
+                    self.tree_ctrl.SetItemText(data_c, data_name) 
+                    temp = (data_id, data_class, state_id)
+                    self.tree_ctrl.SetItemPyData(data_c, temp) 
+                    self.tree_ctrl.SetItemText(i_c_c, 'Type: %s' % data_class)
+                    self.tree_ctrl.SetItemText(p_c_c, 'Path: %s' % str(path)) 
+                    self.tree_ctrl.DeleteChildren(d_p_c) 
+                    for process in process_list:
+                        i_t_c = self.tree_ctrl.AppendItem(d_p_c,
+                                                          process.__str__())
             self.append_theory(state_id, theory_list)
             
    
@@ -396,16 +393,22 @@ class DataPanel(ScrolledPanel, PanelBase):
         if not theory_list:
             return 
         if state_id not in self.list_cb_data.keys():
-            msg = "Invalid state ID : %s requested for theory" % str(state_id)
-            raise ValueError, msg
-            
-        item = self.list_cb_data[state_id]
-        data_c, _, _, _, _, theory_child = item
-        data_id, _, _ = self.tree_ctrl.GetItemPyData(data_c) 
-        
-        if data_id in self.list_cb_theory.keys():
+            root = self.theory_root
+        else:
+            item = self.list_cb_data[state_id]
+            data_c, _, _, _, _, _ = item
+            root = data_c
+        if root is not None:
+             self.append_theory_helper(root=root, 
+                                       state_id=state_id, 
+                                       theory_list=theory_list)
+      
+    def append_theory_helper(self, root, state_id, theory_list):
+        """
+        """
+        if state_id in self.list_cb_theory.keys():
             #update current list of theory for this data
-            theory_list_ctrl = self.list_cb_theory[data_id]
+            theory_list_ctrl = self.list_cb_theory[state_id]
 
             for theory_id, item in theory_list.iteritems():
                 theory_data, theory_state = item
@@ -423,7 +426,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                     temp = (theory_id, theory_class, state_id)
                 if theory_id not in theory_list_ctrl:
                     #add new theory
-                    t_child = self.tree_ctrl.AppendItem(theory_child,
+                    t_child = self.tree_ctrl.AppendItem(root,
                                                     name, ct_type=1, data=temp)
                     t_i_c = self.tree_ctrl.AppendItem(t_child, 'Info')
                     i_c_c = self.tree_ctrl.AppendItem(t_i_c, 
@@ -459,7 +462,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                     #if theory_state is not None:
                     #    name = theory_state.model.name 
                     temp = (theory_id, theory_class, state_id)
-                    t_child = self.tree_ctrl.AppendItem(theory_child,
+                    t_child = self.tree_ctrl.AppendItem(root,
                             name, ct_type=1, 
                             data=(theory_data.id, theory_class, state_id))
                     t_i_c = self.tree_ctrl.AppendItem(t_child, 'Info')
@@ -472,7 +475,8 @@ class DataPanel(ScrolledPanel, PanelBase):
                                                           process.__str__())
             
                     theory_list_ctrl[theory_id] = [t_child, i_c_c, t_p_c]
-                self.list_cb_theory[data_id] = theory_list_ctrl
+                #self.list_cb_theory[data_id] = theory_list_ctrl
+                self.list_cb_theory[state_id] = theory_list_ctrl
             
    
     def set_data_helper(self):
@@ -542,7 +546,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         #remove theory  references independently of data
         for key in theory_key:
             for t_key, theory_dict in self.list_cb_theory.iteritems():
-                del theory_dict[key]
+                if key in theory_dict:
+                    del theory_dict[key]
             
         self.parent.remove_data(data_id=data_to_remove,
                                   theory_id=theory_to_remove)
@@ -644,7 +649,7 @@ class State():
         self.msg += "params : \n"
         self.msg += "name  value\n"
         return msg
-def set_data_state(data, path, theory, state):
+def set_data_state(data=None, path=None, theory=None, state=None):
     dstate = DataState(data=data)
     dstate.set_path(path=path)
     dstate.set_theory(theory, state)
@@ -728,7 +733,11 @@ if __name__ == "__main__":
         data_list['3'] = dstate
         #state 6
         data_list['6']=set_data_state(None, path,theory, state)
-        
+        data_list['6']=set_data_state(theory=theory, state=None)
+        theory = Theory1D()
+        theory.id = 7
+        data_list['6']=set_data_state(theory=theory, state=None)
+        data_list['7']=set_data_state(theory=theory, state=None)
         window = DataFrame(list=data_list)
         window.load_data_list(list=data_list)
         #window.layout_perspective(list_of_perspective=list_of_perspective)
