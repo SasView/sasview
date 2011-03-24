@@ -6,7 +6,7 @@ from data_util.calcthread import CalcThread
 class FitThread(CalcThread):
     """Thread performing the fit """
     
-    def __init__(self, parent,
+    def __init__(self, 
                   fn,
                   page_id,
                    handler,
@@ -20,7 +20,6 @@ class FitThread(CalcThread):
                  updatefn,
                  yieldtime,
                  worktime)
-        self.parent = parent
         self.handler = handler
         self.fitter = fn
         self.pars = pars

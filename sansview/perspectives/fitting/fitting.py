@@ -595,8 +595,7 @@ class Plugin(PluginBase):
         
         ## perform single fit
         if fitproblem_count == 1:
-            calc_fit = FitThread(parent=self.parent,
-                                    handler = handler,
+            calc_fit = FitThread(handler = handler,
                                     fn=fitter,
                                    pars=pars,
                                    page_id=list_page_id,
@@ -604,8 +603,7 @@ class Plugin(PluginBase):
         else:
             current_page_id = self.sim_page.uid
             ## Perform more than 1 fit at the time
-            calc_fit = FitThread(parent=self.parent,
-                                handler=handler,
+            calc_fit = FitThread(handler=handler,
                                     fn=fitter,
                                     page_id=list_page_id,
                                    completefn= self._simul_fit_completed)
@@ -1053,10 +1051,10 @@ class Plugin(PluginBase):
         """
         Update the output of plotting model 1D
         """
-        #msg = "Plot updating ... "
-        #wx.PostEvent(self.parent, StatusEvent(status=msg,type="update"))
-        #self.ready_fit()
-        #self.calc_thread.ready(0.01)
+        msg = "Plot updating ... "
+        wx.PostEvent(self.parent, StatusEvent(status=msg,type="update"))
+        self.ready_fit()
+        
     
     def _fill_default_model2D(self, theory, page_id, qmax,qstep, qmin=None):
         """
@@ -1220,11 +1218,10 @@ class Plugin(PluginBase):
         """
         Update the output of plotting model
         """
-        #wx.PostEvent(self.parent, StatusEvent(status="Plot \
+        wx.PostEvent(self.parent, StatusEvent(status="Plot \
         #updating ... ", type="update"))
-        #self.ready_fit()
-        #self.calc_thread.ready(0.01)
-    
+        self.ready_fit()
+  
     def _complete2D(self, image, data, model, page_id,  elapsed, index, qmin,
                      qmax, toggle_mode_on=False,state=None,qstep=DEFAULT_NPTS):
         """
