@@ -159,7 +159,7 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
 RectangleDispersion :: RectangleDispersion() {
 	npts  = 11;
 	width = 0.0;
-	nsigmas = 1.0;
+	nsigmas = 1.73205;
 };
 
 void RectangleDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
@@ -171,8 +171,8 @@ void RectangleDispersion :: accept_as_destination(DispersionVisitor* visitor, vo
 
 double rectangle_weight(double mean, double sigma, double x) {
 	double vary, expo_value;
-    double sig = fabs(sigma);
-    if (x>= (mean-sig) && x<(mean+sig)){
+    double wid = fabs(sigma) * sqrt(3.0);
+    if (x>= (mean-wid) && x<=(mean+wid)){
     	return 1.0;
     }
     else{
@@ -192,7 +192,7 @@ void RectangleDispersion :: operator() (void *param, vector<WeightPoint> &weight
 	if (width<=0) {
 		width = 0.0;
 		npts  = 1;
-		nsigmas = 1.0;
+		nsigmas = 1.73205;
 	}
 
 	Parameter* par = (Parameter*)param;
@@ -227,9 +227,9 @@ void RectangleDispersion :: operator() (void *param, vector<WeightPoint> &weight
  */
 
 LogNormalDispersion :: LogNormalDispersion() {
-	npts  = 11;
+	npts  = 15;
 	width = 0.0;
-	nsigmas = 3.0;
+	nsigmas = 4.0;
 };
 
 void LogNormalDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
@@ -242,7 +242,7 @@ void LogNormalDispersion :: accept_as_destination(DispersionVisitor* visitor, vo
 double lognormal_weight(double mean, double sigma, double x) {
 
 	double sigma2 = pow(sigma, 2.0);
-	return 1.0/(x*sigma2) * exp( -pow((log(x) -mean), 2.0) / (2.0*sigma2));
+	return 1.0/(x*sigma) * exp( -pow((log(x) -log(mean)), 2.0) / (2.0*sigma2));
 
 }
 
@@ -258,7 +258,7 @@ void LogNormalDispersion :: operator() (void *param, vector<WeightPoint> &weight
 	if (width<=0) {
 		width = 0.0;
 		npts  = 1;
-		nsigmas = 3.0;
+		nsigmas = 4.0;
 	}
 
 	Parameter* par = (Parameter*)param;
@@ -268,14 +268,16 @@ void LogNormalDispersion :: operator() (void *param, vector<WeightPoint> &weight
 		weights.insert(weights.end(), WeightPoint(value, 1.0));
 	} else {
 		for(int i=0; i<npts; i++) {
+			// Note that the definition of sigma is different from Gaussian
 			if ((*par).has_min==false){
-				// width = sigma for angles
-				sig = width;
+				// sig  for angles
+				sig = width / value;
 			}
 			else{
-				//width = polydispersity (=sigma/value) for length
-				sig = width * value;
+				// by lognormal definition, PD is same as sigma
+				sig = width;
 			}
+
 			// We cover n(nsigmas) times sigmas on each side of the mean
 			double val = value + sig * (2.0*nsigmas*double(i)/double(npts-1) - nsigmas);
 
