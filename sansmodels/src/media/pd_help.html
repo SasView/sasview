@@ -1,0 +1,344 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 12 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:0in;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-link:"Balloon Text Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";}
+span.BalloonTextChar
+	{mso-style-name:"Balloon Text Char";
+	mso-style-link:"Balloon Text";
+	font-family:"Tahoma","sans-serif";}
+.MsoPapDefault
+	{margin-bottom:10.0pt;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US>
+
+<div class=WordSection1>
+
+<p class=MsoNormal><h3><span style='font-family:"Times New Roman","serif"'>Polydisperisty
+and Angular Distributions</span></h3></p>
+
+<p class=MsoNormal><span style='font-family:"Times New Roman","serif"'>Calculates
+the form factor for a polydisperse and/or angular population of particles with
+uniform scattering length density. The resultant form factor is normalized by
+the average particle volume such that P(q) = scale*&lt;F*F&gt;/Vol + bkg, where
+F is the scattering amplitude and the &lt; &gt; denote an average over the size
+distribution.  Users should use PD for a size distribution and Sigma for an
+angular distribution.</span></p>
+<p> Note that this computation is very time intensive thus applying polydispersion/angular distrubtion for 
+more than one paramters or increasing Npts values might need extensive patience to complete the computation.</p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>The following five distribution
+functions are provided;</span></p>
+<p>&nbsp;</p>
+<ul>
+<li><a href="#Rectangular">Rectangular distribution</a></li>
+<li><a href="#Array">Array distribution</a></li>
+<li><a href="#Gaussian">Gaussian distribution</a></li>
+<li><a href="#Lognormal">Lognormal distribution</a></li>
+<li><a href="#Schulz">Schulz distribution</a></li>
+</ul>
+<p>&nbsp;</p>
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'><a name="Rectangular"><h4>Rectangular distribution</a></h4></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif";position:relative;top:22.0pt'><img
+width=248 height=67 src="pd_image001.png"></span></p>
+
+<p>&nbsp;</p>
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>The x<sub>mean</sub> is the mean
+of the distribution, w is the half-width, and Norm is a normalization factor
+which is determined during the numerical calculation. Note that the Sigma and
+the half width <i>w</i> are different.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>The standard deviation is </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif";position:relative;top:4.0pt'><img
+width=72 height=24 src="pd_image002.png"></span><span
+style='font-family:"Times New Roman","serif"'>. </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>The PD (polydispersity) is </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif";position:relative;top:6.0pt'><img
+width=93 height=24 src="pd_image003.png"></span><span
+style='font-family:"Times New Roman","serif"'>.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'><img width=511 height=270
+id="Picture 1" src="pd_image004.jpg" alt=flat.gif></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'><a name="Array"><h4>Array distribution</h4></a></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>This distribution is to be given
+by users as a txt file where the array should be defined by two columns in the
+order of x and f(x) values. The f(x) will be normalized by SansView during the
+computation.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>Example of an array in the file;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>30        0.1</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>32        0.3</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>35        0.4</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>36        0.5</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>37        0.6</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>39        0.7</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>41        0.9</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>We use only these array values in
+the computation, therefore the mean value given in the control panel, for
+example ‘radius = 60’, will be ignored.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'><a name="Gaussian"><h4>Gaussian distribution</h4></a></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif";position:relative;top:12.0pt'><img
+width=212 height=44 src="pd_image005.png"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>The x<sub>mean</sub> is the mean
+of the distribution and Norm is a normalization factor which is determined
+during the numerical calculation.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>The PD (polydispersity) is </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif";position:relative;top:6.0pt'><img
+width=93 height=24 src="pd_image003.png"></span><span
+style='font-family:"Times New Roman","serif"'>.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'><img width=518 height=275
+id="Picture 2" src="pd_image006.jpg" alt=gauss.gif></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'><a name="Lognormal"><h4>Lognormal distribution</h4></a></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif";position:relative;top:14.0pt'><img
+width=236 height=47 src="pd_image007.png"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>The mu = ln(x<sub>med</sub>),  x<sub>med</sub>
+is the median value of the distribution, and Norm is a normalization factor
+which will be determined during the numerical calculation. The median value is
+the value given in the size parameter in the control panel, for example,
+“radius = 60”.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>The PD (polydispersity) is given
+by sigma,</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif";position:relative;top:5.0pt'><img
+width=55 height=21 src="pd_image008.png"></span><span
+style='font-family:"Times New Roman","serif"'>.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>For the angular distribution,</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif";position:relative;top:6.0pt'><img
+width=76 height=24 src="pd_image009.png"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>The mean value is given by x<sub>mean</sub>
+=exp(mu+p^2/2).</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>The peak value is given by x<sub>peak</sub>=exp(mu-p^2).</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'><img width=450 height=239
+id="Picture 7" src="pd_image010.jpg" alt=lognormal.gif></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>This distribution function
+spreads more and the peak shifts to the left as the p increases, requiring
+higher values of Nsigmas and Npts.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'><a name="Schulz"><h4>Schulz distribution</h4></a></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif";position:relative;top:15.0pt'><img
+width=347 height=45 src="pd_image011.png"></span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>The x<sub>mean</sub> is the mean
+of the distribution and Norm is a normalization factor which is determined
+during the numerical calculation. </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>The z = 1/p^2 – 1.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>The PD (polydispersity) is </span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif";position:relative;top:6.0pt'><img
+width=80 height=24 src="pd_image012.png"></span><span
+style='font-family:"Times New Roman","serif"'>.</span></p>
+
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'><img width=438 height=232
+id="Picture 4" src="pd_image013.jpg" alt=schulz.gif></span></p>
+
+</div>
+
+</body>
+
+</html>
