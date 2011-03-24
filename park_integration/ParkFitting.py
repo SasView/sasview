@@ -7,18 +7,67 @@ FitArrange, ParkFit,Parameter classes.All listed classes work together
 to perform a simple fit with park optimizer.
 """
 #import time
-#import numpy
+import numpy
 #import park
 from park import fit
 from park import fitresult
 from park.assembly import Assembly
 from park.fitmc import FitSimplex 
+import park.fitmc
 from park.fitmc import FitMC
 
 #from Loader import Load
 from sans.fit.AbstractFitEngine import FitEngine
 
 
+
+class MyAssembly(Assembly):
+    def __init__(self, models, curr_thread=None):
+        Assembly.__init__(self, models)
+        self.curr_thread = curr_thread
+        
+    def eval(self):
+        """
+        Recalculate the theory functions, and from them, the
+        residuals and chisq.
+
+        :note: Call this after the parameters have been updated.
+        """
+        # Handle abort from a separate thread.
+        self._cancel = False
+        if self.curr_thread != None:
+            try:
+                self.curr_thread.isquit()
+            except:
+                self._cancel = True
+
+        # Evaluate the computed parameters
+        self._fitexpression()
+
+        # Check that the resulting parameters are in a feasible region.
+        if not self.isfeasible(): return numpy.inf
+
+        resid = []
+        k = len(self._fitparameters)
+        for m in self.parts:
+            # In order to support abort, need to be able to propagate an
+            # external abort signal from self.abort() into an abort signal
+            # for the particular model.  Can't see a way to do this which
+            # doesn't involve setting a state variable.
+            self._current_model = m
+            if self._cancel: return numpy.inf
+            if m.isfitted and m.weight != 0:
+                m.residuals = m.fitness.residuals()
+                N = len(m.residuals)
+                m.degrees_of_freedom = N-k if N>k else 1
+                m.chisq = numpy.sum(m.residuals**2)
+                resid.append(m.weight*m.residuals)
+        self.residuals = numpy.hstack(resid)
+        N = len(self.residuals)
+        self.degrees_of_freedom = N-k if N>k else 1
+        self.chisq = numpy.sum(self.residuals**2)
+        return self.chisq
+    
 class ParkFit(FitEngine):
     """ 
     ParkFit performs the Fit.This class can be used as follow:
@@ -58,7 +107,7 @@ class ParkFit(FitEngine):
         self.fit_arrange_dict = {}
         self.param_list = []
         
-    def create_assembly(self):
+    def create_assembly(self, curr_thread):
         """
         Extract sansmodel and sansdata from 
         self.FitArrangelist ={Uid:FitArrange}
@@ -87,14 +136,14 @@ class ParkFit(FitEngine):
                         p.set(p.range)         
                     else:
                         p.status = 'fixed'
-            #i += 1
             data_list = item.get_data()
-            #parkdata=self._concatenateData(Ldata)
             parkdata = data_list
             fitness = (parkmodel, parkdata)
             mylist.append(fitness)
-        self.problem = Assembly(mylist)
+        self.problem = MyAssembly(models=mylist, curr_thread=curr_thread)
         
+  
+    
     def fit(self, q=None, handler=None, curr_thread=None):
         """
         Performs fit with park.fit module.It can  perform fit with one model
@@ -116,7 +165,7 @@ class ParkFit(FitEngine):
         :return: result.cov Covariance matrix
         
         """
-        self.create_assembly()
+        self.create_assembly(curr_thread=curr_thread)
         localfit = FitSimplex()
         localfit.ftol = 1e-8
         
@@ -124,9 +173,7 @@ class ParkFit(FitEngine):
         fitter = FitMC(localfit=localfit, start_points=1)
         if handler == None:
             handler = fitresult.ConsoleUpdate(improvement_delta=0.1)
-        result = fit.fit(self.problem,
-                         fitter=fitter,
-                         handler=handler)
+        result = fit.fit(self.problem, fitter=fitter, handler=handler)
         self.problem.all_results(result)
         if result != None:
             if q != None:
