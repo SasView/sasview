@@ -10,7 +10,7 @@ class HelpWindow(wx.Frame):
     """
     """
     def __init__(self, parent, id, title= 'HelpWindow', pageToOpen=None):
-        wx.Frame.__init__(self, parent, id, title, size=(850, 500))
+        wx.Frame.__init__(self, parent, id, title, size=(850, 530))
         """
         contains help info
         """
@@ -52,6 +52,7 @@ class HelpWindow(wx.Frame):
         # get the media path
         path = models.get_data_path(media='media')
         self.path = os.path.join(path,"model_functions.html")
+        self.path_pd = os.path.join(path,"pd_help.html")
         self.path_sm = os.path.join(path,"smear_computation.html")
                     
         page1="""<html>
@@ -71,10 +72,12 @@ class HelpWindow(wx.Frame):
             <li><a href ="media/model_use_help.html" target ="showframe">Visualize Model</a><br></li>
             <li><a href ="media/averaging_help.html" target ="showframe">Data Averaging</a><br></li>
             <li><a href ="%s" target ="showframe">Model Functions</a><br></li>
+            <li><a href ="%s" target ="showframe">Polydispersion Distributions</a><br></li>
             <li><a href ="%s" target ="showframe">Smear Computation</a><br></li>
+            <li><a href ="media/key_help.html" target ="showframe">Key Combination</a><br></li>
             </ul>
             </body>
-            </html>""" % (self.path, self.path_sm)
+            </html>""" % (self.path, self.path_pd, self.path_sm)
         
         self.rhelp.SetPage(page1)
         self.lhelp.SetPage(page)
@@ -101,7 +104,7 @@ class HelpWindow(wx.Frame):
         
     def OnButtonClicked(self, event):
         """
-        Function to diplay html page related to the hyperlinktext selected
+        Function to diplay Model html page related to the hyperlinktext selected
         """
         
         self.rhelp.LoadPage(self.path)
@@ -111,7 +114,9 @@ class HelpWindow(wx.Frame):
         Function to diplay html page related to the hyperlinktext selected
         """
         link= event.GetLinkInfo().GetHref()
+        
         self.rhelp.LoadPage(link)
+        
 """
 Example: ::
 
