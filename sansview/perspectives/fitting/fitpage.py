@@ -79,9 +79,6 @@ class FitPage(BasicPage):
         if len(self.parameters) == 0:
             self.Layout()
             return
-        #if self.engine_type =="park":
-        #    self.btFit.SetLabel("Fit")
-        #    self.bind_fit_button()
         for item in self.parameters:
             if self.engine_type =="scipy" :
                 item[5].SetValue("")
@@ -196,6 +193,7 @@ class FitPage(BasicPage):
 
         #Fit button
         self.btFit = wx.Button(self,wx.NewId(),'Fit', size=(88,25))
+        self.default_bt_colour = self.btFit.GetBackgroundColour()
         self.btFit.Bind(wx.EVT_BUTTON, self._onFit,id= self.btFit.GetId())
         self.btFit.SetToolTipString("Start fitting.")
         
@@ -972,9 +970,11 @@ class FitPage(BasicPage):
         """
         self.btFit.Unbind(event=wx.EVT_BUTTON, id= self.btFit.GetId())
         if self.btFit.GetLabel().lower() == "stop":
+            self.btFit.SetBackgroundColour('red')
             self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._StopFit,
                              id=self.btFit.GetId())
         elif self.btFit.GetLabel().lower() == "fit":
+            self.btFit.SetBackgroundColour(self.default_bt_colour)
             self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._onFit, 
                             id=self.btFit.GetId())
         else:
