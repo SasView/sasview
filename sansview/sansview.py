@@ -35,10 +35,7 @@ GSTYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.TOOL_ON
 class SansViewApp(gui_manager.ViewApp):
     """
     """
-    SIZE = (APP_WIDTH, APP_HEIGHT)
-    TITLE = local_config.__appname__
-    PROG_SPLASH_PATH = os.path.join("images","SVwelcome.png")
-    STYLE = GSTYLE
+  
 
 class SansView():
     """

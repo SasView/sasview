@@ -2,7 +2,8 @@
     Application settings
 """
 import time
-
+import os
+from sans.guiframe.gui_style import GUIFRAME
 # Version of the application
 __appname__ = "SansView"
 __version__ = 'Dev01042011'
@@ -43,6 +44,24 @@ _inst_url = "http://www.utk.edu"
 _corner_image = "images/angles_flat.png"
 _welcome_image = "images/SVwelcome.png"
 _copyright = "(c) 2009, University of Tennessee"
+#edit the list of file state your plugin can read
+PLUGIN_STATE_EXTENSIONS = ['.prv','.fitv', '.inv']
+APPLICATION_STATE_EXTENSION = '.svs'
+#
+WLIST = ['SansView files (*.svs)|*.svs',
+                  'P(r) files (*.prv)|*.prv',
+                  'Fitting files (*.fitv)|*.fitv',
+                  'Invariant files (*.inv)|*.inv']
+
+SPLASH_SCREEN_PATH = os.path.join("images","SVwelcome.png")
+DEFAULT_STYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.TOOL_ON
+SPLASH_SCREEN_WIDTH = 500
+SPLASH_SCREEN_HEIGHT = 300
+SS_MAX_DISPLAY_TIME = 3000 #3 sec
+PLOPANEL_WIDTH = 400
+PLOPANEL_HEIGTH = 400
+GUIFRAME_WIDTH = 1000
+GUIFRAME_HEIGHT = 800
 
 def printEVT(message):
     if __EVT_DEBUG__:
