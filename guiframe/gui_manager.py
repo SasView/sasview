@@ -1815,7 +1815,7 @@ class ViewApp(wx.App):
         """
         self.frame.build_gui()
         self.frame.post_init()
-        if self.s_screen.IsShown():
+        if self.s_screen is not None and self.s_screen.IsShown():
             self.s_screen.Close()
         
     def set_welcome_panel(self, panel_class):
