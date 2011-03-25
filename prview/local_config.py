@@ -2,6 +2,7 @@
 Application settings
 """
 import time
+from sans.guiframe.gui_style import GUIFRAME
 
 # Version of the application
 __appname__ = "PrView"
@@ -46,6 +47,20 @@ _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = "images/prview.jpg"
 _copyright = "(c) 2008, University of Tennessee"
+#edit the list of file state your plugin can read
+PLUGIN_STATE_EXTENSIONS = ['.prv']
+APPLICATION_STATE_EXTENSION = '.prv'
+#
+WLIST = ['P(r) files (*.prv)|*.prv']
+SPLASH_SCREEN_PATH = "images/danse_logo.png"
+DEFAULT_STYLE = GUIFRAME.DEFAULT_STYLE
+SPLASH_SCREEN_WIDTH = 500
+SPLASH_SCREEN_HEIGHT = 300
+SS_MAX_DISPLAY_TIME = 3000 #3 sec
+PLOPANEL_WIDTH = 400
+PLOPANEL_HEIGTH = 400
+GUIFRAME_WIDTH = 850
+GUIFRAME_HEIGHT = 780
 
 import wx.lib.newevent
 (StatusBarEvent, EVT_STATUS) = wx.lib.newevent.NewEvent()

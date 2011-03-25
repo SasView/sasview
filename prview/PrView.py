@@ -1,25 +1,17 @@
 import wx
 #import gui_manager
 from sans.guiframe import gui_manager
-from sans.guiframe.gui_style import GUIFRAME
+
 # For py2exe, import config here
 import local_config
 import sys
 
 
-# Application dimensions
-APP_HEIGHT = 780
-APP_WIDTH  = 850
-PROG_SPLASH_SCREEN = "images/ball.png"
 
 class PrApp(gui_manager.ViewApp):
     """
     """
-    SIZE = (APP_WIDTH, APP_HEIGHT)
-    TITLE = local_config.__appname__
-    PROG_SPLASH_PATH = PROG_SPLASH_SCREEN
-    STYLE = GUIFRAME.DEFAULT_STYLE
-    
+   
 class PrView():
     """
     """
