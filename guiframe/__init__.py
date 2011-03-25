@@ -22,7 +22,7 @@ def get_data_path(media):
         path, _ = os.path.split(path)
         media_path = os.path.join(path, media)
         if os.path.isdir(media_path):
-            module_media_path = os.path.join(media_path, 'images')
+            module_media_path = os.path.join(media_path, 'icons')
             if os.path.isdir(module_media_path):
                 return module_media_path
             return media_path
@@ -40,5 +40,5 @@ def data_files():
     data_files = []
     path = get_data_path(media="images")
     for f in findall(path):
-        data_files.append(('icons', [f]))
+        data_files.append(('images/icons', [f]))
     return data_files
