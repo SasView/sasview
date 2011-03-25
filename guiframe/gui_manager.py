@@ -245,7 +245,7 @@ class ViewerFrame(wx.Frame):
         is_loaded = False
         for item in self.plugins:
             if plugin.__class__ == item.__class__:
-                msg = "Plugin %s already loaded" % plugin.__class__.__name__
+                msg = "Plugin %s already loaded" % plugin.sub_menu
                 logging.info(msg)
                 is_loaded = True    
         if not is_loaded:
@@ -300,10 +300,12 @@ class ViewerFrame(wx.Frame):
                 toks = os.path.splitext(os.path.basename(item))
                 name = ''
                 if not toks[0] == '__init__':
-                    
                     if toks[1] == '.py' or toks[1] == '':
                         name = toks[0]
-                
+                    #check the validity of the module name parsed
+                    #before trying to import it
+                    if name is None or name.strip() == '':
+                        continue
                     path = [os.path.abspath(dir)]
                     file = ''
                     try:
@@ -327,8 +329,8 @@ class ViewerFrame(wx.Frame):
                                 msg += " in %s\n  %s" % (name, sys.exc_value)
                                 config.printEVT(msg)
                     except:
-                        print sys.exc_value
                         msg = "ViewerFrame._find_plugins: %s" % sys.exc_value
+                        #print msg
                         logging.error(msg)
                     finally:
                         if not file == None:
