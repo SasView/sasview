@@ -139,7 +139,7 @@ class ScipyFit(FitEngine):
                                                     full_output=1,
                                                     warning=True)
         except:
-            if sys.last_type == FitAbort:
+            if hasattr(sys, 'last_type') and sys.last_type == FitAbort:
                 if self.handler is not None:
                     msg = "Fit Stop!"
                     #self.handler.error(msg)
