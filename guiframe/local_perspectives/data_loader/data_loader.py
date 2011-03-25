@@ -32,9 +32,9 @@ except:
     import config
  
 extension_list = []
-if APPLICATION_STATE_EXTENSION is not None:
-    extension_list.append(APPLICATION_STATE_EXTENSION)
-EXTENSIONS = PLUGIN_STATE_EXTENSIONS + extension_list   
+if config.APPLICATION_STATE_EXTENSION is not None:
+    extension_list.append(config.APPLICATION_STATE_EXTENSION)
+EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS + extension_list   
 
 class Plugin(PluginBase):
     
