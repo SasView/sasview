@@ -1027,11 +1027,34 @@ class ViewerFrame(wx.Frame):
                 data_state = self._data_manager.get_selected_data()
                 self._data_panel.load_data_list(data_state)
                 self._mgr.GetPane(self._data_panel.window_name).Show(True)
-                     
+      
+    def load_from_cmd(self,  path):   
+        """
+        """ 
+        print "load_from_cmd", path
+        if path is  None:
+            return
+        else:
+            path = os.path.abspath(path)
+            if not os.path.isfile(path):
+               print "return abs path", path
+               return
+             
+            print "find a path -->", path
+
+        basename  = os.path.basename(path)
+        root, extension = os.path.splitext(basename)
+        if extension.lower() not in EXTENSIONS:
+            self.load_data(path)
+            print "load data"
+        else:
+            self.load_state(path)
+            "load state"
+        
     def load_state(self, path):   
         """
         """
-        if path and os.path.isfile(path):
+        if path and (path is not None) and os.path.isfile(path):
             basename  = os.path.basename(path)
             if APPLICATION_STATE_EXTENSION is not None \
                 and basename.endswith(APPLICATION_STATE_EXTENSION):
@@ -1783,11 +1806,6 @@ class ViewApp(wx.App):
                                  pos=pos, 
                                  gui_style = DEFAULT_STYLE,
                                  size=size) 
-        #try to load file at the start
-        #try:
-        #    self.open_file()
-        #except:
-        #    raise
         self.s_screen = None
         # Display a splash screen on top of the frame.
         if len(sys.argv) > 1 and '--time' in sys.argv[1:]:
@@ -1808,27 +1826,29 @@ class ViewApp(wx.App):
         if hasattr(self.frame, 'special'):
             self.frame.special.SetCurrent()
         self.SetTopWindow(self.frame)
-        import time
-        
+        self.input_file = None
+        self.dir = None
+        print "sys.argv", sys.argv
+        if len(sys.argv) >= 2:
+            print "sys.argv 0", sys.argv[0]
+            cmd = sys.argv[0].lower()
+            if os.path.isfile(cmd):
+                basename  = os.path.basename(cmd)
+                self.dir = os.path.dirname(cmd)
+                print "basename", basename
+                if basename in ['sansview.py', 'sansview.exe']:
+                    print "sys.argv 1", sys.argv[1]
+                    self.input_file = sys.argv[1]
         return True
-    
-    def load(self, path):
-        """
-        """
-        if self.frame is not None:
-            self.frame.load(path)
-            
+
     def open_file(self):
         """
         open a state file at the start of the application
         """
-        if len(sys.argv) >= 2:
-            if sys.argv[0].lower() in ['sansview.py', 'sansview.exe']:
-                path = sys.argv[1]
-                if os.path.isfile(path):
-                    self.load(path)
-                else:
-                    print "SansView cannot read this file: %s" % str(path)
+        
+        if self.frame is not None:
+            self.frame.load_from_cmd(path=self.input_file)
+         
             
     def set_manager(self, manager):
         """
@@ -1843,6 +1863,11 @@ class ViewApp(wx.App):
         """
         self.frame.build_gui()
         self.frame.post_init()
+        #try to load file at the start
+        try:
+            self.open_file()
+        except:
+            raise
         if self.s_screen is not None and self.s_screen.IsShown():
             self.s_screen.Close()
         
