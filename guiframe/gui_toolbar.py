@@ -37,12 +37,7 @@ class GUIToolBar(Tbar):
         """
         tbar_size = (22, 22)
         button_type =  wx.ITEM_NORMAL
-      
-        self.AddSeparator()
-        zoom_in_im = GUIFRAME_ICON.ZOOM_IN_ICON
-        zoom_in_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
-        zoom_in_bmp = zoom_in_im.ConvertToBitmap()
-        #disable_zoom_in_bmp = clear_image(zoom_in_im).ConvertToBitmap()
+
         self.AddSeparator()
         reset_im = GUIFRAME_ICON.RESET_ICON
         reset_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
