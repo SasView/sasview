@@ -1772,17 +1772,11 @@ class ViewApp(wx.App):
             else:
                 self.frame.Show()   
         except:
-            try: 
-                self.frame.Show()
-            except:
-                raise
-                msg = "Cannot display splash screen\n"
-                msg += str (sys.exc_value)
-                #raise
-                logging.error(msg)
-        
-        
-
+           msg = "Cannot display splash screen\n"
+           msg += str (sys.exc_value)
+           logging.error(msg)
+           self.frame.Show()
+           
         if hasattr(self.frame, 'special'):
             self.frame.special.SetCurrent()
         self.SetTopWindow(self.frame)
