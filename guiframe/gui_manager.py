@@ -772,20 +772,24 @@ class ViewerFrame(wx.Frame):
             plug_data_count = False
             plug_no_data_count = False
             self._applications_menu = wx.Menu()
+            pos = 0
             separator = self._applications_menu.AppendSeparator()
             for plug in self.plugins:
                 if len(plug.get_perspective()) > 0:
                     id = wx.NewId()
                     if plug.use_data():
-                        self._applications_menu.InsertCheckItem(0, id, plug.sub_menu,
+                        
+                        self._applications_menu.InsertCheckItem(pos, id, plug.sub_menu,
                                       "Switch to application: %s" % plug.sub_menu)
                         plug_data_count = True
+                        pos += 1
                     else:
                         plug_no_data_count = True
                         self._applications_menu.AppendCheckItem(id, plug.sub_menu,
                                       "Switch to application: %s" % plug.sub_menu)
                     wx.EVT_MENU(self, id, plug.on_perspective)
-            if not (plug_data_count and  plug_no_data_count):
+            #self._applications_menu.
+            if (not plug_data_count or not plug_no_data_count):
                 self._applications_menu.RemoveItem(separator)
             self._menubar.Append(self._applications_menu, '&Applications')
             self._check_applications_menu()
