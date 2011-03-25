@@ -52,7 +52,6 @@ from DataLoader.loader import Loader
 
 #read some constants from config
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
-
 APPLICATION_NAME = config.__appname__
 SPLASH_SCREEN_PATH = config.SPLASH_SCREEN_PATH
 DEFAULT_STYLE = config.DEFAULT_STYLE
@@ -69,10 +68,10 @@ if APPLICATION_STATE_EXTENSION is not None:
     extension_list.append(APPLICATION_STATE_EXTENSION)
 EXTENSIONS = PLUGIN_STATE_EXTENSIONS + extension_list
 try:
-    WLIST = '|'.join(config.WLIST)
+    PLUGINS_WLIST = '|'.join(config.PLUGINS_WLIST)
 except:
-    WLIST = ''
-
+    PLUGINS_WLIST = ''
+APPLICATION_WLIST = config.APPLICATION_WLIST
 
 class ViewerFrame(wx.Frame):
     """
@@ -797,19 +796,30 @@ class ViewerFrame(wx.Frame):
          # File menu
         self._file_menu = wx.Menu()
         style = self.__gui_style & GUIFRAME.DATALOADER_ON
+        style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
         if style == GUIFRAME.DATALOADER_ON:
-            # some menu of plugin to be seen under file menu
-            hint_load_file = "Read state's files and load"
-            hint_load_file += " them into the application"
+            if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
+                # some menu of plugin to be seen under file menu
+                hint_load_file = "Read state's files and load"
+                hint_load_file += " them into the application"
+                id = wx.NewId()
+                self._save_appl_menu = self._file_menu.Append(id, 
+                                        '&Load Application', hint_load_file)
+                wx.EVT_MENU(self, id, self._on_open_state_application)
+                
             id = wx.NewId()
+            hint_load_file = "read all applications states save previously"
             self._save_appl_menu = self._file_menu.Append(id, 
-                                    '&Open State from File', hint_load_file)
-            wx.EVT_MENU(self, id, self._on_open_state)
-            id = wx.NewId()
-            self._save_appl_menu = self._file_menu.Append(id, 
+                                    '&Load Project', hint_load_file)
+            wx.EVT_MENU(self, id, self._on_open_state_project)
+           
+            if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
+                self._file_menu.AppendSeparator()
+                id = wx.NewId()
+                self._save_appl_menu = self._file_menu.Append(id, 
                                                           '&Save Application',
                                  'Save state of the current active application')
-            wx.EVT_MENU(self, id, self._on_save_application)
+                wx.EVT_MENU(self, id, self._on_save_application)
             id = wx.NewId()
             self._file_menu.Append(id, '&Save Project',
                                  'Save the state of the whole application')
@@ -1068,8 +1078,8 @@ class ViewerFrame(wx.Frame):
             error_message += str(sys.exc_value) + "\n"
             print error_message
            
-            
-    def _on_open_state(self, event):
+      
+    def _on_open_state_application(self, event):
         """
         """
         path = None
@@ -1079,7 +1089,25 @@ class ViewerFrame(wx.Frame):
         dlg = wx.FileDialog(self, 
                             "Choose a file", 
                             self._default_save_location, "",
-                             WLIST)
+                             PLUGINS_WLIST)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            if path is not None:
+                self._default_save_location = os.path.dirname(path)
+        dlg.Destroy()
+        self.load_state(path=path)  
+            
+    def _on_open_state_project(self, event):
+        """
+        """
+        path = None
+        if self._default_save_location == None:
+            self._default_save_location = os.getcwd()
+ 
+        dlg = wx.FileDialog(self, 
+                            "Choose a file", 
+                            self._default_save_location, "",
+                             APPLICATION_WLIST)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             if path is not None:

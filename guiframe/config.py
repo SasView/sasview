@@ -45,13 +45,14 @@ _copyright = "(c) 2008, University of Tennessee"
 #for sansview this how you can edit these lists
 #PLUGIN_STATE_EXTENSIONS = ['.prv','.fitv', '.inv']
 #APPLICATION_STATE_EXTENSION = '.svs'
-#WLIST = ['SansView files (*.svs)|*.svs','P(r) files (*.prv)|*.prv',
+#PLUGINS_WLIST = ['P(r) files (*.prv)|*.prv',
 #                  'Fitting files (*.fitv)|*.fitv',
 #                  'Invariant files (*.inv)|*.inv']
-
-PLUGIN_STATE_EXTENSIONS = []
+#APPLICATION_WLIST = 'SansView files (*.svs)|*.svs'
+APPLICATION_WLIST = ''
 APPLICATION_STATE_EXTENSION = None
-WLIST = []
+PLUGINS_WLIST = []
+PLUGIN_STATE_EXTENSIONS = []
 SPLASH_SCREEN_PATH = "images/danse_logo.png"     
 DEFAULT_STYLE = GUIFRAME.SINGLE_APPLICATION
 SPLASH_SCREEN_WIDTH = 500
