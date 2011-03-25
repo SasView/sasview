@@ -53,7 +53,12 @@ class SansView():
         # Note: py2exe can't find dynamically loaded
         # modules. We load the fitting module here
         # to ensure a complete Windows executable build.
-        
+
+        # Fitting perspective
+        import perspectives.fitting as module    
+        fitting_plug = module.Plugin()
+        self.gui.add_perspective(fitting_plug)
+
         # P(r) perspective
         try:
             import sans.perspectives.pr as module    
@@ -82,7 +87,8 @@ class SansView():
         except:
             logging.error("SansView: could not find Calculator plug-in module")
             logging.error(sys.exc_value)  
-        """    
+            
+        """ 
         # theory perspective
         try:
             import sans.perspectives.theory as module    
@@ -91,12 +97,7 @@ class SansView():
         except:
             logging.error("SansView: could not find theory plug-in module")
             logging.error(sys.exc_value) 
-        """ 
-            
-        # Fitting perspective
-        import perspectives.fitting as module    
-        fitting_plug = module.Plugin()
-        self.gui.add_perspective(fitting_plug)
+        """
        
         # Add welcome page
         self.gui.set_welcome_panel(WelcomePanel)
