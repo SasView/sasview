@@ -117,13 +117,9 @@ class Plugin(PluginBase):
             return []
         data = plotpanel.plots[graph.selected_plottable]
         
-        if not issubclass(data.__class__, Data1D):
-            name = data.__class__.__name__
-            msg = "Invariant use only Data1D got: [%s] " % str(name)
-            raise ValueError, msg 
-        
-        if data.name != "$I_{obs}(q)$" and  data.name != " $P_{fit}(r)$":
-           return [[invariant_option, invariant_hint, 
+        if issubclass(data.__class__, Data1D):
+           if data.name != "$I_{obs}(q)$" and  data.name != " $P_{fit}(r)$":
+               return [[invariant_option, invariant_hint, 
                                         self._compute_invariant]]
         return []
 
