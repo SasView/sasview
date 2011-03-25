@@ -2,7 +2,7 @@
 Application settings
 """
 import time
-
+from sans.guiframe.gui_style import GUIFRAME
 # Version of the application
 __appname__ = "DummyView"
 __version__ = '0.1.0'
@@ -41,6 +41,27 @@ _inst_url = "http://www.utk.edu"
 _corner_image = "images/angles_flat.png"
 _welcome_image = "images/SVwelcome.png"
 _copyright = "(c) 2008, University of Tennessee"
+#edit the lists below of file state your plugin can read
+#for sansview this how you can edit these lists
+#PLUGIN_STATE_EXTENSIONS = ['.prv','.fitv', '.inv']
+#APPLICATION_STATE_EXTENSION = '.svs'
+#WLIST = ['SansView files (*.svs)|*.svs','P(r) files (*.prv)|*.prv',
+#                  'Fitting files (*.fitv)|*.fitv',
+#                  'Invariant files (*.inv)|*.inv']
+
+PLUGIN_STATE_EXTENSIONS = []
+APPLICATION_STATE_EXTENSION = None
+WLIST = []
+SPLASH_SCREEN_PATH = "images/danse_logo.png"     
+DEFAULT_STYLE = GUIFRAME.SINGLE_APPLICATION
+SPLASH_SCREEN_WIDTH = 500
+SPLASH_SCREEN_HEIGHT = 300
+SS_MAX_DISPLAY_TIME = 3000 #3 sec
+PLOPANEL_WIDTH = 400
+PLOPANEL_HEIGTH = 400
+GUIFRAME_WIDTH = 1000
+GUIFRAME_HEIGHT = 800
+
 
 import wx.lib.newevent
 (StatusBarEvent, EVT_STATUS) = wx.lib.newevent.NewEvent()

@@ -137,11 +137,7 @@ class PluginBase:
         # Return the list of panels
         return []
     
-    def clear_panel(self):
-        """
-        reset all panels
-        """
-    
+ 
     def get_tools(self):
         """
         Returns a set of menu entries for tools

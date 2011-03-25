@@ -88,7 +88,12 @@ class Plugin(PluginBase):
             return True
         return False
         
-    def clear_panel(self, group_id):
+    def clear_panel(self):
+        """
+        """
+        pass
+    
+    def clear_panel_by_id(self, group_id):
         """
         clear the graph
         """
@@ -238,7 +243,7 @@ class Plugin(PluginBase):
             if event.action.lower() == 'delete':
                 return self.delete_panel(group_id)
             if event.action.lower() == "clear":
-                return self.clear_panel(group_id)
+                return self.clear_panel_by_id(group_id)
             
         title = None
         if hasattr(event, 'title'):

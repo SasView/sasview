@@ -50,12 +50,29 @@ from sans.guiframe.gui_toolbar import GUIToolBar
 from DataLoader.loader import Loader
 
 
-PLOPANEL_WIDTH = 400
-PLOPANEL_HEIGTH = 400
-GUIFRAME_WIDTH = 1000
-GUIFRAME_HEIGHT = 800
-PROG_SPLASH_SCREEN = "images/danse_logo.png" 
-EXTENSIONS =  ['.inv', '.fitv', '.prv', '.svs']
+#read some constants from config
+APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
+
+APPLICATION_NAME = config.__appname__
+SPLASH_SCREEN_PATH = config.SPLASH_SCREEN_PATH
+DEFAULT_STYLE = config.DEFAULT_STYLE
+SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
+SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
+SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
+PLOPANEL_WIDTH = config.PLOPANEL_WIDTH
+PLOPANEL_HEIGTH = config.PLOPANEL_HEIGTH
+GUIFRAME_WIDTH = config.GUIFRAME_WIDTH 
+GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
+PLUGIN_STATE_EXTENSIONS =  config.PLUGIN_STATE_EXTENSIONS
+extension_list = []
+if APPLICATION_STATE_EXTENSION is not None:
+    extension_list.append(APPLICATION_STATE_EXTENSION)
+EXTENSIONS = PLUGIN_STATE_EXTENSIONS + extension_list
+try:
+    WLIST = '|'.join(config.WLIST)
+except:
+    WLIST = ''
+
 
 class ViewerFrame(wx.Frame):
     """
@@ -991,7 +1008,7 @@ class ViewerFrame(wx.Frame):
                 if extension == ext:
                     reader.read(path)
                     return
-                elif extension == '.svs':
+                elif extension == APPLICATION_STATE_EXTENSION:
                     reader.read(path)
         
         style = self.__gui_style & GUIFRAME.MANAGER_ON
@@ -1000,7 +1017,58 @@ class ViewerFrame(wx.Frame):
                 data_state = self._data_manager.get_selected_data()
                 self._data_panel.load_data_list(data_state)
                 self._mgr.GetPane(self._data_panel.window_name).Show(True)
-                        
+                     
+    def load_state(self, path):   
+        """
+        """
+        if path and os.path.isfile(path):
+            basename  = os.path.basename(path)
+            if APPLICATION_STATE_EXTENSION is not None \
+                and basename.endswith(APPLICATION_STATE_EXTENSION):
+                #remove panels for new states
+                for plug in self.plugins:
+                    reader, ext = plug.get_extensions()
+                    if ext is not None and ext.strip() != ''\
+                        and ext.lower() not in EXTENSIONS:
+                        plug.clear_panel()  
+            self.panel_on_focus = None    
+            self.get_data(path)
+        if self.defaultPanel is not None and \
+            self._mgr.GetPane(self.panels["default"].window_name).IsShown():
+            self.on_close_welcome_panel()
+            
+    def load_data(self, path):
+        """
+        """
+        if not os.path.isfile(path):
+            return
+        basename  = os.path.basename(path)
+        root, extension = os.path.splitext(basename)
+        if extension.lower() in EXTENSIONS:
+            log_msg = "Data Loader cannot "
+            log_msg += "load: %s\n" % str(path)
+            log_msg += "Try File opening ...."
+            print log_msg
+            return
+    
+        try:
+            print "Loading Data..." + str(path) + "\n"
+            temp =  self.loader.load(path)
+            if temp.__class__.__name__ == "list":
+                for item in temp:
+                    data = self.parent.create_gui_data(item, path)
+                    output[data.id] = data
+            else:
+                data = self.parent.create_gui_data(temp, path)
+                output[data.id] = data
+            
+            self.add_data(data_list=output)
+        except:
+            error_message = "Error while loading Data: %s\n" % str(path)
+            error_message += str(sys.exc_value) + "\n"
+            print error_message
+           
+            
     def _on_open_state(self, event):
         """
         """
@@ -1008,33 +1076,16 @@ class ViewerFrame(wx.Frame):
         if self._default_save_location == None:
             self._default_save_location = os.getcwd()
  
-        wlist = ['SansView files (*.svs)|*.svs',
-                  'P(r) files (*.prv)|*.prv',
-                  'Fitting files (*.fitv)|*.fitv',
-                  'Invariant files (*.inv)|*.inv']
-        wlist = '|'.join(wlist)
         dlg = wx.FileDialog(self, 
                             "Choose a file", 
                             self._default_save_location, "",
-                             wlist)
+                             WLIST)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             if path is not None:
                 self._default_save_location = os.path.dirname(path)
         dlg.Destroy()
-        if path and os.path.isfile(path):
-            basename  = os.path.basename(path)
-            if  basename.endswith('.svs'):
-                #remove panels for new states
-                for plug in self.plugins:
-                    plug.clear_panel()
-                    self.panel_on_focus = None
-                
-            self.get_data(path)
-                
-        if self.defaultPanel is not None and \
-            self._mgr.GetPane(self.panels["default"].window_name).IsShown():
-            self.on_close_welcome_panel()
+        self.load_state(path=path)
     
     def _on_save_application(self, event):
         """
@@ -1054,7 +1105,9 @@ class ViewerFrame(wx.Frame):
         reader, ext = self._current_perspective.get_extensions()
         path = None
         dlg = wx.FileDialog(self, "Save Project file",
-                            self._default_save_location, "", '.svs', wx.SAVE)
+                            self._default_save_location, "",
+                             APPLICATION_STATE_EXTENSION, 
+                             wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
@@ -1093,9 +1146,8 @@ class ViewerFrame(wx.Frame):
             fd.write(doc.toprettyxml())
             fd.close()
         else:
-            raise
-            #print "Nothing to save..."
-            #raise RuntimeError, "%s is not a SansView (.svs) file..." % path
+            msg = "%s cannot read %s\n" % (str(APPLICATION_NAME), str(path))
+            raise RuntimeError, msg
         return doc
 
     def quit_guiframe(self):
@@ -1694,41 +1746,41 @@ class DefaultPanel(wx.Panel, PanelBase):
 class ViewApp(wx.App):
     """
     """
-    SIZE = (GUIFRAME_WIDTH,GUIFRAME_HEIGHT)
-    TITLE = config.__appname__
-    PROG_SPLASH_PATH = PROG_SPLASH_SCREEN
-    STYLE = GUIFRAME.SINGLE_APPLICATION
-    SPLASH_WIDTH = 500
-    SPLASH_HEIGHT = 300
-    SPLASH_MAX_DISPLAY_TIME = 3000 #3 sec
-    
     def OnInit(self):
         """
         """
-        pos, size = self.window_placement(self.SIZE)
+        pos, size = self.window_placement((GUIFRAME_WIDTH, GUIFRAME_HEIGHT))
         self.frame = ViewerFrame(parent=None, 
-                                 title=self.TITLE, 
+                                 title=APPLICATION_NAME, 
                                  pos=pos, 
-                                 gui_style = self.STYLE,
+                                 gui_style = DEFAULT_STYLE,
                                  size=size) 
-         # Display a splash screen on top of the frame.
+        #try to load file at the start
+        #try:
+        #    self.open_file()
+        #except:
+        #    raise
+        self.s_screen = None
+        # Display a splash screen on top of the frame.
         if len(sys.argv) > 1 and '--time' in sys.argv[1:]:
             log_time("Starting to display the splash screen")
-        if self.PROG_SPLASH_PATH is not None and \
-            os.path.isfile(self.PROG_SPLASH_PATH):
-            try:
-                s_screen = self.display_splash_screen(parent=self.frame, path=self.PROG_SPLASH_PATH)   
+        
+        try:
+            if os.path.isfile(SPLASH_SCREEN_PATH):
+                self.s_screen = self.display_splash_screen(parent=self.frame, 
+                                        path=SPLASH_SCREEN_PATH)
+            else:
+                self.frame.Show()   
+        except:
+            try: 
+                self.frame.Show()
             except:
-                try: 
-                    self.frame.Show()
-                except:
-                    
-                    msg = "Cannot display splash screen\n"
-                    msg += str (sys.exc_value)
-                    #raise
-                    logging.error(msg)
-        else:
-            self.frame.Show()
+                raise
+                msg = "Cannot display splash screen\n"
+                msg += str (sys.exc_value)
+                #raise
+                logging.error(msg)
+        
         
 
         if hasattr(self.frame, 'special'):
@@ -1738,6 +1790,24 @@ class ViewApp(wx.App):
         
         return True
     
+    def load(self, path):
+        """
+        """
+        if self.frame is not None:
+            self.frame.load(path)
+            
+    def open_file(self):
+        """
+        open a state file at the start of the application
+        """
+        if len(sys.argv) >= 2:
+            if sys.argv[0].lower() in ['sansview.py', 'sansview.exe']:
+                path = sys.argv[1]
+                if os.path.isfile(path):
+                    self.load(path)
+                else:
+                    print "SansView cannot read this file: %s" % str(path)
+            
     def set_manager(self, manager):
         """
         Sets a reference to the application manager
@@ -1751,6 +1821,8 @@ class ViewApp(wx.App):
         """
         self.frame.build_gui()
         self.frame.post_init()
+        if self.s_screen.IsShown():
+            self.s_screen.Close()
         
     def set_welcome_panel(self, panel_class):
         """
@@ -1800,13 +1872,14 @@ class ViewApp(wx.App):
         return (xpos, ypos), (min(x, window_width), min(y, window_height))
     
     def display_splash_screen(self, parent, 
-                              path=PROG_SPLASH_SCREEN):
+                              path=SPLASH_SCREEN_PATH):
         """Displays the splash screen.  It will exactly cover the main frame."""
-
+       
         # Prepare the picture.  On a 2GHz intel cpu, this takes about a second.
         x, y = parent.GetSizeTuple()
         image = wx.Image(path, wx.BITMAP_TYPE_PNG)
-        image.Rescale(self.SPLASH_WIDTH, self.SPLASH_HEIGHT, wx.IMAGE_QUALITY_HIGH)
+        image.Rescale(SPLASH_SCREEN_WIDTH, 
+                      SPLASH_SCREEN_HEIGHT, wx.IMAGE_QUALITY_HIGH)
         bm = image.ConvertToBitmap()
 
         # Create and show the splash screen.  It will disappear only when the
@@ -1825,7 +1898,7 @@ class ViewApp(wx.App):
                                         wx.FRAME_NO_TASKBAR|
                                         wx.STAY_ON_TOP),
                                         
-                        milliseconds=self.SPLASH_MAX_DISPLAY_TIME,
+                        milliseconds=SS_MAX_DISPLAY_TIME,
                         parent=parent,
                         id=wx.ID_ANY)
 

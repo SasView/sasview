@@ -3,14 +3,12 @@ Dummy application.
 Allows the user to set an external data manager
 """
 import gui_manager
-from sans.guiframe.gui_style import GUIFRAME
+
 from sans.guiframe.plugin_base import PluginBase
 
 class DummyView(gui_manager.ViewApp):
     """
     """
-    #PROG_SPLASH_PATH = None
-    STYLE = GUIFRAME.SINGLE_APPLICATION
     
 class TestPlugin(PluginBase):
     

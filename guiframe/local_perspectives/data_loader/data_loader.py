@@ -16,8 +16,25 @@ from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.utils import parse_name
 from sans.guiframe.gui_style import GUIFRAME
-
-EXTENSIONS = ['.svs', '.prv','.fitv', '.inv']
+try:
+    # Try to find a local config
+    import imp
+    path = os.getcwd()
+    if(os.path.isfile("%s/%s.py" % (path, 'local_config'))) or \
+        (os.path.isfile("%s/%s.pyc" % (path, 'local_config'))):
+        fObj, path, descr = imp.find_module('local_config', [path])
+        config = imp.load_module('local_config', fObj, path, descr)  
+    else:
+        # Try simply importing local_config
+        import local_config as config
+except:
+    # Didn't find local config, load the default 
+    import config
+ 
+extension_list = []
+if APPLICATION_STATE_EXTENSION is not None:
+    extension_list.append(APPLICATION_STATE_EXTENSION)
+EXTENSIONS = PLUGIN_STATE_EXTENSIONS + extension_list   
 
 class Plugin(PluginBase):
     
