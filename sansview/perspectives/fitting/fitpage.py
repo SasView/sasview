@@ -996,6 +996,10 @@ class FitPage(BasicPage):
         """
         call back for model selection
         """  
+        if self.plugin_rbutton.GetValue():
+            self._show_combox_helper()
+            print "went here"
+            
         self._on_select_model_helper() 
         self.set_model_param_sizer(self.model)                   
         

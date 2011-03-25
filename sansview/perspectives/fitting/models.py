@@ -42,7 +42,7 @@ def _check_plugin(model, name):
     """
     #Check is the plugin is of type Model1DPlugin
     if not issubclass(model, Model1DPlugin):
-        msg= "Plugin %s must be of type Model1DPlugin \n"%str(name)
+        msg = "Plugin %s must be of type Model1DPlugin \n"%str(name)
         log(msg)
         return None
     if model.__name__!="Model":
@@ -81,6 +81,9 @@ def _findModels(dir):
     # Go through files in plug-in directory
     try:
         list = os.listdir(dir)
+        #always recompile the folder plugin
+        import compileall
+        compileall.compile_dir(dir, force=1)
         for item in list:
             toks = os.path.splitext(os.path.basename(item))
             if toks[1]=='.py' and not toks[0]=='__init__':
