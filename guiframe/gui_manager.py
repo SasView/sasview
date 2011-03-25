@@ -298,14 +298,14 @@ class ViewerFrame(wx.Frame):
             ## the default panel is the panel is the last plugin added
             for item in list:
                 toks = os.path.splitext(os.path.basename(item))
-                name = None
+                name = ''
                 if not toks[0] == '__init__':
                     
                     if toks[1] == '.py' or toks[1] == '':
                         name = toks[0]
                 
                     path = [os.path.abspath(dir)]
-                    file = None
+                    file = ''
                     try:
                         if toks[1] == '':
                             mod_path = '.'.join([dir, name])
@@ -1030,29 +1030,24 @@ class ViewerFrame(wx.Frame):
       
     def load_from_cmd(self,  path):   
         """
+        load data from cmd or application
         """ 
-        print "load_from_cmd", path
-        if path is  None:
+        if path is None:
             return
         else:
             path = os.path.abspath(path)
             if not os.path.isfile(path):
-               print "return abs path", path
                return
-             
-            print "find a path -->", path
-
         basename  = os.path.basename(path)
         root, extension = os.path.splitext(basename)
         if extension.lower() not in EXTENSIONS:
             self.load_data(path)
-            print "load data"
         else:
             self.load_state(path)
-            "load state"
-        
+          
     def load_state(self, path):   
         """
+        load data from command line or application
         """
         if path and (path is not None) and os.path.isfile(path):
             basename  = os.path.basename(path)
@@ -1072,6 +1067,7 @@ class ViewerFrame(wx.Frame):
             
     def load_data(self, path):
         """
+        load data from command line
         """
         if not os.path.isfile(path):
             return
@@ -1083,21 +1079,25 @@ class ViewerFrame(wx.Frame):
             log_msg += "Try File opening ...."
             print log_msg
             return
-    
+        message = ""
+        log_msg = ''
+        output = {}
+        error_message = ""
         try:
-            print "Loading Data..." + str(path) + "\n"
+            print "Loading Data...:\n" + str(path) + "\n"
             temp =  self.loader.load(path)
             if temp.__class__.__name__ == "list":
                 for item in temp:
-                    data = self.parent.create_gui_data(item, path)
+                    data = self.create_gui_data(item, path)
                     output[data.id] = data
             else:
-                data = self.parent.create_gui_data(temp, path)
+                data = self.create_gui_data(temp, path)
                 output[data.id] = data
             
             self.add_data(data_list=output)
         except:
-            error_message = "Error while loading Data: %s\n" % str(path)
+            error_message = "Error while loading"
+            error_message += " Data from cmd:\n %s\n" % str(path)
             error_message += str(sys.exc_value) + "\n"
             print error_message
            
@@ -1826,28 +1826,29 @@ class ViewApp(wx.App):
         if hasattr(self.frame, 'special'):
             self.frame.special.SetCurrent()
         self.SetTopWindow(self.frame)
-        self.input_file = None
-        self.dir = None
-        print "sys.argv", sys.argv
-        if len(sys.argv) >= 2:
-            print "sys.argv 0", sys.argv[0]
-            cmd = sys.argv[0].lower()
-            if os.path.isfile(cmd):
-                basename  = os.path.basename(cmd)
-                self.dir = os.path.dirname(cmd)
-                print "basename", basename
-                if basename in ['sansview.py', 'sansview.exe']:
-                    print "sys.argv 1", sys.argv[1]
-                    self.input_file = sys.argv[1]
+        try:
+            self.open_file()
+        except:
+            msg = "%s Could not load " % str(APPLICATION_NAME)
+            msg += "input file from command line.\n"
+            logging.error(msg)
         return True
 
     def open_file(self):
         """
         open a state file at the start of the application
         """
-        
+        input_file = None
+        if len(sys.argv) >= 2:
+            cmd = sys.argv[0].lower()
+            if os.path.isfile(cmd):
+                basename  = os.path.basename(cmd)
+                if basename in ['sansview.py', 'sansview.exe']:
+                    input_file = sys.argv[1]
+        if input_file is None:
+            return
         if self.frame is not None:
-            self.frame.load_from_cmd(path=self.input_file)
+            self.frame.load_from_cmd(path=input_file)
          
             
     def set_manager(self, manager):
@@ -1960,10 +1961,6 @@ class ViewApp(wx.App):
         self.frame.Show(True)
         event.Skip()
       
-      
-
-        
-
 if __name__ == "__main__": 
     app = ViewApp(0)
     app.MainLoop()
