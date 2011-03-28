@@ -157,7 +157,7 @@ class GUIToolBar(Tbar):
         self.Realize()
         
     def enable_undo(self, panel):
-        self.EnableTool(GUIFRAME_ID.PRINT_ID, panel.get_print_flag())
+        self.EnableTool(GUIFRAME_ID.UNDO_ID, panel.get_undo_flag())
         self.Realize()
         
     def enable_redo(self, panel):
