@@ -80,6 +80,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
         self.graph.yaxis("\\rm{Intensity} ", "cm^{-1}")
         self.graph.render(self)
+        
+        # In resizing event
+        self.resizing = False
+        self.canvas.set_resizing(self.resizing)
+        self.Bind(wx.EVT_SIZE, self._OnReSize)
        
     def get_symbol_label(self):
         """
@@ -87,9 +92,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         _labels = {}
         i = 0
-        _labels['Points'] = i
+        _labels['Circle'] = i
         i += 1
-        _labels['X '] = i
+        _labels['Cross X '] = i
         i += 1
         _labels['Triangle Down'] = i
         i += 1
@@ -99,11 +104,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
         i += 1
         _labels['Triangle Right'] = i
         i += 1
-        _labels['Plus'] = i
+        _labels['Cross +'] = i
         i += 1
         _labels['Square'] = i
         i += 1
-        _labels['Thin Diamond'] = i
+        _labels['Diamond'] = i
         i += 1
         _labels['Diamond'] = i
         i += 1
@@ -113,7 +118,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         i += 1
         _labels['Pentagon'] = i
         i += 1
-        _labels['Curve'] = i
+        _labels['Line'] = i
         return _labels
 
     
@@ -128,7 +133,34 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """    
         self.graph.reset()
         self.plots      = {}
+        
+    def _OnReSize(self, event):   
+        """
+        On response of the resize of a panel, set axes_visiable False
+        """
+        # ready for another event
+        event.Skip()  
+        # set the resizing flag
+        self.resizing = True
+        self.canvas.set_resizing(self.resizing)
+        self.parent.set_schedule(True)
+        
+        
+    def set_resizing(self, resizing=False):
+        """
+        Set the resizing (True/False)
+        """
+        self.resizing = resizing
+        #self.canvas.set_resizing(resizing)
     
+    def schedule_full_draw(self, func='append'):    
+        """
+        Put self in schedule to full redraw list
+        """
+        # append/del this panel in the schedule list
+        self.parent.set_schedule_full_draw(self, func)
+        
+
     def remove_data_by_id(self, id):
         """'
         remove data from plot
@@ -173,9 +205,16 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.graph.yaxis(y_unit, y_label)
         ## Set the view scale for all plots
         self._onEVT_FUNC_PROPERTY()
-        ## render the graph
-        self.graph.render(self)
-        self.subplot.figure.canvas.draw_idle()
+        ## render the graph<=No need this done in canvas
+        #self.graph.render(self)
+        #self.subplot.figure.canvas.draw_idle()
+    
+    def draw_plot(self):
+        """
+        Draw plot
+        """
+        self.draw()  
+
 
        
     def onLeftDown(self,event): 
@@ -232,18 +271,24 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._slicerpop.set_graph(self.graph)     
         # Various plot options
         id = wx.NewId()
-        self._slicerpop.Append(id, '&Save image', 'Save image as PNG')
+        self._slicerpop.Append(id, '&Save Image', 'Save image as PNG')
         wx.EVT_MENU(self, id, self.onSaveImage)
         id = wx.NewId()
-        self._slicerpop.Append(id, '&Print image', 'Print image ')
+        self._slicerpop.Append(id, '&Print Image', 'Print image ')
         wx.EVT_MENU(self, id, self.onPrint)
         id = wx.NewId()
-        self._slicerpop.Append(id, '&Print Preview', 'image preview for print')
+        self._slicerpop.Append(id, '&Print Preview', 'Print preview')
         wx.EVT_MENU(self, id, self.onPrinterPreview)
         
-       
+        id = wx.NewId()
+        self._slicerpop.Append(id, '&Copy to Clipboard', 'Copy to the clipboard')
+        wx.EVT_MENU(self, id, self.OnCopyFigureMenu)
+        
+        self._slicerpop.AppendSeparator()
+
         #add menu of other plugins
         item_list = self.parent.get_context_menu(self)
+
         if (not item_list == None) and (not len(item_list) == 0):
             for item in item_list:
                 try:
@@ -256,11 +301,22 @@ class ModelPanel1D(PlotPanel, PanelBase):
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
                     pass
             self._slicerpop.AppendSeparator()
-        id = wx.NewId()
-        
-        self._slicerpop.Append(id, '&Print image', 'Print image')
+        #id = wx.NewId()
+        #self._slicerpop.Append(id, '&Print image', 'Print image')
         if self.graph.selected_plottable in self.plots:
             plot = self.plots[self.graph.selected_plottable]
+
+            id = wx.NewId()
+            self._slicerpop.Append(id, '&Linear Fit')
+            wx.EVT_MENU(self, id, self.onFitting)
+            self._slicerpop.AppendSeparator()
+            id = wx.NewId()
+            name = plot.name
+            self._slicerpop.Append(id, "&Save Points as a File")
+            wx.EVT_MENU(self, id, self._onSave)
+            id = wx.NewId()
+            self._slicerpop.Append(id, "Remove %s Curve" % name)
+            wx.EVT_MENU(self, id, self._onRemove)
             if not plot.is_data:
                 id = wx.NewId()
                 self._slicerpop.Append(id, '&Freeze', 'Freeze')
@@ -273,17 +329,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             id = wx.NewId()
             self._slicerpop.AppendMenu(id,'&Modify Symbol',  symbol_menu)
             self._slicerpop.AppendSeparator()
-            #else:
-            id = wx.NewId()
-            self._slicerpop.Append(id, '&Linear Fit')
-            wx.EVT_MENU(self, id, self.onFitting)
-            id = wx.NewId()
-            name = plot.name
-            self._slicerpop.Append(id, "&Save points")
-            wx.EVT_MENU(self, id, self._onSave)
-            id = wx.NewId()
-            self._slicerpop.Append(id, "Remove %s curve" % name)
-            wx.EVT_MENU(self, id, self._onRemove)
+
             id = wx.NewId()
             self.hide_menu = self._slicerpop.Append(id, "Hide Error")
             if plot.dy is not None or plot.dy != []:
@@ -327,8 +373,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         ## Set the view scale for all plots
         self._onEVT_FUNC_PROPERTY()
         ## render the graph
-        self.graph.render(self)
-        self.subplot.figure.canvas.draw_idle()
+        #self.graph.render(self)
+        #self.subplot.figure.canvas.draw_idle()
         
     def _onsaveTXT(self, path):
         """
@@ -352,15 +398,24 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 except:
                     has_errors = False
             if has_errors:
-                out.write("<X>   <Y>   <dY>\n")
+                if data.dx != None:
+                    out.write("<X>   <Y>   <dY>   <dX>\n")
+                else:
+                    out.write("<X>   <Y>   <dY>\n")
             else:
                 out.write("<X>   <Y>\n")
                 
             for i in range(len(data.x)):
                 if has_errors:
-                    out.write("%g  %g  %g\n" % (data.x[i], 
-                                                data.y[i],
-                                               data.dy[i]))
+                    if data.dx != None:
+                        out.write("%g  %g  %g  %g\n" % (data.x[i], 
+                                                    data.y[i],
+                                                    data.dy[i],
+                                                    data.dx[i]))
+                    else:
+                        out.write("%g  %g  %g\n" % (data.x[i], 
+                                                    data.y[i],
+                                                    data.dy[i]))
                 else:
                     out.write("%g  %g\n" % (data.x[i], 
                                             data.y[i]))

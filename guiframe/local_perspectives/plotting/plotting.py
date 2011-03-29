@@ -34,6 +34,9 @@ class Plugin(PluginBase):
         self.plot_panels = {}
         self._panel_on_focus = None
         self.menu_default_id = None
+        # Plot menu
+        self.menu = None
+
      
     def set_panel_on_focus(self, panel):
         """
@@ -58,9 +61,9 @@ class Plugin(PluginBase):
         """
         self.menu = wx.Menu()
         self.menu.Append(DEFAULT_MENU_ITEM_ID, DEFAULT_MENU_ITEM_LABEL, 
-                             "No plot available")
+                             "No graph available")
         self.menu.FindItemByPosition(0).Enable(False)
-        return [(self.menu, "Plot")]
+        return [(self.menu, "Graph")]
     
     def get_panels(self, parent):
         """
@@ -134,8 +137,11 @@ class Plugin(PluginBase):
             if pos != -1:
                 self.menu.Delete(DEFAULT_MENU_ITEM_ID)
            
-        self.menu.Append(event_id, new_panel.window_caption, 
+        self.menu.AppendCheckItem(event_id, new_panel.window_caption, 
                          "Show %s plot panel" % new_panel.window_caption)
+        self.menu.Check(event_id, True)
+        wx.EVT_MENU(self.parent, event_id, self._on_check_menu)
+        wx.EVT_SHOW(new_panel, self._on_close_panel)
         # Set UID to allow us to reference the panel later
         new_panel.uid = event_id
         # Ship the plottable to its panel
@@ -265,4 +271,35 @@ class Plugin(PluginBase):
             self.create_panel_helper(new_panel, data, group_id, title)
       
         return
-   
+
+    def _on_check_menu(self, event):
+        """
+        Check mark on menu
+        """
+        event.Skip()
+        event_id = event.GetId()
+        
+        #self.menu.Enable(event_id, False)
+        self.parent._on_view(event)
+        if not self.menu.IsChecked(event_id):
+            self.menu.Check(event_id, True)
+
+        
+    def _on_close_panel(self, event):
+        """
+        Update check mark on panel's show and hide event
+        """
+        event.Skip()
+        panel = event.GetEventObject()
+        id = panel.uid
+        if event.GetShow() and self.parent._mgr.GetPane(panel).IsShown():
+            if not self.menu.IsChecked(id):
+                self.menu.Check(id, True)
+                #self.menu.Enable(id, False)
+        else:
+            try:
+                if self.menu.IsChecked(id):
+                    self.menu.Check(id, False)
+                    #self.menu.Enable(id, True)
+            except:
+                pass 

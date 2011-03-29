@@ -193,7 +193,8 @@ class ModelPanel2D(ModelPanel1D):
         self.graph.yaxis(data._yaxis, data._yunit)
         self.graph.title(self.data2D.name)
         self.graph.render(self)
-        self.subplot.figure.canvas.draw_idle()
+        self.draw_plot()
+        #self.subplot.figure.canvas.draw_idle()
         ## store default value of zmin and zmax 
         self.default_zmin_ctl = self.zmin_2D
         self.default_zmax_ctl = self.zmax_2D
@@ -210,15 +211,15 @@ class ModelPanel2D(ModelPanel1D):
         slicerpop.set_graph(self.graph)
              
         id = wx.NewId()
-        slicerpop.Append(id, '&Save image')
+        slicerpop.Append(id, '&Save Image')
         wx.EVT_MENU(self, id, self.onSaveImage)
         
         id = wx.NewId()
-        slicerpop.Append(id,'&Print image', 'Print image')
+        slicerpop.Append(id,'&Print Image', 'Print image')
         wx.EVT_MENU(self, id, self.onPrint)
         
         id = wx.NewId()
-        slicerpop.Append(id,'&Print Preview', 'image preview for print')
+        slicerpop.Append(id,'&Print Preview', 'Print preview')
         wx.EVT_MENU(self, id, self.onPrinterPreview)
 
         id = wx.NewId()
@@ -237,7 +238,9 @@ class ModelPanel2D(ModelPanel1D):
         if len(self.data2D.detector) == 1:        
             
             item_list = self.parent.get_context_menu(self)
-            if (not item_list == None) and (not len(item_list) == 0):
+            if (not item_list == None) and (not len(item_list) == 0) and\
+                self.data2D.name.split(" ")[0] != 'Residuals':  
+                # The line above; Not for trunk
                 for item in item_list:
                     try:
                         id = wx.NewId()
@@ -252,7 +255,12 @@ class ModelPanel2D(ModelPanel1D):
             
             id = wx.NewId()
             slicerpop.Append(id, '&Perform circular average')
-            wx.EVT_MENU(self, id, self.onCircular) 
+            wx.EVT_MENU(self, id, self.onCircular) \
+            # For Masked Data
+            if not plot.mask.all():
+                id = wx.NewId()
+                slicerpop.Append(id, '&Masked circular average')
+                wx.EVT_MENU(self, id, self.onMaskedCircular) 
             id = wx.NewId()
             slicerpop.Append(id, '&Sector [Q view]')
             wx.EVT_MENU(self, id, self.onSectorQ) 
@@ -355,7 +363,7 @@ class ModelPanel2D(ModelPanel1D):
         Respond to changes in the model by recalculating the 
         profiles and resetting the widgets.
         """
-        self.draw()
+        self.draw_plot()
         
     def _getEmptySlicerEvent(self):
         """
@@ -400,8 +408,17 @@ class ModelPanel2D(ModelPanel1D):
         event.obj_class = self.slicer.__class__
         event.params = self.slicer.get_params()
         wx.PostEvent(self, event)
-
-    def onCircular(self, event):
+        
+    def onMaskedCircular(self, event):
+        """
+        perform circular averaging on Data2D with mask if it exists
+        
+        :param event: wx.menu event
+        
+        """
+        self.onCircular(event, True)
+        
+    def onCircular(self, event, ismask=False):
         """
         perform circular averaging on Data2D
         
@@ -423,7 +440,7 @@ class ModelPanel2D(ModelPanel1D):
         ## Create data1D circular average of data2D
         Circle = CircularAverage(r_min=0, r_max=self.radius, 
                                  bin_width=bin_width)
-        circ = Circle(self.data2D)
+        circ = Circle(self.data2D, ismask=ismask)
         from sans.guiframe.dataFitting import Data1D
         if hasattr(circ, "dxl"):
             dxl = circ.dxl
@@ -442,9 +459,16 @@ class ModelPanel2D(ModelPanel1D):
         #new_plot.info = self.data2D.info
         new_plot.interactive = True
         new_plot.detector = self.data2D.detector
+        
         ## If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
-        new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+        if hasattr(self.data2D, "scale"):
+            if self.data2D.scale == 'linear':
+                new_plot.ytransform = 'y'
+                new_plot.yaxis("\\rm{Residuals} ", "normalized")
+        else:
+            new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+
         new_plot.group_id = "Circ avg " + self.data2D.name
         new_plot.id = "Circ avg " + self.data2D.name
         new_plot.is_data = True

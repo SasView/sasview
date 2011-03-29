@@ -148,12 +148,19 @@ class ViewerFrame(wx.Frame):
         #panel on focus
         self.panel_on_focus = None
         self.loader = Loader()   
-         #data manager
+        #data manager
         from data_manager import DataManager
         self._data_manager = DataManager()
         self._data_panel = DataPanel(parent=self)
         if self.panel_on_focus is not None:
             self._data_panel.set_panel_on_focus(self.panel_on_focus.window_caption)
+        # list of plot panels in schedule to full redraw
+        self.schedule = False
+        #self.callback = True
+        self._idle_count = 0
+        self.schedule_full_draw_list = []
+        self.idletimer = wx.CallLater(1, self._onDrawIdle)
+
         # Check for update
         #self._check_update(None)
         # Register the close event so it calls our own method
@@ -550,7 +557,8 @@ class ViewerFrame(wx.Frame):
                               Resizable(True).
                               # Use a large best size to make sure the AUI 
                               # manager takes all the available space
-                              BestSize(wx.Size(PLOPANEL_WIDTH, PLOPANEL_HEIGTH)))
+                              BestSize(wx.Size(PLOPANEL_WIDTH, PLOPANEL_HEIGTH)).
+                              MinSize(wx.Size(PLOPANEL_WIDTH*0.9, PLOPANEL_HEIGTH)))
             self._popup_fixed_panel(p)
     
         elif style2 == GUIFRAME.FLOATING_PANEL:
@@ -920,7 +928,8 @@ class ViewerFrame(wx.Frame):
         :param evt: menu event
         
         """
-        self.show_panel(evt.GetId())
+        self.show_panel(evt.GetId(), 'on')
+        wx.CallLater(5, self.set_schedule(True))
         
     def on_close_welcome_panel(self):
         """
@@ -952,7 +961,7 @@ class ViewerFrame(wx.Frame):
                 self._mgr.GetPane(self.panels[id].window_name).Hide()
         self._mgr.Update()
        
-    def show_panel(self, uid):
+    def show_panel(self, uid, show=None):
         """
         Shows the panel with the given id
         
@@ -962,12 +971,18 @@ class ViewerFrame(wx.Frame):
         ID = str(uid)
         config.printEVT("show_panel: %s" % ID)
         if ID in self.panels.keys():
-            if not self._mgr.GetPane(self.panels[ID].window_name).IsShown():
-                self._mgr.GetPane(self.panels[ID].window_name).Show()
+            if not self._mgr.GetPane(self.panels[ID].window_name).IsShown(): 
+                if show == 'on':
+                    self._mgr.GetPane(self.panels[ID].window_name).Show()   
+                elif self.panels[ID].window_name.split(" ")[0] == "Residuals":
+                    self._mgr.GetPane(self.panels[ID].window_name).Hide()
+                else:
+                    self._mgr.GetPane(self.panels[ID].window_name).Show()
                 # Hide default panel
                 self._mgr.GetPane(self.panels["default"].window_name).Hide()
-            self._mgr.Update()
-            
+        self._mgr.Update()     
+        self._redraw_idle()
+                    
     def hide_panel(self, uid):
         """
         hide panel
@@ -1793,6 +1808,113 @@ class ViewerFrame(wx.Frame):
         """
         if self.panel_on_focus is not None:
             self._toolbar.enable_reset(self.panel_on_focus)
+
+    def set_schedule_full_draw(self, panel=None, func='del'):
+        """
+        Add/subtract the schedule full draw list with the panel given
+        
+        :param panel: plot panel
+        :param func: append or del [string]
+        """
+
+        # append this panel in the schedule list if not in yet
+        if func == 'append':
+            if not panel in self.schedule_full_draw_list:
+                self.schedule_full_draw_list.append(panel) 
+        # remove this panel from schedule list
+        elif func == 'del':
+            if len(self.schedule_full_draw_list) > 0:
+                if panel in self.schedule_full_draw_list:
+                    self.schedule_full_draw_list.remove(panel)
+
+        # reset the schdule
+        if len(self.schedule_full_draw_list) == 0:
+            self.schedule = False
+        else:
+            self.schedule = True    
+        
+    def full_draw(self):
+        """
+        Draw the panels with axes in the schedule to full dwar list
+        """
+        count = len(self.schedule_full_draw_list)
+        #if not self.schedule:
+        if count < 1:
+            self.set_schedule(False)
+            return
+        else:
+            ind = 0
+            # if any of the panel is shown do full_draw
+            for panel in self.schedule_full_draw_list:
+                ind += 1
+                if self._mgr.GetPane(panel.window_name).IsShown():
+                    break
+                # otherwise, return
+                if ind == count:
+                    return
+
+        #Simple redraw only for a panel shown
+        def f_draw(panel):
+            """
+            Draw A panel in the full dwar list
+            """
+            # Check if the panel is shown
+            if self._mgr.GetPane(panel.window_name).IsShown():
+                try:
+                    # This checking of GetCapture is to stop redrawing
+                    # while any panel is capture.
+                    if self.GetCapture() == None:
+                        # draw if possible
+                        panel.set_resizing(False)
+                        panel.draw_plot()
+                except:
+                    pass
+        #print self.callback,self.schedule,self.schedule_full_draw_list
+        
+        # Draw all panels        
+        map(f_draw, self.schedule_full_draw_list)
+        
+        # Reset the attr  
+        if len(self.schedule_full_draw_list) == 0:
+            self.set_schedule(False)
+        else:
+            self.set_schedule(True)
+        # update mgr
+        self._mgr.Update()
+        
+    def set_schedule(self, schedule=False):  
+        """
+        Set schedule
+        """
+        self.schedule = schedule
+                
+    def get_schedule(self):  
+        """
+        Get schedule
+        """
+        return self.schedule
+    
+        
+    def _onDrawIdle(self, *args, **kwargs):
+        """
+        ReDraw with axes
+        """
+        # check if it is time to redraw
+        if self.GetCapture() == None:
+            # Draw plot, changes resizing too
+            self.full_draw()
+            
+        # restart idle        
+        self._redraw_idle(*args, **kwargs)
+
+            
+    def _redraw_idle(self, *args, **kwargs):
+        """
+        Restart Idle
+        """
+        # restart idle   
+        self.idletimer.Restart(55, *args, **kwargs)
+
         
 class DefaultPanel(wx.Panel, PanelBase):
     """

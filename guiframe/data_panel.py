@@ -21,7 +21,7 @@ from sans.guiframe.panel_base import PanelBase
 
 PANEL_WIDTH = 200
 #PANEL_HEIGHT = 560
-PANEL_HEIGHT = 800
+PANEL_HEIGHT = 840
 STYLE_FLAG = wx.SUNKEN_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|\
                     wx.WANTS_CHARS|CT.TR_HAS_VARIABLE_ROW_HEIGHT
                     

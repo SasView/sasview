@@ -35,7 +35,7 @@ class GUIToolBar(Tbar):
     def do_layout(self):
         """
         """
-        tbar_size = (22, 22)
+        tbar_size = (20, 15)
         button_type =  wx.ITEM_NORMAL
 
         self.AddSeparator()
