@@ -14,7 +14,6 @@ from sans.fit.AbstractFitEngine import FitEngine
 from sans.fit.AbstractFitEngine import SansAssembly
 from sans.fit.AbstractFitEngine import FitAbort
 
-
 class fitresult(object):
     """
     Storing fit result
@@ -52,10 +51,13 @@ class fitresult(object):
         n = len(self.model.parameterset)
         self.iterations += 1
         result_param = zip(xrange(n), self.model.parameterset)
-        msg = [" [Iteration #: %s] | P%-3d  %s......|.....%s" % \
-               (self.iterations, p[0], p[1], p[1].value)\
+        msg1 = ["[Iteration #: %s ]" % self.iterations]
+        msg2 = ["P%-3d  %s......|.....%s" % \
+        	(p[0], p[1], p[1].value)\
               for p in result_param if p[1].name in self.param_list]
-        msg.append("=== goodness of fit: %s" % (str(self.fitness)))
+        
+        msg3 = ["=== goodness of fit: %s ===" % (str(self.fitness))]
+        msg =  msg1 + msg3 + msg2
         return "\n".join(msg)
     
     def print_summary(self):
@@ -99,7 +101,6 @@ class ScipyFit(FitEngine):
         self.fit_arrange_dict = {}
         self.param_list = []
         self.curr_thread = None
-        self.result = None
     #def fit(self, *args, **kw):
     #    return profile(self._fit, *args, **kw)
 
@@ -123,28 +124,32 @@ class ScipyFit(FitEngine):
         listdata = fitproblem[0].get_data()
         # Concatenate dList set (contains one or more data)before fitting
         data = listdata
+       
         self.curr_thread = curr_thread
-        self.result = fitresult(model=model, param_list=self.param_list)
-        self.handler = handler
-        if self.handler is not None:
-            self.handler.set_result(result=self.result)
+        ftol = curr_thread.ftol
+        
+        # Check the initial value if it is within range
+        self._check_param_range(model)
+        
+        result = fitresult(model=model, param_list=self.param_list)
+        if handler is not None:
+            handler.set_result(result=result)
         #try:
-        functor = SansAssembly(self.param_list, model, data, handler=self.handler,
-                         fitresult=self.result, curr_thread= self.curr_thread)
-    
+        functor = SansAssembly(self.param_list, model, data, handler=handler,
+                         fitresult=result, curr_thread= self.curr_thread)
         try:
-            out, cov_x, _, mesg, success = optimize.leastsq(functor,
+        	out, cov_x, _, mesg, success = optimize.leastsq(functor,
                                             model.get_params(self.param_list),
-                                                    ftol = 0.001,
+                                                    ftol=ftol,
                                                     full_output=1,
                                                     warning=True)
         except:
             if hasattr(sys, 'last_type') and sys.last_type == FitAbort:
-                if self.handler is not None:
+                if handler is not None:
                     msg = "Fit Stop!"
                     #self.handler.error(msg)
-                    self.result = self.handler.get_result()
-                    return self.result
+                    result = handler.get_result()
+                    return result
             else:
                 raise 
        
@@ -153,22 +158,76 @@ class ScipyFit(FitEngine):
             stderr = numpy.sqrt(numpy.diag(cov_x))
         else:
             stderr = None
+
+        if not (numpy.isnan(out).any()) and (cov_x != None):
+            result.fitness = chisqr
+            result.stderr  = stderr
+            result.pvec = out
+            result.success = success
+            if q is not None:
+                q.put(result)
+                return q
+            return result
         
-        if (out is not None) and not (numpy.isnan(out).any()) \
-            and (cov_x != None):
-            self.result.fitness = chisqr
-            self.result.stderr  = stderr
-            self.result.pvec = out
-            self.result.success = success
-        else:  
-            msg = "SVD did not converge " + str(mesg)
-            #handler.error(msg)
-        return self.result
-
-       
+        # Error will be present to the client, not here 
+        #else:  
+        #    raise ValueError, "SVD did not converge" + str(mesg)
+        
+    def _check_param_range(self, model):
+        """
+        Check parameter range and set the initial value inside 
+        if it is out of range.
+        
+        : model: park model object
+        """
+        is_outofbound = False
+        # loop through parameterset
+        for p in model.parameterset:        
+            param_name = p.get_name()
+            # proceed only if the parameter name is in the list of fitting
+            if param_name in self.param_list:
+                # if the range was defined, check the range
+                if numpy.isfinite(p.range[0]):
+                    if p.value <= p.range[0]: 
+                        # 10 % backing up from the border if not zero
+                        # for Scipy engine to work properly.
+                        shift = self._get_zero_shift(p.range[0])
+                        new_value = p.range[0] + shift
+                        p.value =  new_value
+                        is_outofbound = True
+                if numpy.isfinite(p.range[1]):
+                    if p.value >= p.range[1]:
+                        shift = self._get_zero_shift(p.range[1])
+                        # 10 % backing up from the border if not zero
+                        # for Scipy engine to work properly.
+                        new_value = p.range[1] - shift
+                        # Check one more time if the new value goes below
+                        # the low bound, If so, re-evaluate the value 
+                        # with the mean of the range.
+                        if numpy.isfinite(p.range[0]):
+                            if new_value < p.range[0]:
+                                new_value = (p.range[0] + p.range[1]) / 2.0
+                        # Todo: 
+                        # Need to think about when both min and max are same.
+                        p.value =  new_value
+                        is_outofbound = True
+                        
+        return is_outofbound
     
-
-
+    def _get_zero_shift(self, range):
+        """
+        Get 10% shift of the param value = 0 based on the range value
+        
+        : param range: min or max value of the bounds
+        """
+        if range == 0:
+            shift = 0.1
+        else:
+            shift = 0.1 * range
+            
+        return shift
+    
+    
 #def profile(fn, *args, **kw):
 #    import cProfile, pstats, os
 #    global call_result
