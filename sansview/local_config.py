@@ -49,18 +49,18 @@ _copyright = "(c) 2009, University of Tennessee"
 #edit the list of file state your plugin can read
 APPLICATION_WLIST = 'SansView files (*.svs)|*.svs'
 APPLICATION_STATE_EXTENSION = '.svs'
-GUIFRAME_WIDTH = 1000
-GUIFRAME_HEIGHT = 800
+GUIFRAME_WIDTH = 1100
+GUIFRAME_HEIGHT = 840
 PLUGIN_STATE_EXTENSIONS = ['.prv','.fitv', '.inv']
 PLUGINS_WLIST = ['P(r) files (*.prv)|*.prv',
                   'Fitting files (*.fitv)|*.fitv',
                   'Invariant files (*.inv)|*.inv']
-PLOPANEL_WIDTH = 400
+PLOPANEL_WIDTH = 450
 PLOPANEL_HEIGTH = 400
-SPLASH_SCREEN_PATH = os.path.join("images","SVwelcome.png")
+SPLASH_SCREEN_PATH = os.path.join("images","SVwelcome_mini.png")
 DEFAULT_STYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.TOOL_ON
-SPLASH_SCREEN_WIDTH = 500
-SPLASH_SCREEN_HEIGHT = 300
+SPLASH_SCREEN_WIDTH = 512
+SPLASH_SCREEN_HEIGHT = 366
 SS_MAX_DISPLAY_TIME = 3000 #3 sec
 
 
