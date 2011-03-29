@@ -28,8 +28,8 @@ import local_config
 import logging
 
 # Application dimensions
-APP_HEIGHT = 800
-APP_WIDTH  = 1000
+APP_HEIGHT = 820
+APP_WIDTH  = 1050
 GSTYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.TOOL_ON
 
 class SansViewApp(gui_manager.ViewApp):
@@ -97,7 +97,12 @@ class SansView():
         except:
             logging.error("SansView: could not find theory plug-in module")
             logging.error(sys.exc_value) 
-        """
+        """ 
+            
+        # Fitting perspective
+        import perspectives.fitting as module    
+        fitting_plug = module.Plugin()
+        self.gui.add_perspective(fitting_plug)
        
         # Add welcome page
         self.gui.set_welcome_panel(WelcomePanel)
