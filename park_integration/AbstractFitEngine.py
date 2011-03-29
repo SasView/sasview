@@ -7,8 +7,8 @@ import math
 import park
 from DataLoader.data_info import Data1D
 from DataLoader.data_info import Data2D
-
-    
+import time
+_SMALLVALUE = 1.0e-10    
     
 class SansParameter(park.Parameter):
     """
@@ -422,6 +422,7 @@ class SansAssembly:
         self.handler = handler
         self.fitresult = fitresult
         self.res = []
+        self.true_res = []
         self.func_name = "Functor"
         
     #def chisq(self, params):
@@ -435,11 +436,11 @@ class SansAssembly:
         
         """
         sum = 0
-        for item in self.res:
+        for item in self.true_res:
             sum += item * item
-        if len(self.res) == 0:
+        if len(self.true_res) == 0:
             return None
-        return sum / len(self.res)
+        return sum / len(self.true_res)
     
     def __call__(self, params):
         """
@@ -447,22 +448,78 @@ class SansAssembly:
         
         :param params: value of parameters to fit
         
-        """
-        self.model.set_params(self.paramlist,params)
-        self.res = self.data.residuals(self.model.eval)
+        """ 
+        #import thread
+        self.model.set_params(self.paramlist, params)
+        self.true_res = self.data.residuals(self.model.eval)
+        # check parameters range
+        if self.check_param_range():
+            # if the param value is outside of the bound
+            # just silent return res = inf
+            return self.res
+        self.res = self.true_res       
         if self.fitresult is not None and  self.handler is not None:
             self.fitresult.set_model(model=self.model)
+            #fitness = self.chisq(params=params)
             fitness = self.chisq()
             self.fitresult.pvec = params
             self.fitresult.set_fitness(fitness=fitness)
             self.handler.set_result(result=self.fitresult)
-            #self.handler.update_fit()
+            self.handler.update_fit()
+
             if self.curr_thread != None :
-                try:
-                    self.curr_thread.isquit()
-                except:
-                    raise FitAbort,"stop leastsqr optimizer"        
+        	    try:
+        	        self.curr_thread.isquit()
+        	    except:
+        	        raise FitAbort,"stop leastsqr optimizer"    
         return self.res
+    
+    def check_param_range(self):
+        """
+        Check the lower and upper bound of the parameter value
+        and set res to the inf if the value is outside of the
+        range
+        :limitation: the initial values must be within range.
+        """
+
+        time.sleep(0.01)
+        is_outofbound = False
+        # loop through the fit parameters
+        for p in self.model.parameterset:
+            param_name = p.get_name()
+            if param_name in self.paramlist:
+                
+                # if the range was defined, check the range
+                if numpy.isfinite(p.range[0]):
+                    if p.value == 0:
+                        # This value works on Scipy
+                        # Do not change numbers below
+                        value = _SMALLVALUE 
+                    else:
+                        value = p.value
+                    # For leastsq, it needs a bit step back from the boundary
+                    val = p.range[0] - value * _SMALLVALUE 
+                    if p.value < val: 
+                        self.res *= 1e+6
+                        
+                        is_outofbound = True
+                        break
+                if numpy.isfinite(p.range[1]):
+                    # This value works on Scipy
+                    # Do not change numbers below
+                    if p.value == 0:
+                        value = _SMALLVALUE 
+                    else:
+                        value = p.value
+                    # For leastsq, it needs a bit step back from the boundary
+                    val = p.range[1] + value * _SMALLVALUE 
+                    if p.value > val:
+                        self.res *= 1e+6
+                        is_outofbound = True
+                        break
+
+        return is_outofbound
+    
     
 class FitEngine:
     def __init__(self):
