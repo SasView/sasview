@@ -108,6 +108,7 @@ class ViewerFrame(wx.Frame):
                 self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         
         ## Application manager
+        self._input_file = None
         self.app_manager = None
         self._mgr = None
         #add current perpsective
@@ -163,6 +164,12 @@ class ViewerFrame(wx.Frame):
         self.Bind(EVT_PANEL_ON_FOCUS, self.set_panel_on_focus)
         self.Bind(EVT_APPEND_BOOKMARK, self.append_bookmark)
     
+    def set_input_file(self, input_file):
+        """
+        :param input_file: file to read
+        """
+        self._input_file = input_file
+        
     def get_data_manager(self):
         """
         """
@@ -199,7 +206,12 @@ class ViewerFrame(wx.Frame):
         self._setup_menus()
         # set tool bar
         self._setup_tool_bar()
-        #self.Fit()
+        try:
+            self.load_from_cmd(self._input_file)
+        except:
+            pass
+        self.post_init()
+        self.Show(True)
         #self._check_update(None)
              
     def _setup_layout(self):
@@ -1854,7 +1866,7 @@ class ViewApp(wx.App):
         if input_file is None:
             return
         if self.frame is not None:
-            self.frame.load_from_cmd(path=input_file)
+            self.frame.set_input_file(input_file=input_file)
          
             
     def set_manager(self, manager):
@@ -1868,13 +1880,12 @@ class ViewApp(wx.App):
         """
         Build the GUI
         """
-        self.frame.build_gui()
-        self.frame.post_init()
         #try to load file at the start
         try:
             self.open_file()
         except:
             raise
+        self.frame.build_gui()
         if self.s_screen is not None and self.s_screen.IsShown():
             self.s_screen.Close()
         
