@@ -1817,7 +1817,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Fill panel's combo box according to the type of model selected
         """
-        self.model_list_box = self.parent.update_model_list()
         if self.shape_rbutton.GetValue():
             ##fill the combobox with form factor list
             self.structurebox.SetSelection(0)

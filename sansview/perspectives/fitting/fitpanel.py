@@ -77,8 +77,10 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
     def update_model_list(self):
         """
         """
-        self.model_list_box = self.menu_mng.update()
-        return self.model_list_box
+        temp = self.menu_mng.update()
+        if len(temp):
+            self.model_list_box = temp
+        return temp
         
         
     def get_page_by_id(self, uid):  

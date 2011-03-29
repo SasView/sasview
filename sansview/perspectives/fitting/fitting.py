@@ -68,7 +68,7 @@ class Plugin(PluginBase):
         self.calc_2D = None
         self.calc_1D = None
         self.fit_thread_list = {}
-        
+        self.fit_panel = None
         # Start with a good default
         self.elapsed = 0.022
         # the type of optimizer selected, park or scipy

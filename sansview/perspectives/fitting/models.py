@@ -2,19 +2,21 @@
 import wx
 import wx.lib.newevent
 import imp
-import os,sys,math
+import os
+import sys
+import math
 import os.path
-
-(ModelEvent, EVT_MODEL) = wx.lib.newevent.NewEvent()
-from sans.guiframe.events import StatusEvent  
 # Time is needed by the log method
 import time
 
+from sans.guiframe.events import StatusEvent  
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
 # as the base class of plug-in models.
 from sans.models.pluginmodel import Model1DPlugin
-    
+   
+PLUGIN_DIR = 'plugins' 
+
 def log(message):
     """
     """
@@ -22,14 +24,7 @@ def log(message):
     out.write("%10g:  %s\n" % (time.clock(), message))
     out.close()
 
-def findModels():
-    """
-    """
-    log("looking for models in: %s/plugins" % os.getcwd())
-    if os.path.isdir('plugins'):
-        return _findModels('plugins')
-    return []
-    
+
 def _check_plugin(model, name):
     """
     Do some checking before model adding plugins in the list
@@ -81,9 +76,6 @@ def _findModels(dir):
     # Go through files in plug-in directory
     try:
         list = os.listdir(dir)
-        #always recompile the folder plugin
-        import compileall
-        compileall.compile_dir(dir, force=1)
         for item in list:
             toks = os.path.splitext(os.path.basename(item))
             if toks[1]=='.py' and not toks[0]=='__init__':
@@ -165,12 +157,28 @@ class ModelManager:
     plugins = []
     ## Event owner (guiframe)
     event_owner = None
+    last_time_dir_modified = 0
+    
     def __init__(self):
         """
         """
         self.stored_plugins = {}
         self._getModelList()
         
+    def findModels(self):
+        """
+        find  plugin model in directory of plugin .recompile all file
+        in the directory if file were modified
+        """
+        if self.is_changed():
+            #always recompile the folder plugin
+            import compileall
+            compileall.compile_dir(dir=PLUGIN_DIR, force=1)
+            log("looking for models in: %s/plugins" % os.getcwd())
+            return _findModels(PLUGIN_DIR)
+        return  {}
+       
+    
     def _getModelList(self):
         """
         List of models we want to make available by default
@@ -391,7 +399,7 @@ class ModelManager:
         self.multi_func_list.append(ReflectivityIIModel)
     
         #Looking for plugins
-        self.stored_plugins = findModels()
+        self.stored_plugins = self.findModels()
         self.plugins = self.stored_plugins.values()
         self.plugins.append(ReflectivityModel)
         self.plugins.append(ReflectivityIIModel)
@@ -399,17 +407,34 @@ class ModelManager:
        
         return 0
 
+    def is_changed(self):
+        """
+        check the last time the plugin dir has changed and return true
+         is the directory was modified else return false
+        """
+        is_modified = False
+        if os.path.isdir(PLUGIN_DIR):
+            temp =  os.path.getmtime(PLUGIN_DIR)
+            if  self.last_time_dir_modified != temp:
+                is_modified = True
+                self.last_time_dir_modified = temp
+        return is_modified
     
     def update(self):
         """
+        return a dictionary of model if 
+        new models were added else return empty dictionary
         """
-        new_plugins = findModels()
-        for name, plug in  new_plugins.iteritems():
-            if name not in self.stored_plugins.keys():
-                self.stored_plugins[name] = plug
-                self.plugins.append(plug)
-        self.model_combobox.set_list("Customized Models", self.plugins)
-        return self.model_combobox.get_list()
+        new_plugins = self.findModels()
+        if len(new_plugins) > 0:
+            for name, plug in  new_plugins.iteritems():
+                if name not in self.stored_plugins.keys():
+                    self.stored_plugins[name] = plug
+                    self.plugins.append(plug)
+            self.model_combobox.set_list("Customized Models", self.plugins)
+            return self.model_combobox.get_list()
+        else:
+            return {}
         
     def populate_menu(self, modelmenu, event_owner):
         """

@@ -49,7 +49,9 @@ class FitPage(BasicPage):
         self.Bind(EVT_CHI2_UPDATE, self.on_complete_chisqr)
         self._set_bookmark_flag(False)
         self._set_save_flag(False)
-
+    
+  
+        
     def _on_fit_complete(self):
         """
         When fit is complete ,reset the fit button label.
@@ -531,6 +533,7 @@ class FitPage(BasicPage):
         self.multifactorbox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
         self.initialize_combox()
         wx.EVT_COMBOBOX(self.formfactorbox, -1, self._on_select_model)
+
         wx.EVT_COMBOBOX(self.structurebox, -1, self._on_select_model)
         wx.EVT_COMBOBOX(self.multifactorbox, -1, self._on_select_model)
         ## check model type to show sizer
@@ -996,9 +999,7 @@ class FitPage(BasicPage):
         """
         call back for model selection
         """  
-        if self.plugin_rbutton.GetValue():
-            self._show_combox_helper()
-            print "went here"
+        
             
         self._on_select_model_helper() 
         self.set_model_param_sizer(self.model)                   
@@ -1058,7 +1059,18 @@ class FitPage(BasicPage):
             ## post state to fit panel
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event) 
+            #update list of plugins if new plugin is available
+            if self.plugin_rbutton.GetValue():
+                temp = self.parent.update_model_list()
+                if temp:
+                    self.model_list_box = temp
+                    current_val = self.formfactorbox.GetValue()
+                    pos = self.formfactorbox.GetSelection()
+                    self._show_combox_helper()
+                    self.formfactorbox.SetSelection(pos)
+                    self.formfactorbox.SetValue(current_val)
         self.SetupScrolling()
+    
       
     def _onparamEnter(self,event):
         """ 
