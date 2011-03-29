@@ -111,7 +111,7 @@ class Plugin(PluginBase):
         graph = plotpanel.graph
         invariant_option = "Compute invariant"
         invariant_hint = "Will displays the invariant panel for"
-        invariant_hint += " futher computation"
+        invariant_hint += " further computation"
         
         if graph.selected_plottable not in plotpanel.plots:
             return []
