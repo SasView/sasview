@@ -187,11 +187,16 @@ class BoxInteractor(_BaseInteractor):
         new_plot.source = self.base.data2D.source
         new_plot.interactive = True
         new_plot.detector = self.base.data2D.detector
-        # If the data file does not tell us what the axes are, just assume...
-        new_plot.xaxis("\\rm{Q}", '\\AA^{-1}')
-        new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
+        ## If the data file does not tell us what the axes are, just assume...
+        new_plot.xaxis("\\rm{Q}", "A^{-1}")
+        if hasattr(self.base.data2D, "scale"):
+            if self.base.data2D.scale == 'linear':
+                new_plot.ytransform = 'y'
+                new_plot.yaxis("\\rm{Residuals} ", "/")
+        else:
+            new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
         new_plot.group_id = str(self.averager.__name__) + self.base.data2D.name
-        new_plot.id = str(self.averager.__name__)
+        #new_plot.id = str(self.averager.__name__)
         #new_plot.is_data= True
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
                                 title=str(self.averager.__name__)))

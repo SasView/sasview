@@ -8,7 +8,7 @@
 #publication, we ask that you acknowledge the use of the software with the 
 #following sentence:
 #
-#"This work benefited from DANSE software developed under NSF award DMR-0520547." 
+#This work benefited from DANSE software developed under NSF award DMR-0520547. 
 #
 #copyright 2008, University of Tennessee
 ################################################################################
@@ -18,10 +18,7 @@
 import wx
 import sys
 import pylab
-from pylab import gca
-from pylab import gcf
 import math
-import re
 import copy
 import numpy
 from danse.common.plottools.PlotPanel import PlotPanel
@@ -118,16 +115,13 @@ class MaskPanel(wx.Dialog):
         #  panel
         sizer = wx.GridBagSizer(10, 10)
         #---------inputs----------------
-        #inputbox = wx.StaticBox(self, -1, "Draw Mask")
         shape_txt = wx.StaticText(self, -1, shape)  
         sizer.Add(shape_txt, (1, 1), flag=wx.TOP|wx.LEFT|wx.BOTTOM, border=5)
-        #innersector_x_txt = wx.StaticText(self, -1, 'Inner Sector')
         self.innersector_rb = wx.RadioButton(self, -1, "Double Wings")
         self.Bind(wx.EVT_RADIOBUTTON, self.onInnerSectorMask,
                   id=self.innersector_rb.GetId())
         sizer.Add(self.innersector_rb, (2, 1), 
                   flag=wx.RIGHT|wx.BOTTOM, border=5)
-        #innersector_x_txt = wx.StaticText(self, -1, 'Inner Sector')
         self.innercircle_rb = wx.RadioButton(self, -1, "Circular Disk")
         self.Bind(wx.EVT_RADIOBUTTON, self.onInnerRingMask,
                   id=self.innercircle_rb.GetId())
@@ -138,7 +132,7 @@ class MaskPanel(wx.Dialog):
         self.Bind(wx.EVT_RADIOBUTTON, self.onInnerBoxMask,
                   id=self.innerbox_rb.GetId())
         sizer.Add(self.innerbox_rb, (4, 1), flag=wx.RIGHT|wx.BOTTOM, border=5)
-        #outersector_y_txt = wx.StaticText(self, -1, 'Outer Sector')
+
         self.outersector_rb = wx.RadioButton(self, -1, "Double Wing Window")
         self.Bind(wx.EVT_RADIOBUTTON, self.onOuterSectorMask, 
                   id=self.outersector_rb.GetId())
@@ -166,25 +160,25 @@ class MaskPanel(wx.Dialog):
                   wx.EXPAND|wx.LEFT|wx.RIGHT, 15)
 
         #-----Buttons------------1
-        id = wx.NewId()
-        button_add = wx.Button(self, id, "Add")
+        id_button = wx.NewId()
+        button_add = wx.Button(self, id_button, "Add")
         button_add.SetToolTipString("Add the mask drawn.")
         button_add.Bind(wx.EVT_BUTTON, self.onAddMask, id=button_add.GetId()) 
         sizer.Add(button_add, (13, 7))
-        id = wx.NewId()
-        button_erase = wx.Button(self, id, "Erase")
+        id_button = wx.NewId()
+        button_erase = wx.Button(self, id_button, "Erase")
         button_erase.SetToolTipString("Erase the mask drawn.")
         button_erase.Bind(wx.EVT_BUTTON, self.onEraseMask,
                           id=button_erase.GetId()) 
         sizer.Add(button_erase, (13, 8))
-        id = wx.NewId()
-        button_reset = wx.Button(self, id, "Reset")
+        id_button = wx.NewId()
+        button_reset = wx.Button(self, id_button, "Reset")
         button_reset.SetToolTipString("Reset the mask.")
         button_reset.Bind(wx.EVT_BUTTON, self.onResetMask,
                           id=button_reset.GetId()) 
         sizer.Add(button_reset, (13, 9), flag=wx.RIGHT|wx.BOTTOM, border=15)
-        id = wx.NewId()
-        button_reset = wx.Button(self, id, "Clear")
+        id_button = wx.NewId()
+        button_reset = wx.Button(self, id_button, "Clear")
         button_reset.SetToolTipString("Clear all mask.")
         button_reset.Bind(wx.EVT_BUTTON, self.onClearMask,
                           id=button_reset.GetId()) 
@@ -269,7 +263,7 @@ class MaskPanel(wx.Dialog):
         if event != None:
             self.onClearSlicer(event)
         self.slicer_z += 1
-        self.slicer = CircularMask(self,self.subplot,
+        self.slicer = CircularMask(self, self.subplot,
                                    zorder=self.slicer_z, side=True)
         self.subplot.set_ylim(self.data.ymin, self.data.ymax)
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)   
@@ -308,7 +302,6 @@ class MaskPanel(wx.Dialog):
         check if the mask valid and update the plot
         
         :param mask: mask data
-        
         """
         ## Redraw the current image
         self._update_mask(mask)
@@ -367,7 +360,6 @@ class MaskPanel(wx.Dialog):
         event.
         
         :param slicer: slicer class to create
-        
         """
         ## Clear current slicer
         if not self.slicer == None:  
@@ -479,21 +471,25 @@ class MaskPanel(wx.Dialog):
         
     def freeze_axes(self):
         """
+        freeze axes
         """
         self.plotpanel.axes_frozen = True
         
     def thaw_axes(self):
         """
+        thaw axes
         """
         self.plotpanel.axes_frozen = False       
          
     def onMouseMotion(self, event):
         """
+        onMotion event
         """
         pass
     
     def onWheel(self, event):
         """
+        on wheel event
         """
         pass  
            
@@ -528,6 +524,7 @@ class Maskplotpanel(PlotPanel):
          
     def add_image(self, plot):
         """
+        Add Image
         """
         self.plots[plot.name] = plot
         #init graph
@@ -553,13 +550,10 @@ class Maskplotpanel(PlotPanel):
         """
         # Slicer plot popup menu
         slicerpop = wx.Menu()
-        #id = wx.NewId()
-        #slicerpop.Append(id,'&Save image', 'Save image as PNG')
-        #wx.EVT_MENU(self, id, self.onSaveImage)
         
-        id = wx.NewId()
-        slicerpop.Append(id, '&Toggle Linear/Log scale')
-        wx.EVT_MENU(self, id, self._onToggleScale)
+        id_cm = wx.NewId()
+        slicerpop.Append(id_cm, '&Toggle Linear/Log scale')
+        wx.EVT_MENU(self, id_cm, self._onToggleScale)
                
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)

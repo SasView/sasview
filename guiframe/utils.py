@@ -25,7 +25,7 @@ def format_number(value, high=False):
         output = "NaN"
         return output.lstrip().rstrip()
     if high:
-        output = "%-6.4g" % value
+        output = "%-7.5g" % value
     else:
         output = "%-5.3g" % value
     return output.lstrip().rstrip()

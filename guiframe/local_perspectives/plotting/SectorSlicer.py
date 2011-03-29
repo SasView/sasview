@@ -166,7 +166,7 @@ class SectorInteractor(_BaseInteractor):
             dxw = sector.dxw
         else:
             dxw = None
-        new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy)
+        new_plot = Data1D(x=sector.x, y=sector.y, dy=sector.dy, dx=sector.dx)
         new_plot.dxl = dxl
         new_plot.dxw = dxw
         new_plot.name = "SectorQ" + "(" + self.base.data2D.name + ")"
@@ -174,12 +174,19 @@ class SectorInteractor(_BaseInteractor):
         #new_plot.info=self.base.data2D.info
         new_plot.interactive = True
         new_plot.detector = self.base.data2D.detector
-        # If the data file does not tell us what the axes are, just assume...
-        new_plot.xaxis("\\rm{Q}", 'A^{-1}')
-        new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+        ## If the data file does not tell us what the axes are, just assume...
+        new_plot.xaxis("\\rm{Q}", "A^{-1}")
+        if hasattr(data, "scale"):
+            if data.scale == 'linear':
+                new_plot.ytransform = 'y'
+                new_plot.yaxis("\\rm{Residuals} ", "/")
+        else:
+            new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+       
         new_plot.group_id = "SectorQ" + self.base.data2D.name
-        new_plot.id = "SectorQ" + self.base.data2D.name
+        new_plot.id = None
         new_plot.is_data = True
+
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
                                     title="SectorQ" + self.base.data2D.name))
         
