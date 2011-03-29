@@ -321,7 +321,7 @@ class InvariantState(object):
         item_list = ['time','date','state','comp_state']
         for name, value_list in self.bookmark_list.iteritems():
             element = newdoc.createElement('mark_'+ str(name))
-            time,date,state,comp_state = value_list
+            _,date,state,comp_state = value_list
             time_element = newdoc.createElement('time')
             time_element.appendChild(newdoc.createTextNode(str(value_list[0])))
             date_element = newdoc.createElement('date')
