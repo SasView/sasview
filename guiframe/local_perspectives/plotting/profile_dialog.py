@@ -125,9 +125,37 @@ class SLDPanel(wx.Dialog):
         """
         self.Close(True)
 
+    def _draw_model(self, event):
+        """
+         on_close, update the model2d plot
+        """
+        pass
 
+    def get_context_menu(self, graph=None):
+        """
+        When the context menu of a plot is rendered, the 
+        get_context_menu method will be called to give you a 
+        chance to add a menu item to the context menu.
+        :param graph: the Graph object to which we attach the context menu
+        
+        :return: a list of menu items with call-back function
+        """
+        return []
     
-
+    def set_schedule_full_draw(self, panel=None, func=None):
+        """
+        Set_schedule for full draw
+        """
+        # Not implemented
+        pass
+    
+    def set_schedule(self, schedule=False):
+        """
+        Set schedule for redraw
+        """
+        # Not implemented
+        pass
+    
 class SLDplotpanel(PlotPanel):
     """
     Panel
