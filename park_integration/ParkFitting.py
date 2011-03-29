@@ -143,8 +143,7 @@ class ParkFit(FitEngine):
         self.problem = MyAssembly(models=mylist, curr_thread=curr_thread)
         
   
-    
-    def fit(self, q=None, handler=None, curr_thread=None):
+    def fit(self, q=None, handler=None, curr_thread=None, ftol=None):
         """
         Performs fit with park.fit module.It can  perform fit with one model
         and a set of data, more than two fit of  one model and sets of data or 
