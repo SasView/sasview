@@ -157,6 +157,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## save initial state on context menu
         #self.onSave(event=None)
         self.Bind(wx.EVT_CONTEXT_MENU, self.onContextMenu)
+        
+        # bind key event
+        self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
 
         ## create the basic structure of the panel with empty sizer
         self.define_page_structure()
@@ -426,7 +429,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.disable_disp = wx.RadioButton(self, -1, 'Off', (10, 10),
                                             style=wx.RB_GROUP)
         self.enable_disp = wx.RadioButton(self, -1, 'On', (10, 30))
-       
+
+        self.disp_help_bt = wx.Button(self,wx.NewId(),'?', size=(20,15))
+        self.disp_help_bt.Bind(wx.EVT_BUTTON, 
+                        self.on_pd_help_clicked,id= self.disp_help_bt.GetId())
+        self.disp_help_bt.SetToolTipString("Helps for Polydispersion.")       
         
         self.Bind(wx.EVT_RADIOBUTTON, self._set_dipers_Param,
                      id=self.disable_disp.GetId())
@@ -441,35 +448,16 @@ class BasicPage(ScrolledPanel, PanelBase):
         sizer_dispersion.Add(self.enable_disp )
         sizer_dispersion.Add((20,20))
         sizer_dispersion.Add(self.disable_disp )
-        sizer_dispersion.Add((10,10))
+        sizer_dispersion.Add((25,20))
+        sizer_dispersion.Add(self.disp_help_bt)
         
-        ## fill a sizer with the combobox to select dispersion type
-        sizer_select_dispers = wx.BoxSizer(wx.HORIZONTAL)  
-        self.model_disp = wx.StaticText(self, -1, 'Distribution Function ')
-            
-        import sans.models.dispersion_models 
-        self.polydisp= sans.models.dispersion_models.models
-        self.disp_box = wx.ComboBox(self, -1)
-
-        for key, value in self.polydisp.iteritems():
-            name = str(key)
-            self.disp_box.Append(name,value)
-        self.disp_box.SetStringSelection("gaussian") 
-        wx.EVT_COMBOBOX(self.disp_box,-1, self._on_select_Disp) 
-             
-        sizer_select_dispers.Add((10,10)) 
-        sizer_select_dispers.Add(self.model_disp) 
-        sizer_select_dispers.Add(self.disp_box,0,
-                wx.TOP|wx.BOTTOM|wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE,border=5)
-      
-        self.model_disp.Hide()
-        self.disp_box.Hide()
-        
+        ## fill a sizer for dispersion         
         boxsizer1.Add( sizer_dispersion,0,
                 wx.TOP|wx.BOTTOM|wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE,border=5)
         #boxsizer1.Add( (10,10) )
-        boxsizer1.Add( sizer_select_dispers )
-        self.sizer4_4 = wx.GridBagSizer(5,5)
+        #boxsizer1.Add( sizer_select_dispers )
+        self.sizer4_4 = wx.GridBagSizer(6,5)
+
         boxsizer1.Add( self.sizer4_4  )
         #-----------------------------------------------------
         self.sizer4.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
@@ -483,108 +471,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.disable_disp= self.disable_disp.GetValue()
         self.SetupScrolling()
 
-    def select_disp_angle(self, event): 
-        """
-        Event for when a user select a parameter to average over.
-        
-        :param event: radiobutton event
-        
-        """
-        self.values=[]
-        self.weights=[]
-        if event.GetEventObject()==self.noDisper_rbox:
-            if self.noDisper_rbox.GetValue():
-                #No array dispersity apply yet
-                self._reset_dispersity()
-                ## Redraw the model ???
-                self._draw_model()
-        # Go through the list of dispersion check boxes to identify
-        # which one has changed 
-        for p in self.disp_cb_dict:
-            self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
-            # Catch which one of the box was just checked or unchecked.
-            if event.GetEventObject() == self.disp_cb_dict[p]:              
-                if self.disp_cb_dict[p].GetValue() == True:
-                    
-                    ##Temp. FIX for V1.0 regarding changing checkbox 
-                    #to radiobutton.
-                    ##This (self._reset_dispersity) should be removed 
-                    #when the array dispersion is fixed.                
-                    self._reset_dispersity()
-
-                    # The user wants this parameter to be averaged. 
-                    # Pop up the file selection dialog.
-                    path = self._selectDlg()
-                    
-                    # If nothing was selected, just return
-                    if path is None:
-                        self.disp_cb_dict[p].SetValue(False)
-                        self.noDisper_rbox.SetValue(True)
-                        return
-                    try:
-                        self._default_save_location = os.path.dirname(path)
-                    except:
-                        pass 
-                    try:
-                        self.values,self.weights = self.read_file(path)
-                    except:
-                        msg="Could not read input file"
-                        wx.PostEvent(self.parent.parent, 
-                                     StatusEvent(status=msg))
-                        return
-                    
-                    # If any of the two arrays is empty, notify the user that we won't
-                    # proceed 
-                    if self.values is None or self.weights is None or \
-                         self.values ==[] or self.weights ==[]:
-                        msg = "The loaded %s distrubtion is"
-                        msg + " corrupted or empty" % p
-                        wx.PostEvent(self.parent.parent, 
-                                     StatusEvent(status=msg))
-                        return
-                        
-                    # Tell the user that we are about to apply the distribution
-                    msg = "Applying loaded %s distribution: %s" % (p, path)
-                    wx.PostEvent(self.parent.parent, StatusEvent(status=msg))  
-                    
-                    # Create the dispersion objects
-                    from sans.models.dispersion_models import ArrayDispersion
-                    disp_model = ArrayDispersion()
-                    disp_model.set_weights(self.values, self.weights)
-                   
-                    # Store the object to make it persist outside the
-                    # scope of this method
-                    #TODO: refactor model to clean this up?
-                    self._disp_obj_dict[p] = disp_model
-                    self.state._disp_obj_dict [p]= disp_model
-                    self.state.values = []
-                    self.state.weights = []
-                    self.state.values = copy.deepcopy(self.values)
-                    self.state.weights = copy.deepcopy(self.weights)
-                    # Set the new model as the dispersion object for the 
-                    #selected parameter
-                    self.model.set_dispersion(p, disp_model)
-                    # Store a reference to the weights in the model object 
-                    #so that
-                    # it's not lost when we use the model within another thread.
-                    #TODO: total hack - fix this
-                    self.state.model= self.model.clone()
-
-                    self.model._persistency_dict = {}
-                    self.model._persistency_dict[p] = \
-                                                    [self.values, self.weights]
-                    self.state.model._persistency_dict[p] = \
-                                                    [self.values,self.weights]
-                else:
-                    self._reset_dispersity()
-              
-                ## Redraw the model
-                self._draw_model()
-        
-        ## post state to fit panel
-        event = PageInfoEvent(page = self)
-        wx.PostEvent(self.parent, event)
-       
     
     def onResetModel(self, event):
         """
@@ -602,7 +488,18 @@ class BasicPage(ScrolledPanel, PanelBase):
         if name in self.saved_states.keys():
             previous_state = self.saved_states[name]
             ## reset state of checkbox,textcrtl  and  regular parameters value
-            self.reset_page(previous_state)      
+            self.reset_page(previous_state)   
+               
+    def on_report_state(self, event):
+        """
+        Report the current fit results
+        """   
+        event.Skip()
+        # Get plot image from plotpanel
+        images, canvases = self.get_images()
+        # get the report dialog
+        self.state.report(images, canvases)
+        
          
     def on_save(self, event):   
         """
@@ -784,16 +681,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.data= copy.deepcopy(self.data)
         self.state.qmax_x = self.qmax_x
         self.state.qmin_x = self.qmin_x
-        try:
-            n = self.disp_box.GetCurrentSelection()
-            dispersity= self.disp_box.GetClientData(n)
-            name= dispersity.__name__
-            self.disp_name = name
-            if name == "GaussianDispersion" :
-               if hasattr(self,"cb1"):
-                   self.state.cb1= self.cb1.GetValue()
-        except:
-            pass
       
         if hasattr(self,"enable_disp"):
             self.state.enable_disp= self.enable_disp.GetValue()
@@ -810,24 +697,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                                 copy.deepcopy(self.pinhole_smearer.GetValue())
         self.state.slit_smearer = copy.deepcopy(self.slit_smearer.GetValue())  
                   
-        if hasattr(self,"disp_box"):
-            self.state.disp_box = self.disp_box.GetSelection()
-
-            if len(self.disp_cb_dict)>0:
-                for k , v in self.disp_cb_dict.iteritems():
-         
-                    if v ==None :
-                        self.state.disp_cb_dict[k]= v
-                    else:
-                        try:
-                            self.state.disp_cb_dict[k]=v.GetValue()
-                        except:
-                            self.state.disp_cb_dict[k]= None
-           
-            if len(self._disp_obj_dict)>0:
-                for k , v in self._disp_obj_dict.iteritems():
-      
-                    self.state._disp_obj_dict[k]= v
+        if len(self._disp_obj_dict)>0:
+            for k , v in self._disp_obj_dict.iteritems():
+                self.state._disp_obj_dict[k]= v
                         
             
             self.state.values = copy.deepcopy(self.values)
@@ -835,14 +707,17 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## save plotting range
         self._save_plotting_range()
         
-        self.state.orientation_params =[]
-        self.state.orientation_params_disp =[]
-        self.state.parameters =[]
-        self.state.fittable_param =[]
-        self.state.fixed_param =[]
+        self.state.orientation_params = []
+        self.state.orientation_params_disp = []
+        self.state.parameters = []
+        self.state.fittable_param = []
+        self.state.fixed_param = []
+        self.state.str_parameters = []
 
         
         ## save checkbutton state and txtcrtl values
+        self._copy_parameters_state(self.str_parameters, 
+                                    self.state.str_parameters)
         self._copy_parameters_state(self.orientation_params,
                                      self.state.orientation_params)
         self._copy_parameters_state(self.orientation_params_disp,
@@ -872,17 +747,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.weights = copy.deepcopy( self.weights)
         ## save data    
         self.state.data= copy.deepcopy(self.data)
-        try:
-            n = self.disp_box.GetCurrentSelection()
-            dispersity= self.disp_box.GetClientData(n)
-            name= dispersity.__name__
-            self.disp_name = name
-            if name == "GaussianDispersion" :
-               if hasattr(self,"cb1"):
-                   self.state.cb1= self.cb1.GetValue()
-
-        except:
-            pass
         
         if hasattr(self,"enable_disp"):
             self.state.enable_disp= self.enable_disp.GetValue()
@@ -1064,7 +928,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         if state == None:
             #self._undo.Enable(False)
             return 
-    
+        # set data, etc. from the state
         self.set_data(state.data)
         self.enable2D= state.enable2D
         self.engine_type = state.engine_type
@@ -1107,54 +971,11 @@ class BasicPage(ScrolledPanel, PanelBase):
          ## display dispersion info layer        
         self.enable_disp.SetValue(state.enable_disp)
         self.disable_disp.SetValue(state.disable_disp)
-        
-        if hasattr(self, "disp_box"):
-            
-            self.disp_box.SetSelection(state.disp_box) 
-            n= self.disp_box.GetCurrentSelection()
-            dispersity= self.disp_box.GetClientData(n)
-            name = dispersity.__name__     
-
+        # If the polydispersion is ON
+        if state.enable_disp:
+            # reset dispersion according the state
             self._set_dipers_Param(event=None)
-       
-            if name == "ArrayDispersion":
-                
-                for item in self.disp_cb_dict.keys():
-                    
-                    if hasattr(self.disp_cb_dict[item], "SetValue") :
-                        self.disp_cb_dict[item].SetValue(\
-                                                    state.disp_cb_dict[item])
-                        # Create the dispersion objects
-                        from sans.models.dispersion_models import ArrayDispersion
-                        disp_model = ArrayDispersion()
-                        if hasattr(state,"values")and\
-                                 self.disp_cb_dict[item].GetValue() == True:
-                            if len(state.values)>0:
-                                self.values=state.values
-                                self.weights=state.weights
-                                disp_model.set_weights(self.values,
-                                                        state.weights)
-                            else:
-                                self._reset_dispersity()
-                        
-                        self._disp_obj_dict[item] = disp_model
-                        # Set the new model as the dispersion object 
-                        #for the selected parameter
-                        self.model.set_dispersion(item, disp_model)
-                    
-                        self.model._persistency_dict[item] = \
-                                                [state.values, state.weights]
-                    
-            else:
-                keys = self.model.getParamList()
-                for item in keys:
-                    if item in self.disp_list and \
-                        not self.model.details.has_key(item):
-                        self.model.details[item] = ["", None, None]
-                for k,v in self.state.disp_cb_dict.iteritems():
-                    self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
-                    self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
-
+            self._reset_page_disp_helper(state)
         ##plotting range restore    
         self._reset_plotting_range(state)
         ## smearing info  restore
@@ -1184,142 +1005,73 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## set the value of the current state to the state given as parameter
         self.state = state.clone() 
     
-        
-    def old_reset_page_helper(self, state):
+    def _reset_page_disp_helper(self, state):
         """
-        Use page_state and change the state of existing page
-        
-        :precondition: the page is already drawn or created
-        
-        :postcondition: the state of the underlying data change as well as the
-            state of the graphic interface
+        Help to rest page for dispersions
         """
-        if state ==None:
-            #self._undo.Enable(False)
-            return 
-       
-        self.model= state.model
-        self.data = state.data
-        if self.data !=None:
-            from DataLoader.qsmearing import smear_selection
-            self.smearer= smear_selection(self.data, self.model)
-        self.enable2D= state.enable2D
-        self.engine_type = state.engine_type
-
-        self.disp_cb_dict = state.disp_cb_dict
-        self.disp_list = state.disp_list
-
-        ## set the state of the radio box
-        self.shape_rbutton.SetValue(state.shape_rbutton )
-        self.shape_indep_rbutton.SetValue(state.shape_indep_rbutton)
-        self.struct_rbutton.SetValue(state.struct_rbutton )
-        self.plugin_rbutton.SetValue(state.plugin_rbutton)
-        ##draw sizer containing model parameters value for the current model
-        self._set_model_sizer_selection( self.model )
-        self.set_model_param_sizer(self.model)
-
-        ## reset value of combox box
-        self.structurebox.SetSelection(state.structurecombobox )
-        self.formfactorbox.SetSelection(state.formfactorcombobox)
+        keys = self.model.getParamList()
+        for item in keys:
+            if item in self.disp_list and \
+                not self.model.details.has_key(item):
+                self.model.details[item] = ["", None, None]
+        #for k,v in self.state.disp_cb_dict.iteritems():
+        self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
+        self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
+        self.values = copy.deepcopy(state.values)
+        self.weights = copy.deepcopy(state.weights)
         
-        
-        ## enable the view 2d button if this is a modelpage type
-        if hasattr(self,"model_view"):
-            if self.enable2D:
-                self.model_view.Disable()
+        for key, disp in state._disp_obj_dict.iteritems():
+            # From saved file, disp_model can not be sent in model obj.
+            # it will be sent as a string here, then converted to model object.
+            if disp.__class__.__name__ == 'str':
+                com_str  = "from sans.models.dispersion_models "
+                com_str += "import %s as disp_func"
+                exec com_str % disp
+                disp_model = disp_func()
             else:
-                self.model_view.Enable()
-        ## set the select all check box to the a given state
-        if hasattr(self, "cb1"):   
-            self.cb1.SetValue(state.cb1)
-     
-        ## reset state of checkbox,textcrtl  and  regular parameters value
-            
-        self._reset_parameters_state(self.orientation_params_disp,
-                                     state.orientation_params_disp)
-        self._reset_parameters_state(self.orientation_params,
-                                     state.orientation_params)
-        self._reset_parameters_state(self.parameters,state.parameters)    
-         ## display dispersion info layer        
-        self.enable_disp.SetValue(state.enable_disp)
-        self.disable_disp.SetValue(state.disable_disp)
-        
-        if hasattr(self, "disp_box"):
-            
-            self.disp_box.SetSelection(state.disp_box) 
-            n= self.disp_box.GetCurrentSelection()
-            dispersity= self.disp_box.GetClientData(n)
-            name= dispersity.__name__     
+                disp_model = disp
 
-            self._set_dipers_Param(event=None)
-       
-            if name=="ArrayDispersion":
-                
-                for item in self.disp_cb_dict.keys():
-                    
-                    if hasattr(self.disp_cb_dict[item],"SetValue") :
-                        self.disp_cb_dict[item].SetValue(state.disp_cb_dict[item])
-                        # Create the dispersion objects
-                        from sans.models.dispersion_models import ArrayDispersion
-                        disp_model = ArrayDispersion()
-                        if hasattr(state,"values") and\
-                             self.disp_cb_dict[item].GetValue()==True:
-                            if len(state.values) > 0:
-                                self.values = state.values
-                                self.weights = state.weights
-                                disp_model.set_weights(self.values,
-                                                        state.weights)
-                            else:
-                                self._reset_dispersity()
-                        
-                        self._disp_obj_dict[item] = disp_model
-                        # Set the new model as the dispersion
-                        #object for the selected parameter
-                        self.model.set_dispersion(item, disp_model)
-                    
-                        self.model._persistency_dict[item] = [state.values,
-                                                               state.weights]
-                    
-            else:
-                keys = self.model.getParamList()
-                for item in keys:
-                    if item in self.disp_list and \
-                            not self.model.details.has_key(item):
-                        self.model.details[item]=["",None,None]
-                for k,v in self.state.disp_cb_dict.iteritems():
-                    self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict) 
-                    self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
-
-        ##plotting range restore    
-        self._reset_plotting_range(state)
-
-        ## smearing info  restore
-        if hasattr(self,"enable_smearer"):
-            ## set smearing value whether or not the data 
-            #contain the smearing info
-            self.enable_smearer.SetValue(state.enable_smearer)
-            self.disable_smearer.SetValue(state.disable_smearer)
-            self.onSmear(event=None)           
-        self.pinhole_smearer.SetValue(state.pinhole_smearer)
-        self.slit_smearer.SetValue(state.slit_smearer)
-        ## we have two more options for smearing
-        if self.pinhole_smearer.GetValue(): self.onPinholeSmear(event=None)
-        elif self.slit_smearer.GetValue(): self.onSlitSmear(event=None)
-       
-        ## reset state of checkbox,textcrtl  and dispersity parameters value
-        self._reset_parameters_state(self.fittable_param,state.fittable_param)
-        self._reset_parameters_state(self.fixed_param,state.fixed_param)
-        
-        ## draw the model with previous parameters value
-        self._onparamEnter_helper()
-        
-        ## reset context menu items
-        self._reset_context_menu()
+            self._disp_obj_dict[key] = disp_model 
+            param_name = key.split('.')[0]
+            # Try to set dispersion only when available
+            # for eg., pass the orient. angles for 1D Cal 
+            try:
+                self.model.set_dispersion(param_name, disp_model)
+                self.model._persistency_dict[key] = \
+                                 [state.values, state.weights]
+            except:
+                pass
+            selection = self._find_polyfunc_selection(disp_model)
+            for list in self.fittable_param:
+                if list[1] == key and list[7] != None:
+                    list[7].SetSelection(selection)
+                    # For the array disp_model, set the values and weights 
+                    if selection == 1:
+                        disp_model.set_weights(self.values[key], 
+                                              self.weights[key])
+                        try:
+                            # Diables all fittable params for array
+                            list[0].SetValue(False)
+                            list[0].Disable()
+                            list[2].Disable()
+                            list[5].Disable()
+                            list[6].Disable()
+                        except:
+                            pass
+            # For array, disable all fixed params
+            if selection == 1:
+                for item in self.fixed_param:
+                    if item[1].split(".")[0] == key.split(".")[0]:
+                        # try it and pass it for the orientation for 1D
+                        try:
+                            item[2].Disable()
+                        except:
+                            pass
     
-        ## set the value of the current state to the state given as parameter
-        self.state = state.clone() 
-        self._draw_model()
-
+        # Make sure the check box updated when all checked
+        if self.cb1.GetValue():
+            self.select_all_param(None)        
+      
     def _selectDlg(self):
         """
         open a dialog file to selected the customized dispersity 
@@ -1544,6 +1296,10 @@ class BasicPage(ScrolledPanel, PanelBase):
                 item_page[0].SetValue(item_page_info[0])
             if item_page[2]!=None:
                 item_page[2].SetValue(item_page_info[2])
+                if item_page[2].__class__.__name__ == "ComboBox":
+                   if self.model.fun_list.has_key(item_page_info[2]):
+                       fun_val = self.model.fun_list[item_page_info[2]]
+                       self.model.setParam(item_page_info[1],fun_val)
             if item_page[3]!=None:
                 ## show or hide text +/-
                 if item_page_info[2]:
@@ -1559,19 +1315,40 @@ class BasicPage(ScrolledPanel, PanelBase):
                     item_page[3].Hide()
             if item_page[5]!=None:
                 ## show of hide the text crtl for fitting error
-                if item_page_info[5][0]:
-                    item_page[5].Show(True)
-                    item_page[5].SetValue(item_page_info[5][1])
-                else:
-                    item_page[5].Hide()
-                    
+                item_page[5].Show(item_page_info[5][0])
+                item_page[5].SetValue(item_page_info[5][1])
+                
             if item_page[6]!=None:
                 ## show of hide the text crtl for fitting error
-                if item_page_info[6][0]:
-                    item_page[6].Show(True)
-                    item_page[6].SetValue(item_page_info[6][1])
-                else:
-                    item_page[6].Hide()
+                item_page[6].Show(item_page_info[6][0])
+                item_page[6].SetValue(item_page_info[6][1])
+
+                    
+    def _reset_strparam_state(self, listtorestore, statelist):
+        """
+        Reset the string parameters at the given state
+        """
+        if len(statelist) == 0:
+            return
+
+        listtorestore = copy.deepcopy(statelist)
+        
+        for j in range(len(listtorestore)):
+            item_page = listtorestore[j]
+            item_page_info = statelist[j]
+            ##change the state of the check box for simple parameters
+            
+            if item_page[0] != None:   
+                item_page[0].SetValue(format_number(item_page_info[0], True))
+
+            if item_page[2] != None:
+                param_name = item_page_info[1]
+                value = item_page_info[2]
+                selection = value
+                if self.model.fun_list.has_key(value):
+                    selection = self.model.fun_list[value]
+                item_page[2].SetValue(selection)
+                self.model.setParam(param_name, selection)
                                       
     def _copy_parameters_state(self, listtocopy, statelist):
         """
@@ -1738,11 +1515,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                             break
                     break
     
-    def _draw_model(self):
+    def _draw_model(self, update_chisqr=True):
         """
         Method to draw or refresh a plotted model.
         The method will use the data member from the model page
         to build a call to the fitting perspective manager.
+        
+        :param chisqr: update chisqr value [bool]
         """
         #if self.check_invalid_panel():
         #    return
@@ -1761,7 +1540,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                                     page_id=self.uid,
                                     toggle_mode_on=toggle_mode_on, 
                                     state = self.state,
-                                    enable2D=self.enable2D)
+                                    enable2D=self.enable2D,
+                                    update_chisqr=update_chisqr)
         
        
     def _on_show_sld(self, event=None):
@@ -2170,7 +1950,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             #try:
             name = str(item[1])
             
-            if string.find(name,".npts") ==-1 and string.find(name,".nsigmas")==-1:      
+            if string.find(name,".npts") ==-1 and \
+                                        string.find(name,".nsigmas")==-1:      
                 ## check model parameters range             
                 param_min= None
                 param_max= None
@@ -2190,7 +1971,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                                            
                         except:
                             msg = "Wrong Fit parameter range entered "
-                            wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
+                            wx.PostEvent(self.parent.parent, 
+                                         StatusEvent(status = msg))
                             raise ValueError, msg
                         is_modified = True
                 ## check maximum value
@@ -2206,7 +1988,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                             item[2].SetBackgroundColour(wx.WHITE)
                         except:
                             msg = "Wrong Fit parameter range entered "
-                            wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
+                            wx.PostEvent(self.parent.parent, 
+                                         StatusEvent(status = msg))
                             raise ValueError, msg
                         is_modified = True
                 
@@ -2215,23 +1998,27 @@ class BasicPage(ScrolledPanel, PanelBase):
                     if not self._validate_qrange(item[5], item[6]):
                         msg= "Wrong Fit range entered for parameter "
                         msg+= "name %s of model %s "%(name, self.model.name)
-                        wx.PostEvent(self.parent.parent, StatusEvent(status = msg))
+                        wx.PostEvent(self.parent.parent, 
+                                     StatusEvent(status = msg))
                 
                 if name in self.model.details.keys():   
-                        self.model.details[name][1:3]= param_min,param_max
+                        self.model.details[name][1:3] = param_min, param_max
                         is_modified = True
               
                 else:
-                        self.model.details [name] = ["",param_min,param_max] 
+                        self.model.details [name] = ["", param_min, param_max] 
                         is_modified = True
-            try:     
-                value= float(item[2].GetValue())
-                item[2].SetBackgroundColour("white")
-                # If the value of the parameter has changed,
-                # +update the model and set the is_modified flag
-                if value != self.model.getParam(name) and numpy.isfinite(value):
-                    self.model.setParam(name,value)
-                    is_modified = True   
+            try:   
+                # Check if the textctr is enabled
+                if item[2].IsEnabled():
+                    value= float(item[2].GetValue())
+                    item[2].SetBackgroundColour("white")
+                    # If the value of the parameter has changed,
+                    # +update the model and set the is_modified flag
+                    if value != self.model.getParam(name) and \
+                                                numpy.isfinite(value):
+                        self.model.setParam(name, value)
+                        
             except:
                 item[2].SetBackgroundColour("pink")
                 msg = "Wrong Fit parameter value entered "
@@ -2263,13 +2050,10 @@ class BasicPage(ScrolledPanel, PanelBase):
     
         if self.model ==None:
             self.model_disp.Hide()
-            self.disp_box.Hide()
             self.sizer4_4.Clear(True)
             return
 
         if self.enable_disp.GetValue():
-            self.model_disp.Show(True)
-            self.disp_box.Show(True)
             ## layout for model containing no dispersity parameters
             
             self.disp_list= self.model.getDispParamList()
@@ -2280,9 +2064,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                 ## set gaussian sizer 
                 self._on_select_Disp(event=None)
         else:
-            self.model_disp.Hide()
-            self.disp_box.Hide()
-            self.disp_box.SetSelection(0) 
             self.sizer4_4.Clear(True)
             
         ## post state to fit panel 
@@ -2309,12 +2090,12 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.fixed_param=[]
         self.orientation_params_disp=[]
         
-        self.model_disp.Hide()
-        self.disp_box.Hide()
         self.sizer4_4.Clear(True)
         text = "No polydispersity available for this model"
+        text = "No polydispersity available for this model"
         model_disp = wx.StaticText(self, -1, text)
-        self.sizer4_4.Add(model_disp,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        self.sizer4_4.Add(model_disp,( iy, ix),(1,1),  
+                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
         self.sizer4_4.Layout()
         self.sizer4.Layout()
     
@@ -2334,8 +2115,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.fittable_param=[]
         self.fixed_param=[]
         self.orientation_params_disp=[]
-        self.values=[]
-        self.weights=[]
+        self.values={}
+        self.weights={}
       
         from sans.models.dispersion_models import GaussianDispersion, ArrayDispersion
         if len(self.disp_cb_dict)==0:
@@ -2367,17 +2148,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         allow selecting different dispersion
         self.disp_list should change type later .now only gaussian
         """
-        n = self.disp_box.GetCurrentSelection()
-        name = self.disp_box.GetValue()
-        dispersity= self.disp_box.GetClientData(n)
-        self.disp_name = name
-        
-        if name.lower() == "array":
-            self._set_sizer_arraydispersion()
-        else:
-            self._set_sizer_dispersion(dispersity= dispersity)
-            
-        self.state.disp_box= n
+        self._set_sizer_dispersion()
+
         ## Redraw the model
         self._draw_model() 
         #self._undo.Enable(True)
@@ -2388,92 +2160,183 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.sizer4.Layout()
         self.SetupScrolling()
     
-    def _set_sizer_arraydispersion(self):
+    def _on_disp_func(self, event=None): 
         """
-        draw sizer with array dispersity  parameters
-        """
+        Select a distribution function for the polydispersion
         
-        if len(self.param_toFit)>0:
+        :Param event: ComboBox event 
+        """
+        # get ready for new event
+        if event != None:
+            event.Skip()
+        # Get event object
+        disp_box =  event.GetEventObject() 
+
+        # Try to select a Distr. function
+        try:   
+            disp_box.SetBackgroundColour("white")
+            selection = disp_box.GetCurrentSelection()
+            param_name = disp_box.Name.split('.')[0]
+            disp_name = disp_box.GetValue()
+            dispersity= disp_box.GetClientData(selection)
+    
+            #disp_model =  GaussianDispersion()
+            disp_model = dispersity()
+            # Get param names to reset the values of the param
+            name1 = param_name + ".width"
+            name2 = param_name + ".npts"
+            name3 = param_name + ".nsigmas"
+            # Check Disp. function whether or not it is 'array'
+            if disp_name.lower() == "array":
+                value2= ""
+                value3= ""
+                value1 = self._set_array_disp(name=name1, disp=disp_model)
+            else:
+                self._del_array_values(name1)
+                #self._reset_array_disp(param_name)
+                self._disp_obj_dict[name1] = disp_model
+                self.model.set_dispersion(param_name, disp_model)
+                self.state._disp_obj_dict[name1]= disp_model
+ 
+                value1= str(format_number(self.model.getParam(name1), True))
+                value2= str(format_number(self.model.getParam(name2)))
+                value3= str(format_number(self.model.getParam(name3)))
+            # Reset fittable polydispersin parameter value
             for item in self.fittable_param:
-                if item in self.param_toFit:
-                    self.param_toFit.remove(item)
-            for item in self.orientation_params_disp:
-                if item in self.param_toFit:
-                    self.param_toFit.remove(item)
-        for item in self.model.details.keys():
-            if item in self.model.fixed:
-                del self.model.details [item]                           
+                 if item[1] == name1:
+                    item[2].SetValue(value1) 
+                    item[5].SetValue("")
+                    item[6].SetValue("")
+                    # Disable for array
+                    if disp_name.lower() == "array":
+                        item[0].SetValue(False)
+                        item[0].Disable()
+                        item[2].Disable()
+                        item[5].Disable()
+                        item[6].Disable()
+                    else:
+                        item[0].Enable()
+                        item[2].Enable()
+                        item[5].Enable()
+                        item[6].Enable()                       
+                    break
+            # Reset fixed polydispersion params
+            for item in self.fixed_param:
+                if item[1] == name2:
+                    item[2].SetValue(value2) 
+                    # Disable Npts for array
+                    if disp_name.lower() == "array":
+                        item[2].Disable()
+                    else:
+                        item[2].Enable()
+                if item[1] == name3:
+                    item[2].SetValue(value3) 
+                    # Disable Nsigs for array
+                    if disp_name.lower() == "array":
+                        item[2].Disable()
+                    else:
+                        item[2].Enable()
+                
+            # Make sure the check box updated when all checked
+            if self.cb1.GetValue():
+                self.select_all_param(None)
 
-        self.fittable_param=[]
-        self.fixed_param=[]
-        self.orientation_params_disp=[]
-        self.sizer4_4.Clear(True) 
-        self._reset_dispersity()
-        ix=0
-        iy=1     
-        disp1 = wx.StaticText(self, -1, 'Array Dispersion')
-        self.sizer4_4.Add(disp1,( iy, ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+            # update params
+            self._update_paramv_on_fit() 
+            # draw
+            self._draw_model()
+            self.Refresh()
+        except:
+            # Error msg
+            msg = "Error occurred:"
+            msg += " Could not select the distribution function..."
+            msg += " Please select another distribution function."
+            disp_box.SetBackgroundColour("pink")
+            # Focus on Fit button so that users can see the pinky box
+            self.btFit.SetFocus()
+            wx.PostEvent(self.parent.parent, 
+                         StatusEvent(status=msg, info="error"))
         
-        # Look for model parameters to which we can apply an ArrayDispersion model
-        # Add a check box for each parameter.
-        self.disp_cb_dict = {}
-        ix+=1 
-        self.noDisper_rbox = wx.RadioButton(self, -1,"None", (10, 10),style= wx.RB_GROUP)
-        self.Bind(wx.EVT_RADIOBUTTON,self.select_disp_angle , id=self.noDisper_rbox.GetId())
-        #MAC needs SetValue
-        self.noDisper_rbox.SetValue(True)
-        self.sizer4_4.Add(self.noDisper_rbox, (iy, ix),
-                           (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
-        for p in self.model.dispersion.keys():
-            if not p in self.model.orientation_params:
-                ix+=1 
-                self.disp_cb_dict[p] = wx.RadioButton(self, -1, p, (10, 10))
-                self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
-                self.Bind(wx.EVT_RADIOBUTTON, self.select_disp_angle, id=self.disp_cb_dict[p].GetId())
-                self.sizer4_4.Add(self.disp_cb_dict[p], (iy, ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+    def _set_array_disp(self, name=None, disp=None):
+        """
+        Set array dispersion
         
-        for p in self.model.dispersion.keys():
-            if p in self.model.orientation_params:
-                ix+=1 
-                self.disp_cb_dict[p] = wx.RadioButton(self, -1, p, (10, 10))
-                self.state.disp_cb_dict[p]=  self.disp_cb_dict[p].GetValue()
-                if not (self.enable2D or self.data.__class__.__name__ =="Data2D"):
-                    self.disp_cb_dict[p].Hide()
-                else:
-                    self.disp_cb_dict[p].Show(True)
-                self.Bind(wx.EVT_RADIOBUTTON, self.select_disp_angle, id=self.disp_cb_dict[p].GetId())
-                self.sizer4_4.Add(self.disp_cb_dict[p], (iy, ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        :param name: name of the parameter for the dispersion to be set
+        :param disp: the polydisperion object
+        """
+        # The user wants this parameter to be averaged. 
+        # Pop up the file selection dialog.
+        path = self._selectDlg()
+        # Array data
+        values = []
+        weights = []
+        # If nothing was selected, just return
+        if path is None:
+            self.disp_cb_dict[name].SetValue(False)
+            #self.noDisper_rbox.SetValue(True)
+            return
+        self._default_save_location = os.path.dirname(path)
 
+        basename  = os.path.basename(path)
+        values,weights = self.read_file(path)
+        
+        # If any of the two arrays is empty, notify the user that we won't
+        # proceed
+        if len(self.param_toFit)>0:
+            if name in self.param_toFit:
+                self.param_toFit.remove(name)
 
-        ix =0
-        iy +=1 
-        self.sizer4_4.Add((20,20),(iy,ix),(1,1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)        
-        self.Layout()
+        # Tell the user that we are about to apply the distribution
+        msg = "Applying loaded %s distribution: %s" % (name, path)
+        wx.PostEvent(self.parent.parent, StatusEvent(status=msg))  
 
-        self.state.orientation_params =[]
-        self.state.orientation_params_disp =[]
-        self.state.parameters =[]
-        self.state.fittable_param =[]
-        self.state.fixed_param =[]
-        
-        ## save checkbutton state and txtcrtl values
-        
-        self._copy_parameters_state(self.orientation_params,
-                                     self.state.orientation_params)
+        disp.set_weights(values, weights)
+        self._disp_obj_dict[name] = disp
+        self.model.set_dispersion(name.split('.')[0], disp)
+        self.state._disp_obj_dict[name]= disp
+        self.values[name] = values
+        self.weights[name] = weights
+        # Store the object to make it persist outside the
+        # scope of this method
+        #TODO: refactor model to clean this up?
+        self.state.values = {}
+        self.state.weights = {}
+        self.state.values = copy.deepcopy(self.values)
+        self.state.weights = copy.deepcopy(self.weights)
 
-        self._copy_parameters_state(self.orientation_params_disp,
-                                     self.state.orientation_params_disp)
+        # Set the new model as the dispersion object for the 
+        #selected parameter
+        #self.model.set_dispersion(p, disp_model)
+        # Store a reference to the weights in the model object 
+        #so that
+        # it's not lost when we use the model within another thread.
+        #TODO: total hack - fix this
+        self.state.model= self.model.clone()
+        self.model._persistency_dict[name.split('.')[0]] = \
+                                        [values, weights]
+        self.state.model._persistency_dict[name.split('.')[0]] = \
+                                        [values,weights]
+        return basename
+    
+    def _del_array_values(self, name=None):  
+        """
+        Reset array dispersion
         
-        self._copy_parameters_state(self.parameters, self.state.parameters)
-        self._copy_parameters_state(self.fittable_param, self.state.fittable_param)
-        self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
-        
-        
-        ## post state to fit panel
-        event = PageInfoEvent(page = self)
-        wx.PostEvent(self.parent, event)
-   
+        :param name: name of the parameter for the dispersion to be set 
+        """
+        # Try to delete values and weight of the names array dic if exists
+        try:
+            del self.values[name]
+            del self.weights[name]
+            # delete all other dic
+            del self.state.values[name]
+            del self.state.weights[name]
+            del self.model._persistency_dict[name.split('.')[0]] 
+            del self.state.model._persistency_dict[name.split('.')[0]]
+        except:
+            pass
+                                            
     def _lay_out(self):
         """
         returns self.Layout
@@ -2493,6 +2356,24 @@ class BasicPage(ScrolledPanel, PanelBase):
         if ON_MAC == True:
             time.sleep(1)
             
+    def _find_polyfunc_selection(self, disp_func = None):
+        """
+        FInd Comboox selection from disp_func 
+        
+        :param disp_function: dispersion distr. function
+        """
+        # List of the poly_model name in the combobox
+        list = ["RectangleDispersion", "ArrayDispersion", 
+                    "LogNormalDispersion", "GaussianDispersion", 
+                    "SchulzDispersion"]
+
+        # Find the selection
+        try:
+            selection = list.index(disp_func.__class__.__name__)
+            return selection
+        except:
+             return 3
+                            
     def on_reset_clicked(self,event):
         """
         On 'Reset' button  for Q range clicked
@@ -2555,24 +2436,243 @@ class BasicPage(ScrolledPanel, PanelBase):
         #self.compute_chisqr(smearer=self.current_smearer)
         #Re draw plot
         self._draw_model()
+        
+    def get_images(self):
+        """
+        Get the images of the plots corresponding this panel for report
+        
+        : return graphs: list of figures
+        : TODO: Move to guiframe
+        """
+        # set list of graphs
+        graphs = []
+        canvases = []
+        # call gui_manager
+        gui_manager = self.parent.parent
+        # loops through the panels [dic]
+        for item1, item2 in gui_manager.panels.iteritems():
+             data_title = self.data.group_id
+             data_name = self.data.name
+            # try to get all plots belonging to this control panel
+             try:
+                 # check titles (main plot) 
+                 # and data_names (model plot[2D], and residuals)
+                 if item2.group_id == data_title or \
+                                item2.window_name.count(data_name):
+                     #panel = gui_manager._mgr.GetPane(item2.window_name)
+                     # append to the list
+                     graphs.append(item2.figure) 
+                     canvases.append(item2.canvas)     
+             except:
+                 # Not for control panels
+                 pass
+        # return the list of graphs
+        return graphs, canvases
 
     def on_model_help_clicked(self,event):
         """
         on 'More details' button
         """
         from help_panel import  HelpWindow
+        import sans.models as models 
         
+        # Get models help model_function path
+        path = models.get_data_path(media='media')
+        model_path = os.path.join(path,"model_functions.html")
         if self.model == None:
             name = 'FuncHelp'
         else:
             name = self.model.origin_name
 
-        frame = HelpWindow(None, -1,  pageToOpen="media/model_functions.html")    
+        frame = HelpWindow(None, -1,  pageToOpen=model_path)    
         frame.Show(True)
         if frame.rhelp.HasAnchor(name):
             frame.rhelp.ScrollToAnchor(name)
         else:
            msg= "Model does not contains an available description "
            msg +="Please try searching in the Help window"
-           wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))                    
+           wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))      
+    
+    def on_pd_help_clicked(self, event):
+        """
+        Button event for PD help
+        """
+        from help_panel import  HelpWindow
+        import sans.models as models 
+        
+        # Get models help model_function path
+        path = models.get_data_path(media='media')
+        pd_path = os.path.join(path,"pd_help.html")
+
+        frame = HelpWindow(None, -1,  pageToOpen=pd_path)    
+        frame.Show(True)
+        
+    def on_left_down(self, event):
+        """
+        Get key stroke event
+        """
+        # Figuring out key combo: Cmd for copy, Alt for paste
+        if event.CmdDown() and event.ShiftDown():
+            flag = self.get_paste()
+        elif event.CmdDown():
+            flag = self.get_copy()
+        else:
+            event.Skip()
+            return
+        # make event free
+        event.Skip()
+        # messages depending on the flag
+        if flag == None:
+            msg = " Parameter values are copied to the clipboard..."
+            infor = 'warning'
+        elif flag:
+            msg = " Parameter values are pasted from the clipboad..."
+            infor = "warning"
+        else:
+            msg = "Error was occured during pasting the parameter values "
+            msg += "from the clipboard..."
+            infor = "error"
+        # inform msg to wx
+        wx.PostEvent( self.parent.parent, 
+                      StatusEvent(status= msg, info=infor))
+        
+            
+    def get_copy(self): 
+        """
+        Get the string copies of the param names and values in the tap
+        """  
+        content = 'sansview_parameter_values:'
+        # Do it if params exist        
+        if  self.parameters !=[]:
+            
+            # go through the parameters 
+            string = self._get_copy_helper(self.parameters, 
+                                           self.orientation_params)
+            content += string
+            
+            # go through the fittables
+            string = self._get_copy_helper(self.fittable_param, 
+                                           self.orientation_params_disp)
+            content += string
+
+            # go through the fixed params
+            string = self._get_copy_helper(self.fixed_param, 
+                                           self.orientation_params_disp)
+            content += string
+                
+            # go through the str params
+            string = self._get_copy_helper(self.str_parameters, 
+                                           self.orientation_params)
+            content += string
+
+        if wx.TheClipboard.Open():
+            wx.TheClipboard.SetData(wx.TextDataObject(str(content)))
+            data = wx.TextDataObject()
+            success = wx.TheClipboard.GetData(data)
+            text = data.GetText()
+            wx.TheClipboard.Close()
+            
+        return None
+    
+    def _get_copy_helper(self, param, orient_param):
+        """
+        Helping get value and name of the params
+        
+        : param param:  parameters
+        : param orient_param = oritational params
+        : return content: strings [list] [name,value:....]
+        """
+        content = ''
+        # go through the str params
+        for item in param: 
+            # 2D
+            if self.data.__class__.__name__== "Data2D":
+                name = item[1]
+                value = item[2].GetValue()
+            # 1D
+            else:
+                ## for 1D all parameters except orientation
+                if not item[1] in orient_param:
+                    name = item[1]
+                    value = item[2].GetValue()
+            # add to the content
+            content += name + ',' + value + ':'
+            
+        return content
+    
+    def get_paste(self): 
+        """
+        Get the string copies of the param names and values in the tap
+        """  
+        context = {}
+        text = ""
+        
+        # Get text from the clip board        
+        if wx.TheClipboard.Open():
+            if wx.TheClipboard.IsSupported(wx.DataFormat(wx.DF_TEXT)):
+                data = wx.TextDataObject()
+                # get wx dataobject
+                success = wx.TheClipboard.GetData(data)
+                # get text
+                text = data.GetText()
+            # close clipboard
+            wx.TheClipboard.Close()
+            
+        # put the text into dictionary    
+        lines = text.split(':')
+        if lines[0] != 'sansview_parameter_values':
+            return False
+        for line in lines[1:-1]:
+            if len(line) != 0:
+                item =line.split(',')
+                name = item[0]
+                value = item[1]
+                # Transfer the text to content[dictionary]
+                context[name] = value
+        
+        # Do it if params exist        
+        if  self.parameters != []:
+            # go through the parameters  
+            self._get_paste_helper(self.parameters, 
+                                   self.orientation_params, context)
+
+            # go through the fittables
+            self._get_paste_helper(self.fittable_param, 
+                                   self.orientation_params_disp, context)
+
+            # go through the fixed params
+            self._get_paste_helper(self.fixed_param, 
+                                   self.orientation_params_disp, context)
+            
+            # go through the str params
+            self._get_paste_helper(self.str_parameters, 
+                                   self.orientation_params, context)
+            
+        return True
+    
+    def _get_paste_helper(self, param, orient_param, content):
+        """
+        Helping set values of the params
+        
+        : param param:  parameters
+        : param orient_param: oritational params
+        : param content: dictionary [ name, value: name1.value1,...] 
+        """
+        # go through the str params
+        for item in param: 
+            # 2D
+            if self.data.__class__.__name__== "Data2D":
+                name = item[1]
+                if name in content.keys():
+                    item[2].SetValue(content[name])
+            # 1D
+            else:
+                ## for 1D all parameters except orientation
+                if not item[1] in orient_param:
+                    name = item[1]
+                    if name in content.keys():
+                        # Avoid changing combox content which needs special care
+                        if item[2].__class__.__name__ != "ComboBox":
+                            item[2].SetValue(content[name])
+                            
                 

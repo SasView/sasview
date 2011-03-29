@@ -68,11 +68,13 @@ class Plugin(PluginBase):
         self.calc_2D = None
         self.calc_1D = None
         self.fit_thread_list = {}
+        self.residuals = None
         self.fit_panel = None
         # Start with a good default
         self.elapsed = 0.022
         # the type of optimizer selected, park or scipy
         self.fitter  = None
+        self.fit_panel = None
         #let fit ready
         self.fitproblem_count = None
         #Flag to let the plug-in know that it is running stand alone
@@ -81,6 +83,8 @@ class Plugin(PluginBase):
         self.closed_page_dict = {}
         ## Fit engine
         self._fit_engine = 'scipy'
+        ## Relative error desired in the sum of squares (float); scipy only
+        self.ftol=1.49012e-08
         #List of selected data
         self.selected_data_list = []
         ## list of slicer panel created to display slicer parameters and results
@@ -131,7 +135,7 @@ class Plugin(PluginBase):
         self.menu1.AppendSeparator()
         id1 = wx.NewId()
         simul_help = "Simultaneous Fit"
-        self.menu1.Append(id1, '&Simultaneous Page',simul_help)
+        self.menu1.Append(id1, '&Simultaneous Fit',simul_help)
         wx.EVT_MENU(owner, id1, self.on_add_sim_page)
         
         id1 = wx.NewId()
@@ -142,7 +146,7 @@ class Plugin(PluginBase):
         #self.fit_panel.set_model_list(self.menu_mng.get_model_list())
    
         #create  menubar items
-        return [(self.menu1, "Fitting")]
+        return [(self.menu1, "FitEngine")]
                
     def on_add_sim_page(self, event):
         """
@@ -444,7 +448,20 @@ class Plugin(PluginBase):
             else:
                 param_name=param_names[1]                    
             return model_name,param_name
-        
+   
+    def set_ftol(self, ftol=None):
+        """
+        Set ftol: Relative error desired in the sum of chi squares.  
+        """
+        # check if it is flaot
+        try:
+            f_tol = float(ftol)
+        except:
+            # default
+            f_tol = 1.49012e-08
+            
+        self.ftol = f_tol
+              
     def stop_fit(self, uid):
         """
         Stop the fit engine
@@ -491,7 +508,9 @@ class Plugin(PluginBase):
                    enable1D=True, enable2D=False,
                    state=None,
                    toggle_mode_on=False,
-                   qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, qstep=DEFAULT_NPTS):
+                   qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, 
+                   qstep=DEFAULT_NPTS,
+                   update_chisqr=True):
         """
         Draw model.
         
@@ -504,6 +523,7 @@ class Plugin(PluginBase):
         :param qmin:  Range's minimum value to draw model
         :param qmax:  Range's maximum value to draw model
         :param qstep: number of step to divide the x and y-axis
+        :param update_chisqr: update chisqr [bool]
              
         """
         if data.__class__.__name__ == "Data1D" or not enable2D:    
@@ -518,7 +538,8 @@ class Plugin(PluginBase):
                                qmax=qmax, 
                                toggle_mode_on=toggle_mode_on,
                                state=state,
-                               qstep=qstep)
+                               qstep=qstep,
+                               update_chisqr=update_chisqr)
         else:     
             ## draw model 2D with no initial data
              self._draw_model2D(model=model,
@@ -530,7 +551,8 @@ class Plugin(PluginBase):
                                 qmax=qmax,
                                 state=state,
                                 toggle_mode_on=toggle_mode_on,
-                                qstep=qstep)
+                                qstep=qstep,
+                                update_chisqr=update_chisqr)
             
     def onFit(self):
         """
@@ -597,16 +619,18 @@ class Plugin(PluginBase):
         if fitproblem_count == 1:
             calc_fit = FitThread(handler = handler,
                                     fn=fitter,
-                                   pars=pars,
-                                   page_id=list_page_id,
-                                   completefn=self._single_fit_completed)
+                                    pars=pars,
+                                    page_id=list_page_id,
+                                    completefn=self._single_fit_completed,
+                                    ftol=self.ftol)
         else:
             current_page_id = self.sim_page.uid
             ## Perform more than 1 fit at the time
             calc_fit = FitThread(handler=handler,
                                     fn=fitter,
                                     page_id=list_page_id,
-                                   completefn= self._simul_fit_completed)
+                                    updatefn=handler.update_fit,
+                                    ftol=self.ftol)
         self.fit_thread_list[current_page_id] = calc_fit
         calc_fit.queue()
         self.ready_fit(calc_fit=calc_fit)
@@ -850,16 +874,20 @@ class Plugin(PluginBase):
         """     
         try:
             if result == None:
-                msg= "Simple Fitting Stop !!!"
-                wx.PostEvent(self.parent, StatusEvent(status=msg,info="warning",
-                                                      type="stop"))
+                msg= "Single Fitting did not converge!!!"
+                wx.PostEvent(self.parent, 
+                             StatusEvent(status=msg, 
+                                         info="warning",
+                                         type="stop"))
                 return
             if not numpy.isfinite(result.fitness) or \
                     numpy.any(result.pvec == None) or \
                     not numpy.all(numpy.isfinite(result.pvec)):
                 msg = "Single Fitting did not converge!!!"
                 wx.PostEvent(self.parent, 
-                             StatusEvent(status=msg, type="stop"))
+                             StatusEvent(status=msg, 
+                                         info="warning",
+                                         type="stop"))
                 return
             for uid in page_id:
                 value = self.page_finder[uid]   
@@ -874,7 +902,12 @@ class Plugin(PluginBase):
                 cpage.onsetValues(result.fitness, 
                                   param_name, result.pvec,result.stderr)
                 cpage._on_fit_complete()
-           
+
+        except ValueError:
+            msg = "Single Fitting did not converge!!!"
+            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
+                                                  type="stop"))
+            return   
         except:
             raise
             #msg = "Single Fit completed but Following"
@@ -898,7 +931,7 @@ class Plugin(PluginBase):
         try:
             msg = "" 
             if result == None:
-                msg = "Complex Fitting Stop !!!"
+                msg= "Complex Fitting did not converge!!!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                       type="stop"))
                 return
@@ -932,6 +965,13 @@ class Plugin(PluginBase):
                                   small_param_name,
                                   small_out,small_cov)
                 cpage._on_fit_complete()
+                
+        except Exception:
+            msg = "Complex Fitting did not converge!!!"
+            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
+                                                  type="stop"))
+            return
+
         except:
             msg = "Simultaneous Fit completed"
             msg += " but Following error occurred:%s" % sys.exc_value
@@ -1143,7 +1183,8 @@ class Plugin(PluginBase):
         theory.id = str(page_id) + " Model2D"
   
     def _complete1D(self, x,y, page_id, elapsed,index,model,
-                    toggle_mode_on=False,state=None, data=None):
+                    toggle_mode_on=False,state=None, 
+                    data=None, update_chisqr=True):
         """
         Complete plotting 1D data
         """ 
@@ -1201,13 +1242,17 @@ class Plugin(PluginBase):
             title = new_plot.title
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                             title= str(title)))
-            
-            wx.PostEvent(current_pg,
-                Chi2UpdateEvent(output=self._cal_chisqr(data=data,
+            if update_chisqr:
+                wx.PostEvent(current_pg,
+                             Chi2UpdateEvent(output=self._cal_chisqr(data=data,
                                                         page_id=page_id,
                                                         index=index)))
+            else:
+                self._plot_residuals(page_id, data, index)
+
             msg = "Plot 1D  complete !"
             wx.PostEvent( self.parent, StatusEvent(status=msg, type="stop" ))
+            #self.current_pg.state.theory_data = deepcopy(self.theory_data)
         except:
             raise
             #msg = " Error occurred when drawing %s Model 1D: " % new_plot.name
@@ -1223,7 +1268,8 @@ class Plugin(PluginBase):
         self.ready_fit()
   
     def _complete2D(self, image, data, model, page_id,  elapsed, index, qmin,
-                     qmax, toggle_mode_on=False,state=None,qstep=DEFAULT_NPTS):
+                     qmax, toggle_mode_on=False,state=None,qstep=DEFAULT_NPTS, 
+                     update_chisqr=True):
         """
         Complete get the result of modelthread and create model 2D
         that can be plot.
@@ -1283,10 +1329,14 @@ class Plugin(PluginBase):
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                                title=title))
         # Chisqr in fitpage
-        wx.PostEvent(current_pg,
-            Chi2UpdateEvent(output=self._cal_chisqr(data=data,
+        if update_chisqr:
+            wx.PostEvent(current_pg,
+                         Chi2UpdateEvent(output=\
+                                    self._cal_chisqr(data=data,
                                                      page_id=page_id,
                                                      index=index)))
+        else:
+            self._plot_residuals(page_id, data, index)
         msg = "Plot 2D complete !"
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
     
@@ -1295,7 +1345,8 @@ class Plugin(PluginBase):
                       state=None,
                       toggle_mode_on=False,
                       qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX,
-                       qstep=DEFAULT_NPTS):
+                      qstep=DEFAULT_NPTS,
+                      update_chisqr=True):
         """
         draw model in 2D
         
@@ -1345,8 +1396,10 @@ class Plugin(PluginBase):
                                     qstep=qstep,
                                     toggle_mode_on=toggle_mode_on,
                                     state=state,
-                                    completefn=self._complete2D)#,
-                                    #updatefn=self._update2D)
+                                    completefn=self._complete2D,
+                                    #updatefn= self._update2D,
+                                    update_chisqr=update_chisqr)
+
             self.calc_2D.queue()
 
         except:
@@ -1359,7 +1412,8 @@ class Plugin(PluginBase):
                 qmin=DEFAULT_QMIN, qmax=DEFAULT_QMAX, 
                 state=None,
                 toggle_mode_on=False,
-                qstep=DEFAULT_NPTS, enable1D=True):
+                qstep=DEFAULT_NPTS, update_chisqr=True, 
+                enable1D=True):
         """
         Draw model 1D from loaded data1D
         
@@ -1377,10 +1431,11 @@ class Plugin(PluginBase):
             if hasattr(data,"x_bins"):
                 return
             x = data.x
-            if qmin == DEFAULT_QMIN :
-                qmin = min(data.x)
-            if qmax == DEFAULT_QMAX:
-                qmax = max(data.x) 
+            if qmin == None :
+                qmin == DEFAULT_QMIN
+
+            if qmax == None:
+                qmax == DEFAULT_QMAX 
         if not enable1D:
             return 
         try:
@@ -1397,8 +1452,10 @@ class Plugin(PluginBase):
                                   smearer=smearer,
                                   state=state,
                                   toggle_mode_on=toggle_mode_on,
-                                  completefn=self._complete1D)#,
-                                  #updatefn=self._update1D)
+                                  completefn=self._complete1D,
+                                  #updatefn = self._update1D,
+                                  update_chisqr=update_chisqr)
+
             self.calc_1D.queue()
 
         except:
@@ -1418,38 +1475,127 @@ class Plugin(PluginBase):
         if data == None: return chisqr
         
         # Get data: data I, theory I, and data dI in order
-        if data.__class__.__name__ =="Data2D":
+        if data.__class__.__name__ == "Data2D":
             if index == None: 
                 index = numpy.ones(len(data.data),ntype=bool)
             # get rid of zero error points
-            index = index & (data.err_data != 0)  
+            index = index & (data.err_data != 0 )  
+            index = index & (numpy.isfinite(data.data)) 
             fn = data.data[index] 
             theory_data = self.page_finder[page_id].get_theory_data()
             gn = theory_data.data[index]
             en = data.err_data[index]
         else:
             # 1 d theory from model_thread is only in the range of index
-            if index == None:
+            if index == None: 
                 index = numpy.ones(len(data.y), ntype=bool)
             if data.dy == None or data.dy == []:
                 dy = numpy.ones(len(data.y))
             else:
                 ## Set consitently w/AbstractFitengine:
                 # But this should be corrected later.
-                dy = data.dy
+                dy = deepcopy(data.dy)
                 dy[dy==0] = 1  
             fn = data.y[index] 
             theory_data = self.page_finder[page_id].get_theory_data()
             gn = theory_data.y
             en = dy[index]
         # residual
-        res = (fn - gn)/en
+        res = (fn - gn) / en
+        residuals = res[numpy.isfinite(res)]
         # get chisqr only w/finite
-        val = res[numpy.isfinite(res)]*res[numpy.isfinite(res)]
-        chisqr = numpy.average(val)
+        chisqr = numpy.average(residuals * residuals)
+        
+        self._plot_residuals(page_id, data, index)
         return chisqr
     
-    
+
+        
+    def _plot_residuals(self, page_id, data=None, index=None): 
+        """
+        Plot the residuals
+        
+        :param data: data
+        :param index: index array (bool) 
+        : Note: this is different from the residuals in cal_chisqr()
+        """
+        if data == None: 
+            return 
+        
+        # Get data: data I, theory I, and data dI in order
+        if data.__class__.__name__ == "Data2D":
+            # build residuals
+            #print data
+            residuals = Data2D()
+            #residuals.copy_from_datainfo(data)
+            # Not for trunk the line below, instead use the line above
+            data.clone_without_data(len(data.data), residuals)
+            residuals.data = None
+            fn = data.data#[index] 
+            theory_data = self.page_finder[page_id].get_theory_data()
+            gn = theory_data.data#[index]
+            en = data.err_data#[index]
+            residuals.data = (fn - gn) / en 
+            residuals.qx_data = data.qx_data#[index]
+            residuals.qy_data = data.qy_data #[index]
+            residuals.q_data = data.q_data#[index]
+            residuals.err_data = numpy.ones(len(residuals.data))#[index]
+            residuals.xmin = min(residuals.qx_data)
+            residuals.xmax = max(residuals.qx_data)
+            residuals.ymin = min(residuals.qy_data)
+            residuals.ymax = max(residuals.qy_data)
+            residuals.q_data = data.q_data#[index]
+            residuals.mask = data.mask
+            residuals.scale = 'linear'
+            #print "print data",residuals
+            # check the lengths
+            if len(residuals.data) != len(residuals.q_data):
+                return
+
+        else:
+            # 1 d theory from model_thread is only in the range of index
+            if data.dy == None or data.dy == []:
+                dy = numpy.ones(len(data.y))
+            else:
+                ## Set consitently w/AbstractFitengine: 
+                ## But this should be corrected later.
+                dy = deepcopy(data.dy)
+                dy[dy==0] = 1  
+            fn = data.y[index] 
+            theory_data = self.page_finder[page_id].get_theory_data()
+            gn = theory_data.y
+            en = dy[index]
+            # build residuals
+            residuals = Data1D()
+            residuals.y = (fn - gn) / en
+            residuals.x = data.x[index]
+            residuals.dy = numpy.ones(len(residuals.y))
+            residuals.dx = None
+            residuals.dxl = None
+            residuals.dxw = None
+            residuals.ytransform = 'y'
+            # For latter scale changes 
+            residuals.xaxis('\\rm{Q} ', 'A^{-1}')
+            residuals.yaxis('\\rm{Residuals} ', 'normalized')
+            
+        new_plot = residuals
+        if data.id == None:
+            data.id = data.name
+        name  = data.id
+        new_plot.name = "Residuals for " + str(data.name)
+        ## allow to highlight data when plotted
+        new_plot.interactive = True
+        ## when 2 data have the same id override the 1 st plotted
+        new_plot.id = new_plot.name#name + " residuals"
+        ##group_id specify on which panel to plot this data
+        new_plot.group_id = new_plot.id
+        #new_plot.is_data = True
+        ##post data to plot
+        title = new_plot.name 
+        
+        # plot data
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))   
+   
 #def profile(fn, *args, **kw):
 #    import cProfile, pstats, os
 #    global call_result

@@ -60,6 +60,7 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
       
         #add default pages
         self.add_default_pages()
+
     
     def _on_engine_change(self, name='scipy'):
         """
@@ -139,11 +140,12 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         """
         Add default pages such as a hint page and an empty fit page
         """
+        pass
         #add default page
-        from hint_fitpage import HintFitPage
-        self.hint_page = HintFitPage(self) 
-        self.AddPage(self.hint_page,"Hint")
-        self.hint_page.set_manager(self._manager)
+        #from hint_fitpage import HintFitPage
+        #self.hint_page = HintFitPage(self) 
+        #self.AddPage(self.hint_page,"Hint")
+        #self.hint_page.set_manager(self._manager)
   
     def close_all(self):
         """

@@ -46,7 +46,6 @@ list_of_state_attributes = [["engine_type", "engine_type", "string"],
                       ["struct_rbutton", "struct_rbutton", "bool"],
                       ["formfactorcombobox", "formfactorcombobox", "float"],
                       ["structurecombobox", "structurecombobox", "float"],
-                      ["disp_box", "disp_box", "float"],
                       ["enable_smearer","enable_smearer","bool"],
                       ["disable_smearer","disable_smearer","bool"],
                       ["pinhole_smearer","pinhole_smearer","bool"],
@@ -64,6 +63,8 @@ list_of_state_attributes = [["engine_type", "engine_type", "string"],
 
 list_of_model_attributes = [["values", "values"],
                             ["weights", "weights"]]
+
+list_of_obj_dic =  [["disp_obj_dict", "_disp_obj_dict", "string"]]
 
 list_of_state_parameters = [["parameters", "parameters"] , 
                             ["str_parameters", "str_parameters"] ,                     
@@ -138,6 +139,12 @@ class PageState(object):
         #------------------------
         #Data used for fitting 
         self.data = data
+        # model data
+        self.theory_data = None
+        #Is 2D
+        self.is_2D = False
+        self.images = None
+        
         #save additional information on data that dataloader.reader does not read
         self.is_data = None
         self.data_name = ""
@@ -195,10 +202,11 @@ class PageState(object):
         self.disp_list =[]
         if self.model is not None:
             self.disp_list = self.model.getDispParamList()
-        self._disp_obj_dict = {}
+
         self.disp_cb_dict = {}
-        self.values = []
-        self.weights = []
+        self.values = {}
+        self.weights = {}
+
                     
         #contains link between a model and selected parameters to fit 
         self.param_toFit = []
@@ -288,9 +296,12 @@ class PageState(object):
         if len(self.disp_cb_dict)>0:
             for k , v in self.disp_cb_dict.iteritems():
                 obj.disp_cb_dict[k]= v
-                
-        obj.values = copy.deepcopy(self.values)
-        obj.weights = copy.deepcopy(self.weights)
+        if len(self.values)>0: 
+            for k , v in self.values.iteritems():       
+                obj.values[k] = v
+        if len(self.weights)>0: 
+            for k , v in self.weights.iteritems():       
+                obj.weights[k] = v
         obj.enable_smearer = copy.deepcopy(self.enable_smearer)
         obj.disable_smearer = copy.deepcopy(self.disable_smearer)
         obj.pinhole_smearer = copy.deepcopy(self.pinhole_smearer)
@@ -336,7 +347,7 @@ class PageState(object):
         """
         rep = "\nState name: %s\n"%self.file
         t = time.localtime(self.timestamp)
-        time_str = time.strftime("%b %d %H:%M", t)
+        time_str = time.strftime("%b %d %H;%M of %Y", t)
         rep += "State created on : %s\n"%time_str
         rep += "State form factor combobox selection: %s\n"%self.formfactorcombobox
         rep += "State structure factor combobox selection: %s\n"%self.structurecombobox
@@ -367,19 +378,176 @@ class PageState(object):
         rep += "dq_r  : %s\n"%self.dq_r
         
         rep += "model  : %s\n\n"% str(self.model)
-        rep += "number parameters(self.parameters): %s\n"%len(self.parameters)
-        rep = self._repr_helper( list=self.parameters, rep=rep)
-        rep += "number str_parameters(self.str_parameters): %s\n"%len(self.str_parameters)
-        rep = self._repr_helper( list=self.str_parameters, rep=rep)
-        rep += "number orientation parameters"
-        rep += "(self.orientation_params): %s\n"%len(self.orientation_params)
-        rep = self._repr_helper( list=self.orientation_params, rep=rep)
-        rep += "number dispersity parameters"
-        rep += "(self.orientation_params_disp): %s\n"%len(self.orientation_params_disp)
-        rep = self._repr_helper( list=self.orientation_params_disp, rep=rep)
+        temp_parameters = []
+        temp_fittable_param = []
+        if self.data.__class__.__name__ == "Data2D":
+            self.is_2D = True
+        else:
+            self.is_2D = False
+        if self.data is not None:
+            if not self.is_2D:
+                for item in self.parameters:
+                    if not item in self.orientation_params:
+                        temp_parameters.append(item)
+                for item in self.fittable_param:
+                    if not item in self.orientation_params_disp:
+                        temp_fittable_param.append(item)
+            else:
+                temp_parameters = self.parameters
+                temp_fittable_param = self.fittable_param
+                
+            rep += "number parameters(self.parameters): %s\n"%len(temp_parameters)
+            rep = self._repr_helper( list=temp_parameters, rep=rep)
+            rep += "number str_parameters(self.str_parameters): %s\n"%len(self.str_parameters)
+            rep = self._repr_helper( list=self.str_parameters, rep=rep) 
+            rep += "number fittable_param(self.fittable_param): %s\n"%len(temp_fittable_param)
+            rep = self._repr_helper( list=temp_fittable_param, rep=rep) 
+            """ 
+            if is_2D:
+                rep += "number orientation parameters"
+                rep += "(self.orientation_params): %s\n"%len(self.orientation_params)
+                rep = self._repr_helper( list=self.orientation_params, rep=rep)
+                rep += "number dispersity parameters"
+                rep += "(self.orientation_params_disp): %s\n"%len(self.orientation_params_disp)
+                rep = self._repr_helper( list=self.orientation_params_disp, rep=rep)
+            """
         
         return rep
-   
+
+
+    def set_report_string(self):
+        """
+        Get the values (strings) from __str__ for report 
+        """
+        # Dictionary of teh report strings
+        repo_time = ""
+        model_name = ""
+        title = ""
+        title_name = ""
+        file_name = ""
+        param_string = ""
+        paramval_string = ""
+        chi2_string = ""
+        q_range = ""
+        strings = self.__repr__()
+        lines = strings.split('\n')
+
+        # get all string values from __str__()
+        for line in lines:
+            value = ""
+            content = line.split(":")
+            name = content[0]
+            try:
+                value = content[1]
+            except:
+                pass
+            if name.count("State created on"):
+                repo_time = "Created on " + value
+            if name.count("parameter name"):
+                val_name = value.split(".")
+                if len(val_name) > 1:
+                    if val_name[1].count("width"):
+                        param_string += value + ','
+                    else:
+                        continue
+                else:
+                    param_string += value + ','
+            if name == "value":
+                param_string += value + ','
+            if name == "error value":
+                param_string += value + ','
+            if name == "parameter unit":
+                param_string += value + ':' 
+            if name == "Value of Chisqr ":
+                chi2 = ("Chi2/Npts = " + value)
+                chi2_string = CENTRE % chi2
+            if name == "Title":
+                if len(value.strip()) == 0:
+                    continue
+                title = value + " [" + repo_time + "]"
+                title_name = HEADER % title
+            if name == "data ":
+                try:
+                    file = ("File name:" + content[2])
+                    file_name = CENTRE % file
+                    if len(title) == 0:
+                        title = content[2] + " [" + repo_time + "]"
+                        title_name = HEADER % title
+                except:
+                    pass
+            if name == "Plotting Range":
+                try:
+                    q_range = content[1] + " = " + content[2] \
+                            + " = " + content[3].split(",")[0]
+                    q_name = ("Q Range:    " + q_range)
+                    q_range = CENTRE % q_name
+                except:
+                    pass
+        paramval = ""
+        for lines in param_string.split(":"): 
+            line = lines.split(",")
+            if len(lines) > 0: 
+                param = line[0] 
+                param += " = " + line[1]
+                if len(line[2].split()) > 0 and not line[2].count("None"):
+                    param += " +- " + line[2]
+                if len(line[3].split()) > 0 and not line[3].count("None"):
+                    param += " " + line[3]
+                if not paramval.count(param):
+                    paramval +=  param + "\n"
+                    paramval_string += CENTRE % param + "\n"
+        
+        html_string = title_name + "\n" + file_name + \
+                                   "\n" + q_range + \
+                                   "\n" + chi2_string + \
+                                   "\n" + ELINE + \
+                                   "\n" + paramval_string + \
+                                   "\n" + ELINE + \
+                                   "\n" + FEET_1 % title + \
+                                   "\n" + FEET_2 
+                            
+        text_string = "\n\n\n" + title + "\n\n" + file + \
+                              "\n" + q_name + \
+                              "\n" + chi2 + \
+                              "\n\n" + paramval 
+                                           
+        return html_string, text_string, title
+    
+    def report(self, figs=None, canvases=None):
+        """
+        Invoke report dialog panel
+        
+        : param figs: list of pylab figures [list]
+        """
+        from report_dialog import ReportDialog
+        # get the strings for report
+        html_str, text_str, title = self.set_report_string()
+        # Allow 2 figures to append
+        if len(figs) == 1:
+            add_str = FEET_3 
+        elif len(figs) == 2:
+            add_str = ELINE 
+            add_str += FEET_2 % ("%s") 
+            add_str += ELINE 
+            add_str += FEET_3 
+        elif len(figs) > 2:
+            add_str = ELINE 
+            add_str += FEET_2 % ("%s") 
+            add_str += ELINE 
+            add_str += FEET_2 % ("%s") 
+            add_str += ELINE 
+            add_str += FEET_3 
+        else:
+            add_str = ""
+        # final report html strings
+        report_str = html_str % ("%s") + add_str
+
+        # make plot image
+        images = self.set_plot_state(figs, canvases)
+        report_list = [report_str, text_str, images ]
+        dialog = ReportDialog(report_list, None, -1, "")
+        dialog.ShowModal()
+          
     def _toXML_helper(self, list, element, newdoc):
         """
         Helper method to create xml file for saving state
@@ -462,26 +630,49 @@ class PageState(object):
        
         for item in list_of_data_attributes:
             element = newdoc.createElement(item[0])
-            exec "element.setAttribute(item[0], str(self.%s))"%(item[1])
+            exec "element.setAttribute(item[0], str(self.%s))" % (item[1])
             inputs.appendChild(element)   
         
         for item in list_of_state_attributes:
             element = newdoc.createElement(item[0])
-            exec "element.setAttribute(item[0], str(self.%s))"%(item[1])
+            exec "element.setAttribute(item[0], str(self.%s))" % (item[1])
             inputs.appendChild(element)
-            
+
+        # For self.values ={ disp_param_name: [vals,...],...}   
+        # and for self.weights ={ disp_param_name: [weights,...],...}              
         for item in list_of_model_attributes:
             element = newdoc.createElement(item[0])
-            exec "list = self.%s"%item[1]
-            for value in list:
-                exec "element.appendChild(newdoc.createTextNode(str(%s)))"%value
+            exec "list = self.%s" % item[1]
+            for key, value in list.iteritems():
+                sub_element = newdoc.createElement(key)
+                sub_element.setAttribute('name', str(key))
+                for val in value:
+                    com = "sub_element.appendChild"
+                    com += "(newdoc.createTextNode(str(%s)))"
+                    exec com % val
+                   
+                element.appendChild(sub_element) 
             inputs.appendChild(element)
-            
+        
+        # Create doc for the dictionary of self._disp_obj_dic
+        for item in list_of_obj_dic:
+             element = newdoc.createElement(item[0])
+             exec "list = self.%s" % item[1]
+             for key, val in list.iteritems():
+                 value = repr(val)
+                 sub_element = newdoc.createElement(key)
+                 sub_element.setAttribute('name', str(key))
+                 sub_element.setAttribute('value', str(value))
+                 element.appendChild(sub_element) 
+             inputs.appendChild(element)    
+                 
         for item in list_of_state_parameters:
             element = newdoc.createElement(item[0])
-            exec "self._toXML_helper(list=self.%s, element=element, newdoc=newdoc)"%item[1]                       
+            com = "self._toXML_helper(list=self.%s,"
+            com += " element=element, newdoc=newdoc)"
+            exec com % item[1]                       
             inputs.appendChild(element)
-       
+               
         # Save the file
         if doc is None:
             fd = open(file, 'w')
@@ -536,8 +727,10 @@ class PageState(object):
                 unit = item.get('unit')
             except:
                 unit = None
-            list.append([selected_to_fit, name, value, "+/-",[error_displayed, error_value],
-                         [minimum_displayed,minimum_value],[maximum_displayed,maximum_value], unit])
+            list.append([selected_to_fit, name, value, "+/-",
+                         [error_displayed, error_value],
+                         [minimum_displayed,minimum_value],
+                         [maximum_displayed,maximum_value], unit])
        
     def fromXML(self, file=None, node=None):
         """
@@ -574,34 +767,109 @@ class PageState(object):
             for item in list_of_data_attributes:
                 node = get_content('ns:%s'%item[0], entry)
                 try:
-                    exec "self.%s = parse_entry_helper(node, item)"%item[0]
+                    exec "self.%s = parse_entry_helper(node, item)" % item[0]
                     
                 except:
                     raise
-            
+
             if entry is not None:
                 
                 for item in list_of_state_attributes:
-                    node = get_content('ns:%s'%item[0], entry)
+                    node = get_content('ns:%s' % item[0], entry)
                     try:
-                        exec "self.%s = parse_entry_helper(node, item)"%str(item[0])
+                        exec "self.%s = parse_entry_helper(node, item)" % \
+                                                                str(item[0])
                     except:
                         raise
                     
-                for item in list_of_model_attributes:
-                    node = get_content("ns:%s"%item[0], entry)
-                    list = []
-                    for value in node:
-                        try:
-                            list.append(float(value)) 
-                        except:
-                            list.append(None)
-                    exec "self.%s = list"%item[1]
-                
                 for item in list_of_state_parameters:
-                    node = get_content("ns:%s"%item[0], entry)
-                    exec "self._fromXML_helper(node=node, list=self.%s)"%item[1]
-                   
+                    node = get_content("ns:%s" % item[0], entry)
+                    exec "self._fromXML_helper(node=node, list=self.%s)" % \
+                                                                    item[1]
+                
+                # Recover _disp_obj_dict from xml file   
+                self._disp_obj_dict = {}    
+                for item in list_of_obj_dic:
+                    # Get node
+                    node = get_content("ns:%s" % item[0], entry)
+                    for attr in node:
+                        name = attr.get('name')
+                        val  = attr.get('value')
+                        value = val.split(" instance")[0]
+                        disp_name = value.split("<")[1]
+                        try:
+                            # Try to recover disp_model object from strings
+                            com  = "from sans.models.dispersion_models "
+                            com += "import %s as disp"
+                            com_name = disp_name.split(".")[3]
+                            exec com % com_name
+                            disp_model = disp()
+                            exec "self.%s['%s'] = com_name" % (item[1], name)
+                        except:
+                            pass
+                        
+                # get self.values and self.weights dic. if exists    
+                for item in list_of_model_attributes:
+                    node = get_content("ns:%s" % item[0], entry)
+                    dic = {}
+                    list = []
+                    for par in node:
+                        name = par.get('name')
+                        values = par.text.split('\n')
+                        # Get lines only with numbers
+                        for line in values:
+                            try:
+                                val= float(line)
+                                list.append(val) 
+                            except:
+                                # pass if line is empty (it happens)
+                                pass
+                    dic[name] = numpy.array(list)
+                    exec "self.%s = dic" % item[1]
+                    
+    def set_plot_state(self, figs, canvases):
+        """
+        Build image state that wx.html understand
+        by plotting, putting it into wx.FileSystem image object
+
+        """
+        images = []
+        # some imports
+        import wx
+
+        # Reset memory
+        self.imgRAM = None
+        wx.MemoryFSHandler()
+        
+        # For no figures in the list, prepare empty plot
+        if figs == None or len(figs) == 0:
+            figs = [None]
+            
+        # Loop over the list of figures   
+        # use wx.MemoryFSHandler
+        self.imgRAM = wx.MemoryFSHandler() 
+        for fig in figs:
+            if figs != None:
+                #fig.set_facecolor('w')
+                ind = figs.index(fig)
+                canvas = canvases[ind]
+                
+            #bmp = wx.BitmapDataObject()
+            #bmp.SetBitmap(canvas.bitmap)
+            #store the image in wx.FileSystem Object 
+            wx.FileSystem.AddHandler(wx.MemoryFSHandler())
+            
+            # index of the fig
+            ind = figs.index(fig)
+            
+            #AddFile, image can be retrieved with 'memory:filename'
+            self.imgRAM.AddFile('img_fit%s.png' % ind , 
+                                canvas.bitmap, wx.BITMAP_TYPE_PNG)
+            
+            #append figs
+            images.append(fig)
+            
+        return images                   
 
 class Reader(CansasReader):
     """
@@ -1232,7 +1500,48 @@ class Reader(CansasReader):
             state.toXML(doc=doc, file=data.name, entry_node=sasentry)
             
         return doc 
-  
+
+    
+# Simple html report templet  
+HEADER = "<html>\n"
+HEADER += "<head>\n"
+HEADER += "<meta http-equiv=Content-Type content='text/html; "
+HEADER += "charset=windows-1252'> \n"
+HEADER += "<meta name=Generator >\n"
+HEADER += "</head>\n"
+HEADER += "<body lang=EN-US>\n"
+HEADER += "<div class=WordSection1>\n"
+HEADER += "<p class=MsoNormal><b><span ><center>"
+HEADER += "%s</center></span></center></b></p>"
+HEADER += "<p class=MsoNormal>&nbsp;</p>"
+PARA = "<p class=MsoNormal> %s \n"
+PARA += "</p>"
+CENTRE = "<p class=MsoNormal><center> %s \n"
+CENTRE += "</center></p>"
+FEET_1 = \
+"""
+<p class=MsoNormal>&nbsp;</p>
+<p class=MsoNormal><b><span ><center> Graph</span></center></b></p> 
+<p class=MsoNormal>&nbsp;</p> 
+<center> 
+<br>Model Computation<br> 
+<br>Data: "%s"<br> 
+"""
+FEET_2 = \
+"""
+<img src="%s" > 
+</img>
+"""
+FEET_3 = \
+"""
+</center> 
+</div>
+</body>
+</html>
+"""
+ELINE = "<p class=MsoNormal>&nbsp;</p>"
+
+ 
 if __name__ == "__main__":
     state = PageState(parent=None)
     #state.toXML()

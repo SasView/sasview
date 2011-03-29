@@ -14,8 +14,8 @@ class FitThread(CalcThread):
                  completefn = None,
                  updatefn   = None,
                  yieldtime  = 0.01,
-                 worktime   = 0.01
-                 ):
+                 worktime   = 0.01,
+                 ftol       = None):
         CalcThread.__init__(self,completefn,
                  updatefn,
                  yieldtime,
@@ -26,6 +26,8 @@ class FitThread(CalcThread):
         self.page_id = page_id
         self.starttime = 0
         self.updatefn = updatefn
+        #Relative error desired in the sum of squares.
+        self.ftol = ftol
    
     def isquit(self):
         """

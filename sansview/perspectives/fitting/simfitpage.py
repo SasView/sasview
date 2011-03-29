@@ -233,7 +233,9 @@ class SimultaneousFitPage(wx.ScrolledWindow):
         sizer_couples = wx.GridBagSizer(5,5)
         #------------------------------------------------------
         if len(self.page_finder)==0:
-            sizer_title.Add(wx.StaticText(self,-1," No fit combinations are found!"))
+            msg = " No fit combinations are found! \n\n"
+            msg += " Please load data and set up at least two fit panels first..."
+            sizer_title.Add(wx.StaticText(self, -1, msg))
         else:
             ## store model  
             self._store_model()
