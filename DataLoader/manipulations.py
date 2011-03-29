@@ -417,7 +417,7 @@ class CircularAverage(object):
         # Bin width (step size) [A-1]
         self.bin_width = bin_width
 
-    def __call__(self, data2D):
+    def __call__(self, data2D, ismask=False):
         """
         Perform circular averaging on the data
         
@@ -430,6 +430,7 @@ class CircularAverage(object):
         q_data = data2D.q_data[numpy.isfinite(data2D.data)]
         qx_data = data2D.qx_data[numpy.isfinite(data2D.data)]
         err_data = data2D.err_data[numpy.isfinite(data2D.data)]
+        mask_data = data2D.mask[numpy.isfinite(data2D.data)]
         
         dq_data = None
         
@@ -488,7 +489,11 @@ class CircularAverage(object):
         err_x = numpy.zeros(nbins)
         y_counts = numpy.zeros(nbins)
 
-        for npt in range(len(data)):          
+        for npt in range(len(data)):   
+            
+            if ismask and not mask_data[npt]:
+                continue   
+            
             frac = 0
             
             # q-value at the pixel (j,i)
@@ -539,6 +544,7 @@ class CircularAverage(object):
         y    = y / y_counts
         x    = x / y_counts
         idx = (numpy.isfinite(y)) & (numpy.isfinite(x)) 
+        
         if err_x != None:
             d_x = err_x[idx] / y_counts[idx]
         else:
