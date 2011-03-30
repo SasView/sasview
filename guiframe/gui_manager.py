@@ -216,7 +216,6 @@ class ViewerFrame(wx.Frame):
         try:
             self.load_from_cmd(self._input_file)
         except:
-            raise
             msg = "%s Cannot load file %s\n" %(str(APPLICATION_NAME), 
                                              str(self._input_file))
             msg += str(sys.exc_value) + '\n'
@@ -615,8 +614,9 @@ class ViewerFrame(wx.Frame):
         """
         application_name = 'No Selected Application'
         panel_name = 'No Panel on Focus'
-        if self._toolbar is not None:
-            self._toolbar.update_toolbar(self.panel_on_focus)
+        if self._toolbar is  None:
+            return
+        self._toolbar.update_toolbar(self.panel_on_focus)
         if self._current_perspective is not None:
             application_name = self._current_perspective.sub_menu
         if self.panel_on_focus is not None:
@@ -1988,14 +1988,15 @@ class ViewApp(wx.App):
             cmd = sys.argv[0].lower()
             if os.path.isfile(cmd):
                 basename  = os.path.basename(cmd)
-                if basename in ['sansview.py', 'sansview.exe']:
+                app_py = str(APPLICATION_NAME).lower() + '.py'
+                app_exe = str(APPLICATION_NAME).lower() + '.exe'
+                if basename.lower() in [app_py, app_exe]:
                     input_file = sys.argv[1]
         if input_file is None:
             return
         if self.frame is not None:
             self.frame.set_input_file(input_file=input_file)
-         
-            
+          
     def set_manager(self, manager):
         """
         Sets a reference to the application manager
