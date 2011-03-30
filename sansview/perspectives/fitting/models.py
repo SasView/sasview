@@ -416,7 +416,6 @@ class ModelManagerBase:
         is_modified = False
         if os.path.isdir(PLUGIN_DIR):
             temp =  os.path.getmtime(PLUGIN_DIR)
-            print "update", self.last_time_dir_modified, temp
             if  self.last_time_dir_modified != temp:
                 is_modified = True
                 self.last_time_dir_modified = temp
@@ -627,7 +626,6 @@ class ModelManager(object):
         return self.__modelmanager.is_changed()
     
     def update(self):
-        print "update %%%"
         return self.__modelmanager.update()
     
     def populate_menu(self, modelmenu, event_owner):
