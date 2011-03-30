@@ -59,9 +59,6 @@ class Plugin(PluginBase):
     def __init__(self, standalone=False):
         PluginBase.__init__(self, name="Fitting", standalone=standalone)
         
-        #Provide list of models existing in the application
-        self.menu_mng = models.ModelManager()
-        
         #list of panel to send to guiframe
         self.mypanels = []
         # reference to the current running thread
@@ -142,9 +139,7 @@ class Plugin(PluginBase):
         simul_help = "Add new fit page"
         self.menu1.Append(id1, '&Create New Page',simul_help)
         wx.EVT_MENU(owner, id1, self.on_add_new_page)
-        
-        #self.fit_panel.set_model_list(self.menu_mng.get_model_list())
-   
+    
         #create  menubar items
         return [(self.menu1, "FitEngine")]
                

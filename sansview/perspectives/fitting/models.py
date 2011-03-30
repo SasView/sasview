@@ -134,7 +134,7 @@ class ModelList(object):
         """
         return self.mydict
         
-class ModelManager:
+class ModelManagerBase:
     """
     """
     ## external dict for models
@@ -158,12 +158,13 @@ class ModelManager:
     ## Event owner (guiframe)
     event_owner = None
     last_time_dir_modified = 0
-    
     def __init__(self):
         """
         """
+       
         self.stored_plugins = {}
         self._getModelList()
+        
         
     def findModels(self):
         """
@@ -415,9 +416,11 @@ class ModelManager:
         is_modified = False
         if os.path.isdir(PLUGIN_DIR):
             temp =  os.path.getmtime(PLUGIN_DIR)
+            print "update", self.last_time_dir_modified, temp
             if  self.last_time_dir_modified != temp:
                 is_modified = True
                 self.last_time_dir_modified = temp
+        
         return is_modified
     
     def update(self):
@@ -608,6 +611,36 @@ class ModelManager:
     
   
         
+class ModelManager(object):
+    """
+    implement model 
+    """
+    __modelmanager = ModelManagerBase()
+    
+    def findModels(self):
+        return self.__modelmanager.findModels()
+    
+    def _getModelList(self):
+        return self.__modelmanager._getModelList()
+    
+    def is_changed(self):
+        return self.__modelmanager.is_changed()
+    
+    def update(self):
+        print "update %%%"
+        return self.__modelmanager.update()
+    
+    def populate_menu(self, modelmenu, event_owner):
+        return self.__modelmanager.populate_menu(modelmenu, event_owner)
+    
+    def _on_model(self, evt):
+        return self.__modelmanager._on_model(evt)
+    
+    def _get_multifunc_models(self):
+        return self.__modelmanager._get_multifunc_models()
+    
+    def get_model_list(self): 
+        return self.__modelmanager.get_model_list()
     
     
   
