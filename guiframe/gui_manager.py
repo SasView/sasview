@@ -216,7 +216,11 @@ class ViewerFrame(wx.Frame):
         try:
             self.load_from_cmd(self._input_file)
         except:
-            pass
+            raise
+            msg = "%s Cannot load file %s\n" %(str(APPLICATION_NAME), 
+                                             str(self._input_file))
+            msg += str(sys.exc_value) + '\n'
+            print msg
         self.post_init()
         self.Show(True)
         #self._check_update(None)
@@ -611,7 +615,8 @@ class ViewerFrame(wx.Frame):
         """
         application_name = 'No Selected Application'
         panel_name = 'No Panel on Focus'
-        self._toolbar.update_toolbar(self.panel_on_focus)
+        if self._toolbar is not None:
+            self._toolbar.update_toolbar(self.panel_on_focus)
         if self._current_perspective is not None:
             application_name = self._current_perspective.sub_menu
         if self.panel_on_focus is not None:
