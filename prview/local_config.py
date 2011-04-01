@@ -2,6 +2,7 @@
 Application settings
 """
 import time
+import os
 from sans.guiframe.gui_style import GUIFRAME
 
 # Version of the application
@@ -62,7 +63,9 @@ SPLASH_SCREEN_PATH = "images/danse_logo.png"
 SPLASH_SCREEN_WIDTH = 500
 SPLASH_SCREEN_HEIGHT = 300
 SS_MAX_DISPLAY_TIME = 3000 #3 sec
-
+SetupIconFile = os.path.join("images", "ball.ico")
+DefaultGroupName = "DANSE"
+OutputBaseFilename = "setupPrView"
 
 import wx.lib.newevent
 (StatusBarEvent, EVT_STATUS) = wx.lib.newevent.NewEvent()
