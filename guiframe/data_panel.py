@@ -31,14 +31,21 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
     Check list control to be used for Data Panel
     """
     def __init__(self, parent,*args, **kwds):
-        #agwstyle is introduced in wx.2.8.11
-        try:
-            kwds['agwStyle'] = STYLE_FLAG
-        except:
+        #agwstyle is introduced in wx.2.8.11 but is not working for mac
+        if sys.platform.count("darwin") != 0:
             try:
                 kwds['style'] = STYLE_FLAG
             except:
                 raise
+        else:
+            #agwstyle is introduced in wx.2.8.11 .argument working only for windows
+            try:
+                kwds['agwStyle'] = STYLE_FLAG
+            except:
+                try:
+                    kwds['style'] = STYLE_FLAG
+                except:
+                    raise
         
         CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
         self.root = self.AddRoot("Available Data")
