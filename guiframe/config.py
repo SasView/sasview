@@ -62,7 +62,9 @@ PLOPANEL_WIDTH = 400
 PLOPANEL_HEIGTH = 400
 GUIFRAME_WIDTH = 1000
 GUIFRAME_HEIGHT = 800
-
+SetupIconFile = os.path.join("images", "ball.ico")
+DefaultGroupName = "DANSE"
+OutputBaseFilename = "setupGuiFrame"
 
 import wx.lib.newevent
 (StatusBarEvent, EVT_STATUS) = wx.lib.newevent.NewEvent()

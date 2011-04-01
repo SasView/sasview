@@ -34,6 +34,8 @@ class PanelBase:
         #panel manager
         self._manager = None
         self.parent = parent
+        if self.parent is not None and hasattr(self.parent, '_manager'):
+            self._manager = self.parent._manager
         self._print_flag = False
         self._undo_flag = False
         self._redo_flag = False
@@ -47,7 +49,6 @@ class PanelBase:
         self._reset_flag = False
         self._has_changed = False
         self.group_id = None
-        
         self.Bind(wx.EVT_LEFT_DOWN, self.on_set_focus)
         self.Bind(wx.EVT_TEXT_ENTER, self.on_set_focus)
         self.Bind(wx.EVT_MIDDLE_DOWN, self.on_set_focus)
