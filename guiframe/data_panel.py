@@ -608,7 +608,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         data_id, theory_id, state_id = self.set_data_helper()
         self.parent.set_data(data_id)
-        self.parent.set_data(state_id=state_id, theory_id=theory_id)
+        self.parent.set_data(data_id=state_id, theory_id=theory_id)
         
     def on_append_plot(self, event=None):
         """
