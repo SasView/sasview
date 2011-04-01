@@ -18,6 +18,7 @@ Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=none
 
+
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
