@@ -23,6 +23,7 @@ from basepage import BasicPage
 from basepage import PageInfoEvent
 from sans.models.qsmearing import smear_selection
 
+
 class FitPage(BasicPage):
     """
     FitPanel class contains fields allowing to display results when
@@ -37,7 +38,7 @@ class FitPage(BasicPage):
         Initialization of the Panel
         """
         BasicPage.__init__(self, parent, color=color)
-       
+        
         ## draw sizer
         self._fill_datainfo_sizer()
         self.is_2D = None
@@ -140,7 +141,7 @@ class FitPage(BasicPage):
 
         #Fit button
         self.btFit = wx.Button(self,wx.NewId(),'Fit', size=(88,25))
-        self.default_bt_colour = self.btFit.GetBackgroundColour()
+        self.default_bt_colour =  self.btFit.GetDefaultAttributes()
         self.btFit.Bind(wx.EVT_BUTTON, self._onFit,id= self.btFit.GetId())
         self.btFit.SetToolTipString("Start fitting.")
         
@@ -968,7 +969,8 @@ class FitPage(BasicPage):
             self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._StopFit,
                              id=self.btFit.GetId())
         elif self.btFit.GetLabel().lower() == "fit":
-            self.btFit.SetBackgroundColour(self.default_bt_colour)
+            self.btFit.SetDefault()
+            #self.btFit.SetBackgroundColour(self.default_bt_colour)
             self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._onFit, 
                             id=self.btFit.GetId())
         else:
@@ -1046,10 +1048,9 @@ class FitPage(BasicPage):
             if event is not None:
                 self._draw_model()
         if event != None:
-            
             ## post state to fit panel
-            event = PageInfoEvent(page = self)
-            wx.PostEvent(self.parent, event) 
+            new_event = PageInfoEvent(page = self)
+            wx.PostEvent(self.parent, new_event) 
             #update list of plugins if new plugin is available
             if self.plugin_rbutton.GetValue():
                 temp = self.parent.update_model_list()

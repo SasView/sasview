@@ -48,7 +48,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         """
         ScrolledPanel.__init__(self, parent, **kwargs)
-        PanelBase.__init__(self)
+        PanelBase.__init__(self, parent)
         self.SetupScrolling()
         #Set window's font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
