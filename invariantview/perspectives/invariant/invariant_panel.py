@@ -132,6 +132,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.state.file = self._data.name
             #Reset the list of states
             self.state.data = copy.deepcopy(data)
+            self._set_preview_flag(False)
             self._reset_state_list()
             
         return True  
@@ -393,7 +394,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 self._manager.plot_theory(data=high_out_data,
                                            name="High-Q extrapolation")
             except:
-                raisee
+                #raise
                 self.inv_container.qstar_high = "ERROR"
                 self.inv_container.qstar_high_err = "ERROR"
                 self._manager.plot_theory(name="High-Q extrapolation")
@@ -849,11 +850,11 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.state.state_list[str(self.state.state_num)] = self.state.clone_state()#copy.deepcopy(self.state.saved_state)
         except:           
             pass
-
-        event.Skip()
+        
         self._set_undo_flag(True)
         self._set_redo_flag(False)
-            
+        event.Skip()
+                   
     def _set_compute_state(self,state=None):
         """
         Notify the compute_invariant state to self.state
