@@ -23,6 +23,8 @@ import sans.perspectives.invariant as invariant
 DATA_FILES += invariant.data_files()
 import sans.models as models
 DATA_FILES += models.data_files()
+import sans.guiframe as guiframe
+DATA_FILES += guiframe.data_files()
 
 #CANSAxml reader data files
 RESOURCES_FILES.append(os.path.join(DataLoader.readers.get_data_path(),'defaults.xml'))
