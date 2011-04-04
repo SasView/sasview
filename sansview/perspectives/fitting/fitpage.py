@@ -2764,7 +2764,7 @@ class BGTextCtrl(wx.TextCtrl):
     def __init__(self, *args, **kwds):
         wx.TextCtrl.__init__(self, *args, **kwds)
         self.SetEditable(False)
-        self.SetBackgroundColour(self.GetParent().GetBackgroundColour())
+        self.SetBackgroundColour(self.GetParent().parent.GetBackgroundColour())
         
         # Bind to mouse event to avoid text highlighting
         # The event will be skipped once the call-back
