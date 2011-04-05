@@ -9,13 +9,16 @@ import periodictable.xsf
 import DataLoader.readers 
 from distutils.sysconfig import get_python_lib
 import os
+import string
+import local_config
 
+ICON = local_config.SetupIconFile_mac
+EXTENSIONS_LIST = []
 DATA_FILES = []
 RESOURCES_FILES = []
 
 #Periodictable data file
 DATA_FILES = periodictable.data_files()
-
 #invariant and calculator help doc
 import sans.perspectives.calculator as calculator
 DATA_FILES += calculator.data_files()
@@ -41,16 +44,52 @@ if libxml_path == None:
 
 APP = ['sansview.py']
 DATA_FILES += ['images','test','plugins','media']
-plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=["svs"],
-                                         CFBundleTypeIconFile='images/ball.icns',
+# locate file extensions
+def find_extension():
+    """
+    Describe the extensions that can be read by the current application
+    """
+    try:
+        list = []
+        EXCEPTION_LIST = ['*', '.', '']
+        from DataLoader.loader import Loader
+        wild_cards = Loader().get_wildcards()
+        for item in wild_cards:
+            #['All (*.*)|*.*']
+            file_type, ext = string.split(item, "|*.", 1)
+            if ext.strip() not in EXCEPTION_LIST and ext.strip() not in list:
+                list.append(ext)
+    except:
+        pass
+    try:
+        file_type, ext = string.split(local_config.APPLICATION_WLIST, "|*.", 1)
+        if ext.strip() not in EXCEPTION_LIST and ext.strip() not in list:
+            list.append(ext)
+    except:
+        pass
+    try:
+        for item in local_config.PLUGINS_WLIST:
+            file_type, ext = string.split(item, "|*.", 1)
+            if ext.strip() not in EXCEPTION_LIST and ext.strip() not in list:
+                list.append(ext) 
+    except:
+        pass
+    
+    return list
+
+EXTENSIONS_LIST = find_extension()
+
+ 
+plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
+                                         CFBundleTypeIconFile=ICON,
                                    CFBundleTypeName="sansview file",
                                    CFBundleTypeRole="shell" )],)
-                                         #)],)
+                                       
 APP = ['sansview.py']
 DATA_FILES += ['images','test','plugins','media']
 OPTIONS = {'argv_emulation': True,
            'packages': ['lxml','periodictable'],
-           'iconfile': 'images/ball.icns',
+           'iconfile': ICON,
            'frameworks':[libxml_path],
            'resources': RESOURCES_FILES,
            'plist':plist,
