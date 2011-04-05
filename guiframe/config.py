@@ -62,7 +62,8 @@ PLOPANEL_WIDTH = 400
 PLOPANEL_HEIGTH = 400
 GUIFRAME_WIDTH = 1000
 GUIFRAME_HEIGHT = 800
-SetupIconFile = os.path.join("images", "ball.ico")
+SetupIconFile_win = os.path.join("images", "ball.ico")
+SetupIconFile_mac = os.path.join("images", "ball.icns")
 DefaultGroupName = "DANSE"
 OutputBaseFilename = "setupGuiFrame"
 
