@@ -19,7 +19,7 @@ DefaultDirName = os.path.join("{pf}" , AppVerName)
 DefaultGroupName = os.path.join(local_config.DefaultGroupName, AppVerName)
                                 
 OutputBaseFilename = local_config.OutputBaseFilename
-SetupIconFile = local_config.SetupIconFile
+SetupIconFile = local_config.SetupIconFile_win
 LicenseFile = 'license.txt'
 DisableProgramGroupPage = 'yes'
 Compression = 'lzma'

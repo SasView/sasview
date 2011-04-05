@@ -62,7 +62,8 @@ DEFAULT_STYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.TOOL_ON
 SPLASH_SCREEN_WIDTH = 512
 SPLASH_SCREEN_HEIGHT = 366
 SS_MAX_DISPLAY_TIME = 3000 #3 sec
-SetupIconFile = os.path.join("images", "ball.ico")
+SetupIconFile_win = os.path.join("images", "ball.ico")
+SetupIconFile_mac = os.path.join("images", "ball.icns")
 DefaultGroupName = "DANSE"
 OutputBaseFilename = "setupSansView"
 
