@@ -72,7 +72,7 @@ temp = []
 for (ext, _, file_type) in EXTENSIONS_LIST:
     dict(CFBundleTypeTypeExtensions=[str(ext)],
          CFBundleTypeIconFile=ICON,
-         CFBundleTypeName=str(file_type),
+         #CFBundleTypeName=str(file_type),
          CFBundleTypeRole="Viewer")
     temp.append(dict)
     
