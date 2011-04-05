@@ -63,7 +63,8 @@ SPLASH_SCREEN_PATH = "images/danse_logo.png"
 SPLASH_SCREEN_WIDTH = 500
 SPLASH_SCREEN_HEIGHT = 300
 SS_MAX_DISPLAY_TIME = 3000 #3 sec
-SetupIconFile = os.path.join("images", "ball.ico")
+SetupIconFile_win = os.path.join("images", "ball.ico")
+SetupIconFile_mac = os.path.join("images", "ball.icns")
 DefaultGroupName = "DANSE"
 OutputBaseFilename = "setupPrView"
 
