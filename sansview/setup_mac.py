@@ -70,14 +70,15 @@ def find_extension():
 EXTENSIONS_LIST = find_extension()
 temp = []
 for (ext, _, file_type) in EXTENSIONS_LIST:
-    dict(CFBundleTypeTypeExtensions=[str(ext)],
+    val= dict(CFBundleTypeTypeExtensions=[str(ext)],
          CFBundleTypeIconFile=ICON,
          #CFBundleTypeName=str(file_type),
          CFBundleTypeRole="Viewer")
-    temp.append(dict)
-    
-PLIST = dict(CFBundleDocumentTypes=temp)
-    
+    temp.append(val)
+  
+PLIST = dict(CFBundleDocumentTypes=temp, )
+print temp
+print PLIST    
 
 # Locate libxml2 library
 lib_locs = ['/usr/local/lib', '/usr/lib']
