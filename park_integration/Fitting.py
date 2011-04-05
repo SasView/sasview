@@ -49,9 +49,10 @@ class Fit:
         else:
             raise ValueError, "enter the keyword scipy or park"
 
-    def fit(self, q=None, handler=None, curr_thread=None):
+    def fit(self, q=None, handler=None, curr_thread=None, ftol=1.49012e-8):
         """Perform the fit """
-        return self._engine.fit(q, handler, curr_thread=curr_thread)
+        return self._engine.fit(q, handler, curr_thread=curr_thread,
+                                ftol=ftol)
      
     def set_model(self, model, id, pars=[], constraints=[]):
         """

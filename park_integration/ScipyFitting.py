@@ -104,7 +104,7 @@ class ScipyFit(FitEngine):
     #def fit(self, *args, **kw):
     #    return profile(self._fit, *args, **kw)
 
-    def fit(self, q=None, handler=None, curr_thread=None):
+    def fit(self, q=None, handler=None, curr_thread=None, ftol=1.49012e-8):
         """
         """
         fitproblem = []
@@ -126,7 +126,7 @@ class ScipyFit(FitEngine):
         data = listdata
        
         self.curr_thread = curr_thread
-        ftol = curr_thread.ftol
+        ftol = ftol
         
         # Check the initial value if it is within range
         self._check_param_range(model)
