@@ -21,7 +21,7 @@ EXTENSIONS_LIST = []
 DATA_FILES = periodictable.data_files()
 #add guiframe data file
 import sans.guiframe as guiframe
-DATA_files += guiframe.data_files()
+DATA_FILES += guiframe.data_files()
 #invariant and calculator help doc
 import sans.perspectives.calculator as calculator
 DATA_FILES += calculator.data_files()
