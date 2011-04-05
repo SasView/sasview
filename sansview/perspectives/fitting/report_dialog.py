@@ -23,11 +23,13 @@ if sys.platform.count("win32") > 0:
     PANEL_WIDTH = 500 
     PANEL_HEIGHT = 700
     FONT_VARIANT = 0
+    ISMAC = False
 else:
     _STATICBOX_WIDTH = 480
     PANEL_WIDTH = 530
     PANEL_HEIGHT = 700
     FONT_VARIANT = 1
+    ISMAC = True
     
 
         
@@ -52,6 +54,8 @@ class ReportDialog(wx.Dialog):
         self.SetSize((720, 650))
         # font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
+        # check if tit is MAC
+        self.is_mac = ISMAC
         # report string
         self.report_list = list
         # number of images of plot
@@ -63,7 +67,6 @@ class ReportDialog(wx.Dialog):
                 self.report_html = self.report_list[0] % \
                                     "memory:img_fit0.png"
             elif len(list[2]) == 2:
-                #print "self.report_list[0]",self.report_list[0]
                 self.report_html = self.report_list[0] % \
                                     ("memory:img_fit0.png", 
                                      "memory:img_fit1.png")
@@ -132,10 +135,19 @@ class ReportDialog(wx.Dialog):
         """
         Save
         """
+        # pdf supporting only on MAC, not on exe
+        if self.is_mac:
+            wild_card = ' PDF files (*.pdf)|*.pdf|'
+            ind_cor = 0 
+        else:
+            wild_card = ''
+            ind_cor = 1 
+        wild_card += 'HTML files (*.html)|*.html|'
+        wild_card += 'Text files (*.txt)|*.txt'
+
         #todo: complete saving fig file and as a txt file
         dlg = wx.FileDialog(self, "Choose a file",
-                            wildcard='HTML files (*.html)|*.html|'+
-                            'Text files (*.txt)|*.txt',
+                            wildcard=wild_card,
                             style=wx.SAVE|wx.OVERWRITE_PROMPT|wx.CHANGE_DIR)
         dlg.SetFilterIndex(0) #Set .html files to be default
 
@@ -148,12 +160,56 @@ class ReportDialog(wx.Dialog):
 
         #set file extensions 
         img_ext = []
-        if ext_num == 0:
+        pic_fname = []
+        #PDF 
+        if ext_num == (0 + 2 * ind_cor):
+            # TODO: Sort this case out
+            ext = '.pdf'
+            
+            fName = os.path.splitext(fName)[0] + ext
+            dlg.Destroy()
+            #pic (png) file path/name
+            for num in range(self.nimages):
+                im_ext = '_img%s.png' % num
+                #img_ext.append(im_ext)
+                pic_name = os.path.splitext(fName)[0] + im_ext
+                pic_fname.append(pic_name)
+                # save the image for use with pdf writer
+                self.report_list[2][num].savefig(pic_name)
+
+            #put the image path in html string
+            report_frame = self.report_list[0]
+            #put image name strings into the html file
+            #Note:The str for pic_fname shouldn't be removed.
+            if self.nimages == 1:
+                html = report_frame % str(pic_fname[0])
+            elif self.nimages == 2:
+                html = report_frame % (str(pic_fname[0]), str(pic_fname[1]))
+            elif self.nimages == 3:
+                html = report_frame % (str(pic_fname[0]), str(pic_fname[1]),
+                                          str(pic_fname[2]))
+
+            # make/open file in case of absence
+            f = open(fName, 'w')
+            f.close()
+            # write pdf as a pdf file
+            pdf = self.HTML2PDF(data=html, filename=fName)
+            
+            #open pdf
+            if pdf:
+                os.startfile(str(fName))
+            #delete image file
+            for num in range(self.nimages):
+                os.remove(pic_fname[num])
+            return
+        #HTML + png(graph)
+        elif ext_num == (1 - ind_cor):
             ext = '.html'
             for num in range(self.nimages):
                 img_ext.append('_img4html%s.png' % num)
             report_frame = self.report_list[0]
-        elif ext_num == 1:
+        #TEXT + pdf(graph)
+        elif ext_num == (2 - ind_cor):
             ext = '.txt'   
             # changing the image extension actually changes the image
             # format on saving
@@ -166,13 +222,13 @@ class ReportDialog(wx.Dialog):
         #file name     
         fName = os.path.splitext(fName)[0] + ext
         dlg.Destroy()
-        pic_fname = []
+        
         #pic (png) file path/name
         for num in range(self.nimages):
             pic_name = os.path.splitext(fName)[0] + img_ext[num]
             pic_fname.append(pic_name)
         #put the image path in html string
-        if ext_num == 0:
+        if ext_num == (1 - ind_cor):
             if self.nimages == 1:
                 report = report_frame % pic_fname[0]
             elif self.nimages == 2:
@@ -233,6 +289,7 @@ class ReportDialog(wx.Dialog):
         f = file(filename, "wb")
         # pisa requires some extra packages, see their web-site
         pdf = pisa.CreatePDF(data, f)
+
         # close the file here otherwise it will be open until quitting
         #the application.
         f.close()

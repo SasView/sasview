@@ -23,14 +23,14 @@ if sys.platform.count("win32") > 0:
     PANEL_WIDTH = 500 
     PANEL_HEIGHT = 700
     FONT_VARIANT = 0
+    ISMAC = False
 else:
     _STATICBOX_WIDTH = 480
     PANEL_WIDTH = 530
     PANEL_HEIGHT = 700
     FONT_VARIANT = 1
-    
-
-        
+    ISMAC = True
+  
 class ReportDialog(wx.Dialog):
     """
     The report dialog box. 
@@ -52,12 +52,26 @@ class ReportDialog(wx.Dialog):
         self.SetSize((720, 650))
         # font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
+
+        # check if tit is MAC
+        self.is_mac = ISMAC
+        
         # report string
         self.report_list = list
         # put image path in the report string
         self.report_html = self.report_list[0] % "memory:img_inv.png"
         # layout
         self._setup_layout()
+        # wild card
+        # pdf supporting only on MAC
+        if self.is_mac:
+        	self.wild_card = ' PDF files (*.pdf)|*.pdf|'
+        else:
+        	self.wild_card = ''
+        self.wild_card += 'HTML files (*.html)|*.html|'
+        self.wild_card += 'Text files (*.txt)|*.txt'
+  
+        
         
     def _setup_layout(self):
         """
@@ -108,7 +122,7 @@ class ReportDialog(wx.Dialog):
         self.SetSizer(vbox)
         self.Centre()
         self.Show(True)
-
+		
 
     def onSave(self, event=None):
         """
@@ -116,24 +130,54 @@ class ReportDialog(wx.Dialog):
         """
         #todo: complete saving fig file and as a txt file
         dlg = wx.FileDialog(self, "Choose a file",
-                            wildcard='HTML files (*.html)|*.html|'+
-                            'Text files (*.txt)|*.txt',
+                            wildcard=self.wild_card,
                             style=wx.SAVE|wx.OVERWRITE_PROMPT|wx.CHANGE_DIR)
         dlg.SetFilterIndex(0) #Set .html files to be default
 
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
-        
-        fName = dlg.GetPath()
-        ext_num = dlg.GetFilterIndex()     
 
+        fName = dlg.GetPath()
+        ext_num = dlg.GetFilterIndex()  
+        # index correction 
+        if not self.is_mac:
+        	ind_cor = 1 
+        else:
+        	ind_cor = 0 
         #set file extensions  
-        if ext_num == 0:
+        if ext_num == (0 + 2 * ind_cor):
+			# TODO: Sort this case out
+            ext = '.pdf'
+            img_ext = '_img.png'
+            fName = os.path.splitext(fName)[0] + ext
+            dlg.Destroy()
+
+            #pic (png) file path/name
+            pic_fname = os.path.splitext(fName)[0] + img_ext
+            # save the image for use with pdf writer
+            self.report_list[2].savefig(pic_fname)
+
+            # put the image file path in the html data
+            html = self.report_list[0] % str(pic_fname)
+            
+            # make/open file in case of absence
+            f = open(fName, 'w')
+            f.close()
+            # write pdf as a pdf file
+            pdf = self.HTML2PDF(data=html, filename=fName)
+            
+            #open pdf
+            if pdf:
+                os.startfile(str(fName))
+            #delete image file
+            os.remove(pic_fname)
+            return
+        elif ext_num == (1 - ind_cor):
             ext = '.html'
             img_ext = '_img4html.png'
             report_frame = self.report_list[0]
-        elif ext_num == 1:
+        elif ext_num == (2 - ind_cor):
             ext = '.txt'   
             # changing the image extension actually changes the image
             # format on saving
@@ -141,15 +185,16 @@ class ReportDialog(wx.Dialog):
             report = self.report_list[1]
         else:
             return
-        
+
         #file name     
         fName = os.path.splitext(fName)[0] + ext
         dlg.Destroy()
         #pic (png) file path/name
         pic_fname = os.path.splitext(fName)[0] + img_ext
         #put the image path in html string
-        if ext_num == 0:
+        if ext_num == (1 - ind_cor):
             report = report_frame % pic_fname
+
         f = open(fName, 'w')
         f.write(report)
         f.close()
