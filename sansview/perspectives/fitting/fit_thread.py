@@ -47,8 +47,7 @@ class FitThread(CalcThread):
             #self.handler.starting_fit()
             #Result from the fit
             result = self.fitter.fit(handler=self.handler, 
-                                     curr_thread=self,
-                                     ftol=self.ftol)
+                                     curr_thread=self)
             self.complete(result= result,
                           page_id=self.page_id,
                           pars = self.pars)
