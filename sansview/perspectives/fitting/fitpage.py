@@ -1200,28 +1200,29 @@ class FitPage(BasicPage):
                 return 
             #Check if # of points for theory model are valid(>0).
             # check for 2d
-            if self.data.__class__.__name__ =="Data2D":
-                # set mask   
-                radius= numpy.sqrt( self.data.qx_data*self.data.qx_data + 
-                                    self.data.qy_data*self.data.qy_data )
-                index_data = ((self.qmin_x <= radius)& \
-                                (radius<= self.qmax_x))
-                index_data = (index_data)&(self.data.mask)
-                index_data = (index_data)&(numpy.isfinite(self.data.data))
-                if len(index_data[index_data]) < 10:
-                    msg = "Cannot Plot :No or too little npts in"
-                    msg += " that data range!!!  "
-                    wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-                    return
+            if self.data is not None:
+                if self.data.__class__.__name__ =="Data2D":
+                    # set mask   
+                    radius= numpy.sqrt( self.data.qx_data*self.data.qx_data + 
+                                        self.data.qy_data*self.data.qy_data )
+                    index_data = ((self.qmin_x <= radius)& \
+                                    (radius<= self.qmax_x))
+                    index_data = (index_data)&(self.data.mask)
+                    index_data = (index_data)&(numpy.isfinite(self.data.data))
+                    if len(index_data[index_data]) < 10:
+                        msg = "Cannot Plot :No or too little npts in"
+                        msg += " that data range!!!  "
+                        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                        return
+                    else:
+                        self.data.mask = index_data
+                        #self.Npts_fit.SetValue(str(len(self.data.mask)))
+                        self.set_npts2fit() 
                 else:
-                    self.data.mask = index_data
-                    #self.Npts_fit.SetValue(str(len(self.data.mask)))
-                    self.set_npts2fit() 
-            else:
-                index_data = ((self.qmin_x <= self.data.x)& \
-                              (self.data.x <= self.qmax_x))
-                self.Npts_fit.SetValue(str(len(self.data.x[index_data])))
-           
+                    index_data = ((self.qmin_x <= self.data.x)& \
+                                  (self.data.x <= self.qmax_x))
+                    self.Npts_fit.SetValue(str(len(self.data.x[index_data])))
+               
         else:
            tcrtl.SetBackgroundColour("pink")
            msg= "Model Error:wrong value entered!!!"
