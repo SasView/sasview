@@ -462,10 +462,10 @@ class ModelPanel2D(ModelPanel1D):
         
         ## If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
-        if hasattr(self.data2D, "scale"):
-            if self.data2D.scale == 'linear':
-                new_plot.ytransform = 'y'
-                new_plot.yaxis("\\rm{Residuals} ", "normalized")
+        if hasattr(self.data2D, "scale") and \
+                    self.data2D.scale == 'linear':
+            new_plot.ytransform = 'y'
+            new_plot.yaxis("\\rm{Residuals} ", "normalized")
         else:
             new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
