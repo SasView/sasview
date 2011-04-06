@@ -6,7 +6,13 @@ from wx.lib.platebtn import PlateButton
 from sans.guiframe.gui_style import GUIFRAME_ID
 from sans.guiframe.gui_style import GUIFRAME_ICON
 from wx.lib.platebtn import PB_STYLE_SQUARE, PB_STYLE_DROPARROW
-
+#Control panel width 
+import sys
+if sys.platform.count("darwin")==0:
+    FONT_VARIANT = 0
+else:
+    FONT_VARIANT = 1
+    
 
 def clear_image(image):
     w, h = image.GetSize()
@@ -26,6 +32,8 @@ class GUIToolBar(Tbar):
     """
     def __init__(self, parent,  *args, **kwds):
         Tbar.__init__(self, parent,  *args, **kwds)
+        #Set window's font size 
+        self.SetWindowVariant(variant=FONT_VARIANT)
         self.parent = parent
         self._bookmark_menu = None
         self._bookmark_bt = None

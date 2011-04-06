@@ -19,10 +19,10 @@ from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.panel_base import PanelBase
 
-PANEL_WIDTH = 200
+PANEL_WIDTH = 180
 #PANEL_HEIGHT = 560
-PANEL_HEIGHT = 840
-STYLE_FLAG = wx.SUNKEN_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|\
+PANEL_HEIGHT = 700
+STYLE_FLAG =wx.RAISED_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|\
                     wx.WANTS_CHARS|CT.TR_HAS_VARIABLE_ROW_HEIGHT
                     
                     
@@ -58,7 +58,7 @@ class DataPanel(ScrolledPanel, PanelBase):
     ## Internal name for the AUI manager
     window_name = "Data Panel"
     ## Title to appear on top of the window
-    window_caption = "Data Panel"
+    window_caption = "Data Explorer"
     #type of window 
     window_type = "Data Panel"
     ## Flag to tell the GUI manager that this panel is not
@@ -67,6 +67,7 @@ class DataPanel(ScrolledPanel, PanelBase):
     def __init__(self, parent, list=[],list_of_perspective=[],
                  size=(PANEL_WIDTH,PANEL_HEIGHT), manager=None, *args, **kwds):
         kwds['size']= size
+        kwds['style'] = STYLE_FLAG
         ScrolledPanel.__init__(self, parent=parent, *args, **kwds)
         PanelBase.__init__(self)
         self.SetupScrolling()
@@ -81,7 +82,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         
         self.owner = None
         self.do_layout()
-       
+        self.Bind(wx.EVT_SHOW, self.on_close_page)
+        
     def do_layout(self):
         """
         """
@@ -98,7 +100,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         w, h = self.parent.GetSize()
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
         self.sizer1 = wx.BoxSizer(wx.VERTICAL)
-        self.sizer1.SetMinSize((w/12, h*2/5))
+        self.sizer1.SetMinSize((w/13, h*2/5))
       
         self.sizer2 = wx.BoxSizer(wx.VERTICAL)
         self.sizer3 = wx.GridBagSizer(5,5)
@@ -636,7 +638,18 @@ class DataPanel(ScrolledPanel, PanelBase):
                               state_id=state_id,
                               theory_id=theory_id,
                               append=False)
-       
+        
+    def on_close_page(self, event=None):
+        """
+        On close
+        """
+        if event != None:
+            event.Skip()
+
+        # send parent to update menu with no show nor hide action
+        self.parent.show_data_panel(action=False)
+    
+        
     def on_freeze(self, event):
         """
         """
@@ -667,7 +680,7 @@ class DataFrame(wx.Frame):
     #  tied to any perspective
     ALWAYS_ON = True
     
-    def __init__(self, parent=None, owner=None, manager=None,size=(400, 800),
+    def __init__(self, parent=None, owner=None, manager=None,size=(200, 800),
                          list_of_perspective=[],list=[], *args, **kwds):
         kwds['size'] = size
         kwds['id'] = -1

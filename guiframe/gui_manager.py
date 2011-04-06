@@ -87,6 +87,8 @@ class ViewerFrame(wx.Frame):
         """
         
         wx.Frame.__init__(self, parent=parent, title=title, pos=pos,size=size)
+        # title
+        self.title = title
         # Preferred window size
         self._window_width, self._window_height = size
         self.__gui_style = gui_style
@@ -131,6 +133,8 @@ class ViewerFrame(wx.Frame):
         self._save_appl_menu = None
         #tool bar
         self._toolbar = None
+        # (un)-focus color
+        #self.color = '#b3b3b3'
         ## Find plug-ins
         # Modify this so that we can specify the directory to look into
         self.plugins = []
@@ -170,7 +174,8 @@ class ViewerFrame(wx.Frame):
         #Register add extra data on the same panel event on load
         self.Bind(EVT_PANEL_ON_FOCUS, self.set_panel_on_focus)
         self.Bind(EVT_APPEND_BOOKMARK, self.append_bookmark)
-    
+        
+        
     def set_input_file(self, input_file):
         """
         :param input_file: file to read
@@ -203,7 +208,7 @@ class ViewerFrame(wx.Frame):
             self._update_toolbar_helper()
             #update edit menu
             self.enable_edit_menu()
-       
+
     def build_gui(self):
         """
         """
@@ -216,14 +221,13 @@ class ViewerFrame(wx.Frame):
         try:
             self.load_from_cmd(self._input_file)
         except:
-            msg = "%s Cannot load file %s\n" %(str(APPLICATION_NAME), 
-                                             str(self._input_file))
-            msg += str(sys.exc_value) + '\n'
-            print msg
+            pass
         self.post_init()
+        self.show_welcome_panel(None)
         self.Show(True)
-        #self._check_update(None)
-             
+        self._check_update(None)
+    
+            
     def _setup_layout(self):
         """
         Set up the layout
@@ -235,7 +239,12 @@ class ViewerFrame(wx.Frame):
         # Add panel
         default_flag = wx.aui.AUI_MGR_DEFAULT| wx.aui.AUI_MGR_ALLOW_ACTIVE_PANE
         self._mgr = wx.aui.AuiManager(self, flags=default_flag)
-   
+        self._mgr.SetDockSizeConstraint(0.5, 0.5)
+        # border color
+        #self.b_color = wx.aui.AUI_DOCKART_BORDER_COLOUR  
+        #self._mgr.GetArtProvider().SetColor(self.b_color, self.color)
+        #self._mgr.SetArtProvider(wx.aui.AuiDockArt(wx.AuiDefaultDockArt))
+        #print "set", self._dockart.GetColour(13)
         # Load panels
         self._load_panels()
         self.set_default_perspective()
@@ -381,7 +390,8 @@ class ViewerFrame(wx.Frame):
         panel_width_min = self._window_width 
         style = self.__gui_style & (GUIFRAME.MANAGER_ON)
         if self._data_panel is not None  and (p == self._data_panel):
-            panel_width_min = self._window_width * 5/25 
+            panel_width_min = self._window_width * 4/25 
+            panel_height_min = self._window_height * 0.8
             return panel_width_min, panel_height_min
         if hasattr(p, "CENTER_PANE") and p.CENTER_PANE:
             style = self.__gui_style & (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON)
@@ -411,52 +421,59 @@ class ViewerFrame(wx.Frame):
         self.panels["default"] = self.defaultPanel
         self._mgr.AddPane(self.defaultPanel, wx.aui.AuiPaneInfo().
                               Name("default").
-                              Center().
-                              CloseButton(False).
-                              MinimizeButton(False).
+                              CenterPane().
+                              #CloseButton(False).
+                              #MinimizeButton(False).
                               # This is where we set the size of
                               # the application window
                               BestSize(wx.Size(self._window_width, 
                                                self._window_height)).
                               Show())
+
         #add data panel 
         self.panels["data_panel"] = self._data_panel
         w, h = self._get_panels_size(self._data_panel)
         self._mgr.AddPane(self._data_panel, wx.aui.AuiPaneInfo().
                               Name(self._data_panel.window_name).
+                              Caption(self._data_panel.window_caption).
                               Left().
                               MinimizeButton().
-                              CloseButton(False).
+                              CloseButton(True).
                               TopDockable(False).
                               BottomDockable(False).
                               LeftDockable(True).
                               RightDockable(False).
                               BestSize(wx.Size(w, h)).
                               Hide())
+
         style = self.__gui_style & GUIFRAME.MANAGER_ON
+        data_pane = self._mgr.GetPane(self.panels["data_panel"].window_name)
         if style != GUIFRAME.MANAGER_ON:
-            self._mgr.GetPane(self.panels["data_panel"].window_name).Hide()
+            data_pane.Hide()
         else:
-            self._mgr.GetPane(self.panels["data_panel"].window_name).Show()
-            
+            data_pane.Show()
+        
+   
         # Add the panels to the AUI manager
         for panel_class in panels:
             p = panel_class
             id = wx.NewId()
-            w, h = self._get_panels_size(p)
+            #w, h = self._get_panels_size(p)
             # Check whether we need to put this panel
             # in the center pane
             if hasattr(p, "CENTER_PANE") and p.CENTER_PANE:
+                w, h = self._get_panels_size(p)
                 if p.CENTER_PANE:
                     self.panels[str(id)] = p
                     self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
-                                          Name(p.window_name).Caption(p.window_caption).
-                                           #CenterPane().
-                                            Center().
-                                            CloseButton(False).
-                                            MinimizeButton(False).
-                                           MinSize(wx.Size(w, h)).
-                                           Hide())
+                                          Name(p.window_name).
+                                          Caption(p.window_caption).
+                                          #CenterPane().
+                                          Center().
+                                          CloseButton(False).
+                                          #MinimizeButton(False).
+                                          #BestSize(wx.Size(w, h)).
+                                          Hide())
             else:
                 self.panels[str(id)] = p
                 self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
@@ -555,13 +572,20 @@ class ViewerFrame(wx.Frame):
         style2 = self.__gui_style & GUIFRAME.FLOATING_PANEL
         if style1 == GUIFRAME.FIXED_PANEL:
             self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
-                              Name(windowname).Caption(caption).
+                              Name(windowname).
+                              Caption(caption).
+                              Position(10).
+                              Floatable().
+                              Right().
+                              Dock().
                               MinimizeButton().
                               Resizable(True).
                               # Use a large best size to make sure the AUI 
                               # manager takes all the available space
-                              BestSize(wx.Size(PLOPANEL_WIDTH, PLOPANEL_HEIGTH)).
-                              MinSize(wx.Size(PLOPANEL_WIDTH*0.9, PLOPANEL_HEIGTH)))
+                              BestSize(wx.Size(PLOPANEL_WIDTH, 
+                                               PLOPANEL_HEIGTH)))
+                              #MinSize(wx.Size(PLOPANEL_WIDTH*0.9, 
+                              #                PLOPANEL_HEIGTH)))
             self._popup_fixed_panel(p)
     
         elif style2 == GUIFRAME.FLOATING_PANEL:
@@ -571,12 +595,13 @@ class ViewerFrame(wx.Frame):
                               Resizable(True).
                               # Use a large best size to make sure the AUI
                               #  manager takes all the available space
-                              BestSize(wx.Size(PLOPANEL_WIDTH, PLOPANEL_HEIGTH)))
+                              BestSize(wx.Size(PLOPANEL_WIDTH, 
+                                               PLOPANEL_HEIGTH)))
             self._popup_floating_panel(p)
             
         pane = self._mgr.GetPane(windowname)
-        self._mgr.MaximizePane(pane)
-        self._mgr.RestoreMaximizedPane()
+        #self._mgr.MaximizePane(pane)
+        #self._mgr.RestoreMaximizedPane()
         # Register for showing/hiding the panel
         wx.EVT_MENU(self, ID, self._on_view)
         
@@ -759,7 +784,7 @@ class ViewerFrame(wx.Frame):
             style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
             if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
                 id = wx.NewId()
-                self._toolbar_menu = preferences_menu.Append(id,'&Hide Toolbar', '')
+                self._toolbar_menu = preferences_menu.Append(id,'&Show Toolbar', '')
                 wx.EVT_MENU(self, id, self._on_hide_toolbar)
             self._window_menu.AppendSubMenu(preferences_menu,'&Preferences')
         if self._window_menu.GetMenuItemCount() == 0:
@@ -942,11 +967,16 @@ class ViewerFrame(wx.Frame):
         """
         if self.defaultPanel is None:
             return 
-        self._mgr.GetPane(self.panels["default"].window_name).Hide()
-        self._mgr.Update()
-        # set a default perspective
-        self.set_default_perspective()
-        
+        default_panel = self._mgr.GetPane(self.panels["default"].window_name)
+        if default_panel.IsShown():
+            default_panel.Hide()
+            
+            # set a default perspective
+            self.set_default_perspective()
+            self._mgr.Update()
+            # Show toolbar
+            self._on_hide_toolbar()
+            
     def show_welcome_panel(self, event):
         """    
         Display the welcome panel
@@ -964,6 +994,10 @@ class ViewerFrame(wx.Frame):
             else:
                 self._mgr.GetPane(self.panels[id].window_name).IsShown()
                 self._mgr.GetPane(self.panels[id].window_name).Hide()
+            if self._toolbar != None and not self._toolbar.IsShown():
+                self._toolbar.Show(True)
+            self._on_hide_toolbar()
+
         self._mgr.Update()
        
     def show_panel(self, uid, show=None):
@@ -1365,6 +1399,7 @@ class ViewerFrame(wx.Frame):
             if hasattr(self.panels[item], "ALWAYS_ON"):
                 if self.panels[item].ALWAYS_ON:
                     continue 
+            
             if self.panels[item].window_name in panels:
                 if not self._mgr.GetPane(self.panels[item].window_name).IsShown():
                     self._mgr.GetPane(self.panels[item].window_name).Show()
@@ -1378,26 +1413,31 @@ class ViewerFrame(wx.Frame):
                 else:
                     if self._mgr.GetPane(self.panels[item].window_name).IsShown():
                         self._mgr.GetPane(self.panels[item].window_name).Hide()
+                
         self._mgr.Update()
         
-    def show_data_panel(self, event=None):
+    def show_data_panel(self, event=None, action=True):
         """
         show the data panel
         """
+        if self._data_panel_menu == None:
+            return
         label = self._data_panel_menu.GetText()
         if label == 'Data Explorer ON':
             pane = self._mgr.GetPane(self.panels["data_panel"].window_name)
             #if not pane.IsShown():
-            pane.Show(True)
-            self._mgr.Update()
+            if action: 
+                pane.Show(True)
+                self._mgr.Update()
             self.__gui_style = self.__gui_style | GUIFRAME.MANAGER_ON
             
             self._data_panel_menu.SetText('Data Explorer OFF')
         else:
             pane = self._mgr.GetPane(self.panels["data_panel"].window_name)
             #if not pane.IsShown():
-            pane.Show(False)
-            self._mgr.Update()
+            if action:
+                pane.Show(False)
+                self._mgr.Update()
             self.__gui_style = self.__gui_style & (~GUIFRAME.MANAGER_ON)
             self._data_panel_menu.SetText('Data Explorer ON')
     
@@ -1433,6 +1473,7 @@ class ViewerFrame(wx.Frame):
         else:
             #automatically send that to the current perspective
             self.set_data(data_id=data_list.keys())
+            self.on_close_welcome_panel()
        
     def set_data(self, data_id): 
         """
@@ -1441,6 +1482,7 @@ class ViewerFrame(wx.Frame):
         list_data, _ = self._data_manager.get_by_id(data_id)
         if self._current_perspective is not None:
             self._current_perspective.set_data(list_data.values())
+            self.on_close_welcome_panel()
         else:
             msg = "Guiframe does not have a current perspective"
             logging.info(msg)
@@ -1541,7 +1583,20 @@ class ViewerFrame(wx.Frame):
             if self._data_panel is not None:
                 self._data_panel.set_active_perspective(name)
                 self._check_applications_menu()
-  
+            #Set the SansView title
+            self._set_title_name(name)
+            
+            
+    def _set_title_name(self, name):
+        """
+        Set the SansView title w/ the current application name
+        
+        : param name: application name [string]
+        """
+        # Set SanView Window title w/ application anme
+        title = self.title + "  - " + name + " -"
+        self.SetTitle(title)
+            
     def _check_applications_menu(self):
         """
         check the menu of the current application
@@ -1988,15 +2043,14 @@ class ViewApp(wx.App):
             cmd = sys.argv[0].lower()
             if os.path.isfile(cmd):
                 basename  = os.path.basename(cmd)
-                app_py = str(APPLICATION_NAME).lower() + '.py'
-                app_exe = str(APPLICATION_NAME).lower() + '.exe'
-                if basename.lower() in [app_py, app_exe]:
+                if basename in ['sansview.py', 'sansview.exe']:
                     input_file = sys.argv[1]
         if input_file is None:
             return
         if self.frame is not None:
             self.frame.set_input_file(input_file=input_file)
-          
+         
+            
     def set_manager(self, manager):
         """
         Sets a reference to the application manager

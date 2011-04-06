@@ -2,7 +2,8 @@
 import numpy
 import string 
 import wx
-import wx.lib.flatnotebook as fnb
+#from wx.lib.flatnotebook import FlatNotebook as nb
+from wx.aui import AuiNotebook as nb
 
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.events import PanelOnFocusEvent
@@ -13,7 +14,7 @@ import models
 _BOX_WIDTH = 80
 
 
-class FitPanel(fnb.FlatNotebook, PanelBase):    
+class FitPanel(nb, PanelBase):    
 
     """
     FitPanel class contains fields allowing to fit  models and  data
@@ -31,20 +32,22 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
     def __init__(self, parent, manager=None, *args, **kwargs):
         """
         """
-        fnb.FlatNotebook.__init__(self, parent, -1,
+        nb.__init__(self, parent, -1,
                     style= wx.aui.AUI_NB_WINDOWLIST_BUTTON|
                     wx.aui.AUI_NB_DEFAULT_STYLE|
                     wx.CLIP_CHILDREN)
         PanelBase.__init__(self, parent)
-        self.SetWindowStyleFlag(style=fnb.FNB_FANCY_TABS)
+        #self.SetWindowStyleFlag(style=nb.FNB_FANCY_TABS)
         self._manager = manager
         self.parent = parent
         self.event_owner = None
         #dictionary of miodel {model class name, model class}
         self.menu_mng = models.ModelManager()
         self.model_list_box = self.menu_mng.get_model_list()
-        #pageClosedEvent = fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING 
-        self.Bind(fnb.EVT_FLATNOTEBOOK_PAGE_CLOSING , self.on_close_page)
+        #pageClosedEvent = nb.EVT_FLATNOTEBOOK_PAGE_CLOSING 
+        pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
+        
+        self.Bind(pageClosedEvent, self.on_close_page)
          ## save the title of the last page tab added
         self.fit_page_name = {}
         ## list of existing fit page
@@ -57,7 +60,7 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         self.Bind(basepage.EVT_PREVIOUS_STATE, self._onUndo)
         self.Bind(basepage.EVT_NEXT_STATE, self._onRedo)
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_page_changing)
-      
+
         #add default pages
         self.add_default_pages()
 
@@ -374,8 +377,8 @@ class FitPanel(fnb.FlatNotebook, PanelBase):
         Delete the given page from the notebook
         """
         #remove hint page
-        if selected_page == self.hint_page:
-            return
+        #if selected_page == self.hint_page:
+        #    return
         ## removing sim_page
         if selected_page == self.sim_page :
             self._manager.sim_page=None 

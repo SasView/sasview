@@ -276,11 +276,20 @@ class Plugin(PluginBase):
                 self.add_fit_page(data=data)
                 wx.PostEvent(self.parent, NewPlotEvent(plot=data, 
                                                        title=str(data.title)))
+                
         except:
             raise
             #msg = "Fitting Set_data: " + str(sys.exc_value)
             #wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
-            
+    
+    def set_top_panel(self):
+        """
+        Close default (welcome) panel
+        """
+        if 'default' in self.parent.panels:
+            self.parent.on_close_welcome_panel()
+
+             
     def set_theory(self,  theory_list=None):
         """
         """
@@ -351,10 +360,10 @@ class Plugin(PluginBase):
                 self.parent.add_data(data_list={data.id:data})
                 wx.PostEvent(self.parent, NewPlotEvent(plot=data,
                                         title=data.title))
-                self.add_fit_page(data)
-                caption = panel.window_name
-                self.store_data(page=panel.id, data=data, caption=caption)
-                self.mypanels.append(panel) 
+                page = self.add_fit_page(data)
+                caption = page.window_name
+                self.store_data(page=page.id, data=data, caption=caption)
+                self.mypanels.append(page) 
                 
             # get ready for the next set_state
             self.state_index += 1
@@ -688,6 +697,7 @@ class Plugin(PluginBase):
                 msg = "Page was already Created"
                 wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                        info="warning"))
+            self.set_top_panel()
         except:
             raise
             #msg = "Creating Fit page: %s"%sys.exc_value
@@ -725,6 +735,7 @@ class Plugin(PluginBase):
         self.store_data(uid=page.uid, data=data, caption=page.window_name)
         if self.sim_page is not None:
             self.sim_page.draw_page()
+        return page
             
     def _onEVT_SLICER_PANEL(self, event):
         """
@@ -850,6 +861,7 @@ class Plugin(PluginBase):
             else:
                 data = plottable
                 self.add_fit_page(data=data)
+        self.set_top_panel()
             
     def update_fit(self, result=None, msg=""):
         """

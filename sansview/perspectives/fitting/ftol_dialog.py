@@ -10,7 +10,7 @@
 ################################################################################
 import wx
 import sys
-from sans.guicomm.events import StatusEvent  
+from sans.guiframe.events import StatusEvent  
 # default ftol
 F_TOL = 1.49012e-08 
 

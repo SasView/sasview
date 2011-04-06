@@ -2721,8 +2721,10 @@ class FitPage(BasicPage):
         if event.AltDown() and event.ShiftDown():
             self._show_ftol_dialog()
             flag = True
-        else:
+        elif event.AltDown() or event.ShiftDown():
             flag = False
+        else:
+            return
         # make event free
         event.Skip()
         # messages depending on the flag

@@ -22,7 +22,7 @@ from pagestate import PageState
 _BOX_WIDTH = 76
 _QMIN_DEFAULT = 0.0005
 _QMAX_DEFAULT = 0.5
-_NPTS_DEFAULT = 50
+_NPTS_DEFAULT = 200
 #Control panel width 
 if sys.platform.count("darwin")==0:
     PANEL_WIDTH = 450
