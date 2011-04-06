@@ -221,13 +221,15 @@ class ViewerFrame(wx.Frame):
         try:
             self.load_from_cmd(self._input_file)
         except:
-            pass
+            msg = "%s Cannot load file %s\n" %(str(APPLICATION_NAME), 
+                                             str(self._input_file))
+            msg += str(sys.exc_value) + '\n'
+            print msg
         self.post_init()
         self.show_welcome_panel(None)
         self.Show(True)
-        self._check_update(None)
-    
-            
+        #self._check_update(None)
+             
     def _setup_layout(self):
         """
         Set up the layout
@@ -449,11 +451,10 @@ class ViewerFrame(wx.Frame):
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         data_pane = self._mgr.GetPane(self.panels["data_panel"].window_name)
         if style != GUIFRAME.MANAGER_ON:
-            data_pane.Hide()
+            self._mgr.GetPane(self.panels["data_panel"].window_name).Hide()
         else:
-            data_pane.Show()
-        
-   
+            self._mgr.GetPane(self.panels["data_panel"].window_name).Show()
+            
         # Add the panels to the AUI manager
         for panel_class in panels:
             p = panel_class
@@ -600,8 +601,8 @@ class ViewerFrame(wx.Frame):
             self._popup_floating_panel(p)
             
         pane = self._mgr.GetPane(windowname)
-        #self._mgr.MaximizePane(pane)
-        #self._mgr.RestoreMaximizedPane()
+        self._mgr.MaximizePane(pane)
+        self._mgr.RestoreMaximizedPane()
         # Register for showing/hiding the panel
         wx.EVT_MENU(self, ID, self._on_view)
         
@@ -2043,7 +2044,9 @@ class ViewApp(wx.App):
             cmd = sys.argv[0].lower()
             if os.path.isfile(cmd):
                 basename  = os.path.basename(cmd)
-                if basename in ['sansview.py', 'sansview.exe']:
+                app_py = str(APPLICATION_NAME).lower() + '.py'
+                app_exe = str(APPLICATION_NAME).lower() + '.exe'
+                if basename.lower() in [app_py, app_exe]:
                     input_file = sys.argv[1]
         if input_file is None:
             return
