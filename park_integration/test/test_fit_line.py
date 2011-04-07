@@ -34,7 +34,7 @@ class testFitModule(unittest.TestCase):
         else: raise AssertError,"No error raised for scipy fitting with wrong parameters name to fit"
         pars1= ['A','B']
         fitter.set_model(model,1,pars1)
-        fitter.select_problem_for_fit(Uid=1,value=1)
+        fitter.select_problem_for_fit(id=1,value=1)
         result1 = fitter.fit()
         self.assert_(result1)
         
@@ -46,7 +46,7 @@ class testFitModule(unittest.TestCase):
         fitter = Fit('park')
         fitter.set_data(data,1)
         fitter.set_model(model,1,pars1)
-        fitter.select_problem_for_fit(Uid=1,value=1)
+        fitter.select_problem_for_fit(id=1,value=1)
         result2 = fitter.fit()
         
         self.assert_(result2)
@@ -87,17 +87,17 @@ class testFitModule(unittest.TestCase):
         pars1= ['A','B']
         fitter.set_data(data1,1)
         fitter.set_model(model1,1,pars1)
-        fitter.select_problem_for_fit(Uid=1,value=0)
+        fitter.select_problem_for_fit(id=1,value=0)
         fitter.set_data(data2,2)
         fitter.set_model(model2,2,pars1)
-        fitter.select_problem_for_fit(Uid=2,value=0)
+        fitter.select_problem_for_fit(id=2,value=0)
         
         try: result1 = fitter.fit()
         except RuntimeError,msg:
            assert str(msg)=="No Assembly scheduled for Scipy fitting."
         else: raise AssertError,"No error raised for scipy fitting with no model"
-        fitter.select_problem_for_fit(Uid=1,value=1)
-        fitter.select_problem_for_fit(Uid=2,value=1)
+        fitter.select_problem_for_fit(id=1,value=1)
+        fitter.select_problem_for_fit(id=2,value=1)
         try: result1 = fitter.fit()
         except RuntimeError,msg:
            assert str(msg)=="Scipy can't fit more than a single fit problem at a time."
@@ -109,8 +109,8 @@ class testFitModule(unittest.TestCase):
         fitter.set_model(model1,1,pars1)
         fitter.set_data(data2,2)
         fitter.set_model(model2,2,pars1)
-        fitter.select_problem_for_fit(Uid=1,value=1)
-        fitter.select_problem_for_fit(Uid=2,value=1)
+        fitter.select_problem_for_fit(id=1,value=1)
+        fitter.select_problem_for_fit(id=2,value=1)
         result2 = fitter.fit()
         
         self.assert_(result2)
@@ -156,8 +156,8 @@ class testFitModule(unittest.TestCase):
         fitter.set_model(model1,1,pars1)
         fitter.set_data(data2,2,smearer=None)
         fitter.set_model(model2,2,pars2)
-        fitter.select_problem_for_fit(Uid=1,value=1)
-        fitter.select_problem_for_fit(Uid=2,value=1)
+        fitter.select_problem_for_fit(id=1,value=1)
+        fitter.select_problem_for_fit(id=2,value=1)
         
         result2 = fitter.fit()
         self.assert_(result2)
@@ -191,7 +191,7 @@ class testFitModule(unittest.TestCase):
         fitter.set_data(data1,1,qmin=0, qmax=7)
         fitter.set_model(model,1,pars1)
         fitter.set_data(data2,1,qmin=1,qmax=10)
-        fitter.select_problem_for_fit(Uid=1,value=1)
+        fitter.select_problem_for_fit(id=1,value=1)
         
         result1 = fitter.fit()
         self.assert_(result1)
@@ -205,7 +205,7 @@ class testFitModule(unittest.TestCase):
         fitter.set_data(data1,1,qmin=0, qmax=7)
         fitter.set_model(model,1,pars1)
         fitter.set_data(data2,1,qmin=1,qmax=10)
-        fitter.select_problem_for_fit(Uid=1,value=1)
+        fitter.select_problem_for_fit(id=1,value=1)
         result2 = fitter.fit()
         
         self.assert_(result2)

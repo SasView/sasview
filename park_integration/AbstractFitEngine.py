@@ -468,10 +468,8 @@ class SansAssembly:
             self.handler.update_fit()
 
             if self.curr_thread != None :
-        	    try:
-        	        self.curr_thread.isquit()
-        	    except:
-        	        raise FitAbort,"stop leastsqr optimizer"    
+        	    if not self.curr_thread.isAlive():
+        	       raise FitAbort,"stop leastsqr optimizer"    
         return self.res
     
     def check_param_range(self):
