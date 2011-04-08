@@ -31,14 +31,21 @@ _BOX_WIDTH = 100
 _Q_DEFAULT = 0.0
 #Slit length panel size 
 if sys.platform.count("win32") > 0:
-    PANEL_WIDTH = 535
+    PANEL_WIDTH = 525
     PANEL_HEIGHT = 653
     FONT_VARIANT = 0
 else:
     PANEL_WIDTH = 560
     PANEL_HEIGHT = 692
     FONT_VARIANT = 1
- 
+
+_SOURCE_MASS = {'Alpha':6.64465620E-24,
+                'Deuteron':3.34358320E-24,
+                'Neutron':1.67492729E-24, 
+                'Photon': 0.0,
+                'Proton':1.67262137E-24,
+                'Triton':5.00826667E-24}
+
 class ResolutionCalculatorPanel(ScrolledPanel):
     """
     Provides the Resolution calculator GUI.
@@ -70,11 +77,12 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.SetWindowVariant(variant=FONT_VARIANT)
         # Object that receive status event
         self.resolution = ResolutionCalculator()
-     
+        # Source selection dic
+        self.source_mass = _SOURCE_MASS
         #layout attribute
         self.hint_sizer = None
         # detector coordinate of estimation of sigmas
-        self.det_coordinate = 'polar'
+        self.det_coordinate = 'cartesian'
 
         self._do_layout()
 
@@ -115,17 +123,25 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         # get the mass
         mass_value = str(self.resolution.mass)
-        mass_unit_txt = wx.StaticText(self, -1, '[g]')
-        mass_txt = wx.StaticText(self, -1, 
-                                'Mass: ')
-        self.mass_tcl = InputTextCtrl(self, -1, 
-                                         size=(_BOX_WIDTH,-1))
-        mass_hint = "Mass of Neutrons"
-        self.mass_tcl.SetValue(mass_value)
-        self.mass_tcl.SetToolTipString(mass_hint)
-        self.mass_sizer.AddMany([(mass_txt, 0, wx.LEFT, 15),
-                                    (self.mass_tcl, 0, wx.LEFT, 15),
-                                    (mass_unit_txt,0, wx.LEFT, 10)])   
+        self.mass_txt = wx.StaticText(self, -1, 
+                                'Source: ')
+        self.mass_hint = "Mass of Neutrons m = %s [g]"\
+                                 % str(self.resolution.mass)
+        self.source_cb = wx.ComboBox(self, -1,
+                                style=wx.CB_READONLY|wx.CB_SORT,
+                                name = '%s'%mass_value)
+        for key, value in self.source_mass.iteritems():
+            name_source = str(key)
+            self.source_cb.Append(name_source, name_source)
+            self.source_cb.SetStringSelection("Neutron") 
+        wx.EVT_COMBOBOX(self.source_cb,-1, self._on_source_selection)      
+        source_hint = "Source Selection: Affect on"
+        source_hint += " the gravitational contribution.\n"
+        source_hint += "Mass of %s: m = %s [g]" % \
+                            ('Neutron', str(self.resolution.mass))
+        self.mass_txt.SetToolTipString(source_hint)
+        self.mass_sizer.AddMany([(self.mass_txt, 0, wx.LEFT, 15),
+                                    (self.source_cb, 0, wx.LEFT, 15)])   
         
     def _layout_intensity(self):
         """
@@ -401,23 +417,34 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         outputQ_sizer = wx.BoxSizer(wx.HORIZONTAL)
         sigma_unit = '['+'1/A' +']'
         self.sigma_r_txt = wx.StaticText(self, -1, 
-                                           'Sigma_r:   ')
+                                           'Sigma_x:   ')
         self.sigma_r_tcl = OutputTextCtrl(self, -1, 
-                                                 size=(_BOX_WIDTH,-1))
+                                                 size=(_BOX_WIDTH*0.8,-1))
         self.sigma_phi_txt = wx.StaticText(self, -1, 
-                                           'Sigma_phi:')
+                                           'Sigma_y:')
         self.sigma_phi_tcl = OutputTextCtrl(self, -1, 
-                                                 size=(_BOX_WIDTH,-1))
+                                                 size=(_BOX_WIDTH*0.8,-1))
+        self.sigma_lamd_txt = wx.StaticText(self, -1, 
+                                           'Sigma_lamd:')
+        self.sigma_lamd_tcl = OutputTextCtrl(self, -1, 
+                                                 size=(_BOX_WIDTH*0.7,-1))
         sigma_1d_txt = wx.StaticText(self, -1, '( 1D:   Sigma:')
         self.sigma_1d_tcl = OutputTextCtrl(self, -1, 
-                                                 size=(_BOX_WIDTH,-1))
-        sigma_hint = " dQ_r or dQ_x, and dQ_phi or dQ_y"
-        sigma_hint_1d = " dQ for 1-dimension"
-        self.sigma_r_tcl.SetToolTipString(sigma_hint)
-        self.sigma_phi_tcl.SetToolTipString(sigma_hint)
+                                                 size=(_BOX_WIDTH*0.7,-1))
+        sigmax_hint = " The x component of the geometric resolution,"
+        sigmax_hint +=  " excluding sigma_lamda."
+        sigmay_hint = " The y component of the geometric resolution,"
+        sigmay_hint +=  " excluding sigma_lamda."
+        sigma_hint_lamd = " The wavelength contribution in the radial direction"
+        sigma_hint_lamd += ".\n Note: The phi component is always zero."
+        sigma_hint_1d = " Resolution in 1-dimension (for 1D data)."
+        self.sigma_r_tcl.SetToolTipString(sigmax_hint)
+        self.sigma_phi_tcl.SetToolTipString(sigmay_hint)
+        self.sigma_lamd_tcl.SetToolTipString(sigma_hint_lamd)
         self.sigma_1d_tcl.SetToolTipString(sigma_hint_1d)
         sigma_r_unit_txt = wx.StaticText(self, -1, sigma_unit)
         sigma_phi_unit_txt = wx.StaticText(self, -1, sigma_unit)
+        sigma_lamd_unit_txt = wx.StaticText(self, -1, sigma_unit)
         sigma_1d_unit_txt = wx.StaticText(self, -1, sigma_unit+' )')
         outputQxy_sizer.AddMany([(self.sigma_r_txt, 0, wx.LEFT, 15),
                                     (self.sigma_r_tcl, 0, wx.LEFT, 15),
@@ -425,7 +452,10 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                                     (self.sigma_phi_txt, 0, wx.LEFT, 15),
                                     (self.sigma_phi_tcl, 0, wx.LEFT, 15),
                                     (sigma_phi_unit_txt, 0, wx.LEFT, 15)])
-        outputQ_sizer.AddMany([(sigma_1d_txt, 0, wx.LEFT, 15),
+        outputQ_sizer.AddMany([(self.sigma_lamd_txt, 0, wx.LEFT, 15),
+                                    (self.sigma_lamd_tcl, 0, wx.LEFT, 15),
+                                    (sigma_lamd_unit_txt, 0, wx.LEFT, 15),
+                                    (sigma_1d_txt, 0, wx.LEFT, 15),
                                     (self.sigma_1d_tcl, 0, wx.LEFT, 15),
                                     (sigma_1d_unit_txt, 0, wx.LEFT, 15)])
         self.output_sizer.AddMany([(sigma_title, 0, wx.LEFT, 15), 
@@ -451,13 +481,13 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         Do the layout for the button widgets
         """ 
         #outerbox_txt = wx.StaticText(self, -1, 'Outer Box')
-        self.x_y_rb = wx.RadioButton(self, -1,"Cartesian")
-        self.Bind(wx.EVT_RADIOBUTTON,
-                  self._on_xy_coordinate, id=self.x_y_rb.GetId())
-        self.r_phi_rb = wx.RadioButton(self, -1,"Polar")
-        self.Bind(wx.EVT_RADIOBUTTON,
-                  self._on_rp_coordinate, id=self.r_phi_rb.GetId())
-        self.r_phi_rb.SetValue(True)
+        #self.x_y_rb = wx.RadioButton(self, -1,"Cartesian")
+        #self.Bind(wx.EVT_RADIOBUTTON,
+        #          self._on_xy_coordinate, id=self.x_y_rb.GetId())
+        #self.r_phi_rb = wx.RadioButton(self, -1,"Polar")
+        #self.Bind(wx.EVT_RADIOBUTTON,
+        #          self._on_rp_coordinate, id=self.r_phi_rb.GetId())
+        #self.r_phi_rb.SetValue(True)
         #reset button
         id = wx.NewId()
         self.reset_button = wx.Button(self, id, "Reset")
@@ -474,11 +504,17 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.bt_close = wx.Button(self, wx.ID_CANCEL,'Close')
         self.bt_close.Bind(wx.EVT_BUTTON, self.on_close)
         self.bt_close.SetToolTipString("Close this window.")
+        """
         self.button_sizer.AddMany([(self.r_phi_rb,  0, wx.LEFT, 15),
                                    (self.x_y_rb,  0, wx.LEFT, 15),
                                    (self.reset_button, 0, wx.LEFT, 50),
                                    (self.compute_button, 0, wx.LEFT, 15),
                                    (self.bt_close, 0, wx.LEFT, 15)])#370)])
+        """
+        self.button_sizer.Add((110, -1))
+        self.button_sizer.AddMany([(self.reset_button, 0, wx.LEFT, 50),
+                                   (self.compute_button, 0, wx.LEFT, 15),
+                                   (self.bt_close, 0, wx.LEFT, 15)])
         self.compute_button.SetFocus()
         
     def _layout_image(self):
@@ -643,7 +679,8 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         #self.resolution.set_intensity(float(intensity))
         wavelength = self.wavelength_tcl.GetValue()
         self.resolution.set_wavelength(float(wavelength))
-        mass = self.mass_tcl.GetValue()
+        source = self.source_cb.GetValue()
+        mass = self.source_mass[str(source)]
         self.resolution.set_neutron_mass(float(mass))
         wavelength_spread = self.wavelength_spread_tcl.GetValue()
         self.resolution.set_wavelength_spread(float(wavelength_spread))
@@ -671,11 +708,17 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.qx = self._string2inputlist(self.qx_tcl.GetValue())
         self.qy = self._string2inputlist(self.qy_tcl.GetValue())
         
-        # Find min max of qs
-        xmin = min(self.qx)
-        xmax = max(self.qx)
-        ymin = min(self.qy)
-        ymax = max(self.qy)
+        try:
+            # Find min max of qs
+            xmin = min(self.qx)
+            xmax = max(self.qx)
+            ymin = min(self.qy)
+            ymax = max(self.qy)
+        except:
+            msg = "An error occured during the resolution computation."
+            msg += "Please check your inputs..."
+            self._status_info(msg, status_type)
+            raise ValueError, "Invalid Q Input..."
 
         # Validate the q inputs
         self._validate_q_input(self.qx, self.qy)
@@ -718,11 +761,13 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         # Get and format the sigmas 
         sigma_r = self.format_number(self.resolution.sigma_1)
         sigma_phi = self.format_number(self.resolution.sigma_2)
+        sigma_lamd = self.format_number(self.resolution.sigma_lamd)
         sigma_1d =  self.format_number(self.resolution.sigma_1d)
 
         # Set output values 
         self.sigma_r_tcl.SetValue(str(sigma_r))
         self.sigma_phi_tcl.SetValue(str(sigma_phi))
+        self.sigma_lamd_tcl.SetValue(str(sigma_lamd))
         self.sigma_1d_tcl.SetValue(str(sigma_1d))
         
     def _draw_lines(self, image = None):
@@ -834,7 +879,8 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.resolution = ResolutionCalculator()
         self.resolution.get_all_instrument_params()
         # reset all param values
-        self.mass_tcl.SetValue(str(self.resolution.mass))
+        self.source_cb.SetValue('Neutron')
+        self._on_source_selection(None)
         #self.intensity_tcl.SetValue(str(self.resolution.intensity))
         self.wavelength_tcl.SetValue(str(self.resolution.wavelength))
         self.wavelength_spread_tcl.SetValue(\
@@ -881,8 +927,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.sigma_phi_tcl.SetValue('')
         self.sigma_1d_tcl.SetValue('')
         # reset radio button
-        self.det_coordinate = 'polar'
-        self.r_phi_rb.SetValue(True)
+        #self.r_phi_rb.SetValue(True)
         # Finally re-compute
         self.on_compute()
         # msg on info
@@ -986,6 +1031,24 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         self.on_compute()
         
+    def _on_source_selection(self, event = None):
+        """
+        On source combobox selection
+        """
+        if event != None:
+            combo = event.GetEventObject()
+            event.Skip()
+        else:
+            combo = self.source_cb
+        selection = combo.GetValue()
+        mass = self.source_mass[selection]
+        self.resolution.set_neutron_mass(mass)   
+        source_hint = "Source Selection: Affect on"
+        source_hint += " the gravitational contribution.\n"
+        source_hint += "Mass of %s: m = %s [g]" % \
+                            (selection, str(self.resolution.get_neutron_mass()))
+        #source_tip.SetTip(source_hint)
+        self.mass_txt.ToolTip.SetTip(source_hint)
         
 class ResolutionWindow(wx.Frame):
     def __init__(self, parent = None, title = "SANS Resolution Estimator",

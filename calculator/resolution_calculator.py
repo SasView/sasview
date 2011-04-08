@@ -10,14 +10,8 @@ from instrument import Aperture
 # import math stuffs
 from math import pi
 from math import sqrt
-from math import cos
-from math import sin
-from math import atan
-from math import atan2
-from math import pow
-from math import asin
-from math import tan
-
+import math 
+import scipy
 import numpy
 
 #Plank's constant in cgs unit
@@ -42,8 +36,13 @@ class ResolutionCalculator(object):
         # 2d image of the resolution
         self.image = []
         # resolutions
+        # lamda in r-direction
+        self.sigma_lamda = 0
+        # x-dir (no lamda)
         self.sigma_1 = 0
+        #y-dir (no lamda)
         self.sigma_2 = 0
+        # 1D total
         self.sigma_1d = 0
         # q min and max
         self.qx_min = -0.3
@@ -73,26 +72,28 @@ class ResolutionCalculator(object):
         self.get_all_instrument_params()
         
     def compute_and_plot(self, qx_value, qy_value, qx_min, qx_max, 
-                          qy_min, qy_max, coord = 'polar'):
+                          qy_min, qy_max, coord = 'cartesian'):
         """
         Compute the resolution
         : qx_value: x component of q
         : qy_value: y component of q
         """
         # compute 2d resolution
-        _, _, sigma_1, sigma_2 = self.compute(qx_value, qy_value, coord)
+        _, _, sigma_1, sigma_2, sigma_r = \
+                            self.compute(qx_value, qy_value, coord)
         # make image
-        image = self.get_image(qx_value, qy_value, sigma_1, sigma_2, 
+        image = self.get_image(qx_value, qy_value, sigma_1, sigma_2, sigma_r, 
                                qx_min, qx_max, qy_min, qy_max, coord)
         # plot image
         return self.plot_image(image) 
 
-    def compute(self, qx_value, qy_value, coord = 'polar'):
+    def compute(self, qx_value, qy_value, coord = 'cartesian'):
         """
         Compute the Q resoltuion in || and + direction of 2D
         : qx_value: x component of q
         : qy_value: y component of q
         """
+        coord = 'cartesian'
         # make sure to update all the variables need.
         self.get_all_instrument_params()
         # wavelength
@@ -112,7 +113,7 @@ class ResolutionCalculator(object):
         if qr_value > knot:
             theta = pi/2
         else:
-            theta = asin(qr_value/knot)
+            theta = math.asin(qr_value/knot)
         # source aperture size
         rone = self.source_aperture_size
         # sample aperture size
@@ -134,7 +135,7 @@ class ResolutionCalculator(object):
         l1_cor = (l_ssa * l_two) / (l_sas + l_two)
         lp_cor = (l_ssa * l_two) / (l_one + l_two)
         # the radial distance to the pixel from the center of the detector
-        radius = tan(theta)*l_two
+        radius = math.tan(theta)*l_two
         #Lp = l_one*l_two/(l_one+l_two)
         # default polar coordinate
         comp1 = 'radial'
@@ -157,50 +158,57 @@ class ResolutionCalculator(object):
         # for wavelength spread
         # reserve for 1d calculation
         sigma_wave_1 = self.get_variance_wave(radius, l_two, lamb_spread, 
-                                          phi, comp1, 'on')
+                                          phi, 'radial', 'on')
         # for 1d
         variance_1d_1 = sigma_1/2 +sigma_wave_1
         # normalize
         variance_1d_1 = knot*knot*variance_1d_1/12
         
         # for 2d
-        sigma_1 += sigma_wave_1
+        #sigma_1 += sigma_wave_1
         # normalize
         sigma_1 = knot*sqrt(sigma_1/12)
-
+        sigma_r = knot*sqrt(sigma_wave_1/12)
         # sigma in the phi/y direction
         # for source apperture
         sigma_2  = self.get_variance(rone, l1_cor, phi, comp2)
+
         # for sample apperture
         sigma_2 += self.get_variance(rtwo, lp_cor, phi, comp2)
+
         # for detector pix
         sigma_2 += self.get_variance(rthree, l_two, phi, comp2)
+
         # for gravity term
         sigma_2 +=  self.get_variance_gravity(l_ssa, l_sad, lamb, lamb_spread, 
                              phi, comp2, 'on')
+
+        
         # for wavelength spread
         # reserve for 1d calculation
         sigma_wave_2 = self.get_variance_wave(radius, l_two, lamb_spread, 
-                                          phi, comp2, 'on') 
+                                          phi, 'phi', 'on') 
         # for 1d
         variance_1d_2 = sigma_2/2 +sigma_wave_2
         # normalize
         variance_1d_2 = knot*knot*variance_1d_2/12
         
         # for 2d
-        sigma_2 += sigma_wave_2
+        #sigma_2 =  knot*sqrt(sigma_2/12)
+        #sigma_2 += sigma_wave_2
         # normalize
         sigma_2 =  knot*sqrt(sigma_2/12)
 
         # set sigmas
         self.sigma_1 = sigma_1
+        self.sigma_lamd = sigma_r
         self.sigma_2 = sigma_2
         
         self.sigma_1d = sqrt(variance_1d_1 + variance_1d_2)
-        return qr_value, phi, sigma_1, sigma_2
+        return qr_value, phi, sigma_1, sigma_2, sigma_r
     
-    def get_image(self, qx_value, qy_value, sigma_1, sigma_2,
-                  qx_min, qx_max, qy_min, qy_max, coord = 'polar'): 
+    def get_image(self, qx_value, qy_value, sigma_1, sigma_2, sigma_r,
+                  qx_min, qx_max, qy_min, qy_max, coord = 'cartesian'): 
         """
         Get the resolution in polar coordinate ready to plot
         : qx_value: qx_value value
@@ -216,10 +224,8 @@ class ResolutionCalculator(object):
         #qx_max = self.qx_max
         #qy_min = self.qy_min
         #qy_max = self.qy_max
-
-        # Find polar values
         qr_value, phi = self._get_polar_value(qx_value, qy_value)
-        
+
         # Check whether the q value is within the detector range
         msg = "Invalid input: Q value out of the detector range..."
         if qx_min < self.qx_min:
@@ -241,12 +247,17 @@ class ResolutionCalculator(object):
         x_val = numpy.arange(self.qx_min, self.qx_max, dx_size)
         y_val = numpy.arange(self.qy_max, self.qy_min, -dy_size)
         q_1, q_2 = numpy.meshgrid(x_val, y_val)
-
+        #q_phi = numpy.arctan(q_1,q_2)
         # check whether polar or cartesian
         if coord == 'polar':
+            # Find polar values
+            qr_value, phi = self._get_polar_value(qx_value, qy_value)
             q_1, q_2 = self._rotate_z(q_1, q_2, phi)
             qc_1 = qr_value
             qc_2 = 0.0
+            # Calculate the 2D Gaussian distribution image
+            image = self._gaussian2d_polar(q_1, q_2, qc_1, qc_2, 
+                                 sigma_1, sigma_2, sigma_r)
         else:
             # catesian coordinate
             # qx_center
@@ -254,8 +265,9 @@ class ResolutionCalculator(object):
             # qy_center
             qc_2 = qy_value
             
-        # Calculate the 2D Gaussian distribution image
-        image = self._gaussian2d(q_1, q_2, qc_1, qc_2, sigma_1, sigma_2)
+            # Calculate the 2D Gaussian distribution image
+            image = self._gaussian2d(q_1, q_2, qc_1, qc_2, 
+                                     sigma_1, sigma_2, sigma_r)
         # Add it if there are more than one inputs.
         if len(self.image) > 0:
             self.image += image
@@ -308,11 +320,11 @@ class ResolutionCalculator(object):
         
         # define sigma component direction
         if comp == 'radial':
-            phi_x = cos(phi)
-            phi_y = sin(phi)
+            phi_x = math.cos(phi)
+            phi_y = math.sin(phi)
         elif comp == 'phi':
-            phi_x = sin(phi)
-            phi_y = cos(phi)
+            phi_x = math.sin(phi)
+            phi_y = math.cos(phi)
         elif comp == 'x':
             phi_x = 1
             phi_y = 0
@@ -361,11 +373,11 @@ class ResolutionCalculator(object):
             return 0
         else:
             # calculate sigma^2
-            sigma = 2 * pow(radius/distance*spread, 2)
+            sigma = 2 * math.pow(radius/distance*spread, 2)
             if comp == 'x':
-                sigma *= (cos(phi)*cos(phi))
+                sigma *= (math.cos(phi)*math.cos(phi))
             elif comp == 'y':
-                sigma *= (sin(phi)*sin(phi))
+                sigma *= (math.sin(phi)*math.sin(phi))
             else:
                 sigma *= 1          
                 
@@ -402,22 +414,22 @@ class ResolutionCalculator(object):
             m_over_h = self.mass /h_constant
             # A value
             a_value = d_distance * (s_distance + d_distance)
-            a_value *= pow(m_over_h / 2, 2)
+            a_value *= math.pow(m_over_h / 2, 2)
             a_value *= gravy
             # unit correction (1/cm to 1/A) for A and d_distance below
             a_value *= 1.0E-16
             
             # calculate sigma^2
-            sigma = pow(a_value / d_distance, 2)
-            sigma *= pow(wavelength, 4)
-            sigma *= pow(spread, 2)
+            sigma = math.pow(a_value / d_distance, 2)
+            sigma *= math.pow(wavelength, 4)
+            sigma *= math.pow(spread, 2)
             sigma *= 8
             
             # only for the polar coordinate
-            if comp == 'radial':
-                sigma *= (sin(phi) * sin(phi))
-            elif comp == 'phi':
-                sigma *= (cos(phi) * cos(phi))
+            #if comp == 'radial':
+            #    sigma *= (math.sin(phi) * math.sin(phi))
+            #elif comp == 'phi':
+            #    sigma *= (math.cos(phi) * math.cos(phi))
             
             return sigma
         
@@ -520,6 +532,7 @@ class ResolutionCalculator(object):
         Set Neutron mass
         """
         self.wave.set_mass(mass)
+        self.mass = mass
         
     def set_sample_aperture_size(self, size):
         """
@@ -602,12 +615,13 @@ class ResolutionCalculator(object):
         :return: x_prime, y-prime
         """        
         # rotate by theta
-        x_prime = x_value * cos(theta) + y_value * sin(theta)
-        y_prime =  -x_value * sin(theta) + y_value * cos(theta)
+        x_prime = x_value * math.cos(theta) + y_value * math.sin(theta)
+        y_prime =  -x_value * math.sin(theta) + y_value * math.cos(theta)
     
         return x_prime, y_prime
     
-    def _gaussian2d(self, x_val, y_val, x0_val, y0_val, sigma_x, sigma_y):
+    def _gaussian2d(self, x_val, y_val, x0_val, y0_val, 
+                    sigma_x, sigma_y, sigma_r):
         """
         Calculate 2D Gaussian distribution
         : x_val: x value
@@ -619,6 +633,45 @@ class ResolutionCalculator(object):
         
         : return: gaussian (value)
         """
+        # phi values at each points (not at the center)
+        x_value = x_val - x0_val
+        y_value = y_val - y0_val
+        phi_i = numpy.arctan2(y_val, x_val)
+
+        sin_phi = numpy.sin(phi_i)
+        cos_phi = numpy.cos(phi_i)
+        
+        x_p = x_value * cos_phi + y_value * sin_phi
+        y_p = -x_value * sin_phi + y_value * cos_phi
+        
+        new_x = x_p * cos_phi / (sigma_r / sigma_x + 1) - y_p * sin_phi
+        new_x /= sigma_x
+        new_y = x_p * sin_phi / (sigma_r / sigma_y + 1) + y_p * cos_phi
+        new_y /= sigma_y
+
+        nu_value = -0.5 *(new_x * new_x + new_y * new_y)
+
+        gaussian = numpy.exp(nu_value)
+        # normalizing factor correction
+        gaussian /= gaussian.sum()
+
+        return gaussian
+
+    def _gaussian2d_polar(self, x_val, y_val, x0_val, y0_val, 
+                        sigma_x, sigma_y, sigma_r):
+        """
+        Calculate 2D Gaussian distribution for polar coodinate 
+        : x_val: x value
+        : y_val: y value
+        : x0_val: mean value in x-axis
+        : y0_val: mean value in y-axis
+        : sigma_x: variance in r-direction
+        : sigma_y: variance in phi-direction
+        : sigma_r: wavelength variance in r-direction
+        
+        : return: gaussian (value)
+        """
+        sigma_x = sqrt(sigma_x * sigma_x + sigma_r * sigma_r)
         # call gaussian1d 
         gaussian  = self._gaussian1d(x_val, x0_val, sigma_x)
         gaussian *= self._gaussian1d(y_val, y0_val, sigma_y)
@@ -627,7 +680,7 @@ class ResolutionCalculator(object):
         if sigma_x != 0 and sigma_y != 0:
             gaussian *= sqrt(2 * pi)
         return gaussian
-
+    
     def _gaussian1d(self, value, mean, sigma):
         """
         Calculate 1D Gaussian distribution
@@ -659,6 +712,8 @@ class ResolutionCalculator(object):
         
         : return phi: the azimuthal angle of q on x-y plane
         """
+        phi = math.atan2(qy_value, qx_value)
+        return phi
         # default
         phi = 0
         # ToDo: This is misterious - sign???
@@ -673,7 +728,7 @@ class ResolutionCalculator(object):
                 phi = 0
         else:
             # the angle
-            phi = atan2(qy_value, qx_value)
+            phi = math.atan2(qy_value, qx_value)
 
         return phi
 
@@ -810,8 +865,8 @@ class ResolutionCalculator(object):
         # Distance from beam center in the plane of detector
         plane_dist = dx_size
         # full scattering angle on the x-axis
-        theta  = atan(plane_dist / det_dist)
-        qx_value     = (2.0 * pi / wavelength) * sin(theta)
+        theta  = math.atan(plane_dist / det_dist)
+        qx_value     = (2.0 * pi / wavelength) * math.sin(theta)
         return qx_value  
     
     def _get_polar_value(self, qx_value, qy_value):
