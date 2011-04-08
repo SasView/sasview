@@ -490,11 +490,10 @@ class BasicPage(ScrolledPanel, PanelBase):
             ## reset state of checkbox,textcrtl  and  regular parameters value
             self.reset_page(previous_state)   
                
-    def on_report_state(self, event):
+    def on_preview(self, event):
         """
         Report the current fit results
         """   
-        event.Skip()
         # Get plot image from plotpanel
         images, canvases = self.get_images()
         # get the report dialog
@@ -2458,7 +2457,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                  # check titles (main plot) 
                  # and data_names (model plot[2D], and residuals)
                  if item2.group_id == data_title or \
-                                item2.window_name.count(data_name):
+                                item2.window_name.count(data_name) or\
+                                item2.window_caption.count(data_name):
                      #panel = gui_manager._mgr.GetPane(item2.window_name)
                      # append to the list
                      graphs.append(item2.figure) 

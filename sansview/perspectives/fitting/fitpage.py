@@ -53,6 +53,7 @@ class FitPage(BasicPage):
         self.Bind(wx.EVT_RIGHT_DOWN, self.on_right_down)
         self._set_bookmark_flag(False)
         self._set_save_flag(False)
+        self._set_preview_flag(False)
     
   
         
@@ -1552,6 +1553,7 @@ class FitPage(BasicPage):
         else:
             self._set_bookmark_flag(True)
             self._set_save_flag(True)
+            self._set_preview_flag(True)
             self._set_smear(data)
             # more disables for 2D
             if self.data.__class__.__name__ =="Data2D":
