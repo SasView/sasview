@@ -212,12 +212,13 @@ class ViewerFrame(wx.Frame):
     def build_gui(self):
         """
         """
+        # set tool bar
+        self._setup_tool_bar()
         # Set up the layout
         self._setup_layout()
         # Set up the menu
         self._setup_menus()
-        # set tool bar
-        self._setup_tool_bar()
+        
         try:
             self.load_from_cmd(self._input_file)
         except:
@@ -971,12 +972,14 @@ class ViewerFrame(wx.Frame):
         default_panel = self._mgr.GetPane(self.panels["default"].window_name)
         if default_panel.IsShown():
             default_panel.Hide()
-            
-            # set a default perspective
-            self.set_default_perspective()
+            # Recover current perspective
+            perspective = self._current_perspective
+            perspective.on_perspective(event=None)
             self._mgr.Update()
             # Show toolbar
-            self._on_hide_toolbar()
+            style = self.__gui_style & GUIFRAME.TOOL_ON
+            if (style == GUIFRAME.TOOL_ON) & (not self._toolbar.IsShown()):
+                self._on_hide_toolbar()
             
     def show_welcome_panel(self, event):
         """    
@@ -1395,6 +1398,9 @@ class ViewerFrame(wx.Frame):
         
         :param panels: list of panels
         """
+        style = self.__gui_style & GUIFRAME.TOOL_ON
+        if (style == GUIFRAME.TOOL_ON) & (not self._toolbar.IsShown()):
+            self._on_hide_toolbar()
         for item in self.panels:
             # Check whether this is a sticky panel
             if hasattr(self.panels[item], "ALWAYS_ON"):
