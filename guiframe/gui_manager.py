@@ -201,13 +201,18 @@ class ViewerFrame(wx.Frame):
         self.panel_on_focus = event.panel
         panel_name = 'No panel on focus'
         application_name = 'No Selected Application'
-        if self.panel_on_focus is not None and self._data_panel is not None:
-            panel_name = self.panel_on_focus.window_caption
-            self._data_panel.set_panel_on_focus(panel_name)
-            #update toolbar
-            self._update_toolbar_helper()
-            #update edit menu
-            self.enable_edit_menu()
+        if self.panel_on_focus is not None:
+            for ID in self.panels.keys():
+                if self.panel_on_focus != self.panels[ID]:
+                    self.panels[ID].on_kill_focus(None)
+
+            if self._data_panel is not None:
+                panel_name = self.panel_on_focus.window_caption
+                self._data_panel.set_panel_on_focus(panel_name)
+                #update toolbar
+                self._update_toolbar_helper()
+                #update edit menu
+                self.enable_edit_menu()
 
     def build_gui(self):
         """
@@ -240,7 +245,7 @@ class ViewerFrame(wx.Frame):
         self.sb = StatusBar(self, wx.ID_ANY)
         self.SetStatusBar(self.sb)
         # Add panel
-        default_flag = wx.aui.AUI_MGR_DEFAULT| wx.aui.AUI_MGR_ALLOW_ACTIVE_PANE
+        default_flag = wx.aui.AUI_MGR_DEFAULT#| wx.aui.AUI_MGR_ALLOW_ACTIVE_PANE
         self._mgr = wx.aui.AuiManager(self, flags=default_flag)
         self._mgr.SetDockSizeConstraint(0.5, 0.5)
         # border color

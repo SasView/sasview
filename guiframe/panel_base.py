@@ -326,7 +326,13 @@ class PanelBase:
         """
         if self.parent is not None:
             wx.PostEvent(self.parent, PanelOnFocusEvent(panel=self))
-        
+            
+    def on_kill_focus(self, event=None):
+        """
+        The  derivative class is on unfocus if implemented
+        """
+        pass
+                
     def get_data(self):
         """
         return list of current data
