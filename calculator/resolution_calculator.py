@@ -644,9 +644,11 @@ class ResolutionCalculator(object):
         x_p = x_value * cos_phi + y_value * sin_phi
         y_p = -x_value * sin_phi + y_value * cos_phi
         
-        new_x = x_p * cos_phi / (sigma_r / sigma_x + 1) - y_p * sin_phi
+        new_sig_x = sqrt(sigma_r * sigma_r / (sigma_x * sigma_x ) + 1)
+        new_sig_y = sqrt(sigma_r * sigma_r / (sigma_y * sigma_y ) + 1)
+        new_x = x_p * cos_phi / new_sig_x - y_p * sin_phi
         new_x /= sigma_x
-        new_y = x_p * sin_phi / (sigma_r / sigma_y + 1) + y_p * cos_phi
+        new_y = x_p * sin_phi / new_sig_y + y_p * cos_phi
         new_y /= sigma_y
 
         nu_value = -0.5 *(new_x * new_x + new_y * new_y)
