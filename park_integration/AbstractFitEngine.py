@@ -468,7 +468,7 @@ class SansAssembly:
             self.handler.update_fit()
 
             if self.curr_thread != None :
-        	      try:
+                try:
                     self.curr_thread.isquit()
                 except:
                     raise FitAbort,"stop leastsqr optimizer"    
