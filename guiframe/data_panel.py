@@ -254,10 +254,22 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_remove.SetToolTipString("Remove data from the application")
         wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
         
-        self.tctrl_perspective = wx.StaticText(self, -1, 'No Active Application')
+        self.tctrl_perspective = wx.StaticText(self, -1, 
+                            'No Active Application',
+                        style=wx.SUNKEN_BORDER|wx.ALIGN_LEFT)
         self.tctrl_perspective.SetToolTipString("Active Application")
-        self.tctrl_plotpanel = wx.StaticText(self, -1, 'No Plot panel on focus')
-        self.tctrl_plotpanel.SetToolTipString("Active Plot Panel")
+        perspective_font = self.tctrl_perspective.GetFont()
+        perspective_font.SetWeight(wx.BOLD)
+        self.tctrl_perspective.SetFont(perspective_font)
+        self.tctrl_perspective.SetClientSize((80,20))
+        self.cb_plotpanel = wx.ComboBox(self, -1, 
+                                style=wx.CB_READONLY|wx.CB_SORT)
+        wx.EVT_COMBOBOX(self.cb_plotpanel,-1, self._on_plot_selection)
+        self.cb_plotpanel.Append('None')
+        self.cb_plotpanel.SetStringSelection('None')
+
+        #self.tctrl_plotpanel = wx.StaticText(self, -1, 'No Plot panel on focus')
+        #self.tctrl_plotpanel.SetToolTipString("Active Plot Panel")
     
         ix = 0
         iy = 0
@@ -271,7 +283,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer3.Add(self.bt_append_plot,( iy, ix),(1,1),  
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        self.sizer3.Add(self.tctrl_plotpanel,(iy, ix),(1,1),
+        self.sizer3.Add(self.cb_plotpanel,(iy, ix),(1,1),
                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)  
         ix = 0          
         iy += 1 
@@ -623,6 +635,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         append plot to plot panel on focus
         """
+        self._on_plot_selection()
         data_id, theory_id, state_id = self.set_data_helper()
         self.parent.plot_data(data_id=data_id,  
                               state_id=state_id,
@@ -661,13 +674,36 @@ class DataPanel(ScrolledPanel, PanelBase):
         set the active perspective
         """
         self.tctrl_perspective.SetLabel(str(name))
+        #perspective_font = self.tctrl_perspective.GetFont()
+        #perspective_font.SetWeight(wx.BOLD)
+        self.tctrl_perspective.SetClientSize((80,20))#SetFont(perspective_font)
      
     def set_panel_on_focus(self, name):
         """
         set the plot panel on focus
         """
-        self.tctrl_plotpanel.SetLabel(str(name))
+        for key, value in self.parent.plot_panels.iteritems():
+            name_plot_panel = str(value.window_caption)
+            if name_plot_panel not in self.cb_plotpanel.GetItems():
+                self.cb_plotpanel.Append(name_plot_panel, value)
+            self.cb_plotpanel.SetStringSelection(name_plot_panel)
+
  
+    def _on_plot_selection(self, event = None):
+        """
+        On source combobox selection
+        """
+        if event != None:
+            combo = event.GetEventObject()
+            event.Skip()
+        else:
+            combo = self.cb_plotpanel
+        selection = combo.GetSelection()
+
+        if combo.GetValue() != 'None':
+            panel = combo.GetClientData(selection)
+            self.parent.on_set_plot_focus(panel)   
+
     
 
 

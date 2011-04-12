@@ -70,7 +70,7 @@ class PanelBase:
         self._has_changed = True
         self._print_flag = flag
         if self._manager is not None and self._manager.parent is not None:
-            self._manager.parent.panel_on_focus = self
+            self._manager.parent.cpanel_on_focus = self
             self._manager.parent.enable_print()
      
     def get_print_flag(self):
@@ -90,7 +90,7 @@ class PanelBase:
         self._has_changed = True
         self._undo_flag = flag
         if self._manager is not None and self._manager.parent is not None:
-            self._manager.parent.panel_on_focus = self
+            self._manager.parent.cpanel_on_focus = self
             self._manager.parent.enable_undo()
       
     def get_undo_flag(self):
@@ -110,7 +110,7 @@ class PanelBase:
         self._has_changed = True
         self._redo_flag = flag
         if self._manager is not None and self._manager.parent is not None:
-            self._manager.parent.panel_on_focus = self
+            self._manager.parent.cpanel_on_focus = self
             self._manager.parent.enable_redo()
       
     def get_redo_flag(self):
@@ -130,7 +130,7 @@ class PanelBase:
         self._has_changed = True
         self._zoom_in_flag = flag
         if self._manager is not None and self._manager.parent is not None:
-            self._manager.parent.panel_on_focus = self
+            self._manager.parent.cpanel_on_focus = self
             self._manager.parent.enable_zoom_in()
        
     def get_zoom_in_flag(self):
@@ -170,7 +170,7 @@ class PanelBase:
         self._has_changed = True
         self._zoom_flag = flag
         if self._manager is not None and self._manager.parent is not None:
-            self._manager.parent.panel_on_focus = self
+            self._manager.parent.cpanel_on_focus = self
             self._manager.parent.enable_zoom()
      
     def get_zoom_flag(self):
@@ -190,7 +190,7 @@ class PanelBase:
         self._has_changed = True
         self._bookmark_flag = flag
         if self._manager is not None and self._manager.parent is not None:
-            self._manager.parent.panel_on_focus = self
+            self._manager.parent.cpanel_on_focus = self
             self._manager.parent.enable_bookmark()
        
     def get_bookmark_flag(self):
@@ -210,7 +210,7 @@ class PanelBase:
         self._has_changed = True
         self._preview_flag = flag
         if self._manager is not None and self._manager.parent is not None:
-            self._manager.parent.panel_on_focus = self
+            self._manager.parent.cpanel_on_focus = self
             self._manager.parent.enable_preview()
        
     def get_preview_flag(self):
@@ -230,7 +230,7 @@ class PanelBase:
         self._has_changed = True
         self._save_flag = flag
         if self._manager is not None and self._manager.parent is not None:
-            self._manager.parent.panel_on_focus = self
+            self._manager.parent.cpanel_on_focus = self
             self._manager.parent.enable_save()
 
     def get_save_flag(self):
@@ -250,7 +250,7 @@ class PanelBase:
         self._has_changed = True
         self._drag_flag = flag
         if self._manager is not None and self._manager.parent is not None:
-            self._manager.parent.panel_on_focus = self
+            self._manager.parent.cpanel_on_focus = self
             self._manager.parent.enable_drag()
        
     def get_drag_flag(self):
@@ -270,7 +270,7 @@ class PanelBase:
         self._has_changed = True
         self._reset_flag = flag
         if self._manager is not None and self._manager.parent is not None:
-            self._manager.parent.panel_on_focus = self
+            self._manager.parent.cpanel_on_focus = self
             self._manager.parent.enable_reset()
       
     def get_reset_flag(self):

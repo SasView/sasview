@@ -143,6 +143,8 @@ class ViewerFrame(wx.Frame):
         self.plugins += self._find_plugins()
         ## List of panels
         self.panels = {}
+        # List of plot panels
+        self.plot_panels = {}
 
         # Default locations
         self._default_save_location = os.getcwd()        
@@ -151,6 +153,8 @@ class ViewerFrame(wx.Frame):
         self.defaultPanel = None
         #panel on focus
         self.panel_on_focus = None
+        #control_panel on focus
+        self.cpanel_on_focus = None
         self.loader = Loader()   
         #data manager
         from data_manager import DataManager
@@ -198,7 +202,8 @@ class ViewerFrame(wx.Frame):
         update the toolbar if available
         update edit menu if available
         """
-        self.panel_on_focus = event.panel
+        if event != None:
+            self.panel_on_focus = event.panel
         panel_name = 'No panel on focus'
         application_name = 'No Selected Application'
         if self.panel_on_focus is not None:
@@ -208,11 +213,18 @@ class ViewerFrame(wx.Frame):
 
             if self._data_panel is not None:
                 panel_name = self.panel_on_focus.window_caption
-                self._data_panel.set_panel_on_focus(panel_name)
+                self._data_panel.set_panel_on_focus(ID)#panel_name)
+                #update combo
+                if self.panel_on_focus in self.plot_panels.values():
+                    self._data_panel.cb_plotpanel.SetStringSelection(str\
+                                         (self.panel_on_focus.window_caption))
+                elif self.panel_on_focus != self._data_panel:
+                    self.cpanel_on_focus = self.panel_on_focus
                 #update toolbar
                 self._update_toolbar_helper()
                 #update edit menu
                 self.enable_edit_menu()
+
 
     def build_gui(self):
         """
@@ -611,7 +623,14 @@ class ViewerFrame(wx.Frame):
         self._mgr.RestoreMaximizedPane()
         # Register for showing/hiding the panel
         wx.EVT_MENU(self, ID, self._on_view)
-        
+        if p not in self.plot_panels.values():
+            self.plot_panels[ID] = p
+            if self._data_panel is not None and \
+                self._plotting_plugin is not None:
+                ind = self._data_panel.cb_plotpanel.FindString('None')
+                if ind != wx.NOT_FOUND:
+                    self._data_panel.cb_plotpanel.Delete(ind)
+                self._data_panel.cb_plotpanel.Append(str(caption), p)
         self._mgr.Update()
         return ID
         
@@ -648,11 +667,11 @@ class ViewerFrame(wx.Frame):
         panel_name = 'No Panel on Focus'
         if self._toolbar is  None:
             return
-        self._toolbar.update_toolbar(self.panel_on_focus)
+        self._toolbar.update_toolbar(self.cpanel_on_focus)
         if self._current_perspective is not None:
             application_name = self._current_perspective.sub_menu
-        if self.panel_on_focus is not None:
-            panel_name = self.panel_on_focus.window_caption
+        if self.cpanel_on_focus is not None:
+            panel_name = self.cpanel_on_focus.window_caption
         self._toolbar.update_button(application_name=application_name, 
                                         panel_name=panel_name)
         self._toolbar.Realize()
@@ -1036,27 +1055,36 @@ class ViewerFrame(wx.Frame):
         hide panel
         """
         ID = str(uid)
+        caption = self.panels[ID].window_caption
         config.printEVT("hide_panel: %s" % ID)
         if ID in self.panels.keys():
             if self._mgr.GetPane(self.panels[ID].window_name).IsShown():
                 self._mgr.GetPane(self.panels[ID].window_name).Hide()
+                if self._data_panel is not None and \
+                            ID in self.plot_panels.keys():
+                    self._data_panel.cb_plotpanel.Append(str(caption), p)
                 # Hide default panel
                 self._mgr.GetPane(self.panels["default"].window_name).Hide()
             self._mgr.Update()
-            
+                
     def delete_panel(self, uid):
         """
         delete panel given uid
         """
         ID = str(uid)
         config.printEVT("delete_panel: %s" % ID)
-        
+        caption = self.panels[ID].window_caption
         if ID in self.panels.keys():
             panel = self.panels[ID]
             self._plotting_plugin.delete_panel(panel.group_id)
             self._mgr.DetachPane(panel)
             panel.Destroy()
             del self.panels[ID]
+            del self.plot_panels[ID]
+            if self._data_panel is not None:
+                ind = self._data_panel.cb_plotpanel.FindString(str(caption))
+                if ind != wx.NOT_FOUND:
+                    self._data_panel.cb_plotpanel.Delete(ind)
             self._mgr.Update()
       
     def clear_panel(self):
@@ -1141,6 +1169,7 @@ class ViewerFrame(wx.Frame):
                         and ext.lower() not in EXTENSIONS:
                         plug.clear_panel()  
             self.panel_on_focus = None    
+            self.cpanel_on_focus = None 
             self.get_data(path)
         if self.defaultPanel is not None and \
             self._mgr.GetPane(self.panels["default"].window_name).IsShown():
@@ -1223,8 +1252,8 @@ class ViewerFrame(wx.Frame):
         """
         save the state of the current active application
         """
-        if self.panel_on_focus is not None:
-            self.panel_on_focus.on_save(event)
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.on_save(event)
             
     def _on_save_project(self, event):
         """
@@ -1487,7 +1516,7 @@ class ViewerFrame(wx.Frame):
             self.set_data(data_id=data_list.keys())
             self.on_close_welcome_panel()
        
-    def set_data(self, data_id): 
+    def set_data(self, data_id, theory_id=None): 
         """
         set data to current perspective
         """
@@ -1679,12 +1708,14 @@ class ViewerFrame(wx.Frame):
         """
         Enable append data on a plot panel
         """
+
         if self.panel_on_focus not in self._plotting_plugin.plot_panels.values():
             return
         is_theory = len(self.panel_on_focus.plots) <= 1 and \
             self.panel_on_focus.plots.values()[0].__class__.__name__ == "Theory1D"
             
         is_data2d = hasattr(new_plot, 'data')
+        
         is_data1d = self.panel_on_focus.__class__.__name__ == "ModelPanel1D"\
             and self.panel_on_focus.group_id is not None
         has_meta_data = hasattr(new_plot, 'meta_data')
@@ -1702,16 +1733,16 @@ class ViewerFrame(wx.Frame):
         """
         enable menu item under edit menu depending on the panel on focus
         """
-        if self.panel_on_focus is not None and self._edit_menu is not None:
-            flag = self.panel_on_focus.get_undo_flag()
+        if self.cpanel_on_focus is not None and self._edit_menu is not None:
+            flag = self.cpanel_on_focus.get_undo_flag()
             self._edit_menu.Enable(GUIFRAME_ID.UNDO_ID, flag)
-            flag = self.panel_on_focus.get_redo_flag()
+            flag = self.cpanel_on_focus.get_redo_flag()
             self._edit_menu.Enable(GUIFRAME_ID.REDO_ID, flag)
-            flag = self.panel_on_focus.get_print_flag()
+            flag = self.cpanel_on_focus.get_print_flag()
             self._edit_menu.Enable(GUIFRAME_ID.PRINT_ID, flag)
-            flag = self.panel_on_focus.get_preview_flag()
+            flag = self.cpanel_on_focus.get_preview_flag()
             self._edit_menu.Enable(GUIFRAME_ID.PREVIEW_ID, flag)
-            flag = self.panel_on_focus.get_reset_flag()
+            flag = self.cpanel_on_focus.get_reset_flag()
             self._edit_menu.Enable(GUIFRAME_ID.RESET_ID, flag)
         else:
             flag = False
@@ -1725,22 +1756,22 @@ class ViewerFrame(wx.Frame):
         """
         undo previous action of the last panel on focus if possible
         """
-        if self.panel_on_focus is not None:
-            self.panel_on_focus.on_undo(event)
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.on_undo(event)
             
     def on_redo_panel(self, event=None):
         """
         redo the last cancel action done on the last panel on focus
         """
-        if self.panel_on_focus is not None:
-            self.panel_on_focus.on_redo(event)
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.on_redo(event)
             
     def on_bookmark_panel(self, event=None):
         """
         bookmark panel
         """
-        if self.panel_on_focus is not None:
-            self.panel_on_focus.on_bookmark(event)
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.on_bookmark(event)
             
     def append_bookmark(self, event=None):
         """
@@ -1752,133 +1783,133 @@ class ViewerFrame(wx.Frame):
         """
         save possible information on the current panel
         """
-        if self.panel_on_focus is not None:
-            self.panel_on_focus.on_save(event)
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.on_save(event)
             
     def on_preview_panel(self, event=None):
         """
         preview information on the panel on focus
         """
-        if self.panel_on_focus is not None:
-            self.panel_on_focus.on_preview(event)
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.on_preview(event)
             
     def on_print_panel(self, event=None):
         """
         print available information on the last panel on focus
         """
-        if self.panel_on_focus is not None:
-            self.panel_on_focus.on_print(event)
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.on_print(event)
             
     def on_zoom_panel(self, event=None):
         """
         zoom on the current panel if possible
         """
-        if self.panel_on_focus is not None:
-            self.panel_on_focus.on_zoom(event)
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.on_zoom(event)
             
     def on_zoom_in_panel(self, event=None):
         """
         zoom in of the panel on focus
         """
-        if self.panel_on_focus is not None:
-            self.panel_on_focus.on_zoom_in(event)
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.on_zoom_in(event)
             
     def on_zoom_out_panel(self, event=None):
         """
         zoom out on the panel on focus
         """
-        if self.panel_on_focus is not None:
-            self.panel_on_focus.on_zoom_out(event)
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.on_zoom_out(event)
             
     def on_drag_panel(self, event=None):
         """
         drag apply to the panel on focus
         """
-        if self.panel_on_focus is not None:
-            self.panel_on_focus.on_drag(event)
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.on_drag(event)
             
     def on_reset_panel(self, event=None):
         """
         reset the current panel
         """
-        if self.panel_on_focus is not None:
-            self.panel_on_focus.on_reset(event)
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.on_reset(event)
             
     def enable_undo(self):
         """
         enable undo related control
         """
-        if self.panel_on_focus is not None:
-            self._toolbar.enable_undo(self.panel_on_focus)
+        if self.cpanel_on_focus is not None:
+            self._toolbar.enable_undo(self.cpanel_on_focus)
             
     def enable_redo(self):
         """
         enable redo 
         """
-        if self.panel_on_focus is not None:
-            self._toolbar.enable_redo(self.panel_on_focus)
+        if self.cpanel_on_focus is not None:
+            self._toolbar.enable_redo(self.cpanel_on_focus)
             
     def enable_bookmark(self):
         """
         Bookmark 
         """
-        if self.panel_on_focus is not None:
-            self._toolbar.enable_bookmark(self.panel_on_focus)
+        if self.cpanel_on_focus is not None:
+            self._toolbar.enable_bookmark(self.cpanel_on_focus)
             
     def enable_save(self):
         """
         save 
         """
-        if self.panel_on_focus is not None:
-            self._toolbar.enable_save(self.panel_on_focus)
+        if self.cpanel_on_focus is not None:
+            self._toolbar.enable_save(self.cpanel_on_focus)
             
     def enable_preview(self):
         """
         preview 
         """
-        if self.panel_on_focus is not None:
-            self._toolbar.enable_preview(self.panel_on_focus)
+        if self.cpanel_on_focus is not None:
+            self._toolbar.enable_preview(self.cpanel_on_focus)
             
     def enable_print(self):
         """
         print 
         """
-        if self.panel_on_focus is not None:
-            self._toolbar.enable_print(self.panel_on_focus)
+        if self.cpanel_on_focus is not None:
+            self._toolbar.enable_print(self.cpanel_on_focus)
             
     def enable_zoom(self):
         """
         zoom 
         """
-        if self.panel_on_focus is not None:
+        if self.cpanel_on_focus is not None:
             self._toolbar.enable_zoom(self.panel_on_focus)
             
     def enable_zoom_in(self):
         """
         zoom in 
         """
-        if self.panel_on_focus is not None:
+        if self.cpanel_on_focus is not None:
             self._toolbar.enable_zoom_in(self.panel_on_focus)
             
     def enable_zoom_out(self):
         """
         zoom out 
         """
-        if self.panel_on_focus is not None:
+        if self.cpanel_on_focus is not None:
             self._toolbar.enable_zoom_out(self.panel_on_focus)
             
     def enable_drag(self, event=None):
         """
         drag 
         """
-        if self.panel_on_focus is not None:
+        if self.cpanel_on_focus is not None:
             self._toolbar.enable_drag(self.panel_on_focus)
             
     def enable_reset(self):
         """
         reset the current panel
         """
-        if self.panel_on_focus is not None:
+        if self.cpanel_on_focus is not None:
             self._toolbar.enable_reset(self.panel_on_focus)
 
     def set_schedule_full_draw(self, panel=None, func='del'):
@@ -1966,7 +1997,19 @@ class ViewerFrame(wx.Frame):
         """
         return self.schedule
     
-        
+    def on_set_plot_focus(self, panel):
+        """
+        Set focus on a plot panel
+        """
+        for plot in self.plot_panels.values():
+            # make sure we don't double focus
+            if panel != plot:
+                plot.on_kill_focus(None)
+        panel.on_set_focus(None)  
+        # set focusing panel
+        self.panel_on_focus = panel  
+        self.set_panel_on_focus(None)
+         
     def _onDrawIdle(self, *args, **kwargs):
         """
         ReDraw with axes
