@@ -924,6 +924,11 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         #copy.deepcopy(self.state.saved_state)
         self.state.state_list[str(self.state.state_num)] = self.state.clone_state()
         self._set_undo_flag(False)
+        self._set_redo_flag(False)
+        self._set_bookmark_flag(False)
+        self._set_preview_flag(False)
+        self._set_save_flag(False)
+
         
     def _on_text(self, event):
         """
