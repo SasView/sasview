@@ -46,7 +46,6 @@ class GUIToolBar(Tbar):
         tbar_size = (20, 15)
         button_type =  wx.ITEM_NORMAL
 
-        self.AddSeparator()
         reset_im = GUIFRAME_ICON.RESET_ICON
         reset_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
         reset_bmp = reset_im.ConvertToBitmap()
@@ -92,20 +91,14 @@ class GUIToolBar(Tbar):
                           disable_redo_bmp, button_type,'Redo')
         self.AddSeparator()
         #add button for the current application
-        self.button_application = wx.StaticText(self, -1, 'Welcome')
-        self.button_application.SetForegroundColour('black')
-        self.button_application.SetBackgroundColour('#1874CD')
-        hint = 'Active Application'
-        self.button_application.SetToolTipString(hint)
-        self.AddControl(self.button_application)
-        self.AddSeparator()
-         #add button for the panel on focus
-        self.button_panel = wx.StaticText(self, -1, 'No Panel')
-        self.button_panel.SetForegroundColour('black')
-        self.button_panel.SetBackgroundColour('#90EE90')
-        hint = 'Panel on Focus'
-        self.button_panel.SetToolTipString(hint)
-        self.AddControl(self.button_panel)
+        #self.button_application = wx.StaticText(self, -1, 'Welcome')
+        #self.button_application.SetForegroundColour('black')
+        #self.button_application.SetBackgroundColour('#1874CD')
+        #hint = 'Active Application'
+        #self.button_application.SetToolTipString(hint)
+        #self.AddControl(self.button_application)
+        #self.AddSeparator()
+        
         self._bookmark_bt = PlateButton(self, -1, 'bookmark', 
                          GUIFRAME_ICON.BOOKMARK_ICON.ConvertToBitmap(), 
                          style=PB_STYLE_SQUARE|PB_STYLE_DROPARROW)
@@ -120,6 +113,20 @@ class GUIToolBar(Tbar):
         self.AddControl(self._bookmark_bt)
        
         self.SetToolBitmapSize(tbar_size)
+        self.AddSeparator()
+        #add button for the panel on focus
+        self.button_panel = wx.StaticText(self, -1, 'No Panel', 
+                                          style=wx.SUNKEN_BORDER|wx.ALIGN_LEFT)
+        #self.button_panel.SetForegroundColour('black')
+        #self.button_panel.SetBackgroundColour('white')
+        button_panel_font = self.button_panel.GetFont()
+        button_panel_font.SetWeight(wx.BOLD)
+        self.button_panel.SetFont(button_panel_font)
+        #self.button_panel.SetClientSize((80,20))
+        hint = 'Control Panel on Focus'
+        self.button_panel.SetToolTipString(hint)
+        self.AddControl(self.button_panel)
+        
         self.Realize()
         
     def on_bind_button(self):
@@ -141,7 +148,7 @@ class GUIToolBar(Tbar):
     def update_button(self, application_name='', panel_name=''):
         """
         """
-        self.button_application.SetLabel(str(application_name))
+        #self.button_application.SetLabel(str(application_name))
         self.button_panel.SetLabel(str(panel_name))
         
     def update_toolbar(self, panel=None):
