@@ -16,6 +16,7 @@
 from sans.models.BaseComponent import BaseComponent
 from scipy.special import gammainc,gamma
 import copy    
+import math
     
 class PolymerExclVolume(BaseComponent):
     """ 
