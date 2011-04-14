@@ -129,7 +129,7 @@ class FitPage(BasicPage):
         smear_set_box= wx.StaticBox(self, -1,'Set Instrumental Smearing')
         sizer_smearer_box = wx.StaticBoxSizer(smear_set_box, wx.HORIZONTAL)
         sizer_smearer_box.SetMinSize((_DATA_BOX_WIDTH,85))
-        sizer_fit = wx.GridSizer(2, 4,2,6)
+        sizer_fit = wx.GridSizer(2, 4, 2, 6)
         
         # combobox for smear2d accuracy selection
         self.smear_accuracy = wx.ComboBox(self, -1,size=(50,-1),style=wx.CB_READONLY)
@@ -196,17 +196,26 @@ class FitPage(BasicPage):
         self.tcChi    =  BGTextCtrl(self, -1, "-", size=(75,20), style=0)
         self.tcChi.SetToolTipString("Chi2/Npts")
         self.Npts_fit    =  BGTextCtrl(self, -1, "-", size=(75,20), style=0)
-        self.Npts_fit.SetToolTipString(" Npts : number of points selected for fitting")
-        self.Npts_total  =  BGTextCtrl(self, -1, "-", size=(75,20), style=0)
-        self.Npts_total.SetToolTipString(" Total Npts : total number of data points")
+        self.Npts_fit.SetToolTipString(\
+                            " Npts : number of points selected for fitting")
+        self.Npts_total  =  self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20), 
+                        style=wx.TE_PROCESS_ENTER, 
+                        text_enter_callback=self._onQrangeEnter)
+        self.Npts_total.SetValue(format_number(self.npts_x))
+        self.Npts_total.SetToolTipString(\
+                                " Total Npts : total number of data points")
+        
         # Update and Draw button
         self.draw_button = wx.Button(self,wx.NewId(),'Compute', size=(88,24))
-        self.draw_button.Bind(wx.EVT_BUTTON, self._onDraw,id= self.draw_button.GetId())
+        self.draw_button.Bind(wx.EVT_BUTTON, \
+                              self._onDraw,id= self.draw_button.GetId())
         self.draw_button.SetToolTipString("Compute and Draw.")
         
         box_description_1= wx.StaticText(self, -1,'    Chi2/Npts')
-        box_description_2= wx.StaticText(self, -1,'Fitted Npts')
-        box_description_3= wx.StaticText(self, -1,'Data Npts')
+        box_description_2= wx.StaticText(self, -1,'Npts(Fit)')
+        box_description_3= wx.StaticText(self, -1,'Total Npts')
+        box_description_3.SetToolTipString( \
+                                " Total Npts : total number of data points")
         #box_description_4= wx.StaticText(self, -1,' ')
         
         
@@ -317,12 +326,13 @@ class FitPage(BasicPage):
                                         text_enter_callback=self._onQrangeEnter)
         self.qmax.SetValue(str(self.qmax_x))
         self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
-        
+        """
         self.theory_npts_tcrtl  = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20), 
                         style=wx.TE_PROCESS_ENTER, 
                         text_enter_callback=self._onQrangeEnter)
         self.theory_npts_tcrtl.SetValue(format_number(self.npts_x))
         self.theory_npts_tcrtl.SetToolTipString("Number of point to plot.")
+        """
         id = wx.NewId()
         self.reset_qrange =wx.Button(self,id,'Reset',size=(77,20))
       
@@ -330,7 +340,7 @@ class FitPage(BasicPage):
         self.reset_qrange.SetToolTipString("Reset Q range to the default values")
      
         sizer_horizontal=wx.BoxSizer(wx.HORIZONTAL)
-        sizer= wx.GridSizer(2, 5,0, 0)
+        sizer= wx.GridSizer(2, 4, 2, 6)
 
         self.btEditMask = wx.Button(self,wx.NewId(),'Editor', size=(88,23))
         self.btEditMask.Bind(wx.EVT_BUTTON, self._onMask,id= self.btEditMask.GetId())
@@ -340,12 +350,12 @@ class FitPage(BasicPage):
         sizer.Add(wx.StaticText(self, -1, 'Q range'))     
         sizer.Add(wx.StaticText(self, -1, ' Min[1/A]'))
         sizer.Add(wx.StaticText(self, -1, ' Max[1/A]'))
-        sizer.Add(wx.StaticText(self, -1, ' Theory Npts'))
         sizer.Add(self.EditMask_title)
+        #sizer.Add(wx.StaticText(self, -1, ''))
         sizer.Add(self.reset_qrange)   
         sizer.Add(self.qmin)
         sizer.Add(self.qmax)
-        sizer.Add(self.theory_npts_tcrtl)
+        #sizer.Add(self.theory_npts_tcrtl)
         sizer.Add(self.btEditMask)
         boxsizer_range.Add(sizer_chi2) 
         boxsizer_range.Add((10,10))
@@ -1223,7 +1233,10 @@ class FitPage(BasicPage):
                     index_data = ((self.qmin_x <= self.data.x)& \
                                   (self.data.x <= self.qmax_x))
                     self.Npts_fit.SetValue(str(len(self.data.x[index_data])))
-               
+            else:
+                self.npts_x = self.Npts_total.GetValue()
+                self._save_plotting_range()
+
         else:
            tcrtl.SetBackgroundColour("pink")
            msg= "Model Error:wrong value entered!!!"
@@ -1590,6 +1603,7 @@ class FitPage(BasicPage):
                 self.Npts_fit.SetValue(str(len(self.data.data)))
                 self.btEditMask.Enable()  
                 self.EditMask_title.Enable() 
+        self.Npts_total.Disable()
         self.dataSource.SetValue(data_name)
         self.qmin_x = data_min
         self.qmax_x = data_max

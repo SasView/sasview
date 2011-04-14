@@ -1241,10 +1241,18 @@ class BasicPage(ScrolledPanel, PanelBase):
                                               qmin=float(self.qmin_x),
                                               uid=self.uid, 
                                                  qmax= float(self.qmax_x))
-                    index_data = ((self.qmin_x <= self.data.x)&\
-                                  (self.data.x <= self.qmax_x))
-                    val = str(len(self.data.x[index_data==True]))
-                    self.Npts_fit.SetValue(val)
+                    if self.data != None:
+                        index_data = ((self.qmin_x <= self.data.x)&\
+                                      (self.data.x <= self.qmax_x))
+                        val = str(len(self.data.x[index_data==True]))
+                        self.Npts_fit.SetValue(val)
+                    else:
+                        # No data in the panel
+                        try:
+                            self.npts_x = float(self.Npts_total.GetValue())
+                        except:
+                            flag = False
+                            return flag
                     flag = True
                 if self._is_2D():
                     # only 2D case set mask   
@@ -1745,9 +1753,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                 wx.PostEvent(self._manager.parent, StatusEvent(status = msg ))
                 return 
             #Check if # of points for theory model are valid(>0).
-            if self.theory_npts != None:
-                if check_float(self.theory_npts):
-                    temp_npts = float(self.theory_npts.GetValue())
+            if self.Npts_total.IsEnabled() :
+                if check_float(self.Npts_total):
+                    temp_npts = float(self.Npts_total.GetValue())
                     if temp_npts !=  self.num_points:
                         self.num_points = temp_npts
                         is_modified = True
