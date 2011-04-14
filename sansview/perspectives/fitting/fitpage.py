@@ -304,6 +304,10 @@ class FitPage(BasicPage):
                 #self.pinhole_smearer.Disable() 
                 self.slit_smearer.Disable()   
                 #self.enable_smearer.Disable() 
+            if self.data == None:
+                self.slit_smearer.Disable() 
+                self.pinhole_smearer.Disable() 
+                self.enable_smearer.Disable() 
         else: self._show_smear_sizer()
         boxsizer_range.Add(self.sizer_set_masking)
          #2D data? default
@@ -1569,10 +1573,12 @@ class FitPage(BasicPage):
             self._set_preview_flag(True)
             self._set_smear(data)
             # more disables for 2D
-            if self.data.__class__.__name__ =="Data2D":
+            if self.data.__class__.__name__ =="Data2D":   
                 self.slit_smearer.Disable()
                 self.default_mask = copy.deepcopy(self.data.mask)
-                
+            else:
+                self.slit_smearer.Enable(True) 
+                self.pinhole_smearer.Enable(True)      
                 
             self.formfactorbox.Enable()
             self.structurebox.Enable()
