@@ -2389,7 +2389,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         #if self.check_invalid_panel():
         #    return
         ##For 3 different cases: Data2D, Data1D, and theory
-        if self.data.__class__.__name__ == "Data2D":
+        if self.model == None:
+            msg="Please select a model first..."
+            wx.MessageBox(msg, 'Info')
+            flag = False
+            return
+            
+        elif self.data.__class__.__name__ == "Data2D":
             data_min= 0
             x= max(math.fabs(self.data.xmin), math.fabs(self.data.xmax)) 
             y= max(math.fabs(self.data.ymin), math.fabs(self.data.ymax))
@@ -2403,6 +2409,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                     flag = self.update_pinhole_smear()
                 else:
                     flag = True
+                    
+        elif self.data == None:
+            self.qmin_x = _QMIN_DEFAULT
+            self.qmax_x = _QMAX_DEFAULT
+            self.num_points = _NPTS_DEFAULT            
+            self.state.npts = self.num_points
+            
         elif self.data.__class__.__name__ != "Data2D":
             self.qmin_x = min(self.data.x)
             self.qmax_x = max(self.data.x)
@@ -2417,10 +2430,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 else:
                     flag = True
         else:
-            self.qmin_x = _QMIN_DEFAULT
-            self.qmax_x = _QMAX_DEFAULT
-            self.num_points = _NPTS_DEFAULT            
-            self.state.npts = self.num_points
+            flag = False
             
         if flag == False:
             msg= "Cannot Plot :Must enter a number!!!  "

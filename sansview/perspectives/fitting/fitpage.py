@@ -913,8 +913,7 @@ class FitPage(BasicPage):
         if self.model ==None:
             msg="Please select a Model first..."
             wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self.manager.parent, StatusEvent(status=\
-                            "Draw model: %s"%msg))
+
             return
         flag = self._update_paramv_on_fit()         
         self._onparamEnter_helper()
@@ -2278,7 +2277,9 @@ class FitPage(BasicPage):
         
         """
         try:
-            if event ==None:
+            if event == None:
+                output= "-"
+            elif not numpy.isfinite(event.output):
                 output= "-"
             else:
                 output = event.output
