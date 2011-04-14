@@ -77,7 +77,7 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         c model.
         """
         state = (self.__dict__, self.params, self.dispersion)
-        return (create_CylinderModel,tuple(), state, None, None)
+        return (create_[PYTHONCLASS],tuple(), state, None, None)
         
     def clone(self):
         """ Return a identical copy of self """
