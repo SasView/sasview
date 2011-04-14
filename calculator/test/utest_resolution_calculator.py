@@ -23,7 +23,7 @@ class resolution_calculator(unittest.TestCase):
         self.cal.set_source2sample_distance([1500])
         self.cal.set_sample2detector_distance([1500])
         self.cal.set_wavelength_spread(0.1)
-        qr, phi, sigma_1, sigma_2 = self.cal.compute(0, 0, coord = 'polar')
+        qr, phi, sigma_1, sigma_2, _ = self.cal.compute(0, 0, coord = 'polar')
         sigma_1d = self.cal.sigma_1d
         
         # The value "0.000213283" was obtained by manual calculation.
