@@ -1753,7 +1753,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 wx.PostEvent(self._manager.parent, StatusEvent(status = msg ))
                 return 
             #Check if # of points for theory model are valid(>0).
-            if self.Npts_total.IsEnabled() :
+            if self.Npts_total.IsEditable() :
                 if check_float(self.Npts_total):
                     temp_npts = float(self.Npts_total.GetValue())
                     if temp_npts !=  self.num_points:

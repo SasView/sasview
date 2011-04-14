@@ -194,7 +194,7 @@ class FitPage(BasicPage):
         
         # StaticText for chi2, N(for fitting), Npts
         self.tcChi    =  BGTextCtrl(self, -1, "-", size=(75,20), style=0)
-        self.tcChi.SetToolTipString("Chi2/Npts")
+        self.tcChi.SetToolTipString("Chi2/Npts(Fit)")
         self.Npts_fit    =  BGTextCtrl(self, -1, "-", size=(75,20), style=0)
         self.Npts_fit.SetToolTipString(\
                             " Npts : number of points selected for fitting")
@@ -1609,7 +1609,12 @@ class FitPage(BasicPage):
                 self.Npts_fit.SetValue(str(len(self.data.data)))
                 self.btEditMask.Enable()  
                 self.EditMask_title.Enable() 
-        self.Npts_total.Disable()
+        self.Npts_total.SetEditable(False)
+        self.Npts_total.SetBackgroundColour(\
+                                    self.GetParent().GetBackgroundColour())
+        
+        self.Npts_total.Bind(wx.EVT_MOUSE_EVENTS, self._npts_click)
+        #self.Npts_total.Disable()
         self.dataSource.SetValue(data_name)
         self.qmin_x = data_min
         self.qmax_x = data_max
@@ -1635,7 +1640,14 @@ class FitPage(BasicPage):
                 
             self.model_view.Disable()
             self._draw_model()
-        
+    
+    def _npts_click(self, event):
+        """
+        Prevent further handling of the mouse event on Npts_total
+        by not calling Skip().
+        """ 
+        pass
+    
     def reset_page(self, state,first=False):
         """
         reset the state
