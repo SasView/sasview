@@ -136,8 +136,8 @@ class Plugin(PluginBase):
         wx.EVT_MENU(owner, id1, self.on_add_sim_page)
         
         id1 = wx.NewId()
-        simul_help = "Add new fit page"
-        self.menu1.Append(id1, '&Create New Page',simul_help)
+        simul_help = "Add new fit panel"
+        self.menu1.Append(id1, '&New Fit Page',simul_help)
         wx.EVT_MENU(owner, id1, self.on_add_new_page)
     
         #create  menubar items

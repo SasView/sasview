@@ -58,6 +58,13 @@ class GUIToolBar(Tbar):
         drag_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
         drag_bmp = drag_im.ConvertToBitmap()
         self.AddSeparator()
+        save_im = GUIFRAME_ICON.SAVE_ICON
+        save_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
+        save_bmp = save_im.ConvertToBitmap()
+        disable_save_bmp = wx.NullBitmap
+        self.AddLabelTool(GUIFRAME_ID.SAVE_ID, 'Save', save_bmp,
+                   disable_save_bmp, button_type,'Save')
+        self.AddSeparator()
         report_im = GUIFRAME_ICON.REPORT_ICON
         report_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
         report_bmp = report_im.ConvertToBitmap()
@@ -140,6 +147,8 @@ class GUIToolBar(Tbar):
                              id=GUIFRAME_ID.UNDO_ID)
             self.parent.Bind(wx.EVT_TOOL, self.parent.on_reset_panel,
                              id=GUIFRAME_ID.RESET_ID)
+            self.parent.Bind(wx.EVT_TOOL, self.parent.on_save_panel,
+                             id=GUIFRAME_ID.SAVE_ID)
             self.parent.Bind(wx.EVT_TOOL, self.parent.on_preview_panel,
                              id=GUIFRAME_ID.PREVIEW_ID)
             self.parent.Bind(wx.EVT_TOOL, self.parent.on_print_panel,
@@ -160,6 +169,7 @@ class GUIToolBar(Tbar):
             self.EnableTool(GUIFRAME_ID.REDO_ID, False)
             self.EnableTool(GUIFRAME_ID.PREVIEW_ID, False)
             self.EnableTool(GUIFRAME_ID.RESET_ID, False)
+            self.EnableTool(GUIFRAME_ID.SAVE_ID, False)
             self._bookmark_bt.Disable()
             
         else:
@@ -168,6 +178,7 @@ class GUIToolBar(Tbar):
             self.EnableTool(GUIFRAME_ID.REDO_ID, panel.get_redo_flag())
             self.EnableTool(GUIFRAME_ID.PREVIEW_ID, panel.get_preview_flag())
             self.EnableTool(GUIFRAME_ID.RESET_ID, panel.get_reset_flag())
+            self.EnableTool(GUIFRAME_ID.SAVE_ID, panel.get_save_flag())
             self._bookmark_bt.Enable(panel.get_bookmark_flag())
         self.Realize()
         

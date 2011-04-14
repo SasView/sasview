@@ -1018,7 +1018,7 @@ class FitPage(BasicPage):
       
         if self.model != None:
             self._set_bookmark_flag(True)
-            self._set_save_flag(True)
+            #self._set_save_flag(True)
             # Reset smearer, model and data
             self._set_smear(self.data)
             try:

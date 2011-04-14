@@ -132,6 +132,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.state.file = self._data.name
             #Reset the list of states
             self.state.data = copy.deepcopy(data)
+            self._set_save_flag(True)
             self._set_preview_flag(False)
             self._reset_state_list()
             

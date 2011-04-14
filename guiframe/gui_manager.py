@@ -641,9 +641,10 @@ class ViewerFrame(wx.Frame):
         # Menu
         self._menubar = wx.MenuBar()
         self._add_menu_file()
+        self._add_menu_edit()
         self._add_menu_data()
         self._add_menu_application()
-        self._add_menu_edit()
+        
         self._add_menu_tool()
         self._add_current_plugin_menu()
         self._add_menu_window()
@@ -694,7 +695,7 @@ class ViewerFrame(wx.Frame):
                         self._tool_menu.Append(id, tool[0], tool[1])
                         wx.EVT_MENU(self, id, tool[2])
             if self._tool_menu is not None:
-                self._menubar.Append(self._tool_menu, '&Tools')
+                self._menubar.Append(self._tool_menu, '&Tool')
                 
     def _add_current_plugin_menu(self):
         """
@@ -783,28 +784,18 @@ class ViewerFrame(wx.Frame):
             for (menu, name) in self._plotting_plugin.populate_menu(self):
                 self._window_menu.AppendSubMenu(menu, name)
         self._menubar.Append(self._window_menu, '&Window')
-     
-        style = self.__gui_style & GUIFRAME.MANAGER_ON
-        id = wx.NewId()
-        self._data_panel_menu = self._window_menu.Append(id,
-                                                '&Data Explorer ON', '')
-        wx.EVT_MENU(self, id, self.show_data_panel)
-        if style == GUIFRAME.MANAGER_ON:
-            self._data_panel_menu.SetText('Data Explorer OFF')
-        else:
-            self._data_panel_menu.SetText('Data Explorer ON')
             
         style = self.__gui_style & GUIFRAME.PLOTTING_ON
         if style == GUIFRAME.PLOTTING_ON:
             self._window_menu.AppendSeparator()
             id = wx.NewId()
             preferences_menu = wx.Menu()
-            hint = "Plot panels will floating"
-            preferences_menu.Append(id, '&Floating Plot Panel', hint)
+            hint = "All plot panels will floating"
+            preferences_menu.Append(id, '&Floating Graphs', hint)
             wx.EVT_MENU(self, id, self.set_plotpanel_floating)
             id = wx.NewId()
-            hint = "Plot panels will displayed within the frame"
-            preferences_menu.Append(id, '&Fixed Plot Panel', hint)
+            hint = "All plot panels will displayed within the frame"
+            preferences_menu.Append(id, '&Fixed Graphs', hint)
             wx.EVT_MENU(self, id, self.set_plotpanel_fixed)
             id = wx.NewId()
             style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
@@ -867,7 +858,7 @@ class ViewerFrame(wx.Frame):
             #self._applications_menu.
             if (not plug_data_count or not plug_no_data_count):
                 self._applications_menu.RemoveItem(separator)
-            self._menubar.Append(self._applications_menu, '&Applications')
+            self._menubar.Append(self._applications_menu, '&Application')
             self._check_applications_menu()
             
     def _add_menu_file(self):
@@ -954,6 +945,19 @@ class ViewerFrame(wx.Frame):
                 for (menu, name) in menu_list:
                     self._menubar.Append(menu, name)
             
+        style = self.__gui_style & GUIFRAME.MANAGER_ON
+        if self._data_plugin != None:
+            _data_menu = self._data_plugin._data_menu
+            _data_menu.AppendSeparator()
+            id = wx.NewId()
+            self._data_panel_menu = _data_menu.Append(id,
+                                                    '&Data Explorer ON', '')
+            wx.EVT_MENU(self, id, self.show_data_panel)
+            if style == GUIFRAME.MANAGER_ON:
+                self._data_panel_menu.SetText('Data Explorer OFF')
+            else:
+                self._data_panel_menu.SetText('Data Explorer ON')
+                        
     def _on_hide_toolbar(self, event=None):
         """
         hide or show toolbar
