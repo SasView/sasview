@@ -46,6 +46,7 @@ list_of_state_attributes = [["engine_type", "engine_type", "string"],
                       ["struct_rbutton", "struct_rbutton", "bool"],
                       ["formfactorcombobox", "formfactorcombobox", "float"],
                       ["structurecombobox", "structurecombobox", "float"],
+                      ["multi_factor","multi_factor","float"],
                       ["enable_smearer","enable_smearer","bool"],
                       ["disable_smearer","disable_smearer","bool"],
                       ["pinhole_smearer","pinhole_smearer","bool"],
@@ -148,7 +149,7 @@ class PageState(object):
         #save additional information on data that dataloader.reader does not read
         self.is_data = None
         self.data_name = ""
-        
+
         if self.data is not None:
             self.data_name = self.data.name
         self.data_id = None
@@ -206,7 +207,6 @@ class PageState(object):
         self.disp_cb_dict = {}
         self.values = {}
         self.weights = {}
-
                     
         #contains link between a model and selected parameters to fit 
         self.param_toFit = []
@@ -217,6 +217,7 @@ class PageState(object):
         ## save selection of combobox
         self.formfactorcombobox = None
         self.structurecombobox  = None
+
         ## radio box to select type of model
         self.shape_rbutton = False
         self.shape_indep_rbutton = False
@@ -313,7 +314,7 @@ class PageState(object):
         obj.disp_box = copy.deepcopy(self.disp_box)
         obj.qmin = copy.deepcopy(self.qmin)
         obj.qmax = copy.deepcopy(self.qmax)
-        obj.multi_factor = copy.deepcopy(self.multi_factor)
+        obj.multi_factor = self.multi_factor
         obj.npts = copy.deepcopy(self.npts )
         obj.cb1 = copy.deepcopy(self.cb1)
         obj.smearer = copy.deepcopy(self.smearer)
@@ -340,7 +341,7 @@ class PageState(object):
             rep += "maximum value : %s \n"%str(item[6][1])
             rep += "parameter unit: %s\n\n"%str(item[7])
         return rep
- 
+    
     def __repr__(self):
         """ 
         output string for printing
@@ -348,6 +349,7 @@ class PageState(object):
         rep = "\nState name: %s\n"%self.file
         t = time.localtime(self.timestamp)
         time_str = time.strftime("%b %d %H;%M of %Y", t)
+
         rep += "State created on : %s\n"%time_str
         rep += "State form factor combobox selection: %s\n"%self.formfactorcombobox
         rep += "State structure factor combobox selection: %s\n"%self.structurecombobox
@@ -355,6 +357,7 @@ class PageState(object):
         rep += "data's name : %s\n"%self.data_name
         rep += "data's id : %s\n"%self.data_id
         rep += "model type (form factor) selected: %s\n"%self.shape_rbutton 
+        rep += "multi_factor : %s\n"% str(self.multi_factor)
         rep += "model type (shape independent) selected: %s\n"%self.shape_indep_rbutton
         rep += "model type (structure factor) selected: %s\n"%self.struct_rbutton
         rep += "model type (plug-in ) selected: %s\n"%self.plugin_rbutton
@@ -411,9 +414,7 @@ class PageState(object):
                 rep += "(self.orientation_params_disp): %s\n"%len(self.orientation_params_disp)
                 rep = self._repr_helper( list=self.orientation_params_disp, rep=rep)
             """
-        
         return rep
-
 
     def set_report_string(self):
         """
@@ -428,6 +429,7 @@ class PageState(object):
         param_string = ""
         paramval_string = ""
         chi2_string = ""
+        multi_factor_string = ""
         q_range = ""
         strings = self.__repr__()
         lines = strings.split('\n')
@@ -461,6 +463,9 @@ class PageState(object):
             if name == "Value of Chisqr ":
                 chi2 = ("Chi2/Npts = " + value)
                 chi2_string = CENTRE % chi2
+            if name == "multi_factor ":
+                muti_factor = ("muti_factor = " + value)
+                muti_factor_string = CENTRE % muti_factor
             if name == "Title":
                 if len(value.strip()) == 0:
                     continue
@@ -539,6 +544,7 @@ class PageState(object):
             add_str += FEET_3 
         else:
             add_str = ""
+
         # final report html strings
         report_str = html_str % ("%s") + add_str
 
@@ -547,7 +553,8 @@ class PageState(object):
         report_list = [report_str, text_str, images ]
         dialog = ReportDialog(report_list, None, -1, "")
         dialog.ShowModal()
-          
+        
+   
     def _toXML_helper(self, list, element, newdoc):
         """
         Helper method to create xml file for saving state
@@ -637,9 +644,9 @@ class PageState(object):
             element = newdoc.createElement(item[0])
             exec "element.setAttribute(item[0], str(self.%s))" % (item[1])
             inputs.appendChild(element)
-
+            
         # For self.values ={ disp_param_name: [vals,...],...}   
-        # and for self.weights ={ disp_param_name: [weights,...],...}              
+        # and for self.weights ={ disp_param_name: [weights,...],...}  
         for item in list_of_model_attributes:
             element = newdoc.createElement(item[0])
             exec "list = self.%s" % item[1]
@@ -672,7 +679,7 @@ class PageState(object):
             com += " element=element, newdoc=newdoc)"
             exec com % item[1]                       
             inputs.appendChild(element)
-               
+        
         # Save the file
         if doc is None:
             fd = open(file, 'w')
@@ -869,7 +876,7 @@ class PageState(object):
             #append figs
             images.append(fig)
             
-        return images                   
+        return images
 
 class Reader(CansasReader):
     """
@@ -1500,7 +1507,6 @@ class Reader(CansasReader):
             state.toXML(doc=doc, file=data.name, entry_node=sasentry)
             
         return doc 
-
     
 # Simple html report templet  
 HEADER = "<html>\n"
@@ -1541,7 +1547,6 @@ FEET_3 = \
 """
 ELINE = "<p class=MsoNormal>&nbsp;</p>"
 
- 
 if __name__ == "__main__":
     state = PageState(parent=None)
     #state.toXML()
