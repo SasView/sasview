@@ -100,6 +100,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         ## smearer object
         self.smearer = None
+        self.enable2D = False
         
         ##list of model parameters. each item must have same length
         ## each item related to a given parameters
@@ -2469,7 +2470,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         # loops through the panels [dic]
         for item1, item2 in gui_manager.panels.iteritems():
              data_title = self.data.group_id
-             data_name = self.data.name
+             data_name = str(self.data.name).split(" [")[0]
             # try to get all plots belonging to this control panel
              try:
                  # check titles (main plot) 
@@ -2500,7 +2501,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         if self.model == None:
             name = 'FuncHelp'
         else:
-            name = self.model.origin_name
+            name = self.model.__class__.__name__
+            print "name",name
 
         frame = HelpWindow(None, -1,  pageToOpen=model_path)    
         frame.Show(True)
