@@ -2,7 +2,8 @@
 import sys,re,string, wx  
 import wx.lib.newevent 
 from sans.guiframe.events import StatusEvent 
-   
+from sans.guiframe.panel_base import PanelBase
+from wx.lib.scrolledpanel import ScrolledPanel
 #Control panel width 
 if sys.platform.count("darwin")==0:
     PANEL_WID = 420
@@ -30,7 +31,7 @@ def get_fittableParam( model):
         
     return fittable_param
 
-class SimultaneousFitPage(wx.ScrolledWindow):
+class SimultaneousFitPage(ScrolledPanel, PanelBase):
     """
     Simultaneous fitting panel
     All that needs to be defined are the
@@ -43,7 +44,8 @@ class SimultaneousFitPage(wx.ScrolledWindow):
     
     
     def __init__(self, parent,page_finder ={}, *args, **kwargs):
-        wx.ScrolledWindow.__init__(self, parent,style= wx.FULL_REPAINT_ON_RESIZE )
+        ScrolledPanel.__init__(self, parent,style= wx.FULL_REPAINT_ON_RESIZE )
+        PanelBase.__init__(self, parent)
         """
         Simultaneous page display
         """
