@@ -2478,10 +2478,14 @@ class BasicPage(ScrolledPanel, PanelBase):
              data_name = str(self.data.name).split(" [")[0]
             # try to get all plots belonging to this control panel
              try:
+                 title = ''
                  # check titles (main plot) 
+                 if hasattr(item2,"data2D"):
+                     title = item2.data2D.title
                  # and data_names (model plot[2D], and residuals)
                  if item2.group_id == data_title or \
-                                item2.window_name.count(data_name) or\
+                                title.count(data_name) or \
+                                item2.window_name.count(data_name) or \
                                 item2.window_caption.count(data_name):
                      #panel = gui_manager._mgr.GetPane(item2.window_name)
                      # append to the list

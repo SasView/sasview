@@ -1296,7 +1296,7 @@ class Plugin(PluginBase):
        
         new_plot= Data2D(image=image, err_image=err_image)
         new_plot.name = model.name
-        
+        new_plot.title = "Analytical model 2D "
         if data is None:
             self._fill_default_model2D(theory=new_plot, 
                                        qmax=qmax, 
@@ -1323,9 +1323,12 @@ class Plugin(PluginBase):
             new_plot.ymax = data.ymax
             new_plot.xmin = data.xmin
             new_plot.xmax = data.xmax
+            title = data.title
+            if len(title) > 1:
+                new_plot.title = "Model2D for " + data.name
         new_plot.is_data = False
         new_plot.name = model.name + " ["+ str(model.__class__.__name__)+ "]"
-        new_plot.title = "Analytical model 2D "
+
         theory_data = deepcopy(new_plot)
         theory_data.name = "Unknown"
         if toggle_mode_on:
@@ -1344,6 +1347,7 @@ class Plugin(PluginBase):
                                        state=state)  
         current_pg = self.fit_panel.get_page_by_id(page_id)
         title = new_plot.title
+
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                                title=title))
         # Chisqr in fitpage
