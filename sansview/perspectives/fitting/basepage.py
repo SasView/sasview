@@ -2502,7 +2502,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             name = 'FuncHelp'
         else:
             name = self.model.__class__.__name__
-            print "name",name
 
         frame = HelpWindow(None, -1,  pageToOpen=model_path)    
         frame.Show(True)

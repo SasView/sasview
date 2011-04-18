@@ -28,6 +28,9 @@ class FitProblem:
         self.qmin = None
         self.qmax = None
         
+        # 1D or 2D
+        self.enable2D = False
+        
     def clone(self):
         """
         copy fitproblem
@@ -47,6 +50,7 @@ class FitProblem:
         obj.plotted_data = copy.deepcopy(self.plotted_data)
         obj.qmin = copy.deepcopy(self.qmin)
         obj.qmax = copy.deepcopy(self.qmax)
+        obj.enable2D = copy.deepcopy(self.enable2D)
         return obj
         
     def set_smearer(self, smearer):
@@ -111,7 +115,12 @@ class FitProblem:
         
         """
         self.theory_data = copy.deepcopy(data)
-      
+        
+    def set_enable2D(self, enable2D):
+        """
+        """
+        self.enable2D = enable2D
+         
     def get_theory_data(self):
         """
         :return: list of data dList
@@ -190,5 +199,9 @@ class FitProblem:
         """
         """
         return self.fit_tab_caption
-   
+    
+    def get_enable2D(self):
+        """
+        """
+        return self.enable2D
    

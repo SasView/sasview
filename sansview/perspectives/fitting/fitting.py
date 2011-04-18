@@ -485,7 +485,8 @@ class Plugin(PluginBase):
                         panel = self.fit_panel.opened_pages[uid]
                         panel. _on_fit_complete()
   
-    def set_smearer(self, uid, smearer, qmin=None, qmax=None, draw=True):
+    def set_smearer(self, uid, smearer, qmin=None, qmax=None, draw=True, 
+                    enable2D=False):
         """
         Get a smear object and store it to a fit problem
         
@@ -496,16 +497,23 @@ class Plugin(PluginBase):
             msg = "Cannot find ID: %s in page_finder" % str(uid)
             raise ValueError, msg
         self.page_finder[uid].set_smearer(smearer)
+        self.page_finder[uid].set_enable2D(enable2D)
         if draw:
             ## draw model 1D with smeared data
             data =  self.page_finder[uid].get_fit_data()
             model = self.page_finder[uid].get_model()
             if model is None:
                 return
+            enable1D = True
+            enable2D = self.page_finder[uid].get_enable2D()
+            if enable2D:
+                enable1D = False
+
             ## if user has already selected a model to plot
             ## redraw the model with data smeared
             smear = self.page_finder[uid].get_smearer()
             self.draw_model(model=model, data=data, page_id=uid, smearer=smear,
+                enable1D=enable1D, enable2D=enable2D,
                 qmin=qmin, qmax=qmax)
 
     def draw_model(self, model, page_id, data=None, smearer=None,
@@ -532,7 +540,6 @@ class Plugin(PluginBase):
         """
         if data.__class__.__name__ == "Data1D" or not enable2D:    
             ## draw model 1D with no loaded data
-            
             self._draw_model1D(model=model, 
                                data=data,
                                page_id=page_id,
@@ -546,7 +553,7 @@ class Plugin(PluginBase):
                                update_chisqr=update_chisqr)
         else:     
             ## draw model 2D with no initial data
-             self._draw_model2D(model=model,
+            self._draw_model2D(model=model,
                                 page_id=page_id,
                                 data=data,
                                 enable2D=enable2D,
@@ -594,6 +601,10 @@ class Plugin(PluginBase):
                     
                     page = self.fit_panel.get_page_by_id(page_id)
                     templist = page.get_param_list()
+                    # missing fit parameters
+                    #if not templist:
+                    #    return
+                    # have the list
                     for element in templist:
                         name = str(element[1])
                         pars.append(name)
@@ -606,11 +617,11 @@ class Plugin(PluginBase):
                     fproblemId += 1 
                     current_page_id = page_id
             except:
-                raise
-                #msg= "%s error: %s" % (engineType, sys.exc_value)
-                #wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
-                #                                      type="stop"))
-                #return 
+                #raise
+                msg= "%s error: %s" % (engineType, sys.exc_value)
+                wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
+                                                      type="stop"))
+                return 
         ## If a thread is already started, stop it
         #if self.calc_fit!= None and self.calc_fit.isrunning():
         #    self.calc_fit.stop()
@@ -1082,7 +1093,7 @@ class Plugin(PluginBase):
         
         if model == None:
             return
-       
+
         if self.page_finder[uid].get_model() is None:
             model.name = "M" + str(self.index_model)
             self.index_model += 1  
@@ -1391,7 +1402,6 @@ class Plugin(PluginBase):
             ## If a thread is already started, stop it
             if (self.calc_2D is not None) and self.calc_2D.isrunning():
                 self.calc_2D.stop()
-
             self.calc_2D = Calc2D(x=x,
                                     y=y,
                                     model=model, 
