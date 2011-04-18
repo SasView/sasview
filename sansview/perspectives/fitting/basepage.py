@@ -1175,7 +1175,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     
             else:
                 self.fitrange = False    
-
+            
             ## if any value is modify draw model with new value
             if not self.fitrange:
                 #self.btFit.Disable()
@@ -1183,8 +1183,10 @@ class BasicPage(ScrolledPanel, PanelBase):
             else:
                 #self.btFit.Enable(True)
                 if is_2Ddata: self.btEditMask.Enable(True)
-
             if is_modified and self.fitrange:
+                if self.data == None:
+                    # Theory case: need to get npts value to draw
+                    self.npts_x = float(self.Npts_total.GetValue())
                 self.state_change= True
                 self._draw_model() 
                 self.Refresh()
@@ -1256,7 +1258,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                             return flag
                     flag = True
                 if self._is_2D():
-                    # only 2D case set mask   
+                    # only 2D case set mask  
                     flag = self._validate_Npts()
                     if not flag:
                         return flag
@@ -1910,6 +1912,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         #default flag
         flag = True
+        # Theory
+        if self.data == None and self.enable2D:
+            return flag
 
         # q value from qx and qy
         radius= numpy.sqrt( self.data.qx_data * self.data.qx_data + 
