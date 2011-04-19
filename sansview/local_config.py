@@ -51,10 +51,10 @@ APPLICATION_WLIST = 'SansView files (*.svs)|*.svs'
 APPLICATION_STATE_EXTENSION = '.svs'
 GUIFRAME_WIDTH = 1100
 GUIFRAME_HEIGHT = 840
-PLUGIN_STATE_EXTENSIONS = ['.prv','.fitv', '.inv']
-PLUGINS_WLIST = ['P(r) files (*.prv)|*.prv',
-                  'Fitting files (*.fitv)|*.fitv',
-                  'Invariant files (*.inv)|*.inv']
+PLUGIN_STATE_EXTENSIONS = ['.fitv', '.inv', '.prv']
+PLUGINS_WLIST = ['Fitting files (*.fitv)|*.fitv',
+                  'Invariant files (*.inv)|*.inv',
+                  'P(r) files (*.prv)|*.prv']
 PLOPANEL_WIDTH = 450
 PLOPANEL_HEIGTH = 400
 SPLASH_SCREEN_PATH = os.path.join("images","SVwelcome_mini.png")
