@@ -391,8 +391,8 @@ class InvariantState(object):
                 entry = get_content('ns:mark_%s' % ind, entry_bookmark) 
                                 
                 if entry is not None:
-                    time = get_content('ns:time', entry)
-                    val_time = str(time.text.strip())
+                    my_time = get_content('ns:time', entry)
+                    val_time = str(my_time.text.strip())
                     date = get_content('ns:date', entry)
                     val_date = str(date.text.strip())
                     state_entry = get_content('ns:state', entry)
