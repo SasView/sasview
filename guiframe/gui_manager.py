@@ -24,7 +24,6 @@ try:
         (os.path.isfile("%s/%s.pyc" % (path, 'local_config'))):
         fObj, path, descr = imp.find_module('local_config', [path])
         config = imp.load_module('local_config', fObj, path, descr)  
-    else:
         # Try simply importing local_config
         import local_config as config
 except:

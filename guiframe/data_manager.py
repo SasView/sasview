@@ -42,6 +42,7 @@ class DataManager(object):
         self.data_name_dict = {}
         self.count = 0
         self.list_of_id = []
+        self.time_stamp = time.time()
       
     def __str__(self):
         _str  = ""
@@ -90,9 +91,10 @@ class DataManager(object):
         ## allow to highlight data when plotted
         new_plot.interactive = True
         ## when 2 data have the same id override the 1 st plotted
-        new_plot.id = time.time()
+        self.time_stamp += 1
+        new_plot.id = self.time_stamp
         ##group_id specify on which panel to plot this data
-        new_plot.group_id = time.time()
+        new_plot.group_id = self.time_stamp
         new_plot.is_data = True
         new_plot.path = path
         new_plot.list_group_id = []
