@@ -58,7 +58,8 @@ class VersionChecker(object):
                 return True
             return False
         else:
-            self._process.kill()
+            return False
+            #self._process.kill()
         return True
     
     def get_version(self):
