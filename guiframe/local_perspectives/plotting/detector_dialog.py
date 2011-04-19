@@ -201,7 +201,7 @@ class DetectorDialog(wx.Dialog):
         """
         set proprieties of the dialog window
         """
-        self.SetTitle("Detector parameters")
+        self.SetTitle("2D Color Map")
         self.SetSize((600, 595))
 
     def __do_layout(self):
