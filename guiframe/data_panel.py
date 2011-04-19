@@ -246,8 +246,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_plot.SetToolTipString("To trigger plotting")
         wx.EVT_BUTTON(self, self.bt_plot.GetId(), self.on_plot)
         
-        self.bt_freeze = wx.Button(self, wx.NewId(), "Freeze")
-        self.bt_freeze.SetToolTipString("To trigger freeze")
+        self.bt_freeze = wx.Button(self, wx.NewId(), "Freeze Theory")
+        self.bt_freeze.SetToolTipString("To trigger freeze a theory")
         wx.EVT_BUTTON(self, self.bt_freeze.GetId(), self.on_freeze)
         
         self.bt_remove = wx.Button(self, wx.NewId(), "Remove Data")
@@ -362,6 +362,9 @@ class DataPanel(ScrolledPanel, PanelBase):
     def enable_button(self, item):
         """
         """
+        # Not implemented
+        return
+        """
         _, data_class, _= self.tree_ctrl.GetItemPyData(item) 
         if item.IsChecked():
             self.all_data1d &= (data_class != "Data2D")
@@ -376,14 +379,16 @@ class DataPanel(ScrolledPanel, PanelBase):
                 self.bt_freeze.Enable()
             else:
                 self.bt_freeze.Disable()
-               
+        """       
     def load_data_list(self, list):
         """
         add need data with its theory under the tree
         """
         if not list:
             return
-        
+        # uncheck previous items
+        self._uncheck_all()    
+           
         for state_id, dstate in list.iteritems():
             data = dstate.get_data()
             theory_list = dstate.get_theory()
@@ -434,7 +439,14 @@ class DataPanel(ScrolledPanel, PanelBase):
                                                           process.__str__())
             self.append_theory(state_id, theory_list)
         
-   
+    def _uncheck_all(self):
+        """
+        Uncheck all check boxes
+        """
+        for item in self.list_cb_data.values():
+            data_ctrl, _, _, _,_, _ = item
+            self.tree_ctrl.CheckItem(data_ctrl, False) 
+        
     def old_append_theory(self, state_id, theory_list):
         """
         append theory object under data from a state of id = state_id
@@ -651,7 +663,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                               state_id=state_id,
                               theory_id=theory_id,
                               append=False)
-        
+         
     def on_close_page(self, event=None):
         """
         On close

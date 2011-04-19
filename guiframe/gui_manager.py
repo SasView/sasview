@@ -213,7 +213,8 @@ class ViewerFrame(wx.Frame):
 
             if self._data_panel is not None:
                 panel_name = self.panel_on_focus.window_caption
-                self._data_panel.set_panel_on_focus(ID)#panel_name)
+                ID = self.panel_on_focus.uid
+                self._data_panel.set_panel_on_focus(ID)
                 #update combo
                 if self.panel_on_focus in self.plot_panels.values():
                     self._data_panel.cb_plotpanel.SetStringSelection(str\
@@ -2019,6 +2020,7 @@ class ViewerFrame(wx.Frame):
             # make sure we don't double focus
             if panel != plot:
                 plot.on_kill_focus(None)
+
         panel.on_set_focus(None)  
         # set focusing panel
         self.panel_on_focus = panel  
