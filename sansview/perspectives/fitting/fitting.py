@@ -135,6 +135,8 @@ class Plugin(PluginBase):
         self.menu1.Append(id1, '&Simultaneous Fit',simul_help)
         wx.EVT_MENU(owner, id1, self.on_add_sim_page)
         
+        self.menu1.AppendSeparator()
+        
         id1 = wx.NewId()
         simul_help = "Add new fit panel"
         self.menu1.Append(id1, '&New Fit Page',simul_help)

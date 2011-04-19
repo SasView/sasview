@@ -204,7 +204,7 @@ class ViewerFrame(wx.Frame):
         if event != None:
             self.panel_on_focus = event.panel
         panel_name = 'No panel on focus'
-        application_name = 'No Selected Application'
+        application_name = 'No Selected Analysis'
         if self.panel_on_focus is not None:
             for ID in self.panels.keys():
                 if self.panel_on_focus != self.panels[ID]:
@@ -664,7 +664,7 @@ class ViewerFrame(wx.Frame):
     def _update_toolbar_helper(self):
         """
         """
-        application_name = 'No Selected Application'
+        application_name = 'No Selected Analysis'
         panel_name = 'No Panel on Focus'
         if self._toolbar is  None:
             return
@@ -749,7 +749,7 @@ class ViewerFrame(wx.Frame):
         for item in self.plugins:
             if hasattr(item, "help"):
                 id = wx.NewId()
-                self._help_menu.Append(id,'&%s help' % item.sub_menu, '')
+                self._help_menu.Append(id,'&%s Help' % item.sub_menu, '')
                 wx.EVT_MENU(self, id, item.help)
         if config._do_aboutbox:
             id = wx.NewId()
@@ -842,18 +842,18 @@ class ViewerFrame(wx.Frame):
                     if plug.use_data():
                         
                         self._applications_menu.InsertCheckItem(pos, id, plug.sub_menu,
-                                      "Switch to application: %s" % plug.sub_menu)
+                                      "Switch to analysis: %s" % plug.sub_menu)
                         plug_data_count = True
                         pos += 1
                     else:
                         plug_no_data_count = True
                         self._applications_menu.AppendCheckItem(id, plug.sub_menu,
-                                      "Switch to application: %s" % plug.sub_menu)
+                                      "Switch to analysis: %s" % plug.sub_menu)
                     wx.EVT_MENU(self, id, plug.on_perspective)
             #self._applications_menu.
             if (not plug_data_count or not plug_no_data_count):
                 self._applications_menu.RemoveItem(separator)
-            self._menubar.Append(self._applications_menu, '&Application')
+            self._menubar.Append(self._applications_menu, '&Analysis')
             self._check_applications_menu()
             
     def _add_menu_file(self):
@@ -866,32 +866,35 @@ class ViewerFrame(wx.Frame):
         style = self.__gui_style & GUIFRAME.DATALOADER_ON
         style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
         if style == GUIFRAME.DATALOADER_ON:
+            id = wx.NewId()
+            hint_load_file = "read all analysis states save previously"
+            self._save_appl_menu = self._file_menu.Append(id, 
+                                    '&Open Project', hint_load_file)
+            wx.EVT_MENU(self, id, self._on_open_state_project)
+            
             if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
                 # some menu of plugin to be seen under file menu
-                hint_load_file = "Read state's files and load"
-                hint_load_file += " them into the application"
+                hint_load_file = "Read a status files and load"
+                hint_load_file += " them into the analysis"
                 id = wx.NewId()
                 self._save_appl_menu = self._file_menu.Append(id, 
-                                        '&Load Application', hint_load_file)
+                                        '&Open Analysis', hint_load_file)
                 wx.EVT_MENU(self, id, self._on_open_state_application)
                 
-            id = wx.NewId()
-            hint_load_file = "read all applications states save previously"
-            self._save_appl_menu = self._file_menu.Append(id, 
-                                    '&Load Project', hint_load_file)
-            wx.EVT_MENU(self, id, self._on_open_state_project)
-           
-            if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
-                self._file_menu.AppendSeparator()
-                id = wx.NewId()
-                self._save_appl_menu = self._file_menu.Append(id, 
-                                                          '&Save Application',
-                                 'Save state of the current active application')
-                wx.EVT_MENU(self, id, self._on_save_application)
+            self._file_menu.AppendSeparator()
             id = wx.NewId()
             self._file_menu.Append(id, '&Save Project',
-                                 'Save the state of the whole application')
+                                 'Save the state of the whole analysis')
+            
             wx.EVT_MENU(self, id, self._on_save_project)
+            if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
+                #self._file_menu.AppendSeparator()
+                id = wx.NewId()
+                self._save_appl_menu = self._file_menu.Append(id, 
+                                                          '&Save Analysis',
+                            'Save state of the current active analysis panel')
+                wx.EVT_MENU(self, id, self._on_save_application)
+            
             self._file_menu.AppendSeparator()
         
         id = wx.NewId()
@@ -1623,7 +1626,7 @@ class ViewerFrame(wx.Frame):
         set the current active perspective 
         """
         self._current_perspective = perspective
-        name = "No current Application selected"
+        name = "No current analysis selected"
         if self._current_perspective is not None:
             self._add_current_plugin_menu()
             for panel in self.panels.values():
