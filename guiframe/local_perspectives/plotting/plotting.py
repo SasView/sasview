@@ -19,7 +19,7 @@ from sans.guiframe.plugin_base import PluginBase
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
 
-DEFAULT_MENU_ITEM_LABEL = "No plot available"
+DEFAULT_MENU_ITEM_LABEL = "No graph available"
 DEFAULT_MENU_ITEM_ID = wx.NewId()
 
 class Plugin(PluginBase):
@@ -63,7 +63,7 @@ class Plugin(PluginBase):
         self.menu.Append(DEFAULT_MENU_ITEM_ID, DEFAULT_MENU_ITEM_LABEL, 
                              "No graph available")
         self.menu.FindItemByPosition(0).Enable(False)
-        return [(self.menu, "Graph")]
+        return [(self.menu, "Show")]
     
     def get_panels(self, parent):
         """
@@ -215,7 +215,7 @@ class Plugin(PluginBase):
             self.menu.Delete(uid)
         if self.menu.GetMenuItemCount() == 0:
             self.menu.Append(DEFAULT_MENU_ITEM_ID, DEFAULT_MENU_ITEM_LABEL, 
-                             "No plot available")
+                             "No graph available")
             self.menu.FindItemByPosition(0).Enable(False)
         
     def delete_panel(self, group_id):

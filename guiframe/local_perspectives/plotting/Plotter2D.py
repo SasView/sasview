@@ -286,7 +286,7 @@ class ModelPanel2D(ModelPanel1D):
                     wx.EVT_MENU(self, id, self._onEditSlicer) 
             slicerpop.AppendSeparator() 
         id = wx.NewId()
-        slicerpop.Append(id, '&Detector Parameters')
+        slicerpop.Append(id, '&2D Color Map')
         wx.EVT_MENU(self, id, self._onEditDetector)
         id = wx.NewId()
         slicerpop.Append(id, '&Toggle Linear/Log scale')

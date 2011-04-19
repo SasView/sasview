@@ -783,29 +783,24 @@ class ViewerFrame(wx.Frame):
         if self._plotting_plugin is not None:
             for (menu, name) in self._plotting_plugin.populate_menu(self):
                 self._window_menu.AppendSubMenu(menu, name)
-        self._menubar.Append(self._window_menu, '&Window')
-            
+        self._menubar.Append(self._window_menu, '&Graph')
+
         style = self.__gui_style & GUIFRAME.PLOTTING_ON
         if style == GUIFRAME.PLOTTING_ON:
             self._window_menu.AppendSeparator()
             id = wx.NewId()
             preferences_menu = wx.Menu()
             hint = "All plot panels will floating"
-            preferences_menu.Append(id, '&Floating Graphs', hint)
+            preferences_menu.Append(id, '&Float', hint)
             wx.EVT_MENU(self, id, self.set_plotpanel_floating)
             id = wx.NewId()
             hint = "All plot panels will displayed within the frame"
-            preferences_menu.Append(id, '&Fixed Graphs', hint)
+            preferences_menu.Append(id, '&Dock', hint)
             wx.EVT_MENU(self, id, self.set_plotpanel_fixed)
-            id = wx.NewId()
-            style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
-            if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
-                id = wx.NewId()
-                self._toolbar_menu = preferences_menu.Append(id,'&Show Toolbar', '')
-                wx.EVT_MENU(self, id, self._on_hide_toolbar)
+
             self._window_menu.AppendSubMenu(preferences_menu,'&Preferences')
         if self._window_menu.GetMenuItemCount() == 0:
-            pos = self._menubar.FindMenu('Window')
+            pos = self._menubar.FindMenu('Graph')
             self._menubar.Remove(pos)
         #wx.EVT_MENU(self, id, self.show_preferences_panel)   
         """
@@ -927,6 +922,14 @@ class ViewerFrame(wx.Frame):
         self._edit_menu.Append(GUIFRAME_ID.RESET_ID, '&Reset', 
                                'Reset current panel')
         wx.EVT_MENU(self, GUIFRAME_ID.RESET_ID, self.on_reset_panel)
+       
+        self._edit_menu.AppendSeparator()
+        style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
+        if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
+            id = wx.NewId()
+            self._toolbar_menu = self._edit_menu.Append(id,'&Show Toolbar', '')
+            wx.EVT_MENU(self, id, self._on_hide_toolbar)
+        
         self._menubar.Append(self._edit_menu,  '&Edit')
         self.enable_edit_menu()
         
@@ -1045,7 +1048,8 @@ class ViewerFrame(wx.Frame):
             if not self._mgr.GetPane(self.panels[ID].window_name).IsShown(): 
                 if show == 'on':
                     self._mgr.GetPane(self.panels[ID].window_name).Show()   
-                elif self.panels[ID].window_name.split(" ")[0] == "Residuals":
+                elif self.panels[ID].window_caption.split(" ")[0] == \
+                                                            "Residuals":
                     self._mgr.GetPane(self.panels[ID].window_name).Hide()
                 else:
                     self._mgr.GetPane(self.panels[ID].window_name).Show()
@@ -1526,6 +1530,11 @@ class ViewerFrame(wx.Frame):
         """
         list_data, _ = self._data_manager.get_by_id(data_id)
         if self._current_perspective is not None:
+            for uid, panel in self.plot_panels.iteritems() :
+                #panel = self.plot_panels[uid]
+                window = self._mgr.GetPane(panel.window_name)
+                if not window.IsFloating():
+                    self.hide_panel(uid)
             self._current_perspective.set_data(list_data.values())
             self.on_close_welcome_panel()
         else:
@@ -1630,7 +1639,7 @@ class ViewerFrame(wx.Frame):
                 self._check_applications_menu()
             #Set the SansView title
             self._set_title_name(name)
-            
+          
             
     def _set_title_name(self, name):
         """
@@ -1686,6 +1695,7 @@ class ViewerFrame(wx.Frame):
         """
         style = self.__gui_style & GUIFRAME.FIXED_PANEL
         if style == GUIFRAME.FIXED_PANEL:
+            self._mgr.GetPane(p.window_name).Dock()
             self._mgr.GetPane(p.window_name).Floatable()
             self._mgr.GetPane(p.window_name).Right()
             self._mgr.GetPane(p.window_name).TopDockable(False)
