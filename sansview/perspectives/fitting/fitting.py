@@ -57,7 +57,7 @@ class Plugin(PluginBase):
     Fitting plugin is used to perform fit 
     """
     def __init__(self, standalone=False):
-        PluginBase.__init__(self, name="Fitting", standalone=standalone)
+        PluginBase.__init__(self, name="Model Fitting", standalone=standalone)
         
         #list of panel to send to guiframe
         self.mypanels = []
@@ -1616,7 +1616,7 @@ class Plugin(PluginBase):
         
         # plot data
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))   
-   
+        
 #def profile(fn, *args, **kw):
 #    import cProfile, pstats, os
 #    global call_result

@@ -51,7 +51,7 @@ class Plugin(PluginBase):
     DEFAULT_DMAX  = 140.0
     
     def __init__(self, standalone=True):
-        PluginBase.__init__(self, name="Pr inversion", standalone=standalone)
+        PluginBase.__init__(self, name="Pr Inversion", standalone=standalone)
         ## Simulation window manager
         self.simview = None
        
