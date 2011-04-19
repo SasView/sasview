@@ -2198,7 +2198,7 @@ class FitPage(BasicPage):
                                  enable2D=self.enable2D,
                                  qmin=float(self.qmin_x), 
                                  qmax= float(self.qmax_x),
-                                 id=self.id) 
+                                 uid=self.uid) 
         return msg
     
     def update_slit_smear(self):
