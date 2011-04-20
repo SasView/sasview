@@ -1,6 +1,7 @@
 """
 Application settings
 """
+import os
 import time
 from sans.guiframe.gui_style import GUIFRAME
 # Version of the application
