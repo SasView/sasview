@@ -175,6 +175,8 @@ class Plugin(PluginBase):
     def delete_data(self, data_id):
         """
         """
+        if self.__data is None:
+            return
         for id in data_id:
             if id == self.__data.id:
                 self.clear_panel()
