@@ -1957,7 +1957,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             return is_modified
         for item in list:
             #skip angle parameters for 1D
-            if self.data.__class__.__name__ !="Data2D":
+            if not self.enable2D:#self.data.__class__.__name__ !="Data2D":
                 if item in self.orientation_params:
                     continue
             #try:
