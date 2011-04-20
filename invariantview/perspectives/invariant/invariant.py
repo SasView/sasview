@@ -17,7 +17,6 @@ import wx
 import copy
 import logging
 
-
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.gui_style import GUIFRAME_ID
@@ -209,7 +208,7 @@ class Plugin(PluginBase):
         # First, check that the data is of the right type
         current_plottable = self.__data
 
-        if issubclass(current_plottable.__class__, LoaderData1D):
+        if issubclass(current_plottable.__class__, Data1D):
             self.state_reader.write(filepath, current_plottable, state)
         else:
             msg = "invariant.save_file: the data being saved is"

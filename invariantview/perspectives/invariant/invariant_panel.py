@@ -622,13 +622,12 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         
         : param event: undo button event
         """
-        if event != None: 
-            event.Skip()
         if self.state.state_num < 0:
             return
         self.is_power_out = True
         # get the previous state_num
         pre_state_num = int(self.state.saved_state['state_num']) - 1
+
         self.get_state_by_num(state_num=str(pre_state_num))
         
         if float(pre_state_num) <= 0:
@@ -638,7 +637,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self._set_redo_flag(True)
         self.is_power_out = False  
         self._info_state_num()
-        
+
         
     def on_redo(self,event=None):
         """
@@ -646,8 +645,6 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         
         : param event: redo button event
         """
-        if event != None:
-            event.Skip()
         self.is_power_out = True
         # get the next state_num
         next_state_num = int(self.state.saved_state['state_num']) + 1
@@ -731,7 +728,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.state.state_list = backup_state_list
         self.state.saved_state = current_state
         self.state.state_num = state_num
-           
+
         
     def get_bookmark_by_num(self, num=None):
         """
@@ -854,7 +851,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         
         self._set_undo_flag(True)
         self._set_redo_flag(False)
-        event.Skip()
+        #event.Skip()
                    
     def _set_compute_state(self,state=None):
         """
@@ -942,7 +939,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             return
         # check if this event is from do/undo button
         if self.state.saved_state['is_time_machine'] or self.new_state:
-            event.Skip()
+            #event.Skip()
             return
         
         # get the object
@@ -978,7 +975,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         except:
             pass
 
-        event.Skip()
+        #event.Skip()
         self._set_undo_flag(True)
         self._set_redo_flag(False)
         self._set_bookmark_flag(True)
@@ -1000,7 +997,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.state.state_list[str(self.state.state_num)] = self.state.clone_state()
         except:
             pass
-        if event != None: event.Skip()\
+        #if event != None: event.Skip()
 
     def _get_input_list(self):     
         """
