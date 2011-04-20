@@ -1112,12 +1112,14 @@ class ViewerFrame(wx.Frame):
             self._plotting_plugin.delete_panel(panel.group_id)
             self._mgr.DetachPane(panel)
             panel.Destroy()
-            del self.panels[ID]
-            del self.plot_panels[ID]
+            if ID in self.panels.keys():
+                del self.panels[ID]
+            if ID in self.plot_panels.keys():
+                del self.plot_panels[ID]
             if self._data_panel is not None:
                 ind = self._data_panel.cb_plotpanel.FindString(str(caption))
                 if ind != wx.NOT_FOUND:
-                    self._data_panel.cb_plotpanel.Delete(ind)
+                   self._data_panel.cb_plotpanel.Delete(ind)
             self._mgr.Update()
       
     def clear_panel(self):
@@ -2050,6 +2052,7 @@ class ViewerFrame(wx.Frame):
         # set focusing panel
         self.panel_on_focus = panel  
         self.set_panel_on_focus(None)
+        print " on_set_plot_focus"
          
     def _onDrawIdle(self, *args, **kwargs):
         """

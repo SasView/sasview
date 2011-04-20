@@ -10,6 +10,7 @@
 """
 This module provides Graphic interface for the data_manager module.
 """
+import os
 import wx
 import sys
 import warnings
@@ -18,6 +19,28 @@ import  wx.lib.agw.customtreectrl as CT
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.panel_base import PanelBase
+from sans.guiframe.events import StatusEvent
+from DataLoader.loader import Loader
+
+try:
+    # Try to find a local config
+    import imp
+    path = os.getcwd()
+    if(os.path.isfile("%s/%s.py" % (path, 'local_config'))) or \
+        (os.path.isfile("%s/%s.pyc" % (path, 'local_config'))):
+        fObj, path, descr = imp.find_module('local_config', [path])
+        config = imp.load_module('local_config', fObj, path, descr)  
+    else:
+        # Try simply importing local_config
+        import local_config as config
+except:
+    # Didn't find local config, load the default 
+    import config
+ 
+extension_list = []
+if config.APPLICATION_STATE_EXTENSION is not None:
+    extension_list.append(config.APPLICATION_STATE_EXTENSION)
+EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS + extension_list   
 
 PANEL_WIDTH = 180
 #PANEL_HEIGHT = 560
@@ -71,6 +94,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         ScrolledPanel.__init__(self, parent=parent, *args, **kwds)
         PanelBase.__init__(self)
         self.SetupScrolling()
+        self.loader = Loader()  
+        #Default location
+        self._default_save_location = None  
         self.all_data1d = True
         self.parent = parent
         self.manager = manager
@@ -83,6 +109,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.owner = None
         self.do_layout()
         self.Bind(wx.EVT_SHOW, self.on_close_page)
+        self.enable_remove()
+        self.enable_import()
         
     def do_layout(self):
         """
@@ -107,11 +135,11 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer4 = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer5 = wx.BoxSizer(wx.VERTICAL)
        
-        self.vbox.Add(self.sizer5, 0,wx.EXPAND|wx.ALL,10)
-        self.vbox.Add(self.sizer1, 0,wx.EXPAND|wx.ALL,0)
-        self.vbox.Add(self.sizer2, 0,wx.EXPAND|wx.ALL,10)
-        self.vbox.Add(self.sizer3, 0,wx.EXPAND|wx.ALL,10)
-        self.vbox.Add(self.sizer4, 0,wx.EXPAND|wx.ALL,10)
+        self.vbox.Add(self.sizer5, 0, wx.EXPAND|wx.ALL,1)
+        self.vbox.Add(self.sizer1, 0, wx.EXPAND|wx.ALL,0)
+        self.vbox.Add(self.sizer2, 0, wx.EXPAND|wx.ALL,1)
+        self.vbox.Add(self.sizer3, 0, wx.EXPAND|wx.ALL,1)
+        self.vbox.Add(self.sizer4, 0, wx.EXPAND|wx.ALL,5)
         
         self.SetSizer(self.vbox)
         
@@ -234,6 +262,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         Layout widgets related to buttons
         """
+        self.bt_add = wx.Button(self, wx.NewId(), "Load Data")
+        self.bt_add.SetToolTipString("Add data from the application")
+        wx.EVT_BUTTON(self, self.bt_add.GetId(), self._load_data)
+        self.bt_remove = wx.Button(self, wx.NewId(), "Remove Data")
+        self.bt_remove.SetToolTipString("Remove data from the application")
+        wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
         self.bt_import = wx.Button(self, wx.NewId(), "Send To")
         self.bt_import.SetToolTipString("Send set of Data to active perspective")
         wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_import)
@@ -249,10 +283,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_freeze = wx.Button(self, wx.NewId(), "Freeze Theory")
         self.bt_freeze.SetToolTipString("To trigger freeze a theory")
         wx.EVT_BUTTON(self, self.bt_freeze.GetId(), self.on_freeze)
-        
-        self.bt_remove = wx.Button(self, wx.NewId(), "Remove Data")
-        self.bt_remove.SetToolTipString("Remove data from the application")
-        wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
         
         self.tctrl_perspective = wx.StaticText(self, -1, 
                             'No Active Application',
@@ -273,37 +303,38 @@ class DataPanel(ScrolledPanel, PanelBase):
     
         ix = 0
         iy = 0
+        self.sizer3.Add(self.bt_add,( iy, ix),(1,1),  
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
+        ix += 1          
+        self.sizer3.Add(self.bt_remove,( iy, ix),(1,1),  
+                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)  
+        ix = 0   
+        iy += 1
         self.sizer3.Add(self.bt_import,( iy, ix),(1,1),  
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
         ix += 1
         self.sizer3.Add(self.tctrl_perspective,(iy, ix),(1,1),
                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)      
         ix = 0          
         iy += 1 
         self.sizer3.Add(self.bt_append_plot,( iy, ix),(1,1),  
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
         ix += 1
         self.sizer3.Add(self.cb_plotpanel,(iy, ix),(1,1),
                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)  
         ix = 0          
         iy += 1 
         self.sizer3.Add(self.bt_plot,( iy, ix),(1,1),  
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
         ix = 0          
         iy += 1 
         self.sizer3.Add(self.bt_freeze,( iy, ix),(1,1),  
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        ix = 0          
-        iy += 1 
-        self.sizer3.Add(self.bt_remove,( iy, ix),(1,1),  
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
         
-        
-     
     def layout_batch(self):
         """
         """
-       
+        return
         self.rb_single_mode = wx.RadioButton(self, -1, 'Single Mode',
                                              style=wx.RB_GROUP)
         self.rb_batch_mode = wx.RadioButton(self, -1, 'Batch Mode')
@@ -385,6 +416,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         add need data with its theory under the tree
         """
         if not list:
+            self.enable_remove()
             return
         # uncheck previous items
         #self._uncheck_all()    
@@ -438,6 +470,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                         i_t_c = self.tree_ctrl.AppendItem(d_p_c,
                                                           process.__str__())
             self.append_theory(state_id, theory_list)
+        self.enable_remove()
         
     def _uncheck_all(self):
         """
@@ -597,6 +630,110 @@ class DataPanel(ScrolledPanel, PanelBase):
                 del self.list_cb_data[state_id]
                 del self.list_cb_theory[data_id]
               
+    def load_error(self, error=None):
+        """
+        Pop up an error message.
+        
+        :param error: details error message to be displayed
+        """
+        message = "The data file you selected could not be loaded.\n"
+        message += "Make sure the content of your file"
+        message += " is properly formatted.\n\n"
+        
+        if error is not None:
+            message += "When contacting the DANSE team, mention the"
+            message += " following:\n%s" % str(error)
+        dial = wx.MessageDialog(self.parent, message, 'Error Loading File',
+                                wx.OK | wx.ICON_EXCLAMATION)
+        dial.ShowModal()  
+        
+    def _load_data(self, event):
+        """
+        Load data
+        """
+        path = None
+        if self._default_save_location == None:
+            self._default_save_location = os.getcwd()
+        
+        cards = self.loader.get_wildcards()
+        wlist =  '|'.join(cards)
+        style = wx.OPEN|wx.FD_MULTIPLE
+        dlg = wx.FileDialog(self.parent, 
+                            "Choose a file", 
+                            self._default_save_location, "",
+                             wlist,
+                             style=style)
+        if dlg.ShowModal() == wx.ID_OK:
+            file_list = dlg.GetPaths()
+            if len(file_list) >= 0 and not(file_list[0]is None):
+                self._default_save_location = os.path.dirname(file_list[0])
+                path = self._default_save_location
+        dlg.Destroy()
+        
+        if path is None or not file_list or file_list[0] is None:
+            return
+        self.get_data(file_list)
+        
+    def get_data(self, path, format=None):
+        """
+        """
+        message = ""
+        log_msg = ''
+        output = {}
+        error_message = ""
+        for p_file in path:
+            basename  = os.path.basename(p_file)
+            root, extension = os.path.splitext(basename)
+            if extension.lower() in EXTENSIONS:
+                log_msg = "Data Loader cannot "
+                log_msg += "load: %s\n" % str(p_file)
+                log_msg += "Try File opening ...."
+                logging.info(log_msg)
+                continue
+        
+            try:
+                temp =  self.loader.load(p_file, format)
+                if temp.__class__.__name__ == "list":
+                    for item in temp:
+                        data = self.parent.create_gui_data(item, p_file)
+                        output[data.id] = data
+                else:
+                    data = self.parent.create_gui_data(temp, p_file)
+                    output[data.id] = data
+                message = "Loading Data..." + str(p_file) + "\n"
+                self.load_update(output=output, message=message)
+            except:
+                error_message = "Error while loading Data: %s\n" % str(p_file)
+                error_message += str(sys.exc_value) + "\n"
+                self.load_update(output=output, message=error_message)
+                
+        message = "Loading Data Complete! "
+        message += log_msg
+        self.load_complete(output=output, error_message=error_message,
+                       message=message, path=path)
+            
+    def load_update(self, output=None, message=""):
+        """
+        print update on the status bar
+        """
+        if message != "" and self.parent is not None:
+            wx.PostEvent(self.parent, StatusEvent(status=message,
+                                                  type="progress",
+                                                   info="warning"))
+            
+    def load_complete(self, output, message="", error_message="", path=None):
+        """
+         post message to  status bar and return list of data
+        """
+        if self.parent is not None:
+            wx.PostEvent(self.parent, StatusEvent(status=message,
+                                              info="warning",
+                                              type="stop"))
+        if error_message != "":
+            self.load_error(error_message)
+        if self.parent is not None:
+            self.parent.add_data(data_list=output)
+            
     def on_remove(self, event):
         """
         Get a list of item checked and remove them from the treectrl
@@ -634,6 +771,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             
         self.parent.remove_data(data_id=data_to_remove,
                                   theory_id=theory_to_remove)
+        self.enable_remove()
         
     def on_import(self, event=None):
         """
@@ -689,7 +827,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         #perspective_font = self.tctrl_perspective.GetFont()
         #perspective_font.SetWeight(wx.BOLD)
         self.tctrl_perspective.SetClientSize((80,20))#SetFont(perspective_font)
-     
+        self.enable_import()
+        
     def set_panel_on_focus(self, name):
         """
         set the plot panel on focus
@@ -715,8 +854,27 @@ class DataPanel(ScrolledPanel, PanelBase):
         if combo.GetValue() != 'None':
             panel = combo.GetClientData(selection)
             self.parent.on_set_plot_focus(panel)   
-
-    
+            
+    def enable_remove(self):
+        """
+        enable or disable remove button
+        """
+        n_t = self.tree_ctrl.GetCount()
+        n_t_t = self.tree_ctrl_theory.GetCount()
+        
+        if n_t + n_t_t <= 0:
+            self.bt_remove.Disable()
+        else:
+            self.bt_remove.Enable()
+            
+    def enable_import(self):
+        """
+        enable or disable send button
+        """
+        if self.tctrl_perspective.GetLabelText() == "No Active Application":
+            self.bt_import.Disable()
+        else:
+            self.bt_import.Enable()
 
 
 class DataFrame(wx.Frame):
