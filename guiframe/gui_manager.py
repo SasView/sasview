@@ -1537,8 +1537,9 @@ class ViewerFrame(wx.Frame):
             for uid, panel in self.plot_panels.iteritems() :
                 #panel = self.plot_panels[uid]
                 window = self._mgr.GetPane(panel.window_name)
-                if not window.IsFloating():
-                    self.hide_panel(uid)
+                # To hide all docked plot panels when set the data
+                #if not window.IsFloating():
+                #    self.hide_panel(uid)
             self._current_perspective.set_data(list_data.values())
             self.on_close_welcome_panel()
         else:
