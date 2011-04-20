@@ -45,10 +45,29 @@ class Plugin(PluginBase):
         self.loader = Loader()  
         self._data_menu = None 
         
-    def populate_menu(self, parent):
+    def populate_file_menu(self):
+        """
+        get a menu item and append it under file menu of the application
+        add load file menu item and load folder item
+        """
+        #menu for data files
+        menu_list = []
+        data_file_hint = "load one or more data in the application"
+        menu_list = [('&Load Data File(s)', data_file_hint, self._load_data)]
+        gui_style = self.parent.get_style()
+        style = gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
+        style1 = gui_style & GUIFRAME.DATALOADER_ON
+        if style == GUIFRAME.MULTIPLE_APPLICATIONS:
+            #menu for data from folder
+            data_folder_hint = "load multiple data in the application"
+            menu_list.append(('&Load Data Folder', data_folder_hint, 
+                              self._load_folder))
+        return menu_list
+    
+    def unused_populate_menu(self, parent):
         """
         """
-         # Add menu data 
+        # Add menu data 
         self._data_menu = wx.Menu()
         #menu for data files
         data_file_id = wx.NewId()

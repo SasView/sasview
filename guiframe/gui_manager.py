@@ -783,11 +783,13 @@ class ViewerFrame(wx.Frame):
         else:
             self._data_panel_menu.SetText('Data Explorer ON')
         self._view_menu.AppendSeparator()
-        style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
-        if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
-            id = wx.NewId()
+        id = wx.NewId()
+        style1 = self.__gui_style & GUIFRAME.TOOL_ON
+        if style1 == GUIFRAME.TOOL_ON:
             self._toolbar_menu = self._view_menu.Append(id,'&Show Toolbar', '')
-            wx.EVT_MENU(self, id, self._on_hide_toolbar)
+        else:
+            self._toolbar_menu = self._view_menu.Append(id,'&Hide Toolbar', '')
+        wx.EVT_MENU(self, id, self._on_hide_toolbar)
         self._menubar.Append(self._view_menu, '&View')
         
     def _add_menu_window(self):
