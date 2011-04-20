@@ -555,9 +555,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         msg +=" Saved! right click on this page to retrieve this model"
         wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
         
-        #id = wx.NewId()
-        #self.popUpMenu.Append(id,name,str(msg))
-        #wx.EVT_MENU(self, id, self.onResetModel)
+        id = wx.NewId()
+        self.popUpMenu.Append(id,name,str(msg))
+        wx.EVT_MENU(self, id, self.onResetModel)
         wx.PostEvent(self.parent.parent, 
                      AppendBookmarkEvent(title=name, 
                                          hint=str(msg), handler=self.onResetModel))

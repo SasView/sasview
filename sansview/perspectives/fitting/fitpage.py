@@ -1039,7 +1039,8 @@ class FitPage(BasicPage):
         self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
       
         if self.model != None:
-            self._set_bookmark_flag(True)
+            if self.data != None:
+                self._set_bookmark_flag(True)
             #self._set_save_flag(True)
             # Reset smearer, model and data
             self._set_smear(self.data)
@@ -1582,7 +1583,8 @@ class FitPage(BasicPage):
             self._set_bookmark_flag(False)
             self._set_save_flag(False)
         else:
-            self._set_bookmark_flag(True)
+            if self.model != None:
+                self._set_bookmark_flag(True)
             self._set_save_flag(True)
             self._set_preview_flag(True)
 
