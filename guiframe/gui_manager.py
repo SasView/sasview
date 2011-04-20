@@ -245,7 +245,7 @@ class ViewerFrame(wx.Frame):
             msg += str(sys.exc_value) + '\n'
             print msg
         self.post_init()
-        self.show_welcome_panel(None)
+        #self.show_welcome_panel(None)
         self.Show(True)
         #self._check_update(None)
              

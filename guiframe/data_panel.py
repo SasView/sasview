@@ -387,7 +387,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         if not list:
             return
         # uncheck previous items
-        self._uncheck_all()    
+        #self._uncheck_all()    
            
         for state_id, dstate in list.iteritems():
             data = dstate.get_data()
