@@ -104,7 +104,13 @@ class PluginBase:
         even if the user is switching between perspectives
         """
         return self._always_active
-
+    
+    def populate_file_menu(self):
+        """
+        Append menu item under file menu item of the frame
+        """
+        return []
+    
     def populate_menu(self, parent):
         """
         Create and return the list of application menu

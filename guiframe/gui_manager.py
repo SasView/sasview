@@ -121,6 +121,7 @@ class ViewerFrame(wx.Frame):
         self._menubar = None
         self._file_menu = None
         self._data_menu = None
+        self._view_menu = None
         self._window_menu = None
         self._data_panel_menu = None
         self._help_menu = None
@@ -643,9 +644,9 @@ class ViewerFrame(wx.Frame):
         self._menubar = wx.MenuBar()
         self._add_menu_file()
         self._add_menu_edit()
-        self._add_menu_data()
+        self._add_menu_view()
+        #self._add_menu_data()
         self._add_menu_application()
-        
         self._add_menu_tool()
         self._add_current_plugin_menu()
         self._add_menu_window()
@@ -767,6 +768,28 @@ class ViewerFrame(wx.Frame):
         #wx.EVT_MENU(self, id, self._check_update)
         self._menubar.Append(self._help_menu, '&Help')
             
+    def _add_menu_view(self):
+        """
+        add menu items under view menu
+        """
+        self._view_menu = wx.Menu()
+        style = self.__gui_style & GUIFRAME.MANAGER_ON
+        id = wx.NewId()
+        self._data_panel_menu = self._view_menu.Append(id,
+                                                '&Data Explorer ON', '')
+        wx.EVT_MENU(self, id, self.show_data_panel)
+        if style == GUIFRAME.MANAGER_ON:
+            self._data_panel_menu.SetText('Data Explorer OFF')
+        else:
+            self._data_panel_menu.SetText('Data Explorer ON')
+        self._view_menu.AppendSeparator()
+        style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
+        if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
+            id = wx.NewId()
+            self._toolbar_menu = self._view_menu.Append(id,'&Show Toolbar', '')
+            wx.EVT_MENU(self, id, self._on_hide_toolbar)
+        self._menubar.Append(self._view_menu, '&View')
+        
     def _add_menu_window(self):
         """
         add a menu window to the menu bar
@@ -857,6 +880,19 @@ class ViewerFrame(wx.Frame):
             self._menubar.Append(self._applications_menu, '&Analysis')
             self._check_applications_menu()
             
+    def _populate_file_menu(self):
+        """
+        Insert menu item under file menu
+        """
+        for plugin in self.plugins:
+            if len(plugin.populate_file_menu()) > 0:
+                for item in plugin.populate_file_menu():
+                    m_name, m_hint, m_handler = item
+                    id = wx.NewId()
+                    self._file_menu.Append(id, m_name, m_hint)
+                    wx.EVT_MENU(self, id, m_handler)
+                self._file_menu.AppendSeparator()
+                
     def _add_menu_file(self):
         """
         add menu file
@@ -864,6 +900,8 @@ class ViewerFrame(wx.Frame):
         
          # File menu
         self._file_menu = wx.Menu()
+        #append item from plugin under menu file if necessary
+        self._populate_file_menu()
         style = self.__gui_style & GUIFRAME.DATALOADER_ON
         style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
         if style == GUIFRAME.DATALOADER_ON:
@@ -926,14 +964,7 @@ class ViewerFrame(wx.Frame):
         self._edit_menu.Append(GUIFRAME_ID.RESET_ID, '&Reset', 
                                'Reset current panel')
         wx.EVT_MENU(self, GUIFRAME_ID.RESET_ID, self.on_reset_panel)
-       
-        self._edit_menu.AppendSeparator()
-        style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
-        if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
-            id = wx.NewId()
-            self._toolbar_menu = self._edit_menu.Append(id,'&Show Toolbar', '')
-            wx.EVT_MENU(self, id, self._on_hide_toolbar)
-        
+    
         self._menubar.Append(self._edit_menu,  '&Edit')
         self.enable_edit_menu()
         
@@ -951,19 +982,7 @@ class ViewerFrame(wx.Frame):
             if menu_list:
                 for (menu, name) in menu_list:
                     self._menubar.Append(menu, name)
-            
-        style = self.__gui_style & GUIFRAME.MANAGER_ON
-        if self._data_plugin != None:
-            _data_menu = self._data_plugin._data_menu
-            _data_menu.AppendSeparator()
-            id = wx.NewId()
-            self._data_panel_menu = _data_menu.Append(id,
-                                                    '&Data Explorer ON', '')
-            wx.EVT_MENU(self, id, self.show_data_panel)
-            if style == GUIFRAME.MANAGER_ON:
-                self._data_panel_menu.SetText('Data Explorer OFF')
-            else:
-                self._data_panel_menu.SetText('Data Explorer ON')
+        
                         
     def _on_hide_toolbar(self, event=None):
         """
