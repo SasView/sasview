@@ -661,7 +661,7 @@ class ViewerFrame(wx.Frame):
         self._toolbar = GUIToolBar(self, -1)
         self.SetToolBar(self._toolbar)
         self._update_toolbar_helper()
-        #self._on_hide_toolbar(event=None)
+        self._on_toggle_toolbar(event=None)
     
     def _update_toolbar_helper(self):
         """
@@ -786,10 +786,10 @@ class ViewerFrame(wx.Frame):
         id = wx.NewId()
         style1 = self.__gui_style & GUIFRAME.TOOL_ON
         if style1 == GUIFRAME.TOOL_ON:
-            self._toolbar_menu = self._view_menu.Append(id,'&Show Toolbar', '')
-        else:
             self._toolbar_menu = self._view_menu.Append(id,'&Hide Toolbar', '')
-        wx.EVT_MENU(self, id, self._on_hide_toolbar)
+        else:
+            self._toolbar_menu = self._view_menu.Append(id,'&Show Toolbar', '')
+        wx.EVT_MENU(self, id, self._on_toggle_toolbar)
         self._menubar.Append(self._view_menu, '&View')
         
     def _add_menu_window(self):
@@ -986,7 +986,7 @@ class ViewerFrame(wx.Frame):
                     self._menubar.Append(menu, name)
         
                         
-    def _on_hide_toolbar(self, event=None):
+    def _on_toggle_toolbar(self, event=None):
         """
         hide or show toolbar
         """
@@ -1035,7 +1035,7 @@ class ViewerFrame(wx.Frame):
             # Show toolbar
             style = self.__gui_style & GUIFRAME.TOOL_ON
             if (style == GUIFRAME.TOOL_ON) & (not self._toolbar.IsShown()):
-                self._on_hide_toolbar()
+                self._on_toggle_toolbar()
             
     def show_welcome_panel(self, event):
         """    
@@ -1056,7 +1056,7 @@ class ViewerFrame(wx.Frame):
                 self._mgr.GetPane(self.panels[id].window_name).Hide()
             if self._toolbar != None and not self._toolbar.IsShown():
                 self._toolbar.Show(True)
-            self._on_hide_toolbar()
+            self._on_toggle_toolbar()
 
         self._mgr.Update()
        
@@ -1467,7 +1467,7 @@ class ViewerFrame(wx.Frame):
         """
         style = self.__gui_style & GUIFRAME.TOOL_ON
         if (style == GUIFRAME.TOOL_ON) & (not self._toolbar.IsShown()):
-            self._on_hide_toolbar()
+            self._on_toggle_toolbar()
         for item in self.panels:
             # Check whether this is a sticky panel
             if hasattr(self.panels[item], "ALWAYS_ON"):
