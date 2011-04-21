@@ -1022,6 +1022,7 @@ class FitPage(BasicPage):
         
         if self.model is None:
             self._set_bookmark_flag(False)
+            self._keep.Enable(False)
             self._set_save_flag(False)
         self.enable_disp.SetValue(False)
         self.disable_disp.SetValue(True)
@@ -1041,6 +1042,7 @@ class FitPage(BasicPage):
         if self.model != None:
             if self.data != None:
                 self._set_bookmark_flag(True)
+                self._keep.Enable(True)
             #self._set_save_flag(True)
             # Reset smearer, model and data
             self._set_smear(self.data)
@@ -1581,10 +1583,12 @@ class FitPage(BasicPage):
             data_max = ""
             data_name = ""
             self._set_bookmark_flag(False)
+            self._keep.Enable(False)
             self._set_save_flag(False)
         else:
             if self.model != None:
                 self._set_bookmark_flag(True)
+                self._keep.Enable(True)
             self._set_save_flag(True)
             self._set_preview_flag(True)
 

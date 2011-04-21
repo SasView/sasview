@@ -147,7 +147,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._keep = wx.MenuItem(self.popUpMenu,id,"BookMark",
                                  " Keep the panel status to recall it later")
         self.popUpMenu.AppendItem(self._keep)
-        self._keep.Enable(True)
+        self._keep.Enable(False)
         self._set_bookmark_flag(False)
         self._set_save_flag(False)
         wx.EVT_MENU(self, id, self.on_bookmark)
@@ -929,7 +929,30 @@ class BasicPage(ScrolledPanel, PanelBase):
             #self._undo.Enable(False)
             return 
         # set data, etc. from the state
-        self.set_data(state.data)
+        # reset page between theory and fitting from bookmarking
+        #if state.data == None:
+        #    data = None
+        #else:
+        data = state.data
+
+        #if data != None:
+        
+        if data == None:
+            data_min = state.qmin
+            data_max = state.qmax
+            self.qmin_x = data_min
+            self.qmax_x = data_max
+            self.minimum_q.SetValue(str(data_min))
+            self.maximum_q.SetValue(str(data_max))
+            self.qmin.SetValue(str(data_min))
+            self.qmax.SetValue(str(data_max))
+
+            self.state.data = data
+            self.state.qmin = self.qmin_x
+            self.state.qmax = self.qmax_x
+        else:
+            self.set_data(data)
+            
         self.enable2D= state.enable2D
         self.engine_type = state.engine_type
 
@@ -954,7 +977,14 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.engine_type = state.engine_type
         #draw the pnael according to the new model parameter 
         self._on_select_model(event=None)
-       
+        # take care of 2D button
+        if data == None and self.model_view.IsEnabled():
+            if self.enable2D:
+                self.model_view.SetLabel("Switch to 1D")
+            else:
+                self.model_view.SetLabel("Switch to 2D")
+        # else:
+                
         if self._manager !=None:
             self._manager._on_change_engine(engine=self.engine_type)
         ## set the select all check box to the a given state
