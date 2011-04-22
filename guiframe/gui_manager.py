@@ -1266,7 +1266,7 @@ class ViewerFrame(wx.Frame):
         dlg = wx.FileDialog(self, 
                             "Choose a file", 
                             self._default_save_location, "",
-                             plug_wlist)
+                            plug_wlist)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             if path is not None:
@@ -1299,8 +1299,11 @@ class ViewerFrame(wx.Frame):
                     plug_wlist ='|'.join(plug_wlist)
                 except:
                     plug_wlist = ''
+
         except:
             plug_wlist = PLUGINS_WLIST 
+            
+        return plug_wlist
             
     def _on_open_state_project(self, event):
         """
