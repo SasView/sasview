@@ -752,7 +752,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             self.alpha_estimate_ctl.Enable(False)
             
             dataset = self.plot_data.GetValue()
-            if dataset.strip() != "":
+            if dataset is not None and dataset.strip() != "":
                 self._manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc, 
                                                  d_max=dmax,
                                                  q_min=qmin, q_max=qmax,
