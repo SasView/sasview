@@ -1527,11 +1527,7 @@ class Plugin(PluginBase):
             theory_data = self.page_finder[page_id].get_theory_data()
             gn = theory_data.y
             en = dy[index]
-        print "n",len(fn)
-        print "n",len(gn)
-        print "n",len(en)
-        print "-",len((fn - gn))
-        print len((fn - gn) / en)
+
         # residual
         res = (fn - gn) / en
         residuals = res[numpy.isfinite(res)]
