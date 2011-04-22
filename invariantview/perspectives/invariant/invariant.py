@@ -232,11 +232,14 @@ class Plugin(PluginBase):
                 msg = "invariant.set_state: datainfo parameter cannot"
                 msg += " be None in standalone mode"
                 raise RuntimeError, msg
-            
+            # Make sure the user sees the invariant panel after loading
+            #self.parent.set_perspective(self.perspective)
+            self.on_perspective(event=None)
             name = data.meta_data['invstate'].file
             data.meta_data['invstate'].file = name
             data.name = name
             data.filename = name
+
             data = self.parent.create_gui_data(data,None)
             self.__data = data
             wx.PostEvent(self.parent, NewPlotEvent(plot=self.__data,
@@ -246,16 +249,11 @@ class Plugin(PluginBase):
             # set state
             self.invariant_panel.is_state_data = True
             
-            # Make sure the user sees the invariant panel after loading
-            #self.parent.set_perspective(self.perspective)
-            self.on_perspective(event=None)
             # Load the invariant states
-            temp_state0 = self.invariant_panel.state.state_list['0']
             self.temp_state = state
+            # Requires to have self.__data and self.temp_state  first.
+            self.on_set_state_helper(None)
 
-            self.invariant_panel.set_state(state=self.temp_state,data=self.__data) 
-            # Must reset the 1st state using the state from file        
-            self.invariant_panel.state.state_list['0'] = temp_state0
         except: 
             logging.error("invariant.set_state: %s" % sys.exc_value)
             

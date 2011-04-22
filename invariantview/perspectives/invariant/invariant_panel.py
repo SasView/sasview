@@ -168,14 +168,17 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         set state when loading it from a .inv/.svs file
         """
+        
         if state == None and data == None:
             self.state = IState()
         elif state == None or data == None: return
         else:
+            new_state = copy.deepcopy(state)
             self.new_state = True
             if not self.set_data(data):
                 return
-            self.state = state 
+
+            self.state = new_state 
             self.state.file = data.name   
 
             num = self.state.saved_state['state_num']
@@ -187,6 +190,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             # get bookmarks
             self.bookmark_num = len(self.state.bookmark_list)
             total_bookmark_num = self.bookmark_num + 1
+
             for ind in range(1,total_bookmark_num):
                 #bookmark_num = ind
                 value = self.state.bookmark_list[ind]
@@ -195,7 +199,6 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 id = wx.NewId()
                 self.popUpMenu.Append(id,name,str(''))
                 wx.EVT_MENU(self, id, self._back_to_bookmark) 
-
                 wx.PostEvent(self.parent, AppendBookmarkEvent(title=name, 
                                           hint='',
                                           handler=self._back_to_bookmark))
