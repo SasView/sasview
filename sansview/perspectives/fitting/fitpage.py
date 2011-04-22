@@ -988,11 +988,12 @@ class FitPage(BasicPage):
         """
         self.btFit.Unbind(event=wx.EVT_BUTTON, id= self.btFit.GetId())
         if self.btFit.GetLabel().lower() == "stop":
-            self.btFit.SetBackgroundColour('red')
+            self.btFit.SetForegroundColour('red')
             self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._StopFit,
                              id=self.btFit.GetId())
         elif self.btFit.GetLabel().lower() == "fit":
             self.btFit.SetDefault()
+            self.btFit.SetForegroundColour('black')
             #self.btFit.SetBackgroundColour(self.default_bt_colour)
             self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._onFit, 
                             id=self.btFit.GetId())
