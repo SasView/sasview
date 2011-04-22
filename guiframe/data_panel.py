@@ -265,8 +265,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_add.SetToolTipString("Add data from the application")
         wx.EVT_BUTTON(self, self.bt_add.GetId(), self._load_data)
         #self.bt_remove = wx.Button(self, wx.NewId(), "Remove Data")
-       # self.bt_remove.SetToolTipString("Remove data from the application")
-       # wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
+        #self.bt_remove.SetToolTipString("Remove data from the application")
+        #wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
         self.bt_import = wx.Button(self, wx.NewId(), "Send To")
         self.bt_import.SetToolTipString("Send set of Data to active perspective")
         wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_import)
@@ -304,9 +304,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         iy = 0
         self.sizer3.Add(self.bt_add,( iy, ix),(1,1),  
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
-        ix += 1          
-        self.sizer3.Add(self.bt_remove,( iy, ix),(1,1),  
-                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)  
+        #ix += 1          
+        #self.sizer3.Add(self.bt_remove,( iy, ix),(1,1),  
+        #                     wx.EXPAND|wx.ADJUST_MINSIZE, 0)  
         ix = 0   
         iy += 1
         self.sizer3.Add(self.bt_import,( iy, ix),(1,1),  
@@ -870,6 +870,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         enable or disable remove button
         """
+        return
         n_t = self.tree_ctrl.GetCount()
         n_t_t = self.tree_ctrl_theory.GetCount()
         if n_t + n_t_t <= 0:
