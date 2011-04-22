@@ -1253,29 +1253,61 @@ class ViewerFrame(wx.Frame):
         path = None
         if self._default_save_location == None:
             self._default_save_location = os.getcwd()
- 
+        
+        plug_wlist = self._on_open_state_app_helper()
         dlg = wx.FileDialog(self, 
                             "Choose a file", 
                             self._default_save_location, "",
-                             PLUGINS_WLIST)
+                             plug_wlist)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             if path is not None:
                 self._default_save_location = os.path.dirname(path)
         dlg.Destroy()
         self.load_state(path=path)  
+    
+    def _on_open_state_app_helper(self):
+        """
+        Helps '_on_open_state_application()' to find the extension of 
+        the current perspective/application
+        """
+        # No current perspective or no extension attr
+        if self._current_perspective is None:
+            return PLUGINS_WLIST 
+        try:
+            # Find the extension of the perspective and get that as 1st item in list
+            ind = None
+            app_ext = self._current_perspective._extensions
+            plug_wlist = config.PLUGINS_WLIST
+            for ext in set(plug_wlist):
+                if ext.count(app_ext) > 0:
+                    ind = ext
+                    break
+            # Found the extension
+            if ind != None:
+                plug_wlist.remove(ind)
+                plug_wlist.insert(0, ind)
+                try:
+                    plug_wlist ='|'.join(plug_wlist)
+                except:
+                    plug_wlist = ''
+        except:
+            plug_wlist = PLUGINS_WLIST 
             
+        return plug_wlist
+    
     def _on_open_state_project(self, event):
         """
         """
         path = None
         if self._default_save_location == None:
             self._default_save_location = os.getcwd()
- 
+        
         dlg = wx.FileDialog(self, 
                             "Choose a file", 
                             self._default_save_location, "",
                              APPLICATION_WLIST)
+        print dlg.GetFilterIndex()
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             if path is not None:
