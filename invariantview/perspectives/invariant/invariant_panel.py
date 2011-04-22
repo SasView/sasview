@@ -80,7 +80,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self._bmark = None
         self.bookmark_num = 0
         
-        #self._set_bookmark_menu()
+        self._set_bookmark_menu()
         #Init state
         self.set_state()
         # default flags for state
@@ -135,7 +135,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self._set_save_flag(True)
             self._set_preview_flag(False)
             self._reset_state_list()
-            
+            self._set_bookmark_flag(True)
         return True  
     
     def set_message(self):
@@ -186,7 +186,6 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 
             # get bookmarks
             self.bookmark_num = len(self.state.bookmark_list)
-
             total_bookmark_num = self.bookmark_num + 1
             for ind in range(1,total_bookmark_num):
                 #bookmark_num = ind
@@ -197,13 +196,17 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 self.popUpMenu.Append(id,name,str(''))
                 wx.EVT_MENU(self, id, self._back_to_bookmark) 
 
+                wx.PostEvent(self.parent, AppendBookmarkEvent(title=name, 
+                                          hint='',
+                                          handler=self._back_to_bookmark))
+
             self.get_state_by_num(state_num=str(num))
             
             self._get_input_list() 
             #make sure that the data is reset (especially
             # when loaded from a inv file)
             self.state.data = self._data
-
+            self._set_preview_flag(False)
             self.new_state = False 
             self.is_state_data = False
 
@@ -603,7 +606,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.state.container = copy.deepcopy(self.inv_container)
             self.state.timestamp= self._get_time_stamp()
             msg = self.state.__str__()
-            #self.state.set_report_string()
+            self.state.set_report_string()
             self.is_power_out = False
             wx.PostEvent(self.parent, StatusEvent(status = msg ))
 
@@ -1050,9 +1053,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         name = "%d] bookmarked at %s on %s"%(self.bookmark_num, my_time, date)
         
         # append it to menu
-        #id = wx.NewId()
-        #self.popUpMenu.Append(id,name,str(msg))
-        #wx.EVT_MENU(self, id, self._back_to_bookmark)
+        id = wx.NewId()
+        self.popUpMenu.Append(id,name,str(msg))
+        wx.EVT_MENU(self, id, self._back_to_bookmark)
         state = self.state.clone_state()
         comp_state = copy.deepcopy(self.state.state_list[str(compute_num)])
         self.state.bookmark_list[self.bookmark_num] = [my_time, date,

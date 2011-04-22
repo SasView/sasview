@@ -250,9 +250,12 @@ class Plugin(PluginBase):
             #self.parent.set_perspective(self.perspective)
             self.on_perspective(event=None)
             # Load the invariant states
+            temp_state0 = self.invariant_panel.state.state_list['0']
             self.temp_state = state
-            self.invariant_panel.set_state(state=state,data=self.__data)         
-           
+
+            self.invariant_panel.set_state(state=self.temp_state,data=self.__data) 
+            # Must reset the 1st state using the state from file        
+            self.invariant_panel.state.state_list['0'] = temp_state0
         except: 
             logging.error("invariant.set_state: %s" % sys.exc_value)
             
