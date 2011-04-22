@@ -1365,6 +1365,7 @@ class ViewerFrame(wx.Frame):
         try:
             data = panel.get_data()
             state = panel.get_state()
+            print "data =------",panel
             if reader is not None:
                 if data is not None:
                     new_doc = reader.write_toXML(data, state)
@@ -1383,7 +1384,8 @@ class ViewerFrame(wx.Frame):
             fd.close()
         else:
             msg = "%s cannot read %s\n" % (str(APPLICATION_NAME), str(path))
-            raise RuntimeError, msg
+            #raise RuntimeError, msg
+            print  msg
         return doc
 
     def quit_guiframe(self):

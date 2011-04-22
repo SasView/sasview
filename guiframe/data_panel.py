@@ -264,9 +264,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_add = wx.Button(self, wx.NewId(), "Load Data")
         self.bt_add.SetToolTipString("Add data from the application")
         wx.EVT_BUTTON(self, self.bt_add.GetId(), self._load_data)
-        self.bt_remove = wx.Button(self, wx.NewId(), "Remove Data")
-        self.bt_remove.SetToolTipString("Remove data from the application")
-        wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
+        #self.bt_remove = wx.Button(self, wx.NewId(), "Remove Data")
+       # self.bt_remove.SetToolTipString("Remove data from the application")
+       # wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
         self.bt_import = wx.Button(self, wx.NewId(), "Send To")
         self.bt_import.SetToolTipString("Send set of Data to active perspective")
         wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_import)
@@ -682,9 +682,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         
         if path is None or not file_list or file_list[0] is None:
             return
-        self.get_data(file_list)
+        self._get_data(file_list)
         
-    def get_data(self, path, format=None):
+    def _get_data(self, path, format=None):
         """
         """
         message = ""
