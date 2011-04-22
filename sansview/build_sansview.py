@@ -60,7 +60,6 @@ INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
 # Release version 1.3.1
 SANSMODELS = "0.4.7"
 DATALOADER = "0.2.7"
-GUICOMM    = "0.1.5"
 GUIFRAME   = "0.2.0"
 SANSVIEW   = "1.3.1"
 PLOTTOOLS  = "0.1.9"
@@ -73,13 +72,11 @@ CALCULATOR = "0.1.1"
 CALC_VIEW  = "0.1.1"
 INVARIANT  = "0.1.1"
 INV_VIEW   = "0.1.1"
-THEORY_VIEW= "0.1.1"
 ELEMENTS = "1.2"
 
 # URLs for SVN repos
 SANSMODELS_URL = "svn://danse.us/sans/releases/sansmodels-%s" % SANSMODELS
 DATALOADER_URL = "svn://danse.us/sans/releases/DataLoader-%s" % DATALOADER
-GUICOMM_URL = "svn://danse.us/sans/releases/guicomm-%s" % GUICOMM
 GUIFRAME_URL = "svn://danse.us/sans/releases/guiframe-%s" % GUIFRAME
 PLOTTOOLS_URL = "svn://danse.us/common/releases/plottools-%s/trunk" % PLOTTOOLS
 UTIL_URL = "svn://danse.us/common/releases/util-%s" % UTIL
@@ -92,7 +89,6 @@ CALC_URL = "svn://danse.us/sans/releases/calculator-%s" % CALCULATOR
 CALC_VIEW_URL = "svn://danse.us/sans/releases/calculatorview-%s" % CALC_VIEW
 INV_URL = "svn://danse.us/sans/releases/Invariant-%s" % INVARIANT
 INV_VIEW_URL = "svn://danse.us/sans/releases/invariantview-%s" % INV_VIEW
-THEO_VIEW_URL = "svn://danse.us/sans/releases/theoryview-%s" % THEORY_VIEW
 ELEMENTS_URL = "svn://danse.us/common/elements/releases/elements-%s" % ELEMENTS
 
 def check_system():
@@ -169,12 +165,6 @@ def checkout(release=False):
     
     os.chdir(wd)
     if release:
-        install_pkg(".", "guicomm-%s" % GUICOMM, GUICOMM_URL)
-    else:
-        install_pkg(".", "guicomm", "svn://danse.us/sans/trunk/guicomm")
-    
-    os.chdir(wd)
-    if release:
         install_pkg(".", "guiframe-%s" % GUIFRAME, GUIFRAME_URL)
     else:
         install_pkg(".", "guiframe", "svn://danse.us/sans/trunk/guiframe")
@@ -232,12 +222,6 @@ def checkout(release=False):
         install_pkg(".", "calculator-%s" % CALCULATOR, CALC_URL)
     else:
         install_pkg(".", "calculator", "svn://danse.us/sans/trunk/calculator")
-    
-    os.chdir(wd)
-    if release:
-        install_pkg(".", "theoryview-%s" % THEORY_VIEW, THEO_VIEW_URL)
-    else:
-        install_pkg(".", "theoryview", "svn://danse.us/sans/trunk/theoryview")
 
     os.chdir(wd)
     if release:
@@ -332,7 +316,6 @@ if __name__ == "__main__":
             # Print out release URLs
             print SANSMODELS_URL 
             print DATALOADER_URL 
-            print GUICOMM_URL 
             print GUIFRAME_URL 
             print PLOTTOOLS_URL 
             print UTIL_URL 
