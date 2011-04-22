@@ -1108,10 +1108,16 @@ class ViewerFrame(wx.Frame):
         config.printEVT("delete_panel: %s" % ID)
         caption = self.panels[ID].window_caption
         if ID in self.panels.keys():
+            self.panel_on_focus = None
             panel = self.panels[ID]
             self._plotting_plugin.delete_panel(panel.group_id)
             self._mgr.DetachPane(panel)
-            panel.Destroy()
+            panel.Hide()
+            panel.clear()
+            panel.Close()
+            self._mgr.Update()
+            print "here here "
+            return 
             if ID in self.panels.keys():
                 del self.panels[ID]
             if ID in self.plot_panels.keys():
@@ -1120,7 +1126,9 @@ class ViewerFrame(wx.Frame):
                 ind = self._data_panel.cb_plotpanel.FindString(str(caption))
                 if ind != wx.NOT_FOUND:
                    self._data_panel.cb_plotpanel.Delete(ind)
+            
             self._mgr.Update()
+ 
       
     def clear_panel(self):
         """
@@ -1168,8 +1176,8 @@ class ViewerFrame(wx.Frame):
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style == GUIFRAME.MANAGER_ON:
             if self._data_panel is not None:
-                data_state = self._data_manager.get_selected_data()
-                self._data_panel.load_data_list(data_state)
+                #data_state = self._data_manager.get_selected_data()
+                #self._data_panel.load_data_list(data_state)
                 self._mgr.GetPane(self._data_panel.window_name).Show(True)
       
     def load_from_cmd(self,  path):   
@@ -1294,8 +1302,6 @@ class ViewerFrame(wx.Frame):
         except:
             plug_wlist = PLUGINS_WLIST 
             
-        return plug_wlist
-    
     def _on_open_state_project(self, event):
         """
         """
@@ -1307,7 +1313,6 @@ class ViewerFrame(wx.Frame):
                             "Choose a file", 
                             self._default_save_location, "",
                              APPLICATION_WLIST)
-        print dlg.GetFilterIndex()
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             if path is not None:

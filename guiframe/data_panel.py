@@ -109,8 +109,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.owner = None
         self.do_layout()
         self.Bind(wx.EVT_SHOW, self.on_close_page)
-        self.enable_remove()
-        self.enable_import()
+       
         
     def do_layout(self):
         """
@@ -330,6 +329,11 @@ class DataPanel(ScrolledPanel, PanelBase):
         iy += 1 
         self.sizer3.Add(self.bt_freeze,( iy, ix),(1,1),  
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
+        self.enable_remove()
+        self.enable_import()
+        self.enable_plot()
+        self.enable_append()
+        self.enable_freeze()
         
     def layout_batch(self):
         """
@@ -417,6 +421,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         if not list:
             self.enable_remove()
+            self.enable_import()
+            self.enable_plot()
+            self.enable_freeze()
             return
         # uncheck previous items
         #self._uncheck_all()    
@@ -471,6 +478,9 @@ class DataPanel(ScrolledPanel, PanelBase):
                                                           process.__str__())
             self.append_theory(state_id, theory_list)
         self.enable_remove()
+        self.enable_import()
+        self.enable_plot()
+        self.enable_freeze()
         
     def _uncheck_all(self):
         """
@@ -772,6 +782,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.parent.remove_data(data_id=data_to_remove,
                                   theory_id=theory_to_remove)
         self.enable_remove()
+        self.enable_freeze()
         
     def on_import(self, event=None):
         """
@@ -838,7 +849,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             if name_plot_panel not in self.cb_plotpanel.GetItems():
                 self.cb_plotpanel.Append(name_plot_panel, value)
             self.cb_plotpanel.SetStringSelection(name_plot_panel)
-
+        self.enable_append()
  
     def _on_plot_selection(self, event = None):
         """
@@ -861,7 +872,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         n_t = self.tree_ctrl.GetCount()
         n_t_t = self.tree_ctrl_theory.GetCount()
-        
         if n_t + n_t_t <= 0:
             self.bt_remove.Disable()
         else:
@@ -875,8 +885,40 @@ class DataPanel(ScrolledPanel, PanelBase):
             self.bt_import.Disable()
         else:
             self.bt_import.Enable()
-
-
+            
+    def enable_plot(self):
+        """
+        enable or disable plot button
+        """
+        n_t = self.tree_ctrl.GetCount()
+        n_t_t = self.tree_ctrl_theory.GetCount()
+        if n_t + n_t_t <= 0:
+            self.bt_plot.Disable()
+        else:
+            self.bt_plot.Enable()
+            
+    def enable_append(self):
+        """
+        enable or disable append button
+        """
+        if self.cb_plotpanel.GetValue() == 'None':
+            self.bt_append_plot.Disable()
+        else:
+            self.bt_append_plot.Enable()
+            
+    def enable_freeze(self):
+        """
+        enable or disable the freeze button
+        """
+        n_t_t = self.tree_ctrl_theory.GetCount()
+        n_l = len(self.list_cb_theory)
+        if (n_t_t <= 0) and (n_l <= 0):
+            self.bt_freeze.Disable()
+        else:
+            self.bt_freeze.Enable()
+        
+        
+        
 class DataFrame(wx.Frame):
     ## Internal name for the AUI manager
     window_name = "Data Panel"
