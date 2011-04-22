@@ -6,21 +6,21 @@
 [Setup]
 
 ChangesAssociations = yes
-AppName=SansView-Dev04192011
-AppVerName=SansView-Dev04192011
-AppPublisher=(c) 2009, University of Tennessee
-AppPublisherURL=http://danse.chem.utk.edu
-AppSupportURL=http://danse.chem.utk.edu
-AppUpdatesURL=http://danse.chem.utk.edu 
-DefaultDirName={pf}\SansView-Dev04192011
-DefaultGroupName=DANSE\SansView-Dev04192011
-DisableProgramGroupPage=yes
-LicenseFile=license.txt
-OutputBaseFilename=setupSansView
-SetupIconFile=images\ball.ico
-Compression=lzma
-SolidCompression=yes
-PrivilegesRequired=none
+AppName = SansView-1.9_release_candidate
+AppVerName = SansView-1.9_release_candidate
+AppPublisher = (c) 2009, University of Tennessee
+AppPublisherURL = http://danse.chem.utk.edu
+AppSupportURL = http://danse.chem.utk.edu
+AppUpdatesURL = http://danse.chem.utk.edu 
+DefaultDirName = {pf}\SansView-1.9_release_candidate
+DefaultGroupName = DANSE\SansView-1.9_release_candidate
+DisableProgramGroupPage = yes
+LicenseFile = license.txt
+OutputBaseFilename = setupSansView
+SetupIconFile = images\ball.ico
+Compression = lzma
+SolidCompression = yes
+PrivilegesRequired = none
 
 
 [Registry]
@@ -54,10 +54,10 @@ Source: "test\*";	DestDir: "{app}\test";	Flags: ignoreversion recursesubdirs cre
 ;	NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\SansView-Dev04192011";	Filename: "{app}\SansView.exe";	WorkingDir: "{app}" 
-Name: "{group}\{cm:UninstallProgram, SansView-Dev04192011}";	 Filename: "{uninstallexe}" 
-Name: "{commondesktop}\SansView-Dev04192011";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" 
+Name: "{group}\SansView-1.9_release_candidate";	Filename: "{app}\SansView.exe";	WorkingDir: "{app}" 
+Name: "{group}\{cm:UninstallProgram, SansView-1.9_release_candidate}";	 Filename: "{uninstallexe}" 
+Name: "{commondesktop}\SansView-1.9_release_candidate";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" 
 
 
 [Run]
-Filename: "{app}\SansView.exe";	Description: "{cm:LaunchProgram, SansView-Dev04192011}";	Flags: nowait postinstall skipifsilent
+Filename: "{app}\SansView.exe";	Description: "{cm:LaunchProgram, SansView-1.9_release_candidate}";	Flags: nowait postinstall skipifsilent
