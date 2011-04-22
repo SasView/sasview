@@ -1262,6 +1262,9 @@ class Plugin(PluginBase):
             title = new_plot.title
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                             title= str(title)))
+            
+            self.page_finder[page_id].set_theory_data(new_plot)
+            
             if update_chisqr:
                 wx.PostEvent(current_pg,
                              Chi2UpdateEvent(output=self._cal_chisqr(data=data,
@@ -1352,6 +1355,7 @@ class Plugin(PluginBase):
 
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                                title=title))
+        self.page_finder[page_id].set_theory_data(new_plot)
         # Chisqr in fitpage
         if update_chisqr:
             wx.PostEvent(current_pg,
@@ -1493,7 +1497,7 @@ class Plugin(PluginBase):
         """
         # default chisqr
         chisqr = None
-        
+
         # return None if data == None
         if data == None: return chisqr
         
@@ -1523,6 +1527,11 @@ class Plugin(PluginBase):
             theory_data = self.page_finder[page_id].get_theory_data()
             gn = theory_data.y
             en = dy[index]
+        print "n",len(fn)
+        print "n",len(gn)
+        print "n",len(en)
+        print "-",len((fn - gn))
+        print len((fn - gn) / en)
         # residual
         res = (fn - gn) / en
         residuals = res[numpy.isfinite(res)]
