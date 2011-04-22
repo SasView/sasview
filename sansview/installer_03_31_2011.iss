@@ -6,21 +6,21 @@
 [Setup]
 
 ChangesAssociations = yes
-AppName = SansView-Dev04192011
-AppVerName = SansView-Dev04192011
-AppPublisher = (c) 2009, University of Tennessee
-AppPublisherURL = http://danse.chem.utk.edu
-AppSupportURL = http://danse.chem.utk.edu
-AppUpdatesURL = http://danse.chem.utk.edu 
-DefaultDirName = {pf}\SansView-Dev04192011
-DefaultGroupName = DANSE\SansView-Dev04192011
-DisableProgramGroupPage = yes
-LicenseFile = license.txt
-OutputBaseFilename = setupSansView
-SetupIconFile = images\ball.ico
-Compression = lzma
-SolidCompression = yes
-PrivilegesRequired = none
+AppName=SansView-Dev04192011
+AppVerName=SansView-Dev04192011
+AppPublisher=(c) 2009, University of Tennessee
+AppPublisherURL=http://danse.chem.utk.edu
+AppSupportURL=http://danse.chem.utk.edu
+AppUpdatesURL=http://danse.chem.utk.edu 
+DefaultDirName={pf}\SansView-Dev04192011
+DefaultGroupName=DANSE\SansView-Dev04192011
+DisableProgramGroupPage=yes
+LicenseFile=license.txt
+OutputBaseFilename=setupSansView
+SetupIconFile=images\ball.ico
+Compression=lzma
+SolidCompression=yes
+PrivilegesRequired=none
 
 
 [Registry]
