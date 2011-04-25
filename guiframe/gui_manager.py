@@ -1356,8 +1356,10 @@ class ViewerFrame(wx.Frame):
         # default cansas xml doc
         doc = None
         for panel in self.panels.values():
-            doc = self.on_save_helper(doc, reader, panel, path)
-        
+            temp = panel.save_project(doc)
+            if temp is not None:
+                doc = temp
+          
         # Write the XML document
         if doc != None:
             fd = open(path, 'w')
@@ -1365,7 +1367,7 @@ class ViewerFrame(wx.Frame):
             fd.close()
         else:
             msg = "%s cannot read %s\n" % (str(APPLICATION_NAME), str(path))
-            #raise RuntimeError, msg
+            logging.error(msg)
                     
     def on_save_helper(self, doc, reader, panel, path):
         """

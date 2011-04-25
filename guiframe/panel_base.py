@@ -54,6 +54,13 @@ class PanelBase:
         self.Bind(wx.EVT_MIDDLE_DOWN, self.on_set_focus)
         self.Bind(wx.EVT_RIGHT_DOWN, self.on_set_focus)
         
+    def save_project(self, doc=None):
+        """
+        return an xml node containing state of the panel
+         that guiframe can write to file
+        """
+        return None
+    
     def has_changed(self):
         """
         """
