@@ -64,6 +64,23 @@ class FitPanel(nb, PanelBase):
         #add default pages
         self.add_default_pages()
 
+    def save_project(self, doc=None):
+        """
+        return an xml node containing state of the panel
+         that guiframe can write to file
+        """
+        for uid, page in self.opened_pages.iteritems():
+            data = page.get_data()
+            # state must be cloned
+            state = page.get_state().clone()
+            if data is not None:
+                new_doc = self._manager.state_reader.write_toXML(data, state)
+                if doc != None and hasattr(doc, "firstChild"):
+                    child = new_doc.firstChild.firstChild
+                    doc.firstChild.appendChild(child)  
+                else:
+                    doc = new_doc 
+        return doc    
     
     def _on_engine_change(self, name='scipy'):
         """
@@ -344,7 +361,7 @@ class FitPanel(nb, PanelBase):
         if page.uid in self.fit_page_name:
            self.fit_page_name[page.uid].appendItem(page.createMemento()) 
             
-    def _onUndo(self, event ):
+    def _onUndo(self, event):
         """
         return the previous state of a given page is available
         """
