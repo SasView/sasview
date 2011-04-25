@@ -1340,9 +1340,10 @@ class ViewerFrame(wx.Frame):
             return
         reader, ext = self._current_perspective.get_extensions()
         path = None
+        extension = '*' + APPLICATION_STATE_EXTENSION
         dlg = wx.FileDialog(self, "Save Project file",
                             self._default_save_location, "",
-                             APPLICATION_STATE_EXTENSION, 
+                             extension, 
                              wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
@@ -1357,26 +1358,6 @@ class ViewerFrame(wx.Frame):
         for panel in self.panels.values():
             doc = self.on_save_helper(doc, reader, panel, path)
         
-            
-    def on_save_helper(self, doc, reader, panel, path):
-        """
-        Save state into a file
-        """
-        try:
-            data = panel.get_data()
-            state = panel.get_state()
-
-            if reader is not None:
-                if data is not None:
-                    new_doc = reader.write_toXML(data, state)
-                    if hasattr(doc, "firstChild"):
-                        child = new_doc.firstChild.firstChild
-                        doc.firstChild.appendChild(child)  
-                    else:
-                        doc = new_doc 
-        except: 
-            raise
-            #pass
         # Write the XML document
         if doc != None:
             fd = open(path, 'w')
@@ -1385,6 +1366,41 @@ class ViewerFrame(wx.Frame):
         else:
             msg = "%s cannot read %s\n" % (str(APPLICATION_NAME), str(path))
             #raise RuntimeError, msg
+                    
+    def on_save_helper(self, doc, reader, panel, path):
+        """
+        Save state into a file
+        """
+        try:
+            if reader is not None:
+                # case of a panel with multi-pages
+                if hasattr(panel, "opened_pages"):
+                    for uid, page in panel.opened_pages.iteritems():
+                        data = page.get_data()
+                        # state must be cloned
+                        state = page.get_state().clone()
+                        if data is not None:
+                            new_doc = reader.write_toXML(data, state)
+                            if doc != None and hasattr(doc, "firstChild"):
+                                child = new_doc.firstChild.firstChild
+                                doc.firstChild.appendChild(child)  
+                            else:
+                                doc = new_doc 
+                # case of only a panel
+                else:
+                    data = panel.get_data()
+                    state = panel.get_state()
+                    if data is not None:
+                        new_doc = reader.write_toXML(data, state)
+                        if doc != None and hasattr(doc, "firstChild"):
+                            child = new_doc.firstChild.firstChild
+                            doc.firstChild.appendChild(child)  
+                        else:
+                            doc = new_doc 
+        except: 
+            raise
+            #pass
+
         return doc
 
     def quit_guiframe(self):
