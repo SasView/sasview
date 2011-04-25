@@ -514,10 +514,14 @@ class Reader:
                         data_conv_i = Converter(attr['unit'])
                         _y = data_conv_i(_y, units=data_info.y_unit)
                     except:
-                        msg = "CanSAS reader: could not convert I(q) unit [%s];"
-                        msg += " expecting [%s]\n  %s" % (attr['unit'], 
-                                            data_info.y_unit, sys.exc_value)
-                        raise ValueError, msg
+                        if attr['unit'].lower() == 'count':
+                            pass
+                        else:
+                            msg = "CanSAS reader: could not"
+                            msg += " convert I(q) unit [%s];" % str(attr['unit'])
+                            msg += " expecting [%s]\n" % str(data_info.y_unit)
+                            msg += "  %s" % str(sys.exc_value)
+                            raise ValueError, msg
                 else:
                     msg = "CanSAS reader: unrecognized I(q) unit [%s];"
                     msg += " expecting [%s]" % (attr['unit'], data_info.y_unit)
@@ -530,10 +534,13 @@ class Reader:
                         data_conv_i = Converter(attr_d['unit'])
                         _dy = data_conv_i(_dy, units=data_info.y_unit)
                     except:
-                        msg = "CanSAS reader: could not convert dI(q) unit "
-                        msg += "[%s]; expecting [%s]\n  %s"  % (attr_d['unit'],
-                                             data_info.y_unit, sys.exc_value)
-                        raise ValueError, msg
+                        if attr_d['unit'].lower() == 'count':
+                            pass 
+                        else:
+                            msg = "CanSAS reader: could not convert dI(q) unit "
+                            msg += "[%s]; expecting [%s]\n  %s"  % (attr_d['unit'],
+                                                 data_info.y_unit, sys.exc_value)
+                            raise ValueError, msg
                 else:
                     msg = "CanSAS reader: unrecognized dI(q) unit [%s]; "
                     msg += "expecting [%s]" % (attr_d['unit'], data_info.y_unit)
