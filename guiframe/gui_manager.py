@@ -684,8 +684,8 @@ class ViewerFrame(wx.Frame):
         Tools menu
         Go through plug-ins and find tools to populate the tools menu
         """
-        style = self.__gui_style & GUIFRAME.TOOL_ON
-        if style == GUIFRAME.TOOL_ON:
+        style = self.__gui_style & GUIFRAME.CALCULATOR_ON
+        if style == GUIFRAME.CALCULATOR_ON:
             self._tool_menu = None
             for item in self.plugins:
                 if hasattr(item, "get_tools"):
@@ -784,8 +784,8 @@ class ViewerFrame(wx.Frame):
             self._data_panel_menu.SetText('Data Explorer ON')
         self._view_menu.AppendSeparator()
         id = wx.NewId()
-        style1 = self.__gui_style & GUIFRAME.TOOL_ON
-        if style1 == GUIFRAME.TOOL_ON:
+        style1 = self.__gui_style & GUIFRAME.TOOLBAR_ON
+        if style1 == GUIFRAME.TOOLBAR_ON:
             self._toolbar_menu = self._view_menu.Append(id,'&Hide Toolbar', '')
         else:
             self._toolbar_menu = self._view_menu.Append(id,'&Show Toolbar', '')
@@ -1033,8 +1033,8 @@ class ViewerFrame(wx.Frame):
             perspective.on_perspective(event=None)
             self._mgr.Update()
             # Show toolbar
-            style = self.__gui_style & GUIFRAME.TOOL_ON
-            if (style == GUIFRAME.TOOL_ON) & (not self._toolbar.IsShown()):
+            style = self.__gui_style & GUIFRAME.TOOLBAR_ON
+            if (style == GUIFRAME.TOOLBAR_ON) & (not self._toolbar.IsShown()):
                 self._on_toggle_toolbar()
             
     def show_welcome_panel(self, event):
@@ -1508,8 +1508,8 @@ class ViewerFrame(wx.Frame):
         
         :param panels: list of panels
         """
-        style = self.__gui_style & GUIFRAME.TOOL_ON
-        if (style == GUIFRAME.TOOL_ON) & (not self._toolbar.IsShown()):
+        style = self.__gui_style & GUIFRAME.TOOLBAR_ON
+        if (style == GUIFRAME.TOOLBAR_ON) & (not self._toolbar.IsShown()):
             self._on_toggle_toolbar()
         for item in self.panels:
             # Check whether this is a sticky panel
