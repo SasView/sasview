@@ -93,13 +93,20 @@ class LamellarPCrystalModel(CLamellarPCrystalModel, BaseComponent):
         
         ## parameters with orientation
         self.orientation_params = []
-   
+
+    def __setstate__(self, state):
+        """
+        restore the state of a model from pickle
+        """
+        self.__dict__, self.params, self.dispersion = state
+        
     def __reduce_ex__(self, proto):
         """
         Overwrite the __reduce_ex__ of PyTypeObject *type call in the init of 
         c model.
         """
-        return (create_LamellarPCrystalModel,tuple())
+        state = (self.__dict__, self.params, self.dispersion)
+        return (create_LamellarPCrystalModel,tuple(), state, None, None)
         
     def clone(self):
         """ Return a identical copy of self """

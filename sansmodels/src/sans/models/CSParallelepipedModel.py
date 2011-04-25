@@ -112,13 +112,20 @@ class CSParallelepipedModel(CCSParallelepipedModel, BaseComponent):
         
         ## parameters with orientation
         self.orientation_params = ['parallel_phi', 'parallel_psi', 'parallel_theta', 'parallel_phi.width', 'parallel_psi.width', 'parallel_theta.width']
-   
+
+    def __setstate__(self, state):
+        """
+        restore the state of a model from pickle
+        """
+        self.__dict__, self.params, self.dispersion = state
+        
     def __reduce_ex__(self, proto):
         """
         Overwrite the __reduce_ex__ of PyTypeObject *type call in the init of 
         c model.
         """
-        return (create_CSParallelepipedModel,tuple())
+        state = (self.__dict__, self.params, self.dispersion)
+        return (create_CSParallelepipedModel,tuple(), state, None, None)
         
     def clone(self):
         """ Return a identical copy of self """

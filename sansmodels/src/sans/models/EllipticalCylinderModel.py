@@ -92,13 +92,20 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
         
         ## parameters with orientation
         self.orientation_params = ['cyl_phi', 'cyl_theta', 'cyl_psi', 'cyl_phi.width', 'cyl_theta.width', 'cyl_psi.width']
-   
+
+    def __setstate__(self, state):
+        """
+        restore the state of a model from pickle
+        """
+        self.__dict__, self.params, self.dispersion = state
+        
     def __reduce_ex__(self, proto):
         """
         Overwrite the __reduce_ex__ of PyTypeObject *type call in the init of 
         c model.
         """
-        return (create_EllipticalCylinderModel,tuple())
+        state = (self.__dict__, self.params, self.dispersion)
+        return (create_EllipticalCylinderModel,tuple(), state, None, None)
         
     def clone(self):
         """ Return a identical copy of self """
