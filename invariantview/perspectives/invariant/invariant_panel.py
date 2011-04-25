@@ -164,6 +164,23 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         self._manager = manager 
         
+    def save_project(self, doc=None):
+        """
+        return an xml node containing state of the panel
+         that guiframe can write to file
+        """
+        data = self.get_data()
+        state = self.get_state()
+        if data is not None:
+            new_doc = self._manager.state_reader.write_toXML(data, state)
+            if new_doc is not None:
+                if doc is not None and hasattr(doc, "firstChild"):
+                    child = new_doc.firstChild.firstChild
+                    doc.firstChild.appendChild(child)  
+                else:
+                    doc = new_doc
+        return doc   
+
     def set_state(self,state=None,data=None):
         """
         set state when loading it from a .inv/.svs file
