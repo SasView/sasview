@@ -234,6 +234,23 @@ class InversionControl(ScrolledPanel, PanelBase):
         else:
             return wx.Panel.__getattribute__(self, name)
         
+    def save_project(self, doc=None):
+        """
+        return an xml node containing state of the panel
+         that guiframe can write to file
+        """
+        data = self.get_data()
+        state = self.get_state()
+        if data is not None:
+            new_doc = self._manager.state_reader.write_toXML(data, state)
+            if new_doc is not None:
+                if doc is not None and hasattr(doc, "firstChild"):
+                    child = new_doc.firstChild.firstChild
+                    doc.firstChild.appendChild(child)  
+                else:
+                    doc = new_doc
+        return doc   
+    
     def on_save(self, evt=None):
         """
         Method used to create a memento of the current state
