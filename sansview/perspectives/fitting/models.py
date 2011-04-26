@@ -8,6 +8,7 @@ import math
 import os.path
 # Time is needed by the log method
 import time
+import logging
 
 from sans.guiframe.events import StatusEvent  
 # Explicitly import from the pluginmodel module so that py2exe
@@ -16,11 +17,14 @@ from sans.guiframe.events import StatusEvent
 from sans.models.pluginmodel import Model1DPlugin
    
 PLUGIN_DIR = 'plugins' 
+path = os.path.dirname(os.path.sys.path[0])
+file = os.path.join(path, "plugins.log")
+
 
 def log(message):
     """
     """
-    out = open("plugins.log", 'a')
+    out = open(file, 'a')
     out.write("%10g:  %s\n" % (time.clock(), message))
     out.close()
 
@@ -106,6 +110,8 @@ def _findModels(dir):
                         file.close()
     except:
         # Don't deal with bad plug-in imports. Just skip.
+        msg = "Could not import model plugin: %s\n" % sys.exc_value
+        log(msg)
         pass
     return plugins
 
@@ -171,16 +177,23 @@ class ModelManagerBase:
         find  plugin model in directory of plugin .recompile all file
         in the directory if file were modified
         """
+        temp = {}
         if self.is_changed():
             #always recompile the folder plugin
             import compileall
-            compileall.compile_dir(dir=PLUGIN_DIR, force=1)
-            dir = os.path.join(os.getcwd(), 'plugins')
-            log("looking for models in: %s" % str(dir))
-            return _findModels(PLUGIN_DIR)
-        return  {}
-       
-    
+            if os.path.isdir(os.path.abspath(PLUGIN_DIR)):
+                dir = os.path.abspath(PLUGIN_DIR)
+            else:
+                dir = os.path.join(os.path.dirname(os.path.sys.path[0]), 'plugins')
+            if not os.path.isdir(dir):
+                log("Could not locate models plugins in: %s" % str(dir))
+            else:
+                log("looking for models in: %s" % str(dir))
+                compileall.compile_dir(dir=dir, ddir=dir, force=1, quiet=True)
+                return  _findModels(dir)
+        logging.info("pluging model : %s\n" % str(temp))
+        return temp
+        
     def _getModelList(self):
         """
         List of models we want to make available by default
