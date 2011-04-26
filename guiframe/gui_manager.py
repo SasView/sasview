@@ -1215,7 +1215,7 @@ class ViewerFrame(wx.Frame):
                     panel = self._mgr.GetPane(self.plot_panels[ID].window_name)
                     if panel.IsShown():
                         panel.Hide()
-        	self.get_data(path)
+            self.get_data(path)
         if self.defaultPanel is not None and \
             self._mgr.GetPane(self.panels["default"].window_name).IsShown():
             self.on_close_welcome_panel()
@@ -1323,8 +1323,13 @@ class ViewerFrame(wx.Frame):
             if path is not None:
                 self._default_save_location = os.path.dirname(path)
         dlg.Destroy()
+        
+        #try:   
+        #    os.popen(path)
+        #    #self.Close()
+        #except:
         self.load_state(path=path)
-    
+        
     def _on_save_application(self, event):
         """
         save the state of the current active application
