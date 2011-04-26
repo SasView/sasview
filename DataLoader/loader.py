@@ -96,10 +96,20 @@ class Registry(ExtensionRegistry):
         :return: number of readers found
         """
         readers_found = 0
+        temp_path = os.path.abspath(dir)
+        if not os.path.isdir(temp_path):
+            temp_path = os.path.join(os.getcwd(), dir)
+        if not os.path.isdir(temp_path):
+            temp_path = os.path.join(os.path.dirname(__file__), dir)
+        if not os.path.isdir(temp_path):
+            temp_path = os.path.join(os.path.dirname(os.path.sys.path[0]), dir)
         
+        dir = temp_path
         # Check whether the directory exists
         if not os.path.isdir(dir): 
-            logging.warning("DataLoader couldn't load from %s" % dir)
+            msg = "DataLoader couldn't locate DataLoader plugin folder."
+            msg += """ "%s" does not exist""" % dir
+            logging.warning(msg)
             return readers_found
         
         for item in os.listdir(dir):

@@ -43,7 +43,8 @@ def read_associations(loader, settings='defaults.xml'):
     # directory, look into the execution directory.
     if not os.path.isfile(path):
         path = os.path.join(os.getcwd(), settings)
-    
+    if not os.path.isfile(path):
+        path = os.path.join(os.path.dirname(os.path.sys.path[0]), settings)
     if os.path.isfile(path):
         tree = etree.parse(path, parser=etree.ETCompatXMLParser())
         
