@@ -2178,6 +2178,12 @@ class ViewApp(wx.App):
                                  gui_style = DEFAULT_STYLE,
                                  size=size) 
         self.s_screen = None
+        try:
+            # make sure the current dir is App dir when it starts
+            temp_path = os.path.dirname(os.path.sys.path[0])  
+            os.chdir(temp_path)
+        except:
+            pass
         # Display a splash screen on top of the frame.
         if len(sys.argv) > 1 and '--time' in sys.argv[1:]:
             log_time("Starting to display the splash screen")
