@@ -1210,23 +1210,12 @@ class ViewerFrame(wx.Frame):
             basename  = os.path.basename(path)
             if APPLICATION_STATE_EXTENSION is not None \
                 and basename.endswith(APPLICATION_STATE_EXTENSION):
-                #remove panels for new states
-                for plug in self.plugins:
-                    #reader, ext = plug.get_extensions()
-                    #if ext is not None and ext.strip() != ''\
-                    #    and ext.lower() not in EXTENSIONS:
-                    #    print "herer clearpanel_geuiframe"
-                    plug.clear_panel() 
-                if self.defaultPanel != None:
-                    self.panels = {'default': self.defaultPanel}
-                else:
-                    #self.clear_panel()
-                    self.panels = {}
-                self._data_panel.clear_panel()    
-                self.plot_panels = {}
-            self.panel_on_focus = None    
-            self.cpanel_on_focus = None 
-            self.get_data(path)
+                #Hide current plot_panels i
+                for ID in self.plot_panels.keys():
+                    panel = self._mgr.GetPane(self.plot_panels[ID].window_name)
+                    if panel.IsShown():
+                        panel.Hide()
+        	self.get_data(path)
         if self.defaultPanel is not None and \
             self._mgr.GetPane(self.panels["default"].window_name).IsShown():
             self.on_close_welcome_panel()
