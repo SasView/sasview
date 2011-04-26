@@ -1453,8 +1453,8 @@ class Reader(CansasReader):
                 return output
               
         except:
-            #self.call_back(format=ext)
-            self.state= state
+            self.call_back(format=ext)
+            #self.state= state
             raise
            
     def write(self, filename, datainfo=None, fitstate=None):

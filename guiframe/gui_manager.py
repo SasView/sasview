@@ -1043,7 +1043,7 @@ class ViewerFrame(wx.Frame):
         """
         if self.defaultPanel is None:
             return 
-        for id in self.panels.keys():
+        for id, panel in self.panels.iteritems():
             if id  ==  'default':
                 # Show default panel
                 if not self._mgr.GetPane(self.panels["default"].window_name).IsShown():
@@ -1051,12 +1051,12 @@ class ViewerFrame(wx.Frame):
             elif id == "data_panel":
                 flag = self._mgr.GetPane(self.panels["data_panel"].window_name).IsShown()
                 self._mgr.GetPane(self.panels["data_panel"].window_name).Show(flag)
-            else:
+            elif panel not in self.plot_panels.values() :
                 self._mgr.GetPane(self.panels[id].window_name).IsShown()
                 self._mgr.GetPane(self.panels[id].window_name).Hide()
-            if self._toolbar != None and not self._toolbar.IsShown():
-                self._toolbar.Show(True)
-            self._on_toggle_toolbar()
+            #if self._toolbar != None and not self._toolbar.IsShown():
+            #    self._toolbar.Show(True)
+            #self._on_toggle_toolbar()
 
         self._mgr.Update()
        
@@ -1116,7 +1116,6 @@ class ViewerFrame(wx.Frame):
             panel.clear()
             panel.Close()
             self._mgr.Update()
-            print "here here "
             return 
             if ID in self.panels.keys():
                 del self.panels[ID]
@@ -1207,10 +1206,19 @@ class ViewerFrame(wx.Frame):
                 and basename.endswith(APPLICATION_STATE_EXTENSION):
                 #remove panels for new states
                 for plug in self.plugins:
-                    reader, ext = plug.get_extensions()
-                    if ext is not None and ext.strip() != ''\
-                        and ext.lower() not in EXTENSIONS:
-                        plug.clear_panel()  
+                    #reader, ext = plug.get_extensions()
+                    #if ext is not None and ext.strip() != ''\
+                    #    and ext.lower() not in EXTENSIONS:
+                    #    print "herer clearpanel_geuiframe"
+                    plug.clear_panel() 
+                if self.defaultPanel != None:
+                    default_panel = self.panels['default']
+                    self.panels = {'default': default_panel}
+                else:
+                    #self.clear_panel()
+                    self.panels = {}
+                    
+                self.plot_panels = {}
             self.panel_on_focus = None    
             self.cpanel_on_focus = None 
             self.get_data(path)

@@ -197,7 +197,7 @@ class FitPanel(nb, PanelBase):
         if state is not None:
             for uid, panel in self.opened_pages.iteritems():
                 #Don't return any panel is the exact same page is created
-                if uid == panel.uid:
+                if uid == panel.uid and panel.data == state.data:
                     # the page is still opened
                     panel.reset_page(state=state)
                     panel.save_current_state() 
@@ -206,7 +206,9 @@ class FitPanel(nb, PanelBase):
                 panel = self._manager.add_fit_page(data=state.data)
                 # add data associated to the page created
                 if panel is not None:  
-                    self._manager.store_page(page=panel.uid, data=state.data)
+                    self._manager.store_data(uid=panel.uid, 
+                                             data=state.data,
+                                             caption=panel.window_caption)
                     panel.reset_page(state=state)
                     panel.save_current_state()
                     

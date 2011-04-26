@@ -315,6 +315,7 @@ class Plugin(PluginBase):
         """
         #state = self.state_reader.get_state()
         if state != None:
+            state = state.clone()
             # store fitting state in temp_state
             self.temp_state.append(state) 
         else:
@@ -346,7 +347,6 @@ class Plugin(PluginBase):
             if state.formfactorcombobox != None:
                 #set state
                 data = self.parent.create_gui_data(state.data)
-                
                 data.group_id = state.data.group_id
                 self.parent.add_data(data_list={data.id:data})
                 wx.PostEvent(self.parent, NewPlotEvent(plot=data,

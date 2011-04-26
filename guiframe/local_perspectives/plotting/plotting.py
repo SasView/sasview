@@ -93,8 +93,13 @@ class Plugin(PluginBase):
         
     def clear_panel(self):
         """
+        Clear and Hide all plot panels
         """
-        pass
+        for group_id in self.plot_panels.keys():
+            panel = self.plot_panels[group_id]
+            panel.graph.reset()
+            self.hide_panel(group_id)
+        self.plot_panels = {}     
     
     def clear_panel_by_id(self, group_id):
         """
