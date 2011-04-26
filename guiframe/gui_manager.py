@@ -108,6 +108,11 @@ class ViewerFrame(wx.Frame):
             ico_file = os.path.join(temp_path,'ball.ico')
             if os.path.isfile(ico_file):
                 self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
+            else:
+                ico_file = os.path.join(os.path.dirname(os.path.sys.path[0]),
+                             'images', 'ball.ico')
+                if os.path.isfile(ico_file):
+                    self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         
         ## Application manager
         self._input_file = None
@@ -1682,7 +1687,13 @@ class ViewerFrame(wx.Frame):
                                                    info='warning'))
             else:
                 #if not append then new plot
-                new_plot.group_id = GROUP_ID
+                from sans.guiframe.dataFitting import Data2D
+                if (Data2D, new_plot.__class__):
+                    #for 2 D always plot in a separated new plot
+                    new_plot.group_id = wx.NewId()
+                else:
+                    # plot all 1D in a new plot
+                    new_plot.group_id = GROUP_ID
             title = "PLOT " + str(new_plot.title)
             wx.PostEvent(self, NewPlotEvent(plot=new_plot,
                                                   title=title))
