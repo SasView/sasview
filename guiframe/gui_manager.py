@@ -212,7 +212,8 @@ class ViewerFrame(wx.Frame):
                 if self.panel_on_focus != self.panels[ID]:
                     self.panels[ID].on_kill_focus(None)
 
-            if self._data_panel is not None:
+            if self._data_panel is not None and \
+                            self.panel_on_focus is not None:
                 panel_name = self.panel_on_focus.window_caption
                 ID = self.panel_on_focus.uid
                 self._data_panel.set_panel_on_focus(ID)
@@ -1212,12 +1213,11 @@ class ViewerFrame(wx.Frame):
                     #    print "herer clearpanel_geuiframe"
                     plug.clear_panel() 
                 if self.defaultPanel != None:
-                    default_panel = self.panels['default']
-                    self.panels = {'default': default_panel}
+                    self.panels = {'default': self.defaultPanel}
                 else:
                     #self.clear_panel()
                     self.panels = {}
-                    
+                self._data_panel.clear_panel()    
                 self.plot_panels = {}
             self.panel_on_focus = None    
             self.cpanel_on_focus = None 

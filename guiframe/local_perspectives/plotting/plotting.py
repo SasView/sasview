@@ -93,13 +93,21 @@ class Plugin(PluginBase):
         
     def clear_panel(self):
         """
-        Clear and Hide all plot panels
+        Clear and Hide all plot panels, and remove them from menu
         """
         for group_id in self.plot_panels.keys():
             panel = self.plot_panels[group_id]
             panel.graph.reset()
             self.hide_panel(group_id)
-        self.plot_panels = {}     
+        self.plot_panels = {}
+        item = self.menu.FindItemByPosition(0)
+        while item != None:
+            self.menu.DeleteItem(item) 
+            try:
+                item = self.menu.FindItemByPosition(0)
+            except:
+                item = None
+               
     
     def clear_panel_by_id(self, group_id):
         """
