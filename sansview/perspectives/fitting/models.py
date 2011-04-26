@@ -175,7 +175,8 @@ class ModelManagerBase:
             #always recompile the folder plugin
             import compileall
             compileall.compile_dir(dir=PLUGIN_DIR, force=1)
-            log("looking for models in: %s/plugins" % os.getcwd())
+            dir = os.path.join(os.getcwd(), 'plugins')
+            log("looking for models in: %s" % str(dir))
             return _findModels(PLUGIN_DIR)
         return  {}
        
