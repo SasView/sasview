@@ -21,6 +21,7 @@ from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.events import StatusEvent
 from DataLoader.loader import Loader
+import logging
 
 try:
     # Try to find a local config
@@ -87,7 +88,9 @@ class DataPanel(ScrolledPanel, PanelBase):
     ## Flag to tell the GUI manager that this panel is not
     #  tied to any perspective
     #ALWAYS_ON = True
-    def __init__(self, parent, list=[],list_of_perspective=[],
+    def __init__(self, parent, 
+                 list=None,
+                 list_of_perspective=None,
                  size=(PANEL_WIDTH,PANEL_HEIGHT), manager=None, *args, **kwds):
         kwds['size']= size
         kwds['style'] = STYLE_FLAG
@@ -100,16 +103,22 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.all_data1d = True
         self.parent = parent
         self.manager = manager
+        if list is None:
+            list = []
         self.list_of_data = list
+        if list_of_perspective is None:
+            list_of_perspective = []
         self.list_of_perspective = list_of_perspective
         self.list_rb_perspectives= []
         self.list_cb_data = {}
         self.list_cb_theory = {}
         self.tree_ctrl = None
         self.tree_ctrl_theory = None
+        self.perspective_cbox = None
         
         self.owner = None
         self.do_layout()
+        self.fill_cbox_analysis(self.list_of_perspective)
         self.Bind(wx.EVT_SHOW, self.on_close_page)
        
         
@@ -120,7 +129,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.layout_selection()
         self.layout_data_list()
         self.layout_button()
-        self.layout_batch()
+        #self.layout_batch()
    
     def define_panel_structure(self):
         """
@@ -132,7 +141,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer1.SetMinSize((w/13, h*2/5))
       
         self.sizer2 = wx.BoxSizer(wx.VERTICAL)
-        self.sizer3 = wx.GridBagSizer(5,5)
+        #self.sizer3 = wx.GridBagSizer(5,5)
+        self.sizer3 = wx.FlexGridSizer(5, 2, 0, 0)
         self.sizer4 = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer5 = wx.BoxSizer(wx.VERTICAL)
        
@@ -274,7 +284,11 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_import = wx.Button(self, wx.NewId(), "Send To")
         self.bt_import.SetToolTipString("Send set of Data to active perspective")
         wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_import)
-        
+        self.perspective_cbox = wx.ComboBox(self, -1, 
+                                style=wx.CB_READONLY)
+        wx.EVT_COMBOBOX(self.perspective_cbox,-1, 
+                        self._on_perspective_selection)
+    
         self.bt_append_plot = wx.Button(self, wx.NewId(), "Append Plot To")
         self.bt_append_plot.SetToolTipString("Plot the selected data in the active panel")
         wx.EVT_BUTTON(self, self.bt_append_plot.GetId(), self.on_append_plot)
@@ -287,14 +301,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_freeze.SetToolTipString("To trigger freeze a theory")
         wx.EVT_BUTTON(self, self.bt_freeze.GetId(), self.on_freeze)
         
-        self.tctrl_perspective = wx.StaticText(self, -1, 
-                            'No Active Application',
-                        style=wx.SUNKEN_BORDER|wx.ALIGN_LEFT)
-        self.tctrl_perspective.SetToolTipString("Active Application")
-        perspective_font = self.tctrl_perspective.GetFont()
-        perspective_font.SetWeight(wx.BOLD)
-        self.tctrl_perspective.SetFont(perspective_font)
-        self.tctrl_perspective.SetClientSize((80,20))
+       
+        #self.tctrl_perspective.SetToolTipString("Active Application")
+        #perspective_font = self.tctrl_perspective.GetFont()
+        #perspective_font.SetWeight(wx.BOLD)
+        #self.tctrl_perspective.SetFont(perspective_font)
+        #self.tctrl_perspective.SetClientSize((80,20))
         self.cb_plotpanel = wx.ComboBox(self, -1, 
                                 style=wx.CB_READONLY|wx.CB_SORT)
         wx.EVT_COMBOBOX(self.cb_plotpanel,-1, self._on_plot_selection)
@@ -304,6 +316,19 @@ class DataPanel(ScrolledPanel, PanelBase):
         #self.tctrl_plotpanel = wx.StaticText(self, -1, 'No Plot panel on focus')
         #self.tctrl_plotpanel.SetToolTipString("Active Plot Panel")
     
+        
+        self.sizer3.AddMany([(self.bt_add),
+                             ((10, 10)),
+                             (self.bt_import),
+                              (self.perspective_cbox, wx.EXPAND),
+                              (self.bt_append_plot),
+                              (self.cb_plotpanel, wx.EXPAND),
+                              (self.bt_plot),
+                              ((10, 10)),
+                              (self.bt_freeze)])
+        self.sizer3.AddGrowableCol(1, 1)
+
+        """
         ix = 0
         iy = 0
         self.sizer3.Add(self.bt_add,( iy, ix),(1,1),  
@@ -315,8 +340,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         iy += 1
         self.sizer3.Add(self.bt_import,( iy, ix),(1,1),  
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
+        
         ix += 1
-        self.sizer3.Add(self.tctrl_perspective,(iy, ix),(1,1),
+        self.sizer3.Add(self.perspective_cbox,(iy, ix),(1,1),
                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)      
         ix = 0          
         iy += 1 
@@ -333,7 +359,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         iy += 1 
         self.sizer3.Add(self.bt_freeze,( iy, ix),(1,1),  
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
-        self.enable_remove()
+        """
+        #self.enable_remove()
         self.enable_import()
         self.enable_plot()
         self.enable_append()
@@ -342,7 +369,6 @@ class DataPanel(ScrolledPanel, PanelBase):
     def layout_batch(self):
         """
         """
-        return
         self.rb_single_mode = wx.RadioButton(self, -1, 'Single Mode',
                                              style=wx.RB_GROUP)
         self.rb_batch_mode = wx.RadioButton(self, -1, 'Batch Mode')
@@ -352,16 +378,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer4.AddMany([(self.rb_single_mode,0, wx.ALL,5),
                             (self.rb_batch_mode,0, wx.ALL,5)])
       
-    def old_layout_data_list(self):
-        """
-        Add a listcrtl in the panel
-        """
-        self.tree_ctrl = DataTreeCtrl(parent=self)
-        self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKING, self.on_check_item)
-        self.sizer1.Add(self.tree_ctrl,1, wx.EXPAND|wx.ALL, 10)
-        self.theory_root = self.tree_ctrl.InsertItem(self.tree_ctrl.root,0,
-                                                   "THEORIES", ct_type=0)
-    
     def layout_data_list(self):
         """
         Add a listcrtl in the panel
@@ -395,30 +411,26 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         item = event.GetItem()
         item.Check(not item.IsChecked()) 
-        self.enable_button(item)
         event.Skip()
         
-    def enable_button(self, item):
+    def fill_cbox_analysis(self, plugin):
         """
+        fill the combobox with analysis name
         """
-        # Not implemented
-        return
-        """
-        _, data_class, _= self.tree_ctrl.GetItemPyData(item) 
-        if item.IsChecked():
-            self.all_data1d &= (data_class != "Data2D")
-            if self.all_data1d:
-                self.bt_freeze.Enable()
-            else:
-                self.bt_freeze.Disable()
-        else:
-            self.all_data1d |= True
-            self.all_data1d &= (data_class != "Data2D")
-            if self.all_data1d:
-                self.bt_freeze.Enable()
-            else:
-                self.bt_freeze.Disable()
-        """       
+        self.list_of_perspective = plugin
+        if self.parent is None or \
+            not hasattr(self.parent, "get_current_perspective") or \
+            len(self.list_of_perspective) == 0:
+            return
+        if self.parent is not None and self.perspective_cbox  is not None:
+            for plug in self.list_of_perspective:
+                if plug.get_perspective():
+                    self.perspective_cbox.Append(plug.sub_menu, plug)
+            
+            curr_pers = self.parent.get_current_perspective()
+            self.perspective_cbox.SetStringSelection(curr_pers.sub_menu)
+        self.enable_import()
+                        
     def load_data_list(self, list):
         """
         add need data with its theory under the tree
@@ -440,7 +452,6 @@ class DataPanel(ScrolledPanel, PanelBase):
                                                            data_name, ct_type=1, 
                                              data=(data_id, data_class, state_id))
                         data_c.Check(True)
-                        self.enable_button(data_c)
                         d_i_c = self.tree_ctrl.AppendItem(data_c, 'Info')
                         i_c_c = self.tree_ctrl.AppendItem(d_i_c, 
                                                       'Type: %s' % data_class)
@@ -473,7 +484,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                             i_t_c = self.tree_ctrl.AppendItem(d_p_c,
                                                               process.__str__())
                 self.append_theory(state_id, theory_list)
-        self.enable_remove()
+        #self.enable_remove()
         self.enable_import()
         self.enable_plot()
         self.enable_freeze()
@@ -487,23 +498,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             data_ctrl, _, _, _,_, _ = item
             self.tree_ctrl.CheckItem(data_ctrl, False) 
         
-    def old_append_theory(self, state_id, theory_list):
-        """
-        append theory object under data from a state of id = state_id
-        replace that theory if  already displayed
-        """
-        if not theory_list:
-            return 
-        if state_id not in self.list_cb_data.keys():
-            root = self.theory_root
-        else:
-            item = self.list_cb_data[state_id]
-            data_c, _, _, _, _, _ = item
-            root = data_c
-        if root is not None:
-             self.append_theory_helper(root=root, 
-                                       state_id=state_id, 
-                                       theory_list=theory_list)
+   
     def append_theory(self, state_id, theory_list):
         """
         append theory object under data from a state of id = state_id
@@ -778,7 +773,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             
         self.parent.remove_data(data_id=data_to_remove,
                                   theory_id=theory_to_remove)
-        self.enable_remove()
+        #self.enable_remove()
         self.enable_freeze()
         
     def on_import(self, event=None):
@@ -831,10 +826,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         set the active perspective
         """
-        self.tctrl_perspective.SetLabel(str(name))
-        #perspective_font = self.tctrl_perspective.GetFont()
-        #perspective_font.SetWeight(wx.BOLD)
-        self.tctrl_perspective.SetClientSize((80,20))#SetFont(perspective_font)
+        self.perspective_cbox.SetStringSelection(name)
         self.enable_import()
         
     def set_panel_on_focus(self, name):
@@ -847,7 +839,17 @@ class DataPanel(ScrolledPanel, PanelBase):
                 self.cb_plotpanel.Append(name_plot_panel, value)
             self.cb_plotpanel.SetStringSelection(name_plot_panel)
         self.enable_append()
- 
+    
+    def _on_perspective_selection(self, event=None):
+        """
+        select the current perspective for guiframe
+        """
+        selection = self.perspective_cbox.GetSelection()
+
+        if self.perspective_cbox.GetValue() != 'None':
+            perspective = self.perspective_cbox.GetClientData(selection)
+            perspective.on_perspective(event=None)
+        
     def _on_plot_selection(self, event = None):
         """
         On source combobox selection
@@ -867,7 +869,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         enable or disable remove button
         """
-        return
         n_t = self.tree_ctrl.GetCount()
         n_t_t = self.tree_ctrl_theory.GetCount()
         if n_t + n_t_t <= 0:
@@ -882,17 +883,27 @@ class DataPanel(ScrolledPanel, PanelBase):
         n_t = 0
         if self.tree_ctrl != None:
             n_t = self.tree_ctrl.GetCount()
-        if n_t <=0  or self.tctrl_perspective.GetLabelText() == "No Active Application":
-            self.bt_import.Disable()
-        else:
+        if n_t > 0 and len(self.list_of_perspective) > 0:
             self.bt_import.Enable()
+        else:
+            self.bt_import.Disable()
+        if len(self.list_of_perspective) <= 0 or \
+            self.perspective_cbox.GetValue()  in ["None",
+                                                "No Active Application"]:
+            self.perspective_cbox.Disable()
+        else:
+            self.perspective_cbox.Enable()
             
     def enable_plot(self):
         """
         enable or disable plot button
         """
-        n_t = self.tree_ctrl.GetCount()
-        n_t_t = self.tree_ctrl_theory.GetCount()
+        n_t = 0 
+        n_t_t = 0
+        if self.tree_ctrl != None:
+            n_t = self.tree_ctrl.GetCount()
+        if self.tree_ctrl_theory != None:
+            n_t_t = self.tree_ctrl_theory.GetCount()
         if n_t + n_t_t <= 0:
             self.bt_plot.Disable()
         else:
@@ -902,10 +913,24 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         enable or disable append button
         """
-        if self.cb_plotpanel.GetValue() == 'None':
+        n_t = 0 
+        n_t_t = 0
+        if self.tree_ctrl != None:
+            n_t = self.tree_ctrl.GetCount()
+        if self.tree_ctrl_theory != None:
+            n_t_t = self.tree_ctrl_theory.GetCount()
+        if n_t + n_t_t <= 0: 
             self.bt_append_plot.Disable()
+            self.cb_plotpanel.Disable()
+        elif self.cb_plotpanel.GetValue() == 'None':
+            self.bt_append_plot.Disable()
+            if self.cb_plotpanel.GetCount() <= 1:
+                self.cb_plotpanel.Disable()
+            else:
+                self.cb_plotpanel.Ensable()
         else:
             self.bt_append_plot.Enable()
+            self.cb_plotpanel.Ensable()
             
     def enable_freeze(self):
         """

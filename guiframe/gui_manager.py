@@ -186,6 +186,12 @@ class ViewerFrame(wx.Frame):
         self.Bind(EVT_APPEND_BOOKMARK, self.append_bookmark)
         
         
+    def get_current_perspective(self):
+        """
+        return the current perspective
+        """
+        return self._current_perspective
+    
     def set_input_file(self, input_file):
         """
         :param input_file: file to read
@@ -251,6 +257,8 @@ class ViewerFrame(wx.Frame):
                                              str(self._input_file))
             msg += str(sys.exc_value) + '\n'
             print msg
+        if self._data_panel is not None:
+            self._data_panel.fill_cbox_analysis(self.plugins)
         self.post_init()
         #self.show_welcome_panel(None)
         self.Show(True)
@@ -309,6 +317,7 @@ class ViewerFrame(wx.Frame):
                 is_loaded = True    
         if not is_loaded:
             self.plugins.append(plugin)
+            
       
     def _get_local_plugins(self):
         """
