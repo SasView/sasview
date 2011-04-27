@@ -17,14 +17,11 @@ from sans.guiframe.events import StatusEvent
 from sans.models.pluginmodel import Model1DPlugin
    
 PLUGIN_DIR = 'plugins' 
-path = os.path.dirname(os.path.sys.path[0])
-file = os.path.join(path, "plugins.log")
-
 
 def log(message):
     """
     """
-    out = open(file, 'a')
+    out = open("plugins.log", 'a')
     out.write("%10g:  %s\n" % (time.clock(), message))
     out.close()
 
@@ -78,6 +75,24 @@ def _findModels(dir):
     # List of plugin objects
     plugins = {}
     # Go through files in plug-in directory
+    #always recompile the folder plugin
+    import compileall
+    dir = os.path.abspath(PLUGIN_DIR)
+    if not os.path.isdir(dir):
+        dir = os.path.join(os.getcwd(), PLUGIN_DIR)
+    if not os.path.isdir(dir):
+        dir = os.path.join(os.path.dirname(__file__), PLUGIN_DIR)
+    if not os.path.isdir(dir):
+        dir = os.path.join(os.path.dirname(os.path.sys.path[0]), PLUGIN_DIR)
+    if not os.path.isdir(dir):
+        msg = "SansView couldn't locate Model plugin folder."
+        msg += """ "%s" does not exist""" % dir
+        logging.warning(msg)
+        return plugins
+    else:
+        log("looking for models in: %s" % str(dir))
+        compileall.compile_dir(dir=dir, ddir=dir, force=1, quiet=True)
+        logging.info("pluging model dir: %s\n" % str(dir))
     try:
         list = os.listdir(dir)
         for item in list:
@@ -179,18 +194,7 @@ class ModelManagerBase:
         """
         temp = {}
         if self.is_changed():
-            #always recompile the folder plugin
-            import compileall
-            if os.path.isdir(os.path.abspath(PLUGIN_DIR)):
-                dir = os.path.abspath(PLUGIN_DIR)
-            else:
-                dir = os.path.join(os.path.dirname(os.path.sys.path[0]), 'plugins')
-            if not os.path.isdir(dir):
-                log("Could not locate models plugins in: %s" % str(dir))
-            else:
-                log("looking for models in: %s" % str(dir))
-                compileall.compile_dir(dir=dir, ddir=dir, force=1, quiet=True)
-                return  _findModels(dir)
+            return  _findModels(dir)
         logging.info("pluging model : %s\n" % str(temp))
         return temp
         
