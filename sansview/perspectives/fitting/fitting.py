@@ -94,6 +94,9 @@ class Plugin(PluginBase):
         #Create a reader for fit page's state
         self.state_reader = None 
         self._extensions = '.fitv'
+        self.scipy_id = wx.NewId()
+        self.park_id = wx.NewId()
+        
         self.temp_state = []
         self.state_index = 0
         self.sfile_ext = None
@@ -114,34 +117,28 @@ class Plugin(PluginBase):
         """
         #Menu for fitting
         self.menu1 = wx.Menu()
-        
-        #Set park engine
-        id3 = wx.NewId()
-        scipy_help= "Scipy Engine: Perform Simple fit. More in Help window...."
-        self.menu1.AppendCheckItem(id3, "Simple Fit  [Scipy]",scipy_help) 
-        wx.EVT_MENU(owner, id3,  self._onset_engine_scipy)
-        
-        id3 = wx.NewId()
-        park_help = "Park Engine: Perform Complex fit. More in Help window...."
-        self.menu1.AppendCheckItem(id3, "Complex Fit  [Park]",park_help) 
-        wx.EVT_MENU(owner, id3,  self._onset_engine_park)
-        
-        self.menu1.FindItemByPosition(0).Check(True)
-        self.menu1.FindItemByPosition(1).Check(False)
-            
+        id1 = wx.NewId()
+        simul_help = "Add new fit panel"
+        self.menu1.Append(id1, '&New Fit Page',simul_help)
+        wx.EVT_MENU(owner, id1, self.on_add_new_page)
         self.menu1.AppendSeparator()
         id1 = wx.NewId()
         simul_help = "Simultaneous Fit"
         self.menu1.Append(id1, '&Simultaneous Fit',simul_help)
         wx.EVT_MENU(owner, id1, self.on_add_sim_page)
-        
         self.menu1.AppendSeparator()
+        #Set park engine
         
-        id1 = wx.NewId()
-        simul_help = "Add new fit panel"
-        self.menu1.Append(id1, '&New Fit Page',simul_help)
-        wx.EVT_MENU(owner, id1, self.on_add_new_page)
-    
+        scipy_help= "Scipy Engine: Perform Simple fit. More in Help window...."
+        self.menu1.AppendCheckItem(self.scipy_id, "Simple Fit  [Scipy]",scipy_help) 
+        wx.EVT_MENU(owner, self.scipy_id,  self._onset_engine_scipy)
+        
+        park_help = "Park Engine: Perform Complex fit. More in Help window...."
+        self.menu1.AppendCheckItem(self.park_id, "Complex Fit  [Park]",park_help) 
+        wx.EVT_MENU(owner, self.park_id,  self._onset_engine_park)
+        
+        self.menu1.FindItemById(self.scipy_id).Check(True)
+        self.menu1.FindItemById(self.park_id).Check(False)
         #create  menubar items
         return [(self.menu1, "FitEngine")]
                
@@ -1068,11 +1065,11 @@ class Plugin(PluginBase):
         self._fit_engine = engine
         ## change menu item state
         if engine=="park":
-            self.menu1.FindItemByPosition(0).Check(False)
-            self.menu1.FindItemByPosition(1).Check(True)
+            self.menu1.FindItemById(self.park_id).Check(True)
+            self.menu1.FindItemById(self.scipy_id).Check(False)
         else:
-            self.menu1.FindItemByPosition(0).Check(True)
-            self.menu1.FindItemByPosition(1).Check(False)
+            self.menu1.FindItemById(self.park_id).Check(False)
+            self.menu1.FindItemById(self.scipy_id).Check(True)
         ## post a message to status bar
         msg = "Engine set to: %s" % self._fit_engine
         wx.PostEvent(self.parent, 
