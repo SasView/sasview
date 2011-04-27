@@ -930,7 +930,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                 self.cb_plotpanel.Ensable()
         else:
             self.bt_append_plot.Enable()
-            self.cb_plotpanel.Ensable()
+            self.cb_plotpanel.Enable()
             
     def enable_freeze(self):
         """
