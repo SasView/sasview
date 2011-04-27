@@ -630,7 +630,7 @@ class ViewerFrame(wx.Frame):
         self._mgr.MaximizePane(pane)
         self._mgr.RestoreMaximizedPane()
         # Register for showing/hiding the panel
-        wx.EVT_MENU(self, ID, self._on_view)
+        wx.EVT_MENU(self, ID, self.on_view)
         if p not in self.plot_panels.values():
             self.plot_panels[ID] = p
             if self._data_panel is not None and \
@@ -850,7 +850,7 @@ class ViewerFrame(wx.Frame):
                         self._window_menu.Append(int(item),
                                                   panel.window_caption,
                                         "Show %s window" % panel.window_caption)
-                        wx.EVT_MENU(self, int(item), self._on_view)
+                        wx.EVT_MENU(self, int(item), self.on_view)
                 self._menubar.Append(self._window_menu, '&Window')
                 """
                 
@@ -1014,7 +1014,7 @@ class ViewerFrame(wx.Frame):
         """
         self.sb.set_status(event=evt)
        
-    def _on_view(self, evt):
+    def on_view(self, evt):
         """
         A panel was selected to be shown. If it's not already
         shown, display it.
