@@ -937,7 +937,7 @@ class FitPage(BasicPage):
         Allow to fit
         """
         if self.data is None:
-            msg = "Please select a Data first..."
+            msg = "Please get Data first..."
             wx.MessageBox(msg, 'Info')
             wx.PostEvent(self._manager.parent, StatusEvent(status=\
                             "Fit: %s" % msg))
@@ -948,7 +948,14 @@ class FitPage(BasicPage):
             wx.PostEvent(self._manager.parent, StatusEvent(status=\
                             "Fit: %s"%msg, type="stop"))
             return
-
+        
+        if len(self.param_toFit) <= 0:
+            msg= "Select at least one parameter to fit"
+            wx.MessageBox(msg, 'Info')
+            wx.PostEvent(self._manager.parent, StatusEvent(status= msg, 
+                                                         type="stop" ))
+            return 
+        
         flag = self._update_paramv_on_fit() 
                 
         if not flag:
@@ -956,13 +963,7 @@ class FitPage(BasicPage):
             wx.PostEvent(self.parent.parent, StatusEvent(status= msg, 
                                                          type="stop"))
             return 
-        
-        if len(self.param_toFit) <= 0:
-            msg= "Select at least one parameter to fit"
-            wx.PostEvent(self.parent.parent, StatusEvent(status= msg, 
-                                                         type="stop" ))
-            return 
-      
+              
         self.select_param(event =None)
         
         #Clear errors if exist from previous fitting
@@ -1020,7 +1021,6 @@ class FitPage(BasicPage):
             
         self._on_select_model_helper() 
         self.set_model_param_sizer(self.model)                   
-        
         if self.model is None:
             self._set_bookmark_flag(False)
             self._keep.Enable(False)
@@ -2523,7 +2523,7 @@ class FitPage(BasicPage):
         self.cb1 = wx.CheckBox(self, -1,str(select_text), (10, 10))
         wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.select_all_param)
         self.cb1.SetToolTipString("To check/uncheck all the boxes below.")
-        #self.cb1.SetValue(True)
+        self.cb1.SetValue(True)
         
         sizer.Add(self.cb1,(iy, ix),(1,1),\
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
