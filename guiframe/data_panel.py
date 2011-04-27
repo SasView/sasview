@@ -852,7 +852,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.perspective_cbox.SetStringSelection(name)
         self.enable_import()
         
-    def set_panel_on_focus(self, name):
+    def set_panel_on_focus(self, name=None):
         """
         set the plot panel on focus
         """
@@ -860,7 +860,9 @@ class DataPanel(ScrolledPanel, PanelBase):
             name_plot_panel = str(value.window_caption)
             if name_plot_panel not in self.cb_plotpanel.GetItems():
                 self.cb_plotpanel.Append(name_plot_panel, value)
-            self.cb_plotpanel.SetStringSelection(name_plot_panel)
+            if name != None and name == name_plot_panel:
+                self.cb_plotpanel.SetStringSelection(name_plot_panel)
+                break
         self.enable_append()
     
     def _on_perspective_selection(self, event=None):

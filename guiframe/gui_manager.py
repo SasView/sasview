@@ -219,9 +219,10 @@ class ViewerFrame(wx.Frame):
         panel_name = 'No panel on focus'
         application_name = 'No Selected Analysis'
         if self.panel_on_focus is not None:
-            for ID in self.panels.keys():
-                if self.panel_on_focus != self.panels[ID]:
-                    self.panels[ID].on_kill_focus(None)
+            if self.panel_on_focus not in self.plot_panels.values():
+                for ID in self.panels.keys():
+                    if self.panel_on_focus != self.panels[ID]:
+                        self.panels[ID].on_kill_focus(None)
 
             if self._data_panel is not None and \
                             self.panel_on_focus is not None:
@@ -2133,7 +2134,6 @@ class ViewerFrame(wx.Frame):
         # set focusing panel
         self.panel_on_focus = panel  
         self.set_panel_on_focus(None)
-        print " on_set_plot_focus"
          
     def _onDrawIdle(self, *args, **kwargs):
         """
