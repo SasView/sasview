@@ -115,6 +115,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.tree_ctrl = None
         self.tree_ctrl_theory = None
         self.perspective_cbox = None
+        self.at_least_on_check = True
         
         self.owner = None
         self.do_layout()
@@ -247,23 +248,33 @@ class DataPanel(ScrolledPanel, PanelBase):
             data_id, data_class, _ = self.tree_ctrl.GetItemPyData(data_ctrl) 
             if option == 'Select all Data':
                 self.tree_ctrl.CheckItem(data_ctrl, True) 
+                self.at_least_on_check = True
             elif option == 'Unselect all Data':
                 self.tree_ctrl.CheckItem(data_ctrl, False)
+                self.at_least_on_check = False
             elif option == 'Select all Data 1D':
                 if data_class == 'Data1D':
                     self.tree_ctrl.CheckItem(data_ctrl, True) 
+                    self.at_least_on_check = True
             elif option == 'Unselect all Data 1D':
                 if data_class == 'Data1D':
                     self.tree_ctrl.CheckItem(data_ctrl, False) 
             elif option == 'Select all Data 1D':
                 if data_class == 'Data1D':
                     self.tree_ctrl.CheckItem(data_ctrl, True) 
+                    self.at_least_on_check = True
             elif option == 'Select all Data 2D':
                 if data_class == 'Data2D':
                     self.tree_ctrl.CheckItem(data_ctrl, True) 
+                    self.at_least_on_check = True
             elif option == 'Unselect all Data 2D':
                 if data_class == 'Data2D':
                     self.tree_ctrl.CheckItem(data_ctrl, False) 
+        self.enable_append()
+        self.enable_freeze()
+        self.enable_plot()
+        self.enable_import()
+        #self.enable_remove()
                
     def on_set_active_perspective(self, event):
         """
@@ -411,6 +422,13 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         item = event.GetItem()
         item.Check(not item.IsChecked()) 
+        if item.IsChecked():
+            self.at_least_on_check = True
+        self.enable_append()
+        self.enable_freeze()
+        self.enable_plot()
+        self.enable_import()
+        #self.enable_remove()
         event.Skip()
         
     def fill_cbox_analysis(self, plugin):
@@ -497,7 +515,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         for item in self.list_cb_data.values():
             data_ctrl, _, _, _,_, _ = item
             self.tree_ctrl.CheckItem(data_ctrl, False) 
-        
+        self.at_least_on_check = False
+        self.enable_append()
+        self.enable_freeze()
+        self.enable_plot()
+        self.enable_import()
+        #self.enable_remove()
    
     def append_theory(self, state_id, theory_list):
         """
@@ -908,6 +931,11 @@ class DataPanel(ScrolledPanel, PanelBase):
             self.bt_plot.Disable()
         else:
             self.bt_plot.Enable()
+        if not self.at_least_on_check:
+            self.bt_plot.Disable()
+        else:
+            self.bt_append_plot.Enable()
+            self.bt_plot.Enable()
             
     def enable_append(self):
         """
@@ -915,6 +943,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         n_t = 0 
         n_t_t = 0
+        if not self.at_least_on_check:
+            self.bt_append_plot.Disable()
+            self.cb_plotpanel.Disable()
+        else:
+            self.bt_append_plot.Enable()
+            self.cb_plotpanel.Enable()
         if self.tree_ctrl != None:
             n_t = self.tree_ctrl.GetCount()
         if self.tree_ctrl_theory != None:
@@ -932,6 +966,9 @@ class DataPanel(ScrolledPanel, PanelBase):
             self.bt_append_plot.Enable()
             self.cb_plotpanel.Enable()
             
+    def check_theory_to_freeze(self):
+        """
+        """
     def enable_freeze(self):
         """
         enable or disable the freeze button
@@ -941,10 +978,10 @@ class DataPanel(ScrolledPanel, PanelBase):
         if self.tree_ctrl_theory != None:
             n_t_t = self.tree_ctrl_theory.GetCount()
         n_l = len(self.list_cb_theory)
-        if (n_t_t <= 0) and (n_l <= 0):
-            self.bt_freeze.Disable()
-        else:
+        if (n_t_t + n_l > 0) and self.at_least_on_check:
             self.bt_freeze.Enable()
+        else:
+            self.bt_freeze.Disable()
         
     def enable_selection(self):
         """
