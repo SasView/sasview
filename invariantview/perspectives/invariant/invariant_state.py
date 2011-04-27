@@ -525,14 +525,26 @@ class InvariantState(object):
                 else:
                     continue
 
+        s_1 = self._check_html_format(s_1)
+        file_name = self._check_html_format(self.file)
+
         # make plot image
         self.set_plot_state(extra_high=bool_0[1],extra_low=bool_1[1])
         # get ready for report with setting all the html strings
         self.report_str = str(self.template_str) % (s_1, s_2,
                                         s_3, s_4, s_5, s_6, s_7, s_8,
                                     s_9, s_10, s_11, s_12, s_13, s_14, s_15,
-                                        s_16, s_17, s_18, self.file, "%s")
+                                        s_16, s_17, s_18, file_name, "%s")
 
+    def _check_html_format(self, name):
+        """
+        Check string '%' for html format
+        """
+        if name.count('%'):
+            name = name.replace('%', '&#37')
+        
+        return name
+        
     def set_saved_state(self, name, value):
         """
         Set the state list 

@@ -502,6 +502,15 @@ class PageState(object):
                     paramval +=  param + "\n"
                     paramval_string += CENTRE % param + "\n"
         
+        text_string = "\n\n\n" + title + "\n\n" + file + \
+                              "\n" + q_name + \
+                              "\n" + chi2 + \
+                              "\n\n" + paramval 
+        
+        title_name = self._check_html_format(title_name)
+        file_name = self._check_html_format(file_name)
+        title = self._check_html_format(title)
+                                  
         html_string = title_name + "\n" + file_name + \
                                    "\n" + q_range + \
                                    "\n" + chi2_string + \
@@ -510,13 +519,18 @@ class PageState(object):
                                    "\n" + ELINE + \
                                    "\n" + FEET_1 % title + \
                                    "\n" + FEET_2 
-                            
-        text_string = "\n\n\n" + title + "\n\n" + file + \
-                              "\n" + q_name + \
-                              "\n" + chi2 + \
-                              "\n\n" + paramval 
-                                           
+                                                                      
         return html_string, text_string, title
+    
+    def _check_html_format(self, name):
+        """
+        Check string '%' for html format
+        """
+        if name.count('%'):
+            name = name.replace('%', '&#37')
+        
+        return name
+    
     
     def report(self, figs=None, canvases=None):
         """
