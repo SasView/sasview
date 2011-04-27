@@ -57,7 +57,7 @@ class Plugin(PluginBase):
     Fitting plugin is used to perform fit 
     """
     def __init__(self, standalone=False):
-        PluginBase.__init__(self, name="Model Fitting", standalone=standalone)
+        PluginBase.__init__(self, name="Fitting", standalone=standalone)
         
         #list of panel to send to guiframe
         self.mypanels = []
@@ -140,7 +140,7 @@ class Plugin(PluginBase):
         self.menu1.FindItemById(self.scipy_id).Check(True)
         self.menu1.FindItemById(self.park_id).Check(False)
         #create  menubar items
-        return [(self.menu1, "FitEngine")]
+        return [(self.menu1, self.sub_menu)]
                
     def on_add_sim_page(self, event):
         """
