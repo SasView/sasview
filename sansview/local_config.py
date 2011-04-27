@@ -49,7 +49,7 @@ _copyright = "(c) 2009, University of Tennessee"
 #edit the list of file state your plugin can read
 APPLICATION_WLIST = 'SansView files (*.svs)|*.svs'
 APPLICATION_STATE_EXTENSION = '.svs'
-GUIFRAME_WIDTH = 1100
+GUIFRAME_WIDTH = 1150
 GUIFRAME_HEIGHT = 840
 PLUGIN_STATE_EXTENSIONS = ['.fitv', '.inv', '.prv']
 PLUGINS_WLIST = ['Fitting files (*.fitv)|*.fitv',
