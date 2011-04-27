@@ -105,6 +105,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.list_rb_perspectives= []
         self.list_cb_data = {}
         self.list_cb_theory = {}
+        self.tree_ctrl = None
+        self.tree_ctrl_theory = None
         
         self.owner = None
         self.do_layout()
@@ -160,6 +162,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         wx.EVT_COMBOBOX(self.selection_cbox,-1, self._on_selection_type)
         self.sizer5.AddMany([(select_txt,0, wx.ALL,5),
                             (self.selection_cbox,0, wx.ALL,5)])
+        self.enable_selection()
+        
     def layout_perspective(self, list_of_perspective=[]):
         """
         Layout widgets related to the list of plug-ins of the gui_manager 
@@ -419,68 +423,61 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         add need data with its theory under the tree
         """
-        if not list:
-            self.enable_remove()
-            self.enable_import()
-            self.enable_plot()
-            self.enable_freeze()
-            return
-        # uncheck previous items
-        #self._uncheck_all()    
-           
-        for state_id, dstate in list.iteritems():
-            data = dstate.get_data()
-            theory_list = dstate.get_theory()
-            if data is not None:
-                data_name = data.name
-                data_class = data.__class__.__name__
-                path = dstate.get_path() 
-                process_list = data.process
-                data_id = data.id
-                
-                if state_id not in self.list_cb_data:
-                    #new state
-                    data_c = self.tree_ctrl.InsertItem(self.tree_ctrl.root,0,
-                                                       data_name, ct_type=1, 
-                                         data=(data_id, data_class, state_id))
-                    data_c.Check(True)
-                    self.enable_button(data_c)
-                    d_i_c = self.tree_ctrl.AppendItem(data_c, 'Info')
-                    i_c_c = self.tree_ctrl.AppendItem(d_i_c, 
-                                                  'Type: %s' % data_class)
-                    p_c_c = self.tree_ctrl.AppendItem(d_i_c,
-                                                  'Path: %s' % str(path))
-                    d_p_c = self.tree_ctrl.AppendItem(d_i_c, 'Process')
+        if list:
+            for state_id, dstate in list.iteritems():
+                data = dstate.get_data()
+                theory_list = dstate.get_theory()
+                if data is not None:
+                    data_name = data.name
+                    data_class = data.__class__.__name__
+                    path = dstate.get_path() 
+                    process_list = data.process
+                    data_id = data.id
                     
-                    for process in process_list:
-                        i_t_c = self.tree_ctrl.AppendItem(d_p_c,
-                                                          process.__str__())
-                    theory_child = self.tree_ctrl.AppendItem(data_c, "THEORIES")
-                   
-                    self.list_cb_data[state_id] = [data_c, 
-                                                   d_i_c,
-                                                   i_c_c,
-                                                    p_c_c,
-                                                     d_p_c,
-                                                     theory_child]
-                else:
-                    data_ctrl_list =  self.list_cb_data[state_id]
-                    #This state is already display replace it contains
-                    data_c, d_i_c, i_c_c, p_c_c, d_p_c, t_c = data_ctrl_list
-                    self.tree_ctrl.SetItemText(data_c, data_name) 
-                    temp = (data_id, data_class, state_id)
-                    self.tree_ctrl.SetItemPyData(data_c, temp) 
-                    self.tree_ctrl.SetItemText(i_c_c, 'Type: %s' % data_class)
-                    self.tree_ctrl.SetItemText(p_c_c, 'Path: %s' % str(path)) 
-                    self.tree_ctrl.DeleteChildren(d_p_c) 
-                    for process in process_list:
-                        i_t_c = self.tree_ctrl.AppendItem(d_p_c,
-                                                          process.__str__())
-            self.append_theory(state_id, theory_list)
+                    if state_id not in self.list_cb_data:
+                        #new state
+                        data_c = self.tree_ctrl.InsertItem(self.tree_ctrl.root,0,
+                                                           data_name, ct_type=1, 
+                                             data=(data_id, data_class, state_id))
+                        data_c.Check(True)
+                        self.enable_button(data_c)
+                        d_i_c = self.tree_ctrl.AppendItem(data_c, 'Info')
+                        i_c_c = self.tree_ctrl.AppendItem(d_i_c, 
+                                                      'Type: %s' % data_class)
+                        p_c_c = self.tree_ctrl.AppendItem(d_i_c,
+                                                      'Path: %s' % str(path))
+                        d_p_c = self.tree_ctrl.AppendItem(d_i_c, 'Process')
+                        
+                        for process in process_list:
+                            i_t_c = self.tree_ctrl.AppendItem(d_p_c,
+                                                              process.__str__())
+                        theory_child = self.tree_ctrl.AppendItem(data_c, "THEORIES")
+                       
+                        self.list_cb_data[state_id] = [data_c, 
+                                                       d_i_c,
+                                                       i_c_c,
+                                                        p_c_c,
+                                                         d_p_c,
+                                                         theory_child]
+                    else:
+                        data_ctrl_list =  self.list_cb_data[state_id]
+                        #This state is already display replace it contains
+                        data_c, d_i_c, i_c_c, p_c_c, d_p_c, t_c = data_ctrl_list
+                        self.tree_ctrl.SetItemText(data_c, data_name) 
+                        temp = (data_id, data_class, state_id)
+                        self.tree_ctrl.SetItemPyData(data_c, temp) 
+                        self.tree_ctrl.SetItemText(i_c_c, 'Type: %s' % data_class)
+                        self.tree_ctrl.SetItemText(p_c_c, 'Path: %s' % str(path)) 
+                        self.tree_ctrl.DeleteChildren(d_p_c) 
+                        for process in process_list:
+                            i_t_c = self.tree_ctrl.AppendItem(d_p_c,
+                                                              process.__str__())
+                self.append_theory(state_id, theory_list)
         self.enable_remove()
         self.enable_import()
         self.enable_plot()
         self.enable_freeze()
+        self.enable_selection()
         
     def _uncheck_all(self):
         """
@@ -882,7 +879,10 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         enable or disable send button
         """
-        if self.tctrl_perspective.GetLabelText() == "No Active Application":
+        n_t = 0
+        if self.tree_ctrl != None:
+            n_t = self.tree_ctrl.GetCount()
+        if n_t <=0  or self.tctrl_perspective.GetLabelText() == "No Active Application":
             self.bt_import.Disable()
         else:
             self.bt_import.Enable()
@@ -911,14 +911,32 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         enable or disable the freeze button
         """
-        n_t_t = self.tree_ctrl_theory.GetCount()
+        n_t_t = 0
+        n_l = 0
+        if self.tree_ctrl_theory != None:
+            n_t_t = self.tree_ctrl_theory.GetCount()
         n_l = len(self.list_cb_theory)
         if (n_t_t <= 0) and (n_l <= 0):
             self.bt_freeze.Disable()
         else:
             self.bt_freeze.Enable()
         
-        
+    def enable_selection(self):
+        """
+        enable or disable combobo box selection
+        """
+        n_t = 0
+        n_t_t = 0
+        if self.tree_ctrl != None:
+            n_t = self.tree_ctrl.GetCount()
+        if self.tree_ctrl_theory != None:
+            n_t_t = self.tree_ctrl_theory.GetCount()
+        if n_t + n_t_t > 0 and self.selection_cbox != None:
+            self.selection_cbox.Enable()
+        else:
+            self.selection_cbox.Disable()
+            
+            
         
 class DataFrame(wx.Frame):
     ## Internal name for the AUI manager
