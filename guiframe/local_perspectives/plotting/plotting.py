@@ -289,14 +289,15 @@ class Plugin(PluginBase):
         """
         Check mark on menu
         """
-        event.Skip()
+        #event.Skip()
         event_id = event.GetId()
-        
-        #self.menu.Enable(event_id, False)
-        self.parent._on_view(event)
-        if not self.menu.IsChecked(event_id):
-            self.menu.Check(event_id, True)
 
+        if self.menu.IsChecked(event_id):
+            self.parent._on_view(event)
+            self.menu.Check(event_id, True)
+        else:
+            self.parent.hide_panel(event_id)
+            self.menu.Check(event_id, False)
         
     def _on_close_panel(self, event):
         """
