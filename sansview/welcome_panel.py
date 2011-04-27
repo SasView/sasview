@@ -94,8 +94,7 @@ class WelcomePage(wx.Panel):
        
         wx.Panel.__init__(self, *args, **kwds)
         
-        image = os.path.join(os.path.dirname(os.path.sys.path[0]),
-                             "images","SVwelcome.png")
+        image = os.path.join("images","SVwelcome.png")
         self.SetWindowVariant(variant = FONT_VARIANT)
         self.bitmap_logo = wx.StaticBitmap(self, -1, wx.Bitmap(image))
        
