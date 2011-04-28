@@ -644,6 +644,7 @@ class Plugin(PluginBase):
                                     fn=fitter,
                                     page_id=list_page_id,
                                     updatefn=handler.update_fit,
+                                    completefn=self._simul_fit_completed,
                                     ftol=self.ftol)
         self.fit_thread_list[current_page_id] = calc_fit
         calc_fit.queue()

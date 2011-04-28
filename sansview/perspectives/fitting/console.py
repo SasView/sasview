@@ -53,8 +53,8 @@ class ConsoleUpdate(FitHandler):
             self.isbetter = False
             self.improvement_time = t
             
-            #wx.PostEvent(self.parent, StatusEvent(status=\
-            # "%d%% complete ..."%(p),type="progress"))
+            wx.PostEvent(self.parent, StatusEvent(status=\
+             "%d%% complete ..."%(p),type="progress"))
        
         # Update percent complete
         dp = p-self.progress_percent
@@ -64,22 +64,22 @@ class ConsoleUpdate(FitHandler):
             if 1 <= dp <= 2:
                 self.progress_percent = p
                 self.progress_time = t
-                #wx.PostEvent(self.parent, StatusEvent(status=\
-                #                                      "%d%% complete ..."%(p),
-                #                                      type="progress"))
+                wx.PostEvent(self.parent, StatusEvent(status=\
+                                                      "%d%% complete ..."%(p),
+                                                      type="progress"))
        
             elif 2 < dp <= 5:
                 if p//5 != self.progress_percent//5:
-                    #wx.PostEvent(self.parent, StatusEvent(status=\
-                    #   "%d%% complete ..."%(5*(p//5)),type="progress"))
+                    wx.PostEvent(self.parent, StatusEvent(status=\
+                        "%d%% complete ..."%(5*(p//5)),type="progress"))
                     self.progress_percent = p
                     self.progress_time = t
             else:
                 if p//10 != self.progress_percent//10:
                     self.progress_percent = p
                     self.progress_time = t
-                    #wx.PostEvent(self.parent, StatusEvent(status=\
-                   #"%d%% complete ..."%(10*(p//10)),type="progress"))
+                    wx.PostEvent(self.parent, StatusEvent(status=\
+                   "%d%% complete ..."%(10*(p//10)),type="progress"))
         
     def improvement(self):
         """
@@ -94,10 +94,10 @@ class ConsoleUpdate(FitHandler):
         """
         if self.isbetter:
             self.result.print_summary()
-        #message = "fit Error"
-        #message = str(msg)+ " \n %s"%self.result.__str__()
-        #wx.PostEvent(self.parent, StatusEvent(status=message,
-        #                                      info="error", type="stop"))
+        message = "fit Error"
+        message = str(msg)+ " \n %s"%self.result.__str__()
+        wx.PostEvent(self.parent, StatusEvent(status=message,
+                                   info="error", type="stop"))
             
     def finalize(self):
         """
@@ -124,8 +124,8 @@ class ConsoleUpdate(FitHandler):
     def starting_fit(self):
         """
         """
-        #wx.PostEvent(self.parent, StatusEvent(status="Starting the Fit...",
-        #                                info="info",type="progress"))
+        wx.PostEvent(self.parent, StatusEvent(status="Starting the Fit...",
+                                        info="info",type="progress"))
         
     def set_result(self, result):
         """
