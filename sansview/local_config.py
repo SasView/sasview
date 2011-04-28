@@ -62,7 +62,7 @@ DEFAULT_STYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.MANAGER_ON\
                     |GUIFRAME.CALCULATOR_ON|GUIFRAME.TOOLBAR_ON
 SPLASH_SCREEN_WIDTH = 512
 SPLASH_SCREEN_HEIGHT = 366
-SS_MAX_DISPLAY_TIME = 3000 #3 sec
+SS_MAX_DISPLAY_TIME = 5000 #5 sec
 SetupIconFile_win = os.path.join("images", "ball.ico")
 SetupIconFile_mac = os.path.join("images", "ball.icns")
 DefaultGroupName = "DANSE"
