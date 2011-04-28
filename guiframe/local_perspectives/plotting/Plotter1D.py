@@ -228,10 +228,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
             position = "x: %8.3g    y: %8.3g" % (event.xdata, event.ydata)
             wx.PostEvent(self.parent, StatusEvent(status=position))
         
-        #self.on_set_focus(None)    
+        self.on_set_focus(None)    
         #post nd event to notify guiframe that this panel is on focus
         wx.PostEvent(self.parent, PanelOnFocusEvent(panel=self))
-        self._manager.set_panel_on_focus(self)
+
         
     def _ontoggle_hide_error(self, event):
         """
