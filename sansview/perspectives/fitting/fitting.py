@@ -868,7 +868,8 @@ class Plugin(PluginBase):
         Plugin.on_perspective(self, event=event)
         for plottable in self.panel.graph.plottables:
             if plottable.__class__.__name__ in ["Data1D", "Theory1D"]:
-                if plottable.name == self.panel.graph.selected_plottable:
+                data_id = self.panel.graph.selected_plottable
+                if plottable == self.panel.plots[data_id]:
                     data = plottable
                     self.add_fit_page(data=data)
                     return
