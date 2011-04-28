@@ -43,9 +43,9 @@ if config.APPLICATION_STATE_EXTENSION is not None:
     extension_list.append(config.APPLICATION_STATE_EXTENSION)
 EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS + extension_list   
 
-PANEL_WIDTH = 180
-#PANEL_HEIGHT = 560
+PANEL_WIDTH = 250
 PANEL_HEIGHT = 700
+CBOX_WIDTH = 140
 STYLE_FLAG =wx.RAISED_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|\
                     wx.WANTS_CHARS|CT.TR_HAS_VARIABLE_ROW_HEIGHT
                     
@@ -90,8 +90,9 @@ class DataPanel(ScrolledPanel, PanelBase):
     #ALWAYS_ON = True
     def __init__(self, parent, 
                  list=None,
-                 list_of_perspective=None,
-                 size=(PANEL_WIDTH,PANEL_HEIGHT), manager=None, *args, **kwds):
+                 size=(PANEL_WIDTH, PANEL_HEIGHT),
+                 list_of_perspective=None, manager=None, *args, **kwds):
+       
         kwds['size']= size
         kwds['style'] = STYLE_FLAG
         ScrolledPanel.__init__(self, parent=parent, *args, **kwds)
@@ -286,6 +287,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         Layout widgets related to buttons
         """
+        w, _ = self.GetSize()
         self.bt_add = wx.Button(self, wx.NewId(), "Load Data")
         self.bt_add.SetToolTipString("Add data from the application")
         wx.EVT_BUTTON(self, self.bt_add.GetId(), self._load_data)
@@ -295,7 +297,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_import = wx.Button(self, wx.NewId(), "Send To")
         self.bt_import.SetToolTipString("Send set of Data to active perspective")
         wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_import)
-        self.perspective_cbox = wx.ComboBox(self, -1, 
+        self.perspective_cbox = wx.ComboBox(self, -1, size=(CBOX_WIDTH, -1),
                                 style=wx.CB_READONLY)
         wx.EVT_COMBOBOX(self.perspective_cbox,-1, 
                         self._on_perspective_selection)
@@ -318,7 +320,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         #perspective_font.SetWeight(wx.BOLD)
         #self.tctrl_perspective.SetFont(perspective_font)
         #self.tctrl_perspective.SetClientSize((80,20))
-        self.cb_plotpanel = wx.ComboBox(self, -1, 
+        
+        self.cb_plotpanel = wx.ComboBox(self, -1, size=(CBOX_WIDTH, -1),
                                 style=wx.CB_READONLY|wx.CB_SORT)
         wx.EVT_COMBOBOX(self.cb_plotpanel,-1, self._on_plot_selection)
         self.cb_plotpanel.Append('None')
@@ -933,11 +936,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             self.bt_plot.Disable()
         else:
             self.bt_plot.Enable()
-        if not self.at_least_on_check:
-            self.bt_plot.Disable()
-        else:
-            self.bt_append_plot.Enable()
-            self.bt_plot.Enable()
+      
             
     def enable_append(self):
         """
@@ -1011,7 +1010,7 @@ class DataFrame(wx.Frame):
     #  tied to any perspective
     ALWAYS_ON = True
     
-    def __init__(self, parent=None, owner=None, manager=None,size=(200, 800),
+    def __init__(self, parent=None, owner=None, manager=None,size=(300, 800),
                          list_of_perspective=[],list=[], *args, **kwds):
         kwds['size'] = size
         kwds['id'] = -1

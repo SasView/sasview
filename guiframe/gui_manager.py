@@ -62,6 +62,7 @@ PLOPANEL_WIDTH = config.PLOPANEL_WIDTH
 PLOPANEL_HEIGTH = config.PLOPANEL_HEIGTH
 GUIFRAME_WIDTH = config.GUIFRAME_WIDTH 
 GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
+DATAPANEL_WIDTH = 250
 PLUGIN_STATE_EXTENSIONS =  config.PLUGIN_STATE_EXTENSIONS
 extension_list = []
 if APPLICATION_STATE_EXTENSION is not None:
@@ -428,13 +429,14 @@ class ViewerFrame(wx.Frame):
         panel_width_min = self._window_width 
         style = self.__gui_style & (GUIFRAME.MANAGER_ON)
         if self._data_panel is not None  and (p == self._data_panel):
-            panel_width_min = self._window_width * 4/25 
+            panel_width_min = DATAPANEL_WIDTH
             panel_height_min = self._window_height * 0.8
             return panel_width_min, panel_height_min
         if hasattr(p, "CENTER_PANE") and p.CENTER_PANE:
             style = self.__gui_style & (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON)
             if style == (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON):
-                panel_width_min = self._window_width * 15/25 
+                panel_width_min = self._window_width -\
+                            (DATAPANEL_WIDTH +config.PLOPANEL_WIDTH)
             return panel_width_min, panel_height_min
         return panel_width_min, panel_height_min
     
@@ -504,12 +506,9 @@ class ViewerFrame(wx.Frame):
                     self.panels[str(id)] = p
                     self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                                           Name(p.window_name).
-                                          Caption(p.window_caption).
-                                          #CenterPane().
+                                          CenterPane().
                                           Center().
                                           CloseButton(False).
-                                          #MinimizeButton(False).
-                                          #BestSize(wx.Size(w, h)).
                                           Hide())
             else:
                 self.panels[str(id)] = p
@@ -621,8 +620,7 @@ class ViewerFrame(wx.Frame):
                               # manager takes all the available space
                               BestSize(wx.Size(PLOPANEL_WIDTH, 
                                                PLOPANEL_HEIGTH)))
-                              #MinSize(wx.Size(PLOPANEL_WIDTH*0.9, 
-                              #                PLOPANEL_HEIGTH)))
+                        
             self._popup_fixed_panel(p)
     
         elif style2 == GUIFRAME.FLOATING_PANEL:
@@ -2134,6 +2132,7 @@ class ViewerFrame(wx.Frame):
         # set focusing panel
         self.panel_on_focus = panel  
         self.set_panel_on_focus(None)
+        print " on_set_plot_focus"
          
     def _onDrawIdle(self, *args, **kwargs):
         """
