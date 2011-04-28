@@ -2132,8 +2132,7 @@ class ViewerFrame(wx.Frame):
         # set focusing panel
         self.panel_on_focus = panel  
         self.set_panel_on_focus(None)
-        print " on_set_plot_focus"
-         
+    
     def _onDrawIdle(self, *args, **kwargs):
         """
         ReDraw with axes

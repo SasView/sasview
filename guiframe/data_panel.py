@@ -116,8 +116,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.tree_ctrl = None
         self.tree_ctrl_theory = None
         self.perspective_cbox = None
-        self.at_least_on_check = True
-        
+       
         self.owner = None
         self.do_layout()
         self.fill_cbox_analysis(self.list_of_perspective)
@@ -143,7 +142,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer1.SetMinSize((w/13, h*2/5))
       
         self.sizer2 = wx.BoxSizer(wx.VERTICAL)
-        #self.sizer3 = wx.GridBagSizer(5,5)
         self.sizer3 = wx.FlexGridSizer(5, 2, 0, 0)
         self.sizer4 = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer5 = wx.BoxSizer(wx.VERTICAL)
@@ -176,57 +174,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                             (self.selection_cbox,0, wx.ALL,5)])
         self.enable_selection()
         
-    def layout_perspective(self, list_of_perspective=[]):
-        """
-        Layout widgets related to the list of plug-ins of the gui_manager 
-        """
-        if len(list_of_perspective)==0:
-            return
-        w, h = self.parent.GetSize()
-        box_description_2= wx.StaticBox(self, -1, "Set Active Perspective")
-        self.boxsizer_2 = wx.StaticBoxSizer(box_description_2, wx.HORIZONTAL)
-        self.sizer_perspective = wx.GridBagSizer(5,5)
-        self.boxsizer_2.Add(self.sizer_perspective)
-        self.sizer2.Add(self.boxsizer_2,1, wx.ALL, 10)
-        self.list_of_perspective = list_of_perspective
-        self.sizer_perspective.Clear(True)
-        self.list_rb_perspectives = []
-       
-        nb_active_perspective = 0
-        if list_of_perspective:
-            ix = 0 
-            iy = 0
-            for perspective_name, is_active in list_of_perspective:
-                
-                if is_active:
-                    nb_active_perspective += 1
-                if nb_active_perspective == 1:
-                    rb = wx.RadioButton(self, -1, perspective_name,
-                                        style=wx.RB_GROUP)
-                    rb.SetToolTipString("Data will be applied to this perspective")
-                    rb.SetValue(is_active)
-                else:
-                    rb = wx.RadioButton(self, -1, perspective_name)
-                    rb.SetToolTipString("Data will be applied to this perspective")
-                    #only one perpesctive can be active
-                    rb.SetValue(False)
-                
-                self.Bind(wx.EVT_RADIOBUTTON, self.on_set_active_perspective,
-                                                     id=rb.GetId())
-                self.list_rb_perspectives.append(rb)
-                self.sizer_perspective.Add(rb,(iy, ix),(1,1),
-                               wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
-                iy += 1
-        else:
-            rb = wx.RadioButton(self, -1, 'No Perspective',
-                                                      style=wx.RB_GROUP)
-            rb.SetValue(True)
-            rb.Disable()
-            ix = 0 
-            iy = 0
-            self.sizer_perspective.Add(rb,(iy, ix),(1,1),
-                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
-            
+    
     def _on_selection_type(self, event):
         """
         Select data according to patterns
@@ -249,25 +197,20 @@ class DataPanel(ScrolledPanel, PanelBase):
             data_id, data_class, _ = self.tree_ctrl.GetItemPyData(data_ctrl) 
             if option == 'Select all Data':
                 self.tree_ctrl.CheckItem(data_ctrl, True) 
-                self.at_least_on_check = True
             elif option == 'Unselect all Data':
                 self.tree_ctrl.CheckItem(data_ctrl, False)
-                self.at_least_on_check = False
             elif option == 'Select all Data 1D':
                 if data_class == 'Data1D':
                     self.tree_ctrl.CheckItem(data_ctrl, True) 
-                    self.at_least_on_check = True
             elif option == 'Unselect all Data 1D':
                 if data_class == 'Data1D':
                     self.tree_ctrl.CheckItem(data_ctrl, False) 
             elif option == 'Select all Data 1D':
                 if data_class == 'Data1D':
                     self.tree_ctrl.CheckItem(data_ctrl, True) 
-                    self.at_least_on_check = True
             elif option == 'Select all Data 2D':
                 if data_class == 'Data2D':
                     self.tree_ctrl.CheckItem(data_ctrl, True) 
-                    self.at_least_on_check = True
             elif option == 'Unselect all Data 2D':
                 if data_class == 'Data2D':
                     self.tree_ctrl.CheckItem(data_ctrl, False) 
@@ -277,12 +220,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.enable_import()
         #self.enable_remove()
                
-    def on_set_active_perspective(self, event):
-        """
-        Select the active perspective
-        """
-        ctrl = event.GetEventObject()
-        
     def layout_button(self):
         """
         Layout widgets related to buttons
@@ -313,24 +250,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_freeze = wx.Button(self, wx.NewId(), "Freeze Theory")
         self.bt_freeze.SetToolTipString("To trigger freeze a theory")
         wx.EVT_BUTTON(self, self.bt_freeze.GetId(), self.on_freeze)
-        
        
-        #self.tctrl_perspective.SetToolTipString("Active Application")
-        #perspective_font = self.tctrl_perspective.GetFont()
-        #perspective_font.SetWeight(wx.BOLD)
-        #self.tctrl_perspective.SetFont(perspective_font)
-        #self.tctrl_perspective.SetClientSize((80,20))
-        
         self.cb_plotpanel = wx.ComboBox(self, -1, size=(CBOX_WIDTH, -1),
                                 style=wx.CB_READONLY|wx.CB_SORT)
         wx.EVT_COMBOBOX(self.cb_plotpanel,-1, self._on_plot_selection)
-        self.cb_plotpanel.Append('None')
-        self.cb_plotpanel.SetStringSelection('None')
+        self.cb_plotpanel.Disable()
 
-        #self.tctrl_plotpanel = wx.StaticText(self, -1, 'No Plot panel on focus')
-        #self.tctrl_plotpanel.SetToolTipString("Active Plot Panel")
-    
-        
         self.sizer3.AddMany([(self.bt_add),
                              ((10, 10)),
                              (self.bt_import),
@@ -342,38 +267,6 @@ class DataPanel(ScrolledPanel, PanelBase):
                               (self.bt_freeze)])
         self.sizer3.AddGrowableCol(1, 1)
 
-        """
-        ix = 0
-        iy = 0
-        self.sizer3.Add(self.bt_add,( iy, ix),(1,1),  
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
-        #ix += 1          
-        #self.sizer3.Add(self.bt_remove,( iy, ix),(1,1),  
-        #                     wx.EXPAND|wx.ADJUST_MINSIZE, 0)  
-        ix = 0   
-        iy += 1
-        self.sizer3.Add(self.bt_import,( iy, ix),(1,1),  
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
-        
-        ix += 1
-        self.sizer3.Add(self.perspective_cbox,(iy, ix),(1,1),
-                          wx.EXPAND|wx.ADJUST_MINSIZE, 0)      
-        ix = 0          
-        iy += 1 
-        self.sizer3.Add(self.bt_append_plot,( iy, ix),(1,1),  
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
-        ix += 1
-        self.sizer3.Add(self.cb_plotpanel,(iy, ix),(1,1),
-                          wx.EXPAND|wx.ADJUST_MINSIZE, 0)  
-        ix = 0          
-        iy += 1 
-        self.sizer3.Add(self.bt_plot,( iy, ix),(1,1),  
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
-        ix = 0          
-        iy += 1 
-        self.sizer3.Add(self.bt_freeze,( iy, ix),(1,1),  
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
-        """
         #self.enable_remove()
         self.enable_import()
         self.enable_plot()
@@ -425,8 +318,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         item = event.GetItem()
         item.Check(not item.IsChecked()) 
-        if item.IsChecked():
-            self.at_least_on_check = True
         self.enable_append()
         self.enable_freeze()
         self.enable_plot()
@@ -518,7 +409,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         for item in self.list_cb_data.values():
             data_ctrl, _, _, _,_, _ = item
             self.tree_ctrl.CheckItem(data_ctrl, False) 
-        self.at_least_on_check = False
         self.enable_append()
         self.enable_freeze()
         self.enable_plot()
@@ -837,11 +727,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         if event != None:
             event.Skip()
-
         # send parent to update menu with no show nor hide action
         self.parent.show_data_panel(action=False)
     
-        
     def on_freeze(self, event):
         """
         """
@@ -867,7 +755,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                 self.cb_plotpanel.SetStringSelection(name_plot_panel)
                 break
         self.enable_append()
-    
+       
     def _on_perspective_selection(self, event=None):
         """
         select the current perspective for guiframe
@@ -884,7 +772,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         if event != None:
             combo = event.GetEventObject()
-            event.Skip()
+            #event.Skip()
         else:
             combo = self.cb_plotpanel
         selection = combo.GetSelection()
@@ -936,20 +824,14 @@ class DataPanel(ScrolledPanel, PanelBase):
             self.bt_plot.Disable()
         else:
             self.bt_plot.Enable()
-      
-            
+        self.enable_append()
+       
     def enable_append(self):
         """
         enable or disable append button
         """
         n_t = 0 
         n_t_t = 0
-        if not self.at_least_on_check:
-            self.bt_append_plot.Disable()
-            self.cb_plotpanel.Disable()
-        else:
-            self.bt_append_plot.Enable()
-            self.cb_plotpanel.Enable()
         if self.tree_ctrl != None:
             n_t = self.tree_ctrl.GetCount()
         if self.tree_ctrl_theory != None:
@@ -957,12 +839,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         if n_t + n_t_t <= 0: 
             self.bt_append_plot.Disable()
             self.cb_plotpanel.Disable()
-        elif self.cb_plotpanel.GetValue() == 'None':
-            self.bt_append_plot.Disable()
-            if self.cb_plotpanel.GetCount() <= 1:
+        elif self.cb_plotpanel.GetCount() <= 0:
                 self.cb_plotpanel.Disable()
-            else:
-                self.cb_plotpanel.Ensable()
+                self.bt_append_plot.Disable()
         else:
             self.bt_append_plot.Enable()
             self.cb_plotpanel.Enable()
@@ -979,7 +858,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         if self.tree_ctrl_theory != None:
             n_t_t = self.tree_ctrl_theory.GetCount()
         n_l = len(self.list_cb_theory)
-        if (n_t_t + n_l > 0) and self.at_least_on_check:
+        if (n_t_t + n_l > 0):
             self.bt_freeze.Enable()
         else:
             self.bt_freeze.Disable()
@@ -1029,13 +908,7 @@ class DataFrame(wx.Frame):
         """
         self.panel.load_data_list(list=list)
         
-    def layout_perspective(self, list_of_perspective=[]):
-        """
-        """
-        self.panel.layout_perspective(list_of_perspective=list_of_perspective)
-    
-    
-        
+   
     
 from dataFitting import Data1D
 from dataFitting import Data2D, Theory1D
@@ -1140,7 +1013,6 @@ if __name__ == "__main__":
         data_list['7']=set_data_state(theory=theory, state=None)
         window = DataFrame(list=data_list)
         window.load_data_list(list=data_list)
-        #window.layout_perspective(list_of_perspective=list_of_perspective)
         window.Show(True)
         window.load_data_list(list=temp_data_list)
     except:
