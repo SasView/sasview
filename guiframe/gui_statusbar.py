@@ -1,7 +1,7 @@
 import wx
 from wx import StatusBar as wxStatusB
 from wx.lib import newevent
-
+import time
 #numner of fields of the status bar 
 NB_FIELDS = 4
 #position of the status bar's fields
@@ -319,6 +319,7 @@ class SPageStatusbar(wxStatusB):
         # Check stop flag that can be set from non main thread 
         if self.timeout is None and self.timer.IsRunning(): 
             self.gauge.Pulse()
+            time.sleep(0.05)
             
         
 if __name__ == "__main__":
