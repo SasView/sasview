@@ -1275,9 +1275,10 @@ class Plugin(PluginBase):
         """
         """
         panel = event.GetEventObject()
+        Plugin.on_perspective(self, event=event)
 
         # If we have more than one displayed plot, make the user choose
-        if len(panel.plots) > 1 and \
+        if len(panel.plots) >= 1 and \
             panel.graph.selected_plottable in panel.plots:
             dataset = panel.plots[panel.graph.selected_plottable].name
         else:
@@ -1302,10 +1303,11 @@ class Plugin(PluginBase):
             pass
         
         self.current_plottable = panel.plots[panel.graph.selected_plottable]
+        self.set_data([self.current_plottable])
         self.control_panel.plotname = dataset
         #self.control_panel.nfunc = self.nfunc
         self.control_panel.d_max = self.max_length
-        self.parent.set_perspective(self.perspective)
+        #self.parent.set_perspective(self.perspective)
         self.control_panel._on_invert(None)
             
     def get_panels(self, parent):
