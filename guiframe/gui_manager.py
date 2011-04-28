@@ -263,7 +263,7 @@ class ViewerFrame(wx.Frame):
             self._data_panel.fill_cbox_analysis(self.plugins)
         self.post_init()
         #self.show_welcome_panel(None)
-        self.Show(True)
+        #self.Show(True)
         #self._check_update(None)
              
     def _setup_layout(self):
@@ -2184,6 +2184,7 @@ class ViewApp(wx.App):
                                  pos=pos, 
                                  gui_style = DEFAULT_STYLE,
                                  size=size) 
+        self.frame.Hide()
         self.s_screen = None
         try:
             # make sure the current dir is App dir when it starts
@@ -2202,10 +2203,12 @@ class ViewApp(wx.App):
             else:
                 self.frame.Show()   
         except:
-           msg = "Cannot display splash screen\n"
-           msg += str (sys.exc_value)
-           logging.error(msg)
-           self.frame.Show()
+            if self.s_screen is not None:
+                self.s_screen.Close()
+            msg = "Cannot display splash screen\n"
+            msg += str (sys.exc_value)
+            logging.error(msg)
+            self.frame.Show()
            
         if hasattr(self.frame, 'special'):
             self.frame.special.SetCurrent()
@@ -2254,8 +2257,8 @@ class ViewApp(wx.App):
         except:
             raise
         self.frame.build_gui()
-        if self.s_screen is not None and self.s_screen.IsShown():
-            self.s_screen.Close()
+        #if self.s_screen is not None and self.s_screen.IsShown():
+        #    self.s_screen.Close()
         
     def set_welcome_panel(self, panel_class):
         """
@@ -2334,7 +2337,9 @@ class ViewApp(wx.App):
                         milliseconds=SS_MAX_DISPLAY_TIME,
                         parent=parent,
                         id=wx.ID_ANY)
-
+        from gui_statusbar import SPageStatusbar
+        statusBar = SPageStatusbar(s_screen)
+        s_screen.SetStatusBar(statusBar)
         s_screen.Bind(wx.EVT_CLOSE, self.on_close_splash_screen)
         s_screen.Show()
         return s_screen

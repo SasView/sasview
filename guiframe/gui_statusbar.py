@@ -294,16 +294,44 @@ class StatusBar(wxStatusB):
         self.frame.Show(True)
         
         
+class SPageStatusbar(wxStatusB):
+    def __init__(self, parent, timeout=None, *args, **kwds):
+        wxStatusB.__init__(self, parent, *args, **kwds)
+        self.SetFieldsCount(1) 
+        self.timeout = timeout
+        self.gauge = wx.Gauge(self,style=wx.GA_HORIZONTAL, size=parent.GetSize())
+        rect = self.GetFieldRect(0)
+        self.gauge.SetPosition((rect.x , rect.y ))
+        if self.timeout is not None:
+            self.gauge.SetRange(int(self.timeout))
+        self.timer = wx.Timer(self, -1) 
+        self.Bind(wx.EVT_TIMER, self._on_time, self.timer) 
+        self.timer.Start(1)
+        self.pos = 0
+       
+    def _on_time(self, evt): 
+        """
+        Update the progress bar while the timer is running 
+        
+        :param evt: wx.EVT_TIMER 
+  
+        """ 
+        # Check stop flag that can be set from non main thread 
+        if self.timeout is None and self.timer.IsRunning(): 
+            self.gauge.Pulse()
+            
+        
 if __name__ == "__main__":
     app = wx.PySimpleApp()
     frame = wx.Frame(None, wx.ID_ANY, 'test frame')
-    statusBar = StatusBar(frame, wx.ID_ANY)
+    #statusBar = StatusBar(frame, wx.ID_ANY)
+    statusBar = SPageStatusbar(frame)
     frame.SetStatusBar(statusBar)
     frame.Show(True)
-    event = MessageEvent()
-    event.type = "progress"
-    event.status  = "statusbar...."
-    event.info = "error"
-    statusBar.set_status(event=event)
+    #event = MessageEvent()
+    #event.type = "progress"
+    #event.status  = "statusbar...."
+    #event.info = "error"
+    #statusBar.set_status(event=event)
     app.MainLoop()
 
