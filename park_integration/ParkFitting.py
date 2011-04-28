@@ -25,6 +25,8 @@ class MyAssembly(Assembly):
     def __init__(self, models, curr_thread=None):
         Assembly.__init__(self, models)
         self.curr_thread = curr_thread
+        self.chisq = None
+        self._cancel = False
         
     def eval(self):
         """
@@ -42,7 +44,10 @@ class MyAssembly(Assembly):
                 self._cancel = True
 
         # Evaluate the computed parameters
-        self._fitexpression()
+        try:
+            self._fitexpression()
+        except NameError:
+            pass
 
         # Check that the resulting parameters are in a feasible region.
         if not self.isfeasible(): return numpy.inf

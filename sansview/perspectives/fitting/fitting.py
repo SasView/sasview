@@ -648,6 +648,9 @@ class Plugin(PluginBase):
                                     ftol=self.ftol)
         self.fit_thread_list[current_page_id] = calc_fit
         calc_fit.queue()
+        msg = "Fitting is in progress..."
+        wx.PostEvent( self.parent, StatusEvent(status=msg, type="progress" ))
+        
         self.ready_fit(calc_fit=calc_fit)
       
             
