@@ -1033,8 +1033,11 @@ class ViewerFrame(wx.Frame):
         :param evt: menu event
         
         """
-        self.show_panel(evt.GetId(), 'on')
+        panel_id = str(evt.GetId())
+        self.on_set_plot_focus(self.panels[panel_id])
+        self.show_panel(evt.GetId(), 'on')      
         wx.CallLater(5, self.set_schedule(True))
+        self.set_plot_unfocus()
         
     def on_close_welcome_panel(self):
         """
@@ -2086,17 +2089,18 @@ class ViewerFrame(wx.Frame):
             """
             Draw A panel in the full dwar list
             """
-            # Check if the panel is shown
-            if self._mgr.GetPane(panel.window_name).IsShown():
-                try:
-                    # This checking of GetCapture is to stop redrawing
-                    # while any panel is capture.
-                    if self.GetCapture() == None:
-                        # draw if possible
-                        panel.set_resizing(False)
-                        panel.draw_plot()
-                except:
-                    pass
+            try:
+                # This checking of GetCapture is to stop redrawing
+                # while any panel is capture.
+                if self.GetCapture() == None:
+                    # draw if possible
+                    panel.set_resizing(False)
+                    panel.draw_plot()
+                    # Check if the panel is not shown
+                    if not self._mgr.GetPane(panel.window_name).IsShown():
+                        self._mgr.GetPane(panel.window_name).Hide()
+            except:
+                pass
         #print self.callback,self.schedule,self.schedule_full_draw_list
         
         # Draw all panels        
@@ -2126,16 +2130,19 @@ class ViewerFrame(wx.Frame):
         """
         Set focus on a plot panel
         """
-        for plot in self.plot_panels.values():
-            # make sure we don't double focus
-            if panel != plot:
-                plot.on_kill_focus(None)
-
+        self.set_plot_unfocus()
         panel.on_set_focus(None)  
         # set focusing panel
         self.panel_on_focus = panel  
         self.set_panel_on_focus(None)
     
+    def set_plot_unfocus(self): 
+        """
+        Un focus all plot panels
+        """
+        for plot in self.plot_panels.values():
+            plot.on_kill_focus(None)
+
     def _onDrawIdle(self, *args, **kwargs):
         """
         ReDraw with axes
