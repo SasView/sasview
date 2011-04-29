@@ -40,12 +40,12 @@ _BOX_WIDTH = 76
 
 
 if sys.platform.count("win32") > 0:
-    _STATICBOX_WIDTH = 400
+    _STATICBOX_WIDTH = 420
     PANEL_WIDTH = 500 
     PANEL_HEIGHT = 700
     FONT_VARIANT = 0
 else:
-    _STATICBOX_WIDTH = 430
+    _STATICBOX_WIDTH = 450
     PANEL_WIDTH = 530
     PANEL_HEIGHT = 700
     FONT_VARIANT = 1
@@ -1280,7 +1280,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.data_name_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH*4, 20),
                                             style=0) 
         self.data_name_tcl.SetToolTipString("Data's name.")
-        self.data_name_sizer.AddMany([(data_name_txt, 0, wx.LEFT|wx.RIGHT, 5),
+        self.data_name_sizer.AddMany([(data_name_txt, 0, wx.LEFT|wx.RIGHT, 10),
                                        (self.data_name_tcl, 0, wx.EXPAND)])
         #Data range [string]
         data_range_txt = wx.StaticText(self, -1, 'Total Q Range (1/A): ') 
@@ -1294,12 +1294,12 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.data_max_tcl.SetToolTipString("The maximum value of q range.")
         self.data_range_sizer.AddMany([(data_range_txt, 0, wx.RIGHT, 5),
                                        (data_min_txt, 0, wx.RIGHT, 5),
-                                       (self.data_min_tcl, 0, wx.RIGHT, 5),
+                                       (self.data_min_tcl, 0, wx.RIGHT, 20),
                                        (data_max_txt, 0, wx.RIGHT, 5),
-                                       (self.data_max_tcl, 0, wx.RIGHT, 5)])
-        self.data_name_boxsizer.AddMany([(self.hint_msg_sizer, 0 , wx.ALL, 2),
-                            (self.data_name_sizer, 0 , wx.ALL, 5),
-                                     (self.data_range_sizer, 0 , wx.ALL, 5)])
+                                       (self.data_max_tcl, 0, wx.RIGHT, 10)])
+        self.data_name_boxsizer.AddMany([(self.hint_msg_sizer, 0 , wx.ALL, 5),
+                            (self.data_name_sizer, 0 , wx.ALL, 10),
+                                     (self.data_range_sizer, 0 , wx.ALL, 10)])
     
     def _enable_fit_power_law_low(self, event=None):
         """
@@ -1579,11 +1579,11 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.extrapolation_range_sizer.AddMany([(extra_hint_txt, 0, 
                                                  wx.LEFT, 5),
                                                 (extrapolation_min_txt, 0,
-                                                 wx.LEFT, 5),
+                                                 wx.LEFT, 10),
                                                 (self.extrapolation_min_tcl,
                                                             0, wx.LEFT, 5),
                                                 (extrapolation_max_txt, 0,
-                                                 wx.LEFT, 5),
+                                                 wx.LEFT, 20),
                                                 (self.extrapolation_max_tcl,
                                                             0, wx.LEFT, 5)])
         self._layout_extrapolation_low()
@@ -1631,7 +1631,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.volume_surface_sizer.Add(self.volume_tcl, (iy, ix), (1, 1),
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 10)
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 20)
         ix += 1
         self.volume_surface_sizer.Add(wx.StaticText(self, -1, uncertainty),
                          (iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 10) 
@@ -1647,13 +1647,13 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         self.volume_surface_sizer.Add(self.surface_tcl, (iy, ix), (1, 1),
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 20)
         ix += 1
         self.volume_surface_sizer.Add(wx.StaticText(self, -1, uncertainty),
-                         (iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+                         (iy, ix),(1,1),wx.EXPAND|wx.ADJUST_MINSIZE, 10) 
         ix += 1
         self.volume_surface_sizer.Add(self.surface_err_tcl, (iy, ix), (1, 1),
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+                            wx.EXPAND|wx.ADJUST_MINSIZE, 10) 
         ix += 1
         self.volume_surface_sizer.Add(surface_units_txt, (iy, ix), (1, 1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 10)
@@ -1702,7 +1702,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         Draw widgets related to inputs
         """
-        contrast_txt = wx.StaticText(self, -1, 'Contrast : ')  
+        contrast_txt = wx.StaticText(self, -1, 'Contrast :')  
         self.contrast_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                         style=0,name='contrast_tcl')
         wx.EVT_TEXT(self, self.contrast_tcl.GetId(), self._on_text)
@@ -1733,12 +1733,12 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.sizer_input.AddMany([(background_txt, 0, wx.LEFT|wx.BOTTOM, 5),
                                   (self.background_tcl, 0, wx.LEFT|wx.BOTTOM, 5),
                                 (background_unit_txt, 0, wx.LEFT|wx.BOTTOM, 5),
-                                (scale_txt, 0, wx.LEFT|wx.BOTTOM, 5),
+                                (scale_txt, 0, wx.LEFT|wx.BOTTOM, 20),
                                 (self.scale_tcl, 0, wx.LEFT|wx.BOTTOM|wx.RIGHT, 5),
                                 (contrast_txt, 0, wx.LEFT|wx.BOTTOM, 5),
                                 (self.contrast_tcl, 0, wx.LEFT|wx.BOTTOM, 5),
                                 (contrast_unit_txt, 0, wx.LEFT|wx.BOTTOM, 5),
-                                (porod_const_txt, 0, wx.LEFT|wx.BOTTOM, 5),
+                                (porod_const_txt, 0, wx.LEFT, 20),
                         (self.porod_constant_tcl, 0, wx.LEFT|wx.BOTTOM|wx.RIGHT, 5)])
         self.inputs_sizer.Add(self.sizer_input)
        
