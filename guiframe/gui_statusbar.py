@@ -319,7 +319,6 @@ class SPageStatusbar(wxStatusB):
         # Check stop flag that can be set from non main thread 
         if self.timeout is None and self.timer.IsRunning(): 
             self.gauge.Pulse()
-            time.sleep(0.05)
             
         
 if __name__ == "__main__":
