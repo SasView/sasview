@@ -2104,8 +2104,8 @@ class ViewerFrame(wx.Frame):
             self.set_schedule(False)
         else:
             self.set_schedule(True)
-        # update mgr
-        self._mgr.Update()
+        # do not update mgr
+        #self._mgr.Update()
         
     def set_schedule(self, schedule=False):  
         """
