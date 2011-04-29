@@ -1161,21 +1161,22 @@ class Plugin(PluginBase):
         if x is None or len(x) == 0:
             load_error("The loaded file contains no data")
             return None
-        
+
         # If we have not errors, add statistical errors
-        if err is not None and y is not None:
-            err = numpy.zeros(len(y))
-            scale = None
-            min_err = 0.0
-            for i in range(len(y)):
-                # Scale the error so that we can fit over several decades of Q
-                if scale == None:
-                    scale = 0.05 * math.sqrt(y[i])
-                    min_err = 0.01 * y[i]
-                err[i] = scale * math.sqrt(math.fabs(y[i])) + min_err
-            message = "The loaded file had no error bars, "
-            message += "statistical errors are assumed."
-            wx.PostEvent(self.parent, StatusEvent(status=message))
+        if y is not None:
+            if err == None or numpy.all(err) == 0:
+                err = numpy.zeros(len(y))
+                scale = None
+                min_err = 0.0
+                for i in range(len(y)):
+                    # Scale the error so that we can fit over several decades of Q
+                    if scale == None:
+                        scale = 0.05 * math.sqrt(y[i])
+                        min_err = 0.01 * y[i]
+                    err[i] = scale * math.sqrt(math.fabs(y[i])) + min_err
+                message = "The loaded file had no error bars, "
+                message += "statistical errors are assumed."
+                wx.PostEvent(self.parent, StatusEvent(status=message))
         
         try:
             # Get the data from the chosen data set and perform inversion
