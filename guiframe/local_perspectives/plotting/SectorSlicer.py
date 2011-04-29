@@ -176,13 +176,11 @@ class SectorInteractor(_BaseInteractor):
         new_plot.detector = self.base.data2D.detector
         ## If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
-        if hasattr(data, "scale"):
-            if data.scale == 'linear':
-                new_plot.ytransform = 'y'
-                new_plot.yaxis("\\rm{Residuals} ", "/")
-        else:
-            new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
-       
+        new_plot.yaxis("\\rm{Intensity}", "cm^{-1}")
+        if hasattr(data, "scale") and data.scale == 'linear':
+            new_plot.ytransform = 'y'
+            new_plot.yaxis("\\rm{Residuals} ", "/")
+
         new_plot.group_id = "SectorQ" + self.base.data2D.name
         new_plot.id = None
         new_plot.is_data = True
