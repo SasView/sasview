@@ -772,7 +772,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         if event != None:
             combo = event.GetEventObject()
-            #event.Skip()
+            event.Skip()
         else:
             combo = self.cb_plotpanel
         selection = combo.GetSelection()
