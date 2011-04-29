@@ -40,12 +40,12 @@ _BOX_WIDTH = 76
 
 
 if sys.platform.count("win32") > 0:
-    _STATICBOX_WIDTH = 450
+    _STATICBOX_WIDTH = 400
     PANEL_WIDTH = 500 
     PANEL_HEIGHT = 700
     FONT_VARIANT = 0
 else:
-    _STATICBOX_WIDTH = 480
+    _STATICBOX_WIDTH = 430
     PANEL_WIDTH = 530
     PANEL_HEIGHT = 700
     FONT_VARIANT = 1
@@ -358,12 +358,10 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         try:
             qstar_total, qstar_total_err = inv.get_qstar_with_error(extrapolation)
-            
             self.invariant_total_tcl.SetValue(format_number(qstar_total))
             self.invariant_total_err_tcl.SetValue(format_number(qstar_total_err))
             self.inv_container.qstar_total = qstar_total
             self.inv_container.qstar_total_err = qstar_total_err
-         
         except:
             self.inv_container.qstar_total = "Error"
             self.inv_container.qstar_total_err = "Error"
@@ -1221,32 +1219,32 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         #Sizer related to outputs
         outputs_box = wx.StaticBox(self, -1, "Outputs")
         self.outputs_sizer = wx.StaticBoxSizer(outputs_box, wx.VERTICAL)
-        self.outputs_sizer.SetMinSize((PANEL_WIDTH,-1))
+        self.outputs_sizer.SetMinSize((_STATICBOX_WIDTH,-1))
         #Sizer related to data
         data_name_box = wx.StaticBox(self, -1, "I(q) Data Source")
         self.data_name_boxsizer = wx.StaticBoxSizer(data_name_box, wx.VERTICAL)
-        self.data_name_boxsizer.SetMinSize((PANEL_WIDTH,-1))
+        self.data_name_boxsizer.SetMinSize((_STATICBOX_WIDTH,-1))
         self.hint_msg_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.data_name_sizer = wx.BoxSizer(wx.HORIZONTAL)
        
         self.data_range_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        #Sizer related to background and scale
-        self.bkg_scale_sizer = wx.BoxSizer(wx.HORIZONTAL) 
-        #Sizer related to contrast and porod constant
-        self.contrast_porod_sizer = wx.BoxSizer(wx.HORIZONTAL) 
+        #Sizer related to inputs
+        self.sizer_input =  wx.FlexGridSizer(2, 5, 0, 0)
         #Sizer related to inputs
         inputs_box = wx.StaticBox(self, -1, "Customized Inputs")
         self.inputs_sizer = wx.StaticBoxSizer(inputs_box, wx.VERTICAL)
+        self.inputs_sizer.SetMinSize((_STATICBOX_WIDTH,-1))
         #Sizer related to extrapolation
         extrapolation_box = wx.StaticBox(self, -1, "Extrapolation")
         self.extrapolation_sizer = wx.StaticBoxSizer(extrapolation_box,
                                                         wx.VERTICAL)
-        self.extrapolation_sizer.SetMinSize((PANEL_WIDTH,-1))
+        self.extrapolation_sizer.SetMinSize((_STATICBOX_WIDTH,-1))
         self.extrapolation_range_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.extrapolation_low_high_sizer = wx.BoxSizer(wx.HORIZONTAL)
         #Sizer related to extrapolation at low q range
         low_q_box = wx.StaticBox(self, -1, "Low Q")
         self.low_extrapolation_sizer = wx.StaticBoxSizer(low_q_box, wx.VERTICAL)
+      
         self.low_q_sizer = wx.GridBagSizer(5,5)
         #Sizer related to extrapolation at low q range
         high_q_box = wx.StaticBox(self, -1, "High Q")
@@ -1259,6 +1257,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.invariant_sizer = wx.GridBagSizer(5, 5)
         #Sizer related to button
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.button_sizer.SetMinSize((_STATICBOX_WIDTH,-1))
         #Sizer related to save button
         self.save_button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         
@@ -1276,12 +1275,12 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.hint_msg_txt.SetToolTipString(msg)
         self.hint_msg_sizer.Add(self.hint_msg_txt)
         #Data name [string]
-        data_name_txt = wx.StaticText(self, -1, 'Data : ')  
+        data_name_txt = wx.StaticText(self, -1, 'Data:')  
        
-        self.data_name_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH*5, 20),
+        self.data_name_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH*4, 20),
                                             style=0) 
         self.data_name_tcl.SetToolTipString("Data's name.")
-        self.data_name_sizer.AddMany([(data_name_txt, 0, wx.LEFT|wx.RIGHT, 10),
+        self.data_name_sizer.AddMany([(data_name_txt, 0, wx.LEFT|wx.RIGHT, 5),
                                        (self.data_name_tcl, 0, wx.EXPAND)])
         #Data range [string]
         data_range_txt = wx.StaticText(self, -1, 'Total Q Range (1/A): ') 
@@ -1293,64 +1292,15 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.data_max_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                            style=0, name='data_max_tcl') 
         self.data_max_tcl.SetToolTipString("The maximum value of q range.")
-        self.data_range_sizer.AddMany([(data_range_txt, 0, wx.RIGHT, 10),
-                                       (data_min_txt, 0, wx.RIGHT, 10),
-                                       (self.data_min_tcl, 0, wx.RIGHT, 10),
-                                       (data_max_txt, 0, wx.RIGHT, 10),
-                                       (self.data_max_tcl, 0, wx.RIGHT, 10)])
-        self.data_name_boxsizer.AddMany([(self.hint_msg_sizer, 0 , wx.ALL, 5),
-                            (self.data_name_sizer, 0 , wx.ALL, 10),
-                                     (self.data_range_sizer, 0 , wx.ALL, 10)])
+        self.data_range_sizer.AddMany([(data_range_txt, 0, wx.RIGHT, 5),
+                                       (data_min_txt, 0, wx.RIGHT, 5),
+                                       (self.data_min_tcl, 0, wx.RIGHT, 5),
+                                       (data_max_txt, 0, wx.RIGHT, 5),
+                                       (self.data_max_tcl, 0, wx.RIGHT, 5)])
+        self.data_name_boxsizer.AddMany([(self.hint_msg_sizer, 0 , wx.ALL, 2),
+                            (self.data_name_sizer, 0 , wx.ALL, 5),
+                                     (self.data_range_sizer, 0 , wx.ALL, 5)])
     
-    def _layout_bkg_scale(self):
-        """
-        Draw widgets related to background and scale
-        """
-        background_txt = wx.StaticText(self, -1, 'Background : ')  
-        self.background_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
-                                          style=0, name='background_tcl') 
-        wx.EVT_TEXT(self, self.background_tcl.GetId(), self._on_text)
-        background_hint_txt = "Background"
-        self.background_tcl.SetToolTipString(background_hint_txt)
-        background_unit_txt = wx.StaticText(self, -1, '[1/cm]')  
-        scale_txt = wx.StaticText(self, -1, 'Scale : ')  
-        self.scale_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0,
-                                     name='scale_tcl')
-        wx.EVT_TEXT(self, self.scale_tcl.GetId(), self._on_text)
-        scale_hint_txt = "Scale"
-        self.scale_tcl.SetToolTipString(scale_hint_txt)
-        self.bkg_scale_sizer.AddMany([(background_txt, 0, wx.LEFT, 10),
-                                       (self.background_tcl, 0, wx.LEFT, 5),
-                                       (background_unit_txt, 0, wx.LEFT, 10),
-                                       (scale_txt, 0, wx.LEFT, 70),
-                                       (self.scale_tcl, 0, wx.LEFT, 40)])
- 
-    def _layout_contrast_porod(self):
-        """
-        Draw widgets related to porod constant and contrast
-        """
-        contrast_txt = wx.StaticText(self, -1, 'Contrast : ')  
-        self.contrast_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
-                                        style=0,name='contrast_tcl')
-        wx.EVT_TEXT(self, self.contrast_tcl.GetId(), self._on_text)
-        contrast_hint_txt = "Contrast"
-        self.contrast_tcl.SetToolTipString(contrast_hint_txt)
-        contrast_unit_txt = wx.StaticText(self, -1, '[1/A^(2)]')  
-        porod_const_txt = wx.StaticText(self, -1, 'Porod Constant:')  
-        self.porod_constant_tcl = InvTextCtrl(self, -1, 
-                                              size=(_BOX_WIDTH, 20), style=0,
-                                              name='porod_constant_tcl') 
-        wx.EVT_TEXT(self, self.porod_constant_tcl.GetId(), self._on_text)
-        porod_const_hint_txt = "Porod Constant"
-        self.porod_constant_tcl.SetToolTipString(porod_const_hint_txt)
-        optional_txt = wx.StaticText(self, -1, '(Optional)')  
-        self.contrast_porod_sizer.AddMany([(contrast_txt, 0, wx.LEFT, 10),
-                                           (self.contrast_tcl, 0, wx.LEFT, 20),
-                                           (contrast_unit_txt, 0, wx.LEFT, 10),
-                                           (porod_const_txt, 0, wx.LEFT, 50),
-                                       (self.porod_constant_tcl, 0, wx.LEFT, 0),
-                                       (optional_txt, 0, wx.LEFT, 10)])
-        
     def _enable_fit_power_law_low(self, event=None):
         """
         Enable and disable the power value editing
@@ -1478,7 +1428,6 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         ix = 0
         self.low_q_sizer.Add(self.power_law_low,(iy, ix), (1, 2),
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-       
         # Parameter controls for power law
         ix = 1
         iy += 1
@@ -1494,8 +1443,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         ix += 1
         self.low_q_sizer.Add(self.power_low_tcl, (iy, ix), (1, 1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        self.low_extrapolation_sizer.AddMany([(self.low_q_sizer, 0,
-                                                wx.BOTTOM|wx.RIGHT, 15)])
+        self.low_extrapolation_sizer.Add(self.low_q_sizer)
         
     def _enable_fit_power_law_high(self, event=None):
         """
@@ -1583,7 +1531,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         ix += 1
         self.high_q_sizer.Add(self.npts_high_tcl, (iy, ix), (1, 1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        iy += 2
+        iy += 1
         ix = 0
         self.high_q_sizer.Add(self.power_law_high, (iy, ix),(1, 2),
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
@@ -1603,24 +1551,24 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         ix += 1
         self.high_q_sizer.Add(self.power_high_tcl, (iy, ix),  (1, 1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        self.high_extrapolation_sizer.AddMany([(self.high_q_sizer, 0, 
-                                                wx.BOTTOM|wx.RIGHT, 10)])
+        self.high_extrapolation_sizer.Add(self.high_q_sizer, 0, 
+                                                wx.BOTTOM, 20)
         
     def _layout_extrapolation(self):
         """
         Draw widgets related to extrapolation
         """
-        extra_hint = "Extrapolation Maximum Q Range [1/A]: "
+        extra_hint = "Extrapolation \nMaximum Q Range [1/A]:"
         extra_hint_txt = wx.StaticText(self, -1, extra_hint)
         #Extrapolation range [string]
-        extrapolation_min_txt = wx.StaticText(self, -1, 'Min :')  
+        extrapolation_min_txt = wx.StaticText(self, -1, 'Min:')  
         self.extrapolation_min_tcl = OutputTextCtrl(self, -1, 
                                                 size=(_BOX_WIDTH, 20), style=0,
                                                 name='extrapolation_min_tcl')
         self.extrapolation_min_tcl.SetValue(str(Q_MINIMUM))
         hint_msg = "The minimum extrapolated q value."
         self.extrapolation_min_tcl.SetToolTipString(hint_msg)
-        extrapolation_max_txt = wx.StaticText(self, -1, 'Max :') 
+        extrapolation_max_txt = wx.StaticText(self, -1, 'Max:') 
         self.extrapolation_max_tcl = OutputTextCtrl(self, -1,
                                                   size=(_BOX_WIDTH, 20),
                                                   style=0,
@@ -1629,26 +1577,23 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         hint_msg = "The maximum extrapolated q value."
         self.extrapolation_max_tcl.SetToolTipString(hint_msg)
         self.extrapolation_range_sizer.AddMany([(extra_hint_txt, 0, 
-                                                 wx.LEFT, 10),
+                                                 wx.LEFT, 5),
                                                 (extrapolation_min_txt, 0,
-                                                 wx.LEFT, 10),
+                                                 wx.LEFT, 5),
                                                 (self.extrapolation_min_tcl,
-                                                            0, wx.LEFT, 10),
+                                                            0, wx.LEFT, 5),
                                                 (extrapolation_max_txt, 0,
-                                                 wx.LEFT, 10),
+                                                 wx.LEFT, 5),
                                                 (self.extrapolation_max_tcl,
-                                                            0, wx.LEFT, 10),
-                                                ])
+                                                            0, wx.LEFT, 5)])
         self._layout_extrapolation_low()
         self._layout_extrapolation_high()
         self.extrapolation_low_high_sizer.AddMany([(self.low_extrapolation_sizer,
-                                                     0, wx.ALL, 5),
+                                0, wx.LEFT|wx.BOTTOM|wx.TOP, 5),
                                                    (self.high_extrapolation_sizer,
-                                                    0, wx.ALL, 5)])
-        self.extrapolation_sizer.AddMany([(self.extrapolation_range_sizer, 0,
-                                            wx.RIGHT, 5),
-                                        (self.extrapolation_low_high_sizer, 0,
-                                           wx.ALL, 5)])
+                                        0, wx.LEFT|wx.BOTTOM|wx.TOP, 5)])
+        self.extrapolation_sizer.AddMany([(self.extrapolation_range_sizer),
+                                        (self.extrapolation_low_high_sizer)])
         
     def _layout_volume_surface_sizer(self):
         """
@@ -1657,7 +1602,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         unit_volume = ''
         unit_surface = ''
         uncertainty = "+/-" 
-        volume_txt = wx.StaticText(self, -1, 'Volume Fraction      ')
+        volume_txt = wx.StaticText(self, -1, 'Volume Fraction')
         self.volume_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH, -1),
                                          name='volume_tcl')
         wx.EVT_TEXT(self, self.volume_tcl.GetId(), self._on_out_text)
@@ -1712,6 +1657,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         ix += 1
         self.volume_surface_sizer.Add(surface_units_txt, (iy, ix), (1, 1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 10)
+        static_line = wx.StaticLine(self, -1)
+        iy += 1
+        ix = 0
         
     def _layout_invariant_sizer(self):
         """
@@ -1754,11 +1702,46 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         Draw widgets related to inputs
         """
-        self._layout_bkg_scale()
-        self._layout_contrast_porod()
-        self.inputs_sizer.AddMany([(self.bkg_scale_sizer, 0, wx.ALL, 5),
-                                    (self.contrast_porod_sizer, 0, wx.ALL, 5)])
+        contrast_txt = wx.StaticText(self, -1, 'Contrast : ')  
+        self.contrast_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
+                                        style=0,name='contrast_tcl')
+        wx.EVT_TEXT(self, self.contrast_tcl.GetId(), self._on_text)
+        contrast_hint_txt = "Contrast"
+        self.contrast_tcl.SetToolTipString(contrast_hint_txt)
+        contrast_unit_txt = wx.StaticText(self, -1, '[1/A^(2)]')  
+        porod_const_txt = wx.StaticText(self, -1, 'Porod Constant:\n(optional)\n')  
+        self.porod_constant_tcl = InvTextCtrl(self, -1, 
+                                              size=(_BOX_WIDTH, 20), style=0,
+                                              name='porod_constant_tcl') 
+        wx.EVT_TEXT(self, self.porod_constant_tcl.GetId(), self._on_text)
+        porod_const_hint_txt = "Porod Constant"
+        self.porod_constant_tcl.SetToolTipString(porod_const_hint_txt)
         
+        background_txt = wx.StaticText(self, -1, 'Background : ')  
+        self.background_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
+                                          style=0, name='background_tcl') 
+        wx.EVT_TEXT(self, self.background_tcl.GetId(), self._on_text)
+        background_hint_txt = "Background"
+        self.background_tcl.SetToolTipString(background_hint_txt)
+        background_unit_txt = wx.StaticText(self, -1, '[1/cm]')  
+        scale_txt = wx.StaticText(self, -1, 'Scale : ')  
+        self.scale_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0,
+                                     name='scale_tcl')
+        wx.EVT_TEXT(self, self.scale_tcl.GetId(), self._on_text)
+        scale_hint_txt = "Scale"
+        self.scale_tcl.SetToolTipString(scale_hint_txt)
+        self.sizer_input.AddMany([(background_txt, 0, wx.LEFT|wx.BOTTOM, 5),
+                                  (self.background_tcl, 0, wx.LEFT|wx.BOTTOM, 5),
+                                (background_unit_txt, 0, wx.LEFT|wx.BOTTOM, 5),
+                                (scale_txt, 0, wx.LEFT|wx.BOTTOM, 5),
+                                (self.scale_tcl, 0, wx.LEFT|wx.BOTTOM|wx.RIGHT, 5),
+                                (contrast_txt, 0, wx.LEFT|wx.BOTTOM, 5),
+                                (self.contrast_tcl, 0, wx.LEFT|wx.BOTTOM, 5),
+                                (contrast_unit_txt, 0, wx.LEFT|wx.BOTTOM, 5),
+                                (porod_const_txt, 0, wx.LEFT|wx.BOTTOM, 5),
+                        (self.porod_constant_tcl, 0, wx.LEFT|wx.BOTTOM|wx.RIGHT, 5)])
+        self.inputs_sizer.Add(self.sizer_input)
+       
     def _layout_outputs_sizer(self):
         """
         Draw widgets related to outputs
@@ -1766,9 +1749,10 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self._layout_volume_surface_sizer()
         self._layout_invariant_sizer()
         static_line = wx.StaticLine(self, -1)
-        self.outputs_sizer.AddMany([(self.volume_surface_sizer, 0, wx.ALL, 10),
+        self.outputs_sizer.AddMany([(self.volume_surface_sizer,
+                                      0, wx.TOP|wx.BOTTOM, 10),
                                     (static_line, 0, wx.EXPAND, 0),
-                                    (self.invariant_sizer, 0, wx.ALL, 10)])
+                         (self.invariant_sizer, 0, wx.TOP|wx.BOTTOM, 10)])
     def _layout_button(self):  
         """
         Do the layout for the button widgets
@@ -1787,8 +1771,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.Bind(wx.EVT_BUTTON, self.display_details, id=id)
         details = "Details on Invariant Total Calculations"
         details_txt = wx.StaticText(self, -1, details)
-        self.button_sizer.AddMany([((50,10), 0 , wx.LEFT,0),
-                                   (details_txt, 0 , 
+        self.button_sizer.AddMany([(details_txt, 0 , 
                                     wx.RIGHT|wx.BOTTOM|wx.TOP, 10),
                                    (self.button_details, 0 , wx.ALL, 10),
                         (self.button_calculate, 0 ,
@@ -1806,8 +1789,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.main_sizer.AddMany([(self.data_name_boxsizer,0, wx.ALL, 10),
                                   (self.outputs_sizer, 0,
                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
-                                  (self.button_sizer,0,
-                                  wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
+                                  (self.button_sizer, 0, wx.LEFT|wx.RIGHT, 15),
                                  (self.inputs_sizer, 0,
                                   wx.LEFT|wx.RIGHT|wx.BOTTOM, 10),
                                   (self.extrapolation_sizer, 0,
