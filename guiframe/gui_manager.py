@@ -641,6 +641,10 @@ class ViewerFrame(wx.Frame):
         wx.EVT_MENU(self, ID, self.on_view)
         if p not in self.plot_panels.values():
             self.plot_panels[ID] = p
+            if len(self.plot_panels) == 1:
+                print "len", len(self.plot_panels)
+                self.panel_on_focus = p
+                self.set_panel_on_focus(None)
             if self._data_panel is not None and \
                 self._plotting_plugin is not None:
                 ind = self._data_panel.cb_plotpanel.FindString('None')
