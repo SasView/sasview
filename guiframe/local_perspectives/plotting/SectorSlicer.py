@@ -177,7 +177,8 @@ class SectorInteractor(_BaseInteractor):
         ## If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{Q}", "A^{-1}")
         new_plot.yaxis("\\rm{Intensity}", "cm^{-1}")
-        if hasattr(data, "scale") and data.scale == 'linear':
+        if hasattr(data, "scale") and data.scale == 'linear' and \
+                self.base.data2D.name.count("Residuals") > 0:
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
 

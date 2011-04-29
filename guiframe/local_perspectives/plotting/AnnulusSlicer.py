@@ -159,12 +159,11 @@ class AnnulusInteractor(_BaseInteractor):
         new_plot.detector = self.base.data2D.detector
         # If the data file does not tell us what the axes are, just assume...
         new_plot.xaxis("\\rm{\phi}", 'degrees')
-        if hasattr(data, "scale"):
-            if data.scale == 'linear':
-                new_plot.ytransform = 'y'
-                new_plot.yaxis("\\rm{Residuals} ", "/")
-        else:
-            new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+        new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
+        if hasattr(data, "scale") and data.scale == 'linear' and \
+                self.base.data2D.name.count("Residuals") > 0:
+            new_plot.ytransform = 'y'
+            new_plot.yaxis("\\rm{Residuals} ", "/")
 
         new_plot.group_id = "AnnulusPhi" + self.base.data2D.name
         new_plot.id = None
