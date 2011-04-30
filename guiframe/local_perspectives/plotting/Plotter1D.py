@@ -227,8 +227,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         if ax != None:
             position = "x: %8.3g    y: %8.3g" % (event.xdata, event.ydata)
             wx.PostEvent(self.parent, StatusEvent(status=position))
-        
-        #self.on_set_focus(None)    
+        # unfocus all
+        self.parent.set_plot_unfocus()  
         #post nd event to notify guiframe that this panel is on focus
         wx.PostEvent(self.parent, PanelOnFocusEvent(panel=self))
 
