@@ -2540,8 +2540,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         if self.model == None:
             name = 'FuncHelp'
         else:
-            name = self.model.__class__.__name__
-
+            name = self.formfactorbox.GetValue()
+            #name = self.model.__class__.__name__
         frame = HelpWindow(None, -1,  pageToOpen=model_path)    
         frame.Show(True)
         if frame.rhelp.HasAnchor(name):
