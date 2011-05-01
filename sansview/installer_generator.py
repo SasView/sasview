@@ -25,7 +25,7 @@ DisableProgramGroupPage = 'yes'
 Compression = 'lzma'
 SolidCompression = 'yes'
 PrivilegesRequired = 'none'
-INSTALLER_FILE = 'installer_03_31_2011'
+INSTALLER_FILE = 'installer_new'
 #find extension for windows file assocation
 #extension list need to be modified for each application
 
