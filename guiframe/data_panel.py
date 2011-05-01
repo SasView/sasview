@@ -226,7 +226,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         w, _ = self.GetSize()
         self.bt_add = wx.Button(self, wx.NewId(), "Load Data")
-        self.bt_add.SetToolTipString("Add data from the application")
+        self.bt_add.SetToolTipString("Load data files")
         wx.EVT_BUTTON(self, self.bt_add.GetId(), self._load_data)
         #self.bt_remove = wx.Button(self, wx.NewId(), "Remove Data")
         #self.bt_remove.SetToolTipString("Remove data from the application")
@@ -264,7 +264,9 @@ class DataPanel(ScrolledPanel, PanelBase):
                               (self.cb_plotpanel, wx.EXPAND),
                               (self.bt_plot),
                               ((10, 10)),
-                              (self.bt_freeze)])
+                              (self.bt_freeze),
+                              ((10, 10))])
+
         self.sizer3.AddGrowableCol(1, 1)
 
         #self.enable_remove()
