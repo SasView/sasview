@@ -650,6 +650,7 @@ class ViewerFrame(wx.Frame):
                 if ind != wx.NOT_FOUND:
                     self._data_panel.cb_plotpanel.Delete(ind)
                 self._data_panel.cb_plotpanel.Append(str(caption), p)
+
         self._mgr.Update()
         return ID
         
@@ -1704,7 +1705,8 @@ class ViewerFrame(wx.Frame):
                     new_plot.group_id = GROUP_ID
             title = "PLOT " + str(new_plot.title)
             wx.PostEvent(self, NewPlotEvent(plot=new_plot,
-                                                  title=title))
+                                                  title=title,
+                                                  group_id = new_plot.group_id))
             
     def remove_data(self, data_id, theory_id=None):
         """
