@@ -430,8 +430,14 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.disable_disp = wx.RadioButton(self, -1, 'Off', (10, 10),
                                             style=wx.RB_GROUP)
         self.enable_disp = wx.RadioButton(self, -1, 'On', (10, 30))
-
-        self.disp_help_bt = wx.Button(self,wx.NewId(),'?', size=(20,15))
+        # best size for MAC and PC
+        if ON_MAC:
+            size_q = (-1, -1)     
+        else:
+            size_q =  (20,15)    
+        self.disp_help_bt = wx.Button(self,wx.NewId(),'?', 
+                                      style = wx.BU_EXACTFIT,
+                                      size=size_q)
         self.disp_help_bt.Bind(wx.EVT_BUTTON, 
                         self.on_pd_help_clicked,id= self.disp_help_bt.GetId())
         self.disp_help_bt.SetToolTipString("Helps for Polydispersion.")       
