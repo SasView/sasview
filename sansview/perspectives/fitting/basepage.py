@@ -566,8 +566,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         wx.EVT_MENU(self, id, self.onResetModel)
         wx.PostEvent(self.parent.parent, 
                      AppendBookmarkEvent(title=name, 
-                                         hint=str(msg), handler=self.onResetModel))
-        
+                                         hint=str(msg), handler=self._back_to_bookmark))
+    def _back_to_bookmark(self, event): 
+        """
+        Back to bookmark
+        """
+        self._manager.on_perspective(event)
+        self.onResetModel(event)
     def old_on_bookmark(self, event):
         """
         save history of the data and model
