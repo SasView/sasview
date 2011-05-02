@@ -593,9 +593,7 @@ class FitPage(BasicPage):
         self.text_disp_max = wx.StaticText(self, -1, 'Max')
         self.sizer4_4.Add(self.text_disp_max,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-        self.text_disp_max.Hide()
-                        
-        
+       
         ix += 1 
         npts = wx.StaticText(self, -1, 'Npts')
         npts.SetToolTipString("Number of sampling points for the numerical\n\
