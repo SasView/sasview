@@ -4,9 +4,8 @@ import wx
 import wx.html as html
 from wx.lib.splitter import MultiSplitterWindow
 import os
-import sys
 
-    
+
 class HelpWindow(wx.Frame):
     """
     """
@@ -15,22 +14,7 @@ class HelpWindow(wx.Frame):
         """
         contains help info
         """
-        path = os.path.dirname(__file__)
-        temp_path = os.path.join(path,'images')
-        ico_file = os.path.join(temp_path,'ball.ico')
-        if os.path.isfile(ico_file):
-            self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
-        else:
-            temp_path = os.path.join(os.getcwd(),'images')
-            ico_file = os.path.join(temp_path,'ball.ico')
-            if os.path.isfile(ico_file):
-                self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
-            else:
-                ico_file = os.path.join(os.path.dirname(os.path.sys.path[0]),
-                             'images', 'ball.ico')
-                if os.path.isfile(ico_file):
-                    self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
-                    
+      
         splitter = MultiSplitterWindow(self, style=wx.SP_LIVE_UPDATE)
         rpanel = wx.Panel(splitter, -1)
         lpanel = wx.Panel(splitter, -1,style=wx.BORDER_SUNKEN)
@@ -67,8 +51,6 @@ class HelpWindow(wx.Frame):
         import sans.models as models 
         # get the media path
         path = models.get_data_path(media='media')
-        if not os.path.isdir(path):
-             path = os.path.dirname(os.path.sys.path[0])
         self.path = os.path.join(path,"model_functions.html")
         self.path_pd = os.path.join(path,"pd_help.html")
         self.path_sm = os.path.join(path,"smear_computation.html")
@@ -78,53 +60,24 @@ class HelpWindow(wx.Frame):
              <p>Select topic on Menu</p>
             </body>
             </html>"""
-        
-        if not os.path.isfile(os.path.join(path, "change_scale_help.html")):
-            path = os.path.join(os.path.dirname(os.path.sys.path[0]), 'media')
-        page = """<html>
+        page="""<html>
             <body>
             <ul>
-            <li><a href ="%s" target ="showframe">Change Scale</a><br></li>
-            """ % str(os.path.join(path, "change_scale_help.html"))
-        page += """
-            <li><a href ="%s" target ="showframe">Graph Help</a><br></li>
-            """ % str(os.path.join(path,  "reset_Graph_help.html"))
-        page += """
-            <li><a href ="%s" target ="showframe">Status Bar Help</a><br></li>
-            """ % str(os.path.join(path,  "status_bar_help.html"))
-        page += """
-            <li><a href ="%s" target ="showframe">Load a File</a><br></li>
-            """ % str(os.path.join(path, "load_data_help.html"))
-        page += """
-            <li><a href ="%s" 
-            target ="showframe">Simultaneous Fit</a><br></li>
-            """ % str(os.path.join(path, "simultaneous_fit_help.html"))
-        page += """
-            <li><a href ="%s" 
-            target ="showframe">Single Fit</a><br></li>
-            """ % str(os.path.join(path,  "single_fit_help.html"))
-        page += """
-            <li><a href ="%s" 
-            target ="showframe">Visualize Model</a><br></li>
-            """ % str(os.path.join(path, "model_use_help.html"))
-        page += """
-            <li><a href ="%s" 
-            target ="showframe">Data Averaging</a><br></li>
-            """ % str(os.path.join(path,  "averaging_help.html"))
-        page += """
+            <li><a href ="media/change_scale_help.html" target ="showframe">Change Scale</a><br></li>
+            <li><a href ="media/reset_Graph_help.html" target ="showframe">Graph Help</a><br></li>
+            <li><a href ="media/status_bar_help.html" target ="showframe">Status Bar Help</a><br></li>
+            <li><a href ="media/load_data_help.html" target ="showframe">Load a File</a><br></li>
+            <li><a href ="media/simultaneous_fit_help.html" target ="showframe">Simultaneous Fit</a><br></li>
+            <li><a href ="media/single_fit_help.html" target ="showframe">Single Fit</a><br></li>
+            <li><a href ="media/model_use_help.html" target ="showframe">Visualize Model</a><br></li>
+            <li><a href ="media/averaging_help.html" target ="showframe">Data Averaging</a><br></li>
             <li><a href ="%s" target ="showframe">Model Functions</a><br></li>
-            """ % str(self.path)
-        page += """<li><a href ="%s" target ="showframe">
-                Polydispersion Distributions</a><br></li>
-                """ % str(self.path_pd)
-        page += """
+            <li><a href ="%s" target ="showframe">Polydispersion Distributions</a><br></li>
             <li><a href ="%s" target ="showframe">Smear Computation</a><br></li>
-            """ % str(self.path_sm)
-        page += """<li><a href ="%s" 
-        target ="showframe">Key Combination</a><br></li>
+            <li><a href ="media/key_help.html" target ="showframe">Key Combination</a><br></li>
             </ul>
             </body>
-            </html>""" % str(os.path.join(path,  "key_help.html"))
+            </html>""" % (self.path, self.path_pd, self.path_sm)
         
         self.rhelp.SetPage(page1)
         self.lhelp.SetPage(page)
