@@ -54,7 +54,7 @@ class FitPage(BasicPage):
         self._set_bookmark_flag(False)
         self._set_save_flag(False)
         self._set_preview_flag(False)
-    
+        self.btFit.SetFocus()
   
         
     def _on_fit_complete(self):
