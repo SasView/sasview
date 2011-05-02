@@ -15,7 +15,10 @@ import wx.aui
 import os
 import sys
 import xml
-
+if sys.platform.count("darwin")==0:
+    ON_MAC = False
+else:
+    ON_MAC = True
 try:
     # Try to find a local config
     import imp
@@ -2200,9 +2203,10 @@ class ViewApp(wx.App):
         self.frame.Hide()
         self.s_screen = None
         try:
-            # make sure the current dir is App dir when it starts
-            temp_path = os.path.dirname(os.path.sys.path[0])  
-            os.chdir(temp_path)
+            if not ON_MAC:
+                # make sure the current dir is App dir when it starts
+                temp_path = os.path.dirname(os.path.sys.path[0])  
+                os.chdir(temp_path)
         except:
             pass
         # Display a splash screen on top of the frame.
