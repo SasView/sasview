@@ -1071,7 +1071,8 @@ class FitPage(BasicPage):
             self.state.model = self.model.clone()
             self.state.model.name = self.model.name
             if event is not None:
-                self._draw_model()
+                #self._draw_model()
+                self._onDraw(event=None)
         if event != None:
             ## post state to fit panel
             new_event = PageInfoEvent(page = self)
