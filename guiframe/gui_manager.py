@@ -649,7 +649,8 @@ class ViewerFrame(wx.Frame):
                 ind = self._data_panel.cb_plotpanel.FindString('None')
                 if ind != wx.NOT_FOUND:
                     self._data_panel.cb_plotpanel.Delete(ind)
-                self._data_panel.cb_plotpanel.Append(str(caption), p)
+                if caption not in self._data_panel.cb_plotpanel.GetItems():
+                    self._data_panel.cb_plotpanel.Append(str(caption), p)
 
         self._mgr.Update()
         return ID
