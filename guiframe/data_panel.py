@@ -46,6 +46,7 @@ EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS + extension_list
 PANEL_WIDTH = 250
 PANEL_HEIGHT = 700
 CBOX_WIDTH = 140
+BUTTON_WIDTH = 80
 STYLE_FLAG =wx.RAISED_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|\
                     wx.WANTS_CHARS|CT.TR_HAS_VARIABLE_ROW_HEIGHT
                     
@@ -225,13 +226,16 @@ class DataPanel(ScrolledPanel, PanelBase):
         Layout widgets related to buttons
         """
         w, _ = self.GetSize()
-        self.bt_add = wx.Button(self, wx.NewId(), "Load Data")
+        self.bt_add = wx.Button(self, wx.NewId(), "Load Data", 
+                                size=(BUTTON_WIDTH, -1))
         self.bt_add.SetToolTipString("Load data files")
         wx.EVT_BUTTON(self, self.bt_add.GetId(), self._load_data)
-        #self.bt_remove = wx.Button(self, wx.NewId(), "Remove Data")
+        #self.bt_remove = wx.Button(self, wx.NewId(), "Remove Data",
+        # size=(BUTTON_WIDTH, -1))
         #self.bt_remove.SetToolTipString("Remove data from the application")
         #wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
-        self.bt_import = wx.Button(self, wx.NewId(), "Send To")
+        self.bt_import = wx.Button(self, wx.NewId(), "Send To",
+                                    size=(BUTTON_WIDTH, -1))
         self.bt_import.SetToolTipString("Send set of Data to active perspective")
         wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_import)
         self.perspective_cbox = wx.ComboBox(self, -1, size=(CBOX_WIDTH, -1),
@@ -239,15 +243,18 @@ class DataPanel(ScrolledPanel, PanelBase):
         wx.EVT_COMBOBOX(self.perspective_cbox,-1, 
                         self._on_perspective_selection)
     
-        self.bt_append_plot = wx.Button(self, wx.NewId(), "Append Plot To")
+        self.bt_append_plot = wx.Button(self, wx.NewId(), "Append Plot To",
+                                        size=(BUTTON_WIDTH, -1))
         self.bt_append_plot.SetToolTipString("Plot the selected data in the active panel")
         wx.EVT_BUTTON(self, self.bt_append_plot.GetId(), self.on_append_plot)
         
-        self.bt_plot = wx.Button(self, wx.NewId(), "New Plot")
+        self.bt_plot = wx.Button(self, wx.NewId(), "New Plot", 
+                                 size=(BUTTON_WIDTH, -1))
         self.bt_plot.SetToolTipString("To trigger plotting")
         wx.EVT_BUTTON(self, self.bt_plot.GetId(), self.on_plot)
         
-        self.bt_freeze = wx.Button(self, wx.NewId(), "Freeze Theory")
+        self.bt_freeze = wx.Button(self, wx.NewId(), "Freeze Theory", 
+                                   size=(BUTTON_WIDTH, -1))
         self.bt_freeze.SetToolTipString("To trigger freeze a theory")
         wx.EVT_BUTTON(self, self.bt_freeze.GetId(), self.on_freeze)
        
@@ -258,7 +265,7 @@ class DataPanel(ScrolledPanel, PanelBase):
 
         self.sizer3.AddMany([(self.bt_add),
                              ((10, 10)),
-                             (self.bt_import),
+                             (self.bt_import, 0, wx.EXPAND|wx.RIGHT, 5),
                               (self.perspective_cbox, wx.EXPAND),
                               (self.bt_append_plot),
                               (self.cb_plotpanel, wx.EXPAND),
