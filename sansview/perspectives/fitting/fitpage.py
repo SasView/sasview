@@ -1058,7 +1058,7 @@ class FitPage(BasicPage):
                 #pass
             ## event to post model to fit to fitting plugins
             (ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
-           
+         
             ## set smearing value whether or not 
             #    the data contain the smearing info
             evt = ModelEventbox(model=self.model, 
@@ -1070,9 +1070,7 @@ class FitPage(BasicPage):
             self._manager._on_model_panel(evt=evt)
             self.state.model = self.model.clone()
             self.state.model.name = self.model.name
-            if event is not None:
-                self._draw_model()
-                
+            
         if event != None:
             ## post state to fit panel
             new_event = PageInfoEvent(page = self)
@@ -1087,7 +1085,7 @@ class FitPage(BasicPage):
                     self._show_combox_helper()
                     self.formfactorbox.SetSelection(pos)
                     self.formfactorbox.SetValue(current_val)
-            self._onDraw(event=None)
+            self._draw_model()
         self.SetupScrolling()
     
       
