@@ -60,19 +60,23 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
         if sys.platform.count("darwin") != 0:
             try:
                 kwds['style'] = STYLE_FLAG
+                CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
             except:
-                raise
+                del kwds['style']
+                CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
         else:
             #agwstyle is introduced in wx.2.8.11 .argument working only for windows
             try:
                 kwds['agwStyle'] = STYLE_FLAG
+                CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
             except:
                 try:
+                    del kwds['agwStyle']
                     kwds['style'] = STYLE_FLAG
+                    CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
                 except:
-                    raise
-        
-        CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
+                    del kwds['style']
+                    CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
         self.root = self.AddRoot("Available Data")
         
 class DataPanel(ScrolledPanel, PanelBase):
