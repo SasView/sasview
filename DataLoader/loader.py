@@ -102,7 +102,7 @@ class Registry(ExtensionRegistry):
         if not os.path.isdir(temp_path):
             temp_path = os.path.join(os.path.dirname(__file__), dir)
         if not os.path.isdir(temp_path):
-            temp_path = os.path.join(os.path.dirname(os.path.sys.path[0]), dir)
+            temp_path = os.path.join(os.path.dirname(sys.path[0]), dir)
         
         dir = temp_path
         # Check whether the directory exists
