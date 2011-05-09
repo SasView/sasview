@@ -235,12 +235,36 @@ class ViewerFrame(wx.Frame):
                     self._data_panel.cb_plotpanel.SetStringSelection(str\
                                          (self.panel_on_focus.window_caption))
                 elif self.panel_on_focus != self._data_panel:
-                    self.cpanel_on_focus = self.panel_on_focus
+                    cpanel = self.panel_on_focus
+                    if self.cpanel_on_focus != cpanel:
+                        self.cpanel_on_focus = self.panel_on_focus
                 #update toolbar
                 self._update_toolbar_helper()
                 #update edit menu
                 self.enable_edit_menu()
 
+    def reset_bookmark_menu(self, panel):
+        """
+        Reset Bookmark menu list
+        
+        : param panel: a control panel or tap where the bookmark is
+        """
+        cpanel = panel
+        if self._toolbar != None and cpanel._bookmark_flag:
+            for item in  self._toolbar.get_bookmark_items():
+                self._toolbar.remove_bookmark_item(item)
+            self._toolbar.add_bookmark_default()
+            pos = 0
+            for bitem in cpanel.popUpMenu.GetMenuItems():
+                pos += 1
+                if pos < 3:
+                    continue
+                id =  bitem.GetId()
+                label = bitem.GetLabel()
+                self._toolbar.append_bookmark_item(id, label)
+                wx.EVT_MENU(self, id, cpanel._back_to_bookmark)
+            self._toolbar.Realize()
+             
 
     def build_gui(self):
         """
@@ -689,13 +713,17 @@ class ViewerFrame(wx.Frame):
         panel_name = 'No Panel on Focus'
         if self._toolbar is  None:
             return
+        if self.cpanel_on_focus is not None:
+            self.reset_bookmark_menu(self.cpanel_on_focus)
         self._toolbar.update_toolbar(self.cpanel_on_focus)
         if self._current_perspective is not None:
             application_name = self._current_perspective.sub_menu
         if self.cpanel_on_focus is not None:
             panel_name = self.cpanel_on_focus.window_caption
+            
         self._toolbar.update_button(application_name=application_name, 
                                         panel_name=panel_name)
+        
         self._toolbar.Realize()
         
     def _add_menu_tool(self):
@@ -1748,8 +1776,7 @@ class ViewerFrame(wx.Frame):
                     for name in self._current_perspective.get_perspective():
                         if name == panel.window_name:
                             panel.on_set_focus(event=None)
-                            break
-                           
+                            break               
             name = self._current_perspective.sub_menu
             if self._data_panel is not None:
                 self._data_panel.set_active_perspective(name)

@@ -111,14 +111,12 @@ class GUIToolBar(Tbar):
                          style=PB_STYLE_SQUARE|PB_STYLE_DROPARROW)
         self._bookmark_bt.Disable()
         self._bookmark_menu = wx.Menu()
-        id = wx.NewId()
-        self._bookmark_menu.Append(id, 'Add bookmark')
-        self._bookmark_menu.AppendSeparator()
-        wx.EVT_MENU(self, id, self.on_bookmark)
+        self.add_bookmark_default()
+        
         
         self._bookmark_bt.SetMenu(self._bookmark_menu)
         self.AddControl(self._bookmark_bt)
-       
+
         self.SetToolBitmapSize(tbar_size)
         self.AddSeparator()
         #add button for the panel on focus
@@ -135,7 +133,16 @@ class GUIToolBar(Tbar):
         self.AddControl(self.button_panel)
         
         self.Realize()
-        
+    
+    def add_bookmark_default(self):   
+        """
+        Add default items in bookmark menu
+        """
+        id = wx.NewId()
+        self._bookmark_menu.Append(id, 'Add bookmark')
+        self._bookmark_menu.AppendSeparator()
+        wx.EVT_MENU(self, id, self.on_bookmark)
+   
     def on_bind_button(self):
         """
         """
@@ -240,4 +247,21 @@ class GUIToolBar(Tbar):
         id = wx.NewId()
         self._bookmark_menu.Append(id, str(title), str(hint))
         wx.EVT_MENU(self, id, handler)
-       
+   
+    def remove_bookmark_item(self, item):   
+        """
+        Remove a bookmark item
+        """
+        self._bookmark_menu.DestroyItem(item)
+        
+    def get_bookmark_items(self):
+        """
+        Get bookmark menu items
+        """
+        return self._bookmark_menu.GetMenuItems()
+    
+    def append_bookmark_item(self, id, label):
+        """
+        Append a item in bookmark
+        """
+        self._bookmark_menu.Append(id, label)

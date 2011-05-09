@@ -120,6 +120,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self._data = data
         #edit the panel
         if self._data is not None:
+            self._delete_bookmark_items()
             self.get_state_by_num(0)
             data_name = self._data.name
             data_qmin = min (self._data.x)
@@ -138,6 +139,21 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self._set_bookmark_flag(True)
         return True  
     
+    def _delete_bookmark_items(self):
+        """
+        Delete bookmark menu items
+        """
+        # delete toolbar menu
+        self.parent.reset_bookmark_menu(self)
+        self.parent._update_toolbar_helper()
+        # delete popUpMenu items
+        pos = 0
+        for item in self.popUpMenu.GetMenuItems():
+            pos += 1
+            if pos < 3:
+                continue
+            self.popUpMenu.DestroyItem(item)
+                
     def set_message(self):
         """
         Display warning message if available

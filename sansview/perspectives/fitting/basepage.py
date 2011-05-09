@@ -144,7 +144,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.popUpMenu = wx.Menu()
     
         id = wx.NewId()
-        self._keep = wx.MenuItem(self.popUpMenu,id,"BookMark",
+        self._keep = wx.MenuItem(self.popUpMenu,id,"Add bookmark",
                                  " Keep the panel status to recall it later")
         self.popUpMenu.AppendItem(self._keep)
         self._keep.Enable(False)
@@ -496,6 +496,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             previous_state = self.saved_states[name]
             ## reset state of checkbox,textcrtl  and  regular parameters value
             self.reset_page(previous_state)   
+        
                
     def on_preview(self, event):
         """
@@ -1910,6 +1911,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.multi_factor = self.multi_factor
         self.disp_list =self.model.getDispParamList()
         self.state.disp_list = self.disp_list
+        self.on_set_focus(None)
         self.Layout()     
         
     def _validate_qrange(self, qmin_ctrl, qmax_ctrl):
