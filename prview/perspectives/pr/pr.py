@@ -28,6 +28,7 @@ from sans.guiframe.events import StatusEvent
 from sans.guiframe.gui_style import GUIFRAME_ID   
 from sans.pr.invertor import Invertor
 from DataLoader.loader import Loader
+import DataLoader
 
 from pr_widgets import load_error 
 from sans.guiframe.plugin_base import PluginBase
