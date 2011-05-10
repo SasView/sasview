@@ -10,9 +10,10 @@ from wx.lib.platebtn import PB_STYLE_SQUARE, PB_STYLE_DROPARROW
 import sys
 if sys.platform.count("darwin")==0:
     FONT_VARIANT = 0
+    IS_MAC = False
 else:
     FONT_VARIANT = 1
-    
+    IS_MAC = True
 
 def clear_image(image):
     w, h = image.GetSize()
@@ -43,7 +44,11 @@ class GUIToolBar(Tbar):
     def do_layout(self):
         """
         """
-        tbar_size = (20, 15)
+        t_size = 20
+        if IS_MAC:
+            t_size = 25        
+            
+        tbar_size = (t_size, t_size)
         button_type =  wx.ITEM_NORMAL
 
         reset_im = GUIFRAME_ICON.RESET_ICON
