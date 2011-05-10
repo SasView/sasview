@@ -59,10 +59,6 @@ class GUIToolBar(Tbar):
         self.AddLabelTool(GUIFRAME_ID.RESET_ID, 'Reset', reset_bmp,
                    disable_reset_bmp, button_type,'Reset')
         self.AddSeparator()
-        drag_im = GUIFRAME_ICON.DRAG_ICON
-        drag_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
-        drag_bmp = drag_im.ConvertToBitmap()
-        self.AddSeparator()
         save_im = GUIFRAME_ICON.SAVE_ICON
         save_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
         save_bmp = save_im.ConvertToBitmap()
@@ -78,14 +74,14 @@ class GUIToolBar(Tbar):
         self.AddLabelTool(GUIFRAME_ID.PREVIEW_ID, 'Report', report_bmp,
                    disable_report_bmp, button_type,'Report')
         self.AddSeparator()
-        print_im = GUIFRAME_ICON.PRINT_ICON
-        print_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
-        print_bmp = print_im.ConvertToBitmap()
-        #disable_print_bmp = clear_image(print_im).ConvertToBitmap()
-        disable_print_bmp = wx.NullBitmap
-        self.AddLabelTool(GUIFRAME_ID.PRINT_ID, 'Print', print_bmp,
-                          disable_print_bmp, button_type, 'Print')
-        self.AddSeparator()
+        #print_im = GUIFRAME_ICON.PRINT_ICON
+        #print_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
+        #print_bmp = print_im.ConvertToBitmap()
+        
+        #disable_print_bmp = wx.NullBitmap
+        #self.AddLabelTool(GUIFRAME_ID.PRINT_ID, 'Print', print_bmp,
+        #                  disable_print_bmp, button_type, 'Print')
+        #self.AddSeparator()
         undo_im = GUIFRAME_ICON.UNDO_ICON
         undo_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
         undo_bmp = undo_im.ConvertToBitmap()
@@ -163,8 +159,8 @@ class GUIToolBar(Tbar):
                              id=GUIFRAME_ID.SAVE_ID)
             self.parent.Bind(wx.EVT_TOOL, self.parent.on_preview_panel,
                              id=GUIFRAME_ID.PREVIEW_ID)
-            self.parent.Bind(wx.EVT_TOOL, self.parent.on_print_panel,
-                             id=GUIFRAME_ID.PRINT_ID)
+            #self.parent.Bind(wx.EVT_TOOL, self.parent.on_print_panel,
+            #                 id=GUIFRAME_ID.PRINT_ID)
             
     def update_button(self, application_name='', panel_name=''):
         """
@@ -176,7 +172,7 @@ class GUIToolBar(Tbar):
         """
         """
         if panel is None:
-            self.EnableTool(GUIFRAME_ID.PRINT_ID, False)
+            #self.EnableTool(GUIFRAME_ID.PRINT_ID, False)
             self.EnableTool(GUIFRAME_ID.UNDO_ID,False)
             self.EnableTool(GUIFRAME_ID.REDO_ID, False)
             self.EnableTool(GUIFRAME_ID.PREVIEW_ID, False)
@@ -185,7 +181,7 @@ class GUIToolBar(Tbar):
             self._bookmark_bt.Disable()
             
         else:
-            self.EnableTool(GUIFRAME_ID.PRINT_ID, panel.get_print_flag())
+            #self.EnableTool(GUIFRAME_ID.PRINT_ID, panel.get_print_flag())
             self.EnableTool(GUIFRAME_ID.UNDO_ID, panel.get_undo_flag())
             self.EnableTool(GUIFRAME_ID.REDO_ID, panel.get_redo_flag())
             self.EnableTool(GUIFRAME_ID.PREVIEW_ID, panel.get_preview_flag())
