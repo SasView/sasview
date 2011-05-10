@@ -608,7 +608,10 @@ class ModelPanel2D(ModelPanel1D):
 
                 format = ".dat"
                 if os.path.splitext(mypath)[1].lower() == format:
-                    loader.save(path, data, format)
+                    # Make sure the ext included in the file name
+                    # especially on MAC
+                    fName = os.path.splitext(path)[0] + format
+                    loader.save(fName, data, format)
                 try:
                     self._default_save_location = os.path.dirname(path)
                 except:
