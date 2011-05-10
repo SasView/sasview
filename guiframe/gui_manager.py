@@ -1383,7 +1383,7 @@ class ViewerFrame(wx.Frame):
             
     def _on_save_project(self, event):
         """
-        save the state of the current active application
+        save the state of the SansView as *.svs
         """
         ## Default file location for save
         self._default_save_location = os.getcwd()
@@ -1412,8 +1412,10 @@ class ViewerFrame(wx.Frame):
                 doc = temp
           
         # Write the XML document
+        extens = APPLICATION_STATE_EXTENSION
+        fName = os.path.splitext(path)[0] + extens
         if doc != None:
-            fd = open(path, 'w')
+            fd = open(fName, 'w')
             fd.write(doc.toprettyxml())
             fd.close()
         else:

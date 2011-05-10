@@ -270,8 +270,12 @@ class InversionControl(ScrolledPanel, PanelBase):
         dlg.Destroy()
         
         state = self.get_state()
-            
-        self._manager.save_data(filepath=path, prstate=state)
+        
+        # MAC always needs the extension for saving
+        extens = ".prv"
+        # Make sure the ext included in the file name
+        fName = os.path.splitext(path)[0] + extens
+        self._manager.save_data(filepath=fName, prstate=state)
         
         return state
     

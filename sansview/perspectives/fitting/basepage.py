@@ -523,8 +523,12 @@ class BasicPage(ScrolledPanel, PanelBase):
             self._default_save_location = os.path.dirname(path)
         else:
             return None
+        # MAC always needs the extension for saving
+        extens = ".fitv"
+        # Make sure the ext included in the file name
+        fName = os.path.splitext(path)[0] + extens
         #the manager write the state into file
-        self._manager.save_fit_state(filepath=path, fitstate=new_state)
+        self._manager.save_fit_state(filepath=fName, fitstate=new_state)
         return new_state  
     
     def _get_time_stamp(self):

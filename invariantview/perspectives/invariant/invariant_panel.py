@@ -1181,8 +1181,11 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             return None
         
         dlg.Destroy()
-        
-        self._manager.save_file(filepath=path, state=self.state)
+        # MAC always needs the extension for saving
+        extens = ".inv"
+        # Make sure the ext included in the file name
+        fName = os.path.splitext(path)[0] + extens
+        self._manager.save_file(filepath=fName, state=self.state)
         
     def _show_message(self, mssg='',msg='Warning'):
         """
