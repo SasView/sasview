@@ -55,8 +55,8 @@ PLUGIN_STATE_EXTENSIONS = ['.fitv', '.inv', '.prv']
 PLUGINS_WLIST = ['Fitting files (*.fitv)|*.fitv',
                   'Invariant files (*.inv)|*.inv',
                   'P(r) files (*.prv)|*.prv']
-PLOPANEL_WIDTH = 400
-PLOPANEL_HEIGTH = 350
+PLOPANEL_WIDTH = 415
+PLOPANEL_HEIGTH = 370
 SPLASH_SCREEN_PATH = os.path.join("images","SVwelcome_mini.png")
 DEFAULT_STYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.MANAGER_ON\
                     |GUIFRAME.CALCULATOR_ON|GUIFRAME.TOOLBAR_ON
