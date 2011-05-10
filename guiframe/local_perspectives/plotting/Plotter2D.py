@@ -594,6 +594,14 @@ class ModelPanel2D(ModelPanel1D):
            
             if dlg.ShowModal() == wx.ID_OK:
                 path = dlg.GetPath()
+                # ext_num = 0 for .txt, ext_num = 1 for .xml
+                # This is MAC Fix
+                ext_num = dlg.GetFilterIndex()
+                if ext_num == 0:
+                    format = '.dat'
+                else:
+                    format = ''
+                path = os.path.splitext(path)[0] + format
                 mypath = os.path.basename(path)
                 
                 #TODO: This is bad design. The DataLoader is designed 
