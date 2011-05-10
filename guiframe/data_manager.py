@@ -72,6 +72,8 @@ class DataManager(object):
         file_name = ""
         if path is not None:
             file_name = os.path.basename(path)
+        if file_name == "":
+            file_name = data.filename
         if data.run:
             run_num = data.run[0]
         name = file_name
