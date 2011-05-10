@@ -22,6 +22,11 @@ from sans.guiframe.dataFitting import Data2D
 DEFAULT_MENU_ITEM_LABEL = "No graph available"
 DEFAULT_MENU_ITEM_ID = wx.NewId()
 
+if sys.platform.count("darwin")==0:
+    IS_MAC = False
+else:
+    IS_MAC = True
+
 class Plugin(PluginBase):
     """
     Plug-in class to be instantiated by the GUI manager
@@ -154,7 +159,12 @@ class Plugin(PluginBase):
                          "Show %s plot panel" % new_panel.window_caption)
         self.menu.Check(event_id, True)
         wx.EVT_MENU(self.parent, event_id, self._on_check_menu)
-        wx.EVT_SHOW(new_panel, self._on_close_panel)
+        
+        if IS_MAC:
+            wx.EVT_CLOSE(new_panel, self._on_close_panel)
+        else:
+            wx.EVT_SHOW(new_panel, self._on_close_panel)
+        
         # Set UID to allow us to reference the panel later
         new_panel.uid = event_id
         # Ship the plottable to its panel
