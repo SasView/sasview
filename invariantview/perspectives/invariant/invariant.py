@@ -82,7 +82,7 @@ class Plugin(PluginBase):
         #append that reader to list of available reader 
         loader = Loader()
         loader.associate_file_reader(".inv", self.state_reader)
-        loader.associate_file_reader(".svs", self.state_reader)
+        #loader.associate_file_reader(".svs", self.state_reader)
         # Return the list of panels
         return [self.invariant_panel]
   
