@@ -109,7 +109,7 @@ class Plugin(PluginBase):
         self._extensions = '.prv'
         l = Loader()
         l.associate_file_reader('.prv', self.state_reader)
-        l.associate_file_reader(".svs", self.state_reader)
+        #l.associate_file_reader(".svs", self.state_reader)
                 
         # Log startup
         logging.info("Pr(r) plug-in started")
