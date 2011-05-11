@@ -189,7 +189,9 @@ class Plugin(PluginBase):
             if extension.lower() in EXTENSIONS:
                 log_msg = "Data Loader cannot "
                 log_msg += "load: %s\n" % str(p_file)
-                log_msg += "Try File opening ...."
+                log_msg += """Please try to open that file from "open project" """
+                log_msg += """or "open analysis" menu\n"""
+                error_message = log_msg + "\n"
                 logging.info(log_msg)
                 continue
         

@@ -42,6 +42,8 @@ extension_list = []
 if config.APPLICATION_STATE_EXTENSION is not None:
     extension_list.append(config.APPLICATION_STATE_EXTENSION)
 EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS + extension_list   
+PLUGINS_WLIST = config.PLUGINS_WLIST
+APPLICATION_WLIST = config.APPLICATION_WLIST
 
 PANEL_WIDTH = 235
 PANEL_HEIGHT = 700
@@ -587,6 +589,10 @@ class DataPanel(ScrolledPanel, PanelBase):
             self._default_save_location = os.getcwd()
         
         cards = self.loader.get_wildcards()
+        temp = [APPLICATION_WLIST] + PLUGINS_WLIST
+        for item in temp:
+            if item in cards:
+                cards.remove(item)
         wlist =  '|'.join(cards)
         style = wx.OPEN|wx.FD_MULTIPLE
         dlg = wx.FileDialog(self.parent, 
@@ -618,7 +624,9 @@ class DataPanel(ScrolledPanel, PanelBase):
             if extension.lower() in EXTENSIONS:
                 log_msg = "Data Loader cannot "
                 log_msg += "load: %s\n" % str(p_file)
-                log_msg += "Try File opening ...."
+                log_msg += """Please try to open that file from "open project" """
+                log_msg += """or "open analysis" menu\n"""
+                error_message = log_msg + "\n"
                 logging.info(log_msg)
                 continue
         
