@@ -2267,7 +2267,8 @@ class ViewApp(wx.App):
             msg += "input file from command line.\n"
             logging.error(msg)
         return True
-
+        self.Bind(wx.EVT_ACTIVATE_APP, self.OnActivate)
+        
     def open_file(self):
         """
         open a state file at the start of the application
@@ -2397,7 +2398,23 @@ class ViewApp(wx.App):
         """
         self.frame.Show(True)
         event.Skip()
-      
+        
+    def OnActivate(self, event):
+        # if this is an activate event, rather than something else, like iconize.
+        if event.GetActive():
+            self.BringWindowToFront()
+        event.Skip()   
+          
+    def BringWindowToFront(self):
+        try: # it's possible for this event to come when the frame is closed
+            self.GetTopWindow().Raise()
+        except:
+            pass
+                
+    def MacReopenApp(self):
+        """Called when the doc icon is clicked, and ???"""
+        self.BringWindowToFront()
+    
 if __name__ == "__main__": 
     app = ViewApp(0)
     app.MainLoop()
