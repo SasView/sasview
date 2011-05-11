@@ -29,7 +29,6 @@ from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.events import NewPlotEvent 
 from sans.guiframe.events import StatusEvent  
 from sans.guiframe.events import EVT_SLICER_PANEL
-from sans.guiframe.events import EVT_REMOVE_DATA
 from sans.guiframe.events import EVT_SLICER_PARS_UPDATE
 from sans.guiframe.gui_style import GUIFRAME_ID
 from sans.guiframe.plugin_base import PluginBase 
@@ -220,8 +219,6 @@ class Plugin(PluginBase):
         self.index_model = 0
         self.index_theory= 0
         self.parent.Bind(EVT_SLICER_PANEL, self._on_slicer_event)
-       
-        self.parent.Bind(EVT_REMOVE_DATA, self._closed_fitpage)
         self.parent.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PANEL)
         self.parent._mgr.Bind(wx.aui.EVT_AUI_PANE_CLOSE,self._onclearslicer)    
         #Create reader when fitting panel are created
