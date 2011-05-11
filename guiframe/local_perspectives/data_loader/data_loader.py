@@ -157,16 +157,10 @@ class Plugin(PluginBase):
         
         :param error: details error message to be displayed
         """
-        message = "The data file you selected could not be loaded.\n"
-        message += "Make sure the content of your file"
-        message += " is properly formatted.\n\n"
-        
-        if error is not None:
-            message += "When contacting the DANSE team, mention the"
-            message += " following:\n%s" % str(error)
-        dial = wx.MessageDialog(self.parent, message, 'Error Loading File',
+        if error is not None or str(error).strip() != "":
+            dial = wx.MessageDialog(self.parent, str(error), 'Error Loading File',
                                 wx.OK | wx.ICON_EXCLAMATION)
-        dial.ShowModal()  
+            dial.ShowModal()  
         
     def get_file_path(self, path):
         """
@@ -207,9 +201,14 @@ class Plugin(PluginBase):
                 message = "Loading Data..." + str(p_file) + "\n"
                 self.load_update(output=output, message=message)
             except:
-                error_message = "Error while loading Data: %s\n" % str(p_file)
-                error_message += str(sys.exc_value) + "\n"
-                self.load_update(output=output, message=error_message)
+                 error = "Error while loading Data: %s\n" % str(p_file)
+                 error += str(sys.exc_value) + "\n"
+                 error_message = "The data file you selected could not be loaded.\n"
+                 error_message += "Make sure the content of your file"
+                 error_message += " is properly formatted.\n\n"
+                 error_message += "When contacting the DANSE team, mention the"
+                 error_message += " following:\n%s" % str(error)
+                 self.load_update(output=output, message=error_message)
                 
         message = "Loading Data Complete! "
         message += log_msg

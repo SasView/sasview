@@ -1725,14 +1725,16 @@ class ViewerFrame(wx.Frame):
                     if self.enable_add_data(new_plot):
                         new_plot.group_id = self.panel_on_focus.group_id
                     else:
-                        message = "Only 1D Data can be append to plot panel\n"
-                        message += "%s will be plot separetly\n" %str(new_plot.name)
+                        message = "Only 1D Data can be append to"
+                        message += " plot panel containing 1D data.\n"
+                        message += "%s not be appended.\n" %str(new_plot.name)
+                        message += "try new plot option.\n"
                         wx.PostEvent(self, StatusEvent(status=message, 
                                                    info='warning'))
             else:
                 #if not append then new plot
                 from sans.guiframe.dataFitting import Data2D
-                if (Data2D, new_plot.__class__):
+                if issubclass(Data2D, new_plot.__class__):
                     #for 2 D always plot in a separated new plot
                     new_plot.group_id = wx.NewId()
                 else:
