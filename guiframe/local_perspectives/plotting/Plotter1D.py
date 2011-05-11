@@ -25,7 +25,6 @@ from sans.guiframe.events import EVT_NEW_PLOT
 from sans.guiframe.events import StatusEvent 
 from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.events import SlicerEvent
-from sans.guiframe.events import RemoveDataEvent
 from sans.guiframe.events import PanelOnFocusEvent
 from sans.guiframe.events import EVT_NEW_LOADED_DATA
 from sans.guiframe.utils import PanelMenu
@@ -179,8 +178,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
             del self.plots[id]
             self.graph.render(self)
             self.subplot.figure.canvas.draw_idle()    
-            event = RemoveDataEvent(data=data)
-            wx.PostEvent(self.parent, event)
             if len(self.graph.plottables) == 0:
                 #onRemove: graph is empty must be the panel must be destroyed
                 self.parent.delete_panel(self.uid)

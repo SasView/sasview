@@ -15,8 +15,6 @@ import wx.lib.newevent
 (SlicerParameterEvent, EVT_SLICER_PARS)   = wx.lib.newevent.NewEvent()
 #slicer event
 (SlicerEvent, EVT_SLICER)   = wx.lib.newevent.NewEvent()
-## event that that destroy a page associate with Data1D removed from the graph
-(RemoveDataEvent, EVT_REMOVE_DATA)   = wx.lib.newevent.NewEvent()
 ##event that allow to add more that to the same plot
 (AddManyDataEvent, EVT_ADD_MANY_DATA)   = wx.lib.newevent.NewEvent()
 ##event for the panel on focus
