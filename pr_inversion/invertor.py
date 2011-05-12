@@ -104,6 +104,30 @@ class Invertor(Cinvertor):
     def __init__(self):
         Cinvertor.__init__(self)
         
+    def __setstate__(self, state):
+        """
+        restore the state of invertor for pickle
+        """
+        (self.__dict__,self.alpha, self.d_max,
+         self.q_min, self.q_max, 
+         self.x, self.y,
+         self.err, self.has_bck,
+         self.slit_height, self.slit_width) = state
+   
+    def __reduce_ex__(self, proto):
+        """
+        Overwrite the __reduce_ex__
+        """
+
+        state = (self.__dict__, 
+                 self.alpha, self.d_max,
+                 self.q_min, self.q_max,
+                 self.x, self.y,
+                 self.err, self.has_bck, 
+                 self.slit_height, self.slit_width,
+                 )
+        return (Invertor,tuple(), state, None, None)
+    
     def __setattr__(self, name, value):
         """
         Set the value of an attribute.
