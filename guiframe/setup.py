@@ -13,10 +13,14 @@ import sys
 path = os.path.join(os.getcwd(), 'local_perspectives')
 package_dir = { "sans.guiframe":".",
                 "sans.guiframe.local_perspectives":"local_perspectives",
-                "sans.guiframe.widgets":"widgets"}
+                "sans.guiframe.widgets":"widgets",
+                "sans.guiframe.media":"media"}
+package_data = {"sans.guiframe": ['images/*'],
+                "sans.guiframe.media": ['*']}
 packages = ["sans.guiframe", 
             "sans.guiframe.local_perspectives",
-            "sans.guiframe.widgets"]
+            "sans.guiframe.widgets",
+            "sans.guiframe.media"]
 # build local plugin
 for dir in os.listdir(path):
     if dir not in ['.svn','__init__.py', '__init__.pyc']:
@@ -51,6 +55,6 @@ setup(
 
     packages = packages,
     
-    package_data={"sans.guiframe": ['images/*']},
+    package_data = package_data,
     )
         

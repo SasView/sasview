@@ -306,6 +306,14 @@ class Plugin(PluginBase):
             self.parent.hide_panel(event_id)
             self.menu.Check(event_id, False)
         
+    def help(self, evt):
+        """
+        Show a general help dialog. 
+        """
+        from help_panel import  HelpWindow
+        frame = HelpWindow(None, -1, 'HelpWindow')    
+        frame.Show(True)
+              
     def _on_close_panel(self, event):
         """
         Update check mark on panel's show and hide event
