@@ -39,11 +39,12 @@ import logging
 from sans.guiframe.events import EVT_STATUS
 from sans.guiframe.events import EVT_APPEND_BOOKMARK
 from sans.guiframe.events import EVT_PANEL_ON_FOCUS
+from sans.guiframe.events import EVT_NEW_LOAD_DATA
 from sans.guiframe.events import StatusEvent
 from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.gui_style import GUIFRAME
 from sans.guiframe.gui_style import GUIFRAME_ID
-from sans.guiframe.events import NewLoadedDataEvent
+#from sans.guiframe.events import NewLoadedDataEvent
 from sans.guiframe.data_panel import DataPanel
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.gui_toolbar import GUIToolBar
@@ -189,8 +190,16 @@ class ViewerFrame(wx.Frame):
         #Register add extra data on the same panel event on load
         self.Bind(EVT_PANEL_ON_FOCUS, self.set_panel_on_focus)
         self.Bind(EVT_APPEND_BOOKMARK, self.append_bookmark)
+        self.Bind(EVT_NEW_LOAD_DATA, self.on_load_data)
         
         
+    def on_load_data(self, event):
+        """
+        received an event to trigger load from data plugin
+        """
+        if self._data_plugin is not None:
+            self._data_plugin.load_data(event)
+            
     def get_current_perspective(self):
         """
         return the current perspective
@@ -957,37 +966,36 @@ class ViewerFrame(wx.Frame):
         self._populate_file_menu()
         style = self.__gui_style & GUIFRAME.DATALOADER_ON
         style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
-        if style == GUIFRAME.DATALOADER_ON:
+        
+        id = wx.NewId()
+        hint_load_file = "read all analysis states save previously"
+        self._save_appl_menu = self._file_menu.Append(id, 
+                                '&Open Project', hint_load_file)
+        wx.EVT_MENU(self, id, self._on_open_state_project)
+            
+        if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
+            # some menu of plugin to be seen under file menu
+            hint_load_file = "Read a status files and load"
+            hint_load_file += " them into the analysis"
             id = wx.NewId()
-            hint_load_file = "read all analysis states save previously"
             self._save_appl_menu = self._file_menu.Append(id, 
-                                    '&Open Project', hint_load_file)
-            wx.EVT_MENU(self, id, self._on_open_state_project)
-            
-            if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
-                # some menu of plugin to be seen under file menu
-                hint_load_file = "Read a status files and load"
-                hint_load_file += " them into the analysis"
-                id = wx.NewId()
-                self._save_appl_menu = self._file_menu.Append(id, 
-                                        '&Open Analysis', hint_load_file)
-                wx.EVT_MENU(self, id, self._on_open_state_application)
+                                    '&Open Analysis', hint_load_file)
+            wx.EVT_MENU(self, id, self._on_open_state_application)
                 
-            self._file_menu.AppendSeparator()
+        self._file_menu.AppendSeparator()
+        id = wx.NewId()
+        self._file_menu.Append(id, '&Save Project',
+                             'Save the state of the whole analysis')
+        wx.EVT_MENU(self, id, self._on_save_project)
+        if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
+            #self._file_menu.AppendSeparator()
             id = wx.NewId()
-            self._file_menu.Append(id, '&Save Project',
-                                 'Save the state of the whole analysis')
-            
-            wx.EVT_MENU(self, id, self._on_save_project)
-            if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
-                #self._file_menu.AppendSeparator()
-                id = wx.NewId()
-                self._save_appl_menu = self._file_menu.Append(id, 
-                                                          '&Save Analysis',
-                            'Save state of the current active analysis panel')
-                wx.EVT_MENU(self, id, self._on_save_application)
-            
-            self._file_menu.AppendSeparator()
+            self._save_appl_menu = self._file_menu.Append(id, 
+                                                      '&Save Analysis',
+                        'Save state of the current active analysis panel')
+            wx.EVT_MENU(self, id, self._on_save_application)
+        
+        self._file_menu.AppendSeparator()
         
         id = wx.NewId()
         self._file_menu.Append(id, '&Quit', 'Exit') 

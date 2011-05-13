@@ -23,4 +23,6 @@ import wx.lib.newevent
 (PanelOnFocusEvent, EVT_PANEL_ON_FOCUS)   = wx.lib.newevent.NewEvent()
 #book mark event
 (AppendBookmarkEvent, EVT_APPEND_BOOKMARK) = wx.lib.newevent.NewEvent()
+#event to ask dataloader plugin to load data if dataloader plugin exist
+(NewLoadDataEvent, EVT_NEW_LOAD_DATA) = wx.lib.newevent.NewEvent()
 

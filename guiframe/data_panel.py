@@ -22,6 +22,8 @@ from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.events import StatusEvent
 from sans.guiframe.events import EVT_DELETE_PLOTPANEL
+from sans.guiframe.events import NewLoadDataEvent
+from sans.guiframe.gui_style import GUIFRAME
 from DataLoader.loader import Loader
 
 try:
@@ -235,6 +237,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         Layout widgets related to buttons
         """
         w, _ = self.GetSize()
+       
         self.bt_add = wx.Button(self, wx.NewId(), "Load Data", 
                                 size=(BUTTON_WIDTH, -1))
         self.bt_add.SetToolTipString("Load data files")
@@ -286,7 +289,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                               ((10, 10))])
 
         self.sizer3.AddGrowableCol(1, 1)
-
+        self.show_data_button()
         self.enable_remove()
         self.enable_import()
         self.enable_plot()
@@ -581,102 +584,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         
     def _load_data(self, event):
         """
-        Load data
-        """
-        path = None
-        if self._default_save_location == None:
-            self._default_save_location = os.getcwd()
-        
-        cards = self.loader.get_wildcards()
-        temp = [APPLICATION_WLIST] + PLUGINS_WLIST
-        for item in temp:
-            if item in cards:
-                cards.remove(item)
-        wlist =  '|'.join(cards)
-        style = wx.OPEN|wx.FD_MULTIPLE
-        dlg = wx.FileDialog(self.parent, 
-                            "Choose a file", 
-                            self._default_save_location, "",
-                             wlist,
-                             style=style)
-        if dlg.ShowModal() == wx.ID_OK:
-            file_list = dlg.GetPaths()
-            if len(file_list) >= 0 and not(file_list[0]is None):
-                self._default_save_location = os.path.dirname(file_list[0])
-                path = self._default_save_location
-        dlg.Destroy()
-        
-        if path is None or not file_list or file_list[0] is None:
-            return
-        self._get_data(file_list)
-        
-    def _get_data(self, path, format=None):
-        """
-        """
-        message = ""
-        log_msg = ''
-        output = {}
-        error_message = ""
-        for p_file in path:
-            basename  = os.path.basename(p_file)
-            root, extension = os.path.splitext(basename)
-            if extension.lower() in EXTENSIONS:
-                log_msg = "Data Loader cannot "
-                log_msg += "load: %s\n" % str(p_file)
-                log_msg += """Please try to open that file from "open project" """
-                log_msg += """or "open analysis" menu\n"""
-                error_message = log_msg + "\n"
-                logging.info(log_msg)
-                continue
-        
-            try:
-                temp =  self.loader.load(p_file, format)
-                if temp.__class__.__name__ == "list":
-                    for item in temp:
-                        data = self.parent.create_gui_data(item, p_file)
-                        output[data.id] = data
-                else:
-                    data = self.parent.create_gui_data(temp, p_file)
-                    output[data.id] = data
-                message = "Loading Data..." + str(p_file) + "\n"
-                self.load_update(output=output, message=message)
-            except:
-                error = "Error while loading Data: %s\n" % str(p_file)
-                error += str(sys.exc_value) + "\n"
-                error_message = "The data file you selected could not be loaded.\n"
-                error_message += "Make sure the content of your file"
-                error_message += " is properly formatted.\n\n"
-                error_message += "When contacting the DANSE team, mention the"
-                error_message += " following:\n%s" % str(error)
-                self.load_update(output=output, message=error_message)
-                
-        message = "Loading Data Complete! "
-        message += log_msg
-        self.load_complete(output=output, error_message=error_message,
-                       message=message, path=path)
-            
-    def load_update(self, output=None, message=""):
-        """
-        print update on the status bar
-        """
-        if message != "" and self.parent is not None:
-            wx.PostEvent(self.parent, StatusEvent(status=message,
-                                                  type="progress",
-                                                   info="warning"))
-            
-    def load_complete(self, output, message="", error_message="", path=None):
-        """
-         post message to  status bar and return list of data
+        send an event to the parent to trigger load from plugin module
         """
         if self.parent is not None:
-            wx.PostEvent(self.parent, StatusEvent(status=message,
-                                              info="warning",
-                                              type="stop"))
-        if error_message != "":
-            self.load_error(error_message)
-        if self.parent is not None:
-            self.parent.add_data(data_list=output)
+            wx.PostEvent(self.parent, NewLoadDataEvent())
             
+
     def on_remove(self, event):
         """
         Get a list of item checked and remove them from the treectrl
@@ -916,7 +829,24 @@ class DataPanel(ScrolledPanel, PanelBase):
         else:
             self.selection_cbox.Disable()
             
-            
+    def show_data_button(self):
+        """
+        show load data and remove data button if 
+        dataloader on else hide them
+        """
+        try:
+            gui_style = self.parent.get_style()
+            style = gui_style & GUIFRAME.DATALOADER_ON
+            if style == GUIFRAME.DATALOADER_ON: 
+                #self.bt_remove.Show(True)
+                self.bt_add.Show(True) 
+            else:
+                #self.bt_remove.Hide()
+                self.bt_add.Hide()
+        except: 
+            #self.bt_remove.Hide()
+            self.bt_add.Hide() 
+           
         
 class DataFrame(wx.Frame):
     ## Internal name for the AUI manager

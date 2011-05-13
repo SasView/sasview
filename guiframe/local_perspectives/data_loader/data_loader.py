@@ -56,7 +56,7 @@ class Plugin(PluginBase):
         #menu for data files
         menu_list = []
         data_file_hint = "load one or more data in the application"
-        menu_list = [('&Load Data File(s)', data_file_hint, self._load_data)]
+        menu_list = [('&Load Data File(s)', data_file_hint, self.load_data)]
         gui_style = self.parent.get_style()
         style = gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
         style1 = gui_style & GUIFRAME.DATALOADER_ON
@@ -77,7 +77,7 @@ class Plugin(PluginBase):
         data_file_hint = "load one or more data in the application"
         self._data_menu.Append(data_file_id, 
                          '&Load Data File(s)', data_file_hint)
-        wx.EVT_MENU(self.parent, data_file_id, self._load_data)
+        wx.EVT_MENU(self.parent, data_file_id, self.load_data)
         gui_style = self.parent.get_style()
         style = gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
         style1 = gui_style & GUIFRAME.DATALOADER_ON
@@ -91,7 +91,7 @@ class Plugin(PluginBase):
             
         return [(self._data_menu, 'Data')]
 
-    def _load_data(self, event):
+    def load_data(self, event):
         """
         Load data
         """
