@@ -42,6 +42,7 @@ class FitPage(BasicPage):
         ## draw sizer
         self._fill_datainfo_sizer()
         self.is_2D = None
+        self.fit_started = False
         # get smear info from data
         self._get_smear_info()
         self._fill_model_sizer( self.sizer1)
@@ -981,16 +982,19 @@ class FitPage(BasicPage):
         self.btFit.SetLabel("Stop")
         self.bind_fit_button()
            
+   
     def bind_fit_button(self):
         """
         bind the fit button to either fit handler or stop fit handler
         """
         self.btFit.Unbind(event=wx.EVT_BUTTON, id= self.btFit.GetId())
         if self.btFit.GetLabel().lower() == "stop":
+            self.fit_started = True
             self.btFit.SetForegroundColour('red')
             self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._StopFit,
                              id=self.btFit.GetId())
         elif self.btFit.GetLabel().lower() == "fit":
+            self.fit_started = False
             self.btFit.SetDefault()
             self.btFit.SetForegroundColour('black')
             #self.btFit.SetBackgroundColour(self.default_bt_colour)
@@ -1001,8 +1005,11 @@ class FitPage(BasicPage):
             raise ValuerError, msg
         self._manager._reset_schedule_problem(value=0)
           
-
-    def _StopFit(self, event):
+    def is_fitting(self):
+        if self.fit_started:
+            self._StopFit(event=None)
+            
+    def _StopFit(self, event=None):
         """
         Stop fit 
         """

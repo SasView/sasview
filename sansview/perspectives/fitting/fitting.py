@@ -226,7 +226,7 @@ class Plugin(PluginBase):
         #append that reader to list of available reader 
         loader = Loader()
         loader.associate_file_reader(".fitv", self.state_reader)
-        loader.associate_file_reader(".svs", self.state_reader)
+        #loader.associate_file_reader(".svs", self.state_reader)
         from sans.perspectives.calculator.sld_panel import SldPanel
         #Send the fitting panel to guiframe
         self.mypanels.append(self.fit_panel) 
@@ -265,6 +265,8 @@ class Plugin(PluginBase):
             dlg = DataDialog(data_list=data_list, nb_data=MAX_NBR_DATA)
             if dlg.ShowModal() == wx.ID_OK:
                 selected_data_list = dlg.get_data()
+            dlg.Destroy()
+            
         else:
             selected_data_list = data_list
         try:

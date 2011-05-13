@@ -2,6 +2,7 @@
 import numpy
 import string 
 import wx
+import sys
 #from wx.lib.flatnotebook import FlatNotebook as nb
 from wx.aui import AuiNotebook as nb
 
@@ -45,9 +46,9 @@ class FitPanel(nb, PanelBase):
         self.menu_mng = models.ModelManager()
         self.model_list_box = self.menu_mng.get_model_list()
         #pageClosedEvent = nb.EVT_FLATNOTEBOOK_PAGE_CLOSING 
-        pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
+        self.pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
         
-        self.Bind(pageClosedEvent, self.on_close_page)
+        self.Bind(self.pageClosedEvent, self.on_close_page)
          ## save the title of the last page tab added
         self.fit_page_name = {}
         ## list of existing fit page
@@ -60,10 +61,13 @@ class FitPanel(nb, PanelBase):
         self.Bind(basepage.EVT_PREVIOUS_STATE, self._onUndo)
         self.Bind(basepage.EVT_NEXT_STATE, self._onRedo)
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_page_changing)
+        self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSED, self.on_closed)
 
-        #add default pages
-        self.add_default_pages()
-
+    def on_closed(self, event):
+        """
+        """
+        print "page closed", self.GetPageCount()
+        
     def save_project(self, doc=None):
         """
         return an xml node containing state of the panel
@@ -115,12 +119,21 @@ class FitPanel(nb, PanelBase):
         
     def on_page_changing(self, event):
         """
+        calls the function when the current event handler has exited. avoiding
+        to call panel on focus on a panel that is currently deleted
+        """
+        wx.CallAfter(self.helper_on_page_change)
+        
+        
+    def helper_on_page_change(self):
+        """
         """
         pos = self.GetSelection()
         if pos != -1:
             selected_page = self.GetPage(pos)
             wx.PostEvent(self.parent, PanelOnFocusEvent(panel=selected_page))
-            
+        
+       
     def on_set_focus(self, event):
         """
         """
@@ -156,16 +169,7 @@ class FitPanel(nb, PanelBase):
             selected_page = self.GetPage(pos)
             return selected_page.get_state()
     
-    def add_default_pages(self):
-        """
-        Add default pages such as a hint page and an empty fit page
-        """
-        pass
-        #add default page
-        #from hint_fitpage import HintFitPage
-        #self.hint_page = HintFitPage(self) 
-        #self.AddPage(self.hint_page,"Hint")
-        #self.hint_page.set_manager(self._manager)
+  
   
     def close_all(self):
         """
@@ -227,11 +231,12 @@ class FitPanel(nb, PanelBase):
         close page and remove all references to the closed page
         """
         nbr_page = self.GetPageCount()
-        if nbr_page == 1:
-           
-            event.Veto()
-            return 
         selected_page = self.GetPage(self.GetSelection())
+        if nbr_page == 1:
+            if selected_page.get_data() == None:
+                if event is not None:
+                    event.Veto()
+                return 
         self._close_helper(selected_page=selected_page)
         
     def close_page_with_data(self, deleted_data):
@@ -249,7 +254,7 @@ class FitPanel(nb, PanelBase):
                     #the fitpanel exists and only the initial fit page is open 
                     #with no selected data
                     return
-                if data.name == deleted_data.name:
+                if data.id == deleted_data.id:
                     self._close_helper(selected_page)
                     self.DeletePage(index)
                     break
@@ -293,6 +298,7 @@ class FitPanel(nb, PanelBase):
         self.sim_page.uid = wx.NewId()
         self.AddPage(self.sim_page,"Simultaneous Fit", True)
         self.sim_page.set_manager(self._manager)
+        self.enable_close_button()
         return self.sim_page
         
  
@@ -309,14 +315,47 @@ class FitPanel(nb, PanelBase):
         self.AddPage(panel, caption, select=True)
         self.opened_pages[panel.uid] = panel
         self.set_engine_helper(panel=panel)
+        self.enable_close_button()
         return panel 
     
+    def enable_close_button(self):
+        """
+        display the close button on tab for more than 1 tabs else remove the 
+        close button
+        """
+        return
+        if self.GetPageCount() <= 1:
+            style = self.GetWindowStyleFlag() 
+            if style & wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB == wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB:
+                style = style & ~wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB
+                self.SetWindowStyle(style)
+        else:
+            style = self.GetWindowStyleFlag()
+            if style & wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB != wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB:
+                style |= wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB
+                self.SetWindowStyle(style)
+            
     def delete_data(self, data):
         """
         Delete the given data
         """
-        if data is None:
-            return None
+        if data.__class__.__name__ != "list":
+            raise ValueError, "Fitpanel delete_data expect list of id"
+        else:
+            n = self.GetPageCount()
+            for page in self.opened_pages.values():
+                pos = self.GetPageIndex(page)
+                temp_data = page.get_data()
+                #stop the fitting before deleting the page
+                page.is_fitting()
+                if temp_data is not None and temp_data.id in data:
+                    self.SetSelection(pos)
+                    self.on_close_page(event=None)
+                    temp = self.GetSelection()
+                    self.DeletePage(temp)
+            if self.GetPageCount()== 0:
+                self.add_empty_page()
+        
     def set_data(self, data):
         """ 
         Add a fitting page on the notebook contained by fitpanel
@@ -434,9 +473,8 @@ class FitPanel(nb, PanelBase):
         #Delete the name of the page into the list of open page
         for uid, list in self.opened_pages.iteritems():
             #Don't return any panel is the exact same page is created
-            
             if selected_page.uid == uid:
                 del self.opened_pages[selected_page.uid]
                 break 
-     
+      
   
