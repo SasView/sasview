@@ -15,6 +15,7 @@ import wx
 import sys
 from sans.guiframe.events import EVT_NEW_PLOT
 from sans.guiframe.events import StatusEvent 
+from sans.guiframe.events import DeletePlotPanelEvent
 from sans.guiframe.plugin_base import PluginBase
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
@@ -243,6 +244,9 @@ class Plugin(PluginBase):
         """
         if group_id in self.plot_panels.keys():
             panel = self.plot_panels[group_id]
+            wx.PostEvent(self.parent, 
+                         DeletePlotPanelEvent(name=panel.window_caption,
+                                    caption=panel.window_caption))
             #remove menu item
             self.delete_menu_item(panel.window_caption, panel.uid)
             del self.plot_panels[group_id]

@@ -14,14 +14,15 @@ import os
 import wx
 import sys
 import warnings
+import logging
 from wx.lib.scrolledpanel import ScrolledPanel
 import  wx.lib.agw.customtreectrl as CT
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.events import StatusEvent
+from sans.guiframe.events import EVT_DELETE_PLOTPANEL
 from DataLoader.loader import Loader
-import logging
 
 try:
     # Try to find a local config
@@ -128,6 +129,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.do_layout()
         self.fill_cbox_analysis(self.list_of_perspective)
         self.Bind(wx.EVT_SHOW, self.on_close_page)
+        if self.parent is not None:
+            self.parent.Bind(EVT_DELETE_PLOTPANEL, self._on_delete_plot_panel)
        
         
     def do_layout(self):
@@ -764,6 +767,19 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         self.perspective_cbox.SetStringSelection(name)
         self.enable_import()
+        
+    def _on_delete_plot_panel(self, event):
+        """
+        get an event with attribute name and caption to delete existing name 
+        from the combobox of the current panel
+        """
+        name = event.name
+        caption = event.caption
+        if self.cb_plotpanel is not None:
+            pos = self.cb_plotpanel.FindString(str(caption)) 
+            if pos != wx.NOT_FOUND:
+                self.cb_plotpanel.Delete(pos)
+        self.enable_append()
         
     def set_panel_on_focus(self, name=None):
         """
