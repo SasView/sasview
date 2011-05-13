@@ -149,7 +149,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer1.SetMinSize((w/13, h*2/5))
       
         self.sizer2 = wx.BoxSizer(wx.VERTICAL)
-        self.sizer3 = wx.FlexGridSizer(5, 2, 0, 0)
+        self.sizer3 = wx.FlexGridSizer(6, 2, 0, 0)
         self.sizer4 = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer5 = wx.BoxSizer(wx.VERTICAL)
        
@@ -225,7 +225,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.enable_freeze()
         self.enable_plot()
         self.enable_import()
-        #self.enable_remove()
+        self.enable_remove()
                
     def layout_button(self):
         """
@@ -236,10 +236,10 @@ class DataPanel(ScrolledPanel, PanelBase):
                                 size=(BUTTON_WIDTH, -1))
         self.bt_add.SetToolTipString("Load data files")
         wx.EVT_BUTTON(self, self.bt_add.GetId(), self._load_data)
-        #self.bt_remove = wx.Button(self, wx.NewId(), "Remove Data",
-        # size=(BUTTON_WIDTH, -1))
-        #self.bt_remove.SetToolTipString("Remove data from the application")
-        #wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
+        self.bt_remove = wx.Button(self, wx.NewId(), "Remove Data",
+         size=(BUTTON_WIDTH, -1))
+        self.bt_remove.SetToolTipString("Remove data from the application")
+        wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
         self.bt_import = wx.Button(self, wx.NewId(), "Send To",
                                     size=(BUTTON_WIDTH, -1))
         self.bt_import.SetToolTipString("Send set of Data to active perspective")
@@ -271,6 +271,8 @@ class DataPanel(ScrolledPanel, PanelBase):
 
         self.sizer3.AddMany([(self.bt_add),
                              ((10, 10)),
+                             (self.bt_remove),
+                             ((10, 10)),
                              (self.bt_import, 0, wx.EXPAND|wx.RIGHT, 5),
                               (self.perspective_cbox, wx.EXPAND),
                               (self.bt_append_plot),
@@ -282,7 +284,7 @@ class DataPanel(ScrolledPanel, PanelBase):
 
         self.sizer3.AddGrowableCol(1, 1)
 
-        #self.enable_remove()
+        self.enable_remove()
         self.enable_import()
         self.enable_plot()
         self.enable_append()
@@ -337,7 +339,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.enable_freeze()
         self.enable_plot()
         self.enable_import()
-        #self.enable_remove()
+        self.enable_remove()
         event.Skip()
         
     def fill_cbox_analysis(self, plugin):
@@ -411,7 +413,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                             i_t_c = self.tree_ctrl.AppendItem(d_p_c,
                                                               process.__str__())
                 self.append_theory(state_id, theory_list)
-        #self.enable_remove()
+        self.enable_remove()
         self.enable_import()
         self.enable_plot()
         self.enable_freeze()
@@ -428,7 +430,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.enable_freeze()
         self.enable_plot()
         self.enable_import()
-        #self.enable_remove()
+        self.enable_remove()
    
     def append_theory(self, state_id, theory_list):
         """
@@ -709,7 +711,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             
         self.parent.remove_data(data_id=data_to_remove,
                                   theory_id=theory_to_remove)
-        #self.enable_remove()
+        self.enable_remove()
         self.enable_freeze()
         
     def on_import(self, event=None):
@@ -717,8 +719,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         Get all select data and set them to the current active perspetive
         """
         data_id, theory_id, state_id = self.set_data_helper()
-        self.parent.set_data(data_id)
-        self.parent.set_data(data_id=state_id, theory_id=theory_id)
+        temp = data_id + state_id
+        self.parent.set_data(data_id=temp, theory_id=theory_id)
         
     def on_append_plot(self, event=None):
         """

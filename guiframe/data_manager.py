@@ -95,9 +95,9 @@ class DataManager(object):
         new_plot.interactive = True
         ## when 2 data have the same id override the 1 st plotted
         self.time_stamp += 1
-        new_plot.id = self.time_stamp
+        new_plot.id = str(name) + str(self.time_stamp)
         ##group_id specify on which panel to plot this data
-        new_plot.group_id = self.time_stamp
+        new_plot.group_id = str(name) + str(self.time_stamp)
         new_plot.is_data = True
         new_plot.path = path
         new_plot.list_group_id = []
@@ -223,11 +223,12 @@ class DataManager(object):
     def delete_data(self, data_id, theory_id=None, delete_all=False):
         """
         """
-        if data_id in self.stored_data.keys():
-            data_state = self.stored_data[data_id]
-            if data_state.data.name in self.data_name_dict:
-                del self.data_name_dict[data_state.data.name]
-            del self.stored_data[data_id]
+        for d_id in data_id:
+            if d_id in self.stored_data.keys():
+                data_state = self.stored_data[d_id]
+                if data_state.data.name in self.data_name_dict:
+                    del self.data_name_dict[data_state.data.name]
+                del self.stored_data[d_id]
         
         self.delete_theory(data_id, theory_id)
         if delete_all:

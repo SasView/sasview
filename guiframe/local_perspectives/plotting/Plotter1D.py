@@ -172,7 +172,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             
             if id in data_list.keys():
                 data = data_list[id]
-            else:
+            if id in theory_list.keys():
                 data = theory_list[id]
            
             del self.plots[id]
