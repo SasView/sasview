@@ -1179,17 +1179,6 @@ class ViewerFrame(wx.Frame):
             panel.Close()
             self._mgr.Update()
             return 
-            if ID in self.panels.keys():
-                del self.panels[ID]
-            if ID in self.plot_panels.keys():
-                del self.plot_panels[ID]
-            if self._data_panel is not None:
-                ind = self._data_panel.cb_plotpanel.FindString(str(caption))
-                if ind != wx.NOT_FOUND:
-                   self._data_panel.cb_plotpanel.Delete(ind)
-            
-            self._mgr.Update()
- 
       
     def clear_panel(self):
         """
@@ -1760,8 +1749,9 @@ class ViewerFrame(wx.Frame):
         if delete all true: delete the all state
         else delete theory
         """
+        temp = data_id + theory_id
         for plug in self.plugins:
-            plug.delete_data(data_id)
+            plug.delete_data(temp)
         total_plot_list = []
         data_list, _ = self._data_manager.get_by_id(data_id)
         _, temp_list_theory = self._data_manager.get_by_id(theory_id)

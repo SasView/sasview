@@ -23,6 +23,7 @@ from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.events import StatusEvent
 from sans.guiframe.events import EVT_DELETE_PLOTPANEL
 from sans.guiframe.events import NewLoadDataEvent
+from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.gui_style import GUIFRAME
 from DataLoader.loader import Loader
 
@@ -154,7 +155,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer1.SetMinSize((w/13, h*2/5))
       
         self.sizer2 = wx.BoxSizer(wx.VERTICAL)
-        self.sizer3 = wx.FlexGridSizer(6, 2, 0, 0)
+        self.sizer3 = wx.FlexGridSizer(7, 2, 0, 0)
         self.sizer4 = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer5 = wx.BoxSizer(wx.VERTICAL)
        
@@ -269,6 +270,11 @@ class DataPanel(ScrolledPanel, PanelBase):
                                    size=(BUTTON_WIDTH, -1))
         self.bt_freeze.SetToolTipString("To trigger freeze a theory")
         wx.EVT_BUTTON(self, self.bt_freeze.GetId(), self.on_freeze)
+        #hide plot
+        self.bt_close_plot = wx.Button(self, wx.NewId(), "Close Plot", 
+                                   size=(BUTTON_WIDTH, -1))
+        self.bt_freeze.SetToolTipString("Close the plot panel on focus")
+        wx.EVT_BUTTON(self, self.bt_close_plot.GetId(), self.on_close_plot)
        
         self.cb_plotpanel = wx.ComboBox(self, -1, size=(CBOX_WIDTH, -1),
                                 style=wx.CB_READONLY|wx.CB_SORT)
@@ -286,6 +292,8 @@ class DataPanel(ScrolledPanel, PanelBase):
                               (self.bt_plot),
                               ((10, 10)),
                               (self.bt_freeze),
+                              ((10, 10)),
+                              (self.bt_close_plot),
                               ((10, 10))])
 
         self.sizer3.AddGrowableCol(1, 1)
@@ -295,6 +303,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.enable_plot()
         self.enable_append()
         self.enable_freeze()
+        self.enable_remove_plot()
         
     def layout_batch(self):
         """
@@ -612,8 +621,12 @@ class DataPanel(ScrolledPanel, PanelBase):
             for  key, value in theory_dict.iteritems():
                 item, _, _ = value
                 if item.IsChecked():
-                    self.tree_ctrl.Delete(item)
+                    try:
+                        self.tree_ctrl.Delete(item)
+                    except:
+                        pass
                     theory_key.append(key)
+                    
         #Remove data and related theory references
         for key in data_key:
             del self.list_cb_data[key]
@@ -623,12 +636,21 @@ class DataPanel(ScrolledPanel, PanelBase):
         for key in theory_key:
             for t_key, theory_dict in self.list_cb_theory.iteritems():
                 if key in theory_dict:
+                    for  key, value in theory_dict.iteritems():
+                        item, _, _ = value
+                        if item.IsChecked():
+                            try:
+                                self.tree_ctrl_theory.Delete(item)
+                            except:
+                                pass
                     del theory_dict[key]
+                    
             
         self.parent.remove_data(data_id=data_to_remove,
                                   theory_id=theory_to_remove)
         self.enable_remove()
         self.enable_freeze()
+        self.enable_remove_plot()
         
     def on_import(self, event=None):
         """
@@ -658,6 +680,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                               state_id=state_id,
                               theory_id=theory_id,
                               append=False)
+        self.enable_remove_plot()
          
     def on_close_page(self, event=None):
         """
@@ -706,6 +729,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                 self.cb_plotpanel.SetStringSelection(name_plot_panel)
                 break
         self.enable_append()
+        self.enable_remove_plot()
        
     def _on_perspective_selection(self, event=None):
         """
@@ -717,7 +741,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             perspective = self.perspective_cbox.GetClientData(selection)
             perspective.on_perspective(event=None)
         
-    def _on_plot_selection(self, event = None):
+    def _on_plot_selection(self, event=None):
         """
         On source combobox selection
         """
@@ -731,6 +755,29 @@ class DataPanel(ScrolledPanel, PanelBase):
         if combo.GetValue() != 'None':
             panel = combo.GetClientData(selection)
             self.parent.on_set_plot_focus(panel)   
+            
+    def on_close_plot(self, event):
+        """
+        clseo the panel on focus
+        """ 
+        self.enable_append()
+        selection = self.cb_plotpanel.GetSelection()
+        if self.cb_plotpanel.GetValue() != 'None':
+            panel = self.cb_plotpanel.GetClientData(selection)
+            if self.parent is not None and panel is not None:
+                wx.PostEvent(self.parent, 
+                             NewPlotEvent(group_id=panel.group_id,
+                                          action="delete"))
+        self.enable_remove_plot()
+        
+    def enable_remove_plot(self):
+        """
+        enable remove plot button if there is a plot panel on focus
+        """
+        if self.cb_plotpanel.GetCount() == 0:
+            self.bt_close_plot.Disable()
+        else:
+            self.bt_close_plot.Enable()
             
     def enable_remove(self):
         """
@@ -846,6 +893,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         except: 
             #self.bt_remove.Hide()
             self.bt_add.Hide() 
+    
            
         
 class DataFrame(wx.Frame):

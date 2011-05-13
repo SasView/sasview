@@ -66,30 +66,7 @@ class Plugin(PluginBase):
             menu_list.append(('&Load Data Folder', data_folder_hint, 
                               self._load_folder))
         return menu_list
-    
-    def unused_populate_menu(self, parent):
-        """
-        """
-        # Add menu data 
-        self._data_menu = wx.Menu()
-        #menu for data files
-        data_file_id = wx.NewId()
-        data_file_hint = "load one or more data in the application"
-        self._data_menu.Append(data_file_id, 
-                         '&Load Data File(s)', data_file_hint)
-        wx.EVT_MENU(self.parent, data_file_id, self.load_data)
-        gui_style = self.parent.get_style()
-        style = gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
-        style1 = gui_style & GUIFRAME.DATALOADER_ON
-        if style == GUIFRAME.MULTIPLE_APPLICATIONS:
-            #menu for data from folder
-            data_folder_id = wx.NewId()
-            data_folder_hint = "load multiple data in the application"
-            self._data_menu.Append(data_folder_id, 
-                             '&Load Data Folder', data_folder_hint)
-            wx.EVT_MENU(self.parent, data_folder_id, self._load_folder)
-            
-        return [(self._data_menu, 'Data')]
+   
 
     def load_data(self, event):
         """

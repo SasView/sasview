@@ -244,12 +244,14 @@ class Plugin(PluginBase):
         """
         if group_id in self.plot_panels.keys():
             panel = self.plot_panels[group_id]
+            uid = panel.uid
             wx.PostEvent(self.parent, 
                          DeletePlotPanelEvent(name=panel.window_caption,
                                     caption=panel.window_caption))
             #remove menu item
             self.delete_menu_item(panel.window_caption, panel.uid)
             del self.plot_panels[group_id]
+            self.parent.delete_panel(uid)
             return True
         return False
     
