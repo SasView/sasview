@@ -71,10 +71,14 @@ class PluginBase:
     
     def is_in_use(self, data_id):
         """
-        get a  data id and return true or false if the data 
-        is currently in use the current plugin
+        get a  data id a list of data name if data data is
+         currently used by the plugin and the name of the plugin
+        
+        data_name = 'None'
+        in_use = False
+        example [(data_name, self.sub_menu)]
         """
-        return False
+        return []
     
     def delete_data(self, data_id):
         """

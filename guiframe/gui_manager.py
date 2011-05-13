@@ -1750,6 +1750,17 @@ class ViewerFrame(wx.Frame):
         else delete theory
         """
         temp = data_id + theory_id
+        """
+        value = [plug.is_in_use(temp) for plug in self.plugins]
+        if len(value) > 0:
+            print "value"
+            return
+            from data_panel import DataDialog
+            dlg = DataDialog(data_list=data_list, nb_data=MAX_NBR_DATA)
+            if dlg.ShowModal() == wx.ID_OK:
+                selected_data_list = dlg.get_data()
+            dlg.Destroy()
+        """
         for plug in self.plugins:
             plug.delete_data(temp)
         total_plot_list = []

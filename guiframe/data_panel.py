@@ -894,7 +894,110 @@ class DataPanel(ScrolledPanel, PanelBase):
             #self.bt_remove.Hide()
             self.bt_add.Hide() 
     
-           
+
+
+WIDTH = 400
+HEIGHT = 300
+
+
+class DataDialog(wx.Dialog):
+    """
+    Allow file selection at loading time
+    """
+    def __init__(self, data_list, parent=None, text='', *args, **kwds):
+        wx.Dialog.__init__(self, parent, *args, **kwds)
+        self.SetTitle("Data Selection")
+        self.SetSize((WIDTH, HEIGHT))
+        self.list_of_ctrl = []
+        if not data_list:
+            return 
+        self._sizer_main = wx.BoxSizer(wx.VERTICAL)
+        self._sizer_txt = wx.BoxSizer(wx.VERTICAL)
+        self._sizer_button = wx.BoxSizer(wx.HORIZONTAL)
+        self.sizer = wx.GridBagSizer(5, 5)
+        self._panel = ScrolledPanel(self, style=wx.RAISED_BORDER,
+                               size=(WIDTH-20, HEIGHT-50))
+        self._panel.SetupScrolling()
+        self.__do_layout(data_list, text=text)
+        
+    def __do_layout(self, data_list, text=''):
+        """
+        layout the dialog
+        """
+        if not data_list or len(data_list) <= 1:
+            return 
+        #add text
+        
+        text = "Deleting these file reset some panels.\n"
+        text += "Do you want to proceed?\n"
+        text_ctrl = wx.StaticText(self, -1, str(text))
+        self._sizer_txt.Add(text_ctrl)
+        iy = 0
+        ix = 0
+        data_count = 0
+        for (data_name, in_use, sub_menu) in range(len(data_list)):
+            if in_use == True:
+                ctrl_name = wx.StaticBox(self, -1, str(data_name))
+                ctrl_in_use = wx.StaticBox(self, -1, " is used by ")
+                plug_name = str(sub_menu) + "\n"
+                ctrl_sub_menu = wx.StaticBox(self, -1, plug_name)
+                self.sizer.Add(ctrl_name, (iy, ix),
+                           (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                ix += 1
+                self._sizer_button.Add(ctrl_in_use, 1,
+                                        wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                ix += 1
+                self._sizer_button.Add(plug_name, 1,
+                                        wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            iy += 1
+        self._panel.SetSizer(self.sizer)
+        #add sizer
+        self._sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        button_cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
+        self._sizer_button.Add(button_cancel, 0,
+                          wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+        button_OK = wx.Button(self, wx.ID_OK, "Ok")
+        button_OK.SetFocus()
+        self._sizer_button.Add(button_OK, 0,
+                                wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+        static_line = wx.StaticLine(self, -1)
+        
+        self._sizer_txt.Add(self._panel, 1, wx.EXPAND|wx.LEFT|wx.RIGHT, 5)
+        self._sizer_main.Add(self._sizer_txt, 1, wx.EXPAND|wx.ALL, 10)
+        self._sizer_main.Add(self._data_text_ctrl, 0, 
+                             wx.EXPAND|wx.LEFT|wx.RIGHT, 10)
+        self._sizer_main.Add(static_line, 0, wx.EXPAND, 0)
+        self._sizer_main.Add(self._sizer_button, 0, wx.EXPAND|wx.ALL, 10)
+        self.SetSizer(self._sizer_main)
+        self.Layout()
+        
+    def get_data(self):
+        """
+        return the selected data
+        """
+        temp = []
+        for item in self.list_of_ctrl:
+            cb, data = item
+            if cb.GetValue():
+                temp.append(data)
+        return temp
+    
+    def _count_selected_data(self, event):
+        """
+        count selected data
+        """
+        if event.GetEventObject().GetValue():
+            self._nb_selected_data += 1
+        else:
+            self._nb_selected_data -= 1
+        select_data_text = " %s Data selected.\n" % str(self._nb_selected_data)
+        self._data_text_ctrl.SetLabel(select_data_text)
+        if self._nb_selected_data <= self._max_data:
+            self._data_text_ctrl.SetForegroundColour('blue')
+        else:
+            self._data_text_ctrl.SetForegroundColour('red')
+        
+                  
         
 class DataFrame(wx.Frame):
     ## Internal name for the AUI manager
