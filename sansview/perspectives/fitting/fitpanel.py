@@ -66,7 +66,9 @@ class FitPanel(nb, PanelBase):
     def on_closed(self, event):
         """
         """
-        print "page closed", self.GetPageCount()
+        if self.GetPageCount() == 0:
+            self.add_empty_page()
+            self.enable_close_button()
         
     def save_project(self, doc=None):
         """
@@ -323,7 +325,6 @@ class FitPanel(nb, PanelBase):
         display the close button on tab for more than 1 tabs else remove the 
         close button
         """
-        return
         if self.GetPageCount() <= 1:
             style = self.GetWindowStyleFlag() 
             if style & wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB == wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB:
