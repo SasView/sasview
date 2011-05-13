@@ -67,7 +67,7 @@ class HelpWindow(wx.Frame):
             <li><a href ="media/load_data_help.html" target ="showframe">Load a File</a><br></li>
             <li><a href ="media/simultaneous_fit_help.html" target ="showframe">Simultaneous Fit</a><br></li>
             <li><a href ="media/single_fit_help.html" target ="showframe">Single Fit</a><br></li>
-            <li><a href ="media/model_use_help.html" target ="showframe">Visualize Model</a><br></li>
+            <li><a href ="media/model_use_help.html" target ="showframe">Model Selection</a><br></li>
             <li><a href ="%s" target ="showframe">Model Functions</a><br></li>
             <li><a href ="%s" target ="showframe">Polydispersion Distributions</a><br></li>
             <li><a href ="%s" target ="showframe">Smear Computation</a><br></li>
