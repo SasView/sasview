@@ -16,20 +16,40 @@ import os
 import sys
 import xml
 
+
+# Try to find a local config
+import imp
+path = os.getcwd()
+if(os.path.isfile("%s/%s.py" % (path, 'local_config'))) or \
+    (os.path.isfile("%s/%s.pyc" % (path, 'local_config'))):
+    fObj, path_config, descr = imp.find_module('local_config', [path])
+    try:
+        config = imp.load_module('local_config', fObj, path_config, descr) 
+    except:
+        # Didn't find local config, load the default 
+        import config
+    finally:
+        if fObj:
+            fObj.close()
+else:
+    # Try simply importing local_config
+    import local_config as config
+PATH_APP = path
+#import compileall
+import py_compile
+c_name = os.path.join(path, 'custom_config.py')
+if(os.path.isfile("%s/%s.py" % (path, 'custom_config'))):
+    py_compile.compile(file=c_name)
+    #compileall.compile_dir(dir=path, force=True, quiet=0)
+    cfObj, path_cconfig, descr = imp.find_module('custom_config', [path]) 
 try:
-    # Try to find a local config
-    import imp
-    path = os.getcwd()
-    if(os.path.isfile("%s/%s.py" % (path, 'local_config'))) or \
-        (os.path.isfile("%s/%s.pyc" % (path, 'local_config'))):
-        fObj, path, descr = imp.find_module('local_config', [path])
-        config = imp.load_module('local_config', fObj, path, descr)  
-    else:
-        # Try simply importing local_config
-        import local_config as config
+    custom_config = imp.load_module('custom_config', cfObj, path_cconfig, descr)
 except:
-    # Didn't find local config, load the default 
-    import config
+    custom_config = None
+finally:
+    if cfObj:
+        cfObj.close()
+
     
 import warnings
 warnings.simplefilter("ignore")
@@ -55,15 +75,38 @@ from DataLoader.loader import Loader
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
 APPLICATION_NAME = config.__appname__
 SPLASH_SCREEN_PATH = config.SPLASH_SCREEN_PATH
-DEFAULT_STYLE = config.DEFAULT_STYLE
+
 SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
 SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
 SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
-PLOPANEL_WIDTH = config.PLOPANEL_WIDTH
+
+try:
+    DATALOADER_SHOW = custom_config.DATALOADER_SHOW
+    TOOLBAR_SHOW = custom_config.TOOLBAR_SHOW
+    FIXED_PANEL = custom_config.FIXED_PANEL
+    WELCOME_PANEL_SHOW = custom_config.WELCOME_PANEL_SHOW
+    PLOPANEL_WIDTH = custom_config.PLOPANEL_WIDTH
+    DATAPANEL_WIDTH = custom_config.DATAPANEL_WIDTH
+    GUIFRAME_WIDTH = custom_config.GUIFRAME_WIDTH 
+    GUIFRAME_HEIGHT = custom_config.GUIFRAME_HEIGHT
+    DEFAULT_PERSPECTIVE = custom_config.DEFAULT_PERSPECTIVE
+except:
+    DATALOADER_SHOW = True
+    TOOLBAR_SHOW = True
+    FIXED_PANEL = True
+    WELCOME_PANEL_SHOW = False
+    PLOPANEL_WIDTH = config.PLOPANEL_WIDTH
+    DATAPANEL_WIDTH = config.DATAPANEL_WIDTH
+    GUIFRAME_WIDTH = config.GUIFRAME_WIDTH 
+    GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
+    DEFAULT_PERSPECTIVE = None
+
+DEFAULT_STYLE = config.DEFAULT_STYLE
+
+
+
 PLOPANEL_HEIGTH = config.PLOPANEL_HEIGTH
-GUIFRAME_WIDTH = config.GUIFRAME_WIDTH 
-GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
-DATAPANEL_WIDTH = 235
+DATAPANEL_HEIGHT = config.DATAPANEL_HEIGHT
 PLUGIN_STATE_EXTENSIONS =  config.PLUGIN_STATE_EXTENSIONS
 extension_list = []
 if APPLICATION_STATE_EXTENSION is not None:
@@ -86,7 +129,7 @@ class ViewerFrame(wx.Frame):
     
     def __init__(self, parent, title, 
                  size=(GUIFRAME_WIDTH, GUIFRAME_HEIGHT),
-                 gui_style=GUIFRAME.DEFAULT_STYLE, 
+                 gui_style=DEFAULT_STYLE, 
                  pos=wx.DefaultPosition):
         """
         Initialize the Frame object
@@ -98,7 +141,6 @@ class ViewerFrame(wx.Frame):
         # Preferred window size
         self._window_width, self._window_height = size
         self.__gui_style = gui_style
-        
         # Logging info
         logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(message)s',
@@ -119,7 +161,7 @@ class ViewerFrame(wx.Frame):
                              'images', 'ball.ico')
                 if os.path.isfile(ico_file):
                     self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
-        
+        self.path = PATH_APP
         ## Application manager
         self._input_file = None
         self.app_manager = None
@@ -192,7 +234,45 @@ class ViewerFrame(wx.Frame):
         self.Bind(EVT_APPEND_BOOKMARK, self.append_bookmark)
         self.Bind(EVT_NEW_LOAD_DATA, self.on_load_data)
         
+        self.setup_custom_conf()
+    
+    def setup_custom_conf(self):
+        """
+        Set up custom configuration if exists
+        """
+        if custom_config == None:
+            return
         
+        if not FIXED_PANEL:
+            self.__gui_style &= (~GUIFRAME.FIXED_PANEL)
+            self.__gui_style |= GUIFRAME.FLOATING_PANEL
+
+        if not DATALOADER_SHOW:
+            self.__gui_style &= (~GUIFRAME.MANAGER_ON)
+
+        if not TOOLBAR_SHOW:
+            self.__gui_style &= (~GUIFRAME.TOOLBAR_ON)
+
+        if WELCOME_PANEL_SHOW:
+            self.__gui_style |= GUIFRAME.WELCOME_PANEL_ON   
+             
+    def set_custom_default_perspective(self):
+        """
+        Set default starting perspective
+        """
+        if custom_config == None:
+            return
+        for plugin in self.plugins:
+            try:
+                if plugin.sub_menu == DEFAULT_PERSPECTIVE:
+                    
+                    plugin.on_perspective(event=None)
+                    #self._check_applications_menu()
+                    break
+            except:
+                pass  
+        return          
+                
     def on_load_data(self, event):
         """
         received an event to trigger load from data plugin
@@ -299,7 +379,18 @@ class ViewerFrame(wx.Frame):
         if self._data_panel is not None:
             self._data_panel.fill_cbox_analysis(self.plugins)
         self.post_init()
-        #self.show_welcome_panel(None)
+        # Set Custom default
+        self.set_custom_default_perspective()
+
+        style = self.__gui_style & GUIFRAME.TOOLBAR_ON
+        if (style == GUIFRAME.TOOLBAR_ON) & (not self._toolbar.IsShown()):
+            self._on_toggle_toolbar() 
+        
+        # Set Custom deafult start page
+        welcome_style = self.__gui_style & GUIFRAME.WELCOME_PANEL_ON
+        if welcome_style == GUIFRAME.WELCOME_PANEL_ON:
+            self.show_welcome_panel(None)
+  
         #self.Show(True)
         #self._check_update(None)
              
@@ -353,10 +444,11 @@ class ViewerFrame(wx.Frame):
             if plugin.__class__ == item.__class__:
                 msg = "Plugin %s already loaded" % plugin.sub_menu
                 logging.info(msg)
-                is_loaded = True    
+                is_loaded = True  
         if not is_loaded:
-            self.plugins.append(plugin)
             
+            self.plugins.append(plugin)
+             
       
     def _get_local_plugins(self):
         """
@@ -429,6 +521,7 @@ class ViewerFrame(wx.Frame):
                                 if plug.set_default_perspective():
                                     self._current_perspective = plug
                                 plugins.append(plug)
+                                
                                 msg = "Found plug-in: %s" % module.PLUGIN_ID
                                 logging.info(msg)
                             except:
@@ -657,7 +750,7 @@ class ViewerFrame(wx.Frame):
                               # manager takes all the available space
                               BestSize(wx.Size(PLOPANEL_WIDTH, 
                                                PLOPANEL_HEIGTH)))
-                        
+        
             self._popup_fixed_panel(p)
     
         elif style2 == GUIFRAME.FLOATING_PANEL:
@@ -669,6 +762,7 @@ class ViewerFrame(wx.Frame):
                               #  manager takes all the available space
                               BestSize(wx.Size(PLOPANEL_WIDTH, 
                                                PLOPANEL_HEIGTH)))
+
             self._popup_floating_panel(p)
             
         pane = self._mgr.GetPane(windowname)
@@ -800,7 +894,7 @@ class ViewerFrame(wx.Frame):
         # Help menu
         self._help_menu = wx.Menu()
         style = self.__gui_style & GUIFRAME.WELCOME_PANEL_ON
-        if style == GUIFRAME.WELCOME_PANEL_ON:
+        if style == GUIFRAME.WELCOME_PANEL_ON or custom_config != None:
             # add the welcome panel menu item
             if self.defaultPanel is not None:
                 id = wx.NewId()
@@ -850,8 +944,50 @@ class ViewerFrame(wx.Frame):
         else:
             self._toolbar_menu = self._view_menu.Append(id,'&Show Toolbar', '')
         wx.EVT_MENU(self, id, self._on_toggle_toolbar)
-        self._menubar.Append(self._view_menu, '&View')
         
+        if custom_config != None:
+            self._view_menu.AppendSeparator()
+            id = wx.NewId()
+            preference_menu = self._view_menu.Append(id,'Startup Setting', '')
+            wx.EVT_MENU(self, id, self._on_preference_menu)
+            
+        self._menubar.Append(self._view_menu, '&View')   
+         
+    def _on_preference_menu(self, event):     
+        """
+        Build a panel to allow to edit Mask
+        """
+        
+        from sans.guiframe.startup_configuration \
+        import StartupConfiguration as ConfDialog
+        
+        self.panel = ConfDialog(parent=self, gui=self.__gui_style)
+        #self.panel.Bind(wx.EVT_CLOSE, self._draw_masked_model)
+        self.panel.ShowModal()
+        #wx.PostEvent(self.parent, event)
+        
+    def _draw_masked_model(self,event):
+        """
+        Draw model image w/mask
+        """
+        event.Skip()
+
+        is_valid_qrange = self._update_paramv_on_fit()
+
+        if is_valid_qrange:
+            # try re draw the model plot if it exists
+            self._draw_model()
+            self.panel.Destroy() # frame
+            self.set_npts2fit()
+        elif self.model == None:
+            self.panel.Destroy()
+            self.set_npts2fit()
+            msg= "No model is found on updating MASK in the model plot... "
+            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        else:
+            msg = ' Please consider your Q range, too.'
+            self.panel.ShowMessage(msg)
+
     def _add_menu_window(self):
         """
         add a menu window to the menu bar
@@ -1116,9 +1252,10 @@ class ViewerFrame(wx.Frame):
             elif panel not in self.plot_panels.values() :
                 self._mgr.GetPane(self.panels[id].window_name).IsShown()
                 self._mgr.GetPane(self.panels[id].window_name).Hide()
-            #if self._toolbar != None and not self._toolbar.IsShown():
+        style = self.__gui_style & GUIFRAME.TOOLBAR_ON
+        if (style == GUIFRAME.TOOLBAR_ON) & (self._toolbar.IsShown()):
             #    self._toolbar.Show(True)
-            #self._on_toggle_toolbar()
+            self._on_toggle_toolbar()
 
         self._mgr.Update()
        
@@ -1580,9 +1717,9 @@ class ViewerFrame(wx.Frame):
         
         :param panels: list of panels
         """
-        style = self.__gui_style & GUIFRAME.TOOLBAR_ON
-        if (style == GUIFRAME.TOOLBAR_ON) & (not self._toolbar.IsShown()):
-            self._on_toggle_toolbar()
+        #style = self.__gui_style & GUIFRAME.TOOLBAR_ON
+        #if (style == GUIFRAME.TOOLBAR_ON) & (not self._toolbar.IsShown()):
+        #    self._on_toggle_toolbar()
         for item in self.panels:
             # Check whether this is a sticky panel
             if hasattr(self.panels[item], "ALWAYS_ON"):

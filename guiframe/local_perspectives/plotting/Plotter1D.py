@@ -73,7 +73,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.uid = None
        
         ## Default locations
-        self._default_save_location = os.getcwd()        
+        self._default_save_location = os.getcwd() 
+        self.size = None       
         ## Graph        
         self.graph = Graph()
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
@@ -143,7 +144,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.resizing = True
         self.canvas.set_resizing(self.resizing)
         self.parent.set_schedule(True)
-        
+        pos_x, pos_y = self.GetPositionTuple()
+        if pos_x != 0 and pos_y != 0:
+            self.size, _ = self.GetClientSizeTuple()
         
     def set_resizing(self, resizing=False):
         """
