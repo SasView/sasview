@@ -174,7 +174,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer1.SetMinSize((w/13, h*2/5))
       
         self.sizer2 = wx.BoxSizer(wx.VERTICAL)
-        self.sizer3 = wx.FlexGridSizer(7, 2, 0, 0)
+        self.sizer3 = wx.FlexGridSizer(7, 2, 3, 1)
         self.sizer4 = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer5 = wx.BoxSizer(wx.VERTICAL)
        
@@ -290,9 +290,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_freeze.SetToolTipString("To trigger freeze a theory")
         wx.EVT_BUTTON(self, self.bt_freeze.GetId(), self.on_freeze)
         #hide plot
-        self.bt_close_plot = wx.Button(self, wx.NewId(), "Close Plot", 
+        self.bt_close_plot = wx.Button(self, wx.NewId(), "Delete Plot", 
                                    size=(BUTTON_WIDTH, -1))
-        self.bt_freeze.SetToolTipString("Close the plot panel on focus")
+        self.bt_freeze.SetToolTipString("Delete the plot panel on focus")
         wx.EVT_BUTTON(self, self.bt_close_plot.GetId(), self.on_close_plot)
        
         self.cb_plotpanel = wx.ComboBox(self, -1, size=(CBOX_WIDTH, -1),
