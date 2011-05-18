@@ -48,14 +48,28 @@ if config.APPLICATION_STATE_EXTENSION is not None:
 EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS + extension_list   
 PLUGINS_WLIST = config.PLUGINS_WLIST
 APPLICATION_WLIST = config.APPLICATION_WLIST
+
+#Control panel width 
+if sys.platform.count("win32") > 0:
+    PANEL_WIDTH = 235
+    PANEL_HEIGHT = 700
+    CBOX_WIDTH = 140
+    BUTTON_WIDTH = 80
+    FONT_VARIANT = 0
+else:
+    PANEL_WIDTH = 255
+    PANEL_HEIGHT = 750
+    CBOX_WIDTH = 155
+    BUTTON_WIDTH = 100
+    FONT_VARIANT = 1
+
 try:
     PANEL_WIDTH = config.DATA_PANEL_WIDTH
     PANEL_HEIGHT = config.DATA_PANEL_HEIGHT
 except:
-    PANEL_WIDTH = 235
-    PANEL_HEIGHT = 700
-CBOX_WIDTH = 140
-BUTTON_WIDTH = 80
+    pass
+
+
 STYLE_FLAG =wx.RAISED_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|\
                     wx.WANTS_CHARS|CT.TR_HAS_VARIABLE_ROW_HEIGHT
                     
@@ -112,6 +126,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         ScrolledPanel.__init__(self, parent=parent, *args, **kwds)
         PanelBase.__init__(self)
         self.SetupScrolling()
+        #Set window's font size 
+        self.SetWindowVariant(variant=FONT_VARIANT)
         self.loader = Loader()  
         #Default location
         self._default_save_location = None  
