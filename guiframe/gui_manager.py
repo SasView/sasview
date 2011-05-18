@@ -34,7 +34,9 @@ if(os.path.isfile("%s/%s.py" % (path, 'local_config'))) or \
 else:
     # Try simply importing local_config
     import local_config as config
+#path = os.path.sys.path[0]
 PATH_APP = path
+
 #import compileall
 import py_compile
 c_name = os.path.join(path, 'custom_config.py')
@@ -47,7 +49,7 @@ try:
 except:
     custom_config = None
 finally:
-    if cfObj:
+    if custom_config != None:
         cfObj.close()
 
     
