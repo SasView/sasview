@@ -45,7 +45,7 @@ if(os.path.isfile("%s/%s.py" % (path, 'custom_config'))):
     #compileall.compile_dir(dir=path, force=True, quiet=0)
     cfObj, path_cconfig, descr = imp.find_module('custom_config', [path]) 
 try:
-    custom_config = imp.load_module('custom_config', cfObj, path_cconfig, descr)
+    custom_config = imp.load_module('custom_config', cfObj, path, descr)
 except:
     custom_config = None
 finally:
