@@ -457,7 +457,7 @@ class FitPage(BasicPage):
         self.model_help.Bind(wx.EVT_BUTTON, self.on_model_help_clicked,id=id)
         self.model_help.SetToolTipString("Model Function Help")
         id = wx.NewId()
-        self.model_view = wx.Button(self, id,"Switch to 2D", size=(80, 23))
+        self.model_view = wx.Button(self, id,"1D Mode", size=(80, 23))
         self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D, id=id)
         hint = "toggle view of model from 1D to 2D  or 2D from 1D"
         self.model_view.SetToolTipString(hint)
@@ -2832,12 +2832,12 @@ class FitPage(BasicPage):
         """
         toggle view of model from 1D to 2D  or 2D from 1D
         """
-        if self.model_view.GetLabelText() == "Switch to 2D":
-            self.model_view.SetLabel("Switch to 1D")
+        if self.model_view.GetLabelText() == "1D Mode":
+            self.model_view.SetLabel("2D Mode")
             self.enable2D = True
               
         else:
-            self.model_view.SetLabel("Switch to 2D")
+            self.model_view.SetLabel("1D Mode")
             self.enable2D = False
 
         self.set_model_param_sizer(self.model)

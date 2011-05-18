@@ -432,9 +432,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.enable_disp = wx.RadioButton(self, -1, 'On', (10, 30))
         # best size for MAC and PC
         if ON_MAC:
-            size_q = (-1, -1)     
+            size_q = (20, -1)      
         else:
-            size_q =  (20,15)    
+            size_q = (20, 15)    
         self.disp_help_bt = wx.Button(self,wx.NewId(),'?', 
                                       style = wx.BU_EXACTFIT,
                                       size=size_q)
@@ -996,9 +996,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         # take care of 2D button
         if data == None and self.model_view.IsEnabled():
             if self.enable2D:
-                self.model_view.SetLabel("Switch to 1D")
+                self.model_view.SetLabel("2D Mode")
             else:
-                self.model_view.SetLabel("Switch to 2D")
+                self.model_view.SetLabel("1D Mode")
         # else:
                 
         if self._manager !=None:
