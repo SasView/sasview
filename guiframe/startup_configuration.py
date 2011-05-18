@@ -55,7 +55,7 @@ class StartupConfiguration(wx.Dialog):
         # build layout
         panel = wx.Panel(self, -1)
         vbox = wx.BoxSizer(wx.VERTICAL)
-        wx.StaticBox(panel, -1, 'Change Configuration', (5, 5),
+        wx.StaticBox(panel, -1, 'Set View-Configuration', (5, 5),
                       (PANEL_WIDTH*0.94, PANEL_HEIGHT*0.7))
         default_bt = wx.RadioButton(panel, -1, 'Default View', (15, 30), 
                                     style=wx.RB_GROUP)
@@ -64,7 +64,7 @@ class StartupConfiguration(wx.Dialog):
         current_bt = wx.RadioButton(panel, -1, 'Current View', (15, 55))
         current_bt.SetValue(False)
         current_bt.Bind(wx.EVT_RADIOBUTTON, self.OnCurrent)
-        msg = "\nThis new configuration will take effect on\n"
+        msg = "\nThis new configuration will take effect after\n"
         msg += "restarting this application..."
         note_txt = wx.StaticText(panel, -1, msg, (15, 75))
         

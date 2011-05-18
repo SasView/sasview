@@ -910,6 +910,7 @@ class ViewerFrame(wx.Frame):
                 self._help_menu.Append(id,'&%s Help' % item.sub_menu, '')
                 wx.EVT_MENU(self, id, item.help)
         if config._do_aboutbox:
+            self._help_menu.AppendSeparator()
             id = wx.NewId()
             self._help_menu.Append(id,'&About', 'Software information')
             wx.EVT_MENU(self, id, self._onAbout)
@@ -1254,10 +1255,10 @@ class ViewerFrame(wx.Frame):
             elif panel not in self.plot_panels.values() :
                 self._mgr.GetPane(self.panels[id].window_name).IsShown()
                 self._mgr.GetPane(self.panels[id].window_name).Hide()
-        style = self.__gui_style & GUIFRAME.TOOLBAR_ON
-        if (style == GUIFRAME.TOOLBAR_ON) & (self._toolbar.IsShown()):
-            #    self._toolbar.Show(True)
-            self._on_toggle_toolbar()
+        #style = self.__gui_style & GUIFRAME.TOOLBAR_ON
+        #if (style == GUIFRAME.TOOLBAR_ON) & (self._toolbar.IsShown()):
+        #    #    self._toolbar.Show(True)
+        #    self._on_toggle_toolbar()
 
         self._mgr.Update()
        
