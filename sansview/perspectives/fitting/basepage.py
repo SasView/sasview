@@ -432,7 +432,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.enable_disp = wx.RadioButton(self, -1, 'On', (10, 30))
         # best size for MAC and PC
         if ON_MAC:
-            size_q = (20, -1)      
+            size_q = (30, 20)      
         else:
             size_q = (20, 15)    
         self.disp_help_bt = wx.Button(self,wx.NewId(),'?', 
