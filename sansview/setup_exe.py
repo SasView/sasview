@@ -102,7 +102,9 @@ import DataLoader.readers
 f = os.path.join(DataLoader.readers.get_data_path(),'defaults.xml')
 if os.path.isfile(f):
     data_files.append(('.', [f]))
-
+f = 'custom_config.py'
+if os.path.isfile(f):
+    data_files.append(('.', [f]))
 # Copying the images directory to the distribution directory.
 for f in findall('images'):
     if os.path.split(f)[0].count('.svn')==0:
@@ -127,6 +129,7 @@ for f in findall('plugins'):
 #
 # packages
 #
+
 packages = ['matplotlib', 'pytz','encodings']
 includes = []
 excludes = [] 
