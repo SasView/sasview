@@ -327,8 +327,10 @@ class ViewerFrame(wx.Frame):
                 self._data_panel.set_panel_on_focus(ID)
                 #update combo
                 if self.panel_on_focus in self.plot_panels.values():
-                    self._data_panel.cb_plotpanel.SetStringSelection(str\
-                                         (self.panel_on_focus.window_caption))
+                    combo = self._data_panel.cb_plotpanel
+                    combo_title = str(self.panel_on_focus.window_caption)
+                    combo.SetStringSelection(combo_title)
+                    combo.SetToolTip( wx.ToolTip(combo_title )) 
                 elif self.panel_on_focus != self._data_panel:
                     cpanel = self.panel_on_focus
                     if self.cpanel_on_focus != cpanel:
