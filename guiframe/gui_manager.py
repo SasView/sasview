@@ -1320,6 +1320,9 @@ class ViewerFrame(wx.Frame):
             panel.clear()
             panel.Close()
             self._mgr.Update()
+            #delete uid number not str(uid)
+            if uid in self.plot_panels.keys():
+                del self.plot_panels[uid]
             return 
       
     def clear_panel(self):
@@ -2319,6 +2322,7 @@ class ViewerFrame(wx.Frame):
         """
         Set focus on a plot panel
         """
+        print "on_set_plot_focus", panel.window_caption
         self.set_plot_unfocus()
         panel.on_set_focus(None)  
         # set focusing panel
