@@ -270,8 +270,9 @@ class DataPanel(ScrolledPanel, PanelBase):
                                     size=(BUTTON_WIDTH, -1))
         self.bt_import.SetToolTipString("Send set of Data to active perspective")
         wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_import)
-        self.perspective_cbox = wx.ComboBox(self, -1, size=(CBOX_WIDTH, -1),
+        self.perspective_cbox = wx.ComboBox(self, -1,
                                 style=wx.CB_READONLY)
+        #self.perspective_cbox.SetMinSize((CBOX_WIDTH, -1))
         wx.EVT_COMBOBOX(self.perspective_cbox,-1, 
                         self._on_perspective_selection)
     
@@ -295,8 +296,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_freeze.SetToolTipString("Delete the plot panel on focus")
         wx.EVT_BUTTON(self, self.bt_close_plot.GetId(), self.on_close_plot)
        
-        self.cb_plotpanel = wx.ComboBox(self, -1, size=(CBOX_WIDTH, -1),
+        self.cb_plotpanel = wx.ComboBox(self, -1, 
                                 style=wx.CB_READONLY|wx.CB_SORT)
+        #self.cb_plotpanel.SetMinSize((CBOX_WIDTH, -1))
         wx.EVT_COMBOBOX(self.cb_plotpanel,-1, self._on_plot_selection)
         self.cb_plotpanel.Disable()
 
@@ -305,9 +307,9 @@ class DataPanel(ScrolledPanel, PanelBase):
                              (self.bt_remove),
                              ((10, 10)),
                              (self.bt_import, 0, wx.EXPAND|wx.RIGHT, 5),
-                              (self.perspective_cbox, wx.EXPAND),
+                              (self.perspective_cbox, wx.EXPAND|wx.ADJUST_MINSIZE, 5),
                               (self.bt_append_plot),
-                              (self.cb_plotpanel, wx.EXPAND),
+                              (self.cb_plotpanel, wx.EXPAND|wx.ADJUST_MINSIZE, 5),
                               (self.bt_plot),
                               ((10, 10)),
                               (self.bt_freeze),
