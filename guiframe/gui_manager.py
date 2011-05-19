@@ -769,9 +769,6 @@ class ViewerFrame(wx.Frame):
 
             self._popup_floating_panel(p)
             
-        pane = self._mgr.GetPane(windowname)
-        self._mgr.MaximizePane(pane)
-        self._mgr.RestoreMaximizedPane()
         # Register for showing/hiding the panel
         wx.EVT_MENU(self, ID, self.on_view)
         if p not in self.plot_panels.values():
@@ -786,8 +783,6 @@ class ViewerFrame(wx.Frame):
                     self._data_panel.cb_plotpanel.Delete(ind)
                 if caption not in self._data_panel.cb_plotpanel.GetItems():
                     self._data_panel.cb_plotpanel.Append(str(caption), p)
-
-        self._mgr.Update()
         return ID
         
     def _setup_menus(self):
@@ -1975,13 +1970,14 @@ class ViewerFrame(wx.Frame):
         """
         make the plot panel floatable
         """
+        
         self.__gui_style &= (~GUIFRAME.FIXED_PANEL)
         self.__gui_style |= GUIFRAME.FLOATING_PANEL
-        for p in self.panels.values():
+        plot_panel = []
+        if self._plotting_plugin is not None:
             plot_panel = self._plotting_plugin.plot_panels.values()
-            for p in self.panels.values():
-                if p in plot_panel:
-                    self._popup_floating_panel(p)
+            for p in plot_panel:
+                self._popup_floating_panel(p)
         
     def set_plotpanel_fixed(self, event=None):
         """
@@ -1992,9 +1988,8 @@ class ViewerFrame(wx.Frame):
         plot_panel = []
         if self._plotting_plugin is not None:
             plot_panel = self._plotting_plugin.plot_panels.values()
-            for p in self.panels.values():
-                if p in plot_panel:
-                    self._popup_fixed_panel(p)
+            for p in plot_panel:
+                self._popup_fixed_panel(p)
                     
     def _popup_fixed_panel(self, p):
         """
@@ -2008,8 +2003,6 @@ class ViewerFrame(wx.Frame):
             self._mgr.GetPane(p.window_name).BottomDockable(False)
             self._mgr.GetPane(p.window_name).LeftDockable(False)
             self._mgr.GetPane(p.window_name).RightDockable(True)
-            flag = self._mgr.GetPane(p.window_name).IsShown()
-            self._mgr.GetPane(p.window_name).Show(flag)
             self._mgr.Update()
             
     def _popup_floating_panel(self, p):
@@ -2020,8 +2013,6 @@ class ViewerFrame(wx.Frame):
             self._mgr.GetPane(p.window_name).Floatable(True)
             self._mgr.GetPane(p.window_name).Float()
             self._mgr.GetPane(p.window_name).Dockable(False)
-            flag = self._mgr.GetPane(p.window_name).IsShown()
-            self._mgr.GetPane(p.window_name).Show(flag)
             self._mgr.Update()
             
     def enable_add_data(self, new_plot):

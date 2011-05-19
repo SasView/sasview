@@ -113,7 +113,6 @@ class DataPanel(ScrolledPanel, PanelBase):
                  list=None,
                  size=(PANEL_WIDTH, PANEL_HEIGHT),
                  list_of_perspective=None, manager=None, *args, **kwds):
-        print "size", size
         kwds['size']= size
         kwds['style'] = STYLE_FLAG
         ScrolledPanel.__init__(self, parent=parent, *args, **kwds)
