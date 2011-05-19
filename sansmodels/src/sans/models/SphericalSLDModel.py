@@ -75,8 +75,18 @@ class SphericalSLDModel(BaseComponent):
         model dispersions
         """ 
         ##set dispersion from model 
-        self.dispersion = {}
-                    
+        for name , value in self.model.dispersion.iteritems():   
+              
+            nshell = -1
+            if name.split('_')[0] == 'thick':
+                while nshell<1:
+                    nshell += 1
+                    if name.split('_')[1] == 'inter%s' % str(nshell):
+                        self.dispersion[name]= value
+                    else: 
+                        continue
+            else:
+                self.dispersion[name]= value
 
     def _set_params(self):
         """
@@ -278,7 +288,14 @@ class SphericalSLDModel(BaseComponent):
         """
         Helper function to setParam
         """
-
+        toks = name.split('.')
+        if len(toks)==2:
+            for item in self.dispersion.keys():
+                if item.lower()==toks[0].lower():
+                    for par in self.dispersion[item]:
+                        if par.lower() == toks[1].lower():
+                            self.dispersion[item][par] = value
+                            return
         # Look for standard parameter
         for item in self.params.keys():
             if item.lower()==name.lower():
@@ -292,6 +309,11 @@ class SphericalSLDModel(BaseComponent):
         """
         Fill the self.fixed list with the model fixed list
         """
+        for item in self.model.fixed:
+            if item.split('.')[0] in self.params.keys(): 
+                self.fixed.append(item)
+
+        self.fixed.sort()
         pass         
 
     def run(self, x = 0.0):
@@ -338,4 +360,11 @@ class SphericalSLDModel(BaseComponent):
         : param parameter: name of the parameter [string]
         :dispersion: dispersion object of type DispersionModel
         """
-        pass
+        value= None
+        try:
+            if parameter in self.model.dispersion.keys():
+                value= self.model.set_dispersion(parameter, dispersion)
+            self._set_dispersion()
+            return value
+        except:
+            raise 

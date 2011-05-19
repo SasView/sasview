@@ -5,7 +5,7 @@
  * Structure definition for sphere parameters
  */
  //[PYTHONCLASS] = SphereSLDModel
- //[DISP_PARAMS] = thick_inter0
+ //[DISP_PARAMS] = rad_core0, thick_inter0
  //[DESCRIPTION] =<text>Calculate neutron reflectivity using the Parratt iterative formula
  //				Parameters:
  //				background:background
@@ -25,7 +25,7 @@
  //				Note: the layer number starts to increase
  //					from the bottom (substrate) to the top.
  //		</text>
- //[FIXED]=  <text></text>
+ //[FIXED]=  <text>rad_core0.width; thick_inter0.width</text>
  //[NON_FITTABLE_PARAMS]= <text>n_shells;func_inter0;func_inter1;func_inter2;func_inter3;func_inter4;func_inter5;func_inter5;func_inter7;func_inter8;func_inter9;func_inter10 </text>
  //[ORIENTATION_PARAMS]= <text> </text>
 

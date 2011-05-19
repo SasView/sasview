@@ -153,6 +153,9 @@ CSphereSLDModel_init(CSphereSLDModel *self, PyObject *args, PyObject *kwds)
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;
         disp_dict = PyDict_New();
+        self->model->rad_core0.dispersion->accept_as_source(visitor, self->model->rad_core0.dispersion, disp_dict);
+        PyDict_SetItemString(self->dispersion, "rad_core0", disp_dict);
+        disp_dict = PyDict_New();
         self->model->thick_inter0.dispersion->accept_as_source(visitor, self->model->thick_inter0.dispersion, disp_dict);
         PyDict_SetItemString(self->dispersion, "thick_inter0", disp_dict);
 
@@ -347,6 +350,8 @@ static PyObject * evalDistribution(CSphereSLDModel *self, PyObject *args){
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core0");
+    self->model->rad_core0.dispersion->accept_as_destination(visitor, self->model->rad_core0.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_inter0");
     self->model->thick_inter0.dispersion->accept_as_destination(visitor, self->model->thick_inter0.dispersion, disp_dict);
 
@@ -474,6 +479,8 @@ static PyObject * run(CSphereSLDModel *self, PyObject *args) {
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core0");
+    self->model->rad_core0.dispersion->accept_as_destination(visitor, self->model->rad_core0.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_inter0");
     self->model->thick_inter0.dispersion->accept_as_destination(visitor, self->model->thick_inter0.dispersion, disp_dict);
 
@@ -588,6 +595,8 @@ static PyObject * calculate_ER(CSphereSLDModel *self) {
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core0");
+    self->model->rad_core0.dispersion->accept_as_destination(visitor, self->model->rad_core0.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_inter0");
     self->model->thick_inter0.dispersion->accept_as_destination(visitor, self->model->thick_inter0.dispersion, disp_dict);
 
@@ -671,6 +680,8 @@ static PyObject * runXY(CSphereSLDModel *self, PyObject *args) {
     // Read in dispersion parameters
     PyObject* disp_dict;
     DispersionVisitor* visitor = new DispersionVisitor();
+    disp_dict = PyDict_GetItemString(self->dispersion, "rad_core0");
+    self->model->rad_core0.dispersion->accept_as_destination(visitor, self->model->rad_core0.dispersion, disp_dict);
     disp_dict = PyDict_GetItemString(self->dispersion, "thick_inter0");
     self->model->thick_inter0.dispersion->accept_as_destination(visitor, self->model->thick_inter0.dispersion, disp_dict);
 
@@ -728,7 +739,9 @@ static PyObject * set_dispersion(CSphereSLDModel *self, PyObject *args) {
 
 	// Ugliness necessary to go from python to C
 	    // TODO: refactor this
-    if (!strcmp(par_name, "thick_inter0")) {
+    if (!strcmp(par_name, "rad_core0")) {
+        self->model->rad_core0.dispersion = dispersion;
+    } else    if (!strcmp(par_name, "thick_inter0")) {
         self->model->thick_inter0.dispersion = dispersion;
     } else {
 	    PyErr_SetString(CSphereSLDModelError,

@@ -197,7 +197,7 @@ class SphereSLDModel(CSphereSLDModel, BaseComponent):
         self.details['rad_core0'] = ['[A]', None, None]
 
         ## fittable parameters
-        self.fixed=[]
+        self.fixed=['rad_core0.width', 'thick_inter0.width']
         
         ## non-fittable parameters
         self.non_fittable = ['n_shells', 'func_inter0', 'func_inter1', 'func_inter2', 'func_inter3', 'func_inter4', 'func_inter5', 'func_inter5', 'func_inter7', 'func_inter8', 'func_inter9', 'func_inter10']

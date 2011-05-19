@@ -12,7 +12,8 @@ extern "C" {
 SphereSLDModel :: SphereSLDModel() {
 	n_shells = Parameter(1.0);
 	scale = Parameter(1.0);
-	thick_inter0 = Parameter(1.0);
+	thick_inter0 = Parameter(1.0, true);
+	thick_inter0.set_min(0.0);
 	func_inter0 = Parameter(0);
 	sld_core0 = Parameter(2.07e-06);
 	sld_solv = Parameter(1.0e-06);
@@ -79,7 +80,8 @@ SphereSLDModel :: SphereSLDModel() {
 
     npts_inter = Parameter(35.0);
     nu_inter0 = Parameter(2.5);
-    rad_core0 = Parameter(60.0);
+    rad_core0 = Parameter(60.0, true);
+    rad_core0.set_min(0.0);
 }
 
 /**
@@ -97,7 +99,7 @@ double SphereSLDModel :: operator()(double q) {
 	dp[3] = func_inter0();
 	dp[4] = sld_core0();
 	dp[5] = sld_solv();
-	dp[6] = background();
+	dp[6] = 0.0;
 
 	dp[7] = sld_flat1();
 	dp[8] = sld_flat2();
@@ -160,8 +162,40 @@ double SphereSLDModel :: operator()(double q) {
 	dp[59] = rad_core0();
 
 	// No polydispersion supported in this model.
+	// Get the dispersion points for the radius
+	vector<WeightPoint> weights_rad_core0;
+	rad_core0.get_weights(weights_rad_core0);
+	vector<WeightPoint> weights_thick_inter0;
+	thick_inter0.get_weights(weights_thick_inter0);
+	// Perform the computation, with all weight points
+	double sum = 0.0;
+	double norm = 0.0;
+	double vol = 0.0;
 
-	return sphere_sld_kernel(dp,q);
+	// Loop over core weight points
+	for(int i=0; i<weights_rad_core0.size(); i++) {
+		dp[59] = weights_rad_core0[i].value;
+		// Loop over thick_inter0 weight points
+		for(int j=0; j<weights_thick_inter0.size(); j++) {
+			dp[2] = weights_thick_inter0[j].value;
+
+			//Un-normalize Sphere by volume
+			sum += weights_rad_core0[i].weight * weights_thick_inter0[j].weight
+				* sphere_sld_kernel(dp,q) * pow((weights_rad_core0[i].value +
+						weights_thick_inter0[j].value),3.0);
+			//Find average volume
+			vol += weights_rad_core0[i].weight * weights_thick_inter0[j].weight
+				* pow((weights_rad_core0[i].value+weights_thick_inter0[j].value),3.0);
+
+			norm += weights_rad_core0[i].weight * weights_thick_inter0[j].weight;
+		}
+	}
+
+	if (vol != 0.0 && norm != 0.0) {
+		//Re-normalize by avg volume
+		sum = sum/(vol/norm);}
+
+	return sum/norm + background();
 }
 
 /**
@@ -224,28 +258,79 @@ double SphereSLDModel :: calculate_ER() {
 	dp.thick_inter9 = thick_inter9();
 	dp.thick_inter10 = thick_inter10();
 
-	double rad_out = dp.rad_core0 + dp.thick_inter0;
-	if (dp.n_shells > 0)
-		rad_out += dp.thick_flat1 + dp.thick_inter1;
-	if (dp.n_shells > 1)
-		rad_out += dp.thick_flat2 + dp.thick_inter2;
-	if (dp.n_shells > 2)
-		rad_out += dp.thick_flat3 + dp.thick_inter3;
-	if (dp.n_shells > 3)
-		rad_out += dp.thick_flat4 + dp.thick_inter4;
-	if (dp.n_shells > 4)
-		rad_out += dp.thick_flat5 + dp.thick_inter5;
-	if (dp.n_shells > 5)
-		rad_out += dp.thick_flat6 + dp.thick_inter6;
-	if (dp.n_shells > 6)
-		rad_out += dp.thick_flat7 + dp.thick_inter7;
-	if (dp.n_shells > 7)
-		rad_out += dp.thick_flat8 + dp.thick_inter8;
-	if (dp.n_shells > 8)
-		rad_out += dp.thick_flat9 + dp.thick_inter9;
-	if (dp.n_shells > 9)
-		rad_out += dp.thick_flat10 + dp.thick_inter10;
+	double rad_out = 0.0;
+	double out = 0.0;
+	// Perform the computation, with all weight points
+	double sum = 0.0;
+	double norm = 0.0;
 
-	return rad_out;
+	// Get the dispersion points for the radius
+	vector<WeightPoint> weights_rad_core0;
+	rad_core0.get_weights(weights_rad_core0);
+
+	// Get the dispersion points for the thick 1
+	vector<WeightPoint> weights_thick_inter0;
+	thick_inter0.get_weights(weights_thick_inter0);
+	// Loop over radius weight points
+	for(int i=0; i<weights_rad_core0.size(); i++) {
+		dp.rad_core0 = weights_rad_core0[i].value;
+		// Loop over radius weight points
+		for(int j=0; j<weights_thick_inter0.size(); j++) {
+			dp.thick_inter0 = weights_thick_inter0[j].value;
+			rad_out = dp.rad_core0 + dp.thick_inter0;
+			if (dp.n_shells > 0)
+				rad_out += dp.thick_flat1 + dp.thick_inter1;
+			if (dp.n_shells > 1)
+				rad_out += dp.thick_flat2 + dp.thick_inter2;
+			if (dp.n_shells > 2)
+				rad_out += dp.thick_flat3 + dp.thick_inter3;
+			if (dp.n_shells > 3)
+				rad_out += dp.thick_flat4 + dp.thick_inter4;
+			if (dp.n_shells > 4)
+				rad_out += dp.thick_flat5 + dp.thick_inter5;
+			if (dp.n_shells > 5)
+				rad_out += dp.thick_flat6 + dp.thick_inter6;
+			if (dp.n_shells > 6)
+				rad_out += dp.thick_flat7 + dp.thick_inter7;
+			if (dp.n_shells > 7)
+				rad_out += dp.thick_flat8 + dp.thick_inter8;
+			if (dp.n_shells > 8)
+				rad_out += dp.thick_flat9 + dp.thick_inter9;
+			if (dp.n_shells > 9)
+				rad_out += dp.thick_flat10 + dp.thick_inter10;
+			sum += weights_rad_core0[i].weight*weights_thick_inter0[j].weight
+				* (rad_out);
+			norm += weights_rad_core0[i].weight*weights_thick_inter0[j].weight;
+		}
+	}
+	if (norm != 0){
+		//return the averaged value
+		out =  sum/norm;}
+	else{
+		//return normal value
+		out = dp.rad_core0 + dp.thick_inter0;
+		if (dp.n_shells > 0)
+			out += dp.thick_flat1 + dp.thick_inter1;
+		if (dp.n_shells > 1)
+			out += dp.thick_flat2 + dp.thick_inter2;
+		if (dp.n_shells > 2)
+			out += dp.thick_flat3 + dp.thick_inter3;
+		if (dp.n_shells > 3)
+			out += dp.thick_flat4 + dp.thick_inter4;
+		if (dp.n_shells > 4)
+			out += dp.thick_flat5 + dp.thick_inter5;
+		if (dp.n_shells > 5)
+			out += dp.thick_flat6 + dp.thick_inter6;
+		if (dp.n_shells > 6)
+			out += dp.thick_flat7 + dp.thick_inter7;
+		if (dp.n_shells > 7)
+			out += dp.thick_flat8 + dp.thick_inter8;
+		if (dp.n_shells > 8)
+			out += dp.thick_flat9 + dp.thick_inter9;
+		if (dp.n_shells > 9)
+			out += dp.thick_flat10 + dp.thick_inter10;
+		}
+
+	return out;
 
 }
