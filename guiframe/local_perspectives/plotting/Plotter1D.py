@@ -333,13 +333,14 @@ class ModelPanel1D(PlotPanel, PanelBase):
 
             id = wx.NewId()
             self.hide_menu = self._slicerpop.Append(id, "Hide Error")
-            if plot.dy is not None or plot.dy != []:
+
+            if plot.dy is not None and plot.dy != []:
                 if plot.hide_error :
                     self.hide_menu.SetText('Show Error')
                 else:
                     self.hide_menu.SetText('Hide Error')
             else:
-                self.hide_menu.Disable()
+                self.hide_menu.Enable(False)
             wx.EVT_MENU(self, id, self._ontoggle_hide_error)
             
             self._slicerpop.AppendSeparator()

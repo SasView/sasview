@@ -68,6 +68,7 @@ class SLDPanel(wx.Dialog):
             data_plot.y = self._set_y_data()
             
             self.newplot = Theory1D(data_plot.x, data_plot.y, data_plot.dy)
+            self.newplot.dy = None
             self.newplot.name = 'SLD'
             self.plotpanel.add_image(self.newplot) 
             self.plotpanel.subplot.set_ylim(min(data_plot.y) - _Y_OFF , 
@@ -105,7 +106,8 @@ class SLDPanel(wx.Dialog):
         # panel sizer
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.plotpanel, -1, wx.LEFT|wx.RIGHT, 5)
-        sizer.Add((0, 10))
+        sizer.Add(wx.StaticLine(self), 0, wx.ALL|wx.EXPAND, 5)
+        sizer.Add((0, 5))
         #-----Button------------1
         id = wx.NewId()
         button_reset = wx.Button(self, id, "Close")
@@ -155,6 +157,13 @@ class SLDPanel(wx.Dialog):
         """
         # Not implemented
         pass
+        
+    def set_plot_unfocus(self):
+        """
+        Set_plot unfocus
+        """
+        # NOt implemented
+        pass
     
 class SLDplotpanel(PlotPanel):
     """
@@ -183,6 +192,7 @@ class SLDplotpanel(PlotPanel):
         Add image(Theory1D)
         """
         self.plots[plot.name] = plot
+        self.plots[plot.name].is_data = False
         #init graph
         #self.gaph = Graph()
         #add plot
