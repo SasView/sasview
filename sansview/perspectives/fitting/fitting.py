@@ -227,10 +227,10 @@ class Plugin(PluginBase):
         loader = Loader()
         loader.associate_file_reader(".fitv", self.state_reader)
         #loader.associate_file_reader(".svs", self.state_reader)
-        from sans.perspectives.calculator.sld_panel import SldPanel
+        #from sans.perspectives.calculator.sld_panel import SldPanel
         #Send the fitting panel to guiframe
         self.mypanels.append(self.fit_panel) 
-        self.mypanels.append(SldPanel(parent=self.parent, base=self.parent))
+        #self.mypanels.append(SldPanel(parent=self.parent, base=self.parent))
         return self.mypanels
     
     def clear_panel(self):

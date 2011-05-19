@@ -306,46 +306,49 @@ class ModelPanel1D(PlotPanel, PanelBase):
         #self._slicerpop.Append(id, '&Print image', 'Print image')
         if self.graph.selected_plottable in self.plots:
             plot = self.plots[self.graph.selected_plottable]
-
-            id = wx.NewId()
-            self._slicerpop.Append(id, '&Linear Fit')
-            wx.EVT_MENU(self, id, self.onFitting)
-            self._slicerpop.AppendSeparator()
+            
             id = wx.NewId()
             name = plot.name
             self._slicerpop.Append(id, "&Save Points as a File")
-            wx.EVT_MENU(self, id, self._onSave)
-            id = wx.NewId()
-            self._slicerpop.Append(id, "Remove %s Curve" % name)
-            wx.EVT_MENU(self, id, self._onRemove)
-            if not plot.is_data:
-                id = wx.NewId()
-                self._slicerpop.Append(id, '&Freeze', 'Freeze')
-                wx.EVT_MENU(self, id, self.onFreeze)
-            symbol_menu = wx.Menu()
-            for label in self._symbol_labels:
-                id = wx.NewId()
-                symbol_menu.Append(id, str(label), str(label))
-                wx.EVT_MENU(self, id, self.onChangeSymbol)
-            id = wx.NewId()
-            self._slicerpop.AppendMenu(id,'&Modify Symbol',  symbol_menu)
             self._slicerpop.AppendSeparator()
-
-            id = wx.NewId()
-            self.hide_menu = self._slicerpop.Append(id, "Hide Error")
-
-            if plot.dy is not None and plot.dy != []:
-                if plot.hide_error :
-                    self.hide_menu.SetText('Show Error')
+            if plot.name != 'SLD':
+                wx.EVT_MENU(self, id, self._onSave)
+                id = wx.NewId()
+                self._slicerpop.Append(id, '&Linear Fit')
+                wx.EVT_MENU(self, id, self.onFitting)
+                self._slicerpop.AppendSeparator()
+    
+                id = wx.NewId()
+                self._slicerpop.Append(id, "Remove %s Curve" % name)
+                wx.EVT_MENU(self, id, self._onRemove)
+                if not plot.is_data:
+                    id = wx.NewId()
+                    self._slicerpop.Append(id, '&Freeze', 'Freeze')
+                    wx.EVT_MENU(self, id, self.onFreeze)
+                symbol_menu = wx.Menu()
+                for label in self._symbol_labels:
+                    id = wx.NewId()
+                    symbol_menu.Append(id, str(label), str(label))
+                    wx.EVT_MENU(self, id, self.onChangeSymbol)
+                id = wx.NewId()
+                self._slicerpop.AppendMenu(id,'&Modify Symbol',  symbol_menu)
+                self._slicerpop.AppendSeparator()
+    
+                id = wx.NewId()
+                self.hide_menu = self._slicerpop.Append(id, "Hide Error")
+    
+                if plot.dy is not None and plot.dy != []:
+                    if plot.hide_error :
+                        self.hide_menu.SetText('Show Error')
+                    else:
+                        self.hide_menu.SetText('Hide Error')
                 else:
-                    self.hide_menu.SetText('Hide Error')
-            else:
-                self.hide_menu.Enable(False)
-            wx.EVT_MENU(self, id, self._ontoggle_hide_error)
-            
-            self._slicerpop.AppendSeparator()
-            # Option to hide
-            #TODO: implement functionality to hide a plottable (legend click)
+                    self.hide_menu.Enable(False)
+                wx.EVT_MENU(self, id, self._ontoggle_hide_error)
+                
+                self._slicerpop.AppendSeparator()
+                # Option to hide
+                #TODO: implement functionality to hide a plottable (legend click)
         
         
         id = wx.NewId()
