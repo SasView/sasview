@@ -1315,10 +1315,12 @@ class BasicPage(ScrolledPanel, PanelBase):
         #For invalid q range, disable the mask editor and fit button, vs.    
         if not self.fitrange:
             #self.btFit.Disable()
-            if self._is_2D():self.btEditMask.Disable()
+            if self._is_2D():
+                self.btEditMask.Disable()
         else:
             #self.btFit.Enable(True)
-            if self._is_2D():self.btEditMask.Enable(True)
+            if self._is_2D() and  self.data != None:
+                self.btEditMask.Enable(True)
 
         if not flag:
             msg = "Cannot Plot or Fit :Must select a "
