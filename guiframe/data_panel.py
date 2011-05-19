@@ -63,13 +63,6 @@ else:
     BUTTON_WIDTH = 100
     FONT_VARIANT = 1
 
-try:
-    PANEL_WIDTH = config.DATA_PANEL_WIDTH
-    PANEL_HEIGHT = config.DATA_PANEL_HEIGHT
-except:
-    pass
-
-
 STYLE_FLAG =wx.RAISED_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|\
                     wx.WANTS_CHARS|CT.TR_HAS_VARIABLE_ROW_HEIGHT
                     
@@ -120,7 +113,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                  list=None,
                  size=(PANEL_WIDTH, PANEL_HEIGHT),
                  list_of_perspective=None, manager=None, *args, **kwds):
-       
+        print "size", size
         kwds['size']= size
         kwds['style'] = STYLE_FLAG
         ScrolledPanel.__init__(self, parent=parent, *args, **kwds)
