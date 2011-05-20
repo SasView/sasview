@@ -925,7 +925,11 @@ class Plugin(PluginBase):
                 cpage.onsetValues(result.fitness, 
                                   param_name, result.pvec,result.stderr)
                 cpage._on_fit_complete()
-            msg = "Completed!"
+            if result.stderr == None:
+                msg = "Fit Abort: "
+            else:
+                msg = "Fitting: "
+            msg += "Completed!!!"
             wx.PostEvent(self.parent, StatusEvent(status=msg))
         except ValueError:
             self._update_fit_button(page_id)
@@ -1294,7 +1298,7 @@ class Plugin(PluginBase):
             else:
                 self._plot_residuals(page_id, data, index)
 
-            msg = "Plot 1D  complete !"
+            msg = "Computation  complete!"
             wx.PostEvent( self.parent, StatusEvent(status=msg, type="stop" ))
             #self.current_pg.state.theory_data = deepcopy(self.theory_data)
         except:
@@ -1386,7 +1390,7 @@ class Plugin(PluginBase):
                                                      index=index)))
         else:
             self._plot_residuals(page_id, data, index)
-        msg = "Plot 2D complete !"
+        msg = "Computation  complete!"
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
     
     def _draw_model2D(self, model, page_id, data=None, smearer=None,
