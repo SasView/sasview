@@ -32,13 +32,9 @@ class MultiplicationModel(BaseComponent):
         ## Parameter details [units, min, max]
         self.details = {}
         
-        # non-fittable parameters
-        self.non_fittable = p_model.non_fittable   
-            
         ##models 
         self.p_model= p_model
-        self.s_model= s_model
-        
+        self.s_model= s_model        
        
         ## dispersion
         self._set_dispersion()
@@ -66,8 +62,21 @@ class MultiplicationModel(BaseComponent):
         except:
             multiplicity = 1
         ## functional multiplicity of the model
-        self.multiplicity = multiplicity      
-        
+        self.multiplicity = multiplicity    
+          
+        # non-fittable parameters
+        self.non_fittable = p_model.non_fittable  
+        self.multiplicity_info = [] 
+        self.fun_list = {}
+        if self.non_fittable > 1:
+            try:
+                self.multiplicity_info = p_model.multiplicity_info 
+                self.fun_list = p_model.fun_list
+            except:
+                pass
+        else:
+            self.multiplicity_info = []
+            
     def _clone(self, obj):
         """
             Internal utility function to copy the internal

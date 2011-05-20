@@ -123,7 +123,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.orientation_params_disp = []
         if self.model != None:
             self.disp_list = self.model.getDispParamList()
-        
+        self.temp_multi_functional = False
         ##enable model 2D draw
         self.enable2D = False
         ## check that the fit range is correct to plot the model again
@@ -1832,7 +1832,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## reset dictionary containing reference to dispersion
         self._disp_obj_dict = {}
         self.disp_cb_dict ={}
-        
+        self.temp_multi_functional = False
         f_id = self.formfactorbox.GetCurrentSelection()
         #For MAC
         form_factor = None
@@ -1901,7 +1901,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         if  struct_factor !=None:
             from sans.models.MultiplicationModel import MultiplicationModel
             self.model= MultiplicationModel(form_factor,struct_factor())
-            
+            # multifunctional form factor
+            if len(form_factor.non_fittable) > 0:
+                self.temp_multi_functional = True
         else:
             if form_factor != None:
                 self.model= form_factor

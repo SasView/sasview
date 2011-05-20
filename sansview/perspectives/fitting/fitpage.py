@@ -1466,7 +1466,8 @@ class FitPage(BasicPage):
         Set the list of func for multifunctional models
         """
         # Check if it is multi_functional model
-        if self.model.__class__ not in self.model_list_box["Multi-Functions"]:
+        if self.model.__class__ not in self.model_list_box["Multi-Functions"] \
+                and not self.temp_multi_functional:
             return None
         # Get the func name list
         list = self.model.fun_list
@@ -2568,9 +2569,10 @@ class FitPage(BasicPage):
          
                 iy += 1
                 ix = 0
-                if self.model.__class__ in \
-                    self.model_list_box["Multi-Functions"] \
-                    and item in self.model.non_fittable:
+                if (self.model.__class__ in \
+                    self.model_list_box["Multi-Functions"] or \
+                    self.temp_multi_functional)\
+                    and (item in self.model.non_fittable):
                     non_fittable_name = wx.StaticText(self, -1, item )
                     sizer.Add(non_fittable_name,(iy, ix),(1,1),\
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 21)
