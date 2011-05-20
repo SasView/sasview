@@ -43,6 +43,7 @@ class FitThread(CalcThread):
         """
         Perform a fit 
         """
+        msg = ""
         try: 
             #self.handler.starting_fit()
             #Result from the fit

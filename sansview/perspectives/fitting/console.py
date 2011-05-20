@@ -94,7 +94,7 @@ class ConsoleUpdate(FitHandler):
         """
         if self.isbetter:
             self.result.print_summary()
-        message = "Fit Error:"
+        message = "Fit Abort:"
         message = str(msg)+ " \n %s"%self.result.__str__()
         wx.PostEvent(self.parent, StatusEvent(status=message,
                                    info="error", type="stop"))
