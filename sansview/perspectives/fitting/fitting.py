@@ -1120,7 +1120,7 @@ class Plugin(PluginBase):
         
         if model == None:
             return
-
+       
         if self.page_finder[uid].get_model() is None:
             model.name = "M" + str(self.index_model)
             self.index_model += 1  

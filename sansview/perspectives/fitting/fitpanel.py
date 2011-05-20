@@ -134,7 +134,7 @@ class FitPanel(nb, PanelBase):
         if pos != -1:
             selected_page = self.GetPage(pos)
             wx.PostEvent(self.parent, PanelOnFocusEvent(panel=selected_page))
-        
+        self.enable_close_button()
        
     def on_set_focus(self, event):
         """
@@ -355,7 +355,7 @@ class FitPanel(nb, PanelBase):
                     temp = self.GetSelection()
                     self.DeletePage(temp)
             if self.GetPageCount()== 0:
-                self.add_empty_page()
+                self._manager.on_add_new_page(event=None)
         
     def set_data(self, data):
         """ 

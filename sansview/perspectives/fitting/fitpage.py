@@ -449,6 +449,8 @@ class FitPage(BasicPage):
         ##Add model function Details button in fitpanel.
         ##The following 3 lines are for Mac. Let JHC know before modifying... 
         title = "Model"
+        self.formfactorbox = None
+        self.multifactorbox = None
         box_description= wx.StaticBox(self, -1,str(title))
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
          
