@@ -41,4 +41,7 @@ def data_files():
     path = get_data_path(media="images")
     for f in findall(path):
         data_files.append(('images/icons', [f]))
+    path = get_data_path(media="media")
+    for f in findall(path):
+        data_files.append(('media', [f]))
     return data_files

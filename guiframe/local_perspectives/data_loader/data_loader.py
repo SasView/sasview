@@ -48,6 +48,14 @@ class Plugin(PluginBase):
         self.loader = Loader()  
         self._data_menu = None 
         
+    def help(self, evt):
+        """
+        Show a general help dialog. 
+        """
+        from help_panel import  HelpWindow
+        frame = HelpWindow(None, -1, 'HelpWindow')    
+        frame.Show(True)
+        
     def populate_file_menu(self):
         """
         get a menu item and append it under file menu of the application
