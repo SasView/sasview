@@ -1875,8 +1875,8 @@ class FitPage(BasicPage):
         self._lay_out()   
         self.Refresh()    
         #PostStatusEvent     
-        msg = "Fit completed! "
-        wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
+        #msg = "Fit completed!dddd "
+        #wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
 
     def onPinholeSmear(self, event):
         """

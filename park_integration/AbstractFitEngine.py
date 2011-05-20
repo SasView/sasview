@@ -471,7 +471,9 @@ class SansAssembly:
                 try:
                     self.curr_thread.isquit()
                 except:
-                    raise FitAbort,"stop leastsqr optimizer"    
+                   self.handler.error("Fitting Terminated.")
+                   raise FitAbort,"The LeastSqr Fit: terminated by the user."    
+         
         return self.res
     
     def check_param_range(self):

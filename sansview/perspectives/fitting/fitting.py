@@ -895,6 +895,7 @@ class Plugin(PluginBase):
         """     
         try:
             if result == None:
+                self._update_fit_button(page_id)
                 msg= "Single Fitting did not converge!!!"
                 wx.PostEvent(self.parent, 
                              StatusEvent(status=msg, 
@@ -909,6 +910,7 @@ class Plugin(PluginBase):
                              StatusEvent(status=msg, 
                                          info="warning",
                                          type="stop"))
+                self._update_fit_button(page_id)
                 return
             for uid in page_id:
                 value = self.page_finder[uid]   
@@ -923,18 +925,21 @@ class Plugin(PluginBase):
                 cpage.onsetValues(result.fitness, 
                                   param_name, result.pvec,result.stderr)
                 cpage._on_fit_complete()
-
+            msg = "Completed!"
+            wx.PostEvent(self.parent, StatusEvent(status=msg))
         except ValueError:
+            self._update_fit_button(page_id)
             msg = "Single Fitting did not converge!!!"
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                   type="stop"))
-            return   
+            return  
         except:
+            self._update_fit_button(page_id)
+            msg = "Single Fit completed but Following"
+            msg += " error occurred:%s" % sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
+                                                  type="stop"))
             raise
-            #msg = "Single Fit completed but Following"
-            #msg += " error occurred:%s" % sys.exc_value
-            #wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
-            #                                      type="stop"))
             return
        
     def _simul_fit_completed(self, result, page_id,pars=None, elapsed=None):
@@ -952,6 +957,7 @@ class Plugin(PluginBase):
         try:
             msg = "" 
             if result == None:
+                self._update_fit_button(page_id)
                 msg= "Complex Fitting did not converge!!!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                       type="stop"))
@@ -959,6 +965,7 @@ class Plugin(PluginBase):
             if not numpy.isfinite(result.fitness) or \
                 numpy.any(result.pvec == None) or not \
                 numpy.all(numpy.isfinite(result.pvec)):
+                self._update_fit_button(page_id)
                 msg= "Simultaneous Fitting did not converge!!!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
                 return
@@ -986,18 +993,31 @@ class Plugin(PluginBase):
                                   small_param_name,
                                   small_out,small_cov)
                 cpage._on_fit_complete()
-                
+                msg = "Fit completed!"
+                wx.PostEvent(self.parent, StatusEvent(status=msg))
         except Exception:
+            self._update_fit_button(page_id)
             msg = "Complex Fitting did not converge!!!"
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                   type="stop"))
             return
 
         except:
+            self._update_fit_button(page_id)
             msg = "Simultaneous Fit completed"
             msg += " but Following error occurred:%s" % sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
-   
+    
+    def _update_fit_button(self, page_id):
+        """
+        Update Fit button when fit stopped
+        
+        : parameter page_id: fitpage where the button is
+        """
+        for uid in page_id:  
+            page = self.fit_panel.get_page_by_id(uid)
+            page._on_fit_complete()
+        
     def _on_show_panel(self, event):
         """
         """
