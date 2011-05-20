@@ -471,7 +471,7 @@ class SansAssembly:
                 try:
                     self.curr_thread.isquit()
                 except:
-                   self.handler.error("Fitting Terminated.")
+                   self.handler.error("Terminating Fitting;")
                    raise FitAbort,"The LeastSqr Fit: terminated by the user."    
          
         return self.res
