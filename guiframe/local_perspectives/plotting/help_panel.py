@@ -6,7 +6,7 @@ import os
 import wx
 import wx.html as html
 from wx.lib.splitter import MultiSplitterWindow
-import sans.guiframe.local_perspectives.plotting as plotting
+from sans.guiframe import get_data_path
 
 
 class HelpWindow(wx.Frame):
@@ -51,7 +51,7 @@ class HelpWindow(wx.Frame):
         self.rhelp = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER, 
                                      size=(500,-1))
         
-        self.path = plotting.get_data_path(media='media')
+        self.path = get_data_path(media='media')
        
         page1 = """<html>
             <body>
