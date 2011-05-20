@@ -1298,7 +1298,7 @@ class Plugin(PluginBase):
             else:
                 self._plot_residuals(page_id, data, index)
 
-            msg = "Computation  complete!"
+            msg = "Computation  completed!"
             wx.PostEvent( self.parent, StatusEvent(status=msg, type="stop" ))
             #self.current_pg.state.theory_data = deepcopy(self.theory_data)
         except:
@@ -1390,7 +1390,7 @@ class Plugin(PluginBase):
                                                      index=index)))
         else:
             self._plot_residuals(page_id, data, index)
-        msg = "Computation  complete!"
+        msg = "Computation  completed!"
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
     
     def _draw_model2D(self, model, page_id, data=None, smearer=None,
