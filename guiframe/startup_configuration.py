@@ -24,6 +24,7 @@ DEFAULT_STRINGS = {'GUIFRAME_WIDTH':1150,
                    'TOOLBAR_SHOW':True,
                    'FIXED_PANEL':True,
                    'WELCOME_PANEL_SHOW':False,
+                   'CLEANUP_PLOT':False,
                    'DEFAULT_PERSPECTIVE':'Fitting'}
 
 if sys.platform.count("win32") > 0:
@@ -64,10 +65,10 @@ class StartupConfiguration(wx.Dialog):
         current_bt = wx.RadioButton(panel, -1, 'Current View', (15, 55))
         current_bt.SetValue(False)
         current_bt.Bind(wx.EVT_RADIOBUTTON, self.OnCurrent)
-        msg = "\nThis new configuration will take effect after\n"
-        msg += "restarting this application..."
+        msg = "\nThis new selection will take effect after\n"
+        msg += "restarting the SansView application..."
         note_txt = wx.StaticText(panel, -1, msg, (15, 75))
-        
+        note_txt.SetForegroundColour("red")
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         cancelButton = wx.Button(self, -1, 'Cancel', size=(70, 25))
         hbox.Add(cancelButton, 1, wx.RIGHT, 5)
@@ -103,8 +104,10 @@ class StartupConfiguration(wx.Dialog):
         try:
             p_size = None
             for panel in self.parent.plot_panels.values():
-                if p_size == None or panel.size > p_size:
-                    p_size = panel.size
+                p_panel = self.parent._mgr.GetPane(panel.window_name)
+                if p_panel.IsShown():
+                    if p_size == None or panel.size > p_size:
+                        p_size = panel.size
             if p_size == None:
                 p_size = DEFAULT_STRINGS['PLOPANEL_WIDTH']
             self.current_string['PLOPANEL_WIDTH'] = p_size
@@ -135,7 +138,8 @@ class StartupConfiguration(wx.Dialog):
                 self.current_string['WELCOME_PANEL_SHOW'] = True
             else:
                 self.current_string['WELCOME_PANEL_SHOW'] = False
-            
+            self.current_string['CLEANUP_PLOT'] = \
+                                        self.parent.cleanup_plots
             perspective = self.parent.get_current_perspective()
             self.current_string['DEFAULT_PERSPECTIVE'] = str(perspective.sub_menu)
             

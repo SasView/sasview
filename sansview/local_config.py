@@ -6,7 +6,7 @@ import os
 from sans.guiframe.gui_style import GUIFRAME
 # Version of the application
 __appname__ = "SansView"
-__version__ = '1.9_RC_2'
+__version__ = '1.9_RC_3'
 __download_page__ = 'http://danse.chem.utk.edu'
 __update_URL__ = 'http://danse.chem.utk.edu/sansview_version.php'
 
@@ -66,6 +66,7 @@ SPLASH_SCREEN_WIDTH = 512
 SPLASH_SCREEN_HEIGHT = 366
 SS_MAX_DISPLAY_TIME = 5000 #5 sec
 WELCOME_PANEL_SHOW = False
+CLEANUP_PLOT = False
 SetupIconFile_win = os.path.join("images", "ball.ico")
 SetupIconFile_mac = os.path.join("images", "ball.icns")
 DefaultGroupName = "DANSE"

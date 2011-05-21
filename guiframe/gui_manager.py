@@ -92,6 +92,7 @@ try:
     GUIFRAME_WIDTH = custom_config.GUIFRAME_WIDTH 
     GUIFRAME_HEIGHT = custom_config.GUIFRAME_HEIGHT
     DEFAULT_PERSPECTIVE = custom_config.DEFAULT_PERSPECTIVE
+    CLEANUP_PLOT = custom_config.CLEANUP_PLOT
 except:
     DATALOADER_SHOW = True
     TOOLBAR_SHOW = True
@@ -102,9 +103,9 @@ except:
     GUIFRAME_WIDTH = config.GUIFRAME_WIDTH 
     GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
     DEFAULT_PERSPECTIVE = None
+    CLEANUP_PLOT = False
 
 DEFAULT_STYLE = config.DEFAULT_STYLE
-
 
 
 PLOPANEL_HEIGTH = config.PLOPANEL_HEIGTH
@@ -189,6 +190,10 @@ class ViewerFrame(wx.Frame):
         self._save_appl_menu = None
         #tool bar
         self._toolbar = None
+        # number of plugins
+        self._num_perspectives = 0
+        # plot duck cleanup option
+        self.cleanup_plots = CLEANUP_PLOT
         # (un)-focus color
         #self.color = '#b3b3b3'
         ## Find plug-ins
@@ -370,6 +375,8 @@ class ViewerFrame(wx.Frame):
         self._setup_tool_bar()
         # Set up the layout
         self._setup_layout()
+        # Set up extra custom tool menu
+        self._setup_extra_custom()
         # Set up the menu
         self._setup_menus()
         
@@ -385,7 +392,14 @@ class ViewerFrame(wx.Frame):
         self.post_init()
         # Set Custom default
         self.set_custom_default_perspective()
-
+  
+        #self.Show(True)
+        #self._check_update(None)
+    
+    def _setup_extra_custom(self):  
+        """
+        Set up toolbar and welcome view if needed
+        """
         style = self.__gui_style & GUIFRAME.TOOLBAR_ON
         if (style == GUIFRAME.TOOLBAR_ON) & (not self._toolbar.IsShown()):
             self._on_toggle_toolbar() 
@@ -394,10 +408,7 @@ class ViewerFrame(wx.Frame):
         welcome_style = self.__gui_style & GUIFRAME.WELCOME_PANEL_ON
         if welcome_style == GUIFRAME.WELCOME_PANEL_ON:
             self.show_welcome_panel(None)
-  
-        #self.Show(True)
-        #self._check_update(None)
-             
+      
     def _setup_layout(self):
         """
         Set up the layout
@@ -443,6 +454,7 @@ class ViewerFrame(wx.Frame):
         Add a perspective if it doesn't already
         exist.
         """
+        self._num_perspectives += 1
         is_loaded = False
         for item in self.plugins:
             if plugin.__class__ == item.__class__:
@@ -542,7 +554,8 @@ class ViewerFrame(wx.Frame):
         except:
             # Should raise and catch at a higher level and 
             # display error on status bar
-            pass   
+            pass  
+
         return plugins
     
     def set_welcome_panel(self, panel_class):
@@ -1013,13 +1026,32 @@ class ViewerFrame(wx.Frame):
             id = wx.NewId()
             preferences_menu = wx.Menu()
             hint = "All plot panels will floating"
-            preferences_menu.Append(id, '&Float', hint)
+            preferences_menu.AppendRadioItem(id, '&Float All', hint)
             wx.EVT_MENU(self, id, self.set_plotpanel_floating)
+            style = self.__gui_style & GUIFRAME.FLOATING_PANEL
+            f_menu = preferences_menu.FindItemById(id)
+            if style == GUIFRAME.FLOATING_PANEL: 
+                f_checked = True
+            else:
+                f_checked = False
+            f_menu.Check(f_checked)
+
             id = wx.NewId()
             hint = "All plot panels will displayed within the frame"
-            preferences_menu.Append(id, '&Dock', hint)
-            wx.EVT_MENU(self, id, self.set_plotpanel_fixed)
-
+            preferences_menu.AppendRadioItem(id, '&Dock All', hint)
+            wx.EVT_MENU(self, id, self.set_plotpanel_fixed) 
+            if not f_checked:
+                d_menu = preferences_menu.FindItemById(id)
+                d_menu.Check(True)
+            preferences_menu.AppendSeparator()
+            id = wx.NewId()
+            hint = "Clean up the dock area for plots on new-plot"
+            preferences_menu.AppendCheckItem(id, '&CleanUp Dock on NewPlot', hint)
+            wx.EVT_MENU(self, id, self.on_cleanup_dock)
+            flag = self.cleanup_plots
+            if self.cleanup_plots:
+                c_menu = preferences_menu.FindItemById(id)
+                c_menu.Check(True)  
             self._window_menu.AppendSubMenu(preferences_menu,'&Preferences')
         if self._window_menu.GetMenuItemCount() == 0:
             pos = self._menubar.FindMenu('Graph')
@@ -1043,6 +1075,7 @@ class ViewerFrame(wx.Frame):
                         wx.EVT_MENU(self, int(item), self.on_view)
                 self._menubar.Append(self._window_menu, '&Window')
                 """
+
                 
     def _add_menu_application(self):
         """
@@ -1051,8 +1084,9 @@ class ViewerFrame(wx.Frame):
         # Only add the perspective menu if there are more than one perspectives
         add menu application
         """
-        style = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
-        if style == GUIFRAME.MULTIPLE_APPLICATIONS:
+        #style = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
+        #if style == GUIFRAME.MULTIPLE_APPLICATIONS:
+        if self._num_perspectives  > 1:
             plug_data_count = False
             plug_no_data_count = False
             self._applications_menu = wx.Menu()
@@ -1104,7 +1138,7 @@ class ViewerFrame(wx.Frame):
         style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
         
         id = wx.NewId()
-        hint_load_file = "read all analysis states save previously"
+        hint_load_file = "read all analysis states saved previously"
         self._save_appl_menu = self._file_menu.Append(id, 
                                 '&Open Project', hint_load_file)
         wx.EVT_MENU(self, id, self._on_open_state_project)
@@ -1284,7 +1318,7 @@ class ViewerFrame(wx.Frame):
                     
     def hide_panel(self, uid):
         """
-        hide panel
+        hide panel except default panel
         """
         ID = str(uid)
         caption = self.panels[ID].window_caption
@@ -1295,8 +1329,8 @@ class ViewerFrame(wx.Frame):
                 if self._data_panel is not None and \
                             ID in self.plot_panels.keys():
                     self._data_panel.cb_plotpanel.Append(str(caption), p)
-                # Hide default panel
-                self._mgr.GetPane(self.panels["default"].window_name).Hide()
+                # Do not Hide default panel here...
+                #self._mgr.GetPane(self.panels["default"].window_name).Hide()
             self._mgr.Update()
                 
     def delete_panel(self, uid):
@@ -1810,12 +1844,13 @@ class ViewerFrame(wx.Frame):
         """
         list_data, _ = self._data_manager.get_by_id(data_id)
         if self._current_perspective is not None:
-            for uid, panel in self.plot_panels.iteritems() :
-                #panel = self.plot_panels[uid]
-                window = self._mgr.GetPane(panel.window_name)
-                # To hide all docked plot panels when set the data
-                #if not window.IsFloating():
-                #    self.hide_panel(uid)
+            if self.cleanup_plots:
+                for uid, panel in self.plot_panels.iteritems():
+                    #panel = self.plot_panels[uid]
+                    window = self._mgr.GetPane(panel.window_name)
+                    # To hide all docked plot panels when set the data
+                    if not window.IsFloating():
+                        self.hide_panel(uid)
             self._current_perspective.set_data(list_data.values())
             self.on_close_welcome_panel()
         else:
@@ -1869,6 +1904,12 @@ class ViewerFrame(wx.Frame):
                         wx.PostEvent(self, StatusEvent(status=message, 
                                                    info='warning'))
             else:
+                if self.cleanup_plots:
+                    for id, panel in self.plot_panels.iteritems():
+                        window = self._mgr.GetPane(panel.window_name)
+                        # To hide all docked plot panels when set the data
+                        if not window.IsFloating():
+                            self.hide_panel(id)
                 #if not append then new plot
                 from sans.guiframe.dataFitting import Data2D
                 if issubclass(Data2D, new_plot.__class__):
@@ -1974,11 +2015,14 @@ class ViewerFrame(wx.Frame):
         self.__gui_style &= (~GUIFRAME.FIXED_PANEL)
         self.__gui_style |= GUIFRAME.FLOATING_PANEL
         plot_panel = []
+        id = event.GetId()
+        menu = self._window_menu.FindItemById(id)
         if self._plotting_plugin is not None:
             plot_panel = self._plotting_plugin.plot_panels.values()
             for p in plot_panel:
                 self._popup_floating_panel(p)
-        
+            menu.Check(True)
+            
     def set_plotpanel_fixed(self, event=None):
         """
         make the plot panel fixed
@@ -1986,11 +2030,34 @@ class ViewerFrame(wx.Frame):
         self.__gui_style &= (~GUIFRAME.FLOATING_PANEL)
         self.__gui_style |= GUIFRAME.FIXED_PANEL
         plot_panel = []
+        id = event.GetId()
+        menu = self._window_menu.FindItemById(id)
         if self._plotting_plugin is not None:
             plot_panel = self._plotting_plugin.plot_panels.values()
             for p in plot_panel:
                 self._popup_fixed_panel(p)
-                    
+            menu.Check(True)
+            
+    def on_cleanup_dock(self, event=None):     
+        """
+        Set Cleanup Dock option
+        """
+        if event == None:
+            return
+        id = event.GetId()
+        menu = self._window_menu.FindItemById(id)
+        Flag = self.cleanup_plots
+        if not Flag:
+            menu.Check(True)
+            self.cleanup_plots = True
+            msg = "Cleanup-Dock option set to 'ON'."
+        else:
+            menu.Check(False)
+            self.cleanup_plots = False
+            msg = "Cleanup-Dock option set to 'OFF'."
+
+        wx.PostEvent(self, StatusEvent(status= msg))
+         
     def _popup_fixed_panel(self, p):
         """
         """
