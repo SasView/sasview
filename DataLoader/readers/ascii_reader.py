@@ -22,6 +22,7 @@ try:
     from data_util.nxsunit import Converter
 except:
     has_converter = False
+_ZERO = 1e-16
 
 class Reader:
     """
@@ -322,6 +323,11 @@ class Reader:
                         dy[i] = tdy[ind[i]]
                     if has_error_dx == True:
                         dx[i] = tdx[ind[i]]
+                # Zeros in dx, dy 
+                if has_error_dx:
+                    dx[dx==0] = _ZERO
+                if has_error_dy:
+                    dy[dy==0] = _ZERO
                 #Data    
                 output.x = x
                 output.y = y

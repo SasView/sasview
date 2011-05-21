@@ -37,7 +37,7 @@ from DataLoader.data_info import Process
 from DataLoader.data_info import Aperture
 from lxml import etree
 import xml.dom.minidom
-
+_ZERO = 1e-16
 has_converter = True
 try:
     from data_util.nxsunit import Converter
@@ -553,10 +553,14 @@ class Reader:
                 dy = numpy.append(dy, _dy)
                 dxl = numpy.append(dxl, _dxl)
                 dxw = numpy.append(dxw, _dxw)
+        # Zeros in dx, dy 
+        dx[dx==0] = _ZERO
+        dy[dy==0] = _ZERO
                 
         data_info.x = x
         data_info.y = y
         data_info.dx = dx
+        
         data_info.dy = dy
         data_info.dxl = dxl
         data_info.dxw = dxw
@@ -582,7 +586,7 @@ class Reader:
             data_info.yaxis("\\rm{Intensity}", data_info.y_unit)
         else:
             data_info.yaxis("\\rm{Intensity}","cm^{-1}")
-        
+
         return data_info
 
     def _to_xml_doc(self, datainfo):
