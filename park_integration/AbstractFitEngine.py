@@ -402,6 +402,8 @@ class FitAbort(Exception):
     """
     Exception raise to stop the fit
     """
+    #pass
+    #print"Creating fit abort Exception"
 
 
 class SansAssembly:
@@ -471,8 +473,11 @@ class SansAssembly:
                 try:
                     self.curr_thread.isquit()
                 except:
-                   self.handler.error("Terminating Fitting;")
-                   raise FitAbort,"The LeastSqr Fit: terminated by the user."    
+                    msg = "Fitting Aborted...  Please ignore the '" 
+                    msg += "Functor Error' recoded in the log file."
+                    self.handler.error(msg)
+                    raise
+                    #return 
          
         return self.res
     
