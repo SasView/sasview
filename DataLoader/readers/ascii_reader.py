@@ -329,10 +329,10 @@ class Reader:
                 if has_error_dy:
                     dy[dy==0] = _ZERO
                 #Data    
-                output.x = x
-                output.y = y
-                output.dy = dy if has_error_dy == True else numpy.zeros(len(y))
-                output.dx = dx if has_error_dx == True else numpy.zeros(len(x))
+                output.x = x[x!=0]
+                output.y = y[x!=0]
+                output.dy = dy[x!=0] if has_error_dy == True else numpy.zeros(len(y))
+                output.dx = dx[x!=0] if has_error_dx == True else numpy.zeros(len(x))
                                 
                 if data_conv_q is not None:
                     output.xaxis("\\rm{Q}", output.x_unit)

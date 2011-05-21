@@ -554,16 +554,18 @@ class Reader:
                 dxl = numpy.append(dxl, _dxl)
                 dxw = numpy.append(dxw, _dxw)
         # Zeros in dx, dy 
-        dx[dx==0] = _ZERO
-        dy[dy==0] = _ZERO
-                
-        data_info.x = x
-        data_info.y = y
-        data_info.dx = dx
+        if not numpy.all(dx==0):
+            dx[dx==0] = _ZERO
+        if not numpy.all(dy==0):
+            dy[dy==0] = _ZERO
+       
+        data_info.x = x[x!=0]
+        data_info.y = y[x!=0]
+        data_info.dx = dx[x!=0]
         
-        data_info.dy = dy
-        data_info.dxl = dxl
-        data_info.dxw = dxw
+        data_info.dy = dy[x!=0]
+        data_info.dxl = dxl[x!=0]
+        data_info.dxw = dxw[x!=0]
         
         data_conv_q = None
         data_conv_i = None
