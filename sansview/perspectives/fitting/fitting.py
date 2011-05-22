@@ -129,11 +129,11 @@ class Plugin(PluginBase):
         #Set park engine
         
         scipy_help= "Scipy Engine: Perform Simple fit. More in Help window...."
-        self.menu1.AppendCheckItem(self.scipy_id, "Simple Fit  [Scipy]",scipy_help) 
+        self.menu1.AppendCheckItem(self.scipy_id, "Simple FitEngine  [LeastSq]",scipy_help) 
         wx.EVT_MENU(owner, self.scipy_id,  self._onset_engine_scipy)
         
         park_help = "Park Engine: Perform Complex fit. More in Help window...."
-        self.menu1.AppendCheckItem(self.park_id, "Complex Fit  [Park]",park_help) 
+        self.menu1.AppendCheckItem(self.park_id, "Complex FitEngine [ParkMC]",park_help) 
         wx.EVT_MENU(owner, self.park_id,  self._onset_engine_park)
         
         self.menu1.FindItemById(self.scipy_id).Check(True)
