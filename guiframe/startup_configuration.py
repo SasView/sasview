@@ -80,10 +80,10 @@ class StartupConfiguration(wx.Dialog):
         current_bt = wx.RadioButton(panel, -1, 'Current View', (15, 55))
         current_bt.SetValue(False)
         current_bt.Bind(wx.EVT_RADIOBUTTON, self.OnCurrent)
-        msg = "\nThis new selection will take effect after\n"
+        msg = "\nThis new configuration will take effect after\n"
         msg += "restarting the SansView application..."
         note_txt = wx.StaticText(panel, -1, msg, (15, 75))
-        note_txt.SetForegroundColour("red")
+        note_txt.SetForegroundColour("black")
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         cancelButton = wx.Button(self, -1, 'Cancel', size=(70, 25))
         hbox.Add(cancelButton, 1, wx.RIGHT, 5)
