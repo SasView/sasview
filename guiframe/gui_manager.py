@@ -943,12 +943,12 @@ class ViewerFrame(wx.Frame):
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         id = wx.NewId()
         self._data_panel_menu = self._view_menu.Append(id,
-                                                '&Data Explorer ON', '')
+                                                '&Show Data Explorer', '')
         wx.EVT_MENU(self, id, self.show_data_panel)
         if style == GUIFRAME.MANAGER_ON:
-            self._data_panel_menu.SetText('Data Explorer OFF')
+            self._data_panel_menu.SetText('Hide Data Explorer')
         else:
-            self._data_panel_menu.SetText('Data Explorer ON')
+            self._data_panel_menu.SetText('Show Data Explorer')
         self._view_menu.AppendSeparator()
         id = wx.NewId()
         style1 = self.__gui_style & GUIFRAME.TOOLBAR_ON
@@ -1786,7 +1786,7 @@ class ViewerFrame(wx.Frame):
         if self._data_panel_menu == None:
             return
         label = self._data_panel_menu.GetText()
-        if label == 'Data Explorer ON':
+        if label == 'Show Data Explorer':
             pane = self._mgr.GetPane(self.panels["data_panel"].window_name)
             #if not pane.IsShown():
             if action: 
@@ -1794,7 +1794,7 @@ class ViewerFrame(wx.Frame):
                 self._mgr.Update()
             self.__gui_style = self.__gui_style | GUIFRAME.MANAGER_ON
             
-            self._data_panel_menu.SetText('Data Explorer OFF')
+            self._data_panel_menu.SetText('Hide Data Explorer')
         else:
             pane = self._mgr.GetPane(self.panels["data_panel"].window_name)
             #if not pane.IsShown():
@@ -1802,7 +1802,7 @@ class ViewerFrame(wx.Frame):
                 pane.Show(False)
                 self._mgr.Update()
             self.__gui_style = self.__gui_style & (~GUIFRAME.MANAGER_ON)
-            self._data_panel_menu.SetText('Data Explorer ON')
+            self._data_panel_menu.SetText('Show Data Explorer')
     
     def add_data_helper(self, data_list):
         """
