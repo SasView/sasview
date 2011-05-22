@@ -173,7 +173,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.vbox.Add(self.sizer5, 0, wx.EXPAND|wx.ALL,1)
         self.vbox.Add(self.sizer1, 0, wx.EXPAND|wx.ALL,0)
         self.vbox.Add(self.sizer2, 0, wx.EXPAND|wx.ALL,1)
-        self.vbox.Add(self.sizer3, 0, wx.EXPAND|wx.ALL,1)
+        self.vbox.Add(self.sizer3, 0, wx.EXPAND|wx.ALL,5)
         self.vbox.Add(self.sizer4, 0, wx.EXPAND|wx.ALL,5)
         
         self.SetSizer(self.vbox)

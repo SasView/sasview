@@ -15,6 +15,7 @@ import copy
 #import sans.guiframe.gui_manager as gui
 from sans.guiframe.events import StatusEvent  
 from sans.guiframe.gui_style import GUIFRAME
+from sans.guiframe import gui_manager as CURRENT
 # default configuration
 DEFAULT_STRINGS = {'GUIFRAME_WIDTH':1150,
                    'GUIFRAME_HEIGHT':840,
@@ -26,7 +27,20 @@ DEFAULT_STRINGS = {'GUIFRAME_WIDTH':1150,
                    'WELCOME_PANEL_SHOW':False,
                    'CLEANUP_PLOT':False,
                    'DEFAULT_PERSPECTIVE':'Fitting'}
-
+try:
+    CURRENT_STRINGS = {'GUIFRAME_WIDTH':CURRENT.GUIFRAME_WIDTH,
+                       'GUIFRAME_HEIGHT':CURRENT.GUIFRAME_HEIGHT,
+                       'PLOPANEL_WIDTH':CURRENT.PLOPANEL_WIDTH,
+                       'DATAPANEL_WIDTH':CURRENT.DATAPANEL_WIDTH,
+                       'DATALOADER_SHOW':CURRENT.DATALOADER_SHOW,
+                       'TOOLBAR_SHOW':CURRENT.TOOLBAR_SHOW,
+                       'FIXED_PANEL':CURRENT.FIXED_PANEL,
+                       'WELCOME_PANEL_SHOW':CURRENT.WELCOME_PANEL_SHOW,
+                       'CLEANUP_PLOT':CURRENT.CLEANUP_PLOT,
+                       'DEFAULT_PERSPECTIVE':CURRENT.DEFAULT_PERSPECTIVE}
+except:
+    CURRENT_STRINGS = DEFAULT_STRINGS
+    
 if sys.platform.count("win32") > 0:
     PANEL_WIDTH = 265 
     PANEL_HEIGHT = 235
@@ -52,7 +66,8 @@ class StartupConfiguration(wx.Dialog):
         self._gui = gui
         # font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
-        self.current_string = copy.deepcopy(DEFAULT_STRINGS)
+        self.current_string = copy.deepcopy(CURRENT_STRINGS)
+        self.return_string = {}
         # build layout
         panel = wx.Panel(self, -1)
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -90,7 +105,8 @@ class StartupConfiguration(wx.Dialog):
         """
         event.Skip()
         # event object and selection
-        return DEFAULT_STRINGS
+        self.return_string = copy.deepcopy(DEFAULT_STRINGS)
+        return self.return_string
         
     def OnCurrent(self, event=None):
         """
@@ -109,12 +125,12 @@ class StartupConfiguration(wx.Dialog):
                     if p_size == None or panel.size > p_size:
                         p_size = panel.size
             if p_size == None:
-                p_size = DEFAULT_STRINGS['PLOPANEL_WIDTH']
+                p_size = CURRENT_STRINGS['PLOPANEL_WIDTH']
             self.current_string['PLOPANEL_WIDTH'] = p_size
             
             data_pw, _ = self.parent.panels["data_panel"].GetSizeTuple()
             if data_pw == None:
-                data_pw = DEFAULT_STRINGS['DATAPANEL_WIDTH']
+                data_pw = CURRENT_STRINGS['DATAPANEL_WIDTH']
             self.current_string['DATAPANEL_WIDTH'] = data_pw
             
             label = self.parent._data_panel_menu.GetText()
@@ -146,7 +162,8 @@ class StartupConfiguration(wx.Dialog):
         except:
             raise
         # event object and selection
-        return self.current_string
+        self.return_string = self.current_string
+        return self.return_string
 
     def OnCancel(self, event):
         """
@@ -154,7 +171,7 @@ class StartupConfiguration(wx.Dialog):
         """
         # clear event
         event.Skip()
-    
+        self.return_string = {}
         self.Destroy()
     
     def OnClose(self, event):
@@ -164,7 +181,7 @@ class StartupConfiguration(wx.Dialog):
         # clear event
         event.Skip()
         fname = os.path.join(self.path, 'custom_config.py')
-        self.write_string(fname, self.current_string)
+        self.write_string(fname, self.return_string)
     
         self.Destroy()
 
@@ -185,3 +202,4 @@ class StartupConfiguration(wx.Dialog):
                 out_f.write("%s = %s\n" % (key,str(item)))
     
         out_f.close() 
+        
