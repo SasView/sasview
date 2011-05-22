@@ -375,8 +375,7 @@ class ViewerFrame(wx.Frame):
         self._setup_tool_bar()
         # Set up the layout
         self._setup_layout()
-        # Set up extra custom tool menu
-        self._setup_extra_custom()
+        
         # Set up the menu
         self._setup_menus()
         
@@ -392,7 +391,8 @@ class ViewerFrame(wx.Frame):
         self.post_init()
         # Set Custom default
         self.set_custom_default_perspective()
-  
+        # Set up extra custom tool menu
+        self._setup_extra_custom()
         #self.Show(True)
         #self._check_update(None)
     
