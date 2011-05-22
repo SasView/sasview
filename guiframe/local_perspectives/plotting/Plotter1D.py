@@ -85,6 +85,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.resizing = False
         self.canvas.set_resizing(self.resizing)
         self.Bind(wx.EVT_SIZE, self._OnReSize)
+        self._add_more_tool()
        
     def get_symbol_label(self):
         """
@@ -483,3 +484,29 @@ class ModelPanel1D(PlotPanel, PanelBase):
             except:
                 pass    
         dlg.Destroy()
+
+    def _add_more_tool(self):
+        """
+        Add refresh button in the tool bar
+        """
+        if self.parent.__class__.__name__ != 'ViewerFrame':
+            return
+        self.toolbar.AddSeparator()
+        id_delete = wx.NewId()
+        delete =  wx.ArtProvider.GetBitmap(wx.ART_DELETE, wx.ART_TOOLBAR)
+        self.toolbar.AddSimpleTool(id_delete, delete,
+                           'Delete permanently', 'permanently Delete')
+
+        self.toolbar.Realize()
+        wx.EVT_TOOL(self, id_delete,  self._on_delete)
+
+    def _on_delete(self, event): 
+        """
+        Refreshes the plotpanel on refresh tollbar button
+        """
+        
+        if self.parent is not None:
+            wx.PostEvent(self.parent, 
+                         NewPlotEvent(group_id=self.group_id,
+                                      action="delete"))
+            

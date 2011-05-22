@@ -225,7 +225,7 @@ class ModelPanel2D(ModelPanel1D):
         id = wx.NewId()
         slicerpop.Append(id, '&Copy to Clipboard', 'Copy to the clipboard')
         wx.EVT_MENU(self, id, self.OnCopyFigureMenu)
-        
+        slicerpop.AppendSeparator()
         # saving data
         plot = self.data2D
         id = wx.NewId()

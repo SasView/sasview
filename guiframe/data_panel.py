@@ -254,9 +254,9 @@ class DataPanel(ScrolledPanel, PanelBase):
                                 size=(BUTTON_WIDTH, -1))
         self.bt_add.SetToolTipString("Load data files")
         wx.EVT_BUTTON(self, self.bt_add.GetId(), self._load_data)
-        self.bt_remove = wx.Button(self, wx.NewId(), "Remove Data",
+        self.bt_remove = wx.Button(self, wx.NewId(), "Delete Data",
          size=(BUTTON_WIDTH, -1))
-        self.bt_remove.SetToolTipString("Remove data from the application")
+        self.bt_remove.SetToolTipString("Delete data from the application")
         wx.EVT_BUTTON(self, self.bt_remove.GetId(), self.on_remove)
         self.bt_import = wx.Button(self, wx.NewId(), "Send To",
                                     size=(BUTTON_WIDTH, -1))
@@ -283,10 +283,10 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_freeze.SetToolTipString("To trigger freeze a theory")
         wx.EVT_BUTTON(self, self.bt_freeze.GetId(), self.on_freeze)
         #hide plot
-        self.bt_close_plot = wx.Button(self, wx.NewId(), "Delete Plot", 
-                                   size=(BUTTON_WIDTH, -1))
-        self.bt_freeze.SetToolTipString("Delete the plot panel on focus")
-        wx.EVT_BUTTON(self, self.bt_close_plot.GetId(), self.on_close_plot)
+        #self.bt_close_plot = wx.Button(self, wx.NewId(), "Delete Plot", 
+        #                           size=(BUTTON_WIDTH, -1))
+        #self.bt_close_plot.SetToolTipString("Delete the plot panel on focus")
+        #wx.EVT_BUTTON(self, self.bt_close_plot.GetId(), self.on_close_plot)
        
         self.cb_plotpanel = wx.ComboBox(self, -1, 
                                 style=wx.CB_READONLY|wx.CB_SORT)
@@ -305,8 +305,8 @@ class DataPanel(ScrolledPanel, PanelBase):
                               (self.bt_plot),
                               ((10, 10)),
                               (self.bt_freeze),
-                              ((10, 10)),
-                              (self.bt_close_plot),
+                              #((10, 10)),
+                              #(self.bt_close_plot),
                               ((10, 10))])
 
         self.sizer3.AddGrowableCol(1, 1)
@@ -787,10 +787,11 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         enable remove plot button if there is a plot panel on focus
         """
-        if self.cb_plotpanel.GetCount() == 0:
-            self.bt_close_plot.Disable()
-        else:
-            self.bt_close_plot.Enable()
+        pass
+        #if self.cb_plotpanel.GetCount() == 0:
+        #    self.bt_close_plot.Disable()
+        #else:
+        #    self.bt_close_plot.Enable()
             
     def enable_remove(self):
         """

@@ -781,10 +781,10 @@ class ViewerFrame(wx.Frame):
                                                PLOPANEL_HEIGTH)))
 
             self._popup_floating_panel(p)
-            
+  
         # Register for showing/hiding the panel
         wx.EVT_MENU(self, ID, self.on_view)
-        if p not in self.plot_panels.values():
+        if p not in self.plot_panels.values() and p.group_id != None:
             self.plot_panels[ID] = p
             if len(self.plot_panels) == 1:
                 self.panel_on_focus = p
