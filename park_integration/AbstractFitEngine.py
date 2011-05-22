@@ -60,7 +60,7 @@ class SansParameter(park.Parameter):
             #lo,hi = self._model.details[self.name][1:]
             #if lo is None: lo = -numpy.inf
             #if hi is None: hi = numpy.inf
-        if lo >= hi:
+        if lo > hi:
             raise ValueError,"wrong fit range for parameters"
         
         return lo, hi

@@ -158,6 +158,9 @@ class ScipyFit(FitEngine):
             else:
                 raise 
             """
+        except:
+            raise
+        
         chisqr = functor.chisq()
         if cov_x is not None and numpy.isfinite(cov_x).all():
             stderr = numpy.sqrt(numpy.diag(cov_x))

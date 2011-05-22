@@ -1940,7 +1940,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         else:
             qmin = float(qmin_ctrl.GetValue())
             qmax = float(qmax_ctrl.GetValue())
-            if qmin <= qmax:
+            if qmin < qmax:
                 #Make sure to set both colours white.  
                 qmin_ctrl.SetBackgroundColour(wx.WHITE)
                 qmin_ctrl.Refresh()
