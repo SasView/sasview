@@ -473,8 +473,9 @@ class SansAssembly:
                 try:
                     self.curr_thread.isquit()
                 except:
-                    msg = "Fitting Aborted...  Please ignore the '" 
-                    msg += "Functor Error' recoded in the log file."
+                    msg = "Fitting: Terminated...       Note: Forcing to stop " 
+                    msg += "fitting may cause a 'Functor error message' "
+                    msg += "being recorded in the log file....."
                     self.handler.error(msg)
                     raise
                     #return 
