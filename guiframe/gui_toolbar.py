@@ -167,6 +167,7 @@ class GUIToolBar(Tbar):
         """
         #self.button_application.SetLabel(str(application_name))
         self.button_panel.SetLabel(str(panel_name))
+        self.button_panel.SetToolTipString(str(panel_name))
         
     def update_toolbar(self, panel=None):
         """
