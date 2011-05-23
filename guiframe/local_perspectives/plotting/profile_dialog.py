@@ -164,6 +164,8 @@ class SLDPanel(wx.Dialog):
         """
         # NOt implemented
         pass
+
+    
     
 class SLDplotpanel(PlotPanel):
     """
@@ -225,7 +227,11 @@ class SLDplotpanel(PlotPanel):
         #Not implemented
         pass
     
-        
+    def _add_more_tool(self):
+        """
+        Not implemented
+        """
+        pass 
         
 class ViewerFrame(wx.Frame):
     """
