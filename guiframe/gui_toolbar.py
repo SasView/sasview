@@ -10,9 +10,11 @@ from wx.lib.platebtn import PB_STYLE_SQUARE, PB_STYLE_DROPARROW
 import sys
 if sys.platform.count("darwin")==0:
     FONT_VARIANT = 0
+    NAME_BOX = wx.DefaultSize
     IS_MAC = False
 else:
     FONT_VARIANT = 1
+    NAME_BOX = (250, 25)
     IS_MAC = True
 
 def clear_image(image):
@@ -123,7 +125,7 @@ class GUIToolBar(Tbar):
         #add button for the panel on focus
         self.button_panel = wx.StaticText(self, -1, 'No Panel', 
                                           wx.DefaultPosition, 
-                                          wx.DefaultSize,
+                                          NAME_BOX,
                                           style=wx.SUNKEN_BORDER|wx.ALIGN_LEFT)
         #self.button_panel.SetForegroundColour('black')
         #self.button_panel.SetBackgroundColour('white')
