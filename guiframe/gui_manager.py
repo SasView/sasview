@@ -1420,7 +1420,9 @@ class ViewerFrame(wx.Frame):
             self.load_data(path)
         else:
             self.load_state(path)
-          
+
+        self._default_save_location = os.path.dirname(path)
+
     def load_state(self, path):   
         """
         load data from command line or application
