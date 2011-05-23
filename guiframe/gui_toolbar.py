@@ -122,6 +122,8 @@ class GUIToolBar(Tbar):
         self.AddSeparator()
         #add button for the panel on focus
         self.button_panel = wx.StaticText(self, -1, 'No Panel', 
+                                          wx.DefaultPosition, 
+                                          wx.DefaultSize,
                                           style=wx.SUNKEN_BORDER|wx.ALIGN_LEFT)
         #self.button_panel.SetForegroundColour('black')
         #self.button_panel.SetBackgroundColour('white')
