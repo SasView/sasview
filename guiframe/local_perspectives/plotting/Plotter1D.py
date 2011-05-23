@@ -495,7 +495,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         id_delete = wx.NewId()
         delete =  wx.ArtProvider.GetBitmap(wx.ART_DELETE, wx.ART_TOOLBAR)
         self.toolbar.AddSimpleTool(id_delete, delete,
-                           'Delete permanently', 'permanently Delete')
+                           'Delete', 'permanently Delete')
 
         self.toolbar.Realize()
         wx.EVT_TOOL(self, id_delete,  self._on_delete)
