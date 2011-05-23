@@ -958,8 +958,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             data_max = state.qmax
             self.qmin_x = data_min
             self.qmax_x = data_max
-            self.minimum_q.SetValue(str(data_min))
-            self.maximum_q.SetValue(str(data_max))
+            #self.minimum_q.SetValue(str(data_min))
+            #self.maximum_q.SetValue(str(data_max))
             self.qmin.SetValue(str(data_min))
             self.qmax.SetValue(str(data_max))
 

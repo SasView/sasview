@@ -390,7 +390,7 @@ class FitPage(BasicPage):
         if self.data is None:
             data_min = ""
             data_max = ""
-            data_name = ""
+            data_name = " None"
         else:
             data_name = self.data.name
             #set maximum range for x in linear scale
@@ -409,7 +409,7 @@ class FitPage(BasicPage):
             ## set q range to plot
             self.qmin_x = data_min
             self.qmax_x = data_max
-        box_description= wx.StaticBox(self, -1, 'Data')
+        box_description= wx.StaticBox(self, -1, 'I(q) Data Source')
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         #----------------------------------------------------------
         sizer_data = wx.BoxSizer(wx.HORIZONTAL)
@@ -419,10 +419,10 @@ class FitPage(BasicPage):
         self.dataSource.SetValue(str(data_name))
         #self.dataSource.SetEditable(False)
         self.dataSource.SetMinSize((_DATA_BOX_WIDTH, -1))
-        sizer_data.Add(wx.StaticText(self, -1, 'Source Name : '))
+        sizer_data.Add(wx.StaticText(self, -1, 'Data : '))
         sizer_data.Add(self.dataSource )
         sizer_data.Add( (0,5) )
-        
+        """
         #---------sizer 2 draw--------------------------------
         text4_3 = wx.StaticText(self, -1, 'Total Q Range (1/A)',
                                  style=wx.ALIGN_LEFT)
@@ -436,9 +436,11 @@ class FitPage(BasicPage):
         sizer_range.Add(self.minimum_q,0, wx.LEFT, 10)
         sizer_range.Add(wx.StaticText(self, -1, "Max: "),0, wx.LEFT, 10)
         sizer_range.Add(self.maximum_q,0, wx.LEFT, 10)
+        """
         boxsizer1.Add(sizer_data,0, wx.ALL, 10)
-        boxsizer1.Add(sizer_range, 0 , wx.LEFT, 10)
+        #boxsizer1.Add(sizer_range, 0 , wx.LEFT, 10)
         #------------------------------------------------------------
+        
         self.sizer0.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer0.Layout()
        
@@ -1652,8 +1654,8 @@ class FitPage(BasicPage):
         self.dataSource.SetValue(data_name)
         self.qmin_x = data_min
         self.qmax_x = data_max
-        self.minimum_q.SetValue(str(data_min))
-        self.maximum_q.SetValue(str(data_max))
+        #self.minimum_q.SetValue(str(data_min))
+        #self.maximum_q.SetValue(str(data_max))
         self.qmin.SetValue(str(data_min))
         self.qmax.SetValue(str(data_max))
         self.qmin.SetBackgroundColour("white")
