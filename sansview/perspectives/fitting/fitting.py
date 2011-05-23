@@ -271,9 +271,12 @@ class Plugin(PluginBase):
             selected_data_list = data_list
         try:
             for data in selected_data_list:
-                self.add_fit_page(data=data)
+                page = self.add_fit_page(data=data)
                 wx.PostEvent(self.parent, NewPlotEvent(plot=data, 
                                                        title=str(data.title)))
+                # update focused panel name 
+                self.parent.panel_on_focus = page
+                self.parent.set_panel_on_focus(None)
                 
         except:
             raise
