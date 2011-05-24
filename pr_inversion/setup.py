@@ -17,7 +17,7 @@ srcdir  = "c_extensions"
 
 setup(
     name="pr_inversion",
-    version = "0.1",
+    version = "0.9",
     description = "Python module inversion of the scattering intensity to P(r)",
     author = "University of Tennessee",
     url = "danse.chem.utk.edu",
