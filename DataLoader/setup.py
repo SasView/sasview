@@ -10,7 +10,7 @@ from distutils.core import setup#, Extension
 #numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
 setup(
     name="DataLoader",
-    version = "0.2",
+    version = "0.9",
     description = "Python module for loading",
     author = "University of Tennessee",
     url = "http://danse.chem.utk.edu",
