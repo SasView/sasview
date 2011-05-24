@@ -71,7 +71,15 @@ SetupIconFile_win = os.path.join("images", "ball.ico")
 SetupIconFile_mac = os.path.join("images", "ball.icns")
 DefaultGroupName = "DANSE"
 OutputBaseFilename = "setupSansView"
-
+DATAPANEL_WIDTH = 235
+FIXED_PANEL = True
+DATALOADER_SHOW = True
+CLEANUP_PLOT = False
+WELCOME_PANEL_SHOW = False
+#Show or hide toolbar at the start up
+TOOLBAR_SHOW = True
+# set a default perspective
+DEFAULT_PERSPECTIVE = 'None'
 
 def printEVT(message):
     if __EVT_DEBUG__:
