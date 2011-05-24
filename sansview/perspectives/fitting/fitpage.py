@@ -463,7 +463,7 @@ class FitPage(BasicPage):
         id = wx.NewId()
         self.model_view = wx.Button(self, id,"1D Mode", size=(80, 23))
         self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D, id=id)
-        hint = "toggle view of model from 1D to 2D  or 2D from 1D"
+        hint = "toggle view of model from 1D to 2D  or 2D to 1D"
         self.model_view.SetToolTipString(hint)
       
         self.shape_rbutton = wx.RadioButton(self, -1, 'Shapes', style=wx.RB_GROUP)
