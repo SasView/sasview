@@ -38,7 +38,7 @@ class FitPage(BasicPage):
         Initialization of the Panel
         """
         BasicPage.__init__(self, parent, color=color)
-        self.model_name_txt = None
+        
         ## draw sizer
         self._fill_datainfo_sizer()
         self.is_2D = None
@@ -421,10 +421,7 @@ class FitPage(BasicPage):
         self.dataSource.SetMinSize((_DATA_BOX_WIDTH, -1))
         sizer_data.Add(wx.StaticText(self, -1, 'Name : '))
         sizer_data.Add(self.dataSource )
-        self.model_name_txt = wx.StaticText(self, -1, " [No model]",
-                                 style=wx.ALIGN_LEFT)
-        self.model_name_txt.SetForegroundColour('blue')
-        sizer_data.Add(self.model_name_txt)
+        sizer_data.Add( (0,5) )
         """
         #---------sizer 2 draw--------------------------------
         text4_3 = wx.StaticText(self, -1, 'Total Q Range (1/A)',
@@ -456,9 +453,9 @@ class FitPage(BasicPage):
         title = "Model"
         self.formfactorbox = None
         self.multifactorbox = None
-        box_description= wx.StaticBox(self, -1,str(title))
-        boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
-         
+        self.mbox_description= wx.StaticBox(self, -1,str(title))
+        boxsizer1 = wx.StaticBoxSizer(self.mbox_description, wx.VERTICAL)
+        
         id = wx.NewId()
         self.model_help =wx.Button(self,id,'Details', size=(80,23))
         self.model_help.Bind(wx.EVT_BUTTON, self.on_model_help_clicked,id=id)
@@ -1083,11 +1080,10 @@ class FitPage(BasicPage):
                                      qmax=float(self.qmax_x)) 
    
             self._manager._on_model_panel(evt=evt)
+            self.mbox_description.SetLabel("Model [%s]" % str(self.model.name))
             self.state.model = self.model.clone()
             self.state.model.name = self.model.name
-            if self.model_name_txt is not None:
-                self.model_name_txt.SetLabel(" [%s]" % str(self.model.name))
-                self.model_name_txt.SetForegroundColour('blue')
+
             self._draw_model()
         if event != None:
             ## post state to fit panel
