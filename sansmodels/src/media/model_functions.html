@@ -505,7 +505,7 @@ ul
      <a href="#LineModel">LineModel</a>.</li>
  <li class=MsoNormal style='line-height:115%'><a href="#Model"><b>Customized
      Models</b></a>: <a href="#A+Bcos(2x)+Csin(2x)">A+Bcos(2x)+Csin(2x)</a>, <a
-     href="#sinpoly_poly">sin(poly)/(poly)</a>, <a href="#ReflectivityModel">ReflectivityModel</a>,
+     href="#sinpoly_poly">sin(poly)/(poly)</a>, <a href="#Sum[P1(Cyl), P2(PEV)]">Sum[P1(Cyl), P2(PEV)]</a>, <a href="#ReflectivityModel">ReflectivityModel</a>,
      <a href="#ReflectivityIIModel">ReflectivityIIModel</a>.</li>
  <li class=MsoNormal style='line-height:115%'><a href="#Structure_Factors"><b>Structure
      Factors</b></a>: <a href="#HardsphereStructure">HardSphereStructure</a>, <a
@@ -13733,7 +13733,7 @@ style='font-size:14.0pt'>4.1.</span></b><b><span style='font-size:7.0pt'>&nbsp;&
 <p class=MsoListParagraph style='margin-left:.55in'><b><span style='font-size:
 14.0pt'>&nbsp;</span></b></p>
 
-<p class=MsoNormal>This function, as a sample of a user defined function, calculates
+<p class=MsoNormal>This function, as an example of a user defined function, calculates
 the intensity = A + Bcos(2q) + Csin(2q).</p>
 
 <p class=MsoNormal>&nbsp;</p>
@@ -13747,7 +13747,7 @@ style='font-size:14.0pt'>4.2.</span></b><b><span style='font-size:7.0pt'>&nbsp;&
 
 <p class=MsoNormal><b>&nbsp;</b></p>
 
-<p class=MsoNormal>This function, as a sample of a user defined function,
+<p class=MsoNormal>This function, as an example of a user defined function,
 calculates the intensity =&nbsp; scale * sin(f)/f, where f = A + Bq + Cq<sup>2</sup>
 + Dq<sup>3 </sup>+ Eq<sup>4</sup> + Fq<sup>5</sup>.</p>
 
@@ -13757,6 +13757,22 @@ calculates the intensity =&nbsp; scale * sin(f)/f, where f = A + Bq + Cq<sup>2</
 
 <p class=MsoListParagraph style='margin-left:.55in;text-indent:-.3in'><b><span
 style='font-size:14.0pt'>4.3.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></b><a name="Sum[P1(Cyl), P2(PEV)]"><b><span style='font-size:14.0pt'>Sum[P1(Cyl), P2(PEV)]
+</span></b></a></p>
+
+<p class=MsoNormal><b>&nbsp;</b></p>
+
+<p class=MsoNormal>This function, as an example of a user defined function,
+calculates the intensity =&nbsp; scale_factor * (CylinderModel + PolymerExclVolume model).
+To make your own sum(P1+P2) model, modify and save the file named 'sum_p1_p2.py' in the SansView/plugins/ folder 
+by changing the model names in the 'from' and 'import' statement, and the self.name if desired.
+</p>
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoListParagraph style='margin-left:.55in;text-indent:-.3in'><b><span
+style='font-size:14.0pt'>4.4.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=ReflectivityModel><b><span style='font-size:14.0pt'>ReflectivityModel</span></b></a></p>
 
 <p class=MsoListParagraph style='margin-left:.55in;text-indent:-.3in'><b><span
@@ -13798,7 +13814,7 @@ SLD profile used for the calculation(above).</b></p>
 <p class=MsoListParagraph style='margin-left:.55in;text-indent:-.3in'>&nbsp;</p>
 
 <p class=MsoListParagraph style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>4.4.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>4.5.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=ReflectivityIIModel><b><span style='font-size:14.0pt'>ReflectivityIIModel</span></b></a></p>
 
 <p class=MsoListParagraph style='margin-left:.55in;text-indent:-.3in'><b><span
