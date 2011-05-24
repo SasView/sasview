@@ -5,6 +5,7 @@ import os
 from distutils.core import setup
 
 setup(
+    version = "0.9",
     name="invariant",
     description = "Invariant perspective for SansView",
     package_dir = {"sans.perspectives":"perspectives",
