@@ -8,7 +8,7 @@ from distutils.core import setup, Extension
 
 setup(
     name="sans.fit",
-    version = "0.1",
+    version = "0.9",
     description = "Python module for fitting",
     author = "University of Tennessee",
     #author_email = "",
