@@ -46,7 +46,7 @@ if 'install' in sys.argv:
 
 setup(
     name="guiframe",
-    version = "0.1",
+    version = "0.9",
     description = "Python module for SANS gui framework",
     author = "University of Tennessee",
     url = "http://danse.chem.utk.edu",
