@@ -400,7 +400,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         pars_sizer = wx.GridBagSizer(5, 5)
 
         iy = 0
-        self.file_radio = wx.StaticText(self, -1, "Data:")
+        self.file_radio = wx.StaticText(self, -1, "Name:")
         pars_sizer.Add(self.file_radio, (iy, 0), (1, 1),
                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         
