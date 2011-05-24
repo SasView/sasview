@@ -6,7 +6,7 @@ from distutils.core import setup
 
 setup(
     name="calculator",
-    version = "0.1",
+    version = "0.9",
     description="calculator perspective for SansView",
     package_dir={"sans.perspectives":"perspectives",
                  "sans.perspectives.calculator":"perspectives/calculator",
