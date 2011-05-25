@@ -1294,7 +1294,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.hint_msg_txt.SetToolTipString(msg)
         self.hint_msg_sizer.Add(self.hint_msg_txt)
         #Data name [string]
-        data_name_txt = wx.StaticText(self, -1, 'Data:')  
+        data_name_txt = wx.StaticText(self, -1, 'Name:')  
        
         self.data_name_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH*4, 20),
                                             style=0) 
