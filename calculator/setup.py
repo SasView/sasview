@@ -10,10 +10,8 @@ setup(
     description = "Python module for sld  calculation",
     author = "University of Tennessee",
     url = "http://danse.chem.utk.edu",
-    
+
     # Use the pure python modules
     package_dir = {"sans.calculator":"."},
-    
-    packages = ["sans.calculator"]
+    packages = ["sans","sans.calculator"],
     )
-        
