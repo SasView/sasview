@@ -70,7 +70,9 @@ Package name: None
 
 
 2- Downloading and Installing
-
+	
+	*** Note: If you have EXE or ZIP SansView installer, you don't need any of the below. This is for installing the SansView from the source.
+	
 	2.1- System Requirements:
 		- Python version >= 2.5 and < 3.0 should be running on the system
 		- We uses Python2.5.4 for WIN, and Python2.6 for MAC
