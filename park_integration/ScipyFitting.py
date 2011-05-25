@@ -55,17 +55,16 @@ class fitresult(object):
         n = len(self.model.parameterset)
         self.iterations += 1
         result_param = zip(xrange(n), self.model.parameterset)
+        msg1 = ["[Iteration #: %s ]" % self.iterations]
+        msg3 = ["=== goodness of fit: %s ===" % (str(self.fitness))]
         if not self.is_mac:
-            msg1 = ["[Iteration #: %s ]" % self.iterations]
             msg2 = ["P%-3d  %s......|.....%s" % \
-            	(p[0], p[1], p[1].value)\
+                (p[0], p[1], p[1].value)\
                   for p in result_param if p[1].name in self.param_list]
-            
-            msg3 = ["=== goodness of fit: %s ===" % (str(self.fitness))]
             msg =  msg1 + msg3 + msg2
-            msg = "\n".join(msg)
         else:
-            msg = ''
+            msg = msg1 + msg3
+        msg = "\n".join(msg)
         return msg
     
     def print_summary(self):
@@ -146,7 +145,7 @@ class ScipyFit(FitEngine):
         functor = SansAssembly(self.param_list, model, data, handler=handler,
                          fitresult=result, curr_thread= self.curr_thread)
         try:
-        	out, cov_x, _, mesg, success = optimize.leastsq(functor,
+            out, cov_x, _, mesg, success = optimize.leastsq(functor,
                                             model.get_params(self.param_list),
                                                     ftol=ftol,
                                                     full_output=1,
