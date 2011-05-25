@@ -13,7 +13,10 @@ from scipy import optimize
 from sans.fit.AbstractFitEngine import FitEngine
 from sans.fit.AbstractFitEngine import SansAssembly
 from sans.fit.AbstractFitEngine import FitAbort
-
+IS_MAC = True
+if sys.platform.count("win32") > 0:
+    IS_MAC = False
+    
 class fitresult(object):
     """
     Storing fit result
@@ -29,6 +32,7 @@ class fitresult(object):
         self.success = None
         self.stderr = None
         self.parameters = None
+        self.is_mac = IS_MAC
         self.model = model
         self.param_list = param_list
         self.iterations = 0
@@ -51,14 +55,18 @@ class fitresult(object):
         n = len(self.model.parameterset)
         self.iterations += 1
         result_param = zip(xrange(n), self.model.parameterset)
-        msg1 = ["[Iteration #: %s ]" % self.iterations]
-        msg2 = ["P%-3d  %s......|.....%s" % \
-        	(p[0], p[1], p[1].value)\
-              for p in result_param if p[1].name in self.param_list]
-        
-        msg3 = ["=== goodness of fit: %s ===" % (str(self.fitness))]
-        msg =  msg1 + msg3 + msg2
-        return "\n".join(msg)
+        if not self.is_mac:
+            msg1 = ["[Iteration #: %s ]" % self.iterations]
+            msg2 = ["P%-3d  %s......|.....%s" % \
+            	(p[0], p[1], p[1].value)\
+                  for p in result_param if p[1].name in self.param_list]
+            
+            msg3 = ["=== goodness of fit: %s ===" % (str(self.fitness))]
+            msg =  msg1 + msg3 + msg2
+            msg = "\n".join(msg)
+        else:
+            msg = ''
+        return msg
     
     def print_summary(self):
         """
