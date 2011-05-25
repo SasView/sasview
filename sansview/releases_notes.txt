@@ -6,16 +6,32 @@ SansView 1.9
 Package name: None
 1- version 1.9
 	- Release date: 05/25/2011
-	- New graphical user interface
+	- The SansView WORKS!!!
+	- Much easier graphical user interface
+	- Optimized for the speed and accuracy of the computation
+	- Added Many shape, polymer, and other models including SphericalSLD, OnionExponetialShell, and even ReflectivityModels
+	- Added Data Explorer to manage, plot, delete, or setup for computation
+	- Added Instrumental resolution estimator (as a Tool)
+	- Customizable Startup appearance
+	- More functionalities on plot panels
+	- Combined Modeling and Fitting
+	- Save/open a SansView project or SansView analysis (subproject)
+	- Start the SansView application from a data file by double-clicking or command line
+	- Easy manipulation of data and plot
+	- Provides Normalized residual plot
+	- Added useful key-combinations to copy (fitpage), paste (fitpage), change fit-tolerance, etc.
+	- Report
+	- 2D masked circular averaging
+	- 2D smearing calculation now uses dQ_parrellel and dQ_perpendicular
+	- More Help
+	- etc
+
 	
-	- Version 1.3.1
+	- Version 1.3
+	
 	- Improved the speed of loading 2D data.
 	- Improved the speed of P*S calculations.
 	- Added 2D smearing calculation for dQx and dQy given along the x-y axes.
-	- Fixed minor bugs.
-		
-	-Version 1.3.0
-	
 	- MAC release
   	- Implemented the invariant, volume fraction, and specific surface area computation.
 	- Implemented the scattering length density calculator.
@@ -57,6 +73,7 @@ Package name: None
 
 	2.1- System Requirements:
 		- Python version >= 2.5 and < 3.0 should be running on the system
+		- We uses Python2.5.4 for WIN, and Python2.6 for MAC
 
 	2.2- Installing:
 		- Get the code from svn://danse.us/sans/releases/sansview-1.9
@@ -73,18 +90,19 @@ Package name: None
 			svn://danse.us/park/releases/park-1.2.1 (run 'python setup.py install' under the 'park-1.2.1' folder)
 	        svn://danse.us/common/releases/plottools-0.9 (run 'python setup.py install'under the 'plottools-0.9\trunk\' folder)
 	        svn://danse.us/common/releases/util-0.9 (run 'python setup.py install'under the 'util-0.1.5' folder)
-	        svn://danse.us/common/elements/releases/elements-1.2 (run 'python setup.py install'under the 'elements-1.2' folder)
 	        svn://danse.us/sans/releases/pr_inversion-0.9 (run 'python setup.py install'under the 'pr_inversion-0.9' folder)
 	        svn://danse.us/sans/releases/prview-0.9 (run 'python setup.py install'under the 'prview-0.9' folder)
 		- The following modules are required:
-			* matplotlib = 0.99.0
+			* matplotlib = 0.99.0(WIN), 0.99.1(MAC)
 			* numpy = 1.4.1
 			* scipy >= 0.7.2
 			* wxpython 2.8.11 unicode
-			* lxml
+			* lxml >= 2.2.2
 			* PIL (Python Image Library)
 			* Pyparsing (apply for bundling)
-			* MinGW (for windows) or other GNU compiler (gcc)
+			* periodictable = 1.3.0 (using 'easy_install periodictable')
+			* MinGW/Cygwin (for Windows) or other GNU compiler (gcc)
+			*Optional: setuptools, svn, Innosetup, py2exe(WIN),and/or py2app(MAC) to build App from the source.
 
 
 3- Known Issues
