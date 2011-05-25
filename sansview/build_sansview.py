@@ -57,22 +57,21 @@ logging.basicConfig(level=logging.INFO,
 SVN    = "svn"
 INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
 
-# Release version 1.3.1
-SANSMODELS = "0.4.7"
-DATALOADER = "0.2.7"
-GUIFRAME   = "0.2.0"
-SANSVIEW   = "1.3.1"
-PLOTTOOLS  = "0.1.9"
-UTIL       = "0.1.5"
+# Release version 1.9
+SANSMODELS = "0.9"
+DATALOADER = "0.9"
+GUIFRAME   = "0.9"
+SANSVIEW   = "1.9"
+PLOTTOOLS  = "0.9"
+UTIL       = "0.9"
 PARK       = "1.2.1"
-PARK_INTEG = "0.1.5"
-PRVIEW     = "0.3.3"
-PR_INV     = "0.2.5"
-CALCULATOR = "0.1.1"
-CALC_VIEW  = "0.1.1"
-INVARIANT  = "0.1.1"
-INV_VIEW   = "0.1.1"
-ELEMENTS = "1.2"
+PARK_INTEG = "0.9"
+PRVIEW     = "0.9"
+PR_INV     = "0.9"
+CALCULATOR = "0.9"
+CALC_VIEW  = "0.9"
+INVARIANT  = "0.9"
+INV_VIEW   = "0.9"
 
 # URLs for SVN repos
 SANSMODELS_URL = "svn://danse.us/sans/releases/sansmodels-%s" % SANSMODELS
@@ -89,7 +88,6 @@ CALC_URL = "svn://danse.us/sans/releases/calculator-%s" % CALCULATOR
 CALC_VIEW_URL = "svn://danse.us/sans/releases/calculatorview-%s" % CALC_VIEW
 INV_URL = "svn://danse.us/sans/releases/Invariant-%s" % INVARIANT
 INV_VIEW_URL = "svn://danse.us/sans/releases/invariantview-%s" % INV_VIEW
-ELEMENTS_URL = "svn://danse.us/common/elements/releases/elements-%s" % ELEMENTS
 
 def check_system():
     """
@@ -223,11 +221,6 @@ def checkout(release=False):
     else:
         install_pkg(".", "calculator", "svn://danse.us/sans/trunk/calculator")
 
-    os.chdir(wd)
-    if release:
-        install_pkg(".", "elements-%s" % ELEMENTS, ELEMENTS_URL)
-    else:
-        install_pkg("elements", "trunk", "svn://danse.us/common/elements/trunk")
 
     os.chdir(wd)
     if release:
