@@ -129,6 +129,6 @@ Package name: None
 
 	- None
 
-6- Other Resources
+6- Installer download website
 
 	- See: http://danse.chem.utk.edu/sansview.html
