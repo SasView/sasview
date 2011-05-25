@@ -1189,9 +1189,9 @@ class ViewerFrame(wx.Frame):
         self._edit_menu.Append(GUIFRAME_ID.PREVIEW_ID, '&Report',
                                'Preview current panel')
         wx.EVT_MENU(self, GUIFRAME_ID.PREVIEW_ID, self.on_preview_panel)
-        self._edit_menu.Append(GUIFRAME_ID.PRINT_ID, '&Print',
-                               'Print current panel')
-        wx.EVT_MENU(self, GUIFRAME_ID.PRINT_ID, self.on_print_panel)
+        #self._edit_menu.Append(GUIFRAME_ID.PRINT_ID, '&Print',
+        #                       'Print current panel')
+        #wx.EVT_MENU(self, GUIFRAME_ID.PRINT_ID, self.on_print_panel)
         self._edit_menu.Append(GUIFRAME_ID.RESET_ID, '&Reset', 
                                'Reset current panel')
         wx.EVT_MENU(self, GUIFRAME_ID.RESET_ID, self.on_reset_panel)
@@ -2118,8 +2118,8 @@ class ViewerFrame(wx.Frame):
             self._edit_menu.Enable(GUIFRAME_ID.UNDO_ID, flag)
             flag = self.cpanel_on_focus.get_redo_flag()
             self._edit_menu.Enable(GUIFRAME_ID.REDO_ID, flag)
-            flag = self.cpanel_on_focus.get_print_flag()
-            self._edit_menu.Enable(GUIFRAME_ID.PRINT_ID, flag)
+            #flag = self.cpanel_on_focus.get_print_flag()
+            #self._edit_menu.Enable(GUIFRAME_ID.PRINT_ID, flag)
             flag = self.cpanel_on_focus.get_preview_flag()
             self._edit_menu.Enable(GUIFRAME_ID.PREVIEW_ID, flag)
             flag = self.cpanel_on_focus.get_reset_flag()
@@ -2128,7 +2128,7 @@ class ViewerFrame(wx.Frame):
             flag = False
             self._edit_menu.Enable(GUIFRAME_ID.UNDO_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.REDO_ID, flag)
-            self._edit_menu.Enable(GUIFRAME_ID.PRINT_ID, flag)
+            #self._edit_menu.Enable(GUIFRAME_ID.PRINT_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.PREVIEW_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.RESET_ID, flag)
             
