@@ -9,10 +9,8 @@ setup(
     description = "Python module for invariant calculation",
     author = "University of Tennessee",
     url = "http://danse.chem.utk.edu",
-    
+
     # Use the pure python modules
     package_dir = {"sans.invariant":"."},
-    
-    packages = ["sans.invariant"]
+    packages = ["sans","sans.invariant"],
     )
-        
