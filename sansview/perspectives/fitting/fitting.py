@@ -363,7 +363,7 @@ class Plugin(PluginBase):
                                         title=data.title))
                 page = self.add_fit_page(data)
                 caption = page.window_name
-                self.store_data(page=page.id, data=data, caption=caption)
+                self.store_data(page=page.uid, data=data, caption=caption)
                 self.mypanels.append(page) 
                 
             # get ready for the next set_state
