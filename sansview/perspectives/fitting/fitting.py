@@ -274,14 +274,9 @@ class Plugin(PluginBase):
                 page = self.add_fit_page(data=data)
                 wx.PostEvent(self.parent, NewPlotEvent(plot=data, 
                                                        title=str(data.title)))
-                # update focused panel name 
-                self.parent.panel_on_focus = page
-                self.parent.set_panel_on_focus(None)
-                
         except:
-            raise
-            #msg = "Fitting Set_data: " + str(sys.exc_value)
-            #wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
+            msg = "Fitting Set_data: " + str(sys.exc_value)
+            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
     
     def set_top_panel(self):
         """
