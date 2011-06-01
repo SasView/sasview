@@ -67,6 +67,16 @@ SetupIconFile_win = os.path.join("images", "ball.ico")
 SetupIconFile_mac = os.path.join("images", "ball.icns")
 DefaultGroupName = "DANSE"
 OutputBaseFilename = "setupGuiFrame"
+DATAPANEL_WIDTH = 235
+DATAPANEL_HEIGHT = 700
+FIXED_PANEL = True
+DATALOADER_SHOW = True
+CLEANUP_PLOT = False
+WELCOME_PANEL_SHOW = False
+#Show or hide toolbar at the start up
+TOOLBAR_SHOW = True
+# set a default perspective
+DEFAULT_PERSPECTIVE = 'None'
 
 import wx.lib.newevent
 (StatusBarEvent, EVT_STATUS) = wx.lib.newevent.NewEvent()
