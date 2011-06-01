@@ -313,7 +313,9 @@ class FitPanel(nb, PanelBase):
         panel.uid = wx.NewId()
         panel.populate_box(dict=self.model_list_box)
         panel.set_manager(self._manager)
-        caption = str(panel.window_name) + " " + str(self._manager.index_model)
+        index = self.GetPageCount()
+        #caption = str(panel.window_name) + " " + str(self._manager.index_model)
+        caption = str(panel.window_name) + " " + str(index)
         self.AddPage(panel, caption, select=True)
         self.opened_pages[panel.uid] = panel
         self.set_engine_helper(panel=panel)
