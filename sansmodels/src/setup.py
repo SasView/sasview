@@ -11,7 +11,7 @@
 """
 import sys
 import os
-
+    
 from numpy.distutils.misc_util import get_numpy_include_dirs
 numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
 
@@ -66,8 +66,8 @@ if len(sys.argv) > 1 and sys.argv[1].lower() == 'odb':
     sys.exit()
 
 # Then build and install the modules
-from distutils.core import setup, Extension
-
+from distutils.core import Extension, setup
+#from setuptools import setup#, find_packages
 
 # Build the module name
 srcdir  = "sans/models/c_extensions"
@@ -76,12 +76,12 @@ igordir = "libigor"
 print "Installing SANS models"
 
 
-setup(
+dist = setup(
     name="models",
-    version = "0.9",
+    version = "0.9.1",
     description = "Python module for SANS scattering models",
-    author = "Mathieu Doucet",
-    author_email = "doucet@nist.gov",
+    author = "SANS/DANSE",
+    author_email = "sansdanse@gmail.gov",
     url = "http://danse.us/trac/sans",
     
     # Place this module under the sans package
@@ -90,7 +90,7 @@ setup(
     # Use the pure python modules
     package_dir = {"sans_extension":"sans/models/c_extensions",
                    "sans.models.media":"media"},
-    package_data={'sans.models.media': ['*']},
+    package_data={'sans.models.media': ['*.gif','*.jpg','*.png','*.html']},
     packages = ["sans","sans.models","sans.models.test",
                 "sans_extension","sans.models.pyre",
                 "sans.models.media"],
@@ -274,12 +274,21 @@ setup(
         srcdir+"/lorentzian.c",
         srcdir+"/CLorentzian.c"
             ],
-         include_dirs=[igordir,srcdir,"sans/models/c_models",numpy_incl_path]),       
-         # Smearer extension
-         Extension("sans_extension.smearer",
+        include_dirs=[igordir,srcdir,"sans/models/c_models",numpy_incl_path]),       
+        # Smearer extension
+        Extension("sans_extension.smearer",
                    sources = [
         "sans/models/c_smearer/smearer_module.cpp",
         "sans/models/c_smearer/smearer.cpp",
         ],
-        include_dirs=["sans/models/c_smearer",numpy_incl_path])])
+        include_dirs=["sans/models/c_smearer",numpy_incl_path]),
+        Extension("sans_extension.smearer2d_helper",
+                  sources = [
+        "sans/models/c_smearer/smearer2d_helper_module.cpp",
+        "sans/models/c_smearer/smearer2d_helper.cpp",
+        ],
+        include_dirs=["sans/models/c_smearer",numpy_incl_path]
+        )
+        ]
+    )
         
