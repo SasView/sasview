@@ -76,16 +76,15 @@ PyObject * new_Smearer_helper(PyObject *, PyObject *args) {
  */
 PyObject * smear2d_input(PyObject *, PyObject *args) {
 	PyObject *weights_obj;
-	PyObject *qx_out_obj;
-	PyObject *qy_out_obj;
-	PyObject *smear_obj;
 	Py_ssize_t w_out;
-	Py_ssize_t n_out;
 	double *weights;
+	PyObject *qx_out_obj;
+	Py_ssize_t n_out;
 	double *qx_out;
+	PyObject *qy_out_obj;
+	//Py_ssize_t n_out;
 	double *qy_out;
-
-
+	PyObject *smear_obj;
 
 	if (!PyArg_ParseTuple(args, "OOOO",  &smear_obj, &weights_obj, &qx_out_obj, &qy_out_obj)) return NULL;
 	OUTVECTOR(weights_obj, weights, w_out);
