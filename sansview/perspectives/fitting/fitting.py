@@ -621,11 +621,14 @@ class Plugin(PluginBase):
         ## If a thread is already started, stop it
         #if self.calc_fit!= None and self.calc_fit.isrunning():
         #    self.calc_fit.stop()
-         #Handler used for park engine displayed message
+        msg = "Fitting is in progress..."
+        wx.PostEvent( self.parent, StatusEvent(status=msg, type="progress" ))
+        
+        #Handler used for park engine displayed message
         handler = ConsoleUpdate(parent=self.parent,
                                 manager=self,
                                 improvement_delta=0.1)
-        
+        time.sleep(0.2)
         ## perform single fit
         if fitproblem_count == 1:
             calc_fit = FitThread(handler = handler,
@@ -644,12 +647,10 @@ class Plugin(PluginBase):
                                     completefn=self._simul_fit_completed,
                                     ftol=self.ftol)
         self.fit_thread_list[current_page_id] = calc_fit
-        calc_fit.queue()
-        msg = "Fitting is in progress..."
-        wx.PostEvent( self.parent, StatusEvent(status=msg, type="progress" ))
+        time.sleep(0.3)
         
-        self.ready_fit(calc_fit=calc_fit)
-      
+        #self.ready_fit(calc_fit=calc_fit)
+        calc_fit.queue()
             
     def ready_fit(self, calc_fit):
         """
@@ -890,7 +891,8 @@ class Plugin(PluginBase):
         :param qmin: the minimum value of x to replot the model 
         :param qmax: the maximum value of x to replot model
           
-        """     
+        """  
+        time.sleep(0.2)   
         try:
             if result == None:
                 self._update_fit_button(page_id)
@@ -956,6 +958,7 @@ class Plugin(PluginBase):
         if page_id is None:
             page_id = []
         ## fit more than 1 model at the same time 
+        time.sleep(0.2)  
         try:
             msg = "" 
             if result == None:
@@ -1136,7 +1139,7 @@ class Plugin(PluginBase):
         """
         msg = "Plot updating ... "
         wx.PostEvent(self.parent, StatusEvent(status=msg,type="update"))
-        self.ready_fit()
+        #self.ready_fit()
         
     
     def _fill_default_model2D(self, theory, page_id, qmax,qstep, qmin=None):
@@ -1311,7 +1314,7 @@ class Plugin(PluginBase):
         """
         wx.PostEvent(self.parent, StatusEvent(status="Plot \
         #updating ... ", type="update"))
-        self.ready_fit()
+        #self.ready_fit()
   
     def _complete2D(self, image, data, model, page_id,  elapsed, index, qmin,
                      qmax, toggle_mode_on=False,state=None,qstep=DEFAULT_NPTS, 
