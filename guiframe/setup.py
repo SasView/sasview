@@ -1,3 +1,4 @@
+
 """
     Installs the guiframe package
 """
@@ -8,19 +9,20 @@ from distutils.core import setup, Extension
 from distutils.sysconfig import get_python_lib
 import os
 import sys
+import glob
 
     
 path = os.path.join(os.getcwd(), 'local_perspectives')
 package_dir = { "sans.guiframe":".",
                 "sans.guiframe.local_perspectives":"local_perspectives",
-                "sans.guiframe.widgets":"widgets",
-                "sans.guiframe.media":"media"}
-package_data = {"sans.guiframe": ['images/*'],
-                "sans.guiframe.media": ['*']}
+                #"sans.guiframe.images":"images",
+               # "sans.guiframe.media":"media",
+                }
+#package_data = {"sans.guiframe": ['images/*'],
+#                "sans.guiframe":'media/*']}
+package_data = {"sans.guiframe": ['images/*', 'media/*']}
 packages = ["sans.guiframe", 
-            "sans.guiframe.local_perspectives",
-            "sans.guiframe.widgets",
-            "sans.guiframe.media"]
+            "sans.guiframe.local_perspectives"]
 # build local plugin
 for dir in os.listdir(path):
     if dir not in ['.svn','__init__.py', '__init__.pyc']:
@@ -54,7 +56,24 @@ setup(
     package_dir = package_dir,
 
     packages = packages,
-    
     package_data = package_data,
+
     )
-        
+if 'sdist' in sys.argv:
+    import zipfile
+    from distutils.filelist import findall
+    filename = "guiframe-0.9"
+    cwd = os.getcwd()
+    for f in findall(cwd):
+        if os.path.basename(f).count(filename) == 1:
+            if zipfile.is_zipfile(f):
+                zfile = zipfile.ZipFile(f, "a")
+                for image_file in glob.glob(os.path.join("images","*")):
+                    print "Adding %s to %s\n" % (image_file, os.path.basename(f))
+                    zfile.write(image_file, os.path.join(filename, image_file))
+                for media_file in glob.glob(os.path.join("media","*")):
+                    print "Adding %s to %s\n" % (media_file, os.path.basename(f))
+                    zfile.write(media_file, os.path.join(filename, media_file))
+                zfile.close()
+                break
+                    
