@@ -6,10 +6,7 @@ import time
 import wx
 import park
 from park.fitresult import FitHandler
-import sys
-IS_MAC = True
-if sys.platform.count("win32") > 0:
-    IS_MAC = False
+
 class ConsoleUpdate(FitHandler):
     """
     Print progress to the console.
@@ -118,10 +115,7 @@ class ConsoleUpdate(FitHandler):
         """
         """
         self.elapsed_time = time.time() - self.elapsed_time
-        if IS_MAC:
-            msg = ''
-        else:
-            msg = " Updating fit ...\n result:\n %s \n"%self.result.__str__()
+        msg = " Updating fit ...\n result:\n %s \n"%self.result.__str__()
         wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                               type="progress"))
         time.sleep(0.01)

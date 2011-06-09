@@ -50,9 +50,6 @@ class fitresult(object):
     def __str__(self):
         """
         """
-        # This str makes MAC slow and timing issue
-        if self.is_mac:
-            return ''
         if self.pvec == None and self.model is None and self.param_list is None:
             return "No results"
         n = len(self.model.parameterset)
