@@ -47,7 +47,7 @@ PyObject * new_Smearer_helper(PyObject *, PyObject *args) {
 	PyObject *qy_values_obj;
 	PyObject *dqx_values_obj;
 	PyObject *dqy_values_obj;
-	//Py_ssize_t n_q;
+	Py_ssize_t n_q;
 	//PyObject rlimit_obj;
 	//PyObject npoints_obj;
 	//PyObject nrbins_obj;
@@ -63,10 +63,10 @@ PyObject * new_Smearer_helper(PyObject *, PyObject *args) {
 
 
 	if (!PyArg_ParseTuple(args, "OOOOdiii", &qx_values_obj, &qy_values_obj, &dqx_values_obj, &dqy_values_obj, &rlimit, &nrbins, &nphibins, &npoints)) return NULL;
-	OUTVECTOR(qx_values_obj, qx_values, npoints);
-	OUTVECTOR(qy_values_obj, qy_values, npoints);
-	OUTVECTOR(dqx_values_obj, dqx_values, npoints);
-	OUTVECTOR(dqy_values_obj, dqy_values, npoints);
+	OUTVECTOR(qx_values_obj, qx_values, n_q);
+	OUTVECTOR(qy_values_obj, qy_values, n_q);
+	OUTVECTOR(dqx_values_obj, dqx_values, n_q);
+	OUTVECTOR(dqy_values_obj, dqy_values, n_q);
 	Smearer_helper* smearer2d_helper = new Smearer_helper(npoints,qx_values,qy_values,dqx_values,dqy_values, rlimit, nrbins, nphibins);
 	return PyCObject_FromVoidPtr(smearer2d_helper, del_smearer2d_helper);
 }
