@@ -6,6 +6,7 @@ import time
 import wx
 import park
 from park.fitresult import FitHandler
+import sys
 IS_MAC = True
 if sys.platform.count("win32") > 0:
     IS_MAC = False
