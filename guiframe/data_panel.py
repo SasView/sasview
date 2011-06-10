@@ -56,12 +56,14 @@ if sys.platform.count("win32") > 0:
     CBOX_WIDTH = 140
     BUTTON_WIDTH = 80
     FONT_VARIANT = 0
+    IS_MAC = False
 else:
     PANEL_WIDTH = 255
     PANEL_HEIGHT = 750
     CBOX_WIDTH = 155
     BUTTON_WIDTH = 100
     FONT_VARIANT = 1
+    IS_MAC = True
 
 STYLE_FLAG =wx.RAISED_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|\
                     wx.WANTS_CHARS|CT.TR_HAS_VARIABLE_ROW_HEIGHT
@@ -73,12 +75,13 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
     """
     def __init__(self, parent,*args, **kwds):
         #agwstyle is introduced in wx.2.8.11 but is not working for mac
-        if sys.platform.count("darwin") != 0:
+        if IS_MAC:
             try:
                 kwds['style'] = STYLE_FLAG
                 CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
             except:
-                del kwds['style']
+                kwds['style'] = wx.RAISED_BORDER|wx.TR_HAS_BUTTONS|wx.TR_HIDE_ROOT|\
+                    wx.WANTS_CHARS|wx.TR_HAS_VARIABLE_ROW_HEIGHT
                 CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
         else:
             #agwstyle is introduced in wx.2.8.11 .argument working only for windows
