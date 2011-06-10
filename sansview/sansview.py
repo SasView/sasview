@@ -14,7 +14,6 @@ import os
 import sys
 # The below will make sure that sansview application uses the matplotlib font 
 # bundled with sansview. 
-mplconfigdir = "None"
 if hasattr(sys, 'frozen'):
     mplconfigdir = os.path.join(sys.prefix, '.matplotlib')
     if not os.path.exists(mplconfigdir):
@@ -27,11 +26,8 @@ from welcome_panel import WelcomePanel
 # For py2exe, import config here
 import local_config
 import logging
-try:
-    logging.error("Uses mpl in mplconfigdir:")
-    logging.error(mplconfigdir) 
-except:
-    pass
+
+
 class SansViewApp(gui_manager.ViewApp):
     """
     """
