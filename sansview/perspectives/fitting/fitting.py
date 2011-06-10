@@ -511,6 +511,7 @@ class Plugin(PluginBase):
             self.draw_model(model=model, data=data, page_id=uid, smearer=smear,
                 enable1D=enable1D, enable2D=enable2D,
                 qmin=qmin, qmax=qmax)
+            time.sleep(0.2)
 
     def draw_model(self, model, page_id, data=None, smearer=None,
                    enable1D=True, enable2D=False,
