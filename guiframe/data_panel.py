@@ -15,9 +15,12 @@ import wx
 # Check version
 toks = wx.__version__.split('.')
 if int(toks[1]) < 9:
-    wx_version = 8
+    if int(toks[2]) < 12:
+        wx_version = 811
+    else:
+        wx_version = 812
 else:
-    wx_version = 9
+    wx_version = 900
 import sys
 import warnings
 import logging
@@ -81,7 +84,7 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
     """
     def __init__(self, parent,*args, **kwds):
         #agwstyle is introduced in wx.2.8.11 but is not working for mac
-        if IS_MAC and wx_version < 9:
+        if IS_MAC and wx_version < 812:
             try:
                 kwds['style'] = STYLE_FLAG
                 CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
