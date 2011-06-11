@@ -1289,7 +1289,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                     self._manager.set_smearer(smearer=temp_smearer,
                                               qmin=float(self.qmin_x),
                                               uid=self.uid, 
-                                                 qmax= float(self.qmax_x))
+                                                 qmax= float(self.qmax_x),
+                                                 draw=False)
                     if self.data != None:
                         index_data = ((self.qmin_x <= self.data.x)&\
                                       (self.data.x <= self.qmax_x))

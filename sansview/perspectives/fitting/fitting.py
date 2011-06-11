@@ -650,7 +650,7 @@ class Plugin(PluginBase):
         self.fit_thread_list[current_page_id] = calc_fit
         time.sleep(0.3)
         
-        #self.ready_fit(calc_fit=calc_fit)
+        self.ready_fit(calc_fit=calc_fit)
         calc_fit.queue()
             
     def ready_fit(self, calc_fit):
