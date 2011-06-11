@@ -1876,10 +1876,12 @@ class FitPage(BasicPage):
                 
         ## save current state  
         self.save_current_state()          
-        #plot model ( when drawing, do not update chisqr value again)
-        self._draw_model(update_chisqr=False)   
+        
         self._lay_out()   
-        self.Refresh()    
+        self.Refresh() 
+        time.sleep(0.1)  
+        #plot model ( when drawing, do not update chisqr value again)
+        self._draw_model(update_chisqr=False)    
         #PostStatusEvent     
         #msg = "Fit completed!dddd "
         #wx.PostEvent(self._manager.parent, StatusEvent(status=msg))

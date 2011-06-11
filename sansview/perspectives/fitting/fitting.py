@@ -1020,6 +1020,8 @@ class Plugin(PluginBase):
         
         : parameter page_id: fitpage where the button is
         """
+        if page_id.__class__.__name__ != 'list':
+            page_id = [page_id]
         for uid in page_id:  
             page = self.fit_panel.get_page_by_id(uid)
             page._on_fit_complete()

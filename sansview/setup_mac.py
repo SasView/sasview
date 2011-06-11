@@ -84,9 +84,7 @@ plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
                                          CFBundleTypeIconFile=ICON,
                                    CFBundleTypeName="sansview file",
                                    CFBundleTypeRole="Shell" )],)
-plist.update(dict(
-    LSPrefersPPC=True,
-))                                   
+
 APP = ['sansview.py']
 DATA_FILES += ['images','test','plugins','media']
 OPTIONS = {'argv_emulation': True,
