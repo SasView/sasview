@@ -12,6 +12,12 @@ This module provides Graphic interface for the data_manager module.
 """
 import os
 import wx
+# Check version
+toks = wx.__version__.split('.')
+if int(toks[1]) < 9:
+    wx_version = 8
+else:
+    wx_version = 9
 import sys
 import warnings
 import logging
@@ -75,13 +81,12 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
     """
     def __init__(self, parent,*args, **kwds):
         #agwstyle is introduced in wx.2.8.11 but is not working for mac
-        if IS_MAC:
+        if IS_MAC and wx_version < 9:
             try:
                 kwds['style'] = STYLE_FLAG
                 CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
             except:
-                kwds['style'] = wx.RAISED_BORDER|wx.TR_HAS_BUTTONS|wx.TR_HIDE_ROOT|\
-                    wx.WANTS_CHARS|wx.TR_HAS_VARIABLE_ROW_HEIGHT
+                del kwds['style']
                 CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
         else:
             #agwstyle is introduced in wx.2.8.11 .argument working only for windows
