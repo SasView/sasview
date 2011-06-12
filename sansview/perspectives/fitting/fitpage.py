@@ -1776,7 +1776,8 @@ class FitPage(BasicPage):
             raise ValueError,"Fit error occured..." 
         
         is_modified = False
-        has_error = False    
+        has_error = False 
+        dispersity = ''   
         
         #Hide textctrl boxes of errors.
         self._clear_Err_on_Fit()    
@@ -1804,7 +1805,7 @@ class FitPage(BasicPage):
                     if self.text_disp_1 != None:
                         self.text_disp_1.Hide()
         except:
-            dispersty = None
+            dispersity = None
             pass
         #set the panel when fit result are float not list
         if out.__class__== numpy.float64:
