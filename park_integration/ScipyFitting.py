@@ -180,10 +180,10 @@ class ScipyFit(FitEngine):
             result.pvec = out
             result.success = success
             
-            if q is not None and success > 0 and success < 5:
+            if q is not None:
                 q.put(result)
                 return q
-            else:
+            if success < 1 or success > 4:
                 result = None
             return result
         else:
