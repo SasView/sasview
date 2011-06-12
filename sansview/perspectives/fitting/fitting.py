@@ -928,12 +928,15 @@ class Plugin(PluginBase):
                                   param_name, result.pvec,result.stderr)
                 print "berfore complete" 
                 wx.CallAfter(cpage._on_fit_complete)
+                print "after complete" 
             if result.stderr == None:
                 msg = "Fit Abort: "
             else:
                 msg = "Fitting: "
             msg += "Completed!!!"
             wx.PostEvent(self.parent, StatusEvent(status=msg))
+            print "after Event" 
+            return
         except ValueError:
             self._update_fit_button(page_id)
             msg = "Single Fitting did not converge!!!"
