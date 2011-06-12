@@ -413,7 +413,8 @@ class DataPanel(ScrolledPanel, PanelBase):
                     path = dstate.get_path() 
                     process_list = data.process
                     data_id = data.id
-                    
+                    s_path = str(path)
+                    print "s_path=",s_path
                     if state_id not in self.list_cb_data:
                         #new state
                         data_c = self.tree_ctrl.InsertItem(self.tree_ctrl.root,0,
@@ -424,7 +425,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                         i_c_c = self.tree_ctrl.AppendItem(d_i_c, 
                                                       'Type: %s' % data_class)
                         p_c_c = self.tree_ctrl.AppendItem(d_i_c,
-                                                      'Path: %s' % str(path))
+                                                      'Path: %s' % s_path)
                         d_p_c = self.tree_ctrl.AppendItem(d_i_c, 'Process')
                         
                         for process in process_list:
@@ -446,7 +447,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                         temp = (data_id, data_class, state_id)
                         self.tree_ctrl.SetItemPyData(data_c, temp) 
                         self.tree_ctrl.SetItemText(i_c_c, 'Type: %s' % data_class)
-                        self.tree_ctrl.SetItemText(p_c_c, 'Path: %s' % str(path)) 
+                        self.tree_ctrl.SetItemText(p_c_c, 'Path: %s' % s_path) 
                         self.tree_ctrl.DeleteChildren(d_p_c) 
                         for process in process_list:
                             i_t_c = self.tree_ctrl.AppendItem(d_p_c,
