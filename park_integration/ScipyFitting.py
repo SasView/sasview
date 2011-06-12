@@ -167,7 +167,7 @@ class ScipyFit(FitEngine):
             """
         except:
             raise
-        print "result0",result.out
+        print "result0",result.pvec
         chisqr = functor.chisq()
         if cov_x is not None and numpy.isfinite(cov_x).all():
             stderr = numpy.sqrt(numpy.diag(cov_x))
@@ -179,7 +179,7 @@ class ScipyFit(FitEngine):
             result.stderr  = stderr
             result.pvec = out
             result.success = success
-            print "result1",result.out
+            print "result1",result.pvec
             if q is not None:
                 q.put(result)
                 return q
