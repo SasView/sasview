@@ -414,7 +414,6 @@ class DataPanel(ScrolledPanel, PanelBase):
                     process_list = data.process
                     data_id = data.id
                     s_path = str(path)
-                    print "s_path=",s_path
                     if state_id not in self.list_cb_data:
                         #new state
                         data_c = self.tree_ctrl.InsertItem(self.tree_ctrl.root,0,
