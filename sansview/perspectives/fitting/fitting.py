@@ -925,7 +925,7 @@ class Plugin(PluginBase):
                 cpage = self.fit_panel.get_page_by_id(uid)
                 cpage.onsetValues(result.fitness, 
                                   param_name, result.pvec,result.stderr)
-                cpage._on_fit_complete()
+                wx.CallAfter(cpage._on_fit_complete)
             if result.stderr == None:
                 msg = "Fit Abort: "
             else:
@@ -998,7 +998,7 @@ class Plugin(PluginBase):
                 cpage.onsetValues(result.fitness,
                                   small_param_name,
                                   small_out,small_cov)
-                cpage._on_fit_complete()
+                wx.CallAfter(cpage._on_fit_complete)
                 msg = "Fit completed!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
         except Exception:
