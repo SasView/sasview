@@ -425,7 +425,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                         i_c_c = self.tree_ctrl.AppendItem(d_i_c, 
                                                       'Type: %s' % data_class)
                         p_c_c = self.tree_ctrl.AppendItem(d_i_c,
-                                                      'Path: %s' % s_path)
+                                                      "Path: '%s'" % s_path)
                         d_p_c = self.tree_ctrl.AppendItem(d_i_c, 'Process')
                         
                         for process in process_list:
