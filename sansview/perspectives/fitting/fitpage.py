@@ -983,11 +983,9 @@ class FitPage(BasicPage):
         
         #single fit 
         self._manager.onFit()
-        print "after Fit"
         self.btFit.SetLabel("Stop")
-        print "after stopBT"
         self.bind_fit_button()
-        print "after stopBTBind"
+           
    
     def bind_fit_button(self):
         """

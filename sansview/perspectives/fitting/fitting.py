@@ -921,10 +921,12 @@ class Plugin(PluginBase):
                 param_name = []
                 for name in pars:
                     param_name.append(name)
-                    
+                print "berfore cpage"    
                 cpage = self.fit_panel.get_page_by_id(uid)
+                print "berfore onsetValues" 
                 cpage.onsetValues(result.fitness, 
                                   param_name, result.pvec,result.stderr)
+                print "berfore complete" 
                 wx.CallAfter(cpage._on_fit_complete)
             if result.stderr == None:
                 msg = "Fit Abort: "
@@ -1284,19 +1286,19 @@ class Plugin(PluginBase):
                 data_id = None
             else:
                 data_id = data.id
-            print "before update_theory"
+
             self.parent.update_theory(data_id=data_id, 
                                        theory=new_plot,
                                        state=state)   
-            print "after update_theory"  
+ 
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
             
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                             title= str(title)))
-            print "after plot" 
+
             self.page_finder[page_id].set_theory_data(new_plot)
-            print "before chisqr" 
+
             if update_chisqr:
                 wx.PostEvent(current_pg,
                              Chi2UpdateEvent(output=self._cal_chisqr(data=data,
@@ -1304,10 +1306,10 @@ class Plugin(PluginBase):
                                                         index=index)))
             else:
                 self._plot_residuals(page_id, data, index)
-            print "after chisqr" 
+
             msg = "Computation  completed!"
             wx.PostEvent( self.parent, StatusEvent(status=msg, type="stop" ))
-            print "after stop"
+
             #self.current_pg.state.theory_data = deepcopy(self.theory_data)
         except:
             raise
