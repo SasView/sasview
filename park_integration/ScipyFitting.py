@@ -179,12 +179,15 @@ class ScipyFit(FitEngine):
             result.stderr  = stderr
             result.pvec = out
             result.success = success
-            print "sucess:", success
-            if q is not None:
+            
+            if q is not None and success > 0 and success < 5:
                 q.put(result)
                 return q
+            else:
+                result = None
             return result
-        
+        else:
+            return None
         # Error will be present to the client, not here 
         #else:  
         #    raise ValueError, "SVD did not converge" + str(mesg)
