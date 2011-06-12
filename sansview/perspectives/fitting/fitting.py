@@ -1307,6 +1307,7 @@ class Plugin(PluginBase):
             print "after chisqr" 
             msg = "Computation  completed!"
             wx.PostEvent( self.parent, StatusEvent(status=msg, type="stop" ))
+            print "after stop"
             #self.current_pg.state.theory_data = deepcopy(self.theory_data)
         except:
             raise
