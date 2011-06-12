@@ -1878,7 +1878,8 @@ class FitPage(BasicPage):
         ## save current state  
         self.save_current_state()          
         
-        self._lay_out()   
+        #self._lay_out()   
+        self.Layout()
         self.Refresh() 
         time.sleep(0.1)  
         #plot model ( when drawing, do not update chisqr value again)
