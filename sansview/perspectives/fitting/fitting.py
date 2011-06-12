@@ -1284,9 +1284,11 @@ class Plugin(PluginBase):
                 data_id = None
             else:
                 data_id = data.id
+            print "before update_theory"
             self.parent.update_theory(data_id=data_id, 
                                        theory=new_plot,
-                                       state=state)     
+                                       state=state)   
+            print "after update_theory"  
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
