@@ -110,12 +110,12 @@ class ChangeFtol(wx.Dialog):
                 flag = False
         if flag:
             # set ftol in fitting
-            self.parent.manager.set_ftol(self.ftol) 
+            self.parent.parent._manager.set_ftol(self.ftol) 
             msg = "The ftol (Scipy) is set to %s." % self.ftol
         else:
            msg = "Error in the selection... No changes in ftol."
         # post event for info
-        wx.PostEvent( self.parent.manager.parent, 
+        wx.PostEvent( self.parent.parent._manager.parent, 
                       StatusEvent(status= msg, info='warning')) 
     
         self.Destroy()
