@@ -179,7 +179,7 @@ class ScipyFit(FitEngine):
             result.stderr  = stderr
             result.pvec = out
             result.success = success
-            print "result1",success, result.pvec
+            print "result1",success, mesg, result.pvec
             if q is not None:
                 q.put(result)
                 return q
