@@ -1291,11 +1291,12 @@ class Plugin(PluginBase):
             print "after update_theory"  
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
+            
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                             title= str(title)))
-            
+            print "after plot" 
             self.page_finder[page_id].set_theory_data(new_plot)
-            
+            print "before chisqr" 
             if update_chisqr:
                 wx.PostEvent(current_pg,
                              Chi2UpdateEvent(output=self._cal_chisqr(data=data,
@@ -1303,7 +1304,7 @@ class Plugin(PluginBase):
                                                         index=index)))
             else:
                 self._plot_residuals(page_id, data, index)
-
+            print "after chisqr" 
             msg = "Computation  completed!"
             wx.PostEvent( self.parent, StatusEvent(status=msg, type="stop" ))
             #self.current_pg.state.theory_data = deepcopy(self.theory_data)
