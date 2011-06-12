@@ -408,7 +408,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                 data = dstate.get_data()
                 theory_list = dstate.get_theory()
                 if data is not None:
-                    data_name = data.name
+                    data_name = str(data.name)
                     data_class = data.__class__.__name__
                     path = dstate.get_path() 
                     process_list = data.process
