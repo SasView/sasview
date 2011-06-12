@@ -1100,7 +1100,7 @@ class FitPage(BasicPage):
                     self.formfactorbox.SetSelection(pos)
                     self.formfactorbox.SetValue(current_val)
             self._onDraw(event=None)
-        self.SetupScrolling()
+        #self.SetupScrolling()
     
       
     def _onparamEnter(self,event):
@@ -2471,7 +2471,7 @@ class FitPage(BasicPage):
         
         if model ==None:
             self.sizer3.Layout()
-            self.SetupScrolling()
+            #self.SetupScrolling()
             return
         ## the panel is drawn using the current value of the fit engine
         if self.engine_type==None and self._manager !=None:
