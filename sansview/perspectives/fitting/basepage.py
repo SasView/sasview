@@ -101,6 +101,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## smearer object
         self.smearer = None
         self.enable2D = False
+        self.is_mac = ON_MAC
         
         ##list of model parameters. each item must have same length
         ## each item related to a given parameters
