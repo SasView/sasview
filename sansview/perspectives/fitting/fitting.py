@@ -921,21 +921,18 @@ class Plugin(PluginBase):
                 param_name = []
                 for name in pars:
                     param_name.append(name)
-                print "berfore cpage"    
+   
                 cpage = self.fit_panel.get_page_by_id(uid)
-                print "berfore onsetValues" 
+
                 cpage.onsetValues(result.fitness, 
                                   param_name, result.pvec,result.stderr)
-                print "berfore complete" 
                 wx.CallAfter(cpage._on_fit_complete)
-                print "after complete" 
             if result.stderr == None:
                 msg = "Fit Abort: "
             else:
                 msg = "Fitting: "
             msg += "Completed!!!"
             wx.PostEvent(self.parent, StatusEvent(status=msg))
-            print "after Event" 
             return
         except ValueError:
             self._update_fit_button(page_id)

@@ -584,7 +584,11 @@ class FitPage(BasicPage):
         self.sizer4_4.Add(values,( iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 
                           0)
         ix +=2 
-        self.text_disp_1 = wx.StaticText(self, -1, '')
+        if self.is_mac:
+            err_text = 'Error'
+        else:
+            err_text = ''
+        self.text_disp_1 = wx.StaticText(self, -1, err_text)
         self.sizer4_4.Add( self.text_disp_1,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         
