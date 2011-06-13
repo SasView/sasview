@@ -1889,7 +1889,7 @@ class FitPage(BasicPage):
             self.Layout() 
         else:
             self.sizer3.Layout()
-            self.sizer4_4Layout()
+            self.sizer4_4.Layout()
         self.Refresh() 
         time.sleep(0.1)  
         #plot model ( when drawing, do not update chisqr value again)
