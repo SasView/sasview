@@ -1302,6 +1302,8 @@ class FitPage(BasicPage):
                 if item in self.param_toFit:
                     continue
                 ## hide statictext +/-    
+                if len(item) < 4 :
+                    continue
                 if item[3]!=None and item[3].IsShown():
                     item[3].Hide()
                 ## hide textcrtl  for error after fit
@@ -1316,6 +1318,8 @@ class FitPage(BasicPage):
                     if item in self.orientation_params:
                         continue
                 if item in self.param_toFit:
+                    continue
+                if len(item) < 4 :
                     continue
                 ## hide statictext +/-    
                 if item[3]!=None and item[3].IsShown():
@@ -1796,13 +1800,13 @@ class FitPage(BasicPage):
             self.tcChi.SetValue("-")
         
         #Hide error title
-        if self.text2_3.IsShown():
-            self.text2_3.Hide()
+        #if self.text2_3.IsShown():
+        #    self.text2_3.Hide()
       
         try:
             if self.enable_disp.GetValue():
                 if hasattr(self,"text_disp_1" ):
-                    if self.text_disp_1 != None:
+                    if self.text_disp_1 != None and self.text_disp_1.IsShown():
                         self.text_disp_1.Hide()
         except:
             dispersity = None
@@ -1846,8 +1850,10 @@ class FitPage(BasicPage):
                         if item[1] == p_name[ind]:
                             break        
                     if len(out)<=len(self.param_toFit) and out[ind] !=None:   
-                        val_out = format_number(out[ind], True)                  
-                        item[2].SetValue(val_out)
+                        val_out = format_number(out[ind], True) 
+                        if numpy.isfinite(val_out):                 
+                            item[2].SetValue(val_out)
+
 
                     if(cov !=None):
                         
@@ -1865,8 +1871,8 @@ class FitPage(BasicPage):
                             if numpy.isfinite(float(cov[ind])):
                                 val_err = format_number(cov[ind], True)
                                 item[3].Show(True)
-                                item[4].Show(True)
                                 item[4].SetValue(val_err)
+                                item[4].Show(True)
 
                                 has_error = True
                     i += 1         
