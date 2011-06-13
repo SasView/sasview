@@ -1839,20 +1839,20 @@ class FitPage(BasicPage):
 
             i = 0
             #Set the panel when fit result are list
-            for item in self.param_toFit:     
-                if len(item)>5 and item != None:     
+            for idx in range(len(self.param_toFit)):     
+                if len(self.param_toFit[idx])>5 and self.param_toFit[idx] != None:     
                     ## reset error value to initial state
-                    item[3].Hide()
-                    item[4].Hide()
+                    self.param_toFit[idx][3].Hide()
+                    self.param_toFit[idx][4].Hide()
                     
                     for ind in range(len(out)):
                         
-                        if item[1] == p_name[ind]:
+                        if self.param_toFit[idx][1] == p_name[ind]:
                             break        
                     if len(out)<=len(self.param_toFit) and out[ind] !=None:   
                         val_out = format_number(out[ind], True) 
                         if numpy.isfinite(val_out):                 
-                            item[2].SetValue(val_out)
+                            self.param_toFit[idx][2].SetValue(val_out)
 
 
                     if(cov !=None):
@@ -1870,9 +1870,9 @@ class FitPage(BasicPage):
                         if cov[ind]!=None :
                             if numpy.isfinite(float(cov[ind])):
                                 val_err = format_number(cov[ind], True)
-                                item[3].Show(True)
-                                item[4].SetValue(val_err)
-                                item[4].Show(True)
+                                self.param_toFit[idx][3].Show(True)
+                                self.param_toFit[idx][4].SetValue(val_err)
+                                self.param_toFit[idx][4].Show(True)
 
                                 has_error = True
                     i += 1         
