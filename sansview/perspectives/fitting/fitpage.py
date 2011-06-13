@@ -803,8 +803,8 @@ class FitPage(BasicPage):
                         text2=wx.StaticText(self, -1, '+/-')
                         self.sizer4_4.Add(text2,(iy, ix),(1,1),
                                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        if not self.is_mac:
-                            text2.Hide() 
+
+                        text2.Hide() 
 
                         ix = 3
                         ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/1.3,20), 
@@ -812,8 +812,8 @@ class FitPage(BasicPage):
                     
                         self.sizer4_4.Add(ctl2, (iy,ix),(1,1), 
                                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        if not self.is_mac:
-                            ctl2.Hide()
+
+                        ctl2.Hide()
                             
                         ix = 4
                         ctl3 = self.ModelTextCtrl(self, -1, 
@@ -2755,14 +2755,14 @@ class FitPage(BasicPage):
                     text2=wx.StaticText(self, -1, '+/-')
                     sizer.Add(text2,(iy, ix),(1,1),\
                                     wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-                    if not self.is_mac:
-                        text2.Hide() 
+
+                    text2.Hide() 
                     ix += 1
                     ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/1.2,20), style=0)
                     sizer.Add(ctl2, (iy,ix),(1,1), 
                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                    if not self.is_mac:
-                        ctl2.Hide()
+
+                    ctl2.Hide()
                     
                     
                     ix += 1
