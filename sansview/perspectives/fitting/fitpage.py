@@ -1844,10 +1844,11 @@ class FitPage(BasicPage):
             i = 0
             #Set the panel when fit result are list
             for item in self.param_toFit:     
-                if len(item)>5 and item != None  and not self.is_mac:     
+                if len(item)>5 and item != None:     
                     ## reset error value to initial state
-                    item[3].Hide()
-                    item[4].Hide()
+                    if not self.is_mac:
+                        item[3].Hide()
+                        item[4].Hide()
                     
                     for ind in range(len(out)):
                         
@@ -2556,11 +2557,11 @@ class FitPage(BasicPage):
         sizer.Add(self.cb1,(iy, ix),(1,1),\
                              wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
         ix +=1
-        self.text2_2 = wx.StaticText(self, -1, 'Values')
+        self.text2_2 = wx.StaticText(self, -1, 'Value')
         sizer.Add(self.text2_2,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix +=2 
-        self.text2_3 = wx.StaticText(self, -1, 'Errors')
+        self.text2_3 = wx.StaticText(self, -1, 'Error')
         sizer.Add(self.text2_3,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         self.text2_3.Hide()
