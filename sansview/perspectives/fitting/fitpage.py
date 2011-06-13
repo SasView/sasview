@@ -1885,8 +1885,11 @@ class FitPage(BasicPage):
         self.save_current_state()          
         
         #self._lay_out() 
-        if not self.is_mac:  
-            self.Layout()
+        if not self.is_mac: 
+            self.Layout() 
+        else:
+            self.sizer3.Layout()
+            self.sizer4_4Layout()
         self.Refresh() 
         time.sleep(0.1)  
         #plot model ( when drawing, do not update chisqr value again)
