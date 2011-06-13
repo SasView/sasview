@@ -477,7 +477,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## saving the state of enable dispersity button
         self.state.enable_disp= self.enable_disp.GetValue()
         self.state.disable_disp= self.disable_disp.GetValue()
-        #self.SetupScrolling()
+        self.SetupScrolling()
 
     
     def onResetModel(self, event):

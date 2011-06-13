@@ -658,7 +658,8 @@ class FitPage(BasicPage):
                         text2=wx.StaticText(self, -1, '+/-')
                         self.sizer4_4.Add(text2,(iy, ix),(1,1),
                                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        text2.Hide() 
+                        if not self.is_mac:
+                            text2.Hide() 
 
                         ix = 3
                         ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/1.3,20), 
@@ -666,8 +667,8 @@ class FitPage(BasicPage):
                   
                         self.sizer4_4.Add(ctl2, (iy,ix),(1,1), 
                                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                     
-                        ctl2.Hide()
+                        if not self.is_mac:
+                            ctl2.Hide()
 
                         ix = 4
                         ctl3 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/2,
@@ -798,7 +799,8 @@ class FitPage(BasicPage):
                         text2=wx.StaticText(self, -1, '+/-')
                         self.sizer4_4.Add(text2,(iy, ix),(1,1),
                                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        text2.Hide() 
+                        if not self.is_mac:
+                            text2.Hide() 
 
                         ix = 3
                         ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/1.3,20), 
@@ -806,7 +808,8 @@ class FitPage(BasicPage):
                     
                         self.sizer4_4.Add(ctl2, (iy,ix),(1,1), 
                                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        ctl2.Hide()
+                        if not self.is_mac:
+                            ctl2.Hide()
                             
                         ix = 4
                         ctl3 = self.ModelTextCtrl(self, -1, 
@@ -1100,7 +1103,7 @@ class FitPage(BasicPage):
                     self.formfactorbox.SetSelection(pos)
                     self.formfactorbox.SetValue(current_val)
             self._onDraw(event=None)
-        #self.SetupScrolling()
+        self.SetupScrolling()
     
       
     def _onparamEnter(self,event):
@@ -1288,7 +1291,8 @@ class FitPage(BasicPage):
         hide the error text control shown 
         after fitting
         """
-        
+        if self.is_mac:
+            return
         if hasattr(self,"text2_3"):
             self.text2_3.Hide()
 
@@ -1800,13 +1804,13 @@ class FitPage(BasicPage):
             self.tcChi.SetValue("-")
         
         #Hide error title
-        #if self.text2_3.IsShown():
-        #    self.text2_3.Hide()
+        if self.text2_3.IsShown() and not self.is_mac:
+            self.text2_3.Hide()
       
         try:
             if self.enable_disp.GetValue():
                 if hasattr(self,"text_disp_1" ):
-                    if self.text_disp_1 != None and self.text_disp_1.IsShown():
+                    if self.text_disp_1 != None and not self.is_mac:
                         self.text_disp_1.Hide()
         except:
             dispersity = None
@@ -1815,7 +1819,7 @@ class FitPage(BasicPage):
         if out.__class__== numpy.float64:
             self.param_toFit[0][2].SetValue(format_number(out, True))
             
-            if self.param_toFit[0][4].IsShown:
+            if self.param_toFit[0][4].IsShown and not self.is_mac:
                 self.param_toFit[0][4].Hide()
             if cov !=None :
                 self.text2_3.Show(True)
@@ -1828,7 +1832,7 @@ class FitPage(BasicPage):
                     pass
 
                 if cov[0]==None or  not numpy.isfinite(cov[0]): 
-                    if self.param_toFit[0][3].IsShown:
+                    if self.param_toFit[0][3].IsShown and not self.is_mac:
                         self.param_toFit[0][3].Hide()
                 else:                    
                     self.param_toFit[0][3].Show(True)               
@@ -1839,20 +1843,19 @@ class FitPage(BasicPage):
 
             i = 0
             #Set the panel when fit result are list
-            for idx in range(len(self.param_toFit)):     
-                if len(self.param_toFit[idx])>5 and self.param_toFit[idx] != None:     
+            for item in self.param_toFit:     
+                if len(item)>5 and item != None  and not self.is_mac:     
                     ## reset error value to initial state
-                    self.param_toFit[idx][3].Hide()
-                    self.param_toFit[idx][4].Hide()
+                    item[3].Hide()
+                    item[4].Hide()
                     
                     for ind in range(len(out)):
                         
-                        if self.param_toFit[idx][1] == p_name[ind]:
+                        if item[1] == p_name[ind]:
                             break        
                     if len(out)<=len(self.param_toFit) and out[ind] !=None:   
-                        val_out = format_number(out[ind], True) 
-                        if numpy.isfinite(val_out):                 
-                            self.param_toFit[idx][2].SetValue(val_out)
+                        val_out = format_number(out[ind], True)                  
+                        item[2].SetValue(val_out)
 
 
                     if(cov !=None):
@@ -1862,7 +1865,8 @@ class FitPage(BasicPage):
                                 if self.enable_disp.GetValue():
                                     if hasattr(self,"text_disp_1" ):
                                         if self.text_disp_1!=None:
-                                            if not self.text_disp_1.IsShown():
+                                            if not self.text_disp_1.IsShown()\
+                                                and not self.is_mac:
                                                 self.text_disp_1.Show(True)
                         except:
                             pass    
@@ -1870,9 +1874,10 @@ class FitPage(BasicPage):
                         if cov[ind]!=None :
                             if numpy.isfinite(float(cov[ind])):
                                 val_err = format_number(cov[ind], True)
-                                self.param_toFit[idx][3].Show(True)
-                                self.param_toFit[idx][4].SetValue(val_err)
-                                self.param_toFit[idx][4].Show(True)
+                                if not self.is_mac:
+                                    item[3].Show(True)
+                                    item[4].Show(True)
+                                item[4].SetValue(val_err)
 
                                 has_error = True
                     i += 1         
@@ -1885,8 +1890,6 @@ class FitPage(BasicPage):
         self.save_current_state()          
         
         #self._lay_out() 
-        self.sizer3.Layout()
-        self.sizer4_4.Layout()
         self.Layout() 
         self.Refresh() 
         time.sleep(0.1)  
@@ -2479,7 +2482,7 @@ class FitPage(BasicPage):
         
         if model ==None:
             self.sizer3.Layout()
-            #self.SetupScrolling()
+            self.SetupScrolling()
             return
         ## the panel is drawn using the current value of the fit engine
         if self.engine_type==None and self._manager !=None:
@@ -2641,12 +2644,14 @@ class FitPage(BasicPage):
                     text2=wx.StaticText(self, -1, '+/-')
                     sizer.Add(text2,(iy, ix),(1,1),\
                                     wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-                    text2.Hide() 
+                    if not self.is_mac:
+                        text2.Hide() 
                     ix += 1
                     ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/1.2,20), style=0)
                     sizer.Add(ctl2, (iy,ix),(1,1), 
                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                    ctl2.Hide()
+                    if not self.is_mac:
+                        ctl2.Hide()
                     
                     ix += 1
                     ctl3 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/1.9,20),
@@ -2743,12 +2748,14 @@ class FitPage(BasicPage):
                     text2=wx.StaticText(self, -1, '+/-')
                     sizer.Add(text2,(iy, ix),(1,1),\
                                     wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-                    text2.Hide() 
+                    if not self.is_mac:
+                        text2.Hide() 
                     ix += 1
                     ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/1.2,20), style=0)
                     sizer.Add(ctl2, (iy,ix),(1,1), 
                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                    ctl2.Hide()
+                    if not self.is_mac:
+                        ctl2.Hide()
                     
                     
                     ix += 1
