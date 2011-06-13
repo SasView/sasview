@@ -2493,7 +2493,8 @@ class ViewApp(wx.App):
                 basename  = os.path.basename(cmd)
                 app_py = str(APPLICATION_NAME).lower() + '.py'
                 app_exe = str(APPLICATION_NAME).lower() + '.exe'
-                if basename.lower() in [app_py, app_exe]:
+                app_app = str(APPLICATION_NAME).lower() + '.app'
+                if basename.lower() in [app_py, app_exe, app_app]:
                     input_file = sys.argv[1]
         if input_file is None:
             return
