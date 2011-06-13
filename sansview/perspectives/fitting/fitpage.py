@@ -814,6 +814,11 @@ class FitPage(BasicPage):
                                           wx.EXPAND|wx.ADJUST_MINSIZE, 0)
 
                         ctl2.Hide()
+                        if self.data.__class__.__name__ ==  "Data2D" or \
+                                self.enable2D:
+                            if self.is_mac:  
+                                text2.Show(True)
+                                ctl2.Show(True)  
                             
                         ix = 4
                         ctl3 = self.ModelTextCtrl(self, -1, 
@@ -2784,7 +2789,10 @@ class FitPage(BasicPage):
                     ctl4.Hide()
                     
                     if self.data.__class__.__name__ == "Data2D" or \
-                            self.enable2D:                     
+                            self.enable2D:  
+                        if self.is_mac:  
+                            text2.Show(True)
+                            ctl2.Show(True)                 
                         ctl3.Show(True)
                         ctl4.Show(True)
                     
