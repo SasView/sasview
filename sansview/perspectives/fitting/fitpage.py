@@ -1891,8 +1891,9 @@ class FitPage(BasicPage):
         self.save_current_state()          
         
         #self._lay_out() 
-        self.Layout() 
-        self.Refresh() 
+        if not self.is_mac:
+            self.Layout() 
+            self.Refresh() 
         time.sleep(0.1)  
         #plot model ( when drawing, do not update chisqr value again)
         self._draw_model(update_chisqr=False)    
@@ -2564,7 +2565,8 @@ class FitPage(BasicPage):
         self.text2_3 = wx.StaticText(self, -1, 'Error')
         sizer.Add(self.text2_3,(iy, ix),(1,1),\
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
-        self.text2_3.Hide()
+        if not self.is_mac:
+            self.text2_3.Hide()
         ix +=1 
         self.text2_min = wx.StaticText(self, -1, 'Min')
         sizer.Add(self.text2_min,(iy, ix),(1,1),\
