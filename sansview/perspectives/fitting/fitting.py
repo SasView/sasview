@@ -36,7 +36,7 @@ from sans.guiframe.plugin_base import PluginBase
 from .console import ConsoleUpdate
 from .fitproblem import FitProblem
 from .fitpanel import FitPanel
-from .fit_thread import FitThread
+#from .fit_thread import FitThread
 from .pagestate import Reader
 from .fitpage import Chi2UpdateEvent
 
@@ -566,6 +566,7 @@ class Plugin(PluginBase):
         """
         perform fit 
         """
+        from .fit_thread import FitThread
         ##  count the number of fitproblem schedule to fit 
         fitproblem_count = 0
         for value in self.page_finder.values():
@@ -629,8 +630,10 @@ class Plugin(PluginBase):
         handler = ConsoleUpdate(parent=self.parent,
                                 manager=self,
                                 improvement_delta=0.1)
+        
         time.sleep(0.2)
         ## perform single fit
+        
         if fitproblem_count == 1:
             calc_fit = FitThread(handler = handler,
                                     fn=fitter,
