@@ -105,7 +105,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             self.qmax_ctl.SetValue("%-5.2g" % value)
         elif name == 'elapsed':
             self.time_ctl.SetValue("%-5.2g" % value)
-        elif name ==' rg':
+        elif name =='rg':
             self.rg_ctl.SetValue("%-5.2g" % value)
         elif name == 'iq0':
             self.iq0_ctl.SetValue("%-5.2g" % value)
