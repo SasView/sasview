@@ -181,7 +181,7 @@ class ScipyFit(FitEngine):
             if q is not None:
                 q.put(result)
                 return q
-            if success < 1 or success > 4:
+            if success < 1 or success > 5:
                 result = None
             return result
         else:
