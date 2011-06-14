@@ -2562,8 +2562,8 @@ class ViewApp(wx.App):
         _, _, x, y = wx.Display().GetClientArea() # size excludes task bar
         if len(sys.argv) > 1 and '--platform' in sys.argv[1:]:
             w, h = wx.DisplaySize()  # size includes task bar area
-        # The below is commented because it is not good fix for dual monitor.
-        #if x > 1920: x = 1280  # display on left side, not centered on screen
+        # display on left side, not centered on screen
+        if x > 1920 and x > (2*y): x = x / 2  
         if x > window_width:  xpos = (x - window_width)/2
         if y > window_height: ypos = (y - window_height)/2
 
