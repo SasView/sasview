@@ -134,6 +134,7 @@ class ModelPanel2D(ModelPanel1D):
             ax = event.inaxes
             if ax != None:
                 self.xInit, self.yInit = event.xdata, event.ydata
+        print "self.data2D.id=", self.data2D.id, "button=", event.button
         self.plottable_selected(self.data2D.id)
        
         self._manager.set_panel_on_focus(self)
