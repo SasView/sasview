@@ -133,8 +133,10 @@ class StartupConfiguration(wx.Dialog):
                 data_pw = CURRENT_STRINGS['DATAPANEL_WIDTH']
             self.current_string['DATAPANEL_WIDTH'] = data_pw
             
-            label = self.parent._data_panel_menu.GetText()
-            if label == 'Hide Data Explorer':
+            #label = self.parent._data_panel_menu.GetText()
+            label = self.parent._mgr.GetPane(\
+                        self.parent.panels['data_panel'].window_name).IsShown()
+            if label:# == 'Hide Data Explorer':
                 self.current_string['DATALOADER_SHOW'] = True
             else:
                 self.current_string['DATALOADER_SHOW'] = False
