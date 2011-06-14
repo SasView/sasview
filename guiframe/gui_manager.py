@@ -2548,8 +2548,8 @@ class ViewApp(wx.App):
         """
         window_width, window_height = size
         screen_size = wx.GetDisplaySize()
-        window_height = window_height if screen_size[1]>window_height else screen_size[1]-50
-        window_width  = window_width if screen_size[0]> window_width else screen_size[0]-50
+        window_height = window_height if screen_size[1]>window_height else screen_size[1]-10
+        window_width  = window_width if screen_size[0]> window_width else screen_size[0]-10
         xpos = ypos = 0
 
         # Note that when running Linux and using an Xming (X11) server on a PC
@@ -2562,7 +2562,8 @@ class ViewApp(wx.App):
         _, _, x, y = wx.Display().GetClientArea() # size excludes task bar
         if len(sys.argv) > 1 and '--platform' in sys.argv[1:]:
             w, h = wx.DisplaySize()  # size includes task bar area
-        if x > 1920: x = 1280  # display on left side, not centered on screen
+        # The below is commented because it is not good fix for dual monitor.
+        #if x > 1920: x = 1280  # display on left side, not centered on screen
         if x > window_width:  xpos = (x - window_width)/2
         if y > window_height: ypos = (y - window_height)/2
 
