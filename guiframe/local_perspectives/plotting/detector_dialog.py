@@ -117,15 +117,15 @@ class DetectorDialog(wx.Dialog):
         flag = True
         try:
             value = self.zmin_ctl.GetValue()
-            if value and float( value) == 0.0:
-                flag = False
-                wx.PostEvent(self.parent,
-                        StatusEvent(status="Enter number greater than zero"))
-                self.zmin_ctl.SetBackgroundColour("pink")
-                self.zmin_ctl.Refresh()
-            else:
-                self.zmin_ctl.SetBackgroundColour(wx.WHITE)
-                self.zmin_ctl.Refresh()
+            #if value and float( value) == 0.0:
+            #    flag = False
+            #    wx.PostEvent(self.parent,
+            #            StatusEvent(status="Enter number greater than zero"))
+            #    self.zmin_ctl.SetBackgroundColour("pink")
+            #    self.zmin_ctl.Refresh()
+            #else:
+            self.zmin_ctl.SetBackgroundColour(wx.WHITE)
+            self.zmin_ctl.Refresh()
         except:
             flag = False
             wx.PostEvent(self.parent, StatusEvent(status="Enter float value"))
