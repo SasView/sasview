@@ -8,7 +8,7 @@ simple fit with scipy optimizer.
 
 import numpy 
 import sys
-from scipy import optimize
+
 
 from sans.fit.AbstractFitEngine import FitEngine
 from sans.fit.AbstractFitEngine import SansAssembly
@@ -141,10 +141,13 @@ class ScipyFit(FitEngine):
         result = fitresult(model=model, param_list=self.param_list)
         if handler is not None:
             handler.set_result(result=result)
-        #try:
-        functor = SansAssembly(self.param_list, model, data, handler=handler,
-                         fitresult=result, curr_thread= self.curr_thread)
         try:
+            # This import must be here; otherwise it will be confused when more
+            # than one thread exist.
+            from scipy import optimize
+            
+            functor = SansAssembly(self.param_list, model, data, handler=handler,\
+                         fitresult=result, curr_thread= curr_thread)
             out, cov_x, _, mesg, success = optimize.leastsq(functor,
                                             model.get_params(self.param_list),
                                                     ftol=ftol,
