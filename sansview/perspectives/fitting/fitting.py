@@ -33,7 +33,7 @@ from sans.guiframe.events import EVT_SLICER_PARS_UPDATE
 from sans.guiframe.gui_style import GUIFRAME_ID
 from sans.guiframe.plugin_base import PluginBase 
 
-from .console import ConsoleUpdate
+#from .console import ConsoleUpdate
 from .fitproblem import FitProblem
 from .fitpanel import FitPanel
 #from .fit_thread import FitThread
@@ -562,26 +562,30 @@ class Plugin(PluginBase):
                                 qstep=qstep,
                                 update_chisqr=update_chisqr)
             
-    def onFit(self):
+    def onFit(self, uid=None):
         """
         perform fit 
+        
+        : param type: uid for single fit, None for simultaneous fit
         """
+        from sans.fit.Fitting import Fit
         from .fit_thread import FitThread
+        from .console import ConsoleUpdate
         ##  count the number of fitproblem schedule to fit 
+        #if uid == None or self._fit_engine == "park":
         fitproblem_count = 0
         for value in self.page_finder.values():
             if value.get_scheduled() == 1:
                 fitproblem_count += 1
                 
         ## if simultaneous fit change automatically the engine to park
-        if fitproblem_count > 1:
+        # scipy can not handle two thread running at the same time
+        if fitproblem_count > 1 or len(self.fit_thread_list)>0:
             self._on_change_engine(engine='park')
             
         self.fitproblem_count = fitproblem_count  
-          
-        from sans.fit.Fitting import Fit
+
         fitter = Fit(self._fit_engine)
-        
         if self._fit_engine == "park":
             engineType = "Simultaneous Fit"
         else:
@@ -591,6 +595,11 @@ class Plugin(PluginBase):
         self.current_pg = None
         list_page_id = []
         for page_id, value in self.page_finder.iteritems():
+            # For simulfit (uid give with None), do for-loop
+            # if uid is specified (singlefit), do it only on the page.
+            if engineType == "Single Fit":
+                if page_id != uid:
+                    continue
             try:
                 if value.get_scheduled() == 1:
                     #Get list of parameters name to fit
@@ -650,6 +659,7 @@ class Plugin(PluginBase):
                                     updatefn=handler.update_fit,
                                     completefn=self._simul_fit_completed,
                                     ftol=self.ftol)
+
         self.fit_thread_list[current_page_id] = calc_fit
         time.sleep(0.3)
         
@@ -816,13 +826,18 @@ class Plugin(PluginBase):
                                                   reset= True)
                     break
     
-    def _reset_schedule_problem(self, value=0):
+    def _reset_schedule_problem(self, value=0, uid=None):
         """
         unschedule or schedule all fitproblem to be fit
         """
-        for page_id in self.page_finder.keys():
-            self.page_finder[page_id].schedule_tofit(value)
-            
+        # case that uid is not specified
+        if uid == None:
+            for page_id in self.page_finder.keys():
+                self.page_finder[page_id].schedule_tofit(value)
+        # when uid is given
+        else:
+            self.page_finder[uid].schedule_tofit(value)
+                
     def _fit_helper(self, pars, value, fitproblem_id,fitter, title="Single Fit " ):
         """
         helper for fitting
@@ -896,6 +911,7 @@ class Plugin(PluginBase):
         :param qmax: the maximum value of x to replot model
           
         """  
+        del self.fit_thread_list[page_id[0]]
         time.sleep(0.2)   
         try:
             if result == None:
@@ -916,6 +932,7 @@ class Plugin(PluginBase):
                                          type="stop"))
                 self._update_fit_button(page_id)
                 return
+            
             for uid in page_id:
                 value = self.page_finder[uid]   
                 model = value.get_model()
@@ -961,6 +978,7 @@ class Plugin(PluginBase):
         :param elapsed: computation time
         
         """
+        self.fit_thread_list = {}
         if page_id is None:
             page_id = []
         ## fit more than 1 model at the same time 
@@ -1113,6 +1131,7 @@ class Plugin(PluginBase):
                      StatusEvent(status=msg))
         ## send the current engine type to fitpanel
         self.fit_panel._on_engine_change(name=self._fit_engine)
+
        
     def _on_model_panel(self, evt):
         """

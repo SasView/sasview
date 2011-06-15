@@ -51,7 +51,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         """
         ##Font size
         self.SetWindowVariant(variant = FONT_VARIANT)
-        self.id = None
+        self.uid = None
         self.parent = parent
         ## store page_finder
         self.page_finder = page_finder
@@ -66,7 +66,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.model_toFit=[]
         ## number of constraint
         self.nb_constraint= 0
-        self.id = wx.NewId()
+        self.uid = wx.NewId()
         ## draw page
         self.define_page_structure()
         self.draw_page()
@@ -145,8 +145,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             self.manager._reset_schedule_problem(value=0)
             for item in self.model_list:
                 if item[0].GetValue():
-                    self.manager.schedule_for_fit( value=1,fitproblem =item[1]) 
-            self.manager.onFit()
+                    self.manager.schedule_for_fit( value=1, fitproblem =item[1]) 
+            self.manager.onFit(None)
         else:
             msg= "Select at least one model to fit "
             wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))

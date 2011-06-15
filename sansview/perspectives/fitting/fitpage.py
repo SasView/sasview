@@ -951,6 +951,14 @@ class FitPage(BasicPage):
         """
         Allow to fit
         """
+        if len(self.parent._manager.fit_thread_list)>0 and\
+                    self.parent._manager._fit_engine != "park":
+            msg = "The FitEnging will be set to 'ParkMC'\n"
+            msg += " to fit with more than one data set..."
+            wx.MessageBox(msg, 'Info')
+            #wx.PostEvent(self._manager.parent, StatusEvent(status=\
+            #                "Fitting: %s"%msg))
+            
         if self.data is None:
             msg = "Please get Data first..."
             wx.MessageBox(msg, 'Info')
@@ -988,13 +996,13 @@ class FitPage(BasicPage):
         # when y(q=0)=None at x[0].         
         self.qmin_x = float(self.qmin.GetValue())
         self.qmax_x = float( self.qmax.GetValue())
-        self._manager._reset_schedule_problem(value=0)
+        self._manager._reset_schedule_problem(value=0, uid=self.uid)
         self._manager.schedule_for_fit(uid=self.uid,value=1, fitproblem =None) 
         self._manager.set_fit_range(uid=self.uid,qmin= self.qmin_x, 
                                    qmax= self.qmax_x)
         
         #single fit 
-        self._manager.onFit()
+        self._manager.onFit(uid=self.uid)
         self.btFit.SetLabel("Stop")
         self.bind_fit_button()
            
