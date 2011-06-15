@@ -490,7 +490,7 @@ class SansAssembly:
         :limitation: the initial values must be within range.
         """
 
-        time.sleep(0.01)
+        #time.sleep(0.01)
         is_outofbound = False
         # loop through the fit parameters
         for p in self.model.parameterset:

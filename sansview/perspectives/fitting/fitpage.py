@@ -1911,7 +1911,7 @@ class FitPage(BasicPage):
         if not self.is_mac:
             self.Layout() 
             self.Refresh() 
-        time.sleep(0.1)  
+        #time.sleep(0.1)  
         #plot model ( when drawing, do not update chisqr value again)
         self._draw_model(update_chisqr=False)    
         #PostStatusEvent     
