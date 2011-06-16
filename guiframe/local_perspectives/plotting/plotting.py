@@ -328,13 +328,19 @@ class Plugin(PluginBase):
         panel = event.GetEventObject()
         id = panel.uid
         if event.GetShow() and self.parent._mgr.GetPane(panel).IsShown():
-            if not self.menu.IsChecked(id):
-                self.menu.Check(id, True)
-                #self.menu.Enable(id, False)
+            try:
+                if self.menu.FindItemById(id) != None:
+                    if not self.menu.IsChecked(id):
+                        self.menu.Check(id, True)
+                        #self.menu.Enable(id, False)
+            except:
+                # when no such item; may happens after delete
+                pass
         else:
             try:
-                if self.menu.IsChecked(id):
-                    self.menu.Check(id, False)
-                    #self.menu.Enable(id, True)
+                if self.menu.FindItemById(id) != None:
+                    if self.menu.IsChecked(id):
+                        self.menu.Check(id, False)
+                        #self.menu.Enable(id, True)
             except:
                 pass 
