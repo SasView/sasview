@@ -85,11 +85,12 @@ class FitPage(BasicPage):
         
         self.engine_type = str(name)
         self.state.engine_type = self.engine_type
-        if len(self.parameters) == 0:
+        if not self.is_mac:
+            if len(self.parameters) == 0:
+                self.Layout()
+                return
             self.Layout()
-            return
-        self.Layout()
-        self.Refresh()
+            self.Refresh()
         
   
         
