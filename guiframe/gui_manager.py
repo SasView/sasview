@@ -2351,9 +2351,6 @@ class ViewerFrame(wx.Frame):
                     # Check if the panel is not shown
                     if not self._mgr.GetPane(panel.window_name).IsShown():
                         self._mgr.GetPane(panel.window_name).Hide()
-                    elif not IS_WIN:
-                        self._mgr.GetPane(panel.window_name).Hide()
-                        self._mgr.GetPane(panel.window_name).Show()
             except:
                 pass
         #print self.callback,self.schedule,self.schedule_full_draw_list
