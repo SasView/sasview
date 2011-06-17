@@ -2349,6 +2349,11 @@ class ViewerFrame(wx.Frame):
                 if self.GetCapture() == None:
                     # draw if possible
                     panel.set_resizing(False)
+                    if not IS_WIN:
+                        x,y=panel.GetSize()
+                        print "szie", x,y
+                        z,a=panel.SetSize((x,y+19))
+                        print "szie1", z,a
                     panel.draw_plot()
                     # Check if the panel is not shown
                     if not self._mgr.GetPane(panel.window_name).IsShown():
