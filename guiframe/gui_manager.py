@@ -2348,6 +2348,7 @@ class ViewerFrame(wx.Frame):
                     # draw if possible
                     panel.set_resizing(False)
                     panel.draw_plot()
+                    panel._resizeflag = False
                     # Check if the panel is not shown
                     if not self._mgr.GetPane(panel.window_name).IsShown():
                         self._mgr.GetPane(panel.window_name).Hide()
