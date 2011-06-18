@@ -2420,13 +2420,12 @@ class ViewerFrame(wx.Frame):
     def refresh_floating(self, panel):
         """
         """
-        if self._mgr.GetPane(panel.window_name).IsDocked () or IS_WIN:
-            return
+        #if self._mgr.GetPane(panel.window_name).IsDocked () or IS_WIN:
+        #    return
         
-        self._mgr.GetPane(panel.window_name).Hide()
-        self._mgr.Update()
-        self._mgr.GetPane(panel.window_name).Show() 
-        self._mgr.Update()
+        size = panel.GetSize()
+        print size
+        
         
 class DefaultPanel(wx.Panel, PanelBase):
     """
