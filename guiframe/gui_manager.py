@@ -2424,9 +2424,7 @@ class ViewerFrame(wx.Frame):
             return
 
         size = panel.GetSize()
-        if size != panel.size and size[1] == panel.size[1] - 16:
-            panel.SetSize(panel.size)
-        print "draw", size, panel.size
+        #print "draw", size, panel.size
         
         
 class DefaultPanel(wx.Panel, PanelBase):
