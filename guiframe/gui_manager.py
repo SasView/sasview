@@ -2424,12 +2424,9 @@ class ViewerFrame(wx.Frame):
             return
         
         self._mgr.GetPane(panel.window_name).Hide()
-        print "here"
-        #self._mgr.Update()
-        #panel.toolbar.update()
-        self._mgr.GetPane(panel.window_name).Show()
-        
-        #self._mgr.Update()
+        self._mgr.Update()
+        self._mgr.GetPane(panel.window_name).Show() 
+        self._mgr.Update()
         
 class DefaultPanel(wx.Panel, PanelBase):
     """
