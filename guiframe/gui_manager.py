@@ -120,6 +120,10 @@ try:
 except:
     PLUGINS_WLIST = ''
 APPLICATION_WLIST = config.APPLICATION_WLIST
+if sys.platform.count("darwin")==0:
+    IS_WIN = True
+else:
+    IS_WIN = False
     
 class ViewerFrame(wx.Frame):
     """
@@ -621,7 +625,7 @@ class ViewerFrame(wx.Frame):
                               Caption(self._data_panel.window_caption).
                               Left().
                               MinimizeButton().
-                              CloseButton(True).
+                              CloseButton(IS_WIN).
                               TopDockable(False).
                               BottomDockable(False).
                               LeftDockable(True).

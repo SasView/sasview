@@ -148,7 +148,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 return
         self.x_size = self.GetSize()
         # Ready for another event
-        # Do not remove this Skip. Otherwise it will get runtime error.
+        # Do not remove this Skip. Otherwise it will get runtime error on wx>=2.9.
         event.Skip() 
         # set the resizing flag
         self.resizing = True
