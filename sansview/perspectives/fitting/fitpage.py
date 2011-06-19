@@ -1892,19 +1892,20 @@ class FitPage(BasicPage):
                    
                         if cov[ind]!=None :
                             if numpy.isfinite(float(cov[ind])):
+                                print "cov[ind]",cov[ind]
                                 val_err = format_number(cov[ind], True)
                                 if not self.is_mac:
                                     item[3].Show(True)
                                     item[4].Show(True)
                                 item[4].SetValue(val_err)
-
+                                
                                 has_error = True
                     i += 1         
         #Show error title when any errors displayed
         if has_error: 
             if not self.text2_3.IsShown():
                 self.text2_3.Show(True) 
-                
+            print "err"    
         ## save current state  
         self.save_current_state()          
         
@@ -1912,7 +1913,7 @@ class FitPage(BasicPage):
         if not self.is_mac:
             self.Layout() 
             self.Refresh() 
-        time.sleep(0.1)  
+        #time.sleep(0.1)  
         #plot model ( when drawing, do not update chisqr value again)
         self._draw_model(update_chisqr=False)    
         #PostStatusEvent     

@@ -512,7 +512,7 @@ class Plugin(PluginBase):
             self.draw_model(model=model, data=data, page_id=uid, smearer=smear,
                 enable1D=enable1D, enable2D=enable2D,
                 qmin=qmin, qmax=qmax)
-            time.sleep(0.2)
+            #time.sleep(0.2)
 
     def draw_model(self, model, page_id, data=None, smearer=None,
                    enable1D=True, enable2D=False,
@@ -641,7 +641,7 @@ class Plugin(PluginBase):
                                 manager=self,
                                 improvement_delta=0.1)
         
-        time.sleep(0.2)
+        #time.sleep(0.2)
         ## perform single fit
         
         if fitproblem_count == 1:
@@ -662,7 +662,7 @@ class Plugin(PluginBase):
                                     ftol=self.ftol)
 
         self.fit_thread_list[current_page_id] = calc_fit
-        time.sleep(0.3)
+        #time.sleep(0.3)
         
         #self.ready_fit(calc_fit=calc_fit)
         calc_fit.queue()
@@ -913,8 +913,7 @@ class Plugin(PluginBase):
           
         """  
         if page_id[0] in self.fit_thread_list.keys():
-            del self.fit_thread_list[page_id[0]]
-        time.sleep(0.2)   
+            del self.fit_thread_list[page_id[0]]  
         try:
             if result == None:
                 self._update_fit_button(page_id)
@@ -984,7 +983,7 @@ class Plugin(PluginBase):
         if page_id is None:
             page_id = []
         ## fit more than 1 model at the same time 
-        time.sleep(0.2)  
+        #time.sleep(0.2)  
         try:
             msg = "" 
             if result == None:
