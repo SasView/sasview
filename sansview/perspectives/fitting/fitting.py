@@ -536,7 +536,6 @@ class Plugin(PluginBase):
         :param update_chisqr: update chisqr [bool]
              
         """
-        print "data.__class__.__name__",data.__class__.__name__
         if data.__class__.__name__ == "Data1D" or not enable2D:    
             ## draw model 1D with no loaded data
             self._draw_model1D(model=model, 
@@ -1526,6 +1525,7 @@ class Plugin(PluginBase):
             return 
         try:
             from model_thread import Calc1D
+            print "a"
             ## If a thread is already started, stop it
             if (self.calc_1D is not None) and self.calc_1D.isrunning():
                 self.calc_1D.stop()
@@ -1541,9 +1541,9 @@ class Plugin(PluginBase):
                                   completefn=self._complete1D,
                                   #updatefn = self._update1D,
                                   update_chisqr=update_chisqr)
-
+            print "b"
             self.calc_1D.queue()
-
+            print "c"
         except:
             msg = " Error occurred when drawing %s Model 1D: " % model.name
             msg += " %s" % sys.exc_value

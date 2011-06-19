@@ -1892,7 +1892,6 @@ class FitPage(BasicPage):
                    
                         if cov[ind]!=None :
                             if numpy.isfinite(float(cov[ind])):
-                                print "cov[ind]",cov[ind]
                                 val_err = format_number(cov[ind], True)
                                 if not self.is_mac:
                                     item[3].Show(True)
@@ -1904,8 +1903,7 @@ class FitPage(BasicPage):
         #Show error title when any errors displayed
         if has_error: 
             if not self.text2_3.IsShown():
-                self.text2_3.Show(True) 
-            print "err"    
+                self.text2_3.Show(True)   
         ## save current state  
         self.save_current_state()          
         
