@@ -23,11 +23,6 @@ from sans.guiframe.dataFitting import Data2D
 DEFAULT_MENU_ITEM_LABEL = "No graph available"
 DEFAULT_MENU_ITEM_ID = wx.NewId()
 
-if sys.platform.count("darwin")==0:
-    IS_WIN = True
-else:
-    IS_WIN = False
-
 class Plugin(PluginBase):
     """
     Plug-in class to be instantiated by the GUI manager
@@ -158,7 +153,7 @@ class Plugin(PluginBase):
            
         self.menu.AppendCheckItem(event_id, new_panel.window_caption, 
                          "Show %s plot panel" % new_panel.window_caption)
-        self.menu.Check(event_id, True)#IS_WIN)
+        self.menu.Check(event_id, True)
         wx.EVT_MENU(self.parent, event_id, self._on_check_menu)
 
         wx.EVT_SHOW(new_panel, self._on_close_panel)
@@ -307,7 +302,7 @@ class Plugin(PluginBase):
 
         if self.menu.IsChecked(event_id):
             self.parent.on_view(event)
-            self.menu.Check(event_id, True)#IS_WIN)
+            self.menu.Check(event_id, True)
         else:
             self.parent.hide_panel(event_id)
             self.menu.Check(event_id, False)
