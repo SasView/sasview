@@ -952,6 +952,8 @@ class FitPage(BasicPage):
         """
         Allow to fit
         """
+        if event != None:
+            event.Skip()
         if len(self.parent._manager.fit_thread_list)>0 and\
                     self.parent._manager._fit_engine != "park":
             msg = "The FitEnging will be set to 'ParkMC'\n"
@@ -1038,7 +1040,6 @@ class FitPage(BasicPage):
         """
         Stop fit 
         """
-        print "stopfit"
         time.sleep(0.1)
         if event != None:
             event.Skip()
