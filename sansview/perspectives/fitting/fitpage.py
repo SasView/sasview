@@ -1039,10 +1039,13 @@ class FitPage(BasicPage):
         Stop fit 
         """
         time.sleep(0.1)
+        print "stp"
         #if self.engine_type=="scipy":
         self._manager.stop_fit(self.uid)
         self._manager._reset_schedule_problem(value=0)
+        print "stp1"
         self._on_fit_complete()
+        print "stp2"
          
     def _on_select_model(self, event=None): 
         """
