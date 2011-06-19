@@ -952,6 +952,8 @@ class FitPage(BasicPage):
         """
         Allow to fit
         """
+        if ON_MAC:
+            time.sleep(0.2)
         if len(self.parent._manager.fit_thread_list)>0 and\
                     self.parent._manager._fit_engine != "park":
             msg = "The FitEnging will be set to 'ParkMC'\n"
