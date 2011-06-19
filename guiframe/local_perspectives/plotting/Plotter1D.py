@@ -142,7 +142,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
         # ready for another event
         event.Skip()  
         # set the resizing flag
-        #self._onSize(event)
         self.resizing = True
         self.canvas.set_resizing(self.resizing)
         self.parent.set_schedule(True)

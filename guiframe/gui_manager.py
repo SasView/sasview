@@ -762,7 +762,7 @@ class ViewerFrame(wx.Frame):
                               Right().
                               Dock().
                               MinimizeButton().
-                              #FloatingPosition(1).
+                              Resizable(True).
                               # Use a large best size to make sure the AUI 
                               # manager takes all the available space
                               BestSize(wx.Size(PLOPANEL_WIDTH, 
@@ -774,7 +774,7 @@ class ViewerFrame(wx.Frame):
             self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                               Name(windowname).Caption(caption).
                               MinimizeButton().
-                              #Resizable(False).
+                              Resizable(True).
                               # Use a large best size to make sure the AUI
                               #  manager takes all the available space
                               BestSize(wx.Size(PLOPANEL_WIDTH, 
@@ -2348,8 +2348,6 @@ class ViewerFrame(wx.Frame):
                     # draw if possible
                     panel.set_resizing(False)
                     panel.draw_plot()
-                    #panel._resizeflag = False
-                    
                     # Check if the panel is not shown
                     if not self._mgr.GetPane(panel.window_name).IsShown():
                         self._mgr.GetPane(panel.window_name).Hide()
@@ -2417,15 +2415,6 @@ class ViewerFrame(wx.Frame):
         # restart idle   
         self.idletimer.Restart(55, *args, **kwargs)
 
-    def refresh_floating(self, panel):
-        """
-        """
-        if self._mgr.GetPane(panel.window_name).IsDocked ():# or IS_WIN:
-            return
-
-        size = panel.GetSize()
-        #print "draw", size, panel.size
-        
         
 class DefaultPanel(wx.Panel, PanelBase):
     """

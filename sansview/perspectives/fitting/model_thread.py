@@ -20,8 +20,8 @@ class Calc2D(CalcThread):
                  completefn = None,
                  updatefn   = None,
                  update_chisqr=True,
-                 yieldtime  = 0.04,
-                 worktime   = 0.04
+                 yieldtime  = 0.01,
+                 worktime   = 0.01
                  ):
         CalcThread.__init__(self,completefn,
                  updatefn,
