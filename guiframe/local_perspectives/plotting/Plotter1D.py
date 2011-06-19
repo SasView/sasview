@@ -139,15 +139,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         On response of the resize of a panel, set axes_visiable False
         """
-        print "evet", event.GetEventObject()
-        print "self.x_size,self.GetSize()",self.x_size, self.GetSize()
         # It was found that wx >= 2.9.3 sends an event even if no size changed.
         # So manually recode the size (=x_size) and compare here.
         if self.x_size != None:
             if self.x_size == self.GetSize():
                 self.resizing = False
                 self.canvas.set_resizing(self.resizing)
-                print "not resizing"
                 return
         self.x_size = self.GetSize()
         # Ready for another event
