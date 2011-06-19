@@ -536,6 +536,7 @@ class Plugin(PluginBase):
         :param update_chisqr: update chisqr [bool]
              
         """
+        print "data.__class__.__name__",data.__class__.__name__
         if data.__class__.__name__ == "Data1D" or not enable2D:    
             ## draw model 1D with no loaded data
             self._draw_model1D(model=model, 
