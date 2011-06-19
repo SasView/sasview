@@ -71,7 +71,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.hide_menu = None
         ## Unique ID (from gui_manager)
         self.uid = None
-       
+        self.x_size = None
         ## Default locations
         self._default_save_location = os.getcwd() 
         self.size = None       
@@ -139,8 +139,17 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         On response of the resize of a panel, set axes_visiable False
         """
-        # ready for another event
-        event.Skip()  
+        # Ready for another event
+        # Do not remove this Skip. Otherwise it will get runtime error.
+        event.Skip() 
+         
+        # It was found that wx >= 2.9.3 sends an event even if no size changed.
+        # So manually recode the size (=x_size) and compare here.
+        if self.x_size != None:
+            if self.x_size == self.GetSize():
+                return
+        self.x_size = self.GetSize()
+        
         # set the resizing flag
         self.resizing = True
         self.canvas.set_resizing(self.resizing)
