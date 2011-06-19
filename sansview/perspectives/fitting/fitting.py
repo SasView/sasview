@@ -472,6 +472,7 @@ class Plugin(PluginBase):
                 calc_fit.stop()
                 msg = "Fit stop!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
+            del self.fit_thread_list[uid]
         #set the fit button label of page when fit stop is trigger from
         #simultaneous fit pane
         if  self.sim_page is not None and uid == self.sim_page.uid:
