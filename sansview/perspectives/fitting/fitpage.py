@@ -1618,7 +1618,14 @@ class FitPage(BasicPage):
             self.enable_smearer.Disable()
         else:
             self.enable_smearer.Enable()
-            
+
+    def _mac_sleep(self, sec=0.2):
+        """
+        Give sleep to MAC
+        """
+        if self.is_mac:
+            time.sleep(sec)
+
     def get_view_mode(self):
         """
         return True if the panel allow 2D or False if 1D
@@ -1929,7 +1936,7 @@ class FitPage(BasicPage):
         if not self.is_mac:
             self.Layout() 
             self.Refresh() 
-        #time.sleep(0.1)  
+        self._mac_sleep(0.1)  
         #plot model ( when drawing, do not update chisqr value again)
         self._draw_model(update_chisqr=False)    
         #PostStatusEvent     

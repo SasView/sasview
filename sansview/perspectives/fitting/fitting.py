@@ -49,7 +49,10 @@ MAX_NBR_DATA = 4
 
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
 
-   
+if sys.platform.count("darwin")==0:
+    ON_MAC = False
+else:
+    ON_MAC = True   
 
 class Plugin(PluginBase):
     """
@@ -512,8 +515,15 @@ class Plugin(PluginBase):
             self.draw_model(model=model, data=data, page_id=uid, smearer=smear,
                 enable1D=enable1D, enable2D=enable2D,
                 qmin=qmin, qmax=qmax)
-            #time.sleep(0.2)
-
+            self._mac_sleep(0.2)
+            
+    def _mac_sleep(self, sec=0.2):
+    	"""
+    	Give sleep to MAC
+    	"""
+        if ON_MAC:
+    	   time.sleep(sec)
+		
     def draw_model(self, model, page_id, data=None, smearer=None,
                    enable1D=True, enable2D=False,
                    state=None,
@@ -641,7 +651,7 @@ class Plugin(PluginBase):
                                 manager=self,
                                 improvement_delta=0.1)
         
-        #time.sleep(0.2)
+        self._mac_sleep(0.2)
         ## perform single fit
         
         if fitproblem_count == 1:
@@ -662,7 +672,7 @@ class Plugin(PluginBase):
                                     ftol=self.ftol)
 
         self.fit_thread_list[current_page_id] = calc_fit
-        #time.sleep(0.3)
+        self._mac_sleep(0.2)
         
         #self.ready_fit(calc_fit=calc_fit)
         calc_fit.queue()
@@ -912,6 +922,7 @@ class Plugin(PluginBase):
         :param qmax: the maximum value of x to replot model
           
         """  
+        self._mac_sleep(0.2)
         if page_id[0] in self.fit_thread_list.keys():
             del self.fit_thread_list[page_id[0]]  
         try:
@@ -983,7 +994,7 @@ class Plugin(PluginBase):
         if page_id is None:
             page_id = []
         ## fit more than 1 model at the same time 
-        #time.sleep(0.2)  
+        self._mac_sleep(0.2) 
         try:
             msg = "" 
             if result == None:
