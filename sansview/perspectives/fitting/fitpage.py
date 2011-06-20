@@ -1314,7 +1314,21 @@ class FitPage(BasicPage):
         after fitting
         """
         if self.is_mac:
+            if len(self.parameters)>0:
+                for item in self.parameters:
+                    #Skip t ifhe angle parameters if 1D data
+                    if self.data.__class__.__name__ !=  "Data2D" and \
+                            not self.enable2D:
+                        if item in self.orientation_params:
+                            continue
+                    ## hide statictext +/-    
+                    if len(item) < 4 :
+                        continue
+                    ## reset value with ''
+                    if item[4]!=None and item[4].IsShown():                   
+                        item[4].SetValue("")
             return
+        
         if hasattr(self,"text2_3"):
             self.text2_3.Hide()
 
