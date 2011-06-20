@@ -381,14 +381,16 @@ class FitPanel(nb, PanelBase):
                     self.SetPageText(pos, str(data.name))
                     self.SetSelection(pos)
                     return page
-                
+            # Todo: Need to set different window name when has same data
+            # Todo: to catch page with same data even if it is not on the top.
+            """
             elif page.get_data().id == data.id:
                 msg = "Data already existing in the fitting panel"
                 wx.PostEvent(self._manager.parent, 
-                             StatusEvent(status=msg, info='warning'))  
+                             StatusEvent(status=msg, info='warning')) 
                 self.SetSelection(pos)
                 return page
-        
+            """
         page = self.add_empty_page()
         pos = self.GetPageIndex(page)
         page.set_data(data)
