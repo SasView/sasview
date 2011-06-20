@@ -1265,9 +1265,9 @@ class ViewerFrame(wx.Frame):
             perspective.on_perspective(event=None)
             self._mgr.Update()
             # Show toolbar
-            style = self.__gui_style & GUIFRAME.TOOLBAR_ON
-            if (style == GUIFRAME.TOOLBAR_ON) & (not self._toolbar.IsShown()):
-                self._on_toggle_toolbar()
+            #style = self.__gui_style & GUIFRAME.TOOLBAR_ON
+            #if (style == GUIFRAME.TOOLBAR_ON) & (not self._toolbar.IsShown()):
+            #    self._on_toggle_toolbar()
             
     def show_welcome_panel(self, event):
         """    
