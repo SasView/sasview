@@ -1412,8 +1412,13 @@ class ViewerFrame(wx.Frame):
             return
         else:
             path = os.path.abspath(path)
-            if not os.path.isfile(path):
+            if not os.path.isfile(path) and not os.path.isdir(path):
                return
+            
+            if os.path.isdir(path):
+                self.load_folder(path)
+                return
+
         basename  = os.path.basename(path)
         root, extension = os.path.splitext(basename)
         if extension.lower() not in EXTENSIONS:
@@ -1477,7 +1482,27 @@ class ViewerFrame(wx.Frame):
             error_message += str(sys.exc_value) + "\n"
             print error_message
            
-      
+    def load_folder(self, path):
+        """
+        Load entire folder
+        """   
+        if not os.path.isdir(path):
+            return
+        if self._data_plugin is None:
+            return
+        try:
+            if path is not None:
+                self._default_save_location = os.path.dirname(path)
+                file_list = self._data_plugin.get_file_path(path)
+                self._data_plugin.get_data(file_list)
+            else:
+                return 
+        except:
+            error_message = "Error while loading"
+            error_message += " Data folder from cmd:\n %s\n" % str(path)
+            error_message += str(sys.exc_value) + "\n"
+            print error_message 
+            
     def _on_open_state_application(self, event):
         """
         """
