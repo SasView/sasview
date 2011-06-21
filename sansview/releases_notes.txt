@@ -3,7 +3,6 @@ Release Notes
 
 SansView 1.9.1
 
-Package name: None
 1- version 1.9.1 : bug-fix release
 
 	- Release date: 06/22/2011
@@ -13,10 +12,10 @@ Package name: None
 	- Fixed a bug w/ 2D color map dialog
 	- Minor feature added: Enable to load a data folder from the command line
 	
-	-version 1.9.0
+	-version 1.9
 	
 	- Much easier graphical user interface
-	- Optimized for the speed and accuracy of the computation
+	- Optimized for the speed and accuracy of the computations
 	- Added Many shape, polymer, and other models including SphericalSLD, OnionExponetialShell, and even ReflectivityModels
 	- Added Data Explorer to manage, plot, delete, or setup for computation
 	- Added Instrumental resolution estimator (as a Tool)
@@ -24,7 +23,7 @@ Package name: None
 	- More functionalities on plot panels
 	- Combined Modeling and Fitting
 	- Save/open a SansView project or SansView analysis (subproject)
-	- Start the SansView application from a data file by double-clicking or command line
+	- Start the SansView application from a data file by double-clicking or from command line
 	- Easy manipulation of data and plot
 	- Provides Normalized residual plot
 	- Added useful key-combinations to copy (fitpage), paste (fitpage), change fit-tolerance, etc.
@@ -89,19 +88,19 @@ Package name: None
 		- Get the code from svn://danse.us/sans/releases/sansview-1.9.1
 			(after all dependent packages/modules are installed/compiled, run 'python sansview.py' under the 'sansview-1.9' folder)
 		- This application is also dependent on the following DANSE code:
-			svn://danse.us/sans/releases/calculator-0.9.1 (run 'python setup.py install' under the 'calculator-0.9' folder)
+			svn://danse.us/sans/releases/calculator-0.9.1 (run 'python setup.py install' under the 'calculator-0.9.1' folder)
 			svn://danse.us/sans/releases/calculatorview-0.9 (run 'python setup.py install' under the 'calculatorview-0.9' folder)
-			svn://danse.us/sans/releases/Invariant-0.9.1 (run 'python setup.py install' under the 'Invariant-0.9' folder)
+			svn://danse.us/sans/releases/Invariant-0.9.1 (run 'python setup.py install' under the 'Invariant-0.9.1' folder)
 			svn://danse.us/sans/releases/invariantview-0.9 (run 'python setup.py install' under the 'invariantview-0.1.1' folder)
-			svn://danse.us/sans/releases/guiframe-0.9.1 (run 'python setup.py install' under the 'guiframe-0.9' folder)
+			svn://danse.us/sans/releases/guiframe-0.9.1 (run 'python setup.py install' under the 'guiframe-0.9.1' folder)
 			svn://danse.us/sans/releases/DataLoader-0.9 (run 'python setup.py install' under the 'DataLoader-0.9' folder)
-			svn://danse.us/sans/releases/park_integration-0.9.1 (run 'python setup.py install' under the 'park_integration-0.9' folder)
-			svn://danse.us/sans/releases/sansmodels-0.9.1 (run 'python setup.py install' under the 'sansmodels-0.9\src\' folder)
+			svn://danse.us/sans/releases/park_integration-0.9.1 (run 'python setup.py install' under the 'park_integration-0.9.1' folder)
+			svn://danse.us/sans/releases/sansmodels-0.9.1 (run 'python setup.py install' under the 'sansmodels-0.9.1\src\' folder)
 			svn://danse.us/park/releases/park-1.2.1 (run 'python setup.py install' under the 'park-1.2.1' folder)
-	        svn://danse.us/common/releases/plottools-0.9.1 (run 'python setup.py install'under the 'plottools-0.9\trunk\' folder)
+	        svn://danse.us/common/releases/plottools-0.9.1 (run 'python setup.py install'under the 'plottools-0.9.1\trunk\' folder)
 	        svn://danse.us/common/releases/util-0.9.1 (run 'python setup.py install'under the 'util-0.1.5' folder)
 	        svn://danse.us/sans/releases/pr_inversion-0.9 (run 'python setup.py install'under the 'pr_inversion-0.9' folder)
-	        svn://danse.us/sans/releases/prview-0.9.1 (run 'python setup.py install'under the 'prview-0.9' folder)
+	        svn://danse.us/sans/releases/prview-0.9.1 (run 'python setup.py install'under the 'prview-0.9.1' folder)
 		- The following modules are required:
 			* matplotlib = 0.99.0(WIN), 0.99.1.1(MAC)
 			* numpy = 1.4.1
