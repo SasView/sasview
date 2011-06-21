@@ -112,6 +112,11 @@ def check_system():
         import scipy
     except:
         logging.error("scipy missing")
+
+    try:
+        import periodictable
+    except:
+        logging.error("periodictable missing")
         
     if os.system("gcc -dumpversion")==1:
         logging.error("missing mingw")
