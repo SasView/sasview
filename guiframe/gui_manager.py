@@ -1235,7 +1235,7 @@ class ViewerFrame(wx.Frame):
         """
         Display status message
         """
-        self.sb.set_status(event=evt)
+        wx.CallAfter(self.sb.set_status, evt)
        
     def on_view(self, evt):
         """
