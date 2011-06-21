@@ -33,7 +33,7 @@ for dir in os.listdir(path):
 
 setup(
     name="guiframe",
-    version = "0.9",
+    version = "0.9.1",
     description = "Python module for SANS gui framework",
     author = "University of Tennessee",
     url = "http://danse.chem.utk.edu",

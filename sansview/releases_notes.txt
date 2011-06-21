@@ -1,12 +1,20 @@
 Release Notes
 =============
 
-SansView 1.9
+SansView 1.9.1
 
 Package name: None
-1- version 1.9
-	- Release date: 05/25/2011
-	- The SansView WORKS!!!
+1- version 1.9.1 : bug-fix release
+
+	- Release date: 06/22/2011
+	- MAC: Fixed some causes of crashing during fitting 
+	- Pr Inversion: Fixed a missing Rg output
+	- Startup Setting: fixed a problem with DataExplorer ON/OFF
+	- Fixed a bug w/ 2D color map dialog
+	- Minor feature added: Enable to load a data folder from the command line
+	
+	-version 1.9.0
+	
 	- Much easier graphical user interface
 	- Optimized for the speed and accuracy of the computation
 	- Added Many shape, polymer, and other models including SphericalSLD, OnionExponetialShell, and even ReflectivityModels
@@ -75,30 +83,30 @@ Package name: None
 	
 	2.1- System Requirements:
 		- Python version >= 2.5 and < 3.0 should be running on the system
-		- We uses Python2.5.4 for WIN, and Python2.6 for MAC
+		- We uses Python2.5.4 for WIN, and Python2.6.3 for MAC
 
 	2.2- Installing:
-		- Get the code from svn://danse.us/sans/releases/sansview-1.9
+		- Get the code from svn://danse.us/sans/releases/sansview-1.9.1
 			(after all dependent packages/modules are installed/compiled, run 'python sansview.py' under the 'sansview-1.9' folder)
 		- This application is also dependent on the following DANSE code:
-			svn://danse.us/sans/releases/calculator-0.9 (run 'python setup.py install' under the 'calculator-0.9' folder)
+			svn://danse.us/sans/releases/calculator-0.9.1 (run 'python setup.py install' under the 'calculator-0.9' folder)
 			svn://danse.us/sans/releases/calculatorview-0.9 (run 'python setup.py install' under the 'calculatorview-0.9' folder)
-			svn://danse.us/sans/releases/Invariant-0.9 (run 'python setup.py install' under the 'Invariant-0.9' folder)
+			svn://danse.us/sans/releases/Invariant-0.9.1 (run 'python setup.py install' under the 'Invariant-0.9' folder)
 			svn://danse.us/sans/releases/invariantview-0.9 (run 'python setup.py install' under the 'invariantview-0.1.1' folder)
-			svn://danse.us/sans/releases/guiframe-0.9 (run 'python setup.py install' under the 'guiframe-0.9' folder)
+			svn://danse.us/sans/releases/guiframe-0.9.1 (run 'python setup.py install' under the 'guiframe-0.9' folder)
 			svn://danse.us/sans/releases/DataLoader-0.9 (run 'python setup.py install' under the 'DataLoader-0.9' folder)
-			svn://danse.us/sans/releases/park_integration-0.9 (run 'python setup.py install' under the 'park_integration-0.9' folder)
-			svn://danse.us/sans/releases/sansmodels-0.9 (run 'python setup.py install' under the 'sansmodels-0.9\src\' folder)
+			svn://danse.us/sans/releases/park_integration-0.9.1 (run 'python setup.py install' under the 'park_integration-0.9' folder)
+			svn://danse.us/sans/releases/sansmodels-0.9.1 (run 'python setup.py install' under the 'sansmodels-0.9\src\' folder)
 			svn://danse.us/park/releases/park-1.2.1 (run 'python setup.py install' under the 'park-1.2.1' folder)
-	        svn://danse.us/common/releases/plottools-0.9 (run 'python setup.py install'under the 'plottools-0.9\trunk\' folder)
-	        svn://danse.us/common/releases/util-0.9 (run 'python setup.py install'under the 'util-0.1.5' folder)
+	        svn://danse.us/common/releases/plottools-0.9.1 (run 'python setup.py install'under the 'plottools-0.9\trunk\' folder)
+	        svn://danse.us/common/releases/util-0.9.1 (run 'python setup.py install'under the 'util-0.1.5' folder)
 	        svn://danse.us/sans/releases/pr_inversion-0.9 (run 'python setup.py install'under the 'pr_inversion-0.9' folder)
-	        svn://danse.us/sans/releases/prview-0.9 (run 'python setup.py install'under the 'prview-0.9' folder)
+	        svn://danse.us/sans/releases/prview-0.9.1 (run 'python setup.py install'under the 'prview-0.9' folder)
 		- The following modules are required:
-			* matplotlib = 0.99.0(WIN), 0.99.1(MAC)
+			* matplotlib = 0.99.0(WIN), 0.99.1.1(MAC)
 			* numpy = 1.4.1
 			* scipy >= 0.7.2
-			* wxpython 2.8.11 unicode
+			* wxpython 2.8.11 unicode(WIN), 2.8.12.0(MAC)
 			* lxml >= 2.2.2
 			* PIL (Python Image Library)
 			* Pyparsing (apply for bundling)

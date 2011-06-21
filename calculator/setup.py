@@ -6,7 +6,7 @@ from distutils.core import setup
 
 setup(
     name="sans.calculator",
-    version = "0.9",
+    version = "0.9.1",
     description = "Python module for sld  calculation",
     author = "University of Tennessee",
     url = "http://danse.chem.utk.edu",

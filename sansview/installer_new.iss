@@ -6,14 +6,14 @@
 [Setup]
 
 ChangesAssociations=yes
-AppName=SansView-1.9
-AppVerName=SansView-1.9
+AppName=SansView-1.9.1
+AppVerName=SansView-1.9.1
 AppPublisher=(c) 2009, University of Tennessee
 AppPublisherURL=http://danse.chem.utk.edu
 AppSupportURL=http://danse.chem.utk.edu
 AppUpdatesURL=http://danse.chem.utk.edu 
-DefaultDirName={pf}\SansView-1.9
-DefaultGroupName=DANSE\SansView-1.9
+DefaultDirName={pf}\SansView-1.9.1
+DefaultGroupName=DANSE\SansView-1.9.1
 DisableProgramGroupPage=yes
 LicenseFile=license.txt
 OutputBaseFilename=setupSansView
@@ -54,10 +54,10 @@ Source: "test\*";	DestDir: "{app}\test";	Flags: ignoreversion recursesubdirs cre
 ;	NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\SansView-1.9";	Filename: "{app}\SansView.exe";	WorkingDir: "{app}" 
-Name: "{group}\{cm:UninstallProgram, SansView-1.9}";	 Filename: "{uninstallexe}" 
-Name: "{commondesktop}\SansView-1.9";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" 
+Name: "{group}\SansView-1.9.1";	Filename: "{app}\SansView.exe";	WorkingDir: "{app}" 
+Name: "{group}\{cm:UninstallProgram, SansView-1.9.1}";	 Filename: "{uninstallexe}" 
+Name: "{commondesktop}\SansView-1.9.1";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" 
 
 
 [Run]
-Filename: "{app}\SansView.exe";	Description: "{cm:LaunchProgram, SansView-1.9}";	Flags: nowait postinstall skipifsilent
+Filename: "{app}\SansView.exe";	Description: "{cm:LaunchProgram, SansView-1.9.1}";	Flags: nowait postinstall skipifsilent
