@@ -331,8 +331,8 @@ class Reader:
                 #Data    
                 output.x = x[x!=0]
                 output.y = y[x!=0]
-                output.dy = dy[x!=0] if has_error_dy == True else numpy.zeros(len(y))
-                output.dx = dx[x!=0] if has_error_dx == True else numpy.zeros(len(x))
+                output.dy = dy[x!=0] if has_error_dy == True else numpy.zeros(len(output.y))
+                output.dx = dx[x!=0] if has_error_dx == True else numpy.zeros(len(output.x))
                                 
                 if data_conv_q is not None:
                     output.xaxis("\\rm{Q}", output.x_unit)
