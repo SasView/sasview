@@ -1235,6 +1235,7 @@ class ViewerFrame(wx.Frame):
         """
         Display status message
         """
+        # This CallAfter fixes many crashes on MAC.
         wx.CallAfter(self.sb.set_status, evt)
        
     def on_view(self, evt):
