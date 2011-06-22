@@ -958,7 +958,7 @@ class Plugin(PluginBase):
 
                 cpage.onsetValues(result.fitness, 
                                   param_name, result.pvec,result.stderr)
-                cpage._on_fit_complete()
+                wx.CallAfter(cpage._on_fit_complete)
             if result.stderr == None:
                 msg = "Fit Abort: "
             else:

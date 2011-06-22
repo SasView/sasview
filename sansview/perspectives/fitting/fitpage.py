@@ -1878,7 +1878,7 @@ class FitPage(BasicPage):
                     if not self.is_mac:
                         item[3].Hide()
                         item[4].Hide()
-                    
+                    print item[1]
                     for ind in range(len(out)):
                         
                         if item[1] == p_name[ind]:
@@ -1917,14 +1917,16 @@ class FitPage(BasicPage):
                 self.text2_3.Show(True)   
         ## save current state  
         self.save_current_state()          
-        
+        print "after self.save_current_state"
         #self._lay_out() 
         if not self.is_mac:
             self.Layout() 
             self.Refresh() 
         self._mac_sleep(0.1)  
+        print "after self._mac_sleep"
         #plot model ( when drawing, do not update chisqr value again)
         self._draw_model(update_chisqr=False)    
+        print "after self._draw_model"
         #PostStatusEvent     
         #msg = "Fit completed!dddd "
         #wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
