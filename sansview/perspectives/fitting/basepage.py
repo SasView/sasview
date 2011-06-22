@@ -1585,15 +1585,12 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         #if self.check_invalid_panel():
         #    return
-        print "in _draw_model0"
         if self.model !=None:
-            print "in _draw_model0"
             temp_smear=None
             if hasattr(self, "enable_smearer"):
                 if not self.disable_smearer.GetValue():
                     temp_smear= self.current_smearer
             toggle_mode_on = self.model_view.IsEnabled()
-            print "after ms_draw"
             self._manager.draw_model(self.model, 
                                     data=self.data,
                                     smearer= temp_smear,

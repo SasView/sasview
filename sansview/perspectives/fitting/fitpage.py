@@ -1886,7 +1886,7 @@ class FitPage(BasicPage):
                     if len(out)<=len(self.param_toFit) and out[ind] !=None:   
                         val_out = format_number(out[ind], True)                  
                         item[2].SetValue(val_out)
-                        print item[1],val_out
+
 
                     if(cov !=None):
                         
@@ -1908,7 +1908,7 @@ class FitPage(BasicPage):
                                     item[3].Show(True)
                                     item[4].Show(True)
                                 item[4].SetValue(val_err)
-                                print item[1],val_err
+                                
                                 has_error = True
                     i += 1         
         #Show error title when any errors displayed
@@ -1917,16 +1917,14 @@ class FitPage(BasicPage):
                 self.text2_3.Show(True)   
         ## save current state  
         self.save_current_state()          
-        print "after self.save_current_state"
+        
         #self._lay_out() 
         if not self.is_mac:
             self.Layout() 
             self.Refresh() 
         self._mac_sleep(0.1)  
-        print "after self._mac_sleep"
         #plot model ( when drawing, do not update chisqr value again)
         self._draw_model(update_chisqr=False)    
-        print "after self._draw_model"
         #PostStatusEvent     
         #msg = "Fit completed!dddd "
         #wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
