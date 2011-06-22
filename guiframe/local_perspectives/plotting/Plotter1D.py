@@ -141,9 +141,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         # It was found that wx >= 2.9.3 sends an event even if no size changed.
         # So manually recode the size (=x_size) and compare here.
-
-        if event != None: 
-        	event.Skip() 
         if self.x_size != None:
             if self.x_size == self.GetSize():
                 self.resizing = False
