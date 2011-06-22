@@ -1014,16 +1014,12 @@ class FitPage(BasicPage):
         """
         bind the fit button to either fit handler or stop fit handler
         """
-        print "bind"
-        
         self.btFit.Unbind(event=wx.EVT_BUTTON, id= self.btFit.GetId())
-        print "unbind"
         if self.btFit.GetLabel().lower() == "stop":
             self.fit_started = True
             self.btFit.SetForegroundColour('red')
             self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._StopFit,
                              id=self.btFit.GetId())
-            print "bind00"
         elif self.btFit.GetLabel().lower() == "fit":
             self.fit_started = False
             self.btFit.SetDefault()
@@ -1044,7 +1040,7 @@ class FitPage(BasicPage):
         """
         Stop fit 
         """
-        time.sleep(0.1)
+        #time.sleep(0.1)
         if event != None:
             event.Skip()
         #if self.engine_type=="scipy":
