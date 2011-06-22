@@ -16,7 +16,10 @@ from pr_widgets import PrTextCtrl
 from pr_widgets import DataFileTextCtrl
 from pr_widgets import OutputTextCtrl
 
-
+if sys.platform.count("darwin")==0:
+    FONT_VARIANT = 0
+else:
+    FONT_VARIANT = 1
 
 class InversionControl(ScrolledPanel, PanelBase):
     """
@@ -37,6 +40,8 @@ class InversionControl(ScrolledPanel, PanelBase):
         ScrolledPanel.__init__(self, parent, id=id, **kwargs)
         PanelBase.__init__(self, parent)
         self.SetupScrolling()
+        #Set window's font size 
+        self.SetWindowVariant(variant=FONT_VARIANT)
         
         self.plots = plots
         self.radio_buttons = {}
@@ -919,12 +924,13 @@ class InversionControl(ScrolledPanel, PanelBase):
                 message += " proceeding with P(r) inversion."
                 wx.PostEvent(self._manager.parent, StatusEvent(status=message))
             else:
-                self._manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc, 
-                                                  d_max=dmax,
-                                                  q_min=qmin, q_max=qmax,
-                                                  bck=has_bck,
-                                                  height=height,
-                                                  width=width)
+                wx.CallAfter(self._manager.setup_plot_inversion, alpha=alpha, 
+                                                    nfunc=nfunc, 
+                                                    d_max=dmax,
+                                                    q_min=qmin, q_max=qmax,
+                                                    bck=has_bck,
+                                                    height=height,
+                                                    width=width)
         else:
             message = "The P(r) form contains invalid values: "
             message += "please submit it again."

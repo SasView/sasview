@@ -955,7 +955,7 @@ class Plugin(PluginBase):
                     param_name.append(name)
    
                 cpage = self.fit_panel.get_page_by_id(uid)
-
+                # Make sure we got all results (CallAfter is important to MAC)
                 wx.CallAfter(cpage.onsetValues, result.fitness, 
                                   param_name, result.pvec, result.stderr)
                 cpage._on_fit_complete()
