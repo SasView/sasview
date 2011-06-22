@@ -956,9 +956,9 @@ class Plugin(PluginBase):
    
                 cpage = self.fit_panel.get_page_by_id(uid)
 
-                cpage.onsetValues(result.fitness, 
-                                  param_name, result.pvec,result.stderr)
-                #cpage._on_fit_complete()
+                #cpage.onsetValues(result.fitness, 
+                #                  param_name, result.pvec,result.stderr)
+                cpage._on_fit_complete()
             if result.stderr == None:
                 msg = "Fit Abort: "
             else:
