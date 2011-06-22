@@ -1050,7 +1050,7 @@ class FitPage(BasicPage):
         #if self.engine_type=="scipy":
         self._manager.stop_fit(self.uid)
         self._manager._reset_schedule_problem(value=0)
-        self._on_fit_complete()
+        #self._on_fit_complete()
          
     def _on_select_model(self, event=None): 
         """
