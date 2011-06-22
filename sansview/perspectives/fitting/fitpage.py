@@ -148,7 +148,7 @@ class FitPage(BasicPage):
         #Fit button
         self.btFit = wx.Button(self,wx.NewId(),'Fit', size=(88,25))
         self.default_bt_colour =  self.btFit.GetDefaultAttributes()
-        self.btFit.Bind(wx.EVT_BUTTON, self._onFit,id= self.btFit.GetId())
+        self.Bind(wx.EVT_BUTTON, self._onFit,id= self.btFit.GetId())
         self.btFit.SetToolTipString("Start fitting.")
         
         #textcntrl for custom resolution
@@ -1015,12 +1015,12 @@ class FitPage(BasicPage):
         """
         bind the fit button to either fit handler or stop fit handler
         """
-        self.btFit.Unbind(event=wx.EVT_BUTTON, id= self.btFit.GetId())
+        self.Unbind(event=wx.EVT_BUTTON, id= self.btFit.GetId())
         if self.btFit.GetLabel().lower() == "stop":
             self.fit_started = True
             if not self.is_mac:
                 self.btFit.SetForegroundColour('red')
-            self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._StopFit,
+            self.Bind(event=wx.EVT_BUTTON, handler=self._StopFit,
                              id=self.btFit.GetId())
         elif self.btFit.GetLabel().lower() == "fit":
             self.fit_started = False
@@ -1028,7 +1028,7 @@ class FitPage(BasicPage):
             if not self.is_mac:
                 self.btFit.SetForegroundColour('black')
             #self.btFit.SetBackgroundColour(self.default_bt_colour)
-            self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._onFit, 
+            self.Bind(event=wx.EVT_BUTTON, handler=self._onFit, 
                             id=self.btFit.GetId())
         else:
             msg = "FitPage: fit button has unknown label"
