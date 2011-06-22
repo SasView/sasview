@@ -63,6 +63,7 @@ class FitPage(BasicPage):
         When fit is complete ,reset the fit button label.
         """
         self.btFit.SetLabel("Fit")
+        print "fit button"
         self.bind_fit_button()
         
     def _is_2D(self):
