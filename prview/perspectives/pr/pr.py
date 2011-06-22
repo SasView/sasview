@@ -882,7 +882,7 @@ class Plugin(PluginBase):
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
                 
         # Show I(q) fit
-        self.show_iq(out, self.pr)
+        wx.CallAfter(self.show_iq, out, self.pr)
         
         # Show P(r) fit
         x_values, x_range = self.show_pr(out, self.pr, cov)  
@@ -1002,7 +1002,7 @@ class Plugin(PluginBase):
             pr = self._create_plot_pr()
             if not pr==None:
                 self.pr = pr
-                wx.CallAfter(self.perform_estimate)
+                self.perform_estimate()
         except:
             wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))            
 
@@ -1106,7 +1106,7 @@ class Plugin(PluginBase):
             #pr = self._create_file_pr(path)
             if not pr is None:
                 self.pr = pr
-                wx.CallAfter(self.perform_estimate)
+                self.perform_estimate()
         except:
             wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
                 
@@ -1269,7 +1269,7 @@ class Plugin(PluginBase):
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
         # Show I(q) fit
-        self.show_iq(out, self.pr)
+        wx.CallAfter(self.show_iq, out, self.pr)
         # Show P(r) fit
         x_values, x_range = self.show_pr(out, self.pr, cov=cov)
         
