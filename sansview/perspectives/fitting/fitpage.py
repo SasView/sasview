@@ -1925,7 +1925,7 @@ class FitPage(BasicPage):
         self._mac_sleep(0.1)  
         print "after self._mac_sleep"
         #plot model ( when drawing, do not update chisqr value again)
-        wx.CallAfter(self._draw_model, update_chisqr=False)    
+        self._draw_model(update_chisqr=False)    
         print "after self._draw_model"
         #PostStatusEvent     
         #msg = "Fit completed!dddd "
