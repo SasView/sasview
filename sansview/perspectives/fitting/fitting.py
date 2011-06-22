@@ -958,13 +958,13 @@ class Plugin(PluginBase):
 
                 cpage.onsetValues(result.fitness, 
                                   param_name, result.pvec,result.stderr)
-                cpage._on_fit_complete()
+                #cpage._on_fit_complete()
             if result.stderr == None:
                 msg = "Fit Abort: "
             else:
                 msg = "Fitting: "
             msg += "Completed!!!"
-            #wx.PostEvent(self.parent, StatusEvent(status=msg))
+            wx.PostEvent(self.parent, StatusEvent(status=msg))
             return
         except ValueError:
             self._update_fit_button(page_id)
