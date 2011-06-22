@@ -1030,10 +1030,11 @@ class Plugin(PluginBase):
                                 small_cov.append(p.stderr)
                 # Display result on each page 
                 cpage = self.fit_panel.get_page_by_id(uid)
-                cpage.onsetValues(result.fitness,
+                wx.CallAfter(cpage.onsetValues, 
+                                    result.fitness,
                                   small_param_name,
                                   small_out,small_cov)
-                wx.CallAfter(cpage._on_fit_complete)
+                cpage._on_fit_complete()
                 msg = "Fit completed!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
         except Exception:

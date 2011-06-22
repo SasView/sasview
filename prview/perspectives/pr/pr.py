@@ -882,7 +882,7 @@ class Plugin(PluginBase):
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
                 
         # Show I(q) fit
-        wx.CallAfter(self.show_iq, out, self.pr)
+        self.show_iq(out, self.pr)
         
         # Show P(r) fit
         x_values, x_range = self.show_pr(out, self.pr, cov)  
@@ -1269,7 +1269,7 @@ class Plugin(PluginBase):
         new_plot.yaxis("\\rm{Intensity} ","cm^{-1}")
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title="Iq"))
         # Show I(q) fit
-        wx.CallAfter(self.show_iq, out, self.pr)
+        self.show_iq(out, self.pr)
         # Show P(r) fit
         x_values, x_range = self.show_pr(out, self.pr, cov=cov)
         
