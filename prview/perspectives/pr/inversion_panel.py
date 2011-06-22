@@ -514,7 +514,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         explanation += " The regularization constant gives the size of that "  
         explanation += "term. The suggested value is the value above which the"
         explanation += " output P(r) will have only one peak."
-        label_explain = wx.StaticText(self, -1, explanation, size=(280,120))
+        label_explain = wx.StaticText(self, -1, explanation, size=(280,90))
         boxsizer2.Add(label_explain,  wx.LEFT|wx.BOTTOM, 5)
         
         
@@ -924,13 +924,12 @@ class InversionControl(ScrolledPanel, PanelBase):
                 message += " proceeding with P(r) inversion."
                 wx.PostEvent(self._manager.parent, StatusEvent(status=message))
             else:
-                wx.CallAfter(self._manager.setup_plot_inversion, alpha=alpha, 
-                                                    nfunc=nfunc, 
-                                                    d_max=dmax,
-                                                    q_min=qmin, q_max=qmax,
-                                                    bck=has_bck,
-                                                    height=height,
-                                                    width=width)
+                self._manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc, 
+                                                  d_max=dmax,
+                                                  q_min=qmin, q_max=qmax,
+                                                  bck=has_bck,
+                                                  height=height,
+                                                  width=width)
         else:
             message = "The P(r) form contains invalid values: "
             message += "please submit it again."

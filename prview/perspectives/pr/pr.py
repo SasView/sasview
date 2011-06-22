@@ -1002,7 +1002,7 @@ class Plugin(PluginBase):
             pr = self._create_plot_pr()
             if not pr==None:
                 self.pr = pr
-                self.perform_estimate()
+                wx.CallAfter(self.perform_estimate)
         except:
             wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))            
 
@@ -1106,7 +1106,7 @@ class Plugin(PluginBase):
             #pr = self._create_file_pr(path)
             if not pr is None:
                 self.pr = pr
-                self.perform_estimate()
+                wx.CallAfter(self.perform_estimate)
         except:
             wx.PostEvent(self.parent, StatusEvent(status=sys.exc_value))
                 
