@@ -1878,7 +1878,7 @@ class FitPage(BasicPage):
                     if not self.is_mac:
                         item[3].Hide()
                         item[4].Hide()
-                    print item[1]
+                    
                     for ind in range(len(out)):
                         
                         if item[1] == p_name[ind]:
@@ -1886,7 +1886,7 @@ class FitPage(BasicPage):
                     if len(out)<=len(self.param_toFit) and out[ind] !=None:   
                         val_out = format_number(out[ind], True)                  
                         item[2].SetValue(val_out)
-
+                        print item[1],val_out
 
                     if(cov !=None):
                         
@@ -1908,7 +1908,7 @@ class FitPage(BasicPage):
                                     item[3].Show(True)
                                     item[4].Show(True)
                                 item[4].SetValue(val_err)
-                                
+                                print item[1],val_err
                                 has_error = True
                     i += 1         
         #Show error title when any errors displayed
