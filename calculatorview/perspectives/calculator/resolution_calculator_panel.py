@@ -627,6 +627,8 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                                   (self.button_sizer, 0,
                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
         self.main_sizer.Add(self.vertical_l_sizer, 0, wx.ALL, 10)
+        # Make sure the default is selected here (MAC).
+        self.source_cb.SetStringSelection("Neutron")
         # Build image plot layout                     
         self._layout_image()
         # Add a vertical static line
