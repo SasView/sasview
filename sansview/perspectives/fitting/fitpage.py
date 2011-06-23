@@ -1567,7 +1567,7 @@ class FitPage(BasicPage):
         import MaskPanel as MaskDialog
         
         self.panel = MaskDialog(self, data=self.data,id =-1 )
-        #self.panel.Bind(wx.EVT_CLOSE, self._draw_masked_model)
+        self.panel.Bind(wx.EVT_CLOSE, self._draw_masked_model)
         self.panel.ShowModal()
         #wx.PostEvent(self.parent, event)
         

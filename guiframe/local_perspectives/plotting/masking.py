@@ -563,15 +563,12 @@ class Maskplotpanel(PlotPanel):
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
 
+
+"""
 class ViewerFrame(wx.Frame):
-    """
-    Add comment
-    """
     def __init__(self, parent, id, title):
-        """
-        comment
-        :param parent: parent panel/container
-        """
+        #comment
+        #:param parent: parent panel/container
         # Initialize the Frame object
         wx.Frame.__init__(self, parent, id, title,
                           wx.DefaultPosition, wx.Size(950, 850))
@@ -589,3 +586,4 @@ class ViewApp(wx.App):
 if __name__ == "__main__": 
     app = ViewApp(0)
     app.MainLoop()     
+"""
