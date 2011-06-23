@@ -130,10 +130,17 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.source_cb = wx.ComboBox(self, -1,
                                 style=wx.CB_READONLY,
                                 name = '%s'%mass_value)
+        # Sort source name because wx2.9 on Mac does not support CB_SORT
+        # Custom sorting
+        source_list = []
         for key, value in self.source_mass.iteritems():
             name_source = str(key)
-            self.source_cb.Append(name_source, name_source)
+            source_list.append(name_source)
+        source_list.sort()
+        for idx in range(len(source_list)):
+            self.source_cb.Append(source_list[idx],idx)
         self.source_cb.SetStringSelection("Neutron") 
+        
         wx.EVT_COMBOBOX(self.source_cb,-1, self._on_source_selection)      
         source_hint = "Source Selection: Affect on"
         source_hint += " the gravitational contribution.\n"
