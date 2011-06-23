@@ -133,7 +133,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         for key, value in self.source_mass.iteritems():
             name_source = str(key)
             self.source_cb.Append(name_source, name_source)
-        self.source_cb.SetStringSelection("Neutron") 
+        self.source_cb.SetValue("Neutron") 
         wx.EVT_COMBOBOX(self.source_cb,-1, self._on_source_selection)      
         source_hint = "Source Selection: Affect on"
         source_hint += " the gravitational contribution.\n"
