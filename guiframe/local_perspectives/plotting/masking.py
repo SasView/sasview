@@ -583,7 +583,7 @@ class ViewApp(wx.App):
     def OnInit(self):
         frame = ViewerFrame(None, -1, 'testView')    
         frame.Show(True)
-        self.SetTopWindow(frame)
+        #self.SetTopWindow(frame)
         
         return True
                
