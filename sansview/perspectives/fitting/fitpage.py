@@ -1575,6 +1575,7 @@ class FitPage(BasicPage):
         """
         Draw model image w/mask
         """
+        self.parent.Enable(True)
         #event.Skip()
         is_valid_qrange = self._update_paramv_on_fit()
 
