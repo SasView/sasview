@@ -492,9 +492,8 @@ class MaskPanel(wx.Dialog):
     def OnClose(self, event):
         """
         """
-        self.Destroy()
         self.parent._draw_masked_model()
-           
+        
 class Maskplotpanel(PlotPanel):
     """
     """

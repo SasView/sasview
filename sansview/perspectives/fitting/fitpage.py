@@ -1566,7 +1566,7 @@ class FitPage(BasicPage):
         from sans.guiframe.local_perspectives.plotting.masking \
         import MaskPanel as MaskDialog
         
-        self.panel = MaskDialog(base=self, data=self.data,id =-1 )
+        self.panel = MaskDialog(base=self, data=self.data, id=wx.NewId())
         #self.panel.Bind(wx.EVT_CLOSE, self._draw_masked_model)
         self.panel.ShowModal()
         #wx.PostEvent(self.parent, event)
@@ -1575,18 +1575,19 @@ class FitPage(BasicPage):
         """
         Draw model image w/mask
         """
-        self.parent.Enable(True)
         #event.Skip()
         is_valid_qrange = self._update_paramv_on_fit()
 
         if is_valid_qrange and self.model != None:
             # try re draw the model plot if it exists
             self._draw_model()
-            #self.panel.OnClose(event)#Destroy() # frame
             self.set_npts2fit()
+            self.panel.Destroy() # frame
+            self.parent.Enable(True)
         elif self.model == None:
-            #self.panel.OnClose(event)#Destroy()
             self.set_npts2fit()
+            self.panel.Destroy() # frame
+            self.parent.Enable(True)
             msg= "No model is found on updating MASK in the model plot... "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
         else:
