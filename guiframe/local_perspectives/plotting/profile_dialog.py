@@ -105,7 +105,7 @@ class SLDPanel(wx.Dialog):
         """
         # panel sizer
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.plotpanel, -1, wx.LEFT|wx.RIGHT, 5)
+        sizer.Add(self.plotpanel, 0, wx.LEFT|wx.RIGHT, 5)
         sizer.Add(wx.StaticLine(self), 0, wx.ALL|wx.EXPAND, 5)
         sizer.Add((0, 5))
         #-----Button------------1
