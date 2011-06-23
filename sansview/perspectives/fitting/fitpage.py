@@ -1571,14 +1571,14 @@ class FitPage(BasicPage):
         self.panel.ShowModal()
         #wx.PostEvent(self.parent, event)
         
-    def _draw_masked_model(self,event=None):
+    def _draw_masked_model(self):
         """
         Draw model image w/mask
         """
         #event.Skip()
         is_valid_qrange = self._update_paramv_on_fit()
 
-        if is_valid_qrange:
+        if is_valid_qrange and self.model != None:
             # try re draw the model plot if it exists
             self._draw_model()
             #self.panel.OnClose(event)#Destroy() # frame
