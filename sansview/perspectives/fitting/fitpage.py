@@ -1592,7 +1592,7 @@ class FitPage(BasicPage):
             msg = ' Please consider your Q range, too.'
             self.panel.ShowMessage(msg)
 
-
+        self.Update()
         
     def _set_smear(self, data):
         """
