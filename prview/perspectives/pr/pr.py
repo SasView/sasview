@@ -830,6 +830,8 @@ class Plugin(PluginBase):
         :param pr: Invertor instance
         :param elapsed: time spent computing
         """
+        # Ensure hat you have all inputs are ready at the time call happens:
+        # Without CallAfter, it will freeze with wx >= 2.9.
         wx.CallAfter(self._completed_call, out, cov, pr, elapsed)
         
     def _completed_call(self, out, cov, pr, elapsed):
