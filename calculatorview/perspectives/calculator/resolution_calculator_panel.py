@@ -83,7 +83,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.hint_sizer = None
         # detector coordinate of estimation of sigmas
         self.det_coordinate = 'cartesian'
-
+        self.source_cb = None
         self._do_layout()
 
     def _define_structure(self):
@@ -128,12 +128,12 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.mass_hint = "Mass of Neutrons m = %s [g]"\
                                  % str(self.resolution.mass)
         self.source_cb = wx.ComboBox(self, -1,
-                                style=wx.CB_READONLY|wx.CB_SORT,
+                                style=wx.CB_DROPDOWN|wx.CB_SORT,
                                 name = '%s'%mass_value)
         for key, value in self.source_mass.iteritems():
             name_source = str(key)
             self.source_cb.Append(name_source, name_source)
-        self.source_cb.SetStringSelection("Neutron") 
+        wx.CallAfter(self.source_cb.SetStringSelection, "Neutron") 
         wx.EVT_COMBOBOX(self.source_cb,-1, self._on_source_selection)      
         source_hint = "Source Selection: Affect on"
         source_hint += " the gravitational contribution.\n"
@@ -685,11 +685,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         #self.resolution.set_intensity(float(intensity))
         wavelength = self.wavelength_tcl.GetValue()
         self.resolution.set_wavelength(float(wavelength))
-        try:
-            source = self.source_cb.GetValue()
-        except:
-            source = "Neutron"
-            self.source_cb.SetStringSelection(source)
+        source = self.source_cb.GetValue()
         mass = self.source_mass[str(source)]
         self.resolution.set_neutron_mass(float(mass))
         wavelength_spread = self.wavelength_spread_tcl.GetValue()
