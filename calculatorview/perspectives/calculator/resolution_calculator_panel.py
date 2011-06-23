@@ -657,7 +657,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         Execute the computation of resolution
         """
-        wx.CallAfter(self, on_compute_call, event)
+        wx.CallAfter(self.on_compute_call, event)
         
     def on_compute_call(self, event = None):
         """
