@@ -2425,10 +2425,13 @@ class ViewerFrame(wx.Frame):
         """
         ReDraw with axes
         """
-        # check if it is time to redraw
-        if self.GetCapture() == None:
-            # Draw plot, changes resizing too
-            self.full_draw()
+        try:
+            # check if it is time to redraw
+            if self.GetCapture() == None:
+                # Draw plot, changes resizing too
+                self.full_draw()
+        except:
+            pass
             
         # restart idle        
         self._redraw_idle(*args, **kwargs)
