@@ -132,7 +132,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                                 name = '%s'%mass_value)
         for key, value in self.source_mass.iteritems():
             name_source = str(key)
-            self.source_cb.Append(name_source)
+            self.source_cb.Append(name_source, name_source)
         self.source_cb.SetStringSelection("Neutron") 
         wx.EVT_COMBOBOX(self.source_cb,-1, self._on_source_selection)      
         source_hint = "Source Selection: Affect on"
@@ -627,8 +627,6 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                                   (self.button_sizer, 0,
                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
         self.main_sizer.Add(self.vertical_l_sizer, 0, wx.ALL, 10)
-        # Make sure the default is selected here (MAC).
-        self.source_cb.SetStringSelection("Neutron")
         # Build image plot layout                     
         self._layout_image()
         # Add a vertical static line
@@ -687,7 +685,11 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         #self.resolution.set_intensity(float(intensity))
         wavelength = self.wavelength_tcl.GetValue()
         self.resolution.set_wavelength(float(wavelength))
-        source = self.source_cb.GetValue()
+        try:
+            source = self.source_cb.GetValue()
+        except:
+            source = "Neutron"
+            self.source_cb.SetStringSelection(source)
         mass = self.source_mass[str(source)]
         self.resolution.set_neutron_mass(float(mass))
         wavelength_spread = self.wavelength_spread_tcl.GetValue()
