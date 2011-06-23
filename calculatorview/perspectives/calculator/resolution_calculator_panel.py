@@ -34,10 +34,12 @@ if sys.platform.count("win32") > 0:
     PANEL_WIDTH = 525
     PANEL_HEIGHT = 653
     FONT_VARIANT = 0
+    IS_WIN = True
 else:
-    PANEL_WIDTH = 560
-    PANEL_HEIGHT = 692
+    PANEL_WIDTH = 540
+    PANEL_HEIGHT = 672
     FONT_VARIANT = 1
+    IS_WIN = False
 
 _SOURCE_MASS = {'Alpha':6.64465620E-24,
                 'Deuteron':3.34358320E-24,
@@ -559,14 +561,18 @@ class ResolutionCalculatorPanel(ScrolledPanel):
 
         # Compute before adding the canvas to the sizer
         self.on_compute()
-
+        
         # Fill up the sizer
+        if IS_WIN:
+            gap = 27
+        else:
+            gap = 15
         self.vertical_r_sizer.Add(self.canvas, 0, 
                                        wx.ALL|wx.EXPAND, 2) 
-        self.vertical_r_spacer.Add((0, 24)) 
+        self.vertical_r_spacer.Add((0, gap)) 
         self.vertical_r_spacer.Add(self.vertical_r_sizer, 0, 
                                        wx.ALL|wx.EXPAND, 2)
-        self.vertical_r_spacer.Add((0, 30)) 
+        self.vertical_r_spacer.Add((0, gap)) 
         self.vertical_r_spacer.Add(wx.StaticLine(self), 0, 
                                        wx.ALL|wx.EXPAND, 2)
         self.vertical_r_spacer.Add(mpl_toolbar, 0,  wx.ALL|wx.EXPAND, 2)
