@@ -42,8 +42,8 @@ if sys.platform.count("win32") > 0:
     PANEL_SIZE = 420
     FONT_VARIANT = 0
 else:
-    _STATICBOX_WIDTH = 410
-    PANEL_SIZE = 450
+    _STATICBOX_WIDTH = 380
+    PANEL_SIZE = 440
     FONT_VARIANT = 1
     
 
