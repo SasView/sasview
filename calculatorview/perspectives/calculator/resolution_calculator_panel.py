@@ -652,8 +652,14 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.parent.Close()
         # reset image
         self.image = None
-       
-    def on_compute(self, event = None):
+    
+    def on_compute(self, event = None):  
+        """
+        Execute the computation of resolution
+        """
+        wx.CallAfter(self, on_compute_call, event)
+        
+    def on_compute_call(self, event = None):
         """
         Execute the computation of resolution
         """
