@@ -92,7 +92,7 @@ class MaskPanel(wx.Dialog):
             self.Centre()
             self.Layout()
             # bind evt_close to _draw in fitpage
-            #self.Bind(wx.EVT_CLOSE, self._draw_model)
+            self.Bind(wx.EVT_CLOSE, self.OnClose)
             
     def ShowMessage(self, msg=''):
         """
@@ -492,7 +492,7 @@ class MaskPanel(wx.Dialog):
     def OnClose(self, event):
         """
         """
-        event.Skip()
+        self.parent._draw_masked_model()
         self.Destroy()
            
 class Maskplotpanel(PlotPanel):
