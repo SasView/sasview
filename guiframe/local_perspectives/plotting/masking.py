@@ -493,7 +493,7 @@ class MaskPanel(wx.Dialog):
         """
         """
         self.parent._draw_masked_model()
-        self.Destroy()
+        wx.CallAfter(self.Destroy)
            
 class Maskplotpanel(PlotPanel):
     """
