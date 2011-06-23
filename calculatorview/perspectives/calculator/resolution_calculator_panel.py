@@ -128,12 +128,12 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.mass_hint = "Mass of Neutrons m = %s [g]"\
                                  % str(self.resolution.mass)
         self.source_cb = wx.ComboBox(self, -1,
-                                style=wx.CB_DROPDOWN|wx.CB_SORT,
+                                style=wx.CB_DROPDOWN,
                                 name = '%s'%mass_value)
         for key, value in self.source_mass.iteritems():
             name_source = str(key)
             self.source_cb.Append(name_source, name_source)
-        wx.CallAfter(self.source_cb.SetStringSelection, "Neutron") 
+        self.source_cb.SetStringSelection("Neutron") 
         wx.EVT_COMBOBOX(self.source_cb,-1, self._on_source_selection)      
         source_hint = "Source Selection: Affect on"
         source_hint += " the gravitational contribution.\n"
