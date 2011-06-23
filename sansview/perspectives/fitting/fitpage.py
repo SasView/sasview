@@ -1579,15 +1579,13 @@ class FitPage(BasicPage):
         is_valid_qrange = self._update_paramv_on_fit()
 
         if is_valid_qrange and self.model != None:
+            self.panel.Destroy() # frame
             # try re draw the model plot if it exists
-            self._draw_model()
+            wx.CallAfter(self._draw_model)
             self.set_npts2fit()
-            self.panel.Destroy() # frame
-            self.parent.Enable(True)
         elif self.model == None:
-            self.set_npts2fit()
             self.panel.Destroy() # frame
-            self.parent.Enable(True)
+            wx.CallAfter(self.set_npts2fit)
             msg= "No model is found on updating MASK in the model plot... "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
         else:
