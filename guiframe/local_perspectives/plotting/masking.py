@@ -33,9 +33,7 @@ from sans.guiframe.events import StatusEvent
 
 DEFAULT_CMAP = pylab.cm.jet
 _BOX_WIDTH = 76
-_STATICBOX_WIDTH = 400
 _SCALE = 1e-6
-
 _STATICBOX_WIDTH = 380
 PANEL_SIZE = 420
 #SLD panel size 
@@ -94,7 +92,7 @@ class MaskPanel(wx.Dialog):
             self.Centre()
             self.Layout()
             # bind evt_close to _draw in fitpage
-            self.Bind(wx.EVT_CLOSE, self._draw_model)
+            #self.Bind(wx.EVT_CLOSE, self._draw_model)
             
     def ShowMessage(self, msg=''):
         """
@@ -563,12 +561,15 @@ class Maskplotpanel(PlotPanel):
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
 
-
-"""
 class ViewerFrame(wx.Frame):
+    """
+    Add comment
+    """
     def __init__(self, parent, id, title):
-        #comment
-        #:param parent: parent panel/container
+        """
+        comment
+        :param parent: parent panel/container
+        """
         # Initialize the Frame object
         wx.Frame.__init__(self, parent, id, title,
                           wx.DefaultPosition, wx.Size(950, 850))
@@ -586,4 +587,3 @@ class ViewApp(wx.App):
 if __name__ == "__main__": 
     app = ViewApp(0)
     app.MainLoop()     
-"""
