@@ -128,7 +128,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.mass_hint = "Mass of Neutrons m = %s [g]"\
                                  % str(self.resolution.mass)
         self.source_cb = wx.ComboBox(self, -1,
-                                style=wx.CB_DROPDOWN,
+                                style=wx.CB_READONLY,
                                 name = '%s'%mass_value)
         for key, value in self.source_mass.iteritems():
             name_source = str(key)
