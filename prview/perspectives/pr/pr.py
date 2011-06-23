@@ -830,7 +830,7 @@ class Plugin(PluginBase):
         :param pr: Invertor instance
         :param elapsed: time spent computing
         """
-        wx.CallAfter(self,_completed_call, out, cov, pr, elapsed)
+        wx.CallAfter(self._completed_call, out, cov, pr, elapsed)
         
     def _completed_call(self, out, cov, pr, elapsed):
         """
