@@ -820,7 +820,7 @@ class Plugin(PluginBase):
         if not message==None:
             wx.PostEvent(self.parent, StatusEvent(status=str(message)))
     
-    def _call_completed(self, out, cov, pr, elapsed):
+    def _completed(self, out, cov, pr, elapsed):
         """
         wxCallAfter Method called with the results when the inversion
         is done
@@ -830,9 +830,9 @@ class Plugin(PluginBase):
         :param pr: Invertor instance
         :param elapsed: time spent computing
         """
-        wx.CallAfter(self,_completed, out, cov, pr, elapsed)
+        wx.CallAfter(self,_completed_call, out, cov, pr, elapsed)
         
-    def _completed(self, out, cov, pr, elapsed):
+    def _completed_call(self, out, cov, pr, elapsed):
         """
         Method called with the results when the inversion
         is done
