@@ -37,7 +37,7 @@ if sys.platform.count("win32") > 0:
     IS_WIN = True
 else:
     PANEL_WIDTH = 540
-    PANEL_HEIGHT = 672
+    PANEL_HEIGHT = 662
     FONT_VARIANT = 1
     IS_WIN = False
 
@@ -566,7 +566,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         if IS_WIN:
             gap = 27
         else:
-            gap = 15
+            gap = 13
         self.vertical_r_sizer.Add(self.canvas, 0, 
                                        wx.ALL|wx.EXPAND, 2) 
         self.vertical_r_spacer.Add((0, gap)) 
