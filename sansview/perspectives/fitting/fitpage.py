@@ -1066,7 +1066,7 @@ class FitPage(BasicPage):
             self.set_dispers_sizer()
         except:
             pass
-        self.btFit.SetFocus() 
+        #self.btFit.SetFocus() 
         self.state.enable_disp = self.enable_disp.GetValue()
         self.state.disable_disp = self.disable_disp.GetValue()
         self.state.pinhole_smearer = self.pinhole_smearer.GetValue()
@@ -1591,7 +1591,7 @@ class FitPage(BasicPage):
         else:
             msg = ' Please consider your Q range, too.'
             self.panel.ShowMessage(msg)
-        self.on_set_focus(None)
+        self.SetFocus()
 
         
     def _set_smear(self, data):
