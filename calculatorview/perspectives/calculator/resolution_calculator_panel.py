@@ -561,7 +561,8 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.on_compute()
 
         # Fill up the sizer
-        self.vertical_r_sizer.Add(self.canvas, -1) 
+        self.vertical_r_sizer.Add(self.canvas, 0, 
+                                       wx.ALL|wx.EXPAND, 2) 
         self.vertical_r_spacer.Add((0, 24)) 
         self.vertical_r_spacer.Add(self.vertical_r_sizer, 0, 
                                        wx.ALL|wx.EXPAND, 2)
