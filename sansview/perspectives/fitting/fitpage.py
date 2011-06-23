@@ -1575,23 +1575,23 @@ class FitPage(BasicPage):
         """
         Draw model image w/mask
         """
-        event.Skip()
+        #event.Skip()
         is_valid_qrange = self._update_paramv_on_fit()
 
         if is_valid_qrange:
             # try re draw the model plot if it exists
             self._draw_model()
-            self.panel.Destroy() # frame
+            self.panel.OnClose(event)#Destroy() # frame
             self.set_npts2fit()
         elif self.model == None:
-            self.panel.Destroy()
+            self.panel.OnClose(event)#Destroy()
             self.set_npts2fit()
             msg= "No model is found on updating MASK in the model plot... "
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
         else:
             msg = ' Please consider your Q range, too.'
             self.panel.ShowMessage(msg)
-        self.SetFocus()
+
 
         
     def _set_smear(self, data):
