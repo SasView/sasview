@@ -1576,7 +1576,6 @@ class FitPage(BasicPage):
         Draw model image w/mask
         """
         event.Skip()
-
         is_valid_qrange = self._update_paramv_on_fit()
 
         if is_valid_qrange:
@@ -1592,6 +1591,8 @@ class FitPage(BasicPage):
         else:
             msg = ' Please consider your Q range, too.'
             self.panel.ShowMessage(msg)
+        self.on_set_focus(None)
+
         
     def _set_smear(self, data):
         """
