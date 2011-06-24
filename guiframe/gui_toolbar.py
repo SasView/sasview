@@ -11,10 +11,12 @@ import sys
 if sys.platform.count("darwin")==0:
     FONT_VARIANT = 0
     NAME_BOX = wx.DefaultSize
+    TB_H = 20
     IS_MAC = False
 else:
     FONT_VARIANT = 1
     NAME_BOX = (250, 25)
+    TB_H = 25
     IS_MAC = True
 
 def clear_image(image):
@@ -46,10 +48,8 @@ class GUIToolBar(Tbar):
     def do_layout(self):
         """
         """
-        t_size = 20
-        if IS_MAC:
-            t_size = 25        
-            
+        t_size = TB_H       
+        print "name_box", NAME_BOX
         tbar_size = (t_size, t_size)
         button_type =  wx.ITEM_NORMAL
 
