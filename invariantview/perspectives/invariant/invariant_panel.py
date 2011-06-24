@@ -102,17 +102,6 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         ## Default file location for save
         self._default_save_location = os.getcwd()
         self._set_bookmark_flag(False)
-        ## Bypass resetting the scroll position at focusing child
-        self.Bind(wx.EVT_SCROLLWIN_THUMBTRACK, self._scroll_skip)
-        
-    def _scroll_skip(self, event):
-        """
-        Unfocus children when scrolling: This fixes a problem w/wx2.9
-        """
-        # If any children are focused, unfocuse them
-        if self != self.FindFocus():
-            self.SetFocusIgnoringChildren()
-        return
     
     def get_data(self):
         """

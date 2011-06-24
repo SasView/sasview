@@ -170,30 +170,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         
         ## layout
         self.set_layout()
-        ## Bypass resetting the scroll position at focusing child
-        self.Bind(wx.EVT_SCROLLWIN_THUMBTRACK, self._scroll_skip)
-        
-    def _scroll_skip(self, event):
-        """
-        Unfocus children when scrolling: This fixes a problem w/wx2.9
-        """
-        print "got event"
-        # If any children are focused, unfocuse them
-        if self != self.FindFocus():
-            print "focused",self.FindFocus()
-            #self.FindFocus().SetFocus()
-            #print "got unfocused",self
-            #self.SetFocus()
-            self.SetFocusIgnoringChildren()
-            print "got unfocused1",self.AcceptsFocus(),self
-            
-        return
     
     def on_set_focus(self, event):
         """
         """
-        if event != None:
-            print "type", event.EventObjectType()
         if self._manager is not None:
             wx.PostEvent(self._manager.parent, PanelOnFocusEvent(panel=self))
         
