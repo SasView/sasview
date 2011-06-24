@@ -162,7 +162,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         
         # bind key event
         self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
-
+        self.Bind(wx.EVT_SCROLLWIN_THUMBRELEASE, self._scroll_pass)
         ## create the basic structure of the panel with empty sizer
         self.define_page_structure()
         ## drawing Initial dispersion parameters sizer 
@@ -172,7 +172,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.set_layout()
         
     
-        
+    def _scroll_pass(self, event):    
+        """
+        """
+        pass
+    
     def on_set_focus(self, event):
         """
         """
