@@ -307,7 +307,7 @@ class Plugin(PluginBase):
 
         if self.menu.IsChecked(event_id):
             self.parent.on_view(event)
-            self.menu.Check(event_id, True)#IS_WIN)
+            self.menu.Check(event_id, IS_WIN)
         else:
             self.parent.hide_panel(event_id)
             self.menu.Check(event_id, False)
