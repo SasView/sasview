@@ -183,6 +183,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             print "focused",self.FindFocus()
             #self.FindFocus().SetFocus()
             #print "got unfocused",self
+            #self.SetFocus()
             self.SetFocusIgnoringChildren()
             print "got unfocused1",self.AcceptsFocus(),self
             
@@ -191,6 +192,8 @@ class BasicPage(ScrolledPanel, PanelBase):
     def on_set_focus(self, event):
         """
         """
+        if event != None:
+            print "type", event.EventObjectType()
         if self._manager is not None:
             wx.PostEvent(self._manager.parent, PanelOnFocusEvent(panel=self))
         
