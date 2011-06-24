@@ -625,7 +625,7 @@ class ViewerFrame(wx.Frame):
                               Caption(self._data_panel.window_caption).
                               Left().
                               MinimizeButton().
-                              CloseButton(True).#(IS_WIN).
+                              CloseButton(IS_WIN).
                               TopDockable(False).
                               BottomDockable(False).
                               LeftDockable(True).

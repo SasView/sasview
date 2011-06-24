@@ -158,7 +158,7 @@ class Plugin(PluginBase):
            
         self.menu.AppendCheckItem(event_id, new_panel.window_caption, 
                          "Show %s plot panel" % new_panel.window_caption)
-        self.menu.Check(event_id, True)#IS_WIN)
+        self.menu.Check(event_id, IS_WIN)
         wx.EVT_MENU(self.parent, event_id, self._on_check_menu)
 
         wx.EVT_SHOW(new_panel, self._on_close_panel)
