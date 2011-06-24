@@ -157,7 +157,18 @@ class DataPanel(ScrolledPanel, PanelBase):
         if self.parent is not None:
             self.parent.Bind(EVT_DELETE_PLOTPANEL, self._on_delete_plot_panel)
        
+        ## Bypass resetting the scroll position at focusing child
+        self.Bind(wx.EVT_SCROLLWIN_THUMBTRACK, self._scroll_skip)
         
+    def _scroll_skip(self, event):
+        """
+        Unfocus children when scrolling: This fixes a problem w/wx2.9
+        """
+        # If any children are focused, unfocuse them
+        if self != self.FindFocus():
+            self.SetFocusIgnoringChildren()
+        return
+     
     def do_layout(self):
         """
         """

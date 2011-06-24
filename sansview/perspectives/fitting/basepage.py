@@ -162,7 +162,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         
         # bind key event
         self.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
-        self.Bind(wx.EVT_SCROLLWIN_THUMBRELEASE, self._scroll_pass)
+        
         ## create the basic structure of the panel with empty sizer
         self.define_page_structure()
         ## drawing Initial dispersion parameters sizer 
@@ -170,12 +170,17 @@ class BasicPage(ScrolledPanel, PanelBase):
         
         ## layout
         self.set_layout()
+        ## Bypass resetting the scroll position at focusing child
+        self.Bind(wx.EVT_SCROLLWIN_THUMBTRACK, self._scroll_skip)
         
-    
-    def _scroll_pass(self, event):    
+    def _scroll_skip(self, event):
         """
+        Unfocus children when scrolling: This fixes a problem w/wx2.9
         """
-        pass
+        # If any children are focused, unfocuse them
+        if self != self.FindFocus():
+            self.SetFocusIgnoringChildren()
+        return
     
     def on_set_focus(self, event):
         """
