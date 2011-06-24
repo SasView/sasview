@@ -180,8 +180,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         print "got event"
         # If any children are focused, unfocuse them
         if self != self.FindFocus():
+            print "focused",self.FindFocus()
             self.SetFocusIgnoringChildren()
-            print "got unfocused"
+            print "got unfocused",self
+            
         return
     
     def on_set_focus(self, event):
