@@ -177,9 +177,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Unfocus children when scrolling: This fixes a problem w/wx2.9
         """
+        print "got event"
         # If any children are focused, unfocuse them
         if self != self.FindFocus():
             self.SetFocusIgnoringChildren()
+            print "got unfocused"
         return
     
     def on_set_focus(self, event):
