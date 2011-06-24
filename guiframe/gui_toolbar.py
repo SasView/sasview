@@ -15,7 +15,7 @@ if sys.platform.count("darwin")==0:
     IS_MAC = False
 else:
     FONT_VARIANT = 1
-    NAME_BOX = (250, 25)
+    NAME_BOX = (200, 25)
     TB_H = 25
     IS_MAC = True
 
@@ -49,7 +49,6 @@ class GUIToolBar(Tbar):
         """
         """
         t_size = TB_H       
-        print "name_box", NAME_BOX
         tbar_size = (t_size, t_size)
         button_type =  wx.ITEM_NORMAL
 
@@ -124,8 +123,8 @@ class GUIToolBar(Tbar):
         self.AddSeparator()
         #add button for the panel on focus
         self.button_panel = wx.StaticText(self, -1, 'No Panel', 
-                                          wx.DefaultPosition, 
-                                          NAME_BOX,
+                                          pos=wx.DefaultPosition, 
+                                          size=NAME_BOX,
                                           style=wx.SUNKEN_BORDER|wx.ALIGN_LEFT)
         #self.button_panel.SetForegroundColour('black')
         #self.button_panel.SetBackgroundColour('white')
