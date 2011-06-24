@@ -181,8 +181,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         # If any children are focused, unfocuse them
         if self != self.FindFocus():
             print "focused",self.FindFocus()
+            #self.FindFocus().SetFocus()
+            #print "got unfocused",self
             self.SetFocusIgnoringChildren()
-            print "got unfocused",self
+            print "got unfocused1",self.AcceptsFocus(),self
             
         return
     
