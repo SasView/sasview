@@ -39,6 +39,8 @@ class PanelBase:
         self._print_flag = False
         self._undo_flag = False
         self._redo_flag = False
+        self._copy_flag = False
+        self._paste_flag = False
         self._preview_flag = False
         self._bookmark_flag = False
         self._zoom_in_flag = False
@@ -125,7 +127,47 @@ class PanelBase:
         Get the redo flag to update appropriately the tool bar
         """
         return self._redo_flag
+
+    def _set_copy_flag(self, flag=True):
+        """
+        The derivative class sets the copy flag value to indicate that the 
+        action done can be recovered
+        """
+        if flag == self._copy_flag:
+            self._has_changed = False
+            return
+        self._has_changed = True
+        self._copy_flag = flag
+        if self._manager is not None and self._manager.parent is not None:
+            self._manager.parent.cpanel_on_focus = self
+            self._manager.parent.enable_copy()
+      
+    def get_copy_flag(self):
+        """
+        Get the copy flag to update appropriately the tool bar
+        """
+        return self._copy_flag
     
+    def _set_paste_flag(self, flag=True):
+        """
+        The derivative class sets the paste flag value to indicate that the 
+        action done can be recovered
+        """
+        if flag == self._paste_flag:
+            self._has_changed = False
+            return
+        self._has_changed = True
+        self._paste_flag = flag
+        if self._manager is not None and self._manager.parent is not None:
+            self._manager.parent.cpanel_on_focus = self
+            self._manager.parent.enable_paste()
+      
+    def get_paste_flag(self):
+        """
+        Get the copy flag to update appropriately the tool bar
+        """
+        return self._copy_flag
+       
     def _set_zoomed_in_flag(self, flag=True):
         """
         The derivative class sets the zoom in flag value to indicate that it
@@ -309,6 +351,14 @@ class PanelBase:
     def on_undo(self, event):
         """
         The current action is canceled
+        """
+    def on_copy(self, event):
+        """
+        The copy action if possible
+        """
+    def on_paste(self, event):
+        """
+        The paste action if possible
         """
     def on_bookmark(self, event):
         """

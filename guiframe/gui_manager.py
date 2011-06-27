@@ -1186,6 +1186,14 @@ class ViewerFrame(wx.Frame):
                                'Redo the previous action')
         wx.EVT_MENU(self, GUIFRAME_ID.REDO_ID, self.on_redo_panel)
         self._edit_menu.AppendSeparator()
+        self._edit_menu.Append(GUIFRAME_ID.COPY_ID, '&Copy', 
+                               'Copy parameter values')
+        wx.EVT_MENU(self, GUIFRAME_ID.COPY_ID, self.on_copy_panel)
+        self._edit_menu.Append(GUIFRAME_ID.PASTE_ID, '&Paste', 
+                               'Paste parameter values')
+        wx.EVT_MENU(self, GUIFRAME_ID.PASTE_ID, self.on_paste_panel)
+        self._edit_menu.AppendSeparator()
+        
         self._edit_menu.Append(GUIFRAME_ID.PREVIEW_ID, '&Report',
                                'Preview current panel')
         wx.EVT_MENU(self, GUIFRAME_ID.PREVIEW_ID, self.on_preview_panel)
@@ -2144,6 +2152,10 @@ class ViewerFrame(wx.Frame):
             self._edit_menu.Enable(GUIFRAME_ID.UNDO_ID, flag)
             flag = self.cpanel_on_focus.get_redo_flag()
             self._edit_menu.Enable(GUIFRAME_ID.REDO_ID, flag)
+            flag = self.cpanel_on_focus.get_copy_flag()
+            self._edit_menu.Enable(GUIFRAME_ID.COPY_ID, flag)
+            flag = self.cpanel_on_focus.get_paste_flag()
+            self._edit_menu.Enable(GUIFRAME_ID.PASTE_ID, flag)
             #flag = self.cpanel_on_focus.get_print_flag()
             #self._edit_menu.Enable(GUIFRAME_ID.PRINT_ID, flag)
             flag = self.cpanel_on_focus.get_preview_flag()
@@ -2154,6 +2166,8 @@ class ViewerFrame(wx.Frame):
             flag = False
             self._edit_menu.Enable(GUIFRAME_ID.UNDO_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.REDO_ID, flag)
+            self._edit_menu.Enable(GUIFRAME_ID.COPY_ID, flag)
+            self._edit_menu.Enable(GUIFRAME_ID.PASTE_ID, flag)
             #self._edit_menu.Enable(GUIFRAME_ID.PRINT_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.PREVIEW_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.RESET_ID, flag)
@@ -2172,6 +2186,20 @@ class ViewerFrame(wx.Frame):
         if self.cpanel_on_focus is not None:
             self.cpanel_on_focus.on_redo(event)
             
+    def on_copy_panel(self, event=None):
+        """
+        copy the last panel on focus if possible
+        """
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.on_copy(event)
+            
+    def on_paste_panel(self, event=None):
+        """
+        paste clipboard to the last panel on focus
+        """
+        if self.cpanel_on_focus is not None:
+            self.cpanel_on_focus.on_paste(event)
+                    
     def on_bookmark_panel(self, event=None):
         """
         bookmark panel
@@ -2255,6 +2283,20 @@ class ViewerFrame(wx.Frame):
         if self.cpanel_on_focus is not None:
             self._toolbar.enable_redo(self.cpanel_on_focus)
             
+    def enable_copy(self):
+        """
+        enable copy related control
+        """
+        if self.cpanel_on_focus is not None:
+            self._toolbar.enable_copy(self.cpanel_on_focus)
+            
+    def enable_paste(self):
+        """
+        enable paste 
+        """
+        if self.cpanel_on_focus is not None:
+            self._toolbar.enable_paste(self.cpanel_on_focus)
+                       
     def enable_bookmark(self):
         """
         Bookmark 

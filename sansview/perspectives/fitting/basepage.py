@@ -530,6 +530,47 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._manager.save_fit_state(filepath=fName, fitstate=new_state)
         return new_state  
     
+    def on_copy(self, event):
+        """
+        Copy Parameter values to the clipboad
+        """
+        flag = self.get_copy()
+        if event != None:
+            event.Skip()
+        # messages depending on the flag
+        self._copy_info(flag)
+        
+    def on_paste(self, event):
+        """
+        Paste Parameter values to the panel if possible
+        """
+        flag = self.get_paste()
+        if event != None:
+            event.Skip()
+        # messages depending on the flag
+        self._copy_info(flag)
+        
+    def _copy_info(self, flag):
+        """
+        Send event dpemding on flag
+        
+        : Param flag: flag that distinguish event
+        """
+        # messages depending on the flag
+        if flag == None:
+            msg = " Parameter values are copied to the clipboard..."
+            infor = 'warning'
+        elif flag:
+            msg = " Parameter values are pasted from the clipboad..."
+            infor = "warning"
+        else:
+            msg = "Error was occured "
+            msg += ": No valid parameter values to paste from the clipboard..."
+            infor = "error"
+        # inform msg to wx
+        wx.PostEvent( self.parent.parent, 
+                      StatusEvent(status= msg, info=infor))
+        
     def _get_time_stamp(self):
         """
         return time and date stings

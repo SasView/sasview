@@ -99,6 +99,23 @@ class GUIToolBar(Tbar):
         self.AddLabelTool(GUIFRAME_ID.REDO_ID, 'Redo', redo_bmp,
                           disable_redo_bmp, button_type,'Redo')
         self.AddSeparator()
+        copy_im = GUIFRAME_ICON.COPY_ICON
+        copy_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
+        copy_bmp = copy_im.ConvertToBitmap()
+        #disable_undo_bmp = clear_image(undo_im).ConvertToBitmap()
+        disable_copy_bmp = wx.NullBitmap
+        self.AddLabelTool(GUIFRAME_ID.COPY_ID, 'Copy', copy_bmp,
+                          disable_copy_bmp, button_type,'Copy parameter values')
+        self.AddSeparator()
+        paste_im = GUIFRAME_ICON.PASTE_ICON
+        paste_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
+        paste_bmp = paste_im.ConvertToBitmap()
+        #disable_redo_bmp = clear_image(redo_im).ConvertToBitmap()
+        disable_paste_bmp = wx.NullBitmap
+        self.AddLabelTool(GUIFRAME_ID.PASTE_ID, 'Paste', paste_bmp,
+                          disable_paste_bmp, button_type,'Paste parameter values')
+
+        self.AddSeparator()
         #add button for the current application
         #self.button_application = wx.StaticText(self, -1, 'Welcome')
         #self.button_application.SetForegroundColour('black')
@@ -135,7 +152,7 @@ class GUIToolBar(Tbar):
         hint = 'Control Panel on Focus'
         self.button_panel.SetToolTipString(hint)
         self.AddControl(self.button_panel)
-        
+        self.AddSeparator()
         self.Realize()
     
     def add_bookmark_default(self):   
@@ -156,6 +173,10 @@ class GUIToolBar(Tbar):
                              id=GUIFRAME_ID.REDO_ID)
             self.parent.Bind(wx.EVT_TOOL, self.parent.on_undo_panel,
                              id=GUIFRAME_ID.UNDO_ID)
+            self.parent.Bind(wx.EVT_TOOL, self.parent.on_copy_panel,
+                             id=GUIFRAME_ID.COPY_ID)
+            self.parent.Bind(wx.EVT_TOOL, self.parent.on_paste_panel,
+                             id=GUIFRAME_ID.PASTE_ID)
             self.parent.Bind(wx.EVT_TOOL, self.parent.on_reset_panel,
                              id=GUIFRAME_ID.RESET_ID)
             self.parent.Bind(wx.EVT_TOOL, self.parent.on_save_panel,
@@ -179,6 +200,8 @@ class GUIToolBar(Tbar):
             #self.EnableTool(GUIFRAME_ID.PRINT_ID, False)
             self.EnableTool(GUIFRAME_ID.UNDO_ID,False)
             self.EnableTool(GUIFRAME_ID.REDO_ID, False)
+            self.EnableTool(GUIFRAME_ID.COPY_ID,False)
+            self.EnableTool(GUIFRAME_ID.PASTE_ID, False)
             self.EnableTool(GUIFRAME_ID.PREVIEW_ID, False)
             self.EnableTool(GUIFRAME_ID.RESET_ID, False)
             self.EnableTool(GUIFRAME_ID.SAVE_ID, False)
@@ -188,6 +211,8 @@ class GUIToolBar(Tbar):
             #self.EnableTool(GUIFRAME_ID.PRINT_ID, panel.get_print_flag())
             self.EnableTool(GUIFRAME_ID.UNDO_ID, panel.get_undo_flag())
             self.EnableTool(GUIFRAME_ID.REDO_ID, panel.get_redo_flag())
+            self.EnableTool(GUIFRAME_ID.COPY_ID, panel.get_copy_flag())
+            self.EnableTool(GUIFRAME_ID.PASTE_ID, panel.get_paste_flag())
             self.EnableTool(GUIFRAME_ID.PREVIEW_ID, panel.get_preview_flag())
             self.EnableTool(GUIFRAME_ID.RESET_ID, panel.get_reset_flag())
             self.EnableTool(GUIFRAME_ID.SAVE_ID, panel.get_save_flag())
@@ -202,6 +227,14 @@ class GUIToolBar(Tbar):
         self.EnableTool(GUIFRAME_ID.REDO_ID, panel.get_redo_flag())
         self.Realize()
         
+    def enable_copy(self, panel):
+        self.EnableTool(GUIFRAME_ID.COPY_ID, panel.get_copy_flag())
+        self.Realize()
+        
+    def enable_paste(self, panel):
+        self.EnableTool(GUIFRAME_ID.PASTE_ID, panel.get_paste_flag())
+        self.Realize() 
+            
     def enable_print(self, panel):
         self.EnableTool(GUIFRAME_ID.PRINT_ID, panel.get_print_flag())
         self.Realize()
