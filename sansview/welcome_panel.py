@@ -18,7 +18,7 @@ import os.path
 import os, sys
 import local_config as config
 import logging
-
+from wx.lib.scrolledpanel import ScrolledPanel
 from sans.guiframe.panel_base import PanelBase
 #Font size width 
 if sys.platform.count("win32")>0:
@@ -75,7 +75,7 @@ class WelcomePanel(wx.aui.AuiNotebook, PanelBase):
         pass
     
     
-class WelcomePage(wx.Panel):
+class WelcomePage(ScrolledPanel):
     """
         Panel created like about box  as a welcome page
         Shows product name, current version, authors, and link to the product page.
@@ -88,12 +88,12 @@ class WelcomePage(wx.Panel):
     CENTER_PANE = True
    
     
-    def __init__(self, *args, **kwds):
+    def __init__(self, parent, *args, **kwds):
 
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
        
-        wx.Panel.__init__(self, *args, **kwds)
-        
+        ScrolledPanel.__init__(self, parent, **kwds)
+        self.SetupScrolling()
         image = os.path.join("images","SVwelcome.png")
         self.SetWindowVariant(variant = FONT_VARIANT)
         self.bitmap_logo = wx.StaticBitmap(self, -1, wx.Bitmap(image))
