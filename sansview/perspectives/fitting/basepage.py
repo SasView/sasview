@@ -534,9 +534,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Copy Parameter values to the clipboad
         """
-        flag = self.get_copy()
         if event != None:
             event.Skip()
+        # It seems MAC needs wxCallAfter
+        flag = wx.CallAfter(self.get_copy)
+        
         # messages depending on the flag
         self._copy_info(flag)
         
@@ -544,9 +546,12 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Paste Parameter values to the panel if possible
         """
-        flag = self.get_paste()
         if event != None:
             event.Skip()
+        # It seems MAC needs wxCallAfter for the setvalues 
+        # for multiple textctrl items, otherwise it tends to crash once a while.
+        flag = wx.CallAfter(self.get_paste)
+        
         # messages depending on the flag
         self._copy_info(flag)
         
