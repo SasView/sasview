@@ -2874,7 +2874,7 @@ class FitPage(BasicPage):
             return
         # Figuring out key combo: Cmd for copy, Alt for paste
         if event.AltDown() and event.ShiftDown():
-            self._show_ftol_dialog()
+            self._manager.show_ftol_dialog()
             flag = True
         elif event.AltDown() or event.ShiftDown():
             flag = False
@@ -2891,14 +2891,6 @@ class FitPage(BasicPage):
             wx.PostEvent( self.parent.parent, 
                           StatusEvent(status= msg, info=infor))
 
-
-    def _show_ftol_dialog(self):
-        """
-        Dialog to select ftol for Scipy
-        """
-        from ftol_dialog import ChangeFtol
-        panel = ChangeFtol(self)
-        panel.ShowModal()
         
     def _onModel2D(self, event):
         """

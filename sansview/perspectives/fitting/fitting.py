@@ -45,7 +45,7 @@ DEFAULT_QMIN = 0.001
 DEFAULT_QMAX = 0.13
 DEFAULT_NPTS = 50
 MAX_NBR_DATA = 4
-
+SANS_F_TOL = 5e-05
 
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
 
@@ -83,7 +83,7 @@ class Plugin(PluginBase):
         ## Fit engine
         self._fit_engine = 'scipy'
         ## Relative error desired in the sum of squares (float); scipy only
-        self.ftol=1.49012e-08
+        self.ftol = SANS_F_TOL
         #List of selected data
         self.selected_data_list = []
         ## list of slicer panel created to display slicer parameters and results
@@ -132,15 +132,26 @@ class Plugin(PluginBase):
         #Set park engine
         
         scipy_help= "Scipy Engine: Perform Simple fit. More in Help window...."
-        self.menu1.AppendCheckItem(self.scipy_id, "Simple FitEngine  [LeastSq]",scipy_help) 
+        self.menu1.AppendCheckItem(self.scipy_id, "Simple FitEngine [LeastSq]",
+                                   scipy_help) 
         wx.EVT_MENU(owner, self.scipy_id,  self._onset_engine_scipy)
         
         park_help = "Park Engine: Perform Complex fit. More in Help window...."
-        self.menu1.AppendCheckItem(self.park_id, "Complex FitEngine [ParkMC]",park_help) 
+        self.menu1.AppendCheckItem(self.park_id, "Complex FitEngine [ParkMC]",
+                                   park_help) 
         wx.EVT_MENU(owner, self.park_id,  self._onset_engine_park)
         
         self.menu1.FindItemById(self.scipy_id).Check(True)
         self.menu1.FindItemById(self.park_id).Check(False)
+        self.menu1.AppendSeparator()
+        self.id_tol = wx.NewId()
+        ftol_help = "Change the current FTolerance (=%s) " % str(self.ftol)
+        ftol_help += "of Simple FitEngine..." 
+        self.menu1.Append(self.id_tol, "Change FTolerance [LeastSq Only]", 
+                                   ftol_help) 
+        wx.EVT_MENU(owner, self.id_tol,  self.show_ftol_dialog)
+        
+        
         #create  menubar items
         return [(self.menu1, self.sub_menu)]
                
@@ -461,10 +472,24 @@ class Plugin(PluginBase):
             f_tol = float(ftol)
         except:
             # default
-            f_tol = 1.49012e-08
+            f_tol = SANS_F_TOL
             
         self.ftol = f_tol
-              
+        # update ftol menu help strings
+        ftol_help = "Change the current FTolerance (=%s) " % str(self.ftol)
+        ftol_help += "of Simple FitEngine..." 
+        self.menu1.SetHelpString(self.id_tol, ftol_help)
+        
+    def show_ftol_dialog(self, event=None):
+        """
+        Dialog to select ftol for Scipy
+        """
+        #if event != None:
+        #    event.Skip()
+        from ftol_dialog import ChangeFtol
+        panel = ChangeFtol(self.parent, self)
+        panel.ShowModal()
+                  
     def stop_fit(self, uid):
         """
         Stop the fit engine
