@@ -2792,7 +2792,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                     name = item[1]
                     if name in content.keys():
                         # Avoid changing combox content which needs special care
-                        if item[2].__class__.__name__ != "ComboBox":
-                            item[2].SetValue(content[name])
-                            
+                        value = content[name]
+                        item[2].SetValue(value)
+                        if item[2].__class__.__name__ == "ComboBox":
+                            if self.model.fun_list.has_key(value):
+                                fun_val = self.model.fun_list[value]
+                                self.model.setParam(name,fun_val)
+                                # save state
+                                #self._copy_parameters_state(self.str_parameters, 
+                                #    self.state.str_parameters)
                 
