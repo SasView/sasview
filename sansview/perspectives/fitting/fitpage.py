@@ -1113,7 +1113,7 @@ class FitPage(BasicPage):
             self.state.model = self.model.clone()
             self.state.model.name = self.model.name
 
-            self._draw_model()
+            
         if event != None:
             ## post state to fit panel
             new_event = PageInfoEvent(page = self)
@@ -1129,6 +1129,8 @@ class FitPage(BasicPage):
                     self.formfactorbox.SetSelection(pos)
                     self.formfactorbox.SetValue(current_val)
             self._onDraw(event=None)
+        else:
+            self._draw_model()
         self.SetupScrolling()
     
       

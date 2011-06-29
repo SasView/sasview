@@ -1304,8 +1304,12 @@ class Plugin(PluginBase):
             new_plot.is_data = False
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
             if data != None:
-                _xaxis, _xunit = data.get_xaxis() 
+                #if model.output_name.lower().count("reflectivity") > 0:
+                #    _yaxis, _yunit = "\\rm{%s}"% model.output_name, \
+                #                                "%s"% model.output_unit
+                #else:
                 _yaxis, _yunit = data.get_yaxis() 
+                _xaxis, _xunit = data.get_xaxis() 
                 new_plot.title = data.name
                 #if the theory is already plotted use the same group id 
                 #to replot
@@ -1318,8 +1322,10 @@ class Plugin(PluginBase):
                 new_plot.group_id = data.group_id
                
             else:
-                _xaxis, _xunit = "\\rm{Q}", 'A^{-1}'
-                _yaxis, _yunit = "\\rm{Intensity} ", "cm^{-1}"
+                _xaxis, _xunit = "\\rm{%s}"% model.input_name, \
+                                                "%s"% model.input_unit
+                _yaxis, _yunit = "\\rm{%s}"% model.output_name, \
+                                                "%s"% model.output_unit
                 new_plot.title = "Analytical model 1D "
                 #find a group id to plot theory without data
                 new_plot.group_id =  str(page_id) + " Model1D"  
@@ -1353,7 +1359,7 @@ class Plugin(PluginBase):
  
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
-            
+
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                             title= str(title)))
 

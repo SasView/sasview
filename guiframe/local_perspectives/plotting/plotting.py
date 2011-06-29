@@ -215,7 +215,7 @@ class Plugin(PluginBase):
                     (x_unit != panel.graph.prop["xunit"])
         flag_y = (panel.graph.prop["yunit"] is not None) and \
                     (panel.graph.prop["yunit"].strip() != "") and\
-                    (x_unit != panel.graph.prop["yunit"])
+                    (y_unit != panel.graph.prop["yunit"])
         if (flag_x and flag_y):
             msg = "Cannot add %s" % str(data.name)
             msg += " to panel %s\n" % str(panel.window_caption)

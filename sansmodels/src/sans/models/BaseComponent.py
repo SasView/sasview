@@ -40,7 +40,13 @@ class BaseComponent:
         self.orientation_params = []
         ## store dispersity reference
         self._persistency_dict = {}
-           
+        ## independent parameter name and unit [string]
+        self.input_name = "Q"
+        self.input_unit = "A^{-1}"
+        ## output name and unit  [string]
+        self.output_name = "Intensity"
+        self.output_unit = "cm^{-1}"
+        
     def __str__(self):
         """ 
         :return: string representatio

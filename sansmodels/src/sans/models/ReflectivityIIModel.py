@@ -54,7 +54,13 @@ class ReflectivityIIModel(BaseComponent):
         # [int(maximum no. of functionality),"str(Titl),
         # [str(name of function0),...], [str(x-asix name of sld),...]]
         self.multiplicity_info = [max_nshells,"No. of Layers:",[],['Depth']]
-        
+        ## independent parameter name and unit [string]
+        self.input_name = "Q"
+        self.input_unit = "A^{-1}"
+        ## output name and unit  [string]
+        self.output_name = "Reflectivity"
+        self.output_unit = ""
+   
     
     def _clone(self, obj):
         """
