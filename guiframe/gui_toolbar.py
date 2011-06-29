@@ -11,7 +11,7 @@ import sys
 if sys.platform.count("darwin")==0:
     FONT_VARIANT = 0
     NAME_BOX = wx.DefaultSize
-    TB_H = 20
+    TB_H = 21
     IS_MAC = False
 else:
     FONT_VARIANT = 1
