@@ -1186,21 +1186,21 @@ class ViewerFrame(wx.Frame):
                                'Redo the previous action')
         wx.EVT_MENU(self, GUIFRAME_ID.REDO_ID, self.on_redo_panel)
         self._edit_menu.AppendSeparator()
-        self._edit_menu.Append(GUIFRAME_ID.COPY_ID, '&Copy', 
+        self._edit_menu.Append(GUIFRAME_ID.COPY_ID, '&Copy Params', 
                                'Copy parameter values')
         wx.EVT_MENU(self, GUIFRAME_ID.COPY_ID, self.on_copy_panel)
-        self._edit_menu.Append(GUIFRAME_ID.PASTE_ID, '&Paste', 
+        self._edit_menu.Append(GUIFRAME_ID.PASTE_ID, '&Paste Params', 
                                'Paste parameter values')
         wx.EVT_MENU(self, GUIFRAME_ID.PASTE_ID, self.on_paste_panel)
         self._edit_menu.AppendSeparator()
         
-        self._edit_menu.Append(GUIFRAME_ID.PREVIEW_ID, '&Report',
+        self._edit_menu.Append(GUIFRAME_ID.PREVIEW_ID, '&Report Results',
                                'Preview current panel')
         wx.EVT_MENU(self, GUIFRAME_ID.PREVIEW_ID, self.on_preview_panel)
         #self._edit_menu.Append(GUIFRAME_ID.PRINT_ID, '&Print',
         #                       'Print current panel')
         #wx.EVT_MENU(self, GUIFRAME_ID.PRINT_ID, self.on_print_panel)
-        self._edit_menu.Append(GUIFRAME_ID.RESET_ID, '&Reset', 
+        self._edit_menu.Append(GUIFRAME_ID.RESET_ID, '&Reset Page', 
                                'Reset current panel')
         wx.EVT_MENU(self, GUIFRAME_ID.RESET_ID, self.on_reset_panel)
     

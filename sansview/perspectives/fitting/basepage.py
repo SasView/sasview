@@ -537,10 +537,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         if event != None:
             event.Skip()
         # It seems MAC needs wxCallAfter
-        flag = wx.CallAfter(self.get_copy)
+        wx.CallAfter(self.get_copy)
         
         # messages depending on the flag
-        self._copy_info(flag)
+        self._copy_info(None)
         
     def on_paste(self, event):
         """
@@ -550,10 +550,9 @@ class BasicPage(ScrolledPanel, PanelBase):
             event.Skip()
         # It seems MAC needs wxCallAfter for the setvalues 
         # for multiple textctrl items, otherwise it tends to crash once a while.
-        flag = wx.CallAfter(self.get_paste)
-        
+        wx.CallAfter(self.get_paste)
         # messages depending on the flag
-        self._copy_info(flag)
+        self._copy_info(True)
         
     def _copy_info(self, flag):
         """
@@ -2696,7 +2695,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             success = wx.TheClipboard.GetData(data)
             text = data.GetText()
             wx.TheClipboard.Close()
-            
+    
         return None
     
     def _get_copy_helper(self, param, orient_param):
@@ -2772,7 +2771,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             # go through the str params
             self._get_paste_helper(self.str_parameters, 
                                    self.orientation_params, context)
-            
+   
         return True
     
     def _get_paste_helper(self, param, orient_param, content):
