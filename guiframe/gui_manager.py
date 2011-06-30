@@ -2415,10 +2415,14 @@ class ViewerFrame(wx.Frame):
                 if self.GetCapture() == None:
                     # draw if possible
                     panel.set_resizing(False)
+                    panel.Show(False)
                     panel.draw_plot()
+                    
                     # Check if the panel is not shown
                     if not self._mgr.GetPane(panel.window_name).IsShown():
                         self._mgr.GetPane(panel.window_name).Hide()
+                    else:
+                        panel.Show(True)
             except:
                 pass
         #print self.callback,self.schedule,self.schedule_full_draw_list
