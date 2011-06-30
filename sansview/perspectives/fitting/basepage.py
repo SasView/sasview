@@ -552,7 +552,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         # for multiple textctrl items, otherwise it tends to crash once a while.
         wx.CallAfter(self.get_paste)
         # messages depending on the flag
-        self._copy_info(True)
+        #self._copy_info(True)
         
     def _copy_info(self, flag):
         """
@@ -2645,20 +2645,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             return
         # make event free
         event.Skip()
-        # messages depending on the flag
-        if flag == None:
-            msg = " Parameter values are copied to the clipboard..."
-            infor = 'warning'
-        elif flag:
-            msg = " Parameter values are pasted from the clipboad..."
-            infor = "warning"
-        else:
-            msg = "Error was occured during pasting the parameter values "
-            msg += "from the clipboard..."
-            infor = "error"
-        # inform msg to wx
-        wx.PostEvent( self.parent.parent, 
-                      StatusEvent(status= msg, info=infor))
         
             
     def get_copy(self): 
@@ -2745,6 +2731,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         # put the text into dictionary    
         lines = text.split(':')
         if lines[0] != 'sansview_parameter_values':
+            self._copy_info(False)
             return False
         for line in lines[1:-1]:
             if len(line) != 0:
@@ -2771,7 +2758,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             # go through the str params
             self._get_paste_helper(self.str_parameters, 
                                    self.orientation_params, context)
-   
+        self._copy_info(True)
         return True
     
     def _get_paste_helper(self, param, orient_param, content):
