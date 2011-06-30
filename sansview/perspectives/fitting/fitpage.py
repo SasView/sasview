@@ -1055,7 +1055,7 @@ class FitPage(BasicPage):
         call back for model selection
         """  
         
-            
+        self.Show(False)    
         self._on_select_model_helper() 
         self.set_model_param_sizer(self.model)                   
         if self.model is None:
@@ -1132,7 +1132,7 @@ class FitPage(BasicPage):
         else:
             self._draw_model()
         self.SetupScrolling()
-    
+        self.Show(True)   
       
     def _onparamEnter(self,event):
         """ 
@@ -2866,8 +2866,8 @@ class FitPage(BasicPage):
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer3.Layout()
         self.Layout()
-        self.Refresh()
-        
+        #self.Refresh()
+
     def on_right_down(self, event):
         """
         Get key stroke event

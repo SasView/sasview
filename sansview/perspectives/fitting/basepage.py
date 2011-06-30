@@ -494,8 +494,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         if name in self.saved_states.keys():
             previous_state = self.saved_states[name]
             ## reset state of checkbox,textcrtl  and  regular parameters value
+            self.Show(False)
             self.reset_page(previous_state)   
-        
+            self.Show(True)
                
     def on_preview(self, event):
         """
