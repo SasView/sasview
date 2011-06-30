@@ -19,7 +19,7 @@ import numpy
 import time
 
 from danse.common.plottools.PlotPanel import PlotPanel
-from danse.common.plottools.plottables import Graph
+#from danse.common.plottools.plottables import Graph
 from sans.guiframe import dataFitting 
 from sans.guiframe.events import EVT_NEW_PLOT
 from sans.guiframe.events import StatusEvent 
@@ -76,7 +76,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._default_save_location = os.getcwd() 
         self.size = None       
         ## Graph        
-        self.graph = Graph()
+        #self.graph = Graph()
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
         self.graph.yaxis("\\rm{Intensity} ", "cm^{-1}")
         self.graph.render(self)
@@ -209,11 +209,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         else:
             self.plots[data.id] = data
             self.graph.add(self.plots[data.id]) 
-        
-        x_label, x_unit = data.get_xaxis()
-        y_label, y_unit = data.get_yaxis()
-        self.graph.xaxis(x_unit, x_label)
-        self.graph.yaxis(y_unit, y_label)
+
         ## Set the view scale for all plots
         self._onEVT_FUNC_PROPERTY()
         ## render the graph<=No need this done in canvas
