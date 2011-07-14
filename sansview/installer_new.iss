@@ -6,14 +6,15 @@
 [Setup]
 
 ChangesAssociations=yes
-AppName=SansView-1.9.1
-AppVerName=SansView-1.9.1
+AppName=SansView
+AppVerName=SansView-1.9.2dev_JUN
 AppPublisher=(c) 2009, University of Tennessee
 AppPublisherURL=http://danse.chem.utk.edu
 AppSupportURL=http://danse.chem.utk.edu
 AppUpdatesURL=http://danse.chem.utk.edu 
-DefaultDirName={pf}\SansView-1.9.1
-DefaultGroupName=DANSE\SansView-1.9.1
+ChangesEnvironment=true 
+DefaultDirName={pf}\SansView-Dev
+DefaultGroupName=DANSE\SansView-1.9.2dev_JUN
 DisableProgramGroupPage=yes
 LicenseFile=license.txt
 OutputBaseFilename=setupSansView
@@ -36,6 +37,9 @@ Root: HKCR;	Subkey: ".inv";	ValueType: string;	ValueName: "";	ValueData: "{app}\
 Root: HKCR;	Subkey: ".prv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
 Root: HKCR; Subkey: "{app}\images\ball.ico";	ValueType: string; ValueName: "";	ValueData: "{app}\SansView.exe,0"
 Root: HKCR; Subkey: "{app}\SansView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SansView.exe""  ""%1"""
+Root: HKCU; Subkey: "Environment";	ValueType: expandsz; ValueName: "SANSVIEWPATH";	ValueData: "{app}";	 Flags: uninsdeletevalue
+; Write to PATH (below) is disabled; need more work
+;Root: HKCU; Subkey: "Environment";	ValueType: expandsz; ValueName: "PATH";	ValueData: "%SANSVIEWPATH%;{olddata}";	 Check: NeedsAddPath()
 
 
 [Languages]
@@ -54,10 +58,39 @@ Source: "test\*";	DestDir: "{app}\test";	Flags: ignoreversion recursesubdirs cre
 ;	NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\SansView-1.9.1";	Filename: "{app}\SansView.exe";	WorkingDir: "{app}" 
-Name: "{group}\{cm:UninstallProgram, SansView-1.9.1}";	 Filename: "{uninstallexe}" 
-Name: "{commondesktop}\SansView-1.9.1";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" 
+Name: "{group}\SansView";	Filename: "{app}\SansView.exe";	WorkingDir: "{app}" 
+Name: "{group}\{cm:UninstallProgram, SansView}";	 Filename: "{uninstallexe}" 
+Name: "{commondesktop}\SansView-1.9.2dev_JUN";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" 
 
 
 [Run]
-Filename: "{app}\SansView.exe";	Description: "{cm:LaunchProgram, SansView-1.9.1}";	Flags: nowait postinstall skipifsilent
+Filename: "{app}\SansView.exe";	Description: "{cm:LaunchProgram, SansView}";	Flags: nowait postinstall skipifsilent
+
+
+[Code]
+function NeedsAddPath(): boolean;
+var
+  oldpath: string;
+  newpath: string;
+  pathArr:    TArrayOfString;
+  i:        Integer;
+begin
+  RegQueryStringValue(HKEY_CURRENT_USER,'Environment','PATH', oldpath)
+  oldpath := oldpath + ';';
+  newpath := '%SANSVIEWPATH%';
+  i := 0;
+  while (Pos(';', oldpath) > 0) do begin
+    SetArrayLength(pathArr, i+1);
+    pathArr[i] := Copy(oldpath, 0, Pos(';', oldpath)-1);
+    oldpath := Copy(oldpath, Pos(';', oldpath)+1, Length(oldpath));
+    i := i + 1;
+    // Check if current directory matches app dir
+    if newpath = pathArr[i-1] 
+    then begin
+      Result := False;
+      exit;
+    end;
+  end;
+  Result := True;
+end;
+
