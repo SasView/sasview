@@ -1711,7 +1711,6 @@ class FitPage(BasicPage):
         self.qmax.SetValue(str(data_max))
         self.qmin.SetBackgroundColour("white")
         self.qmax.SetBackgroundColour("white")
-        
         self.state.data = data
         self.state.qmin = self.qmin_x
         self.state.qmax = self.qmax_x
@@ -1728,8 +1727,7 @@ class FitPage(BasicPage):
                 
             self.model_view.Disable()
             self._draw_model()
-        self.Refresh()
-        
+    
     def _npts_click(self, event):
         """
         Prevent further handling of the mouse event on Npts_total

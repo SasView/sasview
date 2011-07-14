@@ -18,11 +18,11 @@ _Y_OFF = 0.5
 
 #SLD panel size 
 if sys.platform.count("win32") > 0:
-    _STATICBOX_WIDTH = 570
-    PANEL_SIZE = 475
+    _STATICBOX_WIDTH = 563
+    PANEL_SIZE = 425
     FONT_VARIANT = 0
 else:
-    _STATICBOX_WIDTH = 610
+    _STATICBOX_WIDTH = 605
     PANEL_SIZE = 500
     FONT_VARIANT = 1
     
