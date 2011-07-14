@@ -19,10 +19,14 @@ import xml
 
 # Try to find a local config
 import imp
-path = os.getcwd()
-if(os.path.isfile("%s/%s.py" % (path, 'local_config'))) or \
-    (os.path.isfile("%s/%s.pyc" % (path, 'local_config'))):
-    fObj, path_config, descr = imp.find_module('local_config', [path])
+tem_path = sys.path[0]
+if os.path.isfile(tem_path):
+    tem_path = os.path.dirname(tem_path)
+os.chdir(tem_path)
+PATH_APP = os.getcwd()
+if(os.path.isfile("%s/%s.py" % (PATH_APP, 'local_config'))) or \
+    (os.path.isfile("%s/%s.pyc" % (PATH_APP, 'local_config'))):
+    fObj, path_config, descr = imp.find_module('local_config', [PATH_APP])
     try:
         config = imp.load_module('local_config', fObj, path_config, descr) 
     except:
@@ -34,18 +38,17 @@ if(os.path.isfile("%s/%s.py" % (path, 'local_config'))) or \
 else:
     # Try simply importing local_config
     import local_config as config
-#path = os.path.sys.path[0]
-PATH_APP = path
 
 #import compileall
 import py_compile
-c_name = os.path.join(path, 'custom_config.py')
-if(os.path.isfile("%s/%s.py" % (path, 'custom_config'))):
+
+c_name = os.path.join(PATH_APP, 'custom_config.py')
+if(os.path.isfile("%s/%s.py" % (PATH_APP, 'custom_config'))):
     py_compile.compile(file=c_name)
     #compileall.compile_dir(dir=path, force=True, quiet=0)
-    cfObj, path_cconfig, descr = imp.find_module('custom_config', [path]) 
+    cfObj, path_cconfig, descr = imp.find_module('custom_config', [PATH_APP]) 
 try:
-    custom_config = imp.load_module('custom_config', cfObj, path, descr)
+    custom_config = imp.load_module('custom_config', cfObj, PATH_APP, descr)
 except:
     custom_config = None
 finally:
@@ -975,31 +978,9 @@ class ViewerFrame(wx.Frame):
         import StartupConfiguration as ConfDialog
         
         self.panel = ConfDialog(parent=self, gui=self.__gui_style)
-        #self.panel.Bind(wx.EVT_CLOSE, self._draw_masked_model)
         self.panel.ShowModal()
         #wx.PostEvent(self.parent, event)
         
-    def _draw_masked_model(self,event):
-        """
-        Draw model image w/mask
-        """
-        event.Skip()
-
-        is_valid_qrange = self._update_paramv_on_fit()
-
-        if is_valid_qrange:
-            # try re draw the model plot if it exists
-            self._draw_model()
-            self.panel.Destroy() # frame
-            self.set_npts2fit()
-        elif self.model == None:
-            self.panel.Destroy()
-            self.set_npts2fit()
-            msg= "No model is found on updating MASK in the model plot... "
-            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-        else:
-            msg = ' Please consider your Q range, too.'
-            self.panel.ShowMessage(msg)
 
     def _add_menu_window(self):
         """
@@ -2523,12 +2504,19 @@ class ViewApp(wx.App):
                                  size=size) 
         self.frame.Hide()
         self.s_screen = None
+        temp_path = None
         try:
             # make sure the current dir is App dir when it starts
-            temp_path = os.path.dirname(os.path.sys.path[0])
+            temp_path = os.path.dirname(sys.path[0])
             os.chdir(temp_path)
         except:
             pass
+        try:
+            self.open_file()
+        except:
+            msg = "%s Could not load " % str(APPLICATION_NAME)
+            msg += "input file from command line.\n"
+            logging.error(msg)
         # Display a splash screen on top of the frame.
         if len(sys.argv) > 1 and '--time' in sys.argv[1:]:
             log_time("Starting to display the splash screen")
@@ -2545,16 +2533,11 @@ class ViewApp(wx.App):
             msg += str (sys.exc_value)
             logging.error(msg)
             self.frame.Show()
-           
+ 
         if hasattr(self.frame, 'special'):
             self.frame.special.SetCurrent()
         self.SetTopWindow(self.frame)
-        try:
-            self.open_file()
-        except:
-            msg = "%s Could not load " % str(APPLICATION_NAME)
-            msg += "input file from command line.\n"
-            logging.error(msg)
+  
         return True
 
     def open_file(self):
@@ -2564,12 +2547,13 @@ class ViewApp(wx.App):
         input_file = None
         if len(sys.argv) >= 2:
             cmd = sys.argv[0].lower()
-            if os.path.isfile(cmd):
-                basename  = os.path.basename(cmd)
-                app_py = str(APPLICATION_NAME).lower() + '.py'
-                app_exe = str(APPLICATION_NAME).lower() + '.exe'
-                app_app = str(APPLICATION_NAME).lower() + '.app'
-                if basename.lower() in [app_py, app_exe, app_app]:
+            basename  = os.path.basename(cmd)
+            app_base = str(APPLICATION_NAME).lower()
+            if os.path.isfile(cmd) or basename.lower() == app_base:
+                app_py = app_base + '.py'
+                app_exe = app_base + '.exe'
+                app_app = app_base + '.app'
+                if basename.lower() in [app_py, app_exe, app_app, app_base]:
                     input_file = sys.argv[1]
         if input_file is None:
             return
