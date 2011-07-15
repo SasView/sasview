@@ -1,9 +1,11 @@
 Release Notes
 =============
 
-SansView 1.9.1
+SansView 1.9.2Dev_JUN
 
-1- version 1.9.1 : bug-fix release
+1	- version 1.9.2Dev_JUN: Devel release in Jun. 2011
+
+	- version 1.9.1 : bug-fix release
 
 	- Release date: 06/22/2011
 	- MAC: Fixed some causes of crashing during fitting 
