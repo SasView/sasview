@@ -293,7 +293,8 @@ class TestFractalCoreShell(unittest.TestCase):
         from sans.models.dispersion_models import SchulzDispersion
         disp = SchulzDispersion()
         self.model.set_dispersion('radius', disp)
-        self.model.dispersion['radius']['width'] = 2.0
+        # 'width' is a ratio now for non-angular parameters
+        self.model.dispersion['radius']['width'] = 0.1
         self.model.dispersion['radius']['npts'] = 100
         self.model.dispersion['radius']['nsigmas'] = 3.0
         # the values are from Igor pro calculation
