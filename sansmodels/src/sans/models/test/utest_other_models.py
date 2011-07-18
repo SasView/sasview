@@ -21,6 +21,7 @@
             - StickyHstructure
             - hardSphereStructure
             
+    @ Note: We don't use matrix for 2D anymore so testEval2D can be ignored (JC)     
             
 """
 
@@ -47,9 +48,10 @@ class TestCoreShell(unittest.TestCase):
         self.y = numpy.array([0.5, 1.57])
         self.x_array = self.comp.evalDistribution(self.x)
         self.y_array = self.comp.evalDistribution(self.y)
+        
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a coreshell """
@@ -66,14 +68,13 @@ class TestCoreShell(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a coreshell  with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-        
-    def testCriticalPoint(self):
-        """ Test coreshell at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0)))
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
+    # No more singular point    
+    #def testCriticalPoint(self):
+    #    """ Test coreshell at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0)))
   
 class TestMultiShellModel(unittest.TestCase):
     """ Unit tests for MultiShell Model """
@@ -97,7 +98,7 @@ class TestMultiShellModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a MultiShell Model """
@@ -114,14 +115,13 @@ class TestMultiShellModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a MultiShell  with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-    
-    def testCriticalPoint(self):
-        """ Test multishell at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0)))
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
+    # No more singular point
+    #def testCriticalPoint(self):
+    #    """ Test multishell at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0)))
     
 class TestVesicleModel(unittest.TestCase):
     """ Unit tests for Vesicle Model """
@@ -141,9 +141,9 @@ class TestVesicleModel(unittest.TestCase):
         self.y = numpy.array([0.5, 1.57])
         self.x_array = self.comp.evalDistribution(self.x)
         self.y_array = self.comp.evalDistribution(self.y)
-        qx_prime = numpy.reshape(self.x, [1,len(self.x)])
-        qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        #qx_prime = numpy.reshape(self.x, [1,len(self.x)])
+        #qy_prime = numpy.reshape(self.y, [len(self.y),1])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a Vesicle Model """
@@ -160,10 +160,9 @@ class TestVesicleModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a Vesicle with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
     
     def testCriticalPoint(self):
         """ Test vesicle at the critical point"""
@@ -190,9 +189,9 @@ class TestBinaryHSModel(unittest.TestCase):
         self.y = numpy.array([0.5, 1.57])
         self.x_array = self.comp.evalDistribution(self.x)
         self.y_array = self.comp.evalDistribution(self.y)
-        qx_prime = numpy.reshape(self.x, [1,len(self.x)])
-        qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        #qx_prime = numpy.reshape(self.x, [1,len(self.x)])
+        #qy_prime = numpy.reshape(self.y, [len(self.y),1])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a BinaryHS Model"""
@@ -209,14 +208,13 @@ class TestBinaryHSModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a BinaryHS with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-        
-    def testCriticalPoint(self):
-        """ Test BinaryHS at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0)))
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
+    # No more singular point    
+    #def testCriticalPoint(self):
+    #    """ Test BinaryHS at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0)))
        
      
 class TestCoreShellCylinderModel(unittest.TestCase):
@@ -242,7 +240,7 @@ class TestCoreShellCylinderModel(unittest.TestCase):
         
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
         self.q = 0.001
         self.phi= math.pi/2
@@ -265,14 +263,13 @@ class TestCoreShellCylinderModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a CoreShellCylinder with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
- 
-    def testCriticalPoint(self):
-        """ Test CoreShellCylinder at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0)))
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
+    # No more singular point
+    #def testCriticalPoint(self):
+    #    """ Test CoreShellCylinder at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0)))
  
  
 class TestHollowCylinderModel(unittest.TestCase):
@@ -286,7 +283,8 @@ class TestHollowCylinderModel(unittest.TestCase):
         self.comp.setParam("core_radius",20.0)
         self.comp.setParam("radius",30)
         self.comp.setParam("length", 400)
-        self.comp.setParam("contrast",5.3e-6 )
+        self.comp.setParam("sldCyl",6.3e-6 )
+        self.comp.setParam("sldSolv",1e-6 )
         self.comp.setParam("Background", 0.01)
         
         self.x = numpy.array([0.4, 1.3])
@@ -295,7 +293,7 @@ class TestHollowCylinderModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
         self.q = 0.001
         self.phi= math.pi/2
@@ -318,14 +316,13 @@ class TestHollowCylinderModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a HollowCylinder with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-        
-    def testCriticalPoint(self):
-        """ Test HollowCylinder at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0)))
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
+    # No more singular point    
+    #def testCriticalPoint(self):
+    #    """ Test HollowCylinder at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0)))
         
         
 class TestFlexibleCylinderModel(unittest.TestCase):
@@ -336,7 +333,8 @@ class TestFlexibleCylinderModel(unittest.TestCase):
         self.comp = FlexibleCylinderModel()
         #Give initial value to model
         self.comp.setParam("scale", 1.0)
-        self.comp.setParam("contrast",5.3e-6 )
+        self.comp.setParam("sldSolv",6.3e-6 )
+        self.comp.setParam("sldCyl",1e-6 )
         self.comp.setParam("kuhn_length",100)
         self.comp.setParam("length", 1000)
         self.comp.setParam("radius",20)
@@ -349,7 +347,7 @@ class TestFlexibleCylinderModel(unittest.TestCase):
         
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
         self.q = 0.001
         self.phi= math.pi/2
@@ -371,14 +369,13 @@ class TestFlexibleCylinderModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a FlexibleCylinder Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-   
-    def testCriticalPoint(self):
-        """ Test FlexibleCylinder at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0)))
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
+    # No more singular point
+    #def testCriticalPoint(self):
+    #    """ Test FlexibleCylinder at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0)))
   
               
 class TestStackedDisksModel(unittest.TestCase):
@@ -408,7 +405,7 @@ class TestStackedDisksModel(unittest.TestCase):
         
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
         self.q = 0.001
         self.phi= math.pi/2
@@ -431,14 +428,13 @@ class TestStackedDisksModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a StackedDisks Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-    
-    def testCriticalPoint(self):
-        """ Test StackedDisks at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0))) 
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
+    # No more singular point
+    #def testCriticalPoint(self):
+    #    """ Test StackedDisks at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0))) 
    
   
 class TestParallelepipedModel(unittest.TestCase):
@@ -452,7 +448,8 @@ class TestParallelepipedModel(unittest.TestCase):
         self.comp.setParam("short_a",35)
         self.comp.setParam("short_b", 75)
         self.comp.setParam("long_c",400 )
-        self.comp.setParam("contrast", 5.3e-006 )
+        self.comp.setParam("sldPipe", 6.3e-006 )
+        self.comp.setParam("sldSolv", 1e-006 )
         self.comp.setParam("scale",1.0 )
         
         self.x = numpy.array([0.4, 1.3])
@@ -462,7 +459,7 @@ class TestParallelepipedModel(unittest.TestCase):
         
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
         self.q = 0.001
         self.phi= math.pi/2
@@ -486,10 +483,9 @@ class TestParallelepipedModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a Parallelepiped Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
    
     def testCriticalPoint(self):
         """ Test Parallelepiped at the critical point"""
@@ -505,7 +501,8 @@ class TestEllipticalCylinderModel(unittest.TestCase):
         self.comp.setParam("r_minor",20.0)
         self.comp.setParam("r_ratio",1.5) 
         self.comp.setParam("length",400.0)
-        self.comp.setParam("contrast",5.3e-006)
+        self.comp.setParam("sldCyl",4e-006)
+        self.comp.setParam("sldSolv",1e-006)
         self.comp.setParam("background",0.0)
         self.comp.setParam("cyl_theta",0.0)
         self.comp.setParam("cyl_phi",0.0)
@@ -518,7 +515,7 @@ class TestEllipticalCylinderModel(unittest.TestCase):
         
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
         self.q = 0.001
         self.phi= math.pi/2
@@ -527,7 +524,7 @@ class TestEllipticalCylinderModel(unittest.TestCase):
         
     def test1D(self):
         """ Test 1D model for a EllipticalCylinder Model"""
-        self.assertAlmostEqual(self.comp.run(0.001),2108.32, 1)
+        self.assertAlmostEqual(self.comp.run(0.001), 675.504402, 4)
         
     def test1D_2(self):
         """ Test 2D model for a EllipticalCylinder Model"""
@@ -541,10 +538,9 @@ class TestEllipticalCylinderModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a EllipticalCylinder with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
     
     def testCriticalPoint(self):
         """ Test EllipticalCylinder at the critical point"""
@@ -560,7 +556,8 @@ class TestEllipsoidModel(unittest.TestCase):
         self.comp.setParam("scale",1.0) 
         self.comp.setParam("radius_a",20.0)
         self.comp.setParam("radius_b",400.0)
-        self.comp.setParam("contrast",3e-006)
+        self.comp.setParam("sldEll",4e-006)
+        self.comp.setParam("sldSolv",1e-006)
         self.comp.setParam("background",0.0)
         self.comp.setParam("axis_theta",1.57)
         self.comp.setParam("axis_phi",0.0)
@@ -572,7 +569,7 @@ class TestEllipsoidModel(unittest.TestCase):
         
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
         self.q = 0.001
         self.phi= math.pi/2
@@ -594,10 +591,9 @@ class TestEllipsoidModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a Ellipsoid Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
     
     def testCriticalPoint(self):
         """ Test Ellipsoid at the critical point"""
@@ -615,7 +611,8 @@ class TestCoreShellEllipsoidModel(unittest.TestCase):
         self.comp.setParam("polar_core", 20.0)
         self.comp.setParam("equat_shell",250.0)
         self.comp.setParam("polar_shell", 30.0)
-        self.comp.setParam("contrast",1e-006)
+        self.comp.setParam("sld_shell",1e-006)
+        self.comp.setParam("sld_core",2e-006)
         self.comp.setParam("sld_solvent",6.3e-006)
         self.comp.setParam("background",0.001)
         self.comp.setParam("axis_theta", 0.0)
@@ -628,7 +625,7 @@ class TestCoreShellEllipsoidModel(unittest.TestCase):
         
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
         self.q = 0.001
         self.phi= math.pi/2
@@ -637,7 +634,7 @@ class TestCoreShellEllipsoidModel(unittest.TestCase):
         
     def test1D(self):
         """ Test 1D model for a CoreShellEllipsoid Model"""
-        self.assertAlmostEqual(self.comp.run(1.0), 0.002578943, 4)
+        self.assertAlmostEqual(self.comp.run(1.0), 0.001894, 4)
         
     def test1D_2(self):
         """ Test 2D model for a CoreShellEllipsoid Model"""
@@ -651,10 +648,9 @@ class TestCoreShellEllipsoidModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a CoreShellEllipsoid with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
     
     def testCriticalPoint(self):
         """ Test CoreShellEllipsoid at the critical point"""
@@ -670,7 +666,8 @@ class TestTriaxialEllipsoidModel(unittest.TestCase):
         self.comp.setParam("semi_axisA",35.0)
         self.comp.setParam("semi_axisB", 100.0)
         self.comp.setParam("semi_axisC",400.0 )
-        self.comp.setParam("contrast",5.3e-6)
+        self.comp.setParam("sldSolv",6.3e-6)
+        self.comp.setParam("sldEll",1e-6)
         self.comp.setParam("background",0.0)
         self.comp.setParam("axis_theta", 1.0)
         self.comp.setParam("axis_phi",0.0 )
@@ -683,7 +680,7 @@ class TestTriaxialEllipsoidModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
         self.q = 0.001
         self.phi= math.pi/2
@@ -707,10 +704,9 @@ class TestTriaxialEllipsoidModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a TriaxialEllipsoid Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
     
     def testCriticalPoint(self):
         """ Test TriaxialEllipsoid at the critical point"""
@@ -735,15 +731,15 @@ class TestLamellarModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a Lamellar Model"""
-        self.assertAlmostEquals(self.comp.run(0.001), 902120)
+        self.assertAlmostEquals(self.comp.run(0.001), 882289.54309, 3)
         
     def test1D_2(self):
         """ Test 2D model for a Lamellar Model"""
-        self.assertAlmostEquals(self.comp.run([0.001, 1.3]),902120)     
+        self.assertAlmostEquals(self.comp.run([0.001, 1.3]),882289.54309, 3)     
     
     def testEval_1D(self):
         """ Test 1D model for a Lamellar Model with evalDistribution"""
@@ -752,14 +748,13 @@ class TestLamellarModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a Lamellar Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)        
-   
-    def testCriticalPoint(self):
-        """ Test Lamellar at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0)))
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+       
+    # No more singular point
+    #def testCriticalPoint(self):
+    #    """ Test Lamellar at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0)))
      
 class TestLamellarFFHGModel(unittest.TestCase):
     """ Unit tests for LamellarFFHG Model"""
@@ -782,16 +777,16 @@ class TestLamellarFFHGModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
         
     def test1D(self):
         """ Test 1D model for a LamellarFFHG Model"""
-        self.assertAlmostEquals(self.comp.run(0.001),653144)
+        self.assertAlmostEquals(self.comp.run(0.001),653143.9209, 3)
         
     def test1D_2(self):
         """ Test 2D model for a LamellarFFHG Model"""
-        self.assertAlmostEquals(self.comp.run([0.001, 1.3]),653144)
+        self.assertAlmostEquals(self.comp.run([0.001, 1.3]),653143.9209, 3)
     
     def testEval_1D(self):
         """ Test 1D model for a LamellarFFHG Model with evalDistribution"""
@@ -800,14 +795,13 @@ class TestLamellarFFHGModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a LamellarFFHG Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)        
-    
-    def testCriticalPoint(self):
-        """ Test LamellarFFHG at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0)))              
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+      
+    # No more singular point
+    #def testCriticalPoint(self):
+    #    """ Test LamellarFFHG at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0)))              
     
 class TestLamellarPSModel(unittest.TestCase):
     """ Unit tests for LamellarPS Model"""
@@ -818,7 +812,8 @@ class TestLamellarPSModel(unittest.TestCase):
         self.comp.setParam("scale",1.0) 
         self.comp.setParam("spacing",400.0)
         self.comp.setParam("delta",30.0)
-        self.comp.setParam("contrast",5.3e-006)
+        self.comp.setParam("sld_bi",6.3e-006)
+        self.comp.setParam("sld_sol",1e-006)
         self.comp.setParam("n_plates",20.0) 
         self.comp.setParam("caille", 0.1)
         self.comp.setParam("background",0.0)
@@ -830,16 +825,16 @@ class TestLamellarPSModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
         
     def test1D(self):
         """ Test 1D model for a LamellarPS Model"""
-        self.assertAlmostEquals(self.comp.run(0.001), 28526.8, 1)
+        self.assertAlmostEquals(self.comp.run(0.001), 27899.30836, 1)
         
     def test1D_2(self):
         """ Test 2D model for a LamellarPS Model"""
-        self.assertAlmostEquals(self.comp.run([0.001, 1.3]),28526.8, 1) 
+        self.assertAlmostEquals(self.comp.run([0.001, 1.3]),27899.30836, 1) 
     
     def testEval_1D(self):
         """ Test 1D model for a LamellarPS Model with evalDistribution"""
@@ -848,14 +843,13 @@ class TestLamellarPSModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a LamellarPS Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)        
-            
-    def testCriticalPoint(self):
-        """ Test LamellarPS at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0)))
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+      
+    # No more singular point        
+    #def testCriticalPoint(self):
+    #    """ Test LamellarPS at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0)))
      
 class TestLamellarPSHGModel(unittest.TestCase):
     """ Unit tests for LamellarPSHG Model"""
@@ -881,15 +875,15 @@ class TestLamellarPSHGModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a LamellarPSHG Model"""
-        self.assertAlmostEquals(self.comp.run(0.001),6.83139e6, 3)
+        self.assertAlmostEquals(self.comp.run(0.001),6831387.29466, 3)
         
     def test1D_2(self):
         """ Test 2D model for a LamellarPSHG Model"""
-        self.assertAlmostEquals(self.comp.run([0.001, 1.3]),6.83139e6,3)
+        self.assertAlmostEquals(self.comp.run([0.001, 1.3]),6831387.29466,3)
         
     def testEval_1D(self):
         """ Test 1D model for a LamellarPSHG Model with evalDistribution"""
@@ -898,14 +892,13 @@ class TestLamellarPSHGModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a LamellarPSHG Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)        
-    
-    def testCriticalPoint(self):
-        """ Test LamellarPSHG at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0)))
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+       
+    # No more singular point
+    #def testCriticalPoint(self):
+    #    """ Test LamellarPSHG at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0)))
      
 class TestSquareWellStructure(unittest.TestCase):
     """ Unit tests for SquareWellStructure """
@@ -925,7 +918,7 @@ class TestSquareWellStructure(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
         
     def test1D(self):
@@ -943,14 +936,13 @@ class TestSquareWellStructure(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a SquareWellStructure with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-    
-    def testCriticalPoint(self):
-        """ Test SquareWellStructure at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0)))                     
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
+    # No more singular point
+    #def testCriticalPoint(self):
+    #    """ Test SquareWellStructure at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0)))                     
      
 class TestHardsphereStructure(unittest.TestCase):
     """ Unit tests for HardsphereStructure"""
@@ -967,7 +959,7 @@ class TestHardsphereStructure(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
         
     def test1D(self):
@@ -985,14 +977,13 @@ class TestHardsphereStructure(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a HardsphereStructure with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-    
-    def testCriticalPoint(self):
-        """ Test HardsphereStructure at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0)))                  
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
+    # No more singular point
+    #def testCriticalPoint(self):
+    #    """ Test HardsphereStructure at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0)))                  
     
 class TestStickyHSStructure(unittest.TestCase):
     """ Unit tests for StickyHSStructure"""
@@ -1012,7 +1003,7 @@ class TestStickyHSStructure(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a StickyHSStructure"""
@@ -1029,14 +1020,13 @@ class TestStickyHSStructure(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a StickyHSStructure with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-               
-    def testCriticalPoint(self):
-        """ Test StickyHSStructure at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0))) 
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
+    # No more singular point           
+    #def testCriticalPoint(self):
+    #    """ Test StickyHSStructure at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0))) 
         
 class TestHayterMSAStructure(unittest.TestCase):
     """ Unit tests for HayterMSAStructure"""
@@ -1058,7 +1048,7 @@ class TestHayterMSAStructure(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
 
     def test1D(self):
         """ Test 1D model for a HayterMSAStructure"""
@@ -1075,10 +1065,9 @@ class TestHayterMSAStructure(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a HayterMSAStructure with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
     
     def testCriticalPoint(self):
         """ Test HayterMSAStructure at the critical point"""
@@ -1108,8 +1097,8 @@ class TestBEPolyelectrolyte(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
-        
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
+
     def test1D(self):
         """ Test 1D model for a BEPolyelectrolyte"""
         self.assertAlmostEqual(self.comp.run(0.001),0.0948, 3)
@@ -1125,10 +1114,9 @@ class TestBEPolyelectrolyte(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a BEPolyelectrolyte with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
    
     def testCriticalPoint(self):
         """ Test BEPolyelectrolyte at the critical point"""
@@ -1152,15 +1140,15 @@ class TestDABModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a DABModel"""
-        self.assertAlmostEqual(self.comp.run(0.001),10.9681, 3)
+        self.assertAlmostEqual(self.comp.run(0.001),637957.9047, 3)
         
     def test1D_2(self):
         """ Test 2D model for a DABModel"""
-        self.assertAlmostEqual(self.comp.run([0.001, 1.3]),10.9681, 3)
+        self.assertAlmostEqual(self.comp.run([0.001, 1.3]),637957.90473, 3)
          
     def testEval_1D(self):
         """ Test 1D model for a DABModel with evalDistribution"""
@@ -1169,10 +1157,9 @@ class TestDABModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a DABModel with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
     
     def testCriticalPoint(self):
         """ Test DABModel at the critical point"""
@@ -1195,7 +1182,7 @@ class TestGuinierModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a GuinierModel"""
@@ -1212,10 +1199,9 @@ class TestGuinierModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a GuinierModel with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
     
     def testCriticalPoint(self):
         """ Test GuinierModel at the critical point"""
@@ -1239,7 +1225,7 @@ class TestDebyeModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a DebyeModel"""
@@ -1256,10 +1242,9 @@ class TestDebyeModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a DebyeModel with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
     
     def testCriticalPoint(self):
         """ Test DebyeModel at the critical point"""
@@ -1282,7 +1267,7 @@ class TestPorodModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a PorodModel"""
@@ -1299,10 +1284,9 @@ class TestPorodModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a PorodModel with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
     
     def testCreaticalPoint(self):
         """ Test for critical point for PorodModel run"""
@@ -1327,7 +1311,7 @@ class TestPeakGaussModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a PeakGauss Model"""
@@ -1344,10 +1328,8 @@ class TestPeakGaussModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a PeakGauss Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
     
     def testCriticalPoint(self):
         """ Test PeakGauss at the critical point"""
@@ -1371,7 +1353,7 @@ class TestPeakLorentzModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a PeakLorentz Model"""
@@ -1388,16 +1370,15 @@ class TestPeakLorentzModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a PeakLorentz Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
         
     def testCriticalPoint(self):
         """ Test PeakLorentz at the critical point"""
         self.comp.setParam('B', 0.0)
         self.assertRaises(ZeroDivisionError, self.comp.run, 10)
-        self.assert_(numpy.isfinite(self.comp.run(0.0)))  
+        #self.assert_(numpy.isfinite(self.comp.run(0.0)))  
         
        
 class TestFractalAbsModel(unittest.TestCase):
@@ -1409,9 +1390,9 @@ class TestFractalAbsModel(unittest.TestCase):
         self.comp.setParam('scale', 0.05)
         self.comp.setParam('radius', 5.0)
         self.comp.setParam('fractal_dim', 2.0)
-        self.comp.setParam('corr_length',100.0)
-        self.comp.setParam('block_sld', 2.0e-6)
-        self.comp.setParam('solvent_sld', 6.35e-6)
+        self.comp.setParam('cor_length',100.0)
+        self.comp.setParam('sldBlock', 2.0e-6)
+        self.comp.setParam('sldSolv', 6.35e-6)
         self.comp.setParam('background',0.0)
         
         self.x = numpy.array([0.4, 1.3])
@@ -1421,7 +1402,7 @@ class TestFractalAbsModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a Fractal Abs Model"""
@@ -1438,14 +1419,13 @@ class TestFractalAbsModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a Fractal Abs Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-    
-    def testCriticalPoint(self):
-        """ Test Fractal Abs at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0)))    
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
+    # No more singular point
+    #def testCriticalPoint(self):
+    #    """ Test Fractal Abs at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0)))    
    
 class TestFractalModel(unittest.TestCase):
     """ Unit tests for FractalModel"""
@@ -1456,9 +1436,9 @@ class TestFractalModel(unittest.TestCase):
         self.comp.setParam('scale', 0.05)
         self.comp.setParam('radius', 5.0)
         self.comp.setParam('fractal_dim', 2.0)
-        self.comp.setParam('corr_length',100.0)
-        self.comp.setParam('block_sld', 2.0e-6)
-        self.comp.setParam('solvent_sld', 6.35e-6)
+        self.comp.setParam('cor_length',100.0)
+        self.comp.setParam('sldBlock', 2.0e-6)
+        self.comp.setParam('sldSolv', 6.35e-6)
         self.comp.setParam('background',0.0)
         
         self.x = numpy.array([0.4, 1.3])
@@ -1468,7 +1448,7 @@ class TestFractalModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a Fractal Model"""
@@ -1485,14 +1465,13 @@ class TestFractalModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a Fractal Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
-        
-    def testCriticalPoint(self):
-        """ Test Fractal at the critical point"""
-        self.assert_(numpy.isfinite(self.comp.run(0.0)))
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
+    # No more singular point    
+    #def testCriticalPoint(self):
+    #    """ Test Fractal at the critical point"""
+    #    self.assert_(numpy.isfinite(self.comp.run(0.0)))
     
 class TestLorentzModel(unittest.TestCase):
     """ Unit tests for LorentzModel"""
@@ -1511,7 +1490,7 @@ class TestLorentzModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a Lorentz Model"""
@@ -1528,10 +1507,9 @@ class TestLorentzModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a Lorentz Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
           
     def testCriticalPoint(self):
         """ Test Lorentz at the critical point"""
@@ -1554,7 +1532,7 @@ class TestPowerLawAbsModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a PowerLawAbs Model"""
@@ -1571,10 +1549,9 @@ class TestPowerLawAbsModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a PowerLawAbs Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
     
     def testCriticalPoint(self):
         """ Test PowerLawAbs at the critical point"""
@@ -1597,7 +1574,7 @@ class TestPowerLawModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a PowerLaw Model"""
@@ -1614,10 +1591,9 @@ class TestPowerLawModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a PowerLawModel with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
     
     def testCriticalPoint(self):
         """ Test PowerLawModel at the critical point"""
@@ -1641,7 +1617,7 @@ class TestTeubnerStreyModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a TeubnerStrey Model"""
@@ -1658,10 +1634,9 @@ class TestTeubnerStreyModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a TeubnerStrey  with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
     
     def testCriticalPoint(self):
         """ Test TeubnerStrey at the critical point"""
@@ -1683,7 +1658,7 @@ class TestLineModel(unittest.TestCase):
         self.y_array = self.comp.evalDistribution(self.y)
         qx_prime = numpy.reshape(self.x, [1,len(self.x)])
         qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([qx_prime, qy_prime])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
         
     def test1D(self):
         """ Test 1D model for a Line Model"""
@@ -1696,10 +1671,9 @@ class TestLineModel(unittest.TestCase):
         
     def testEval_2D(self):
         """ Test 2D model for a Line  with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0][0],8)
-        self.assertAlmostEquals(self.comp.runXY([0.4,1.57]),self.xy_matrix[1][0], 8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 0.5]),self.xy_matrix[0][1],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3, 1.57]),self.xy_matrix[1][1],8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0], 8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+
     
     def testCriticalPoint(self):
         """ Test line at the critical point"""
