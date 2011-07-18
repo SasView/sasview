@@ -36,11 +36,11 @@ class TestSphere(unittest.TestCase):
         
     def test1D_3(self):
         """ Test 2D model for a Shpere for 2 vectors as input """
-        x= numpy.reshape(self.x, [len(self.x),1])
-        y= numpy.reshape(self.y, [1,len(self.y)])
-        vect = self.comp.evalDistribution([x,y])
-        self.assertAlmostEqual(vect[0][0],9.2985e-07, 4)
-        self.assertAlmostEqual(vect[len(self.x)-1][len(self.y)-1],1.3871e-08, 4)
+        #x= numpy.reshape(self.x, [len(self.x),1])
+        #y= numpy.reshape(self.y, [1,len(self.y)])
+        vect = self.comp.evalDistribution([self.x,self.y])
+        self.assertAlmostEqual(vect[0],9.2985e-07, 4)
+        self.assertAlmostEqual(vect[len(self.x)-1],1.3871e-08, 4)
         
         
 class TestCylinder(unittest.TestCase):
@@ -68,19 +68,17 @@ class TestCylinder(unittest.TestCase):
          
     def test1D_2(self):
         """ Test 2D model of a cylinder """ 
-        self.comp.setParam('cyl_theta', 1.0)
-        self.comp.setParam('cyl_phi', 1.0)
+        self.comp.setParam('cyl_theta', 1.0 * 180/3.1415)
+        self.comp.setParam('cyl_phi', 1.0 * 180/3.1415)
         self.assertAlmostEqual(self.comp.run([0.2, 2.5]), 
-                               0.038176446608393366, 4)
+                               0.038176446608393366, 3)
         
     def test1D_3(self):
         """ Test 2D model for a cylinder for 2 vectors as input """
-        x= numpy.reshape(self.x, [len(self.x),1])
-        y= numpy.reshape(self.y, [1,len(self.y)])
-        vect = self.comp.evalDistribution([x,y])
+        vect = self.comp.evalDistribution([self.x,self.y])
       
-        self.assertAlmostEqual(vect[0][0],5.06121018e-08,4)
-        self.assertAlmostEqual(vect[len(self.x)-1][len(self.y)-1],2.5978e-11, 4)
+        self.assertAlmostEqual(vect[0],5.06121018e-08,4)
+        self.assertAlmostEqual(vect[len(self.x)-1],2.5978e-11, 4)
         
         
 
