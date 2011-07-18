@@ -73,6 +73,7 @@ from sans.guiframe.gui_style import GUIFRAME_ID
 from sans.guiframe.data_panel import DataPanel
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.gui_toolbar import GUIToolBar
+from sans.guiframe.events import EVT_NEW_BATCH
 from DataLoader.loader import Loader
 
 
@@ -243,9 +244,19 @@ class ViewerFrame(wx.Frame):
         self.Bind(EVT_PANEL_ON_FOCUS, self.set_panel_on_focus)
         self.Bind(EVT_APPEND_BOOKMARK, self.append_bookmark)
         self.Bind(EVT_NEW_LOAD_DATA, self.on_load_data)
-        
+        self.Bind(EVT_NEW_BATCH, self.on_batch_selection)
         self.setup_custom_conf()
     
+    def on_batch_selection(self, event):
+        """
+        :param event: contains parameter enable . when enable is set to True
+        the application is in Batch mode
+        else the application is default mode(single mode)
+        """
+        self.batch_on = event.enable
+        for plug in self.plugins:
+            plug.set_bacth_selection(self.batch_on)
+            
     def setup_custom_conf(self):
         """
         Set up custom configuration if exists

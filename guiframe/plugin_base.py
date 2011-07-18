@@ -46,6 +46,8 @@ class PluginBase:
         ## List of panels that you would like to open in AUI windows
         #  for your plug-in. This defines your plug-in "perspective"
         self.perspective = []
+        #flag to tell the current plugin that aaplication is in batch mode
+        self.batch_on = False
         
     def clear_panel(self):
         """
@@ -196,6 +198,18 @@ class PluginBase:
         """
         self.parent.set_current_perspective(self)
         self.parent.set_perspective(self.perspective)
+        
+    def set_bacth_selection(self, flag):
+        """
+        the plugin to its batch state if flag is True
+        """
+        self.batch_on = flag
+        self.on_batch_selection(self.batch_on)    
+    
+    def on_batch_selection(self, flag):
+        """
+        need to be overwritten by the derivated class
+        """
     
     def post_init(self):
         """

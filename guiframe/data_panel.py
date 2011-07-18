@@ -34,6 +34,7 @@ from sans.guiframe.events import EVT_DELETE_PLOTPANEL
 from sans.guiframe.events import NewLoadDataEvent
 from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.gui_style import GUIFRAME
+from sans.guiframe.events import NewBatchEvent
 from DataLoader.loader import Loader
 
 try:
@@ -339,6 +340,24 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.rb_batch_mode.SetValue(False)
         self.sizer4.AddMany([(self.rb_single_mode,0, wx.ALL,5),
                             (self.rb_batch_mode,0, wx.ALL,5)])
+        
+    def on_single_mode(self, event):
+        """
+        change guiframe to its single mode
+        """
+        if self.parent is not None:
+                wx.PostEvent(self.parent, 
+                             NewBatchEvent(enable=False))
+        print "single mode"
+        
+    def on_batch_mode(self, event):
+        """
+        change guiframe to its batch mode
+        """
+        if self.parent is not None:
+                wx.PostEvent(self.parent, 
+                             NewBatchEvent(enable=True))
+        print "batch mode"
       
     def layout_data_list(self):
         """
