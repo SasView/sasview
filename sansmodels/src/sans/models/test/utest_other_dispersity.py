@@ -31,9 +31,9 @@ class TestCylinder(unittest.TestCase):
         disp = DispersionModel()
         self.model.setParam('scale', 10.0)
         self.model.set_dispersion('radius', disp)
-        self.model.dispersion['radius']['width'] = 5.0
+        self.model.dispersion['radius']['width'] = 5.0/20.0
         self.model.dispersion['radius']['npts'] = 100
-        self.model.dispersion['radius']['nsigmas'] = 2.5
+        self.model.dispersion['radius']['nsigmas'] = 2.0
         print "constant",self.model.run(0.001), self.model.dispersion
         self.assertAlmostEqual(self.model.run(0.001), 1.021051*4527.47250339, 3)
         self.assertAlmostEqual(self.model.runXY([0.001, 0.001]), 1.021048*4546.997777604715, 2)
@@ -42,9 +42,9 @@ class TestCylinder(unittest.TestCase):
         from sans.models.dispersion_models import GaussianDispersion
         disp = GaussianDispersion()
         self.model.set_dispersion('radius', disp)
-        self.model.dispersion['radius']['width'] = 5.0
+        self.model.dispersion['radius']['width'] = 5.0/20.0
         self.model.dispersion['radius']['npts'] = 100
-        self.model.dispersion['radius']['nsigmas'] = 2.5
+        self.model.dispersion['radius']['nsigmas'] = 2.0
         self.model.setParam('scale', 10.0)
         
         self.assertAlmostEqual(self.model.run(0.001), 1.1804794*4723.32213339, 3)
@@ -54,9 +54,9 @@ class TestCylinder(unittest.TestCase):
         from sans.models.dispersion_models import GaussianDispersion
         disp = GaussianDispersion()
         self.model.set_dispersion('radius', disp)
-        self.model.dispersion['radius']['width'] = 5.0
+        self.model.dispersion['radius']['width'] = 5.0/20.0
         self.model.dispersion['radius']['npts'] = 100
-        self.model.dispersion['radius']['nsigmas'] = 2.5
+        self.model.dispersion['radius']['nsigmas'] = 2.0
         self.model.setParam('scale', 10.0)
         
         new_model = self.model.clone()
@@ -68,30 +68,30 @@ class TestCylinder(unittest.TestCase):
         from sans.models.dispersion_models import SchulzDispersion
         disp = SchulzDispersion()
         self.model.set_dispersion('radius', disp)
-        self.model.dispersion['radius']['width'] = 5.0
+        self.model.dispersion['radius']['width'] = 5.0/20.0
         #self.model.dispersion['radius']['width'] = 0.0
         self.model.dispersion['radius']['npts'] = 100
-        self.model.dispersion['radius']['nsigmas'] = 2.5
-        #self.model.setParam('scale', 1.0)
-        self.model.setParam('scale', 10.0)
+        self.model.dispersion['radius']['nsigmas'] = 2.0
+        self.model.setParam('scale', 1.0)
+        #self.model.setParam('scale', 10.0)
         print "schulz",self.model.run(0.001), self.model.dispersion
-        self.assertAlmostEqual(self.model.run(0.001), 450.355, 3)
-        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 452.299, 3)
+        self.assertAlmostEqual(self.model.run(0.001), 542.23568, 3)
+        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 544.54864, 3)
         
     def test_lognormal_zero(self):
         from sans.models.dispersion_models import LogNormalDispersion
         disp = LogNormalDispersion()
         self.model.set_dispersion('radius', disp)
-        self.model.dispersion['radius']['width'] = 5.0
+        self.model.dispersion['radius']['width'] = 5.0/20.0
         #self.model.dispersion['radius']['width'] = 0.0
         self.model.dispersion['radius']['npts'] = 100
-        self.model.dispersion['radius']['nsigmas'] = 2.5
-        #self.model.setParam('scale', 1.0)
-        self.model.setParam('scale', 10.0)
+        self.model.dispersion['radius']['nsigmas'] = 2.0
+        self.model.setParam('scale', 1.0)
+        #self.model.setParam('scale', 10.0)
         print "model dispersion",self.model.dispersion
         print "lognormal",self.model.run(0.001)
-        self.assertAlmostEqual(self.model.run(0.001), 450.355, 3)
-        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 452.299, 3)
+        self.assertAlmostEqual(self.model.run(0.001), 450.64237, 3)
+        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 452.58733, 3)
         
     def test_gaussian_zero(self):
         from sans.models.dispersion_models import GaussianDispersion
@@ -99,7 +99,7 @@ class TestCylinder(unittest.TestCase):
         self.model.set_dispersion('radius', disp)
         self.model.dispersion['radius']['width'] = 0.0
         self.model.dispersion['radius']['npts'] = 100
-        self.model.dispersion['radius']['nsigmas'] = 2.5
+        self.model.dispersion['radius']['nsigmas'] = 2.0
         self.model.setParam('scale', 1.0)
         
         self.assertAlmostEqual(self.model.run(0.001), 450.355, 3)
