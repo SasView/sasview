@@ -1,10 +1,7 @@
 """
      Installation script for DANSE calculator perspective for SansView
 """
-import sys
-if len(sys.argv) == 1:
-    sys.argv.append('install')
-import os
+
 from distutils.core import setup
 
 setup(
