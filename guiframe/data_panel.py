@@ -59,7 +59,7 @@ PLUGINS_WLIST = config.PLUGINS_WLIST
 APPLICATION_WLIST = config.APPLICATION_WLIST
 
 #Control panel width 
-if sys.platform.count("win32") > 0:
+if sys.platform.count("darwin")==0:
     PANEL_WIDTH = 235
     PANEL_HEIGHT = 700
     CBOX_WIDTH = 140
