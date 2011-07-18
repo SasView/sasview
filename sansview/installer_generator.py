@@ -99,7 +99,7 @@ def write_registry(extension=None):
                                                               str('%'))
         
         #SANSVIEWPATH
-        msg += """Root: HKCU; Subkey: "%s";\t"""  %  str('Environment')
+        msg += """Root: HKLM; Subkey: "%s";\t"""  %  str('SYSTEM\CurrentControlSet\Control\Session Manager\Environment')
         msg += """ValueType: %s; """ % str('expandsz')
         msg += """ValueName: "%s";\t""" % str('SANSVIEWPATH') 
         msg += """ValueData: "{app}";\t"""
