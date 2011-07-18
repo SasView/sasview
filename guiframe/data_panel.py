@@ -165,7 +165,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.layout_selection()
         self.layout_data_list()
         self.layout_button()
-        #self.layout_batch()
+        self.layout_batch()
    
     def define_panel_structure(self):
         """
@@ -348,8 +348,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         if self.parent is not None:
                 wx.PostEvent(self.parent, 
                              NewBatchEvent(enable=False))
-        print "single mode"
-        
+       
     def on_batch_mode(self, event):
         """
         change guiframe to its batch mode
@@ -357,7 +356,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         if self.parent is not None:
                 wx.PostEvent(self.parent, 
                              NewBatchEvent(enable=True))
-        print "batch mode"
       
     def layout_data_list(self):
         """
