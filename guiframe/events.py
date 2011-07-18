@@ -25,4 +25,6 @@ import wx.lib.newevent
 (AppendBookmarkEvent, EVT_APPEND_BOOKMARK) = wx.lib.newevent.NewEvent()
 #event to ask dataloader plugin to load data if dataloader plugin exist
 (NewLoadDataEvent, EVT_NEW_LOAD_DATA) = wx.lib.newevent.NewEvent()
+#event to toggle from single model to  batch
+(NewBatchEvent, EVT_NEW_BATCH) = wx.lib.newevent.NewEvent()
 

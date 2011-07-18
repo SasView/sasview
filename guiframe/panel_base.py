@@ -12,6 +12,7 @@
 
 
 from sans.guiframe.events import PanelOnFocusEvent
+from sans.guiframe.events import EVT_NEW_BATCH
 import wx
 
 class PanelBase:
@@ -50,12 +51,21 @@ class PanelBase:
         self._drag_flag = False
         self._reset_flag = False
         self._has_changed = False
+        self.batch_on = False
         self.group_id = None
+        self.Bind(EVT_NEW_BATCH, self.on_batch_selection)
         self.Bind(wx.EVT_LEFT_DOWN, self.on_set_focus)
         self.Bind(wx.EVT_TEXT_ENTER, self.on_set_focus)
         self.Bind(wx.EVT_MIDDLE_DOWN, self.on_set_focus)
         self.Bind(wx.EVT_RIGHT_DOWN, self.on_set_focus)
         
+    def on_batch_selection(self, event):
+        """
+        :param event: contains parameter enable . when enable is set to True
+        the application is in Batch mode
+        else the application is default mode(single mode)
+        """
+        self.batch_on = event.enable
     def save_project(self, doc=None):
         """
         return an xml node containing state of the panel
