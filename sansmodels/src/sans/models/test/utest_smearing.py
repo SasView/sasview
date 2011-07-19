@@ -129,6 +129,7 @@ class smear_test_1Dpinhole(unittest.TestCase):
         # smear cal (after first call done above)
         for i in range(1000):
             output = s(input)
+
         # record time taken
         last_call_time = time()-st
         # compare the ratio of ((NIST_answer-SsanView_answer)/NIST_answer)
