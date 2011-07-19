@@ -76,10 +76,10 @@ class Validate2D:
         output_f.write("<q_average> <2d_average> <1d_average>\n")
             
         for i_q in range(1, 30):
-            q = 0.025*i_q
+            q = 0.025 *i_q
             sum = 0.0
             for i_theta in range(npts):
-                theta = 180.0/npts*i_theta
+                theta = 180.0 / npts * i_theta
                 
                 model.setParam(theta_label, theta)
                 
@@ -90,9 +90,9 @@ class Validate2D:
                     sum += math.sin(theta*math.pi/180.0)*model.run([q, 0])
                     #sum += model.run([q, 0])
             
-            value = sum/npts/npts*180.0/2.0
+            value = sum/npts/npts*math.pi/2.0
             ana = model.run(q)
-            if q<0.3 and (value-ana)/ana>0.05:
+            if q<0.25 and (value-ana)/ana>0.05:
                 passed = False
             output_f.write("%10g %10g %10g\n" % (q, value, ana))
             print "Q=%g: %10g %10g %10g %10g" % (q, value, ana, value-ana, value/ana)
@@ -141,7 +141,7 @@ class Validate2D:
             
             value = sum/npts
             ana = model.run(q)
-            if q<0.3 and (value-ana)/ana>0.05:
+            if q<0.25 and (value-ana)/ana>0.05:
                 passed = False
             output_f.write("%10g %10g %10g\n" % (q, value, ana))
             print "Q=%g: %10g %10g %10g %10g" % (q, value, ana, value-ana, value/ana)
@@ -176,9 +176,9 @@ class Validate2D:
                         print "ERROR", q, theta, 180.0 * 2.0 / npts * j
                     sum += math.sin(theta*math.pi/180.0)*model.run([q, 0])
             
-            value = sum/npts/npts*180.0/2.0
+            value = sum/npts/npts*math.pi/2.0
             ana = model.run(q)
-            if q<0.3 and (value-ana)/ana>0.05:
+            if q<0.25 and (value-ana)/ana>0.05:
                 passed = False
             output_f.write("%10g %10g %10g\n" % (q, value, ana))
             print "Q=%g: %10g %10g %10g %10g" % (q, value, ana, value-ana, value/ana)
