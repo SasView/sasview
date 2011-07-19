@@ -101,19 +101,21 @@ class Validate2D:
         from sans.models.CylinderModel import CylinderModel
         
         cyl = CylinderModel()
-        cyl.setParam("cyl_theta", 1.57)
+        cyl.setParam("cyl_theta", 90)
         cyl.setParam("cyl_phi", 0.0)
         cyl.setParam("radius", 20)
         cyl.setParam("length", 400)
-        cyl.setParam("contrast", 1.0e-6)
+        cyl.setParam("sldCyl", 2.0e-6)
+        cyl.setParam("sldSolv", 1.0e-6)
 
         ell = EllipticalCylinderModel()
         ell.setParam("r_ratio", 1.0)
         ell.setParam("r_minor", 20)
-        ell.setParam("cyl_theta", 1.57)
+        ell.setParam("cyl_theta", 90)
         ell.setParam("cyl_phi", 0.0)
         ell.setParam("length", 400)
-        ell.setParam("contrast", 1.0e-6)
+        ell.setParam("sldCyl", 2.0e-6)
+        ell.setParam("sldSolv", 1.0e-6)
         
         passed = True
         for i_q in range(1, 30):
@@ -145,17 +147,20 @@ class Validate2D:
         model = EllipticalCylinderModel()
         model.setParam('r_ratio', 1.0)
         model.setParam("r_minor", 20)
-        model.setParam("cyl_theta", 1.57)
+        model.setParam("cyl_theta", 90)
         model.setParam("cyl_phi", 0.0)
         model.setParam("length", 400)
-        model.setParam("contrast", 1.0e-6)
+        model.setParam("sldEll", 2.0e-6)
+        model.setParam("sldSolv", 1.0e-6)
         
         cyl = CylinderModel()
-        cyl.setParam("cyl_theta", 1.57)
+        cyl.setParam("cyl_theta", 90)
         cyl.setParam("cyl_phi", 0.0)
         cyl.setParam("radius", 20)
         cyl.setParam("length", 400)
-        cyl.setParam("contrast", 1.0e-6)
+        cyl.setParam("sldCyl", 2.0e-6)
+        cyl.setParam("sldSolv", 1.0e-6)
+
         
         output_f = open("average_func.txt",'w')    
         output_f.write("<q_average> <2d_average> <1d_average>\n")
@@ -190,14 +195,14 @@ class Validate2D:
         
         for i_theta in range(npts):
             theta = math.pi/npts*i_theta            
-            model.setParam('cyl_theta', theta)
+            model.setParam('cyl_theta', theta * 180 / math.pi)
             
             for j in range(npts):
-                model.setParam('cyl_phi', math.pi * 2.0 / npts * j)
+                model.setParam('cyl_phi', 180 * 2.0 / npts * j)
                      
                 if str(model.run([q, 0])).count("IN")>0:                        
                     if self.verbose:
-                        print "ERROR", q, theta, math.pi * 2.0 / npts * j
+                        print "ERROR", q, theta, 180 * 2.0 / npts * j
                 else:
                     sum += math.sin(theta)*model.run([q, 0])
         
