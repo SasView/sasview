@@ -73,6 +73,7 @@ from sans.guiframe.gui_style import GUIFRAME_ID
 from sans.guiframe.data_panel import DataPanel
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.gui_toolbar import GUIToolBar
+from sans.guiframe.data_processor import GridFrame
 from sans.guiframe.events import EVT_NEW_BATCH
 from DataLoader.loader import Loader
 
@@ -233,7 +234,9 @@ class ViewerFrame(wx.Frame):
         self._idle_count = 0
         self.schedule_full_draw_list = []
         self.idletimer = wx.CallLater(1, self._onDrawIdle)
-
+        
+        self.batch_frame = GridFrame(parent=self)
+        self.batch_frame.Hide()
         # Check for update
         #self._check_update(None)
         # Register the close event so it calls our own method
@@ -247,6 +250,14 @@ class ViewerFrame(wx.Frame):
         self.Bind(EVT_NEW_BATCH, self.on_batch_selection)
         self.setup_custom_conf()
     
+    def on_set_batch_result(self, data, name):
+        """
+        Display data into a grid in batch mode and show the grid
+        """
+        self.batch_frame.set_data(data)
+        self.batch_frame.Show(True)
+        
+        
     def on_batch_selection(self, event):
         """
         :param event: contains parameter enable . when enable is set to True
@@ -255,7 +266,7 @@ class ViewerFrame(wx.Frame):
         """
         self.batch_on = event.enable
         for plug in self.plugins:
-            plug.set_bacth_selection(self.batch_on)
+            plug.set_batch_selection(self.batch_on)
             
     def setup_custom_conf(self):
         """

@@ -335,6 +335,10 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.rb_single_mode = wx.RadioButton(self, -1, 'Single Mode',
                                              style=wx.RB_GROUP)
         self.rb_batch_mode = wx.RadioButton(self, -1, 'Batch Mode')
+        self.Bind(wx.EVT_RADIOBUTTON, self.on_single_mode,
+                     id=self.rb_single_mode.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self.on_batch_mode,
+                   id=self.rb_batch_mode.GetId())
         
         self.rb_single_mode.SetValue(True)
         self.rb_batch_mode.SetValue(False)

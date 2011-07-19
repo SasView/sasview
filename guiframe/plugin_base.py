@@ -199,7 +199,7 @@ class PluginBase:
         self.parent.set_current_perspective(self)
         self.parent.set_perspective(self.perspective)
         
-    def set_bacth_selection(self, flag):
+    def set_batch_selection(self, flag):
         """
         the plugin to its batch state if flag is True
         """
