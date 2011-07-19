@@ -54,7 +54,7 @@ class Validate2D:
             Perform test and produce output file
             @param model_class: python class of the model to test
         """
-        print "Averaging %s" % model_class.__name__
+        print "Averaging %s: Note; takes loooong time." % model_class.__name__
         passed = True
         
         npts =points
