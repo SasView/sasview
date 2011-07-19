@@ -9,7 +9,8 @@ import math
 import time
 from sans.models.dispersion_models import ArrayDispersion, GaussianDispersion
 from DataLoader.data_info import Data1D
-from sans.guiframe.events import StatusEvent   
+from sans.guiframe.events import StatusEvent 
+from sans.guiframe.events import NewPlotEvent  
 from sans.guiframe.utils import format_number,check_float
 
 (Chi2UpdateEvent, EVT_CHI2_UPDATE)   = wx.lib.newevent.NewEvent()
@@ -40,7 +41,7 @@ class FitPage(BasicPage):
         BasicPage.__init__(self, parent, color=color)
         
         ## draw sizer
-        self._fill_datainfo_sizer()
+        self._fill_data_sizer()
         self.is_2D = None
         self.fit_started = False
         # get smear info from data
@@ -58,7 +59,61 @@ class FitPage(BasicPage):
         self._set_copy_flag(False)
         self._set_paste_flag(False)
         self.btFit.SetFocus()
-  
+        self.fill_data_combobox(data_list=self.data_list)
+    
+    
+    def _fill_data_sizer(self):
+        """
+        fill sizer 0 with data info
+        """
+        box_description= wx.StaticBox(self, -1, 'I(q) Data Source')
+        boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
+        #----------------------------------------------------------
+        sizer_data = wx.BoxSizer(wx.HORIZONTAL)
+        self.dataSource = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        wx.EVT_COMBOBOX(self.dataSource, -1, self.on_select_data)
+        self.dataSource.SetMinSize((_DATA_BOX_WIDTH, -1))
+        sizer_data.Add(wx.StaticText(self, -1, 'Name : '))
+        sizer_data.Add(self.dataSource)
+        sizer_data.Add( (0,5) )
+        boxsizer1.Add(sizer_data,0, wx.ALL, 10)
+        self.sizer0.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
+        self.sizer0.Layout()
+        
+    def enable_datasource(self):
+        """
+        Enable or disable data source control depending on existing data
+        """
+        if not self.data_list:
+            self.dataSource.Disable()
+        else:
+            self.dataSource.Enable()
+            
+    def fill_data_combobox(self, data_list):
+        """
+        Get a list of data and fill the corresponding combobox
+        """
+        self.dataSource.Clear()
+        self.data_list = data_list
+        self.enable_datasource()
+        for data in self.data_list:
+            if data is not None:
+                self.dataSource.Append(str(data.name), clientData=data)
+        self.dataSource.SetSelection(0)
+        self.on_select_data(event=None)
+                
+    def on_select_data(self, event=None):
+        """
+        """
+        if event is None and self.dataSource.GetCount() > 0:
+            data = self.dataSource.GetClientData(0)
+            self.set_data(data)
+        elif self.dataSource.GetCount() > 0:
+            pos = self.dataSource.GetSelection()
+            data = self.dataSource.GetClientData(pos)
+            self.set_data(data)
+    
+    
         
     def _on_fit_complete(self):
         """
@@ -292,7 +347,7 @@ class FitPage(BasicPage):
         sizer_smearer_box.Add(self.sizer_set_smearer)       
         sizer_chi2.Add(sizer_smearer_box)
         sizer_chi2.Add((-1,5))
-
+        
         # hide all smear messages and textctrl
         self._hide_all_smear_info()
         
@@ -385,67 +440,6 @@ class FitPage(BasicPage):
         self.sizer5.Add(boxsizer_range,0, wx.EXPAND | wx.ALL, 10)
         self.sizer5.Layout()
 
-    def _fill_datainfo_sizer(self):
-        """
-        fill sizer 0 with data info
-        """
-        ## no loaded data , don't fill the sizer
-        if self.data is None:
-            data_min = ""
-            data_max = ""
-            data_name = " None"
-        else:
-            data_name = self.data.name
-            #set maximum range for x in linear scale
-            if not hasattr(self.data,"data"): #Display only for 1D data fit
-                # Minimum value of data   
-                data_min = min(self.data.x)
-                # Maximum value of data  
-                data_max = max(self.data.x)
-            else:
-                ## Minimum value of data 
-                data_min = 0
-                x = max(math.fabs(self.data.xmin), math.fabs(self.data.xmax)) 
-                y = max(math.fabs(self.data.ymin), math.fabs(self.data.ymax))
-                ## Maximum value of data  
-                data_max = math.sqrt(x*x + y*y)
-            ## set q range to plot
-            self.qmin_x = data_min
-            self.qmax_x = data_max
-        box_description= wx.StaticBox(self, -1, 'I(q) Data Source')
-        boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
-        #----------------------------------------------------------
-        sizer_data = wx.BoxSizer(wx.HORIZONTAL)
-        #Filling the sizer containing data related fields
-        #self.dataSource = wx.StaticText(self, -1,str(self.data.name))
-        self.dataSource = BGTextCtrl(self, -1)
-        self.dataSource.SetValue(str(data_name))
-        #self.dataSource.SetEditable(False)
-        self.dataSource.SetMinSize((_DATA_BOX_WIDTH, -1))
-        sizer_data.Add(wx.StaticText(self, -1, 'Name : '))
-        sizer_data.Add(self.dataSource )
-        sizer_data.Add( (0,5) )
-        """
-        #---------sizer 2 draw--------------------------------
-        text4_3 = wx.StaticText(self, -1, 'Total Q Range (1/A)',
-                                 style=wx.ALIGN_LEFT)
-        sizer_range = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_range.Add( text4_3 ,0, wx.RIGHT, 10)
-        self.minimum_q = BGTextCtrl(self, -1, size=(_BOX_WIDTH,20))
-        self.minimum_q.SetValue(str(data_min))
-        self.maximum_q = BGTextCtrl(self, -1,size=(_BOX_WIDTH,20))
-        self.maximum_q.SetValue(str(data_max))
-        sizer_range.Add(wx.StaticText(self, -1, "Min: "),0, wx.LEFT, 10)
-        sizer_range.Add(self.minimum_q,0, wx.LEFT, 10)
-        sizer_range.Add(wx.StaticText(self, -1, "Max: "),0, wx.LEFT, 10)
-        sizer_range.Add(self.maximum_q,0, wx.LEFT, 10)
-        """
-        boxsizer1.Add(sizer_data,0, wx.ALL, 10)
-        #boxsizer1.Add(sizer_range, 0 , wx.LEFT, 10)
-        #------------------------------------------------------------
-        
-        self.sizer0.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
-        self.sizer0.Layout()
        
     def _fill_model_sizer(self, sizer):
         """
@@ -1635,12 +1629,16 @@ class FitPage(BasicPage):
         """
         reset the current data 
         """
+        id = None
+        group_id = None
         flag = False
         if self.data is None and data is not None:
-            self.window_name = str(data.name)
-            ## Title to appear on top of the window
-            self.window_caption = str(data.name)
             flag = True
+        if data is not None:
+            id = data.id
+            group_id = data.group_id
+            if self.data is not None:
+                flag = (data.id != self.data.id)
         self.data = data
         if self.data is None:
             data_min = ""
@@ -1726,6 +1724,17 @@ class FitPage(BasicPage):
                 self.model_view.SetLabel("1D Mode")
                 
             self.model_view.Disable()
+            
+            #replace data plot on combo box selection
+            #by removing the previous selected data
+            wx.PostEvent(self._manager.parent, NewPlotEvent(action="remove",
+                                                    group_id=group_id, id=id))
+            #plot the current selected data
+            wx.PostEvent(self._manager.parent, NewPlotEvent(plot=self.data, 
+                                                           title=str(self.data.title)))
+            self._manager.store_data(uid=self.uid, data=data,
+                                     data_list=self.data_list,
+                                      caption=self.window_name)
             self._draw_model()
     
     def _npts_click(self, event):

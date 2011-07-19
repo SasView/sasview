@@ -2,6 +2,15 @@
 import sys
 from data_util.calcthread import CalcThread
 
+def map_getattr(classInstance, classFunc, *args):
+    """
+    Take an instance of a class and a function name as a string.
+    Execute class.function and return result
+    """
+    return  getattr(classInstance,classFunc)(*args)
+
+def map_apply(arguments):
+    return apply(arguments[0], arguments[1:])
 
 class FitThread(CalcThread):
     """Thread performing the fit """
@@ -44,12 +53,33 @@ class FitThread(CalcThread):
         Perform a fit 
         """
         msg = ""
-        try: 
+        try:
+            list_handler = []
+            list_curr_thread = [] 
+            list_ftol = []
+            list_map_get_attr = []
+            list_fit_function = []
+            list_q = []
+            for i in range(len(self.fitter)):
+                list_handler.append(None)
+                list_q.append(None)
+                list_curr_thread.append(None)
+                list_ftol.append(self.ftol)
+                list_fit_function.append('fit')
+                list_map_get_attr.append(map_getattr)
+            from multiprocessing import Pool
+            inputs = zip(list_map_get_attr,self.fitter, list_fit_function, list_handler, list_q, list_curr_thread,list_ftol)
+            print inputs
+            result =  Pool(1).map(func=map_apply, 
+                               iterable=inputs)
             #self.handler.starting_fit()
             #Result from the fit
-            result = self.fitter.fit(handler=self.handler, 
-                                     curr_thread=self,
-                                     ftol=self.ftol)
+            """
+                result = self.fitter.fit(handler=self.handler, 
+                                         curr_thread=self,
+                                         ftol=self.ftol)
+            """
+            print "fithread result", result
             self.complete(result= result,
                           page_id=self.page_id,
                           pars = self.pars)

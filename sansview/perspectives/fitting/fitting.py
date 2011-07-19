@@ -33,10 +33,10 @@ from sans.guiframe.events import EVT_SLICER_PARS_UPDATE
 from sans.guiframe.gui_style import GUIFRAME_ID
 from sans.guiframe.plugin_base import PluginBase 
 
-#from .console import ConsoleUpdate
+from .console import ConsoleUpdate
 from .fitproblem import FitProblem
 from .fitpanel import FitPanel
-#from .fit_thread import FitThread
+from .fit_thread import FitThread
 from .pagestate import Reader
 from .fitpage import Chi2UpdateEvent
 
@@ -106,6 +106,15 @@ class Plugin(PluginBase):
         self.page_finder = {}
         # Log startup
         logging.info("Fitting plug-in started") 
+        
+    def on_batch_selection(self, flag):
+        """
+        switch the the notebook of batch mode or not
+        """
+        self.batch_on = flag
+        if self.batch_on:
+            if self.fit_panel is not None:
+                self.fit_panel.batch_on = flag
         
     def populate_menu(self, owner):
         """
@@ -274,23 +283,24 @@ class Plugin(PluginBase):
         if data_list is None:
             data_list = []
         selected_data_list = []
-        if len(data_list) > MAX_NBR_DATA :
-            from fitting_widgets import DataDialog
-            dlg = DataDialog(data_list=data_list, nb_data=MAX_NBR_DATA)
-            if dlg.ShowModal() == wx.ID_OK:
-                selected_data_list = dlg.get_data()
-            dlg.Destroy()
-            
+        if self.batch_on:
+            page = self.add_fit_page(data=data_list)
         else:
-            selected_data_list = data_list
-        try:
-            for data in selected_data_list:
-                page = self.add_fit_page(data=data)
-                wx.PostEvent(self.parent, NewPlotEvent(plot=data, 
-                                                       title=str(data.title)))
-        except:
-            msg = "Fitting Set_data: " + str(sys.exc_value)
-            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
+            if len(data_list) > MAX_NBR_DATA:
+                from fitting_widgets import DataDialog
+                dlg = DataDialog(data_list=data_list, nb_data=MAX_NBR_DATA)
+                if dlg.ShowModal() == wx.ID_OK:
+                    selected_data_list = dlg.get_data()
+                dlg.Destroy()
+                
+            else:
+                selected_data_list = data_list
+            try:
+                for data in selected_data_list:
+                    page = self.add_fit_page(data=[data])
+            except:
+                msg = "Fitting Set_data: " + str(sys.exc_value)
+                wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
     
     def set_top_panel(self):
         """
@@ -370,9 +380,11 @@ class Plugin(PluginBase):
                 self.parent.add_data(data_list={data.id:data})
                 wx.PostEvent(self.parent, NewPlotEvent(plot=data,
                                         title=data.title))
-                page = self.add_fit_page(data)
+                page = self.add_fit_page([data])
                 caption = page.window_name
-                self.store_data(page=page.uid, data=data, caption=caption)
+                self.store_data(uid=page.uid, data=page.get_data(),
+                        data_list=page.get_data_list(), 
+                        caption=page.window_name)
                 self.mypanels.append(page) 
                 
             # get ready for the next set_state
@@ -601,32 +613,28 @@ class Plugin(PluginBase):
     def onFit(self, uid=None):
         """
         perform fit 
-        
-        : param type: uid for single fit, None for simultaneous fit
         """
-        from sans.fit.Fitting import Fit
-        from .fit_thread import FitThread
-        from .console import ConsoleUpdate
         ##  count the number of fitproblem schedule to fit 
-        #if uid == None or self._fit_engine == "park":
         fitproblem_count = 0
         for value in self.page_finder.values():
             if value.get_scheduled() == 1:
                 fitproblem_count += 1
                 
         ## if simultaneous fit change automatically the engine to park
-        # scipy can not handle two thread running at the same time
-        if fitproblem_count > 1 or len(self.fit_thread_list)>0:
+        if fitproblem_count > 1:
             self._on_change_engine(engine='park')
             
         self.fitproblem_count = fitproblem_count  
-
+          
+        from sans.fit.Fitting import Fit
         fitter = Fit(self._fit_engine)
+        
         if self._fit_engine == "park":
             engineType = "Simultaneous Fit"
         else:
             engineType = "Single Fit"
             
+        fitter_list = []
         fproblemId = 0
         self.current_pg = None
         list_page_id = []
@@ -654,6 +662,7 @@ class Plugin(PluginBase):
                     #Set Engine  (model , data) related to the page on 
                     self._fit_helper(value=value, pars=pars,
                                      fitter=fitter,
+                                     fitter_list=fitter_list,
                                       fitproblem_id=fproblemId,
                                       title=engineType) 
                     list_page_id.append(page_id)
@@ -678,10 +687,10 @@ class Plugin(PluginBase):
         
         self._mac_sleep(0.2)
         ## perform single fit
-        
         if fitproblem_count == 1:
+            print "fitter_list", fitter_list
             calc_fit = FitThread(handler = handler,
-                                    fn=fitter,
+                                    fn=fitter_list,
                                     pars=pars,
                                     page_id=list_page_id,
                                     completefn=self._single_fit_completed,
@@ -690,18 +699,18 @@ class Plugin(PluginBase):
             current_page_id = self.sim_page.uid
             ## Perform more than 1 fit at the time
             calc_fit = FitThread(handler=handler,
-                                    fn=fitter,
+                                    fn=fitter_list,
                                     page_id=list_page_id,
                                     updatefn=handler.update_fit,
                                     completefn=self._simul_fit_completed,
                                     ftol=self.ftol)
-
         self.fit_thread_list[current_page_id] = calc_fit
-        self._mac_sleep(0.2)
-        
-        #self.ready_fit(calc_fit=calc_fit)
         calc_fit.queue()
-            
+        msg = "Fitting is in progress..."
+        wx.PostEvent( self.parent, StatusEvent(status=msg, type="progress" ))
+        
+        self.ready_fit(calc_fit=calc_fit)
+        
     def ready_fit(self, calc_fit):
         """
         Ready for another fit
@@ -729,17 +738,20 @@ class Plugin(PluginBase):
                                                    group_id=group_id,
                                                    action='remove'))
            
-    def store_data(self, uid, data=None, caption=None):
+    def store_data(self, uid, data=None, data_list=None, caption=None):
         """
         Helper to save page reference into the plug-in
         
         :param page: page to store
         
         """
+        if data_list is None:
+            data_list = []
         #create a fitproblem storing all link to data,model,page creation
         if not uid in self.page_finder.keys():
             self.page_finder[uid] = FitProblem()
         self.page_finder[uid].set_fit_data(data)
+        self.page_finder[uid].set_fit_data_list(data_list)
         self.page_finder[uid].set_fit_tab_caption(caption)
         
     def on_add_new_page(self, event=None):
@@ -777,6 +789,7 @@ class Plugin(PluginBase):
         #if theory already plotted
         if page.uid in self.page_finder:
             theory_data = self.page_finder[page.uid].get_theory_data()
+            data = page.get_data()
             if issubclass(data.__class__, Data2D):
                 data.group_id = wx.NewId()
                 if theory_data is not None:
@@ -794,7 +807,9 @@ class Plugin(PluginBase):
                                                action="delete"))
                     self.parent.update_data(prev_data=theory_data, new_data=data)   
               
-        self.store_data(uid=page.uid, data=data, caption=page.window_name)
+        self.store_data(uid=page.uid, data=page.get_data(),
+                        data_list=page.get_data_list(), 
+                        caption=page.window_name)
         if self.sim_page is not None:
             self.sim_page.draw_page()
         return page
@@ -874,44 +889,65 @@ class Plugin(PluginBase):
         else:
             self.page_finder[uid].schedule_tofit(value)
                 
-    def _fit_helper(self, pars, value, fitproblem_id,fitter, title="Single Fit " ):
+    def _fit_setter(self, data, value, fitter, fit_id, pars):
         """
-        helper for fitting
         """
-        metadata = value.get_fit_data()
         model = value.get_model()
         smearer = value.get_smearer()
         qmin, qmax = value.get_range()
-        self.fit_id = fitproblem_id
+        #Extra list of parameters and their constraints
+        listOfConstraint = []
+        
+        param = value.get_model_param()
+        if len(param) > 0:
+            for item in param:
+                ## check if constraint
+                if item[0] != None and item[1] != None:
+                    listOfConstraint.append((item[0],item[1]))
+               
+        #Do the single fit
+        fitter.set_model(deepcopy(model), fit_id,
+                               pars, constraints=listOfConstraint)
+        
+        fitter.set_data(data=data, id=fit_id,
+                             smearer=smearer, qmin=qmin, qmax=qmax)
+       
+        fitter.select_problem_for_fit(id=fit_id, value=1)
+        value.clear_model_param()
+            
+            
+    def _fit_helper(self, pars, value, fitproblem_id, fitter_list,
+                    fitter=None, title="Single Fit " ):
+        """
+        helper for fitting
+        """
+        from sans.fit.Fitting import Fit
+        self.fit_id = 0
+        data_list = value.get_fit_data_list()
+        pointer_to_fitproblem = value.get_pointer_to_fitproblem()
         #Create list of parameters for fitting used
         templist = []
-       
-        try:
-            #Extra list of parameters and their constraints
-            listOfConstraint = []
+        for single_data in data_list:
+            fitter = Fit(self._fit_engine)
+            try:
+                if single_data.id in pointer_to_fitproblem:
+                     new_value = self.page_finder[pointer_to_fitproblem[single_data.id]]
+                     self._fit_setter(data=single_data, value=new_value, 
+                                     fitter=fitter,
+                                     pars=pars,
+                                      fit_id=self.fit_id)
+                else:
+                    self._fit_setter(data=single_data, value=value, 
+                                     fitter=fitter,
+                                     pars=pars,
+                                      fit_id=self.fit_id)
+            except:
+                raise
+                #msg = title + " error: %s" % sys.exc_value
+                #wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
+            fitter_list.append(fitter)
+            self.fit_id += 1
             
-            param = value.get_model_param()
-            if len(param) > 0:
-                for item in param:
-                    ## check if constraint
-                    if item[0] != None and item[1] != None:
-                        listOfConstraint.append((item[0],item[1]))
-                   
-            #Do the single fit
-            fitter.set_model(model, self.fit_id,
-                                   pars, constraints=listOfConstraint)
-            
-            fitter.set_data(data=metadata, id=self.fit_id,
-                                 smearer=smearer, qmin=qmin, qmax=qmax)
-           
-            fitter.select_problem_for_fit(id=self.fit_id,
-                                               value=value.get_scheduled())
-            value.clear_model_param()
-        except:
-            raise
-            #msg = title + " error: %s" % sys.exc_value
-            #wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
-          
     def _onSelect(self,event):
         """ 
         when Select data to fit a new page is created .Its reference is 
@@ -924,17 +960,41 @@ class Plugin(PluginBase):
                 data_id = self.panel.graph.selected_plottable
                 if plottable == self.panel.plots[data_id]:
                     data = plottable
-                    self.add_fit_page(data=data)
+                    self.add_fit_page(data=[data])
                     return
             else:
                 data = plottable
-                self.add_fit_page(data=data)
+                self.add_fit_page(data=[data])
         self.set_top_panel()
             
     def update_fit(self, result=None, msg=""):
         """
         """
         print "update_fit result", result
+        
+    def _batch_single_fit_complete_helper(self,result, pars, page_id, elapsed=None):
+        """
+        Fit result are display in batch mode
+        """
+        self._update_fit_button(page_id)
+        msg = "Single Fitting complete "
+        wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
+                                                      type="stop"))
+        if self.batch_on:
+            batch_result = {"Chi2":[]}
+            for index  in range(len(pars)):
+                    batch_result[pars[index]] = []
+                    batch_result["error on %s" % pars[index]] = []
+            for res in result:
+                batch_result["Chi2"].append(res.fitness)
+                for index  in range(len(pars)):
+                    batch_result[pars[index]].append(res.pvec[index])
+                    batch_result["error on %s" % pars[index]].append(res.stderr[index])
+              
+            pid = page_id[0]
+            self.page_finder[pid].set_result(result=batch_result)      
+            self.parent.on_set_batch_result(data=batch_result, name=self.sub_menu)
+            
         
     def _single_fit_completed(self, result, pars, page_id, elapsed=None):
         """
@@ -949,63 +1009,68 @@ class Plugin(PluginBase):
         """  
         self._mac_sleep(0.2)
         if page_id[0] in self.fit_thread_list.keys():
-            del self.fit_thread_list[page_id[0]]  
-        try:
-            if result == None:
-                self._update_fit_button(page_id)
-                msg= "Single Fitting did not converge!!!"
-                wx.PostEvent(self.parent, 
-                             StatusEvent(status=msg, 
-                                         info="warning",
-                                         type="stop"))
-                return
-            if not numpy.isfinite(result.fitness) or \
-                    numpy.any(result.pvec == None) or \
-                    not numpy.all(numpy.isfinite(result.pvec)):
-                msg = "Single Fitting did not converge!!!"
-                wx.PostEvent(self.parent, 
-                             StatusEvent(status=msg, 
-                                         info="warning",
-                                         type="stop"))
-                self._update_fit_button(page_id)
-                return
-            
-            for uid in page_id:
-                value = self.page_finder[uid]   
-                model = value.get_model()
-                page_id = uid
-                    
-                param_name = []
-                for name in pars:
-                    param_name.append(name)
-   
-                cpage = self.fit_panel.get_page_by_id(uid)
-                # Make sure we got all results (CallAfter is important to MAC)
-                wx.CallAfter(cpage.onsetValues, result.fitness, 
-                                  param_name, result.pvec, result.stderr)
-                cpage._on_fit_complete()
-            if result.stderr == None:
-                msg = "Fit Abort: "
-            else:
-                msg = "Fitting: "
-            msg += "Completed!!!"
-            wx.PostEvent(self.parent, StatusEvent(status=msg))
-            return
-        except ValueError:
-            self._update_fit_button(page_id)
-            msg = "Single Fitting did not converge!!!"
-            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
-                                                  type="stop"))
-            return  
-        except:
-            self._update_fit_button(page_id)
-            msg = "Single Fit completed but Following"
-            msg += " error occurred:%s" % sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
-                                                  type="stop"))
-            raise
-            return
+            del self.fit_thread_list[page_id[0]] 
+        if self.batch_on:
+            wx.CallAfter(self._batch_single_fit_complete_helper, result, pars, page_id, elapsed=None)
+            return 
+        else:  
+            try:
+                result = result[0]
+                if result == None:
+                    self._update_fit_button(page_id)
+                    msg= "Single Fitting did not converge!!!"
+                    wx.PostEvent(self.parent, 
+                                 StatusEvent(status=msg, 
+                                             info="warning",
+                                             type="stop"))
+                    return
+                if not numpy.isfinite(result.fitness) or \
+                        numpy.any(result.pvec == None) or \
+                        not numpy.all(numpy.isfinite(result.pvec)):
+                    msg = "Single Fitting did not converge!!!"
+                    wx.PostEvent(self.parent, 
+                                 StatusEvent(status=msg, 
+                                             info="warning",
+                                             type="stop"))
+                    self._update_fit_button(page_id)
+                    return
+                
+                for uid in page_id:
+                    value = self.page_finder[uid]   
+                    model = value.get_model()
+                    page_id = uid
+                        
+                    param_name = []
+                    for name in pars:
+                        param_name.append(name)
        
+                    cpage = self.fit_panel.get_page_by_id(uid)
+                    # Make sure we got all results (CallAfter is important to MAC)
+                    wx.CallAfter(cpage.onsetValues, result.fitness, 
+                                      param_name, result.pvec, result.stderr)
+                    cpage._on_fit_complete()
+                if result.stderr == None:
+                    msg = "Fit Abort: "
+                else:
+                    msg = "Fitting: "
+                msg += "Completed!!!"
+                wx.PostEvent(self.parent, StatusEvent(status=msg))
+                return
+            except ValueError:
+                self._update_fit_button(page_id)
+                msg = "Single Fitting did not converge!!!"
+                wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
+                                                      type="stop"))
+                return  
+            except:
+                self._update_fit_button(page_id)
+                msg = "Single Fit completed but Following"
+                msg += " error occurred:%s" % sys.exc_value
+                wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
+                                                      type="stop"))
+                raise
+                return
+           
     def _simul_fit_completed(self, result, page_id,pars=None, elapsed=None):
         """
         Parameter estimation completed, 

@@ -12,6 +12,10 @@ class FitProblem:
         """
         ## data used for fitting
         self.fit_data = None
+        #list of data  in case of batch mode
+        self.data_list = []
+        #dictionary of data id and location to corresponding fitproblem
+        self.fitproblem_pointers = {}
         self.theory_data = None
         ## the current model
         self.model = None
@@ -27,6 +31,7 @@ class FitProblem:
         ## fitting range
         self.qmin = None
         self.qmax = None
+        self.result = []
         
         # 1D or 2D
         self.enable2D = False
@@ -142,6 +147,20 @@ class FitProblem:
         """
         return self.fit_data
     
+    def set_fit_data_list(self, data_list):
+        """ 
+        save a copy of a list of data
+        
+        :param data_list: list of data
+        
+        """
+        self.data_list = data_list
+            
+    def get_fit_data_list(self):
+        """
+        """
+        return self.data_list
+    
     def set_model_param(self,name,value=None):
         """ 
         Store the name and value of a parameter of this fitproblem's model
@@ -204,4 +223,28 @@ class FitProblem:
         """
         """
         return self.enable2D
+    
+    def get_pointer_to_fitproblem(self):
+        """
+        return dictionary of id of fitproblem
+        """
+        return self.fitproblem_pointers
+    
+    def set_pointer_to_fitproblem(self, data_id, page_id):
+        """
+        """
+        self.fitproblem_pointers[data_id] = page_id
+        
+    def set_result(self, result):
+        """
+        set a list of result
+        """
+        self.result = result
+        
+    def get_result(self):
+        """
+        get result 
+        """
+        return self.result
+        
    

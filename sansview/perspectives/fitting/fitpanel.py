@@ -53,6 +53,10 @@ class FitPanel(nb, PanelBase):
         self.fit_page_name = {}
         ## list of existing fit page
         self.opened_pages = {}
+        #index of fit page
+        self.fit_page_index = 0
+        #index of batch page
+        self.batch_page_index = 0
         #page of simultaneous fit 
         self.sim_page = None
         self.fit_engine_type = "scipy"
@@ -308,14 +312,22 @@ class FitPanel(nb, PanelBase):
         """
         add an empty page
         """
-        from fitpage import FitPage
-        panel = FitPage(parent=self)
+        if self.batch_on:
+            from batchfitpage import BatchFitPage
+            panel = BatchFitPage(parent=self)
+            #Increment index of batch page
+            self.batch_page_index += 1
+            index = self.batch_page_index
+        else:
+            from fitpage import FitPage
+            panel = FitPage(parent=self)
+            #Increment index of fit page
+            self.fit_page_index += 1
+            index = self.fit_page_index
         panel.uid = wx.NewId()
         panel.populate_box(dict=self.model_list_box)
         panel.set_manager(self._manager)
-        index = self.GetPageCount()
-        #caption = str(panel.window_name) + " " + str(self._manager.index_model)
-        caption = str(panel.window_name) + " " + str(index)
+        caption = str(panel.window_caption) + " " + str(index)
         self.AddPage(panel, caption, select=True)
         self.opened_pages[panel.uid] = panel
         self.set_engine_helper(panel=panel)
@@ -359,7 +371,7 @@ class FitPanel(nb, PanelBase):
             if self.GetPageCount()== 0:
                 self._manager.on_add_new_page(event=None)
         
-    def set_data(self, data):
+    def set_data(self, data_list):
         """ 
         Add a fitting page on the notebook contained by fitpanel
         
@@ -368,32 +380,49 @@ class FitPanel(nb, PanelBase):
         :return panel : page just added for further used. is used by fitting module
         
         """
-        if data is None:
+        if not data_list:
             return None
+        
+        if self.batch_on:
+            page = self.add_empty_page()
+            print  "batch on fitpanel", page.__class__.__name__, page.window_caption
+            pos = self.GetPageIndex(page)
+            page.fill_data_combobox(data_list)
+            self.opened_pages[page.uid] = page
+            return page
+        else:
+            data = None
+            data = data_list[0]
+            if data is None:
+                return None
         for page in self.opened_pages.values():
             #check if the selected data existing in the fitpanel
             pos = self.GetPageIndex(page)
             if page.get_data() is None:
+                #make sure data get placed in 1D empty tab if data is 1D
+                #else data get place on 2D tab empty tab
                 enable2D = page.get_view_mode()
                 if (data.__class__.__name__ == "Data2D" and enable2D)\
                 or (data.__class__.__name__ == "Data1D" and not enable2D):
-                    page.set_data(data)
+                    #page.set_data(data)
+                    page.fill_data_combobox(data_list)
                     self.SetPageText(pos, str(data.name))
                     self.SetSelection(pos)
                     return page
-            # Todo: Need to set different window name when has same data
-            # Todo: to catch page with same data even if it is not on the top.
-            """
-            elif page.get_data().id == data.id:
-                msg = "Data already existing in the fitting panel"
-                wx.PostEvent(self._manager.parent, 
-                             StatusEvent(status=msg, info='warning')) 
-                self.SetSelection(pos)
-                return page
-            """
+                # Todo: Need to set different window name when has same data
+                # Todo: to catch page with same data even if it is not on the top.
+                """
+                elif page.get_data().id == data.id:
+                    msg = "Data already existing in the fitting panel"
+                    wx.PostEvent(self._manager.parent, 
+                                 StatusEvent(status=msg, info='warning')) 
+                    self.SetSelection(pos)
+                    return page
+                """
         page = self.add_empty_page()
         pos = self.GetPageIndex(page)
-        page.set_data(data)
+        page.fill_data_combobox(data_list)
+        #page.set_data(data)
         self.SetPageText(pos, str(data.name))
         self.opened_pages[page.uid] = page
         
@@ -446,7 +475,10 @@ class FitPanel(nb, PanelBase):
         if selected_page == self.sim_page :
             self._manager.sim_page=None 
             return
-        
+        if selected_page.__class__.__name__ == "FitPage":
+            self.fit_page_index -= 1
+        else:
+            self.batch_page_index -= 1
         ## closing other pages
         state = selected_page.createMemento()
         page_name = selected_page.window_name

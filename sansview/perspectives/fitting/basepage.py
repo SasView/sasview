@@ -63,6 +63,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.model = None
         ## data
         self.data = None
+        #list of available data
+        self.data_list = []
         self.mask = None
         self.uid = None
         ## Q range
@@ -363,11 +365,18 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         """
         return self.state
+    
     def get_data(self):
         """
         return the current data 
         """
         return self.data  
+    
+    def get_data_list(self):
+        """
+        return the current data 
+        """
+        return self.data_list  
     
     def set_manager(self, manager):
         """
