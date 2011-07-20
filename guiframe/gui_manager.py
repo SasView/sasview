@@ -1782,7 +1782,7 @@ class ViewerFrame(wx.Frame):
                     wx.MessageBox(msg, 'Error')
             else:
                 try:
-                    command = "open"
+                    command = "open "
                     command += path
                     os.system(command)
                 except:
