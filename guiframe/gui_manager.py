@@ -944,6 +944,12 @@ class ViewerFrame(wx.Frame):
                 id = wx.NewId()
                 self._help_menu.Append(id,'&%s Help' % item.sub_menu, '')
                 wx.EVT_MENU(self, id, item.help)
+        if config._do_tutorial:
+            self._help_menu.AppendSeparator()
+            id = wx.NewId()
+            self._help_menu.Append(id,'&Tutorial', 'Software tutorial')
+            wx.EVT_MENU(self, id, self._onTutorial)
+            
         if config._do_aboutbox:
             self._help_menu.AppendSeparator()
             id = wx.NewId()
@@ -1752,8 +1758,33 @@ class ViewerFrame(wx.Frame):
         if config._do_aboutbox:
             import aboutbox 
             dialog = aboutbox.DialogAbout(None, -1, "")
-            dialog.ShowModal()            
-            
+            dialog.ShowModal()   
+                     
+    def _onTutorial(self, evt):
+        """
+        Pop up the tutorial dialog
+        
+        :param evt: menu event
+        
+        """
+        if config._do_tutorial:
+            try:
+                #if IS_WIN:
+                import pdfview 
+                path = config.TUTORIAL_PATH
+                dialog = pdfview.PDFFrame(None, -1, "Tutorial", path)
+                #self.SetTopWindow(dialog)
+                dialog.Show(True) 
+                #else:
+                #    command = "open"
+                #    command += path
+                #    os.system(command)
+            except:
+                msg = "This feature requires 'Adobe Acrobat pdf Reader'\n"
+                msg += "Please install it first (Free from Adobe)..."
+                wx.MessageBox(msg, 'Error')
+                #wx.PostEvent(self, StatusEvent(status=msg, info="error"))
+                      
     def set_manager(self, manager):
         """
         Sets the application manager for this frame

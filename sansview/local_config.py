@@ -22,7 +22,8 @@ __EVT_DEBUG_2_FILE__   = False
 __EVT_DEBUG_FILENAME__ = "debug.log"
 
 # About box info
-_do_aboutbox=True
+_do_aboutbox = True
+_do_tutorial = True
 _acknowledgement =  \
 '''This software was developed by the University of Tennessee as part of the
 Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
@@ -60,6 +61,7 @@ PLOPANEL_HEIGTH = 370
 DATAPANEL_WIDTH = 235
 DATAPANEL_HEIGHT = 700
 SPLASH_SCREEN_PATH = os.path.join("images","SVwelcome_mini.png")
+TUTORIAL_PATH = os.path.join("media","sansview_tutorial.pdf")
 DEFAULT_STYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.MANAGER_ON\
                     |GUIFRAME.CALCULATOR_ON|GUIFRAME.TOOLBAR_ON
 SPLASH_SCREEN_WIDTH = 512

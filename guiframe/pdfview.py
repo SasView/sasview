@@ -1,0 +1,116 @@
+# Read PDF files by embeding the Adobe Acrobat Reader
+# wx.activex module uses class ActiveX control
+
+import  wx
+if wx.Platform == '__WXMSW__':
+    from wx.lib.pdfwin import PDFWindow
+
+class PDFPanel(wx.Panel):
+    """
+    Panel that contains the pdf reader
+    """
+    def __init__(self, parent, path=None):
+        """
+        """
+        wx.Panel.__init__(self, parent, id=-1)
+        
+        self.parent = parent
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        btnSizer = wx.BoxSizer(wx.HORIZONTAL)
+        
+        self.pdf = PDFWindow(self, style=wx.SUNKEN_BORDER)
+        
+        sizer.Add(self.pdf, proportion=1, flag=wx.EXPAND)
+        
+        btn = wx.Button(self, wx.NewId(), "Open PDF File")
+        self.Bind(wx.EVT_BUTTON, self.OnOpenButton, btn)
+        btnSizer.Add(btn, proportion=1, flag=wx.EXPAND|wx.ALL, border=5)
+
+        self.pdf.LoadFile(path)
+        btn = wx.Button(self, wx.NewId(), "Previous Page")
+        self.Bind(wx.EVT_BUTTON, self.OnPrevPageButton, btn)
+        btnSizer.Add(btn, proportion=1, flag=wx.EXPAND|wx.ALL, border=5)
+
+        btn = wx.Button(self, wx.NewId(), "Next Page")
+        self.Bind(wx.EVT_BUTTON, self.OnNextPageButton, btn)
+        btnSizer.Add(btn, proportion=1, flag=wx.EXPAND|wx.ALL, border=5)
+        
+        btn = wx.Button(self, wx.NewId(), "Close")
+        self.Bind(wx.EVT_BUTTON, self.OnClose, btn)
+        btnSizer.Add(btn, proportion=1, flag=wx.EXPAND|wx.ALL, border=5)
+        btnSizer.Add((50,-1), proportion=2, flag=wx.EXPAND)
+        sizer.Add(btnSizer, proportion=0, flag=wx.EXPAND)
+
+        self.SetSizer(sizer)
+        self.SetAutoLayout(True)
+        
+    def OnOpenButton(self, event):
+        """
+        Open file button
+        """
+        # make sure you have PDF files available on your drive
+        dlg = wx.FileDialog(self, wildcard="*.pdf")
+        if dlg.ShowModal() == wx.ID_OK:
+            wx.BeginBusyCursor()
+            self.pdf.LoadFile(dlg.GetPath())
+
+            wx.EndBusyCursor()
+        dlg.Destroy()
+        
+    def OnLoad(self, event=None, path=None):
+        """
+        Load a pdf file
+        
+        : Param path: full path to the file
+        """
+        self.pdf.LoadFile(path)
+
+        
+    def OnPrevPageButton(self, event):
+        """
+        Goes to Previous page
+        """
+        self.pdf.gotoPreviousPage()
+
+    def OnNextPageButton(self, event):
+        """
+        Goes to Next page
+        """
+        self.pdf.gotoNextPage()
+        
+    def OnClose(self, event):
+        """
+        Close panel
+        """
+        self.parent.Destroy()
+
+class PDFFrame(wx.Frame):
+    """
+    Frame for PDF panel
+    """
+    def __init__(self, parent, id, title, path):
+        """
+        Init
+        
+        :param parent: parent panel/container
+        :param path: full path of the pdf file 
+        """
+        # Initialize the Frame object
+        wx.Frame.__init__(self, parent, id, title,
+                          wx.DefaultPosition, wx.Size(600, 830))
+        # make an instance of the class
+        PDFPanel(self, path) 
+        
+class ViewApp(wx.App):
+    def OnInit(self):
+        path = None
+        frame = PDFFrame(None, -1, "PDFView", path=path)  
+         
+        frame.Show(True)
+        #self.SetTopWindow(frame)
+        
+        return True
+               
+if __name__ == "__main__": 
+    app = ViewApp(0)
+    app.MainLoop()     
