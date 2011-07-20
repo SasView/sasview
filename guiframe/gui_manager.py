@@ -19,6 +19,7 @@ import xml
 
 # Try to find a local config
 import imp
+DATAPATH = os.getcwd()
 tem_path = sys.path[0]
 if os.path.isfile(tem_path):
     tem_path = os.path.dirname(tem_path)
@@ -2613,7 +2614,9 @@ class ViewApp(wx.App):
                 app_exe = app_base + '.exe'
                 app_app = app_base + '.app'
                 if basename.lower() in [app_py, app_exe, app_app, app_base]:
-                    input_file = sys.argv[1]
+                    data_base = sys.argv[1]
+                    input_file = os.path.normpath(os.path.join(DATAPATH, 
+                                                               data_base))
         if input_file is None:
             return
         if self.frame is not None:
