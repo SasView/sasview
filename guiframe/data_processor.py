@@ -105,144 +105,15 @@ class Notebook(nb, PanelBase):
         self.parent = parent
         self.manager = manager
         self.data = data
-        self.grid = GridPage(self, panel=self.parent)
-        self.AddPage(self.grid, "Batch")
-        self.grid.SetFocus()
         
     def set_data(self, data):
         if data is None:
-            data = {}
-        pos = self.GetSelection()
-        if pos != -1:
-            selected_page = self.GetPage(pos)
-            selected_page.set_data(data)  
             return
-        if  len(data) > 0:
-            self.data = data
-            self.col_names = data.keys()
-            self.col_names.sort() 
-            self._cols = len(self.data.keys()) 
-            self._rows = max([len(v) for v in self.data.values()]) 
-            selected_page.SetNumberRows(int(self._rows))
-            selected_page.SetNumberCols(int(self._cols))
-            for index  in range(len(self.col_names)):
-                self.SetColLabelValue(index, str(self.col_names[index]))
-        return
-        
-        if  len(data) > 0:
-            self.data = data
-            self.col_names = data.keys()
-            self.col_names.sort() 
-            self._cols = len(self.data.keys()) 
-            self._rows = max([len(v) for v in self.data.values()]) 
-            for index in xrange(self._rows):
-                self.row_names.append( str(index))
-                self.AppendRows(index)  
-                self.SetColLabelValue(index)
-         
-            #AppendCols(self, numCols, updateLabels)
-            #SetColLabelValue(int col, const wxString& value)
-            #AppendRows(self, numRows, updateLabels)    
-       
-
-class TableBase(Grid.PyGridTableBase):
-    """
-     grid receiving dictionary data structure as input
-    """
-    def __init__(self, data=None):
-        """data is a dictionary of key=column_name , value list of row value.
-        
-        :Note: the value stored in the list will be append to the grid in the same order .
-        :example:data = {col_1:[value1, value2], col_2:[value11, value22]}
-        +--------++--------++--------+
-        | Index  | col_1    | col2   |
-        +--------++--------++--------+
-        | Index1 | value1  | value2  |
-        +--------++--------++--------+
-        | Index2 | value11  | value22|
-        +--------++--------++--------+
-        """
-        # The base class must be initialized *first*
-        Grid.PyGridTableBase.__init__(self)
-        self.data = {}
-        self._rows = 0
-        self._cols = 0
-        self.col_names = []
-        self.row_names = []
-        
-        if data is None:
-            data = {}
-        self.set_data(data)
-        
-    def set_data(self, data):
-        if  len(data) > 0:
-            self.data = data
-            self.col_names = data.keys()
-            self.col_names.sort() 
-            self._cols = len(self.data.keys()) 
-            self._rows = max([len(v) for v in self.data.values()]) 
-            for index in xrange(self._rows):
-                self.row_names.append( str(index))
-         
-    
-          
-    def GetNumberCols(self):
-        return self._cols
-
-    def GetNumberRows(self):
-        return self._rows
-
-    def GetColLabelValue(self, col):
-        if len(self.col_names) > col:
-            return self.col_names[col]
-        
-    def GetRowLabelValue(self, row):
-        if len(self.row_names) > row:
-            return self.row_names[row]
-
-    def GetValue(self, row, col):
-        pos = int(row)
-        if len(self.data[self.col_names[col]]) > pos:
-            return str(self.data[self.col_names[col]][pos])
-
-    def GetRawValue(self, row, col):
-        pos = int(row)
-        if len(self.data[self.col_names[col]]) > pos:
-            return self.data[self.col_names[col]][row]
-
-    def SetValue(self, row, col, value):
-        if len(self.data) == 0:
-            return
-        pos = int(row)
-        if len(self.data[self.col_names[col]]) > pos:
-            self.data[self.col_names[col]][row] = value
             
-    def getRaw(self, row):
-        pos = int(row)
-        row_value = []
-        for col in xrange(self.data.values()):
-            if len(col) < pos:
-                row_value.append(None)
-            else:
-                row_value.append(col[pos])
-        return row_value
-            
-
-class Table(Grid.Grid):
-    def __init__(self, parent, data=None):
-        """
-        """
-        Grid.Grid.__init__(self, parent, -1)
-        self._table = TableBase(data=data)
-        self.SetTable(self._table)
-        self.Bind(Grid.EVT_GRID_LABEL_RIGHT_CLICK, self.on_context_menu)
-        
-    def on_context_menu(self, event):
-        row, col = event.GetRow(), event.GetCol()
-        print "right click", row, col
-        
-    def set_data(self, data):
-        self._table.set_data(data)
+        grid = GridPage(self, panel=self.parent)
+        grid.set_data(data)  
+        self.AddPage(grid, "Batch")
+     
         
 class SPanel(ScrolledPanel):
     def __init__(self, parent, *args, **kwds):
