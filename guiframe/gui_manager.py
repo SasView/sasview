@@ -1767,23 +1767,29 @@ class ViewerFrame(wx.Frame):
         :param evt: menu event
         
         """
-        if config._do_tutorial:
-            try:
-                #if IS_WIN:
-                import pdfview 
-                path = config.TUTORIAL_PATH
-                dialog = pdfview.PDFFrame(None, -1, "Tutorial", path)
-                #self.SetTopWindow(dialog)
-                dialog.Show(True) 
-                #else:
-                #    command = "open"
-                #    command += path
-                #    os.system(command)
-            except:
-                msg = "This feature requires 'Adobe Acrobat pdf Reader'\n"
-                msg += "Please install it first (Free from Adobe)..."
-                wx.MessageBox(msg, 'Error')
-                #wx.PostEvent(self, StatusEvent(status=msg, info="error"))
+        if config._do_tutorial:   
+            path = config.TUTORIAL_PATH
+            if IS_WIN:
+                try:
+                    import pdfview 
+                    
+                    dialog = pdfview.PDFFrame(None, -1, "Tutorial", path)
+                    #self.SetTopWindow(dialog)
+                    dialog.Show(True) 
+                except:
+                    msg = "This feature requires 'Adobe Acrobat pdf Reader'\n"
+                    msg += "Please install it first (Free from Adobe)..."
+                    wx.MessageBox(msg, 'Error')
+            else:
+                try:
+                    command = "open"
+                    command += path
+                    os.system(command)
+                except:
+                    msg = "This feature requires 'Preview' Application\n"
+                    msg += "Please install it first..."
+                    wx.MessageBox(msg, 'Error')
+
                       
     def set_manager(self, manager):
         """
