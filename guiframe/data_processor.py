@@ -380,11 +380,22 @@ class GridFrame(wx.Frame):
         menubar.Append(edit, "&New column")
         self.SetMenuBar(menubar)
         wx.EVT_MENU(self, id_col, self.on_add_column)
+        self.Bind(wx.EVT_CLOSE, self.on_close)
 
         
+    def on_close(self, event):
+        """
+        """
+        self.Hide()
+        
     def on_add_column(self, event):
+        """
+        """
         self.panel.add_column()
+        
     def set_data(self, data):
+        """
+        """
         self.panel.set_data(data)
       
       
