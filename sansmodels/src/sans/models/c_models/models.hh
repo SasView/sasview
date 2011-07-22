@@ -561,6 +561,29 @@ public:
 };
 
 
+class PearlNecklaceModel{
+public:
+	// Model parameters
+	Parameter scale;
+	Parameter radius;
+	Parameter edge_separation;
+	Parameter thick_string;
+	Parameter num_pearls;
+	Parameter sld_pearl;
+	Parameter sld_string;
+	Parameter sld_solv;
+	Parameter background;
+
+	// Constructor
+	PearlNecklaceModel();
+
+	// Operators to get I(Q)
+	double operator()(double q);
+	double operator()(double qx, double qy);
+	double calculate_ER();
+	double evaluate_rphi(double q, double phi);
+};
+
 class FCCrystalModel{
 public:
 	// Model parameters
