@@ -3,8 +3,8 @@
 
 int factorial(int i);
 
-double Si(double x, int nmax );
+double Si(double x);
 
-double sin_x(double x);
+double sinc(double x);
 
 #endif

@@ -20,8 +20,8 @@ PearlNecklaceModel :: PearlNecklaceModel() {
 	num_pearls = Parameter(3);
 	num_pearls.set_min(0.0);
 	sld_pearl = Parameter(1.0e-06);
-	sld_string = Parameter(5.0e-06);
-	sld_solv = Parameter(0.5e-06);
+	sld_string = Parameter(1.0e-06);
+	sld_solv = Parameter(6.3e-06);
     background = Parameter(0.0);
 
 }

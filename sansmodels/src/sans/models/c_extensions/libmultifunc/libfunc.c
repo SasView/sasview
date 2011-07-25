@@ -1,3 +1,4 @@
+// by jcho
 #include <math.h>
 #include "libmultifunc/libfunc.h"
 #include <stdio.h>
@@ -18,15 +19,27 @@ int factorial(int i)
 }
 
 // Used in pearl nec model
-//integral of sin(x)/x up to namx term nmax>10 looks fine.
-double Si(double x, int nmax )
+// Sine integral function: approximated within 1%!!!
+// integral of sin(x)/x up to namx term nmax=6 looks the best.
+double Si(double x)
 {
 	int i;
+	int nmax=6;
 	double out;
 	long double power;
-	if (x > 5.0){
-		double pi = 4.0*atan(1.0);
-		return pi/2.0;
+	double pi = 4.0*atan(1.0);
+	if (x >= pi*6.2/4.0){
+
+		double out_sin = 0.0;
+		double out_cos = 0.0;
+		out = pi/2.0;
+		for (i=0; i<nmax-2; i+=1){
+			out_cos += pow(-1.0, i) * (double)factorial(2*i) / pow(x, 2*i+1);
+			out_sin += pow(-1.0, i) * (double)factorial(2*i+1) / pow(x, 2*i+2);
+		}
+		out -= cos(x) * out_cos;
+		out -= sin(x) * out_sin;
+		return out;
 	}
 	out = 0.0;
 	for (i=0; i<nmax; i+=1)
@@ -42,7 +55,7 @@ double Si(double x, int nmax )
 	return out;
 }
 
-double sin_x(double x)
+double sinc(double x)
 {
 	if (x==0){
 		return 1.0;

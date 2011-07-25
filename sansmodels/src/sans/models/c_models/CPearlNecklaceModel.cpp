@@ -92,12 +92,12 @@ CPearlNecklaceModel_init(CPearlNecklaceModel *self, PyObject *args, PyObject *kw
         PyDict_SetItemString(self->params,"num_pearls",Py_BuildValue("d",3.000000000000));
         PyDict_SetItemString(self->params,"scale",Py_BuildValue("d",1.000000000000));
         PyDict_SetItemString(self->params,"thick_string",Py_BuildValue("d",2.500000000000));
-        PyDict_SetItemString(self->params,"sld_string",Py_BuildValue("d",0.000005000000));
+        PyDict_SetItemString(self->params,"sld_string",Py_BuildValue("d",0.000001000000));
         PyDict_SetItemString(self->params,"edge_separation",Py_BuildValue("d",350.000000000000));
         PyDict_SetItemString(self->params,"sld_pearl",Py_BuildValue("d",0.000001000000));
         PyDict_SetItemString(self->params,"radius",Py_BuildValue("d",80.000000000000));
         PyDict_SetItemString(self->params,"background",Py_BuildValue("d",0.000000000000));
-        PyDict_SetItemString(self->params,"sld_solv",Py_BuildValue("d",0.000000500000));
+        PyDict_SetItemString(self->params,"sld_solv",Py_BuildValue("d",0.000006300000));
         // Initialize dispersion / averaging parameter dict
         DispersionVisitor* visitor = new DispersionVisitor();
         PyObject * disp_dict;

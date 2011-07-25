@@ -46,8 +46,8 @@ class PearlNecklaceModel(CPearlNecklaceModel, BaseComponent):
          thick_string    = 2.5 [A]
          num_pearls      = 3.0 
          sld_pearl       = 1e-006 [1/A^(2)]
-         sld_string      = 5e-006 [1/A^(2)]
-         sld_solv        = 5e-007 [1/A^(2)]
+         sld_string      = 1e-006 [1/A^(2)]
+         sld_solv        = 6.3e-006 [1/A^(2)]
          background      = 0.0 
 
     """

@@ -52,11 +52,11 @@ double pearl_necklace_kernel(double dp[], double q) {
 
 	// Note take only 20 terms in Si series: 10 terms may be enough though.
 	double gamma;
-	gamma = Si(q* edge_separation, 6);
+	gamma = Si(q* edge_separation);
 	gamma /= (q* edge_separation);
 	double beta;
-	beta = Si(q * (edge_separation + radius), 6);
-	beta -= Si(q * radius, 6);
+	beta = Si(q * (edge_separation + radius));
+	beta -= Si(q * radius);
 	beta /= (q* edge_separation);
 
 	//form factors
@@ -67,26 +67,26 @@ double pearl_necklace_kernel(double dp[], double q) {
 	double A_s = edge_separation + 2.0 * radius;
 
 	// form factor for num_pearls
-	sss = 1.0 - pow(sin_x(q*A_s), (int)num_pearls );
-	sss /= pow((1.0-sin_x(q*A_s)), 2);
-	sss *= sin_x(q*A_s);
+	sss = 1.0 - pow(sinc(q*A_s), num_pearls );
+	sss /= pow((1.0-sinc(q*A_s)), 2);
+	sss *= -sinc(q*A_s);
 	sss -= num_pearls/2.0;
-	sss += num_pearls/(1.0-sin_x(q*A_s));
+	sss += num_pearls/(1.0-sinc(q*A_s));
 	sss *= 2.0 * pow((m_s*psi), 2);
 
 	// form factor for num_strings (like thin rods)
 	double srr_1;
-	srr_1 = -pow(sin_x(q*edge_separation/2.0), 2);
-	//printf ("sss %g, %g, %g\n",sss, srr_1, gamma);
+	srr_1 = -pow(sinc(q*edge_separation/2.0), 2);
+
 	srr_1 += 2.0 * gamma;
 	srr_1 *= num_strings;
 	double srr_2;
-	srr_2 = 2.0/(1.0-sin_x(q*A_s));
+	srr_2 = 2.0/(1.0-sinc(q*A_s));
 	srr_2 *= num_strings;
 	srr_2 *= pow(beta, 2);
 	double srr_3;
-	srr_3 = 1.0 - pow(sin_x(q*A_s), (int)num_strings);
-	srr_3 /= pow((1.0-sin_x(q*A_s)), 2);
+	srr_3 = 1.0 - pow(sinc(q*A_s), num_strings);
+	srr_3 /= pow((1.0-sinc(q*A_s)), 2);
 	srr_3 *= pow(beta, 2);
 	srr_3 *= -2.0;
 
@@ -95,11 +95,11 @@ double pearl_necklace_kernel(double dp[], double q) {
 	srr *= pow(m_r, 2);
 
 	// form factor for correlations
-	srs = -1.0;
-	srs -= pow(sin_x(q*A_s), (int)num_strings);
-	srs /= pow((1.0-sin_x(q*A_s)), 2);
-	srs *= sin_x(q*A_s);
-	srs += (num_strings/(1.0-sin_x(q*A_s)));
+	srs = 1.0;
+	srs -= pow(sinc(q*A_s), num_strings);
+	srs /= pow((1.0-sinc(q*A_s)), 2);
+	srs *= -sinc(q*A_s);
+	srs += (num_strings/(1.0-sinc(q*A_s)));
 	srs *= 4.0;
 	srs *= (m_r * m_s * beta * psi);
 
@@ -110,7 +110,6 @@ double pearl_necklace_kernel(double dp[], double q) {
 	// scale and background
 	form_factor *= scale;
 	form_factor += background;
-
     return (form_factor);
 }
 

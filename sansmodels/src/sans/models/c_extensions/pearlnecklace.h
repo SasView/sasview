@@ -43,10 +43,10 @@ typedef struct {
 	//  [DEFAULT]=sld_pearl= 1.0e-06 [1/A^(2)]
 	double sld_pearl;
 	///	sld_string
-	//  [DEFAULT]=sld_string= 5.0e-06 [1/A^(2)]
+	//  [DEFAULT]=sld_string= 1.0e-06 [1/A^(2)]
 	double sld_string;
 	///	sld_solv
-	//  [DEFAULT]=sld_solv= 0.5e-06 [1/A^(2)]
+	//  [DEFAULT]=sld_solv= 6.3e-06 [1/A^(2)]
 	double sld_solv;
 	/// Background
 	//  [DEFAULT]=background=0
