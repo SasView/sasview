@@ -109,6 +109,7 @@ SansView 1.9.2Dev_JUN
 			* scipy >= 0.7.2
 			* wxpython 2.8.11 unicode(WIN), 2.8.12.0(MAC)
 			* lxml >= 2.2.2
+			* comtypes (for PDF window)
 			* PIL (Python Image Library)
 			* Pyparsing (apply for bundling)
 			* periodictable = 1.3.0 (using 'easy_install periodictable')
