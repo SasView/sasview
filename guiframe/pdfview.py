@@ -2,6 +2,7 @@
 # wx.activex module uses class ActiveX control
 
 import  wx
+import os
 if wx.Platform == '__WXMSW__':
     from wx.lib.pdfwin import PDFWindow
 
@@ -15,6 +16,7 @@ class PDFPanel(wx.Panel):
         wx.Panel.__init__(self, parent, id=-1)
         
         self.parent = parent
+        self.path = path
         sizer = wx.BoxSizer(wx.VERTICAL)
         btnSizer = wx.BoxSizer(wx.HORIZONTAL)
         
@@ -26,7 +28,7 @@ class PDFPanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self.OnOpenButton, btn)
         btnSizer.Add(btn, proportion=1, flag=wx.EXPAND|wx.ALL, border=5)
 
-        self.pdf.LoadFile(path)
+        self.pdf.LoadFile(self.path)
         btn = wx.Button(self, wx.NewId(), "Previous Page")
         self.Bind(wx.EVT_BUTTON, self.OnPrevPageButton, btn)
         btnSizer.Add(btn, proportion=1, flag=wx.EXPAND|wx.ALL, border=5)
@@ -50,10 +52,12 @@ class PDFPanel(wx.Panel):
         """
         # make sure you have PDF files available on your drive
         dlg = wx.FileDialog(self, wildcard="*.pdf")
+        dlg.SetDirectory(os.path.dirname(self.path))
         if dlg.ShowModal() == wx.ID_OK:
             wx.BeginBusyCursor()
-            self.pdf.LoadFile(dlg.GetPath())
-
+            file = dlg.GetPath()
+            self.pdf.LoadFile(file)
+            self.parent.SetTitle(os.path.basename(file.split('.')[0]))
             wx.EndBusyCursor()
         dlg.Destroy()
         

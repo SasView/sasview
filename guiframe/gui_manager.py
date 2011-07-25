@@ -1772,9 +1772,9 @@ class ViewerFrame(wx.Frame):
             path = config.TUTORIAL_PATH
             if IS_WIN:
                 try:
-                    import pdfview 
+                    from sans.guiframe.pdfview import PDFFrame
                     
-                    dialog = pdfview.PDFFrame(None, -1, "Tutorial", path)
+                    dialog = PDFFrame(None, -1, "Tutorial", path)
                     #self.SetTopWindow(dialog)
                     dialog.Show(True) 
                 except:

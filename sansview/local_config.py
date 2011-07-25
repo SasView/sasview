@@ -61,7 +61,7 @@ PLOPANEL_HEIGTH = 370
 DATAPANEL_WIDTH = 235
 DATAPANEL_HEIGHT = 700
 SPLASH_SCREEN_PATH = os.path.join("images","SVwelcome_mini.png")
-TUTORIAL_PATH = os.path.join("media","sansview_tutorial.pdf")
+TUTORIAL_PATH = os.path.join("media","Tutorial.pdf")
 DEFAULT_STYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.MANAGER_ON\
                     |GUIFRAME.CALCULATOR_ON|GUIFRAME.TOOLBAR_ON
 SPLASH_SCREEN_WIDTH = 512
