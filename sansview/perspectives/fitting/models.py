@@ -241,7 +241,7 @@ class ModelManagerBase:
         
         from sans.models.PearlNecklaceModel import PearlNecklaceModel
         self.shape_list.append(PearlNecklaceModel)
-        self.multiplication_factor.append(PearlNecklaceModel)
+        #self.multiplication_factor.append(PearlNecklaceModel)
                          
         from sans.models.SphericalSLDModel import SphericalSLDModel
         self.shape_list.append(SphericalSLDModel)
