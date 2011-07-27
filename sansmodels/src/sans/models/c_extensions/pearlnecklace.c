@@ -1,5 +1,5 @@
 /**
- * spheresld model
+ * pearl necklace model
  */
 #include <math.h>
 #include "pearlnecklace.h"

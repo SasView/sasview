@@ -16,7 +16,7 @@
  //				sld_solv: the SLD of the solvent
  //				num_pearls: number of the pearls
  //				radius: the radius of a pearl
- //				edge_separation: the length of sring segment; surface to surface
+ //				edge_separation: the length of string segment; surface to surface
  //				thick_string: thickness (ie, diameter) of the string
  //		</text>
  //[FIXED]=  <text>radius.width; edge_separation.width</text>
