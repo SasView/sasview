@@ -57,7 +57,7 @@ double Si(double x)
 
 double sinc(double x)
 {
-	if (x==0){
+	if (x==0.0){
 		return 1.0;
 	}
 	return sin(x)/x;
