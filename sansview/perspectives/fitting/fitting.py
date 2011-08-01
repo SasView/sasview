@@ -347,12 +347,15 @@ class Plugin(PluginBase):
 
     def  on_set_state_helper(self,event=None):
         """
-        Set_state_helper. This actually sets state after plotting data from state file.
+        Set_state_helper. This actually sets state 
+        after plotting data from state file.
         
-        : event: FitStateUpdateEvent called by dataloader.plot_data from guiframe
+        : event: FitStateUpdateEvent called 
+            by dataloader.plot_data from guiframe
         """
         if len(self.temp_state) == 0:
-            if self.state_index==0 and len(self.mypanels) <= 0 and self.sfile_ext =='.svs':
+            if self.state_index==0 and len(self.mypanels) <= 0 \
+            and self.sfile_ext =='.svs':
                 self.fit_panel.add_default_pages()
                 self.temp_state = []
                 self.state_index = 0
@@ -440,7 +443,8 @@ class Plugin(PluginBase):
         """
         Used by simfitpage.py to reset a parameter given the string constrainst.
          
-        :param modelname: the name ot the model for with the parameter has to reset
+        :param modelname: the name ot the model for with the parameter 
+                            has to reset
         :param value: can be a string in this case.
         :param names: the paramter name
          
@@ -797,7 +801,8 @@ class Plugin(PluginBase):
                     wx.PostEvent(self.parent, 
                              NewPlotEvent(group_id=group_id,
                                                action="delete"))
-                    self.parent.update_data(prev_data=theory_data, new_data=data)      
+                    self.parent.update_data(prev_data=theory_data,
+                                             new_data=data)      
             else:
                 if theory_data is not None:
                     group_id = str(page.uid) + " Model2D"
@@ -805,7 +810,8 @@ class Plugin(PluginBase):
                     wx.PostEvent(self.parent, 
                              NewPlotEvent(group_id=group_id,
                                                action="delete"))
-                    self.parent.update_data(prev_data=theory_data, new_data=data)   
+                    self.parent.update_data(prev_data=theory_data,
+                                             new_data=data)   
               
         self.store_data(uid=page.uid, data=page.get_data(),
                         data_list=page.get_data_list(), 
@@ -823,7 +829,8 @@ class Plugin(PluginBase):
             and panel_name to find the slicer 's panel concerned.
         """
         for item in self.parent.panels:
-            if self.parent.panels[item].window_caption.startswith(event.panel_name):
+            name = event.panel_name
+            if self.parent.panels[item].window_caption.startswith(name):
                 self.parent.panels[item].set_slicer(event.type, event.params)
                 
         self.parent._mgr.Update()
@@ -931,8 +938,8 @@ class Plugin(PluginBase):
             fitter = Fit(self._fit_engine)
             try:
                 if single_data.id in pointer_to_fitproblem:
-                     new_value = self.page_finder[pointer_to_fitproblem[single_data.id]]
-                     self._fit_setter(data=single_data, value=new_value, 
+                     v = self.page_finder[pointer_to_fitproblem[single_data.id]]
+                     self._fit_setter(data=single_data, value=v, 
                                      fitter=fitter,
                                      pars=pars,
                                       fit_id=self.fit_id)
@@ -972,7 +979,8 @@ class Plugin(PluginBase):
         """
         print "update_fit result", result
         
-    def _batch_single_fit_complete_helper(self,result, pars, page_id, elapsed=None):
+    def _batch_single_fit_complete_helper(self,result, pars, page_id, 
+                                          elapsed=None):
         """
         Fit result are display in batch mode
         """
@@ -989,11 +997,13 @@ class Plugin(PluginBase):
                 batch_result["Chi2"].append(res.fitness)
                 for index  in range(len(pars)):
                     batch_result[pars[index]].append(res.pvec[index])
-                    batch_result["error on %s" % pars[index]].append(res.stderr[index])
+                    item = res.stderr[index]
+                    batch_result["error on %s" % pars[index]].append(item)
               
             pid = page_id[0]
             self.page_finder[pid].set_result(result=batch_result)      
-            self.parent.on_set_batch_result(data=batch_result, name=self.sub_menu)
+            self.parent.on_set_batch_result(data=batch_result, 
+                                            name=self.sub_menu)
             
         
     def _single_fit_completed(self, result, pars, page_id, elapsed=None):
@@ -1011,7 +1021,8 @@ class Plugin(PluginBase):
         if page_id[0] in self.fit_thread_list.keys():
             del self.fit_thread_list[page_id[0]] 
         if self.batch_on:
-            wx.CallAfter(self._batch_single_fit_complete_helper, result, pars, page_id, elapsed=None)
+            wx.CallAfter(self._batch_single_fit_complete_helper,
+                          result, pars, page_id, elapsed=None)
             return 
         else:  
             try:
@@ -1045,7 +1056,8 @@ class Plugin(PluginBase):
                         param_name.append(name)
        
                     cpage = self.fit_panel.get_page_by_id(uid)
-                    # Make sure we got all results (CallAfter is important to MAC)
+                    # Make sure we got all results 
+                    #(CallAfter is important to MAC)
                     wx.CallAfter(cpage.onsetValues, result.fitness, 
                                       param_name, result.pvec, result.stderr)
                     cpage._on_fit_complete()
