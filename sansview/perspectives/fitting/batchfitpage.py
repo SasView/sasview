@@ -141,7 +141,7 @@ class BatchFitPage(FitPage):
         sizer_smearer.Add( self.slit_smearer ) 
         sizer_smearer.Add((10,10))  
         """     
-        
+        """
         # StaticText for chi2, N(for fitting), Npts
         self.tcChi    =  BGTextCtrl(self, -1, "-", size=(75,20), style=0)
         self.tcChi.SetToolTipString("Chi2/Npts(Fit)")
@@ -154,28 +154,32 @@ class BatchFitPage(FitPage):
         self.Npts_total.SetValue(format_number(self.npts_x))
         self.Npts_total.SetToolTipString(\
                                 " Total Npts : total number of data points")
-        
+        """
         # Update and Draw button
         self.draw_button = wx.Button(self,wx.NewId(),'Compute', size=(88,24))
         self.draw_button.Bind(wx.EVT_BUTTON, \
                               self._onDraw,id= self.draw_button.GetId())
         self.draw_button.SetToolTipString("Compute and Draw.")
-        
+        """
         box_description_1= wx.StaticText(self, -1,'    Chi2/Npts')
         box_description_2= wx.StaticText(self, -1,'Npts(Fit)')
         box_description_3= wx.StaticText(self, -1,'Total Npts')
         box_description_3.SetToolTipString( \
                                 " Total Npts : total number of data points")
         #box_description_4= wx.StaticText(self, -1,' ')
+        """
         
-        
+        """
         sizer_fit.Add(box_description_1,0,0)
         sizer_fit.Add(box_description_2,0,0)
-        sizer_fit.Add(box_description_3,0,0)       
+        sizer_fit.Add(box_description_3,0,0)  
+        """     
         sizer_fit.Add(self.draw_button,0,0)
+        """
         sizer_fit.Add(self.tcChi,0,0)
         sizer_fit.Add(self.Npts_fit ,0,0)
         sizer_fit.Add(self.Npts_total,0,0)
+        """
         sizer_fit.Add(self.btFit,0,0) 
         """
         self.smear_description_none    =  wx.StaticText(self, -1, smear_message_none , style=wx.ALIGN_LEFT)
@@ -571,10 +575,12 @@ class BatchFitPage(FitPage):
                 data_min = min(self.data.x)
                 # Maximum value of data  
                 data_max = max(self.data.x)
+                """
                 #number of total data points
                 self.Npts_total.SetValue(str(len(self.data.x)))
                 #default:number of data points selected to fit
                 self.Npts_fit.SetValue(str(len(self.data.x)))
+                """
                 self.btEditMask.Disable()  
                 self.EditMask_title.Disable()
             else:
@@ -585,18 +591,22 @@ class BatchFitPage(FitPage):
                 y = max(math.fabs(self.data.ymin), math.fabs(self.data.ymax))
                 ## Maximum value of data  
                 data_max = math.sqrt(x*x + y*y)
+                """
                 #number of total data points
                 self.Npts_total.SetValue(str(len(self.data.data)))
                 #default:number of data points selected to fit
                 self.Npts_fit.SetValue(str(len(self.data.data)))
+                """
                 self.btEditMask.Enable()  
                 self.EditMask_title.Enable() 
+        """
         self.Npts_total.SetEditable(False)
         self.Npts_total.SetBackgroundColour(\
                                     self.GetParent().GetBackgroundColour())
         
         self.Npts_total.Bind(wx.EVT_MOUSE_EVENTS, self._npts_click)
         #self.Npts_total.Disable()
+        """
         self.dataSource.SetValue(data_name)
         self.qmin_x = data_min
         self.qmax_x = data_max
@@ -624,8 +634,11 @@ class BatchFitPage(FitPage):
             
             #replace data plot on combo box selection
             #by removing the previous selected data
-            wx.PostEvent(self._manager.parent, NewPlotEvent(action="remove",
-                                                    group_id=group_id, id=id))
+            #wx.PostEvent(self._manager.parent, NewPlotEvent(action="remove",
+            #                                        group_id=group_id, id=id))
+            wx.PostEvent(self._manager.parent, 
+                             NewPlotEvent(group_id=group_id,
+                                               action="delete"))
             #plot the current selected data
             wx.PostEvent(self._manager.parent, NewPlotEvent(plot=self.data, 
                                                            title=str(self.data.title)))

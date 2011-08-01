@@ -312,6 +312,7 @@ class FitPanel(nb, PanelBase):
         """
         add an empty page
         """
+        """
         if self.batch_on:
             from batchfitpage import BatchFitPage
             panel = BatchFitPage(parent=self)
@@ -319,11 +320,12 @@ class FitPanel(nb, PanelBase):
             self.batch_page_index += 1
             index = self.batch_page_index
         else:
-            from fitpage import FitPage
-            panel = FitPage(parent=self)
-            #Increment index of fit page
-            self.fit_page_index += 1
-            index = self.fit_page_index
+        """
+        from fitpage import FitPage
+        panel = FitPage(parent=self)
+        #Increment index of fit page
+        self.fit_page_index += 1
+        index = self.fit_page_index
         panel.uid = wx.NewId()
         panel.populate_box(dict=self.model_list_box)
         panel.set_manager(self._manager)
@@ -341,12 +343,14 @@ class FitPanel(nb, PanelBase):
         """
         if self.GetPageCount() <= 1:
             style = self.GetWindowStyleFlag() 
-            if style & wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB == wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB:
+            flag = wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB
+            if style & wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB == flag:
                 style = style & ~wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB
                 self.SetWindowStyle(style)
         else:
             style = self.GetWindowStyleFlag()
-            if style & wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB != wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB:
+            flag = wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB
+            if style & wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB != flag:
                 style |= wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB
                 self.SetWindowStyle(style)
             
@@ -371,25 +375,72 @@ class FitPanel(nb, PanelBase):
             if self.GetPageCount()== 0:
                 self._manager.on_add_new_page(event=None)
         
+    def set_data_on_batch_mode(self, data_list):
+        """
+        Add all data to a single tab when the application is on Batch mode.
+        However all data in the set of data must be either 1D or 2D type. 
+        This method presents option to select the data type before creating a 
+        tab. 
+        """
+        data_1d_list = []
+        data_2d_list = []
+        for data in data_list:
+            if data.__class__.__name__ == "Data1D":
+                data_1d_list.append(data)
+            if data.__class__.__name__ == "Data2D":
+                data_2d_list.append(data)
+        page = None
+        for p in self.opened_pages.values():
+            #check if the selected data existing in the fitpanel
+            pos = self.GetPageIndex(page)
+            if p.get_data() is None:
+                page = p
+                break
+               
+        if data_1d_list and data_2d_list:
+            # need to warning the user that this batch is a special case
+            from .fitting_widgets import BatchDataDialog
+            dlg = BatchDataDialog(self)
+            if dlg.ShowModal() == wx.ID_OK:
+                data_type = dlg.get_data()
+                dlg.Destroy()
+                if page  is None:
+                    page = self.add_empty_page()
+                if data_type == 1:
+                    #user has selected only data1D
+                    page.fill_data_combobox(data_1d_list)
+                elif data_type == 2:
+                    page.fill_data_combobox(data_2d_list)
+            else:
+                #the batch analysis is canceled
+                 dlg.Destroy()
+                 return None
+        else:
+            if page is None:
+                page = self.add_empty_page()
+            if data_1d_list and not data_2d_list:
+                #only on type of data 
+                page.fill_data_combobox(data_1d_list)
+            elif not data_1d_list and data_2d_list:
+                page.fill_data_combobox(data_2d_list)
+            
+        self.opened_pages[page.uid] = page
+        return page
+    
     def set_data(self, data_list):
         """ 
         Add a fitting page on the notebook contained by fitpanel
         
         :param data: data to fit
         
-        :return panel : page just added for further used. is used by fitting module
+        :return panel : page just added for further used. 
+        is used by fitting module
         
         """
         if not data_list:
             return None
-        
         if self.batch_on:
-            page = self.add_empty_page()
-            print  "batch on fitpanel", page.__class__.__name__, page.window_caption
-            pos = self.GetPageIndex(page)
-            page.fill_data_combobox(data_list)
-            self.opened_pages[page.uid] = page
-            return page
+           return self.set_data_on_batch_mode(data_list)
         else:
             data = None
             data = data_list[0]

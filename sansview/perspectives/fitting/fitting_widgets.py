@@ -17,6 +17,70 @@ WIDTH = 400
 HEIGHT = 300
 MAX_NBR_DATA = 4
 
+class BatchDataDialog(wx.Dialog):
+    """
+    The current design of Batch  fit allows only of type of data in the data
+    set. This allows the user to make a quick selection of the type of data
+    to use in fit tab.
+    """
+    def __init__(self, parent=None,  *args, **kwds):
+        wx.Dialog.__init__(self, parent, *args, **kwds)
+        self.SetSize((WIDTH, 250))
+        self.data_1d_selected = None
+        self.data_2d_selected = None
+        self._do_layout()
+   
+    def _do_layout(self):
+        """
+        Draw the content of the current dialog window
+        """
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        box_description= wx.StaticBox(self, -1,str("Hint"))
+        hint_sizer = wx.StaticBoxSizer(box_description, wx.VERTICAL)
+        selection_sizer = wx.GridBagSizer(5,5)
+        button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.data_1d_selected = wx.RadioButton(self, -1, 'Data1D',
+                                                style=wx.RB_GROUP)
+        self.data_2d_selected  = wx.RadioButton(self, -1, 'Data2D')
+        self.data_1d_selected.SetValue(True)
+        self.data_2d_selected.SetValue(False)
+        button_cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
+        button_OK = wx.Button(self, wx.ID_OK, "Ok")
+        button_OK.SetFocus()
+        hint = "Selected Data set contains both 1D and 2D Data.\n"
+        hint += "Please select on type of analysis before proceeding.\n"
+        hint_sizer.Add(wx.StaticText(self, -1, hint))
+        #draw area containing radio buttons
+        ix = 0
+        iy = 0
+        selection_sizer.Add(self.data_1d_selected, (iy, ix),
+                           (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        iy += 1
+        selection_sizer.Add(self.data_2d_selected, (iy, ix),
+                           (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        #contruction the sizer contaning button
+        button_sizer.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        button_sizer.Add(button_cancel, 0,
+                          wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+        button_sizer.Add(button_OK, 0,
+                                wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+        vbox.Add(hint_sizer,  0, wx.EXPAND|wx.ALL, 10)
+        vbox.Add(selection_sizer, 0, wx.TOP|wx.BOTTOM, 10)
+        vbox.Add(wx.StaticLine(self, -1),  0, wx.EXPAND, 0)
+        vbox.Add(button_sizer, 0 , wx.TOP|wx.BOTTOM, 10)
+        self.SetSizer(vbox)
+        
+    def get_data(self):
+        """
+        return 1 if  user requested Data1D , 2 if user requested Data2D
+        """
+        if self.data_1d_selected.GetValue():
+            return 1
+        else:
+            return 2
+
+
+
 class DataDialog(wx.Dialog):
     """
     Allow file selection at loading time

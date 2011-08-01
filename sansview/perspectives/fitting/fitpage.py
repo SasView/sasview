@@ -1279,7 +1279,8 @@ class FitPage(BasicPage):
                     if len(index_data[index_data]) < 10:
                         msg = "Cannot Plot :No or too little npts in"
                         msg += " that data range!!!  "
-                        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                        wx.PostEvent(self.parent.parent, 
+                                     StatusEvent(status=msg))
                         return
                     else:
                         self.data.mask = index_data
@@ -1731,7 +1732,7 @@ class FitPage(BasicPage):
                                                     group_id=group_id, id=id))
             #plot the current selected data
             wx.PostEvent(self._manager.parent, NewPlotEvent(plot=self.data, 
-                                                           title=str(self.data.title)))
+                                                title=str(self.data.title)))
             self._manager.store_data(uid=self.uid, data=data,
                                      data_list=self.data_list,
                                       caption=self.window_name)
