@@ -1626,6 +1626,29 @@ class FitPage(BasicPage):
         """
         return self.enable2D
     
+    def compute_data_range(self, data):
+        """
+        compute the minimum and the maximum range of the data
+        return the npts contains in data
+        :param data:
+        """
+        qmin, qmax, npts = None, None, None
+        if data is not None:
+            if not hasattr(data,"data"):
+                qmin = min(data.x)
+                # Maximum value of data  
+                qmax = max(data.x)
+                npts = len(data.x)
+            else:
+                qmin = 0
+                x = max(math.fabs(data.xmin), math.fabs(data.xmax)) 
+                y = max(math.fabs(data.ymin), math.fabs(data.ymax))
+                ## Maximum value of data  
+                qmax = math.sqrt(x*x + y*y)
+                npts = len(data.data)
+        return qmin, qmax, npts
+            
+    
     def set_data(self, data):
         """
         reset the current data 
@@ -1669,32 +1692,18 @@ class FitPage(BasicPage):
             self.formfactorbox.Enable()
             self.structurebox.Enable()
             data_name = self.data.name
+            data_min, data_max, npts = self.compute_data_range(self.data)
             #set maximum range for x in linear scale
             if not hasattr(self.data,"data"): #Display only for 1D data fit
-                # Minimum value of data   
-                data_min = min(self.data.x)
-                # Maximum value of data  
-                data_max = max(self.data.x)
-                #number of total data points
-                self.Npts_total.SetValue(str(len(self.data.x)))
-                #default:number of data points selected to fit
-                self.Npts_fit.SetValue(str(len(self.data.x)))
                 self.btEditMask.Disable()  
                 self.EditMask_title.Disable()
             else:
                 
-                ## Minimum value of data 
-                data_min = 0
-                x = max(math.fabs(self.data.xmin), math.fabs(self.data.xmax)) 
-                y = max(math.fabs(self.data.ymin), math.fabs(self.data.ymax))
-                ## Maximum value of data  
-                data_max = math.sqrt(x*x + y*y)
-                #number of total data points
-                self.Npts_total.SetValue(str(len(self.data.data)))
-                #default:number of data points selected to fit
-                self.Npts_fit.SetValue(str(len(self.data.data)))
                 self.btEditMask.Enable()  
                 self.EditMask_title.Enable() 
+        self.Npts_total.SetValue(str(npts))
+        #default:number of data points selected to fit
+        self.Npts_fit.SetValue(str(npts))
         self.Npts_total.SetEditable(False)
         self.Npts_total.SetBackgroundColour(\
                                     self.GetParent().GetBackgroundColour())
@@ -1706,6 +1715,10 @@ class FitPage(BasicPage):
         self.qmax_x = data_max
         #self.minimum_q.SetValue(str(data_min))
         #self.maximum_q.SetValue(str(data_max))
+        if data_min is None:
+            data_min = ""
+        if data_max is None:
+            data_max = ""
         self.qmin.SetValue(str(data_min))
         self.qmax.SetValue(str(data_max))
         self.qmin.SetBackgroundColour("white")
