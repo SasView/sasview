@@ -384,6 +384,7 @@ class FitPanel(nb, PanelBase):
         """
         data_1d_list = []
         data_2d_list = []
+        # separate data into data1d and data2d list
         for data in data_list:
             if data.__class__.__name__ == "Data1D":
                 data_1d_list.append(data)

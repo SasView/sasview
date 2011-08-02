@@ -96,9 +96,15 @@ class FitPage(BasicPage):
         self.dataSource.Clear()
         self.data_list = data_list
         self.enable_datasource()
+        if data_list:
+            qmin, qmax, _ = self.compute_data_range(data_list[0])
+            self.qmin_data_set, self.qmax_data_set = qmin, qmax
         for data in self.data_list:
             if data is not None:
+                self.compute_data_set_range(data)
                 self.dataSource.Append(str(data.name), clientData=data)
+                
+        print "fill_data_combox", self.qmin_data_set, self.qmax_data_set
         self.dataSource.SetSelection(0)
         self.on_select_data(event=None)
                 
@@ -291,16 +297,24 @@ class FitPage(BasicPage):
 
         # StaticText for smear
         #self.tcChi    =  wx.StaticText(self, -1, "-", style=wx.ALIGN_LEFT)
-        self.smear_description_none    =  wx.StaticText(self, -1, smear_message_none , style=wx.ALIGN_LEFT)
-        self.smear_description_dqdata    =  wx.StaticText(self, -1, smear_message_dqdata , style=wx.ALIGN_LEFT)
-        self.smear_description_type    =  wx.StaticText(self, -1, "Type:" , style=wx.ALIGN_LEFT)
-        self.smear_description_accuracy_type    =  wx.StaticText(self, -1, "Accuracy:" , style=wx.ALIGN_LEFT)
-        self.smear_description_smear_type    =  BGTextCtrl(self, -1, size=(57,20), style=0)
+        self.smear_description_none =  wx.StaticText(self, -1, 
+                                    smear_message_none , style=wx.ALIGN_LEFT)
+        self.smear_description_dqdata =  wx.StaticText(self, 
+                                -1, smear_message_dqdata , style=wx.ALIGN_LEFT)
+        self.smear_description_type =  wx.StaticText(self,
+                                     -1, "Type:" , style=wx.ALIGN_LEFT)
+        self.smear_description_accuracy_type =  wx.StaticText(self, -1, 
+                                        "Accuracy:" , style=wx.ALIGN_LEFT)
+        self.smear_description_smear_type =  BGTextCtrl(self, -1, 
+                                                        size=(57,20), style=0)
         self.smear_description_smear_type.SetValue(str(self.dq_l))
         self.SetBackgroundColour(self.GetParent().GetBackgroundColour())
-        self.smear_description_2d     =  wx.StaticText(self, -1, smear_message_2d  , style=wx.ALIGN_LEFT)
-        self.smear_message_new_s = wx.StaticText(self, -1, smear_message_new_ssmear  , style=wx.ALIGN_LEFT)
-        self.smear_message_new_p = wx.StaticText(self, -1, smear_message_new_psmear  , style=wx.ALIGN_LEFT)
+        self.smear_description_2d =  wx.StaticText(self, -1, 
+                                    smear_message_2d  , style=wx.ALIGN_LEFT)
+        self.smear_message_new_s = wx.StaticText(self, -1,
+                         smear_message_new_ssmear, style=wx.ALIGN_LEFT)
+        self.smear_message_new_p = wx.StaticText(self, -1,
+                                 smear_message_new_psmear , style=wx.ALIGN_LEFT)
         self.smear_description_2d_x     =  wx.StaticText(self, -1, smear_message_2d_x_title  , style=wx.ALIGN_LEFT)
         self.smear_description_2d_x.SetToolTipString("  dQp(parallel) in q_r direction.")
         self.smear_description_2d_y     =  wx.StaticText(self, -1, smear_message_2d_y_title  , style=wx.ALIGN_LEFT)
@@ -463,7 +477,8 @@ class FitPage(BasicPage):
         hint = "toggle view of model from 1D to 2D  or 2D to 1D"
         self.model_view.SetToolTipString(hint)
       
-        self.shape_rbutton = wx.RadioButton(self, -1, 'Shapes', style=wx.RB_GROUP)
+        self.shape_rbutton = wx.RadioButton(self, -1, 'Shapes',
+                                             style=wx.RB_GROUP)
         self.shape_indep_rbutton = wx.RadioButton(self, -1, "Shape-Independent")
         self.struct_rbutton = wx.RadioButton(self, -1, "Structure Factor ")
         self.plugin_rbutton = wx.RadioButton(self, -1, "Customized Models")
@@ -1626,6 +1641,17 @@ class FitPage(BasicPage):
         """
         return self.enable2D
     
+    def compute_data_set_range(self, data):
+        """
+        find the range that include all data  in the set
+        return the minimum and the maximum values
+        """
+        if data is not None:
+            qmin, qmax, _ = self.compute_data_range(data)
+            self.qmin_data_set = min(self.qmin_data_set, qmin)
+            self.qmax_data_set = max(self.qmax_data_set, qmax)
+        
+        
     def compute_data_range(self, data):
         """
         compute the minimum and the maximum range of the data
@@ -1646,6 +1672,7 @@ class FitPage(BasicPage):
                 ## Maximum value of data  
                 qmax = math.sqrt(x*x + y*y)
                 npts = len(data.data)
+        print "compute single data range", qmin, qmax
         return qmin, qmax, npts
             
     

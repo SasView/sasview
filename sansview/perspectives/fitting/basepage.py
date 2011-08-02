@@ -67,6 +67,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.data_list = []
         self.mask = None
         self.uid = None
+        #Q range for data set
+        self.qmin_data_set = None
+        self.qmax_data_set = None
         ## Q range
         self.qmin = None
         self.qmax = None
