@@ -377,6 +377,54 @@ class TestFlexibleCylinderModel(unittest.TestCase):
     #    """ Test FlexibleCylinder at the critical point"""
     #    self.assert_(numpy.isfinite(self.comp.run(0.0)))
   
+class TestFlexCylEllipXModel(unittest.TestCase):
+    """ Unit tests for FlexCylEllipXModel"""
+    
+    def setUp(self):
+        from sans.models.FlexCylEllipXModel import FlexCylEllipXModel
+        self.comp = FlexCylEllipXModel()
+        #Give initial value to model
+        self.comp.setParam("scale", 1.0)
+        self.comp.setParam("sldSolv",6.3e-6 )
+        self.comp.setParam("sldCyl",1e-6 )
+        self.comp.setParam("kuhn_length",100)
+        self.comp.setParam("length", 1000)
+        self.comp.setParam("radius",20)
+        self.comp.setParam("background", 0.0001)
+        self.comp.setParam("axis_ratio", 1.0)
+        
+        self.x = numpy.array([0.4, 1.3])
+        self.y = numpy.array([0.5, 1.57])
+        self.x_array = self.comp.evalDistribution(self.x)
+        self.y_array = self.comp.evalDistribution(self.y)
+        
+        qx_prime = numpy.reshape(self.x, [1,len(self.x)])
+        qy_prime = numpy.reshape(self.y, [len(self.y),1])
+        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
+        
+        self.q = 0.001
+        self.phi= math.pi/2
+        self.qx= self.q*math.cos(self.phi)
+        self.qy= self.q*math.sin(self.phi)
+        
+    def test1D(self):
+        """ Test 1D model for FlexCylEllipXModel"""
+        self.assertAlmostEqual(self.comp.run(0.001), 3509.22, 1)
+        
+    def test1D_2(self):
+        """ Test 2D model for FlexCylEllipXModel"""
+        self.assertAlmostEqual(self.comp.run([self.q, self.phi]), 
+                              self.comp.runXY([self.qx, self.qy]),1) 
+    def testEval_1D(self):
+        """ Test 1D model for FlexCylEllipXModel with evalDistribution"""
+        self.assertEquals(self.comp.run(0.4),self.x_array[0])
+        self.assertEquals(self.comp.run(1.3),self.x_array[1])
+        
+    def testEval_2D(self):
+        """ Test 2D model for FlexCylEllipXModel with evalDistribution"""
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+              
               
 class TestStackedDisksModel(unittest.TestCase):
     """ Unit tests for StackedDisks Model"""
