@@ -376,7 +376,7 @@ class TestSphere(unittest.TestCase):
             the update to C++ underlying class.
         """
         self.assertAlmostEqual(self.model.run(0.001), 
-                               90412744456148.094, 3)
+                               90412744456130.672, 3)
         self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 
                                90347660670656.391, 1)
 
@@ -389,7 +389,7 @@ class TestSphere(unittest.TestCase):
         disp.setParam('n_pts', 10)
         disp.setParam('radius.npts', 10)
         disp.setParam('radius.nsigmas', 2.5)
-        self.assertAlmostEqual(disp.run(0.001), 96795008379475.25, 1)
+        self.assertAlmostEqual(disp.run(0.001), 96795008379480.859, 1)
         
     def test_new_disp(self):
         from sans.models.dispersion_models import GaussianDispersion
