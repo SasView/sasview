@@ -902,6 +902,7 @@ class Plugin(PluginBase):
         model = value.get_model()
         smearer = value.get_smearer()
         qmin, qmax = value.get_range()
+        print "fitter_setter", qmin, qmax
         #Extra list of parameters and their constraints
         listOfConstraint = []
         

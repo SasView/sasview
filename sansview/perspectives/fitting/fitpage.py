@@ -97,8 +97,9 @@ class FitPage(BasicPage):
         self.data_list = data_list
         self.enable_datasource()
         if data_list:
-            qmin, qmax, _ = self.compute_data_range(data_list[0])
+            qmin, qmax, npts = self.compute_data_range(data_list[0])
             self.qmin_data_set, self.qmax_data_set = qmin, qmax
+            self.npts_data_set = npts
         for data in self.data_list:
             if data is not None:
                 self.compute_data_set_range(data)
@@ -1009,12 +1010,11 @@ class FitPage(BasicPage):
         # Remove or do not allow fitting on the Q=0 point, especially 
         # when y(q=0)=None at x[0].         
         self.qmin_x = float(self.qmin.GetValue())
-        self.qmax_x = float( self.qmax.GetValue())
+        self.qmax_x = float(self.qmax.GetValue())
         self._manager._reset_schedule_problem(value=0, uid=self.uid)
-        self._manager.schedule_for_fit(uid=self.uid,value=1, fitproblem =None) 
-        self._manager.set_fit_range(uid=self.uid,qmin= self.qmin_x, 
-                                   qmax= self.qmax_x)
-        
+        self._manager.schedule_for_fit(uid=self.uid,value=1, fitproblem=None) 
+        self._manager.set_fit_range(uid=self.uid,qmin=self.qmin_x, 
+                                   qmax=self.qmax_x)
         #single fit 
         self._manager.onFit(uid=self.uid)
         self.btFit.SetLabel("Stop")
@@ -1647,10 +1647,10 @@ class FitPage(BasicPage):
         return the minimum and the maximum values
         """
         if data is not None:
-            qmin, qmax, _ = self.compute_data_range(data)
+            qmin, qmax, npts = self.compute_data_range(data)
             self.qmin_data_set = min(self.qmin_data_set, qmin)
             self.qmax_data_set = max(self.qmax_data_set, qmax)
-        
+            self.npts_data_set += npts
         
     def compute_data_range(self, data):
         """
@@ -1719,7 +1719,9 @@ class FitPage(BasicPage):
             self.formfactorbox.Enable()
             self.structurebox.Enable()
             data_name = self.data.name
-            data_min, data_max, npts = self.compute_data_range(self.data)
+            #data_min, data_max, npts = self.compute_data_range(self.data)
+            data_min, data_max = self.qmin_data_set, self.qmax_data_set
+            npts =  self.npts_data_set
             #set maximum range for x in linear scale
             if not hasattr(self.data,"data"): #Display only for 1D data fit
                 self.btEditMask.Disable()  

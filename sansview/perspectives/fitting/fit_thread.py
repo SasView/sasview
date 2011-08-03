@@ -68,18 +68,11 @@ class FitThread(CalcThread):
                 list_fit_function.append('fit')
                 list_map_get_attr.append(map_getattr)
             from multiprocessing import Pool
-            inputs = zip(list_map_get_attr,self.fitter, list_fit_function, list_handler, list_q, list_curr_thread,list_ftol)
-            print inputs
+            inputs = zip(list_map_get_attr,self.fitter, list_fit_function,
+                         list_handler, list_q, list_curr_thread,list_ftol)
             result =  Pool(1).map(func=map_apply, 
                                iterable=inputs)
             #self.handler.starting_fit()
-            #Result from the fit
-            """
-                result = self.fitter.fit(handler=self.handler, 
-                                         curr_thread=self,
-                                         ftol=self.ftol)
-            """
-            print "fithread result", result
             self.complete(result= result,
                           page_id=self.page_id,
                           pars = self.pars)
@@ -88,7 +81,8 @@ class FitThread(CalcThread):
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...
             #print "keyboard exception"
-            #Stop on exception during fitting. Todo: need to put some mssg and reset progress bar.
+            #Stop on exception during fitting. Todo: need to put 
+            #some mssg and reset progress bar.
             raise
             #if self.handler is not None:
             #    self.handler.error(msg=msg)

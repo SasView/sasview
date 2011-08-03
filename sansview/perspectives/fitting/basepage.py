@@ -70,6 +70,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         #Q range for data set
         self.qmin_data_set = None
         self.qmax_data_set = None
+        self.npts_data_set = 0
         ## Q range
         self.qmin = None
         self.qmax = None
