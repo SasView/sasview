@@ -384,11 +384,14 @@ class FitPanel(nb, PanelBase):
         """
         data_1d_list = []
         data_2d_list = []
+        group_id_1d = wx.NewId()
         # separate data into data1d and data2d list
         for data in data_list:
             if data.__class__.__name__ == "Data1D":
+                data.group_id = group_id_1d
                 data_1d_list.append(data)
             if data.__class__.__name__ == "Data2D":
+                data.group_id = NewId()
                 data_2d_list.append(data)
         page = None
         for p in self.opened_pages.values():

@@ -692,7 +692,6 @@ class Plugin(PluginBase):
         self._mac_sleep(0.2)
         ## perform single fit
         if fitproblem_count == 1:
-            print "fitter_list", fitter_list
             calc_fit = FitThread(handler = handler,
                                     fn=fitter_list,
                                     pars=pars,
