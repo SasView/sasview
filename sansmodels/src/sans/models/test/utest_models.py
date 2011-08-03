@@ -152,7 +152,7 @@ class TestGaussian(unittest.TestCase):
         self.gauss.setParam('center', 1.0)
         self.gauss.setParam('sigma', 1.0)
         value = math.exp(-0.5)
-        self.assertEqual(self.gauss.run([math.sqrt(8.0), math.pi/4.0]), 2.0*2.0*value*value)
+        self.assertAlmostEqual(self.gauss.run([math.sqrt(8.0), math.pi/4.0]), 2.0*2.0*value*value, 5)
         
 class TestLorentzian(unittest.TestCase):
     """Unit tests for Lorentzian function"""
@@ -184,7 +184,7 @@ class TestLorentzian(unittest.TestCase):
         self.lor.setParam('gamma', 1.0)
         self.assertEqual(self.lor.run(1.0), 1.0)
         value = 0.25/(1+.25)
-        self.assertEqual(self.lor.run([math.sqrt(8.0), math.pi/4.0]), value*value)
+        self.assertAlmostEqual(self.lor.run([math.sqrt(8.0), math.pi/4.0]), value*value, 5)
         
 class TestSin(unittest.TestCase):
     """Unit tests for Sin(x) function"""
