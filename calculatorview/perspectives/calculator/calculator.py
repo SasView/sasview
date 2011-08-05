@@ -100,7 +100,7 @@ class Plugin(PluginBase):
         frame = ResolutionWindow(parent=self.parent)
         frame.Show(True) 
   
-    def on_perspective(self, event):
+        #def on_perspective(self, event):
         """
         Call back function for the perspective menu item.
         We notify the parent window that the perspective
@@ -109,8 +109,9 @@ class Plugin(PluginBase):
         :param event: menu event
         
         """
-        self.parent.set_perspective(self.perspective)
-        event.Skip()
+        #self.parent.set_perspective(self.perspective)
+        #if event != None:
+        #    event.Skip()
 
     
   
