@@ -9,7 +9,9 @@ copyright 2008, 2009, 2010 University of Tennessee
 """
 import wx
 import sys
+import os
 import matplotlib
+import math
 #Use the WxAgg back end. The Wx one takes too long to render
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
@@ -73,6 +75,10 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.sigma_r = None
         self.sigma_phi = None
         self.sigma_1d = None
+        # monchromatic or polychromatic
+        self.wave_color = 'mono'
+        self.num_wave = 10
+        self.spectrum_dic = {}
         # dQ 2d image
         self.image = None
         #Font size 
@@ -142,15 +148,26 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         for idx in range(len(source_list)):
             self.source_cb.Append(source_list[idx],idx)
         self.source_cb.SetStringSelection("Neutron") 
+        wx.EVT_COMBOBOX(self.source_cb,-1, self._on_source_selection) 
         
-        wx.EVT_COMBOBOX(self.source_cb,-1, self._on_source_selection)      
+        # combo box for color
+        self.wave_color_cb =  wx.ComboBox(self, -1,
+                                style=wx.CB_READONLY,
+                                name = 'color')
+        # two choices
+        self.wave_color_cb.Append('Monochromatic')
+        self.wave_color_cb.Append('Polychromatic')
+        self.wave_color_cb.SetStringSelection("Monochromatic") 
+        wx.EVT_COMBOBOX(self.wave_color_cb,-1, self._on_source_color) 
+        
         source_hint = "Source Selection: Affect on"
         source_hint += " the gravitational contribution.\n"
         source_hint += "Mass of %s: m = %s [g]" % \
                             ('Neutron', str(self.resolution.mass))
         self.mass_txt.SetToolTipString(source_hint)
         self.mass_sizer.AddMany([(self.mass_txt, 0, wx.LEFT, 15),
-                                    (self.source_cb, 0, wx.LEFT, 15)])   
+                                    (self.source_cb, 0, wx.LEFT, 15),
+                                    (self.wave_color_cb, 0, wx.LEFT, 15)])   
         
     def _layout_intensity(self):
         """
@@ -176,7 +193,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         Fill the sizer containing wavelength
         """
         # get the wavelength
-        wavelength_value = str(self.resolution.wavelength)
+        wavelength_value = str(self.resolution.get_wavelength())
         wavelength_unit_txt = wx.StaticText(self, -1, '[A]')
         wavelength_txt = wx.StaticText(self, -1, 
                                 'Wavelength: ')
@@ -185,17 +202,39 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         wavelength_hint = "Wavelength of Neutrons"
         self.wavelength_tcl.SetValue(wavelength_value)
         self.wavelength_tcl.SetToolTipString(wavelength_hint)
+
+        # get the spectrum
+        spectrum_value = self.resolution.get_default_spectrum()
+        self.spectrum_dic['Add new'] = ''
+        self.spectrum_dic['Flat'] = spectrum_value
+        
+        self.spectrum_txt = wx.StaticText(self, -1, 
+                                'Spectrum: ')
+        self.spectrum_cb = wx.ComboBox(self, -1,
+                                style=wx.CB_READONLY,
+                                size=(_BOX_WIDTH,-1),
+                                name = 'spectrum')
+        self.spectrum_cb.Append('Add new')
+        self.spectrum_cb.Append('Flat')
+        wx.EVT_COMBOBOX(self.spectrum_cb, -1, self._on_spectrum_cb) 
+        spectrum_hint = "Wavelength Spectrum: Intensity vs. wavelength"
+        #self.spectrum_cb.SetValue(spectrum_value)
+        self.spectrum_cb.SetStringSelection('Flat') 
+        self.spectrum_cb.SetToolTipString(spectrum_hint)
         self.wavelength_sizer.AddMany([(wavelength_txt, 0, wx.LEFT, 15),
-                                    (self.wavelength_tcl, 0, wx.LEFT, 15),
-                                    (wavelength_unit_txt,0, wx.LEFT, 10)])   
-         
+                                    (self.wavelength_tcl, 0, wx.LEFT, 5),
+                                    (wavelength_unit_txt,0, wx.LEFT, 5),
+                                    (self.spectrum_txt, 0, wx.LEFT, 20),
+                                    (self.spectrum_cb, 0, wx.LEFT, 5)])   
+        self.spectrum_txt.Show(False)
+        self.spectrum_cb.Show(False)
         
     def _layout_wavelength_spread(self):
         """
         Fill the sizer containing wavelength
         """
         # get the wavelength
-        wavelength_spread_value = str(self.resolution.wavelength_spread)
+        wavelength_spread_value = str(self.resolution.get_wavelength_spread())
         wavelength_spread_unit_txt = wx.StaticText(self, -1, '')
         wavelength_spread_txt = wx.StaticText(self, -1, 
                                 'Wavelength Spread: ')
@@ -480,7 +519,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         hint_msg = ""
         #hint_msg += "This tool is to approximately compute "
-        #hint_msg += "the resolution (dQ)."
+        #hint_msg += "the instrumental resolution (dQ)."
 
         self.hint_txt = wx.StaticText(self, -1, hint_msg)
         self.hint_sizer.AddMany([(self.hint_txt, 0, wx.LEFT, 15)])
@@ -489,6 +528,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         Do the layout for the button widgets
         """ 
+        # coordinate selction removed
         #outerbox_txt = wx.StaticText(self, -1, 'Outer Box')
         #self.x_y_rb = wx.RadioButton(self, -1,"Cartesian")
         #self.Bind(wx.EVT_RADIOBUTTON,
@@ -506,7 +546,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         #compute button
         id = wx.NewId()
         self.compute_button = wx.Button(self, id, "Compute")
-        hint_on_compute = "..."
+        hint_on_compute = "Compute... Please wait until finished."
         self.compute_button.SetToolTipString(hint_on_compute)
         self.Bind(wx.EVT_BUTTON, self.on_compute, id=id)
         # close button
@@ -641,6 +681,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                                   (self.button_sizer, 0,
                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
         self.main_sizer.Add(self.vertical_l_sizer, 0, wx.ALL, 10)
+        
         # Build image plot layout                     
         self._layout_image()
         # Add a vertical static line
@@ -650,6 +691,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.main_sizer.Add(self.vertical_r_spacer, 0, wx.ALL, 10)
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
+        
 
     def on_close(self, event):
         """
@@ -694,54 +736,70 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         qx_max = [] 
         qy_min = [] 
         qy_max = [] 
-        # Get all the values at set to compute
-        #intensity = self.intensity_tcl.GetValue()
-        #self.resolution.set_intensity(float(intensity))
-        wavelength = self.wavelength_tcl.GetValue()
-        self.resolution.set_wavelength(float(wavelength))
-        source = self.source_cb.GetValue()
-        mass = self.source_mass[str(source)]
-        self.resolution.set_neutron_mass(float(mass))
-        wavelength_spread = self.wavelength_spread_tcl.GetValue()
-        self.resolution.set_wavelength_spread(float(wavelength_spread))
-        source_aperture_size = self.source_aperture_tcl.GetValue()
-        source_aperture_size = self._string2list(source_aperture_size)
-        self.resolution.set_source_aperture_size(source_aperture_size)
-        sample_aperture_size = self.sample_aperture_tcl.GetValue()
-        sample_aperture_size = self._string2list(sample_aperture_size)
-        self.resolution.set_sample_aperture_size(sample_aperture_size)
-        source2sample_distance = self.source2sample_distance_tcl.GetValue()
-        source2sample_distance = self._string2list(source2sample_distance)
-        self.resolution.set_source2sample_distance(source2sample_distance)
-        sample2sample_distance = self.sample2sample_distance_tcl.GetValue()
-        sample2sample_distance = self._string2list(sample2sample_distance)
-        self.resolution.set_sample2sample_distance(sample2sample_distance)
-        sample2detector_distance = self.sample2detector_distance_tcl.GetValue()
-        sample2detector_distance = self._string2list(sample2detector_distance)
-        self.resolution.set_sample2detector_distance(sample2detector_distance)
-        detector_size = self.detector_size_tcl.GetValue()
-        detector_size = self._string2list(detector_size)
-        self.resolution.set_detector_size(detector_size)
-        detector_pix_size = self.detector_pix_size_tcl.GetValue()
-        detector_pix_size = self._string2list(detector_pix_size)
-        self.resolution.set_detector_pix_size(detector_pix_size)
-        self.qx = self._string2inputlist(self.qx_tcl.GetValue())
-        self.qy = self._string2inputlist(self.qy_tcl.GetValue())
         
         try:
+            # Get all the values at set to compute
+            # default num bin of wave list
+            self.num_wave = 10
+            wavelength = self._str2longlist(self.wavelength_tcl.GetValue())
+            source = self.source_cb.GetValue()
+            mass = self.source_mass[str(source)]
+            self.resolution.set_neutron_mass(float(mass))
+            wavelength_spread = self._str2longlist(\
+                        self.wavelength_spread_tcl.GetValue().split(';')[0])
+            # Validate the wave inputs
+            wave_input = self._validate_q_input(wavelength, wavelength_spread)
+            if wave_input != None:
+                wavelength, wavelength_spread = wave_input
+    
+            #self.resolution.set_wave(float(wavelength))
+            self.resolution.set_wave(wavelength)
+            #self.resolution.set_wave_spread(float(wavelength_spread))
+            self.resolution.set_wave_spread(wavelength_spread)
+            source_aperture_size = self.source_aperture_tcl.GetValue()
+            source_aperture_size = self._string2list(source_aperture_size)
+            self.resolution.set_source_aperture_size(source_aperture_size)
+            sample_aperture_size = self.sample_aperture_tcl.GetValue()
+            sample_aperture_size = self._string2list(sample_aperture_size)
+            self.resolution.set_sample_aperture_size(sample_aperture_size)
+            source2sample_distance = self.source2sample_distance_tcl.GetValue()
+            source2sample_distance = self._string2list(source2sample_distance)
+            self.resolution.set_source2sample_distance(source2sample_distance)
+            sample2sample_distance = self.sample2sample_distance_tcl.GetValue()
+            sample2sample_distance = self._string2list(sample2sample_distance)
+            self.resolution.set_sample2sample_distance(sample2sample_distance)
+            sample2detector_distance = self.sample2detector_distance_tcl.GetValue()
+            sample2detector_distance = self._string2list(sample2detector_distance)
+            self.resolution.set_sample2detector_distance(sample2detector_distance)
+            detector_size = self.detector_size_tcl.GetValue()
+            detector_size = self._string2list(detector_size)
+            self.resolution.set_detector_size(detector_size)
+            detector_pix_size = self.detector_pix_size_tcl.GetValue()
+            detector_pix_size = self._string2list(detector_pix_size)
+            self.resolution.set_detector_pix_size(detector_pix_size)
+            self.qx = self._string2inputlist(self.qx_tcl.GetValue())
+            self.qy = self._string2inputlist(self.qy_tcl.GetValue())
+            
+            
             # Find min max of qs
             xmin = min(self.qx)
             xmax = max(self.qx)
             ymin = min(self.qy)
             ymax = max(self.qy)
+            if not self._validate_q_input(self.qx, self.qy):
+                raise
         except:
             msg = "An error occured during the resolution computation."
             msg += "Please check your inputs..."
             self._status_info(msg, status_type)
-            raise ValueError, "Invalid Q Input..."
+            wx.MessageBox(msg, 'Warning')
+            return
+            #raise ValueError, "Invalid Q Input..."
 
         # Validate the q inputs
-        self._validate_q_input(self.qx, self.qy)
+        q_input = self._validate_q_input(self.qx, self.qy)
+        if q_input != None:
+            self.qx, self.qy = q_input
         
         # Make list of q min max for mapping
         for length in range(len(self.qx)):
@@ -756,24 +814,54 @@ class ResolutionCalculatorPanel(ScrolledPanel):
             #_pylab_helpers.Gcf.set_active(self.fm)
             # Clear the image before redraw
             self.image.clf()
-            #self.image.draw()
             # reset the image
             self.resolution.reset_image()
 
         # Compute and get the image plot
         try:
-            self.image = map(self._map_func, self.qx, self.qy, 
-                             qx_min, qx_max, qy_min, qy_max)[0]
-            msg = "Finished the resolution computation..."
+            from .resolcal_thread import CalcRes as thread
+            cal_res = thread(func = self._map_func,
+                         qx = self.qx,
+                         qy = self.qy,
+                         qx_min = qx_min,
+                         qx_max = qx_max,
+                         qy_min = qy_min,
+                         qy_max = qy_max,
+                         image = self.image,
+                         completefn = self.complete_cal)
+            #self.image = map(self._map_func, self.qx, self.qy, 
+            #                 qx_min, qx_max, qy_min, qy_max)[0]
+            cal_res.queue()
+            msg = "Computation is in progress..."
+            #msg = "Finished the resolution computation..."
+            status_type = 'progress'
             self._status_info(msg, status_type)
         except:
+            raise
             msg = "An error occured during the resolution computation."
             msg += "Please check your inputs..."
+            status_type = 'stop'
             self._status_info(msg, status_type)
-            raise ValueError, "Invalid Q Input: Out of detector range..."
+            wx.MessageBox(msg, 'Warning')
+            
+    def complete(self, image, elapsed=None):
+        """
+        Callafter complete: wx call after needed for stable output
+        """
+        wx.CallAfter(self.complte, image, elapsed)   
         
+    def complete_cal(self, image, elapsed=None):
+        """
+        Complete computation
+        """
+        self.image = image
         # Draw lines in image before drawing
-        self._draw_lines(self.image)
+        wave_list, _ = self.resolution.get_wave_list()
+        if len(wave_list) > 1 and wave_list[-1] == max(wave_list):
+            # draw a green rectangle(limit for the longest wavelength 
+            # to be involved) for tof inputs
+            self._draw_lines(self.image, color='g')
+        self._draw_lines(self.image, color='r')
         # Draw image
         self.image.draw()
         #self.vertical_r_sizer.Layout()
@@ -789,27 +877,36 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.sigma_phi_tcl.SetValue(str(sigma_phi))
         self.sigma_lamd_tcl.SetValue(str(sigma_lamd))
         self.sigma_1d_tcl.SetValue(str(sigma_1d))
+        msg = "Resolution computation is finished."
+        status_type = 'stop'
+        self._status_info(msg, status_type)
         
-    def _draw_lines(self, image = None):
+    def _draw_lines(self, image=None, color='r'):
         """
         Draw lines in image if applicable
         : Param image: pylab object
         """
         if image == None:
             return
-        
-        # Get the params from resolution
-        # ploting range
-        qx_min = self.resolution.qx_min
-        qx_max = self.resolution.qx_max
-        qy_min = self.resolution.qy_min
-        qy_max = self.resolution.qy_max
-        
-        # detector range
-        detector_qx_min = self.resolution.detector_qx_min
-        detector_qx_max = self.resolution.detector_qx_max
-        detector_qy_min = self.resolution.detector_qy_min
-        detector_qy_max = self.resolution.detector_qy_max
+        if color == 'g':
+            # Get the params from resolution
+            # ploting range for largest wavelength
+            qx_min = self.resolution.qx_min
+            qx_max = self.resolution.qx_max
+            qy_min = self.resolution.qy_min
+            qy_max = self.resolution.qy_max
+            # detector range
+            detector_qx_min = self.resolution.detector_qx_min
+            detector_qx_max = self.resolution.detector_qx_max
+            detector_qy_min = self.resolution.detector_qy_min
+            detector_qy_max = self.resolution.detector_qy_max
+        else:
+            qx_min, qx_max, qy_min, qy_max = self.resolution.get_detector_qrange()
+            # detector range
+            detector_qx_min = self.resolution.qxmin_limit
+            detector_qx_max = self.resolution.qxmax_limit
+            detector_qy_min = self.resolution.qymin_limit
+            detector_qy_max = self.resolution.qymax_limit
         
         # Draw zero axis lines
         if qy_min < 0 and qy_max >= 0:
@@ -828,23 +925,42 @@ class ResolutionCalculatorPanel(ScrolledPanel):
             image.axhline(y = detector_qy_min + 0.0002,
                                xmin = x_min,
                                xmax = x_max, 
-                               linewidth = 2, color='r')
+                               linewidth = 2, color=color)
         if detector_qy_max <= qy_max:
             image.axhline(y = detector_qy_max - 0.0002, 
                                xmin = x_min, 
                                xmax = x_max, 
-                               linewidth = 2, color='r')
+                               linewidth = 2, color=color)
         if detector_qx_min >= qx_min:
             image.axvline(x = detector_qx_min + 0.0002, 
                                ymin = y_min, 
                                ymax = y_max, 
-                               linewidth = 2, color='r')
+                               linewidth = 2, color=color)
         if detector_qx_max <= qx_max:
             image.axvline(x = detector_qx_max - 0.0002, 
                                ymin = y_min, 
                                ymax = y_max, 
-                               linewidth = 2, color='r')
-
+                               linewidth = 2, color=color)
+        xmin = min(self.qx)
+        xmax = max(self.qx)
+        ymin = min(self.qy)
+        ymax = max(self.qy)
+        if color != 'g':
+            if xmin < detector_qx_min or xmax > detector_qx_max or \
+                        ymin < detector_qy_min or ymax > detector_qy_max:
+                # message
+                status_type = 'stop' 
+                msg = 'At least one q value located out side of\n'
+                msg += " the detector range (%s < qx < %s, %s < qy < %s),\n" % \
+                        (self.format_number(detector_qx_min), 
+                         self.format_number(detector_qx_max),
+                         self.format_number(detector_qy_min), 
+                         self.format_number(detector_qy_max))
+                msg += " is ignored in computation.\n"
+                
+                self._status_info(msg, status_type)
+                wx.MessageBox(msg, 'Warning')
+        
     def _map_func(self, qx, qy, qx_min, qx_max, qy_min, qy_max):    
         """
         Prepare the Mapping for the computation
@@ -852,10 +968,17 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         
         : return: image (pylab)
         """
+        try:
+            qx_value = float(qx)
+            qy_value = float(qy)
+        except:
+            raise
         # calculate 2D resolution distribution image
-        image = self.resolution.compute_and_plot(float(qx), float(qy), 
+        image = self.resolution.compute_and_plot(qx_value, qy_value, 
                                  qx_min, qx_max, qy_min, qy_max, 
                                  self.det_coordinate)
+        
+
         return image
     
     def _validate_q_input(self, qx, qy):    
@@ -868,25 +991,26 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         # check qualifications
         if qx.__class__.__name__ != 'list':
-            return False
+            return None
         if qy.__class__.__name__ != 'list' :
-            return False
+            return None
         if len(qx) < 1:
-            return False
+            return None
         if len(qy) < 1:
-            return False
+            return None
         # allow one input
         if len(qx) == 1 and len(qy) > 1:
             qx = [qx[0] for ind in range(len(qy))]
-            self.qx = qx
+            #self.qx = qx
         if len(qy) == 1 and len(qx) > 1:
             qy = [qy[0] for ind in range(len(qx))]
-            self.qy = qy
+            #self.qy = qy
         # check length
         if len(qx) != len(qy):
-            return False
-
-        return True  
+            return None
+        if qx == None or qy == None:
+            return None
+        return qx, qy 
      
     def on_reset(self, event):
         """
@@ -901,10 +1025,14 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         # reset all param values
         self.source_cb.SetValue('Neutron')
         self._on_source_selection(None)
+        self.wave_color_cb.SetValue('Monochromatic')
+        self._on_source_color(None)
         #self.intensity_tcl.SetValue(str(self.resolution.intensity))
-        self.wavelength_tcl.SetValue(str(self.resolution.wavelength))
-        self.wavelength_spread_tcl.SetValue(\
-                                        str(self.resolution.wavelength_spread))
+        self.wavelength_tcl.SetValue(str(6.0))
+        self.wavelength_spread_tcl.SetValue(str(0.125))
+        self.resolution.set_spectrum(self.spectrum_dic['Flat'])
+        self.spectrum_txt.Show(False)
+        self.spectrum_cb.Show(False)
         source_aperture_value = str(self.resolution.source_aperture_size[0])
         if len(self.resolution.source_aperture_size)>1:
             source_aperture_value += ", "
@@ -1011,6 +1139,51 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                 pass
         
         return new_string
+    
+    def _str2longlist(self, string):
+        """
+        Change NNN, NNN,... to list, NNN - NNN ; NNN to list, or float to list
+        
+        : return new_string: string like list
+        """
+        new_string = []
+        msg = "Wrong format of intputs."
+        try:
+            if self.wave_color.lower().count('poly') > 0:
+                wx.MessageBox(msg, 'Warning')
+            else:
+                # is float
+                out = [float(string)]
+                return out
+        except:
+            if self.wave_color.lower().count('mono') > 0:
+                wx.MessageBox(msg, 'Warning')
+            else:
+                try:
+                    # has a '-' 
+                    if string.count('-') > 0:
+                        value = string.split('-')
+                        if value[1].count(';') > 0:
+                            # has a ';'
+                            last_list = value[1].split(';')
+                            num =  math.ceil(float(last_list[1]))
+                            max = float(last_list[0])
+                            self.num_wave = num
+                        else:
+                            # default num
+                            num = self.num_wave
+                            max = float(value[1])
+                        min = float(value[0])
+                        # make a list
+                        bin_size = math.fabs(max - min) / (num - 1)
+                        out = [min + bin_size * bnum for bnum in range(num)]
+                        return out
+                    if string.count(',') > 0:
+                        out = self._string2inputlist(string)
+                        return out
+                except:
+                    pass
+                #    wx.MessageBox(msg, 'Warning')
 
     def _on_xy_coordinate(self,event=None):
         """
@@ -1040,6 +1213,15 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         Status msg
         """
+        if type == "stop":
+            label = "Compute"
+            able = True
+        else:   
+            label = "Wait..."
+            able = False
+        self.compute_button.Enable(able)
+        self.compute_button.SetLabel(label)
+        self.compute_button.SetToolTipString(label)
         if self.parent.parent != None:
                 wx.PostEvent(self.parent.parent, 
                              StatusEvent(status = msg, type = type ))
@@ -1069,6 +1251,126 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                             (selection, str(self.resolution.get_neutron_mass()))
         #source_tip.SetTip(source_hint)
         self.mass_txt.ToolTip.SetTip(source_hint)
+        
+    def _on_source_color(self, event = None):
+        """
+        On source color combobox selection
+        """
+        if event != None:
+            #combo = event.GetEventObject()
+            event.Skip()
+        #else:
+        combo = self.wave_color_cb
+        selection = combo.GetValue()
+        self.wave_color = selection
+        if self.wave_color.lower() == 'polychromatic':
+            list = self.resolution.get_wave_list()
+            minw = min(list[0])
+            if len(list[0]) < 2:
+                maxw = 2 * minw
+            else:
+                maxw = max(list[0])
+            self.wavelength_tcl.SetValue('%s - %s' % (minw, maxw))
+            minw = min(list[1])
+            maxw = max(list[1])
+            self.wavelength_spread_tcl.SetValue('%s - %s' % (minw, maxw))
+            spectrum_val = self.spectrum_cb.GetValue()
+            self.resolution.set_spectrum(self.spectrum_dic[spectrum_val])
+            self.spectrum_txt.Show(True)
+            self.spectrum_cb.Show(True)
+          
+        else:
+            wavelength = self.resolution.get_wavelength()
+            wavelength_spread = self.resolution.get_wavelength_spread()
+            self.wavelength_tcl.SetValue(str(wavelength))
+            self.wavelength_spread_tcl.SetValue(str(wavelength_spread))
+            self.resolution.set_spectrum(self.spectrum_dic['Flat'])
+            self.spectrum_txt.Show(False)
+            self.spectrum_cb.Show(False)
+        self.wavelength_sizer.Layout() 
+        self.Layout()
+        
+    def _on_spectrum_cb(self, event=None):
+        """
+        On spectrum ComboBox event
+        """
+        if event != None:
+            combo = event.GetEventObject()
+            event.Skip()
+        else:
+            raise
+        selection = self.spectrum_cb.GetValue()
+        if selection == 'Add new':
+            path = self._selectDlg()
+            if path == None:
+                self.spectrum_cb.SetValue('Flat')
+                self.resolution.set_spectrum(self.spectrum_dic['Flat'])
+                msg = "No file has been chosen."
+                wx.MessageBox(msg, 'Info')
+                return
+            try:
+                basename  = os.path.basename(path)
+                if basename not in self.spectrum_dic.keys():
+                    self.spectrum_cb.Append(basename)
+                self.spectrum_dic[basename] = self._read_file(path)
+                self.spectrum_cb.SetValue(basename)
+                self.resolution.set_spectrum(self.spectrum_dic[basename])
+                return
+            except:
+                raise
+                msg = "Failed to load the spectrum data file."
+                wx.MessageBox(msg, 'Warning')
+                raise ValueError, "Invalid spectrum file..."
+        
+        self.resolution.set_spectrum(self.spectrum_dic[selection])
+                             
+    def _selectDlg(self):
+        """
+        open a dialog file to select a customized spectrum
+        """
+        import os
+        dlg = wx.FileDialog(self, 
+                "Choose a wavelength spectrum file: Intensity vs. wavelength",
+                self.parent.parent._default_save_location , "", 
+                "*.*", wx.OPEN)
+        path = None
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+        dlg.Destroy()
+        return path
+        
+    def _read_file(self, path):
+        """
+        Read two columns file as tuples of numpy array
+        
+        :param path: the path to the file to read
+        
+        """
+        try:
+            if path==None:
+                wx.PostEvent(self.parent.parent, StatusEvent(status=\
+                            " Selected Distribution was not loaded: %s"%path))
+                return None, None
+            input_f = open(path, 'r')
+            buff = input_f.read()
+            lines = buff.split('\n')
+            
+            wavelength = []
+            intensity = []
+            for line in lines:
+                toks = line.split()
+                try:
+                    wave = float(toks[0])
+                    intens = float(toks[1])
+                    wavelength.append(wave)
+                    intensity.append(intens)
+                except:
+                    # Skip non-data lines
+                    pass
+                
+            return [wavelength, intensity]
+        except:
+            raise 
         
 class ResolutionWindow(wx.Frame):
     def __init__(self, parent = None, title = "SANS Resolution Estimator",
