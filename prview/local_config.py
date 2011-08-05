@@ -74,6 +74,8 @@ CLEANUP_PLOT = False
 WELCOME_PANEL_SHOW = False
 #Show or hide toolbar at the start up
 TOOLBAR_SHOW = True
+#Open Save project menu
+OPEN_SAVE_PROJECT_MENU = True
 # set a default perspective
 DEFAULT_PERSPECTIVE = 'None'
 import wx.lib.newevent
