@@ -5,7 +5,7 @@ instrumental parameters.
 """
 from instrument import Sample
 from instrument import Detector
-from instrument import Neutron
+from instrument import TOF as Neutron
 from instrument import Aperture
 # import math stuffs
 from math import pi
@@ -35,6 +35,7 @@ class ResolutionCalculator(object):
         self.detector = Detector()
         # 2d image of the resolution
         self.image = []
+        self.image_lam = []
         # resolutions
         # lamda in r-direction
         self.sigma_lamda = 0
@@ -54,6 +55,16 @@ class ResolutionCalculator(object):
         self.detector_qx_max = 0.3
         self.detector_qy_min = -0.3
         self.detector_qy_max = 0.3
+        # possible max qrange
+        self.qxmin_limit = 0
+        self.qxmax_limit = 0
+        self.qymin_limit = 0
+        self.qymax_limit = 0
+        # set sigmas
+        self.sigma_1 = 0
+        self.sigma_lamd = 0
+        self.sigma_2 = 0
+        self.sigma_1d = 0
         # plots
         self.plot = None
         # instrumental params defaults
@@ -69,7 +80,13 @@ class ResolutionCalculator(object):
         self.detector_pix_size = []
         self.detector_size = []
         # get all the values of the instrumental parameters
+        #self.intensity = self.get_intensity()
+        #self.wavelength = self.get_wavelength()
+        #self.wavelength_spread = self.get_wavelength_spread()
         self.get_all_instrument_params()
+        # max q range for all lambdas
+        self.qxrange = []
+        self.qyrange = []
         
     def compute_and_plot(self, qx_value, qy_value, qx_min, qx_max, 
                           qy_min, qy_max, coord = 'cartesian'):
@@ -78,32 +95,140 @@ class ResolutionCalculator(object):
         : qx_value: x component of q
         : qy_value: y component of q
         """
-        # compute 2d resolution
-        _, _, sigma_1, sigma_2, sigma_r = \
-                            self.compute(qx_value, qy_value, coord)
-        # make image
-        image = self.get_image(qx_value, qy_value, sigma_1, sigma_2, sigma_r, 
-                               qx_min, qx_max, qy_min, qy_max, coord)
-        # plot image
-        return self.plot_image(image) 
+        # make sure to update all the variables need.
+        # except lambda, dlambda, and intensity
+        self.get_all_instrument_params()
+        # wavelength etc.
+        lamda_list, dlamb_list = self.get_wave_list()
+        intens_list = []#self.get_intensity_list()
 
-    def compute(self, qx_value, qy_value, coord = 'cartesian'):
+        sig1_list = []
+        sig2_list = []
+        sigr_list = []
+        sigma1d_list = []
+        num_lamda = len(lamda_list)
+        for num in range(num_lamda):
+            lam = lamda_list[num]
+            # wavelength spread
+            dlam = dlamb_list[num]
+            intens = self.setup_tof(lam, dlam)
+            intens_list.append(intens)
+            # save q min max
+            #qx_min = 0
+            #qx_max = 0
+            #qy_min = 0
+            #qy_max = 0
+            # compute 2d resolution
+            _, _, sigma_1, sigma_2, sigma_r, sigma1d = \
+                            self.compute(lam, dlam, qx_value, qy_value, coord)
+            # make image
+            image = self.get_image(qx_value, qy_value, sigma_1, sigma_2, 
+                            sigma_r, qx_min, qx_max, qy_min, qy_max,
+                            coord, False)
+            
+            # Non tof mode to be speed up 
+            #if num_lamda < 2:
+            #    return self.plot_image(image)
+            
+            if qx_min > self.qx_min:
+                qx_min = self.qx_min
+            if qx_max < self.qx_max:
+                qx_max = self.qx_max
+            if qy_min > self.qy_min:
+                qy_min = self.qy_min
+            if qy_max < self.qy_max:
+                qy_max = self.qy_max
+                
+            # set max qranges
+            self.qxrange = [qx_min, qx_max]
+            self.qyrange = [qy_min, qy_max]
+            
+            sig1_list.append(sigma_1)
+            sig2_list.append(sigma_2)
+            sigr_list.append(sigma_r)
+            sigma1d_list.append(sigma1d)
+        # redraw image in global 2d q-space.   
+        self.image_lam = []
+        total_intensity = 0
+        sigma_1 = 0
+        sigma_r = 0
+        sigma_2 = 0
+        sigma1d = 0
+        for ind in range(num_lamda):
+            lam = lamda_list[ind]
+            dlam = dlamb_list[ind]
+            intens = self.setup_tof(lam, dlam)
+            out = self.get_image(qx_value, qy_value, sig1_list[ind], 
+                                   sig2_list[ind], sigr_list[ind], 
+                                   qx_min, qx_max, qy_min, qy_max, coord)
+            # this is the case of q being outside the detector
+            #if numpy.all(out==0.0):
+            #    continue
+            image = out
+            # set sigmas
+            sigma_1 += sig1_list[ind] * self.intensity
+            sigma_r += sigr_list[ind] * self.intensity
+            sigma_2 += sig2_list[ind] * self.intensity
+            sigma1d += sigma1d_list[ind] * self.intensity
+            total_intensity += self.intensity
+        if total_intensity != 0:
+            image_out = image / total_intensity
+            sigma_1 = sigma_1 / total_intensity
+            sigma_r = sigma_r / total_intensity
+            sigma_2 = sigma_2 / total_intensity
+            sigma1d = sigma1d / total_intensity
+            # set sigmas
+            self.sigma_1 = sigma_1
+            self.sigma_lamd = sigma_r
+            self.sigma_2 = sigma_2
+            self.sigma_1d = sigma1d
+            # rescale 
+            max_im_val = 1 #image_out.max()
+            if max_im_val > 0:
+                image_out /= max_im_val
+        else:
+            image_out = image * 0.0
+            # Don't calculate sigmas nor set self.sigmas!
+            sigma_1 = 0
+            sigma_r = 0
+            sigma_2 = 0
+            sigma1d = 0
+        if len(self.image) > 0:
+            self.image += image_out
+        else:
+            self.image = image_out
+        
+        # plot image
+        return self.plot_image(self.image) 
+    
+    def setup_tof(self, wavelength, wavelength_spread):
+        """
+        Setup all parameters in instrument
+        
+        : param ind: index of lambda, etc
+        """
+
+        # set wave.wavelength
+        self.set_wavelength(wavelength)
+        self.set_wavelength_spread(wavelength_spread)
+        self.intensity = self.wave.get_intensity()
+        
+        if wavelength == 0:
+            msg = "Can't compute the resolution: the wavelength is zero..." 
+            raise RuntimeError, msg
+        return self.intensity
+        
+    def compute(self, wavelength, wavelength_spread, qx_value, qy_value, 
+                coord = 'cartesian'):
         """
         Compute the Q resoltuion in || and + direction of 2D
         : qx_value: x component of q
         : qy_value: y component of q
         """
         coord = 'cartesian'
-        # make sure to update all the variables need.
-        self.get_all_instrument_params()
-        # wavelength
-        lamb = self.wavelength
-   
-        if lamb == 0:
-            msg = "Can't compute the resolution: the wavelength is zero..." 
-            raise RuntimeError, msg
-        # wavelength spread
-        lamb_spread = self.wavelength_spread
+        lamb = wavelength
+        lamb_spread = wavelength_spread
+        
         # Find polar values
         qr_value, phi = self._get_polar_value(qx_value, qy_value)
         # vacuum wave transfer
@@ -135,7 +260,7 @@ class ResolutionCalculator(object):
         l1_cor = (l_ssa * l_two) / (l_sas + l_two)
         lp_cor = (l_ssa * l_two) / (l_one + l_two)
         # the radial distance to the pixel from the center of the detector
-        radius = math.tan(theta)*l_two
+        radius = math.tan(theta) * l_two
         #Lp = l_one*l_two/(l_one+l_two)
         # default polar coordinate
         comp1 = 'radial'
@@ -160,15 +285,15 @@ class ResolutionCalculator(object):
         sigma_wave_1 = self.get_variance_wave(radius, l_two, lamb_spread, 
                                           phi, 'radial', 'on')
         # for 1d
-        variance_1d_1 = sigma_1/2 +sigma_wave_1
+        variance_1d_1 = sigma_1/2 + sigma_wave_1
         # normalize
-        variance_1d_1 = knot*knot*variance_1d_1/12
+        variance_1d_1 = knot * knot * variance_1d_1 / 12
         
         # for 2d
         #sigma_1 += sigma_wave_1
         # normalize
-        sigma_1 = knot*sqrt(sigma_1/12)
-        sigma_r = knot*sqrt(sigma_wave_1/12)
+        sigma_1 = knot*sqrt(sigma_1 / 12)
+        sigma_r = knot*sqrt(sigma_wave_1 / 12)
         # sigma in the phi/y direction
         # for source apperture
         sigma_2  = self.get_variance(rone, l1_cor, phi, comp2)
@@ -191,24 +316,47 @@ class ResolutionCalculator(object):
         # for 1d
         variance_1d_2 = sigma_2/2 +sigma_wave_2
         # normalize
-        variance_1d_2 = knot*knot*variance_1d_2/12
+        variance_1d_2 = knot*knot*variance_1d_2 / 12
         
         # for 2d
         #sigma_2 =  knot*sqrt(sigma_2/12)
         #sigma_2 += sigma_wave_2
         # normalize
-        sigma_2 =  knot*sqrt(sigma_2/12)
-
+        sigma_2 =  knot * sqrt(sigma_2 / 12)
+        sigma1d = sqrt(variance_1d_1 + variance_1d_2)
         # set sigmas
         self.sigma_1 = sigma_1
         self.sigma_lamd = sigma_r
         self.sigma_2 = sigma_2
-        
-        self.sigma_1d = sqrt(variance_1d_1 + variance_1d_2)
-        return qr_value, phi, sigma_1, sigma_2, sigma_r
+        self.sigma_1d = sigma1d
+        return qr_value, phi, sigma_1, sigma_2, sigma_r, sigma1d
+    
+    def _within_detector_range(self,qx_value, qy_value):
+        """
+        check if qvalues are within detector range
+        """
+        # detector range
+        detector_qx_min = self.detector_qx_min
+        detector_qx_max = self.detector_qx_max
+        detector_qy_min = self.detector_qy_min
+        detector_qy_max = self.detector_qy_max
+        if self.qxmin_limit > detector_qx_min:
+            self.qxmin_limit = detector_qx_min
+        if self.qxmax_limit < detector_qx_max:
+            self.qxmax_limit = detector_qx_max
+        if self.qymin_limit > detector_qy_min:
+            self.qymin_limit = detector_qy_min
+        if self.qymax_limit < detector_qy_max:
+            self.qymax_limit = detector_qy_max
+        if qx_value < detector_qx_min or qx_value > detector_qx_max:
+            return False
+        if qy_value < detector_qy_min or qy_value > detector_qy_max:
+            return False
+        return True
     
     def get_image(self, qx_value, qy_value, sigma_1, sigma_2, sigma_r,
-                  qx_min, qx_max, qy_min, qy_max, coord = 'cartesian'): 
+                  qx_min, qx_max, qy_min, qy_max, 
+                  coord = 'cartesian', full_cal=True): 
         """
         Get the resolution in polar coordinate ready to plot
         : qx_value: qx_value value
@@ -219,11 +367,7 @@ class ResolutionCalculator(object):
         """
         # Get  qx_max and qy_max...
         output = self._get_detector_qxqy_pixels()
-        # Set qx_value/qy_value min/max
-        #qx_min = self.qx_min
-        #qx_max = self.qx_max
-        #qy_min = self.qy_min
-        #qy_max = self.qy_max
+       
         qr_value, phi = self._get_polar_value(qx_value, qy_value)
 
         # Check whether the q value is within the detector range
@@ -240,7 +384,9 @@ class ResolutionCalculator(object):
         if qy_max > self.qy_max:
             self.qy_max = qy_max
             #raise ValueError, msg
-
+        if not full_cal:
+            return None
+ 
         # Make an empty graph in the detector scale
         dx_size = (self.qx_max - self.qx_min) / (1000 - 1)
         dy_size = (self.qy_max - self.qy_min) / (1000 - 1)
@@ -268,13 +414,19 @@ class ResolutionCalculator(object):
             # Calculate the 2D Gaussian distribution image
             image = self._gaussian2d(q_1, q_2, qc_1, qc_2, 
                                      sigma_1, sigma_2, sigma_r)
-        # Add it if there are more than one inputs.
-        if len(self.image) > 0:
-            self.image += image
-        else:
-            self.image = image
+        # out side of detector
+        if not self._within_detector_range(qx_value, qy_value):
+            image *= 0.0
+            self.intensity = 0.0
+            #return self.image
 
-        return self.image
+        # Add it if there are more than one inputs.
+        if len(self.image_lam) > 0:
+            self.image_lam += image * self.intensity
+        else:
+            self.image_lam = image * self.intensity
+        
+        return self.image_lam
     
     def plot_image(self, image):
         """
@@ -290,9 +442,11 @@ class ResolutionCalculator(object):
         plt.ylabel('$\\rm{Q}_{y} [A^{-1}]$')
         # Max value of the image
         max = numpy.max(image)
+        qx_min, qx_max, qy_min, qy_max = self.get_detector_qrange()
+
         # Image
         im = plt.imshow(image, 
-                extent = [self.qx_min, self.qx_max, self.qy_min, self.qy_max])
+                extent = [qx_min, qx_max, qy_min, qy_max])
 
         # bilinear interpolation to make it smoother
         im.set_interpolation('bilinear')
@@ -445,6 +599,24 @@ class ResolutionCalculator(object):
         """
         return self.wave.wavelength
     
+    def get_spectrum(self):
+        """
+        Get spectrum
+        """
+        return self.wave.spectrum   
+    
+    def get_default_spectrum(self):
+        """
+        Get default_spectrum
+        """
+        return self.wave.get_default_spectrum()    
+    
+    def get_spectrum(self):
+        """
+        Get _spectrum
+        """
+        return self.wave.get_spectrum() 
+         
     def get_wavelength_spread(self):
         """
         Get wavelength spread
@@ -474,7 +646,7 @@ class ResolutionCalculator(object):
         Get detector pixel size
         """
         return self.detector.pix_size
-    
+       
     def get_detector_size(self):
         """
         Get detector size
@@ -504,19 +676,70 @@ class ResolutionCalculator(object):
         Set intensity
         """
         self.wave.set_intensity(intensity)
-   
+        
+    def set_wave(self, wavelength):
+        """
+        Set wavelength list or wavelength
+        """
+        if wavelength.__class__.__name__ == 'list':
+            self.wave.set_wave_list(wavelength)
+        elif wavelength.__class__.__name__ == 'float':
+            self.wave.set_wave_list([wavelength])
+            #self.set_wavelength(wavelength)
+        else:
+            raise
+    
+    def set_wave_spread(self, wavelength_spread):
+        """
+        Set wavelength spread  or wavelength spread
+        """
+        if wavelength_spread.__class__.__name__ == 'list':
+            self.wave.set_wave_spread_list(wavelength_spread)
+        elif wavelength_spread.__class__.__name__ == 'float':
+            self.wave.set_wave_spread_list([wavelength_spread])
+            #self.set_wavelength_spread(wavelength_spread)
+        else:
+            raise
+        
     def set_wavelength(self, wavelength):
         """
         Set wavelength
         """
+        self.wavelength = wavelength
         self.wave.set_wavelength(wavelength)
-    
+        
+    def set_spectrum(self, spectrum):
+        """
+        Set spectrum
+        """
+        self.spectrum = spectrum
+        self.wave.set_spectrum(spectrum)  
+          
     def set_wavelength_spread(self, wavelength_spread):
         """
         Set wavelength spread
         """
+        self.wavelength_spread = wavelength_spread
         self.wave.set_wavelength_spread(wavelength_spread)
+        
+    def set_wave_list(self, wavelength_list, wavelengthspread_list):
+        """
+        Set wavelength and its spread list
+        """
+        self.wave.set_wave_list(wavelength_list, wavelengthspread_list)
     
+    def get_wave_list(self):
+        """
+        Set wavelength spread
+        """
+        return self.wave.get_wave_list()
+    
+    def get_intensity_list(self):
+        """
+        Set wavelength spread
+        """
+        return self.wave.get_intensity_list()
+           
     def set_source_aperture_size(self, size):
         """
         Set source aperture size
@@ -591,10 +814,11 @@ class ResolutionCalculator(object):
         """
         Get all instrumental parameters
         """
-        self.intensity = self.get_intensity()
-        self.wavelength = self.get_wavelength()
-        self.wavelength_spread = self.get_wavelength_spread()
+        #self.intensity = self.get_intensity()
+        #self.wavelength = self.get_wavelength()
+        #self.wavelength_spread = self.get_wavelength_spread()
         self.mass = self.get_neutron_mass()
+        self.spectrum = self.get_spectrum()
         self.source_aperture_size = self.get_source_aperture_size()
         self.sample_aperture_size = self.get_sample_aperture_size()
         self.detector_pix_size = self.get_detector_pix_size()
@@ -602,9 +826,22 @@ class ResolutionCalculator(object):
         self.source2sample_distance = self.get_source2sample_distance()
         self.sample2sample_distance = self.get_sample2sample_distance()
         self.sample2detector_distance = self.get_sample2detector_distance()
-
-
-          
+    
+    def get_detector_qrange(self):
+        """
+        get max detector q ranges
+        
+        : return: qx_min, qx_max, qy_min, qy_max tuple
+        """
+        if len(self.qxrange) != 2 or len(self.qyrange) != 2:
+            return None
+        qx_min = self.qxrange[0]
+        qx_max = self.qxrange[1]
+        qy_min = self.qyrange[0]
+        qy_max = self.qyrange[1]
+        
+        return qx_min, qx_max, qy_min, qy_max
+    
     def _rotate_z(self, x_value, y_value, theta= 0.0):
         """
         Rotate x-y cordinate around z-axis by theta
@@ -743,7 +980,7 @@ class ResolutionCalculator(object):
         self.get_all_instrument_params()
         
         # wavelength
-        wavelength = self.wavelength
+        wavelength = self.wave.wavelength
         # Gavity correction
         delta_y = self._get_beamcenter_drop() # in cm
         
@@ -838,11 +1075,14 @@ class ResolutionCalculator(object):
                                 sample2detector_distance, wavelength)
         self.qx_max += self._get_qx(0.5 * pix_x_size, 
                                     sample2detector_distance, wavelength)
+        
         # min and max values of detecter
         self.detector_qx_min = self.qx_min
         self.detector_qx_max = self.qx_max
         self.detector_qy_min = self.qy_min
         self.detector_qy_max = self.qy_max
+        
+        
 
         # try to set it as a Data2D otherwise pass (not required for now)
         try:
@@ -915,7 +1155,7 @@ class ResolutionCalculator(object):
         # Covert unit from A to cm
         unit_cm = 1e-08
         # Velocity of neutron in horizontal direction (~ actual velocity)
-        velocity = _PLANK_H / (self.mass * self.wavelength * unit_cm)
+        velocity = _PLANK_H / (self.mass * self.wave.wavelength * unit_cm)
         # Compute delta y
         delta_y = 0.5
         delta_y *= _GRAVITY
