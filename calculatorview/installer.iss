@@ -3,13 +3,13 @@
 
 [Setup]
 AppName=SansViewTool
-AppVerName=SansViewTool-1.0_dev
+AppVerName=SansViewTool-0.9.2dev
 AppPublisher=University of Tennessee
 AppPublisherURL=http://danse.chem.utk.edu/
 AppSupportURL=http://danse.chem.utk.edu/
 AppUpdatesURL=http://danse.chem.utk.edu/
-DefaultDirName={pf}\SansViewTool-1.0_dev
-DefaultGroupName=DANSE\SansViewTool-1.0_dev
+DefaultDirName={pf}\SansViewTool
+DefaultGroupName=DANSE\SansViewTool-0.9.2dev
 DisableProgramGroupPage=yes
 LicenseFile=license.txt
 OutputBaseFilename=setupSansViewTool
@@ -29,7 +29,7 @@ Source: "dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createal
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\SansViewTool"; Filename: "{app}\SansViewTool-1.0_dev.exe"; WorkingDir: "{app}"
+Name: "{group}\SansViewTool"; Filename: "{app}\SansViewTool.exe"; WorkingDir: "{app}"
 Name: "{group}\{cm:UninstallProgram,SansViewTool}"; Filename: "{uninstallexe}"
 Name: "{commondesktop}\SansViewTool"; Filename: "{app}\SansViewTool.exe"; Tasks: desktopicon; WorkingDir: "{app}"
 
