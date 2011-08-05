@@ -11,36 +11,16 @@
 
 import wx
 from sans.guiframe import gui_manager
+
 # For py2exe, import config here
 import local_config
 import logging
 
-# Application dimensions
-APP_HEIGHT = 80
-APP_WIDTH  = 360
-
 class SansViewToolApp(gui_manager.ViewApp):
     """
     """
-    def OnInit(self):
-        """
-        """
-        screen_size = wx.GetDisplaySize()
-        app_height = APP_HEIGHT if screen_size[1]>APP_HEIGHT else screen_size[1]-50
-        app_width  = APP_WIDTH if screen_size[0]>APP_WIDTH else screen_size[0]-50
-
-        self.frame = gui_manager.ViewerFrame(None, -1, local_config.__appname__, 
-                             window_height=app_height, window_width=app_width)  
-
-        self.frame.Show(True)
-
-        if hasattr(self.frame, 'special'):
-            self.frame.special.SetCurrent()
-        self.SetTopWindow(self.frame)
-        return True
     
    
-
 class SansViewTool():
     """
     """
@@ -61,19 +41,20 @@ class SansViewTool():
         
         #Calculator perspective   
         try:
-            import perspectives.calculator as module    
-            calculator_plug = module.Plugin(standalone=True)
+            import sans.perspectives.calculator as module    
+            calculator_plug = module.Plugin(standalone=False)
             self.gui.add_perspective(calculator_plug)
         except:
-            logging.error("SansView: could not find Calculator plug-in module") 
+            logging.error("SansView: could not find Calculator plug-in module")
+            logging.error(sys.exc_value)  
         
       
         # Build the GUI
         self.gui.build_gui()
-
+        
         # Start the main loop
-        self.gui.MainLoop()  
-       
+        self.gui.MainLoop() 
+        
 
 if __name__ == "__main__": 
     sansviewtool = SansViewTool()
