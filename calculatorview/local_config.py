@@ -77,6 +77,10 @@ CLEANUP_PLOT = False
 WELCOME_PANEL_SHOW = False
 #Open Save project menu
 OPEN_SAVE_PROJECT_MENU = False
+#VIEW MENU
+VIEW_MENU = False
+#EDIT MENU
+EDIT_MENU = False
 #Show or hide toolbar at the start up
 TOOLBAR_SHOW = False
 # set a default perspective

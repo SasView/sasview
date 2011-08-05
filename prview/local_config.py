@@ -76,6 +76,10 @@ WELCOME_PANEL_SHOW = False
 TOOLBAR_SHOW = True
 #Open Save project menu
 OPEN_SAVE_PROJECT_MENU = True
+#VIEW MENU
+VIEW_MENU = True
+#EDIT MENU
+EDIT_MENU = True
 # set a default perspective
 DEFAULT_PERSPECTIVE = 'None'
 import wx.lib.newevent

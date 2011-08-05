@@ -69,7 +69,12 @@ SPLASH_SCREEN_HEIGHT = 366
 SS_MAX_DISPLAY_TIME = 6000 #6 sec
 WELCOME_PANEL_SHOW = False
 CLEANUP_PLOT = False
+# OPEN and SAVE project menu
 OPEN_SAVE_PROJECT_MENU = True
+#VIEW MENU
+VIEW_MENU = True
+#EDIT MENU
+EDIT_MENU = True
 SetupIconFile_win = os.path.join("images", "ball.ico")
 SetupIconFile_mac = os.path.join("images", "ball.icns")
 DefaultGroupName = "DANSE"

@@ -118,6 +118,8 @@ PLOPANEL_HEIGTH = config.PLOPANEL_HEIGTH
 DATAPANEL_HEIGHT = config.DATAPANEL_HEIGHT
 PLUGIN_STATE_EXTENSIONS =  config.PLUGIN_STATE_EXTENSIONS
 OPEN_SAVE_MENU = config.OPEN_SAVE_PROJECT_MENU
+VIEW_MENU = config.VIEMENU
+EDIT_MENU = config.EDITMENU
 extension_list = []
 if APPLICATION_STATE_EXTENSION is not None:
     extension_list.append(APPLICATION_STATE_EXTENSION)
@@ -972,6 +974,8 @@ class ViewerFrame(wx.Frame):
         """
         add menu items under view menu
         """
+        if not VIEW_MENU:
+            return
         self._view_menu = wx.Menu()
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         id = wx.NewId()
@@ -1188,6 +1192,8 @@ class ViewerFrame(wx.Frame):
         """
         add menu edit
         """
+        if not EDIT_MENU:
+            return
         # Edit Menu
         self._edit_menu = wx.Menu()
         self._edit_menu.Append(GUIFRAME_ID.UNDO_ID, '&Undo', 
