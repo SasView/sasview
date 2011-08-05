@@ -15,7 +15,7 @@ from sans.guiframe import gui_manager
 # For py2exe, import config here
 import local_config
 import logging
-
+import sys
 class SansViewToolApp(gui_manager.ViewApp):
     """
     """
@@ -42,12 +42,12 @@ class SansViewTool():
         #Calculator perspective   
         try:
             import sans.perspectives.calculator as module    
-            calculator_plug = module.Plugin(standalone=False)
+            calculator_plug = module.Plugin(standalone=True)
             self.gui.add_perspective(calculator_plug)
         except:
             logging.error("SansView: could not find Calculator plug-in module")
             logging.error(sys.exc_value)  
-        
+
       
         # Build the GUI
         self.gui.build_gui()
