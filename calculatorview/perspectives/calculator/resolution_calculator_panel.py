@@ -1149,12 +1149,9 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         new_string = []
         msg = "Wrong format of intputs."
         try:
-            if self.wave_color.lower().count('poly') > 0:
-                wx.MessageBox(msg, 'Warning')
-            else:
-                # is float
-                out = [float(string)]
-                return out
+            # is float
+            out = [float(string)]
+            return out
         except:
             if self.wave_color.lower().count('mono') > 0:
                 wx.MessageBox(msg, 'Warning')
