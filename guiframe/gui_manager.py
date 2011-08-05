@@ -117,6 +117,7 @@ DEFAULT_STYLE = config.DEFAULT_STYLE
 PLOPANEL_HEIGTH = config.PLOPANEL_HEIGTH
 DATAPANEL_HEIGHT = config.DATAPANEL_HEIGHT
 PLUGIN_STATE_EXTENSIONS =  config.PLUGIN_STATE_EXTENSIONS
+OPEN_SAVE_MENU = config.OPEN_SAVE_PROJECT_MENU
 extension_list = []
 if APPLICATION_STATE_EXTENSION is not None:
     extension_list.append(APPLICATION_STATE_EXTENSION)
@@ -1146,12 +1147,12 @@ class ViewerFrame(wx.Frame):
         self._populate_file_menu()
         style = self.__gui_style & GUIFRAME.DATALOADER_ON
         style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
-        
-        id = wx.NewId()
-        hint_load_file = "read all analysis states saved previously"
-        self._save_appl_menu = self._file_menu.Append(id, 
-                                '&Open Project', hint_load_file)
-        wx.EVT_MENU(self, id, self._on_open_state_project)
+        if OPEN_SAVE_MENU:
+            id = wx.NewId()
+            hint_load_file = "read all analysis states saved previously"
+            self._save_appl_menu = self._file_menu.Append(id, 
+                                    '&Open Project', hint_load_file)
+            wx.EVT_MENU(self, id, self._on_open_state_project)
             
         if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
             # some menu of plugin to be seen under file menu
@@ -1161,12 +1162,12 @@ class ViewerFrame(wx.Frame):
             self._save_appl_menu = self._file_menu.Append(id, 
                                     '&Open Analysis', hint_load_file)
             wx.EVT_MENU(self, id, self._on_open_state_application)
-                
-        self._file_menu.AppendSeparator()
-        id = wx.NewId()
-        self._file_menu.Append(id, '&Save Project',
-                             'Save the state of the whole analysis')
-        wx.EVT_MENU(self, id, self._on_save_project)
+        if OPEN_SAVE_MENU:        
+            self._file_menu.AppendSeparator()
+            id = wx.NewId()
+            self._file_menu.Append(id, '&Save Project',
+                                 'Save the state of the whole analysis')
+            wx.EVT_MENU(self, id, self._on_save_project)
         if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
             #self._file_menu.AppendSeparator()
             id = wx.NewId()
