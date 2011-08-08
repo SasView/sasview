@@ -1,1 +1,0 @@
-- Call _check_update in a separate thread 
