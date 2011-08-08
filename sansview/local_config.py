@@ -6,7 +6,7 @@ import os
 from sans.guiframe.gui_style import GUIFRAME
 # Version of the application
 __appname__ = "SansView"
-__version__ = '1.9.2dev_JUN'
+__version__ = '1.9.2dev_AUG'
 __download_page__ = 'http://danse.chem.utk.edu'
 __update_URL__ = 'http://danse.chem.utk.edu/sansview_version.php'
 

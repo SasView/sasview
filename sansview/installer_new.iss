@@ -7,14 +7,14 @@
 
 ChangesAssociations=yes
 AppName=SansView
-AppVerName=SansView-1.9.2dev_JUN
+AppVerName=SansView-1.9.2dev_AUG
 AppPublisher=(c) 2009, University of Tennessee
 AppPublisherURL=http://danse.chem.utk.edu
 AppSupportURL=http://danse.chem.utk.edu
 AppUpdatesURL=http://danse.chem.utk.edu 
 ChangesEnvironment=true 
 DefaultDirName={pf}\SansView-Dev
-DefaultGroupName=DANSE\SansView-1.9.2dev_JUN
+DefaultGroupName=DANSE\SansView-1.9.2dev_AUG
 DisableProgramGroupPage=yes
 LicenseFile=license.txt
 OutputBaseFilename=setupSansView
