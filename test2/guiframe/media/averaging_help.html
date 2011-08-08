@@ -1,0 +1,107 @@
+<html>
+<body>
+
+<h4>2D Data Averaging</h4>
+<ul>
+<li><a href="#Description">Description</a></li>
+<li><a href="#How to use">How to Average? </a></li>
+<p> Available averagings: </p>
+<li><a href="#Circular Average">Perform Circular Average</a></li>
+<li><a href="#Masked Average">Masked Circular Average</a></li>
+<li><a href="#Sector"> Sector [Q view]</a></li>
+<li><a href="#Annulus"> Annulus [Phi view]</a></li>
+<li><a href="#Box sum"> Box sum</a></li>
+<li><a href="#Box averaging in Qx"> Box averaging in Qx</a></li>
+<li><a href="#Box averaging in Qy"> Box averaging in Qy</a></li>
+
+</ul>
+<h5><a name="Description">Description</a></h5>
+<p>
+ This feature allows you to perform different types of averages on your data,
+ and allows you to see what regions of the detector will contribute to 
+ the average. 
+ The region to be averaged will be drown and can be modified by dragging the lines around. 
+</p>
+
+
+<h5><a name="How to use">How to Average?</a></h5>
+<p>
+Right click on 2D data for the context menu to appear. Select one type of averages
+among <b>"sector [Q view]", "Annulus [Phi view]", "Box sum", "Box averaging in Qx ",
+"box averaging on Qy","Perform circular Average".</b>
+</p> 
+<p>
+A slicer will appear except for <b> "Perform circular Average"</b>
+that you can drag by clicking on a slicer 's marker. 
+ When the marker is highlighted in red , it means that the slicer can change size.You can
+ also move some of the slicer by simply drag its side when highlighted in red.
+ the slicer size will be reset to its previous size if the user try to select a region greater 
+ than the size of the data.
+ 
+</p>
+ <p>The user can also select a region to average when a slicer has been selected already by <b>right 
+ clicking </b> on the context menu and selecting <b>Edit Slicer Parameters</b>. The dialog window 
+ will appears and the user can enter values to selected a region or selected numbers of points to 
+ plot <b>nbins</b>.
+</p>
+ 
+<p>
+ For <b>Box sum</b> , when the user selects this option, a new panel is created containing 
+ the result of average of the sum of every pixels contains on  that data.The user can also enter 
+ values to select a region.
+</p>
+
+<h5><a name="Circular Average">Perform Circular Average</a></h5>
+<p>
+It will perform and average in constant q-rings around the (x,y)
+ pixel location of the beam center. 
+</p>
+
+
+<h5><a name="Masked Average">Masked Circular Average</a></h5>
+<p>
+This operation is same as 'Perform Circular Average' except that the masked region is excluded if masked.
+</p>
+
+<h5><a name="Sector">Sector [Q view]</a></h5>
+<p>
+It averages in constant q-arcs. The width of the sector
+ is specified in degrees (+/- delta phi) each direction from the central angle (phi).
+</p>
+
+<h5><a name="Annulus"> Annulus [Phi view]</a></h5>
+<p>
+It performs an average between two q-values centered in (0,0),
+ and averaged over a width of a specified number of pixels.
+ The data is returned as a function of angle (phi) in degrees. 
+ Moving one circle of this slicer
+ to radius of zero corresponding to a circular averaging on radius qmax , 
+ the outer circle.
+  The angle zero starts from the positive x-axis direction.
+</p>
+
+<h5><a name="Box sum"> Box sum</a></h5>
+<p>
+Perform the sum of counts in a 2D region of interest.When editing the slicer ,the user can 
+enter the length and the width the rectangle slicer and the coordinates of the center of this
+rectangle. 
+</p>
+<h5><a name="Box averaging in Qx"> Box averaging in Qx</a></h5>
+<p>
+Computes average I(Qx) for a region of interest. When editing the slicer ,the user can 
+control the length and the width the rectangle slicer. 
+The averaged output is calculated from the constant bins with rectangular shape.
+The resultant q values are nominal values, i.e., the central values of each bins on the x-axis.
+
+</p>
+<h5><a name="Box averaging in Qy"> Box averaging in Qy</a></h5>
+<p>
+ Computes average I(Qy) for a region of interest.When editing the slicer ,the user can 
+control the length and the width the rectangle slicer. 
+The averaged output is calculated from the constant bins with rectangular shape.
+The resultant q values are nominal values, i.e., the central values of each bins on the y-axis.
+</p>
+
+</body>
+</html>
+
