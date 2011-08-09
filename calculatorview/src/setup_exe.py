@@ -96,8 +96,8 @@ for f in findall('images'):
 import sans.guiframe as guiframe
 data_files += guiframe.data_files()
 # Copy the settings file for the DataLoader file extension associations
-import DataLoader.readers
-f = os.path.join(DataLoader.readers.get_data_path(),'defaults.xml')
+import sans.dataloader.readers
+f = os.path.join(sans.dataloader.readers.get_data_path(),'defaults.xml')
 if os.path.isfile(f):
     data_files.append(('.', [f]))
 f = 'custom_config.py'
