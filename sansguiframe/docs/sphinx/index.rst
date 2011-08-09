@@ -13,6 +13,7 @@ Contents:
 
    api/index.rst
    api/local_perspectives/plotting/index.rst
+   api/local_perspectives/data_loader/index.rst
 
 Indices and tables
 ==================
