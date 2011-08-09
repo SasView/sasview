@@ -90,14 +90,14 @@ dist = setup(
     #ext_package = "sans",
     
     # Use the pure python modules
-    package_dir = {"sans_extension":"sans/models/c_extensions",
+    package_dir = {"sans.models.sans_extension":"sans/models/c_extensions",
                    "sans.models.media":"sans/models/media"},
     package_data={'sans.models.media': ['*.gif','*.jpg','*.png','*.html']},
     packages = ["sans","sans.models","sans.models.test",
-                "sans_extension","sans.models.pyre",
+                "sans.models.sans_extension","sans.models.pyre",
                 "sans.models.media"],
     
-    ext_modules = [ Extension("sans_extension.c_models",
+    ext_modules = [ Extension("sans.models.sans_extension.c_models",
      sources = [
         "sans/models/c_models/c_models.cpp",
         #srcdir+"/CSphereModel.c",
@@ -282,13 +282,13 @@ dist = setup(
             ],
         include_dirs=[igordir,srcdir,"sans/models/c_models",numpy_incl_path]),       
         # Smearer extension
-        Extension("sans_extension.smearer",
+        Extension("sans.models.sans_extension.smearer",
                    sources = [
         "sans/models/c_smearer/smearer_module.cpp",
         "sans/models/c_smearer/smearer.cpp",
         ],
         include_dirs=["sans/models/c_smearer",numpy_incl_path]),
-        Extension("sans_extension.smearer2d_helper",
+        Extension("sans.models.sans_extension.smearer2d_helper",
                   sources = [
         "sans/models/c_smearer/smearer2d_helper_module.cpp",
         "sans/models/c_smearer/smearer2d_helper.cpp",
