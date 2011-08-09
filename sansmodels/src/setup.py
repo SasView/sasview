@@ -11,6 +11,8 @@
 """
 import sys
 import os
+if len(sys.argv) == 1:
+    sys.argv.append('install')
     
 from numpy.distutils.misc_util import get_numpy_include_dirs
 numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
@@ -71,13 +73,13 @@ from distutils.core import Extension, setup
 
 # Build the module name
 srcdir  = "sans/models/c_extensions"
-igordir = "libigor"
+igordir = "sans/models/libigor"
 
 print "Installing SANS models"
 
 
 dist = setup(
-    name="models",
+    name="sans.models",
     version = "0.9.1",
     description = "Python module for SANS scattering models",
     author = "SANS/DANSE",
@@ -89,7 +91,7 @@ dist = setup(
     
     # Use the pure python modules
     package_dir = {"sans_extension":"sans/models/c_extensions",
-                   "sans.models.media":"media"},
+                   "sans.models.media":"sans/models/media"},
     package_data={'sans.models.media': ['*.gif','*.jpg','*.png','*.html']},
     packages = ["sans","sans.models","sans.models.test",
                 "sans_extension","sans.models.pyre",

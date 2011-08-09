@@ -1,5 +1,5 @@
-graft media
-graft libigor
+graft sans/models/media
+graft sans/models/libigor
 graft sans/models/c_models
 recursive-include sans *.h
 recursive-include sans *.hh
