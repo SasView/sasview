@@ -16,7 +16,7 @@
 
 import math, logging, os
 import numpy
-from DataLoader.data_info import Data2D
+from sans.dataloader.data_info import Data2D
     
 class Reader:
     """

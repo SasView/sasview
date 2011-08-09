@@ -30,11 +30,11 @@ import logging
 import numpy
 import os
 import sys
-from DataLoader.data_info import Data1D
-from DataLoader.data_info import Collimation
-from DataLoader.data_info import Detector
-from DataLoader.data_info import Process
-from DataLoader.data_info import Aperture
+from sans.dataloader.data_info import Data1D
+from sans.dataloader.data_info import Collimation
+from sans.dataloader.data_info import Detector
+from sans.dataloader.data_info import Process
+from sans.dataloader.data_info import Aperture
 from lxml import etree
 import xml.dom.minidom
 _ZERO = 1e-16

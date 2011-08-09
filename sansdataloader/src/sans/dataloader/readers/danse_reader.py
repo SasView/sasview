@@ -20,8 +20,8 @@ import os
 #import copy
 import numpy
 import logging
-from DataLoader.data_info import Data2D, Detector
-from DataLoader.manipulations import reader2D_converter
+from sans.dataloader.data_info import Data2D, Detector
+from sans.dataloader.manipulations import reader2D_converter
 
 # Look for unit converter
 has_converter = True

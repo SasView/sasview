@@ -10,8 +10,8 @@
 
 import numpy
 import os
-from DataLoader.data_info import Data1D
-from DataLoader.data_info import Detector
+from sans.dataloader.data_info import Data1D
+from sans.dataloader.data_info import Detector
 
 has_converter = True
 try:

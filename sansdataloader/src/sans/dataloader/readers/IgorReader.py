@@ -19,9 +19,9 @@ import os
 import numpy
 import math
 #import logging
-from DataLoader.data_info import Data2D
-from DataLoader.data_info import Detector
-from DataLoader.manipulations import reader2D_converter
+from sans.dataloader.data_info import Data2D
+from sans.dataloader.data_info import Detector
+from sans.dataloader.manipulations import reader2D_converter
 
 # Look for unit converter
 has_converter = True

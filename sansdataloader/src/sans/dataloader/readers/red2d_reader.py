@@ -17,7 +17,7 @@ import os
 import numpy
 import math
 #import logging
-from DataLoader.data_info import Data2D, Detector
+from sans.dataloader.data_info import Data2D, Detector
 
 # Look for unit converter
 has_converter = True
