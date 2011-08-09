@@ -35,9 +35,6 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="ParkFitting.html" title="ParkFitting"
              accesskey="N">next</a> |</li>
         <li class="right" >
@@ -55,120 +52,8 @@
             
   <div class="section" id="fitting">
 <h1>Fitting<a class="headerlink" href="#fitting" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.fit.Fitting">
-<span id="mod-sans-fit-fitting"></span><h2>:mod:` sans.fit.Fitting`<a class="headerlink" href="#module-sans.fit.Fitting" title="Permalink to this headline">¶</a></h2>
-<p>Class Fit contains ScipyFit and ParkFit methods declaration
-allows to create instance of type ScipyFit or ParkFit to perform either
-a park fit or a scipy fit.</p>
-<dl class="class">
-<dt id="sans.fit.Fitting.Fit">
-<em class="property">class </em><tt class="descclassname">sans.fit.Fitting.</tt><tt class="descname">Fit</tt><big>(</big><em>engine='scipy'</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrap class that allows to select the fitting type.this class 
-can be used as follow :</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">sans.fit.Fitting</span> <span class="kn">import</span> <span class="n">Fit</span>
-<span class="n">fitter</span><span class="o">=</span> <span class="n">Fit</span><span class="p">()</span>
-<span class="n">fitter</span><span class="o">.</span><span class="n">fit_engine</span><span class="p">(</span><span class="s">&#39;scipy&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">fitter</span><span class="o">.</span><span class="n">fit_engine</span><span class="p">(</span><span class="s">&#39;park&#39;</span><span class="p">)</span>
-<span class="n">engine</span> <span class="o">=</span> <span class="n">fitter</span><span class="o">.</span><span class="n">returnEngine</span><span class="p">()</span>
-<span class="n">engine</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="nb">id</span><span class="p">)</span>
-<span class="n">engine</span><span class="o">.</span><span class="n">set_param</span><span class="p">(</span> <span class="n">model</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pars</span><span class="p">)</span>
-<span class="n">engine</span><span class="o">.</span><span class="n">set_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="nb">id</span><span class="p">)</span>
-
-<span class="n">chisqr1</span><span class="p">,</span> <span class="n">out1</span><span class="p">,</span> <span class="n">cov1</span><span class="o">=</span><span class="n">engine</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">pars</span><span class="p">,</span><span class="n">qmin</span><span class="p">,</span><span class="n">qmax</span><span class="p">)</span>
-</pre></div>
-</div>
-<dl class="method">
-<dt id="sans.fit.Fitting.Fit.fit">
-<tt class="descname">fit</tt><big>(</big><em>q=None</em>, <em>handler=None</em>, <em>curr_thread=None</em>, <em>ftol=1.49012e-008</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Perform the fit</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.fit.Fitting.Fit.get_model">
-<tt class="descname">get_model</tt><big>(</big><em>id</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.get_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>return list of data</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.fit.Fitting.Fit.get_problem_to_fit">
-<tt class="descname">get_problem_to_fit</tt><big>(</big><em>id</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.get_problem_to_fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the self.selected value of the fit problem of id</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> &#8211; the id of the problem</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.fit.Fitting.Fit.remove_fit_problem">
-<tt class="descname">remove_fit_problem</tt><big>(</big><em>id</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.remove_fit_problem" title="Permalink to this definition">¶</a></dt>
-<dd><p>remove fitarrange in id</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.fit.Fitting.Fit.select_problem_for_fit">
-<tt class="descname">select_problem_for_fit</tt><big>(</big><em>id</em>, <em>value</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.select_problem_for_fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>select a couple of model and data at the id position in dictionary
-and set in self.selected value to value</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; the value to allow fitting.
-can only have the value one or zero</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.fit.Fitting.Fit.set_data">
-<tt class="descname">set_data</tt><big>(</big><em>data</em>, <em>id</em>, <em>smearer=None</em>, <em>qmin=None</em>, <em>qmax=None</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.set_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Store data to fit at the psotion id of the fit engine</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>data</strong> &#8211; data to fit</li>
-<li><strong>smearer</strong> &#8211; smearerobject to smear data</li>
-<li><strong>qmin</strong> &#8211; the minimum q range to fit</li>
-<li><strong>qmax</strong> &#8211; the minimum q range to fit</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.fit.Fitting.Fit.set_engine">
-<tt class="descname">set_engine</tt><big>(</big><em>word</em><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.set_engine" title="Permalink to this definition">¶</a></dt>
-<dd><p>Select the type of Fit</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>word</strong> &#8211; the keyword to select the fit type</td>
-</tr>
-<tr class="field"><th class="field-name">Raise :</th><td class="field-body">if the user does not enter &#8216;scipy&#8217; or &#8216;park&#8217;,
-a valueError is raised</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.fit.Fitting.Fit.set_model">
-<tt class="descname">set_model</tt><big>(</big><em>model</em>, <em>id</em>, <em>pars=</em><span class="optional">[</span><span class="optional">]</span>, <em>constraints=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.fit.Fitting.Fit.set_model" title="Permalink to this definition">¶</a></dt>
-<dd><p>store a model model to fit at the position id of the fit engine</p>
-</dd></dl>
-
-</dd></dl>
-
+<div class="section" id="mod-sans-fit-fitting">
+<h2>:mod:` sans.fit.Fitting`<a class="headerlink" href="#mod-sans-fit-fitting" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -181,7 +66,7 @@ a valueError is raised</td>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Fitting</a><ul>
-<li><a class="reference internal" href="#module-sans.fit.Fitting">:mod:` sans.fit.Fitting`</a></li>
+<li><a class="reference internal" href="#mod-sans-fit-fitting">:mod:` sans.fit.Fitting`</a></li>
 </ul>
 </li>
 </ul>
@@ -220,9 +105,6 @@ a valueError is raised</td>
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
-        <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
         <li class="right" >
           <a href="ParkFitting.html" title="ParkFitting"
              >next</a> |</li>

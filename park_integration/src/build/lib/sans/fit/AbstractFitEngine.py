@@ -5,8 +5,8 @@ import  copy
 import numpy
 import math
 import park
-from sans.dataloader.data_info import Data1D
-from sans.dataloader.data_info import Data2D
+from DataLoader.data_info import Data1D
+from DataLoader.data_info import Data2D
 import time
 _SMALLVALUE = 1.0e-10    
     
