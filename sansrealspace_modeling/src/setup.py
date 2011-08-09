@@ -7,8 +7,10 @@
       python setup.py bdist_wininst
 
 """
-import sys, os
-from distutils.core import setup, Extension
+import sys
+import os
+from distutils.core import setup
+from distutils.core import Extension
 from distutils import util
 from distutils import sysconfig
 
@@ -36,7 +38,7 @@ if os.name=='nt':
 mod_list = ["iqPy", "geoshapespy", "pointsmodelpy", "analmodelpy"]
 
 # Define package directors, will be extended below
-pck_dirs = {pck_top:"."}
+pck_dirs = {pck_top:os.path.join('sans', 'simulation')}
 
 # List of modules to install, will be extende below
 pck_list = [pck_top]
@@ -61,11 +63,12 @@ deps["pointsmodelpy"] = ["iqPy", "geoshapespy"]
 libs = {}
 
 for module in mod_list:
-    pck_dirs["%s.%s" % (pck_top, module)] = "%s/%s" % (module, module)
+    temp_path = os.path.join('sans', 'simulation', module, module)
+    pck_dirs["%s.%s" % (pck_top, module)] = temp_path
     pck_list.append("%s.%s" % (pck_top, module))
 
-    src_m = "%s/%smodule" % (module, module)
-    src_l = "%s/lib%s" % (module, module)
+    src_m = "sans/simulation/%s/%smodule" % (module, module)
+    src_l = "sans/simulation/%s/lib%s" % (module, module)
 
     files = get_c_files(src_m)
     list_lib = get_c_files(src_l)
@@ -73,7 +76,7 @@ for module in mod_list:
     libs[module] = []    
     for dep in deps[module]:
         
-        for f in get_c_files("%s/lib%s" % (dep, dep)):
+        for f in get_c_files("sans/simulation/%s/lib%s" % (dep, dep)):
             index = f.rindex('.')
             if os.name=='nt':
                 fo = f[:index]+'.obj'
@@ -94,15 +97,13 @@ for module in mod_list:
         include_dirs=incl_dirs) )
 
 setup(
-    name="realspacesimulation",
+    name="sans.simulation",
     version = "0.2",
     description = "Python module for SANS simulation",
     author = "University of Tennessee",
     url = "http://danse.us/trac/sans",
-    
     package_dir = pck_dirs,
     packages    = pck_list,
-    
     ext_modules = exts)
 
 
