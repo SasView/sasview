@@ -82,7 +82,7 @@ def reader2D_converter(data2d=None):
     if data2d.data == None or data2d.x_bins == None or data2d.y_bins == None:
         raise ValueError, "Can't convert this data: data=None..."
     
-    from DataLoader.data_info import Data2D
+    from sans.dataloader.data_info import Data2D
 
     new_x = numpy.tile(data2d.x_bins, (len(data2d.y_bins), 1))
     new_y = numpy.tile(data2d.y_bins, (len(data2d.x_bins), 1))
