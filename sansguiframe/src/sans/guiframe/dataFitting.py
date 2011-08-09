@@ -9,8 +9,8 @@ from danse.common.plottools.plottables import Data1D as PlotData1D
 from danse.common.plottools.plottables import Data2D as PlotData2D
 from danse.common.plottools.plottables import Theory1D as PlotTheory1D
 
-from DataLoader.data_info import Data1D as LoadData1D
-from DataLoader.data_info import Data2D as LoadData2D
+from sans.dataloader.data_info import Data1D as LoadData1D
+from sans.dataloader.data_info import Data2D as LoadData2D
 
 
 class Data1D(PlotData1D, LoadData1D):

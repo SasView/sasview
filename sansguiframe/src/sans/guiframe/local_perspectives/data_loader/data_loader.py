@@ -7,8 +7,8 @@ import sys
 import wx
 import logging
 
-from DataLoader.loader import Loader
-import DataLoader.data_info as DataInfo
+from sans.dataloader.loader import Loader
+import sans.dataloader.data_info as DataInfo
 from sans.guiframe.plugin_base import PluginBase
 from sans.guiframe.events import StatusEvent
 from sans.guiframe.events import NewPlotEvent

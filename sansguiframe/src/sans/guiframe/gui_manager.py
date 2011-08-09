@@ -76,7 +76,7 @@ from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.gui_toolbar import GUIToolBar
 from sans.guiframe.data_processor import GridFrame
 from sans.guiframe.events import EVT_NEW_BATCH
-from DataLoader.loader import Loader
+from sans.dataloader.loader import Loader
 
 
 #read some constants from config

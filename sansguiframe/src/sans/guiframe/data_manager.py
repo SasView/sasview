@@ -20,7 +20,7 @@ import copy
 
 from sans.guiframe.data_state import DataState
 from sans.guiframe.utils import parse_name
-import DataLoader.data_info as DataInfo
+import sans.dataloader.data_info as DataInfo
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
 import time

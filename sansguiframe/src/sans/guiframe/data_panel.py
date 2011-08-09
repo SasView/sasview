@@ -35,7 +35,7 @@ from sans.guiframe.events import NewLoadDataEvent
 from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.gui_style import GUIFRAME
 from sans.guiframe.events import NewBatchEvent
-from DataLoader.loader import Loader
+from sans.dataloader.loader import Loader
 
 try:
     # Try to find a local config
