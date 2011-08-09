@@ -13,7 +13,7 @@ package_dir = {"sans.guiframe":os.path.join("sans", "guiframe"),
                                                         "local_perspectives"),}
 
 package_data = {"sans.guiframe": ['images/*', 'media/*']}
-packages = ["sans.guiframe", 
+packages = ["sans.guiframe", 'sans',
             "sans.guiframe.local_perspectives"]
 # build local plugin
 for dir in os.listdir(path):
