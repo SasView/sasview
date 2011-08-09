@@ -4,15 +4,15 @@
 
 import unittest
 import numpy, math
-from DataLoader.loader import  Loader
-from DataLoader.data_info import Data1D
+from sans.dataloader.loader import  Loader
+from sans.dataloader.data_info import Data1D
  
 import os.path
 
 class abs_reader(unittest.TestCase):
     
     def setUp(self):
-        from DataLoader.readers.abs_reader import Reader
+        from sans.dataloader.readers.abs_reader import Reader
         self.data = Reader().read("jan08002.ABS")
         
     def test_checkdata(self):
@@ -310,7 +310,7 @@ class cansas_reader(unittest.TestCase):
         
         
     def test_writer(self):
-        from DataLoader.readers.cansas_reader import Reader
+        from sans.dataloader.readers.cansas_reader import Reader
         r = Reader()
         x = numpy.ones(5)
         y = numpy.ones(5)

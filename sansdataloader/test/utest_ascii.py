@@ -5,7 +5,7 @@ import warnings
 warnings.simplefilter("ignore")
 
 import unittest
-from DataLoader.loader import  Loader
+from sans.dataloader.loader import  Loader
  
 import os.path
 

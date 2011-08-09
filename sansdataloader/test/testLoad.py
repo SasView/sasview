@@ -13,8 +13,8 @@ logging.basicConfig(level=logging.DEBUG,
 
 import unittest
 import math
-import DataLoader
-from DataLoader.loader import  Loader
+import sans.dataloader
+from sans.dataloader.loader import  Loader
 
 # Check whether we should test image loading on this system 
 HAS_IMAGE = False
