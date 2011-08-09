@@ -5,8 +5,8 @@
 
 import unittest
 import numpy, math
-from DataLoader.loader import  Loader
-from DataLoader.data_info import Data1D, Data2D
+from sans.dataloader.loader import  Loader
+from sans.dataloader.data_info import Data1D, Data2D
 #from DataLoader.qsmearing import SlitSmearer, QSmearer, smear_selection
 from sans.models.qsmearing import SlitSmearer, QSmearer, smear_selection
 from sans.models.SphereModel import SphereModel
