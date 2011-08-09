@@ -1086,7 +1086,7 @@ class ResolutionCalculator(object):
 
         # try to set it as a Data2D otherwise pass (not required for now)
         try:
-            from DataLoader.data_info import Data2D
+            from sans.dataloader.data_info import Data2D
             output = Data2D()
             inten = numpy.zeros_like(qx_value)
             output.data     = inten
