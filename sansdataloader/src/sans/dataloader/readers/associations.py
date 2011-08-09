@@ -115,7 +115,7 @@ if __name__ == "__main__":
                         format='%(asctime)s %(levelname)s %(message)s',
                         filename='logger.log',
                         filemode='w')
-    from DataLoader.loader import Loader
+    from sans.dataloader.loader import Loader
     l = Loader()
     read_associations(l)
     
