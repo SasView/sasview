@@ -3,7 +3,7 @@ Console Module display message of a dialog
 """
 import wx
 import sys
-from DataLoader.loader import Loader
+from sans.dataloader.loader import Loader
 
 _BOX_WIDTH = 60
 CONSOLE_WIDTH = 340

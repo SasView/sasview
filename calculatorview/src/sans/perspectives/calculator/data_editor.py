@@ -4,11 +4,11 @@ import sys
 import os 
 from copy import deepcopy
 
-from DataLoader.loader import Loader
+from sans.dataloader.loader import Loader
 #from DataLoader.data_info import DataInfo
 #from DataLoader.data_info import  Detector
 #from DataLoader.data_info import Collimation
-from DataLoader.data_info import Data2D
+from sans.dataloader.data_info import Data2D
 from detector_editor import DetectorDialog
 from collimation_editor import CollimationDialog
 from console import ConsoleDialog

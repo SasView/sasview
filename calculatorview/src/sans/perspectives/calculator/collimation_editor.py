@@ -3,8 +3,8 @@
 import wx
 import sys
 from copy import deepcopy
-from DataLoader.loader import Loader
-from DataLoader.data_info import Aperture, Collimation
+from sans.dataloader.loader import Loader
+from sans.dataloader.data_info import Aperture, Collimation
 from aperture_editor import ApertureDialog
 
 from sans.guiframe.utils import check_float

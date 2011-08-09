@@ -2,7 +2,7 @@
 import wx
 import sys
 from copy import deepcopy
-from DataLoader.data_info import Detector
+from sans.dataloader.data_info import Detector
 from sans.guiframe.utils import check_float
 
 _BOX_WIDTH = 60

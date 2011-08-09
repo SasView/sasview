@@ -545,7 +545,7 @@ class SampleDialog(wx.Dialog):
 
 if __name__ == "__main__":
     app = wx.App()
-    from DataLoader.data_info import Sample
+    from sans.dataloader.data_info import Sample
     sample = Sample()
     dlg = SampleDialog(sample=sample)
     dlg.ShowModal()

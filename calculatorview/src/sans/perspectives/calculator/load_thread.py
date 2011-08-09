@@ -4,7 +4,7 @@ import sys
 
 
 from data_util.calcthread import CalcThread
-from DataLoader.loader import Loader
+from sans.dataloader.loader import Loader
         
 
 class DataReader(CalcThread):

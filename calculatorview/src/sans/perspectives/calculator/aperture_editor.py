@@ -2,7 +2,7 @@
 import wx
 import sys
 from copy import deepcopy
-from DataLoader.loader import Loader
+from sans.dataloader.loader import Loader
 from sans.guiframe.utils import check_float
 
 _BOX_WIDTH = 60
@@ -403,7 +403,7 @@ if __name__ == "__main__":
     # Instantiate a loader 
     loader = Loader()
     # Load data 
-    from DataLoader.data_info import Aperture
+    from sans.dataloader.data_info import Aperture
     ap = Aperture()
     dlg = ApertureDialog(aperture=ap)
     dlg.ShowModal()
