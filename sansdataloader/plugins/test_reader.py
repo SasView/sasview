@@ -8,7 +8,7 @@ See the license text in license.txt
 copyright 2008, University of Tennessee
 """
 import numpy, os
-from DataLoader.data_info import Data1D
+from sans.dataloader.data_info import Data1D
 
 
 class Reader:
