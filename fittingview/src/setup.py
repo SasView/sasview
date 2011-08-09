@@ -9,7 +9,7 @@ setup(
     description = "Fitting module  for SansView",
     package_dir = {"sans.perspectives":"sans/perspectives",
                    "sans.perspectives.pr":"sans/perspectives/fitting"},
-    packages = ["sans.perspectives",
+    packages = ["sans.perspectives", 'sans',
                 "sans.perspectives.fitting"],
     )
 
