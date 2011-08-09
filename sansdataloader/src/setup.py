@@ -18,6 +18,6 @@ setup(
     
     package_dir = {"sans.dataloader":"sans/dataloader"},
     package_data={"sans.dataloader.readers": ['defaults.xml']},
-    packages = ["sans.dataloader","sans.dataloader.readers"]
+    packages = ["sans.dataloader","sans", "sans.dataloader.readers"]
     )
         

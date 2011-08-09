@@ -13,7 +13,7 @@ setup(
     package_dir={"sans.perspectives":"sans/perspectives",
                  "sans.perspectives.calculator":"sans/perspectives/calculator"},
     package_data={'sans.perspectives.calculator': ['images/*', 'media/*']},
-    packages=["sans.perspectives",
+    packages=["sans.perspectives", "sans",
               "sans.perspectives.calculator"],
     )
 
