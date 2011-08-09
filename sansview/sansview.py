@@ -51,7 +51,7 @@ class SansView():
         # to ensure a complete Windows executable build.
 
         # Fitting perspective
-        import perspectives.fitting as module    
+        import sans.perspectives.fitting as module    
         fitting_plug = module.Plugin()
         self.gui.add_perspective(fitting_plug)
 
