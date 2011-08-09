@@ -1,4 +1,4 @@
-from DataLoader.loader import Loader
+from sans.dataloader.loader import Loader
 import unittest
 
 class testLoader(unittest.TestCase):
