@@ -3,7 +3,9 @@
 """
 
 from distutils.core import setup
-
+import sys
+if len(sys.argv) == 1:
+    sys.argv.append('install')
 setup(
     name="sans.calculator",
     version = "0.9.1",
@@ -12,6 +14,6 @@ setup(
     url = "http://danse.chem.utk.edu",
 
     # Use the pure python modules
-    package_dir = {"sans.calculator":"."},
+    package_dir = {"sans.calculator":"sans/calculator"},
     packages = ["sans","sans.calculator"],
     )
