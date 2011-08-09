@@ -3,17 +3,17 @@
 """
 
 from distutils.core import setup
-
+import sys
+if len(sys.argv) == 1:
+    sys.argv.append('install')
 setup(
-    name="calculator",
+    name="sans.calculatorview",
     version = "0.9",
     description="calculator perspective for SansView",
-    package_dir={"sans.perspectives":"perspectives",
-                 "sans.perspectives.calculator":"perspectives/calculator",
-                 "sans.perspectives.calculator.media":"media"},
-    package_data={'sans.perspectives.calculator.media': ['*']},
+    package_dir={"sans.perspectives":"sans/perspectives",
+                 "sans.perspectives.calculator":"sans/perspectives/calculator"},
+    package_data={'sans.perspectives.calculator': ['images/*', 'media/*']},
     packages=["sans.perspectives",
-              "sans.perspectives.calculator",
-              "sans.perspectives.calculator.media"],
+              "sans.perspectives.calculator"],
     )
 
