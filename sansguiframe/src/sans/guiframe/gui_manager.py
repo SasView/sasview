@@ -15,51 +15,11 @@ import wx.aui
 import os
 import sys
 import xml
-
-
+import py_compile
 # Try to find a local config
 import imp
-DATAPATH = os.getcwd()
-tem_path = sys.path[0]
-if os.path.isfile(tem_path):
-    tem_path = os.path.dirname(tem_path)
-os.chdir(tem_path)
-PATH_APP = os.getcwd()
-if(os.path.isfile("%s/%s.py" % (PATH_APP, 'local_config'))) or \
-    (os.path.isfile("%s/%s.pyc" % (PATH_APP, 'local_config'))):
-    fObj, path_config, descr = imp.find_module('local_config', [PATH_APP])
-    try:
-        config = imp.load_module('local_config', fObj, path_config, descr) 
-    except:
-        # Didn't find local config, load the default 
-        import config
-    finally:
-        if fObj:
-            fObj.close()
-else:
-    # Try simply importing local_config
-    import local_config as config
-
-#import compileall
-import py_compile
-
-c_name = os.path.join(PATH_APP, 'custom_config.py')
-if(os.path.isfile("%s/%s.py" % (PATH_APP, 'custom_config'))):
-    py_compile.compile(file=c_name)
-    #compileall.compile_dir(dir=path, force=True, quiet=0)
-    cfObj, path_cconfig, descr = imp.find_module('custom_config', [PATH_APP]) 
-try:
-    custom_config = imp.load_module('custom_config', cfObj, PATH_APP, descr)
-except:
-    custom_config = None
-finally:
-    if custom_config != None:
-        cfObj.close()
-
-    
 import warnings
 warnings.simplefilter("ignore")
-
 import logging
 
 from sans.guiframe.events import EVT_STATUS
@@ -78,6 +38,50 @@ from sans.guiframe.data_processor import GridFrame
 from sans.guiframe.events import EVT_NEW_BATCH
 from sans.dataloader.loader import Loader
 
+DATAPATH = os.getcwd()
+tem_path = sys.path[0]
+if os.path.isfile(tem_path):
+    tem_path = os.path.dirname(tem_path)
+os.chdir(tem_path)
+PATH_APP = os.getcwd()
+
+def _find_local_config(file, path):
+    """
+    Find configuration file for the current application
+    """
+    
+    file_path = os.path.abspath(os.path.join(path, "%s.py" % file))
+    if(os.path.isfile(file_path)):
+        py_compile.compile(file=file_path)
+        fObj, path_config, descr = imp.find_module(file, [path])
+        try:
+            return imp.load_module(file, fObj, path_config, descr) 
+        except:
+            raise
+        finally:
+            if fObj:
+                fObj.close()
+        
+              
+try:
+    path = PATH_APP
+    config = _find_local_config('local_config', path)
+    if config is None:
+        path, _ = os.path.split(PATH_APP)
+        config = _find_local_config('local_config', path)
+except:
+    # Didn't find local config, load the default 
+    import sans.guiframe.config as config
+try:
+    path = PATH_APP
+    custom_config = _find_local_config('custom_config', path)
+    if custom_config is None:
+        path, _ = os.path.split(PATH_APP)
+        custom_config = _find_local_config('custom_config', path)
+except:
+    msg = "Custom_config file was not imported"
+    logging.info(msg)
+    
 
 #read some constants from config
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
