@@ -969,11 +969,11 @@ class Plugin(PluginBase):
         # Write the output to file
         # First, check that the data is of the right type
         if issubclass(self.current_plottable.__class__,
-                       DataLoader.data_info.Data1D):
+                       sans.dataloader.data_info.Data1D):
             self.state_reader.write(filepath, self.current_plottable, prstate)
         else:
             msg = "pr.save_data: the data being saved is not a"
-            msg += " DataLoader.data_info.Data1D object" 
+            msg += " sans.dataloader.data_info.Data1D object" 
             raise RuntimeError, msg
         
         

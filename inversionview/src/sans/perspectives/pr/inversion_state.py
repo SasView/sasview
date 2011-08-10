@@ -17,8 +17,8 @@ import logging
 from xml.dom.minidom import parse
 from lxml import etree
 from sans.guiframe.dataFitting import Data1D
-from DataLoader.readers.cansas_reader import Reader as CansasReader
-from DataLoader.readers.cansas_reader import get_content
+from sans.dataloader.readers.cansas_reader import Reader as CansasReader
+from sans.dataloader.readers.cansas_reader import get_content
 
 PRNODE_NAME = 'pr_inversion'
 CANSAS_NS = "cansas1d/1.0"
