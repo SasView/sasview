@@ -1,18 +1,16 @@
 """
      Installation script for DANSE calculator perspective for SansView
 """
-
+import os
 from distutils.core import setup
-import sys
-if len(sys.argv) == 1:
-    sys.argv.append('install')
+cal_dir = os.path.join("src", "sans", "perspective", "caculator")
 setup(
     name="sans.calculatorview",
     version = "0.9",
     description="calculator perspective for SansView",
     package_dir={"sans":"src/sans",
                  "sans.perspectives":"src/sans/perspectives",
-                 "sans.perspectives.calculator":"src/sans/perspectives/calculator"},
+                 "sans.perspectives.calculator":cal_dir},
     package_data={'sans.perspectives.calculator': ['images/*', 'media/*']},
     packages=["sans.perspectives", "sans",
               "sans.perspectives.calculator"],
