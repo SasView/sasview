@@ -28,7 +28,7 @@ def get_c_files(path):
 # Top package name
 #pck_top = "sansModeling"
 pck_top = "sans.simulation"
-
+pck_dir = os.path.join("src","sans", "simulation")
 # The temp directory that the compiled files will be put in
 tempdir = "build/temp."+util.get_platform()+'-'+sysconfig.get_python_version()
 if os.name=='nt':
@@ -38,7 +38,7 @@ if os.name=='nt':
 mod_list = ["iqPy", "geoshapespy", "pointsmodelpy", "analmodelpy"]
 
 # Define package directors, will be extended below
-pck_dirs = {pck_top:os.path.join('sans', 'simulation')}
+pck_dirs = {pck_top:pck_dir}
 
 # List of modules to install, will be extende below
 pck_list = [pck_top]
@@ -63,12 +63,12 @@ deps["pointsmodelpy"] = ["iqPy", "geoshapespy"]
 libs = {}
 
 for module in mod_list:
-    temp_path = os.path.join('sans', 'simulation', module, module)
+    temp_path = os.path.join(pck_dir, module, module)
     pck_dirs["%s.%s" % (pck_top, module)] = temp_path
     pck_list.append("%s.%s" % (pck_top, module))
 
-    src_m = "sans/simulation/%s/%smodule" % (module, module)
-    src_l = "sans/simulation/%s/lib%s" % (module, module)
+    src_m = os.path.join(pck_dir, module, "%smodule" %(module))
+    src_l = os.path.join(pck_dir, module, "lib%s" % (module))
 
     files = get_c_files(src_m)
     list_lib = get_c_files(src_l)
@@ -76,13 +76,13 @@ for module in mod_list:
     libs[module] = []    
     for dep in deps[module]:
         
-        for f in get_c_files("sans/simulation/%s/lib%s" % (dep, dep)):
+        for f in get_c_files(os.path.join(pck_dir, dep, "lib%s" % dep)):
             index = f.rindex('.')
             if os.name=='nt':
                 fo = f[:index]+'.obj'
             else:
                 fo = f[:index]+'.o'
-            libs[module].append("%s/%s" %(tempdir,fo))
+            libs[module].append("%s/%s" %(tempdir, fo))
         
     files.extend(list_lib)
     file_list[module] = files
