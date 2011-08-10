@@ -13,7 +13,7 @@ numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
 #print "NUMPY", numpy_incl_path
 
 # Build the module name
-srcdir  = os.path.join("sans", "c_extensions")
+srcdir  = os.path.join("sans", "pr", "c_extensions")
 
 setup(
     name="pr_inversion",
