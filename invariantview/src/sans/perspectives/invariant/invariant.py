@@ -21,7 +21,7 @@ from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.gui_style import GUIFRAME_ID
 from .invariant_state import Reader as reader
-from DataLoader.loader import Loader
+from sans.dataloader.loader import Loader
 from .invariant_panel import InvariantPanel
 from sans.guiframe.plugin_base import PluginBase
 
@@ -212,7 +212,7 @@ class Plugin(PluginBase):
             self.state_reader.write(filepath, current_plottable, state)
         else:
             msg = "invariant.save_file: the data being saved is"
-            msg += " not a DataLoader.data_info.Data1D object" 
+            msg += " not a sans.dataloader.data_info.Data1D object" 
             raise RuntimeError, msg
 
     def set_state(self, state=None, datainfo=None):    

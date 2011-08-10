@@ -1836,10 +1836,10 @@ class InvariantWindow(wx.Frame):
         
         wx.Frame.__init__(self, parent, id, title, size=(PANEL_WIDTH +100,
                                                              PANEL_HEIGHT+100))
-        from DataLoader.loader import  Loader
+        from sans.dataloader.loader import  Loader
         self.loader = Loader()
         import invariant
-        path = "C:/ECLPS/workspace/trunk/DataLoader/test/ascii_test_3.txt"
+        path = "C:/ECLPS/workspace/trunk/sansdataloader/test/ascii_test_3.txt"
         data= self.loader.load(path)
         self.panel = InvariantPanel(self)
 

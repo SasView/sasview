@@ -6,11 +6,11 @@ import os
 import sys
 import logging
 import copy
-import DataLoader
+import sans.dataloader
 #from xml.dom.minidom import parse
 from lxml import etree
-from DataLoader.readers.cansas_reader import Reader as CansasReader
-from DataLoader.readers.cansas_reader import get_content
+from sans.dataloader.readers.cansas_reader import Reader as CansasReader
+from sans.dataloader.readers.cansas_reader import get_content
 from sans.guiframe.utils import format_number
 from sans.guiframe.dataFitting import Theory1D
 from sans.guiframe.dataFitting import Data1D
@@ -792,8 +792,8 @@ class Reader(CansasReader):
         : return: xml doc
         """
         if datainfo is None:
-            datainfo = DataLoader.data_info.Data1D(x=[], y=[])    
-        elif not issubclass(datainfo.__class__, DataLoader.data_info.Data1D):
+            datainfo = sans.dataloader.data_info.Data1D(x=[], y=[])    
+        elif not issubclass(datainfo.__class__, sans.dataloader.data_info.Data1D):
             msg = "The cansas writer expects a Data1D"
             msg += " instance: %s" % str(datainfo.__class__.__name__)
             raise RuntimeError, msg
