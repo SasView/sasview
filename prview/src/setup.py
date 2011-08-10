@@ -3,6 +3,8 @@
 """
 import os
 from distutils.core import setup
+currpath = os.path.split(os.getcwd())[0]
+
 setup(
       version="0.9.1",
       name="prview",
@@ -12,6 +14,6 @@ setup(
       packages=["sans.perspectives","sans",
                 "sans.perspectives.pr"],
       package_data={"sans.perspectives.pr":['images/*']},
-      scripts= [os.path.join("bin", "PrView.py")],
+      scripts= [os.path.join(currpath, "scripts", "PrView.py")]
     )
 
