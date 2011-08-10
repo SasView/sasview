@@ -7,6 +7,7 @@
       python setup.py bdist_wininst
 
 """
+import os
 #TODO: this should be part of realSpaceModeling
 from distutils.core import setup
 setup(
@@ -15,7 +16,9 @@ setup(
     description = "Python module for SANS scattering models",
     url = "http://danse.us/trac/sans",
     # Use the pure python modules
-    package_dir = {"sans.realspace":"sans/realspace"},
+    package_dir = {"sans":os.path.join("src", "sans"),
+                   "sans.realspace":os.path.join("src",
+                                                 "sans", "realspace")},
     packages = ["sans.realspace"]
     )
         
