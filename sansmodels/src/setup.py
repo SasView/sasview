@@ -91,11 +91,10 @@ dist = setup(
     
     # Use the pure python modules
     package_dir = {"sans.models.sans_extension":"sans/models/c_extensions",
-                   "sans.models.media":"sans/models/media"},
-    package_data={'sans.models.media': ['*.gif','*.jpg','*.png','*.html']},
-    packages = ["sans","sans.models","sans.models.test",
-                "sans.models.sans_extension","sans.models.pyre",
-                "sans.models.media"],
+                  },
+    package_data={'sans.models': [os.path.join('media', "*")]},
+    packages = ["sans","sans.models",
+                "sans.models.sans_extension","sans.models.pyre",],
     
     ext_modules = [ Extension("sans.models.sans_extension.c_models",
      sources = [
