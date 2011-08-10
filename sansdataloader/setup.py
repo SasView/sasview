@@ -16,7 +16,8 @@ setup(
     author = "University of Tennessee",
     url = "http://danse.chem.utk.edu",
     
-    package_dir = {"sans.dataloader":"sans/dataloader"},
+    package_dir = {"sans":"src/sans",
+                   "sans.dataloader":"src/sans/dataloader"},
     package_data={"sans.dataloader.readers": ['defaults.xml']},
     packages = ["sans.dataloader","sans", "sans.dataloader.readers"]
     )

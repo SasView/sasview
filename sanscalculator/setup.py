@@ -14,6 +14,7 @@ setup(
     url = "http://danse.chem.utk.edu",
 
     # Use the pure python modules
-    package_dir = {"sans.calculator":"sans/calculator"},
-    packages = ["sans","sans.calculator"],
+    package_dir = {"sans":"src/sans",
+                   "sans.calculator":"src/sans/calculator"},
+    packages = ["sans", "sans.calculator"],
     )
