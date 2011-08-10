@@ -10,6 +10,8 @@
 
 """
 import sys
+if len(sys.argv) == 1:
+    sys.argv.append('install')
 import os
 
     
@@ -47,10 +49,10 @@ def createODBfiles():
     
     class_list = ModelFactory().getAllModels()
     for name in class_list:
-        odb = open("sans/models/pyre/%s.odb" % name, 'w')
+        odb = open("src/sans/models/pyre/%s.odb" % name, 'w')
         odb.write(createODBcontent(name))
         odb.close()
-        print "sans/models/pyre/%s.odb created" % name
+        print "src/sans/models/pyre/%s.odb created" % name
         
 #
 # Proceed with installation
@@ -91,6 +93,7 @@ IGNORED_FILES = ["a.exe",
                    "wrapping.py",
                    "winFuncs.c"]
 IGNORED_EXTENSIONS = [".h", ".txt", ".def", ".mm", ".hh", ".py"]
+EXTENSIONS = [".c", ".cpp"]
 
 def append_file(file_list, dir_path):
     """
@@ -99,7 +102,7 @@ def append_file(file_list, dir_path):
     for f in os.listdir(dir_path):
         if os.path.isfile(os.path.join(dir_path, f)):
             _, ext = os.path.splitext(f)
-            if ext not in IGNORED_EXTENSIONS and f not in IGNORED_FILES:
+            if ext.lower() in EXTENSIONS and f not in IGNORED_FILES:
                 file_list.append(os.path.join(dir_path, f)) 
         elif os.path.isdir(os.path.join(dir_path, f)) and \
                 not f.startswith("."):
@@ -107,7 +110,7 @@ def append_file(file_list, dir_path):
             for new_f in os.listdir(sub_dir):
                 if os.path.isfile(os.path.join(sub_dir, new_f)):
                     _, ext = os.path.splitext(new_f)
-                    if ext not in IGNORED_EXTENSIONS and\
+                    if ext.lower() in EXTENSIONS and\
                          new_f not in IGNORED_FILES:
                         file_list.append(os.path.join(sub_dir, new_f)) 
         
