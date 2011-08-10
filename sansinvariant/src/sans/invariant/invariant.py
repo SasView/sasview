@@ -17,7 +17,7 @@ This module implements invariant and its related computations.
 import math 
 import numpy
 
-from DataLoader.data_info import Data1D as LoaderData1D
+from sans.dataloader.data_info import Data1D as LoaderData1D
 
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM  = 1e-5
