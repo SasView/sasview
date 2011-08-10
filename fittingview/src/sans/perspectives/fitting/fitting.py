@@ -23,7 +23,7 @@ import models
 import fitpage
 
 
-from DataLoader.loader import Loader
+from sans.dataloader.loader import Loader
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.events import NewPlotEvent 
@@ -1291,7 +1291,7 @@ class Plugin(PluginBase):
         :param theory: Data2D to fill
         
         """
-        from DataLoader.data_info import Detector, Source
+        from sans.dataloader.data_info import Detector, Source
         
         detector = Detector()
         theory.detector.append(detector)         

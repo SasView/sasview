@@ -21,10 +21,10 @@ import xml.dom.minidom
 from xml.dom.minidom import parse
 from lxml import etree
 
-import DataLoader
-from DataLoader.readers.cansas_reader import Reader as CansasReader
-from DataLoader.readers.cansas_reader import get_content, write_node
-from DataLoader.data_info import Data2D, Detector
+import sans.dataloader
+from sans.dataloader.readers.cansas_reader import Reader as CansasReader
+from sans.dataloader.readers.cansas_reader import get_content, write_node
+from sans.dataloader.data_info import Data2D, Detector
 
 #Information to read/write state as xml
 FITTING_NODE_NAME = 'fitting_plug_in'
@@ -1500,7 +1500,7 @@ class Reader(CansasReader):
         """
 
         if state.data is None:
-            data = DataLoader.data_info.Data1D(x=[], y=[])  
+            data = sans.dataloader.data_info.Data1D(x=[], y=[])  
         else:  
             #make sure title and data run is filled up.
             if state.data.title == None or state.data.title=='': state.data.title = state.data.name
@@ -1508,7 +1508,7 @@ class Reader(CansasReader):
                 state.data.run = [str(state.data.name)]
                 state.data.run_name[0] = state.data.name
    
-            if issubclass(state.data.__class__, DataLoader.data_info.Data1D):
+            if issubclass(state.data.__class__, sans.dataloader.data_info.Data1D):
 
                 data = state.data
                 doc, sasentry = self._to_xml_doc(data)
