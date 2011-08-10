@@ -13,7 +13,7 @@ from SmearList import Smear
 # Disable "could be a function" complaint 
 # pylint: disable-msg=R0201
 
-from sans_extension.c_models import Disperser
+from sans.models.sans_extension.c_models import Disperser
 from sans.models.ModelFactory import ModelFactory
 from sans.models.DisperseModel import DisperseModel
       
