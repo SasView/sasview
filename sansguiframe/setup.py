@@ -6,11 +6,11 @@ Installs the guiframe package
 from distutils.core import setup
 import os
 
-path = os.path.join(os.getcwd(), "sans", "guiframe",'local_perspectives')
-package_dir = {"sans.guiframe":os.path.join("sans", "guiframe"),
-               "sans.guiframe.local_perspectives":os.path.join("sans",
-                                                        "guiframe",
-                                                        "local_perspectives"),}
+path = os.path.join(os.getcwd(), "src", "sans",
+                     "guiframe","local_perspectives")
+package_dir = {"sans":os.path.join("src", "sans"),
+               "sans.guiframe":os.path.join("src", "sans", "guiframe"),
+               "sans.guiframe.local_perspectives":path}
 
 package_data = {"sans.guiframe": ['images/*', 'media/*']}
 packages = ["sans.guiframe", 'sans',
@@ -20,9 +20,9 @@ for dir in os.listdir(path):
     if dir not in ['.svn','__init__.py', '__init__.pyc']:
         package_name = "sans.guiframe.local_perspectives." + dir
         packages.append(package_name)
-        package_dir[package_name] = os.path.join("sans", 
+        package_dir[package_name] = os.path.join("src", "sans", 
                                                  "guiframe",
-                                                 "local_perspectives" , dir)
+                                                 "local_perspectives", dir)
 
 
 setup(
