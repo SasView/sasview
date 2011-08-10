@@ -13,6 +13,7 @@ setup(
                    "sans/perspectives/invariant/media"},
     package_data={'sans.perspectives.invariant.media': ['*']},
     packages = ["sans.perspectives",
+                "sans",
                 "sans.perspectives.invariant",
                 "sans.perspectives.invariant.media"],
     )
