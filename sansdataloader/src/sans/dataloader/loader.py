@@ -59,7 +59,7 @@ class Registry(ExtensionRegistry):
         #readers.register_readers(self._identify_plugin)
         
         # Look for plug-in readers
-        self.find_plugins('plugins')
+        #self.find_plugins('plugins')
 
         
     def load(self, path, format=None):
