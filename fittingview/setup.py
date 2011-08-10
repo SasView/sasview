@@ -7,9 +7,9 @@ setup(
     version = "0.9.1",
     name="fittingview",
     description = "Fitting module  for SansView",
-    package_dir = {"sans.perspectives":"sans/perspectives",
-                   "sans.perspectives.pr":"sans/perspectives/fitting"},
-    packages = ["sans.perspectives", 'sans',
+    package_dir = {"sans.perspectives":"src/sans/perspectives",
+                   "sans.perspectives.pr":"src/sans/perspectives/fitting"},
+    packages = ["sans.perspectives", "src/sans",
                 "sans.perspectives.fitting"],
     )
 
