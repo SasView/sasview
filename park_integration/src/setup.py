@@ -17,6 +17,6 @@ setup(
     # Use the pure python modules
     package_dir = {"sans.fit":"sans/fit"},
     
-    packages = ["sans.fit"]
+    packages = ["sans.fit", "sans"]
     )
         
