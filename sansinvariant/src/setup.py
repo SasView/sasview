@@ -12,5 +12,5 @@ setup(
 
     # Use the pure python modules
     package_dir = {"sans.invariant":"."},
-    packages = ["sans","sans.invariant"],
+    packages = ["sans.invariant", "sans"],
     )
