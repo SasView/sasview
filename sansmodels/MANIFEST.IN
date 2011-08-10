@@ -1,6 +1,7 @@
-graft sans/models/media
-graft sans/models/libigor
-graft sans/models/c_models
+graft src/sans/models/media
+graft src/sans/models/libigor
+graft src/sans/models/c_smearer
+graft src/sans/models/c_models
+graft src/sans/models/c_extensions
 recursive-include sans *.h
 recursive-include sans *.hh
-
