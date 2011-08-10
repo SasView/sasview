@@ -2,9 +2,8 @@
      Installation script for SANS DataLoader
 """
 import os
-import sys
-if len(sys.argv) == 1:
-    sys.argv.append('install')
+
+
 # Then build and install the modules
 from distutils.core import setup#, Extension
 #from numpy.distutils.misc_util import get_numpy_include_dirs
@@ -16,8 +15,9 @@ setup(
     author = "University of Tennessee",
     url = "http://danse.chem.utk.edu",
     
-    package_dir = {"sans":"src/sans",
-                   "sans.dataloader":"src/sans/dataloader"},
+    package_dir = {"sans": os.path.join("src", "sans"),
+                   "sans.dataloader":os.path.join("src",
+                                                  "sans", "dataloader")},
     package_data={"sans.dataloader.readers": ['defaults.xml']},
     packages = ["sans.dataloader","sans", "sans.dataloader.readers"]
     )
