@@ -11,6 +11,6 @@ setup(
     url = "http://danse.chem.utk.edu",
 
     # Use the pure python modules
-    package_dir = {"sans.invariant":"."},
-    packages = ["sans.invariant", "sans"],
+    package_dir = {"sans.invariant":"src/sans/invariant"},
+    packages = ["sans.invariant", "src/sans"],
     )
