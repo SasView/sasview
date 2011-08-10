@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CEllipticalCylinderModel
+from sans.models.sans_extension.c_models import CEllipticalCylinderModel
 import copy    
 
 def create_EllipticalCylinderModel():
@@ -44,8 +44,8 @@ class EllipticalCylinderModel(CEllipticalCylinderModel, BaseComponent):
          r_minor         = 20.0 [A]
          r_ratio         = 1.5 
          length          = 400.0 [A]
-         sldCyl          = 4e-006 [1/A^(2)]
-         sldSolv         = 1e-006 [1/A^(2)]
+         sldCyl          = 4e-06 [1/A^(2)]
+         sldSolv         = 1e-06 [1/A^(2)]
          background      = 0.0 [1/cm]
          cyl_theta       = 90.0 [deg]
          cyl_phi         = 0.0 [deg]

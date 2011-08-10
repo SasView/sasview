@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CLamellarFFHGModel
+from sans.models.sans_extension.c_models import CLamellarFFHGModel
 import copy    
 
 def create_LamellarFFHGModel():
@@ -43,9 +43,9 @@ class LamellarFFHGModel(CLamellarFFHGModel, BaseComponent):
          scale           = 1.0 
          t_length        = 15.0 [A]
          h_thickness     = 10.0 [A]
-         sld_tail        = 4e-007 [1/A^(2)]
-         sld_head        = 3e-006 [1/A^(2)]
-         sld_solvent     = 6e-006 [1/A^(2)]
+         sld_tail        = 4e-07 [1/A^(2)]
+         sld_head        = 3e-06 [1/A^(2)]
+         sld_solvent     = 6e-06 [1/A^(2)]
          background      = 0.0 [1/cm]
 
     """

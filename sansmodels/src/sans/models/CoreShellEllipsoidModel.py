@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CCoreShellEllipsoidModel
+from sans.models.sans_extension.c_models import CCoreShellEllipsoidModel
 import copy    
 
 def create_CoreShellEllipsoidModel():
@@ -45,9 +45,9 @@ class CoreShellEllipsoidModel(CCoreShellEllipsoidModel, BaseComponent):
          polar_core      = 20.0 [A]
          equat_shell     = 250.0 [A]
          polar_shell     = 30.0 [A]
-         sld_core        = 2e-006 [1/A^(2)]
-         sld_shell       = 1e-006 [1/A^(2)]
-         sld_solvent     = 6.3e-006 [1/A^(2)]
+         sld_core        = 2e-06 [1/A^(2)]
+         sld_shell       = 1e-06 [1/A^(2)]
+         sld_solvent     = 6.3e-06 [1/A^(2)]
          background      = 0.001 [1/cm]
          axis_theta      = 0.0 [deg]
          axis_phi        = 0.0 [deg]

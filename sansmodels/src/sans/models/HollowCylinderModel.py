@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CHollowCylinderModel
+from sans.models.sans_extension.c_models import CHollowCylinderModel
 import copy    
 
 def create_HollowCylinderModel():
@@ -44,8 +44,8 @@ class HollowCylinderModel(CHollowCylinderModel, BaseComponent):
          core_radius     = 20.0 [A]
          radius          = 30.0 [A]
          length          = 400.0 [A]
-         sldCyl          = 6.3e-006 [1/A^(2)]
-         sldSolv         = 1e-006 [1/A^(2)]
+         sldCyl          = 6.3e-06 [1/A^(2)]
+         sldSolv         = 1e-06 [1/A^(2)]
          background      = 0.01 [1/cm]
          axis_theta      = 90.0 [deg]
          axis_phi        = 0.0 [deg]

@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CCoreFourShellModel
+from sans.models.sans_extension.c_models import CCoreFourShellModel
 import copy    
 
 def create_CoreFourShellModel():
@@ -42,16 +42,16 @@ class CoreFourShellModel(CCoreFourShellModel, BaseComponent):
     List of default parameters:
          scale           = 1.0 
          rad_core0       = 60.0 [A]
-         sld_core0       = 6.4e-006 [1/A^(2)]
+         sld_core0       = 6.4e-06 [1/A^(2)]
          thick_shell1    = 10.0 [A]
-         sld_shell1      = 1e-006 [1/A^(2)]
+         sld_shell1      = 1e-06 [1/A^(2)]
          thick_shell2    = 10.0 [A]
-         sld_shell2      = 2e-006 [1/A^(2)]
+         sld_shell2      = 2e-06 [1/A^(2)]
          thick_shell3    = 10.0 [A]
-         sld_shell3      = 3e-006 [1/A^(2)]
+         sld_shell3      = 3e-06 [1/A^(2)]
          thick_shell4    = 10.0 [A]
-         sld_shell4      = 4e-006 [1/A^(2)]
-         sld_solv        = 6.4e-006 [1/A^(2)]
+         sld_shell4      = 4e-06 [1/A^(2)]
+         sld_solv        = 6.4e-06 [1/A^(2)]
          background      = 0.001 [1/cm]
 
     """

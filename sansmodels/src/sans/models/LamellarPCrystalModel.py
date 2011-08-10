@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CLamellarPCrystalModel
+from sans.models.sans_extension.c_models import CLamellarPCrystalModel
 import copy    
 
 def create_LamellarPCrystalModel():
@@ -45,8 +45,8 @@ class LamellarPCrystalModel(CLamellarPCrystalModel, BaseComponent):
          Nlayers         = 20.0 
          spacing         = 250.0 [A]
          pd_spacing      = 0.0 
-         sld_layer       = 1e-006 [1/A^(2)]
-         sld_solvent     = 6.34e-006 [1/A^(2)]
+         sld_layer       = 1e-06 [1/A^(2)]
+         sld_solvent     = 6.34e-06 [1/A^(2)]
          background      = 0.0 [1/cm]
 
     """

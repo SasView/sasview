@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CLamellarPSHGModel
+from sans.models.sans_extension.c_models import CLamellarPSHGModel
 import copy    
 
 def create_LamellarPSHGModel():
@@ -44,9 +44,9 @@ class LamellarPSHGModel(CLamellarPSHGModel, BaseComponent):
          spacing         = 40.0 [A]
          deltaT          = 10.0 [A]
          deltaH          = 2.0 [A]
-         sld_tail        = 4e-007 [1/A^(2)]
-         sld_head        = 2e-006 [1/A^(2)]
-         sld_solvent     = 6e-006 [1/A^(2)]
+         sld_tail        = 4e-07 [1/A^(2)]
+         sld_head        = 2e-06 [1/A^(2)]
+         sld_solvent     = 6e-06 [1/A^(2)]
          n_plates        = 30.0 
          caille          = 0.001 
          background      = 0.001 [1/cm]

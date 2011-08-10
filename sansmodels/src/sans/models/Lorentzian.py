@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CLorentzian
+from sans.models.sans_extension.c_models import CLorentzian
 import copy    
 
 def create_Lorentzian():

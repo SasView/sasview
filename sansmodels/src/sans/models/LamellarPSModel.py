@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CLamellarPSModel
+from sans.models.sans_extension.c_models import CLamellarPSModel
 import copy    
 
 def create_LamellarPSModel():
@@ -43,8 +43,8 @@ class LamellarPSModel(CLamellarPSModel, BaseComponent):
          scale           = 1.0 
          spacing         = 400.0 [A]
          delta           = 30.0 [A]
-         sld_bi          = 6.3e-006 [1/A^(2)]
-         sld_sol         = 1e-006 [1/A^(2)]
+         sld_bi          = 6.3e-06 [1/A^(2)]
+         sld_sol         = 1e-06 [1/A^(2)]
          n_plates        = 20.0 
          caille          = 0.1 
          background      = 0.0 [1/cm]

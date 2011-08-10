@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CFlexCylEllipXModel
+from sans.models.sans_extension.c_models import CFlexCylEllipXModel
 import copy    
 
 def create_FlexCylEllipXModel():
@@ -45,8 +45,8 @@ class FlexCylEllipXModel(CFlexCylEllipXModel, BaseComponent):
          kuhn_length     = 100.0 [A]
          radius          = 20.0 [A]
          axis_ratio      = 1.5 
-         sldCyl          = 1e-006 [1/A^(2)]
-         sldSolv         = 6.3e-006 [1/A^(2)]
+         sldCyl          = 1e-06 [1/A^(2)]
+         sldSolv         = 6.3e-06 [1/A^(2)]
          background      = 0.0001 [1/cm]
 
     """

@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CCoreShellCylinderModel
+from sans.models.sans_extension.c_models import CCoreShellCylinderModel
 import copy    
 
 def create_CoreShellCylinderModel():
@@ -44,9 +44,9 @@ class CoreShellCylinderModel(CCoreShellCylinderModel, BaseComponent):
          radius          = 20.0 [A]
          thickness       = 10.0 [A]
          length          = 400.0 [A]
-         core_sld        = 1e-006 [1/A^(2)]
-         shell_sld       = 4e-006 [1/A^(2)]
-         solvent_sld     = 1e-006 [1/A^(2)]
+         core_sld        = 1e-06 [1/A^(2)]
+         shell_sld       = 4e-06 [1/A^(2)]
+         solvent_sld     = 1e-06 [1/A^(2)]
          background      = 0.0 [1/cm]
          axis_theta      = 90.0 [deg]
          axis_phi        = 0.0 [deg]

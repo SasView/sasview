@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CTriaxialEllipsoidModel
+from sans.models.sans_extension.c_models import CTriaxialEllipsoidModel
 import copy    
 
 def create_TriaxialEllipsoidModel():
@@ -44,8 +44,8 @@ class TriaxialEllipsoidModel(CTriaxialEllipsoidModel, BaseComponent):
          semi_axisA      = 35.0 [A]
          semi_axisB      = 100.0 [A]
          semi_axisC      = 400.0 [A]
-         sldEll          = 1e-006 [1/A^(2)]
-         sldSolv         = 6.3e-006 [1/A^(2)]
+         sldEll          = 1e-06 [1/A^(2)]
+         sldSolv         = 6.3e-06 [1/A^(2)]
          background      = 0.0 [1/cm]
          axis_theta      = 57.325 [deg]
          axis_phi        = 57.325 [deg]

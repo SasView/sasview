@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CLamellarModel
+from sans.models.sans_extension.c_models import CLamellarModel
 import copy    
 
 def create_LamellarModel():
@@ -42,8 +42,8 @@ class LamellarModel(CLamellarModel, BaseComponent):
     List of default parameters:
          scale           = 1.0 
          bi_thick        = 50.0 [A]
-         sld_bi          = 1e-006 [1/A^(2)]
-         sld_sol         = 6.3e-006 [1/A^(2)]
+         sld_bi          = 1e-06 [1/A^(2)]
+         sld_sol         = 6.3e-06 [1/A^(2)]
          background      = 0.0 [1/cm]
 
     """

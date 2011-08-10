@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CStackedDisksModel
+from sans.models.sans_extension.c_models import CStackedDisksModel
 import copy    
 
 def create_StackedDisksModel():
@@ -44,9 +44,9 @@ class StackedDisksModel(CStackedDisksModel, BaseComponent):
          radius          = 3000.0 [A]
          core_thick      = 10.0 [A]
          layer_thick     = 15.0 [A]
-         core_sld        = 4e-006 [1/A^(2)]
-         layer_sld       = -4e-007 [1/A^(2)]
-         solvent_sld     = 5e-006 [1/A^(2)]
+         core_sld        = 4e-06 [1/A^(2)]
+         layer_sld       = -4e-07 [1/A^(2)]
+         solvent_sld     = 5e-06 [1/A^(2)]
          n_stacking      = 1.0 
          sigma_d         = 0.0 
          background      = 0.001 [1/cm]

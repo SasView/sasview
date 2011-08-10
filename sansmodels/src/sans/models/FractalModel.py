@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CFractalModel
+from sans.models.sans_extension.c_models import CFractalModel
 import copy    
 
 def create_FractalModel():
@@ -44,8 +44,8 @@ class FractalModel(CFractalModel, BaseComponent):
          radius          = 5.0 [A]
          fractal_dim     = 2.0 
          cor_length      = 100.0 [A]
-         sldBlock        = 2e-006 [1/A^(2)]
-         sldSolv         = 6.35e-006 [1/A^(2)]
+         sldBlock        = 2e-06 [1/A^(2)]
+         sldSolv         = 6.35e-06 [1/A^(2)]
          background      = 0.0 [1/cm]
 
     """

@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CSphereModel
+from sans.models.sans_extension.c_models import CSphereModel
 import copy    
 
 def create_SphereModel():
@@ -42,8 +42,8 @@ class SphereModel(CSphereModel, BaseComponent):
     List of default parameters:
          scale           = 1.0 
          radius          = 60.0 [A]
-         sldSph          = 2e-006 [1/A^(2)]
-         sldSolv         = 1e-006 [1/A^(2)]
+         sldSph          = 2e-06 [1/A^(2)]
+         sldSolv         = 1e-06 [1/A^(2)]
          background      = 0.0 [1/cm]
 
     """

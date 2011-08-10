@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CFCCrystalModel
+from sans.models.sans_extension.c_models import CFCCrystalModel
 import copy    
 
 def create_FCCrystalModel():
@@ -44,8 +44,8 @@ class FCCrystalModel(CFCCrystalModel, BaseComponent):
          dnn             = 220.0 [A]
          d_factor        = 0.06 
          radius          = 40.0 [A]
-         sldSph          = 3e-006 [1/A^(2)]
-         sldSolv         = 6.3e-006 [1/A^(2)]
+         sldSph          = 3e-06 [1/A^(2)]
+         sldSolv         = 6.3e-06 [1/A^(2)]
          background      = 0.0 [1/cm]
          theta           = 0.0 [deg]
          phi             = 0.0 [deg]

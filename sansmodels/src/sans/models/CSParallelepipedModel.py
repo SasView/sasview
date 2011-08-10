@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CCSParallelepipedModel
+from sans.models.sans_extension.c_models import CCSParallelepipedModel
 import copy    
 
 def create_CSParallelepipedModel():
@@ -47,11 +47,11 @@ class CSParallelepipedModel(CCSParallelepipedModel, BaseComponent):
          rimA            = 10.0 [A]
          rimB            = 10.0 [A]
          rimC            = 10.0 [A]
-         sld_rimA        = 2e-006 [1/A^(2)]
-         sld_rimB        = 4e-006 [1/A^(2)]
-         sld_rimC        = 2e-006 [1/A^(2)]
-         sld_pcore       = 1e-006 [1/A^(2)]
-         sld_solv        = 6e-006 [1/A^(2)]
+         sld_rimA        = 2e-06 [1/A^(2)]
+         sld_rimB        = 4e-06 [1/A^(2)]
+         sld_rimC        = 2e-06 [1/A^(2)]
+         sld_pcore       = 1e-06 [1/A^(2)]
+         sld_solv        = 6e-06 [1/A^(2)]
          background      = 0.06 [1/cm]
          parallel_theta  = 0.0 [deg]
          parallel_phi    = 0.0 [deg]

@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import COnionModel
+from sans.models.sans_extension.c_models import COnionModel
 import copy    
 
 def create_OnionModel():
@@ -43,29 +43,29 @@ class OnionModel(COnionModel, BaseComponent):
          n_shells        = 1.0 
          scale           = 1.0 
          rad_core0       = 200.0 [A]
-         sld_core0       = 1e-006 [1/A^(2)]
-         sld_solv        = 6.4e-006 [1/A^(2)]
+         sld_core0       = 1e-06 [1/A^(2)]
+         sld_solv        = 6.4e-06 [1/A^(2)]
          background      = 0.0 [1/cm]
-         sld_out_shell1  = 2e-006 [1/A^(2)]
-         sld_out_shell2  = 2.5e-006 [1/A^(2)]
-         sld_out_shell3  = 3e-006 [1/A^(2)]
-         sld_out_shell4  = 3.5e-006 [1/A^(2)]
-         sld_out_shell5  = 4e-006 [1/A^(2)]
-         sld_out_shell6  = 4.5e-006 [1/A^(2)]
-         sld_out_shell7  = 5e-006 [1/A^(2)]
-         sld_out_shell8  = 5.5e-006 [1/A^(2)]
-         sld_out_shell9  = 6e-006 [1/A^(2)]
-         sld_out_shell10 = 6.2e-006 [1/A^(2)]
-         sld_in_shell1   = 1.7e-006 [1/A^(2)]
-         sld_in_shell2   = 2.2e-006 [1/A^(2)]
-         sld_in_shell3   = 2.7e-006 [1/A^(2)]
-         sld_in_shell4   = 3.2e-006 [1/A^(2)]
-         sld_in_shell5   = 3.7e-006 [1/A^(2)]
-         sld_in_shell6   = 4.2e-006 [1/A^(2)]
-         sld_in_shell7   = 4.7e-006 [1/A^(2)]
-         sld_in_shell8   = 5.2e-006 [1/A^(2)]
-         sld_in_shell9   = 5.7e-006 [1/A^(2)]
-         sld_in_shell10  = 6e-006 [1/A^(2)]
+         sld_out_shell1  = 2e-06 [1/A^(2)]
+         sld_out_shell2  = 2.5e-06 [1/A^(2)]
+         sld_out_shell3  = 3e-06 [1/A^(2)]
+         sld_out_shell4  = 3.5e-06 [1/A^(2)]
+         sld_out_shell5  = 4e-06 [1/A^(2)]
+         sld_out_shell6  = 4.5e-06 [1/A^(2)]
+         sld_out_shell7  = 5e-06 [1/A^(2)]
+         sld_out_shell8  = 5.5e-06 [1/A^(2)]
+         sld_out_shell9  = 6e-06 [1/A^(2)]
+         sld_out_shell10 = 6.2e-06 [1/A^(2)]
+         sld_in_shell1   = 1.7e-06 [1/A^(2)]
+         sld_in_shell2   = 2.2e-06 [1/A^(2)]
+         sld_in_shell3   = 2.7e-06 [1/A^(2)]
+         sld_in_shell4   = 3.2e-06 [1/A^(2)]
+         sld_in_shell5   = 3.7e-06 [1/A^(2)]
+         sld_in_shell6   = 4.2e-06 [1/A^(2)]
+         sld_in_shell7   = 4.7e-06 [1/A^(2)]
+         sld_in_shell8   = 5.2e-06 [1/A^(2)]
+         sld_in_shell9   = 5.7e-06 [1/A^(2)]
+         sld_in_shell10  = 6e-06 [1/A^(2)]
          A_shell1        = 1.0 
          A_shell2        = 1.0 
          A_shell3        = 1.0 

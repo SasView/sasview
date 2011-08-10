@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CCoreShellModel
+from sans.models.sans_extension.c_models import CCoreShellModel
 import copy    
 
 def create_CoreShellModel():
@@ -43,9 +43,9 @@ class CoreShellModel(CCoreShellModel, BaseComponent):
          scale           = 1.0 
          radius          = 60.0 [A]
          thickness       = 10.0 [A]
-         core_sld        = 1e-006 [1/A^(2)]
-         shell_sld       = 2e-006 [1/A^(2)]
-         solvent_sld     = 3e-006 [1/A^(2)]
+         core_sld        = 1e-06 [1/A^(2)]
+         shell_sld       = 2e-06 [1/A^(2)]
+         solvent_sld     = 3e-06 [1/A^(2)]
          background      = 0.0 [1/cm]
 
     """

@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CVesicleModel
+from sans.models.sans_extension.c_models import CVesicleModel
 import copy    
 
 def create_VesicleModel():
@@ -43,8 +43,8 @@ class VesicleModel(CVesicleModel, BaseComponent):
          scale           = 1.0 
          radius          = 100.0 [A]
          thickness       = 30.0 [A]
-         core_sld        = 6.36e-006 [1/A^(2)]
-         shell_sld       = 5e-007 [1/A^(2)]
+         core_sld        = 6.36e-06 [1/A^(2)]
+         shell_sld       = 5e-07 [1/A^(2)]
          background      = 0.0 [1/cm]
 
     """

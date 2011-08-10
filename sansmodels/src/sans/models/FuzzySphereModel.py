@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CFuzzySphereModel
+from sans.models.sans_extension.c_models import CFuzzySphereModel
 import copy    
 
 def create_FuzzySphereModel():
@@ -43,8 +43,8 @@ class FuzzySphereModel(CFuzzySphereModel, BaseComponent):
          scale           = 0.01 
          radius          = 60.0 [A]
          fuzziness       = 10.0 [A]
-         sldSph          = 1e-006 [1/A^(2)]
-         sldSolv         = 3e-006 [1/A^(2)]
+         sldSph          = 1e-06 [1/A^(2)]
+         sldSolv         = 3e-06 [1/A^(2)]
          background      = 0.001 [1/cm]
 
     """

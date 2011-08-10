@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CCappedCylinderModel
+from sans.models.sans_extension.c_models import CCappedCylinderModel
 import copy    
 
 def create_CappedCylinderModel():
@@ -44,8 +44,8 @@ class CappedCylinderModel(CCappedCylinderModel, BaseComponent):
          rad_cyl         = 20.0 [A]
          len_cyl         = 400.0 [A]
          rad_cap         = 40.0 [A]
-         sld_capcyl      = 1e-006 [1/A^(2)]
-         sld_solv        = 6.3e-006 [1/A^(2)]
+         sld_capcyl      = 1e-06 [1/A^(2)]
+         sld_solv        = 6.3e-06 [1/A^(2)]
          background      = 0.0 [1/cm]
          theta           = 0.0 [deg]
          phi             = 0.0 [deg]

@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CSphereSLDModel
+from sans.models.sans_extension.c_models import CSphereSLDModel
 import copy    
 
 def create_SphereSLDModel():
@@ -44,19 +44,19 @@ class SphereSLDModel(CSphereSLDModel, BaseComponent):
          scale           = 1.0 
          thick_inter0    = 50.0 [A]
          func_inter0     = 0.0 
-         sld_core0       = 2.07e-006 [1/A^(2)]
-         sld_solv        = 1e-006 [1/A^(2)]
+         sld_core0       = 2.07e-06 [1/A^(2)]
+         sld_solv        = 1e-06 [1/A^(2)]
          background      = 0.0 
-         sld_flat1       = 4e-006 [1/A^(2)]
-         sld_flat2       = 3.5e-006 [1/A^(2)]
-         sld_flat3       = 4e-006 [1/A^(2)]
-         sld_flat4       = 3.5e-006 [1/A^(2)]
-         sld_flat5       = 4e-006 [1/A^(2)]
-         sld_flat6       = 3.5e-006 [1/A^(2)]
-         sld_flat7       = 4e-006 [1/A^(2)]
-         sld_flat8       = 3.5e-006 [1/A^(2)]
-         sld_flat9       = 4e-006 [1/A^(2)]
-         sld_flat10      = 3.5e-006 [1/A^(2)]
+         sld_flat1       = 4e-06 [1/A^(2)]
+         sld_flat2       = 3.5e-06 [1/A^(2)]
+         sld_flat3       = 4e-06 [1/A^(2)]
+         sld_flat4       = 3.5e-06 [1/A^(2)]
+         sld_flat5       = 4e-06 [1/A^(2)]
+         sld_flat6       = 3.5e-06 [1/A^(2)]
+         sld_flat7       = 4e-06 [1/A^(2)]
+         sld_flat8       = 3.5e-06 [1/A^(2)]
+         sld_flat9       = 4e-06 [1/A^(2)]
+         sld_flat10      = 3.5e-06 [1/A^(2)]
          thick_inter1    = 50.0 [A]
          thick_inter2    = 50.0 [A]
          thick_inter3    = 50.0 [A]

@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CRPAModel
+from sans.models.sans_extension.c_models import CRPAModel
 import copy    
 
 def create_RPAModel():
@@ -56,15 +56,15 @@ class RPAModel(CRPAModel, BaseComponent):
          Na              = 1000.0 
          Phia            = 0.25 
          va              = 100.0 
-         La              = 1e-012 
+         La              = 1e-12 
          Nb              = 1000.0 
          Phib            = 0.25 
          vb              = 100.0 
-         Lb              = 1e-012 
+         Lb              = 1e-12 
          Nc              = 1000.0 
          Phic            = 0.25 
          vc              = 100.0 
-         Lc              = 1e-012 
+         Lc              = 1e-12 
          Nd              = 1000.0 
          Phid            = 0.25 
          vd              = 100.0 

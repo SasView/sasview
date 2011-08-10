@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CStickyHSStructure
+from sans.models.sans_extension.c_models import CStickyHSStructure
 import copy    
 
 def create_StickyHSStructure():

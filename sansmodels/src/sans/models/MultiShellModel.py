@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CMultiShellModel
+from sans.models.sans_extension.c_models import CMultiShellModel
 import copy    
 
 def create_MultiShellModel():
@@ -44,8 +44,8 @@ class MultiShellModel(CMultiShellModel, BaseComponent):
          core_radius     = 60.0 [A]
          s_thickness     = 10.0 [A]
          w_thickness     = 10.0 [A]
-         core_sld        = 6.4e-006 [1/A^(2)]
-         shell_sld       = 4e-007 [1/A^(2)]
+         core_sld        = 6.4e-06 [1/A^(2)]
+         shell_sld       = 4e-07 [1/A^(2)]
          n_pairs         = 2.0 
          background      = 0.0 [1/cm]
 

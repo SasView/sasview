@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CEllipsoidModel
+from sans.models.sans_extension.c_models import CEllipsoidModel
 import copy    
 
 def create_EllipsoidModel():
@@ -43,8 +43,8 @@ class EllipsoidModel(CEllipsoidModel, BaseComponent):
          scale           = 1.0 
          radius_a        = 20.0 [A]
          radius_b        = 400.0 [A]
-         sldEll          = 4e-006 [1/A^(2)]
-         sldSolv         = 1e-006 [1/A^(2)]
+         sldEll          = 4e-06 [1/A^(2)]
+         sldSolv         = 1e-06 [1/A^(2)]
          background      = 0.0 [1/cm]
          axis_theta      = 90.0 [deg]
          axis_phi        = 0.0 [deg]

@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CBarBellModel
+from sans.models.sans_extension.c_models import CBarBellModel
 import copy    
 
 def create_BarBellModel():
@@ -44,8 +44,8 @@ class BarBellModel(CBarBellModel, BaseComponent):
          rad_bar         = 20.0 [A]
          len_bar         = 400.0 [A]
          rad_bell        = 40.0 [A]
-         sld_barbell     = 1e-006 [1/A^(2)]
-         sld_solv        = 6.3e-006 [1/A^(2)]
+         sld_barbell     = 1e-06 [1/A^(2)]
+         sld_solv        = 6.3e-06 [1/A^(2)]
          background      = 0.0 [1/cm]
          theta           = 0.0 [deg]
          phi             = 0.0 [deg]

@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CParallelepipedModel
+from sans.models.sans_extension.c_models import CParallelepipedModel
 import copy    
 
 def create_ParallelepipedModel():
@@ -44,8 +44,8 @@ class ParallelepipedModel(CParallelepipedModel, BaseComponent):
          short_a         = 35.0 [A]
          short_b         = 75.0 [A]
          long_c          = 400.0 [A]
-         sldPipe         = 6.3e-006 [1/A^(2)]
-         sldSolv         = 1e-006 [1/A^(2)]
+         sldPipe         = 6.3e-06 [1/A^(2)]
+         sldSolv         = 1e-06 [1/A^(2)]
          background      = 0.0 [1/cm]
          parallel_theta  = 0.0 [deg]
          parallel_phi    = 0.0 [deg]

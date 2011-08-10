@@ -25,7 +25,7 @@ Provide functionality for a C extension model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from sans_extension.c_models import CBinaryHSModel
+from sans.models.sans_extension.c_models import CBinaryHSModel
 import copy    
 
 def create_BinaryHSModel():
@@ -44,9 +44,9 @@ class BinaryHSModel(CBinaryHSModel, BaseComponent):
          s_radius        = 25.0 [A]
          vol_frac_ls     = 0.1 
          vol_frac_ss     = 0.2 
-         ls_sld          = 3.5e-006 [1/A^(2)]
-         ss_sld          = 5e-007 [1/A^(2)]
-         solvent_sld     = 6.36e-006 [1/A^(2)]
+         ls_sld          = 3.5e-06 [1/A^(2)]
+         ss_sld          = 5e-07 [1/A^(2)]
+         solvent_sld     = 6.36e-06 [1/A^(2)]
          background      = 0.001 [1/cm]
 
     """
