@@ -13,7 +13,7 @@ numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
 #print "NUMPY", numpy_incl_path
 
 # Build the module name
-srcdir  = os.path.join("sans", "pr", "c_extensions")
+srcdir  = os.path.join("src", "sans", "pr", "c_extensions")
 
 setup(
     name="pr_inversion",
@@ -23,10 +23,11 @@ setup(
     url = "danse.chem.utk.edu",
     
     # Use the pure python modules
-    package_dir = {"sans.pr.core":srcdir,
-                   "sans.pr": os.path.join("sans", "pr")},
+    package_dir = {"sans":"src/sans",
+                   "sans.pr.core":srcdir,
+                   "sans.pr": os.path.join("src","sans", "pr")},
     
-    packages = ["sans.pr","sans.pr.core"],
+    packages = ["sans", "sans.pr","sans.pr.core"],
     
     ext_modules = [ Extension("sans.pr.core.pr_inversion",
      sources = [ os.path.join(srcdir, "Cinvertor.c"),
