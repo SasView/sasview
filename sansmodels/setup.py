@@ -11,8 +11,7 @@
 """
 import sys
 import os
-if len(sys.argv) == 1:
-    sys.argv.append('install')
+
     
 from numpy.distutils.misc_util import get_numpy_include_dirs
 numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
@@ -48,10 +47,10 @@ def createODBfiles():
     
     class_list = ModelFactory().getAllModels()
     for name in class_list:
-        odb = open("src/sans/models/pyre/%s.odb" % name, 'w')
+        odb = open("sans/models/pyre/%s.odb" % name, 'w')
         odb.write(createODBcontent(name))
         odb.close()
-        print "src/sans/models/pyre/%s.odb created" % name
+        print "sans/models/pyre/%s.odb created" % name
         
 #
 # Proceed with installation
@@ -72,10 +71,52 @@ from distutils.core import Extension, setup
 #from setuptools import setup#, find_packages
 
 # Build the module name
-srcdir  = "src/sans/models/c_extensions"
-igordir = "src/sans/models/libigor"
-
+srcdir  = os.path.join("src", "sans", "models", "c_extensions")
+igordir = os.path.join("src","sans", "models", "libigor")
+c_model_dir = os.path.join("src", "sans", "models", "c_models")
+smear_dir  = os.path.join("src", "sans", "models", "c_smearer")
 print "Installing SANS models"
+
+
+IGNORED_FILES = ["a.exe",
+                 "__init__.py"
+                 ".svn",
+                   "lineparser.py",
+                   "run.py",
+                   "CGaussian.cpp",
+                   "CLogNormal.cpp",
+                   "CLorentzian.cpp",
+                   "CSchulz.cpp",
+                   "WrapperGenerator.py",
+                   "wrapping.py",
+                   "winFuncs.c"]
+IGNORED_EXTENSIONS = [".h", ".txt", ".def", ".mm", ".hh", ".py"]
+
+def append_file(file_list, dir_path):
+    """
+    Add sources file to sources
+    """
+    for f in os.listdir(dir_path):
+        if os.path.isfile(os.path.join(dir_path, f)):
+            _, ext = os.path.splitext(f)
+            if ext not in IGNORED_EXTENSIONS and f not in IGNORED_FILES:
+                file_list.append(os.path.join(dir_path, f)) 
+        elif os.path.isdir(os.path.join(dir_path, f)) and \
+                not f.startswith("."):
+            sub_dir = os.path.join(dir_path, f)
+            for new_f in os.listdir(sub_dir):
+                if os.path.isfile(os.path.join(sub_dir, new_f)):
+                    _, ext = os.path.splitext(new_f)
+                    if ext not in IGNORED_EXTENSIONS and\
+                         new_f not in IGNORED_FILES:
+                        file_list.append(os.path.join(sub_dir, new_f)) 
+        
+model_sources = []
+append_file(file_list=model_sources, dir_path=srcdir)
+append_file(file_list=model_sources, dir_path=igordir)
+append_file(file_list=model_sources, dir_path=c_model_dir)
+smear_sources = []
+append_file(file_list=smear_sources, dir_path=smear_dir)
 
 
 dist = setup(
@@ -90,210 +131,29 @@ dist = setup(
     #ext_package = "sans",
     
     # Use the pure python modules
-    package_dir = {"sans":"src/sans",
-                   "sans.models.sans_extension":"src/sans/models/c_extensions",
+    package_dir = {"sans":os.path.join("src", "sans"),
+                   "sans.models":os.path.join("src", "sans", "models"),
+                   "sans.models.sans_extension":srcdir,
                   },
     package_data={'sans.models': [os.path.join('media', "*")]},
     packages = ["sans","sans.models",
                 "sans.models.sans_extension","sans.models.pyre",],
     
     ext_modules = [ Extension("sans.models.sans_extension.c_models",
-     sources = [
-        "src/sans/models/c_models/c_models.cpp",
-        #srcdir+"/CSphereModel.c",
-        #srcdir+"/sphere.c",
-        "src/sans/models/c_models/CSphereModel.cpp",
-        "src/sans/models/c_models/CPearlNecklaceModel.cpp",
-        "src/sans/models/c_models/pearlnecklace.cpp",
-        srcdir+"/pearlnecklace.c",
-        "src/sans/models/c_models/COnionModel.cpp",
-        "src/sans/models/c_models/onion.cpp",
-        srcdir+"/onion.c",
-        "src/sans/models/c_models/CReflModel.cpp",
-        "src/sans/models/c_models/refl.cpp",
-        srcdir+"/refl.c",
-        "src/sans/models/c_models/CReflAdvModel.cpp",
-        "src/sans/models/c_models/refl_adv.cpp",
-        srcdir+"/refl_adv.c",
-        #srcdir+"/SquareWell.c",
-        "src/sans/models/c_models/CSquareWellStructure.cpp",  
-        "src/sans/models/c_models/SquareWell.cpp", 
-        #srcdir+"/StickyHS.c",         
-        "src/sans/models/c_models/CStickyHSStructure.cpp", 
-        "src/sans/models/c_models/StickyHS.cpp",              
-        "src/sans/models/c_models/CHardsphereStructure.cpp", 
-        "src/sans/models/c_models/Hardsphere.cpp",    
-        #srcdir+"/DiamCyl.c",         
-        "src/sans/models/c_models/CDiamCylFunc.cpp", 
-        "src/sans/models/c_models/DiamCyl.cpp",   
-        #srcdir+"/DiamEllip.c",         
-        "src/sans/models/c_models/CDiamEllipFunc.cpp", 
-        "src/sans/models/c_models/DiamEllip.cpp",     
-        #srcdir+"/HayterMSA.c",         
-        "src/sans/models/c_models/CHayterMSAStructure.cpp", 
-        "src/sans/models/c_models/HayterMSA.cpp",             
-        "src/sans/models/c_models/sphere.cpp",
-        srcdir+"/fuzzysphere.c",
-        "src/sans/models/c_models/CFuzzySphereModel.cpp",
-        "src/sans/models/c_models/fuzzysphere.cpp",
-        #srcdir+"/CCylinderModel.c",
-        "src/sans/models/c_models/CCylinderModel.cpp",
-        "src/sans/models/c_models/cylinder.cpp",
-        "src/sans/models/c_models/parameters.cpp",
-        "src/sans/models/c_models/dispersion_visitor.cpp",
-        srcdir+"/cylinder.c",
-        #srcdir+"/CParallelepiped.c",
-        "src/sans/models/c_models/CParallelepipedModel.cpp",
-        "src/sans/models/c_models/parallelepiped.cpp",
-        srcdir+"/parallelepiped.c",
-        "src/sans/models/c_models/CCSParallelepipedModel.cpp",
-        "src/sans/models/c_models/csparallelepiped.cpp",
-        srcdir+"/csparallelepiped.c",
-        #srcdir+"/CCoreShellCylinderModel.c",
-        "src/sans/models/c_models/CCoreShellCylinderModel.cpp",
-        "src/sans/models/c_models/coreshellcylinder.cpp",
-        srcdir+"/core_shell_cylinder.c",
-        #srcdir+"/CHollowCylinderModel.c",
-        "src/sans/models/c_models/CHollowCylinderModel.cpp",
-        "src/sans/models/c_models/hollowcylinder.cpp",
-        srcdir+"/hollow_cylinder.c",
-        #srcdir+"/CCoreShellModel.c",
-        #srcdir+"/core_shell.c",
-        "src/sans/models/c_models/CCoreShellModel.cpp",
-        "src/sans/models/c_models/coreshellsphere.cpp",
-        #srcdir+"/CEllipsoidModel.c",
-        "src/sans/models/c_models/CEllipsoidModel.cpp",
-        "src/sans/models/c_models/ellipsoid.cpp",        
-        srcdir+"/ellipsoid.c",
-        "src/sans/models/c_models/CCoreFourShellModel.cpp",
-        "src/sans/models/c_models/corefourshell.cpp",
-        #srcdir+"/corefourshell.c",
-        #srcdir+"/CEllipticalCylinderModel.c",
-        "src/sans/models/c_models/CEllipticalCylinderModel.cpp",
-        "src/sans/models/c_models/ellipticalcylinder.cpp",                
-        srcdir+"/elliptical_cylinder.c",
-        #srcdir+"/CTriaxialEllipsoidModel.c",
-        "src/sans/models/c_models/CTriaxialEllipsoidModel.cpp",
-        "src/sans/models/c_models/triaxialellipsoid.cpp",                
-        srcdir+"/triaxial_ellipsoid.c",
-        #srcdir+"/CFlexibleCylinderModel.c",
-        "src/sans/models/c_models/CFlexibleCylinderModel.cpp",
-        "src/sans/models/c_models/flexiblecylinder.cpp",                
-        srcdir+"/flexible_cylinder.c",
-        "src/sans/models/c_models/CFlexCylEllipXModel.cpp",
-        "src/sans/models/c_models/flexcyl_ellipX.cpp",         
-        srcdir+"/flexcyl_ellipX.c",
-        "src/sans/models/c_models/CBarBellModel.cpp",
-        "src/sans/models/c_models/barbell.cpp",         
-        srcdir+"/barbell.c",
-        "src/sans/models/c_models/CCappedCylinderModel.cpp",
-        "src/sans/models/c_models/capcyl.cpp",         
-        srcdir+"/capcyl.c",
-        #srcdir+"/CStakedDisksModel.c",
-        "src/sans/models/c_models/CSCCrystalModel.cpp",
-        "src/sans/models/c_models/sc.cpp",                
-        srcdir+"/sc.c",
-        "src/sans/models/c_models/CFCCrystalModel.cpp",
-        "src/sans/models/c_models/fcc.cpp",                
-        srcdir+"/fcc.c",
-        "src/sans/models/c_models/CBCCrystalModel.cpp",
-        "src/sans/models/c_models/bcc.cpp",                
-        srcdir+"/bcc.c",
-        "src/sans/models/c_models/CStackedDisksModel.cpp",
-        "src/sans/models/c_models/stackeddisks.cpp",                
-        srcdir+"/stacked_disks.c",
-        #srcdir+"/CLamellarModel.c",
-        "src/sans/models/c_models/CLamellarModel.cpp",
-        "src/sans/models/c_models/lamellar.cpp",                
-        srcdir+"/lamellar.c",
-        #srcdir+"/CLamellarFFHGModel.c",
-        "src/sans/models/c_models/CLamellarFFHGModel.cpp",
-        "src/sans/models/c_models/lamellarFF_HG.cpp",                
-        #srcdir+"/lamellarFF_HG.c",
-        #srcdir+"/CLamellarPSModel.c",
-        "src/sans/models/c_models/CLamellarPSModel.cpp",
-        "src/sans/models/c_models/lamellarPS.cpp",                
-        srcdir+"/lamellarPS.c",
-        #srcdir+"/CLamellarPSHGModel.c",
-        "src/sans/models/c_models/CLamellarPSHGModel.cpp",
-        "src/sans/models/c_models/lamellarPS_HG.cpp",                
-        #srcdir+"/lamellarPS_HG.c",
-        "src/sans/models/c_models/CLamellarPCrystalModel.cpp",
-        "src/sans/models/c_models/lamellarPC.cpp",                
-        #srcdir+"/lamellarPC.c",
-        #srcdir+"/COblateModel.c",
-        "src/sans/models/c_models/CCoreShellEllipsoidModel.cpp",
-        "src/sans/models/c_models/spheroid.cpp",   
-        srcdir+"/spheroid.c",             
-        #srcdir+"/COblateModel.c",
-        #"sans/models/c_models/COblateModel.cpp",
-        #"sans/models/c_models/oblate.cpp",                
-        #srcdir+"/oblate.c",
-        #srcdir+"/CProlateModel.c",
-        #"sans/models/c_models/CProlateModel.cpp",
-        #"sans/models/c_models/prolate.cpp",                
-        #srcdir+"/prolate.c",
-        #srcdir+"/CMultishellModel.c",
-        "src/sans/models/c_models/CMultiShellModel.cpp",
-        "src/sans/models/c_models/multishell.cpp",                
-        #srcdir+"/multishell.c",
-        "src/sans/models/c_models/CSphereSLDModel.cpp",
-        "src/sans/models/c_models/spheresld.cpp",                
-        srcdir+"/spheresld.c",
-        #srcdir+"/CVesicleModel.c",
-        "src/sans/models/c_models/CVesicleModel.cpp",
-        "src/sans/models/c_models/vesicle.cpp",                
-        #srcdir+"/vesicle.c",
-        #srcdir+"/CBinaryHSModel.c",
-        "src/sans/models/c_models/CBinaryHSModel.cpp",
-        "src/sans/models/c_models/binaryHS.cpp",                
-        "src/sans/models/c_models/CPoly_GaussCoil.cpp",
-        "src/sans/models/c_models/polygausscoil.cpp",   
-        srcdir+"/rpa.c",             
-        "src/sans/models/c_models/CRPAModel.cpp",
-        "src/sans/models/c_models/rpa.cpp", 
-        #srcdir+"/fractal.c",             
-        "src/sans/models/c_models/CFractalModel.cpp",
-        "src/sans/models/c_models/fractal.cpp", 
-        srcdir+"/sld_cal.c",         
-        "src/sans/models/c_models/CSLDCalFunc.cpp", 
-        "src/sans/models/c_models/sld_cal.cpp",  
-        #gammainc function need to imported from somewhere  
-        #srcdir+"/polyexclvol.c",             
-        #"sans/models/c_models/CPolymerExclVolModel.cpp",
-        #"sans/models/c_models/polyexclvol.cpp",  
-        srcdir+"/libmultifunc/librefl.c",
-        srcdir+"/libmultifunc/libfunc.c",
-        #srcdir+"/polygausscoil.c",             
-        #srcdir+"/binaryHS.c",
-        srcdir+"/disperser.c",
-        igordir+"/libCylinder.c",
-        igordir+"/libStructureFactor.c",
-        igordir+"/libSphere.c",
-        igordir+"/libTwoPhase.c",
-        srcdir+"/gaussian.c",
-        srcdir+"/CGaussian.c",
-        srcdir+"/logNormal.c",
-        srcdir+"/CLogNormal.c",
-        srcdir+"/schulz.c",
-        srcdir+"/CSchulz.c",
-        srcdir+"/lorentzian.c",
-        srcdir+"/CLorentzian.c"
-            ],
-        include_dirs=[igordir,srcdir,"src/sans/models/c_models",numpy_incl_path]),       
+             sources=model_sources,                 
+      
+        include_dirs=[igordir, srcdir, c_model_dir, numpy_incl_path]),       
         # Smearer extension
         Extension("sans.models.sans_extension.smearer",
-                   sources = [
-        "src/sans/models/c_smearer/smearer_module.cpp",
-        "src/sans/models/c_smearer/smearer.cpp",
-        ],
-        include_dirs=["src/sans/models/c_smearer",numpy_incl_path]),
+                   sources = [os.path.join(smear_dir, 
+                                          "smearer.cpp"),
+                             os.path.join(smear_dir, "smearer_module.cpp"),],
+        include_dirs=[smear_dir, numpy_incl_path]),
         Extension("sans.models.sans_extension.smearer2d_helper",
-                  sources = [
-        "src/sans/models/c_smearer/smearer2d_helper_module.cpp",
-        "src/sans/models/c_smearer/smearer2d_helper.cpp",
-        ],
-        include_dirs=["src/sans/models/c_smearer",numpy_incl_path]
+                  sources = [os.path.join(smear_dir, 
+                                          "smearer2d_helper_module.cpp"),
+                             os.path.join(smear_dir, "smearer2d_helper.cpp"),],
+        include_dirs=[smear_dir,numpy_incl_path]
         )
         ]
     )
