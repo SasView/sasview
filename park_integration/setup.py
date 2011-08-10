@@ -15,8 +15,8 @@ setup(
     url = "http://danse.chem.utk.edu",
     
     # Use the pure python modules
-    package_dir = {"sans.fit":"sans/fit"},
+    package_dir = {"sans.fit":"src/sans/fit"},
     
-    packages = ["sans.fit", "sans"]
+    packages = ["sans.fit", "src/sans"]
     )
         
