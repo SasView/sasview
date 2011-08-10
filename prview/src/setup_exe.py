@@ -13,7 +13,8 @@
 # be added to the distribution directory for that purpose.
 # See for example the 'images' directory below.
 
-import os, sys
+import os
+import sys
 
 # When using the SansView build script, we need to be able to pass
 # an extra path to be added to the python path. The extra arguments

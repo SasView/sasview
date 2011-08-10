@@ -68,6 +68,7 @@ SetupIconFile_mac = os.path.join("images", "ball.icns")
 DefaultGroupName = "DANSE"
 OutputBaseFilename = "setupPrView"
 DATAPANEL_WIDTH = 235
+DATAPANEL_HEIGHT = 700
 FIXED_PANEL = True
 DATALOADER_SHOW = True
 CLEANUP_PLOT = False
