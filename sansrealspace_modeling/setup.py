@@ -97,7 +97,7 @@ for module in mod_list:
         include_dirs=incl_dirs) )
 
 setup(
-    name="sans.simulation",
+    name="sansrealspace_modeling",
     version = "0.2",
     description = "Python module for SANS simulation",
     author = "University of Tennessee",

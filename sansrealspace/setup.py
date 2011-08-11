@@ -11,7 +11,7 @@ import os
 #TODO: this should be part of realSpaceModeling
 from distutils.core import setup
 setup(
-    name="sans.realspace",
+    name="sansrealspace",
     version = "0.1",
     description = "Python module for SANS scattering models",
     url = "http://danse.us/trac/sans",
