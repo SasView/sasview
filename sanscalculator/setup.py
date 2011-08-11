@@ -5,7 +5,7 @@
 from distutils.core import setup
 
 setup(
-    name="sans.calculator",
+    name="sanscalculator",
     version = "0.9.1",
     description = "Python module for sld  calculation",
     author = "University of Tennessee",
