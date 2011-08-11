@@ -26,6 +26,7 @@ from sans.guiframe.events import EVT_STATUS
 from sans.guiframe.events import EVT_APPEND_BOOKMARK
 from sans.guiframe.events import EVT_PANEL_ON_FOCUS
 from sans.guiframe.events import EVT_NEW_LOAD_DATA
+from sans.guiframe.events import EVT_NEW_COLOR
 from sans.guiframe.events import StatusEvent
 from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.gui_style import GUIFRAME
