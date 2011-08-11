@@ -4,6 +4,7 @@
 import time
 import os
 from sans.guiframe.gui_style import GUIFRAME
+import sans.perspectives.fitting as fitting
 # Version of the application
 __appname__ = "SansView"
 __version__ = '1.9.2dev_AUG'
@@ -61,7 +62,11 @@ PLOPANEL_HEIGTH = 370
 DATAPANEL_WIDTH = 235
 DATAPANEL_HEIGHT = 700
 SPLASH_SCREEN_PATH = os.path.join("images","SVwelcome_mini.png")
-TUTORIAL_PATH = os.path.join("media","Tutorial.pdf")
+try:
+    fit_media_path = fitting.get_data_path(media='media')
+    TUTORIAL_PATH = os.path.join(fit_media_path,"Tutorial.pdf")
+except:
+    raise
 DEFAULT_STYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.MANAGER_ON\
                     |GUIFRAME.CALCULATOR_ON|GUIFRAME.TOOLBAR_ON
 SPLASH_SCREEN_WIDTH = 512
