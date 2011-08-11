@@ -7,7 +7,7 @@ currpath = os.path.split(os.getcwd())[0]
 
 setup(
       version="0.9.1",
-      name="prview",
+      name="inversionview",
       description="P(r) inversion perspective for SansView",
       package_dir={"sans":"src/sans",
                    "sans.perspectives":"src/sans/perspectives",
