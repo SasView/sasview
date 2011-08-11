@@ -1,4 +1,7 @@
-graft src\sans\perspectives\calculator\media\*.*
-graft src\sans\perspectives\calculator\images\*.*
+graft docs
+graft scripts
+include README.txt
+include release_notes.txt
+include license.txt
 
 

@@ -3,7 +3,7 @@
 """
 import os
 from distutils.core import setup
-cal_dir = os.path.join("src", "sans", "perspective", "caculator")
+cal_dir = os.path.join("src", "sans", "perspective", "calculator")
 setup(
     name="calculatorview",
     version = "0.9",
