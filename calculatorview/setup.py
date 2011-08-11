@@ -5,7 +5,7 @@ import os
 from distutils.core import setup
 cal_dir = os.path.join("src", "sans", "perspective", "caculator")
 setup(
-    name="sans.calculatorview",
+    name="calculatorview",
     version = "0.9",
     description="calculator perspective for SansView",
     package_dir={"sans":"src/sans",
