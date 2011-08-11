@@ -64,9 +64,8 @@ UTIL       = "0.1.5"
 PR_INV = "0.2.5"
 
 # URLs for SVN repos
-DATALOADER_URL = "svn://danse.us/sans/releases/DataLoader-%s" % DATALOADER
-GUICOMM_URL = "svn://danse.us/sans/releases/guicomm-%s" % GUICOMM
-GUIFRAME_URL = "svn://danse.us/sans/releases/guiframe-%s" % GUIFRAME
+DATALOADER_URL = "svn://danse.us/sans/releases/sansdataloader-%s" % DATALOADER
+GUIFRAME_URL = "svn://danse.us/sans/releases/sansguiframe-%s" % GUIFRAME
 PLOTTOOLS_URL = "svn://danse.us/common/releases/plottools-%s/trunk" % PLOTTOOLS
 UTIL_URL = "svn://danse.us/common/releases/util-%s" % UTIL
 PRVIEW_URL = "svn://danse.us/sans/releases/prview-%s" % PRVIEW
@@ -137,19 +136,13 @@ def checkout(release=False):
     if release:
         install_pkg(".", "DataLoader-%s" % DATALOADER, DATALOADER_URL)
     else:
-        install_pkg(".", "DataLoader", "svn://danse.us/sans/trunk/DataLoader")
-    
-    os.chdir(wd)
-    if release:
-        install_pkg(".", "guicomm-%s" % GUICOMM, GUICOMM_URL)
-    else:
-        install_pkg(".", "guicomm", "svn://danse.us/sans/trunk/guicomm")
+        install_pkg(".", "DataLoader", "svn://danse.us/sans/trunk/sansdataloader")
     
     os.chdir(wd)
     if release:
         install_pkg(".", "guiframe-%s" % GUIFRAME, GUIFRAME_URL)
     else:
-        install_pkg(".", "guiframe", "svn://danse.us/sans/trunk/guiframe")
+        install_pkg(".", "guiframe", "svn://danse.us/sans/trunk/sansguiframe")
     
     os.chdir(wd)
     if release:
@@ -189,7 +182,7 @@ def prepare(wipeout = False):
         libdir = get_python_lib()
         old_dirs = [os.path.join(libdir, 'danse'),
                     os.path.join(libdir, 'data_util'),
-                    os.path.join(libdir, 'DataLoader'),
+                    os.path.join(libdir, 'sansdataloader'),
                     os.path.join(libdir, 'sans'),
                     os.path.join(libdir, 'sans_extension'),
                     ]
@@ -220,7 +213,7 @@ def warning():
     print "modules:"
     print "   - danse"
     print "   - data_util"
-    print "   - DataLoader"
+    print "   - sansdataloader"
     print "   - sans"
     print "   - sans_extension\n"
     answer = raw_input("Do you want to delete those modules [Y] or continue with a dirty installation [N]? [Y|N]")
@@ -247,7 +240,6 @@ if __name__ == "__main__":
         elif sys.argv[1]=="-n":
             # Print out release URLs
             print DATALOADER_URL 
-            print GUICOMM_URL 
             print GUIFRAME_URL 
             print PLOTTOOLS_URL 
             print UTIL_URL 
