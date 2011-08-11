@@ -178,7 +178,7 @@ class BoxSum(_BaseInteractor):
         y_min = self.vertical_lines.y2
         y_max = self.vertical_lines.y1
         ##computation of the sum and its error
-        from DataLoader.manipulations import Boxavg
+        from sans.dataloader.manipulations import Boxavg
         box =  Boxavg(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
         self.count, self.error = box(self.base.data2D)
         

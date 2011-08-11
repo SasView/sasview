@@ -6,7 +6,7 @@ Usage:
 """
 from setuptools import setup
 import periodictable.xsf
-import DataLoader.readers 
+import sans.dataloader.readers 
 from distutils.sysconfig import get_python_lib
 import os
 import string
@@ -30,7 +30,7 @@ import sans.guiframe as guiframe
 DATA_FILES += guiframe.data_files()
 
 #CANSAxml reader data files
-RESOURCES_FILES.append(os.path.join(DataLoader.readers.get_data_path(),'defaults.xml'))
+RESOURCES_FILES.append(os.path.join(sans.dataloader.readers.get_data_path(),'defaults.xml'))
 
 # Locate libxml2 library
 lib_locs = ['/usr/local/lib', '/usr/lib']
@@ -52,7 +52,7 @@ def find_extension():
     try:
         list = []
         EXCEPTION_LIST = ['*', '.', '']
-        from DataLoader.loader import Loader
+        from sans.dataloader.loader import Loader
         wild_cards = Loader().get_wildcards()
         for item in wild_cards:
             #['All (*.*)|*.*']

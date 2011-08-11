@@ -120,7 +120,7 @@ class SectorMask(_BaseInteractor):
 
         mask = data.mask
         ## Averaging
-        from DataLoader.manipulations import Sectorcut
+        from sans.dataloader.manipulations import Sectorcut
         radius = self.qmax 
         phimin =  -self.left_line.phi + self.main_line.theta
         phimax = self.left_line.phi + self.main_line.theta

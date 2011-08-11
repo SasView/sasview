@@ -32,10 +32,10 @@ import os
 import sys
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
-from DataLoader.data_info import Collimation
-from DataLoader.data_info import Detector
-from DataLoader.data_info import Process
-from DataLoader.data_info import Aperture
+from sans.dataloader.data_info import Collimation
+from sans.dataloader.data_info import Detector
+from sans.dataloader.data_info import Process
+from sans.dataloader.data_info import Aperture
 from lxml import etree
 import xml.dom.minidom
 

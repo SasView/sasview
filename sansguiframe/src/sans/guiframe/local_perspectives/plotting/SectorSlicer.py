@@ -145,7 +145,7 @@ class SectorInteractor(_BaseInteractor):
         if data == None:
             return
         ## Averaging
-        from DataLoader.manipulations import SectorQ
+        from sans.dataloader.manipulations import SectorQ
         radius = self.qmax 
         phimin =  -self.left_line.phi + self.main_line.theta
         phimax = self.left_line.phi + self.main_line.theta

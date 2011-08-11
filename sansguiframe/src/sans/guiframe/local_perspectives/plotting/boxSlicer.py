@@ -537,7 +537,7 @@ class BoxInteractorX(BoxInteractor):
         """
         Post data creating by averaging in Qx direction
         """
-        from DataLoader.manipulations import SlabX
+        from sans.dataloader.manipulations import SlabX
         self.post_data(SlabX, direction="X")   
         
 
@@ -554,7 +554,7 @@ class BoxInteractorY(BoxInteractor):
         """
         Post data creating by averaging in Qy direction
         """
-        from DataLoader.manipulations import SlabY
+        from sans.dataloader.manipulations import SlabY
         self.post_data(SlabY, direction="Y")   
         
         

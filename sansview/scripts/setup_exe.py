@@ -97,9 +97,9 @@ for f in matplotlibdata:
     dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
     data_files.append((os.path.split(dirname)[0], [f]))
 
-# Copy the settings file for the DataLoader file extension associations
-import DataLoader.readers
-f = os.path.join(DataLoader.readers.get_data_path(),'defaults.xml')
+# Copy the settings file for the sans.dataloader file extension associations
+import sans.dataloader.readers
+f = os.path.join(sans.dataloader.readers.get_data_path(),'defaults.xml')
 if os.path.isfile(f):
     data_files.append(('.', [f]))
 f = 'custom_config.py'

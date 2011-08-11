@@ -147,7 +147,7 @@ class BoxMask(_BaseInteractor):
         Get the limits of the boxsum and compute the sum of the pixel
         contained in that region and the error on that sum
         """
-        from DataLoader.manipulations import Boxcut
+        from sans.dataloader.manipulations import Boxcut
         ## Data 2D for which the pixel will be summed
         data = self.base.data
         mask = data.mask

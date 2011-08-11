@@ -40,7 +40,7 @@ def find_extension():
     try:
         list = []
         #(ext, type, name, flags)
-        from DataLoader.loader import Loader
+        from sans.dataloader.loader import Loader
         wild_cards = Loader().get_wildcards()
         for item in wild_cards:
             #['All (*.*)|*.*']

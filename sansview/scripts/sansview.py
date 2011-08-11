@@ -61,6 +61,7 @@ class SansView():
             pr_plug = module.Plugin(standalone=False)
             self.gui.add_perspective(pr_plug)
         except:
+            raise
             logging.error("SansView: could not find P(r) plug-in module") 
             logging.error(sys.exc_value)  
         
@@ -70,6 +71,7 @@ class SansView():
             invariant_plug = module.Plugin(standalone=False)
             self.gui.add_perspective(invariant_plug)
         except:
+            raise
             logging.error("SansView: could not find Invariant plug-in module") 
             logging.error(sys.exc_value)  
         
