@@ -77,7 +77,7 @@ FIT_VIEW   = "0.9.1"
 # URLs for SVN repos
 SANSMODELS_URL = "svn://danse.us/sans/releases/sansmodels-%s" % SANSMODELS
 DATALOADER_URL = "svn://danse.us/sans/releases/sansdataloader-%s" % DATALOADER
-GUIFRAME_URL = "svn://danse.us/sans/releases/guiframe-%s" % GUIFRAME
+GUIFRAME_URL = "svn://danse.us/sans/releases/sansguiframe-%s" % GUIFRAME
 PLOTTOOLS_URL = "svn://danse.us/common/releases/plottools-%s/trunk" % PLOTTOOLS
 UTIL_URL = "svn://danse.us/common/releases/util-%s" % UTIL
 SANSVIEW_URL = "svn://danse.us/sans/releases/sansview-%s" % SANSVIEW
