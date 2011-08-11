@@ -81,6 +81,8 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.spectrum_dic = {}
         # dQ 2d image
         self.image = None
+        # results of sigmas
+        self.sigma_strings =' '
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         # Object that receive status event
@@ -820,6 +822,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         # Compute and get the image plot
         try:
             from sans.perspectives.calculator.resolcal_thread import CalcRes as thread
+            self.sigma_strings = '\nResolution COmputation is Finished:\n'
             cal_res = thread(func = self._map_func,
                          qx = self.qx,
                          qy = self.qy,
@@ -828,7 +831,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                          qy_min = qy_min,
                          qy_max = qy_max,
                          image = self.image,
-                         completefn = self.complete_cal)
+                         completefn = self.complete)
             #self.image = map(self._map_func, self.qx, self.qy, 
             #                 qx_min, qx_max, qy_min, qy_max)[0]
             cal_res.queue()
@@ -848,7 +851,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         Callafter complete: wx call after needed for stable output
         """
-        wx.CallAfter(self.complte, image, elapsed)   
+        wx.CallAfter(self.complete_cal, image, elapsed)   
         
     def complete_cal(self, image, elapsed=None):
         """
@@ -877,7 +880,8 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.sigma_phi_tcl.SetValue(str(sigma_phi))
         self.sigma_lamd_tcl.SetValue(str(sigma_lamd))
         self.sigma_1d_tcl.SetValue(str(sigma_1d))
-        msg = "Resolution computation is finished."
+        msg = self.sigma_strings
+        msg += "\n"
         status_type = 'stop'
         self._status_info(msg, status_type)
         
@@ -977,9 +981,23 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         image = self.resolution.compute_and_plot(qx_value, qy_value, 
                                  qx_min, qx_max, qy_min, qy_max, 
                                  self.det_coordinate)
-        
-
+        # record sigmas
+        self.sigma_strings += " At Qx = %s, Qy = %s; \n"% (qx_value,qy_value)
+        self._sigma_strings()
         return image
+    def _sigma_strings(self):
+        """
+        Recode sigmas as strins
+        """
+        sigma_r = self.format_number(self.resolution.sigma_1)
+        sigma_phi = self.format_number(self.resolution.sigma_2)
+        sigma_lamd = self.format_number(self.resolution.sigma_lamd)
+        sigma_1d =  self.format_number(self.resolution.sigma_1d)
+        # Set output values 
+        self.sigma_strings += "   sigma_x = %s\n"% sigma_r
+        self.sigma_strings += "   sigma_y = %s\n"% sigma_phi
+        self.sigma_strings += "   sigma_lamd = %s\n"% sigma_lamd
+        self.sigma_strings += "   sigma_1D = %s\n"% sigma_1d
     
     def _validate_q_input(self, qx, qy):    
         """
