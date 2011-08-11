@@ -27,7 +27,7 @@ def get_c_files(path):
 
 # Top package name
 #pck_top = "sansModeling"
-pck_top = "sans.simulation"
+pck_top = "sansrealspace_modeling"
 pck_dir = os.path.join("src","sans", "simulation")
 # The temp directory that the compiled files will be put in
 tempdir = "build/temp."+util.get_platform()+'-'+sysconfig.get_python_version()
