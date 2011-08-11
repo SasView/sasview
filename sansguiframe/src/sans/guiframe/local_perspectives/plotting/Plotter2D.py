@@ -428,7 +428,7 @@ class ModelPanel2D(ModelPanel1D):
         # Find the best number of bins
         npt = math.sqrt(len(self.data2D.data[numpy.isfinite(self.data2D.data)]))
         npt = math.floor(npt)
-        from DataLoader.manipulations import CircularAverage
+        from sans.dataloader.manipulations import CircularAverage
         ## compute the maximum radius of data2D
         self.qmax = max(math.fabs(self.data2D.xmax), 
                         math.fabs(self.data2D.xmin))
@@ -609,7 +609,7 @@ class ModelPanel2D(ModelPanel1D):
                 # It should be a simple matter of calling the .
                 #save(file, data, '.xml') method
                 # of the DataLoader.loader.Loader class.
-                from DataLoader.loader import  Loader
+                from sans.dataloader.loader import  Loader
                 #Instantiate a loader 
                 loader = Loader() 
                 data = self.data2D

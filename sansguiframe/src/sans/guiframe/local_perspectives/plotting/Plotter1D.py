@@ -591,8 +591,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
             #to recognize extensions.
             # It should be a simple matter of calling the .
             #save(file, data, '.xml') method
-            # of the DataLoader.loader.Loader class.
-            from DataLoader.loader import  Loader
+            # of the sans.dataloader.loader.Loader class.
+            from sans.dataloader.loader import  Loader
             #Instantiate a loader 
             loader = Loader() 
             data = self.plots[self.graph.selected_plottable]
