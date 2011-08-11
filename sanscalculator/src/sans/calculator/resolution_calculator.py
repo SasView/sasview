@@ -165,23 +165,25 @@ class ResolutionCalculator(object):
             #if numpy.all(out==0.0):
             #    continue
             image = out
-            # set sigmas
-            sigma_1 += sig1_list[ind] * self.intensity
-            sigma_r += sigr_list[ind] * self.intensity
-            sigma_2 += sig2_list[ind] * self.intensity
-            sigma1d += sigma1d_list[ind] * self.intensity
+            # set variance as sigmas
+            sigma_1 += sig1_list[ind] *  sig1_list[ind] * self.intensity
+            sigma_r += sigr_list[ind] * sigr_list[ind] * self.intensity
+            sigma_2 += sig2_list[ind] * sig2_list[ind] * self.intensity
+            sigma1d += sigma1d_list[ind] * sigma1d_list[ind] * self.intensity
             total_intensity += self.intensity
+        
         if total_intensity != 0:
+            # average variance
             image_out = image / total_intensity
             sigma_1 = sigma_1 / total_intensity
             sigma_r = sigma_r / total_intensity
             sigma_2 = sigma_2 / total_intensity
             sigma1d = sigma1d / total_intensity
             # set sigmas
-            self.sigma_1 = sigma_1
-            self.sigma_lamd = sigma_r
-            self.sigma_2 = sigma_2
-            self.sigma_1d = sigma1d
+            self.sigma_1 = sqrt(sigma_1)
+            self.sigma_lamd = sqrt(sigma_r)
+            self.sigma_2 = sqrt(sigma_2)
+            self.sigma_1d = sqrt(sigma1d)
             # rescale 
             max_im_val = 1 #image_out.max()
             if max_im_val > 0:
