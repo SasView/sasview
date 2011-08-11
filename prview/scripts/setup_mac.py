@@ -2,12 +2,12 @@
     Setup script to build a Mac app
 """
 from setuptools import setup
-import DataLoader.readers 
+import sans.dataloader.readers 
 import os
 
 #Data reader data files
 
-RESOURCES_FILES = os.path.join(DataLoader.readers.get_data_path(),'defaults.xml')
+RESOURCES_FILES = os.path.join(sans.dataloader.readers.get_data_path(),'defaults.xml')
 
 # Locate libxml2 library
 lib_locs = ['/usr/local/lib', '/usr/lib']
