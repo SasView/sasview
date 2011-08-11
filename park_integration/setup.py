@@ -7,7 +7,7 @@ from distutils.core import setup, Extension
 
 
 setup(
-    name="sans.fit",
+    name="park_integration",
     version = "0.9.1",
     description = "Python module for fitting",
     author = "University of Tennessee",
