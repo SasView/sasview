@@ -9,7 +9,7 @@ from distutils.core import setup#, Extension
 #from numpy.distutils.misc_util import get_numpy_include_dirs
 #numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
 setup(
-    name="sans.dataloader",
+    name="sansdataloader",
     version = "0.9.1",
     description = "Python module for loading",
     author = "University of Tennessee",
