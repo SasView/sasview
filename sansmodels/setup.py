@@ -10,8 +10,6 @@
 
 """
 import sys
-if len(sys.argv) == 1:
-    sys.argv.append('install')
 import os
 
     
@@ -92,7 +90,6 @@ IGNORED_FILES = ["a.exe",
                    "WrapperGenerator.py",
                    "wrapping.py",
                    "winFuncs.c"]
-IGNORED_EXTENSIONS = [".h", ".txt", ".def", ".mm", ".hh", ".py"]
 EXTENSIONS = [".c", ".cpp"]
 
 def append_file(file_list, dir_path):
