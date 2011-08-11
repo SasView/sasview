@@ -256,6 +256,7 @@ class ViewerFrame(wx.Frame):
         self.Bind(EVT_APPEND_BOOKMARK, self.append_bookmark)
         self.Bind(EVT_NEW_LOAD_DATA, self.on_load_data)
         self.Bind(EVT_NEW_BATCH, self.on_batch_selection)
+        self.Bind(EVT_NEW_COLOR, self.on_color_selection)
         self.setup_custom_conf()
     
     def on_set_batch_result(self, data, name):
@@ -276,6 +277,15 @@ class ViewerFrame(wx.Frame):
         for plug in self.plugins:
             plug.set_batch_selection(self.batch_on)
             
+    def on_color_selection(self, event):
+        """
+        :param event: contains parameters for id and color
+        """ 
+        color, id = event.color, event.id
+        for plug in self.plugins:
+            plug.add_color(color, id)
+        
+        
     def setup_custom_conf(self):
         """
         Set up custom configuration if exists
