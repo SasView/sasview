@@ -24,6 +24,7 @@ from sans.guiframe import dataFitting
 from sans.guiframe.events import EVT_NEW_PLOT
 from sans.guiframe.events import StatusEvent 
 from sans.guiframe.events import NewPlotEvent
+from sans.guiframe.events import NewColorEvent
 from sans.guiframe.events import SlicerEvent
 from sans.guiframe.events import PanelOnFocusEvent
 from sans.guiframe.events import EVT_NEW_LOADED_DATA
@@ -37,6 +38,42 @@ DEFAULT_QSTEP = 0.001
 DEFAULT_BEAM = 0.005
 BIN_WIDTH = 1
 
+class SizeDialog(wx.Dialog):
+    def __init__(self, parent, id, title):
+        wx.Dialog.__init__(self, parent, id, title, size=(300, 175))
+
+        #panel = wx.Panel(self, -1)
+        
+        mainbox = wx.BoxSizer(wx.VERTICAL)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        textbox = wx.BoxSizer(wx.HORIZONTAL)
+        
+        text1 = "Enter in a custom size (float values > 0 accepted)"
+        msg = wx.StaticText(self, -1, text1,(30,15), style=wx.ALIGN_CENTRE)
+        msg.SetLabel(text1)
+        self.myTxtCtrl = wx.TextCtrl(self, -1, '', (100, 50))
+        
+        textbox.Add(self.myTxtCtrl, flag=wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 
+                 border=10, proportion=2)
+        vbox.Add(msg, flag=wx.ALL, border=10, proportion=1)
+        vbox.Add(textbox, flag=wx.EXPAND|wx.TOP|wx.BOTTOM|wx.ADJUST_MINSIZE,
+                 border=10)
+    
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        okButton = wx.Button(self,wx.ID_OK, 'OK', size=(70, 30))
+        closeButton = wx.Button(self,wx.ID_CANCEL, 'Close', size=(70, 30))
+        hbox.Add(okButton, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 
+                 border=10)
+        hbox.Add(closeButton, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 
+                 border=10)
+        
+        mainbox.Add(vbox, flag=wx.ALL, border=10)
+        mainbox.Add(hbox, flag=wx.EXPAND|wx.TOP|wx.BOTTOM|wx.ADJUST_MINSIZE, 
+                    border=10)
+        self.SetSizer(mainbox)
+    
+    def getText(self):
+        return self.myTxtCtrl.GetValue()
 
 class ModelPanel1D(PlotPanel, PanelBase):
     """
@@ -67,6 +104,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._available_data = []
         self._menu_add_ids = []
         self._symbol_labels = self.get_symbol_label()
+        self._color_labels = self.get_color_label()
+        self.currColorIndex = ""
       
         self.hide_menu = None
         ## Unique ID (from gui_manager)
@@ -120,6 +159,25 @@ class ModelPanel1D(PlotPanel, PanelBase):
         _labels['Pentagon'] = i
         i += 1
         _labels['Line'] = i
+        return _labels
+    
+    def get_color_label(self):
+        """
+        Associates label to a specific color
+        """
+        _labels = {}
+        i = 0
+        _labels['Blue'] = i
+        i += 1
+        _labels['Green'] = i
+        i += 1
+        _labels['Red'] = i
+        i += 1
+        _labels['Cyan'] = i
+        i += 1
+        _labels['Magenta'] = i
+        i += 1
+        _labels['Yellow'] = i
         return _labels
 
     
@@ -332,6 +390,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                     id = wx.NewId()
                     self._slicerpop.Append(id, '&Freeze', 'Freeze')
                     wx.EVT_MENU(self, id, self.onFreeze)
+                
                 symbol_menu = wx.Menu()
                 for label in self._symbol_labels:
                     id = wx.NewId()
@@ -339,6 +398,27 @@ class ModelPanel1D(PlotPanel, PanelBase):
                     wx.EVT_MENU(self, id, self.onChangeSymbol)
                 id = wx.NewId()
                 self._slicerpop.AppendMenu(id,'&Modify Symbol',  symbol_menu)
+                
+                color_menu = wx.Menu()
+                for label in self._color_labels:
+                    id = wx.NewId()
+                    color_menu.Append(id, str(label), str(label))
+                    wx.EVT_MENU(self, id, self.onChangeColor)
+                id = wx.NewId()
+                self._slicerpop.AppendMenu(id, '&Modify Symbol Color', color_menu)
+                
+                
+                size_menu = wx.Menu()
+                for i in range(10):
+                    id = wx.NewId()
+                    size_menu.Append(id, str(i), str(i))
+                    wx.EVT_MENU(self, id, self.onChangeSize)
+                id = wx.NewId()
+                size_menu.Append(id, '&Custom', 'Custom')
+                wx.EVT_MENU(self, id, self.onChangeSize)
+                id = wx.NewId()
+                self._slicerpop.AppendMenu(id, '&Modify Symbol Size', size_menu)
+                
                 self._slicerpop.AppendSeparator()
     
                 id = wx.NewId()
@@ -373,7 +453,48 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         plot = self.plots[self.graph.selected_plottable]
         self.parent.onfreeze([plot.id])
+    
+    def onChangeColor(self, event):
+        """
+        Changes the color of the graph when selected
+        """
+        menu = event.GetEventObject()
+        id = event.GetId()
+        label =  menu.GetLabel(id)
+        selected_plot = self.plots[self.graph.selected_plottable]
+        selected_plot.custom_color = self._color_labels[label]
+        ## Set the view scale for all plots
+        self._onEVT_FUNC_PROPERTY()
+        ## render the graph
+        #self.graph.render(self)
+        #self.subplot.figure.canvas.draw_idle()
+        print "PARENT: ", self.parent
+        wx.PostEvent(self.parent,
+                      NewColorEvent(color=selected_plot.custom_color,
+                                             id=selected_plot.id))
+    
+    def onChangeSize(self, event):
         
+        menu = event.GetEventObject()
+        id = event.GetId()
+        label =  menu.GetLabel(id)
+        selected_plot = self.plots[self.graph.selected_plottable]
+        
+        if label == "&Custom":
+            sizedial = SizeDialog(None, -1, 'Change Marker Size')
+            if sizedial.ShowModal() == wx.ID_OK:
+                label = sizedial.getText()
+            sizedial.Destroy()
+
+        selected_plot.marker_size = int(label)
+        self._onEVT_FUNC_PROPERTY()
+        ## Set the view scale for all plots
+        
+        ## render the graph
+        #self.graph.render(self)
+        #self.subplot.figure.canvas.draw_idle()
+
+    
     def onChangeSymbol(self, event):
         """
         """
@@ -387,6 +508,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         ## render the graph
         #self.graph.render(self)
         #self.subplot.figure.canvas.draw_idle()
+        
+        
         
     def _onsaveTXT(self, path):
         """
