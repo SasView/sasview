@@ -1,2 +1,4 @@
 graft docs
+include README.txt
+include release_notes.txt
 
