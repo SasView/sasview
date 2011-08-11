@@ -4,7 +4,7 @@
 from distutils.core import setup
 
 setup(
-    name="sans.invariant",
+    name="sansinvariant",
     version = "0.9",
     description = "Python module for invariant calculation",
     author = "University of Tennessee",
