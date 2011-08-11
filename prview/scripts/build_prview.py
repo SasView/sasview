@@ -61,6 +61,7 @@ GUIFRAME   = "0.2.0"
 PRVIEW     = "0.3.3"
 PLOTTOOLS  = "0.1.9"
 UTIL       = "0.1.5"
+INV_VIEW   = "0.2.5"
 PR_INV = "0.2.5"
 
 # URLs for SVN repos
@@ -68,6 +69,7 @@ DATALOADER_URL = "svn://danse.us/sans/releases/sansdataloader-%s" % DATALOADER
 GUIFRAME_URL = "svn://danse.us/sans/releases/sansguiframe-%s" % GUIFRAME
 PLOTTOOLS_URL = "svn://danse.us/common/releases/plottools-%s/trunk" % PLOTTOOLS
 UTIL_URL = "svn://danse.us/common/releases/util-%s" % UTIL
+INV_VIEW_URL = "svn://danse.us/sans/releases/inversionview-%s" % INV_VIEW
 PRVIEW_URL = "svn://danse.us/sans/releases/prview-%s" % PRVIEW
 PR_INV_URL = "svn://danse.us/sans/releases/pr_inversion-%s" % PR_INV
 
@@ -134,16 +136,22 @@ def checkout(release=False):
     
     os.chdir(wd)
     if release:
-        install_pkg(".", "DataLoader-%s" % DATALOADER, DATALOADER_URL)
+        install_pkg(".", "sansdataloader-%s" % DATALOADER, DATALOADER_URL)
     else:
-        install_pkg(".", "DataLoader", "svn://danse.us/sans/trunk/sansdataloader")
+        install_pkg(".", "sansdataloader", "svn://danse.us/sans/trunk/sansdataloader")
     
     os.chdir(wd)
     if release:
-        install_pkg(".", "guiframe-%s" % GUIFRAME, GUIFRAME_URL)
+        install_pkg(".", "sansguiframe-%s" % GUIFRAME, GUIFRAME_URL)
     else:
-        install_pkg(".", "guiframe", "svn://danse.us/sans/trunk/sansguiframe")
-    
+        install_pkg(".", "sansguiframe", "svn://danse.us/sans/trunk/sansguiframe")
+        
+    os.chdir(wd)
+    if release:
+        install_pkg(".", "inversionview-%s" % INV_VIEW, INV_VIEW_URL)
+    else:
+        install_pkg(".", "inversionview", "svn://danse.us/sans/trunk/inversionview")
+   
     os.chdir(wd)
     if release:
         install_pkg("plottools-%s" % PLOTTOOLS, "trunk", PLOTTOOLS_URL)
@@ -244,6 +252,7 @@ if __name__ == "__main__":
             print PLOTTOOLS_URL 
             print UTIL_URL 
             print PRVIEW_URL
+            print INV_VIEW_URL
             print PR_INV_URL 
         else:
             logging.info("Build script for PrView %s" % PRVIEW)
@@ -266,8 +275,8 @@ if __name__ == "__main__":
                     os.chdir("prview-%s" % (PRVIEW))
                     os.system("%s setup_exe.py py2exe --extrapath \"%s\python25\lib\site-packages\"" % (PYTHON, LIB_FOLDER))
                     os.system("%s/Q installer.iss" % INNO)
-                    shutil.copy2(os.path.join("Output","setupSansView.exe"), 
-                                 os.path.join(CWD, "setupSansView_%s.exe" % str(timestamp)))
+                    shutil.copy2(os.path.join("Output","setupPrView.exe"), 
+                                 os.path.join(CWD, "setupPrView_%s.exe" % str(timestamp)))
                 elif sys.platform=='darwin':
                     logging.info("Building Mac application from release version")
                     os.chdir("prview-%s" % (PRVIEW))
