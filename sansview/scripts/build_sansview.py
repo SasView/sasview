@@ -72,21 +72,23 @@ CALCULATOR = "0.9.1"
 CALC_VIEW  = "0.9"
 INVARIANT  = "0.9.1"
 INV_VIEW   = "0.9"
+FIT_VIEW   = "0.9.1"
 
 # URLs for SVN repos
 SANSMODELS_URL = "svn://danse.us/sans/releases/sansmodels-%s" % SANSMODELS
-DATALOADER_URL = "svn://danse.us/sans/releases/DataLoader-%s" % DATALOADER
+DATALOADER_URL = "svn://danse.us/sans/releases/sansdataloader-%s" % DATALOADER
 GUIFRAME_URL = "svn://danse.us/sans/releases/guiframe-%s" % GUIFRAME
 PLOTTOOLS_URL = "svn://danse.us/common/releases/plottools-%s/trunk" % PLOTTOOLS
 UTIL_URL = "svn://danse.us/common/releases/util-%s" % UTIL
 SANSVIEW_URL = "svn://danse.us/sans/releases/sansview-%s" % SANSVIEW
+FIT_URL = "svn://danse.us/sans/releases/fittingview-%s" % FIT_VIEW
 PARK_INTEG_URL = "svn://danse.us/sans/releases/park_integration-%s" % PARK_INTEG
 PARK_URL = "svn://danse.us/park/releases/park-%s" % PARK
-PRVIEW_URL = "svn://danse.us/sans/releases/prview-%s" % PRVIEW
+PRVIEW_URL = "svn://danse.us/sans/releases/inversionview-%s" % PRVIEW
 PR_INV_URL = "svn://danse.us/sans/releases/pr_inversion-%s" % PR_INV
-CALC_URL = "svn://danse.us/sans/releases/calculator-%s" % CALCULATOR
+CALC_URL = "svn://danse.us/sans/releases/sanscalculator-%s" % CALCULATOR
 CALC_VIEW_URL = "svn://danse.us/sans/releases/calculatorview-%s" % CALC_VIEW
-INV_URL = "svn://danse.us/sans/releases/Invariant-%s" % INVARIANT
+INV_URL = "svn://danse.us/sans/releases/sansinvariant-%s" % INVARIANT
 INV_VIEW_URL = "svn://danse.us/sans/releases/invariantview-%s" % INV_VIEW
 
 def check_system():
@@ -156,9 +158,9 @@ def checkout(release=False):
     
     os.chdir(wd)
     if release:
-        install_pkg(".", "DataLoader-%s" % DATALOADER, DATALOADER_URL)
+        install_pkg(".", "sansdataloader-%s" % DATALOADER, DATALOADER_URL)
     else:
-        install_pkg(".", "DataLoader", "svn://danse.us/sans/trunk/DataLoader")
+        install_pkg(".", "sansdataloader", "svn://danse.us/sans/trunk/sansdataloader")
     
     os.chdir(wd)
     if release:
@@ -168,9 +170,9 @@ def checkout(release=False):
     
     os.chdir(wd)
     if release:
-        install_pkg(".", "guiframe-%s" % GUIFRAME, GUIFRAME_URL)
+        install_pkg(".", "sansguiframe-%s" % GUIFRAME, GUIFRAME_URL)
     else:
-        install_pkg(".", "guiframe", "svn://danse.us/sans/trunk/guiframe")
+        install_pkg(".", "sansguiframe", "svn://danse.us/sans/trunk/sansguiframe")
     
     os.chdir(wd)
     if release:
@@ -192,9 +194,9 @@ def checkout(release=False):
     
     os.chdir(wd)
     if release:
-        install_pkg(".", "prview-%s" % PRVIEW, PRVIEW_URL)
+        install_pkg(".", "inversionview-%s" % PRVIEW, PRVIEW_URL)
     else:
-        install_pkg(".", "prview", "svn://danse.us/sans/trunk/prview")
+        install_pkg(".", "prview", "svn://danse.us/sans/trunk/inversionview")
     
     os.chdir(wd)
     if release:
@@ -204,9 +206,9 @@ def checkout(release=False):
     
     os.chdir(wd)
     if release:
-        install_pkg(".", "Invariant-%s" % INVARIANT, INV_URL)
+        install_pkg(".", "sansinvariant-%s" % INVARIANT, INV_URL)
     else:
-        install_pkg(".", "Invariant", "svn://danse.us/sans/trunk/Invariant")
+        install_pkg(".", "Invariant", "svn://danse.us/sans/trunk/sansinvariant")
     
     os.chdir(wd)
     if release:
@@ -222,9 +224,9 @@ def checkout(release=False):
     
     os.chdir(wd)
     if release:
-        install_pkg(".", "calculator-%s" % CALCULATOR, CALC_URL)
+        install_pkg(".", "sanscalculator-%s" % CALCULATOR, CALC_URL)
     else:
-        install_pkg(".", "calculator", "svn://danse.us/sans/trunk/calculator")
+        install_pkg(".", "sanscalculator", "svn://danse.us/sans/trunk/sanscalculator")
 
 
     os.chdir(wd)
@@ -232,7 +234,13 @@ def checkout(release=False):
         install_pkg(".", "park-%s" % PARK, PARK_URL)
     else:
         install_pkg(".", "park-1.2", "svn://danse.us/park/branches/park-1.2")
-    
+        
+    os.chdir(wd)
+    if release:
+        os.system(".", "fittingview-%s" % FIT_VIEW, FIT_URL)
+    else:
+        os.system(".", "fittingview", "svn://danse.us/sans/trunk/fittingview")
+            
     os.chdir(wd)
     if release:
         os.system("%s checkout -q %s" % (SVN, SANSVIEW_URL))
@@ -322,6 +330,7 @@ if __name__ == "__main__":
             print PARK_URL 
             print PRVIEW 
             print PR_INV 
+            print FIT_URL
         else:
             logging.info("Build script for SansView %s" % SANSVIEW)
                     
