@@ -66,6 +66,9 @@ class Plugin(PluginBase):
         # reference to the current running thread
         self.calc_2D = None
         self.calc_1D = None
+        
+        self.color_dict = {}
+        
         self.fit_thread_list = {}
         self.residuals = None
         self.fit_panel = None
@@ -93,6 +96,7 @@ class Plugin(PluginBase):
         #keep reference of the simultaneous fit page
         self.sim_page = None
         self.index_model = 0
+        self.test_model_color = None
         #Create a reader for fit page's state
         self.state_reader = None 
         self._extensions = '.fitv'
@@ -106,6 +110,12 @@ class Plugin(PluginBase):
         self.page_finder = {}
         # Log startup
         logging.info("Fitting plug-in started") 
+    
+    def add_color(self, color, id):
+        """
+        adds a color as a key with a plot id as its value to a dictionary
+        """
+        self.color_dict[id] = color
         
     def on_batch_selection(self, flag):
         """
@@ -203,6 +213,8 @@ class Plugin(PluginBase):
         if graph.selected_plottable not in plotpanel.plots:
             return []
         item = plotpanel.plots[graph.selected_plottable]
+        self.test_model_color = item.custom_color
+        #print "i'm in fitting - color is",self.test_model_color
         if item.__class__.__name__ is "Data2D": 
             if hasattr(item,"is_data"):
                 if item.is_data:
@@ -1436,7 +1448,11 @@ class Plugin(PluginBase):
  
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
-
+            new_plot.custom_color = self.test_model_color
+            #print "just set the new plot color"
+            if new_plot.id in self.color_dict:
+                new_plot.custom_color = self.color_dict[new_plot.id]
+            #print "I HAVE JUST ADDED A NEW COLOR/ID ", new_plot.custom_color
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                             title= str(title)))
 
