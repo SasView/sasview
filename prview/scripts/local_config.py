@@ -49,7 +49,9 @@ _inst_url = "http://www.utk.edu"
 _corner_image = "images/prview.jpg"
 _copyright = "(c) 2008, University of Tennessee"
 #edit the list of file state your plugin can read
-
+# About box info
+_do_aboutbox=True
+_do_tutorial = False
 APPLICATION_STATE_EXTENSION = '.prv'
 APPLICATION_WLIST = 'P(r) files (*.prv)|*.prv'
 DEFAULT_STYLE = GUIFRAME.DEFAULT_STYLE
