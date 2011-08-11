@@ -27,4 +27,5 @@ import wx.lib.newevent
 (NewLoadDataEvent, EVT_NEW_LOAD_DATA) = wx.lib.newevent.NewEvent()
 #event to toggle from single model to  batch
 (NewBatchEvent, EVT_NEW_BATCH) = wx.lib.newevent.NewEvent()
-
+##color event
+(NewColorEvent, EVT_NEW_COLOR) = wx.lib.newevent.NewEvent()
