@@ -120,7 +120,7 @@ append_file(file_list=smear_sources, dir_path=smear_dir)
 
 
 dist = setup(
-    name="sans.models",
+    name="sansmodels",
     version = "0.9.1",
     description = "Python module for SANS scattering models",
     author = "SANS/DANSE",
