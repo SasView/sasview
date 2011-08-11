@@ -48,6 +48,14 @@ class PluginBase:
         self.perspective = []
         #flag to tell the current plugin that aaplication is in batch mode
         self.batch_on = False
+        #properties for color and ID of a specific plugin..
+        self.color = None
+        self.id = -1
+        
+    def add_color(self, color, id):
+        """
+        Adds color to a plugin
+        """
         
     def clear_panel(self):
         """
