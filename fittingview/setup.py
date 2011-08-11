@@ -14,6 +14,7 @@ setup(
                                                        "sans",
                                                        "perspectives",
                                                        "fitting")},
+    package_data={'sans.perspectives.fitting': ['media/*']},
     packages = ["sans.perspectives", 'sans',
                 "sans.perspectives.fitting"],
     )

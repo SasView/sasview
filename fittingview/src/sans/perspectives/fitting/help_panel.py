@@ -54,6 +54,18 @@ class HelpWindow(wx.Frame):
         self.path = os.path.join(path,"model_functions.html")
         self.path_pd = os.path.join(path,"pd_help.html")
         self.path_sm = os.path.join(path,"smear_computation.html")
+        import sans.perspectives.fitting as fitting
+        
+        fitting_path = fitting.get_data_path(media='media')
+        
+        _html_file = {"status_bar_help.html":"Status Bar Help",
+                      "load_data_help.html":"Load a File",
+                      "simultaneous_fit_help.html":"Simultaneous Fit",
+                      "single_fit_help.html":"Single Fit",
+                      "model_use_help.html":"Model Selection",
+                      "key_help.html":"Key Combination",
+                      }
+
                     
         page1="""<html>
             <body>
@@ -63,15 +75,15 @@ class HelpWindow(wx.Frame):
         page="""<html>
             <body>
             <ul>
-            <li><a href ="media/status_bar_help.html" target ="showframe">Status Bar Help</a><br></li>
-            <li><a href ="media/load_data_help.html" target ="showframe">Load a File</a><br></li>
-            <li><a href ="media/simultaneous_fit_help.html" target ="showframe">Simultaneous Fit</a><br></li>
-            <li><a href ="media/single_fit_help.html" target ="showframe">Single Fit</a><br></li>
-            <li><a href ="media/model_use_help.html" target ="showframe">Model Selection</a><br></li>
-            <li><a href ="%s" target ="showframe">Model Functions</a><br></li>
-            <li><a href ="%s" target ="showframe">Polydispersion Distributions</a><br></li>
-            <li><a href ="%s" target ="showframe">Smear Computation</a><br></li>
-            <li><a href ="media/key_help.html" target ="showframe">Key Combination</a><br></li>
+            """
+        for p, title in _html_file.iteritems():
+            pp = os.path.join(fitting_path, p)
+            page += """<li><a href ="%s" target="showframe">%s</a><br></li>""" % (pp, title)
+          
+        page += """
+            <li><a href ="%s" target="showframe">Model Functions</a><br></li>
+            <li><a href ="%s" target="showframe">Polydispersion Distributions</a><br></li>
+            <li><a href ="%s" target="showframe">Smear Computation</a><br></li>
             </ul>
             </body>
             </html>""" % (self.path, self.path_pd, self.path_sm)
@@ -112,7 +124,7 @@ class HelpWindow(wx.Frame):
         """
         link= event.GetLinkInfo().GetHref()
         
-        self.rhelp.LoadPage(link)
+        self.rhelp.LoadPage(os.path.abspath(link))
         
 """
 Example: ::
