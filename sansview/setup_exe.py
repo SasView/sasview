@@ -122,17 +122,17 @@ if os.path.isfile(f):
 # Copying the images directory to the distribution directory.
 for f in findall(images_dir):
     if os.path.split(f)[0].count('.svn')==0:
-        data_files.append((os.path.split(f)[0], [f]))
+        data_files.append(("images", [f]))
 
 # Copying the HTML help docs
 for f in findall(media_dir):
     if os.path.split(f)[0].count('.svn')==0:
-        data_files.append((os.path.split(f)[0], [f]))
+        data_files.append(("media", [f]))
 
 # Copying the sample data user data
 for f in findall(test_dir):
     if os.path.split(f)[0].count('.svn')==0:
-        data_files.append((os.path.split(f)[0], [f]))
+        data_files.append(("test", [f]))
         
 # Copying the sample data user data
 for f in findall(plugins_dir):
