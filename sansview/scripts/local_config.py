@@ -4,7 +4,6 @@
 import time
 import os
 from sans.guiframe.gui_style import GUIFRAME
-import sans.perspectives.fitting as fitting
 # Version of the application
 __appname__ = "SansView"
 __version__ = '1.9.2dev_AUG'
@@ -47,7 +46,9 @@ _corner_image = "images/angles_flat.png"
 _welcome_image = "images/SVwelcome.png"
 _copyright = "(c) 2009, University of Tennessee"
 
-
+path, _= os.path.split(os.getcwd())
+icon_path = os.path.join(path, "images")
+media_path = os.path.join(path, "media")
 #edit the list of file state your plugin can read
 APPLICATION_WLIST = 'SansView files (*.svs)|*.svs'
 APPLICATION_STATE_EXTENSION = '.svs'
@@ -61,12 +62,8 @@ PLOPANEL_WIDTH = 415
 PLOPANEL_HEIGTH = 370
 DATAPANEL_WIDTH = 235
 DATAPANEL_HEIGHT = 700
-SPLASH_SCREEN_PATH = os.path.join("images","SVwelcome_mini.png")
-try:
-    fit_media_path = fitting.get_data_path(media='media')
-    TUTORIAL_PATH = os.path.join(fit_media_path,"Tutorial.pdf")
-except:
-    raise
+SPLASH_SCREEN_PATH = os.path.join(icon_path,"SVwelcome_mini.png")
+TUTORIAL_PATH = os.path.join(media_path,"Tutorial.pdf")
 DEFAULT_STYLE = GUIFRAME.MULTIPLE_APPLICATIONS|GUIFRAME.MANAGER_ON\
                     |GUIFRAME.CALCULATOR_ON|GUIFRAME.TOOLBAR_ON
 SPLASH_SCREEN_WIDTH = 512
@@ -80,8 +77,9 @@ OPEN_SAVE_PROJECT_MENU = True
 VIEW_MENU = True
 #EDIT MENU
 EDIT_MENU = True
-SetupIconFile_win = os.path.join("images", "ball.ico")
-SetupIconFile_mac = os.path.join("images", "ball.icns")
+
+SetupIconFile_win = os.path.join(icon_path, "ball.ico")
+SetupIconFile_mac = os.path.join(icon_path, "ball.icns")
 DefaultGroupName = "DANSE"
 OutputBaseFilename = "setupSansView"
 DATAPANEL_WIDTH = 235
