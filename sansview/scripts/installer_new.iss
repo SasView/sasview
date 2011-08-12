@@ -18,36 +18,27 @@ DefaultGroupName=DANSE\SansView-1.9.2dev_AUG
 DisableProgramGroupPage=yes
 LicenseFile=license.txt
 OutputBaseFilename=setupSansView
-SetupIconFile=images\ball.ico
+SetupIconFile=C:\Documents and Settings\galina\workspace\trunk\sansview\images\ball.ico
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=none
 
 
 [Registry]
-Root: HKCR;	Subkey: ".txt\openwithlist\SansView.exe"; Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".xml\openwithlist\SansView.exe"; Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".tif\openwithlist\SansView.exe"; Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".tiff\openwithlist\SansView.exe"; Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".asc\openwithlist\SansView.exe"; Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".dat\openwithlist\SansView.exe"; Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".sans\openwithlist\SansView.exe"; Flags: uninsdeletekey noerror
-Root: HKCR; Subkey: "applications\SansView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SansView.exe""  ""%1""" ; Flags: uninsdeletevalue noerror
-Root: HKCU;	Subkey: "Software\Classes\.txt\OpenWithList\SansView.exe"; Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.xml\openwithlist\SansView.exe"; Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.asc\openwithlist\SansView.exe"; Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.dat\openwithlist\SansView.exe"; Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.tif\openwithlist\SansView.exe"; Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.tiff\openwithlist\SansView.exe"; Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.sans\openwithlist\SansView.exe"; Flags: uninsdeletekey noerror
-Root: HKCU; Subkey: "Software\Classes\applications\SansView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SansView.exe""  ""%1""" ; Flags: uninsdeletevalue noerror
+Root: HKCR;	Subkey: ".xml";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
+Root: HKCR;	Subkey: ".txt";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
+Root: HKCR;	Subkey: ".asc";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
+Root: HKCR;	Subkey: ".dat";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
+Root: HKCR;	Subkey: ".tif";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
+Root: HKCR;	Subkey: ".abs";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
+Root: HKCR;	Subkey: ".d1d";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
+Root: HKCR;	Subkey: ".sans";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
 Root: HKCR;	Subkey: ".svs";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
-Root: HKCR;	Subkey: ".fitv"; ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
+Root: HKCR;	Subkey: ".fitv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
 Root: HKCR;	Subkey: ".inv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
 Root: HKCR;	Subkey: ".prv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
-Root: HKCR; Subkey: "{app}\SansView.exe"; ValueType: string; ValueName: ""; ValueData: "SansView File"; Flags: uninsdeletekey 
-Root: HKCR; Subkey: "{app}\SansView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SansView.exe""  ""%1""" ; Flags: uninsdeletevalue noerror
-Root: HKCR; Subkey: "{app}\images\ball.ico";	ValueType: string; ValueName: "";	ValueData: "{app}\SansView.exe,0"
+Root: HKCR; Subkey: "{app}\C:\Documents and Settings\galina\workspace\trunk\sansview\images\ball.ico";	ValueType: string; ValueName: "";	ValueData: "{app}\SansView.exe,0"
+Root: HKCR; Subkey: "{app}\SansView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SansView.exe""  ""%1"""
 Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment";	ValueType: expandsz; ValueName: "SANSVIEWPATH";	ValueData: "{app}";	 Flags: uninsdeletevalue
 ; Write to PATH (below) is disabled; need more work
 ;Root: HKCU; Subkey: "Environment";	ValueType: expandsz; ValueName: "PATH";	ValueData: "%SANSVIEWPATH%;{olddata}";	 Check: NeedsAddPath()
@@ -61,19 +52,18 @@ Name: "english";	MessagesFile: "compiler:Default.isl"
 Name: "desktopicon";	Description: "{cm:CreateDesktopIcon}";	GroupDescription: "{cm:AdditionalIcons}";	Flags: unchecked
 
 
-
 [Files]
-Source: "dist\SansView.exe";	DestDir: "{app}";	Flags: ignoreversion
+Source: "C:\Documents and Settings\galina\workspace\trunk\sansview\scripts\dist\SansView.exe";	DestDir: "{app}";	Flags: ignoreversion
 Source: "dist\*";	DestDir: "{app}";	Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "images\*";	DestDir: "{app}\images";	Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "test\*";	DestDir: "{app}\test";	Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Documents and Settings\galina\workspace\trunk\sansview\images\*";	DestDir: "{app}\images";	Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Documents and Settings\galina\workspace\trunk\sansview\test\*";	DestDir: "{app}\test";	Flags: ignoreversion recursesubdirs createallsubdirs
 ;	NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
 Name: "{group}\SansView";	Filename: "{app}\SansView.exe";	WorkingDir: "{app}" 
 Name: "{group}\{cm:UninstallProgram, SansView}";	 Filename: "{uninstallexe}" 
-Name: "{commondesktop}\SansView";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}"
-;Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\SansView"; Filename: "{app}\SansView.exe" 
+Name: "{commondesktop}\SansView-1.9.2dev_AUG";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" 
+
 
 [Run]
 Filename: "{app}\SansView.exe";	Description: "{cm:LaunchProgram, SansView}";	Flags: nowait postinstall skipifsilent
@@ -86,7 +76,7 @@ var
   newpath: string;
   pathArr:    TArrayOfString;
   i:        Integer;
-begin                                                        
+begin
   RegQueryStringValue(HKEY_CURRENT_USER,'Environment','PATH', oldpath)
   oldpath := oldpath + ';';
   newpath := '%SANSVIEWPATH%';
@@ -105,3 +95,4 @@ begin
   end;
   Result := True;
 end;
+
