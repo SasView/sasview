@@ -1,0 +1,144 @@
+Release Notes
+=============
+
+SansView 1.9.2Dev_JUN
+
+1	- version 1.9.2Dev_JUN: Devel release in Jun. 2011
+
+	- version 1.9.1 : bug-fix release
+
+	- Release date: 06/22/2011
+	- MAC: Fixed some causes of crashing during fitting 
+	- Pr Inversion: Fixed a missing Rg output
+	- Startup Setting: fixed a problem with DataExplorer ON/OFF
+	- Fixed a bug w/ 2D color map dialog
+	- Minor feature added: Enable to load a data folder from the command line
+	
+	-version 1.9
+	
+	- Much easier graphical user interface
+	- Optimized for the speed and accuracy of the computations
+	- Added Many shape, polymer, and other models including SphericalSLD, OnionExponetialShell, and even ReflectivityModels
+	- Added Data Explorer to manage, plot, delete, or setup for computation
+	- Added Instrumental resolution estimator (as a Tool)
+	- Customizable Startup appearance
+	- More functionalities on plot panels
+	- Combined Modeling and Fitting
+	- Save/open a SansView project or SansView analysis (subproject)
+	- Start the SansView application from a data file by double-clicking or from command line
+	- Easy manipulation of data and plot
+	- Provides Normalized residual plot
+	- Added useful key-combinations to copy (fitpage), paste (fitpage), change fit-tolerance, etc.
+	- Report
+	- 2D masked circular averaging
+	- 2D smearing calculation now uses dQ_parrellel and dQ_perpendicular
+	- More Help
+	- etc
+
+	
+	- Version 1.3
+	
+	- Improved the speed of loading 2D data.
+	- Improved the speed of P*S calculations.
+	- Added 2D smearing calculation for dQx and dQy given along the x-y axes.
+	- MAC release
+  	- Implemented the invariant, volume fraction, and specific surface area computation.
+	- Implemented the scattering length density calculator.
+  	- Re-structured 2D calculation to 2D reduced(Q) data rather than raw pixel data
+	- Capable of Mask enhanced 2D calculation and fitting.
+	- Added a 2D mask data editor.
+	- Added inputs for the slit and pinhole resolution.
+	- Added a slit size calculator.
+	- Support more format options to save a graph.
+	- Enable to display multiple data sets in one graph by loading a data into the graph.
+	- Added a tool bar in a plot panel.
+	
+ 	- Previous Versions
+ 	
+  	- Implemented P(r) inversion (Indirect Fourier transformations).
+	- Improved fitting and model calculation speed by a factor of ten.
+  	- Supporting many more model functions.
+	- Supporting P(Q)*S(Q) for most of the shape based form factors.
+	- Added more distribution functions for the polydispersion calculations.
+	- Added a bookmark feature so that the results of the calculation can be recalled later.
+	- Q range reset button is added.
+	- Added a color bar in 2D data plots.
+	- Added a model function detail button for an easy access to the model help from the fitting panel.
+	- Simultaneous fit of a number of different sets of data with/without the constraints. 
+	- Loading and displaying 1D and 2D data of various formats.
+	- 1D and 2D data fitting using Scipy or Park (a MC fitting optimizer) fit engine. 
+	- 2D data manipulation and modeling. 
+	- Supporting a number of standard model and model-independent functions including form factor and structure factor functions and their multiplications.  
+	- Plug-in mechanism for data readers. 
+	- Easy pop-up menu by mouse clicking on a given plot. 
+	- Users arrange the various windows. 
+	- Supporting varius 2D averaging methods : Circular, sectorslicer, annulus, boxsum, boxQx and boxQy.  
+	- User defined Qrange (Qmin and Qmax) for both 1D and 2D data for fitting and modeling.  
+	- The user can toggle between a number of different scales on all plots.
+	- Support saving data in the formats of ASCII and xml.
+
+
+2- Downloading and Installing
+	
+	*** Note: If you have EXE or ZIP SansView installer, you don't need any of the below. This is for installing the SansView from the source.
+	
+	2.1- System Requirements:
+		- Python version >= 2.5 and < 3.0 should be running on the system
+		- We uses Python2.5.4 for WIN, and Python2.6.3 for MAC
+
+	2.2- Installing:
+		- Get the code from svn://danse.us/sans/releases/sansview-1.9.1
+			(after all dependent packages/modules are installed/compiled, run 'python sansview.py' under the 'sansview-1.9' folder)
+		- This application is also dependent on the following DANSE code:
+			svn://danse.us/sans/releases/calculator-0.9.1 (run 'python setup.py install' under the 'calculator-0.9.1' folder)
+			svn://danse.us/sans/releases/calculatorview-0.9 (run 'python setup.py install' under the 'calculatorview-0.9' folder)
+			svn://danse.us/sans/releases/Invariant-0.9.1 (run 'python setup.py install' under the 'Invariant-0.9.1' folder)
+			svn://danse.us/sans/releases/invariantview-0.9 (run 'python setup.py install' under the 'invariantview-0.1.1' folder)
+			svn://danse.us/sans/releases/guiframe-0.9.1 (run 'python setup.py install' under the 'guiframe-0.9.1' folder)
+			svn://danse.us/sans/releases/DataLoader-0.9 (run 'python setup.py install' under the 'DataLoader-0.9' folder)
+			svn://danse.us/sans/releases/park_integration-0.9.1 (run 'python setup.py install' under the 'park_integration-0.9.1' folder)
+			svn://danse.us/sans/releases/sansmodels-0.9.1 (run 'python setup.py install' under the 'sansmodels-0.9.1\src\' folder)
+			svn://danse.us/park/releases/park-1.2.1 (run 'python setup.py install' under the 'park-1.2.1' folder)
+	        svn://danse.us/common/releases/plottools-0.9.1 (run 'python setup.py install'under the 'plottools-0.9.1\trunk\' folder)
+	        svn://danse.us/common/releases/util-0.9.1 (run 'python setup.py install'under the 'util-0.1.5' folder)
+	        svn://danse.us/sans/releases/pr_inversion-0.9 (run 'python setup.py install'under the 'pr_inversion-0.9' folder)
+	        svn://danse.us/sans/releases/prview-0.9.1 (run 'python setup.py install'under the 'prview-0.9.1' folder)
+		- The following modules are required:
+			* matplotlib = 0.99.0(WIN), 0.99.1.1(MAC)
+			* numpy = 1.4.1
+			* scipy >= 0.7.2
+			* wxpython 2.8.11 unicode(WIN), 2.8.12.0(MAC)
+			* lxml >= 2.2.2
+			* comtypes (for PDF window)
+			* PIL (Python Image Library)
+			* Pyparsing (apply for bundling)
+			* periodictable = 1.3.0 (using 'easy_install periodictable')
+			* MinGW/Cygwin (for Windows) or other GNU compiler (gcc)
+			*Optional: setuptools, svn, Innosetup, py2exe(WIN),and/or py2app(MAC) to build App from the source.
+
+
+3- Known Issues
+
+	3.1- All systems:
+		- None
+
+	3.2- Windows:
+		- None
+		
+	3.3- MAC:
+		- None
+		
+	3.4- Linux:
+		- None
+
+4- Troubleshooting
+
+	- None
+
+5- Frequently Asked Questions
+
+	- None
+
+6- Installer download website
+
+	- See: http://danse.chem.utk.edu/sansview.html
