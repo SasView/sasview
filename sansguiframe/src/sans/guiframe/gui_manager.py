@@ -1717,8 +1717,8 @@ class ViewerFrame(wx.Frame):
         """
         Quit the application
         """
-        #flag = self.quit_guiframe()
-        if True:
+        flag = self.quit_guiframe()
+        if flag:
             wx.Exit()
             sys.exit()
 
@@ -1799,6 +1799,7 @@ class ViewerFrame(wx.Frame):
                     #self.SetTopWindow(dialog)
                     dialog.Show(True) 
                 except:
+                    raise
                     msg = "This feature requires 'Adobe pdf Reader'\n"
                     msg += "Please install it first (Free)..."
                     wx.MessageBox(msg, 'Error')
