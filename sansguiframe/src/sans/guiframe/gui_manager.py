@@ -88,16 +88,20 @@ except:
 APPLICATION_STATE_EXTENSION = config.APPLICATION_STATE_EXTENSION
 APPLICATION_NAME = config.__appname__
 SPLASH_SCREEN_PATH = config.SPLASH_SCREEN_PATH
-
+WELCOME_PANEL_ON = config.WELCOME_PANEL_ON
 SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
 SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
 SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
-
+if not WELCOME_PANEL_ON:
+        WELCOME_PANEL_SHOW = False
+else:
+    WELCOME_PANEL_SHOW = True
 try:
     DATALOADER_SHOW = custom_config.DATALOADER_SHOW
     TOOLBAR_SHOW = custom_config.TOOLBAR_SHOW
     FIXED_PANEL = custom_config.FIXED_PANEL
-    WELCOME_PANEL_SHOW = custom_config.WELCOME_PANEL_SHOW
+    if WELCOME_PANEL_ON:
+        WELCOME_PANEL_SHOW = custom_config.WELCOME_PANEL_SHOW
     PLOPANEL_WIDTH = custom_config.PLOPANEL_WIDTH
     DATAPANEL_WIDTH = custom_config.DATAPANEL_WIDTH
     GUIFRAME_WIDTH = custom_config.GUIFRAME_WIDTH 
@@ -952,7 +956,7 @@ class ViewerFrame(wx.Frame):
         style = self.__gui_style & GUIFRAME.WELCOME_PANEL_ON
         if style == GUIFRAME.WELCOME_PANEL_ON or custom_config != None:
             # add the welcome panel menu item
-            if self.defaultPanel is not None:
+            if config.WELCOME_PANEL_ON and self.defaultPanel is not None:
                 id = wx.NewId()
                 self._help_menu.Append(id, '&Welcome', '')
                 self._help_menu.AppendSeparator()

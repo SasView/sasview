@@ -7,7 +7,7 @@ from sans.guiframe.gui_style import GUIFRAME
 
 # Version of the application
 __appname__ = "PrView"
-__version__ = '0.3.0'
+__version__ = '0.9.1'
 __download_page__ = 'http://danse.chem.utk.edu'
 __update_URL__ = 'http://danse.chem.utk.edu/prview_version.php'
 
@@ -74,11 +74,11 @@ DATAPANEL_HEIGHT = 700
 FIXED_PANEL = True
 DATALOADER_SHOW = True
 CLEANUP_PLOT = False
-WELCOME_PANEL_SHOW = False
+WELCOME_PANEL_ON  = False
 #Show or hide toolbar at the start up
 TOOLBAR_SHOW = True
 #Open Save project menu
-OPEN_SAVE_PROJECT_MENU = True
+OPEN_SAVE_PROJECT_MENU = False
 #VIEW MENU
 VIEW_MENU = True
 #EDIT MENU
