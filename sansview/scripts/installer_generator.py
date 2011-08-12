@@ -9,8 +9,8 @@ import string
 
 REG_PROGRAM = """{app}\MYPROG.EXE"" ""%1"""
 APPLICATION = str(local_config.__appname__ )+ '.exe'
-AppName  = str(local_config.__appname__ ) # + '-'+ str(local_config.__version__)
-AppVerName = str(local_config.__appname__ ) + '-'+ str(local_config.__version__)
+AppName = str(local_config.__appname__ )# + '-'+ str(local_config.__version__)
+AppVerName = str(local_config.__appname__ )+'-'+ str(local_config.__version__)
 Dev = ''
 if AppVerName.lower().count('dev') > 0:
     Dev = '-Dev'
@@ -32,6 +32,10 @@ PrivilegesRequired = 'none'
 INSTALLER_FILE = 'installer_new'
 #find extension for windows file assocation
 #extension list need to be modified for each application
+
+icon_path =  local_config.icon_path
+media_path = local_config.media_path
+test_path = local_config.test_path
 
 def find_extension():
     """
@@ -138,18 +142,20 @@ def write_tasks():
     msg += """GroupDescription: "{cm:AdditionalIcons}";\tFlags: unchecked\n"""
     return msg
 
+path, _ =  os.path.split(os.getcwd())
+dist_path = os.path.join(path, "scripts", "dist")
 def write_file():
     """
     copy some data files
     """
     msg = "\n\n[Files]\n"
-    msg += """Source: "dist\%s";\t""" % str(APPLICATION)
+    msg += """Source: "%s\%s";\t""" % (dist_path, str(APPLICATION))
     msg += """DestDir: "{app}";\tFlags: ignoreversion\n"""
     msg += """Source: "dist\*";\tDestDir: "{app}";\t"""
     msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
-    msg += """Source: "images\*";\tDestDir: "{app}\%s";\t""" % str("images")
+    msg += """Source: "%s\*";\tDestDir: "{app}\%s";\t""" % (icon_path, str("images"))
     msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
-    msg += """Source: "test\*";\tDestDir: "{app}\%s";\t""" % str("test")
+    msg += """Source: "%s\*";\tDestDir: "{app}\%s";\t""" % (test_path, str("test"))
     msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
     msg += """;\tNOTE: Don't use "Flags: ignoreversion" on any shared system files"""
     return msg

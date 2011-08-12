@@ -49,6 +49,7 @@ _copyright = "(c) 2009, University of Tennessee"
 path, _= os.path.split(os.getcwd())
 icon_path = os.path.join(path, "images")
 media_path = os.path.join(path, "media")
+test_path = os.path.join(path, "test")
 #edit the list of file state your plugin can read
 APPLICATION_WLIST = 'SansView files (*.svs)|*.svs'
 APPLICATION_STATE_EXTENSION = '.svs'
