@@ -94,7 +94,11 @@ class WelcomePage(ScrolledPanel):
        
         ScrolledPanel.__init__(self, parent, **kwds)
         self.SetupScrolling()
-        image = os.path.join("images","SVwelcome.png")
+        path = os.getcwd()
+        import local_config
+        #icon_path = os.path.join(path, "images")
+        #print "PPP", icon_path,path
+        image = os.path.join(local_config._welcome_image)
         self.SetWindowVariant(variant = FONT_VARIANT)
         self.bitmap_logo = wx.StaticBitmap(self, -1, wx.Bitmap(image))
        

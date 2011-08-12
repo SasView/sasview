@@ -36,20 +36,22 @@ _authors = []
 _paper = "http://danse.us/trac/sans/newticket"
 _license = "mailto:sansdanse@gmail.com"
 
-_nsf_logo = "images/nsf_logo.png"
-_danse_logo = "images/danse_logo.png"
-_inst_logo = "images/utlogo.gif"
-_nsf_url = "http://www.nsf.gov"
-_danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
-_inst_url = "http://www.utk.edu"
-_corner_image = "images/angles_flat.png"
-_welcome_image = "images/SVwelcome.png"
-_copyright = "(c) 2009, University of Tennessee"
-
-path, _= os.path.split(os.getcwd())
+path = os.getcwd()
 icon_path = os.path.join(path, "images")
 media_path = os.path.join(path, "media")
 test_path = os.path.join(path, "test")
+
+_nsf_logo = os.path.join(icon_path, "nsf_logo.png")
+_danse_logo = os.path.join(icon_path, "danse_logo.png")
+_inst_logo = os.path.join(icon_path, "utlogo.gif")
+_nsf_url = "http://www.nsf.gov"
+_danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
+_inst_url = "http://www.utk.edu"
+_corner_image = os.path.join(icon_path, "angles_flat.png")
+_welcome_image = os.path.join(icon_path, "SVwelcome.png")
+_copyright = "(c) 2009, University of Tennessee"
+
+
 #edit the list of file state your plugin can read
 APPLICATION_WLIST = 'SansView files (*.svs)|*.svs'
 APPLICATION_STATE_EXTENSION = '.svs'

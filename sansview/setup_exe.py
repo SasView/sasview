@@ -74,8 +74,8 @@ class Target:
 # Adapted from http://www.py2exe.org/index.cgi/MatPlotLib
 # to use the MatPlotLib.
 #
-current_dir = os.getcwd()
-path, _ = os.path.split(current_dir)
+path = os.getcwd()
+
 plugins_dir = os.path.join(path, "plugins")
 media_dir = os.path.join(path, "media")
 images_dir = os.path.join(path, "images")
@@ -84,19 +84,20 @@ test_dir = os.path.join(path, "test")
 matplotlibdatadir = matplotlib.get_data_path()
 matplotlibdata = findall(matplotlibdatadir)
 data_files = []
-from glob import glob
-data_files = [("Microsoft.VC90.CRT", glob(r'C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*'))]
-sys.path.append("C:\\Program Files\\Microsoft Visual Studio 9.0\\VC\\redist\\x86\\Microsoft.VC90.CRT")
 # Copying SLD data
 import periodictable
 import logging
 data_files += periodictable.data_files()
+
+import sans.perspectives.fitting as fitting
+data_files += fitting.data_files()
 
 import sans.perspectives.calculator as calculator
 data_files += calculator.data_files()
 
 import sans.perspectives.invariant as invariant
 data_files += invariant.data_files()
+
 import sans.guiframe as guiframe
 data_files += guiframe.data_files()
 
@@ -113,6 +114,9 @@ f = os.path.join(sans.dataloader.readers.get_data_path(),'defaults.xml')
 if os.path.isfile(f):
     data_files.append(('.', [f]))
 f = 'custom_config.py'
+if os.path.isfile(f):
+    data_files.append(('.', [f]))
+f = 'local_config.py'
 if os.path.isfile(f):
     data_files.append(('.', [f]))
 # Copying the images directory to the distribution directory.
@@ -133,7 +137,7 @@ for f in findall(test_dir):
 # Copying the sample data user data
 for f in findall(plugins_dir):
     if os.path.split(f)[0].count('.svn')==0:
-        data_files.append((os.path.split(f)[0], [f]))
+        data_files.append(('plugins', [f]))
 
     
 #
