@@ -35,6 +35,9 @@
           <a href="../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="Fitting.html" title="Fitting"
              accesskey="N">next</a> |</li>
         <li class="right" >
@@ -52,8 +55,639 @@
             
   <div class="section" id="abstractfitengine">
 <h1>AbstractFitEngine<a class="headerlink" href="#abstractfitengine" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="mod-sans-fit-abstractfitengine">
-<h2>:mod:` sans.fit.AbstractFitEngine`<a class="headerlink" href="#mod-sans-fit-abstractfitengine" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-sans.fit.AbstractFitEngine">
+<span id="mod-sans-fit-abstractfitengine"></span><h2>:mod:` sans.fit.AbstractFitEngine`<a class="headerlink" href="#module-sans.fit.AbstractFitEngine" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="sans.fit.AbstractFitEngine.FitAbort">
+<em class="property">exception </em><tt class="descclassname">sans.fit.AbstractFitEngine.</tt><tt class="descname">FitAbort</tt><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitAbort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
+<p>Exception raise to stop the fit</p>
+<dl class="attribute">
+<dt id="sans.fit.AbstractFitEngine.FitAbort.args">
+<tt class="descname">args</tt><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitAbort.args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.AbstractFitEngine.FitAbort.message">
+<tt class="descname">message</tt><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitAbort.message" title="Permalink to this definition">¶</a></dt>
+<dd><p>exception message</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.fit.AbstractFitEngine.FitArrange">
+<em class="property">class </em><tt class="descclassname">sans.fit.AbstractFitEngine.</tt><tt class="descname">FitArrange</tt><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitArrange" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitArrange.add_data">
+<tt class="descname">add_data</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitArrange.add_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>add_data fill a self.data_list with data to fit</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; Data to add in the list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitArrange.get_data">
+<tt class="descname">get_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitArrange.get_data" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">list of data data_list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitArrange.get_model">
+<tt class="descname">get_model</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitArrange.get_model" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">saved model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitArrange.get_to_fit">
+<tt class="descname">get_to_fit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitArrange.get_to_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>return self.selected value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitArrange.remove_data">
+<tt class="descname">remove_data</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitArrange.remove_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove one element from the list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; Data to remove from data_list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitArrange.set_model">
+<tt class="descname">set_model</tt><big>(</big><em>model</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitArrange.set_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>set_model save a copy of the model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> &#8211; the model being set</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitArrange.set_to_fit">
+<tt class="descname">set_to_fit</tt><big>(</big><em>value=0</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitArrange.set_to_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>set self.selected to 0 or 1  for other values raise an exception</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; integer between 0 or 1</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.fit.AbstractFitEngine.FitData1D">
+<em class="property">class </em><tt class="descclassname">sans.fit.AbstractFitEngine.</tt><tt class="descname">FitData1D</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em>, <em>smearer=None</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.dataloader.data_info.Data1D</span></tt></p>
+<p>Wrapper class  for SANS data 
+FitData1D inherits from DataLoader.data_info.Data1D. Implements 
+a way to get residuals from data.</p>
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData1D.add_notes">
+<tt class="descname">add_notes</tt><big>(</big><em>message=''</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData1D.add_notes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add notes to datainfo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData1D.append_empty_process">
+<tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData1D.append_empty_process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData1D.clone_without_data">
+<tt class="descname">clone_without_data</tt><big>(</big><em>length=0</em>, <em>clone=None</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData1D.clone_without_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clone the current object, without copying the data (which
+will be filled out by a subsequent operation).
+The data arrays will be initialized to zero.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>length</strong> &#8211; length of the data array to be initialized</li>
+<li><strong>clone</strong> &#8211; if provided, the data will be copied to clone</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData1D.get_fit_range">
+<tt class="descname">get_fit_range</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData1D.get_fit_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the range of data.x to fit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData1D.is_slit_smeared">
+<tt class="descname">is_slit_smeared</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData1D.is_slit_smeared" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the data has slit smearing information</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">True is slit smearing info is present, False otherwise</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData1D.residuals">
+<tt class="descname">residuals</tt><big>(</big><em>fn</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData1D.residuals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute residuals.</p>
+<p>If self.smearer has been set, use if to smear
+the data before computing chi squared.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fn</strong> &#8211; function that return model value</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">residuals</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData1D.residuals_deriv">
+<tt class="descname">residuals_deriv</tt><big>(</big><em>model</em>, <em>pars=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData1D.residuals_deriv" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">residuals derivatives .</td>
+</tr>
+<tr class="field"><th class="field-name">Note :</th><td class="field-body">in this case just return empty array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData1D.set_fit_range">
+<tt class="descname">set_fit_range</tt><big>(</big><em>qmin=None</em>, <em>qmax=None</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData1D.set_fit_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>to set the fit range</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData1D.xaxis">
+<tt class="descname">xaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData1D.xaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the x axis label and unit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData1D.yaxis">
+<tt class="descname">yaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData1D.yaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the y axis label and unit</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.fit.AbstractFitEngine.FitData2D">
+<em class="property">class </em><tt class="descclassname">sans.fit.AbstractFitEngine.</tt><tt class="descname">FitData2D</tt><big>(</big><em>sans_data2d</em>, <em>data=None</em>, <em>err_data=None</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.dataloader.data_info.Data2D</span></tt></p>
+<p>Wrapper class  for SANS data</p>
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData2D.add_notes">
+<tt class="descname">add_notes</tt><big>(</big><em>message=''</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData2D.add_notes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add notes to datainfo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData2D.append_empty_process">
+<tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData2D.append_empty_process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData2D.clone_without_data">
+<tt class="descname">clone_without_data</tt><big>(</big><em>length=0</em>, <em>clone=None</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData2D.clone_without_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clone the current object, without copying the data (which
+will be filled out by a subsequent operation).
+The data arrays will be initialized to zero.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>length</strong> &#8211; length of the data array to be initialized</li>
+<li><strong>clone</strong> &#8211; if provided, the data will be copied to clone</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData2D.get_fit_range">
+<tt class="descname">get_fit_range</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData2D.get_fit_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the range of data.x to fit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData2D.residuals">
+<tt class="descname">residuals</tt><big>(</big><em>fn</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData2D.residuals" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the residuals</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData2D.residuals_deriv">
+<tt class="descname">residuals_deriv</tt><big>(</big><em>model</em>, <em>pars=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData2D.residuals_deriv" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">residuals derivatives .</td>
+</tr>
+<tr class="field"><th class="field-name">Note :</th><td class="field-body">in this case just return empty array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData2D.set_data">
+<tt class="descname">set_data</tt><big>(</big><em>sans_data2d</em>, <em>qmin=None</em>, <em>qmax=None</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData2D.set_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the correct qx_data and qy_data within range to fit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData2D.set_fit_range">
+<tt class="descname">set_fit_range</tt><big>(</big><em>qmin=None</em>, <em>qmax=None</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData2D.set_fit_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>to set the fit range</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData2D.set_smearer">
+<tt class="descname">set_smearer</tt><big>(</big><em>smearer</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData2D.set_smearer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set smearer</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData2D.xaxis">
+<tt class="descname">xaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData2D.xaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the x axis label and unit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData2D.yaxis">
+<tt class="descname">yaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData2D.yaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the y axis label and unit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitData2D.zaxis">
+<tt class="descname">zaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitData2D.zaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the z axis label and unit</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.fit.AbstractFitEngine.FitEngine">
+<em class="property">class </em><tt class="descclassname">sans.fit.AbstractFitEngine.</tt><tt class="descname">FitEngine</tt><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitEngine" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitEngine.get_model">
+<tt class="descname">get_model</tt><big>(</big><em>id</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitEngine.get_model" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> &#8211; id is key in the dictionary containing the model to return</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">a model at this id or None if no FitArrange element was 
+created with this id</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitEngine.get_problem_to_fit">
+<tt class="descname">get_problem_to_fit</tt><big>(</big><em>id</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitEngine.get_problem_to_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the self.selected value of the fit problem of id</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> &#8211; the id of the problem</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitEngine.remove_fit_problem">
+<tt class="descname">remove_fit_problem</tt><big>(</big><em>id</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitEngine.remove_fit_problem" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove   fitarrange in id</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitEngine.select_problem_for_fit">
+<tt class="descname">select_problem_for_fit</tt><big>(</big><em>id</em>, <em>value</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitEngine.select_problem_for_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>select a couple of model and data at the id position in dictionary
+and set in self.selected value to value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; the value to allow fitting. 
+can only have the value one or zero</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitEngine.set_data">
+<tt class="descname">set_data</tt><big>(</big><em>data</em>, <em>id</em>, <em>smearer=None</em>, <em>qmin=None</em>, <em>qmax=None</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitEngine.set_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receives plottable, creates a list of data to fit,set data
+in a FitArrange object and adds that object in a dictionary 
+with key id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> &#8211; data added</li>
+<li><strong>id</strong> &#8211; unique key corresponding to a fitArrange object with data</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.FitEngine.set_model">
+<tt class="descname">set_model</tt><big>(</big><em>model</em>, <em>id</em>, <em>pars=</em><span class="optional">[</span><span class="optional">]</span>, <em>constraints=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.FitEngine.set_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>set a model on a given  in the fit engine.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> &#8211; sans.models type</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>:param <span class="classifier-delimiter">:</span> <span class="classifier">is the key of the fitArrange dictionary where model is </span></dt>
+<dd>saved as a value</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pars</strong> &#8211; the list of parameters to fit</li>
+<li><strong>constraints</strong> &#8211; <p>list of 
+tuple (name of parameter, value of parameters)
+the value of parameter must be a string to constraint 2 different
+parameters.
+Example:  
+we want to fit 2 model M1 and M2 both have parameters A and B.
+constraints can be:</p>
+<blockquote>
+<div>constraints = [(M1.A, M2.B+2), (M1.B= M2.A <a href="#id1"><span class="problematic" id="id2">*</span></a>5),...,]</div></blockquote>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Note :</th><td class="field-body"><p class="first last">pars must contains only name of existing model&#8217;s parameters</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.fit.AbstractFitEngine.Model">
+<em class="property">class </em><tt class="descclassname">sans.fit.AbstractFitEngine.</tt><tt class="descname">Model</tt><big>(</big><em>sans_model</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.Model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">park.model.Model</span></tt></p>
+<p>PARK wrapper for SANS models.</p>
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.Model.eval">
+<tt class="descname">eval</tt><big>(</big><em>x</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.Model.eval" title="Permalink to this definition">¶</a></dt>
+<dd><p>override eval method of park model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; the x value used to compute a function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.Model.eval_derivs">
+<tt class="descname">eval_derivs</tt><big>(</big><em>x</em>, <em>pars=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.Model.eval_derivs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the model and derivatives wrt pars at x.</p>
+<p>pars is a list of the names of the parameters for which derivatives
+are desired.</p>
+<p>This method needs to be specialized in the model to evaluate the
+model function.  Alternatively, the model can implement is own
+version of residuals which calculates the residuals directly
+instead of calling eval.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.Model.get_params">
+<tt class="descname">get_params</tt><big>(</big><em>fitparams</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.Model.get_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a list of value of paramter to fit</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fitparams</strong> &#8211; list of paramaters name to fit</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.Model.set">
+<tt class="descname">set</tt><big>(</big><em>**kw</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.Model.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the initial value for a set of parameters.</p>
+<p>E.g., model.set(width=3,center=5)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.Model.set_params">
+<tt class="descname">set_params</tt><big>(</big><em>paramlist</em>, <em>params</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.Model.set_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set value for parameters to fit</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> &#8211; list of value for parameters to fit</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.fit.AbstractFitEngine.SansAssembly">
+<em class="property">class </em><tt class="descclassname">sans.fit.AbstractFitEngine.</tt><tt class="descname">SansAssembly</tt><big>(</big><em>paramlist</em>, <em>model=None</em>, <em>data=None</em>, <em>fitresult=None</em>, <em>handler=None</em>, <em>curr_thread=None</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansAssembly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sans Assembly class a class wrapper to be call in optimizer.leastsq method</p>
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.SansAssembly.check_param_range">
+<tt class="descname">check_param_range</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansAssembly.check_param_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the lower and upper bound of the parameter value
+and set res to the inf if the value is outside of the
+range
+:limitation: the initial values must be within range.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.SansAssembly.chisq">
+<tt class="descname">chisq</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansAssembly.chisq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates chi^2</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> &#8211; list of parameter values</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">chi^2</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.fit.AbstractFitEngine.SansParameter">
+<em class="property">class </em><tt class="descclassname">sans.fit.AbstractFitEngine.</tt><tt class="descname">SansParameter</tt><big>(</big><em>name</em>, <em>model</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">park.parameter.Parameter</span></tt></p>
+<p>SANS model parameters for use in the PARK fitting service.
+The parameter attribute value is redirected to the underlying
+parameter value in the SANS model.</p>
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.SansParameter.get">
+<tt class="descname">get</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansParameter.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the current value for a parameter.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.SansParameter.get_name">
+<tt class="descname">get_name</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansParameter.get_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.SansParameter.iscomputed">
+<tt class="descname">iscomputed</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansParameter.iscomputed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.SansParameter.isfeasible">
+<tt class="descname">isfeasible</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansParameter.isfeasible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true if the value is in the range</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.SansParameter.isfitted">
+<tt class="descname">isfitted</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansParameter.isfitted" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.SansParameter.isfixed">
+<tt class="descname">isfixed</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansParameter.isfixed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.SansParameter.isrestrained">
+<tt class="descname">isrestrained</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansParameter.isrestrained" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.AbstractFitEngine.SansParameter.name">
+<tt class="descname">name</tt><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansParameter.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>parameter name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.AbstractFitEngine.SansParameter.range">
+<tt class="descname">range</tt><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansParameter.range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override _getrange of park parameter
+return the range of parameter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.SansParameter.set">
+<tt class="descname">set</tt><big>(</big><em>value</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansParameter.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a parameter to a value, a range or an expression.  If it is a value,
+the parameter will be fixed for the fit.  If it is a range, the value
+will be varying for the fit.  If it is an expression, the parameter will
+be calculated from the values of other parameters in the fit.</p>
+<p>Raises ValueError if the value could not be interpreted.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.SansParameter.setprefix">
+<tt class="descname">setprefix</tt><big>(</big><em>prefix</em><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansParameter.setprefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the full path to the parameter as used in expressions involving
+the parameter name.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.AbstractFitEngine.SansParameter.summarize">
+<tt class="descname">summarize</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansParameter.summarize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return parameter range string.</p>
+<p>E.g.,  &#8221;       Gold .....|.... 5.2043 in [2,7]&#8221;</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.AbstractFitEngine.SansParameter.value">
+<tt class="descname">value</tt><a class="headerlink" href="#sans.fit.AbstractFitEngine.SansParameter.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>override the _getvalue of park parameter</p>
+<p>:return value the parameter associates with self.name</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
@@ -66,7 +700,7 @@
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">AbstractFitEngine</a><ul>
-<li><a class="reference internal" href="#mod-sans-fit-abstractfitengine">:mod:` sans.fit.AbstractFitEngine`</a></li>
+<li><a class="reference internal" href="#module-sans.fit.AbstractFitEngine">:mod:` sans.fit.AbstractFitEngine`</a></li>
 </ul>
 </li>
 </ul>
@@ -105,6 +739,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="../genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="Fitting.html" title="Fitting"
              >next</a> |</li>
