@@ -66,7 +66,7 @@ class Target:
     def __init__(self, **kw):
         self.__dict__.update(kw)
         # for the versioninfo resources
-        self.version = "0.3"
+        self.version = "0.9.1"
         self.company_name = "U Tennessee"
         self.copyright = "copyright 2009"
         self.name = "PrView"
@@ -75,29 +75,42 @@ class Target:
 # Adapted from http://www.py2exe.org/index.cgi/MatPlotLib
 # to use the MatPlotLib.
 #
+path = os.getcwd()
+plugins_dir = os.path.join(path, "plugins")
+images_dir = os.path.join(path, "images")
+test_dir = os.path.join(path, "test")
+
 matplotlibdatadir = matplotlib.get_data_path()
 matplotlibdata = findall(matplotlibdatadir)
 data_files = []
 
+import sans.guiframe as guiframe
+data_files += guiframe.data_files()
+
 for f in matplotlibdata:
     dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
     data_files.append((os.path.split(dirname)[0], [f]))
-
+   
+f = 'local_config.py'
+if os.path.isfile(f):
+    data_files.append(('.', [f]))  
+f = 'custom_config.py'
+if os.path.isfile(f):
+    data_files.append(('.', [f]))    
 # Copying the images directory to the distribution directory.
-for f in findall('images'):
+for f in findall(images_dir):
     if os.path.split(f)[0].count('.svn')==0:
-        data_files.append((os.path.split(f)[0], [f]))
+        data_files.append(("images", [f]))
 
 # Copying the sample data user data
-for f in findall('test'):
+for f in findall(test_dir):
     if os.path.split(f)[0].count('.svn')==0:
-        data_files.append((os.path.split(f)[0], [f]))
+        data_files.append(("test", [f]))
         
 # Copying the sample data user data
-for f in findall('plugins'):
+for f in findall(plugins_dir):
     if os.path.split(f)[0].count('.svn')==0:
-        data_files.append((os.path.split(f)[0], [f]))
-    
+        data_files.append(("plugins", [f]))  
 #
 # packages
 #

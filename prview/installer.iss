@@ -2,14 +2,14 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 [Setup]
-AppName=PrView-0.3
-AppVerName=PrView 0.3
+AppName=PrView-0.9.1
+AppVerName=PrView 0.9.1
 AppPublisher=University of Tennessee
 AppPublisherURL=http://danse.chem.utk.edu/
 AppSupportURL=http://danse.chem.utk.edu/
 AppUpdatesURL=http://danse.chem.utk.edu/
-DefaultDirName={pf}\PrView-0.3
-DefaultGroupName=DANSE\PrView-0.3
+DefaultDirName={pf}\PrView-0.9.1
+DefaultGroupName=DANSE\PrView-0.9.1
 DisableProgramGroupPage=yes
 LicenseFile=license.txt
 OutputBaseFilename=setupPrView

@@ -33,6 +33,9 @@ class PrView():
         #from gui_manager import ViewApp
         #self.gui = gui_manager.ViewApp(0) 
         self.gui = PrApp(0)
+         # Set the application manager for the GUI
+        self.gui.set_manager(self)
+        
         # Add perspectives to the basic application
         # Additional perspectives can still be loaded
         # dynamically
@@ -43,9 +46,7 @@ class PrView():
         # Build the GUI
         self.gui.build_gui()
         
-        # Set the application manager for the GUI
-        self.gui.set_manager(self)
-        
+       
         # Start the main loop
         self.gui.MainLoop()  
         
