@@ -822,7 +822,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         # Compute and get the image plot
         try:
             from sans.perspectives.calculator.resolcal_thread import CalcRes as thread
-            self.sigma_strings = '\nResolution COmputation is Finished:\n'
+            self.sigma_strings = '\nResolution: Computation is finished. \n'
             cal_res = thread(func = self._map_func,
                          qx = self.qx,
                          qy = self.qy,
