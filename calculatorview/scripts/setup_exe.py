@@ -14,7 +14,8 @@
 # See for example the 'images' directory below.
 
 import os, sys
-
+if len(sys.argv) == 1:
+    sys.argv.append('py2exe')
 # When using the SansView build script, we need to be able to pass
 # an extra path to be added to the python path. The extra arguments
 # should be removed from the list so that the setup processing doesn't
@@ -90,9 +91,11 @@ for f in matplotlibdata:
     data_files.append((os.path.split(dirname)[0], [f]))
 
 # Copying the images directory to the distribution directory.
-for f in findall('images'):
+import sans.perspectives.calculator as cal
+path = cal.get_data_path('images')
+for f in findall(path):
     if os.path.split(f)[0].count('.svn')==0:
-        data_files.append((os.path.split(f)[0], [f]))
+        data_files.append(('images', [f]))
 import sans.guiframe as guiframe
 data_files += guiframe.data_files()
 # Copy the settings file for the DataLoader file extension associations
@@ -105,7 +108,8 @@ if os.path.isfile(f):
     data_files.append(('.', [f]))
 
 # Copying the HTML help docs
-for f in findall('media'):
+path = cal.get_data_path('media')
+for f in findall(path):
     if os.path.split(f)[0].count('.svn')==0:
         data_files.append((os.path.split(f)[0], [f]))
 
