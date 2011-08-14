@@ -26,7 +26,7 @@ def get_data_path(media):
         path, _ = os.path.split(path)
         media_path = os.path.join(path, media)
         if os.path.isdir(media_path):
-             module_media_path = os.path.join(media_path,'calculator_media')
+             module_media_path = os.path.join(media_path,'calculator_%s'% media)
              if os.path.isdir(module_media_path):
                  return module_media_path
              return media_path
