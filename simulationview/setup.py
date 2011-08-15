@@ -5,7 +5,7 @@ import os
 # Then build and install the modules
 from distutils.core import setup
 setup(
-    name="simview",
+    name="simulationview",
     version = "0.1.1",
     description = "Python module for SANS SimView",
     author = "University of Tennessee",
