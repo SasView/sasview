@@ -1,0 +1,1259 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dataFitting &mdash; guiframe v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="guiframe v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="data_manager" href="data_manager.html" />
+    <link rel="prev" title="custom_pstats" href="custom_pstats.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="data_manager.html" title="data_manager"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="custom_pstats.html" title="custom_pstats"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="datafitting">
+<h1>dataFitting<a class="headerlink" href="#datafitting" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.guiframe.dataFitting">
+<span id="sans-guiframe-datafitting"></span><h2><a class="reference internal" href="#module-sans.guiframe.dataFitting" title="sans.guiframe.dataFitting"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.dataFitting</span></tt></a><a class="headerlink" href="#module-sans.guiframe.dataFitting" title="Permalink to this headline">¶</a></h2>
+<p>Adapters for fitting module</p>
+<dl class="class">
+<dt id="sans.guiframe.dataFitting.Data1D">
+<em class="property">class </em><tt class="descclassname">sans.guiframe.dataFitting.</tt><tt class="descname">Data1D</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">danse.common.plottools.plottables.Data1D</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">sans.dataloader.data_info.Data1D</span></tt></p>
+<dl class="class">
+<dt id="sans.guiframe.dataFitting.Data1D.View">
+<em class="property">class </em><tt class="descname">View</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation of the data that might include a transformation</p>
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.View.check_data_logX">
+<tt class="descname">check_data_logX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.check_data_logX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove negative value in x vector to avoid plotting negative
+value of Log10</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.View.check_data_logY">
+<tt class="descname">check_data_logY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.check_data_logY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove negative value in y vector 
+to avoid plotting negative value of Log10</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.View.onFitRangeView">
+<tt class="descname">onFitRangeView</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.onFitRangeView" title="Permalink to this definition">¶</a></dt>
+<dd><p>It limits View data range to plot from min to max</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xmin</strong> &#8211; the minimum value of x to plot.</li>
+<li><strong>xmax</strong> &#8211; the maximum value of x to plot</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.View.onResetView">
+<tt class="descname">onResetView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.onResetView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset x,y,dx and y in their full range  and in the initial scale
+in case their previous range has changed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.View.returnXview">
+<tt class="descname">returnXview</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.returnXview" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return View  x,y,dx,dy</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.View.setTransformX">
+<tt class="descname">setTransformX</tt><big>(</big><em>funcx</em>, <em>funcdx</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.setTransformX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive pointers to function that transform x and dx 
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; pointer to function that transforms x</li>
+<li><strong>transdx</strong> &#8211; pointer to function that transforms dx</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.View.setTransformY">
+<tt class="descname">setTransformY</tt><big>(</big><em>funcy</em>, <em>funcdy</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.setTransformY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive pointers to function that transform y and dy 
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; pointer to function that transforms y</li>
+<li><strong>transdx</strong> &#8211; pointer to function that transforms dy</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.View.transform">
+<tt class="descname">transform</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.transform" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Transforms the x,y,dx and dy vectors and stores</dt>
+<dd>the output in View parameters</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; array of x values</li>
+<li><strong>y</strong> &#8211; array of y values</li>
+<li><strong>dx</strong> &#8211; array of  errors values on x</li>
+<li><strong>dy</strong> &#8211; array of error values on y</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.add_notes">
+<tt class="descclassname">Data1D.</tt><tt class="descname">add_notes</tt><big>(</big><em>message=''</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.add_notes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add notes to datainfo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.append_empty_process">
+<tt class="descclassname">Data1D.</tt><tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.append_empty_process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.changed">
+<tt class="descclassname">Data1D.</tt><tt class="descname">changed</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.changed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.check_data_PlottableX">
+<tt class="descclassname">Data1D.</tt><tt class="descname">check_data_PlottableX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.check_data_PlottableX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Since no transformation is made for log10(x), check that 
+no negative values is plot in log scale</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.check_data_PlottableY">
+<tt class="descclassname">Data1D.</tt><tt class="descname">check_data_PlottableY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.check_data_PlottableY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Since no transformation is made for log10(y), check that 
+no negative values is plot in log scale</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.clone_without_data">
+<tt class="descclassname">Data1D.</tt><tt class="descname">clone_without_data</tt><big>(</big><em>length=0</em>, <em>clone=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.clone_without_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clone the current object, without copying the data (which
+will be filled out by a subsequent operation).
+The data arrays will be initialized to zero.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>length</strong> &#8211; length of the data array to be initialized</li>
+<li><strong>clone</strong> &#8211; if provided, the data will be copied to clone</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.colors">
+<tt class="descclassname">Data1D.</tt><tt class="descname">colors</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.colors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number of colors need to render the object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.copy_from_datainfo">
+<tt class="descclassname">Data1D.</tt><tt class="descname">copy_from_datainfo</tt><big>(</big><em>data1d</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.copy_from_datainfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>copy values of Data1D of type DataLaoder.Data_info</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.get_xaxis">
+<tt class="descclassname">Data1D.</tt><tt class="descname">get_xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.get_xaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the units and name of x-axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.get_yaxis">
+<tt class="descclassname">Data1D.</tt><tt class="descname">get_yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.get_yaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the units and name of y- axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.is_empty">
+<tt class="descclassname">Data1D.</tt><tt class="descname">is_empty</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.is_empty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if there is no data stored in the plottable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.is_slit_smeared">
+<tt class="descclassname">Data1D.</tt><tt class="descname">is_slit_smeared</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.is_slit_smeared" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the data has slit smearing information</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">True is slit smearing info is present, False otherwise</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="sans.guiframe.dataFitting.Data1D.labels">
+<em class="property">classmethod </em><tt class="descclassname">Data1D.</tt><tt class="descname">labels</tt><big>(</big><em>collection</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a label mostly unique within a collection</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.onFitRange">
+<tt class="descclassname">Data1D.</tt><tt class="descname">onFitRange</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.onFitRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>It limits View data range to plot from min to max</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xmin</strong> &#8211; the minimum value of x to plot.</li>
+<li><strong>xmax</strong> &#8211; the maximum value of x to plot</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.onReset">
+<tt class="descclassname">Data1D.</tt><tt class="descname">onReset</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.onReset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset x, y, dx, dy view with its parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.render">
+<tt class="descclassname">Data1D.</tt><tt class="descname">render</tt><big>(</big><em>plot</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.render" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders the plottable on the graph</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.reset_view">
+<tt class="descclassname">Data1D.</tt><tt class="descname">reset_view</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.reset_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reload view with new value to plot</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.returnValuesOfView">
+<tt class="descclassname">Data1D.</tt><tt class="descname">returnValuesOfView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.returnValuesOfView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return View parameters and it is used by Fit Dialog</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.setLabel">
+<tt class="descclassname">Data1D.</tt><tt class="descname">setLabel</tt><big>(</big><em>labelx</em>, <em>labely</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.setLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>It takes a label of the x and y transformation and set View parameters</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; The label of x transformation is sent by Properties Dialog</li>
+<li><strong>transy</strong> &#8211; The label of y transformation is sent Properties Dialog</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.set_View">
+<tt class="descclassname">Data1D.</tt><tt class="descname">set_View</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.set_View" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load View</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.set_data">
+<tt class="descclassname">Data1D.</tt><tt class="descname">set_data</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.set_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.transformView">
+<tt class="descclassname">Data1D.</tt><tt class="descname">transformView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.transformView" title="Permalink to this definition">¶</a></dt>
+<dd><p>It transforms x, y before displaying</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.transformX">
+<tt class="descclassname">Data1D.</tt><tt class="descname">transformX</tt><big>(</big><em>transx</em>, <em>transdx</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.transformX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive pointers to function that transform x and dx 
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; pointer to function that transforms x</li>
+<li><strong>transdx</strong> &#8211; pointer to function that transforms dx</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.transformY">
+<tt class="descclassname">Data1D.</tt><tt class="descname">transformY</tt><big>(</big><em>transy</em>, <em>transdy</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.transformY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive pointers to function that transform y and dy 
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transy</strong> &#8211; pointer to function that transforms y</li>
+<li><strong>transdy</strong> &#8211; pointer to function that transforms dy</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.xaxis">
+<tt class="descclassname">Data1D.</tt><tt class="descname">xaxis</tt><big>(</big><em>name</em>, <em>units</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.xaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the name and unit of x_axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; the name of x-axis</li>
+<li><strong>units</strong> &#8211; the units of x_axis</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.yaxis">
+<tt class="descclassname">Data1D.</tt><tt class="descname">yaxis</tt><big>(</big><em>name</em>, <em>units</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.yaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the name and unit of y_axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; the name of y-axis</li>
+<li><strong>units</strong> &#8211; the units of y_axis</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.guiframe.dataFitting.Data2D">
+<em class="property">class </em><tt class="descclassname">sans.guiframe.dataFitting.</tt><tt class="descname">Data2D</tt><big>(</big><em>image=None</em>, <em>err_image=None</em>, <em>xmin=None</em>, <em>xmax=None</em>, <em>ymin=None</em>, <em>ymax=None</em>, <em>zmin=None</em>, <em>zmax=None</em>, <em>qx_data=None</em>, <em>qy_data=None</em>, <em>q_data=None</em>, <em>mask=None</em>, <em>dqx_data=None</em>, <em>dqy_data=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">danse.common.plottools.plottables.Data2D</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">sans.dataloader.data_info.Data2D</span></tt></p>
+<dl class="class">
+<dt id="sans.guiframe.dataFitting.Data2D.View">
+<em class="property">class </em><tt class="descname">View</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation of the data that might include a transformation</p>
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.View.check_data_logX">
+<tt class="descname">check_data_logX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.check_data_logX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove negative value in x vector to avoid plotting negative
+value of Log10</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.View.check_data_logY">
+<tt class="descname">check_data_logY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.check_data_logY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove negative value in y vector 
+to avoid plotting negative value of Log10</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.View.onFitRangeView">
+<tt class="descname">onFitRangeView</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.onFitRangeView" title="Permalink to this definition">¶</a></dt>
+<dd><p>It limits View data range to plot from min to max</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xmin</strong> &#8211; the minimum value of x to plot.</li>
+<li><strong>xmax</strong> &#8211; the maximum value of x to plot</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.View.onResetView">
+<tt class="descname">onResetView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.onResetView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset x,y,dx and y in their full range  and in the initial scale
+in case their previous range has changed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.View.returnXview">
+<tt class="descname">returnXview</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.returnXview" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return View  x,y,dx,dy</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.View.setTransformX">
+<tt class="descname">setTransformX</tt><big>(</big><em>funcx</em>, <em>funcdx</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.setTransformX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive pointers to function that transform x and dx 
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; pointer to function that transforms x</li>
+<li><strong>transdx</strong> &#8211; pointer to function that transforms dx</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.View.setTransformY">
+<tt class="descname">setTransformY</tt><big>(</big><em>funcy</em>, <em>funcdy</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.setTransformY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive pointers to function that transform y and dy 
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; pointer to function that transforms y</li>
+<li><strong>transdx</strong> &#8211; pointer to function that transforms dy</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.View.transform">
+<tt class="descname">transform</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.transform" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Transforms the x,y,dx and dy vectors and stores</dt>
+<dd>the output in View parameters</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; array of x values</li>
+<li><strong>y</strong> &#8211; array of y values</li>
+<li><strong>dx</strong> &#8211; array of  errors values on x</li>
+<li><strong>dy</strong> &#8211; array of error values on y</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.add_notes">
+<tt class="descclassname">Data2D.</tt><tt class="descname">add_notes</tt><big>(</big><em>message=''</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.add_notes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add notes to datainfo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.append_empty_process">
+<tt class="descclassname">Data2D.</tt><tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.append_empty_process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.changed">
+<tt class="descclassname">Data2D.</tt><tt class="descname">changed</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.changed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.check_data_PlottableX">
+<tt class="descclassname">Data2D.</tt><tt class="descname">check_data_PlottableX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.check_data_PlottableX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Since no transformation is made for log10(x), check that 
+no negative values is plot in log scale</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.check_data_PlottableY">
+<tt class="descclassname">Data2D.</tt><tt class="descname">check_data_PlottableY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.check_data_PlottableY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Since no transformation is made for log10(y), check that 
+no negative values is plot in log scale</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.clone_without_data">
+<tt class="descclassname">Data2D.</tt><tt class="descname">clone_without_data</tt><big>(</big><em>length=0</em>, <em>clone=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.clone_without_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clone the current object, without copying the data (which
+will be filled out by a subsequent operation).
+The data arrays will be initialized to zero.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>length</strong> &#8211; length of the data array to be initialized</li>
+<li><strong>clone</strong> &#8211; if provided, the data will be copied to clone</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.colors">
+<tt class="descclassname">Data2D.</tt><tt class="descname">colors</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.colors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number of colors need to render the object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.copy_from_datainfo">
+<tt class="descclassname">Data2D.</tt><tt class="descname">copy_from_datainfo</tt><big>(</big><em>data2d</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.copy_from_datainfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>copy value of Data2D of type DataLoader.data_info</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.get_xaxis">
+<tt class="descclassname">Data2D.</tt><tt class="descname">get_xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.get_xaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the units and name of x-axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.get_yaxis">
+<tt class="descclassname">Data2D.</tt><tt class="descname">get_yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.get_yaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the units and name of y- axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.is_empty">
+<tt class="descclassname">Data2D.</tt><tt class="descname">is_empty</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.is_empty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if there is no data stored in the plottable</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="sans.guiframe.dataFitting.Data2D.labels">
+<em class="property">classmethod </em><tt class="descclassname">Data2D.</tt><tt class="descname">labels</tt><big>(</big><em>collection</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a label mostly unique within a collection</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.onFitRange">
+<tt class="descclassname">Data2D.</tt><tt class="descname">onFitRange</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.onFitRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>It limits View data range to plot from min to max</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xmin</strong> &#8211; the minimum value of x to plot.</li>
+<li><strong>xmax</strong> &#8211; the maximum value of x to plot</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.onReset">
+<tt class="descclassname">Data2D.</tt><tt class="descname">onReset</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.onReset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset x, y, dx, dy view with its parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.render">
+<tt class="descclassname">Data2D.</tt><tt class="descname">render</tt><big>(</big><em>plot</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.render" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renders the plottable on the graph</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.reset_view">
+<tt class="descclassname">Data2D.</tt><tt class="descname">reset_view</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.reset_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reload view with new value to plot</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.returnValuesOfView">
+<tt class="descclassname">Data2D.</tt><tt class="descname">returnValuesOfView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.returnValuesOfView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return View parameters and it is used by Fit Dialog</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.setLabel">
+<tt class="descclassname">Data2D.</tt><tt class="descname">setLabel</tt><big>(</big><em>labelx</em>, <em>labely</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.setLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>It takes a label of the x and y transformation and set View parameters</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; The label of x transformation is sent by Properties Dialog</li>
+<li><strong>transy</strong> &#8211; The label of y transformation is sent Properties Dialog</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.setValues">
+<tt class="descclassname">Data2D.</tt><tt class="descname">setValues</tt><big>(</big><em>datainfo=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.setValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use datainfo object to initialize data2D</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>datainfo</strong> &#8211; object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.set_View">
+<tt class="descclassname">Data2D.</tt><tt class="descname">set_View</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.set_View" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load View</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.set_data">
+<tt class="descclassname">Data2D.</tt><tt class="descname">set_data</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.set_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.set_zrange">
+<tt class="descclassname">Data2D.</tt><tt class="descname">set_zrange</tt><big>(</big><em>zmin=None</em>, <em>zmax=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.set_zrange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.transformView">
+<tt class="descclassname">Data2D.</tt><tt class="descname">transformView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.transformView" title="Permalink to this definition">¶</a></dt>
+<dd><p>It transforms x, y before displaying</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.transformX">
+<tt class="descclassname">Data2D.</tt><tt class="descname">transformX</tt><big>(</big><em>transx</em>, <em>transdx</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.transformX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive pointers to function that transform x and dx 
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; pointer to function that transforms x</li>
+<li><strong>transdx</strong> &#8211; pointer to function that transforms dx</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.transformY">
+<tt class="descclassname">Data2D.</tt><tt class="descname">transformY</tt><big>(</big><em>transy</em>, <em>transdy</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.transformY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive pointers to function that transform y and dy 
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transy</strong> &#8211; pointer to function that transforms y</li>
+<li><strong>transdy</strong> &#8211; pointer to function that transforms dy</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.xaxis">
+<tt class="descclassname">Data2D.</tt><tt class="descname">xaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.xaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>set x-axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>label</strong> &#8211; x-axis label</li>
+<li><strong>unit</strong> &#8211; x-axis unit</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.yaxis">
+<tt class="descclassname">Data2D.</tt><tt class="descname">yaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.yaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>set y-axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>label</strong> &#8211; y-axis label</li>
+<li><strong>unit</strong> &#8211; y-axis unit</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.zaxis">
+<tt class="descclassname">Data2D.</tt><tt class="descname">zaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.zaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>set z-axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>label</strong> &#8211; z-axis label</li>
+<li><strong>unit</strong> &#8211; z-axis unit</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.guiframe.dataFitting.Theory1D">
+<em class="property">class </em><tt class="descclassname">sans.guiframe.dataFitting.</tt><tt class="descname">Theory1D</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">danse.common.plottools.plottables.Theory1D</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">sans.dataloader.data_info.Data1D</span></tt></p>
+<dl class="class">
+<dt id="sans.guiframe.dataFitting.Theory1D.View">
+<em class="property">class </em><tt class="descname">View</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation of the data that might include a transformation</p>
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.View.check_data_logX">
+<tt class="descname">check_data_logX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.check_data_logX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove negative value in x vector to avoid plotting negative
+value of Log10</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.View.check_data_logY">
+<tt class="descname">check_data_logY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.check_data_logY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove negative value in y vector 
+to avoid plotting negative value of Log10</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.View.onFitRangeView">
+<tt class="descname">onFitRangeView</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.onFitRangeView" title="Permalink to this definition">¶</a></dt>
+<dd><p>It limits View data range to plot from min to max</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xmin</strong> &#8211; the minimum value of x to plot.</li>
+<li><strong>xmax</strong> &#8211; the maximum value of x to plot</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.View.onResetView">
+<tt class="descname">onResetView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.onResetView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset x,y,dx and y in their full range  and in the initial scale
+in case their previous range has changed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.View.returnXview">
+<tt class="descname">returnXview</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.returnXview" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return View  x,y,dx,dy</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.View.setTransformX">
+<tt class="descname">setTransformX</tt><big>(</big><em>funcx</em>, <em>funcdx</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.setTransformX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive pointers to function that transform x and dx 
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; pointer to function that transforms x</li>
+<li><strong>transdx</strong> &#8211; pointer to function that transforms dx</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.View.setTransformY">
+<tt class="descname">setTransformY</tt><big>(</big><em>funcy</em>, <em>funcdy</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.setTransformY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive pointers to function that transform y and dy 
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; pointer to function that transforms y</li>
+<li><strong>transdx</strong> &#8211; pointer to function that transforms dy</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.View.transform">
+<tt class="descname">transform</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.transform" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Transforms the x,y,dx and dy vectors and stores</dt>
+<dd>the output in View parameters</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; array of x values</li>
+<li><strong>y</strong> &#8211; array of y values</li>
+<li><strong>dx</strong> &#8211; array of  errors values on x</li>
+<li><strong>dy</strong> &#8211; array of error values on y</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.add_notes">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">add_notes</tt><big>(</big><em>message=''</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.add_notes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add notes to datainfo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.append_empty_process">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.append_empty_process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.changed">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">changed</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.changed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.check_data_PlottableX">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">check_data_PlottableX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.check_data_PlottableX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Since no transformation is made for log10(x), check that 
+no negative values is plot in log scale</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.check_data_PlottableY">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">check_data_PlottableY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.check_data_PlottableY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Since no transformation is made for log10(y), check that 
+no negative values is plot in log scale</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.clone_without_data">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">clone_without_data</tt><big>(</big><em>length=0</em>, <em>clone=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.clone_without_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clone the current object, without copying the data (which
+will be filled out by a subsequent operation).
+The data arrays will be initialized to zero.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>length</strong> &#8211; length of the data array to be initialized</li>
+<li><strong>clone</strong> &#8211; if provided, the data will be copied to clone</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.colors">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">colors</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.colors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number of colors need to render the object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.copy_from_datainfo">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">copy_from_datainfo</tt><big>(</big><em>data1d</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.copy_from_datainfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>copy values of Data1D of type DataLaoder.Data_info</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.get_xaxis">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">get_xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.get_xaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the units and name of x-axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.get_yaxis">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">get_yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.get_yaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the units and name of y- axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.is_empty">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">is_empty</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.is_empty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if there is no data stored in the plottable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.is_slit_smeared">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">is_slit_smeared</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.is_slit_smeared" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the data has slit smearing information</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">True is slit smearing info is present, False otherwise</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="sans.guiframe.dataFitting.Theory1D.labels">
+<em class="property">classmethod </em><tt class="descclassname">Theory1D.</tt><tt class="descname">labels</tt><big>(</big><em>collection</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.labels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a label mostly unique within a collection</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.onFitRange">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">onFitRange</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.onFitRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>It limits View data range to plot from min to max</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xmin</strong> &#8211; the minimum value of x to plot.</li>
+<li><strong>xmax</strong> &#8211; the maximum value of x to plot</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.onReset">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">onReset</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.onReset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset x, y, dx, dy view with its parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.render">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">render</tt><big>(</big><em>plot</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.render" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.reset_view">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">reset_view</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.reset_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reload view with new value to plot</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.returnValuesOfView">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">returnValuesOfView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.returnValuesOfView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return View parameters and it is used by Fit Dialog</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.setLabel">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">setLabel</tt><big>(</big><em>labelx</em>, <em>labely</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.setLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>It takes a label of the x and y transformation and set View parameters</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; The label of x transformation is sent by Properties Dialog</li>
+<li><strong>transy</strong> &#8211; The label of y transformation is sent Properties Dialog</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.set_View">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">set_View</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.set_View" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load View</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.set_data">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">set_data</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.set_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.transformView">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">transformView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.transformView" title="Permalink to this definition">¶</a></dt>
+<dd><p>It transforms x, y before displaying</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.transformX">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">transformX</tt><big>(</big><em>transx</em>, <em>transdx</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.transformX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive pointers to function that transform x and dx 
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transx</strong> &#8211; pointer to function that transforms x</li>
+<li><strong>transdx</strong> &#8211; pointer to function that transforms dx</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.transformY">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">transformY</tt><big>(</big><em>transy</em>, <em>transdy</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.transformY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive pointers to function that transform y and dy 
+and set corresponding View pointers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>transy</strong> &#8211; pointer to function that transforms y</li>
+<li><strong>transdy</strong> &#8211; pointer to function that transforms dy</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.xaxis">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">xaxis</tt><big>(</big><em>name</em>, <em>units</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.xaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the name and unit of x_axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; the name of x-axis</li>
+<li><strong>units</strong> &#8211; the units of x_axis</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.yaxis">
+<tt class="descclassname">Theory1D.</tt><tt class="descname">yaxis</tt><big>(</big><em>name</em>, <em>units</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.yaxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the name and unit of y_axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; the name of y-axis</li>
+<li><strong>units</strong> &#8211; the units of y_axis</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">dataFitting</a><ul>
+<li><a class="reference internal" href="#module-sans.guiframe.dataFitting"><tt class="docutils literal"><span class="pre">sans.guiframe.dataFitting</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="custom_pstats.html"
+                        title="previous chapter">custom_pstats</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="data_manager.html"
+                        title="next chapter">data_manager</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/dataFitting.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="data_manager.html" title="data_manager"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="custom_pstats.html" title="custom_pstats"
+             >previous</a> |</li>
+        <li><a href="../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
