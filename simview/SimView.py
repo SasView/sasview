@@ -28,18 +28,18 @@ import local_config
 import logging
 
 
-class SansViewApp(gui_manager.ViewApp):
+class SimViewApp(gui_manager.ViewApp):
     """
     """
 
-class SansView():
+class SimView():
     
     def __init__(self):
         """
             Initialize application
         """
         #from gui_manager import ViewApp
-        self.gui = SansViewApp(0) 
+        self.gui = SimViewApp(0) 
         
         # Add perspectives to the basic application
         # Additional perspectives can still be loaded
@@ -62,4 +62,4 @@ class SansView():
         self.gui.MainLoop()  
 
 if __name__ == "__main__": 
-    sansview = SansView()
+    sansview = SimView()
