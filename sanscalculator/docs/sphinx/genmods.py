@@ -52,8 +52,10 @@ def genfiles(package, package_name, modules, dir='api'):
 
 
 modules=[
-    ('sld_calculator', 'Sld Calculator'),
+    ('instrument', 'Instrument'),
     ('slit_length_calculator', 'Slit Length Calculator'),
+    ('kiessig_calculator', 'Kiessig Calculator'),
+    ('resolution_calculator', 'Resolution Calculator')
 ]
 package='sans.calculator'
 package_name='Reference'

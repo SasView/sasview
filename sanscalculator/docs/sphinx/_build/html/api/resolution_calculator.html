@@ -1,0 +1,411 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Resolution Calculator &mdash; calculator v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="calculator v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="prev" title="Kiessig Calculator" href="kiessig_calculator.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="kiessig_calculator.html" title="Kiessig Calculator"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">calculator v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="resolution-calculator">
+<h1>Resolution Calculator<a class="headerlink" href="#resolution-calculator" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.calculator.resolution_calculator">
+<span id="sans-calculator-resolution-calculator"></span><h2><a class="reference internal" href="#module-sans.calculator.resolution_calculator" title="sans.calculator.resolution_calculator"><tt class="xref py py-mod docutils literal"><span class="pre">sans.calculator.resolution_calculator</span></tt></a><a class="headerlink" href="#module-sans.calculator.resolution_calculator" title="Permalink to this headline">¶</a></h2>
+<p>This object is a small tool to allow user to quickly
+determine the variance in q  from the 
+instrumental parameters.</p>
+<dl class="class">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator">
+<em class="property">class </em><tt class="descclassname">sans.calculator.resolution_calculator.</tt><tt class="descname">ResolutionCalculator</tt><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>compute resolution in 2D</p>
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.compute">
+<tt class="descname">compute</tt><big>(</big><em>wavelength</em>, <em>wavelength_spread</em>, <em>qx_value</em>, <em>qy_value</em>, <em>coord='cartesian'</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the Q resoltuion in || and + direction of 2D
+: qx_value: x component of q
+: qy_value: y component of q</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.compute_and_plot">
+<tt class="descname">compute_and_plot</tt><big>(</big><em>qx_value</em>, <em>qy_value</em>, <em>qx_min</em>, <em>qx_max</em>, <em>qy_min</em>, <em>qy_max</em>, <em>coord='cartesian'</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.compute_and_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the resolution
+: qx_value: x component of q
+: qy_value: y component of q</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_all_instrument_params">
+<tt class="descname">get_all_instrument_params</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_all_instrument_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all instrumental parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_default_spectrum">
+<tt class="descname">get_default_spectrum</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_default_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get default_spectrum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_detector_pix_size">
+<tt class="descname">get_detector_pix_size</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_detector_pix_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get detector pixel size</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_detector_qrange">
+<tt class="descname">get_detector_qrange</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_detector_qrange" title="Permalink to this definition">¶</a></dt>
+<dd><p>get max detector q ranges</p>
+<p>: return: qx_min, qx_max, qy_min, qy_max tuple</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_detector_size">
+<tt class="descname">get_detector_size</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_detector_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get detector size</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_image">
+<tt class="descname">get_image</tt><big>(</big><em>qx_value</em>, <em>qy_value</em>, <em>sigma_1</em>, <em>sigma_2</em>, <em>sigma_r</em>, <em>qx_min</em>, <em>qx_max</em>, <em>qy_min</em>, <em>qy_max</em>, <em>coord='cartesian'</em>, <em>full_cal=True</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the resolution in polar coordinate ready to plot
+: qx_value: qx_value value
+: qy_value: qy_value value
+: sigma_1: variance in r direction
+: sigma_2: variance in phi direction
+: coord: coordinate system of image, &#8216;polar&#8217; or &#8216;cartesian&#8217;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_intensity">
+<tt class="descname">get_intensity</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_intensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get intensity</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_intensity_list">
+<tt class="descname">get_intensity_list</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_intensity_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set wavelength spread</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_neutron_mass">
+<tt class="descname">get_neutron_mass</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_neutron_mass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Neutron mass</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_sample2detector_distance">
+<tt class="descname">get_sample2detector_distance</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_sample2detector_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get detector sample2detector_distance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_sample2sample_distance">
+<tt class="descname">get_sample2sample_distance</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_sample2sample_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get detector sampleslitsample_distance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_sample_aperture_size">
+<tt class="descname">get_sample_aperture_size</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_sample_aperture_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get sample aperture size</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_source2sample_distance">
+<tt class="descname">get_source2sample_distance</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_source2sample_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get detector source2sample_distance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_source_aperture_size">
+<tt class="descname">get_source_aperture_size</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_source_aperture_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get source aperture size</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_spectrum">
+<tt class="descname">get_spectrum</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get _spectrum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_variance">
+<tt class="descname">get_variance</tt><big>(</big><em>size=</em><span class="optional">[</span><span class="optional">]</span>, <em>distance=0</em>, <em>phi=0</em>, <em>comp='radial'</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_variance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the variance when the slit/pinhole size is given
+: size: list that can be one(diameter for circular)</p>
+<blockquote>
+<div>or two components(lengths for rectangular)</div></blockquote>
+<p>: distance: [z, x] where z along the incident beam, x // qx_value
+: comp: direction of the sigma; can be &#8216;phi&#8217;, &#8216;y&#8217;, &#8216;x&#8217;, and &#8216;radial&#8217;</p>
+<p>: return variance: sigma^2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_variance_gravity">
+<tt class="descname">get_variance_gravity</tt><big>(</big><em>s_distance</em>, <em>d_distance</em>, <em>wavelength</em>, <em>spread</em>, <em>phi</em>, <em>comp='radial'</em>, <em>switch='on'</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_variance_gravity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the variance from gravity when the wavelength spread is given</p>
+<p>: s_distance: source to sample distance
+: d_distance: sample to detector distance
+: wavelength: wavelength
+: spread: wavelength spread (ratio)
+: comp: direction of the sigma; can be &#8216;phi&#8217;, &#8216;y&#8217;, &#8216;x&#8217;, and &#8216;radial&#8217;</p>
+<p>: return variance: sigma^2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_variance_wave">
+<tt class="descname">get_variance_wave</tt><big>(</big><em>radius</em>, <em>distance</em>, <em>spread</em>, <em>phi</em>, <em>comp='radial'</em>, <em>switch='on'</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_variance_wave" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the variance when the wavelength spread is given</p>
+<p>: radius: the radial distance from the beam center to the pix of q
+: distance: sample to detector distance
+: spread: wavelength spread (ratio)
+: comp: direction of the sigma; can be &#8216;phi&#8217;, &#8216;y&#8217;, &#8216;x&#8217;, and &#8216;radial&#8217;</p>
+<p>: return variance: sigma^2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_wave_list">
+<tt class="descname">get_wave_list</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_wave_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set wavelength spread</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_wavelength">
+<tt class="descname">get_wavelength</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get wavelength</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.get_wavelength_spread">
+<tt class="descname">get_wavelength_spread</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.get_wavelength_spread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get wavelength spread</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.plot_image">
+<tt class="descname">plot_image</tt><big>(</big><em>image</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.plot_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot image using pyplot
+: image: 2d resolution image</p>
+<p>: return plt: pylab object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.reset_image">
+<tt class="descname">reset_image</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.reset_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset image to default (=[])</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.set_detector_pix_size">
+<tt class="descname">set_detector_pix_size</tt><big>(</big><em>size</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.set_detector_pix_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set detector pixel size</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.set_detector_size">
+<tt class="descname">set_detector_size</tt><big>(</big><em>size</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.set_detector_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set detector size in number of pixels
+: param size: [pixel_nums] or [x_pix_num, yx_pix_num]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.set_intensity">
+<tt class="descname">set_intensity</tt><big>(</big><em>intensity</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.set_intensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set intensity</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.set_neutron_mass">
+<tt class="descname">set_neutron_mass</tt><big>(</big><em>mass</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.set_neutron_mass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set Neutron mass</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.set_sample2detector_distance">
+<tt class="descname">set_sample2detector_distance</tt><big>(</big><em>distance</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.set_sample2detector_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set detector sample2detector_distance</p>
+<p>: param distance: [distance, x_offset]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.set_sample2sample_distance">
+<tt class="descname">set_sample2sample_distance</tt><big>(</big><em>distance</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.set_sample2sample_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set detector sample_slit2sample_distance</p>
+<p>: param distance: [distance, x_offset]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.set_sample_aperture_size">
+<tt class="descname">set_sample_aperture_size</tt><big>(</big><em>size</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.set_sample_aperture_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set sample aperture size</p>
+<p>: param size: [dia_value] or [xheight_value, yheight_value]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.set_source2sample_distance">
+<tt class="descname">set_source2sample_distance</tt><big>(</big><em>distance</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.set_source2sample_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set detector source2sample_distance</p>
+<p>: param distance: [distance, x_offset]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.set_source_aperture_size">
+<tt class="descname">set_source_aperture_size</tt><big>(</big><em>size</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.set_source_aperture_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set source aperture size</p>
+<p>: param size: [dia_value] or [x_value, y_value]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.set_spectrum">
+<tt class="descname">set_spectrum</tt><big>(</big><em>spectrum</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.set_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set spectrum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.set_wave">
+<tt class="descname">set_wave</tt><big>(</big><em>wavelength</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.set_wave" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set wavelength list or wavelength</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.set_wave_list">
+<tt class="descname">set_wave_list</tt><big>(</big><em>wavelength_list</em>, <em>wavelengthspread_list</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.set_wave_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set wavelength and its spread list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.set_wave_spread">
+<tt class="descname">set_wave_spread</tt><big>(</big><em>wavelength_spread</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.set_wave_spread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set wavelength spread  or wavelength spread</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.set_wavelength">
+<tt class="descname">set_wavelength</tt><big>(</big><em>wavelength</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.set_wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set wavelength</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.set_wavelength_spread">
+<tt class="descname">set_wavelength_spread</tt><big>(</big><em>wavelength_spread</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.set_wavelength_spread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set wavelength spread</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.resolution_calculator.ResolutionCalculator.setup_tof">
+<tt class="descname">setup_tof</tt><big>(</big><em>wavelength</em>, <em>wavelength_spread</em><big>)</big><a class="headerlink" href="#sans.calculator.resolution_calculator.ResolutionCalculator.setup_tof" title="Permalink to this definition">¶</a></dt>
+<dd><p>Setup all parameters in instrument</p>
+<p>: param ind: index of lambda, etc</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Resolution Calculator</a><ul>
+<li><a class="reference internal" href="#module-sans.calculator.resolution_calculator"><tt class="docutils literal"><span class="pre">sans.calculator.resolution_calculator</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="kiessig_calculator.html"
+                        title="previous chapter">Kiessig Calculator</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/resolution_calculator.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="kiessig_calculator.html" title="Kiessig Calculator"
+             >previous</a> |</li>
+        <li><a href="../index.html">calculator v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Gervaise Alina.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

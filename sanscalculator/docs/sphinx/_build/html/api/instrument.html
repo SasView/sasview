@@ -1,0 +1,514 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Instrument &mdash; calculator v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="calculator v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="Slit Length Calculator" href="slit_length_calculator.html" />
+    <link rel="prev" title="Reference" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="slit_length_calculator.html" title="Slit Length Calculator"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Reference"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">calculator v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="instrument">
+<h1>Instrument<a class="headerlink" href="#instrument" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.calculator.instrument">
+<span id="sans-calculator-instrument"></span><h2><a class="reference internal" href="#module-sans.calculator.instrument" title="sans.calculator.instrument"><tt class="xref py py-mod docutils literal"><span class="pre">sans.calculator.instrument</span></tt></a><a class="headerlink" href="#module-sans.calculator.instrument" title="Permalink to this headline">¶</a></h2>
+<p>This module is a small tool to allow user to 
+control instrumental parameters</p>
+<dl class="class">
+<dt id="sans.calculator.instrument.Aperture">
+<em class="property">class </em><tt class="descclassname">sans.calculator.instrument.</tt><tt class="descname">Aperture</tt><a class="headerlink" href="#sans.calculator.instrument.Aperture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>An object class that defines the aperture variables</p>
+<dl class="method">
+<dt id="sans.calculator.instrument.Aperture.set_sample_distance">
+<tt class="descname">set_sample_distance</tt><big>(</big><em>distance=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Aperture.set_sample_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the sample aperture distance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Aperture.set_sample_size">
+<tt class="descname">set_sample_size</tt><big>(</big><em>size=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Aperture.set_sample_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the sample aperture size</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Aperture.set_source_size">
+<tt class="descname">set_source_size</tt><big>(</big><em>size=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Aperture.set_source_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the source aperture size</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.calculator.instrument.Detector">
+<em class="property">class </em><tt class="descclassname">sans.calculator.instrument.</tt><tt class="descname">Detector</tt><a class="headerlink" href="#sans.calculator.instrument.Detector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>An object class that defines the detector variables</p>
+<dl class="method">
+<dt id="sans.calculator.instrument.Detector.set_distance">
+<tt class="descname">set_distance</tt><big>(</big><em>distance=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Detector.set_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the detector distance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Detector.set_pix_size">
+<tt class="descname">set_pix_size</tt><big>(</big><em>size=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Detector.set_pix_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the detector pix_size</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Detector.set_size">
+<tt class="descname">set_size</tt><big>(</big><em>size=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Detector.set_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the detector  size</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.calculator.instrument.Neutron">
+<em class="property">class </em><tt class="descclassname">sans.calculator.instrument.</tt><tt class="descname">Neutron</tt><a class="headerlink" href="#sans.calculator.instrument.Neutron" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>An object that defines the wavelength variables</p>
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.get_band">
+<tt class="descname">get_band</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.get_band" title="Permalink to this definition">¶</a></dt>
+<dd><p>To get the wavelength band</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.get_default_spectrum">
+<tt class="descname">get_default_spectrum</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.get_default_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>get default spectrum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.get_intensity">
+<tt class="descname">get_intensity</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.get_intensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>To get the value of intensity</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.get_mass">
+<tt class="descname">get_mass</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.get_mass" title="Permalink to this definition">¶</a></dt>
+<dd><p>To get the neutron mass</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.get_ramdom_value">
+<tt class="descname">get_ramdom_value</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.get_ramdom_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>To get the value of wave length</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.get_spectrum">
+<tt class="descname">get_spectrum</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.get_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>To get the wavelength spectrum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.get_wavelength">
+<tt class="descname">get_wavelength</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.get_wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>To get the value of wavelength</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.get_wavelength_spread">
+<tt class="descname">get_wavelength_spread</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.get_wavelength_spread" title="Permalink to this definition">¶</a></dt>
+<dd><p>To get the value of wavelength spread</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.plot_spectrum">
+<tt class="descname">plot_spectrum</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.plot_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>To plot the wavelength spactrum
+: requirment: matplotlib.pyplot</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.set_band">
+<tt class="descname">set_band</tt><big>(</big><em>band=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_band" title="Permalink to this definition">¶</a></dt>
+<dd><p>To set the wavelength band</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>band</strong> &#8211; array of [min, max]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.set_full_band">
+<tt class="descname">set_full_band</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_full_band" title="Permalink to this definition">¶</a></dt>
+<dd><p>set band to default value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.set_intensity">
+<tt class="descname">set_intensity</tt><big>(</big><em>intensity=368428</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_intensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the intensity in counts/sec</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.set_mass">
+<tt class="descname">set_mass</tt><big>(</big><em>mass=1.6749272900000001e-024</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_mass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the wavelength</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.set_spectrum">
+<tt class="descname">set_spectrum</tt><big>(</big><em>spectrum</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set spectrum</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>spectrum</strong> &#8211; numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.set_wavelength">
+<tt class="descname">set_wavelength</tt><big>(</big><em>wavelength=6.0</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the wavelength</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.set_wavelength_spread">
+<tt class="descname">set_wavelength_spread</tt><big>(</big><em>spread=0.125</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_wavelength_spread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the wavelength spread</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.setup_spectrum">
+<tt class="descname">setup_spectrum</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.setup_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>To set the wavelength spectrum, and intensity, assumes 
+wavelength is already within the spectrum</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.calculator.instrument.Sample">
+<em class="property">class </em><tt class="descclassname">sans.calculator.instrument.</tt><tt class="descname">Sample</tt><a class="headerlink" href="#sans.calculator.instrument.Sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>An object class that defines the sample variables</p>
+<dl class="method">
+<dt id="sans.calculator.instrument.Sample.set_distance">
+<tt class="descname">set_distance</tt><big>(</big><em>distance=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Sample.set_distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the sample distance</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Sample.set_size">
+<tt class="descname">set_size</tt><big>(</big><em>size=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Sample.set_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the sample size</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Sample.set_thickness">
+<tt class="descname">set_thickness</tt><big>(</big><em>thickness=0.0</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Sample.set_thickness" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the sample thickness</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.calculator.instrument.TOF">
+<em class="property">class </em><tt class="descclassname">sans.calculator.instrument.</tt><tt class="descname">TOF</tt><a class="headerlink" href="#sans.calculator.instrument.TOF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sans.calculator.instrument.Neutron" title="sans.calculator.instrument.Neutron"><tt class="xref py py-class docutils literal"><span class="pre">sans.calculator.instrument.Neutron</span></tt></a></p>
+<p>TOF: make list of wavelength and wave length spreads</p>
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.get_band">
+<tt class="descname">get_band</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.get_band" title="Permalink to this definition">¶</a></dt>
+<dd><p>To get the wavelength band</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.get_default_spectrum">
+<tt class="descname">get_default_spectrum</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.get_default_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>get default spectrum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.get_intensity">
+<tt class="descname">get_intensity</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.get_intensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>To get the value of intensity</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.get_intensity_list">
+<tt class="descname">get_intensity_list</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.get_intensity_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>get list of the intensity wrt wavelength_list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.get_mass">
+<tt class="descname">get_mass</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.get_mass" title="Permalink to this definition">¶</a></dt>
+<dd><p>To get the neutron mass</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.get_ramdom_value">
+<tt class="descname">get_ramdom_value</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.get_ramdom_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>To get the value of wave length</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.get_spectrum">
+<tt class="descname">get_spectrum</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.get_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>To get the wavelength spectrum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.get_wave_list">
+<tt class="descname">get_wave_list</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.get_wave_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get wavelength and wavelength_spread list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.get_wavelength">
+<tt class="descname">get_wavelength</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.get_wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>To get the value of wavelength</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.get_wavelength_spread">
+<tt class="descname">get_wavelength_spread</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.get_wavelength_spread" title="Permalink to this definition">¶</a></dt>
+<dd><p>To get the value of wavelength spread</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.plot_spectrum">
+<tt class="descname">plot_spectrum</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.plot_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>To plot the wavelength spactrum
+: requirment: matplotlib.pyplot</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.set_band">
+<tt class="descname">set_band</tt><big>(</big><em>band=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_band" title="Permalink to this definition">¶</a></dt>
+<dd><p>To set the wavelength band</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>band</strong> &#8211; array of [min, max]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.set_full_band">
+<tt class="descname">set_full_band</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_full_band" title="Permalink to this definition">¶</a></dt>
+<dd><p>set band to default value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.set_intensity">
+<tt class="descname">set_intensity</tt><big>(</big><em>intensity=368428</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_intensity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the intensity in counts/sec</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.set_mass">
+<tt class="descname">set_mass</tt><big>(</big><em>mass=1.6749272900000001e-024</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_mass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the wavelength</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.set_spectrum">
+<tt class="descname">set_spectrum</tt><big>(</big><em>spectrum</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set spectrum</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>spectrum</strong> &#8211; numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.set_wave_list">
+<tt class="descname">set_wave_list</tt><big>(</big><em>wavelength=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_wave_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set wavelength list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>wavelength</strong> &#8211; list of wavelengths</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.set_wave_spread_list">
+<tt class="descname">set_wave_spread_list</tt><big>(</big><em>wavelength_spread=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_wave_spread_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set wavelength_spread list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>wavelength_spread</strong> &#8211; list of wavelength spreads</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.set_wavelength">
+<tt class="descname">set_wavelength</tt><big>(</big><em>wavelength=6.0</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_wavelength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the wavelength</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.set_wavelength_spread">
+<tt class="descname">set_wavelength_spread</tt><big>(</big><em>spread=0.125</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_wavelength_spread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the wavelength spread</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.setup_spectrum">
+<tt class="descname">setup_spectrum</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.setup_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>To set the wavelength spectrum, and intensity, assumes 
+wavelength is already within the spectrum</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sans.calculator.instrument.validate">
+<tt class="descclassname">sans.calculator.instrument.</tt><tt class="descname">validate</tt><big>(</big><em>value=None</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the value is folat &gt; 0.0</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return value:</th><td class="field-body">True / False</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Instrument</a><ul>
+<li><a class="reference internal" href="#module-sans.calculator.instrument"><tt class="docutils literal"><span class="pre">sans.calculator.instrument</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Reference</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="slit_length_calculator.html"
+                        title="next chapter">Slit Length Calculator</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/instrument.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="slit_length_calculator.html" title="Slit Length Calculator"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Reference"
+             >previous</a> |</li>
+        <li><a href="../index.html">calculator v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Gervaise Alina.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
