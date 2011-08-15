@@ -3,7 +3,7 @@
 """
 import os
 
-filedirs = ['.', 'perspectives', 'perspectives/fitting']
+filedirs = ['.']
 
 for d in filedirs:
     files = os.listdir(d)
