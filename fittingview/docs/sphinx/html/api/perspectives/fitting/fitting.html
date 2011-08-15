@@ -1,0 +1,543 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>fitting &mdash; sansview v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="sansview v0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="help_panel" href="help_panel.html" />
+    <link rel="prev" title="fitproblem" href="fitproblem.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="help_panel.html" title="help_panel"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="fitproblem.html" title="fitproblem"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">sansview v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="fitting">
+<h1>fitting<a class="headerlink" href="#fitting" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.perspectives.fitting.fitting">
+<span id="sans-perspectives-fitting-fitting"></span><h2><a class="reference internal" href="#module-sans.perspectives.fitting.fitting" title="sans.perspectives.fitting.fitting"><tt class="xref py py-mod docutils literal"><span class="pre">sans.perspectives.fitting.fitting</span></tt></a><a class="headerlink" href="#module-sans.perspectives.fitting.fitting" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sans.perspectives.fitting.fitting.Plugin">
+<em class="property">class </em><tt class="descclassname">sans.perspectives.fitting.fitting.</tt><tt class="descname">Plugin</tt><big>(</big><em>standalone=False</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.plugin_base.PluginBase</span></tt></p>
+<p>Fitting plugin is used to perform fit</p>
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.add_color">
+<tt class="descname">add_color</tt><big>(</big><em>color</em>, <em>id</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.add_color" title="Permalink to this definition">¶</a></dt>
+<dd><p>adds a color as a key with a plot id as its value to a dictionary</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.add_fit_page">
+<tt class="descname">add_fit_page</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.add_fit_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>given a data, ask to the fitting panel to create a new fitting page,
+get this page and store it into the page_finder of this plug-in</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.can_load_data">
+<tt class="descname">can_load_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.can_load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>if return True, then call handler to laod data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.clear_panel">
+<tt class="descname">clear_panel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.clear_panel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.delete_data">
+<tt class="descname">delete_data</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.delete_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>delete  the given data from panel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.draw_model">
+<tt class="descname">draw_model</tt><big>(</big><em>model</em>, <em>page_id</em>, <em>data=None</em>, <em>smearer=None</em>, <em>enable1D=True</em>, <em>enable2D=False</em>, <em>state=None</em>, <em>toggle_mode_on=False</em>, <em>qmin=0.001</em>, <em>qmax=0.13</em>, <em>qstep=50</em>, <em>update_chisqr=True</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.draw_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>model</strong> &#8211; the model to draw</li>
+<li><strong>name</strong> &#8211; the name of the model to draw</li>
+<li><strong>data</strong> &#8211; the data on which the model is based to be drawn</li>
+<li><strong>description</strong> &#8211; model&#8217;s description</li>
+<li><strong>enable1D</strong> &#8211; if true enable drawing model 1D</li>
+<li><strong>enable2D</strong> &#8211; if true enable drawing model 2D</li>
+<li><strong>qmin</strong> &#8211; Range&#8217;s minimum value to draw model</li>
+<li><strong>qmax</strong> &#8211; Range&#8217;s maximum value to draw model</li>
+<li><strong>qstep</strong> &#8211; number of step to divide the x and y-axis</li>
+<li><strong>update_chisqr</strong> &#8211; update chisqr [bool]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.get_context_menu">
+<tt class="descname">get_context_menu</tt><big>(</big><em>plotpanel=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.get_context_menu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the context menu items available for P(r).them allow fitting option
+for Data2D and Data1D only.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> &#8211; the Graph object to which we attach the context menu</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">a list of menu items with call-back function</td>
+</tr>
+<tr class="field"><th class="field-name">Note :</th><td class="field-body">if Data1D was generated from Theory1D  
+the fitting option is not allowed</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.get_extensions">
+<tt class="descname">get_extensions</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.get_extensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>return state reader and its extensions</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.get_page_finder">
+<tt class="descname">get_page_finder</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.get_page_finder" title="Permalink to this definition">¶</a></dt>
+<dd><p>return self.page_finder used also by simfitpage.py</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.get_panels">
+<tt class="descname">get_panels</tt><big>(</big><em>parent</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.get_panels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create and return a list of panel objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.get_perspective">
+<tt class="descname">get_perspective</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.get_perspective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the list of panel names for this perspective</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.get_tools">
+<tt class="descname">get_tools</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.get_tools" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a set of menu entries for tools</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.help">
+<tt class="descname">help</tt><big>(</big><em>evt</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.help" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show a general help dialog.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.is_always_active">
+<tt class="descname">is_always_active</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.is_always_active" title="Permalink to this definition">¶</a></dt>
+<dd><p>return True is this plugin is always active and it is local to guiframe
+even if the user is switching between perspectives</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.is_in_use">
+<tt class="descname">is_in_use</tt><big>(</big><em>data_id</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.is_in_use" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>get a  data id a list of data name if data data is</dt>
+<dd>currently used by the plugin and the name of the plugin</dd>
+</dl>
+<p>data_name = &#8216;None&#8217;
+in_use = False
+example [(data_name, self.sub_menu)]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.load_data">
+<tt class="descname">load_data</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load  data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.load_folder">
+<tt class="descname">load_folder</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.load_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load entire folder</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.onFit">
+<tt class="descname">onFit</tt><big>(</big><em>uid=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.onFit" title="Permalink to this definition">¶</a></dt>
+<dd><p>perform fit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.on_add_new_page">
+<tt class="descname">on_add_new_page</tt><big>(</big><em>event=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.on_add_new_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>ask fit panel to create a new empty page</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.on_add_sim_page">
+<tt class="descname">on_add_sim_page</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.on_add_sim_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a page to access simultaneous fit option</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.on_batch_selection">
+<tt class="descname">on_batch_selection</tt><big>(</big><em>flag</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.on_batch_selection" title="Permalink to this definition">¶</a></dt>
+<dd><p>switch the the notebook of batch mode or not</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.on_perspective">
+<tt class="descname">on_perspective</tt><big>(</big><em>event=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.on_perspective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call back function for the perspective menu item.
+We notify the parent window that the perspective
+has changed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; menu event</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.on_set_state_helper">
+<tt class="descname">on_set_state_helper</tt><big>(</big><em>event=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.on_set_state_helper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set_state_helper. This actually sets state 
+after plotting data from state file.</p>
+<dl class="docutils">
+<dt>: event: FitStateUpdateEvent called </dt>
+<dd>by dataloader.plot_data from guiframe</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.populate_file_menu">
+<tt class="descname">populate_file_menu</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.populate_file_menu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append menu item under file menu item of the frame</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.populate_menu">
+<tt class="descname">populate_menu</tt><big>(</big><em>owner</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.populate_menu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a menu for the Fitting plug-in</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>id</strong> &#8211; id to create a menu</li>
+<li><strong>owner</strong> &#8211; owner of menu</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of information to populate the main menu</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.post_init">
+<tt class="descname">post_init</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.post_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post initialization call back to close the loose ends</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.ready_fit">
+<tt class="descname">ready_fit</tt><big>(</big><em>calc_fit</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.ready_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ready for another fit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.remove_plot">
+<tt class="descname">remove_plot</tt><big>(</big><em>uid</em>, <em>theory=False</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.remove_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove model plot when a fit page is closed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.save_fit_state">
+<tt class="descname">save_fit_state</tt><big>(</big><em>filepath</em>, <em>fitstate</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.save_fit_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>save fit page state into file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.schedule_for_fit">
+<tt class="descname">schedule_for_fit</tt><big>(</big><em>value=0</em>, <em>uid=None</em>, <em>fitproblem=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.schedule_for_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the fit problem field to 0 or 1 to schedule that problem to fit.
+Schedule the specified fitproblem or get the fit problem related to 
+the current page and set value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>value</strong> &#8211; integer 0 or 1</li>
+<li><strong>fitproblem</strong> &#8211; fitproblem to schedule or not to fit</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.set_batch_selection">
+<tt class="descname">set_batch_selection</tt><big>(</big><em>flag</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.set_batch_selection" title="Permalink to this definition">¶</a></dt>
+<dd><p>the plugin to its batch state if flag is True</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.set_data">
+<tt class="descname">set_data</tt><big>(</big><em>data_list=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.set_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>receive a list of data to fit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.set_default_perspective">
+<tt class="descname">set_default_perspective</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.set_default_perspective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call back method that True to notify the parent that the current plug-in
+can be set as default  perspective.
+when returning False, the plug-in is not candidate for an automatic 
+default perspective setting</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.set_fit_range">
+<tt class="descname">set_fit_range</tt><big>(</big><em>uid</em>, <em>qmin</em>, <em>qmax</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.set_fit_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the fitting range of a given page</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.set_ftol">
+<tt class="descname">set_ftol</tt><big>(</big><em>ftol=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.set_ftol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set ftol: Relative error desired in the sum of chi squares.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.set_is_active">
+<tt class="descname">set_is_active</tt><big>(</big><em>active=False</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.set_is_active" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.set_page_finder">
+<tt class="descname">set_page_finder</tt><big>(</big><em>modelname</em>, <em>names</em>, <em>values</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.set_page_finder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used by simfitpage.py to reset a parameter given the string constrainst.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>modelname</strong> &#8211; the name ot the model for with the parameter 
+has to reset</li>
+<li><strong>value</strong> &#8211; can be a string in this case.</li>
+<li><strong>names</strong> &#8211; the paramter name</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Note :</th><td class="field-body"><p class="first last">expecting park used for fit.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.set_smearer">
+<tt class="descname">set_smearer</tt><big>(</big><em>uid</em>, <em>smearer</em>, <em>qmin=None</em>, <em>qmax=None</em>, <em>draw=True</em>, <em>enable2D=False</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.set_smearer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a smear object and store it to a fit problem</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>smearer</strong> &#8211; smear object to allow smearing data</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.set_state">
+<tt class="descname">set_state</tt><big>(</big><em>state=None</em>, <em>datainfo=None</em>, <em>format=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.set_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call-back method for the fit page state reader.
+This method is called when a .fitv/.svs file is loaded.</p>
+<p>: param state: PageState object
+: param datainfo: data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.set_theory">
+<tt class="descname">set_theory</tt><big>(</big><em>theory_list=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.set_theory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.set_top_panel">
+<tt class="descname">set_top_panel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.set_top_panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close default (welcome) panel</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.show_ftol_dialog">
+<tt class="descname">show_ftol_dialog</tt><big>(</big><em>event=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.show_ftol_dialog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dialog to select ftol for Scipy</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.split_string">
+<tt class="descname">split_string</tt><big>(</big><em>item</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.split_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>receive a word containing dot and split it. used to split parameterset
+name into model name and parameter name example:</p>
+<div class="highlight-python"><pre>paramaterset (item) = M1.A
+Will return model_name = M1 , parameter name = A</pre>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.stop_fit">
+<tt class="descname">stop_fit</tt><big>(</big><em>uid</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.stop_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop the fit engine</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.store_data">
+<tt class="descname">store_data</tt><big>(</big><em>uid</em>, <em>data=None</em>, <em>data_list=None</em>, <em>caption=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.store_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper to save page reference into the plug-in</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>page</strong> &#8211; page to store</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.update_fit">
+<tt class="descname">update_fit</tt><big>(</big><em>result=None</em>, <em>msg=''</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.update_fit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.fitting.Plugin.use_data">
+<tt class="descname">use_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.fitting.Plugin.use_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>return True if these plugin use data</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">fitting</a><ul>
+<li><a class="reference internal" href="#module-sans.perspectives.fitting.fitting"><tt class="docutils literal"><span class="pre">sans.perspectives.fitting.fitting</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="fitproblem.html"
+                        title="previous chapter">fitproblem</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="help_panel.html"
+                        title="next chapter">help_panel</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api/perspectives/fitting/fitting.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="help_panel.html" title="help_panel"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="fitproblem.html" title="fitproblem"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">sansview v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
