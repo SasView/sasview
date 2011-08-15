@@ -40,10 +40,19 @@ from sans.guiframe.events import EVT_NEW_BATCH
 from sans.dataloader.loader import Loader
 
 DATAPATH = os.getcwd()
-tem_path = sys.path[0]
-if os.path.isfile(tem_path):
-    tem_path = os.path.dirname(tem_path)
-os.chdir(tem_path)
+def _change_current_dir():
+    """
+    Get the path of the current ran file and change the application current
+    directory to the directory of that file
+    """
+    tem_path = sys.path[0]
+    if os.path.isfile(tem_path):
+        tem_path = os.path.dirname(tem_path)
+    
+    os.chdir(os.path.abspath(tem_path))
+    
+    
+_change_current_dir()    
 PATH_APP = os.getcwd()
 
 def _find_local_config(file, path):
@@ -2591,9 +2600,7 @@ class ViewApp(wx.App):
         self.s_screen = None
         temp_path = None
         try:
-            # make sure the current dir is App dir when it starts
-            temp_path = os.path.dirname(sys.path[0])
-            os.chdir(temp_path)
+            _change_current_dir()
         except:
             pass
         try:
