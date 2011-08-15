@@ -1,0 +1,362 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>loader &mdash; DataLoader v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="DataLoader v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="manipulations" href="manipulations.html" />
+    <link rel="prev" title="data_info" href="data_info.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="manipulations.html" title="manipulations"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="data_info.html" title="data_info"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="loader">
+<h1>loader<a class="headerlink" href="#loader" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-DataLoader.loader">
+<span id="dataloader-loader"></span><h2><a class="reference internal" href="#module-DataLoader.loader" title="DataLoader.loader"><tt class="xref py py-mod docutils literal"><span class="pre">DataLoader.loader</span></tt></a><a class="headerlink" href="#module-DataLoader.loader" title="Permalink to this headline">¶</a></h2>
+<p>File handler to support different file extensions.
+Uses reflectometry&#8217;s registry utility.</p>
+<p>The default readers are found in the &#8216;readers&#8217; sub-module
+and registered by default at initialization time.</p>
+<p>To add a new default reader, one must register it in
+the register_readers method found in readers/__init__.py.</p>
+<p>A utility method (find_plugins) is available to inspect 
+a directory (for instance, a user plug-in directory) and
+look for new readers/writers.</p>
+<dl class="class">
+<dt id="DataLoader.loader.Loader">
+<em class="property">class </em><tt class="descclassname">DataLoader.loader.</tt><tt class="descname">Loader</tt><a class="headerlink" href="#DataLoader.loader.Loader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Utility class to use the Registry as a singleton.</p>
+<dl class="method">
+<dt id="DataLoader.loader.Loader.associate_file_reader">
+<tt class="descname">associate_file_reader</tt><big>(</big><em>ext</em>, <em>loader</em><big>)</big><a class="headerlink" href="#DataLoader.loader.Loader.associate_file_reader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a reader object to readers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ext</strong> &#8211; file extension [string]</li>
+<li><strong>module</strong> &#8211; reader object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataLoader.loader.Loader.associate_file_type">
+<tt class="descname">associate_file_type</tt><big>(</big><em>ext</em>, <em>module</em><big>)</big><a class="headerlink" href="#DataLoader.loader.Loader.associate_file_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Look into a module to find whether it contains a 
+Reader class. If so, append it to readers and (potentially)
+to the list of writers for the given extension</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ext</strong> &#8211; file extension [string]</li>
+<li><strong>module</strong> &#8211; module object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataLoader.loader.Loader.find_plugins">
+<tt class="descname">find_plugins</tt><big>(</big><em>dir</em><big>)</big><a class="headerlink" href="#DataLoader.loader.Loader.find_plugins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find plugins in a given directory</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dir</strong> &#8211; directory to look into to find new readers/writers</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataLoader.loader.Loader.get_wildcards">
+<tt class="descname">get_wildcards</tt><big>(</big><big>)</big><a class="headerlink" href="#DataLoader.loader.Loader.get_wildcards" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="DataLoader.loader.Loader.load">
+<tt class="descname">load</tt><big>(</big><em>file</em>, <em>format=None</em><big>)</big><a class="headerlink" href="#DataLoader.loader.Loader.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file</strong> &#8211; file name (path)</li>
+<li><strong>format</strong> &#8211; specified format to use (optional)</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">DataInfo object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataLoader.loader.Loader.save">
+<tt class="descname">save</tt><big>(</big><em>file</em>, <em>data</em>, <em>format</em><big>)</big><a class="headerlink" href="#DataLoader.loader.Loader.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a DataInfo object to file
+:param file: file name (path)
+:param data: DataInfo object
+:param format: format to write the data in</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="DataLoader.loader.Registry">
+<em class="property">class </em><tt class="descclassname">DataLoader.loader.</tt><tt class="descname">Registry</tt><a class="headerlink" href="#DataLoader.loader.Registry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">data_util.registry.ExtensionRegistry</span></tt></p>
+<p>Registry class for file format extensions.
+Readers and writers are supported.</p>
+<dl class="method">
+<dt id="DataLoader.loader.Registry.associate_file_reader">
+<tt class="descname">associate_file_reader</tt><big>(</big><em>ext</em>, <em>loader</em><big>)</big><a class="headerlink" href="#DataLoader.loader.Registry.associate_file_reader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a reader object to readers</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ext</strong> &#8211; file extension [string]</li>
+<li><strong>module</strong> &#8211; reader object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataLoader.loader.Registry.associate_file_type">
+<tt class="descname">associate_file_type</tt><big>(</big><em>ext</em>, <em>module</em><big>)</big><a class="headerlink" href="#DataLoader.loader.Registry.associate_file_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Look into a module to find whether it contains a 
+Reader class. If so, APPEND it to readers and (potentially)
+to the list of writers for the given extension</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ext</strong> &#8211; file extension [string]</li>
+<li><strong>module</strong> &#8211; module object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataLoader.loader.Registry.extensions">
+<tt class="descname">extensions</tt><big>(</big><big>)</big><a class="headerlink" href="#DataLoader.loader.Registry.extensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a sorted list of registered extensions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataLoader.loader.Registry.find_plugins">
+<tt class="descname">find_plugins</tt><big>(</big><em>dir</em><big>)</big><a class="headerlink" href="#DataLoader.loader.Registry.find_plugins" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find readers in a given directory. This method
+can be used to inspect user plug-in directories to
+find new readers/writers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dir</strong> &#8211; directory to search into</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">number of readers found</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataLoader.loader.Registry.formats">
+<tt class="descname">formats</tt><big>(</big><big>)</big><a class="headerlink" href="#DataLoader.loader.Registry.formats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a sorted list of the registered formats.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataLoader.loader.Registry.load">
+<tt class="descname">load</tt><big>(</big><em>path</em>, <em>format=None</em><big>)</big><a class="headerlink" href="#DataLoader.loader.Registry.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call the loader for the file type of path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>path</strong> &#8211; file path</li>
+<li><strong>format</strong> &#8211; explicit extension, to force the use 
+of a particular reader</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Defaults to the ascii (multi-column) reader
+if no reader was registered for the file&#8217;s
+extension.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataLoader.loader.Registry.lookup">
+<tt class="descname">lookup</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#DataLoader.loader.Registry.lookup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the loader associated with the file type of path.</p>
+<p>Raises ValueError if file type is not known.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataLoader.loader.Registry.lookup_writers">
+<tt class="descname">lookup_writers</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#DataLoader.loader.Registry.lookup_writers" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">the loader associated with the file type of path.</td>
+</tr>
+<tr class="field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr><td>&nbsp;</td><td class="field-body">if file type is not known.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataLoader.loader.Registry.save">
+<tt class="descname">save</tt><big>(</big><em>path</em>, <em>data</em>, <em>format=None</em><big>)</big><a class="headerlink" href="#DataLoader.loader.Registry.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call the writer for the file type of path.</p>
+<p>Raises ValueError if no writer is available.
+Raises KeyError if format is not available.</p>
+<p>May raise a writer-defined exception if writer fails.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">loader</a><ul>
+<li><a class="reference internal" href="#module-DataLoader.loader"><tt class="docutils literal"><span class="pre">DataLoader.loader</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="data_info.html"
+                        title="previous chapter">data_info</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="manipulations.html"
+                        title="next chapter">manipulations</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/loader.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="manipulations.html" title="manipulations"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="data_info.html" title="data_info"
+             >previous</a> |</li>
+        <li><a href="../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

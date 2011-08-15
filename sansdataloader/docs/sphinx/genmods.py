@@ -67,7 +67,7 @@ package_name='Reference'
 if __name__ == "__main__":
     genfiles(package, package_name, modules, dir='api')
     modules = []
-    path = os.path.abspath(os.path.dirname('../../readers/'))
+    path = os.path.abspath(os.path.dirname('../../src/sans/dataloader/readers/'))
     list = os.listdir(path)
     for item in list:
         toks = os.path.splitext(os.path.basename(item))
