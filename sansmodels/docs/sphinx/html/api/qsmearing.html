@@ -1,0 +1,237 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>qsmearing &mdash; sansmodels v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="sansmodels v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="ReflAdvModel" href="ReflAdvModel.html" />
+    <link rel="prev" title="ProlateModel" href="ProlateModel.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ReflAdvModel.html" title="ReflAdvModel"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ProlateModel.html" title="ProlateModel"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="qsmearing">
+<h1>qsmearing<a class="headerlink" href="#qsmearing" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.models.qsmearing">
+<span id="sans-models-qsmearing"></span><h2><a class="reference internal" href="#module-sans.models.qsmearing" title="sans.models.qsmearing"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.qsmearing</span></tt></a><a class="headerlink" href="#module-sans.models.qsmearing" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sans.models.qsmearing.QSmearer">
+<em class="property">class </em><tt class="descclassname">sans.models.qsmearing.</tt><tt class="descname">QSmearer</tt><big>(</big><em>data1D</em>, <em>model=None</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.models.qsmearing._QSmearer</span></tt></p>
+<p>Adaptor for Gaussian Q smearing class and SANS data</p>
+<dl class="method">
+<dt id="sans.models.qsmearing.QSmearer.get_bin_range">
+<tt class="descname">get_bin_range</tt><big>(</big><em>q_min=None</em>, <em>q_max=None</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer.get_bin_range" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>q_min</strong> &#8211; minimum q-value to smear</li>
+<li><strong>q_max</strong> &#8211; maximum q-value to smear</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.QSmearer.get_unsmeared_range">
+<tt class="descname">get_unsmeared_range</tt><big>(</big><em>q_min</em>, <em>q_max</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer.get_unsmeared_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the range needed in unsmeared-Q to cover
+the smeared Q range
+Take 3 sigmas as the offset between smeared and unsmeared space</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.models.qsmearing.SlitSmearer">
+<em class="property">class </em><tt class="descclassname">sans.models.qsmearing.</tt><tt class="descname">SlitSmearer</tt><big>(</big><em>data1D</em>, <em>model=None</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.models.qsmearing._SlitSmearer</span></tt></p>
+<p>Adaptor for slit smearing class and SANS data</p>
+<dl class="method">
+<dt id="sans.models.qsmearing.SlitSmearer.get_bin_range">
+<tt class="descname">get_bin_range</tt><big>(</big><em>q_min=None</em>, <em>q_max=None</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.get_bin_range" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>q_min</strong> &#8211; minimum q-value to smear</li>
+<li><strong>q_max</strong> &#8211; maximum q-value to smear</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.SlitSmearer.get_unsmeared_range">
+<tt class="descname">get_unsmeared_range</tt><big>(</big><em>q_min</em>, <em>q_max</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.get_unsmeared_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the range needed in unsmeared-Q to cover
+the smeared Q range</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="sans.models.qsmearing.get_qextrapolate">
+<tt class="descclassname">sans.models.qsmearing.</tt><tt class="descname">get_qextrapolate</tt><big>(</big><em>width</em>, <em>data_x</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.get_qextrapolate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make fake data_x points extrapolated outside of the data_x points</p>
+<p>: param width: array of std of q resolution
+: param Data1D.x: Data1D.x array</p>
+<p>: return new_width, data_x_ext: extrapolated width array and x array</p>
+<p>: assumption1: data_x is ordered from lower q to higher q
+: assumption2: len(data) = len(width)
+: assumption3: the distance between the data points is more compact</p>
+<blockquote>
+<div>than the size of width</div></blockquote>
+<p>: Todo1: Make sure that the assumptions are correct for Data1D
+: Todo2: This fixes the edge problem in Qsmearer but still needs to make</p>
+<blockquote>
+<div>smearer interface</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="sans.models.qsmearing.smear_selection">
+<tt class="descclassname">sans.models.qsmearing.</tt><tt class="descname">smear_selection</tt><big>(</big><em>data1D</em>, <em>model=None</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.smear_selection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the right type of smearer according 
+to the data.</p>
+<p>The canSAS format has a rule that either
+slit smearing data OR resolution smearing data
+is available.</p>
+<p>For the present purpose, we choose the one that
+has none-zero data. If both slit and resolution
+smearing arrays are filled with good data 
+(which should not happen), then we choose the
+resolution smearing data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data1D</strong> &#8211; Data1D object</li>
+<li><strong>model</strong> &#8211; sans.model instance</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">qsmearing</a><ul>
+<li><a class="reference internal" href="#module-sans.models.qsmearing"><tt class="docutils literal"><span class="pre">sans.models.qsmearing</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ProlateModel.html"
+                        title="previous chapter">ProlateModel</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ReflAdvModel.html"
+                        title="next chapter">ReflAdvModel</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/qsmearing.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ReflAdvModel.html" title="ReflAdvModel"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ProlateModel.html" title="ProlateModel"
+             >previous</a> |</li>
+        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,287 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>NullModel &mdash; sansmodels v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="sansmodels v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="OblateModel" href="OblateModel.html" />
+    <link rel="prev" title="NoStructure" href="NoStructure.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="OblateModel.html" title="OblateModel"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="NoStructure.html" title="NoStructure"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="nullmodel">
+<h1>NullModel<a class="headerlink" href="#nullmodel" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.models.NullModel">
+<span id="sans-models-nullmodel"></span><h2><a class="reference internal" href="#module-sans.models.NullModel" title="sans.models.NullModel"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.NullModel</span></tt></a><a class="headerlink" href="#module-sans.models.NullModel" title="Permalink to this headline">¶</a></h2>
+<p>Provide sin(x) function as a BaseComponent model</p>
+<dl class="class">
+<dt id="sans.models.NullModel.NullModel">
+<em class="property">class </em><tt class="descclassname">sans.models.NullModel.</tt><tt class="descname">NullModel</tt><a class="headerlink" href="#sans.models.NullModel.NullModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="BaseComponent.html#sans.models.BaseComponent.BaseComponent" title="sans.models.BaseComponent.BaseComponent"><tt class="xref py py-class docutils literal"><span class="pre">sans.models.BaseComponent.BaseComponent</span></tt></a></p>
+<p>Class that evaluates a sin(x) model.</p>
+<dl class="method">
+<dt id="sans.models.NullModel.NullModel.calculate_ER">
+<tt class="descname">calculate_ER</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.NullModel.NullModel.calculate_ER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.NullModel.NullModel.clone">
+<tt class="descname">clone</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.NullModel.NullModel.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a identical copy of self</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.NullModel.NullModel.evalDistribution">
+<tt class="descname">evalDistribution</tt><big>(</big><em>qdist</em><big>)</big><a class="headerlink" href="#sans.models.NullModel.NullModel.evalDistribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate a distribution of q-values.</p>
+<ul>
+<li><p class="first">For 1D, a numpy array is expected as input:</p>
+<blockquote>
+<div><p>evalDistribution(q)</p>
+</div></blockquote>
+</li>
+</ul>
+<p>where q is a numpy array.</p>
+<ul class="simple">
+<li>For 2D, a list of numpy arrays are expected: [qx_prime,qy_prime],
+where 1D arrays,</li>
+</ul>
+<p>qx_prime = [ qx[0], qx[1], qx[2], ....]
+and
+qy_prime = [ qy[0], qy[1], qy[2], ....]</p>
+<p>Then get
+q = numpy.sqrt(qx_prime^2+qy_prime^2)</p>
+<p>that is a qr in 1D array;
+q = [q[0], q[1], q[2], ....]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Note :</th><td class="field-body"><p class="first">Due to 2D speed issue, no anisotropic scattering 
+is supported for python models, thus C-models should have</p>
+<blockquote class="last">
+<div><p>their own evalDistribution methods.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The method is then called the following way:</p>
+<p>evalDistribution(q)
+where q is a numpy array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>qdist</strong> &#8211; ndarray of scalar q-values or list [qx,qy] 
+where qx,qy are 1D ndarrays</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.NullModel.NullModel.getDispParamList">
+<tt class="descname">getDispParamList</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.NullModel.NullModel.getDispParamList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of all available parameters for the model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.NullModel.NullModel.getParam">
+<tt class="descname">getParam</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#sans.models.NullModel.NullModel.getParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the value of a model parameter</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; name of the parameter</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.NullModel.NullModel.getParamList">
+<tt class="descname">getParamList</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.NullModel.NullModel.getParamList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of all available parameters for the model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.NullModel.NullModel.getParamListWithToken">
+<tt class="descname">getParamListWithToken</tt><big>(</big><em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.NullModel.NullModel.getParamListWithToken" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.NullModel.NullModel.getParamWithToken">
+<tt class="descname">getParamWithToken</tt><big>(</big><em>name</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.NullModel.NullModel.getParamWithToken" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.NullModel.NullModel.is_fittable">
+<tt class="descname">is_fittable</tt><big>(</big><em>par_name</em><big>)</big><a class="headerlink" href="#sans.models.NullModel.NullModel.is_fittable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a given parameter is fittable or not</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par_name</strong> &#8211; the parameter name to check</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.NullModel.NullModel.run">
+<tt class="descname">run</tt><big>(</big><em>x=0.0</em><big>)</big><a class="headerlink" href="#sans.models.NullModel.NullModel.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the model
+&#64;param x: input x
+&#64;return: 1</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.NullModel.NullModel.runXY">
+<tt class="descname">runXY</tt><big>(</big><em>x=0.0</em><big>)</big><a class="headerlink" href="#sans.models.NullModel.NullModel.runXY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the model
+&#64;param x: input x, or [x, y] [radian]
+&#64;return: sin(x) or sin(x)*sin(y)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.NullModel.NullModel.setParam">
+<tt class="descname">setParam</tt><big>(</big><em>name</em>, <em>value</em><big>)</big><a class="headerlink" href="#sans.models.NullModel.NullModel.setParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the value of a model parameter</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; name of the parameter</li>
+<li><strong>value</strong> &#8211; value of the parameter</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.NullModel.NullModel.setParamWithToken">
+<tt class="descname">setParamWithToken</tt><big>(</big><em>name</em>, <em>value</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.NullModel.NullModel.setParamWithToken" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">NullModel</a><ul>
+<li><a class="reference internal" href="#module-sans.models.NullModel"><tt class="docutils literal"><span class="pre">sans.models.NullModel</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="NoStructure.html"
+                        title="previous chapter">NoStructure</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="OblateModel.html"
+                        title="next chapter">OblateModel</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/NullModel.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="OblateModel.html" title="OblateModel"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="NoStructure.html" title="NoStructure"
+             >previous</a> |</li>
+        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

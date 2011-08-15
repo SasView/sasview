@@ -1,0 +1,254 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dispersion_models &mdash; sansmodels v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="sansmodels v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="DivComponent" href="DivComponent.html" />
+    <link rel="prev" title="DisperseModel" href="DisperseModel.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="DivComponent.html" title="DivComponent"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="DisperseModel.html" title="DisperseModel"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dispersion-models">
+<h1>dispersion_models<a class="headerlink" href="#dispersion-models" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.models.dispersion_models">
+<span id="sans-models-dispersion-models"></span><h2><a class="reference internal" href="#module-sans.models.dispersion_models" title="sans.models.dispersion_models"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.dispersion_models</span></tt></a><a class="headerlink" href="#module-sans.models.dispersion_models" title="Permalink to this headline">¶</a></h2>
+<p>Class definitions for python dispersion model for 
+model parameters. These classes are bridges to the C++
+dispersion object.</p>
+<p>The ArrayDispersion class takes in numpy arrays only.</p>
+<p>Usage:
+These classes can be used to set the dispersion model of a SANS model
+parameter:</p>
+<blockquote>
+<div>cyl = CylinderModel()
+cyl.set_dispersion(&#8216;radius&#8217;, GaussianDispersion())</div></blockquote>
+<p>After the dispersion model is set, you can access it&#8217;s
+parameter through the dispersion dictionary:</p>
+<blockquote>
+<div>cyl.dispersion[&#8216;radius&#8217;][&#8216;width&#8217;] = 5.0</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">TODO:</th><td class="field-body">For backward compatibility, the model parameters are still kept in
+a dictionary. The next iteration of refactoring work should involve moving
+away from value-based parameters to object-based parameter. We want to
+store parameters as objects so that we can unify the &#8216;params&#8217; and &#8216;dispersion&#8217;
+dictionaries into a single dictionary of parameter objects that hold the
+complete information about the parameter (units, limits, dispersion model, etc...).</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="sans.models.dispersion_models.ArrayDispersion">
+<em class="property">class </em><tt class="descclassname">sans.models.dispersion_models.</tt><tt class="descname">ArrayDispersion</tt><a class="headerlink" href="#sans.models.dispersion_models.ArrayDispersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sans.models.dispersion_models.DispersionModel" title="sans.models.dispersion_models.DispersionModel"><tt class="xref py py-class docutils literal"><span class="pre">sans.models.dispersion_models.DispersionModel</span></tt></a></p>
+<p>Python bridge class for a dispersion model based on arrays.
+The user has to set a weight distribution that
+will be used in the averaging the model parameter
+it is applied to.</p>
+<dl class="method">
+<dt id="sans.models.dispersion_models.ArrayDispersion.set_weights">
+<tt class="descname">set_weights</tt><big>(</big><em>values</em>, <em>weights</em><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.ArrayDispersion.set_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the weights of an array dispersion
+Only accept numpy arrays.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>values</strong> &#8211; numpy array of values</li>
+<li><strong>weights</strong> &#8211; numpy array of weights for each value entry</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.models.dispersion_models.DispersionModel">
+<em class="property">class </em><tt class="descclassname">sans.models.dispersion_models.</tt><tt class="descname">DispersionModel</tt><a class="headerlink" href="#sans.models.dispersion_models.DispersionModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python bridge class for a basic dispersion model 
+class with a constant parameter value distribution</p>
+<dl class="method">
+<dt id="sans.models.dispersion_models.DispersionModel.set_weights">
+<tt class="descname">set_weights</tt><big>(</big><em>values</em>, <em>weights</em><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.DispersionModel.set_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the weights of an array dispersion</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.models.dispersion_models.GaussianDispersion">
+<em class="property">class </em><tt class="descclassname">sans.models.dispersion_models.</tt><tt class="descname">GaussianDispersion</tt><a class="headerlink" href="#sans.models.dispersion_models.GaussianDispersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sans.models.dispersion_models.DispersionModel" title="sans.models.dispersion_models.DispersionModel"><tt class="xref py py-class docutils literal"><span class="pre">sans.models.dispersion_models.DispersionModel</span></tt></a></p>
+<p>Python bridge class for a dispersion model based 
+on a Gaussian distribution.</p>
+<dl class="method">
+<dt id="sans.models.dispersion_models.GaussianDispersion.set_weights">
+<tt class="descname">set_weights</tt><big>(</big><em>values</em>, <em>weights</em><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.GaussianDispersion.set_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the weights of an array dispersion</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.models.dispersion_models.LogNormalDispersion">
+<em class="property">class </em><tt class="descclassname">sans.models.dispersion_models.</tt><tt class="descname">LogNormalDispersion</tt><a class="headerlink" href="#sans.models.dispersion_models.LogNormalDispersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sans.models.dispersion_models.DispersionModel" title="sans.models.dispersion_models.DispersionModel"><tt class="xref py py-class docutils literal"><span class="pre">sans.models.dispersion_models.DispersionModel</span></tt></a></p>
+<p>Python bridge class for a dispersion model based 
+on a Log Normal distribution.</p>
+<dl class="method">
+<dt id="sans.models.dispersion_models.LogNormalDispersion.set_weights">
+<tt class="descname">set_weights</tt><big>(</big><em>values</em>, <em>weights</em><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.LogNormalDispersion.set_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the weights of an array dispersion</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.models.dispersion_models.RectangleDispersion">
+<em class="property">class </em><tt class="descclassname">sans.models.dispersion_models.</tt><tt class="descname">RectangleDispersion</tt><a class="headerlink" href="#sans.models.dispersion_models.RectangleDispersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sans.models.dispersion_models.DispersionModel" title="sans.models.dispersion_models.DispersionModel"><tt class="xref py py-class docutils literal"><span class="pre">sans.models.dispersion_models.DispersionModel</span></tt></a></p>
+<p>Python bridge class for a dispersion model based 
+on a Gaussian distribution.</p>
+<dl class="method">
+<dt id="sans.models.dispersion_models.RectangleDispersion.set_weights">
+<tt class="descname">set_weights</tt><big>(</big><em>values</em>, <em>weights</em><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.RectangleDispersion.set_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the weights of an array dispersion</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.models.dispersion_models.SchulzDispersion">
+<em class="property">class </em><tt class="descclassname">sans.models.dispersion_models.</tt><tt class="descname">SchulzDispersion</tt><a class="headerlink" href="#sans.models.dispersion_models.SchulzDispersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sans.models.dispersion_models.DispersionModel" title="sans.models.dispersion_models.DispersionModel"><tt class="xref py py-class docutils literal"><span class="pre">sans.models.dispersion_models.DispersionModel</span></tt></a></p>
+<p>Python bridge class for a dispersion model based 
+on a Schulz distribution.</p>
+<dl class="method">
+<dt id="sans.models.dispersion_models.SchulzDispersion.set_weights">
+<tt class="descname">set_weights</tt><big>(</big><em>values</em>, <em>weights</em><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.SchulzDispersion.set_weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the weights of an array dispersion</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">dispersion_models</a><ul>
+<li><a class="reference internal" href="#module-sans.models.dispersion_models"><tt class="docutils literal"><span class="pre">sans.models.dispersion_models</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="DisperseModel.html"
+                        title="previous chapter">DisperseModel</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="DivComponent.html"
+                        title="next chapter">DivComponent</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/dispersion_models.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="DivComponent.html" title="DivComponent"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="DisperseModel.html" title="DisperseModel"
+             >previous</a> |</li>
+        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

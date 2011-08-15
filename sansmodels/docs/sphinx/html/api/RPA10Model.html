@@ -1,0 +1,258 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>RPA10Model &mdash; sansmodels v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="sansmodels v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="RPAModel" href="RPAModel.html" />
+    <link rel="prev" title="ReflModel" href="ReflModel.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="RPAModel.html" title="RPAModel"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ReflModel.html" title="ReflModel"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="rpa10model">
+<h1>RPA10Model<a class="headerlink" href="#rpa10model" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.models.RPA10Model">
+<span id="sans-models-rpa10model"></span><h2><a class="reference internal" href="#module-sans.models.RPA10Model" title="sans.models.RPA10Model"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.RPA10Model</span></tt></a><a class="headerlink" href="#module-sans.models.RPA10Model" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sans.models.RPA10Model.RPA10Model">
+<em class="property">class </em><tt class="descclassname">sans.models.RPA10Model.</tt><tt class="descname">RPA10Model</tt><big>(</big><em>multfactor=1</em><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="BaseComponent.html#sans.models.BaseComponent.BaseComponent" title="sans.models.BaseComponent.BaseComponent"><tt class="xref py py-class docutils literal"><span class="pre">sans.models.BaseComponent.BaseComponent</span></tt></a></p>
+<p>This multi-model is based on Parratt formalism and provides the capability
+of changing the number of layers between 0 and 10.</p>
+<dl class="method">
+<dt id="sans.models.RPA10Model.RPA10Model.calculate_ER">
+<tt class="descname">calculate_ER</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model.calculate_ER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.RPA10Model.RPA10Model.clone">
+<tt class="descname">clone</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new object identical to the current object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.RPA10Model.RPA10Model.evalDistribution">
+<tt class="descname">evalDistribution</tt><big>(</big><em>x=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model.evalDistribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the model in cartesian coordinates</p>
+<p>: param x: input q[], or [qx[], qy[]]
+: return: scattering function P(q[])</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.RPA10Model.RPA10Model.getDispParamList">
+<tt class="descname">getDispParamList</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model.getDispParamList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of all available parameters for the model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.RPA10Model.RPA10Model.getParam">
+<tt class="descname">getParam</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model.getParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the value of a model parameter</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; name of the parameter</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.RPA10Model.RPA10Model.getParamList">
+<tt class="descname">getParamList</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model.getParamList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of all available parameters for the model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.RPA10Model.RPA10Model.getParamListWithToken">
+<tt class="descname">getParamListWithToken</tt><big>(</big><em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model.getParamListWithToken" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.RPA10Model.RPA10Model.getParamWithToken">
+<tt class="descname">getParamWithToken</tt><big>(</big><em>name</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model.getParamWithToken" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.RPA10Model.RPA10Model.getProfile">
+<tt class="descname">getProfile</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model.getProfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get SLD profile</p>
+<p>: return: None, No SLD profile supporting for this model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.RPA10Model.RPA10Model.is_fittable">
+<tt class="descname">is_fittable</tt><big>(</big><em>par_name</em><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model.is_fittable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a given parameter is fittable or not</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par_name</strong> &#8211; the parameter name to check</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.RPA10Model.RPA10Model.run">
+<tt class="descname">run</tt><big>(</big><em>x=0.0</em><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the model</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; input q, or [q,phi]</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">scattering function P(q)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.RPA10Model.RPA10Model.runXY">
+<tt class="descname">runXY</tt><big>(</big><em>x=0.0</em><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model.runXY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the model</p>
+<p>: param x: input q-value (float or [float, float] as [qx, qy])
+: return: scattering function value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.RPA10Model.RPA10Model.setParam">
+<tt class="descname">setParam</tt><big>(</big><em>name</em>, <em>value</em><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model.setParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the value of a model parameter</p>
+<p>: param name: name of the parameter
+: param value: value of the parameter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.RPA10Model.RPA10Model.setParamWithToken">
+<tt class="descname">setParamWithToken</tt><big>(</big><em>name</em>, <em>value</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model.setParamWithToken" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.RPA10Model.RPA10Model.set_dispersion">
+<tt class="descname">set_dispersion</tt><big>(</big><em>parameter</em>, <em>dispersion</em><big>)</big><a class="headerlink" href="#sans.models.RPA10Model.RPA10Model.set_dispersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the dispersion object for a model parameter</p>
+<p>: param parameter: name of the parameter [string]
+:dispersion: dispersion object of type DispersionModel</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">RPA10Model</a><ul>
+<li><a class="reference internal" href="#module-sans.models.RPA10Model"><tt class="docutils literal"><span class="pre">sans.models.RPA10Model</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ReflModel.html"
+                        title="previous chapter">ReflModel</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="RPAModel.html"
+                        title="next chapter">RPAModel</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/RPA10Model.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="RPAModel.html" title="RPAModel"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ReflModel.html" title="ReflModel"
+             >previous</a> |</li>
+        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
