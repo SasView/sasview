@@ -21,3 +21,6 @@ How-to build an application using guiframe:
     
 4- each panel used in guiframe must inheritation from PanelBase in panel_base.py
 
+Sansmodels contains the various functions necessary for each model
+that is provided in Sansview, along with the C extensions that perform
+the calcullations for those models.
