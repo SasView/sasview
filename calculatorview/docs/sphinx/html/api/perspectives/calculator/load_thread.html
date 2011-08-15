@@ -1,0 +1,209 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>load_thread &mdash; calculatorview v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="calculatorview v0.1.0 documentation" href="../../../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="sample_editor" href="sample_editor.html" />
+    <link rel="prev" title="help_panel" href="help_panel.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sample_editor.html" title="sample_editor"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="help_panel.html" title="help_panel"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../../index.html">calculatorview v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="load-thread">
+<h1>load_thread<a class="headerlink" href="#load-thread" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.perspectives.calculator.load_thread">
+<span id="sans-perspectives-calculator-load-thread"></span><h2><a class="reference internal" href="#module-sans.perspectives.calculator.load_thread" title="sans.perspectives.calculator.load_thread"><tt class="xref py py-mod docutils literal"><span class="pre">sans.perspectives.calculator.load_thread</span></tt></a><a class="headerlink" href="#module-sans.perspectives.calculator.load_thread" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="sans.perspectives.calculator.load_thread.DataReader">
+<em class="property">class </em><tt class="descclassname">sans.perspectives.calculator.load_thread.</tt><tt class="descname">DataReader</tt><big>(</big><em>path</em>, <em>completefn=None</em>, <em>updatefn=None</em>, <em>yieldtime=0.01</em>, <em>worktime=0.01</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.load_thread.DataReader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">data_util.calcthread.CalcThread</span></tt></p>
+<p>Load a data given a filename</p>
+<dl class="method">
+<dt id="sans.perspectives.calculator.load_thread.DataReader.complete">
+<tt class="descname">complete</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.load_thread.DataReader.complete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the GUI with the completed results from a work unit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.load_thread.DataReader.compute">
+<tt class="descname">compute</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.load_thread.DataReader.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>read some data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.load_thread.DataReader.interrupt">
+<tt class="descname">interrupt</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.load_thread.DataReader.interrupt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop the current work item.  To clear the work queue as
+well call the stop() method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.load_thread.DataReader.isquit">
+<tt class="descname">isquit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.load_thread.DataReader.isquit" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#64;raise KeyboardInterrupt: when the thread is interrupted</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.load_thread.DataReader.isrunning">
+<tt class="descname">isrunning</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.load_thread.DataReader.isrunning" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.load_thread.DataReader.queue">
+<tt class="descname">queue</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.load_thread.DataReader.queue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a work unit to the end of the queue.  See the compute()
+method for details of the arguments to the work unit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.load_thread.DataReader.ready">
+<tt class="descname">ready</tt><big>(</big><em>delay=0.0</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.load_thread.DataReader.ready" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ready for another update after delay=t seconds.  Call
+this for threads which can show intermediate results from
+long calculations.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.load_thread.DataReader.requeue">
+<tt class="descname">requeue</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.load_thread.DataReader.requeue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace the work unit on the end of the queue.  See the compute()
+method for details of the arguments to the work unit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.load_thread.DataReader.reset">
+<tt class="descname">reset</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.load_thread.DataReader.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear the queue and start a new work unit.  See the compute()
+method for details of the arguments to the work unit.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.load_thread.DataReader.stop">
+<tt class="descname">stop</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.load_thread.DataReader.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear the queue and stop the thread.  New items may be
+queued after stop.  To stop just the current work item, and
+continue the rest of the queue call the interrupt method</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.load_thread.DataReader.update">
+<tt class="descname">update</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.load_thread.DataReader.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update GUI with the lastest results from the current work unit.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">load_thread</a><ul>
+<li><a class="reference internal" href="#module-sans.perspectives.calculator.load_thread"><tt class="docutils literal"><span class="pre">sans.perspectives.calculator.load_thread</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="help_panel.html"
+                        title="previous chapter">help_panel</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sample_editor.html"
+                        title="next chapter">sample_editor</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../../_sources/api/perspectives/calculator/load_thread.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sample_editor.html" title="sample_editor"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="help_panel.html" title="help_panel"
+             >previous</a> |</li>
+        <li><a href="../../../index.html">calculatorview v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
