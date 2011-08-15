@@ -21,3 +21,4 @@ How-to build an application using guiframe:
     
 4- each panel used in guiframe must inheritation from PanelBase in panel_base.py
 
+Sansrealspace_modeling contains C extensions and various other modules.
