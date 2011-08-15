@@ -21,3 +21,7 @@ How-to build an application using guiframe:
     
 4- each panel used in guiframe must inheritation from PanelBase in panel_base.py
 
+Sansrealspace contains the VolumeCanvas module. This module creates a 
+simulation canvas for real-space simulation of SANS scattering intensity.
+The user can create an arrangement of basic shapes and estimate I(q) and
+I(q_x, q_y). Error estimates on the simulation are also available. 
