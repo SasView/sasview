@@ -1,0 +1,294 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ScipyFitting &mdash; park_integration v0.1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="park_integration v0.1.0 documentation" href="../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="prev" title="ParkFitting" href="ParkFitting.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ParkFitting.html" title="ParkFitting"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">park_integration v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scipyfitting">
+<h1>ScipyFitting<a class="headerlink" href="#scipyfitting" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-sans.fit.ScipyFitting">
+<span id="mod-sans-fit-scipyfitting"></span><h2>:mod:` sans.fit.ScipyFitting`<a class="headerlink" href="#module-sans.fit.ScipyFitting" title="Permalink to this headline">¶</a></h2>
+<p>ScipyFitting module contains FitArrange , ScipyFit,
+Parameter classes.All listed classes work together to perform a 
+simple fit with scipy optimizer.</p>
+<dl class="class">
+<dt id="sans.fit.ScipyFitting.ScipyFit">
+<em class="property">class </em><tt class="descclassname">sans.fit.ScipyFitting.</tt><tt class="descname">ScipyFit</tt><a class="headerlink" href="#sans.fit.ScipyFitting.ScipyFit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="AbstractFitEngine.html#sans.fit.AbstractFitEngine.FitEngine" title="sans.fit.AbstractFitEngine.FitEngine"><tt class="xref py py-class docutils literal"><span class="pre">sans.fit.AbstractFitEngine.FitEngine</span></tt></a></p>
+<p>ScipyFit performs the Fit.This class can be used as follow:
+#Do the fit SCIPY
+create an engine: engine = ScipyFit()
+Use data must be of type plottable
+Use a sans model</p>
+<p>Add data with a dictionnary of FitArrangeDict where Uid is a key and data
+is saved in FitArrange object.
+engine.set_data(data,Uid)</p>
+<p>Set model parameter &#8220;M1&#8221;= model.name add {model.parameter.name:value}.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Note :</th><td class="field-body">Set_param() if used must always preceded set_model()
+for the fit to be performed.In case of Scipyfit set_param is called in
+fit () automatically.</td>
+</tr>
+</tbody>
+</table>
+<p>engine.set_param( model,&#8221;M1&#8221;, {&#8216;A&#8217;:2,&#8217;B&#8217;:4})</p>
+<p>Add model with a dictionnary of FitArrangeDict{} where Uid is a key and model
+is save in FitArrange object.
+engine.set_model(model,Uid)</p>
+<p>engine.fit return chisqr,[model.parameter 1,2,..],[[err1....][..err2...]]
+chisqr1, out1, cov1=engine.fit({model.parameter.name:value},qmin,qmax)</p>
+<dl class="method">
+<dt id="sans.fit.ScipyFitting.ScipyFit.fit">
+<tt class="descname">fit</tt><big>(</big><em>q=None</em>, <em>handler=None</em>, <em>curr_thread=None</em>, <em>ftol=1.49012e-008</em><big>)</big><a class="headerlink" href="#sans.fit.ScipyFitting.ScipyFit.fit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ScipyFitting.ScipyFit.get_model">
+<tt class="descname">get_model</tt><big>(</big><em>id</em><big>)</big><a class="headerlink" href="#sans.fit.ScipyFitting.ScipyFit.get_model" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> &#8211; id is key in the dictionary containing the model to return</td>
+</tr>
+<tr class="field"><th class="field-name">Returns:</th><td class="field-body">a model at this id or None if no FitArrange element was 
+created with this id</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ScipyFitting.ScipyFit.get_problem_to_fit">
+<tt class="descname">get_problem_to_fit</tt><big>(</big><em>id</em><big>)</big><a class="headerlink" href="#sans.fit.ScipyFitting.ScipyFit.get_problem_to_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the self.selected value of the fit problem of id</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> &#8211; the id of the problem</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ScipyFitting.ScipyFit.remove_fit_problem">
+<tt class="descname">remove_fit_problem</tt><big>(</big><em>id</em><big>)</big><a class="headerlink" href="#sans.fit.ScipyFitting.ScipyFit.remove_fit_problem" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove   fitarrange in id</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ScipyFitting.ScipyFit.select_problem_for_fit">
+<tt class="descname">select_problem_for_fit</tt><big>(</big><em>id</em>, <em>value</em><big>)</big><a class="headerlink" href="#sans.fit.ScipyFitting.ScipyFit.select_problem_for_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>select a couple of model and data at the id position in dictionary
+and set in self.selected value to value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; the value to allow fitting. 
+can only have the value one or zero</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ScipyFitting.ScipyFit.set_data">
+<tt class="descname">set_data</tt><big>(</big><em>data</em>, <em>id</em>, <em>smearer=None</em>, <em>qmin=None</em>, <em>qmax=None</em><big>)</big><a class="headerlink" href="#sans.fit.ScipyFitting.ScipyFit.set_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receives plottable, creates a list of data to fit,set data
+in a FitArrange object and adds that object in a dictionary 
+with key id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> &#8211; data added</li>
+<li><strong>id</strong> &#8211; unique key corresponding to a fitArrange object with data</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ScipyFitting.ScipyFit.set_model">
+<tt class="descname">set_model</tt><big>(</big><em>model</em>, <em>id</em>, <em>pars=</em><span class="optional">[</span><span class="optional">]</span>, <em>constraints=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.fit.ScipyFitting.ScipyFit.set_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>set a model on a given  in the fit engine.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> &#8211; sans.models type</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>:param <span class="classifier-delimiter">:</span> <span class="classifier">is the key of the fitArrange dictionary where model is </span></dt>
+<dd>saved as a value</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pars</strong> &#8211; the list of parameters to fit</li>
+<li><strong>constraints</strong> &#8211; <p>list of 
+tuple (name of parameter, value of parameters)
+the value of parameter must be a string to constraint 2 different
+parameters.
+Example:  
+we want to fit 2 model M1 and M2 both have parameters A and B.
+constraints can be:</p>
+<blockquote>
+<div>constraints = [(M1.A, M2.B+2), (M1.B= M2.A <a href="#id1"><span class="problematic" id="id2">*</span></a>5),...,]</div></blockquote>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Note :</th><td class="field-body"><p class="first last">pars must contains only name of existing model&#8217;s parameters</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.fit.ScipyFitting.fitresult">
+<em class="property">class </em><tt class="descclassname">sans.fit.ScipyFitting.</tt><tt class="descname">fitresult</tt><big>(</big><em>model=None</em>, <em>param_list=None</em><big>)</big><a class="headerlink" href="#sans.fit.ScipyFitting.fitresult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Storing fit result</p>
+<dl class="method">
+<dt id="sans.fit.ScipyFitting.fitresult.print_summary">
+<tt class="descname">print_summary</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ScipyFitting.fitresult.print_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ScipyFitting.fitresult.set_fitness">
+<tt class="descname">set_fitness</tt><big>(</big><em>fitness</em><big>)</big><a class="headerlink" href="#sans.fit.ScipyFitting.fitresult.set_fitness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ScipyFitting.fitresult.set_model">
+<tt class="descname">set_model</tt><big>(</big><em>model</em><big>)</big><a class="headerlink" href="#sans.fit.ScipyFitting.fitresult.set_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ScipyFitting</a><ul>
+<li><a class="reference internal" href="#module-sans.fit.ScipyFitting">:mod:` sans.fit.ScipyFitting`</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ParkFitting.html"
+                        title="previous chapter">ParkFitting</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/ScipyFitting.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ParkFitting.html" title="ParkFitting"
+             >previous</a> |</li>
+        <li><a href="../index.html">park_integration v0.1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>
