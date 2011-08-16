@@ -10,7 +10,7 @@ import numpy
 import math
 import logging
 import sys
-import sans_extension.smearer as smearer 
+import sans.models.sans_extension.smearer as smearer 
 from sans.models.smearing_2d import Smearer2D
 
 def smear_selection(data1D, model = None):
