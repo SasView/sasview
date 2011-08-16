@@ -36,10 +36,10 @@ _authors = []
 _paper = "http://danse.us/trac/sans/newticket"
 _license = "mailto:sansdanse@gmail.com"
 
-path = os.getcwd()
-icon_path = os.path.join(path, "images")
-media_path = os.path.join(path, "media")
-test_path = os.path.join(path, "test")
+
+icon_path = "images"
+media_path = "media"
+test_path =  "test"
 
 _nsf_logo = os.path.join(icon_path, "nsf_logo.png")
 _danse_logo = os.path.join(icon_path, "danse_logo.png")

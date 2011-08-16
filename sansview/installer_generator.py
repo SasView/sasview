@@ -9,7 +9,7 @@ import string
 
 REG_PROGRAM = """{app}\MYPROG.EXE"" ""%1"""
 APPLICATION = str(local_config.__appname__ )+ '.exe'
-AppName = str(local_config.__appname__ )# + '-'+ str(local_config.__version__)
+AppName = str(local_config.__appname__ )
 AppVerName = str(local_config.__appname__ )+'-'+ str(local_config.__version__)
 Dev = ''
 if AppVerName.lower().count('dev') > 0:
@@ -30,8 +30,6 @@ Compression = 'lzma'
 SolidCompression = 'yes'
 PrivilegesRequired = 'none'
 INSTALLER_FILE = 'installer_new'
-#find extension for windows file assocation
-#extension list need to be modified for each application
 
 icon_path =  local_config.icon_path
 media_path = local_config.media_path
@@ -41,43 +39,77 @@ def find_extension():
     """
     Describe the extensions that can be read by the current application
     """
+    list_data = []
+    list_app =[]
     try:
-        list = []
+        
         #(ext, type, name, flags)
         from sans.dataloader.loader import Loader
         wild_cards = Loader().get_wildcards()
         for item in wild_cards:
             #['All (*.*)|*.*']
             file_type, ext = string.split(item, "|*", 1)
-            if ext.strip() not in ['.*', ''] and ext.strip() not in list:
-                list.append((ext, 'string', file_type))
+            if ext.strip() not in ['.*', ''] and ext.strip() not in list_data:
+                list_data.append((ext, 'string', file_type))
     except:
         pass
     try:
         file_type, ext = string.split(local_config.APPLICATION_WLIST, "|*", 1)
-        if ext.strip() not in ['.', ''] and ext.strip() not in list:
-            list.append((ext, 'string', file_type))
+        if ext.strip() not in ['.', ''] and ext.strip() not in list_app:
+            list_app.append((ext, 'string', file_type))
     except:
         pass
     try:
         for item in local_config.PLUGINS_WLIST:
             file_type, ext = string.split(item, "|*", 1)
-            if ext.strip() not in ['.', ''] and ext.strip() not in list:
-                list.append((ext, 'string', file_type)) 
+            if ext.strip() not in ['.', ''] and ext.strip() not in list_app:
+                list_app.append((ext, 'string', file_type)) 
     except:
         pass
-    return list
-EXTENSION = find_extension()
-    
-def write_registry(extension=None):
+    return list_data, list_app
+DATA_EXTENSION, APP_EXTENSION = find_extension()
+
+def write_registry(data_extension=None, app_extension=None):
     """
     create file association for windows.
     Allow open file on double click
     """
     msg = ""
-    if extension is not None and extension:
+    if data_extension is not None and data_extension:
+        openwithlist = "OpenWithList\%s" % str(APPLICATION)
         msg = "\n\n[Registry]\n"
-        for (ext, type, _) in extension:
+        for (ext, type, _) in data_extension:
+            list = os.path.join(ext, openwithlist)
+            msg +=  """Root: HKCR;\tSubkey: "%s";\t""" % str(list)
+            msg += """ Flags: %s""" % str('uninsdeletekey noerror')
+            msg += "\n"
+        #list the file on right-click
+        msg += """Root: HKCR; Subkey: "applications\%s\shell\open\command";\t"""\
+                              %  str(APPLICATION)
+        msg += """ValueType: %s; """ % str('string')
+        msg += """ValueName: "%s";\t""" %str('') 
+        msg += """ValueData: \"""{app}\%s""  ""%s1\"""; \t"""% (str(APPLICATION),
+                                                          str('%'))    
+        msg += """ Flags: %s""" % str('uninsdeletevalue noerror')
+        msg += "\n"
+        user_list = "Software\Classes" 
+        for (ext, type, _) in data_extension:
+            list = os.path.join(user_list, ext, openwithlist)
+            msg +=  """Root: HKCU;\tSubkey: "%s";\t""" % str(list)
+            msg += """ Flags: %s""" % str('uninsdeletekey noerror')
+            msg += "\n"
+        #list the file on right-click
+        user_list = os.path.join("Software", "Classes", "applications")
+        msg += """Root: HKCR; Subkey: "%s\%s\shell\open\command";\t"""\
+                              %  (str(user_list), str(APPLICATION))
+        msg += """ValueType: %s; """ % str('string')
+        msg += """ValueName: "%s";\t""" %str('') 
+        msg += """ValueData: \"""{app}\%s""  ""%s1\"""; \t"""% (str(APPLICATION),
+                                                          str('%'))    
+        msg += """ Flags: %s""" % str('uninsdeletevalue noerror')
+        msg += "\n"        
+    if app_extension is not None and app_extension:
+        for (ext, type, _) in app_extension:
             msg +=  """Root: HKCR;\tSubkey: "%s";\t""" % str(ext)
             msg += """ValueType: %s;\t""" % str(type)
             #file type empty set the current application as the default 
@@ -88,36 +120,44 @@ def write_registry(extension=None):
             msg += """ValueData: "{app}\%s";\t""" % str(APPLICATION)
             msg += """ Flags: %s""" % str('uninsdeletevalue')
             msg += "\n"
-     
-        #create default icon
-        msg += """Root: HKCR; Subkey: "{app}\%s";\t""" % str(SetupIconFile)
-        msg += """ValueType: %s; """ % str('string')
-        msg += """ValueName: "%s";\t""" % str('') 
-        msg += """ValueData: "{app}\%s,0"\n""" % str(APPLICATION)
+    msg += """Root: HKCR; Subkey: "{app}\%s";\t""" % str(APPLICATION)
+    msg += """ValueType: %s; """ % str('string')
+    msg += """ValueName: "%s";\t""" % str('') 
+    msg += """ValueData: "{app}\%s";\t""" % str("SansView File") 
+    msg += """ Flags: %s \t""" % str("uninsdeletekey")
+    msg += "\n"
         
-        #execute the file on double-click
-        msg += """Root: HKCR; Subkey: "{app}\%s\shell\open\command";\t"""  %  str(APPLICATION)
-        msg += """ValueType: %s; """ % str('string')
-        msg += """ValueName: "%s";\t""" %str('') 
-        msg += """ValueData: \"""{app}\%s""  ""%s1\"""\n"""% (str(APPLICATION),
-                                                              str('%'))
-        
-        #SANSVIEWPATH
-        msg += """Root: HKLM; Subkey: "%s";\t"""  %  str('SYSTEM\CurrentControlSet\Control\Session Manager\Environment')
-        msg += """ValueType: %s; """ % str('expandsz')
-        msg += """ValueName: "%s";\t""" % str('SANSVIEWPATH') 
-        msg += """ValueData: "{app}";\t"""
-        msg += """ Flags: %s""" % str('uninsdeletevalue')
-        msg += "\n"
-        
-        #PATH
-        msg += """; Write to PATH (below) is disabled; need more work\n"""
-        msg += """;Root: HKCU; Subkey: "%s";\t"""  %  str('Environment')
-        msg += """ValueType: %s; """ % str('expandsz')
-        msg += """ValueName: "%s";\t""" % str('PATH') 
-        msg += """ValueData: "%s;{olddata}";\t""" % str('%SANSVIEWPATH%')
-        msg += """ Check: %s""" % str('NeedsAddPath()')
-        msg += "\n"
+    #execute the file on double-click
+    msg += """Root: HKCR; Subkey: "{app}\%s\shell\open\command";\t"""  %  str(APPLICATION)
+    msg += """ValueType: %s; """ % str('string')
+    msg += """ValueName: "%s";\t""" %str('') 
+    msg += """ValueData: \"""{app}\%s""  ""%s1\""";\t"""% (str(APPLICATION),
+                                                          str('%'))  
+    msg += """ Flags: %s \t""" % str("uninsdeletevalue noerror")
+    msg += "\n"                                                      
+    #create default icon
+    msg += """Root: HKCR; Subkey: "{app}\%s";\t""" % str(SetupIconFile)
+    msg += """ValueType: %s; """ % str('string')
+    msg += """ValueName: "%s";\t""" % str('') 
+    msg += """ValueData: "{app}\%s,0"\n""" % str(APPLICATION)
+
+    
+    #SANSVIEWPATH
+    msg += """Root: HKLM; Subkey: "%s";\t"""  %  str('SYSTEM\CurrentControlSet\Control\Session Manager\Environment')
+    msg += """ValueType: %s; """ % str('expandsz')
+    msg += """ValueName: "%s";\t""" % str('SANSVIEWPATH') 
+    msg += """ValueData: "{app}";\t"""
+    msg += """ Flags: %s""" % str('uninsdeletevalue')
+    msg += "\n"
+    
+    #PATH
+    msg += """; Write to PATH (below) is disabled; need more tests\n"""
+    msg += """;Root: HKCU; Subkey: "%s";\t"""  %  str('Environment')
+    msg += """ValueType: %s; """ % str('expandsz')
+    msg += """ValueName: "%s";\t""" % str('PATH') 
+    msg += """ValueData: "%s;{olddata}";\t""" % str('%SANSVIEWPATH%')
+    msg += """ Check: %s""" % str('NeedsAddPath()')
+    msg += "\n"
         
     return msg
 
@@ -142,8 +182,7 @@ def write_tasks():
     msg += """GroupDescription: "{cm:AdditionalIcons}";\tFlags: unchecked\n"""
     return msg
 
-path, _ =  os.path.split(os.getcwd())
-dist_path = os.path.join(path, "scripts", "dist")
+dist_path = "dist"
 def write_file():
     """
     copy some data files
@@ -153,9 +192,11 @@ def write_file():
     msg += """DestDir: "{app}";\tFlags: ignoreversion\n"""
     msg += """Source: "dist\*";\tDestDir: "{app}";\t"""
     msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
-    msg += """Source: "%s\*";\tDestDir: "{app}\%s";\t""" % (icon_path, str("images"))
+    msg += """Source: "%s\*";\tDestDir: "{app}\%s";\t""" % (str(icon_path), str("images"))
     msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
-    msg += """Source: "%s\*";\tDestDir: "{app}\%s";\t""" % (test_path, str("test"))
+    msg += """Source: "%s\*";\tDestDir: "{app}\%s";\t""" % (str(test_path), str("test"))
+    msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
+    msg += """Source: "%s\*";\tDestDir: "{app}\%s";\t""" % (str(media_path), str("media"))
     msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
     msg += """;\tNOTE: Don't use "Flags: ignoreversion" on any shared system files"""
     return msg
@@ -249,7 +290,8 @@ if __name__ == "__main__":
     TEMPLATE += "SolidCompression=%s\n" % str(SolidCompression)
     TEMPLATE += "PrivilegesRequired=%s\n" % str(PrivilegesRequired)
    
-    TEMPLATE += write_registry(extension=EXTENSION)
+    TEMPLATE += write_registry(data_extension=DATA_EXTENSION,
+                                app_extension=APP_EXTENSION)
     TEMPLATE += write_language()
     TEMPLATE += write_tasks()
     TEMPLATE += write_file()
