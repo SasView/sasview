@@ -38,7 +38,7 @@ class ResolutionCalculator(object):
         self.image_lam = []
         # resolutions
         # lamda in r-direction
-        self.sigma_lamda = 0
+        self.sigma_lamd = 0
         # x-dir (no lamda)
         self.sigma_1 = 0
         #y-dir (no lamda)
@@ -60,11 +60,7 @@ class ResolutionCalculator(object):
         self.qxmax_limit = 0
         self.qymin_limit = 0
         self.qymax_limit = 0
-        # set sigmas
-        self.sigma_1 = 0
-        self.sigma_lamd = 0
-        self.sigma_2 = 0
-        self.sigma_1d = 0
+
         # plots
         self.plot = None
         # instrumental params defaults
@@ -113,14 +109,14 @@ class ResolutionCalculator(object):
             dlam = dlamb_list[num]
             intens = self.setup_tof(lam, dlam)
             intens_list.append(intens)
-            # save q min max
-            #qx_min = 0
-            #qx_max = 0
-            #qy_min = 0
-            #qy_max = 0
+            # cehck if tof
+            if num_lamda > 1:
+                tof = True
+            else:
+                tof = False
             # compute 2d resolution
             _, _, sigma_1, sigma_2, sigma_r, sigma1d = \
-                            self.compute(lam, dlam, qx_value, qy_value, coord)
+                        self.compute(lam, dlam, qx_value, qy_value, coord, tof)
             # make image
             image = self.get_image(qx_value, qy_value, sigma_1, sigma_2, 
                             sigma_r, qx_min, qx_max, qy_min, qy_max,
@@ -221,7 +217,7 @@ class ResolutionCalculator(object):
         return self.intensity
         
     def compute(self, wavelength, wavelength_spread, qx_value, qy_value, 
-                coord = 'cartesian'):
+                coord = 'cartesian', tof=False):
         """
         Compute the Q resoltuion in || and + direction of 2D
         : qx_value: x component of q
@@ -230,7 +226,13 @@ class ResolutionCalculator(object):
         coord = 'cartesian'
         lamb = wavelength
         lamb_spread = wavelength_spread
-        
+        # the shape of wavelength distribution
+        if tof:
+            # rectangular
+            tof_factor =  2
+        else:
+            # triangular
+            tof_factor =  1
         # Find polar values
         qr_value, phi = self._get_polar_value(qx_value, qy_value)
         # vacuum wave transfer
@@ -287,7 +289,7 @@ class ResolutionCalculator(object):
         sigma_wave_1 = self.get_variance_wave(radius, l_two, lamb_spread, 
                                           phi, 'radial', 'on')
         # for 1d
-        variance_1d_1 = sigma_1/2 + sigma_wave_1
+        variance_1d_1 = sigma_1/2 + sigma_wave_1 / tof_factor
         # normalize
         variance_1d_1 = knot * knot * variance_1d_1 / 12
         
@@ -295,7 +297,7 @@ class ResolutionCalculator(object):
         #sigma_1 += sigma_wave_1
         # normalize
         sigma_1 = knot*sqrt(sigma_1 / 12)
-        sigma_r = knot*sqrt(sigma_wave_1 / 12)
+        sigma_r = knot*sqrt(sigma_wave_1 / (tof_factor *12))
         # sigma in the phi/y direction
         # for source apperture
         sigma_2  = self.get_variance(rone, l1_cor, phi, comp2)
@@ -316,7 +318,7 @@ class ResolutionCalculator(object):
         sigma_wave_2 = self.get_variance_wave(radius, l_two, lamb_spread, 
                                           phi, 'phi', 'on') 
         # for 1d
-        variance_1d_2 = sigma_2/2 +sigma_wave_2
+        variance_1d_2 = sigma_2 / 2 + sigma_wave_2 / tof_factor
         # normalize
         variance_1d_2 = knot*knot*variance_1d_2 / 12
         
@@ -877,6 +879,7 @@ class ResolutionCalculator(object):
         y_value = y_val - y0_val
         phi_i = numpy.arctan2(y_val, x_val)
 
+        phi_i = numpy.arctan2(y_val, x_val)
         sin_phi = numpy.sin(phi_i)
         cos_phi = numpy.cos(phi_i)
         
@@ -1109,8 +1112,8 @@ class ResolutionCalculator(object):
         # Distance from beam center in the plane of detector
         plane_dist = dx_size
         # full scattering angle on the x-axis
-        theta  = math.atan(plane_dist / det_dist)
-        qx_value     = (2.0 * pi / wavelength) * math.sin(theta)
+        theta  = numpy.arctan(plane_dist / det_dist)
+        qx_value     = (2.0 * pi / wavelength) * numpy.sin(theta)
         return qx_value  
     
     def _get_polar_value(self, qx_value, qy_value):
@@ -1161,7 +1164,9 @@ class ResolutionCalculator(object):
         # Compute delta y
         delta_y = 0.5
         delta_y *= _GRAVITY
-        delta_y *= self.sample2detector_distance[0] 
+        sampletodetector = self.sample2detector_distance[0] - \
+                                    self.sample2sample_distance[0]
+        delta_y *= sampletodetector
         delta_y *= (self.source2sample_distance[0] + self.sample2detector_distance[0])
         delta_y /= (velocity * velocity)
 
