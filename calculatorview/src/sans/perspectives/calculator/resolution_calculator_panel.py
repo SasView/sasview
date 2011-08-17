@@ -158,7 +158,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                                 name = 'color')
         # two choices
         self.wave_color_cb.Append('Monochromatic')
-        self.wave_color_cb.Append('Polychromatic')
+        self.wave_color_cb.Append('TOF')
         self.wave_color_cb.SetStringSelection("Monochromatic") 
         wx.EVT_COMBOBOX(self.wave_color_cb,-1, self._on_source_color) 
         
@@ -1278,7 +1278,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         combo = self.wave_color_cb
         selection = combo.GetValue()
         self.wave_color = selection
-        if self.wave_color.lower() == 'polychromatic':
+        if self.wave_color.lower() == 'tof':
             list = self.resolution.get_wave_list()
             minw = min(list[0])
             if len(list[0]) < 2:
