@@ -350,6 +350,19 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._slicerpop.Append(id, '&Copy to Clipboard', 'Copy to the clipboard')
         wx.EVT_MENU(self, id, self.OnCopyFigureMenu)
         
+        id = wx.NewId()
+        self._slicerpop.AppendSeparator()
+        self._slicerpop.Append(id, '&Toggle Legend On/Off', 'Toggle Legend On/Off')
+        wx.EVT_MENU(self, id, self.onLegend)
+        
+        loc_menu = wx.Menu()
+        for label in self._loc_labels:
+            id = wx.NewId()
+            loc_menu.Append(id, str(label), str(label))
+            wx.EVT_MENU(self, id, self.onChangeLegendLoc)
+        id = wx.NewId()
+        self._slicerpop.AppendMenu(id, '&Modify Legend Location', loc_menu)
+        
         self._slicerpop.AppendSeparator()
 
         #add menu of other plugins
