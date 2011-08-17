@@ -4,7 +4,7 @@ import numpy
 import copy
 import time
 import unittest
-from DataLoader.loader import Loader
+from sans.dataloader.loader import Loader
 from sans.fit.Fitting import Fit
 from sans.models.CylinderModel import CylinderModel
 import sans.models.dispersion_models 
@@ -12,6 +12,9 @@ from sans.models.qsmearing import smear_selection
 
 NPTS = 1
 
+
+
+    
 def classMapper(classInstance, classFunc, *args):
     """
     Take an instance of a class and a function name as a string.
@@ -23,9 +26,10 @@ def mapapply(arguments):
     return apply(arguments[0], arguments[1:])
 
 
+
 class BatchScipyFit:
     """
-    test fit module using map function
+    test fit module
     """
     def __init__(self, qmin=None, qmax=None):
         """ """
@@ -84,27 +88,32 @@ class BatchScipyFit:
         self.param_to_fit = ['scale', 'length', 'radius']
         self.list_of_constraints = []
         self.list_of_mapper = []
+        engine ="scipy"
         
         path = "testdata_line3.txt"
-        self._reset_helper(path=path, engine="scipy", npts=NPTS)
+        self._reset_helper(path=path, engine=engine, npts=NPTS)
         path = "testdata_line.txt"
-        self._reset_helper(path=path, engine="scipy", npts=NPTS)
+        self._reset_helper(path=path, engine=engine, npts=NPTS)
         path = "SILIC010_noheader.DAT"
-        self._reset_helper(path=path, engine="scipy", npts=NPTS)
+        self._reset_helper(path=path, engine=engine, npts=NPTS)
         path = "cyl_400_20.txt"
-        self._reset_helper(path=path, engine="scipy", npts=NPTS)
+        self._reset_helper(path=path, engine=engine, npts=NPTS)
         path = "sphere_80.txt"
-        self._reset_helper(path=path, engine="scipy", npts=NPTS)
+        self._reset_helper(path=path, engine=engine, npts=NPTS)
         path = "PolySpheres.txt"
-        self._reset_helper(path=path, engine="scipy", npts=NPTS)
+        self._reset_helper(path=path, engine=engine, npts=NPTS)
+        path = "latex_qdev.txt"
+        self._reset_helper(path=path, engine=engine, npts=NPTS)
+        path = "latex_qdev2.txt"
+        self._reset_helper(path=path, engine=engine, npts=NPTS)
       
     def test_map_fit(self):
         """
         """ 
         results =  map(classMapper,self.list_of_fitter, self.list_of_function)
-        #print len(results)
-        #for result in results:
-        #    print result.fitness, result.stderr, result.pvec
+        print len(results)
+        for result in results:
+            print result.fitness, result.stderr, result.pvec
         
     def test_process_map_fit(self, n=1):
         """
@@ -117,12 +126,12 @@ class BatchScipyFit:
         results =  Pool(n).map(func=mapapply, 
                                iterable=temp)
         t1 = time.time()
-        print "got %s fit results  in %ss" % (str(len(results)), str(t1 - t0))
-       
-        #for result in results:
-        #    print result.fitness, result.stderr, result.pvec
-        #t2 = time.time()
-        #print "print fit results ", time.strftime(" %H:%M:%S", time.localtime(t2)), t2 - t1   
+        print "got fit results ", time.strftime(" %H:%M:%S", time.localtime(t1)), t1 - t0
+        print len(results)
+        for result in results:
+            print result.fitness, result.stderr, result.pvec
+        t2 = time.time()
+        print "print fit1 results ", time.strftime(" %H:%M:%S", time.localtime(t2)), t2 - t1   
                 
 class testBatch(unittest.TestCase):
     """
@@ -135,11 +144,11 @@ class testBatch(unittest.TestCase):
         """test fit with python built in map function---- full range of each data"""
         self.test.test_map_fit()
         
-    def test_fit2(self):
-        """test fit with python built in map function---- common range for all data"""
-        self.test.set_range(qmin=0.013, qmax=0.05)
-        self.test.reset_value()
-        self.test.test_map_fit()
+    #def test_fit2(self):
+    #   """test fit with python built in map function---- common range for all data"""
+    #    self.test.set_range(qmin=0.013, qmax=0.05)
+    #    self.test.reset_value()
+    #    self.test.test_map_fit()
         
     def test_fit3(self):
         """test fit with data full range using 1 processor and map"""
@@ -147,11 +156,11 @@ class testBatch(unittest.TestCase):
         self.test.reset_value()
         self.test.test_process_map_fit(n=1)
         
-    def test_fit4(self):
-        """test fit with a common fixed range for data using 1 processor and map"""
-        self.test.set_range(qmin=0.013, qmax=0.05)
-        self.test.reset_value()
-        self.test.test_process_map_fit(n=1)
+    #def test_fit4(self):
+    #    """test fit with a common fixed range for data using 1 processor and map"""
+    #    self.test.set_range(qmin=0.013, qmax=0.05)
+    #    self.test.reset_value()
+    #    self.test.test_process_map_fit(n=1)
         
             
 if __name__ == '__main__':
