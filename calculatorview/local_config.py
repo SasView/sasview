@@ -36,20 +36,20 @@ _authors = []
 _paper = "http://danse.us/trac/sans/newticket"
 _license = "mailto:sansdanse@gmail.com"
 
-_nsf_logo = "images/nsf_logo.png"
-_danse_logo = "images/danse_logo.png"
-_inst_logo = "images/utlogo.gif"
+_nsf_logo = "images/icons/nsf_logo.png"
+_danse_logo = "images/icons/danse_logo.png"
+_inst_logo = "images/icons/utlogo.gif"
 _nsf_url = "http://www.nsf.gov"
 _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
-_corner_image = "images/angles_flat.png"
-_welcome_image = "images/SVwelcome.png"
+_corner_image = "images/icons/angles_flat.png"
+_welcome_image = "images/icons/SVwelcome.png"
 _copyright = "(c) 2009, University of Tennessee"
 
 
 #edit the list of file state your plugin can read
 APPLICATION_WLIST = ''
-APPLICATION_STATE_EXTENSION = ''
+APPLICATION_STATE_EXTENSION = None
 GUIFRAME_WIDTH = 300
 GUIFRAME_HEIGHT = 200
 PLUGIN_STATE_EXTENSIONS = []
@@ -58,7 +58,7 @@ PLOPANEL_WIDTH = 415
 PLOPANEL_HEIGTH = 370
 DATAPANEL_WIDTH = 235
 DATAPANEL_HEIGHT = 700
-SPLASH_SCREEN_PATH = os.path.join("images","SVwelcome_mini.png")
+SPLASH_SCREEN_PATH = os.path.join("images","icons","SVwelcome_mini.png")
 TUTORIAL_PATH = os.path.join("media","Tutorial.pdf")
 DEFAULT_STYLE = GUIFRAME.CALCULATOR_ON
 SPLASH_SCREEN_WIDTH = 512
@@ -66,8 +66,8 @@ SPLASH_SCREEN_HEIGHT = 366
 SS_MAX_DISPLAY_TIME = 6000 #6 sec
 WELCOME_PANEL_ON  = False
 CLEANUP_PLOT = False
-SetupIconFile_win = os.path.join("images", "ball.ico")
-SetupIconFile_mac = os.path.join("images", "ball.icns")
+SetupIconFile_win = os.path.join("images","icons", "ball.ico")
+SetupIconFile_mac = os.path.join("images","icons", "ball.icns")
 DefaultGroupName = "DANSE"
 OutputBaseFilename = "setupSansViewTool"
 DATAPANEL_WIDTH = 235

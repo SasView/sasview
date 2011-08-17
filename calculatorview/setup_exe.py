@@ -106,7 +106,9 @@ if os.path.isfile(f):
 f = 'custom_config.py'
 if os.path.isfile(f):
     data_files.append(('.', [f]))
-
+f = 'local_config.py'
+if os.path.isfile(f):
+    data_files.append(('.', [f]))
 # Copying the HTML help docs
 path = cal.get_data_path('media')
 for f in findall(path):
