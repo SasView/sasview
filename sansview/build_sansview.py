@@ -78,7 +78,7 @@ FIT_VIEW   = "0.9.1"
 SANSMODELS_URL = "svn://danse.us/sans/releases/sansmodels-%s" % SANSMODELS
 DATALOADER_URL = "svn://danse.us/sans/releases/sansdataloader-%s" % DATALOADER
 GUIFRAME_URL = "svn://danse.us/sans/releases/sansguiframe-%s" % GUIFRAME
-PLOTTOOLS_URL = "svn://danse.us/common/releases/plottools-%s/trunk" % PLOTTOOLS
+PLOTTOOLS_URL = "svn://danse.us/common/releases/plottools-%s" % PLOTTOOLS
 UTIL_URL = "svn://danse.us/common/releases/util-%s" % UTIL
 SANSVIEW_URL = "svn://danse.us/sans/releases/sansview-%s" % SANSVIEW
 FIT_URL = "svn://danse.us/sans/releases/fittingview-%s" % FIT_VIEW
@@ -176,9 +176,9 @@ def checkout(release=False):
     
     os.chdir(wd)
     if release:
-        install_pkg("plottools-%s" % PLOTTOOLS, "trunk", PLOTTOOLS_URL)
+        install_pkg(".", "plottools-%s" % PLOTTOOLS, PLOTTOOLS_URL)
     else:
-        install_pkg("plottools", "trunk", "svn://danse.us/common/plottools/trunk")
+        install_pkg(".", "plottools", "svn://danse.us/common/plottools")
     
     os.chdir(wd)
     if release:
@@ -196,7 +196,7 @@ def checkout(release=False):
     if release:
         install_pkg(".", "inversionview-%s" % PRVIEW, PRVIEW_URL)
     else:
-        install_pkg(".", "prview", "svn://danse.us/sans/trunk/inversionview")
+        install_pkg(".", "inversionview", "svn://danse.us/sans/trunk/inversionview")
     
     os.chdir(wd)
     if release:
@@ -208,7 +208,7 @@ def checkout(release=False):
     if release:
         install_pkg(".", "sansinvariant-%s" % INVARIANT, INV_URL)
     else:
-        install_pkg(".", "Invariant", "svn://danse.us/sans/trunk/sansinvariant")
+        install_pkg(".", "sansinvariant", "svn://danse.us/sans/trunk/sansinvariant")
     
     os.chdir(wd)
     if release:
@@ -237,9 +237,9 @@ def checkout(release=False):
         
     os.chdir(wd)
     if release:
-        os.system(".", "fittingview-%s" % FIT_VIEW, FIT_URL)
+        install_pkg(".", "fittingview-%s" % FIT_VIEW, FIT_URL)
     else:
-        os.system(".", "fittingview", "svn://danse.us/sans/trunk/fittingview")
+        install_pkg(".", "fittingview", "svn://danse.us/sans/trunk/fittingview")
             
     os.chdir(wd)
     if release:
@@ -261,10 +261,8 @@ def prepare(wipeout = False):
         libdir = get_python_lib()
         old_dirs = [os.path.join(libdir, 'danse'),
                     os.path.join(libdir, 'data_util'),
-                    os.path.join(libdir, 'DataLoader'),
                     os.path.join(libdir, 'park'),
                     os.path.join(libdir, 'sans'),
-                    os.path.join(libdir, 'sans_extension'),
                     ]
         for d in old_dirs:
             if os.path.isdir(d):
