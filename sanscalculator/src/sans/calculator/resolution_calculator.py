@@ -227,6 +227,7 @@ class ResolutionCalculator(object):
         lamb = wavelength
         lamb_spread = wavelength_spread
         # the shape of wavelength distribution
+        print "tof", tof
         if tof:
             # rectangular
             tof_factor =  2
@@ -282,14 +283,14 @@ class ResolutionCalculator(object):
         # for detector pix
         sigma_1 += self.get_variance(rthree, l_two, phi, comp1)
         # for gravity term
-        sigma_1 +=  self.get_variance_gravity(l_ssa, l_sad, lamb, lamb_spread, 
-                             phi, comp1, 'on')  
+        sigma_1 +=  (self.get_variance_gravity(l_ssa, l_sad, lamb, lamb_spread, 
+                             phi, comp1, 'on') / tof_factor)
         # for wavelength spread
         # reserve for 1d calculation
-        sigma_wave_1 = self.get_variance_wave(radius, l_two, lamb_spread, 
-                                          phi, 'radial', 'on')
+        sigma_wave_1 = (self.get_variance_wave(radius, l_two, lamb_spread, 
+                                          phi, 'radial', 'on') / tof_factor)
         # for 1d
-        variance_1d_1 = sigma_1/2 + sigma_wave_1 / tof_factor
+        variance_1d_1 = sigma_1/2 + sigma_wave_1 
         # normalize
         variance_1d_1 = knot * knot * variance_1d_1 / 12
         
@@ -309,16 +310,16 @@ class ResolutionCalculator(object):
         sigma_2 += self.get_variance(rthree, l_two, phi, comp2)
 
         # for gravity term
-        sigma_2 +=  self.get_variance_gravity(l_ssa, l_sad, lamb, lamb_spread, 
-                             phi, comp2, 'on')
+        sigma_2 +=  (self.get_variance_gravity(l_ssa, l_sad, lamb, lamb_spread, 
+                             phi, comp2, 'on') / tof_factor)
 
         
         # for wavelength spread
         # reserve for 1d calculation
-        sigma_wave_2 = self.get_variance_wave(radius, l_two, lamb_spread, 
-                                          phi, 'phi', 'on') 
+        sigma_wave_2 = (self.get_variance_wave(radius, l_two, lamb_spread, 
+                                          phi, 'phi', 'on') / tof_factor)
         # for 1d
-        variance_1d_2 = sigma_2 / 2 + sigma_wave_2 / tof_factor
+        variance_1d_2 = sigma_2 / 2 + sigma_wave_2 
         # normalize
         variance_1d_2 = knot*knot*variance_1d_2 / 12
         
