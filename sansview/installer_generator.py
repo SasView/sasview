@@ -100,7 +100,7 @@ def write_registry(data_extension=None, app_extension=None):
             msg += "\n"
         #list the file on right-click
         user_list = os.path.join("Software", "Classes", "applications")
-        msg += """Root: HKCR; Subkey: "%s\%s\shell\open\command";\t"""\
+        msg += """Root: HKCU; Subkey: "%s\%s\shell\open\command";\t"""\
                               %  (str(user_list), str(APPLICATION))
         msg += """ValueType: %s; """ % str('string')
         msg += """ValueName: "%s";\t""" %str('') 

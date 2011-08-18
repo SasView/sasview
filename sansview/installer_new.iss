@@ -42,7 +42,7 @@ Root: HKCU;	Subkey: "Software\Classes\.tif\OpenWithList\SansView.exe";	 Flags: u
 Root: HKCU;	Subkey: "Software\Classes\.abs\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCU;	Subkey: "Software\Classes\.d1d\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCU;	Subkey: "Software\Classes\.sans\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCR; Subkey: "Software\Classes\applications\SansView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SansView.exe""  ""%1"""; 	 Flags: uninsdeletevalue noerror
+Root: HKCU; Subkey: "Software\Classes\applications\SansView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SansView.exe""  ""%1"""; 	 Flags: uninsdeletevalue noerror
 Root: HKCR;	Subkey: ".svs";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
 Root: HKCR;	Subkey: ".fitv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
 Root: HKCR;	Subkey: ".inv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
