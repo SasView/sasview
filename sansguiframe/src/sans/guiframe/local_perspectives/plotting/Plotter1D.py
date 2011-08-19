@@ -19,6 +19,8 @@ import numpy
 import time
 
 from danse.common.plottools.PlotPanel import PlotPanel
+from danse.common.plottools.SizeDialog import SizeDialog
+from danse.common.plottools.LabelDialog import LabelDialog
 #from danse.common.plottools.plottables import Graph
 from sans.guiframe import dataFitting 
 from sans.guiframe.events import EVT_NEW_PLOT
@@ -38,42 +40,6 @@ DEFAULT_QSTEP = 0.001
 DEFAULT_BEAM = 0.005
 BIN_WIDTH = 1
 
-class SizeDialog(wx.Dialog):
-    def __init__(self, parent, id, title):
-        wx.Dialog.__init__(self, parent, id, title, size=(300, 175))
-
-        #panel = wx.Panel(self, -1)
-        
-        mainbox = wx.BoxSizer(wx.VERTICAL)
-        vbox = wx.BoxSizer(wx.VERTICAL)
-        textbox = wx.BoxSizer(wx.HORIZONTAL)
-        
-        text1 = "Enter in a custom size (float values > 0 accepted)"
-        msg = wx.StaticText(self, -1, text1,(30,15), style=wx.ALIGN_CENTRE)
-        msg.SetLabel(text1)
-        self.myTxtCtrl = wx.TextCtrl(self, -1, '', (100, 50))
-        
-        textbox.Add(self.myTxtCtrl, flag=wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 
-                 border=10, proportion=2)
-        vbox.Add(msg, flag=wx.ALL, border=10, proportion=1)
-        vbox.Add(textbox, flag=wx.EXPAND|wx.TOP|wx.BOTTOM|wx.ADJUST_MINSIZE,
-                 border=10)
-    
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
-        okButton = wx.Button(self,wx.ID_OK, 'OK', size=(70, 30))
-        closeButton = wx.Button(self,wx.ID_CANCEL, 'Close', size=(70, 30))
-        hbox.Add(okButton, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 
-                 border=10)
-        hbox.Add(closeButton, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 
-                 border=10)
-        
-        mainbox.Add(vbox, flag=wx.ALL, border=10)
-        mainbox.Add(hbox, flag=wx.EXPAND|wx.TOP|wx.BOTTOM|wx.ADJUST_MINSIZE, 
-                    border=10)
-        self.SetSizer(mainbox)
-    
-    def getText(self):
-        return self.myTxtCtrl.GetValue()
 
 class ModelPanel1D(PlotPanel, PanelBase):
     """
@@ -433,7 +399,13 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 self._slicerpop.AppendMenu(id, '&Modify Symbol Size', size_menu)
                 
                 self._slicerpop.AppendSeparator()
-    
+                
+                id = wx.NewId()
+                self._slicerpop.Append(id, '&Edit Legend Label', 'Edit Legend Label')
+                wx.EVT_MENU(self, id, self.onEditLabels)
+                
+                self._slicerpop.AppendSeparator()
+                
                 id = wx.NewId()
                 self.hide_menu = self._slicerpop.Append(id, "Hide Error")
     
@@ -467,6 +439,24 @@ class ModelPanel1D(PlotPanel, PanelBase):
         plot = self.plots[self.graph.selected_plottable]
         self.parent.onfreeze([plot.id])
     
+    def onEditLabels(self, event):
+        """
+        """
+        menu = event.GetEventObject()
+        id = event.GetId()
+        label =  menu.GetLabel(id)
+        selected_plot = self.plots[self.graph.selected_plottable]
+        
+        dial = LabelDialog(None, -1, 'Change Plot Label')
+        if dial.ShowModal() == wx.ID_OK:
+            newLabel = dial.getText()
+        dial.Destroy()
+
+        selected_plot.name = newLabel
+        self.graph.render(self)
+        self._onEVT_FUNC_PROPERTY()
+        
+        
     def onChangeColor(self, event):
         """
         Changes the color of the graph when selected
@@ -629,7 +619,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
 
     def _add_more_tool(self):
         """
-        Add refresh button in the tool bar
+        Add refresh, add/delete button in the tool bar
         """
         if self.parent.__class__.__name__ != 'ViewerFrame':
             return
@@ -641,6 +631,25 @@ class ModelPanel1D(PlotPanel, PanelBase):
 
         self.toolbar.Realize()
         wx.EVT_TOOL(self, id_delete,  self._on_delete)
+        
+        #New toolbar option - adding text to the plot
+        self.toolbar.AddSeparator()
+        id_text = wx.NewId()
+        text =  wx.ArtProvider.GetBitmap(wx.ART_PASTE, wx.ART_TOOLBAR)
+        self.toolbar.AddSimpleTool(id_text, text,
+                           'Add Text to Plot', 'Adds text to plot')
+
+        self.toolbar.Realize()
+        wx.EVT_TOOL(self, id_text,  self._on_addtext)
+        
+        self.toolbar.AddSeparator()
+        id_text = wx.NewId()
+        text =  wx.ArtProvider.GetBitmap(wx.ART_CUT, wx.ART_TOOLBAR)
+        self.toolbar.AddSimpleTool(id_text, text,
+                           'Remove Text from Plot', 'Removes text from plot')
+
+        self.toolbar.Realize()
+        wx.EVT_TOOL(self, id_text,  self._on_removetext)
 
     def _on_delete(self, event): 
         """
@@ -651,4 +660,5 @@ class ModelPanel1D(PlotPanel, PanelBase):
             wx.PostEvent(self.parent, 
                          NewPlotEvent(group_id=self.group_id,
                                       action="delete"))
+            
             
