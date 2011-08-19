@@ -310,6 +310,8 @@ class Plugin(PluginBase):
             try:
                 for data in selected_data_list:
                     page = self.add_fit_page(data=[data])
+                    print "self.parent", self.parent
+                    self.parent._mgr.Update()
             except:
                 msg = "Fitting Set_data: " + str(sys.exc_value)
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
