@@ -730,8 +730,9 @@ class ViewerFrame(wx.Frame):
     def update_data(self, prev_data, new_data):
         """
         """
-        prev_id, data_state = self._data_manager.update_data(prev_data=prev_data, 
-                                       new_data=new_data)
+        prev_id, data_state = wx.CallAfter(self._data_manager.update_data, 
+                                           prev_data=prev_data, 
+                                           new_data=new_data)
         
         self._data_panel.remove_by_id(prev_id)
         self._data_panel.load_data_list(data_state)
