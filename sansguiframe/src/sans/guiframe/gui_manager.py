@@ -730,9 +730,8 @@ class ViewerFrame(wx.Frame):
     def update_data(self, prev_data, new_data):
         """
         """
-        prev_id, data_state = wx.CallAfter(self._data_manager.update_data, 
-                                           prev_data=prev_data, 
-                                           new_data=new_data)
+        prev_id, data_state = self._data_manager.update_data(prev_data=prev_data, 
+                                       new_data=new_data)
         
         self._data_panel.remove_by_id(prev_id)
         self._data_panel.load_data_list(data_state)
@@ -1956,7 +1955,6 @@ class ViewerFrame(wx.Frame):
         """
         list_data, _ = self._data_manager.get_by_id(data_id)
         if self._current_perspective is not None:
-            self._current_perspective.set_data(list_data.values())
             if self.cleanup_plots:
                 for uid, panel in self.plot_panels.iteritems():
                     #panel = self.plot_panels[uid]
@@ -1964,6 +1962,7 @@ class ViewerFrame(wx.Frame):
                     # To hide all docked plot panels when set the data
                     if not window.IsFloating():
                         self.hide_panel(uid)
+            self._current_perspective.set_data(list_data.values())
             self.on_close_welcome_panel()
         else:
             msg = "Guiframe does not have a current perspective"
