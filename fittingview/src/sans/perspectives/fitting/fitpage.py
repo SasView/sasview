@@ -1737,7 +1737,7 @@ class FitPage(BasicPage):
         self.Npts_total.SetBackgroundColour(\
                                     self.GetParent().GetBackgroundColour())
         
-        #self.Npts_total.Bind(wx.EVT_MOUSE_EVENTS, self._npts_click)
+        self.Npts_total.Bind(wx.EVT_MOUSE_EVENTS, self._npts_click)
         #self.Npts_total.Disable()
         self.dataSource.SetValue(data_name)
         self.qmin_x = data_min
