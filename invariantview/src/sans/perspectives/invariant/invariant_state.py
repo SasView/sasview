@@ -12,7 +12,7 @@ from lxml import etree
 from sans.dataloader.readers.cansas_reader import Reader as CansasReader
 from sans.dataloader.readers.cansas_reader import get_content
 from sans.guiframe.utils import format_number
-from sans.guiframe.dataFitting import Theory1D
+from sans.guiframe.gui_style import GUIFRAME_ID
 from sans.guiframe.dataFitting import Data1D
 
 INVNODE_NAME = 'invariant'
@@ -87,8 +87,10 @@ class InvariantState(object):
         # Input 
         self.file  = None
         self.data = Data1D(x=[], y=[], dx=None, dy=None)
-        self.theory_lowQ =  Theory1D(x=[], y=[], dy=None)
-        self.theory_highQ = Theory1D(x=[], y=[], dy=None)
+        self.theory_lowQ =  Data1D(x=[], y=[], dy=None)
+        self.theory_lowQ.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
+        self.theory_highQ = Data1D(x=[], y=[], dy=None)
+        self.theory_highQ.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
         #self.is_time_machine = False
         self.saved_state = list
         self.state_list = state_list
