@@ -687,6 +687,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         Get all select data and set them to the current active perspetive
         """
+        if event != None:
+            event.Skip()
         data_id, theory_id, state_id = self.set_data_helper()
         temp = data_id + state_id
         self.parent.set_data(data_id=temp, theory_id=theory_id)
