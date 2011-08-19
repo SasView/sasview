@@ -294,7 +294,7 @@ class Plugin(PluginBase):
                 new_panel = self.create_1d_panel(data, group_id)
             else:
                 new_panel = self.create_2d_panel(data, group_id)
-            self.create_panel_helper(new_panel, data, group_id, title)
+            wx.CallAfter(self.create_panel_helper, new_panel, data, group_id, title)
       
         return
 
