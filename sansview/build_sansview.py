@@ -300,7 +300,6 @@ def warning():
     return answer.upper()=="Y"
         
 if __name__ == "__main__": 
-    print "Build script for SansView %s" % SANSVIEW
     
     if len(sys.argv)==1:
         # If there is no argument, build the installer
