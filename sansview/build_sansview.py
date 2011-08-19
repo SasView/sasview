@@ -131,6 +131,7 @@ def install_pkg(install_dir, setup_dir, url):
         @param setup_dir: relative location of the setup.py script
         @param url: URL of the SVN repo
     """
+    print "PYTHON, LIB_FOLDER=====",PYTHON, LIB_FOLDER
     logging.info("Installing %s" % url)
     try:
         if not os.path.isdir(install_dir):
@@ -164,9 +165,9 @@ def checkout(release=False):
     
     os.chdir(wd)
     if release:
-        install_pkg(".", "sansmodels-%s/src" % SANSMODELS, SANSMODELS_URL)
+        install_pkg(".", "sansmodels-%s" % SANSMODELS, SANSMODELS_URL)
     else:
-        install_pkg(".", "sansmodels/src", "svn://danse.us/sans/trunk/sansmodels")
+        install_pkg(".", "sansmodels", "svn://danse.us/sans/trunk/sansmodels")
     
     os.chdir(wd)
     if release:
