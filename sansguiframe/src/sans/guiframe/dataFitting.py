@@ -258,3 +258,19 @@ class Data2D(PlotData2D, LoadData2D):
                 result.err_data[i][j] = math.sqrt(math.fabs(output.variance))
         return result
         
+def check_data_validity(data):
+      """
+      Return True is data is valid enough to compute chisqr, else False
+      """
+      flag = True
+      if data is not None:
+          if issubclass(data.__class__, Data2D):
+              if (data.data is None) or (len(data.data) == 0) \
+               or (len(data.err_data) == 0):
+                  flag = False
+          else:
+              if (data.y is None) or (len(data.y) == 0): 
+                  flag = False
+      else:
+          flag = False
+      return flag
