@@ -30,6 +30,7 @@ warnings.simplefilter("ignore")
 # Import plotting classes
 from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools import Data1D as Model1D
+from sans.guiframe.gui_style import GUIFRAME_ID
 from danse.common.plottools.plottables import Graph
 
 from pr_widgets import PrTextCtrl
@@ -69,7 +70,7 @@ class OutputPlot(PlotPanel):
         # Plot area
         self.plot = Model1D(self.x, y=y, dy=dy)
         self.plot.name = DEFAULT_OUTPUT
-        self.plot.symbol = 13
+        self.plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
 
         # Graph        
         self.graph = Graph()
