@@ -450,9 +450,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         dial = LabelDialog(None, -1, 'Change Plot Label')
         if dial.ShowModal() == wx.ID_OK:
             newLabel = dial.getText()
+            selected_plot.name = newLabel
         dial.Destroy()
 
-        selected_plot.name = newLabel
         self.graph.render(self)
         self._onEVT_FUNC_PROPERTY()
         
