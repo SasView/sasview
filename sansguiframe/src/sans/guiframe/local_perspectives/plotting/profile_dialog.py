@@ -7,6 +7,7 @@ from copy import deepcopy
 from danse.common.plottools.plottables import Graph
 from Plotter1D import ModelPanel1D as PlotPanel
 from sans.guiframe.dataFitting import Data1D
+from sans.guiframe.gui_style import GUIFRAME_ID
 import pylab
 
 DEFAULT_CMAP = None#pylab.cm.jet
@@ -68,9 +69,9 @@ class SLDPanel(wx.Dialog):
             data_plot.y = self._set_y_data()
             
             self.newplot = Data1D(data_plot.x, data_plot.y, data_plot.dy)
+            self.new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
             self.newplot.dy = None
             self.newplot.name = 'SLD'
-            self.newplot.symbol = 13
             self.plotpanel.add_image(self.newplot) 
             self.plotpanel.subplot.set_ylim(min(data_plot.y) - _Y_OFF , 
                                                 max(data_plot.y) + _Y_OFF)
@@ -192,7 +193,7 @@ class SLDplotpanel(PlotPanel):
         
     def add_image(self, plot):
         """
-        Add image(Data1D)
+        Add image(Theory1D)
         """
         self.plots[plot.name] = plot
         self.plots[plot.name].is_data = False
