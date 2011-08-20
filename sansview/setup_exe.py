@@ -14,7 +14,8 @@
 # See for example the 'images' directory below.
 
 import os, sys
-
+if len(sys.argv) == 1:
+    sys.argv.append('py2exe')
 # When using the SansView build script, we need to be able to pass
 # an extra path to be added to the python path. The extra arguments
 # should be removed from the list so that the setup processing doesn't
@@ -65,9 +66,9 @@ class Target:
     def __init__(self, **kw):
         self.__dict__.update(kw)
         # for the versioninfo resources
-        self.version = "1.9.1"
+        self.version = "1.9.2Dev"
         self.company_name = "U Tennessee"
-        self.copyright = "copyright 2009"
+        self.copyright = "copyright 2009 - 2011"
         self.name = "SansView"
         
 #
@@ -144,7 +145,7 @@ for f in findall(plugins_dir):
 # packages
 #
 
-packages = ['matplotlib', 'pytz','encodings']
+packages = ['matplotlib', 'numpy', 'scipy', 'pytz', 'encodings']
 includes = []
 excludes = [] 
 
