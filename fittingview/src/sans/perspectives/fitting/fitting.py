@@ -308,10 +308,8 @@ class Plugin(PluginBase):
             else:
                 selected_data_list = data_list
             try:
-                one_data = []
                 for data in selected_data_list:
-                    one_data = [data]
-                    page = wx.CallAfter(self.add_fit_page, one_data)
+                    page = self.add_fit_page(data=[data])
             except:
                 msg = "Fitting Set_data: " + str(sys.exc_value)
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
