@@ -467,7 +467,9 @@ ul
      <a href="#CoreMultiShellModel">CoreMultiShellModel</a>, <a
      href="#VesicleModel">VesicleModel</a>, <a href="#MultiShellModel">MultiShellModel</a>,
       <a href="#OnionExpShellModel">OnionExpShellModel</a>, <a
-     href="#SphericalSLDModel">SphericalSLDModel</a>, <a href="#CylinderModel">CylinderModel</a>,
+     href="#SphericalSLDModel">SphericalSLDModel</a>, <a
+     href="#PearlNecklaceModel">PearlNecklaceModel</a>
+     , <a href="#CylinderModel">CylinderModel</a>,
      <a href="#CoreShellCylinderModel">CoreShellCylinderModel</a>, <a
      href="#HollowCylinderModel">HollowCylinderModel</a>, <a
      href="#FlexibleCylinderModel">FlexibleCylinderModel</a>, <a
@@ -655,11 +657,15 @@ src="image004.gif"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 <p class=MsoNormal align=center style='text-align:center'>&nbsp;</p>
 
-<p class=MsoNormal>where <i>scale</i> is a scale factor* volume fraction, V is
-the volume of the scatterer, <i>r</i> is the radius of the sphere, <i>bkg</i>
-is the background level and <i><span style='font-family:"Arial","sans-serif"'>&#916;</span>&#961;</i>
-(contrast)&nbsp; is the scattering length density (SLD) &nbsp;difference
-between the scatterer and the solvent it is in.</p>
+<p class=MsoNormal>where scale is a scale factor* volume fraction, 
+V is the volume of the scatterer, r is the radius of the sphere, 
+bkg is the background level and sldXXX is the scattering length density 
+(SLD)  of  the scatterer or the solvent.  </p>
+<p>
+Note that if your data is in absolute scale, 
+the 'scale' should represent the volume fraction (unitless) if you have a good fit.  
+If not, it should represent the volume fraction * a factor 
+(by which your data might need to be rescaled).</p>
 
 <p class=MsoNormal>&nbsp;</p>
 
@@ -3237,9 +3243,270 @@ Small-Angle X-Ray and Neutron Scattering’, Plenum Press, New York, 1987</p>
 <p class=MsoNormal>&nbsp;</p>
 
 <p class=MsoNormal>&nbsp;</p>
-
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
 style='font-size:14.0pt'>2.10.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></b><b><a name=PearlNecklaceModel><span style='font-size:14.0pt'>PearlNecklaceModel</span></b></p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>This model provides the form factor for a pearl necklace composed
+of two elements: N pearls (homogeneous spheres) freely jointed by M rods (like
+strings) (with a total mass M<sub>w</sub> = M *m<sub>r</sub> + N * m<sub>s</sub>,
+the radius R and the string segment length (or edge separation) l (= A- 2R)).
+The A is the center to center pearl separation distance.</p>
+<p/>
+<center><img src="pearl_fig.jpg"></center>
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:.85in;text-indent:-.35in'><b>1.1.</b><b><span
+style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp; </span>Definition</b></p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The output of the scattering intensity function for the
+pearlnecklace model is given by (Schweins, 2004):</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal align=center style='text-align:center'><span
+style='position:relative;top:15.0pt'><img 
+src="pearl_eq1.gif"></span>&nbsp; </p>
+
+<p class=MsoNormal>where</p>
+
+<p class=MsoNormal align=center style='text-align:center'><span
+style='position:relative;top:16.0pt'><img 
+src="pearl_eq2.gif"></span><span
+style='position:relative;top:14.0pt'>,</span>&nbsp;&nbsp; </p>
+
+<p class=MsoNormal align=center style='text-align:center'><span
+style='position:relative;top:17.0pt'><img 
+src="pearl_eq3.gif"></span><span
+style='position:relative;top:14.0pt'>,</span></p>
+
+<p class=MsoNormal align=center style='text-align:center'><span
+style='position:relative;top:16.0pt'><img 
+src="pearl_eq4.gif"></span><span
+style='position:relative;top:14.0pt'>,</span></p>
+
+<p class=MsoNormal align=center style='text-align:center'><span
+style='position:relative;top:15.0pt'><img 
+src="pearl_eq5.gif"></span>&nbsp;,</p>
+
+<p class=MsoNormal align=center style='text-align:center'><span
+style='position:relative;top:14.0pt'><img 
+src="pearl_eq6.gif">,</span></p>
+
+<p class=MsoNormal><span style='position:relative;top:14.0pt'>and</span></p>
+
+<p class=MsoNormal align=center style='text-align:center'><span
+style='position:relative;top:14.0pt'><img 
+src="pearl_eq7.gif">.</span></p>
+<p/>
+<p class=MsoNormal>where the mass m<sub>i </sub> is (sld(of i) – sld(of
+solvent)) * (volume of the N pearls/rods), V is the total volume of the necklace.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The 2D scattering intensity is the same as P(q) above,
+regardless of the orientation of the q vector.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The returned value is scaled to units of [cm<sup>-1</sup>]
+and the parameters of the sphere model are the following:</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<div align=center>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
+ style='border-collapse:collapse'>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Parameter name</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Units</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Default value</p>
+  </td>
+ </tr>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>scale</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>None</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>1.0</p>
+  </td>
+ </tr>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>radius</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Å</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>80.0</p>
+  </td>
+ </tr>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>edge_separation</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Å</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>350.0</p>
+  </td>
+ </tr>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>num_pearls</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>(integer)</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>3</p>
+  </td>
+ </tr>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>sld_pearl</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Å<sup> -2</sup></p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>1e-6</p>
+  </td>
+ </tr>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>sld_solv</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Å<sup> -2</sup></p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>6.3e-6</p>
+  </td>
+ </tr>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>sld_string</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Å<sup> -2</sup></p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>1e-6</p>
+  </td>
+ </tr>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>thick_string</p>
+  <p class=MsoBodyText>(=rod diameter)</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Å</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>2.5</p>
+  </td>
+ </tr>
+ <tr style='height:20.0pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:20.0pt'>
+  <p class=MsoBodyText>background</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:20.0pt'>
+  <p class=MsoBodyText>cm<sup>-1</sup></p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:20.0pt'>
+  <p class=MsoBodyText>0.0</p>
+  </td>
+ </tr>
+</table>
+
+</div>
+
+<p class=MsoNormal align=center style='text-align:center'>&nbsp;</p>
+
+<p class=MsoNormal align=center style='text-align:center'><img 
+src="pearl_plot.jpg"></p>
+
+<p class=MsoNormal align=center style='text-align:center'>&nbsp;</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>REFERENCE</p>
+
+<p class=MsoNormal>R. Schweins and K. Huber, ‘Particle Scattering Factor of
+Pearl Necklace Chains’, Macromol. Symp., 211, 25-42, 2004.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
+style='font-size:14.0pt'>2.11.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=CylinderModel><b><span style='font-size:14.0pt'>Cylinder
 Model</span></b></a></p>
 
@@ -3432,12 +3699,12 @@ and the parameters of the cylinder model are the following:</p>
   <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt;height:19.85pt'>
-  <p class=MsoBodyText>Radian</p>
+  <p class=MsoBodyText>degree</p>
   </td>
   <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt;height:19.85pt'>
-  <p class=MsoBodyText>1.0</p>
+  <p class=MsoBodyText>60</p>
   </td>
  </tr>
  <tr style='height:20.6pt'>
@@ -3448,12 +3715,12 @@ and the parameters of the cylinder model are the following:</p>
   <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt;height:20.6pt'>
-  <p class=MsoBodyText>Radian</p>
+  <p class=MsoBodyText>degree</p>
   </td>
   <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt;height:20.6pt'>
-  <p class=MsoBodyText>1.0</p>
+  <p class=MsoBodyText>60</p>
   </td>
  </tr>
 </table>
@@ -3564,7 +3831,7 @@ Background=0.0 cm<sup> -1</sup>.</p>
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.11.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.12.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=CoreShellCylinderModel><b><span style='font-size:14.0pt'>Core-Shell
 Cylinder Model</span></b></a></p>
 
@@ -3795,12 +4062,12 @@ and the parameters of the core-shell cylinder model are the following:</p>
   <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
-  <p class=MsoBodyText>Radian</p>
+  <p class=MsoBodyText>degree</p>
   </td>
   <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
-  <p class=MsoBodyText>1.57</p>
+  <p class=MsoBodyText>90</p>
   </td>
  </tr>
  <tr style='height:20.0pt'>
@@ -3811,7 +4078,7 @@ and the parameters of the core-shell cylinder model are the following:</p>
   <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt;height:20.0pt'>
-  <p class=MsoBodyText>Radian</p>
+  <p class=MsoBodyText>degree</p>
   </td>
   <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -3900,7 +4167,7 @@ and Background=0.0 cm<sup> -1</sup>.</p>
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.12.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.13.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=HollowCylinderModel><b><span style='font-size:14.0pt'>HollowCylinderModel</span></b></a></p>
 
 <p class=MsoNormal>&nbsp;</p>
@@ -4136,7 +4403,7 @@ by Small-Angle X-Ray and Neutron Scattering&quot;, Plenum Press, New York,
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.13.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.14.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=FlexibleCylinderModel></a><b><span style='font-size:14.0pt'>FlexibleCylinderModel</span></b></p>
 
 <p class=MsoNormal>&nbsp;</p>
@@ -4355,7 +4622,7 @@ Cationic Wormlike Micelles&quot; Langmuir, August 2006.</p>
 <p class=MsoNormal>&nbsp;</p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.14.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.15.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><b><span style='font-size:14.0pt'>FlexCylEllipXMo<a
 name=FlexCylEllipXModel></a>del</span></b></p>
 
@@ -4642,7 +4909,7 @@ width=440 height=300 src="image078.jpg"></p>
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.15.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.16.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=StackedDisksModel><b><span style='font-size:14.0pt'>StackedDisksModel
 </span></b></a></p>
 
@@ -5003,7 +5270,7 @@ Scattering&quot;, Clarendon, Oxford, 1994.</p>
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.16.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.17.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=ParallelepipedModel><b><span style='font-size:14.0pt'>ParallelepipedModel</span></b></a></p>
 
 <p class=MsoNormal>&nbsp;</p>
@@ -5290,7 +5557,7 @@ c-library provided by the NIST Center for Neutron Research (Kline, 2006):</p>
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.17.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.18.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><b><span style='font-size:14.0pt'><a
 name=CSParallelepipedModel>CSParallelepipedModel</a></span></b></p>
 
@@ -5718,7 +5985,7 @@ c-library provided by the NIST Center for Neutron Research (Kline, 2006):</p>
 <p class=MsoNormal>&nbsp;</p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.18.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.19.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=EllipticalCylinderModel><b><span style='font-size:14.0pt'>Elliptical
 Cylinder Model</span></b></a></p>
 
@@ -6059,7 +6326,7 @@ York, (1987).</p>
 <p class=MsoNormal>&nbsp;</p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.19.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.20.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=BarBellModel><b><span style='font-size:14.0pt'>BarBell(/DumBell)Model</span></b></a></p>
 
 <p class=MsoNormal>&nbsp;</p>
@@ -6358,7 +6625,7 @@ src="image111.jpg"></p>
 <p class=MsoNormal>&nbsp;</p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.20.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.21.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=CappedCylinderModel><b><span style='font-size:14.0pt'>CappedCylinder(/ConvexLens)Model</span></b></a></p>
 
 <p class=MsoNormal>&nbsp;</p>
@@ -6650,7 +6917,7 @@ src="image118.jpg"></p>
 <p class=MsoNormal>&nbsp;</p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.21.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.22.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=EllipsoidModel><b><span style='font-size:14.0pt'>Ellipsoid
 Model</span></b></a></p>
 
@@ -6852,12 +7119,12 @@ and the parameters of the ellipsoid model are the following:</p>
   <td width=105 valign=top style='width:78.9pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt;height:19.85pt'>
-  <p class=MsoBodyText>Radian</p>
+  <p class=MsoBodyText>degree</p>
   </td>
   <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt;height:19.85pt'>
-  <p class=MsoBodyText>1.57</p>
+  <p class=MsoBodyText>90</p>
   </td>
  </tr>
  <tr style='height:20.6pt'>
@@ -6868,7 +7135,7 @@ and the parameters of the ellipsoid model are the following:</p>
   <td width=105 valign=top style='width:78.9pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0in 5.4pt 0in 5.4pt;height:20.6pt'>
-  <p class=MsoBodyText>Radian</p>
+  <p class=MsoBodyText>degree</p>
   </td>
   <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
@@ -6990,7 +7257,7 @@ Background=0.0 cm<sup> -1</sup>.</p>
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.22.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.23.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=CoreShellEllipsoidModel><b><span style='font-size:14.0pt'>CoreShellEllipsoidModel
 </span></b></a></p>
 
@@ -7267,7 +7534,7 @@ c-library provided by the NIST Center for Neutron Research (Kline, 2006):</p>
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.23.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.24.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=TriaxialEllipsoidModel><b><span style='font-size:14.0pt'>TriaxialEllipsoidModel</span></b></a></p>
 
 <p class=MsoNormal>&nbsp;</p>
@@ -7542,7 +7809,7 @@ Small-Angle X-Ray and Neutron Scattering”, Plenum, New York, 1987.</p>
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.24.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.25.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=LamellarModel><b><span style='font-size:14.0pt'>LamellarModel</span></b></a></p>
 
 <p class=MsoNormal>&nbsp;</p>
@@ -7729,7 +7996,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.25.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.26.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=LamellarFFHGModel><b><span style='font-size:14.0pt'>LamellarFFHGModel</span></b></a></p>
 
 <p class=MsoNormal>&nbsp;</p>
@@ -7958,7 +8225,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.26.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.27.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=LamellarPSModel><b><span style='font-size:14.0pt'>LamellarPSModel</span></b></a></p>
 
 <p class=MsoNormal>&nbsp;</p>
@@ -8205,7 +8472,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.27.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.28.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=LamellarPSHGModel><b><span style='font-size:14.0pt'>LamellarPSHGModel</span></b></a></p>
 
 <p class=MsoNormal>&nbsp;</p>
@@ -8507,7 +8774,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.28.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.29.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=LamellarPCrystalModel><b><span style='font-size:14.0pt'>LamellarPCrystalModel</span></b></a></p>
 
 <p class=MsoNormal>&nbsp;</p>
@@ -8760,7 +9027,7 @@ Egelhaaf, J. Phys. Chem. B, 103 (1999) 9888-9897.</p>
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.29.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.30.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=SCCrystalModel><b><span style='font-size:14.0pt'>SC(Simple
 Cubic Para-)CrystalModel</span></b></a></p>
 
@@ -9072,7 +9339,7 @@ width=447 height=322 src="image157.jpg"></b></p>
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.30.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.31.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=FCCrystalModel><b><span style='font-size:14.0pt'>FC(Face
 Centered Cubic Para-)CrystalModel</span></b></a></p>
 
@@ -9386,7 +9653,7 @@ width=473 height=352 src="image166.jpg"></p>
 <p class=MsoNormal><b>&nbsp;</b></p>
 
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.31.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.32.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name=BCCrystalModel><b><span style='font-size:14.0pt'>BC(Body
 Centered Cubic Para-)CrystalModel</span></b></a></p>
 
