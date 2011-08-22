@@ -227,7 +227,7 @@ class ResolutionCalculator(object):
         lamb = wavelength
         lamb_spread = wavelength_spread
         # the shape of wavelength distribution
-        print "tof", tof
+
         if tof:
             # rectangular
             tof_factor =  2
@@ -880,7 +880,6 @@ class ResolutionCalculator(object):
         y_value = y_val - y0_val
         phi_i = numpy.arctan2(y_val, x_val)
 
-        phi_i = numpy.arctan2(y_val, x_val)
         sin_phi = numpy.sin(phi_i)
         cos_phi = numpy.cos(phi_i)
         
