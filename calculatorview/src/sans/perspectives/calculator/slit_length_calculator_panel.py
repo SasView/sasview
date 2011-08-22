@@ -188,8 +188,9 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
                                 type="progress"))
             self.reader = DataReader(path=path,
                                     completefn=self.complete_loading,
-                                    updatefn=None)
+                                    updatefn=self.load_update)
             self.reader.queue()
+            self.load_update()
         except:
             if self.parent.parent is None:
                 return 
@@ -197,6 +198,19 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
             wx.PostEvent(self.parent.parent,
                           StatusEvent(status=msg, type='stop'))
             return 
+        
+    def load_update(self):
+        """
+        print update on the status bar
+        """
+        if self.parent.parent is None:
+                return 
+        if self.reader.isrunning():
+            type = "progress"
+        else:
+            type = "stop"
+        wx.PostEvent(self.parent.parent, StatusEvent(status="",
+                                                  type=type))
             
     def complete_loading(self, data=None, filename=''):
         """
