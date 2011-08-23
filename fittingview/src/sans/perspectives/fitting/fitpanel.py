@@ -480,7 +480,7 @@ class FitPanel(nb, PanelBase):
         #page.set_data(data)
         self.SetPageText(pos, str(data.name))
         self.opened_pages[page.uid] = page
-        
+        self.SetSelection(pos)
         return page
        
     def _onGetstate(self, event):
