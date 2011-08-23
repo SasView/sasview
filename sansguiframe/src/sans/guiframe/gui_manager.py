@@ -384,24 +384,30 @@ class ViewerFrame(wx.Frame):
 
             if self._data_panel is not None and \
                             self.panel_on_focus is not None:
-                panel_name = self.panel_on_focus.window_caption
-                ID = self.panel_on_focus.uid
-                self._data_panel.set_panel_on_focus(ID)
-                #update combo
-                if self.panel_on_focus in self.plot_panels.values():
-                    combo = self._data_panel.cb_plotpanel
-                    combo_title = str(self.panel_on_focus.window_caption)
-                    combo.SetStringSelection(combo_title)
-                    combo.SetToolTip( wx.ToolTip(combo_title )) 
-                elif self.panel_on_focus != self._data_panel:
-                    cpanel = self.panel_on_focus
-                    if self.cpanel_on_focus != cpanel:
-                        self.cpanel_on_focus = self.panel_on_focus
+                self.set_panel_on_focus_helper()
                 #update toolbar
                 self._update_toolbar_helper()
                 #update edit menu
                 self.enable_edit_menu()
-
+    
+    def set_panel_on_focus_helper(self):
+        """
+        Helper for panel on focus with data_panel
+        """
+        panel_name = self.panel_on_focus.window_caption
+        ID = self.panel_on_focus.uid
+        self._data_panel.set_panel_on_focus(ID)
+        #update combo
+        if self.panel_on_focus in self.plot_panels.values():
+            combo = self._data_panel.cb_plotpanel
+            combo_title = str(self.panel_on_focus.window_caption)
+            combo.SetStringSelection(combo_title)
+            combo.SetToolTip( wx.ToolTip(combo_title )) 
+        elif self.panel_on_focus != self._data_panel:
+            cpanel = self.panel_on_focus
+            if self.cpanel_on_focus != cpanel:
+                self.cpanel_on_focus = self.panel_on_focus
+                
     def reset_bookmark_menu(self, panel):
         """
         Reset Bookmark menu list
@@ -845,7 +851,7 @@ class ViewerFrame(wx.Frame):
             self.plot_panels[ID] = p
             if len(self.plot_panels) == 1:
                 self.panel_on_focus = p
-                self.set_panel_on_focus(None)
+                self.set_panel_on_focus_helper()
             if self._data_panel is not None and \
                 self._plotting_plugin is not None:
                 ind = self._data_panel.cb_plotpanel.FindString('None')
@@ -2533,7 +2539,7 @@ class ViewerFrame(wx.Frame):
         panel.on_set_focus(None)  
         # set focusing panel
         self.panel_on_focus = panel  
-        self.set_panel_on_focus(None)
+        self.set_panel_on_focus_helper()
     
     def set_plot_unfocus(self): 
         """
