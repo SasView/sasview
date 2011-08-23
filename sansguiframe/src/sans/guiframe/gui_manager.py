@@ -2135,7 +2135,7 @@ class ViewerFrame(wx.Frame):
         id = event.GetId()
         menu = self._window_menu.FindItemById(id)
         if self._plotting_plugin is not None:
-            plot_panel = self._plotting_plugin.plot_panels.values()
+            plot_panel = self.plot_panels.values()
             for p in plot_panel:
                 self._popup_floating_panel(p)
             menu.Check(True)
@@ -2150,7 +2150,7 @@ class ViewerFrame(wx.Frame):
         id = event.GetId()
         menu = self._window_menu.FindItemById(id)
         if self._plotting_plugin is not None:
-            plot_panel = self._plotting_plugin.plot_panels.values()
+            plot_panel = self.plot_panels.values()
             for p in plot_panel:
                 self._popup_fixed_panel(p)
             menu.Check(True)
