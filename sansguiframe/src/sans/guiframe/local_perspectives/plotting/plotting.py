@@ -23,10 +23,12 @@ from sans.guiframe.dataFitting import Data2D
 DEFAULT_MENU_ITEM_LABEL = "No graph available"
 DEFAULT_MENU_ITEM_ID = wx.NewId()
 
-if sys.platform.count("darwin")==0:
-    IS_WIN = True
-else:
-    IS_WIN = False
+IS_WIN = True    
+if sys.platform.count("win32")==0:
+    if wx.__version__.split('.')[0] == 2:
+        if wx.__version__.split('.')[1] < 9:
+            IS_WIN = False
+
 
 class Plugin(PluginBase):
     """
