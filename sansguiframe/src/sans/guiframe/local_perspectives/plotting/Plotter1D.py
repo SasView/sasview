@@ -315,20 +315,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         id = wx.NewId()
         self._slicerpop.Append(id, '&Copy to Clipboard', 'Copy to the clipboard')
         wx.EVT_MENU(self, id, self.OnCopyFigureMenu)
-        
-        id = wx.NewId()
-        self._slicerpop.AppendSeparator()
-        self._slicerpop.Append(id, '&Toggle Legend On/Off', 'Toggle Legend On/Off')
-        wx.EVT_MENU(self, id, self.onLegend)
-        
-        loc_menu = wx.Menu()
-        for label in self._loc_labels:
-            id = wx.NewId()
-            loc_menu.Append(id, str(label), str(label))
-            wx.EVT_MENU(self, id, self.onChangeLegendLoc)
-        id = wx.NewId()
-        self._slicerpop.AppendMenu(id, '&Modify Legend Location', loc_menu)
-        
+                
         self._slicerpop.AppendSeparator()
 
         #add menu of other plugins
@@ -369,7 +356,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                     id = wx.NewId()
                     self._slicerpop.Append(id, '&Freeze', 'Freeze')
                     wx.EVT_MENU(self, id, self.onFreeze)
-                
+                self._slicerpop.AppendSeparator()    
                 symbol_menu = wx.Menu()
                 for label in self._symbol_labels:
                     id = wx.NewId()
@@ -386,7 +373,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 id = wx.NewId()
                 self._slicerpop.AppendMenu(id, '&Modify Symbol Color', color_menu)
                 
-                
                 size_menu = wx.Menu()
                 for i in range(10):
                     id = wx.NewId()
@@ -400,13 +386,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 
                 self._slicerpop.AppendSeparator()
                 
-                id = wx.NewId()
-                self._slicerpop.Append(id, '&Edit Legend Label', 'Edit Legend Label')
-                wx.EVT_MENU(self, id, self.onEditLabels)
-                
-                self._slicerpop.AppendSeparator()
-                
-                id = wx.NewId()
                 self.hide_menu = self._slicerpop.Append(id, "Hide Error")
     
                 if plot.dy is not None and plot.dy != []:
@@ -419,9 +398,24 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 wx.EVT_MENU(self, id, self._ontoggle_hide_error)
                 
                 self._slicerpop.AppendSeparator()
+                id = wx.NewId()
+                self._slicerpop.Append(id, '&Edit Legend Label', 'Edit Legend Label')
+                wx.EVT_MENU(self, id, self.onEditLabels)
                 # Option to hide
                 #TODO: implement functionality to hide a plottable (legend click)
+
+        loc_menu = wx.Menu()
+        for label in self._loc_labels:
+            id = wx.NewId()
+            loc_menu.Append(id, str(label), str(label))
+            wx.EVT_MENU(self, id, self.onChangeLegendLoc)
+        id = wx.NewId()
+        self._slicerpop.AppendMenu(id, '&Modify Legend Location', loc_menu)
         
+        id = wx.NewId()
+        self._slicerpop.Append(id, '&Toggle Legend On/Off', 'Toggle Legend On/Off')
+        wx.EVT_MENU(self, id, self.onLegend)
+        self._slicerpop.AppendSeparator()
         
         id = wx.NewId()
         self._slicerpop.Append(id, '&Change scale')
