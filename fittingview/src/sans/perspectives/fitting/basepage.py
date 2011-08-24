@@ -2612,10 +2612,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         on 'More details' button
         """
         from help_panel import  HelpWindow
-        import sans.models as models 
+        from sans.models import get_data_path
         
         # Get models help model_function path
-        path = models.get_data_path(media='media')
+        path = get_data_path(media='media')
         model_path = os.path.join(path,"model_functions.html")
         if self.model == None:
             name = 'FuncHelp'

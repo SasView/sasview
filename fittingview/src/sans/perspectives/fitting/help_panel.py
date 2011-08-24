@@ -48,15 +48,19 @@ class HelpWindow(wx.Frame):
         self.lhelp = html.HtmlWindow(lpanel, -1, style=wx.NO_BORDER)
         self.rhelp = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER, size=(500,-1))
 
-        import sans.models as models 
         # get the media path
-        path = models.get_data_path(media='media')
+        if pageToOpen != None:
+            path = os.path.dirname(pageToOpen)
+        else:
+            from sans.models import get_data_path as model_path
+            # Get models help model_function path
+            path = model_path(media='media')
+
         self.path = os.path.join(path,"model_functions.html")
         self.path_pd = os.path.join(path,"pd_help.html")
         self.path_sm = os.path.join(path,"smear_computation.html")
-        import sans.perspectives.fitting as fitting
-        
-        fitting_path = fitting.get_data_path(media='media')
+        from sans.perspectives.fitting import get_data_path as fit_path
+        fitting_path = fit_path(media='media')
         
         _html_file = {"status_bar_help.html":"Status Bar Help",
                       "load_data_help.html":"Load a File",
