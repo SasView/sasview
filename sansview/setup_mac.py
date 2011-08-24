@@ -20,6 +20,8 @@ RESOURCES_FILES = []
 #Periodictable data file
 DATA_FILES = periodictable.data_files()
 #invariant and calculator help doc
+import sans.perspectives.fitting as fitting
+DATA_FILES += fitting.data_files()
 import sans.perspectives.calculator as calculator
 DATA_FILES += calculator.data_files()
 import sans.perspectives.invariant as invariant
@@ -43,7 +45,7 @@ if libxml_path == None:
     raise RuntimeError, "Could not find libxml2 on the system"
 
 APP = ['sansview.py']
-DATA_FILES += ['images','test','plugins','media', 'custom_config.py']
+DATA_FILES += ['images','test','plugins','media', 'custom_config.py', 'local_config.py']
 # locate file extensions
 def find_extension():
     """
@@ -88,7 +90,7 @@ plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
 APP = ['sansview.py']
 DATA_FILES += ['images','test','plugins','media']
 OPTIONS = {'argv_emulation': True,
-           'packages': ['lxml','periodictable'],
+           'packages': ['lxml','numpy', 'scipy', 'periodictable'],
            'iconfile': ICON,
            'frameworks':[libxml_path],
            'resources': RESOURCES_FILES,
