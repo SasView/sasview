@@ -69,7 +69,7 @@ class SLDPanel(wx.Dialog):
             data_plot.y = self._set_y_data()
             
             self.newplot = Data1D(data_plot.x, data_plot.y, data_plot.dy)
-            self.new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
+            self.newplot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
             self.newplot.dy = None
             self.newplot.name = 'SLD'
             self.plotpanel.add_image(self.newplot) 
