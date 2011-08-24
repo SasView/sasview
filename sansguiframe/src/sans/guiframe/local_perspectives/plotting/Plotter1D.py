@@ -85,7 +85,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
         self.graph.yaxis("\\rm{Intensity} ", "cm^{-1}")
         self.graph.render(self)
-        
+        self.position = None
         # In resizing event
         self.resizing = False
         self.canvas.set_resizing(self.resizing)
@@ -256,7 +256,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
         PlotPanel.onLeftDown(self, event)
         ax = event.inaxes
         if ax != None:
-            position = "x: %8.3g    y: %8.3g" % (event.xdata, event.ydata)
+            pos_x = "%8.3g"% event.xdata
+            pos_y = "%8.3g"% event.ydata
+            self.position = str(pos_x), str(pos_y)
+            position = "x: %s    y: %s" % (self.position)
             wx.PostEvent(self.parent, StatusEvent(status=position))
         # unfocus all
         self.parent.set_plot_unfocus()  
@@ -417,6 +420,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
         wx.EVT_MENU(self, id, self.onLegend)
         self._slicerpop.AppendSeparator()
         
+        id = wx.NewId()
+        self._slicerpop.Append(id, '&Add text')
+        wx.EVT_MENU(self, id, self._on_addtext)
+        id = wx.NewId()
+        self._slicerpop.Append(id, '&Remove text')
+        wx.EVT_MENU(self, id, self._on_removetext)
         id = wx.NewId()
         self._slicerpop.Append(id, '&Change scale')
         wx.EVT_MENU(self, id, self._onProperties)
@@ -625,7 +634,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
 
         self.toolbar.Realize()
         wx.EVT_TOOL(self, id_delete,  self._on_delete)
-        
+        """
         #New toolbar option - adding text to the plot
         self.toolbar.AddSeparator()
         id_text = wx.NewId()
@@ -644,7 +653,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
 
         self.toolbar.Realize()
         wx.EVT_TOOL(self, id_text,  self._on_removetext)
-
+        """
     def _on_delete(self, event): 
         """
         Refreshes the plotpanel on refresh tollbar button
