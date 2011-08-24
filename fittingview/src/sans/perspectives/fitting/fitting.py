@@ -1381,6 +1381,7 @@ class Plugin(PluginBase):
         theory.ymax = ymax 
         theory.group_id = str(page_id) + " Model2D"
         theory.id = str(page_id) + " Model2D"
+        theory.title = "Analytical model 2D "
   
     def _complete1D(self, x,y, page_id, elapsed,index,model,
                     toggle_mode_on=False,state=None, 
