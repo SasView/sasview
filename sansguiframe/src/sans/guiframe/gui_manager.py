@@ -851,7 +851,7 @@ class ViewerFrame(wx.Frame):
             self.plot_panels[ID] = p
             if len(self.plot_panels) == 1:
                 self.panel_on_focus = p
-                self.set_panel_on_focus_helper()
+                self.set_panel_on_focus(None)
             if self._data_panel is not None and \
                 self._plotting_plugin is not None:
                 ind = self._data_panel.cb_plotpanel.FindString('None')
@@ -2539,7 +2539,7 @@ class ViewerFrame(wx.Frame):
         panel.on_set_focus(None)  
         # set focusing panel
         self.panel_on_focus = panel  
-        self.set_panel_on_focus_helper()
+        self.set_panel_on_focus(None)
     
     def set_plot_unfocus(self): 
         """
