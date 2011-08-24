@@ -238,15 +238,15 @@ class ModelManagerBase:
         self.shape_list.append(OnionExpShellModel)
         self.multiplication_factor.append(OnionExpShellModel)
         self.multi_func_list.append(OnionExpShellModel)
-        
-        from sans.models.PearlNecklaceModel import PearlNecklaceModel
-        self.shape_list.append(PearlNecklaceModel)
-        #self.multiplication_factor.append(PearlNecklaceModel)
                          
         from sans.models.SphericalSLDModel import SphericalSLDModel
         self.shape_list.append(SphericalSLDModel)
         self.multiplication_factor.append(SphericalSLDModel)
         self.multi_func_list.append(SphericalSLDModel)
+        
+        from sans.models.PearlNecklaceModel import PearlNecklaceModel
+        self.shape_list.append(PearlNecklaceModel)
+        #self.multiplication_factor.append(PearlNecklaceModel)
         
         from sans.models.CylinderModel import CylinderModel
         self.shape_list.append(CylinderModel)
