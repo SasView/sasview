@@ -161,7 +161,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         w, h = self.parent.GetSize()
         self.vbox  = wx.BoxSizer(wx.VERTICAL)
         self.sizer1 = wx.BoxSizer(wx.VERTICAL)
-        self.sizer1.SetMinSize((w/13, h*2/5))
+        self.sizer1.SetMinSize(wx.Size(w/13, h*2/5))
       
         self.sizer2 = wx.BoxSizer(wx.VERTICAL)
         self.sizer3 = wx.FlexGridSizer(7, 2, 4, 1)
@@ -169,7 +169,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer5 = wx.BoxSizer(wx.VERTICAL)
        
         self.vbox.Add(self.sizer5, 0, wx.EXPAND|wx.ALL,1)
-        self.vbox.Add(self.sizer1, 0, wx.EXPAND|wx.ALL,0)
+        self.vbox.Add(self.sizer1, 1, wx.EXPAND|wx.ALL,0)
         self.vbox.Add(self.sizer2, 0, wx.EXPAND|wx.ALL,1)
         self.vbox.Add(self.sizer3, 0, wx.EXPAND|wx.ALL,5)
         self.vbox.Add(self.sizer4, 0, wx.EXPAND|wx.ALL,5)
@@ -330,7 +330,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.rb_single_mode.SetValue(True)
         self.rb_batch_mode.SetValue(False)
         self.sizer4.AddMany([(self.rb_single_mode,0, wx.ALL,5),
-                            (self.rb_batch_mode,0, wx.ALL,5)])
+                            (self.rb_batch_mode,0, wx.ALL,5),
+                            (20,80)])
         
     def on_single_mode(self, event):
         """
@@ -354,12 +355,14 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         tree_ctrl_label = wx.StaticText(self, -1, "Data")
         tree_ctrl_label.SetForegroundColour('blue')
-        self.tree_ctrl = DataTreeCtrl(parent=self)
+        self.tree_ctrl = DataTreeCtrl(parent=self, style=wx.SUNKEN_BORDER)
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKING, self.on_check_item)
         tree_ctrl_theory_label = wx.StaticText(self, -1, "Theory")
         tree_ctrl_theory_label.SetForegroundColour('blue')
-        self.tree_ctrl_theory = DataTreeCtrl(parent=self)
-        self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_CHECKING, self.on_check_item)
+        self.tree_ctrl_theory = DataTreeCtrl(parent=self, 
+                                                    style=wx.SUNKEN_BORDER)
+        self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_CHECKING, 
+                                                    self.on_check_item)
         self.sizer1.Add(tree_ctrl_label, 0, wx.LEFT, 10)
         self.sizer1.Add(self.tree_ctrl, 1, wx.EXPAND|wx.ALL, 10)
         self.sizer1.Add(tree_ctrl_theory_label, 0,  wx.LEFT, 10)
