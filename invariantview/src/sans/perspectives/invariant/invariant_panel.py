@@ -39,7 +39,7 @@ POWER = 4.0
 _BOX_WIDTH = 76
 
 
-if sys.platform.count("darwin")==0:
+if sys.platform.count("win32") > 0:
     _STATICBOX_WIDTH = 420
     PANEL_WIDTH = 500 
     PANEL_HEIGHT = 700

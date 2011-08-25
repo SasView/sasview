@@ -16,7 +16,7 @@ from pr_widgets import PrTextCtrl
 from pr_widgets import DataFileTextCtrl
 from pr_widgets import OutputTextCtrl
 
-if sys.platform.count("darwin")==0:
+if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
 else:
     FONT_VARIANT = 1

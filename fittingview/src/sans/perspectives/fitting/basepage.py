@@ -24,7 +24,7 @@ _QMIN_DEFAULT = 0.0005
 _QMAX_DEFAULT = 0.5
 _NPTS_DEFAULT = 50
 #Control panel width 
-if sys.platform.count("darwin")==0:
+if sys.platform.count("win32")> 0:
     PANEL_WIDTH = 450
     FONT_VARIANT = 0
     ON_MAC = False
