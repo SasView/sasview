@@ -145,7 +145,7 @@ for f in findall(plugins_dir):
 # packages
 #
 
-packages = ['matplotlib', 'numpy', 'scipy', 'pytz', 'encodings']
+packages = ['matplotlib', 'scipy', 'pytz', 'encodings']
 includes = []
 excludes = [] 
 
