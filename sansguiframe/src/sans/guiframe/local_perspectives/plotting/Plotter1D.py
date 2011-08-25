@@ -85,7 +85,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
         self.graph.yaxis("\\rm{Intensity} ", "cm^{-1}")
         self.graph.render(self)
-        self.position = None
+        
         # In resizing event
         self.resizing = False
         self.canvas.set_resizing(self.resizing)
@@ -256,10 +256,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
         PlotPanel.onLeftDown(self, event)
         ax = event.inaxes
         if ax != None:
+            # data coordinate position
             pos_x = "%8.3g"% event.xdata
             pos_y = "%8.3g"% event.ydata
-            self.position = str(pos_x), str(pos_y)
-            position = "x: %s    y: %s" % (self.position)
+            position = "x: %s    y: %s" % (pos_x, pos_y)
             wx.PostEvent(self.parent, StatusEvent(status=position))
         # unfocus all
         self.parent.set_plot_unfocus()  
@@ -420,12 +420,13 @@ class ModelPanel1D(PlotPanel, PanelBase):
         wx.EVT_MENU(self, id, self.onLegend)
         self._slicerpop.AppendSeparator()
         
-        id = wx.NewId()
-        self._slicerpop.Append(id, '&Add text')
-        wx.EVT_MENU(self, id, self._on_addtext)
-        id = wx.NewId()
-        self._slicerpop.Append(id, '&Remove text')
-        wx.EVT_MENU(self, id, self._on_removetext)
+        if self.position != None:
+            id = wx.NewId()
+            self._slicerpop.Append(id, '&Add text')
+            wx.EVT_MENU(self, id, self._on_addtext)
+            id = wx.NewId()
+            self._slicerpop.Append(id, '&Remove text')
+            wx.EVT_MENU(self, id, self._on_removetext)
         id = wx.NewId()
         self._slicerpop.Append(id, '&Change scale')
         wx.EVT_MENU(self, id, self._onProperties)
