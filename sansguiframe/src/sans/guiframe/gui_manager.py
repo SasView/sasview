@@ -449,7 +449,7 @@ class ViewerFrame(wx.Frame):
                                              str(self._input_file))
             msg += str(sys.exc_value) + '\n'
             print msg
-        if self._data_panel is not None:
+        if self._data_panel is not None and len(self.plugins) > 0:
             self._data_panel.fill_cbox_analysis(self.plugins)
         self.post_init()
         # Set Custom default
