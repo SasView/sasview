@@ -7,14 +7,20 @@ import time
 import copy 
 import math
 import string
-from sans.guiframe.panel_base import PanelBase
 from wx.lib.scrolledpanel import ScrolledPanel
+from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.utils import format_number,check_float
 from sans.guiframe.events import PanelOnFocusEvent
 from sans.guiframe.events import StatusEvent
 from sans.guiframe.events import AppendBookmarkEvent
+from sans.guiframe.dataFitting import Data2D
+from sans.guiframe.dataFitting import Data1D
+from sans.guiframe.dataFitting import check_data_validity
+from sans.dataloader.data_info import Detector
+from sans.dataloader.data_info import Source
 import pagestate
 from pagestate import PageState
+
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
 (PreviousStateEvent, EVT_PREVIOUS_STATE)   = wx.lib.newevent.NewEvent()
 (NextStateEvent, EVT_NEXT_STATE)   = wx.lib.newevent.NewEvent()
@@ -61,12 +67,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.event_owner = None
          ## current model
         self.model = None
+        self.index_model = None
         ## data
         self.data = None
         #list of available data
         self.data_list = []
         self.mask = None
-        self.uid = None
+        self.uid = wx.NewId()
         #Q range for data set
         self.qmin_data_set = None
         self.qmax_data_set = None
@@ -147,6 +154,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.number_saved_state = 0
         ## dictionary of saved state
         self.saved_states = {} 
+        #create a default data for an empty panel
+        self.create_default_data()
         ## Create context menu for page
         self.popUpMenu = wx.Menu()
     
@@ -177,6 +186,111 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## layout
         self.set_layout()
     
+    def set_index_model(self, index):
+        """
+        Index related to this page
+        """
+        self.index_model = index
+        
+    def create_default_data(self):
+        """
+        Given the user selection, creates a 1D or 2D data 
+        Only when the page is on theory mode.
+        """
+        if self.enable2D and not check_data_validity(self.data):
+            self._create_default_2d_data()
+        else:
+            self._create_default_1d_data()
+        
+            
+    def _create_default_1d_data(self):
+        """
+        Create default data for fitting perspective 
+        Only when the page is on theory mode.
+        :warning: This data is never plotted.
+        
+        """
+        x = numpy.linspace(start=self.qmin_x, stop=self.qmax_x, 
+                           num=self.npts_x, endpoint=True)
+        self.data = Data1D(x=x)
+        self.data.xaxis('\\rm{Q}',"A^{-1}")
+        self.data.yaxis('\\rm{Intensity}', "cm^{-1}")
+        self.data.is_data = False
+        self.data.id = str(self.uid) + " data" 
+        self.data.group_id = str(self.uid) + " Model1D" 
+       
+    def _create_default_2d_data(self):
+        """
+        Create 2D data by default
+        Only when the page is on theory mode.
+        :warning: This data is never plotted.
+        """
+        self.data = Data2D()
+        qmax = self.qmax_x
+        self.data.xaxis('\\rm{Q_{x}}', 'A^{-1}')
+        self.data.yaxis('\\rm{Q_{y}}', 'A^{-1}')
+        self.data.is_data = False
+        self.data.id = str(self.uid) + " data" 
+        self.data.group_id = str(self.uid) + " Model2D" 
+        ## Default values    
+        self.data.detector.append(Detector())  
+        index = len(self.data.detector) - 1
+        self.data.detector[index].distance = 8000   # mm        
+        self.data.source.wavelength= 6         # A      
+        self.data.detector[index].pixel_size.x = 5  # mm
+        self.data.detector[index].pixel_size.y = 5  # mm
+        self.data.detector[index].beam_center.x = qmax
+        self.data.detector[index].beam_center.y = qmax
+        ## create x_bins and y_bins of the model 2D
+        pixel_width_x = self.data.detector[index].pixel_size.x
+        pixel_width_y = self.data.detector[index].pixel_size.y
+        center_x = self.data.detector[index].beam_center.x/pixel_width_x
+        center_y = self.data.detector[index].beam_center.y/pixel_width_y
+        # theory default: assume the beam 
+        #center is located at the center of sqr detector
+        xmax = self.qmax_x
+        xmin = -self.qmin_x
+        ymax = self.qmax_x
+        ymin = -self.qmin_x
+        qstep = self.npts_x
+        x = numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)  
+        y = numpy.linspace(start=ymin, stop=ymax, num=qstep, endpoint=True)
+        ## use data info instead
+        new_x = numpy.tile(x, (len(y), 1))
+        new_y = numpy.tile(y, (len(x), 1))
+        new_y = new_y.swapaxes(0,1)
+        # all data reuire now in 1d array
+        qx_data = new_x.flatten()
+        qy_data = new_y.flatten()
+        q_data = numpy.sqrt(qx_data*qx_data + qy_data*qy_data)
+        # set all True (standing for unmasked) as default
+        mask = numpy.ones(len(qx_data), dtype=bool)
+        # calculate the range of qx and qy: this way,
+        # it is a little more independent
+        x_size = xmax - xmin
+        y_size = ymax - ymin
+        # store x and y bin centers in q space
+        x_bins  = x
+        y_bins  = y 
+        # bin size: x- & y-directions
+        xstep = x_size/len(x_bins-1)
+        ystep = y_size/len(y_bins-1)
+        self.data.detector.append(Detector())         
+        self.data.source = Source()
+        self.data.data = numpy.ones(len(qx_data))
+        self.data.err_data = numpy.ones(len(mask))
+        self.data.qx_data = qx_data 
+        self.data.qy_data = qy_data  
+        self.data.q_data = q_data 
+        self.data.mask = mask            
+        self.data.x_bins = x_bins  
+        self.data.y_bins = y_bins   
+        # max and min taking account of the bin sizes
+        self.data.xmin = xmin 
+        self.data.xmax = xmax
+        self.data.ymin = ymin 
+        self.data.ymax = ymax 
+        
     def on_set_focus(self, event):
         """
         """
@@ -1288,9 +1402,10 @@ class BasicPage(ScrolledPanel, PanelBase):
                 #self.btFit.Enable(True)
                 if is_2Ddata: self.btEditMask.Enable(True)
             if is_modified and self.fitrange:
-                if self.data == None:
-                    # Theory case: need to get npts value to draw
-                    self.npts_x = float(self.Npts_total.GetValue())
+                #if self.data == None:
+                # Theory case: need to get npts value to draw
+                self.npts_x = float(self.Npts_total.GetValue())
+                self.create_default_data()
                 self.state_change= True
                 self._draw_model() 
                 self.Refresh()
@@ -1340,14 +1455,18 @@ class BasicPage(ScrolledPanel, PanelBase):
                     else:
                         self._manager.set_smearer(smearer=temp_smearer,
                                                   uid=self.uid,
+                                                  fid=self.data.id,
                                                      qmin=float(self.qmin_x),
                                                       qmax=float(self.qmax_x),
+                            enable_smearer=not self.disable_smearer.GetValue(),
                                                       draw=False)
                 elif not self._is_2D():
                     self._manager.set_smearer(smearer=temp_smearer,
                                               qmin=float(self.qmin_x),
                                               uid=self.uid, 
+                                              fid=self.data.id,
                                                  qmax= float(self.qmax_x),
+                            enable_smearer=not self.disable_smearer.GetValue(),
                                                  draw=False)
                     if self.data != None:
                         index_data = ((self.qmin_x <= self.data.x)&\
@@ -1653,7 +1772,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                                     smearer= temp_smear,
                                     qmin=float(self.qmin_x), 
                                     qmax=float(self.qmax_x),
-                                    qstep= float(self.npts_x),
                                     page_id=self.uid,
                                     toggle_mode_on=toggle_mode_on, 
                                     state = self.state,
@@ -1675,7 +1793,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         sld_data = Data1D(x,y)
         sld_data.name = 'SLD'
         sld_data.axes = self.sld_axes
-        self.panel = SLDPanel(self, data=sld_data,axes =self.sld_axes,id =-1 )
+        self.panel = SLDPanel(self, data=sld_data, axes =self.sld_axes,id =-1)
         self.panel.ShowModal()    
         
     def _set_multfactor_combobox(self, multiplicity=10):   
@@ -1826,6 +1944,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         wx.PostEvent(self.parent, event)
         self.state_change = False
         #Draw the model for a different range
+        self.create_default_data()
         self._draw_model()
                    
     def _theory_qrange_enter(self, event):
@@ -1882,6 +2001,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         wx.PostEvent(self.parent, event)
         self.state_change= False
         #Draw the model for a different range
+        self.create_default_data()
         self._draw_model()
                    
     def _on_select_model_helper(self): 
