@@ -136,20 +136,16 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         ## validity of the constraint expression is own by fit engine
         if self.show_constraint.GetValue():
             self._set_constraint()
-        ## get the fit range of very fit problem        
-        for id, value in self.page_finder.iteritems():
-            qmin, qmax= self.page_finder[id].get_range()
-            value.set_range(qmin, qmax)
         ## model was actually selected from this page to be fit
         if len(self.model_toFit) >= 1 :
             self.manager._reset_schedule_problem(value=0)
             for item in self.model_list:
                 if item[0].GetValue():
-                    self.manager.schedule_for_fit( value=1, fitproblem =item[1]) 
+                    self.manager.schedule_for_fit(value=1, uid=item[2]) 
             self.manager.onFit(None)
         else:
             msg= "Select at least one model to fit "
-            wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
+            wx.PostEvent(self.parent.Parent, StatusEvent(status=msg))
            
     def set_manager(self, manager):
         """
@@ -226,7 +222,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         if len(self.model_list)>0:
             for item in self.model_list:
                 item[0].SetValue(False) 
-                self.manager.schedule_for_fit( value=0,fitproblem =item[1])
+                self.manager.schedule_for_fit(value=0, uid=item[2])
                 
         self.sizer1.Clear(True)    
         box_description= wx.StaticBox(self, -1,"Fit Combinations")
@@ -550,7 +546,9 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                         msg+= " to set constraint! "
                         wx.PostEvent(self.parent.Parent, StatusEvent(status= msg ))
                         constraint = None
-                    self.page_finder[id].set_model_param(param,constraint)
+                    for fid in self.page_finder[id].iterkeys():
+                        self.page_finder[id].set_model_param(param,
+                                                        constraint, fid=fid)
                     break
     
     def _fill_sizer_model_list(self,sizer):
@@ -588,37 +586,43 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             try:
                 ix = 0
                 iy += 1 
-                model = value.get_model()
-                name = '_'
-                if model is not None:
-                    name = str(model.name)
-                cb = wx.CheckBox(self, -1, name)
-                cb.SetValue(False)
-                cb.Enable(model is not None)
-                sizer.Add( cb,( iy,ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-                wx.EVT_CHECKBOX(self, cb.GetId(), self.check_model_name)
-                ix += 2 
-                type = model.__class__.__name__
-                model_type = wx.StaticText(self, -1, str(type))
-                sizer.Add(model_type,( iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                data = value.get_fit_data()
-                name = '-'
-                if data is not None:
-                    name = str(data.name)
-                data_used = wx.StaticText(self, -1, name)
-                ix += 1 
-                sizer.Add(data_used,( iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                for fitproblem in value.get_fit_problem():
+                    model = fitproblem.get_model()
+                    name = '_'
+                    if model is not None:
+                        name = str(model.name)
+                    cb = wx.CheckBox(self, -1, name)
+                    cb.SetValue(False)
+                    cb.Enable(model is not None)
+                    sizer.Add(cb, (iy, ix), (1, 1), 
+                               wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                    wx.EVT_CHECKBOX(self, cb.GetId(), self.check_model_name)
+                    ix += 2 
+                    type = model.__class__.__name__
+                    model_type = wx.StaticText(self, -1, str(type))
+                    sizer.Add(model_type, (iy, ix), (1, 1), 
+                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    data = fitproblem.get_fit_data()
+                    name = '-'
+                    if data is not None:
+                        name = str(data.name)
+                    data_used = wx.StaticText(self, -1, name)
+                    ix += 1 
+                    sizer.Add(data_used, (iy, ix), (1, 1), 
+                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    ix += 1 
+                    caption = value.get_fit_tab_caption()
+                    tab_caption_used= wx.StaticText(self, -1, str(caption))
+                    sizer.Add(tab_caption_used, (iy, ix), (1, 1), 
+                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                     
-                ix += 1 
-                caption = value.get_fit_tab_caption()
-                tab_caption_used= wx.StaticText(self, -1, str(caption))
-                sizer.Add(tab_caption_used,( iy,ix),(1,1),  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                
                 self.model_list.append([cb,value,id,model])
                 
             except:
                 raise
                 #pass
         iy += 1
-        sizer.Add((20,20),( iy,ix),(1,1),  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        sizer.Add((20, 20), (iy, ix), (1, 1), 
+                  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         sizer.Layout()    
+
