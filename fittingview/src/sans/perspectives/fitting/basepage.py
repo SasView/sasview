@@ -89,7 +89,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## default fitengine type
         self.engine_type = 'scipy'
         ## smear default
-        self.smearer = None
         self.current_smearer = None
         ## 2D smear accuracy default
         self.smear2d_accuracy = 'Low'
@@ -110,9 +109,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._disp_obj_dict = {}
         ## selected parameters to apply dispersion
         self.disp_cb_dict ={}
-
         ## smearer object
-        self.smearer = None
         self.enable2D = False
         self.is_mac = ON_MAC
         
@@ -154,8 +151,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.number_saved_state = 0
         ## dictionary of saved state
         self.saved_states = {} 
-        #create a default data for an empty panel
-        self.create_default_data()
         ## Create context menu for page
         self.popUpMenu = wx.Menu()
     
@@ -197,12 +192,15 @@ class BasicPage(ScrolledPanel, PanelBase):
         Given the user selection, creates a 1D or 2D data 
         Only when the page is on theory mode.
         """
-        if self.enable2D and not check_data_validity(self.data):
-            self._create_default_2d_data()
-        else:
-            self._create_default_1d_data()
+        if not hasattr(self, "model_view"):
+            return
+        toggle_mode_on = self.model_view.IsEnabled()
+        if toggle_mode_on:
+            if self.enable2D and not check_data_validity(self.data):
+                self._create_default_2d_data()
+            else:
+                self._create_default_1d_data()
         
-            
     def _create_default_1d_data(self):
         """
         Create default data for fitting perspective 
@@ -874,7 +872,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.state.enable_disp= self.enable_disp.GetValue()
             self.state.disable_disp = self.disable_disp.GetValue()
             
-        self.state.smearer = copy.deepcopy(self.smearer)
+        self.state.smearer = copy.deepcopy(self.current_smearer)
         if hasattr(self,"enable_smearer"):
             self.state.enable_smearer = \
                                 copy.deepcopy(self.enable_smearer.GetValue())
@@ -940,7 +938,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.state.enable_disp= self.enable_disp.GetValue()
             self.state.disable_disp = self.disable_disp.GetValue()
             
-        self.state.smearer = copy.deepcopy(self.smearer)
+        self.state.smearer = copy.deepcopy(self.current_smearer)
         if hasattr(self,"enable_smearer"):
             self.state.enable_smearer = \
                                 copy.deepcopy(self.enable_smearer.GetValue())

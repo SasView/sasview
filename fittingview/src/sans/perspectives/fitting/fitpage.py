@@ -63,6 +63,8 @@ class FitPage(BasicPage):
         self.btFit.SetFocus()
         self.enable_fit_button()
         self.fill_data_combobox(data_list=self.data_list)
+        #create a default data for an empty panel
+        self.create_default_data()
     
     def enable_fit_button(self):
         """
@@ -1117,7 +1119,7 @@ class FitPage(BasicPage):
                 temp_smear = None
                 if not self.disable_smearer.GetValue():
                     # Set the smearer environments
-                    temp_smear = self.smearer
+                    temp_smear = self.current_smearer
             except:
                 raise
                 ## error occured on chisqr computation
@@ -1416,7 +1418,7 @@ class FitPage(BasicPage):
                         self.enable2D:  
             if data.dqx_data == None or  data.dqy_data ==None: 
                 return
-            elif self.smearer != None and (data.dqx_data.any()!=0) and \
+            elif self.current_smearer != None and (data.dqx_data.any()!=0) and \
                             (data.dqx_data.any()!=0): 
                 self.smear_type = "Pinhole2d"
                 self.dq_l = format_number(numpy.average(data.dqx_data)) 
@@ -1634,9 +1636,9 @@ class FitPage(BasicPage):
         """
         if data is None:
             return
-        self.smearer = smear_selection(data, self.model)
+        self.current_smearer = smear_selection(data, self.model)
         self.disable_smearer.SetValue(True)
-        if self.smearer == None:
+        if self.current_smearer == None:
             self.enable_smearer.Disable()
         else:
             self.enable_smearer.Enable()
@@ -1735,15 +1737,13 @@ class FitPage(BasicPage):
             self.formfactorbox.Enable()
             self.structurebox.Enable()
             data_name = self.data.name
-            #data_min, data_max, npts = self.compute_data_range(self.data)
             data_min, data_max = self.qmin_data_set, self.qmax_data_set
             npts =  self.npts_data_set
             #set maximum range for x in linear scale
-            if not hasattr(self.data,"data"): #Display only for 1D data fit
+            if not hasattr(self.data, "data"): #Display only for 1D data fit
                 self.btEditMask.Disable()  
                 self.EditMask_title.Disable()
             else:
-                
                 self.btEditMask.Enable()  
                 self.EditMask_title.Enable() 
         self.Npts_total.SetValue(str(npts))
@@ -1754,7 +1754,6 @@ class FitPage(BasicPage):
                                     self.GetParent().GetBackgroundColour())
         
         self.Npts_total.Bind(wx.EVT_MOUSE_EVENTS, self._npts_click)
-        #self.Npts_total.Disable()
         self.dataSource.SetValue(data_name)
         self.qmin_x = data_min
         self.qmax_x = data_max
@@ -1789,8 +1788,8 @@ class FitPage(BasicPage):
             #plot the current selected data
             wx.PostEvent(self._manager.parent, NewPlotEvent(plot=self.data, 
                                                 title=str(self.data.title)))
-            self._manager.store_data(uid=self.uid, data_list=self.data_list,
-                                      caption=self.window_name)
+            #self._manager.store_data(uid=self.uid, data_list=self.data_list,
+            #                          caption=self.window_name)
             self._draw_model()
     
     def _npts_click(self, event):
@@ -2410,7 +2409,7 @@ class FitPage(BasicPage):
                 msg= ": Resolution smearing parameters"
             if hasattr(self.data,"dxw"):
                 msg= ": Slit smearing parameters"
-            if self.smearer ==None:
+            if self.current_smearer ==None:
                 wx.PostEvent(self._manager.parent, StatusEvent(status=\
                             "Data contains no smearing information"))
             else:
