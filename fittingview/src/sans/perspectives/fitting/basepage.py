@@ -224,7 +224,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         :warning: This data is never plotted.
         """
         self.data = Data2D()
-        qmax = self.qmax_x
+        qmax = self.qmax_x / math.sqrt(2)
         self.data.xaxis('\\rm{Q_{x}}', 'A^{-1}')
         self.data.yaxis('\\rm{Q_{y}}', 'A^{-1}')
         self.data.is_data = False
@@ -246,11 +246,12 @@ class BasicPage(ScrolledPanel, PanelBase):
         center_y = self.data.detector[index].beam_center.y/pixel_width_y
         # theory default: assume the beam 
         #center is located at the center of sqr detector
-        xmax = qmax
+        xmax = qmax 
         xmin = -qmax
         ymax = qmax
         ymin = -qmax
         qstep = self.npts_x
+
         x = numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)  
         y = numpy.linspace(start=ymin, stop=ymax, num=qstep, endpoint=True)
         ## use data info instead
@@ -288,7 +289,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.data.xmax = xmax
         self.data.ymin = ymin 
         self.data.ymax = ymax 
-        
+
     def on_set_focus(self, event):
         """
         """
