@@ -612,7 +612,7 @@ class Plugin(PluginBase):
         :param update_chisqr: update chisqr [bool]
              
         """
-        if issublclass(data.__class__, Data1D) or not enable2D:    
+        if issubclass(data.__class__, Data1D) or not enable2D:    
             ## draw model 1D with no loaded data
             self._draw_model1D(model=model, 
                                data=data,
@@ -1207,8 +1207,8 @@ class Plugin(PluginBase):
         msg = "Plot updating ... "
         wx.PostEvent(self.parent, StatusEvent(status=msg,type="update"))
         
-    def _complete1D(self, x,y, page_id, elapsed,index,model,
-                    toggle_mode_on=False,state=None, 
+    def _complete1D(self, x, y, page_id, elapsed, index, model,
+                    toggle_mode_on=False, state=None, 
                     data=None, update_chisqr=True):
         """
         Complete plotting 1D data
@@ -1271,7 +1271,7 @@ class Plugin(PluginBase):
         #self.ready_fit()
   
     def _complete2D(self, image, data, model, page_id,  elapsed, index, qmin,
-                     qmax, toggle_mode_on=False,state=None,qstep=DEFAULT_NPTS, 
+                     qmax, toggle_mode_on=False, state=None, 
                      update_chisqr=True):
         """
         Complete get the result of modelthread and create model 2D
