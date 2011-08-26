@@ -248,10 +248,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         center_y = self.data.detector[index].beam_center.y/pixel_width_y
         # theory default: assume the beam 
         #center is located at the center of sqr detector
-        xmax = self.qmax_x
-        xmin = -self.qmin_x
-        ymax = self.qmax_x
-        ymin = -self.qmin_x
+        xmax = qmax
+        xmin = -qmax
+        ymax = qmax
+        ymin = -qmax
         qstep = self.npts_x
         x = numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)  
         y = numpy.linspace(start=ymin, stop=ymax, num=qstep, endpoint=True)
@@ -275,9 +275,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         # bin size: x- & y-directions
         xstep = x_size/len(x_bins-1)
         ystep = y_size/len(y_bins-1)
-        self.data.detector.append(Detector())         
+  
         self.data.source = Source()
-        self.data.data = numpy.ones(len(qx_data))
+        self.data.data = numpy.ones(len(mask))
         self.data.err_data = numpy.ones(len(mask))
         self.data.qx_data = qx_data 
         self.data.qy_data = qy_data  
