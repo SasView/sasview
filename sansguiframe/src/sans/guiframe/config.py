@@ -58,6 +58,7 @@ SPLASH_SCREEN_PATH = "images/danse_logo.png"
 DEFAULT_STYLE = GUIFRAME.SINGLE_APPLICATION
 SPLASH_SCREEN_WIDTH = 500
 SPLASH_SCREEN_HEIGHT = 300
+TUTORIAL_PATH = None
 SS_MAX_DISPLAY_TIME = 4000 #4 sec
 PLOPANEL_WIDTH = 350
 PLOPANEL_HEIGTH = 350
@@ -77,6 +78,8 @@ WELCOME_PANEL_SHOW = False
 TOOLBAR_SHOW = True
 # set a default perspective
 DEFAULT_PERSPECTIVE = 'None'
+# OPEN and SAVE project menu
+OPEN_SAVE_PROJECT_MENU = True
 
 import wx.lib.newevent
 (StatusBarEvent, EVT_STATUS) = wx.lib.newevent.NewEvent()

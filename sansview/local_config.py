@@ -86,7 +86,7 @@ SetupIconFile_win = os.path.join(icon_path, "ball.ico")
 SetupIconFile_mac = os.path.join(icon_path, "ball.icns")
 DefaultGroupName = "DANSE"
 OutputBaseFilename = "setupSansView"
-DATAPANEL_WIDTH = 235
+
 FIXED_PANEL = True
 DATALOADER_SHOW = True
 CLEANUP_PLOT = False
