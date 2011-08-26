@@ -1,4 +1,5 @@
 
+
 import math
 import numpy
 import copy
@@ -72,6 +73,9 @@ class BatchScipyFit:
                              self.list_of_constraints)
             #smear data
             current_smearer = smear_selection(data, model)
+            import cPickle
+            p = cPickle.dumps(current_smearer)
+            sm = cPickle.loads(p)
             fitter.set_data(data=data, id=i,
                              smearer=current_smearer, qmin=self.qmin, qmax=self.qmax)
             fitter.select_problem_for_fit(id=i, value=1)
@@ -106,6 +110,7 @@ class BatchScipyFit:
         self._reset_helper(path=path, engine=engine, npts=NPTS)
         path = "latex_qdev2.txt"
         self._reset_helper(path=path, engine=engine, npts=NPTS)
+        
       
     def test_map_fit(self):
         """
@@ -139,28 +144,29 @@ class testBatch(unittest.TestCase):
     """  
     def setUp(self):
         self.test = BatchScipyFit(qmin=None, qmax=None)
+       
     
-    def test_fit1(self):
+    def __test_fit1(self):
         """test fit with python built in map function---- full range of each data"""
         self.test.test_map_fit()
         
-    #def test_fit2(self):
-    #   """test fit with python built in map function---- common range for all data"""
-    #    self.test.set_range(qmin=0.013, qmax=0.05)
-    #    self.test.reset_value()
-    #    self.test.test_map_fit()
+    def __test_fit2(self):
+        """test fit with python built in map function---- common range for all data"""
+        self.test.set_range(qmin=0.013, qmax=0.05)
+        self.test.reset_value()
+        self.test.test_map_fit()
         
     def test_fit3(self):
         """test fit with data full range using 1 processor and map"""
         self.test.set_range(qmin=None, qmax=None)
         self.test.reset_value()
-        self.test.test_process_map_fit(n=1)
+        self.test.test_process_map_fit(n=2)
         
-    #def test_fit4(self):
-    #    """test fit with a common fixed range for data using 1 processor and map"""
-    #    self.test.set_range(qmin=0.013, qmax=0.05)
-    #    self.test.reset_value()
-    #    self.test.test_process_map_fit(n=1)
+    def test_fit4(self):
+        """test fit with a common fixed range for data using 1 processor and map"""
+        self.test.set_range(qmin=-1, qmax=10)
+        self.test.reset_value()
+        self.test.test_process_map_fit(n=1)
         
             
 if __name__ == '__main__':
