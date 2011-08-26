@@ -1281,7 +1281,7 @@ class Plugin(PluginBase):
         new_plot.name = model.name
         new_plot.title = "Analytical model 2D "
         new_plot.id = str(page_id) + "model"
-        new_plot.group_id = data.group_id
+        new_plot.group_id = str(page_id) + " Model2D"
         new_plot.detector = data.detector
         new_plot.source = data.source
         new_plot.is_data = False 
