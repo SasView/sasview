@@ -9,6 +9,7 @@ from wx.aui import AuiNotebook as nb
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.events import PanelOnFocusEvent
 from sans.guiframe.events import StatusEvent
+from sans.guiframe.dataFitting import check_data_validity
 
 import basepage
 import models
@@ -53,7 +54,7 @@ class FitPanel(nb, PanelBase):
         self.fit_page_name = {}
         ## list of existing fit page
         self.opened_pages = {}
-        #index of fit page
+        #index of fit page 
         self.fit_page_index = 0
         #index of batch page
         self.batch_page_index = 0
@@ -112,8 +113,7 @@ class FitPanel(nb, PanelBase):
         if len(temp):
             self.model_list_box = temp
         return temp
-        
-        
+
     def get_page_by_id(self, uid):  
         """
         """
@@ -323,16 +323,24 @@ class FitPanel(nb, PanelBase):
         """
         from fitpage import FitPage
         panel = FitPage(parent=self)
-        #Increment index of fit page
-        self.fit_page_index += 1
-        index = self.fit_page_index
-        panel.uid = wx.NewId()
+        if self.batch_on:
+            self.batch_page_index += 1
+            caption = "BatchPage " + str(self.batch_page_index)
+            panel.set_index_model(self.batch_page_index)
+        else:
+            #Increment index of fit page
+            self.fit_page_index += 1
+            caption = "FitPage " + str(self.fit_page_index)
+            panel.set_index_model(self.fit_page_index)
         panel.populate_box(dict=self.model_list_box)
         panel.set_manager(self._manager)
-        caption = str(panel.window_caption) + " " + str(index)
+        panel.window_caption = caption
+        panel.window_name = caption
         self.AddPage(panel, caption, select=True)
         self.opened_pages[panel.uid] = panel
         self.set_engine_helper(panel=panel)
+        self._manager.create_fit_problem(panel.uid)
+        self._manager.page_finder[panel.uid].add_data(panel.get_data())
         self.enable_close_button()
         return panel 
     
@@ -395,12 +403,11 @@ class FitPanel(nb, PanelBase):
                 data_2d_list.append(data)
         page = None
         for p in self.opened_pages.values():
-            #check if the selected data existing in the fitpanel
-            pos = self.GetPageIndex(page)
-            if p.get_data() is None:
+            #check if there is an empty page to fill up 
+            if not check_data_validity(p.get_data()):
                 page = p
+                self.batch_page_index += 1
                 break
-               
         if data_1d_list and data_2d_list:
             # need to warning the user that this batch is a special case
             from .fitting_widgets import BatchDataDialog
@@ -427,7 +434,11 @@ class FitPanel(nb, PanelBase):
                 page.fill_data_combobox(data_1d_list)
             elif not data_1d_list and data_2d_list:
                 page.fill_data_combobox(data_2d_list)
-            
+        pos = self.GetPageIndex(page)
+        caption = "BatchPage" + str(self.batch_page_index)
+        self.SetPageText(pos, caption)
+        page.window_caption = caption
+        page.window_name = caption
         self.opened_pages[page.uid] = page
         return page
     
@@ -453,32 +464,19 @@ class FitPanel(nb, PanelBase):
         for page in self.opened_pages.values():
             #check if the selected data existing in the fitpanel
             pos = self.GetPageIndex(page)
-            if page.get_data() is None:
+            if not check_data_validity(page.get_data()):
                 #make sure data get placed in 1D empty tab if data is 1D
                 #else data get place on 2D tab empty tab
                 enable2D = page.get_view_mode()
                 if (data.__class__.__name__ == "Data2D" and enable2D)\
                 or (data.__class__.__name__ == "Data1D" and not enable2D):
-                    #page.set_data(data)
                     page.fill_data_combobox(data_list)
-                    self.SetPageText(pos, str(data.name))
                     self.SetSelection(pos)
                     return page
-                # Todo: Need to set different window name when has same data
-                # Todo: to catch page with same data even if it is not on the top.
-                """
-                elif page.get_data().id == data.id:
-                    msg = "Data already existing in the fitting panel"
-                    wx.PostEvent(self._manager.parent, 
-                                 StatusEvent(status=msg, info='warning')) 
-                    self.SetSelection(pos)
-                    return page
-                """
+        #create new page and add data
         page = self.add_empty_page()
         pos = self.GetPageIndex(page)
         page.fill_data_combobox(data_list)
-        #page.set_data(data)
-        self.SetPageText(pos, str(data.name))
         self.opened_pages[page.uid] = page
         self.SetSelection(pos)
         return page
