@@ -11,7 +11,9 @@ from sans.models.dispersion_models import ArrayDispersion, GaussianDispersion
 from sans.dataloader.data_info import Data1D
 from sans.guiframe.events import StatusEvent 
 from sans.guiframe.events import NewPlotEvent  
-from sans.guiframe.utils import format_number,check_float
+from sans.guiframe.dataFitting import check_data_validity
+from sans.guiframe.utils import format_number
+from sans.guiframe.utils import check_float
 
 (Chi2UpdateEvent, EVT_CHI2_UPDATE)   = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 76
@@ -59,9 +61,16 @@ class FitPage(BasicPage):
         self._set_copy_flag(False)
         self._set_paste_flag(False)
         self.btFit.SetFocus()
+        self.enable_fit_button()
         self.fill_data_combobox(data_list=self.data_list)
     
-    
+    def enable_fit_button(self):
+        """
+        Enable fit button if data is valid and model is valid
+        """
+        flag = check_data_validity(self.data) & (self.model is not None)
+        self.btFit.Enable(flag)
+        
     def _fill_data_sizer(self):
         """
         fill sizer 0 with data info
@@ -97,6 +106,7 @@ class FitPage(BasicPage):
         self.data_list = data_list
         self.enable_datasource()
         if data_list:
+            #find the maximum range covering all data
             qmin, qmax, npts = self.compute_data_range(data_list[0])
             self.qmin_data_set, self.qmax_data_set = qmin, qmax
             self.npts_data_set = npts
@@ -104,8 +114,6 @@ class FitPage(BasicPage):
             if data is not None:
                 self.compute_data_set_range(data)
                 self.dataSource.Append(str(data.name), clientData=data)
-                
-        print "fill_data_combox", self.qmin_data_set, self.qmax_data_set
         self.dataSource.SetSelection(0)
         self.on_select_data(event=None)
                 
@@ -1012,7 +1020,7 @@ class FitPage(BasicPage):
         self.qmin_x = float(self.qmin.GetValue())
         self.qmax_x = float(self.qmax.GetValue())
         self._manager._reset_schedule_problem(value=0, uid=self.uid)
-        self._manager.schedule_for_fit(uid=self.uid,value=1, fitproblem=None) 
+        self._manager.schedule_for_fit(uid=self.uid,value=1) 
         self._manager.set_fit_range(uid=self.uid,qmin=self.qmin_x, 
                                    qmax=self.qmax_x)
         #single fit 
@@ -1059,6 +1067,13 @@ class FitPage(BasicPage):
         self._manager._reset_schedule_problem(value=0)
         self._on_fit_complete()
          
+    def rename_model(self):
+        """
+        find a short name for model
+        """
+        if self.model is not None:
+            self.model.name = "M" + str(self.index_model)
+    
     def _on_select_model(self, event=None): 
         """
         call back for model selection
@@ -1085,8 +1100,9 @@ class FitPage(BasicPage):
     
         self.state.structurecombobox = self.structurebox.GetCurrentSelection()
         self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
-      
+        self.enable_fit_button()
         if self.model != None:
+            self.rename_model()
             self._set_copy_flag(True)
             self._set_paste_flag(True)
             if self.data != None:
@@ -1099,7 +1115,7 @@ class FitPage(BasicPage):
                 # update smearer sizer
                 self.onSmear(None)
                 temp_smear = None
-                if self.enable_smearer.GetValue():
+                if not self.disable_smearer.GetValue():
                     # Set the smearer environments
                     temp_smear = self.smearer
             except:
@@ -1113,8 +1129,10 @@ class FitPage(BasicPage):
             #    the data contain the smearing info
             evt = ModelEventbox(model=self.model, 
                                         smearer=temp_smear, 
+                             enable_smearer=not self.disable_smearer.GetValue(),
                                         qmin=float(self.qmin_x),
                                         uid=self.uid,
+                                        caption=self.window_caption,
                                      qmax=float(self.qmax_x)) 
    
             self._manager._on_model_panel(evt=evt)
@@ -1184,10 +1202,11 @@ class FitPage(BasicPage):
                 elif self.data.__class__.__name__ !=  "Data2D" and \
                         not self.enable2D:
                     self._manager.set_smearer(smearer=temp_smearer, 
-                                              enable2D=self.enable2D,
+                                              fid=self.data.id,
                                               uid=self.uid,
                                              qmin= float(self.qmin_x),
                                             qmax= float(self.qmax_x),
+                            enable_smearer=not self.disable_smearer.GetValue(),
                                             draw=True) 
                 if flag:   
                     #self.compute_chisqr(smearer= temp_smearer)
@@ -1247,9 +1266,7 @@ class FitPage(BasicPage):
         """
         Check validity of value enter in the Q range field
         """
-        #if self.check_invalid_panel():
-        #    return
-        tcrtl= event.GetEventObject()
+        tcrtl = event.GetEventObject()
         #Clear msg if previously shown.
         msg= ""
         wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
@@ -1281,43 +1298,39 @@ class FitPage(BasicPage):
                 return 
             #Check if # of points for theory model are valid(>0).
             # check for 2d
-            if self.data is not None:
-                if self.data.__class__.__name__ == "Data2D" or \
-                        self.enable2D:
-                    # set mask   
-                    radius= numpy.sqrt( self.data.qx_data*self.data.qx_data + 
-                                        self.data.qy_data*self.data.qy_data )
-                    index_data = ((self.qmin_x <= radius)& \
-                                    (radius<= self.qmax_x))
-                    index_data = (index_data)&(self.data.mask)
-                    index_data = (index_data)&(numpy.isfinite(self.data.data))
-                    if len(index_data[index_data]) < 10:
-                        msg = "Cannot Plot :No or too little npts in"
-                        msg += " that data range!!!  "
-                        wx.PostEvent(self.parent.parent, 
-                                     StatusEvent(status=msg))
-                        return
-                    else:
-                        self.data.mask = index_data
-                        #self.Npts_fit.SetValue(str(len(self.data.mask)))
-                        self.set_npts2fit() 
+            if self.data.__class__.__name__ == "Data2D" or \
+                    self.enable2D:
+                # set mask   
+                radius= numpy.sqrt(self.data.qx_data*self.data.qx_data + 
+                                    self.data.qy_data*self.data.qy_data )
+                index_data = ((self.qmin_x <= radius)& \
+                                (radius<= self.qmax_x))
+                index_data = (index_data)&(self.data.mask)
+                index_data = (index_data)&(numpy.isfinite(self.data.data))
+                if len(index_data[index_data]) < 10:
+                    msg = "Cannot Plot :No or too little npts in"
+                    msg += " that data range!!!  "
+                    wx.PostEvent(self.parent.parent, 
+                                 StatusEvent(status=msg))
+                    return
                 else:
-                    index_data = ((self.qmin_x <= self.data.x)& \
-                                  (self.data.x <= self.qmax_x))
-                    self.Npts_fit.SetValue(str(len(self.data.x[index_data])))
+                    self.data.mask = index_data
+                    #self.Npts_fit.SetValue(str(len(self.data.mask)))
+                    self.set_npts2fit() 
             else:
-                self.npts_x = self.Npts_total.GetValue()
-                self._save_plotting_range()
-
+                index_data = ((self.qmin_x <= self.data.x)& \
+                              (self.data.x <= self.qmax_x))
+                self.Npts_fit.SetValue(str(len(self.data.x[index_data])))
+            
+            self.npts_x = self.Npts_total.GetValue()
+            self.create_default_data()
+            self._save_plotting_range()
         else:
            tcrtl.SetBackgroundColour("pink")
            msg= "Model Error:wrong value entered!!!"
            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
         
         self._draw_model()
-        ##update chi2
-        #self.compute_chisqr(smearer= temp_smearer)
-        #self._undo.Enable(True)
         self.save_current_state()
         event = PageInfoEvent(page = self)
         wx.PostEvent(self.parent, event)
@@ -1672,7 +1685,6 @@ class FitPage(BasicPage):
                 ## Maximum value of data  
                 qmax = math.sqrt(x*x + y*y)
                 npts = len(data.data)
-        print "compute single data range", qmin, qmax
         return qmin, qmax, npts
             
     
@@ -1683,14 +1695,17 @@ class FitPage(BasicPage):
         id = None
         group_id = None
         flag = False
+        if self.data is not None:
+            group_id = self.data.group_id
+           
         if self.data is None and data is not None:
-            flag = True
+                flag = True
         if data is not None:
             id = data.id
-            group_id = data.group_id
             if self.data is not None:
                 flag = (data.id != self.data.id)
         self.data = data
+        self.data.group_id = group_id
         if self.data is None:
             data_min = ""
             data_max = ""
@@ -1702,6 +1717,7 @@ class FitPage(BasicPage):
             if self.model != None:
                 self._set_bookmark_flag(True)
                 self._keep.Enable(True)
+                
             self._set_save_flag(True)
             self._set_preview_flag(True)
 
@@ -1755,7 +1771,7 @@ class FitPage(BasicPage):
         self.state.data = data
         self.state.qmin = self.qmin_x
         self.state.qmax = self.qmax_x
-        
+        self.enable_fit_button()
         #update model plot with new data information
         if flag:
             #set model view button
@@ -1765,9 +1781,7 @@ class FitPage(BasicPage):
             else:
                 self.enable2D = False
                 self.model_view.SetLabel("1D Mode")
-                
             self.model_view.Disable()
-            
             #replace data plot on combo box selection
             #by removing the previous selected data
             wx.PostEvent(self._manager.parent, NewPlotEvent(action="remove",
@@ -1775,8 +1789,7 @@ class FitPage(BasicPage):
             #plot the current selected data
             wx.PostEvent(self._manager.parent, NewPlotEvent(plot=self.data, 
                                                 title=str(self.data.title)))
-            self._manager.store_data(uid=self.uid, data=data,
-                                     data_list=self.data_list,
+            self._manager.store_data(uid=self.uid, data_list=self.data_list,
                                       caption=self.window_name)
             self._draw_model()
     
@@ -2150,10 +2163,12 @@ class FitPage(BasicPage):
             get_pin_min.SetBackgroundColour("white")
             get_pin_max.SetBackgroundColour("white")
         ## set smearing value whether or not the data contain the smearing info
+        
         self._manager.set_smearer(smearer=self.current_smearer,
-                                 enable2D=self.enable2D,
+                                fid=self.data.id,
                                  qmin=float(self.qmin_x),
                                  qmax= float(self.qmax_x),
+                                 enable_smearer=not self.disable_smearer.GetValue(),
                                  uid=self.uid)
         return msg
         
@@ -2325,9 +2340,10 @@ class FitPage(BasicPage):
         #temp_smearer = self.current_smearer
         ## set smearing value whether or not the data contain the smearing info
         self._manager.set_smearer(smearer=self.current_smearer, 
-                                 enable2D=self.enable2D,
+                                 fid=self.data.id,
                                  qmin=float(self.qmin_x), 
                                  qmax= float(self.qmax_x),
+                        enable_smearer=not self.disable_smearer.GetValue(),
                                  uid=self.uid) 
         return msg
     
@@ -2414,9 +2430,11 @@ class FitPage(BasicPage):
         self.Layout()
         ## set smearing value whether or not the data contain the smearing info
         self._manager.set_smearer(uid=self.uid, smearer=temp_smearer,
-                        enable2D=self.enable2D,
-                        qmin= float(self.qmin_x),
-                        qmax= float(self.qmax_x), draw=True) 
+                                  fid=self.data.id,
+                        qmin=float(self.qmin_x),
+                        qmax=float(self.qmax_x),
+                        enable_smearer=not self.disable_smearer.GetValue(),
+                         draw=True) 
         
         self.state.enable_smearer=  self.enable_smearer.GetValue()
         self.state.disable_smearer=self.disable_smearer.GetValue()
@@ -2425,10 +2443,8 @@ class FitPage(BasicPage):
       
     def on_complete_chisqr(self, event):  
         """
-        print result chisqr 
-        
+        Display result chisqr on the panel
         :event: activated by fitting/ complete after draw
-        
         """
         try:
             if event == None:
@@ -2438,7 +2454,6 @@ class FitPage(BasicPage):
             else:
                 output = event.output
             self.tcChi.SetValue(str(format_number(output, True)))
-
             self.state.tcChi = self.tcChi.GetValue()
         except:
             pass  
@@ -2957,7 +2972,7 @@ class FitPage(BasicPage):
         else:
             self.model_view.SetLabel("1D Mode")
             self.enable2D = False
-
+        self.create_default_data()
         self.set_model_param_sizer(self.model)
         self._set_sizer_dispersion()  
         self._draw_model()
