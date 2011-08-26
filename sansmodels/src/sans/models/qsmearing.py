@@ -10,7 +10,8 @@ import numpy
 import math
 import logging
 import sys
-import sans.models.sans_extension.smearer as smearer 
+import copy
+import sans_extension.smearer as smearer 
 from sans.models.smearing_2d import Smearer2D
 
 def smear_selection(data1D, model = None):
@@ -93,17 +94,7 @@ class _BaseSmearer(object):
         self._init_complete = False
         self._smearer = None
         self.model = None
-        
-    def __deepcopy__(self, memo={}):
-        """
-        Return a valid copy of self.
-        Avoid copying the _smearer C object and force a matrix recompute
-        when the copy is used.  
-        """
-        result = _BaseSmearer()
-        result.nbins = self.nbins
-        return result
-
+    
     def _compute_matrix(self):
         """
         """
@@ -124,7 +115,6 @@ class _BaseSmearer(object):
             q_min = self.min
         if q_max == None:
             q_max = self.max
-
         _qmin_unsmeared, _qmax_unsmeared = self.get_unsmeared_range(q_min,
                                                                      q_max)
         _first_bin = None
@@ -171,12 +161,12 @@ class _BaseSmearer(object):
         # to the iq_in
         iq_in_temp = iq_in
         if self.model != None:
-            temp_first, temp_last = self._get_extrapolated_bin( \
-                                                        first_bin, last_bin)
+            temp_first, temp_last = self._get_extrapolated_bin(first_bin, 
+                                                               last_bin)
             if self.nbins_low > 0:
-                iq_in_low = self.model.evalDistribution( \
+                iq_in_low = self.model.evalDistribution(
                                     numpy.fabs(self.qvalues[0:self.nbins_low]))
-            iq_in_high = self.model.evalDistribution( \
+            iq_in_high = self.model.evalDistribution(
                                             self.qvalues[(len(self.qvalues) - \
                                             self.nbins_high - 1):])
             # Todo: find out who is sending iq[last_poin] = 0.
@@ -190,8 +180,6 @@ class _BaseSmearer(object):
         else:
             temp_first = first_bin
             temp_last = last_bin
-            #iq_in_temp = iq_in
-
         # Sanity check
         if len(iq_in_temp) != self.nbins:
             msg = "Invalid I(q) vector: inconsistent array "
@@ -299,6 +287,7 @@ class _SlitSmearer(_BaseSmearer):
         self._weights = None
         self.qvalues  = None
         
+   
     def _initialize_smearer(self):
         """
         Initialize the C++ smearer object.
@@ -342,6 +331,7 @@ class SlitSmearer(_SlitSmearer):
         self.width = 0
         self.nbins_low = 0
         self.nbins_high = 0
+        self.data = data1D
         self.model = model
         if data1D.dxw is not None and len(data1D.dxw) == len(data1D.x):
             self.width = data1D.dxw[0]
@@ -385,6 +375,52 @@ class SlitSmearer(_SlitSmearer):
         self.max = max(data1d_x)
         ## Q-values
         self.qvalues = data1d_x
+        
+    def __deepcopy__(self, memo={}):
+        """
+        Return a valid copy of self.
+        Avoid copying the _smearer C object and force a matrix recompute
+        when the copy is used.  
+        """
+        result = SlitSmearer(self.data, self.model)
+        result.width = self.width
+        result.height = self.height
+        result.nbins_low = self.nbins_low
+        result.nbins_high = self.nbins_high
+        result.data = copy.deepcopy(self.data)
+        result.model = copy.deepcopy(self.model)
+        result.nbins = self.nbins
+        result.nbins_low = self.nbins_low
+        result.nbins_high = self.nbins_high
+        result._weights = self._weights
+        ## Internal flag to keep track of C++ smearer initialization
+        result._init_complete = self._init_complete
+        import sans_extension.smearer as smearer 
+        result._smearer =  smearer.new_slit_smearer_with_q(self.width, 
+                                                    self.height, self.qvalues)
+        return result
+
+        
+    def __setstate__(self, state):
+        """
+        """
+        self.__dict__, self.model,  self.data = state
+        import sans_extension.smearer as smearer 
+        self._smearer = smearer.new_slit_smearer_with_q(self.width, 
+                                                    self.height, self.qvalues)
+        
+    def __reduce_ex__(self, proto):
+        """
+        Overwrite the __reduce_ex__ of PyTypeObject *type call in the init of 
+        c model.
+        """
+        model = copy.deepcopy(self.model)
+        data = copy.deepcopy(self.data)
+        dict = self.__dict__
+        if "_smearer" in dict.keys():
+            del dict["_smearer"]
+        state = (dict, model, data)
+        return (QSmearer, (data, model), state, None, None)
         
 
 class _QSmearer(_BaseSmearer):
@@ -456,9 +492,10 @@ class QSmearer(_QSmearer):
         # Initialization from parent class
         super(QSmearer, self).__init__()
         data1d_x = []
+        self.data =  copy.deepcopy(data1D)
         self.nbins_low = 0
         self.nbins_high = 0
-        self.model = model
+        self.model = copy.deepcopy(model)
         ## Resolution
         #self.width = numpy.zeros(len(data1D.x))
         if data1D.dx is not None and len(data1D.dx) == len(data1D.x):
@@ -469,7 +506,6 @@ class QSmearer(_QSmearer):
         else:
             self.nbins_low, self.nbins_high, self.width, data1d_x = \
                                 get_qextrapolate(self.width, data1D.x)
-
         ## Number of Q bins
         self.nbins = len(data1d_x)
         ## Minimum Q 
@@ -478,6 +514,51 @@ class QSmearer(_QSmearer):
         self.max = max(data1d_x)
         ## Q-values
         self.qvalues = data1d_x
+        
+    def __deepcopy__(self, memo={}):
+        """
+        Return a valid copy of self.
+        Avoid copying the _smearer C object and force a matrix recompute
+        when the copy is used.  
+        """
+        result = QSmearer(self.data, self.model)
+        result.nbins = self.nbins
+        result.min = self.min
+        result.max = self.max
+        result.nbins_low = self.nbins_low
+        result.nbins_high = self.nbins_high
+        result.width = copy.deepcopy(self.width)
+        result._weights = copy.deepcopy(self._weights)
+        result.qvalues = copy.deepcopy(self.qvalues)
+        ## Internal flag to keep track of C++ smearer initialization
+        result._init_complete = self._init_complete
+        import sans_extension.smearer as smearer 
+        result._smearer =  smearer.new_q_smearer_with_q(numpy.asarray(result.width),
+                                                      result.qvalues)
+        return result
+
+        
+    def __setstate__(self, state):
+        """
+        """
+        self.__dict__, self.model,  self.data = state
+        import sans_extension.smearer as smearer 
+        self._smearer =  smearer.new_q_smearer_with_q(numpy.asarray(self.width),
+                                                      self.qvalues)
+ 
+    def __reduce_ex__(self, proto):
+        """
+        Overwrite the __reduce_ex__ of PyTypeObject *type call in the init of 
+        c model.
+        """
+        model = copy.deepcopy(self.model)
+        data = copy.deepcopy(self.data)
+        dict = self.__dict__
+        if "_smearer" in dict.keys():
+            del dict["_smearer"]
+        state = (dict, model, data)
+        return (QSmearer, (data, model), state, None, None)
+    
 
         
 def get_qextrapolate(width, data_x):
