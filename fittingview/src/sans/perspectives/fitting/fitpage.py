@@ -109,9 +109,9 @@ class FitPage(BasicPage):
         self.enable_datasource()
         if data_list:
             #find the maximum range covering all data
-            qmin, qmax, npts = self.compute_data_range(data_list[0])
+            qmin, qmax, _ = self.compute_data_range(data_list[0])
             self.qmin_data_set, self.qmax_data_set = qmin, qmax
-            self.npts_data_set = npts
+            self.npts_data_set = 0
         for data in self.data_list:
             if data is not None:
                 self.compute_data_set_range(data)
