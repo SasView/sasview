@@ -34,9 +34,10 @@ class Reader:
     ## Wildcards
     type = ["ASCII files (*.txt)|*.txt",
             "ASCII files (*.dat)|*.dat",
-            "ASCII files (*.abs)|*.abs"]
+            "ASCII files (*.abs)|*.abs",
+            "CSV files (*.csv)|*.csv"]
     ## List of allowed extensions
-    ext = ['.txt', '.TXT', '.dat', '.DAT', '.abs', '.ABS']  
+    ext = ['.txt', '.TXT', '.dat', '.DAT', '.abs', '.ABS', 'csv', 'CSV']  
     
     ## Flag to bypass extension check
     allow_all = True
@@ -119,7 +120,9 @@ class Reader:
                 #minimum required number of columns of data; ( <= 4).           
                 lentoks = 2     
                 for line in lines:
-                    toks = line.split()
+                    toks = line.split(',')
+                    if len(toks) < 2:
+                        toks = line.split()
                     try:
                         #Make sure that all columns are numbers.
                         for colnum in range(len(toks)):
