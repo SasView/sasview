@@ -8,7 +8,7 @@ import copy
 import math
 import time
 from sans.models.dispersion_models import ArrayDispersion, GaussianDispersion
-from sans.dataloader.data_info import Data1D
+#from sans.dataloader.data_info import Data1D
 from sans.guiframe.events import StatusEvent 
 from sans.guiframe.events import NewPlotEvent  
 from sans.guiframe.dataFitting import check_data_validity
