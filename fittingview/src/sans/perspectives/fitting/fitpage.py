@@ -483,7 +483,7 @@ class FitPage(BasicPage):
         self.model_help.Bind(wx.EVT_BUTTON, self.on_model_help_clicked,id=id)
         self.model_help.SetToolTipString("Model Function Help")
         id = wx.NewId()
-        self.model_view = wx.Button(self, id,"1D Mode", size=(80, 23))
+        self.model_view = wx.Button(self, id,"Show 2D", size=(80, 23))
         self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D, id=id)
         hint = "toggle view of model from 1D to 2D  or 2D to 1D"
         self.model_view.SetToolTipString(hint)
@@ -1113,6 +1113,10 @@ class FitPage(BasicPage):
             #self._set_save_flag(True)
             # Reset smearer, model and data
             self._set_smear(self.data)
+    
+            # more disables for 2D
+            self._set_smear_buttons()
+            
             try:
                 # update smearer sizer
                 self.onSmear(None)
@@ -2964,21 +2968,37 @@ class FitPage(BasicPage):
         """
         toggle view of model from 1D to 2D  or 2D from 1D
         """
-        if self.model_view.GetLabelText() == "1D Mode":
-            self.model_view.SetLabel("2D Mode")
+        if self.model_view.GetLabelText() == "Show 2D":
+            self.model_view.SetLabel("Show 1D")
             self.enable2D = True
               
         else:
-            self.model_view.SetLabel("1D Mode")
+            self.model_view.SetLabel("Show 2D")
             self.enable2D = False
         self.create_default_data()
         self.set_model_param_sizer(self.model)
         self._set_sizer_dispersion()  
+        self._set_smear_buttons()
         self._draw_model()
         
         
         self.state.enable2D =  copy.deepcopy(self.enable2D)
-        
+    
+    def _set_smear_buttons(self):
+        """
+        Set semarer radio buttons 
+        """
+        # more disables for 2D
+        if self.data.__class__.__name__ ==  "Data2D" or \
+                    self.enable2D:
+            self.slit_smearer.Disable()
+            self.pinhole_smearer.Enable(True) 
+            self.default_mask = copy.deepcopy(self.data.mask)
+        else:
+            self.slit_smearer.Enable(True) 
+            self.pinhole_smearer.Enable(True)  
+            
+            
 class BGTextCtrl(wx.TextCtrl):
     """
     Text control used to display outputs.
