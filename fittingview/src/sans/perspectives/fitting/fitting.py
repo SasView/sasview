@@ -948,6 +948,8 @@ class Plugin(PluginBase):
                     batch_result[pars[index]] = []
                     batch_result["error on %s" % pars[index]] = []
             for res in result:
+                if res is None:
+                    continue
                 batch_result["Chi2"].append(res.fitness)
                 for index  in range(len(pars)):
                     batch_result[pars[index]].append(res.pvec[index])
