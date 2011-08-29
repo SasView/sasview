@@ -1021,7 +1021,7 @@ class Plugin(PluginBase):
         :param page_id: list of page ids which called fit function
         :param elapsed: time spent at the fitting level
         """
-        result = result 
+        result = result[0] 
         self.fit_thread_list = {}
         if page_id is None:
             page_id = []
@@ -1045,7 +1045,7 @@ class Plugin(PluginBase):
               
             for uid in page_id:   
                 fpdict = self.page_finder[uid]
-                for value in ftpdict.itervalues():
+                for value in fpdict.itervalues():
                     model = value.get_model()
                     data =  value.get_fit_data()
                     small_param_name = []
@@ -1071,6 +1071,7 @@ class Plugin(PluginBase):
                 msg = "Fit completed!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
         except Exception:
+            raise
             self._update_fit_button(page_id)
             msg = "Complex Fitting did not converge!!!"
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
