@@ -637,7 +637,7 @@ class Plugin(PluginBase):
                                 toggle_mode_on=toggle_mode_on,
                                 update_chisqr=update_chisqr)
             
-    def onFit(self, uid=None):
+    def onFit(self, uid):
         """
         Get series of data, model, associates parameters and range and send then
         to  series of fit engines. Fit data and model, display result to 
@@ -649,7 +649,6 @@ class Plugin(PluginBase):
         for value in self.page_finder.values():
             if value.get_scheduled() == 1:
                 fitproblem_count += 1
-                
         ## if simultaneous fit change automatically the engine to park
         if fitproblem_count > 1:
             self._on_change_engine(engine='park')
@@ -658,9 +657,16 @@ class Plugin(PluginBase):
             engineType = "Simultaneous Fit"
         else:
             engineType = "Single Fit"
-        fitter_list = []
+        fitter_list = []        
+        sim_fitter = None     
+        if self.sim_page is not None and self.sim_page.uid == uid:
+            #simulatanous fit only one engine need to be created    
+            sim_fitter = Fit(self._fit_engine)  
+            fitter_list.append(sim_fitter) 
+        
         self.current_pg = None
         list_page_id = []
+        fit_id = 0
         for page_id, value in self.page_finder.iteritems():
             # For simulfit (uid give with None), do for-loop
             # if uid is specified (singlefit), do it only on the page.
@@ -677,11 +683,21 @@ class Plugin(PluginBase):
                     for element in templist:
                         name = str(element[1])
                         pars.append(name)
-                    #Set Engine  (model , data) related to the page on 
-                    self._fit_helper(value, pars, fitter_list)
+
+                    for fitproblem in  value.get_fit_problem():
+                        if sim_fitter is None:
+                            fitter = Fit(self._fit_engine)  
+                            self._fit_helper(fitproblem, pars, fitter, fit_id)
+                            fitter_list.append(fitter) 
+                        else:
+                            fitter = sim_fitter
+                            self._fit_helper(fitproblem, pars, fitter, fit_id)
+                        fit_id += 1
                     list_page_id.append(page_id)
                     current_page_id = page_id
+                    value.clear_model_param()
             except:
+                raise
                 msg= "%s error: %s" % (engineType, sys.exc_value)
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                       type="stop"))
@@ -864,35 +880,30 @@ class Plugin(PluginBase):
             if uid in self.page_finder.keys():
                 self.page_finder[uid].schedule_tofit(value)
                 
-    def _fit_helper(self, value, pars, fitter_list):
+    def _fit_helper(self, fitproblem, pars, fitter, fit_id):
         """
         Create and set fit engine with series of data and model
         :param pars: list of fittable parameters
         :param fitter_list: list of fit engine
         :param value:  structure storing data mapped to their model, range etc..
         """
-        fit_id = 0
-        for fitproblem in  value.get_fit_problem():
-            fitter = Fit(self._fit_engine)
-            data = fitproblem.get_fit_data()
-            model = fitproblem.get_model()
-            smearer = fitproblem.get_smearer()
-            qmin, qmax = fitproblem.get_range()
-            #Extra list of parameters and their constraints
-            listOfConstraint = []
-            param = fitproblem.get_model_param()
-            if len(param) > 0:
-                for item in param:
-                    ## check if constraint
-                    if item[0] != None and item[1] != None:
-                        listOfConstraint.append((item[0],item[1]))
-            fitter.set_model(model, fit_id, pars, constraints=listOfConstraint)
-            fitter.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin, 
-                            qmax=qmax)
-            fitter.select_problem_for_fit(id=fit_id, value=1)
-            fitter_list.append(fitter)
-            fit_id += 1
-        value.clear_model_param()
+        data = fitproblem.get_fit_data()
+        model = fitproblem.get_model()
+        smearer = fitproblem.get_smearer()
+        qmin, qmax = fitproblem.get_range()
+        #Extra list of parameters and their constraints
+        listOfConstraint = []
+        param = fitproblem.get_model_param()
+        if len(param) > 0:
+            for item in param:
+                ## check if constraint
+                if item[0] != None and item[1] != None:
+                    listOfConstraint.append((item[0],item[1]))
+        fitter.set_model(model, fit_id, pars, constraints=listOfConstraint)
+        fitter.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin, 
+                        qmax=qmax)
+        fitter.select_problem_for_fit(id=fit_id, value=1)
+       
        
     def _onSelect(self,event):
         """ 
@@ -1021,7 +1032,7 @@ class Plugin(PluginBase):
         :param page_id: list of page ids which called fit function
         :param elapsed: time spent at the fitting level
         """
-        result = result[0] 
+        result = result[0]
         self.fit_thread_list = {}
         if page_id is None:
             page_id = []
