@@ -403,24 +403,26 @@ class SlitSmearer(_SlitSmearer):
         
     def __setstate__(self, state):
         """
+        Restore the state of the object by reconstruction the (smearer) object
         """
         self.__dict__, self.model,  self.data = state
         import sans_extension.smearer as smearer 
         self._smearer = smearer.new_slit_smearer_with_q(self.width, 
                                                     self.height, self.qvalues)
+        self.__dict__['_smearer'] = self._smearer
         
     def __reduce_ex__(self, proto):
         """
-        Overwrite the __reduce_ex__ of PyTypeObject *type call in the init of 
-        c model.
+        Overwrite the __reduce_ex__to avoid pickle PyCobject(smearer)
         """
         model = copy.deepcopy(self.model)
         data = copy.deepcopy(self.data)
-        dict = self.__dict__
-        if "_smearer" in dict.keys():
-            del dict["_smearer"]
+        dict = {}
+        for k , v in self.__dict__.iteritems():
+            if k != "_smearer":
+                dict[k] = v
         state = (dict, model, data)
-        return (QSmearer, (data, model), state, None, None)
+        return (SlitSmearer, (data, model), state, None, None)
         
 
 class _QSmearer(_BaseSmearer):
@@ -449,6 +451,7 @@ class _QSmearer(_BaseSmearer):
         ## Smearing matrix
         self._weights = None
         self.qvalues  = None
+      
         
     def _initialize_smearer(self):
         """
@@ -514,6 +517,7 @@ class QSmearer(_QSmearer):
         self.max = max(data1d_x)
         ## Q-values
         self.qvalues = data1d_x
+       
         
     def __deepcopy__(self, memo={}):
         """
@@ -540,22 +544,24 @@ class QSmearer(_QSmearer):
         
     def __setstate__(self, state):
         """
+        Restore the state of the object by reconstruction the (smearer) object
         """
         self.__dict__, self.model,  self.data = state
         import sans_extension.smearer as smearer 
         self._smearer =  smearer.new_q_smearer_with_q(numpy.asarray(self.width),
                                                       self.qvalues)
+        self.__dict__['_smearer'] = self._smearer
  
     def __reduce_ex__(self, proto):
         """
-        Overwrite the __reduce_ex__ of PyTypeObject *type call in the init of 
-        c model.
+        Overwrite the __reduce_ex__to avoid pickle PyCobject(smearer)
         """
         model = copy.deepcopy(self.model)
         data = copy.deepcopy(self.data)
-        dict = self.__dict__
-        if "_smearer" in dict.keys():
-            del dict["_smearer"]
+        dict = {}
+        for k , v in self.__dict__.iteritems():
+            if k != "_smearer":
+                dict[k] = v
         state = (dict, model, data)
         return (QSmearer, (data, model), state, None, None)
     
