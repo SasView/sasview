@@ -227,7 +227,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         :param event: data event
         """
         if data.id in self.plots.keys():
-            #replace
+            #replace except label 
+            label = self.plots[data.id].label
+            data.label = label
             self.graph.replace(data)
             self.plots[data.id] = data
         else:
@@ -442,24 +444,20 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         plot = self.plots[self.graph.selected_plottable]
         self.parent.onfreeze([plot.id])
-    
+        
     def onEditLabels(self, event):
         """
+        Edit legend label
         """
-        menu = event.GetEventObject()
-        id = event.GetId()
-        label =  menu.GetLabel(id)
         selected_plot = self.plots[self.graph.selected_plottable]
-        
-        dial = LabelDialog(None, -1, 'Change Plot Label')
+        label = selected_plot.label
+        dial = LabelDialog(None, -1, 'Change Legend Label', label)
         if dial.ShowModal() == wx.ID_OK:
-            newLabel = dial.getText()
-            selected_plot.name = newLabel
+            newLabel = dial.getText() 
+            selected_plot.label = newLabel
         dial.Destroy()
-
-        self.graph.render(self)
-        self._onEVT_FUNC_PROPERTY()
-        
+        ## render the graph
+        self._onEVT_FUNC_PROPERTY() 
         
     def onChangeColor(self, event):
         """
