@@ -227,19 +227,27 @@ class ModelPanel1D(PlotPanel, PanelBase):
         :param event: data event
         """
         if data.id in self.plots.keys():
-            #replace except label 
+            #Recover panel prop.s
+            xlo, xhi = self.subplot.get_xlim()
+            ylo, yhi = self.subplot.get_ylim()
             old_data = self.plots[data.id]
             data.label = old_data.label
             data.custom_color = old_data.custom_color
+            # Replace data
             self.graph.replace(data)
             self.plots[data.id] = data
+            ## Set the view scale for all plots
+            self._onEVT_FUNC_PROPERTY()
+            # Recover the x,y limits
+            self.subplot.set_xlim((xlo, xhi))     
+            self.subplot.set_ylim((ylo, yhi))  
         else:
             self.plots[data.id] = data
             self.graph.add(self.plots[data.id]) 
+            ## Set the view scale for all plots
+            self._onEVT_FUNC_PROPERTY()
         
-        ## Set the view scale for all plots
-        self._onEVT_FUNC_PROPERTY()
-    
+          
     def draw_plot(self):
         """
         Draw plot

@@ -165,10 +165,16 @@ class ModelPanel2D(ModelPanel1D):
          
         :param event: data event
         """
+        xlo = None
+        xhi = None
+        ylo = None 
+        yhi = None
         ## Update self.data2d with the current plot
         self.data2D = data
         if data.id in self.plots.keys():
             #replace
+            xlo, xhi = self.subplot.get_xlim()
+            ylo, yhi = self.subplot.get_ylim()
             self.graph.replace(data)
             self.plots[data.id] = data
         else:
@@ -198,6 +204,12 @@ class ModelPanel2D(ModelPanel1D):
         ## store default value of zmin and zmax 
         self.default_zmin_ctl = self.zmin_2D
         self.default_zmax_ctl = self.zmax_2D
+        # Recover the x,y limits
+        if (xlo and xhi and ylo and yhi) != None:
+            if (xlo > data.xmin and xhi < data.xmax and\
+                        ylo > data.ymin and yhi < data.ymax):
+                self.subplot.set_xlim((xlo, xhi))     
+                self.subplot.set_ylim((ylo, yhi))  
 
     def onContextMenu(self, event):
         """
