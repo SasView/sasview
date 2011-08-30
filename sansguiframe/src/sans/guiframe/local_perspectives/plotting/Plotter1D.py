@@ -228,20 +228,17 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         if data.id in self.plots.keys():
             #replace except label 
-            new_data = self.plots[data.id]
-            data.label = new_data.label
-            data.custom_color = new_data.custom_color
+            old_data = self.plots[data.id]
+            data.label = old_data.label
+            data.custom_color = old_data.custom_color
             self.graph.replace(data)
             self.plots[data.id] = data
         else:
             self.plots[data.id] = data
             self.graph.add(self.plots[data.id]) 
-
+        
         ## Set the view scale for all plots
         self._onEVT_FUNC_PROPERTY()
-        ## render the graph<=No need this done in canvas
-        #self.graph.render(self)
-        #self.subplot.figure.canvas.draw_idle()
     
     def draw_plot(self):
         """
