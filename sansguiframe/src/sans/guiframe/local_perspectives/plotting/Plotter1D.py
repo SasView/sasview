@@ -228,8 +228,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         if data.id in self.plots.keys():
             #replace except label 
-            label = self.plots[data.id].label
-            data.label = label
+            new_data = self.plots[data.id]
+            data.label = new_data.label
+            data.custom_color = new_data.custom_color
             self.graph.replace(data)
             self.plots[data.id] = data
         else:
