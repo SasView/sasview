@@ -17,24 +17,32 @@ from sans.guiframe.dataFitting import Data1D
 
 
 class GridPage(sheet.CSheet):
+    """
+    """
     def __init__(self, parent, panel=None):
         """
         """
         sheet.CSheet.__init__(self, parent)
         self.SetLabelBackgroundColour('#DBD4D4')
+        self.AutoSize()
         self.panel = panel
         self.col_names = []
-        self._cols = 0
-        self._rows = 0
+        self._cols = 50
+        self._rows = 51
+        col_with = 30
+        row_height = 20
+        self.SetColMinimalAcceptableWidth(col_with)
+        self.SetRowMinimalAcceptableHeight(row_height)
         self.SetNumberRows(self._cols)
         self.SetNumberCols(self._rows)
         self.Bind(wx.grid.EVT_GRID_LABEL_RIGHT_CLICK, self.on_right_click)
         self.axis_value = []
         self.axis_label = ""
        
-        
     def on_right_click(self, event):
-        print "on double click", event.GetRow(), event.GetCol()
+        """
+        Catch the right click mouse
+        """
         col = event.GetCol()
         if col != -1 and len(self.col_names) > col:
             label = self.col_names[int(col)]
@@ -48,7 +56,6 @@ class GridPage(sheet.CSheet):
         slicerpop.Append(id, '&Set X axis', 'Set X axis')
         wx.EVT_MENU(self, id, self.on_set_x_axis)
         
-        
         id = wx.NewId()
         slicerpop.Append(id, '&Set Y axis', 'Set Y axis')
         wx.EVT_MENU(self, id, self.on_set_y_axis)
@@ -57,35 +64,51 @@ class GridPage(sheet.CSheet):
         self.PopupMenu(slicerpop, pos)
         
         
-            
     def on_set_x_axis(self, event):
+        """
+        """
         self.panel.set_xaxis(x=self.axis_value, label=self.axis_label)
    
     def on_set_y_axis(self, event):
+        """
+        """
         self.panel.set_yaxis(y=self.axis_value, label=self.axis_label)     
             
     def set_data(self, data):
         """
+        Add data to the grid
         """
         if data is None:
             data = {}
         if  len(data) > 0:
+           
+            self._cols = self.GetNumberCols()
+            self._rows = self.GetNumberRows()
             self.data = data
             self.col_names = data.keys()
             self.col_names.sort() 
-            self._cols = len(self.data.keys()) 
-            self._rows = max([len(v) for v in self.data.values()]) 
-            self.SetNumberRows(int(self._rows))
-            self.SetNumberCols(int(self._cols))
-            for index  in range(len(self.col_names)):
-                self.SetColLabelValue(index, str(self.col_names[index]))
-                
+            nbr_user_cols = len(self.col_names)
+            #Add more columns to the grid if necessary
+            if nbr_user_cols > self._cols:
+                new_col_nbr = nbr_user_cols -  self._cols 
+                self.AppendCols(new_col_nbr, True)
+            #Add more rows to the grid if necessary  
+            nbr_user_row = len(self.data.values())
+            if nbr_user_row > self._rows + 1:
+                new_row_nbr =  nbr_user_row - self._rows 
+                self.AppendRows(new_row_nbr, True)
+            # add data to the grid    
+            label_row = 0
+            for index  in range(nbr_user_cols):
+                # use the first row of the grid to add user defined labels
+                self.SetCellValue(label_row, index, str(self.col_names[index]))
             col = 0
             for value_list in self.data.values():
-                for row in range(len(value_list)):
+                for row in range(1, len(value_list)):
                     self.SetCellValue(row, col, str(value_list[row]))
                 col += 1
             self.AutoSize()
+           
 
 class Notebook(nb, PanelBase):
     """
@@ -99,26 +122,79 @@ class Notebook(nb, PanelBase):
         """
         """
         nb.__init__(self, parent, -1,
-                    style= wx.NB_BOTTOM)
+                    style= wx.aui.AUI_BUTTON_DOWN|wx.aui.AUI_NB_WINDOWLIST_BUTTON|
+                    wx.aui.AUI_NB_DEFAULT_STYLE|
+                    wx.CLIP_CHILDREN)
         PanelBase.__init__(self, parent)
-    
+        self.enable_close_button()
         self.parent = parent
         self.manager = manager
         self.data = data
+        self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_page)
         
+    def enable_close_button(self):
+        """
+        display the close button on tab for more than 1 tabs else remove the 
+        close button
+        """
+        if self.GetPageCount() <= 1:
+            style = self.GetWindowStyleFlag() 
+            flag = wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB
+            if style & wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB == flag:
+                style = style & ~wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB
+                self.SetWindowStyle(style)
+        else:
+            style = self.GetWindowStyleFlag()
+            flag = wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB
+            if style & wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB != flag:
+                style |= wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB
+                self.SetWindowStyle(style)
+                
+    def on_close_page(self, event):
+        """
+        close the page
+        """
+        if self.GetPageCount() == 1:
+            event.Veto()
+        self.enable_close_button()
+        
+ 
+            
     def set_data(self, data):
         if data is None:
             return
             
         grid = GridPage(self, panel=self.parent)
         grid.set_data(data)  
-        self.AddPage(grid, "Batch")
-     
+        self.AddPage(grid, "")
+        pos = self.GetPageIndex(grid)
+        title = "Batch " + str(self.GetPageCount())
+        self.SetPageText(pos, title)
         
+    def add_column(self):
+        """
+        Append a new column to the grid
+        """
+        pos = self.GetSelection()
+        grid = self.GetPage(pos)
+        grid.AppendCols(1, True)
+        
+    def on_remove_column(self):
+        """
+        Remove column to the current grid
+        """
+        pos = self.GetSelection()
+        grid = self.GetPage(pos)
+        cols_pos = grid.GetSelectedCols() 
+        for cpos in cols_pos:
+            grid.DeleteCols(cpos)
+          
+          
 class SPanel(ScrolledPanel):
     def __init__(self, parent, *args, **kwds):
         ScrolledPanel.__init__(self, parent , *args, **kwds)
         self.SetupScrolling()  
+
 
 class GridPanel(SPanel):
     def __init__(self, parent,data=None, *args, **kwds):
@@ -235,8 +311,16 @@ class GridPanel(SPanel):
    
         
     def add_column(self):
+        """
+        """
         if self.grid is not None:
             self.grid.add_column()
+        
+    def on_remove_column(self):
+        """
+        """
+        if self.grid is not None:
+            self.grid.on_remove_column()
         
         
 class GridFrame(wx.Frame):
@@ -245,22 +329,31 @@ class GridFrame(wx.Frame):
         self.parent = parent
         self.panel = GridPanel(self, data)
         menubar = wx.MenuBar()
-        edit = wx.Menu()
-        id_col = wx.NewId()
-        edit.Append(id_col, 'Edit', '' )
-        menubar.Append(edit, "&New column")
         self.SetMenuBar(menubar)
-        wx.EVT_MENU(self, id_col, self.on_add_column)
+        edit = wx.Menu()
+        menubar.Append(edit, "&Edit")
         self.Bind(wx.EVT_CLOSE, self.on_close)
-
         
+        add_col_menu = edit.Append(wx.NewId(), 'Add Column', 'Add column')
+        wx.EVT_MENU(self, add_col_menu.GetId(), self.on_add_column)
+        remove_col_menu = edit.Append(wx.NewId(), 'Remove Column', 
+                                      'Remove Column')
+        wx.EVT_MENU(self, remove_col_menu.GetId(), self.on_remove_column)
+
     def on_close(self, event):
         """
         """
         self.Hide()
         
+    def on_remove_column(self, event):
+        """
+        Remove the selected column to the grid
+        """
+        self.panel.on_remove_column()
+        
     def on_add_column(self, event):
         """
+        Append a new column to the grid
         """
         self.panel.add_column()
         
@@ -280,7 +373,7 @@ if __name__ == "__main__":
             j += 1
             data["index"+str(i)] = [i/j, i*j, i, i+j]
             
-        frame = TestFrame(data=data)
+        frame = GridFrame(data=data)
         frame.Show(True)
     except:
         print sys.exc_value
