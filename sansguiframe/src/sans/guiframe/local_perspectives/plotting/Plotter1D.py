@@ -246,6 +246,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self.graph.add(self.plots[data.id]) 
             ## Set the view scale for all plots
             self._onEVT_FUNC_PROPERTY()
+            self.toolbar.update()
         
           
     def draw_plot(self):

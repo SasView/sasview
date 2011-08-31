@@ -19,6 +19,7 @@ import pylab
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Graph
+from danse.common.plottools.LabelDialog import LabelDialog
 from sans.guiframe.events import EVT_NEW_PLOT
 from sans.guiframe.events import EVT_SLICER_PARS
 from sans.guiframe.events import StatusEvent 
@@ -197,7 +198,9 @@ class ModelPanel2D(ModelPanel1D):
                 data._yunit = 'pixel'
         self.graph.xaxis(data._xaxis, data._xunit)
         self.graph.yaxis(data._yaxis, data._yunit)
-        self.graph.title(self.data2D.name)
+        if data.label == None:
+            data.label = data.name
+        self.graph.title(data.label)
         self.graph.render(self)
         self.draw_plot()
         #self.subplot.figure.canvas.draw_idle()
@@ -209,7 +212,9 @@ class ModelPanel2D(ModelPanel1D):
             if (xlo > data.xmin and xhi < data.xmax and\
                         ylo > data.ymin and yhi < data.ymax):
                 self.subplot.set_xlim((xlo, xhi))     
-                self.subplot.set_ylim((ylo, yhi))  
+                self.subplot.set_ylim((ylo, yhi)) 
+            else: 
+                self.toolbar.update()
 
     def onContextMenu(self, event):
         """
@@ -297,6 +302,12 @@ class ModelPanel2D(ModelPanel1D):
                     slicerpop.Append(id, '&Edit Slicer Parameters')
                     wx.EVT_MENU(self, id, self._onEditSlicer) 
             slicerpop.AppendSeparator() 
+            
+        id = wx.NewId()
+        slicerpop.Append(id, '&Edit Label', 'Edit Label')
+        wx.EVT_MENU(self, id, self.onEditLabels)
+        slicerpop.AppendSeparator()
+        
         id = wx.NewId()
         slicerpop.Append(id, '&2D Color Map')
         wx.EVT_MENU(self, id, self._onEditDetector)
@@ -306,7 +317,22 @@ class ModelPanel2D(ModelPanel1D):
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
-   
+            
+    def onEditLabels(self, event):
+        """
+        Edit legend label
+        """
+        selected_plot = self.plots[self.graph.selected_plottable]
+        label = selected_plot.label
+        dial = LabelDialog(None, -1, 'Change Label', label)
+        if dial.ShowModal() == wx.ID_OK:
+            newLabel = dial.getText() 
+            selected_plot.label = newLabel
+        dial.Destroy()
+        ## render the graph
+        self.subplot.set_title(selected_plot.label)
+        self.subplot.figure.canvas.draw_idle()
+        
     def _onEditDetector(self, event):
         """
         Allow to view and edits  detector parameters
