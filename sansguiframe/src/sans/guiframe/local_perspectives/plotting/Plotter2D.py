@@ -19,7 +19,7 @@ import pylab
 import danse.common.plottools
 from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Graph
-from danse.common.plottools.LabelDialog import LabelDialog
+from danse.common.plottools.TextDialog import TextDialog
 from sans.guiframe.events import EVT_NEW_PLOT
 from sans.guiframe.events import EVT_SLICER_PARS
 from sans.guiframe.events import StatusEvent 
@@ -31,6 +31,7 @@ from binder import BindArtist
 from Plotter1D import ModelPanel1D
 from danse.common.plottools.toolbar import NavigationToolBar 
 from sans.guiframe.dataFitting import Data1D
+from matplotlib.font_manager import FontProperties
 (InternalEvent, EVT_INTERNAL) = wx.lib.newevent.NewEvent()
 
 DEFAULT_QMAX = 0.05
@@ -115,6 +116,9 @@ class ModelPanel2D(ModelPanel1D):
         self.axes_frozen = False
         ## panel that contains result from slicer motion (ex: Boxsum info)
         self.panel_slicer = None
+        self.title_label = None
+        self.title_font = None
+        self.title_color = 'black'
         ## Graph        
         self.graph = Graph()
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
@@ -171,7 +175,7 @@ class ModelPanel2D(ModelPanel1D):
         ylo = None 
         yhi = None
         ## Update self.data2d with the current plot
-        self.data2D = data
+        
         if data.id in self.plots.keys():
             #replace
             xlo, xhi = self.subplot.get_xlim()
@@ -190,7 +194,7 @@ class ModelPanel2D(ModelPanel1D):
         ## render the graph with its new content
                 
         #data2D: put 'Pixel (Number)' for axis title and unit in case of having no detector info and none in _units
-        if len(self.data2D.detector) < 1: 
+        if len(data.detector) < 1: 
             if len(data._xunit) < 1 and len(data._yunit) < 1:
                 data._xaxis = '\\rm{x}'
                 data._yaxis = '\\rm{y}'
@@ -198,12 +202,25 @@ class ModelPanel2D(ModelPanel1D):
                 data._yunit = 'pixel'
         self.graph.xaxis(data._xaxis, data._xunit)
         self.graph.yaxis(data._yaxis, data._yunit)
+        data.label = self.title_label
+        
         if data.label == None:
             data.label = data.name
-        self.graph.title(data.label)
-        self.graph.render(self)
-        self.draw_plot()
-        #self.subplot.figure.canvas.draw_idle()
+            
+        if not self.title_font:
+            self.graph.title(data.label)
+            self.graph.render(self)
+            self.draw_plot()
+            
+        else:
+            self.graph.render(self)
+            self.draw_plot()
+            self.subplot.set_title(label=data.label,
+                                   fontproperties=self.title_font,
+                                   color=self.title_color)
+            self.subplot.figure.canvas.draw_idle() 
+        
+        self.data2D = data
         ## store default value of zmin and zmax 
         self.default_zmin_ctl = self.zmin_2D
         self.default_zmax_ctl = self.zmax_2D
@@ -324,14 +341,36 @@ class ModelPanel2D(ModelPanel1D):
         """
         selected_plot = self.plots[self.graph.selected_plottable]
         label = selected_plot.label
-        dial = LabelDialog(None, -1, 'Change Label', label)
+        dial = TextDialog(None, -1, 'Change Label', label)
         if dial.ShowModal() == wx.ID_OK:
-            newLabel = dial.getText() 
-            selected_plot.label = newLabel
+            try:
+                FONT = FontProperties()
+                newlabel = dial.getText()
+                font = FONT.copy()
+                font.set_size(dial.getSize())
+                font.set_family(dial.getFamily())
+                font.set_style(dial.getStyle())
+                font.set_weight(dial.getWeight())
+                colour = dial.getColor()
+                if len(newlabel) > 0:
+                    selected_plot.label = newlabel
+                    self.title_label = selected_plot.label
+                    self.title_font = font
+                    self.title_color = colour
+                    ## render the graph
+                    self.subplot.set_title(label=self.title_label,
+                                           fontproperties=self.title_font,
+                                           color=self.title_color)
+                    self.subplot.figure.canvas.draw_idle()  
+            except:
+                if self.parent != None:
+                    from sans.guiframe.events import StatusEvent 
+                    msg= "Add Text: Error. Check your property values..."
+                    wx.PostEvent(self.parent, StatusEvent(status = msg ))
+                else:
+                    raise
         dial.Destroy()
-        ## render the graph
-        self.subplot.set_title(selected_plot.label)
-        self.subplot.figure.canvas.draw_idle()
+
         
     def _onEditDetector(self, event):
         """
