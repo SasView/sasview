@@ -431,13 +431,13 @@ class ModelPanel1D(PlotPanel, PanelBase):
         
         if self.position != None:
             id = wx.NewId()
-            self._slicerpop.Append(id, '&Add text')
+            self._slicerpop.Append(id, '&Add Text')
             wx.EVT_MENU(self, id, self._on_addtext)
             id = wx.NewId()
-            self._slicerpop.Append(id, '&Remove text')
+            self._slicerpop.Append(id, '&Remove Text')
             wx.EVT_MENU(self, id, self._on_removetext)
         id = wx.NewId()
-        self._slicerpop.Append(id, '&Change scale')
+        self._slicerpop.Append(id, '&Change Scale')
         wx.EVT_MENU(self, id, self._onProperties)
         id = wx.NewId()
         self._slicerpop.Append(id, '&Reset Graph')

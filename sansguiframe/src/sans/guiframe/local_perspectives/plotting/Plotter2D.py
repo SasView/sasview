@@ -264,7 +264,7 @@ class ModelPanel2D(ModelPanel1D):
         plot = self.data2D
         id = wx.NewId()
         name = plot.name
-        slicerpop.Append(id, "&Save as a file (DAT)" )
+        slicerpop.Append(id, "&Save as a File (DAT)" )
         self.action_ids[str(id)] = plot
         wx.EVT_MENU(self, id, self._onSave)
 
@@ -288,31 +288,31 @@ class ModelPanel2D(ModelPanel1D):
                 slicerpop.AppendSeparator()
             
             id = wx.NewId()
-            slicerpop.Append(id, '&Perform circular average')
+            slicerpop.Append(id, '&Perform Circular Average')
             wx.EVT_MENU(self, id, self.onCircular) \
             # For Masked Data
             if not plot.mask.all():
                 id = wx.NewId()
-                slicerpop.Append(id, '&Masked circular average')
+                slicerpop.Append(id, '&Masked Circular Average')
                 wx.EVT_MENU(self, id, self.onMaskedCircular) 
             id = wx.NewId()
-            slicerpop.Append(id, '&Sector [Q view]')
+            slicerpop.Append(id, '&Sector [Q View]')
             wx.EVT_MENU(self, id, self.onSectorQ) 
             id = wx.NewId()
-            slicerpop.Append(id, '&Annulus [Phi view ]')
+            slicerpop.Append(id, '&Annulus [Phi View ]')
             wx.EVT_MENU(self, id, self.onSectorPhi) 
             id = wx.NewId()
             slicerpop.Append(id, '&Box Sum')
             wx.EVT_MENU(self, id, self.onBoxSum) 
             id = wx.NewId()
-            slicerpop.Append(id, '&Box averaging in Qx')
+            slicerpop.Append(id, '&Box Averaging in Qx')
             wx.EVT_MENU(self, id, self.onBoxavgX) 
             id = wx.NewId()
-            slicerpop.Append(id, '&Box averaging in Qy')
+            slicerpop.Append(id, '&Box Averaging in Qy')
             wx.EVT_MENU(self, id, self.onBoxavgY) 
             if self.slicer != None:
                 id = wx.NewId()
-                slicerpop.Append(id, '&Clear slicer')
+                slicerpop.Append(id, '&Clear Slicer')
                 wx.EVT_MENU(self, id,  self.onClearSlicer) 
                 if self.slicer.__class__.__name__  != "BoxSum":
                     id = wx.NewId()
@@ -329,7 +329,7 @@ class ModelPanel2D(ModelPanel1D):
         slicerpop.Append(id, '&2D Color Map')
         wx.EVT_MENU(self, id, self._onEditDetector)
         id = wx.NewId()
-        slicerpop.Append(id, '&Toggle Linear/Log scale')
+        slicerpop.Append(id, '&Toggle Linear/Log Scale')
         wx.EVT_MENU(self, id, self._onToggleScale) 
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
