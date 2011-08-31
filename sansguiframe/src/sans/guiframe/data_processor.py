@@ -132,6 +132,7 @@ class Notebook(nb, PanelBase):
         self.data = data
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_page)
         
+        
     def enable_close_button(self):
         """
         display the close button on tab for more than 1 tabs else remove the 
@@ -149,7 +150,19 @@ class Notebook(nb, PanelBase):
             if style & wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB != flag:
                 style |= wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB
                 self.SetWindowStyle(style)
-                
+              
+    def on_edit_axis(self):
+        """
+        Return the select cell of a given selected column
+        """
+        pos = self.GetSelection()
+        grid = self.GetPage(pos)
+        print "selected column",grid.GetSelectedCols(), grid.GetSelectionMode()
+
+        print "selected cell", grid.GetSelectedCells()
+        
+        print "notebook on_edit_axis()"
+        
     def on_close_page(self, event):
         """
         close the page
@@ -201,7 +214,7 @@ class GridPanel(SPanel):
         SPanel.__init__(self, parent , *args, **kwds)
         self.vbox = wx.BoxSizer(wx.VERTICAL)
         
-        self.plotting_sizer = wx.FlexGridSizer(3, 5, 10, 5)
+        self.plotting_sizer = wx.FlexGridSizer(3, 7, 10, 5)
         w, h = self.GetSize()
         #self.panel_grid = SPanel(self, -1, size=(w, -1))
         self.grid_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -265,10 +278,8 @@ class GridPanel(SPanel):
         """
         self.grid = Notebook(parent=self)
         self.grid.set_data(self._data)
-        #self.grid = Table(parent=self, data=self._data)
-        #vbox = wx.BoxSizer(wx.HORIZONTAL)
         self.grid_sizer.Add(self.grid, 1, wx.EXPAND, 0)
-        #self.panel_grid.SetSizer(vbox)
+    
         
     def layout_grid1(self):
         """
@@ -284,32 +295,51 @@ class GridPanel(SPanel):
         Draw area containing options to plot
         """
         self.x_axis_label = wx.TextCtrl(self, -1)
-       
         self.y_axis_label = wx.TextCtrl(self, -1)
-        
-        self.x_axis_value = wx.TextCtrl(self, -1)
-        self.y_axis_value = wx.TextCtrl(self, -1)
-       
+        self.x_axis_value = wx.TextCtrl(self, -1, size=(200, -1))
+        self.y_axis_value = wx.TextCtrl(self, -1, size=(200, -1))
+        self.x_axis_add = wx.Button(self, -1, "Add")
+        self.x_axis_add.Bind(event=wx.EVT_BUTTON, handler=self.on_edit_axis, 
+                            id=self.x_axis_add.GetId())
+        self.y_axis_add = wx.Button(self, -1, "Add")
+        self.y_axis_add.Bind(event=wx.EVT_BUTTON, handler=self.on_edit_axis, 
+                            id=self.y_axis_add.GetId())
         self.x_axis_unit = wx.TextCtrl(self, -1)
         self.y_axis_unit = wx.TextCtrl(self, -1)
         self.plot_button = wx.Button(self, -1, "Plot")
         wx.EVT_BUTTON(self, self.plot_button.GetId(), self.on_plot)
-        self.plotting_sizer.AddMany([(wx.StaticText(self, -1, "x"), 1, wx.LEFT, 10),
-                                     (self.x_axis_label,  wx.TOP|wx.BOTTOM|wx.LEFT, 10),
-                                      (self.x_axis_value,  wx.TOP|wx.BOTTOM|wx.LEFT, 10),
-                                     (wx.StaticText(self, -1 , "unit"), 1, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE|wx.EXPAND, 0),
-                                      (self.x_axis_unit),
-                                      (wx.StaticText(self, -1, "y"), 1, wx.LEFT, 10),
-                                       (self.y_axis_label,  wx.TOP|wx.BOTTOM|wx.LEFT, 10),
-                                      (self.y_axis_value, wx.TOP|wx.BOTTOM|wx.LEFT, 10),
-                                     (wx.StaticText(self, -1 , "unit"), 1, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE|wx.EXPAND, 0),
-                                      (self.y_axis_unit),
-                                      (-1, -1),
-                                      (-1, -1),
-                                      (-1, -1),
-                                      (self.plot_button, 1, wx.LEFT, 30)])
+        self.plotting_sizer.AddMany([
+                    (wx.StaticText(self, -1, "x-axis label"), 1, wx.LEFT, 10),
+                    (self.x_axis_label, wx.TOP|wx.BOTTOM|wx.LEFT, 10),
+                    (wx.StaticText(self, -1, "x-axis value"), 1, wx.LEFT, 10),
+                    (self.x_axis_value, wx.TOP|wx.BOTTOM|wx.LEFT, 10),
+                    (self.x_axis_add, 1, wx.LEFT|wx.RIGHT, 0),
+                    (wx.StaticText(self, -1 , "unit"), 1, wx.LEFT|wx.RIGHT, 0),
+                    (self.x_axis_unit, 0, wx.LEFT, 0),
+                    (wx.StaticText(self, -1, "y-axis label"), 1, wx.LEFT, 10),
+                    (self.y_axis_label,  wx.TOP|wx.BOTTOM|wx.LEFT, 10),
+                    (wx.StaticText(self, -1, "y-axis value"), 1, wx.LEFT, 10),
+                    (self.y_axis_value, wx.TOP|wx.BOTTOM|wx.LEFT, 10),
+                    (self.y_axis_add, 1, wx.LEFT|wx.RIGHT, 0),
+                    (wx.StaticText(self, -1 , "unit"), 1, wx.LEFT|wx.RIGHT, 0),
+                    (self.y_axis_unit, 0, wx.LEFT, 0),
+                      (-1, -1),
+                      (-1, -1),
+                      (-1, -1),
+                      (-1, -1),
+                      (-1, -1),
+                      (-1, -1),
+                      (self.plot_button, 1, wx.LEFT, 0)])
    
+    def on_edit_axis(self, event):
+        """
+        Get the selected column on  the visible grid and set values for axis
+        """
+        self.grid.on_edit_axis()
         
+    def edit_axis_helper(self, tcrtl_label, tcrtl_value):
+        """
+        """
     def add_column(self):
         """
         """
@@ -324,7 +354,7 @@ class GridPanel(SPanel):
         
         
 class GridFrame(wx.Frame):
-    def __init__(self, parent=None, data=None, id=-1, title="Batch Results", size=(500, 400)):
+    def __init__(self, parent=None, data=None, id=-1, title="Batch Results", size=(700, 400)):
         wx.Frame.__init__(self, parent=parent, id=id, title=title, size=size)
         self.parent = parent
         self.panel = GridPanel(self, data)
