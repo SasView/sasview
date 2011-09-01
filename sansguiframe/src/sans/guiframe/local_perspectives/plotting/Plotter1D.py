@@ -429,6 +429,14 @@ class ModelPanel1D(PlotPanel, PanelBase):
         wx.EVT_MENU(self, id, self.onLegend)
         self._slicerpop.AppendSeparator()
         
+        id = wx.NewId()
+        self._slicerpop.Append(id, '&Modify Y Axis Label')
+        wx.EVT_MENU(self, id, self._on_yaxis_label)     
+        id = wx.NewId()
+        self._slicerpop.Append(id, '&Modify X Axis Label')
+        wx.EVT_MENU(self, id, self._on_xaxis_label)
+        self._slicerpop.AppendSeparator()
+        
         if self.position != None:
             id = wx.NewId()
             self._slicerpop.Append(id, '&Add Text')
@@ -436,9 +444,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
             id = wx.NewId()
             self._slicerpop.Append(id, '&Remove Text')
             wx.EVT_MENU(self, id, self._on_removetext)
+            self._slicerpop.AppendSeparator()
         id = wx.NewId()
         self._slicerpop.Append(id, '&Change Scale')
         wx.EVT_MENU(self, id, self._onProperties)
+        self._slicerpop.AppendSeparator()
         id = wx.NewId()
         self._slicerpop.Append(id, '&Reset Graph')
         wx.EVT_MENU(self, id, self.onResetGraph)  

@@ -175,7 +175,7 @@ class ModelPanel2D(ModelPanel1D):
         ylo = None 
         yhi = None
         ## Update self.data2d with the current plot
-        
+        self.data2D = data
         if data.id in self.plots.keys():
             #replace
             xlo, xhi = self.subplot.get_xlim()
@@ -200,8 +200,11 @@ class ModelPanel2D(ModelPanel1D):
                 data._yaxis = '\\rm{y}'
                 data._xunit = 'pixel'
                 data._yunit = 'pixel'
+        
+        # graph properties
         self.graph.xaxis(data._xaxis, data._xunit)
         self.graph.yaxis(data._yaxis, data._yunit)
+            
         data.label = self.title_label
         
         if data.label == None:
@@ -210,8 +213,9 @@ class ModelPanel2D(ModelPanel1D):
         if not self.title_font:
             self.graph.title(data.label)
             self.graph.render(self)
+            # Set the axis labels on subplot
+            self._set_axis_labels()
             self.draw_plot()
-            
         else:
             self.graph.render(self)
             self.draw_plot()
@@ -220,7 +224,7 @@ class ModelPanel2D(ModelPanel1D):
                                    color=self.title_color)
             self.subplot.figure.canvas.draw_idle() 
         
-        self.data2D = data
+        
         ## store default value of zmin and zmax 
         self.default_zmin_ctl = self.zmin_2D
         self.default_zmax_ctl = self.zmax_2D
@@ -232,7 +236,29 @@ class ModelPanel2D(ModelPanel1D):
                 self.subplot.set_ylim((ylo, yhi)) 
             else: 
                 self.toolbar.update()
-
+    def _set_axis_labels(self):
+        """
+        Set axis labels
+        """
+        data = self.data2D
+        # control axis labels from the panel itself
+        yname, yunits = data.get_yaxis()
+        if self.yaxis_label != None:
+            yname = self.yaxis_label
+            yunits = self.yaxis_unit
+        else:
+            self.yaxis_label = yname
+            self.yaxis_unit = yunits
+        xname, xunits = data.get_xaxis()
+        if self.xaxis_label != None:
+            xname = self.xaxis_label
+            xunits = self.xaxis_unit
+        else:
+            self.xaxis_label = xname
+            self.xaxis_unit = xunits
+        self.xaxis(xname, xunits, self.xaxis_font, self.xaxis_color)
+        self.yaxis(yname, yunits, self.yaxis_font, self.yaxis_color)
+        
     def onContextMenu(self, event):
         """
         2D plot context menu
@@ -326,8 +352,18 @@ class ModelPanel2D(ModelPanel1D):
         slicerpop.AppendSeparator()
         
         id = wx.NewId()
+        slicerpop.Append(id, '&Modify Y Axis Label')
+        wx.EVT_MENU(self, id, self._on_yaxis_label)     
+        id = wx.NewId()
+        slicerpop.Append(id, '&Modify X Axis Label')
+        wx.EVT_MENU(self, id, self._on_xaxis_label)
+        slicerpop.AppendSeparator()
+        
+        id = wx.NewId()
         slicerpop.Append(id, '&2D Color Map')
         wx.EVT_MENU(self, id, self._onEditDetector)
+        slicerpop.AppendSeparator()
+        
         id = wx.NewId()
         slicerpop.Append(id, '&Toggle Linear/Log Scale')
         wx.EVT_MENU(self, id, self._onToggleScale) 
