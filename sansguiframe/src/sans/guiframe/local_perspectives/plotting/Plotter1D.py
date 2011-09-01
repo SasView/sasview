@@ -158,6 +158,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """    
         self.graph.reset()
         self.plots      = {}
+        if self.is_zoomed:
+                self.is_zoomed = False
         
     def _OnReSize(self, event):   
         """
@@ -238,15 +240,20 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self.plots[data.id] = data
             ## Set the view scale for all plots
             self._onEVT_FUNC_PROPERTY()
-            # Recover the x,y limits
-            self.subplot.set_xlim((xlo, xhi))     
-            self.subplot.set_ylim((ylo, yhi))  
+            # Check if zoomed
+            toolbar_zoomed = self.toolbar.GetToolEnabled(self.toolbar._NTB2_BACK)
+            if self.is_zoomed or toolbar_zoomed:
+                # Recover the x,y limits
+                self.subplot.set_xlim((xlo, xhi))     
+                self.subplot.set_ylim((ylo, yhi))  
         else:
             self.plots[data.id] = data
             self.graph.add(self.plots[data.id]) 
             ## Set the view scale for all plots
             self._onEVT_FUNC_PROPERTY()
             self.toolbar.update()
+            if self.is_zoomed:
+                self.is_zoomed = False
         
           
     def draw_plot(self):

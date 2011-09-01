@@ -228,6 +228,11 @@ class ModelPanel2D(ModelPanel1D):
         ## store default value of zmin and zmax 
         self.default_zmin_ctl = self.zmin_2D
         self.default_zmax_ctl = self.zmax_2D
+        # Check if zoomed
+        toolbar_zoomed = self.toolbar.GetToolEnabled(self.toolbar._NTB2_BACK)
+        if not self.is_zoomed and not toolbar_zoomed:
+            return
+        
         # Recover the x,y limits
         if (xlo and xhi and ylo and yhi) != None:
             if (xlo > data.xmin and xhi < data.xmax and\
@@ -236,6 +241,8 @@ class ModelPanel2D(ModelPanel1D):
                 self.subplot.set_ylim((ylo, yhi)) 
             else: 
                 self.toolbar.update()
+                self._is_zoomed = False
+
     def _set_axis_labels(self):
         """
         Set axis labels
