@@ -31,14 +31,45 @@ class GridPage(sheet.CSheet):
         self._rows = 51
         col_with = 30
         row_height = 20
+        self.axis_value = []
+        self.axis_label = ""
+        self.selected_cells = []
+        self.selected_cols = []
         self.SetColMinimalAcceptableWidth(col_with)
         self.SetRowMinimalAcceptableHeight(row_height)
         self.SetNumberRows(self._cols)
         self.SetNumberCols(self._rows)
+        self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.on_left_click)
         self.Bind(wx.grid.EVT_GRID_LABEL_RIGHT_CLICK, self.on_right_click)
-        self.axis_value = []
-        self.axis_label = ""
+        self.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.on_selected_cell)
+        
        
+    def on_selected_cell(self, event):
+        """
+        Handler catching cell selection
+        """
+        flag = event.CmdDown() or event.ControlDown()
+        cell = (event.GetRow(), event.GetCol())
+        if not flag:
+            self.selected_cells = []
+        if cell in self.selected_cells:
+            self.selected_cells.remove(cell)
+        else:
+            self.selected_cells.append(cell)
+        event.Skip()
+      
+    def on_left_click(self, event):
+        """
+        Catch the left click on label mouse event
+        """
+        flag = event.CmdDown() or event.ControlDown()
+        col = event.GetCol()
+        if not flag:
+            self.selected_cols  = []
+        if col not in self.selected_cols:
+            self.selected_cols.append(col)
+        event.Skip()
+        
     def on_right_click(self, event):
         """
         Catch the right click mouse
@@ -157,11 +188,18 @@ class Notebook(nb, PanelBase):
         """
         pos = self.GetSelection()
         grid = self.GetPage(pos)
-        print "selected column",grid.GetSelectedCols(), grid.GetSelectionMode()
-
-        print "selected cell", grid.GetSelectedCells()
-        
-        print "notebook on_edit_axis()"
+        if len(grid.selected_cols) > 1:
+            msg = "Edit axis doesn't understand this selection.\n"
+            msg += "Please select only one column"
+            raise ValueError, msg
+        list_of_cells = []
+        if len(grid.selected_cols) == 1:
+            col = grid.selected_cols[0]
+            for row in range(grid.GetNumberRows()):
+                list_of_cells.append((row, col))
+                
+        print "selected cell",  grid.selected_cells.sort(), grid.selected_cells
+  
         
     def on_close_page(self, event):
         """
@@ -271,7 +309,8 @@ class GridPanel(SPanel):
         new_plot.xaxis(self.x_axis_label.GetValue(), self.x_axis_unit.GetValue())
         new_plot.yaxis(self.y_axis_label.GetValue(), self.y_axis_unit.GetValue())
         wx.PostEvent(self.parent.parent, 
-                             NewPlotEvent(plot=new_plot, group_id=str(new_plot.group_id), title ="batch"))    
+                             NewPlotEvent(plot=new_plot, 
+                        group_id=str(new_plot.group_id), title ="batch"))    
     def layout_grid(self):
         """
         Draw the area related to the grid
