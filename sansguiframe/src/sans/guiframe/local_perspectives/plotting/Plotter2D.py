@@ -61,6 +61,14 @@ class NavigationToolBar2D(NavigationToolBar):
         """
         add item to the toolbar
         """
+        #add button
+        id_context = wx.NewId()
+        context_tip = 'Graph Menu'
+        context =  wx.ArtProvider.GetBitmap(wx.ART_LIST_VIEW, wx.ART_TOOLBAR)
+        self.InsertSimpleTool(0, id_context, context, 
+                                   context_tip, context_tip)
+        wx.EVT_TOOL(self, id_context,  self.parent.onToolContextMenu)
+        self.InsertSeparator(1)
         #add print button
         id_print = wx.NewId()
         print_bmp =  wx.ArtProvider.GetBitmap(wx.ART_PRINT, wx.ART_TOOLBAR)
@@ -354,7 +362,7 @@ class ModelPanel2D(ModelPanel1D):
             slicerpop.AppendSeparator() 
             
         id = wx.NewId()
-        slicerpop.Append(id, '&Edit Label', 'Edit Label')
+        slicerpop.Append(id, '&Edit Graph Label', 'Edit Graph Label')
         wx.EVT_MENU(self, id, self.onEditLabels)
         slicerpop.AppendSeparator()
         
@@ -374,8 +382,12 @@ class ModelPanel2D(ModelPanel1D):
         id = wx.NewId()
         slicerpop.Append(id, '&Toggle Linear/Log Scale')
         wx.EVT_MENU(self, id, self._onToggleScale) 
-        pos = event.GetPosition()
-        pos = self.ScreenToClient(pos)
+        try:
+            pos_evt = event.GetPosition()
+            pos = self.ScreenToClient(pos_evt)
+        except:
+            pos_x, pos_y = self.toolbar.GetPositionTuple()
+            pos = (pos_x, pos_y + 5)
         self.PopupMenu(slicerpop, pos)
             
     def onEditLabels(self, event):

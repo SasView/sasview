@@ -459,10 +459,15 @@ class ModelPanel1D(PlotPanel, PanelBase):
         id = wx.NewId()
         self._slicerpop.Append(id, '&Reset Graph')
         wx.EVT_MENU(self, id, self.onResetGraph)  
-        pos = event.GetPosition()
-        pos = self.ScreenToClient(pos)
+        try:
+            pos_evt = event.GetPosition()
+            pos = self.ScreenToClient(pos_evt)
+        except:
+            pos_x, pos_y = self.toolbar.GetPositionTuple()
+            pos = (pos_x, pos_y + 5)
+
         self.PopupMenu(self._slicerpop, pos)
-     
+        
     def onFreeze(self, event):
         """
         """
@@ -657,17 +662,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
 
         self.toolbar.Realize()
         wx.EVT_TOOL(self, id_delete,  self._on_delete)
-        """
-        #New toolbar option - adding text to the plot
-        self.toolbar.AddSeparator()
-        id_text = wx.NewId()
-        text =  wx.ArtProvider.GetBitmap(wx.ART_PASTE, wx.ART_TOOLBAR)
-        self.toolbar.AddSimpleTool(id_text, text,
-                           'Add Text to Plot', 'Adds text to plot')
-
-        self.toolbar.Realize()
-        wx.EVT_TOOL(self, id_text,  self._on_addtext)
         
+        """
         self.toolbar.AddSeparator()
         id_text = wx.NewId()
         text =  wx.ArtProvider.GetBitmap(wx.ART_CUT, wx.ART_TOOLBAR)
