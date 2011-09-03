@@ -2350,6 +2350,46 @@ class ViewerFrame(wx.Frame):
         if self.cpanel_on_focus is not None:
             self.cpanel_on_focus.on_reset(event)
             
+    def on_change_caption(self, name, old_caption, new_caption):     
+        """
+        Change the panel caption
+        
+        :param name: window_name of the pane
+        :param old_caption: current caption [string]
+        :param new_caption: new caption [string]
+        """
+        # wx.aui.AuiPaneInfo
+        pane_info = self.get_paneinfo(name) 
+        # New Caption
+        pane_info.Caption(new_caption)
+        # update the data_panel.cb_plotpanel
+        if 'data_panel' in self.panels.keys():
+            # remove from data_panel combobox
+            data_panel = self.panels["data_panel"]
+            if data_panel.cb_plotpanel is not None:
+                pos = data_panel.cb_plotpanel.FindString(str(old_caption)) 
+                if pos != wx.NOT_FOUND:
+                    data_panel.cb_plotpanel.SetString(pos, new_caption)
+                    data_panel.cb_plotpanel.SetStringSelection(new_caption)
+        # update window Show menu
+        if self._window_menu != None:
+            for item in self._window_menu.GetMenuItems():
+                pos = self._window_menu.FindItem(old_caption)
+                if self._window_menu.GetLabel(pos) == str(old_caption):
+                    self._window_menu.SetLabel(pos, new_caption)
+                break
+        # update aui manager
+        self._mgr.Update()
+        
+    def get_paneinfo(self, name):
+        """
+        Get pane Caption from window_name
+        
+        :param name: window_name in AuiPaneInfo
+        : return: AuiPaneInfo of the name
+        """
+        return self._mgr.GetPane(name) 
+    
     def enable_undo(self):
         """
         enable undo related control
@@ -2506,7 +2546,6 @@ class ViewerFrame(wx.Frame):
                         panel.Show(True)
             except:
                 pass
-        #print self.callback,self.schedule,self.schedule_full_draw_list
         
         # Draw all panels        
         map(f_draw, self.schedule_full_draw_list)

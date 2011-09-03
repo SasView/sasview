@@ -49,7 +49,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
     ## Internal name for the AUI manager
     window_name = "plotpanel"
     ## Title to appear on top of the window
-    window_caption = "Plot Panel"
+    window_caption = "Graph"
     ## Flag to tell the GUI manager that this panel is not
     #  tied to any perspective
     ALWAYS_ON = True
@@ -457,7 +457,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         wx.EVT_MENU(self, id, self._onProperties)
         self._slicerpop.AppendSeparator()
         id = wx.NewId()
-        self._slicerpop.Append(id, '&Reset Graph')
+        self._slicerpop.Append(id, '&Reset Range')
         wx.EVT_MENU(self, id, self.onResetGraph)  
         try:
             pos_evt = event.GetPosition()
@@ -465,7 +465,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
         except:
             pos_x, pos_y = self.toolbar.GetPositionTuple()
             pos = (pos_x, pos_y + 5)
-
+            
+        self._slicerpop.AppendSeparator()
+        id = wx.NewId()
+        self._slicerpop.Append(id, '&Window Title')
+        wx.EVT_MENU(self, id, self.onChangeCaption)
+        
         self.PopupMenu(self._slicerpop, pos)
         
     def onFreeze(self, event):

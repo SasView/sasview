@@ -389,6 +389,13 @@ class ModelPanel2D(ModelPanel1D):
             pos_x, pos_y = self.toolbar.GetPositionTuple()
             pos = (pos_x, pos_y + 5)
         self.PopupMenu(slicerpop, pos)
+        
+        slicerpop.AppendSeparator()
+        id = wx.NewId()
+        slicerpop.Append(id, '&Window Title')
+        wx.EVT_MENU(self, id, self.onChangeCaption)
+        
+        self.PopupMenu(self._slicerpop, pos)
             
     def onEditLabels(self, event):
         """
