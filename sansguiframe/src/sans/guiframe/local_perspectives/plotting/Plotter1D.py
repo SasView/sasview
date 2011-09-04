@@ -275,7 +275,14 @@ class ModelPanel1D(PlotPanel, PanelBase):
         left button down and ready to drag
         Display the position of the mouse on the statusbar
         """
-        PlotPanel.onLeftDown(self, event)                      
+        PlotPanel.onLeftDown(self, event)
+        ax = event.inaxes
+        if ax != None:
+            # data coordinate position
+            pos_x = "%8.3g"% event.xdata
+            pos_y = "%8.3g"% event.ydata
+            position = "x: %s    y: %s" % (pos_x, pos_y)
+            wx.PostEvent(self.parent, StatusEvent(status=position))
         # unfocus all
         self.parent.set_plot_unfocus()  
         #post nd event to notify guiframe that this panel is on focus

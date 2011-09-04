@@ -143,7 +143,13 @@ class ModelPanel2D(ModelPanel1D):
         """
         # Check that the LEFT button was pressed
         PlotPanel.onLeftDown(self, event)    
-          
+        ax = event.inaxes
+        if ax != None:
+            # data coordinate position
+            pos_x = "%8.3g"% event.xdata
+            pos_y = "%8.3g"% event.ydata
+            position = "x: %s    y: %s" % (pos_x, pos_y)
+            wx.PostEvent(self.parent, StatusEvent(status=position))
         self.plottable_selected(self.data2D.id)
         self._manager.set_panel_on_focus(self)
         wx.PostEvent(self.parent, PanelOnFocusEvent(panel=self))
