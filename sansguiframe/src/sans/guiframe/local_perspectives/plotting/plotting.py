@@ -157,20 +157,23 @@ class Plugin(PluginBase):
             pos = self.menu.FindItem(DEFAULT_MENU_ITEM_LABEL)
             if pos != -1:
                 self.menu.Delete(DEFAULT_MENU_ITEM_ID)
-           
-        self.menu.AppendCheckItem(event_id, new_panel.window_caption, 
-                         "Show %s plot panel" % new_panel.window_caption)
-        self.menu.Check(event_id, IS_WIN)
-        wx.EVT_MENU(self.parent, event_id, self._on_check_menu)
-
-        wx.EVT_SHOW(new_panel, self._on_close_panel)
-        
         # Set UID to allow us to reference the panel later
         new_panel.uid = event_id
         # Ship the plottable to its panel
         new_panel.plot_data(data) 
         self.plot_panels[new_panel.group_id] = new_panel
         
+        # Set Graph menu and help string        
+        helpString = 'Show/Hide Graph: '
+        for plot in  new_panel.plots.itervalues():
+            helpString += (' ' + plot.label + ';')
+        self.menu.AppendCheckItem(event_id, new_panel.window_caption, 
+                                  helpString)
+        self.menu.Check(event_id, IS_WIN)
+        wx.EVT_MENU(self.parent, event_id, self._on_check_menu)
+
+        wx.EVT_SHOW(new_panel, self._on_close_panel)
+         
         
     def create_1d_panel(self, data, group_id):
         """
@@ -281,7 +284,7 @@ class Plugin(PluginBase):
             
         title = None
         if hasattr(event, 'title'):
-            title = event.title
+            title = 'Graph'#event.title
                 
         data = event.plot
         group_id = data.group_id

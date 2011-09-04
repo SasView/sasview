@@ -246,6 +246,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 # Recover the x,y limits
                 self.subplot.set_xlim((xlo, xhi))     
                 self.subplot.set_ylim((ylo, yhi))  
+            # Update Graph menu and help string        
+            pos = self.parent._window_menu.FindItem(self.window_caption)
+            helpString = 'Show/Hide Graph: '
+            for plot in  self.plots.itervalues():
+                helpString += (' ' + plot.label +';')
+            self.parent._window_menu.SetHelpString(pos, helpString)
         else:
             self.plots[data.id] = data
             self.graph.add(self.plots[data.id]) 
@@ -269,14 +275,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         left button down and ready to drag
         Display the position of the mouse on the statusbar
         """
-        PlotPanel.onLeftDown(self, event)
-        ax = event.inaxes
-        if ax != None:
-            # data coordinate position
-            pos_x = "%8.3g"% event.xdata
-            pos_y = "%8.3g"% event.ydata
-            position = "x: %s    y: %s" % (pos_x, pos_y)
-            wx.PostEvent(self.parent, StatusEvent(status=position))
+        PlotPanel.onLeftDown(self, event)                      
         # unfocus all
         self.parent.set_plot_unfocus()  
         #post nd event to notify guiframe that this panel is on focus
@@ -457,7 +456,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         wx.EVT_MENU(self, id, self._onProperties)
         self._slicerpop.AppendSeparator()
         id = wx.NewId()
-        self._slicerpop.Append(id, '&Reset Range')
+        self._slicerpop.Append(id, '&Reset Axis Ranges')
         wx.EVT_MENU(self, id, self.onResetGraph)  
         try:
             pos_evt = event.GetPosition()
@@ -489,7 +488,15 @@ class ModelPanel1D(PlotPanel, PanelBase):
         if dial.ShowModal() == wx.ID_OK:
             newLabel = dial.getText() 
             selected_plot.label = newLabel
+            # Updata Graph menu help string
+            pos = self.parent._window_menu.FindItem(self.window_caption)
+            helpString = 'Show/Hide Graph: '
+            for plot in  self.plots.itervalues():
+                helpString += (' ' + plot.label +';')
+            self.parent._window_menu.SetHelpString(pos, helpString)
+            #break
         dial.Destroy()
+        
         ## render the graph
         self._onEVT_FUNC_PROPERTY() 
         

@@ -233,6 +233,8 @@ class ViewerFrame(wx.Frame):
         self.panels = {}
         # List of plot panels
         self.plot_panels = {}
+        # default Graph number fot the plotpanel caption
+        self.graph_num = 0
 
         # Default locations
         self._default_save_location = os.getcwd()        
@@ -807,11 +809,20 @@ class ViewerFrame(wx.Frame):
             if self.panels[item].window_name.startswith(p.window_name): 
                 count += 1
         windowname = p.window_name
-        caption = p.window_caption
+        windowcaption = 'Graph'#p.window_caption
         if count > 0:
             windowname += str(count+1)
-            caption += (' '+str(count))
+            #caption += (' '+str(count))
         p.window_name = windowname
+
+        # Append nummber
+        captions = self._get_plotpanel_captions()
+        while (1):
+            self.graph_num += 1
+            caption = windowcaption + '%s'% str(self.graph_num)
+            if caption not in captions:
+                break
+
         p.window_caption = caption
             
         style1 = self.__gui_style & GUIFRAME.FIXED_PANEL
@@ -860,7 +871,19 @@ class ViewerFrame(wx.Frame):
                 if caption not in self._data_panel.cb_plotpanel.GetItems():
                     self._data_panel.cb_plotpanel.Append(str(caption), p)
         return ID
+    
+    def _get_plotpanel_captions(self):
+        """
+        Get all the plotpanel cations
         
+        : return: list of captions
+        """
+        captions = []
+        for Id in self.plot_panels.keys():
+            captions.append(self.plot_panels[Id].window_caption)
+        
+        return captions
+          
     def _setup_menus(self):
         """
         Set up the application menus
@@ -2360,26 +2383,44 @@ class ViewerFrame(wx.Frame):
         """
         # wx.aui.AuiPaneInfo
         pane_info = self.get_paneinfo(name) 
-        # New Caption
-        pane_info.Caption(new_caption)
         # update the data_panel.cb_plotpanel
         if 'data_panel' in self.panels.keys():
             # remove from data_panel combobox
             data_panel = self.panels["data_panel"]
             if data_panel.cb_plotpanel is not None:
+                # Check if any panel has the same caption
+                has_newstring = data_panel.cb_plotpanel.FindString\
+                                                            (str(new_caption)) 
+                caption = new_caption
+                if has_newstring != wx.NOT_FOUND:
+                    captions = self._get_plotpanel_captions()
+                    # Append nummber
+                    inc = 1
+                    while (1):
+                        caption = new_caption + '_%s'% str(inc)
+                        if caption not in captions:
+                            break
+                        inc += 1
+                    # notify to users
+                    msg = "Found Same Title: Added '_%s'"% str(inc)
+                    wx.PostEvent(self, StatusEvent(status=msg))
+                # update data_panel cb
                 pos = data_panel.cb_plotpanel.FindString(str(old_caption)) 
                 if pos != wx.NOT_FOUND:
-                    data_panel.cb_plotpanel.SetString(pos, new_caption)
-                    data_panel.cb_plotpanel.SetStringSelection(new_caption)
+                    data_panel.cb_plotpanel.SetString(pos, caption)
+                    data_panel.cb_plotpanel.SetStringSelection(caption)
         # update window Show menu
         if self._window_menu != None:
             for item in self._window_menu.GetMenuItems():
                 pos = self._window_menu.FindItem(old_caption)
                 if self._window_menu.GetLabel(pos) == str(old_caption):
-                    self._window_menu.SetLabel(pos, new_caption)
+                    self._window_menu.SetLabel(pos, caption)
                 break
+        # New Caption
+        pane_info.Caption(caption)
         # update aui manager
         self._mgr.Update()
+        return caption
         
     def get_paneinfo(self, name):
         """
@@ -2579,7 +2620,7 @@ class ViewerFrame(wx.Frame):
         # set focusing panel
         self.panel_on_focus = panel  
         self.set_panel_on_focus(None)
-    
+
     def set_plot_unfocus(self): 
         """
         Un focus all plot panels

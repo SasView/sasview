@@ -1312,7 +1312,8 @@ class Plugin(PluginBase):
         if len(title) > 1:
             new_plot.title = "Model2D for " + data.name
         new_plot.is_data = False
-        new_plot.name = model.name + " ["+ str(model.__class__.__name__)+ "]"
+        new_plot.name = model.name + " [" + \
+                                    str(model.__class__.__name__) + "-2D]"
         theory_data = deepcopy(new_plot)
         theory_data.name = "Unknown"
         

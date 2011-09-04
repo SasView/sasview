@@ -142,13 +142,9 @@ class ModelPanel2D(ModelPanel1D):
         
         """
         # Check that the LEFT button was pressed
-        if event.button == 1:
-            self.leftdown = True
-            ax = event.inaxes
-            if ax != None:
-                self.xInit, self.yInit = event.xdata, event.ydata
+        PlotPanel.onLeftDown(self, event)    
+          
         self.plottable_selected(self.data2D.id)
-       
         self._manager.set_panel_on_focus(self)
         wx.PostEvent(self.parent, PanelOnFocusEvent(panel=self))
         
@@ -250,7 +246,13 @@ class ModelPanel2D(ModelPanel1D):
             else: 
                 self.toolbar.update()
                 self._is_zoomed = False
-
+                
+        # Update Graph menu and help string        
+        pos = self.parent._window_menu.FindItem(self.window_caption)
+        helpString = 'Show/Hide Graph: '
+        helpString += (' ' + data.label +';')
+        self.parent._window_menu.SetHelpString(pos, helpString)
+        
     def _set_axis_labels(self):
         """
         Set axis labels
@@ -382,6 +384,13 @@ class ModelPanel2D(ModelPanel1D):
         id = wx.NewId()
         slicerpop.Append(id, '&Toggle Linear/Log Scale')
         wx.EVT_MENU(self, id, self._onToggleScale) 
+        
+        
+        slicerpop.AppendSeparator()
+        id = wx.NewId()
+        slicerpop.Append(id, '&Window Title')
+        wx.EVT_MENU(self, id, self.onChangeCaption)
+        
         try:
             pos_evt = event.GetPosition()
             pos = self.ScreenToClient(pos_evt)
@@ -390,12 +399,6 @@ class ModelPanel2D(ModelPanel1D):
             pos = (pos_x, pos_y + 5)
         self.PopupMenu(slicerpop, pos)
         
-        slicerpop.AppendSeparator()
-        id = wx.NewId()
-        slicerpop.Append(id, '&Window Title')
-        wx.EVT_MENU(self, id, self.onChangeCaption)
-        
-        self.PopupMenu(self._slicerpop, pos)
             
     def onEditLabels(self, event):
         """
@@ -415,7 +418,9 @@ class ModelPanel2D(ModelPanel1D):
                 font.set_weight(dial.getWeight())
                 colour = dial.getColor()
                 if len(newlabel) > 0:
+                    # update Label
                     selected_plot.label = newlabel
+                    self.graph.title(newlabel)
                     self.title_label = selected_plot.label
                     self.title_font = font
                     self.title_color = colour
@@ -432,6 +437,13 @@ class ModelPanel2D(ModelPanel1D):
                 else:
                     raise
         dial.Destroy()
+        
+        # Update Graph menu and help string 
+        if self.title_label != None:     
+            pos = self.parent._window_menu.FindItem(self.window_caption)
+            helpString = 'Show/Hide Graph: '
+            helpString += (' ' + self.title_label +';')
+            self.parent._window_menu.SetHelpString(pos, helpString)
 
         
     def _onEditDetector(self, event):
