@@ -463,7 +463,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         wx.EVT_MENU(self, id, self._onProperties)
         self._slicerpop.AppendSeparator()
         id = wx.NewId()
-        self._slicerpop.Append(id, '&Reset Axis Ranges')
+        self._slicerpop.Append(id, '&Reset Graph Range')
         wx.EVT_MENU(self, id, self.onResetGraph)  
         try:
             pos_evt = event.GetPosition()
