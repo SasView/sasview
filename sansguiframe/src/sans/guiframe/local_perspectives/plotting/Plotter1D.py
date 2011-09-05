@@ -278,11 +278,15 @@ class ModelPanel1D(PlotPanel, PanelBase):
         PlotPanel.onLeftDown(self, event)
         ax = event.inaxes
         if ax != None:
-            # data coordinate position
-            pos_x = "%8.3g"% event.xdata
-            pos_y = "%8.3g"% event.ydata
-            position = "x: %s    y: %s" % (pos_x, pos_y)
-            wx.PostEvent(self.parent, StatusEvent(status=position))
+            try:
+                pos_x = float(event.xdata)# / size_x
+                pos_y = float(event.ydata)# / size_y
+                pos_x = "%8.3g"% pos_x
+                pos_y = "%8.3g"% pos_y
+                self.position = str(pos_x), str(pos_y)
+                wx.PostEvent(self.parent, StatusEvent(status=self.position))
+            except:
+                self.position = None  
         # unfocus all
         self.parent.set_plot_unfocus()  
         #post nd event to notify guiframe that this panel is on focus
