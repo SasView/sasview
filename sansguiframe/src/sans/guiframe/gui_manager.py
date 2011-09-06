@@ -125,7 +125,6 @@ try:
     else:
         DEFAULT_OPEN_FOLDER = PATH_APP
 except:
-    raise
     DATALOADER_SHOW = True
     TOOLBAR_SHOW = True
     FIXED_PANEL = True
