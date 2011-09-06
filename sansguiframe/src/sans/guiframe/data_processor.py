@@ -4,6 +4,7 @@ Implement grid used to store data
 import wx
 import numpy
 import sys
+import copy
 from wx.lib.scrolledpanel import ScrolledPanel
 import  wx.grid as  Grid
 import wx.aui
@@ -43,7 +44,6 @@ class GridPage(sheet.CSheet):
         self.Bind(wx.grid.EVT_GRID_LABEL_RIGHT_CLICK, self.on_right_click)
         self.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.on_selected_cell)
         
-       
     def on_selected_cell(self, event):
         """
         Handler catching cell selection
@@ -94,7 +94,6 @@ class GridPage(sheet.CSheet):
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
         
-        
     def on_set_x_axis(self, event):
         """
         """
@@ -112,7 +111,6 @@ class GridPage(sheet.CSheet):
         if data is None:
             data = {}
         if  len(data) > 0:
-           
             self._cols = self.GetNumberCols()
             self._rows = self.GetNumberRows()
             self.data = data
@@ -153,7 +151,8 @@ class Notebook(nb, PanelBase):
         """
         """
         nb.__init__(self, parent, -1,
-                    style= wx.aui.AUI_BUTTON_DOWN|wx.aui.AUI_NB_WINDOWLIST_BUTTON|
+                    style= wx.aui.AUI_BUTTON_DOWN|
+                    wx.aui.AUI_NB_WINDOWLIST_BUTTON|
                     wx.aui.AUI_NB_DEFAULT_STYLE|
                     wx.CLIP_CHILDREN)
         PanelBase.__init__(self, parent)
@@ -162,8 +161,7 @@ class Notebook(nb, PanelBase):
         self.manager = manager
         self.data = data
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_page)
-        
-        
+    
     def enable_close_button(self):
         """
         display the close button on tab for more than 1 tabs else remove the 
@@ -195,12 +193,62 @@ class Notebook(nb, PanelBase):
         list_of_cells = []
         if len(grid.selected_cols) == 1:
             col = grid.selected_cols[0]
+            if len(grid.selected_cells) > 0:
+                cell_row, cell_col = grid.selected_cells[0]
+                if cell_col  != col:
+                    msg = "Edit axis doesn't understand this selection.\n"
+                    msg += "Please select element of the same col"
+                    raise ValueError, msg
             for row in range(grid.GetNumberRows()):
-                list_of_cells.append((row, col))
-                
-        print "selected cell",  grid.selected_cells.sort(), grid.selected_cells
-  
+                list_of_cells.append((row + 1 , col))
+            for item in grid.selected_cells:
+                if item in list_of_cells:
+                    list_of_cells.remove(item)
+        elif len(grid.selected_cols) == 0:
+            list_of_cells = [(row + 1, col) for row, col in grid.selected_cells]
+        return list_of_cells
+    
+    def create_axis_label(self, cell_list):
+        """
+        Receive a list of cells and  create a string presenting the selected 
+        cells. 
+        :param cell_list: list of tuple
         
+        """
+        pos = self.GetSelection()
+        grid = self.GetPage(pos)
+        label = ""
+        col_name = ""
+        if len(cell_list) > 0:
+            temp_list = copy.deepcopy(cell_list)
+            temp_list.sort()
+            temp = []
+            for item in temp_list:
+                if item[0] <= 1:
+                    temp.append(item)
+            for element in temp:
+                temp_list.remove(element)
+            row_min, _  = temp_list[0]    
+            row_max = row_min
+            label += str(col_name) + "[" + str(row_min) + ":"
+            print "temp_list", temp_list
+            for index in xrange(len(temp_list)):
+                prev = index - 1
+                row, _ = temp_list[index]
+                if row > row_max + 1 :
+                    if prev > 0:
+                        row_max, _ = temp_list[prev]
+                        label += str(row_max) + "]" + ","
+                        row_min = row
+                        label  += "[" + str(row_min) + ":"
+                row_max = row
+               
+                if (index == len(temp_list)- 1):
+                    label +=  str(row_max) + "]"
+                    print "here"
+        print "label ", label             
+        return label 
+    
     def on_close_page(self, event):
         """
         close the page
@@ -209,8 +257,6 @@ class Notebook(nb, PanelBase):
             event.Veto()
         self.enable_close_button()
         
- 
-            
     def set_data(self, data):
         if data is None:
             return
@@ -253,8 +299,6 @@ class GridPanel(SPanel):
         self.vbox = wx.BoxSizer(wx.VERTICAL)
         
         self.plotting_sizer = wx.FlexGridSizer(3, 7, 10, 5)
-        w, h = self.GetSize()
-        #self.panel_grid = SPanel(self, -1, size=(w, -1))
         self.grid_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.vbox.AddMany([(self.grid_sizer, 1, wx.EXPAND, 0),
                            (wx.StaticLine(self, -1), 0, wx.EXPAND, 0),
@@ -263,7 +307,6 @@ class GridPanel(SPanel):
         self._data = data
         self.x = []
         self.y  = []
-        
         self.x_axis_label = None
         self.y_axis_label = None
         self.x_axis_value = None
@@ -296,8 +339,6 @@ class GridPanel(SPanel):
         self.y_axis_value.SetValue("%s[:]" % str(label))
         self.y_axis_label.SetValue(str(label))
         
-  
-            
     def on_plot(self, event):
         """
         plotting
@@ -318,16 +359,6 @@ class GridPanel(SPanel):
         self.grid = Notebook(parent=self)
         self.grid.set_data(self._data)
         self.grid_sizer.Add(self.grid, 1, wx.EXPAND, 0)
-    
-        
-    def layout_grid1(self):
-        """
-        Draw the area related to the grid
-        """
-        self.grid = Table(parent=self.panel_grid, data=self._data)
-        vbox = wx.BoxSizer(wx.HORIZONTAL)
-        vbox.Add(self.grid, 1, wx.EXPAND, 0)
-        self.panel_grid.SetSizer(vbox)
        
     def layout_plotting_area(self):
         """
@@ -374,8 +405,19 @@ class GridPanel(SPanel):
         """
         Get the selected column on  the visible grid and set values for axis
         """
-        self.grid.on_edit_axis()
+        cell_list = self.grid.on_edit_axis()
+        self.create_axis_label(cell_list)
         
+    def create_axis_label(self, cell_list):
+        """
+        Receive a list of cells and  create a string presenting the selected 
+        cells. 
+        :param cell_list: list of tuple
+        
+        """
+        if self.grid is not None:
+            return self.grid.create_axis_label(cell_list)
+    
     def edit_axis_helper(self, tcrtl_label, tcrtl_value):
         """
         """
@@ -393,7 +435,8 @@ class GridPanel(SPanel):
         
         
 class GridFrame(wx.Frame):
-    def __init__(self, parent=None, data=None, id=-1, title="Batch Results", size=(700, 400)):
+    def __init__(self, parent=None, data=None, id=-1, 
+                 title="Batch Results", size=(700, 400)):
         wx.Frame.__init__(self, parent=parent, id=id, title=title, size=size)
         self.parent = parent
         self.panel = GridPanel(self, data)
