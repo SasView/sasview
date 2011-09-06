@@ -16,6 +16,7 @@ from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.utils import parse_name
 from sans.guiframe.gui_style import GUIFRAME
+from sans.guiframe.gui_manager import DEFAULT_OPEN_FOLDER
 try:
     # Try to find a local config
     import imp
@@ -30,7 +31,8 @@ try:
 except:
     # Didn't find local config, load the default 
     import config
- 
+
+       
 extension_list = []
 if config.APPLICATION_STATE_EXTENSION is not None:
     extension_list.append(config.APPLICATION_STATE_EXTENSION)
@@ -38,13 +40,12 @@ EXTENSIONS = config.PLUGIN_STATE_EXTENSIONS + extension_list
 PLUGINS_WLIST = config.PLUGINS_WLIST
 APPLICATION_WLIST = config.APPLICATION_WLIST
 
-
 class Plugin(PluginBase):
     
     def __init__(self, standalone=False):
         PluginBase.__init__(self, name="DataLoader", standalone=standalone)
         #Default location
-        self._default_save_location = None  
+        self._default_save_location = DEFAULT_OPEN_FOLDER
         self.loader = Loader()  
         self._data_menu = None 
         
@@ -105,6 +106,7 @@ class Plugin(PluginBase):
         
         if path is None or not file_list or file_list[0] is None:
             return
+        self.parent._default_save_location = self._default_save_location
         self.get_data(file_list)
         
         
@@ -135,6 +137,7 @@ class Plugin(PluginBase):
             return    
         file_list = self.get_file_path(path)
         self.get_data(file_list)
+        self.parent._default_save_location = self._default_save_location
         
     def load_error(self, error=None):
         """
