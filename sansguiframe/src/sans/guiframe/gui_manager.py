@@ -82,6 +82,7 @@ try:
 except:
     # Didn't find local config, load the default 
     import sans.guiframe.config as config
+custom_config = None
 try:
     path = PATH_APP
     custom_config = _find_local_config('custom_config', path)
@@ -117,7 +118,14 @@ try:
     GUIFRAME_HEIGHT = custom_config.GUIFRAME_HEIGHT
     DEFAULT_PERSPECTIVE = custom_config.DEFAULT_PERSPECTIVE
     CLEANUP_PLOT = custom_config.CLEANUP_PLOT
+    # custom open_path
+    open_folder = custom_config.DEFAULT_OPEN_FOLDER
+    if open_folder != None and os.path.isdir(open_folder):
+        DEFAULT_OPEN_FOLDER = os.path.abspath(open_folder)
+    else:
+        DEFAULT_OPEN_FOLDER = PATH_APP
 except:
+    raise
     DATALOADER_SHOW = True
     TOOLBAR_SHOW = True
     FIXED_PANEL = True
@@ -128,6 +136,7 @@ except:
     GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
     DEFAULT_PERSPECTIVE = None
     CLEANUP_PLOT = False
+    DEFAULT_OPEN_FOLDER = PATH_APP
 
 DEFAULT_STYLE = config.DEFAULT_STYLE
 
@@ -237,8 +246,7 @@ class ViewerFrame(wx.Frame):
         self.graph_num = 0
 
         # Default locations
-        self._default_save_location = os.getcwd()        
-        
+        self._default_save_location = DEFAULT_OPEN_FOLDER       
         # Welcome panel
         self.defaultPanel = None
         #panel on focus
@@ -1563,7 +1571,7 @@ class ViewerFrame(wx.Frame):
             error_message += " Data from cmd:\n %s\n" % str(path)
             error_message += str(sys.exc_value) + "\n"
             print error_message
-           
+        print "_default_save_location", self._default_save_location  
     def load_folder(self, path):
         """
         Load entire folder

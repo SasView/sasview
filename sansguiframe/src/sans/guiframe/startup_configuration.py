@@ -26,7 +26,8 @@ DEFAULT_STRINGS = {'GUIFRAME_WIDTH':1150,
                    'FIXED_PANEL':True,
                    'WELCOME_PANEL_SHOW':False,
                    'CLEANUP_PLOT':False,
-                   'DEFAULT_PERSPECTIVE':'Fitting'}
+                   'DEFAULT_PERSPECTIVE':'Fitting',
+                   'DEFAULT_OPEN_FOLDER': None}
 try:
     CURRENT_STRINGS = {'GUIFRAME_WIDTH':CURRENT.GUIFRAME_WIDTH,
                        'GUIFRAME_HEIGHT':CURRENT.GUIFRAME_HEIGHT,
@@ -37,7 +38,8 @@ try:
                        'FIXED_PANEL':CURRENT.FIXED_PANEL,
                        'WELCOME_PANEL_SHOW':CURRENT.WELCOME_PANEL_SHOW,
                        'CLEANUP_PLOT':CURRENT.CLEANUP_PLOT,
-                       'DEFAULT_PERSPECTIVE':CURRENT.DEFAULT_PERSPECTIVE}
+                       'DEFAULT_PERSPECTIVE':CURRENT.DEFAULT_PERSPECTIVE,
+                       'DEFAULT_OPEN_FOLDER':CURRENT.DEFAULT_OPEN_FOLDER}
 except:
     CURRENT_STRINGS = DEFAULT_STRINGS
     
@@ -67,7 +69,7 @@ class StartupConfiguration(wx.Dialog):
         # font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         self.current_string = copy.deepcopy(CURRENT_STRINGS)
-        self.return_string = {}
+        self.return_string = copy.deepcopy(DEFAULT_STRINGS)
         # build layout
         panel = wx.Panel(self, -1)
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -159,7 +161,14 @@ class StartupConfiguration(wx.Dialog):
             self.current_string['CLEANUP_PLOT'] = \
                                         self.parent.cleanup_plots
             perspective = self.parent.get_current_perspective()
-            self.current_string['DEFAULT_PERSPECTIVE'] = str(perspective.sub_menu)
+            self.current_string['DEFAULT_PERSPECTIVE'] =\
+                                            str(perspective.sub_menu)
+            location = ''
+            temp = self.parent._default_save_location.split("\\")
+            for strings in temp:
+                location += (strings + "/")
+            self.current_string['DEFAULT_OPEN_FOLDER'] = location
+                        #self.parent._default_save_location.ascii_letters
             
         except:
             raise
@@ -198,8 +207,9 @@ class StartupConfiguration(wx.Dialog):
             raise  #RuntimeError, "Error: Can not change the configuration..."
         out_f.write("#Application appearance custom configuration\n" )
         for key, item in strings.iteritems():
-            if key == 'DEFAULT_PERSPECTIVE':
-                out_f.write("%s = '%s'\n" % (key,str(item)))
+            if (key == 'DEFAULT_PERSPECTIVE') or \
+                (key == 'DEFAULT_OPEN_FOLDER' and item != None):
+                out_f.write("%s = \"%s\"\n" % (key,str(item)))
             else:
                 out_f.write("%s = %s\n" % (key,str(item)))
     
