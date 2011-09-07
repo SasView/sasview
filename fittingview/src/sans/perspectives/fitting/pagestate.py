@@ -53,14 +53,17 @@ list_of_state_attributes = [["engine_type", "engine_type", "string"],
                       ["slit_smearer","slit_smearer","bool"],
                       ["enable_disp","enable_disp","bool"],
                       ["disable_disp","disable_disp","bool"],
-                      ["slit_smearer","slit_smearer","bool"],
+                      ["dI_noweight","dI_noweight","bool"],
+                      ["dI_didata","dI_didata","bool"],
+                      ["dI_sqrdata","dI_sqrdata","bool"],
+                      ["dI_idata","dI_idata","bool"],
                       ["enable2D","enable2D","bool"],
                       ["cb1","cb1","bool"],
                       ["tcChi","tcChi","float"],
-                     ["smearer", "smearer", "float"],
-                     ["smear_type","smear_type", "string"],
-                     ["dq_l", "dq_l", "string"],
-                     ["dq_r","dq_r", "string"]]
+                      ["smearer", "smearer", "float"],
+                      ["smear_type","smear_type", "string"],
+                      ["dq_l", "dq_l", "string"],
+                      ["dq_r","dq_r", "string"]]
 
 list_of_model_attributes = [["values", "values"],
                             ["weights", "weights"]]
@@ -241,6 +244,11 @@ class PageState(object):
         self.disable_smearer = True
         self.pinhole_smearer = False
         self.slit_smearer   = False
+        # weighting options
+        self.dI_noweight = False
+        self.dI_didata = True
+        self.dI_sqrdata = False
+        self.dI_idata   = False
         ## disperity selection
         self.enable_disp = False
         self.disable_disp = True
@@ -308,6 +316,10 @@ class PageState(object):
         obj.pinhole_smearer = copy.deepcopy(self.pinhole_smearer)
         obj.slit_smearer = copy.deepcopy(self.slit_smearer)
         obj.smear_type = copy.deepcopy(self.smear_type)
+        obj.dI_noweight = copy.deepcopy(self.dI_noweight)
+        obj.dI_didata = copy.deepcopy(self.dI_didata)
+        obj.dI_sqrdata = copy.deepcopy(self.dI_sqrdata)
+        obj.dI_idata = copy.deepcopy(self.dI_idata)
         obj.dq_l = copy.deepcopy(self.dq_l)
         obj.dq_r = copy.deepcopy(self.dq_r)
 
@@ -372,6 +384,13 @@ class PageState(object):
         rep += "Dispersity enable : %s\n"%str(self.enable_disp)
         rep += "Dispersity disable : %s\n"%str(self.disable_disp)
         rep += "Slit smearer enable: %s\n"%str(self.slit_smearer)
+        
+        rep += "dI_noweight : %s\n"%str(self.dI_noweight)
+        rep += "dI_didata : %s\n"%str(self.dI_didata)
+        rep += "dI_sqrdata : %s\n"%str(self.dI_sqrdata)
+        rep += "dI_idata : %s\n"%str(self.dI_idata)
+        
+        
         rep += "2D enable : %s\n"%str(self.enable2D)
         rep += "All parameters checkbox selected: %s\n"%(self.cb1)
         rep += "Value of Chisqr : %s\n"%str(self.tcChi)

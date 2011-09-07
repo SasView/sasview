@@ -68,6 +68,7 @@ class Plugin(PluginBase):
         
         self.fit_thread_list = {}
         self.residuals = None
+        self.weight = None
         self.fit_panel = None
         # Start with a good default
         self.elapsed = 0.022
@@ -429,7 +430,19 @@ class Plugin(PluginBase):
         save fit page state into file
         """
         self.state_reader.write(filename=filepath, fitstate=fitstate)
-        
+
+    def set_fit_weight(self, uid, weight, is2d=False, fid=None):
+        """
+        Set the fit weights of a given page for all
+        its data by default. If fid is provide then set the range 
+        only for the data with fid as id
+        :param uid: id corresponding to a fit page
+        :param fid: id corresponding to a fit problem (data, model)
+        :param weight: current dy data
+        """
+        if uid in self.page_finder.keys():
+            self.page_finder[uid].set_weight(weight=weight, is2d=is2d)
+                    
     def set_fit_range(self, uid, qmin, qmax, fid=None):
         """
         Set the fitting range of a given page for all
@@ -581,7 +594,7 @@ class Plugin(PluginBase):
             smear = self.page_finder[uid].get_smearer(fid=fid)
             self.draw_model(model=model, data=data, page_id=uid, smearer=smear,
                 enable1D=enable1D, enable2D=enable2D,
-                qmin=qmin, qmax=qmax)
+                qmin=qmin, qmax=qmax, weight=None)
             self._mac_sleep(0.2)
             
     def _mac_sleep(self, sec=0.2):
@@ -596,7 +609,7 @@ class Plugin(PluginBase):
                    state=None,
                    toggle_mode_on=False,
                    qmin=None, qmax=None, 
-                   update_chisqr=True):
+                   update_chisqr=True, weight=None):
         """
         Draw model.
         
@@ -612,6 +625,7 @@ class Plugin(PluginBase):
         :param update_chisqr: update chisqr [bool]
              
         """
+        self.weight = weight
         if issubclass(data.__class__, Data1D) or not enable2D:    
             ## draw model 1D with no loaded data
             self._draw_model1D(model=model, 
@@ -1428,6 +1442,8 @@ class Plugin(PluginBase):
         Get handy Chisqr using the output from draw1D and 2D, 
         instead of calling expansive CalcChisqr in guithread
         """
+        data = deepcopy(data)
+        
         # default chisqr
         chisqr = None
         #to compute chisq make sure data has valid data
@@ -1439,6 +1455,8 @@ class Plugin(PluginBase):
         if data.__class__.__name__ == "Data2D":
             if index == None: 
                 index = numpy.ones(len(data.data),ntype=bool)
+            if self.weight != None:
+                data.err_data = self.weight
             # get rid of zero error points
             index = index & (data.err_data != 0)  
             index = index & (numpy.isfinite(data.data)) 
@@ -1450,6 +1468,8 @@ class Plugin(PluginBase):
             # 1 d theory from model_thread is only in the range of index
             if index == None: 
                 index = numpy.ones(len(data.y), ntype=bool)
+            if self.weight != None:
+                data.dy = self.weight
             if data.dy == None or data.dy == []:
                 dy = numpy.ones(len(data.y))
             else:
@@ -1467,6 +1487,8 @@ class Plugin(PluginBase):
         # get chisqr only w/finite
         chisqr = numpy.average(residuals * residuals)
         self._plot_residuals(page_id, data, index)
+        #reset weight
+        self.weight = None
         return chisqr
     
     def _plot_residuals(self, page_id, data=None, index=None): 

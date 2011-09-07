@@ -868,7 +868,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.data= copy.deepcopy(self.data)
         self.state.qmax_x = self.qmax_x
         self.state.qmin_x = self.qmin_x
-      
+        self.state.dI_noweight = copy.deepcopy(self.dI_noweight.GetValue())
+        self.state.dI_didata = copy.deepcopy(self.dI_didata.GetValue())
+        self.state.dI_sqrdata = copy.deepcopy(self.dI_sqrdata.GetValue())
+        self.state.dI_idata = copy.deepcopy(self.dI_idata.GetValue())
         if hasattr(self,"enable_disp"):
             self.state.enable_disp= self.enable_disp.GetValue()
             self.state.disable_disp = self.disable_disp.GetValue()
@@ -949,7 +952,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.pinhole_smearer = \
                                 copy.deepcopy(self.pinhole_smearer.GetValue())
         self.state.slit_smearer = copy.deepcopy(self.slit_smearer.GetValue())  
-            
+        self.state.dI_noweight = copy.deepcopy(self.dI_noweight.GetValue())
+        self.state.dI_didata = copy.deepcopy(self.dI_didata.GetValue())
+        self.state.dI_sqrdata = copy.deepcopy(self.dI_sqrdata.GetValue())
+        self.state.dI_idata = copy.deepcopy(self.dI_idata.GetValue())  
         if hasattr(self,"disp_box"):
             self.state.disp_box = self.disp_box.GetCurrentSelection()
 
@@ -1087,6 +1093,12 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.onSmear(event=None)           
         self.pinhole_smearer.SetValue(state.pinhole_smearer)
         self.slit_smearer.SetValue(state.slit_smearer)
+        
+        self.dI_noweight.SetValue(state.dI_noweight)
+        self.dI_didata.SetValue(state.dI_didata)
+        self.dI_sqrdata.SetValue(state.dI_sqrdata)
+        self.dI_idata.SetValue(state.dI_idata)
+        
         ## we have two more options for smearing
         if self.pinhole_smearer.GetValue(): self.onPinholeSmear(event=None)
         elif self.slit_smearer.GetValue(): self.onSlitSmear(event=None)
@@ -1204,10 +1216,17 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.onSmear(event=None)           
         self.pinhole_smearer.SetValue(state.pinhole_smearer)
         self.slit_smearer.SetValue(state.slit_smearer)
+        
+        self.dI_noweight.SetValue(state.dI_noweight)
+        self.dI_didata.SetValue(state.dI_didata)
+        self.dI_sqrdata.SetValue(state.dI_sqrdata)
+        self.dI_idata.SetValue(state.dI_idata)
+        
+        
         ## we have two more options for smearing
         if self.pinhole_smearer.GetValue(): self.onPinholeSmear(event=None)
         elif self.slit_smearer.GetValue(): self.onSlitSmear(event=None)
-       
+        
         ## reset state of checkbox,textcrtl  and dispersity parameters value
         self._reset_parameters_state(self.fittable_param,state.fittable_param)
         self._reset_parameters_state(self.fixed_param,state.fixed_param)
@@ -1765,6 +1784,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             if hasattr(self, "enable_smearer"):
                 if not self.disable_smearer.GetValue():
                     temp_smear= self.current_smearer
+            weight = self.get_weight()
             toggle_mode_on = self.model_view.IsEnabled()
             self._manager.draw_model(self.model, 
                                     data=self.data,
@@ -1775,7 +1795,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                                     toggle_mode_on=toggle_mode_on, 
                                     state = self.state,
                                     enable2D=self.enable2D,
-                                    update_chisqr=update_chisqr)
+                                    update_chisqr=update_chisqr,
+                                    weight=weight)
         
        
     def _on_show_sld(self, event=None):

@@ -325,12 +325,12 @@ class FitPanel(nb, PanelBase):
         panel = FitPage(parent=self)
         if self.batch_on:
             self.batch_page_index += 1
-            caption = "BatchPage " + str(self.batch_page_index)
+            caption = "BatchPage" + str(self.batch_page_index)
             panel.set_index_model(self.batch_page_index)
         else:
             #Increment index of fit page
             self.fit_page_index += 1
-            caption = "FitPage " + str(self.fit_page_index)
+            caption = "FitPage" + str(self.fit_page_index)
             panel.set_index_model(self.fit_page_index)
         panel.populate_box(dict=self.model_list_box)
         panel.set_manager(self._manager)

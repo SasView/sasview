@@ -87,6 +87,14 @@ class FitProblemComponent(object):
         """
         :return: fitting range
         """
+    def set_weight(self, weight=None):
+        """
+        set fitting range 
+        """
+    def get_weight(self):
+        """
+        get fitting weight
+        """
     def clear_model_param(self):
         """
         clear constraint info
@@ -256,7 +264,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
                 self[d.id].set_fit_data(d)
                 self[d.id].set_model(self.model)
                 self[d.id].set_range(self.qmin, self.qmax)
-          
+                #self[d.id].set_smearer(self[d.id].get_smearer())
     def get_fit_data(self, fid):
         """
        
@@ -321,7 +329,24 @@ class FitProblemDictionary(FitProblemComponent, dict):
         if fid in self.iterkeys():
             return self[fid].get_range()
         
-    
+    def set_weight(self, weight, is2d, fid=None):
+        """
+        fit weight
+        """
+        if fid is None:
+            for value in self.itervalues():
+                value.set_weight(weight, is2d)
+        else:
+            if fid in self.iterkeys():
+                self[fid].value.set_weight(weight, is2d)
+                
+    def get_weight(self, fid=None):
+        """
+        return fit weight
+        """
+        if fid in self.iterkeys():
+            return self[fid].get_weight()
+                 
     def clear_model_param(self, fid=None):
         """
         clear constraint info
@@ -380,6 +405,8 @@ class FitProblem(FitProblemComponent):
         ## fitting range
         self.qmin = None
         self.qmax = None
+        # fit weight
+        self.weight = None
         
         
     def enable_smearing(self, flag=False):
@@ -458,7 +485,7 @@ class FitProblem(FitProblemComponent):
         Store data associated with this class
         :param data: list of data selected
         """
-        self.fit_data = data
+        self.fit_data = copy.deepcopy(data)
             
     def get_fit_data(self):
         """
@@ -466,6 +493,22 @@ class FitProblem(FitProblemComponent):
         """
         return self.fit_data
     
+    def set_weight(self, weight, is2d):
+        """
+        Set weight array
+        """
+        self.weight = weight
+        if is2d:
+            self.fit_data.err_data = self.weight
+        else:
+            self.fit_data.dy = self.weight
+
+    def get_weight(self):
+        """
+        returns weight array
+        """
+        return self.weight
+        
     def set_model_param(self,name,value=None):
         """ 
         Store the name and value of a parameter of this fitproblem's model
