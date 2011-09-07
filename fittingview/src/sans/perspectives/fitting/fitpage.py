@@ -348,7 +348,7 @@ class FitPage(BasicPage):
                               self._onDraw,id= self.draw_button.GetId())
         self.draw_button.SetToolTipString("Compute and Draw.")
         
-        box_description_1= wx.StaticText(self, -1,'    Chi2/Npts')
+        box_description_1= wx.StaticText(self, -1,'   Chi2/Npts')
         box_description_2= wx.StaticText(self, -1,'Npts(Fit)')
         box_description_3= wx.StaticText(self, -1,'Total Npts')
         box_description_3.SetToolTipString( \
@@ -522,7 +522,7 @@ class FitPage(BasicPage):
         self.btEditMask.SetToolTipString("Edit Mask.")
         self.EditMask_title = wx.StaticText(self, -1, ' Masking(2D)')
 
-        sizer.Add(wx.StaticText(self, -1, 'Q range'))     
+        sizer.Add(wx.StaticText(self, -1, '   Q range'))     
         sizer.Add(wx.StaticText(self, -1, ' Min[1/A]'))
         sizer.Add(wx.StaticText(self, -1, ' Max[1/A]'))
         sizer.Add(self.EditMask_title)
