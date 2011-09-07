@@ -1109,7 +1109,7 @@ class FitPage(BasicPage):
         self._manager.schedule_for_fit(uid=self.uid,value=1) 
         self._manager.set_fit_weight(uid=self.uid, 
                                      weight=self.get_weight(),
-                                     is2d = self.is_2D)
+                                     is2d = self._is_2D())
         self._manager.set_fit_range(uid=self.uid,qmin=self.qmin_x, 
                                    qmax=self.qmax_x)
         #single fit 
@@ -1125,7 +1125,7 @@ class FitPage(BasicPage):
                        self.dI_didata,
                        self.dI_sqrdata,
                        self.dI_idata]
-        if self.is_2D:
+        if self._is_2D():
             dy_data = self.data.err_data 
             data = self.data.data
         else:
@@ -1139,9 +1139,9 @@ class FitPage(BasicPage):
                 elif button_list.index(item) == 1:
                     dy = dy_data
                 elif button_list.index(item) == 2:
-                    dy = numpy.sqrt(data)
+                    dy = numpy.sqrt(numpy.abs(data))
                 elif button_list.index(item) == 3:
-                    dy = data
+                    dy = numpy.abs(data)
                 break
         return dy
                 
