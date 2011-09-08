@@ -87,9 +87,8 @@ class FitThread(CalcThread):
             #if self.handler is not None:
             #    self.handler.error(msg=msg)
         except:
-            raise
-            #if self.handler is not None:
-            #    self.handler.error(msg=str(sys.exc_value))
+            if self.handler is not None:
+                self.handler.error(msg=str(sys.exc_value))
            
         
     

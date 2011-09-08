@@ -710,7 +710,6 @@ class Plugin(PluginBase):
                     current_page_id = page_id
                     value.clear_model_param()
             except:
-                raise
                 msg= "%s error: %s" % (engineType, sys.exc_value)
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                       type="stop"))

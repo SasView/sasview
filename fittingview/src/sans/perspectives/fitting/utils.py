@@ -21,7 +21,7 @@ def get_weight(data, is2d, flag=None):
     elif flag == 1:
         weight = dy_data
     elif flag == 2:
-        self.weight = numpy.sqrt(numpy.abs(data))
+        weight = numpy.sqrt(numpy.abs(data))
     elif flag == 3:
         weight = numpy.abs(data)
     return weight
