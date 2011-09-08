@@ -3,6 +3,8 @@ Implement grid used to store data
 """
 import wx
 import numpy
+import math
+import re
 import sys
 import copy
 from wx.lib.scrolledpanel import ScrolledPanel
@@ -16,6 +18,45 @@ from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.events import StatusEvent  
 from sans.guiframe.dataFitting import Data1D
 
+FUNC_DICT = {"sqrt": "math.sqrt",
+             "pow": "math.sqrt"}
+def parse_string(sentence, list):
+    """
+    Return a dictionary of column label and index or row selected
+    :param sentence: String to parse
+    :param list: list of columns label
+    """
+    toks = []
+    p2 = re.compile(r'\d+')
+    p = re.compile(r'[\+\-\*\%\/]')
+    labels = p.split(sentence)
+    col_dict = {}
+    for elt in labels:
+        rang = None
+        temp_arr = []
+        for label in  list:
+            label_pos =  elt.find(label)
+            if label_pos != -1:
+                if elt.count(',') > 0:
+                    new_temp = []
+                    temp = elt.split(label)
+                    for item in temp:
+                        range_pos = item.find(":")
+                        if range_pos != -1:
+                            rang = p2.findall(item)
+                            for i in xrange(int(rang[0]), int(rang[1])+1 ):
+                                new_temp.append(i)
+                    temp_arr += new_temp
+                else:
+                    temp = elt.split(label)
+                    for item in temp:
+                        range_pos = item.find(":")
+                        if range_pos != -1:
+                            rang = p2.findall(item)
+                            for i in xrange(int(rang[0]), int(rang[1])+1 ):
+                                temp_arr.append(i)
+                col_dict[elt] = (label, temp_arr)
+    return col_dict
 
 class GridPage(sheet.CSheet):
     """
@@ -49,13 +90,20 @@ class GridPage(sheet.CSheet):
         Handler catching cell selection
         """
         flag = event.CmdDown() or event.ControlDown()
-        cell = (event.GetRow(), event.GetCol())
+        row, col = event.GetRow(), event.GetCol()
+        cell = (row, col)
         if not flag:
             self.selected_cells = []
+            self.axis_value = []
+            self.axis_label = ""
         if cell in self.selected_cells:
             self.selected_cells.remove(cell)
         else:
             self.selected_cells.append(cell)
+        if row > 1:
+            if (cell) in self.selected_cells:
+                self.axis_value.append(self.GetCellValue(row, col))
+        self.axis_label = self.GetCellValue(row, col)
         event.Skip()
       
     def on_left_click(self, event):
@@ -65,9 +113,16 @@ class GridPage(sheet.CSheet):
         flag = event.CmdDown() or event.ControlDown()
         col = event.GetCol()
         if not flag:
-            self.selected_cols  = []
+            self.selected_cols = []
+            self.axis_value = []
+            self.axis_label = ""
         if col not in self.selected_cols:
             self.selected_cols.append(col)
+        if not flag :
+            for row in range(2, self.GetNumberRows()+ 1):
+                self.axis_value.append(self.GetCellValue(row, col))
+            row = 1
+            self.axis_label = self.GetCellValue(row, col)
         event.Skip()
         
     def on_right_click(self, event):
@@ -208,6 +263,20 @@ class Notebook(nb, PanelBase):
             list_of_cells = [(row + 1, col) for row, col in grid.selected_cells]
         return list_of_cells
     
+    def get_column_labels(self):
+        """
+        return dictionary of columns labels of the current page
+        """
+        pos = self.GetSelection()
+        grid = self.GetPage(pos)
+        labels = {}
+        row = 0
+        for col in range(grid.GetNumberCols()):
+            label = grid.GetCellValue(row, col)
+            if label.strip() != "" :
+                labels[label.strip()] = col
+        return labels
+        
     def create_axis_label(self, cell_list):
         """
         Receive a list of cells and  create a string presenting the selected 
@@ -228,10 +297,10 @@ class Notebook(nb, PanelBase):
                     temp.append(item)
             for element in temp:
                 temp_list.remove(element)
-            row_min, _  = temp_list[0]    
+            row_min, col  = temp_list[0]    
             row_max = row_min
+            col_name = grid.GetCellValue(0, col)
             label += str(col_name) + "[" + str(row_min) + ":"
-            print "temp_list", temp_list
             for index in xrange(len(temp_list)):
                 prev = index - 1
                 row, _ = temp_list[index]
@@ -242,12 +311,9 @@ class Notebook(nb, PanelBase):
                         row_min = row
                         label  += "[" + str(row_min) + ":"
                 row_max = row
-               
                 if (index == len(temp_list)- 1):
-                    label +=  str(row_max) + "]"
-                    print "here"
-        print "label ", label             
-        return label 
+                    label +=  str(row_max) + "]"     
+        return label, col_name
     
     def on_close_page(self, event):
         """
@@ -294,7 +360,7 @@ class SPanel(ScrolledPanel):
 
 
 class GridPanel(SPanel):
-    def __init__(self, parent,data=None, *args, **kwds):
+    def __init__(self, parent, data=None, *args, **kwds):
         SPanel.__init__(self, parent , *args, **kwds)
         self.vbox = wx.BoxSizer(wx.VERTICAL)
         
@@ -309,12 +375,12 @@ class GridPanel(SPanel):
         self.y  = []
         self.x_axis_label = None
         self.y_axis_label = None
-        self.x_axis_value = None
-        self.y_axis_value = None
+        self.x_axis_title = None
+        self.y_axis_title = None
         self.x_axis_unit = None
         self.y_axis_unit = None
         self.plot_button = None
-        self.grid = None
+        self.notebook = None
         self.layout_grid()
         self.layout_plotting_area()
         self.SetSizer(self.vbox)
@@ -322,52 +388,109 @@ class GridPanel(SPanel):
     def set_data(self, data):
         """
         """
-        if self.grid is not None:
-            self.grid.set_data(data)
+        if self.notebook is not None:
+            self.notebook.set_data(data)
         
-    def set_xaxis(self, label="", x=None) :
+    def set_xaxis(self, label="", x=None):
+        """
+        """
         if x is None:
             x = []
         self.x = x
-        self.x_axis_value.SetValue("%s[:]" % str(label))
-        self.x_axis_label.SetValue(str(label))
+        self.x_axis_label.SetValue("%s[:]" % str(label))
+        self.x_axis_title.SetValue(str(label))
         
-    def set_yaxis(self, label="", y=None) :
+    def set_yaxis(self, label="", y=None):
+        """
+        """
         if y is None:
             y = []
         self.y = y
-        self.y_axis_value.SetValue("%s[:]" % str(label))
-        self.y_axis_label.SetValue(str(label))
+        self.y_axis_label.SetValue("%s[:]" % str(label))
+        self.y_axis_title.SetValue(str(label))
         
+    def get_plot_axis(self, col, list):
+        """
+       
+        """
+        axis = []
+        pos = self.notebook.GetSelection()
+        grid = self.notebook.GetPage(pos)
+        for row in list:
+            label = grid.GetCellValue(row - 1, col)
+            if label.strip() != "":
+                axis.append(float(label.strip()))
+        return axis
+    
     def on_plot(self, event):
         """
-        plotting
+        Evaluate the contains of textcrtl and plot result
         """ 
-        new_plot = Data1D(x=self.x, y=self.y)
+        pos = self.notebook.GetSelection()
+        grid = self.notebook.GetPage(pos)
+        column_names = {}
+        if grid is not None:
+            column_names = self.notebook.get_column_labels()
+        #evalue x
+        sentence = self.x_axis_label.GetValue()
+        if sentence.strip() == "":
+            msg = "select value for x axis"
+            raise ValueError, msg
+        dict = parse_string(sentence, column_names.keys())
+        for tok, (col_name, list) in dict.iteritems():
+            col = column_names[col_name]
+            xaxis = self.get_plot_axis(col, list)
+            sentence = sentence.replace(tok, 
+                                        "numpy.array(%s)" % str(xaxis))
+        for key, value in FUNC_DICT.iteritems():
+            sentence = sentence.replace(key.lower(), value)
+        x = eval(sentence)
+        #evaluate y
+        sentence = self.y_axis_label.GetValue()
+        if sentence.strip() == "":
+            msg = "select value for y axis"
+            raise ValueError, msg
+        dict = parse_string(sentence, column_names.keys())
+        for tok, (col_name, list) in dict.iteritems():
+            col = column_names[col_name]
+            yaxis = self.get_plot_axis(col, list)
+            sentence = sentence.replace(tok, 
+                                        "numpy.array(%s)" % str(yaxis))
+        for key, value in FUNC_DICT.iteritems():
+            sentence = sentence.replace(key, value)
+        y = eval(sentence)
+        #plotting
+        new_plot = Data1D(x=x, y=y)
         new_plot.id =  wx.NewId()
         new_plot.group_id = wx.NewId()
-        title = "%s vs %s" % (self.y_axis_label.GetValue(), self.x_axis_label.GetValue())
-        new_plot.xaxis(self.x_axis_label.GetValue(), self.x_axis_unit.GetValue())
-        new_plot.yaxis(self.y_axis_label.GetValue(), self.y_axis_unit.GetValue())
-        wx.PostEvent(self.parent.parent, 
+        title = "%s vs %s" % (self.y_axis_title.GetValue(), 
+                              self.x_axis_title.GetValue())
+        new_plot.xaxis(self.x_axis_title.GetValue(), self.x_axis_unit.GetValue())
+        new_plot.yaxis(self.y_axis_title.GetValue(), self.y_axis_unit.GetValue())
+        try:
+            title = self.notebook.GetPageText(pos)
+            wx.PostEvent(self.parent.parent, 
                              NewPlotEvent(plot=new_plot, 
-                        group_id=str(new_plot.group_id), title ="batch"))    
+                        group_id=str(new_plot.group_id), title =title))    
+        except:
+            pass
+        
     def layout_grid(self):
         """
         Draw the area related to the grid
         """
-        self.grid = Notebook(parent=self)
-        self.grid.set_data(self._data)
-        self.grid_sizer.Add(self.grid, 1, wx.EXPAND, 0)
+        self.notebook = Notebook(parent=self)
+        self.notebook.set_data(self._data)
+        self.grid_sizer.Add(self.notebook, 1, wx.EXPAND, 0)
        
     def layout_plotting_area(self):
         """
         Draw area containing options to plot
         """
-        self.x_axis_label = wx.TextCtrl(self, -1)
-        self.y_axis_label = wx.TextCtrl(self, -1)
-        self.x_axis_value = wx.TextCtrl(self, -1, size=(200, -1))
-        self.y_axis_value = wx.TextCtrl(self, -1, size=(200, -1))
+        self.x_axis_title = wx.TextCtrl(self, -1)
+        self.y_axis_title = wx.TextCtrl(self, -1)
+        self.x_axis_label = wx.TextCtrl(self, -1, size=(200, -1))
+        self.y_axis_label = wx.TextCtrl(self, -1, size=(200, -1))
         self.x_axis_add = wx.Button(self, -1, "Add")
         self.x_axis_add.Bind(event=wx.EVT_BUTTON, handler=self.on_edit_axis, 
                             id=self.x_axis_add.GetId())
@@ -379,35 +502,47 @@ class GridPanel(SPanel):
         self.plot_button = wx.Button(self, -1, "Plot")
         wx.EVT_BUTTON(self, self.plot_button.GetId(), self.on_plot)
         self.plotting_sizer.AddMany([
-                    (wx.StaticText(self, -1, "x-axis label"), 1, wx.LEFT, 10),
-                    (self.x_axis_label, wx.TOP|wx.BOTTOM|wx.LEFT, 10),
-                    (wx.StaticText(self, -1, "x-axis value"), 1, wx.LEFT, 10),
-                    (self.x_axis_value, wx.TOP|wx.BOTTOM|wx.LEFT, 10),
-                    (self.x_axis_add, 1, wx.LEFT|wx.RIGHT, 0),
-                    (wx.StaticText(self, -1 , "unit"), 1, wx.LEFT|wx.RIGHT, 0),
-                    (self.x_axis_unit, 0, wx.LEFT, 0),
-                    (wx.StaticText(self, -1, "y-axis label"), 1, wx.LEFT, 10),
-                    (self.y_axis_label,  wx.TOP|wx.BOTTOM|wx.LEFT, 10),
-                    (wx.StaticText(self, -1, "y-axis value"), 1, wx.LEFT, 10),
-                    (self.y_axis_value, wx.TOP|wx.BOTTOM|wx.LEFT, 10),
-                    (self.y_axis_add, 1, wx.LEFT|wx.RIGHT, 0),
-                    (wx.StaticText(self, -1 , "unit"), 1, wx.LEFT|wx.RIGHT, 0),
-                    (self.y_axis_unit, 0, wx.LEFT, 0),
+                    (wx.StaticText(self, -1, "x-axis label"), 1,
+                      wx.TOP|wx.BOTTOM|wx.LEFT, 10),
+                    (self.x_axis_label, 1, wx.TOP|wx.BOTTOM, 10),
+                    (self.x_axis_add, 1, wx.TOP|wx.BOTTOM|wx.RIGHT, 10),
+                    (wx.StaticText(self, -1, "x-axis title"), 1, 
+                     wx.TOP|wx.BOTTOM|wx.LEFT, 10),
+                    (self.x_axis_title, 1, wx.TOP|wx.BOTTOM, 10),
+                    (wx.StaticText(self, -1 , "unit"), 1, 
+                     wx.TOP|wx.BOTTOM, 10),
+                    (self.x_axis_unit, 1, wx.TOP|wx.BOTTOM, 10),
+                    (wx.StaticText(self, -1, "y-axis label"), 1, 
+                     wx.BOTTOM|wx.LEFT, 10),
+                    (self.y_axis_label, wx.BOTTOM, 10),
+                    (self.y_axis_add, 1, wx.BOTTOM|wx.RIGHT, 10),
+                    (wx.StaticText(self, -1, "y-axis title"), 1, 
+                     wx.BOTTOM|wx.LEFT, 10),
+                    (self.y_axis_title,  wx.BOTTOM, 10),
+                    (wx.StaticText(self, -1 , "unit"), 1, wx.BOTTOM, 10),
+                    (self.y_axis_unit, 1, wx.BOTTOM, 10),
                       (-1, -1),
                       (-1, -1),
                       (-1, -1),
                       (-1, -1),
                       (-1, -1),
                       (-1, -1),
-                      (self.plot_button, 1, wx.LEFT, 0)])
+                      (self.plot_button, 1, wx.LEFT|wx.BOTTOM, 10)])
    
     def on_edit_axis(self, event):
         """
         Get the selected column on  the visible grid and set values for axis
         """
-        cell_list = self.grid.on_edit_axis()
-        self.create_axis_label(cell_list)
-        
+        cell_list = self.notebook.on_edit_axis()
+        label, title = self.create_axis_label(cell_list)
+        tcrtl = event.GetEventObject()
+        if tcrtl == self.x_axis_add:
+            self.edit_axis_helper(self.x_axis_label, self.x_axis_title,
+                                   label, title)
+        elif tcrtl == self.y_axis_add:
+            self.edit_axis_helper(self.y_axis_label, self.y_axis_title,
+                                   label, title)
+            
     def create_axis_label(self, cell_list):
         """
         Receive a list of cells and  create a string presenting the selected 
@@ -415,23 +550,27 @@ class GridPanel(SPanel):
         :param cell_list: list of tuple
         
         """
-        if self.grid is not None:
-            return self.grid.create_axis_label(cell_list)
+        if self.notebook is not None:
+            return self.notebook.create_axis_label(cell_list)
     
-    def edit_axis_helper(self, tcrtl_label, tcrtl_value):
+    def edit_axis_helper(self, tcrtl_label, tcrtl_title, label, title):
         """
+        get controls to modify
         """
+        tcrtl_label.SetValue(str(label))
+        tcrtl_title.SetValue(str(title))
+        
     def add_column(self):
         """
         """
-        if self.grid is not None:
-            self.grid.add_column()
+        if self.notebook is not None:
+            self.notebook.add_column()
         
     def on_remove_column(self):
         """
         """
-        if self.grid is not None:
-            self.grid.on_remove_column()
+        if self.notebook is not None:
+            self.notebook.on_remove_column()
         
         
 class GridFrame(wx.Frame):
