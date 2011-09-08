@@ -700,7 +700,6 @@ class Plugin(PluginBase):
                     for fitproblem in  value.get_fit_problem():
                         if sim_fitter is None:
                             fitter = Fit(self._fit_engine)  
-                            print "onfit id ", id(fitproblem)
                             self._fit_helper(fitproblem, pars, fitter, fit_id)
                             fitter_list.append(fitter) 
                         else:
@@ -857,10 +856,11 @@ class Plugin(PluginBase):
     def _onEVT_SLICER_PANEL(self, event):
         """
         receive and event telling to update a panel with a name starting with 
-        event.panel_name. this method update slicer panel for a given interactor.
+        event.panel_name. this method update slicer panel 
+        for a given interactor.
         
-        :param event: contains type of slicer , paramaters for updating the panel
-            and panel_name to find the slicer 's panel concerned.
+        :param event: contains type of slicer , paramaters for updating 
+            the panel and panel_name to find the slicer 's panel concerned.
         """
         for item in self.parent.panels:
             name = event.panel_name
@@ -959,16 +959,22 @@ class Plugin(PluginBase):
         if self.batch_on:
             batch_result = {"Chi2":[]}
             for index  in range(len(pars)):
-                    batch_result[pars[index]] = []
-                    batch_result["error on %s" % pars[index]] = []
+                batch_result[pars[index]] = []
+                batch_result["error on %s" % pars[index]] = []
             for res in result:
                 if res is None:
-                    continue
-                batch_result["Chi2"].append(res.fitness)
-                for index  in range(len(pars)):
-                    batch_result[pars[index]].append(res.pvec[index])
-                    item = res.stderr[index]
-                    batch_result["error on %s" % pars[index]].append(item)
+                    null_value = numpy.nan
+                    batch_result["Chi2"].append(null_value)
+                    for index  in range(len(pars)):
+                        batch_result[pars[index]].append(null_value)
+                        item = null_value
+                        batch_result["error on %s" % pars[index]].append(item)
+                else:
+                    batch_result["Chi2"].append(res.fitness)
+                    for index  in range(len(pars)):
+                        batch_result[pars[index]].append(res.pvec[index])
+                        item = res.stderr[index]
+                        batch_result["error on %s" % pars[index]].append(item)
             pid = page_id[0]
             self.page_finder[pid].set_result(result=batch_result)      
             self.parent.on_set_batch_result(data=batch_result, 
@@ -1258,7 +1264,8 @@ class Plugin(PluginBase):
             new_plot.name = model.name + " ["+ str(model.__class__.__name__)+"]"
             new_plot.xaxis(_xaxis, _xunit)
             new_plot.yaxis(_yaxis, _yunit)
-            self.page_finder[page_id].set_theory_data(data=new_plot, fid=data.id)
+            self.page_finder[page_id].set_theory_data(data=new_plot, 
+                                                      fid=data.id)
             self.parent.update_theory(data_id=data.id, theory=new_plot,
                                        state=state)   
             current_pg = self.fit_panel.get_page_by_id(page_id)
@@ -1276,7 +1283,8 @@ class Plugin(PluginBase):
             else:
                 if update_chisqr:
                     wx.PostEvent(current_pg,
-                                 Chi2UpdateEvent(output=self._cal_chisqr(data=data,
+                                 Chi2UpdateEvent(output=self._cal_chisqr(
+                                                                data=data,
                                                             page_id=page_id,
                                                             index=index)))
                 else:
