@@ -375,11 +375,14 @@ class ModelPanel2D(ModelPanel1D):
         slicerpop.AppendSeparator()
         
         id = wx.NewId()
-        slicerpop.Append(id, '&Modify Y Axis Label')
+        slicerpop.Append(id, '&Edit Y Axis Label')
         wx.EVT_MENU(self, id, self._on_yaxis_label)     
         id = wx.NewId()
-        slicerpop.Append(id, '&Modify X Axis Label')
+        slicerpop.Append(id, '&Edit X Axis Label')
         wx.EVT_MENU(self, id, self._on_xaxis_label)
+        id = wx.NewId()
+        slicerpop.Append(id, '&Toggle Grid On/Off', 'Toggle Grid On/Off')
+        wx.EVT_MENU(self, id, self.onGridOnOff)
         slicerpop.AppendSeparator()
         
         id = wx.NewId()

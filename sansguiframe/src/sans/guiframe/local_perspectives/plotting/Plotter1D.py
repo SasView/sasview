@@ -299,7 +299,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         
         selected_plot = self.plots[self.graph.selected_plottable]
-        if self.hide_menu.GetText() == "Hide Error":
+        if self.hide_menu.GetText() == "Hide Error Bar":
             selected_plot.hide_error = True
         else:
             selected_plot.hide_error = False
@@ -413,15 +413,13 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 id = wx.NewId()
                 self._slicerpop.AppendMenu(id, '&Modify Symbol Size', size_menu)
                 
-                self._slicerpop.AppendSeparator()
-                
-                self.hide_menu = self._slicerpop.Append(id, "Hide Error")
+                self.hide_menu = self._slicerpop.Append(id, "Hide Error Bar")
     
                 if plot.dy is not None and plot.dy != []:
                     if plot.hide_error :
-                        self.hide_menu.SetText('Show Error')
+                        self.hide_menu.SetText('Show Error Bar')
                     else:
-                        self.hide_menu.SetText('Hide Error')
+                        self.hide_menu.SetText('Hide Error Bar')
                 else:
                     self.hide_menu.Enable(False)
                 wx.EVT_MENU(self, id, self._ontoggle_hide_error)
@@ -447,11 +445,15 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._slicerpop.AppendSeparator()
         
         id = wx.NewId()
-        self._slicerpop.Append(id, '&Modify Y Axis Label')
+        self._slicerpop.Append(id, '&Edit Y Axis Label')
         wx.EVT_MENU(self, id, self._on_yaxis_label)     
         id = wx.NewId()
-        self._slicerpop.Append(id, '&Modify X Axis Label')
+        self._slicerpop.Append(id, '&Edit X Axis Label')
         wx.EVT_MENU(self, id, self._on_xaxis_label)
+
+        id = wx.NewId()
+        self._slicerpop.Append(id, '&Toggle Grid On/Off', 'Toggle Grid On/Off')
+        wx.EVT_MENU(self, id, self.onGridOnOff)
         self._slicerpop.AppendSeparator()
         
         if self.position != None:
