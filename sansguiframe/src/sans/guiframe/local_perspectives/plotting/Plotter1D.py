@@ -72,6 +72,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._symbol_labels = self.get_symbol_label()
         self._color_labels = self.get_color_label()
         self.currColorIndex = ""
+        self._is_changed_legend_label = False
       
         self.hide_menu = None
         ## Unique ID (from gui_manager)
@@ -233,7 +234,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
             xlo, xhi = self.subplot.get_xlim()
             ylo, yhi = self.subplot.get_ylim()
             old_data = self.plots[data.id]
-            data.label = old_data.label
+            if self._is_changed_legend_label:
+                data.label = old_data.label
             data.custom_color = old_data.custom_color
             # Replace data
             self.graph.replace(data)
@@ -507,6 +509,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             for plot in  self.plots.itervalues():
                 helpString += (' ' + plot.label +';')
             self.parent._window_menu.SetHelpString(pos, helpString)
+            self._is_changed_legend_label = True
             #break
         dial.Destroy()
         

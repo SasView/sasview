@@ -214,8 +214,8 @@ class ModelPanel2D(ModelPanel1D):
         # graph properties
         self.graph.xaxis(data._xaxis, data._xunit)
         self.graph.yaxis(data._yaxis, data._yunit)
-            
-        data.label = self.title_label
+        if self._is_changed_legend_label:   
+                data.label = self.title_label
         
         if data.label == None:
             data.label = data.name
@@ -437,6 +437,7 @@ class ModelPanel2D(ModelPanel1D):
                     self.subplot.set_title(label=self.title_label,
                                            fontproperties=self.title_font,
                                            color=self.title_color)
+                    self._is_changed_legend_label = True
                     self.subplot.figure.canvas.draw_idle()  
             except:
                 if self.parent != None:
