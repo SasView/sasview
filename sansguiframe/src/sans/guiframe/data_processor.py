@@ -182,14 +182,17 @@ class GridPage(sheet.CSheet):
                 new_row_nbr =  nbr_user_row - self._rows 
                 self.AppendRows(new_row_nbr, True)
             # add data to the grid    
-            label_row = 0
+            row = 0
             for index  in range(nbr_user_cols):
+                col = index
                 # use the first row of the grid to add user defined labels
-                self.SetCellValue(label_row, index, str(self.col_names[index]))
+                self.SetCellValue(row, col, str(self.col_names[index]))
             col = 0
             for value_list in self.data.values():
-                for row in range(1, len(value_list)):
-                    self.SetCellValue(row, col, str(value_list[row]))
+                row = 1
+                for index in range(len(value_list)):
+                    self.SetCellValue(row, col, str(value_list[index]))
+                    row += 1
                 col += 1
             self.AutoSize()
            
