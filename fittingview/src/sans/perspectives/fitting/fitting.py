@@ -431,7 +431,7 @@ class Plugin(PluginBase):
         """
         self.state_reader.write(filename=filepath, fitstate=fitstate)
 
-    def set_fit_weight(self, uid, weight, is2d=False, fid=None):
+    def set_fit_weight(self, uid, flag, is2d=False, fid=None):
         """
         Set the fit weights of a given page for all
         its data by default. If fid is provide then set the range 
@@ -441,7 +441,7 @@ class Plugin(PluginBase):
         :param weight: current dy data
         """
         if uid in self.page_finder.keys():
-            self.page_finder[uid].set_weight(weight=weight, is2d=is2d)
+            self.page_finder[uid].set_weight(flag=flag, is2d=is2d)
                     
     def set_fit_range(self, uid, qmin, qmax, fid=None):
         """
@@ -697,10 +697,10 @@ class Plugin(PluginBase):
                     for element in templist:
                         name = str(element[1])
                         pars.append(name)
-
                     for fitproblem in  value.get_fit_problem():
                         if sim_fitter is None:
                             fitter = Fit(self._fit_engine)  
+                            print "onfit id ", id(fitproblem)
                             self._fit_helper(fitproblem, pars, fitter, fit_id)
                             fitter_list.append(fitter) 
                         else:
@@ -792,10 +792,11 @@ class Plugin(PluginBase):
         """
         if data_list is None:
             data_list = []
+        
         self.page_finder[uid].set_fit_data(data=data_list)
         if caption is not None:
             self.page_finder[uid].set_fit_tab_caption(caption=caption)
-        
+            
     def on_add_new_page(self, event=None):
         """
         ask fit panel to create a new empty page
@@ -847,7 +848,6 @@ class Plugin(PluginBase):
                                                action="delete"))
                     self.parent.update_data(prev_data=theory_data,
                                              new_data=data)   
-              
         self.store_data(uid=page.uid, data_list=page.get_data_list(), 
                         caption=page.window_caption)
         if self.sim_page is not None:

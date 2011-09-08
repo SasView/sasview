@@ -1108,7 +1108,7 @@ class FitPage(BasicPage):
         self._manager._reset_schedule_problem(value=0, uid=self.uid)
         self._manager.schedule_for_fit(uid=self.uid,value=1) 
         self._manager.set_fit_weight(uid=self.uid, 
-                                     weight=self.get_weight(),
+                                     flag=self.get_weight_flag(),
                                      is2d = self._is_2D())
         self._manager.set_fit_range(uid=self.uid,qmin=self.qmin_x, 
                                    qmax=self.qmax_x)
@@ -1117,33 +1117,27 @@ class FitPage(BasicPage):
         self.btFit.SetLabel("Stop")
         self.bind_fit_button()
            
-    def get_weight(self):
+    def get_weight_flag(self):
         """
-        Get weighting dI data
+        Get flag corresponding to a given weighting dI data.
         """
         button_list = [self.dI_noweight,
                        self.dI_didata,
                        self.dI_sqrdata,
                        self.dI_idata]
-        if self._is_2D():
-            dy_data = self.data.err_data 
-            data = self.data.data
-        else:
-            dy_data = self.data.dy
-            data = self.data.y
-        dy = dy_data
+        flag = 1
         for item in button_list:
             if item.GetValue():
                 if button_list.index(item) == 0:
-                    dy = numpy.ones_like(dy_data)
+                    flag = 0 #dy = numpy.ones_like(dy_data)
                 elif button_list.index(item) == 1:
-                    dy = dy_data
+                    flag = 1 #dy = dy_data
                 elif button_list.index(item) == 2:
-                    dy = numpy.sqrt(numpy.abs(data))
+                    flag = 2 #dy = numpy.sqrt(numpy.abs(data))
                 elif button_list.index(item) == 3:
-                    dy = numpy.abs(data)
+                    flag = 3 # dy = numpy.abs(data)
                 break
-        return dy
+        return flag
                 
     def bind_fit_button(self):
         """

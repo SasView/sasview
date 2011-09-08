@@ -87,7 +87,7 @@ class FitProblemComponent(object):
         """
         :return: fitting range
         """
-    def set_weight(self, weight=None):
+    def set_weight(self, flag=None):
         """
         set fitting range 
         """
@@ -329,16 +329,16 @@ class FitProblemDictionary(FitProblemComponent, dict):
         if fid in self.iterkeys():
             return self[fid].get_range()
         
-    def set_weight(self, weight, is2d, fid=None):
+    def set_weight(self,  is2d, flag=None, fid=None):
         """
         fit weight
         """
         if fid is None:
             for value in self.itervalues():
-                value.set_weight(weight, is2d)
+                value.set_weight(flag=flag, is2d=is2d)
         else:
             if fid in self.iterkeys():
-                self[fid].value.set_weight(weight, is2d)
+                self[fid].set_weight(flag=flag, is2d=is2d)
                 
     def get_weight(self, fid=None):
         """
@@ -486,18 +486,21 @@ class FitProblem(FitProblemComponent):
         :param data: list of data selected
         """
         self.fit_data = copy.deepcopy(data)
-            
+        
     def get_fit_data(self):
         """
         :return: data associate with this class
         """
         return self.fit_data
     
-    def set_weight(self, weight, is2d):
+    def set_weight(self, is2d, flag=None):
         """
-        Set weight array
+        Received flag and compute error on data.
+        :param flag: flag to transform error of data.
+        :param is2d: flag to distinguish 1D to 2D Data
         """
-        self.weight = weight
+        from .utils import get_weight
+        self.weight = get_weight(data=self.fit_data, is2d=is2d, flag=flag)
         if is2d:
             self.fit_data.err_data = self.weight
         else:

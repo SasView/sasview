@@ -1784,7 +1784,10 @@ class BasicPage(ScrolledPanel, PanelBase):
             if hasattr(self, "enable_smearer"):
                 if not self.disable_smearer.GetValue():
                     temp_smear= self.current_smearer
-            weight = self.get_weight()
+            # compute weight for the current data
+            from .utils import get_weight
+            flag = self.get_weight_flag()
+            weight = get_weight(data=self.data, is2d=self._is_2D(), flag=flag)
             toggle_mode_on = self.model_view.IsEnabled()
             self._manager.draw_model(self.model, 
                                     data=self.data,
