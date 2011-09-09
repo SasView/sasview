@@ -82,6 +82,7 @@ class Plugin(PluginBase):
         Load data
         """
         path = None
+        self._default_save_location = self.parent._default_save_location
         if self._default_save_location == None:
             self._default_save_location = os.getcwd()
         
@@ -122,6 +123,7 @@ class Plugin(PluginBase):
         Load entire folder
         """
         path = None
+        self._default_save_location = self.parent._default_save_location
         if self._default_save_location == None:
             self._default_save_location = os.getcwd()
         dlg = wx.DirDialog(self.parent, "Choose a directory", 

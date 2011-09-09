@@ -745,6 +745,8 @@ class ModelPanel2D(ModelPanel1D):
         
         """
         id = str(evt.GetId())
+        if self.parent != None:
+            self._default_save_location = self.parent._default_save_location
         if id in self.action_ids:         
             
             path = None
@@ -783,6 +785,8 @@ class ModelPanel2D(ModelPanel1D):
                     loader.save(fName, data, format)
                 try:
                     self._default_save_location = os.path.dirname(path)
+                    self.parent._default_save_location = \
+                                            self._default_save_location 
                 except:
                     pass    
             dlg.Destroy()

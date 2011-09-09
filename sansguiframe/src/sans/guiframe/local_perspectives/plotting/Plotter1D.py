@@ -79,7 +79,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.uid = None
         self.x_size = None
         ## Default locations
-        self._default_save_location = os.getcwd() 
+        #self._default_save_location = os.getcwd() 
         self.size = None       
         ## Graph        
         #self.graph = Graph()
@@ -619,6 +619,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             out.close()                 
             try:
                 self._default_save_location = os.path.dirname(path)
+                self.parent._default_save_location = self._default_save_location
             except:
                 pass    
                 
@@ -632,10 +633,16 @@ class ModelPanel1D(PlotPanel, PanelBase):
        
         path = None
         wildcard = "Text files (*.txt)|*.txt|"\
-        "CanSAS 1D files(*.xml)|*.xml" 
+                    "CanSAS 1D files(*.xml)|*.xml" 
+        default_name = self.plots[self.graph.selected_plottable].label
+        if default_name.count('.') > 0:
+            default_name = default_name.split('.')[0]
+        default_name += "_out"
+        if self.parent != None:
+            self._default_save_location = self.parent._default_save_location
         dlg = wx.FileDialog(self, "Choose a file",
                             self._default_save_location,
-                             "", wildcard , wx.SAVE)
+                            default_name, wildcard , wx.SAVE)
        
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
@@ -672,6 +679,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 loader.save(fName, data, format)
             try:
                 self._default_save_location = os.path.dirname(path)
+                self.parent._default_save_location = self._default_save_location
             except:
                 pass    
         dlg.Destroy()

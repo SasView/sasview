@@ -1570,7 +1570,7 @@ class ViewerFrame(wx.Frame):
             error_message += " Data from cmd:\n %s\n" % str(path)
             error_message += str(sys.exc_value) + "\n"
             print error_message
-        print "_default_save_location", self._default_save_location  
+ 
     def load_folder(self, path):
         """
         Load entire folder
@@ -1677,7 +1677,7 @@ class ViewerFrame(wx.Frame):
         save the state of the SansView as *.svs
         """
         ## Default file location for save
-        self._default_save_location = os.getcwd()
+        #self._default_save_location = os.getcwd()
         if self._current_perspective is  None:
             return
         reader, ext = self._current_perspective.get_extensions()
