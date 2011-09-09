@@ -822,6 +822,9 @@ class Plugin(PluginBase):
         :param data: is a list of data
         """
         page = self.fit_panel.set_data(data)
+        # page could be None when loading state files
+        if page == None:
+            return page
         page_caption = page.window_caption
         #append Data1D to the panel containing its theory
         #if theory already plotted

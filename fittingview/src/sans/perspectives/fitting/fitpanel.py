@@ -458,7 +458,13 @@ class FitPanel(nb, PanelBase):
            return self.set_data_on_batch_mode(data_list)
         else:
             data = None
-            data = data_list[0]
+            try:
+                data = data_list[0]
+            except:
+                # for 'fitv' files
+                data_list = [data]
+                data = data_list[0]
+                
             if data is None:
                 return None
         for page in self.opened_pages.values():
