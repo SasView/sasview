@@ -978,9 +978,9 @@ class Plugin(PluginBase):
                         item = res.stderr[index]
                         batch_result["error on %s" % pars[index]].append(item)
             pid = page_id[0]
-            self.page_finder[pid].set_result(result=batch_result)      
+            self.page_finder[pid].set_result(result=batch_result)   
             self.parent.on_set_batch_result(data=batch_result, 
-                                            name=self.sub_menu)
+                                            plugin_name=self.sub_menu)
             for uid in page_id:
                 cpage = self.fit_panel.get_page_by_id(uid)
                 cpage._on_fit_complete()
