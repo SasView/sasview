@@ -1670,21 +1670,24 @@ class ViewerFrame(wx.Frame):
         save the state of the current active application
         """
         if self.cpanel_on_focus is not None:
-            self.cpanel_on_focus.on_save(event)
+            try:
+                self.cpanel_on_focus.on_save(event)
+            except:
+                msg = "Error occurred while saving: "
+                msg += "To save, the application panel should have a data set.."
+                wx.PostEvent(self, StatusEvent(status=msg))  
             
     def _on_save_project(self, event):
         """
         save the state of the SansView as *.svs
         """
-        ## Default file location for save
-        #self._default_save_location = os.getcwd()
         if self._current_perspective is  None:
             return
         reader, ext = self._current_perspective.get_extensions()
         path = None
         extension = '*' + APPLICATION_STATE_EXTENSION
         dlg = wx.FileDialog(self, "Save Project file",
-                            self._default_save_location, "",
+                            self._default_save_location, "sansview_proj",
                              extension, 
                              wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
@@ -1693,25 +1696,31 @@ class ViewerFrame(wx.Frame):
         else:
             return None
         dlg.Destroy()
-        if path is None:
-            return
-        # default cansas xml doc
-        doc = None
-        for panel in self.panels.values():
-            temp = panel.save_project(doc)
-            if temp is not None:
-                doc = temp
-          
-        # Write the XML document
-        extens = APPLICATION_STATE_EXTENSION
-        fName = os.path.splitext(path)[0] + extens
-        if doc != None:
-            fd = open(fName, 'w')
-            fd.write(doc.toprettyxml())
-            fd.close()
-        else:
-            msg = "%s cannot read %s\n" % (str(APPLICATION_NAME), str(path))
-            logging.error(msg)
+        try:
+            if path is None:
+                return
+            # default cansas xml doc
+            doc = None
+            for panel in self.panels.values():
+                temp = panel.save_project(doc)
+                if temp is not None:
+                    doc = temp
+              
+            # Write the XML document
+            extens = APPLICATION_STATE_EXTENSION
+            fName = os.path.splitext(path)[0] + extens
+            if doc != None:
+                fd = open(fName, 'w')
+                fd.write(doc.toprettyxml())
+                fd.close()
+            else:
+                msg = "%s cannot read %s\n" % (str(APPLICATION_NAME), str(path))
+                logging.error(msg)
+        except:
+           msg = "Error occurred while saving: "
+           msg += "To save, at leat one application panel "
+           msg += "should have a data set.."
+           wx.PostEvent(self, StatusEvent(status=msg))    
                     
     def on_save_helper(self, doc, reader, panel, path):
         """

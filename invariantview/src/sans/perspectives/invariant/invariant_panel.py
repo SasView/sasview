@@ -94,13 +94,14 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self._do_layout()
         self.reset_panel()
         self._reset_state_list()
-        
+        ## Default file location for save
+        self._default_save_location = os.getcwd()        
         if self.parent is not None:
             msg = ""
             wx.PostEvent(self.parent,StatusEvent(status=msg, info="info"))
-            
-        ## Default file location for save
-        self._default_save_location = os.getcwd()
+            self._default_save_location =\
+                        self.parent._default_save_location
+        
         self._set_bookmark_flag(False)
     
     def get_data(self):
@@ -1172,11 +1173,20 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         # Ask the user the location of the file to write to.
         path = None
+        if self.parent != None:
+            self._default_save_location =\
+             self.parent._default_save_location
+        if self._default_save_location == None:
+            self._default_save_location = os.getcwd()
         dlg = wx.FileDialog(self, "Choose a file",
-                            self._default_save_location, "", "*.inv", wx.SAVE)
+                            self._default_save_location, \
+                            self.window_caption, "*.inv", wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
+            if self.parent != None:
+                self.parent._default_save_location =\
+                    self._default_save_location
         else:
             return None
         
