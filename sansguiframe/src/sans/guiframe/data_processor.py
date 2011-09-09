@@ -20,6 +20,9 @@ from sans.guiframe.dataFitting import Data1D
 
 FUNC_DICT = {"sqrt": "math.sqrt",
              "pow": "math.sqrt"}
+
+
+
 def parse_string(sentence, list):
     """
     Return a dictionary of column label and index or row selected
@@ -617,6 +620,96 @@ class GridFrame(wx.Frame):
         self.panel.set_data(data)
       
       
+class BatchOutputDialog(wx.Dialog):
+    """
+    Allow to select where the result of batch will be displayed or stored
+    """
+    def __init__(self, parent=None, data=None, *args, **kwds):
+        """
+        :param parent: Window instantiating this dialog
+        :param result: result to display in a grid or export to an external 
+                application.
+        """
+        kwds['style'] = wx.CAPTION|wx.SYSTEM_MENU 
+        wx.Dialog.__init__(self, parent, *args, **kwds)
+        self.parent = parent
+        self.data = data
+        self.flag = 1
+        self.SetSize((300, 200))
+        self.local_app_selected = None
+        self.external_app_selected = None
+        self.save_to_file = None
+        self._do_layout()
+
+    def _do_layout(self):
+        """
+        Draw the content of the current dialog window
+        """
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        box_description= wx.StaticBox(self, -1,str("Batch Outputs"))
+        hint_sizer = wx.StaticBoxSizer(box_description, wx.VERTICAL)
+        selection_sizer = wx.GridBagSizer(5,5)
+        button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        text = "Open with SansView"
+        self.local_app_selected = wx.RadioButton(self, -1, text,
+                                                style=wx.RB_GROUP)
+        self.Bind(wx.EVT_RADIOBUTTON, self.onselect,
+                    id=self.local_app_selected.GetId())
+        text = "Open with Excel"
+        self.external_app_selected  = wx.RadioButton(self, -1, text)
+        self.Bind(wx.EVT_RADIOBUTTON, self.onselect,
+                    id=self.external_app_selected.GetId())
+        text = "Save to file"
+        self.save_to_file = wx.CheckBox(self, -1, text)
+        self.Bind(wx.EVT_CHECKBOX, self.onselect,
+                    id=self.save_to_file.GetId())
+        self.local_app_selected.SetValue(True)
+        self.external_app_selected.SetValue(False)
+        self.save_to_file.SetValue(False)
+  
+        button_OK = wx.Button(self, wx.ID_OK, "Ok")
+        button_OK.SetFocus()
+        hint = ""
+        hint_sizer.Add(wx.StaticText(self, -1, hint))
+        hint_sizer.Add(selection_sizer)
+        #draw area containing radio buttons
+        ix = 0
+        iy = 0
+        selection_sizer.Add(self.local_app_selected, (iy, ix),
+                           (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        iy += 1
+        selection_sizer.Add(self.external_app_selected, (iy, ix),
+                           (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        iy += 1
+        selection_sizer.Add(self.save_to_file, (iy, ix),
+                           (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        #contruction the sizer contaning button
+        button_sizer.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        button_sizer.Add(button_OK, 0,
+                                wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+        vbox.Add(hint_sizer,  0, wx.EXPAND|wx.ALL, 10)
+        vbox.Add(wx.StaticLine(self, -1),  0, wx.EXPAND, 0)
+        vbox.Add(button_sizer, 0 , wx.TOP|wx.BOTTOM, 10)
+        self.SetSizer(vbox)
+        
+    def onselect(self, event=None):
+        """
+        Receive event and display data into third party application
+        or save data to file.
+        
+        """
+        if self.save_to_file.GetValue():
+            self.flag = 3
+            if self.parent is not None and  self.data is not None:
+                self.parent.save_batch_into_file(self.data)
+        elif self.local_app_selected.GetValue():
+            self.flag = 1
+        else:
+            self.flag = 2
+        return self.flag
+    
+  
+        
 if __name__ == "__main__":
     app = wx.App()
    

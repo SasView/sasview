@@ -31,11 +31,11 @@ from sans.guiframe.events import StatusEvent
 from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.gui_style import GUIFRAME
 from sans.guiframe.gui_style import GUIFRAME_ID
-#from sans.guiframe.events import NewLoadedDataEvent
 from sans.guiframe.data_panel import DataPanel
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.gui_toolbar import GUIToolBar
 from sans.guiframe.data_processor import GridFrame
+from sans.guiframe.data_processor import BatchOutputDialog
 from sans.guiframe.events import EVT_NEW_BATCH
 from sans.dataloader.loader import Loader
 
@@ -287,10 +287,26 @@ class ViewerFrame(wx.Frame):
         """
         Display data into a grid in batch mode and show the grid
         """
-        self.batch_frame.set_data(data)
-        self.batch_frame.Show(True)
+        #Neeed to save configuration for later 
+        dlg = BatchOutputDialog(self, data)
+        flag = None
+        if dlg.ShowModal() == wx.ID_OK:
+            flag = dlg.onselect()
+            dlg.Destroy()
+        if flag == 1:
+            self.batch_frame.set_data(data)
+            self.batch_frame.Show(True)
+        elif flag == 2:
+            self.deplay_in_external_app(data)
         
-        
+    def save_batch_into_file(self, data):
+        """
+        Save data into file. default extension is .csv
+        """
+    def deplay_in_external_app(self, data):
+        """
+        Display data in the another application , by default Excel
+        """
     def on_batch_selection(self, event):
         """
         :param event: contains parameter enable . when enable is set to True
