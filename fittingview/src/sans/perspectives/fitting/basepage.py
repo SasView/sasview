@@ -642,11 +642,17 @@ class BasicPage(ScrolledPanel, PanelBase):
         new_state = self.state.clone()
         # Ask the user the location of the file to write to.
         path = None
+        if self.parent !=  None:
+            self._default_save_location = \
+                        self.parent.parent._default_save_location
         dlg = wx.FileDialog(self, "Choose a file", self._default_save_location,
-                                                 "", "*.fitv", wx.SAVE)
+                                        self.window_caption, "*.fitv", wx.SAVE)
+
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
+            self.parent.parent._default_save_location =\
+                                 self._default_save_location
         else:
             return None
         # MAC always needs the extension for saving
@@ -1313,6 +1319,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         open a dialog file to selected the customized dispersity 
         """
         import os
+        if self.parent !=  None:
+            self._default_save_location = \
+                        self.parent.parent._default_save_location
         dlg = wx.FileDialog(self, "Choose a weight file",
                                 self._default_save_location , "", 
                                 "*.*", wx.OPEN)
@@ -2543,6 +2552,9 @@ class BasicPage(ScrolledPanel, PanelBase):
             #self.noDisper_rbox.SetValue(True)
             return
         self._default_save_location = os.path.dirname(path)
+        if self.parent != None:
+            self.parent.parent._default_save_location =\
+                             self._default_save_location
 
         basename  = os.path.basename(path)
         values,weights = self.read_file(path)
