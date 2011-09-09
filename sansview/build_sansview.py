@@ -269,9 +269,10 @@ def checkout(release=False):
             conf = ''
             import datetime
             for line in conf_file.readlines():
-                conf += line
-                if line.count('__version__'):
+                if line.count('__build__'):
                     conf += "__build__ = '%s-%s' \n"% (build_num, datetime.date.today())
+                else:
+                    conf += line
             conf_file.close()
             conf_file = open('local_config.py', 'w')
             conf_file.write(conf)
