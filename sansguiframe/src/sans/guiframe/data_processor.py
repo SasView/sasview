@@ -5,6 +5,7 @@ import wx
 import numpy
 import math
 import re
+import os
 import sys
 import copy
 from wx.lib.scrolledpanel import ScrolledPanel
@@ -624,15 +625,18 @@ class BatchOutputDialog(wx.Dialog):
     """
     Allow to select where the result of batch will be displayed or stored
     """
-    def __init__(self, parent=None, data=None, *args, **kwds):
+    def __init__(self, parent=None, data=None, file_name="",
+                 details="", *args, **kwds):
         """
         :param parent: Window instantiating this dialog
         :param result: result to display in a grid or export to an external 
                 application.
         """
-        kwds['style'] = wx.CAPTION|wx.SYSTEM_MENU 
+        #kwds['style'] = wx.CAPTION|wx.SYSTEM_MENU 
         wx.Dialog.__init__(self, parent, *args, **kwds)
         self.parent = parent
+        self.file_name = file_name
+        self.details = details
         self.data = data
         self.flag = 1
         self.SetSize((300, 200))
@@ -666,7 +670,6 @@ class BatchOutputDialog(wx.Dialog):
         self.local_app_selected.SetValue(True)
         self.external_app_selected.SetValue(False)
         self.save_to_file.SetValue(False)
-  
         button_OK = wx.Button(self, wx.ID_OK, "Ok")
         button_OK.SetFocus()
         hint = ""
@@ -699,14 +702,36 @@ class BatchOutputDialog(wx.Dialog):
         
         """
         if self.save_to_file.GetValue():
-            self.flag = 3
-            if self.parent is not None and  self.data is not None:
-                self.parent.save_batch_into_file(self.data)
-        elif self.local_app_selected.GetValue():
+            reader, ext = os.path.splitext(self.file_name)
+            path = None
+            location = os.getcwd()
+            if self.parent is not None: 
+                location = self.parent._default_save_location
+                dlg = wx.FileDialog(self, "Save Project file",
+                            location, self.file_name, ext, wx.SAVE)
+                path = None
+                if dlg.ShowModal() == wx.ID_OK:
+                    path = dlg.GetPath()
+                    if self.parent is not None:
+                        self.parent._default_save_location = os.path.dirname(path)
+                dlg.Destroy()
+                if path != None:
+                    if self.parent is not None and  self.data is not None:
+                        self.parent.write_batch_output(data=self.data, 
+                                               file_name=path,
+                                               details=self.details)
+        
+        if self.local_app_selected.GetValue():
             self.flag = 1
         else:
             self.flag = 2
         return self.flag
+    
+    def save_file(self):
+        """
+        Save inot file
+        """
+        
     
   
         
