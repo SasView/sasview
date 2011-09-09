@@ -114,7 +114,11 @@ class WelcomePage(ScrolledPanel):
         version = '.'.join(verwords[:-1])
         revision = verwords[-1]
         self.label_title = wx.StaticText(self, -1, config.__appname__+ " "+str(config.__version__))#(version))
-        self.label_build = wx.StaticText(self, -1, "Build: "+str(config.__version__))
+        try:
+            build_num = str(config.__build__)
+        except:
+            build_num = str(config.__version__)
+        self.label_build = wx.StaticText(self, -1, "Build: " + build_num)
      
         sizer_main = wx.BoxSizer(wx.VERTICAL)
         sizer_header = wx.BoxSizer(wx.HORIZONTAL)

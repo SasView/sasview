@@ -127,10 +127,13 @@ class DialogAbout(wx.Dialog):
         verwords = config.__version__.split('.')
         version = '.'.join(verwords[:-1])
         revision = verwords[-1]
-        
+        try:
+            build_num = str(config.__build__)
+        except:
+            build_num = str(config.__version__)
         self.label_author.SetLabel(strLabel)
         self.label_version.SetLabel(config.__version__)#(version)
-        self.label_svnrevision.SetLabel(config.__version__)
+        self.label_svnrevision.SetLabel(build_num)
         
         # set bitmaps for logo buttons
         image = file_dir + "/images/nsf_logo.png"

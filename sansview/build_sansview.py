@@ -136,9 +136,18 @@ def install_pkg(install_dir, setup_dir, url):
     try:
         if not os.path.isdir(install_dir):
             os.mkdir(install_dir)
-        os.chdir(install_dir)   
+        os.chdir(install_dir)
+        build_num = os.path.basename(os.getcwd())   
         os.system("%s checkout -q %s" % (SVN, url))        
         os.chdir(setup_dir)
+        if setup_dir.count('sansview') > 0:
+            conf_file = open('local_config.py', 'rw')
+            conf = conf_file.read()
+            conf = '__build__ = %s %s \n'% (build_num, time.localtime()) +\
+                     conf
+            conf_file.write(conf)
+            conf_file.close()
+            print "install_dir", build_num,'__build__ = %s %s \n'% (build_num, time.localtime())
         if sys.platform == 'win32':
             os.system("%s setup.py -q build -cmingw32" % PYTHON)
             os.system("%s setup.py -q install --root \"%s\"" % (PYTHON, LIB_FOLDER))
@@ -247,7 +256,30 @@ def checkout(release=False):
         os.system("%s checkout -q %s" % (SVN, SANSVIEW_URL))
     else:
         os.system("%s checkout -q svn://danse.us/sans/trunk/sansview" % SVN)
-    
+    # put build number to local_config
+    try:
+        build_num = os.path.basename(wd).split('_')[1] 
+        if sys.argv[1]=="-r":
+            sansview_folder = "sansview-%s" % (SANSVIEW)  
+        else:
+            sansview_folder = "sansview"   
+        os.chdir(sansview_folder)
+        if os.getcwd().count('sansview') > 0:
+            conf_file = open('local_config.py', 'r')
+            conf = ''
+            import datetime
+            for line in conf_file.readlines():
+                conf += line
+                if line.count('__version__'):
+                    conf += "__build__ = '%s-%s' \n"% (build_num, datetime.date.today())
+            conf_file.close()
+            conf_file = open('local_config.py', 'w')
+            conf_file.write(conf)
+            conf_file.close()
+    except:
+        pass
+    os.chdir(wd)
+   
 def prepare(wipeout = False):
     """
         Prepare the build
