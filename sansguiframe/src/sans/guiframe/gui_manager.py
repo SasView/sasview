@@ -168,6 +168,7 @@ class ViewerFrame(wx.Frame):
     def __init__(self, parent, title, 
                  size=(GUIFRAME_WIDTH, GUIFRAME_HEIGHT),
                  gui_style=DEFAULT_STYLE, 
+                 style=wx.DEFAULT_FRAME_STYLE,
                  pos=wx.DefaultPosition):
         """
         Initialize the Frame object
