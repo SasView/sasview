@@ -203,6 +203,7 @@ class ViewerFrame(wx.Frame):
                 if os.path.isfile(ico_file):
                     self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         self.path = PATH_APP
+        self.application_name = APPLICATION_NAME 
         ## Application manager
         self._input_file = None
         self.app_manager = None
@@ -297,22 +298,26 @@ class ViewerFrame(wx.Frame):
         details += "on %s.\n" % time_str 
         ext = ".csv"
         file_name = "Batch_" + str(plugin_name)+ "_" + time_str + ext
-        #Neeed to save configuration for later 
+        #Need to save configuration for later 
         dlg = BatchOutputDialog(parent=self, data=data, 
                                 file_name=file_name,
                                 details=details)
         flag = None
-        if dlg.ShowModal() == wx.ID_OK:
+        if dlg.ShowModal() == wx.ID_CANCEL:
             flag = dlg.flag
+            dlg.Show(True)
+        else:
             dlg.Destroy()
         if flag == 1:
             self.batch_frame.set_data(data)
             self.batch_frame.Show(True)
         elif flag == 2:
+            file_name = self._default_save_location + str(file_name)
             if not os.path.exists(file_name):
                 self.write_batch_output(data=data, file_name=file_name,
                                                details=details)
-            self.deplay_in_external_app(data=data, file_name=file_name)
+            self.deplay_in_external_app(data=data, file_name=file_name,
+                                         plugin_name=plugin_name)
         
     def write_batch_output(self, data, file_name, details=""):
         """
@@ -351,10 +356,22 @@ class ViewerFrame(wx.Frame):
             index += 1
         fd.close()
             
-    def deplay_in_external_app(self, data, file_name):
+    def deplay_in_external_app(self, data, file_name, plugin_name):
         """
         Display data in the another application , by default Excel
         """
+        try:
+            from win32com.client import Dispatch
+            excel_app = Dispatch('Excel.Application')     
+            wb = excel_app.Workbooks.Open(file_name) 
+            excel_app.Visible = 1
+        except:
+            msg = "Error occured when calling Excel\n"
+            msg += "Check that Excel in installed in this machine or \n"
+            msg += "Check that %s really exists.\n" % str(file_name)
+            wx.PostEvent(self, StatusEvent(status=msg,
+                                             info="error"))
+            
          
     def on_batch_selection(self, event):
         """

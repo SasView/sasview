@@ -654,7 +654,7 @@ class BatchOutputDialog(wx.Dialog):
         hint_sizer = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         selection_sizer = wx.GridBagSizer(5,5)
         button_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        text = "Open with SansView"
+        text = "Open with %s" % self.parent.application_name 
         self.local_app_selected = wx.RadioButton(self, -1, text,
                                                 style=wx.RB_GROUP)
         self.Bind(wx.EVT_RADIOBUTTON, self.onselect,
@@ -663,14 +663,15 @@ class BatchOutputDialog(wx.Dialog):
         self.external_app_selected  = wx.RadioButton(self, -1, text)
         self.Bind(wx.EVT_RADIOBUTTON, self.onselect,
                     id=self.external_app_selected.GetId())
-        text = "Save to file"
+        text = "Save to File"
         self.save_to_file = wx.CheckBox(self, -1, text)
         self.Bind(wx.EVT_CHECKBOX, self.onselect,
                     id=self.save_to_file.GetId())
         self.local_app_selected.SetValue(True)
         self.external_app_selected.SetValue(False)
         self.save_to_file.SetValue(False)
-        button_OK = wx.Button(self, wx.ID_OK, "Ok")
+        button_close = wx.Button(self, wx.ID_OK, "Close")
+        button_OK = wx.Button(self, wx.ID_CANCEL, "Apply")
         button_OK.SetFocus()
         hint = ""
         hint_sizer.Add(wx.StaticText(self, -1, hint))
@@ -688,6 +689,9 @@ class BatchOutputDialog(wx.Dialog):
                            (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         #contruction the sizer contaning button
         button_sizer.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+
+        button_sizer.Add(button_close, 0,
+                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         button_sizer.Add(button_OK, 0,
                                 wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         vbox.Add(hint_sizer,  0, wx.EXPAND|wx.ALL, 10)
