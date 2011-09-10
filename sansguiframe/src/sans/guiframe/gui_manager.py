@@ -22,7 +22,7 @@ import imp
 import warnings
 warnings.simplefilter("ignore")
 import logging
-import win32com
+
 
 from sans.guiframe.events import EVT_STATUS
 from sans.guiframe.events import EVT_APPEND_BOOKMARK
