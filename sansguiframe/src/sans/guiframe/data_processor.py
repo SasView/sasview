@@ -490,6 +490,7 @@ class GridPanel(SPanel):
         new_plot.yaxis(self.y_axis_title.GetValue(), self.y_axis_unit.GetValue())
         try:
             title = self.notebook.GetPageText(pos)
+            data.name = title
             wx.PostEvent(self.parent.parent, 
                              NewPlotEvent(plot=new_plot, 
                         group_id=str(new_plot.group_id), title =title))    
