@@ -621,11 +621,11 @@ class GridFrame(wx.Frame):
         self.panel.set_data(data)
       
       
-class BatchOutputDialog(wx.Dialog):
+class BatchOutputFrame(wx.Frame):
     """
     Allow to select where the result of batch will be displayed or stored
     """
-    def __init__(self, parent=None, data=None, file_name="",
+    def __init__(self, parent, data=None, file_name="",
                  details="", *args, **kwds):
         """
         :param parent: Window instantiating this dialog
@@ -633,8 +633,9 @@ class BatchOutputDialog(wx.Dialog):
                 application.
         """
         #kwds['style'] = wx.CAPTION|wx.SYSTEM_MENU 
-        wx.Dialog.__init__(self, parent, *args, **kwds)
+        wx.Frame.__init__(self, parent, *args, **kwds)
         self.parent = parent
+        self.panel = wx.Panel(self)
         self.file_name = file_name
         self.details = details
         self.data = data
@@ -650,31 +651,35 @@ class BatchOutputDialog(wx.Dialog):
         Draw the content of the current dialog window
         """
         vbox = wx.BoxSizer(wx.VERTICAL)
-        box_description= wx.StaticBox(self, -1,str("Batch Outputs"))
+        box_description = wx.StaticBox(self.panel, -1, str("Batch Outputs"))
         hint_sizer = wx.StaticBoxSizer(box_description, wx.VERTICAL)
-        selection_sizer = wx.GridBagSizer(5,5)
+        selection_sizer = wx.GridBagSizer(5, 5)
         button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         text = "Open with %s" % self.parent.application_name 
-        self.local_app_selected = wx.RadioButton(self, -1, text,
+        self.local_app_selected = wx.RadioButton(self.panel, -1, text,
                                                 style=wx.RB_GROUP)
         self.Bind(wx.EVT_RADIOBUTTON, self.onselect,
                     id=self.local_app_selected.GetId())
         text = "Open with Excel"
-        self.external_app_selected  = wx.RadioButton(self, -1, text)
+        self.external_app_selected  = wx.RadioButton(self.panel, -1, text)
         self.Bind(wx.EVT_RADIOBUTTON, self.onselect,
                     id=self.external_app_selected.GetId())
         text = "Save to File"
-        self.save_to_file = wx.CheckBox(self, -1, text)
+        self.save_to_file = wx.CheckBox(self.panel, -1, text)
         self.Bind(wx.EVT_CHECKBOX, self.onselect,
                     id=self.save_to_file.GetId())
         self.local_app_selected.SetValue(True)
         self.external_app_selected.SetValue(False)
         self.save_to_file.SetValue(False)
-        button_close = wx.Button(self, wx.ID_OK, "Close")
-        button_OK = wx.Button(self, wx.ID_CANCEL, "Apply")
-        button_OK.SetFocus()
+        button_close = wx.Button(self.panel, -1, "Close")
+        button_close.Bind(wx.EVT_BUTTON, id=button_close.GetId(),
+                           handler=self.on_close)
+        button_apply = wx.Button(self.panel, -1, "Apply")
+        button_apply.Bind(wx.EVT_BUTTON, id=button_apply.GetId(),
+                        handler=self.on_apply)
+        button_apply.SetFocus()
         hint = ""
-        hint_sizer.Add(wx.StaticText(self, -1, hint))
+        hint_sizer.Add(wx.StaticText(self.panel, -1, hint))
         hint_sizer.Add(selection_sizer)
         #draw area containing radio buttons
         ix = 0
@@ -692,12 +697,28 @@ class BatchOutputDialog(wx.Dialog):
 
         button_sizer.Add(button_close, 0,
                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        button_sizer.Add(button_OK, 0,
+        button_sizer.Add(button_apply, 0,
                                 wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         vbox.Add(hint_sizer,  0, wx.EXPAND|wx.ALL, 10)
-        vbox.Add(wx.StaticLine(self, -1),  0, wx.EXPAND, 0)
+        vbox.Add(wx.StaticLine(self.panel, -1),  0, wx.EXPAND, 0)
         vbox.Add(button_sizer, 0 , wx.TOP|wx.BOTTOM, 10)
         self.SetSizer(vbox)
+        
+    def on_apply(self, event):
+        """
+        Get the user selection and display output to the selected application
+        """
+        if self.flag == 1:
+            self.parent.open_with_localapp(self.data)
+        elif self.flag == 2:
+            self.parent.open_with_externalapp(data=self.data, 
+                                           file_name=self.file_name,
+                                           details=self.details)
+    def on_close(self, event):
+        """
+        close the Window
+        """
+        self.Close()
         
     def onselect(self, event=None):
         """
@@ -710,32 +731,23 @@ class BatchOutputDialog(wx.Dialog):
             path = None
             location = os.getcwd()
             if self.parent is not None: 
-                location = self.parent._default_save_location
+                location = os.path.dirname(self.file_name)
                 dlg = wx.FileDialog(self, "Save Project file",
                             location, self.file_name, ext, wx.SAVE)
                 path = None
                 if dlg.ShowModal() == wx.ID_OK:
                     path = dlg.GetPath()
-                    if self.parent is not None:
-                        self.parent._default_save_location = os.path.dirname(path)
                 dlg.Destroy()
                 if path != None:
                     if self.parent is not None and  self.data is not None:
-                        self.parent.write_batch_output(data=self.data, 
+                        self.parent.write_batch_tofile(data=self.data, 
                                                file_name=path,
                                                details=self.details)
-        
         if self.local_app_selected.GetValue():
             self.flag = 1
         else:
             self.flag = 2
         return self.flag
-    
-    def save_file(self):
-        """
-        Save inot file
-        """
-        
     
   
         

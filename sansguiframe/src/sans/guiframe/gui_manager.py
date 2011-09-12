@@ -37,7 +37,7 @@ from sans.guiframe.data_panel import DataPanel
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.gui_toolbar import GUIToolBar
 from sans.guiframe.data_processor import GridFrame
-from sans.guiframe.data_processor import BatchOutputDialog
+from sans.guiframe.data_processor import BatchOutputFrame
 from sans.guiframe.events import EVT_NEW_BATCH
 from sans.dataloader.loader import Loader
 
@@ -298,32 +298,27 @@ class ViewerFrame(wx.Frame):
         details += "on %s.\n" % time_str 
         ext = ".csv"
         file_name = "Batch_" + str(plugin_name)+ "_" + time_str + ext
+        file_name = self._default_save_location + str(file_name)
         #Need to save configuration for later 
-        dlg = BatchOutputDialog(parent=self, data=data, 
+        frame = BatchOutputFrame(parent=self, data=data, 
                                 file_name=file_name,
                                 details=details)
-        flag = None
-        if dlg.ShowModal() == wx.ID_CANCEL:
-            flag = dlg.flag
-            dlg.Show(True)
-        else:
-            dlg.Destroy()
-        if flag == 1:
-            self.batch_frame.set_data(data)
-            self.batch_frame.Show(True)
-        elif flag == 2:
-            file_name = self._default_save_location + str(file_name)
-            if not os.path.exists(file_name):
-                self.write_batch_output(data=data, file_name=file_name,
-                                               details=details)
-            self.deplay_in_external_app(data=data, file_name=file_name,
-                                         plugin_name=plugin_name)
+        frame.Show(True)
+    
+    def open_with_localapp(self, data):
+        """
+        Display value of data into the application grid
+        :param data: dictionary of string and list of items
+        """
+        self.batch_frame.set_data(data)
+        self.batch_frame.Show(True)
         
-    def write_batch_output(self, data, file_name, details=""):
+    def write_batch_tofile(self, data, file_name, details=""):
         """
         Helper to write result from batch into cvs file
         """
-        
+        self._default_save_location = os.path.dirname(file_name)
+        file_name = os.path.basename(file_name)
         if data is None or file_name is None or file_name.strip() == "":
             return
         _, ext = os.path.splitext(file_name)
@@ -356,10 +351,13 @@ class ViewerFrame(wx.Frame):
             index += 1
         fd.close()
             
-    def deplay_in_external_app(self, data, file_name, plugin_name):
+    def open_with_externalapp(self, data, file_name, details=""):
         """
         Display data in the another application , by default Excel
         """
+        if not os.path.exists(file_name):
+            self.write_batch_tofile(data=data, file_name=file_name,
+                                               details=details)
         try:
             from win32com.client import Dispatch
             excel_app = Dispatch('Excel.Application')     
