@@ -937,7 +937,8 @@ class Plugin(PluginBase):
             if param not in pars:
                 if param not in batch_inputs.keys():
                     batch_inputs[param] = []
-                batch_inputs[param].append(model.getParam(param))
+                if param not in model.non_fittable:
+                    batch_inputs[param].append(model.getParam(param))
         fitter.set_model(model, fit_id, pars, constraints=listOfConstraint)
         fitter.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin, 
                         qmax=qmax)
