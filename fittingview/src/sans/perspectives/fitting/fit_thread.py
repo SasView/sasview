@@ -19,7 +19,8 @@ class FitThread(CalcThread):
                   fn,
                   page_id,
                    handler,
-                   batch_result, 
+                    batch_outputs,
+                    batch_inputs=None,             
                   pars=None,
                  completefn = None,
                  updatefn   = None,
@@ -33,7 +34,8 @@ class FitThread(CalcThread):
         self.handler = handler
         self.fitter = fn
         self.pars = pars
-        self.batch_result = batch_result
+        self.batch_inputs = batch_inputs
+        self.batch_outputs = batch_outputs
         self.page_id = page_id
         self.starttime = 0
         self.updatefn = updatefn
@@ -56,6 +58,7 @@ class FitThread(CalcThread):
         """
         msg = ""
         try:
+            import copy
             list_handler = []
             list_curr_thread = [] 
             list_ftol = []
@@ -71,12 +74,12 @@ class FitThread(CalcThread):
                 list_map_get_attr.append(map_getattr)
             from multiprocessing import Pool
             inputs = zip(list_map_get_attr,self.fitter, list_fit_function,
-                         list_handler, list_q, list_curr_thread,list_ftol)
+                         list_handler, list_q, list_curr_thread, list_ftol)
             result =  Pool(1).map(func=map_apply, 
                                iterable=inputs)
-            #self.handler.starting_fit()
-            self.complete(result= result,
-                          batch_result=self.batch_result,
+            self.complete(result=result,
+                          batch_inputs=self.batch_inputs,
+                           batch_outputs=self.batch_outputs,
                           page_id=self.page_id,
                           pars = self.pars)
            

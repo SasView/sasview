@@ -681,7 +681,8 @@ class Plugin(PluginBase):
         self.current_pg = None
         list_page_id = []
         fit_id = 0
-        batch_result = {}
+        batch_inputs = {}
+        batch_outputs = {}
         for page_id, value in self.page_finder.iteritems():
             # For simulfit (uid give with None), do for-loop
             # if uid is specified (singlefit), do it only on the page.
@@ -701,18 +702,27 @@ class Plugin(PluginBase):
                     for fitproblem in  value.get_fit_problem():
                         if sim_fitter is None:
                             fitter = Fit(self._fit_engine)  
-                            self._fit_helper(fitproblem, pars, fitter,
-                                              fit_id, batch_result)
+                            self._fit_helper(fitproblem=fitproblem, 
+                                                pars=pars, 
+                                                fitter=fitter,
+                                              fit_id=fit_id, 
+                                              batch_inputs=batch_inputs,
+                                              batch_outputs=batch_outputs)
                             fitter_list.append(fitter) 
                         else:
                             fitter = sim_fitter
-                            self._fit_helper(fitproblem, pars, fitter,
-                                              fit_id, batch_result)
+                            self._fit_helper(fitproblem=fitproblem, 
+                                                pars=pars, 
+                                                fitter=fitter,
+                                              fit_id=fit_id, 
+                                              batch_inputs=batch_inputs,
+                                              batch_outputs=batch_outputs)
                         fit_id += 1
                     list_page_id.append(page_id)
                     current_page_id = page_id
                     value.clear_model_param()
             except:
+                raise
                 msg= "%s error: %s" % (engineType, sys.exc_value)
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                       type="stop"))
@@ -733,7 +743,8 @@ class Plugin(PluginBase):
             calc_fit = FitThread(handler = handler,
                                     fn=fitter_list,
                                     pars=pars,
-                                    batch_result=batch_result,
+                                    batch_inputs=batch_inputs,
+                                    batch_outputs=batch_outputs,
                                     page_id=list_page_id,
                                     completefn=self._single_fit_completed,
                                     ftol=self.ftol)
@@ -742,7 +753,8 @@ class Plugin(PluginBase):
             ## Perform more than 1 fit at the time
             calc_fit = FitThread(handler=handler,
                                     fn=fitter_list,
-                                    batch_result=batch_result, 
+                                    batch_inputs=batch_inputs,
+                                    batch_outputs=batch_outputs,
                                     page_id=list_page_id,
                                     updatefn=handler.update_fit,
                                     completefn=self._simul_fit_completed,
@@ -856,7 +868,7 @@ class Plugin(PluginBase):
                                              new_data=data)   
         self.store_data(uid=page.uid, data_list=page.get_data_list(), 
                         caption=page.window_caption)
-        if self.sim_page is not None:
+        if self.sim_page is not None and not self.batch_on:
             self.sim_page.draw_page()
         return page
             
@@ -901,7 +913,8 @@ class Plugin(PluginBase):
             if uid in self.page_finder.keys():
                 self.page_finder[uid].schedule_tofit(value)
                 
-    def _fit_helper(self, fitproblem, pars, fitter, fit_id, batch_result):
+    def _fit_helper(self, fitproblem, pars, fitter, fit_id,
+                    batch_inputs, batch_outputs):
         """
         Create and set fit engine with series of data and model
         :param pars: list of fittable parameters
@@ -920,15 +933,29 @@ class Plugin(PluginBase):
                 ## check if constraint
                 if item[0] != None and item[1] != None:
                     listOfConstraint.append((item[0],item[1]))
+        for param in model.getParamList():
+            if param not in pars:
+                if param not in batch_inputs.keys():
+                    batch_inputs[param] = []
+                batch_inputs[param].append(model.getParam(param))
         fitter.set_model(model, fit_id, pars, constraints=listOfConstraint)
-        if "Data" not in batch_result.keys():
-            batch_result["Data"] = []
-        batch_result["Data"].append(data.name)
         fitter.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin, 
                         qmax=qmax)
         fitter.select_problem_for_fit(id=fit_id, value=1)
-       
-       
+        #fill batch result information
+        if "Data" not in batch_outputs.keys():
+            batch_outputs["Data"] = []
+        batch_outputs["Data"].append(data.name)
+        for key, value in data.meta_data.iteritems():
+            if key not in batch_inputs.keys():
+                batch_inputs[key] = []
+            batch_inputs[key].append(value)
+        param = "temperature"
+        if hasattr(data.sample, param):
+            if param not in  batch_inputs.keys():
+                 batch_inputs[param] = []
+            batch_inputs[param].append(data.sample.temperature)
+    
     def _onSelect(self,event):
         """ 
         when Select data to fit a new page is created .Its reference is 
@@ -954,7 +981,7 @@ class Plugin(PluginBase):
         print "update_fit result", result
         
     def _batch_single_fit_complete_helper(self, result, pars, page_id, 
-                                         batch_result,  elapsed=None):
+                            batch_outputs, batch_inputs, elapsed=None):
         """
         Display fit result in batch 
         :param result: list of objects received fromt fit engines
@@ -966,35 +993,39 @@ class Plugin(PluginBase):
         msg = "Single Fitting complete "
         wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                                       type="stop"))
+        if batch_outputs is None:
+            batch_outputs = {}
         if self.batch_on:
-            batch_result = {"Chi2":[]}
+            # format batch_outputs
+            batch_outputs["Chi2"] = []
             for index  in range(len(pars)):
-                batch_result[pars[index]] = []
-                batch_result["error on %s" % pars[index]] = []
+                batch_outputs[pars[index]] = []
+                batch_outputs["error on %s" % pars[index]] = []
             for res in result:
                 if res is None:
                     null_value = numpy.nan
-                    batch_result["Chi2"].append(null_value)
+                    batch_outputs["Chi2"].append(null_value)
                     for index  in range(len(pars)):
-                        batch_result[pars[index]].append(null_value)
+                        batch_outputs[pars[index]].append(null_value)
                         item = null_value
-                        batch_result["error on %s" % pars[index]].append(item)
+                        batch_outputs["error on %s" % pars[index]].append(item)
                 else:
-                    batch_result["Chi2"].append(res.fitness)
+                    batch_outputs["Chi2"].append(res.fitness)
                     for index  in range(len(pars)):
-                        batch_result[pars[index]].append(res.pvec[index])
+                        batch_outputs[pars[index]].append(res.pvec[index])
                         item = res.stderr[index]
-                        batch_result["error on %s" % pars[index]].append(item)
+                        batch_outputs["error on %s" % pars[index]].append(item)
             pid = page_id[0]
-            self.page_finder[pid].set_result(result=batch_result)   
-            self.parent.on_set_batch_result(data=batch_result, 
+            self.page_finder[pid].set_result(result=batch_outputs)   
+            self.parent.on_set_batch_result(data_outputs=batch_outputs, 
+                                            data_inputs=batch_inputs,
                                             plugin_name=self.sub_menu)
             for uid in page_id:
                 cpage = self.fit_panel.get_page_by_id(uid)
                 cpage._on_fit_complete()
             
-    def _single_fit_completed(self, result, pars, page_id, 
-                              batch_result, elapsed=None):
+    def _single_fit_completed(self, result, pars, page_id, batch_outputs,
+                          batch_inputs=None,  elapsed=None):
         """
          Display fit result on one page of the notebook.
         :param result: list of object generated when fit ends
@@ -1007,7 +1038,8 @@ class Plugin(PluginBase):
             del self.fit_thread_list[page_id[0]] 
         if self.batch_on:
             wx.CallAfter(self._batch_single_fit_complete_helper,
-                          result, pars, page_id, batch_result, elapsed)
+                          result, pars, page_id, batch_outputs, 
+                          batch_inputs, elapsed)
             return 
         else:  
             try:
@@ -1057,7 +1089,9 @@ class Plugin(PluginBase):
                                                       type="stop"))
                 raise
                
-    def _simul_fit_completed(self, result, page_id, batch_result, pars=None, 
+    def _simul_fit_completed(self, result, page_id, batch_outputs,
+                             batch_inputs=None,
+                              pars=None, 
                              elapsed=None):
         """
         Display result of the fit on related panel(s).
@@ -1243,7 +1277,7 @@ class Plugin(PluginBase):
         self.page_finder[uid].enable_smearing(enable_smearer)
         self.page_finder[uid].set_range(qmin=qmin, qmax=qmax)
         self.page_finder[uid].set_fit_tab_caption(caption=caption)
-        if self.sim_page is not None:
+        if self.sim_page is not None and not self.batch_on:
             self.sim_page.draw_page()
         
     def _update1D(self, x, output):
