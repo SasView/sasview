@@ -432,9 +432,15 @@ class GridPanel(SPanel):
         pos = self.notebook.GetSelection()
         grid = self.notebook.GetPage(pos)
         for row in list:
-            label = grid.GetCellValue(row - 1, col)
-            if label.strip() != "":
-                axis.append(float(label.strip()))
+            label = grid.GetCellValue(0, col)
+            value = grid.GetCellValue(row - 1, col).strip()
+            if value != "":
+                if label.lower().strip() == "data":
+                    axis.append(float(row - 1))
+                else:
+                    axis.append(float(value))
+            else:
+                axis.append(None) 
         return axis
     
     def on_plot(self, event):
