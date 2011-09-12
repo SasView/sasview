@@ -286,7 +286,8 @@ class ViewerFrame(wx.Frame):
         self.Bind(EVT_NEW_COLOR, self.on_color_selection)
         self.setup_custom_conf()
     
-    def on_set_batch_result(self, data, plugin_name):
+    def on_set_batch_result(self, data_outputs, data_inputs=None,
+                             plugin_name=""):
         """
         Display data into a grid in batch mode and show the grid
         """
@@ -300,17 +301,18 @@ class ViewerFrame(wx.Frame):
         file_name = "Batch_" + str(plugin_name)+ "_" + time_str + ext
         file_name = self._default_save_location + str(file_name)
         #Need to save configuration for later 
-        frame = BatchOutputFrame(parent=self, data=data, 
+        frame = BatchOutputFrame(parent=self, data_outputs=data_outputs, 
+                                 data_inputs=data_inputs,
                                 file_name=file_name,
                                 details=details)
         frame.Show(True)
     
-    def open_with_localapp(self, data):
+    def open_with_localapp(self, data_inputs, data_outputs):
         """
         Display value of data into the application grid
         :param data: dictionary of string and list of items
         """
-        self.batch_frame.set_data(data)
+        self.batch_frame.set_data(data_inputs, data_outputs)
         self.batch_frame.Show(True)
         
     def on_read_batch_tofile(self, event):
@@ -348,6 +350,7 @@ class ViewerFrame(wx.Frame):
             separator = ","
         buffer = fd.read()
         lines = buffer.split('\n')
+        fd.close()
         column_names_line  = ""
         index = None
         for index in range(len(lines)):

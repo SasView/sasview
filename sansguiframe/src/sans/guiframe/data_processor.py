@@ -23,7 +23,6 @@ FUNC_DICT = {"sqrt": "math.sqrt",
              "pow": "math.sqrt"}
 
 
-
 def parse_string(sentence, list):
     """
     Return a dictionary of column label and index or row selected
@@ -73,6 +72,8 @@ class GridPage(sheet.CSheet):
         self.AutoSize()
         self.panel = panel
         self.col_names = []
+        self.data_inputs = {}
+        self.data_outputs = {}
         self._cols = 50
         self._rows = 51
         col_with = 30
@@ -163,17 +164,21 @@ class GridPage(sheet.CSheet):
         """
         self.panel.set_yaxis(y=self.axis_value, label=self.axis_label)     
             
-    def set_data(self, data):
+    def set_data(self, data_inputs, data_outputs):
         """
         Add data to the grid
         """
-        if data is None:
-            data = {}
-        if  len(data) > 0:
+        if data_outputs is None:
+            data_outputs = {}
+        self.data_outputs = data_outputs
+        if self.data_inputs is None:
+            data_inputs = {}
+        self.data_inputs = data_inputs
+        
+        if  len(self.data_outputs) > 0:
             self._cols = self.GetNumberCols()
             self._rows = self.GetNumberRows()
-            self.data = data
-            self.col_names = data.keys()
+            self.col_names = self.data_outputs.keys()
             self.col_names.sort() 
             nbr_user_cols = len(self.col_names)
             #Add more columns to the grid if necessary
@@ -181,23 +186,25 @@ class GridPage(sheet.CSheet):
                 new_col_nbr = nbr_user_cols -  self._cols 
                 self.AppendCols(new_col_nbr, True)
             #Add more rows to the grid if necessary  
-            nbr_user_row = len(self.data.values())
+            nbr_user_row = len(self.data_outputs.values())
             if nbr_user_row > self._rows + 1:
                 new_row_nbr =  nbr_user_row - self._rows 
                 self.AppendRows(new_row_nbr, True)
             # add data to the grid    
             row = 0
-            for index  in range(nbr_user_cols):
-                col = index
-                # use the first row of the grid to add user defined labels
-                self.SetCellValue(row, col, str(self.col_names[index]))
             col = 0
-            for value_list in self.data.values():
-                row = 1
-                for index in range(len(value_list)):
-                    self.SetCellValue(row, col, str(value_list[index]))
-                    row += 1
+            cell_col = 0
+            for col_name in  self.col_names:
+                # use the first row of the grid to add user defined labels
+                self.SetCellValue(row, col, str(col_name))
                 col += 1
+                cell_row =  1
+                value_list = self.data_outputs[col_name]
+                
+                for value in value_list:
+                    self.SetCellValue(cell_row, cell_col, str(value))
+                    cell_row += 1
+                cell_col += 1
             self.AutoSize()
            
 
@@ -330,12 +337,11 @@ class Notebook(nb, PanelBase):
             event.Veto()
         self.enable_close_button()
         
-    def set_data(self, data):
-        if data is None:
+    def set_data(self, data_inputs, data_outputs):
+        if data_outputs is None or data_outputs == {}:
             return
-            
         grid = GridPage(self, panel=self.parent)
-        grid.set_data(data)  
+        grid.set_data(data_inputs, data_outputs)  
         self.AddPage(grid, "")
         pos = self.GetPageIndex(grid)
         title = "Batch " + str(self.GetPageCount())
@@ -367,7 +373,8 @@ class SPanel(ScrolledPanel):
 
 
 class GridPanel(SPanel):
-    def __init__(self, parent, data=None, *args, **kwds):
+    def __init__(self, parent, data_inputs=None,
+                 data_outputs=None, *args, **kwds):
         SPanel.__init__(self, parent , *args, **kwds)
         self.vbox = wx.BoxSizer(wx.VERTICAL)
         
@@ -377,7 +384,8 @@ class GridPanel(SPanel):
                            (wx.StaticLine(self, -1), 0, wx.EXPAND, 0),
                            (self.plotting_sizer)])
         self.parent = parent
-        self._data = data
+        self._data_inputs = data_inputs
+        self._data_outputs = data_outputs
         self.x = []
         self.y  = []
         self.x_axis_label = None
@@ -392,11 +400,11 @@ class GridPanel(SPanel):
         self.layout_plotting_area()
         self.SetSizer(self.vbox)
         
-    def set_data(self, data):
+    def set_data(self, data_inputs, data_outputs):
         """
         """
         if self.notebook is not None:
-            self.notebook.set_data(data)
+            self.notebook.set_data(data_inputs, data_outputs)
         
     def set_xaxis(self, label="", x=None):
         """
@@ -487,7 +495,7 @@ class GridPanel(SPanel):
         Draw the area related to the grid
         """
         self.notebook = Notebook(parent=self)
-        self.notebook.set_data(self._data)
+        self.notebook.set_data(self._data_inputs, self._data_outputs)
         self.grid_sizer.Add(self.notebook, 1, wx.EXPAND, 0)
        
     def layout_plotting_area(self):
@@ -581,11 +589,11 @@ class GridPanel(SPanel):
         
         
 class GridFrame(wx.Frame):
-    def __init__(self, parent=None, data=None, id=-1, 
+    def __init__(self, parent=None, data_inputs=None, data_outputs=None, id=-1, 
                  title="Batch Results", size=(700, 400)):
         wx.Frame.__init__(self, parent=parent, id=id, title=title, size=size)
         self.parent = parent
-        self.panel = GridPanel(self, data)
+        self.panel = GridPanel(self, data_inputs, data_outputs)
         menubar = wx.MenuBar()
         self.SetMenuBar(menubar)
         edit = wx.Menu()
@@ -615,17 +623,17 @@ class GridFrame(wx.Frame):
         """
         self.panel.add_column()
         
-    def set_data(self, data):
+    def set_data(self, data_inputs, data_outputs):
         """
         """
-        self.panel.set_data(data)
+        self.panel.set_data(data_inputs, data_outputs)
       
       
 class BatchOutputFrame(wx.Frame):
     """
     Allow to select where the result of batch will be displayed or stored
     """
-    def __init__(self, parent, data=None, file_name="",
+    def __init__(self, parent, data_inputs, data_outputs, file_name="",
                  details="", *args, **kwds):
         """
         :param parent: Window instantiating this dialog
@@ -638,14 +646,18 @@ class BatchOutputFrame(wx.Frame):
         self.panel = wx.Panel(self)
         self.file_name = file_name
         self.details = details
-        self.data = data
+        self.data_inputs = data_inputs
+        self.data_outputs = data_outputs
+        self.data = {}
+        for item in (self.data_outputs, self.data_inputs):
+            self.data.update(item)
         self.flag = 1
         self.SetSize((300, 200))
         self.local_app_selected = None
         self.external_app_selected = None
         self.save_to_file = None
         self._do_layout()
-
+    
     def _do_layout(self):
         """
         Draw the content of the current dialog window
@@ -709,7 +721,8 @@ class BatchOutputFrame(wx.Frame):
         Get the user selection and display output to the selected application
         """
         if self.flag == 1:
-            self.parent.open_with_localapp(self.data)
+            self.parent.open_with_localapp(data_inputs=self.data_inputs,
+                                            data_outputs=self.data_outputs)
         elif self.flag == 2:
             self.parent.open_with_externalapp(data=self.data, 
                                            file_name=self.file_name,
@@ -761,7 +774,7 @@ if __name__ == "__main__":
             j += 1
             data["index"+str(i)] = [i/j, i*j, i, i+j]
             
-        frame = GridFrame(data=data)
+        frame = GridFrame(data_outputs=data, data_inputs=data)
         frame.Show(True)
     except:
         print sys.exc_value
