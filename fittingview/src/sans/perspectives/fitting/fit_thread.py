@@ -19,6 +19,7 @@ class FitThread(CalcThread):
                   fn,
                   page_id,
                    handler,
+                   batch_result, 
                   pars=None,
                  completefn = None,
                  updatefn   = None,
@@ -32,6 +33,7 @@ class FitThread(CalcThread):
         self.handler = handler
         self.fitter = fn
         self.pars = pars
+        self.batch_result = batch_result
         self.page_id = page_id
         self.starttime = 0
         self.updatefn = updatefn
@@ -74,6 +76,7 @@ class FitThread(CalcThread):
                                iterable=inputs)
             #self.handler.starting_fit()
             self.complete(result= result,
+                          batch_result=self.batch_result,
                           page_id=self.page_id,
                           pars = self.pars)
            

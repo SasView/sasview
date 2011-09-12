@@ -431,12 +431,12 @@ class FitProblem(FitProblemComponent):
         """
         if not self.smearer_enable:
             return None
-        if self.smearer_computer_value is None and \
-            self.smearer_compute_count > 1:
+        #if self.smearer_computer_value is None and \
+        #     self.smearer_compute_count > 1:
             #smeari_selection should be call only once per fitproblem
-            self.smearer_computer_value = smear_selection(self.fit_data,
+        self.smearer_computer_value = smear_selection(self.fit_data,
                                                            self.model)
-            self.smearer_compute_count += 1
+        self.smearer_compute_count += 1
         return self.smearer_computer_value
     
     def save_model_name(self, name):
@@ -449,7 +449,7 @@ class FitProblem(FitProblemComponent):
         """
         return self.name_per_page
     
-    def set_model(self,model):
+    def set_model(self, model):
         """ 
         associates each model with its new created name
         :param model: model selected
