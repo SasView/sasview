@@ -399,7 +399,7 @@ class FitProblem(FitProblemComponent):
         ##list containing parameter name and value
         self.list_param = []
         ## smear object to smear or not data1D
-        self.smearer_compute_count = 0
+        self.smearer_computed = False
         self.smearer_enable = False
         self.smearer_computer_value = None
         ## fitting range
@@ -431,12 +431,11 @@ class FitProblem(FitProblemComponent):
         """
         if not self.smearer_enable:
             return None
-        #if self.smearer_computer_value is None and \
-        #     self.smearer_compute_count > 1:
+        if not self.smearer_computed:
             #smeari_selection should be call only once per fitproblem
-        self.smearer_computer_value = smear_selection(self.fit_data,
+            self.smearer_computer_value = smear_selection(self.fit_data,
                                                            self.model)
-        self.smearer_compute_count += 1
+            self.smearer_computed = True
         return self.smearer_computer_value
     
     def save_model_name(self, name):
@@ -455,7 +454,10 @@ class FitProblem(FitProblemComponent):
         :param model: model selected
         :param name: name created for model
         """
-        self.model= model
+        self.model = model
+        self.smearer_computer_value = smear_selection(self.fit_data,
+                                                           self.model)
+        self.smearer_computed = True
         
     def get_model(self):
         """
@@ -486,6 +488,9 @@ class FitProblem(FitProblemComponent):
         :param data: list of data selected
         """
         self.fit_data = copy.deepcopy(data)
+        self.smearer_computer_value = smear_selection(self.fit_data,
+                                                           self.model)
+        self.smearer_computed = True
         
     def get_fit_data(self):
         """
