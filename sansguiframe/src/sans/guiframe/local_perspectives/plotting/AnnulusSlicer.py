@@ -170,6 +170,7 @@ class AnnulusInteractor(_BaseInteractor):
         #new_plot.is_data= True
         new_plot.xtransform = "x"
         new_plot.ytransform = "y"
+        self.base.parent.update_theory(data_id=data.id, theory=new_plot)
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
                                                  title="AnnulusPhi"))
         

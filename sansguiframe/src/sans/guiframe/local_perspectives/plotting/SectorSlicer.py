@@ -185,7 +185,8 @@ class SectorInteractor(_BaseInteractor):
         new_plot.group_id = "SectorQ" + self.base.data2D.name
         new_plot.id = None
         new_plot.is_data = True
-
+        self.base.parent.update_theory(data_id=data, \
+                                       theory=new_plot)
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,
                                     title="SectorQ" + self.base.data2D.name))
         

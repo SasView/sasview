@@ -633,6 +633,8 @@ class ModelPanel2D(ModelPanel1D):
         new_plot.group_id = "Circ avg " + self.data2D.name
         new_plot.id = "Circ avg " + self.data2D.name
         new_plot.is_data = True
+        self.parent.update_theory(data_id=self.data2D, \
+                                       theory=new_plot)
         wx.PostEvent(self.parent, 
                      NewPlotEvent(plot=new_plot, title=new_plot.name))
        

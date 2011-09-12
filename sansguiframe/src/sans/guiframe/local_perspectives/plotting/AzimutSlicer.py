@@ -199,6 +199,8 @@ class SectorInteractor(_BaseInteractor):
         new_plot.xaxis("\\rm{Q}", 'rad')
         new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
         new_plot.group_id = str(new_sector.__name__) + self.base.data2D.name
+        self.base.parent.update_theory(data_id=self.base.data2D.id, \
+                                       theory=new_plot)
         wx.PostEvent(self.base.parent,
                     NewPlotEvent(plot=new_plot, title=str(new_sector.__name__)))
         
