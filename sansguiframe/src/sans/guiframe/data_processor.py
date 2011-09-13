@@ -74,10 +74,12 @@ class GridPage(sheet.CSheet):
         self.col_names = []
         self.data_inputs = {}
         self.data_outputs = {}
+        self.data = {}
         self._cols = 50
         self._rows = 51
         col_with = 30
         row_height = 20
+        self.max_row_touse = 0
         self.axis_value = []
         self.axis_label = ""
         self.selected_cells = []
@@ -89,6 +91,15 @@ class GridPage(sheet.CSheet):
         self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.on_left_click)
         self.Bind(wx.grid.EVT_GRID_LABEL_RIGHT_CLICK, self.on_right_click)
         self.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.on_selected_cell)
+        self.Bind(wx.grid.EVT_GRID_CMD_CELL_CHANGE, self.on_edit_cell)
+       
+    def on_edit_cell(self, event):
+        """
+        """
+        row, col = event.GetRow(), event.GetCol()
+        if row > self.max_row_touse:
+            self.max_row_touse = row
+        event.Skip()
         
     def on_selected_cell(self, event):
         """
@@ -117,42 +128,87 @@ class GridPage(sheet.CSheet):
         """
         flag = event.CmdDown() or event.ControlDown()
         col = event.GetCol()
-        if not flag:
-            self.selected_cols = []
-            self.axis_value = []
-            self.axis_label = ""
-        if col not in self.selected_cols:
-            self.selected_cols.append(col)
-        if not flag :
-            for row in range(2, self.GetNumberRows()+ 1):
-                self.axis_value.append(self.GetCellValue(row, col))
-            row = 1
-            self.axis_label = self.GetCellValue(row, col)
         event.Skip()
         
     def on_right_click(self, event):
         """
         Catch the right click mouse
         """
+        
         col = event.GetCol()
-        if col != -1 and len(self.col_names) > col:
-            label = self.col_names[int(col)]
-            self.axis_label = label
-            if label in self.data.keys():
-                col_val = self.data[label]
-                self.axis_value = col_val
+        self.selected_cols = []
+        self.selected_cols.append(col)
         # Slicer plot popup menu
         slicerpop = wx.Menu()
+        col_label_menu  = wx.Menu()
+        slicerpop.AppendSubMenu(col_label_menu , 
+                                 '&Insert Column', 'Insert Column')
+        hint = 'Insert empty column before the selected column'
         id = wx.NewId()
-        slicerpop.Append(id, '&Set X axis', 'Set X axis')
-        wx.EVT_MENU(self, id, self.on_set_x_axis)
+        col_label_menu.Append(id, '&Empty', hint)
+        wx.EVT_MENU(self, id, self.on_insert_column)
+        col_name = [self.GetCellValue(0, col) 
+                        for col in range(self.GetNumberCols())]
+        for label in self.data.keys():
+            if label not in col_name:
+                id = wx.NewId()
+                hint = 'Insert %s column before the selected column' % str(label)
+                col_label_menu.Append(id, '&%s' % str(label), hint)
+                wx.EVT_MENU(self, id, self.on_insert_column)
+        id = wx.NewId()    
+        hint = 'Remove selected column %s'
+        slicerpop.Append(id, 
+                                 '&Remove Column', hint)
+        wx.EVT_MENU(self, id, self.on_remove_column)
         
-        id = wx.NewId()
-        slicerpop.Append(id, '&Set Y axis', 'Set Y axis')
-        wx.EVT_MENU(self, id, self.on_set_y_axis)
-        pos = event.GetPosition()
+        pos = wx.GetMousePosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
+        
+    def on_remove_column(self, event):
+        """
+        """
+        if self.selected_cols is not None or len(self.selected_cols) > 0:
+            col = self.selected_cols[0]
+            # add data to the grid    
+            row = 0
+            id = event.GetId()
+            col_name = self.GetCellValue(row, col)
+            self.data[col_name] = []
+            for row in range(1, self.GetNumberRows()):
+                if row <= self.max_row_touse:
+                    value = self.GetCellValue(row, col)
+                    self.data[col_name].append(value)
+                    for k , value_list in self.data.iteritems():
+                        if k != col_name:
+                            length = len(value_list)
+                            if length < self.max_row_touse:
+                                diff = self.max_row_touse - length
+                                for i in range(diff):
+                                    self.data[k].append("")
+            self.DeleteCols(pos=col, numCols=1, updateLabels=True)
+            self.AutoSize()
+            
+    def on_insert_column(self, event):
+        """
+        """
+        if self.selected_cols is not None or len(self.selected_cols) > 0:
+            col = self.selected_cols[0]
+            # add data to the grid    
+            row = 0
+            id = event.GetId()
+            col_name = event.GetEventObject().GetLabelText(id)
+            self.InsertCols(pos=col, numCols=1, updateLabels=True)
+            if col_name.strip() != "Empty":
+                self.SetCellValue(row, col, str(col_name.strip()))
+            if col_name in self.data.keys():
+                value_list = self.data[col_name]
+                cell_row =  1
+                for value in value_list:
+                    self.SetCellValue(cell_row, col, str(value))
+                    cell_row += 1
+            self.AutoSize()
+                
         
     def on_set_x_axis(self, event):
         """
@@ -174,7 +230,9 @@ class GridPage(sheet.CSheet):
         if self.data_inputs is None:
             data_inputs = {}
         self.data_inputs = data_inputs
-        
+        self.data = {}
+        for item in (self.data_outputs, self.data_inputs):
+            self.data.update(item)
         if  len(self.data_outputs) > 0:
             self._cols = self.GetNumberCols()
             self._rows = self.GetNumberRows()
@@ -205,6 +263,8 @@ class GridPage(sheet.CSheet):
                     self.SetCellValue(cell_row, cell_col, str(value))
                     cell_row += 1
                 cell_col += 1
+                if cell_row > self.max_row_touse:
+                    self.max_row_touse = cell_row
             self.AutoSize()
            
 
@@ -443,6 +503,16 @@ class GridPanel(SPanel):
                 axis.append(None) 
         return axis
     
+    def on_save_column(self, parent):
+        """
+        """
+        pos = self.notebook.GetSelection()
+        grid = self.notebook.GetPage(pos)
+        if parent is not None and  self.data is not None:
+            parent.write_batch_tofile(data=grid.data, 
+                                               file_name=path,
+                                               details=self.details)
+        
     def on_plot(self, event):
         """
         Evaluate the contains of textcrtl and plot result
@@ -603,15 +673,18 @@ class GridFrame(wx.Frame):
         self.panel = GridPanel(self, data_inputs, data_outputs)
         menubar = wx.MenuBar()
         self.SetMenuBar(menubar)
+        """
         edit = wx.Menu()
-        menubar.Append(edit, "&Edit")
+        menubar.Append(edit, "&File")
+        save_menu = edit.Append(wx.NewId(), 'Save As', 'Save into File')
+        wx.EVT_MENU(self, save_menu.GetId(), self.on_save_column)
+        """
         self.Bind(wx.EVT_CLOSE, self.on_close)
         
-        add_col_menu = edit.Append(wx.NewId(), 'Add Column', 'Add column')
-        wx.EVT_MENU(self, add_col_menu.GetId(), self.on_add_column)
-        remove_col_menu = edit.Append(wx.NewId(), 'Remove Column', 
-                                      'Remove Column')
-        wx.EVT_MENU(self, remove_col_menu.GetId(), self.on_remove_column)
+    def on_save_column(self, event):
+        """
+        """
+        self.panel.on_save_column(self.parent)
 
     def on_close(self, event):
         """
@@ -624,7 +697,13 @@ class GridFrame(wx.Frame):
         """
         self.panel.on_remove_column()
         
-    def on_add_column(self, event):
+    def on_insert_column(self, event):
+        """
+        Insert a new column to the grid
+        """
+        self.panel.insert_column()
+        
+    def on_append_column(self, event):
         """
         Append a new column to the grid
         """
@@ -780,8 +859,10 @@ if __name__ == "__main__":
         for i in range(4):
             j += 1
             data["index"+str(i)] = [i/j, i*j, i, i+j]
-            
-        frame = GridFrame(data_outputs=data, data_inputs=data)
+        
+        data_input =  copy.deepcopy(data)   
+        data_input["index5"] = [10,20,40, 50]
+        frame = GridFrame(data_outputs=data, data_inputs=data_input)
         frame.Show(True)
     except:
         print sys.exc_value
