@@ -2,6 +2,7 @@
 SLD Profile Dialog for multifunctional models
 """
 import wx
+import os
 import sys
 from copy import deepcopy
 from danse.common.plottools.plottables import Graph
@@ -33,9 +34,9 @@ class SLDPanel(wx.Dialog):
     Provides the SLD profile plot panel.
     """
     ## Internal nickname for the window, used by the AUI manager
-    window_name = "SLD Profile"
+    window_name = "Scattering Length Density Profile"
     ## Name to appear on the window title bar
-    window_caption = "SLD Profile"
+    window_caption = "Scattering Length Density Profile"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
     def __init__(self, parent=None, base=None, data=None, axes =['Radius'], 
@@ -48,8 +49,9 @@ class SLDPanel(wx.Dialog):
             #Font size 
             kwds = []
             self.SetWindowVariant(variant=FONT_VARIANT)
+
             self.SetTitle("Scattering Length Density Profile")
-            self.parent = base
+            self.parent = parent
             self.data = data
             self.str = self.data.__str__()
             ## when 2 data have the same id override the 1 st plotted
@@ -166,7 +168,11 @@ class SLDPanel(wx.Dialog):
         """
         # NOt implemented
         pass
-
+    
+    def on_change_caption(self, name, old_caption, new_caption):
+        """
+        """
+        self.parent.parent.parent.on_change_caption(name, old_caption, new_caption)
     
     
 class SLDplotpanel(PlotPanel):
@@ -183,6 +189,8 @@ class SLDplotpanel(PlotPanel):
 
         # Keep track of the parent Frame
         self.parent = parent
+        self.window_name = "Scattering Length Density Profile"
+        self.window_caption = self.window_name
         # Internal list of plottable names (because graph 
         # doesn't have a dictionary of handles for the plottables)
         self.plots = {}
@@ -190,6 +198,10 @@ class SLDplotpanel(PlotPanel):
         self.axes_label = []
         for idx in range(0, len(axes)):
             self.axes_label.append(axes[idx])
+        self.xaxis_label = ''
+        self.xaxis_unit = ''
+        self.yaxis_label = ''
+        self.yaxis_unit = ''
         
     def add_image(self, plot):
         """
@@ -203,8 +215,12 @@ class SLDplotpanel(PlotPanel):
         self.graph.add(plot)
         #add axes
         x1_label = self.axes_label[0]
-        self.graph.xaxis('\\rm{%s} '% x1_label, 'A')
-        self.graph.yaxis('\\rm{SLD} ', '10^{-6}A^{-2}')
+        self.xaxis_label = '\\rm{%s} '% x1_label
+        self.xaxis_unit = 'A'
+        self.graph.xaxis(self.xaxis_label, self.xaxis_unit)
+        self.yaxis_label = '\\rm{SLD} '
+        self.yaxis_unit = '10^{-6}A^{-2}'
+        self.graph.yaxis(self.yaxis_label, self.yaxis_unit)
         #draw
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
@@ -234,7 +250,71 @@ class SLDplotpanel(PlotPanel):
         Not implemented
         """
         pass 
+    
+    def onChangeCaption(self, event):
+        """
+        Not implemented
+        """
+        pass
+    
+    def _onSave(self, evt):
+        """
+        Save a data set to a text file
         
+        :param evt: Menu event
+        
+        """
+       
+        path = None
+        wildcard = "Text files (*.txt)|*.txt|"\
+                    "CanSAS 1D files(*.xml)|*.xml" 
+        default_name = "sld_profile"
+        if self.parent != None:
+            self._default_save_location = self.parent.parent._default_save_location
+        dlg = wx.FileDialog(self, "Choose a file",
+                            self._default_save_location,
+                            default_name, wildcard , wx.SAVE)
+       
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            # ext_num = 0 for .txt, ext_num = 1 for .xml
+            # This is MAC Fix
+            ext_num = dlg.GetFilterIndex()
+            if ext_num == 0:
+                format = '.txt'
+            else:
+                format = '.xml'
+            path = os.path.splitext(path)[0] + format
+            mypath = os.path.basename(path)
+            
+            #TODO: This is bad design. The DataLoader is designed 
+            #to recognize extensions.
+            # It should be a simple matter of calling the .
+            #save(file, data, '.xml') method
+            # of the sans.dataloader.loader.Loader class.
+            from sans.dataloader.loader import  Loader
+            #Instantiate a loader 
+            loader = Loader() 
+            data = self.parent.data
+            format = ".txt"
+            if os.path.splitext(mypath)[1].lower() == format:
+                # Make sure the ext included in the file name
+                # especially on MAC
+                fName = os.path.splitext(path)[0] + format
+                self._onsaveTXT(fName)
+            format = ".xml"
+            if os.path.splitext(mypath)[1].lower() == format:
+                # Make sure the ext included in the file name
+                # especially on MAC
+                fName = os.path.splitext(path)[0] + format
+                loader.save(fName, data, format)
+            try:
+                self._default_save_location = os.path.dirname(path)
+                self.parent.parent._default_save_location = self._default_save_location
+            except:
+                pass    
+        dlg.Destroy()
+         
 class ViewerFrame(wx.Frame):
     """
     Add comment
