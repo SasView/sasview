@@ -1497,43 +1497,43 @@ class Plugin(PluginBase):
         Get handy Chisqr using the output from draw1D and 2D, 
         instead of calling expansive CalcChisqr in guithread
         """
-        data = deepcopy(data)
+        data_copy = deepcopy(data)
         
         # default chisqr
         chisqr = None
         #to compute chisq make sure data has valid data
         # return None if data == None
-        if not check_data_validity(data):
+        if not check_data_validity(data_copy):
             return chisqr
         
         # Get data: data I, theory I, and data dI in order
-        if data.__class__.__name__ == "Data2D":
+        if data_copy.__class__.__name__ == "Data2D":
             if index == None: 
-                index = numpy.ones(len(data.data),ntype=bool)
+                index = numpy.ones(len(data_copy.data),ntype=bool)
             if self.weight != None:
-                data.err_data = self.weight
+                data_copy.err_data = self.weight
             # get rid of zero error points
-            index = index & (data.err_data != 0)  
-            index = index & (numpy.isfinite(data.data)) 
-            fn = data.data[index] 
-            theory_data = self.page_finder[page_id].get_theory_data(fid=data.id)
+            index = index & (data_copy.err_data != 0)  
+            index = index & (numpy.isfinite(data_copy.data)) 
+            fn = data_copy.data[index] 
+            theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
             gn = theory_data.data[index]
-            en = data.err_data[index]
+            en = data_copy.err_data[index]
         else:
             # 1 d theory from model_thread is only in the range of index
             if index == None: 
-                index = numpy.ones(len(data.y), ntype=bool)
+                index = numpy.ones(len(data_copy.y), ntype=bool)
             if self.weight != None:
-                data.dy = self.weight
-            if data.dy == None or data.dy == []:
-                dy = numpy.ones(len(data.y))
+                data_copy.dy = self.weight
+            if data_copy.dy == None or data_copy.dy == []:
+                dy = numpy.ones(len(data_copy.y))
             else:
                 ## Set consitently w/AbstractFitengine:
                 # But this should be corrected later.
-                dy = deepcopy(data.dy)
+                dy = deepcopy(data_copy.dy)
                 dy[dy==0] = 1  
-            fn = data.y[index] 
-            theory_data = self.page_finder[page_id].get_theory_data(fid=data.id)
+            fn = data_copy.y[index] 
+            theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
             gn = theory_data.y
             en = dy[index]
         # residual
@@ -1541,9 +1541,8 @@ class Plugin(PluginBase):
         residuals = res[numpy.isfinite(res)]
         # get chisqr only w/finite
         chisqr = numpy.average(residuals * residuals)
-        self._plot_residuals(page_id, data, index)
-        #reset weight
-        self.weight = None
+        self._plot_residuals(page_id, data_copy, index)
+        
         return chisqr
     
     def _plot_residuals(self, page_id, data=None, index=None): 
@@ -1554,50 +1553,51 @@ class Plugin(PluginBase):
         :param index: index array (bool) 
         : Note: this is different from the residuals in cal_chisqr()
         """
+        data_copy = deepcopy(data)
         # Get data: data I, theory I, and data dI in order
-        if data.__class__.__name__ == "Data2D":
+        if data_copy.__class__.__name__ == "Data2D":
             # build residuals
             residuals = Data2D()
             #residuals.copy_from_datainfo(data)
             # Not for trunk the line below, instead use the line above
-            data.clone_without_data(len(data.data), residuals)
+            data_copy.clone_without_data(len(data_copy.data), residuals)
             residuals.data = None
-            fn = data.data#[index] 
-            theory_data = self.page_finder[page_id].get_theory_data(fid=data.id)
+            fn = data_copy.data#[index] 
+            theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
             gn = theory_data.data#[index]
-            en = data.err_data#[index]
+            en = self.weight#data_copy.err_data#[index]
             residuals.data = (fn - gn) / en 
-            residuals.qx_data = data.qx_data#[index]
-            residuals.qy_data = data.qy_data #[index]
-            residuals.q_data = data.q_data#[index]
+            residuals.qx_data = data_copy.qx_data#[index]
+            residuals.qy_data = data_copy.qy_data #[index]
+            residuals.q_data = data_copy.q_data#[index]
             residuals.err_data = numpy.ones(len(residuals.data))#[index]
             residuals.xmin = min(residuals.qx_data)
             residuals.xmax = max(residuals.qx_data)
             residuals.ymin = min(residuals.qy_data)
             residuals.ymax = max(residuals.qy_data)
-            residuals.q_data = data.q_data#[index]
-            residuals.mask = data.mask
+            residuals.q_data = data_copy.q_data#[index]
+            residuals.mask = data_copy.mask
             residuals.scale = 'linear'
             # check the lengths
             if len(residuals.data) != len(residuals.q_data):
                 return
         else:
             # 1 d theory from model_thread is only in the range of index
-            if data.dy == None or data.dy == []:
-                dy = numpy.ones(len(data.y))
+            if data_copy.dy == None or data_copy.dy == []:
+                dy = numpy.ones(len(data_copy.y))
             else:
                 ## Set consitently w/AbstractFitengine: 
                 ## But this should be corrected later.
-                dy = deepcopy(data.dy)
+                dy = self.weight#deepcopy(data_copy.dy)
                 dy[dy==0] = 1  
-            fn = data.y[index] 
-            theory_data = self.page_finder[page_id].get_theory_data(fid=data.id)
+            fn = data_copy.y[index] 
+            theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
             gn = theory_data.y
             en = dy[index]
             # build residuals
             residuals = Data1D()
             residuals.y = (fn - gn) / en
-            residuals.x = data.x[index]
+            residuals.x = data_copy.x[index]
             residuals.dy = numpy.ones(len(residuals.y))
             residuals.dx = None
             residuals.dxl = None
@@ -1619,8 +1619,9 @@ class Plugin(PluginBase):
         title = new_plot.name 
         
         # plot data
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))   
-        
+        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title)) 
+        #reset weight  
+        self.weight = None
 #def profile(fn, *args, **kw):
 #    import cProfile, pstats, os
 #    global call_result
