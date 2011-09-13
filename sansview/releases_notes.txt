@@ -113,7 +113,7 @@ SansView 1.9.2Dev_JUN
 			* comtypes (for PDF window)(WIN)
 			* pywin32 (to read ms office)(WIN)
 			* PIL (Python Image Library)
-			* Pyparsing (apply for bundling)
+			* Pyparsing (apply for periodictable and bundling)
 			* periodictable = 1.3.0 (using 'easy_install periodictable')
 			* MinGW/Cygwin (for Windows) or other GNU compiler (gcc)
 			*Optional: setuptools, svn, Innosetup, py2exe(WIN),and/or py2app(MAC) to build App from the source.
