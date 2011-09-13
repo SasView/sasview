@@ -360,6 +360,12 @@ class ExploreDialog(wx.Dialog):
         # Bind the Enter key to recalculation
         self.Bind(wx.EVT_TEXT_ENTER, self._recalc)
 
+    def set_plot_unfocus(self):
+        """
+        Not implemented
+        """
+        pass
+    
     def _recalc(self, event=None):
         """
         Invoked when the user changed a value on the form.
