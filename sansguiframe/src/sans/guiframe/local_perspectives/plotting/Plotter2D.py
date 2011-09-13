@@ -749,13 +749,17 @@ class ModelPanel2D(ModelPanel1D):
         id = str(evt.GetId())
         if self.parent != None:
             self._default_save_location = self.parent._default_save_location
+        default_name = self.plots[self.graph.selected_plottable].label
+        if default_name.count('.') > 0:
+            default_name = default_name.split('.')[0]
+        default_name += "_out"
         if id in self.action_ids:         
             
             path = None
             wildcard = "IGOR/DAT 2D file in Q_map (*.dat)|*.DAT"
             dlg = wx.FileDialog(self, "Choose a file",
                                 self._default_save_location,
-                                 "", wildcard , wx.SAVE)
+                                default_name, wildcard , wx.SAVE)
            
             if dlg.ShowModal() == wx.ID_OK:
                 path = dlg.GetPath()

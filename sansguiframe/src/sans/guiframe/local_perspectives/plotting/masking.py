@@ -390,6 +390,12 @@ class MaskPanel(wx.Dialog):
         """
         self.data.mask = mask
         
+    def set_plot_unfocus(self):
+        """
+        Not implemented
+        """
+        pass
+    
     def _update_mask(self,mask):
         """
         Respond to changes in masking
