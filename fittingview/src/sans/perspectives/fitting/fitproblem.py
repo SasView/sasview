@@ -391,6 +391,8 @@ class FitProblem(FitProblemComponent):
         ## data used for fitting
         self.fit_data = None
         self.theory_data = None
+        # original data: should not be modified
+        self.original_data = None
         ## the current model
         self.model = None
         ## if 1 this fit problem will be selected to fit , if 0 
@@ -487,6 +489,9 @@ class FitProblem(FitProblemComponent):
         Store data associated with this class
         :param data: list of data selected
         """
+        # original data: should not be modified
+        self.original_data = copy.deepcopy(data)
+        # fit data: used for fit and can be modified for convenience
         self.fit_data = copy.deepcopy(data)
         self.smearer_computer_value = smear_selection(self.fit_data,
                                                            self.model)
@@ -505,7 +510,8 @@ class FitProblem(FitProblemComponent):
         :param is2d: flag to distinguish 1D to 2D Data
         """
         from .utils import get_weight
-        self.weight = get_weight(data=self.fit_data, is2d=is2d, flag=flag)
+        # send original data for weighting
+        self.weight = get_weight(data=self.original_data, is2d=is2d, flag=flag)
         if is2d:
             self.fit_data.err_data = self.weight
         else:
