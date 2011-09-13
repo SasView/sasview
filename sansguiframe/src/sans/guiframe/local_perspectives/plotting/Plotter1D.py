@@ -479,11 +479,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
         except:
             pos_x, pos_y = self.toolbar.GetPositionTuple()
             pos = (pos_x, pos_y + 5)
-            
-        self._slicerpop.AppendSeparator()
-        id = wx.NewId()
-        self._slicerpop.Append(id, '&Window Title')
-        wx.EVT_MENU(self, id, self.onChangeCaption)
+        
+        if self.parent.ClassName.count('wxDialog') == 0:    
+            self._slicerpop.AppendSeparator()
+            id = wx.NewId()
+            self._slicerpop.Append(id, '&Window Title')
+            wx.EVT_MENU(self, id, self.onChangeCaption)
         
         self.PopupMenu(self._slicerpop, pos)
         
