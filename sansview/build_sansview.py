@@ -260,9 +260,14 @@ def checkout(release=False):
     try:
         build_num = os.path.basename(wd).split('_')[1] 
         if sys.argv[1]=="-r":
-            sansview_folder = "sansview-%s" % (SANSVIEW)  
+            sansview_folder = "sansview-%s" % (SANSVIEW) 
         else:
-            sansview_folder = "sansview"   
+            sansview_folder = "sansview"  
+        # try to make the sansview dir writable 
+        try:
+            os.system("chmod 777 -R %s"% sansview_foler)
+        except:
+            pass
         os.chdir(sansview_folder)
         if os.getcwd().count('sansview') > 0:
             conf_file = open('local_config.py', 'r')
@@ -280,7 +285,7 @@ def checkout(release=False):
     except:
         pass
     os.chdir(wd)
-   
+    
 def prepare(wipeout = False):
     """
         Prepare the build
