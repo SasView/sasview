@@ -1297,6 +1297,7 @@ class Plugin(PluginBase):
         try:
             new_plot = Data1D(x=x, y=y)
             new_plot.is_data = False
+            new_plot.dy = numpy.zeros(len(y))
             new_plot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
             _yaxis, _yunit = data.get_yaxis() 
             _xaxis, _xunit = data.get_xaxis() 
@@ -1531,7 +1532,7 @@ class Plugin(PluginBase):
                 ## Set consitently w/AbstractFitengine:
                 # But this should be corrected later.
                 dy = deepcopy(data_copy.dy)
-                dy[dy==0] = numpy.ones(len(dy[dy==0]))  
+                dy[dy==0] = 1
             fn = data_copy.y[index] 
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
             gn = theory_data.y
