@@ -1239,6 +1239,17 @@ class ViewerFrame(wx.Frame):
 
         style = self.__gui_style & GUIFRAME.PLOTTING_ON
         if style == GUIFRAME.PLOTTING_ON:
+            
+            self._window_menu.AppendSeparator()
+            id = wx.NewId()
+            hint = "Hide all the graph panels"
+            self._window_menu.Append(id, '&Hide  All', hint)
+            wx.EVT_MENU(self, id, self.hide_all_plotpanels)
+            id = wx.NewId()
+            hint = "Show all the graph panels"
+            self._window_menu.Append(id, '&Show All', hint)
+            wx.EVT_MENU(self, id, self.show_all_plotpanels)
+            
             self._window_menu.AppendSeparator()
             id = wx.NewId()
             preferences_menu = wx.Menu()
@@ -1547,6 +1558,54 @@ class ViewerFrame(wx.Frame):
                 self._mgr.GetPane(self.panels["default"].window_name).Hide()
         self._mgr.Update()     
         self._redraw_idle()
+
+    def show_all_plotpanels(self, event):
+        """
+        Show all plotpanels shown
+        
+        :param event: menu event
+        """
+        #event.Skip()
+        any_hidden = False
+        for id in self.plot_panels.keys():
+            if self._mgr.GetPane(self.plot_panels[id].window_name).IsShown():
+                continue
+            else:
+                any_hidden = True
+                self.show_panel(id)
+        if not any_hidden:
+            msg = "No graph panels to show."
+        else:
+            # Make sure the Checkmenuitem checked: Need this for-loop \
+            # because the check menu is not responding on floating panel 
+            for item in self._plotting_plugin.menu.GetMenuItems():
+                item.Check(True)
+            msg = "All graph panels are shown."
+        wx.PostEvent(self, StatusEvent(status=msg))
+            
+    def hide_all_plotpanels(self, event):
+        """
+        Hide all plotpanels shown
+        
+        :param event: menu event
+        """
+        #event.Skip()
+        any_shown = False
+        for ID in self.plot_panels.keys():
+            if self._mgr.GetPane(self.plot_panels[ID].window_name).IsShown():
+                any_shown = True
+                self.hide_panel(ID)
+            else:
+                continue
+        if not any_shown:
+            msg = "No graph panels to hide."
+        else:
+            # Make sure the Checkmenuitem unchecked: Need this for-loop 
+            # because the check menu is not responding on floating panel 
+            for item in self._plotting_plugin.menu.GetMenuItems():
+                item.Check(False)
+            msg = "All graph panels are hidden."
+        wx.PostEvent(self, StatusEvent(status=msg))
                     
     def hide_panel(self, uid):
         """
