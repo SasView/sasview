@@ -1611,13 +1611,12 @@ class Plugin(PluginBase):
         ## allow to highlight data when plotted
         new_plot.interactive = True
         ## when 2 data have the same id override the 1 st plotted
-        new_plot.id = new_plot.name#name + " residuals"
+        new_plot.id = "res" + data_copy.id#name + " residuals"
         ##group_id specify on which panel to plot this data
         new_plot.group_id = new_plot.id
         #new_plot.is_data = True
         ##post data to plot
         title = new_plot.name 
-        
         # plot data
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title)) 
         #reset weight  
