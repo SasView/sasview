@@ -440,8 +440,11 @@ class DataPanel(ScrolledPanel, PanelBase):
                         d_p_c = self.tree_ctrl.AppendItem(d_i_c, 'Process')
                         
                         for process in process_list:
+                            process_str = str(process).replace('\n',' ')
+                            if len(process_str)>20:
+                                process_str = process_str[:20]+' [...]'
                             i_t_c = self.tree_ctrl.AppendItem(d_p_c,
-                                                              process.__str__())
+                                                              process_str)
                         theory_child = self.tree_ctrl.AppendItem(data_c, "THEORIES")
                        
                         self.list_cb_data[state_id] = [data_c, 
