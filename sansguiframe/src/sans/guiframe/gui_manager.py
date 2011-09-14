@@ -2258,7 +2258,7 @@ class ViewerFrame(wx.Frame):
                                                    group_id=group_id,
                                                    action='remove'))
                 #remove res plot: Todo: improve
-                self._remove_res_plot(id)
+                wx.CallAfter(self._remove_res_plot, id)
         self._data_manager.delete_data(data_id=data_id, 
                                        theory_id=theory_id)
             
