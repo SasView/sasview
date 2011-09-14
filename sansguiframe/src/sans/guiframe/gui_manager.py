@@ -1580,7 +1580,8 @@ class ViewerFrame(wx.Frame):
             panel.Hide()
             panel.clear()
             panel.Close()
-            self._mgr.Update()
+            #CallAfter: make sure panel is clear before updating mgr
+            wx.CallAfter(self._mgr.Update)
             #delete uid number not str(uid)
             if uid in self.plot_panels.keys():
                 del self.plot_panels[uid]

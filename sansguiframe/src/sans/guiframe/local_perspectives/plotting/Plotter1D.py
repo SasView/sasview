@@ -215,13 +215,14 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 data = data_list[id]
             if id in theory_list.keys():
                 data = theory_list[id]
-           
+            
             del self.plots[id]
             self.graph.render(self)
             self.subplot.figure.canvas.draw_idle()    
             if len(self.graph.plottables) == 0:
                 #onRemove: graph is empty must be the panel must be destroyed
                 self.parent.delete_panel(self.uid)
+
         
     def plot_data(self, data):
         """
@@ -528,10 +529,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
         selected_plot.custom_color = self._color_labels[label]
         ## Set the view scale for all plots
         self._onEVT_FUNC_PROPERTY()
-        ## render the graph
-        #self.graph.render(self)
-        #self.subplot.figure.canvas.draw_idle()
-        print "PARENT: ", self.parent
         wx.PostEvent(self.parent,
                       NewColorEvent(color=selected_plot.custom_color,
                                              id=selected_plot.id))

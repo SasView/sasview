@@ -96,6 +96,7 @@ class Plugin(PluginBase):
         if group_id in self.plot_panels.keys():
             panel = self.plot_panels[group_id]
             panel.remove_data_by_id(id=id)
+            
             return True
         return False
         
