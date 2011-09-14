@@ -278,7 +278,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         
         self.bt_freeze = wx.Button(self, wx.NewId(), "Freeze Theory", 
                                    size=(BUTTON_WIDTH, -1))
-        self.bt_freeze.SetToolTipString("To trigger freeze a theory")
+        freeze_tip = "To trigger freeze a theory: making a copy to Data box,\n"
+        freeze_tip += "     so that it can act like a real data set."
+        self.bt_freeze.SetToolTipString(freeze_tip)
         wx.EVT_BUTTON(self, self.bt_freeze.GetId(), self.on_freeze)
         #hide plot
         #self.bt_close_plot = wx.Button(self, wx.NewId(), "Delete Plot", 
@@ -735,10 +737,17 @@ class DataPanel(ScrolledPanel, PanelBase):
     
     def on_freeze(self, event):
         """
+        On freeze to make a theory to a data set
         """
         _, theory_id, state_id = self.set_data_helper()
-        self.parent.freeze(data_id=state_id, theory_id=theory_id)
-        
+        if len(theory_id) > 0:
+            self.parent.freeze(data_id=state_id, theory_id=theory_id)
+            msg = "Freeze Theory:"
+            msg += " The theory(s) copied to the Data box as a data set."
+        else:
+            msg = "Freeze Theory: Requires at least one theory checked."
+        wx.PostEvent(self.parent, StatusEvent(status=msg))
+            
     def set_active_perspective(self, name):
         """
         set the active perspective
