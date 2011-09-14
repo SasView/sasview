@@ -638,6 +638,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         Get a list of item checked and remove them from the treectrl
         Ask the parent to remove reference to this item 
         """
+        msg = "This operation will delete the data sets checked "
+        msg += "and all the related."
+        msg_box = wx.MessageDialog(None, msg, 'Warning', wx.OK|wx.CANCEL)
+        if msg_box.ShowModal() != wx.ID_OK:
+            return
+        
         data_to_remove, theory_to_remove, _ = self.set_data_helper()
         data_key = []
         theory_key = []
