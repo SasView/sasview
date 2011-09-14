@@ -2269,8 +2269,8 @@ class ViewerFrame(wx.Frame):
         : param id: id of the data
         """
         try:
-            wx.PostEvent(self, NewPlotEvent(id=("res"+id),
-                                           group_id=("res"+id),
+            wx.PostEvent(self, NewPlotEvent(id=("res"+str(id)),
+                                           group_id=("res"+str(id)),
                                            action='remove'))
         except:
             pass
