@@ -374,7 +374,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self._slicerpop.Append(id, "&Save Points as a File")
             wx.EVT_MENU(self, id, self._onSave)
             self._slicerpop.AppendSeparator()
-            if plot.name != 'SLD':
+            if self.parent.ClassName.count('wxDialog') == 0: 
                 id = wx.NewId()
                 self._slicerpop.Append(id, '&Linear Fit')
                 wx.EVT_MENU(self, id, self.onFitting)
