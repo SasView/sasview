@@ -639,7 +639,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         Ask the parent to remove reference to this item 
         """
         msg = "This operation will delete the data sets checked "
-        msg += "and all the related."
+        msg += "and all the dependents."
         msg_box = wx.MessageDialog(None, msg, 'Warning', wx.OK|wx.CANCEL)
         if msg_box.ShowModal() != wx.ID_OK:
             return

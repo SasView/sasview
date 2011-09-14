@@ -2257,10 +2257,24 @@ class ViewerFrame(wx.Frame):
                 wx.PostEvent(self, NewPlotEvent(id=id,
                                                    group_id=group_id,
                                                    action='remove'))
+                #remove res plot: Todo: improve
+                self._remove_res_plot(id)
         self._data_manager.delete_data(data_id=data_id, 
                                        theory_id=theory_id)
             
+    def _remove_res_plot(self, id):
+        """
+        Try to remove corresponding res plot
         
+        : param id: id of the data
+        """
+        try:
+            wx.PostEvent(self, NewPlotEvent(id=("res"+id),
+                                           group_id=("res"+id),
+                                           action='remove'))
+        except:
+            pass
+                          
     def set_current_perspective(self, perspective):
         """
         set the current active perspective 
