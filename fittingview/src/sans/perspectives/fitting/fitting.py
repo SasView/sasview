@@ -189,6 +189,10 @@ class Plugin(PluginBase):
         Create a page to access simultaneous fit option
         """
         if self.sim_page != None:
+            self.sim_page.Show(True)
+            self.sim_page.Refresh()
+            self.sim_page.SetFocus()
+            self.parent._mgr.Update()
             msg= "Simultaneous Fit page already opened"
             wx.PostEvent(self.parent, StatusEvent(status= msg))
             return 
