@@ -1107,9 +1107,6 @@ class FitPage(BasicPage):
         self.qmax_x = float(self.qmax.GetValue())
         self._manager._reset_schedule_problem(value=0, uid=self.uid)
         self._manager.schedule_for_fit(uid=self.uid,value=1) 
-        self._manager.set_fit_weight(uid=self.uid, 
-                                     flag=self.get_weight_flag(),
-                                     is2d = self._is_2D())
         self._manager.set_fit_range(uid=self.uid,qmin=self.qmin_x, 
                                    qmax=self.qmax_x)
         #single fit 

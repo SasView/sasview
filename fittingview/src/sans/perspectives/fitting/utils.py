@@ -17,7 +17,7 @@ def get_weight(data, is2d, flag=None):
         dy_data = data.dy
         data = data.y
     if flag == 0:
-        weight = numpy.ones_like(dy_data)
+        weight = numpy.ones_like(data)
     elif flag == 1:
         weight = dy_data
     elif flag == 2:

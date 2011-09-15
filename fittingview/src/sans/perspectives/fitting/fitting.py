@@ -695,6 +695,9 @@ class Plugin(PluginBase):
                     pars = []
                     templist = []
                     page = self.fit_panel.get_page_by_id(page_id)
+                    self.set_fit_weight(uid=page.uid, 
+                                     flag=page.get_weight_flag(),
+                                     is2d = page._is_2D())
                     templist = page.get_param_list()
                     for element in templist:
                         name = str(element[1])
