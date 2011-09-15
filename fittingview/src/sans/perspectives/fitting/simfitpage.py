@@ -163,8 +163,9 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.model_toFit = [] 
         if self.cb1.GetValue()== True:
             for item in self.model_list:
-                item[0].SetValue(True)
-                self.model_toFit.append(item)
+                if item[0].IsEnabled():
+                    item[0].SetValue(True)
+                    self.model_toFit.append(item)
                 
             ## constraint info
             self._store_model()
@@ -587,13 +588,14 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 ix = 0
                 iy += 1 
                 for fitproblem in value.get_fit_problem():
+                    data = fitproblem.get_fit_data()
                     model = fitproblem.get_model()
                     name = '_'
                     if model is not None:
                         name = str(model.name)
                     cb = wx.CheckBox(self, -1, name)
                     cb.SetValue(False)
-                    cb.Enable(model is not None)
+                    cb.Enable(model is not None and data.is_data)
                     sizer.Add(cb, (iy, ix), (1, 1), 
                                wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                     wx.EVT_CHECKBOX(self, cb.GetId(), self.check_model_name)
@@ -602,9 +604,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                     model_type = wx.StaticText(self, -1, str(type))
                     sizer.Add(model_type, (iy, ix), (1, 1), 
                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                    data = fitproblem.get_fit_data()
                     name = '-'
-                    if data is not None:
+                    if data is not None and data.is_data:
                         name = str(data.name)
                     data_used = wx.StaticText(self, -1, name)
                     ix += 1 
