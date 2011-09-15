@@ -627,3 +627,11 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         sizer.Layout()    
 
+    def on_set_focus(self, event=None):
+        """
+        The  derivative class is on focus if implemented
+        """
+        if self.parent is not None:
+            wx.PostEvent(self.parent, PanelOnFocusEvent(panel=self))
+        self.page_finder = self.parent.get_page_finder()
+        
