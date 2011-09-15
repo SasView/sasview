@@ -1,4 +1,4 @@
-# 
+# Note: This script should be moved the upper folder to run properly.
 # Script for linux to setup all SansView internal packages (Not on sansview itself)
 #
 # Usage:
