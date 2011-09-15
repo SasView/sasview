@@ -112,14 +112,17 @@ class GridPage(sheet.CSheet):
             self.selected_cells = []
             self.axis_value = []
             self.axis_label = ""
-        if cell in self.selected_cells:
-            self.selected_cells.remove(cell)
+        if cell not in self.selected_cells:
+            if row > 0:
+                self.selected_cells.append(cell)
         else:
-            self.selected_cells.append(cell)
-        if row > 1:
-            if (cell) in self.selected_cells:
-                self.axis_value.append(self.GetCellValue(row, col))
-        self.axis_label = self.GetCellValue(row, col)
+            if flag:
+                self.selected_cells.remove(cell)
+        self.axis_value = []
+        for cell_row, cell_col in self.selected_cells:
+            if cell_row > 0 and cell_row < self.max_row_touse:
+                self.axis_value.append(self.GetCellValue(cell_row, cell_col))
+        self.axis_label = self.GetCellValue(0, col)
         event.Skip()
       
     def on_left_click(self, event):
@@ -128,7 +131,22 @@ class GridPage(sheet.CSheet):
         """
         flag = event.CmdDown() or event.ControlDown()
         col = event.GetCol()
+        if not flag:
+            self.selected_cols = []
+            self.selected_cells = []
+            self.axis_label = ""
+        for row in range(1, self.GetNumberRows()+ 1):
+            cell = (row, col)
+            if row > 0 and row < self.max_row_touse:
+                if cell not in self.selected_cells:
+                    self.selected_cells.append(cell)
+        self.selected_cols.append(col)
+        self.axis_value = []
+        for cell_row, cell_col in self.selected_cells:
+            self.axis_value.append(self.GetCellValue(cell_row, cell_col))
+        self.axis_label = self.GetCellValue(0, col)
         event.Skip()
+        
         
     def on_right_click(self, event):
         """
@@ -175,8 +193,8 @@ class GridPage(sheet.CSheet):
             id = event.GetId()
             col_name = self.GetCellValue(row, col)
             self.data[col_name] = []
-            for row in range(1, self.GetNumberRows()):
-                if row <= self.max_row_touse:
+            for row in range(1, self.GetNumberRows() + 1):
+                if row < self.max_row_touse:
                     value = self.GetCellValue(row, col)
                     self.data[col_name].append(value)
                     for k , value_list in self.data.iteritems():
@@ -223,6 +241,8 @@ class GridPage(sheet.CSheet):
     def set_data(self, data_inputs, data_outputs):
         """
         Add data to the grid
+        :param data_inputs: data to use from the context menu of the grid
+        :param data_ouputs: default columns deplayed
         """
         if data_outputs is None:
             data_outputs = {}
@@ -319,7 +339,6 @@ class Notebook(nb, PanelBase):
             msg = "Edit axis doesn't understand this selection.\n"
             msg += "Please select only one column"
             raise ValueError, msg
-        list_of_cells = []
         if len(grid.selected_cols) == 1:
             col = grid.selected_cols[0]
             if len(grid.selected_cells) > 0:
@@ -328,14 +347,8 @@ class Notebook(nb, PanelBase):
                     msg = "Edit axis doesn't understand this selection.\n"
                     msg += "Please select element of the same col"
                     raise ValueError, msg
-            for row in range(grid.GetNumberRows()):
-                list_of_cells.append((row + 1 , col))
-            for item in grid.selected_cells:
-                if item in list_of_cells:
-                    list_of_cells.remove(item)
-        elif len(grid.selected_cols) == 0:
-            list_of_cells = [(row + 1, col) for row, col in grid.selected_cells]
-        return list_of_cells
+        return grid.selected_cells
+       
     
     def get_column_labels(self):
         """
@@ -362,32 +375,52 @@ class Notebook(nb, PanelBase):
         grid = self.GetPage(pos)
         label = ""
         col_name = ""
+        def create_label(col_name,  row_min=None, row_max=None):
+            """
+            """
+            result = ""
+            if row_min is not  None or row_max is not None:
+                if row_min is None:
+                    result = str(row_max) + "]"
+                elif row_max is None:
+                     result = str(col_name) + "[" + str(row_min) + ":"
+                else:
+                    result = str(col_name) +  "[" + str(row_min) + ":"
+                    result += str(col_name) + str(row_max) + "]"
+            return result
+            
         if len(cell_list) > 0:
-            temp_list = copy.deepcopy(cell_list)
-            temp_list.sort()
-            temp = []
-            for item in temp_list:
-                if item[0] <= 1:
-                    temp.append(item)
-            for element in temp:
-                temp_list.remove(element)
-            row_min, col  = temp_list[0]    
-            row_max = row_min
-            col_name = grid.GetCellValue(0, col)
-            label += str(col_name) + "[" + str(row_min) + ":"
-            for index in xrange(len(temp_list)):
-                prev = index - 1
-                row, _ = temp_list[index]
-                if row > row_max + 1 :
-                    if prev > 0:
-                        row_max, _ = temp_list[prev]
-                        label += str(row_max) + "]" + ","
-                        row_min = row
-                        label  += "[" + str(row_min) + ":"
-                row_max = row
-                if (index == len(temp_list)- 1):
-                    label +=  str(row_max) + "]"     
-        return label, col_name
+            if len(cell_list) == 1:
+                 row_min, col  = cell_list[0]    
+                 col_name = grid.GetCellValue(0, col)
+                 label = create_label(col_name, row_min+1 , row_min+1)
+                 return  label,  col_name
+            else:
+                temp_list = copy.deepcopy(cell_list)
+                temp_list.sort()
+                length = len(temp_list)
+                row_min, col  = temp_list[0]    
+                row_max, _  = temp_list[length-1]
+                col_name = grid.GetCellValue(0, col)
+                index = 0
+                for row in xrange(row_min, row_max +1):
+                    if index > 0 and index < len(temp_list):
+                        new_row, _ = temp_list[index]
+                        if row != new_row:
+                            temp_list.insert(index, (None, None))
+                            if index -1 >=0:
+                                new_row, _ = temp_list[index-1]
+                                label += create_label(col_name, None, new_row +1)
+                                label += ","
+                            if index + 1 < len(temp_list):
+                                new_row, _ = temp_list[index + 1]
+                                label += create_label(col_name, new_row+1, None)
+                    if index == 0:
+                        label += create_label(col_name,  row_min+1, None)
+                    elif index == len(temp_list)-1:
+                        label += create_label(col_name, None, row_max+1)
+                    index += 1
+                return label, col_name
     
     def on_close_page(self, event):
         """
@@ -498,7 +531,13 @@ class GridPanel(SPanel):
                 if label.lower().strip() == "data":
                     axis.append(float(row - 1))
                 else:
-                    axis.append(float(value))
+                    try:
+                        axis.append(float(value))
+                    except:
+                        msg = "Invalid data in row %s column %s" % (str(row),
+                                                                    str(col))
+                        wx.PostEvent(self.parent.parent, 
+                             SatusEvent(status=msg, info="error")) 
             else:
                 axis.append(None) 
         return axis
@@ -560,12 +599,13 @@ class GridPanel(SPanel):
         new_plot.yaxis(self.y_axis_title.GetValue(), self.y_axis_unit.GetValue())
         try:
             title = self.notebook.GetPageText(pos)
-            data.name = title
+            new_plot.name = title
             wx.PostEvent(self.parent.parent, 
                              NewPlotEvent(plot=new_plot, 
                         group_id=str(new_plot.group_id), title =title))    
         except:
-            pass
+             wx.PostEvent(self.parent.parent, 
+                             SatusEvent(status=msg, info="error")) 
         
     def layout_grid(self):
         """
