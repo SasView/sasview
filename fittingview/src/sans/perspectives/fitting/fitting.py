@@ -1596,7 +1596,10 @@ class Plugin(PluginBase):
             else:
                 ## Set consitently w/AbstractFitengine: 
                 ## But this should be corrected later.
-                dy = self.weight#deepcopy(data_copy.dy)
+                if self.weight == None:
+                    dy = data_copy.dy
+                else:
+                    dy = self.weight#deepcopy(data_copy.dy)
                 dy[dy==0] = 1  
             fn = data_copy.y[index] 
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
