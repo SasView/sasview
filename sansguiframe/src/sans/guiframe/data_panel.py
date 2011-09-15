@@ -421,6 +421,8 @@ class DataPanel(ScrolledPanel, PanelBase):
                 theory_list = dstate.get_theory()
                 if data is not None:
                     data_name = str(data.name)
+                    data_title = str(data.title)
+                    data_run = str(data.run)
                     data_class = data.__class__.__name__
                     path = dstate.get_path() 
                     process_list = data.process
@@ -433,6 +435,10 @@ class DataPanel(ScrolledPanel, PanelBase):
                                              data=(data_id, data_class, state_id))
                         data_c.Check(True)
                         d_i_c = self.tree_ctrl.AppendItem(data_c, 'Info')
+                        d_t_c = self.tree_ctrl.AppendItem(d_i_c, 
+                                                      'Title: %s' % data_title)
+                        r_n_c = self.tree_ctrl.AppendItem(d_i_c, 
+                                                      'Run: %s' % data_run)
                         i_c_c = self.tree_ctrl.AppendItem(d_i_c, 
                                                       'Type: %s' % data_class)
                         p_c_c = self.tree_ctrl.AppendItem(d_i_c,
@@ -449,6 +455,8 @@ class DataPanel(ScrolledPanel, PanelBase):
                        
                         self.list_cb_data[state_id] = [data_c, 
                                                        d_i_c,
+                                                       d_t_c,
+                                                       r_n_c,
                                                        i_c_c,
                                                         p_c_c,
                                                          d_p_c,
@@ -456,7 +464,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                     else:
                         data_ctrl_list =  self.list_cb_data[state_id]
                         #This state is already display replace it contains
-                        data_c, d_i_c, i_c_c, p_c_c, d_p_c, t_c = data_ctrl_list
+                        data_c, d_i_c, d_t_c, r_n_c,  i_c_c, p_c_c, d_p_c, t_c = data_ctrl_list
                         self.tree_ctrl.SetItemText(data_c, data_name) 
                         temp = (data_id, data_class, state_id)
                         self.tree_ctrl.SetItemPyData(data_c, temp) 
@@ -478,7 +486,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         Uncheck all check boxes
         """
         for item in self.list_cb_data.values():
-            data_ctrl, _, _, _,_, _ = item
+            data_ctrl, _, _, _, _, _,_, _ = item
             self.tree_ctrl.CheckItem(data_ctrl, False) 
         self.enable_append()
         self.enable_freeze()
@@ -498,7 +506,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             tree = self.tree_ctrl_theory
         else:
             item = self.list_cb_data[state_id]
-            data_c, _, _, _, _, _ = item
+            data_c, _, _, _, _, _, _, _ = item
             root = data_c
             tree = self.tree_ctrl
         if root is not None:
@@ -591,7 +599,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         state_to_plot = []
         theory_to_plot = []
         for value in self.list_cb_data.values():
-            item, _, _, _, _, _ = value
+            item, _, _, _, _, _, _,  _ = value
             if item.IsChecked():
                 data_id, _, state_id = self.tree_ctrl.GetItemPyData(item)
                 data_to_plot.append(data_id)
@@ -612,7 +620,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         """
         for item in self.list_cb_data.values():
-            data_c, _, _, _, _, theory_child = item
+            data_c, _, _, _, _, _,  _, theory_child = item
             data_id, _, state_id = self.tree_ctrl.GetItemPyData(data_c) 
             if id == data_id:
                 self.tree_ctrl.Delete(data_c)
@@ -654,7 +662,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         theory_key = []
         #remove  data from treectrl
         for d_key, item in self.list_cb_data.iteritems():
-            data_c, d_i_c, i_c_c, p_c_c, d_p_c, t_c = item
+            data_c, d_i_c, d_t_c, r_n_c,  i_c_c, p_c_c, d_p_c, t_c = item
             if data_c.IsChecked():
                 self.tree_ctrl.Delete(data_c)
                 data_key.append(d_key)
