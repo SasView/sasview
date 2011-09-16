@@ -145,6 +145,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         _labels['Magenta'] = i
         i += 1
         _labels['Yellow'] = i
+        i += 1
+        _labels['Black'] = i
         return _labels
 
     
