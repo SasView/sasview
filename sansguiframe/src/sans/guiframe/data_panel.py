@@ -215,7 +215,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             return 
         option = self.selection_cbox.GetString(pos)
         for item in self.list_cb_data.values():
-            data_ctrl, _, _, _,_, _ = item
+            data_ctrl, _, _, _,_, _,_,_= item
             data_id, data_class, _ = self.tree_ctrl.GetItemPyData(data_ctrl) 
             if option == 'Select all Data':
                 self.tree_ctrl.CheckItem(data_ctrl, True) 
