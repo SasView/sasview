@@ -90,9 +90,9 @@ void DispersionModel :: set_weights(int npoints, double* values, double* weights
  */
 
 GaussianDispersion :: GaussianDispersion() {
-	npts  = 11;
+	npts  = 100;
 	width = 0.0;
-	nsigmas = 2.5;
+	nsigmas = 10;
 };
 
 void GaussianDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
@@ -122,7 +122,7 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
 	if (width<=0) {
 		width = 0.0;
 		npts  = 1;
-		nsigmas = 2.5;
+		nsigmas = 10;
 	}
 
 	Parameter* par = (Parameter*)param;
@@ -157,7 +157,7 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
  */
 
 RectangleDispersion :: RectangleDispersion() {
-	npts  = 11;
+	npts  = 100;
 	width = 0.0;
 	nsigmas = 1.73205;
 };
@@ -227,9 +227,9 @@ void RectangleDispersion :: operator() (void *param, vector<WeightPoint> &weight
  */
 
 LogNormalDispersion :: LogNormalDispersion() {
-	npts  = 15;
+	npts  = 100;
 	width = 0.0;
-	nsigmas = 4.0;
+	nsigmas = 10.0;
 };
 
 void LogNormalDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
@@ -242,7 +242,7 @@ void LogNormalDispersion :: accept_as_destination(DispersionVisitor* visitor, vo
 double lognormal_weight(double mean, double sigma, double x) {
 
 	double sigma2 = pow(sigma, 2.0);
-	return 1.0/(x*sigma) * exp( -pow((log(x) -log(mean)), 2.0) / (2.0*sigma2));
+	return 1.0/(x*sigma) * exp( -pow((log(x) - mean), 2.0) / (2.0*sigma2));
 
 }
 
@@ -258,12 +258,13 @@ void LogNormalDispersion :: operator() (void *param, vector<WeightPoint> &weight
 	if (width<=0) {
 		width = 0.0;
 		npts  = 1;
-		nsigmas = 4.0;
+		nsigmas = 10.0;
 	}
 
 	Parameter* par = (Parameter*)param;
 	double value = (*par)();
 	double sig;
+	double log_value;
 	if (npts<2) {
 		weights.insert(weights.end(), WeightPoint(value, 1.0));
 	} else {
@@ -271,20 +272,24 @@ void LogNormalDispersion :: operator() (void *param, vector<WeightPoint> &weight
 			// Note that the definition of sigma is different from Gaussian
 			if ((*par).has_min==false){
 				// sig  for angles
-				sig = width / value;
+				sig = width;
 			}
 			else{
 				// by lognormal definition, PD is same as sigma
-				sig = width;
+				sig = width * value;
 			}
-
+			
 			// We cover n(nsigmas) times sigmas on each side of the mean
+			//constant bin in real space
 			double val = value + sig * (2.0*nsigmas*double(i)/double(npts-1) - nsigmas);
-
+			// sigma in the lognormal function is in ln(R) space, thus needs converting
+			sig = fabs(sig/value); 
 			if ( ((*par).has_min==false || val>(*par).min)
 			  && ((*par).has_max==false || val<(*par).max)  ) {
-				double _w = lognormal_weight(value, sig, val);
+				double _w = lognormal_weight(log(value), sig, val);
 				weights.insert(weights.end(), WeightPoint(val, _w));
+				//printf("%g \t %g\n",val,_w);
+
 			}
 		}
 	}
@@ -297,9 +302,9 @@ void LogNormalDispersion :: operator() (void *param, vector<WeightPoint> &weight
  */
 
 SchulzDispersion :: SchulzDispersion() {
-	npts  = 11;
+	npts  = 100;
 	width = 0.0;
-	nsigmas = 3.0;
+	nsigmas = 10.0;
 };
 
 void SchulzDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
@@ -331,7 +336,7 @@ void SchulzDispersion :: operator() (void *param, vector<WeightPoint> &weights){
 	if (width<=0) {
 		width = 0.0;
 		npts  = 1;
-		nsigmas = 3.0;
+		nsigmas = 10.0;
 	}
 
 	Parameter* par = (Parameter*)param;
