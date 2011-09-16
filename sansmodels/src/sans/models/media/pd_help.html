@@ -57,10 +57,12 @@ the form factor for a polydisperse and/or angular population of particles with
 uniform scattering length density. The resultant form factor is normalized by
 the average particle volume such that P(q) = scale*&lt;F*F&gt;/Vol + bkg, where
 F is the scattering amplitude and the &lt; &gt; denote an average over the size
-distribution.  Users should use PD for a size distribution and Sigma for an
-angular distribution.</span></p>
+distribution.  Users should use PD (polydispersity: this definition is different from the typical definition in polymer science) 
+for a size distribution and Sigma for an
+angular distribution (see below).</span></p>
 <p> Note that this computation is very time intensive thus applying polydispersion/angular distrubtion for 
-more than one paramters or increasing Npts values might need extensive patience to complete the computation.</p>
+more than one paramters or increasing Npts values might need extensive patience to complete the computation. Also
+note that even though it is time consuming, it is safer to have larger values of Npts and Nsigmas.</p>
 
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
 style='font-family:"Times New Roman","serif"'>The following five distribution
@@ -332,7 +334,12 @@ style='font-family:"Times New Roman","serif"'>The PD (polydispersity) is </span>
 style='font-family:"Times New Roman","serif";position:relative;top:6.0pt'><img
 width=80 height=24 src="pd_image012.png"></span><span
 style='font-family:"Times New Roman","serif"'>.</span></p>
-
+<p/>
+<p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
+style='font-family:"Times New Roman","serif"'>Note that the higher PD (polydispersity)
+ might need higher values of Npts and Nsigmas. For example, at PD = 0.7 and  radisus = 60 A, 
+ Npts >= 160, and Nsigmas >= 15 at least.</span></p>
+ <p/>
 <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt'><span
 style='font-family:"Times New Roman","serif"'><img width=438 height=232
 id="Picture 4" src="pd_image013.jpg" alt=schulz.gif></span></p>
