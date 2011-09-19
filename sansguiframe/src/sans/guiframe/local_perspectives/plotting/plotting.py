@@ -25,8 +25,8 @@ DEFAULT_MENU_ITEM_ID = wx.NewId()
 
 IS_WIN = True    
 if sys.platform.count("win32")==0:
-    if wx.__version__.split('.')[0] == 2:
-        if wx.__version__.split('.')[1] < 9:
+    if int(wx.__version__.split('.')[0]) == 2:
+        if int(wx.__version__.split('.')[1]) < 9:
             IS_WIN = False
 
 
