@@ -45,6 +45,7 @@ class ResolutionCalculator(object):
         self.sigma_2 = 0
         # 1D total
         self.sigma_1d = 0
+        self.gravity_phi = None
         # q min and max
         self.qx_min = -0.3
         self.qx_max = 0.3
@@ -138,7 +139,7 @@ class ResolutionCalculator(object):
             # set max qranges
             self.qxrange = [qx_min, qx_max]
             self.qyrange = [qy_min, qy_max]
-            
+            #print qy_max+qy_min,qy_max,qy_min
             sig1_list.append(sigma_1)
             sig2_list.append(sigma_2)
             sigr_list.append(sigma_r)
@@ -282,15 +283,19 @@ class ResolutionCalculator(object):
         sigma_1 += self.get_variance(rtwo, lp_cor, phi, comp1)
         # for detector pix
         sigma_1 += self.get_variance(rthree, l_two, phi, comp1)
-        # for gravity term
-        sigma_1 +=  (self.get_variance_gravity(l_ssa, l_sad, lamb, lamb_spread, 
-                             phi, comp1, 'on') / tof_factor)
+        # for gravity term for 1d
+        sigma_1grav1d =  self.get_variance_gravity(l_ssa, l_sad, lamb, lamb_spread, 
+                             phi, comp1, 'on') / tof_factor
         # for wavelength spread
         # reserve for 1d calculation
-        sigma_wave_1 = (self.get_variance_wave(radius, l_two, lamb_spread, 
-                                          phi, 'radial', 'on') / tof_factor)
+        A_value = self._cal_A_value(lamb, l_ssa, l_sad)
+        sigma_wave_1, sigma_wave_1_1d = self.get_variance_wave(A_value, 
+                                          radius, l_two, lamb_spread, 
+                                          phi, 'radial', 'on')
+        sigma_wave_1 /= tof_factor
+        sigma_wave_1_1d /=  tof_factor
         # for 1d
-        variance_1d_1 = sigma_1/2 + sigma_wave_1 
+        variance_1d_1 = (sigma_1 + sigma_1grav1d) /2 + sigma_wave_1_1d
         # normalize
         variance_1d_1 = knot * knot * variance_1d_1 / 12
         
@@ -309,17 +314,20 @@ class ResolutionCalculator(object):
         # for detector pix
         sigma_2 += self.get_variance(rthree, l_two, phi, comp2)
 
-        # for gravity term
-        sigma_2 +=  (self.get_variance_gravity(l_ssa, l_sad, lamb, lamb_spread, 
-                             phi, comp2, 'on') / tof_factor)
+        # for gravity term for 1d
+        sigma_2grav1d =  self.get_variance_gravity(l_ssa, l_sad, lamb, lamb_spread, 
+                             phi, comp2, 'on') / tof_factor
 
         
         # for wavelength spread
         # reserve for 1d calculation
-        sigma_wave_2 = (self.get_variance_wave(radius, l_two, lamb_spread, 
-                                          phi, 'phi', 'on') / tof_factor)
+        sigma_wave_2, sigma_wave_2_1d = self.get_variance_wave(A_value, 
+                                          radius, l_two, lamb_spread, 
+                                          phi, 'phi', 'on') 
+        sigma_wave_2 /=  tof_factor
+        sigma_wave_2_1d /=  tof_factor
         # for 1d
-        variance_1d_2 = sigma_2 / 2 + sigma_wave_2 
+        variance_1d_2 = (sigma_2 + sigma_2grav1d) / 2 + sigma_wave_2_1d
         # normalize
         variance_1d_2 = knot*knot*variance_1d_2 / 12
         
@@ -513,7 +521,7 @@ class ResolutionCalculator(object):
 
         return sigma
 
-    def get_variance_wave(self, radius, distance, spread, phi, 
+    def get_variance_wave(self, A_value, radius, distance, spread, phi, 
                           comp = 'radial', switch = 'on'):
         """
         Get the variance when the wavelength spread is given
@@ -523,14 +531,30 @@ class ResolutionCalculator(object):
         : spread: wavelength spread (ratio)
         : comp: direction of the sigma; can be 'phi', 'y', 'x', and 'radial'
         
-        : return variance: sigma^2
+        : return variance: sigma^2 for 2d, sigma^2 for 1d [tuple]
         """
         if switch.lower() == 'off':
-            return 0
+            return 0, 0
         # check the singular point
         if distance == 0 or comp == 'phi':
-            return 0
+            return 0, 0
         else:
+            # calculate sigma^2 for 1d
+            sigma1d = 2 * math.pow(radius/distance*spread, 2)
+            if comp == 'x':
+                sigma1d *= (math.cos(phi)*math.cos(phi))
+            elif comp == 'y':
+                sigma1d *= (math.sin(phi)*math.sin(phi))
+            else:
+                sigma1d *= 1  
+            # sigma^2 for 2d  
+            # shift the coordinate due to the gravitational shift
+            rad_x = radius * math.cos(phi)
+            rad_y = A_value - radius * math.sin(phi)
+            radius = math.sqrt(rad_x * rad_x + rad_y * rad_y)
+            # new phi 
+            phi = math.atan2(-rad_y, rad_x)
+            self.gravity_phi = phi 
             # calculate sigma^2
             sigma = 2 * math.pow(radius/distance*spread, 2)
             if comp == 'x':
@@ -540,7 +564,7 @@ class ResolutionCalculator(object):
             else:
                 sigma *= 1          
                 
-            return sigma
+            return sigma, sigma1d
 
     def get_variance_gravity(self, s_distance, d_distance, wavelength, spread, 
                              phi, comp = 'radial', switch = 'on'):
@@ -563,21 +587,7 @@ class ResolutionCalculator(object):
         if d_distance == 0 or comp == 'x':
             return 0
         else:
-            # neutron mass in cgs unit
-            self.mass = self.get_neutron_mass()
-            # plank constant in cgs unit
-            h_constant = _PLANK_H
-            # gravity in cgs unit
-            gravy = _GRAVITY
-            # m/h
-            m_over_h = self.mass /h_constant
-            # A value
-            a_value = d_distance * (s_distance + d_distance)
-            a_value *= math.pow(m_over_h / 2, 2)
-            a_value *= gravy
-            # unit correction (1/cm to 1/A) for A and d_distance below
-            a_value *= 1.0E-16
-            
+            a_value = self._cal_A_value(None, s_distance, d_distance)
             # calculate sigma^2
             sigma = math.pow(a_value / d_distance, 2)
             sigma *= math.pow(wavelength, 4)
@@ -591,7 +601,33 @@ class ResolutionCalculator(object):
             #    sigma *= (math.cos(phi) * math.cos(phi))
             
             return sigma
+    
+    def _cal_A_value(self, lamda, s_distance, d_distance):    
+        """
+        Calculate A value for gravity
         
+        : s_distance: source to sample distance
+        : d_distance: sample to detector distance
+        """
+        # neutron mass in cgs unit
+        self.mass = self.get_neutron_mass()
+        # plank constant in cgs unit
+        h_constant = _PLANK_H
+        # gravity in cgs unit
+        gravy = _GRAVITY
+        # m/h
+        m_over_h = self.mass /h_constant
+        # A value
+        a_value = d_distance * (s_distance + d_distance)
+        a_value *= math.pow(m_over_h / 2, 2)
+        a_value *= gravy
+        # unit correction (1/cm to 1/A) for A and d_distance below
+        a_value *= 1.0E-16
+        # if lamda is give (broad meanning of A)  return 2* lamda^2 * A
+        if lamda != None:
+            a_value *= (4 * lamda * lamda)
+        return a_value
+    
     def get_intensity(self):
         """
         Get intensity
@@ -879,9 +915,13 @@ class ResolutionCalculator(object):
         x_value = x_val - x0_val
         y_value = y_val - y0_val
         phi_i = numpy.arctan2(y_val, x_val)
+        
+        # phi correction due to the gravity shift (in phi)
+        phi_0 = math.atan2(y0_val, x0_val)
+        phi_i = phi_i - phi_0 + self.gravity_phi
 
-        sin_phi = numpy.sin(phi_i)
-        cos_phi = numpy.cos(phi_i)
+        sin_phi = numpy.sin(self.gravity_phi)
+        cos_phi = numpy.cos(self.gravity_phi)
         
         x_p = x_value * cos_phi + y_value * sin_phi
         y_p = -x_value * sin_phi + y_value * cos_phi

@@ -738,7 +738,12 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         qx_max = [] 
         qy_min = [] 
         qy_max = [] 
-        
+        # possible max qrange
+        self.resolution.qxmin_limit = 0
+        self.resolution.qxmax_limit = 0
+        self.resolution.qymin_limit = 0
+        self.resolution.qymax_limit = 0
+        # q min and max of the detector
         try:
             # Get all the values at set to compute
             # default num bin of wave list
@@ -911,7 +916,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
             detector_qx_max = self.resolution.qxmax_limit
             detector_qy_min = self.resolution.qymin_limit
             detector_qy_max = self.resolution.qymax_limit
-        
+
         # Draw zero axis lines
         if qy_min < 0 and qy_max >= 0:
             image.axhline(linewidth = 1)
@@ -923,7 +928,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         x_max = fabs(detector_qx_max - qx_min) / (qx_max - qx_min)
         y_min = fabs(detector_qy_min - qy_min) / (qy_max - qy_min)
         y_max = fabs(detector_qy_max - qy_min) / (qy_max - qy_min)
-        
+
         # Draw Detector outline
         if detector_qy_min >= qy_min:
             image.axhline(y = detector_qy_min + 0.0002,
