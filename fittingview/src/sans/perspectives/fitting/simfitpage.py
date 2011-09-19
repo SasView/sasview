@@ -4,6 +4,7 @@ import wx.lib.newevent
 from sans.guiframe.events import StatusEvent 
 from sans.guiframe.panel_base import PanelBase
 from wx.lib.scrolledpanel import ScrolledPanel
+from sans.guiframe.events import PanelOnFocusEvent
 #Control panel width 
 if sys.platform.count("darwin")==0:
     PANEL_WID = 420
@@ -632,6 +633,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         The  derivative class is on focus if implemented
         """
         if self.parent is not None:
-            wx.PostEvent(self.parent, PanelOnFocusEvent(panel=self))
-        self.page_finder = self.parent.get_page_finder()
+            if self.parent.parent is not None:
+                wx.PostEvent(self.parent.parent, PanelOnFocusEvent(panel=self))
+            self.page_finder = self.parent._manager.get_page_finder()
         
