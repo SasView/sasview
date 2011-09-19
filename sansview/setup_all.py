@@ -193,7 +193,10 @@ def install(release=False):
     # try to make the sansview dir writable to everyone
     os.chdir(wd) 
     try:
-        os.system("chmod 777 -R %s"% setup_dir)
+        if sys.platform == 'darwin':
+            os.system("chmod -R g+w %s"% setup_dir) 
+        else:
+            os.system("chmod 777 -R %s"% setup_dir)
     except:
         print "Could not give a permission to everyone for %s." % setup_dir
 

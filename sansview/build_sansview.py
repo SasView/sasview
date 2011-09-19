@@ -131,7 +131,7 @@ def install_pkg(install_dir, setup_dir, url):
         @param setup_dir: relative location of the setup.py script
         @param url: URL of the SVN repo
     """
-    print "PYTHON, LIB_FOLDER=====",PYTHON, LIB_FOLDER
+    #print "PYTHON, LIB_FOLDER=====",PYTHON, LIB_FOLDER
     logging.info("Installing %s" % url)
     try:
         if not os.path.isdir(install_dir):
@@ -265,7 +265,10 @@ def checkout(release=False):
             sansview_folder = "sansview"  
         # try to make the sansview dir writable 
         try:
-            os.system("chmod 777 -R %s"% sansview_foler)
+            if sys.platform == 'darwin':
+                os.system("chmod -R g+w %s"% sansview_foler) 
+            else:
+                os.system("chmod 777 -R %s"% sansview_foler)
         except:
             pass
         os.chdir(sansview_folder)

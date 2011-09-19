@@ -316,7 +316,10 @@ def checkout(release=False):
             sansview_folder = "sansview"  
         # try to make the sansview dir writable 
         try:
-            os.system("chmod -R g+w %s"% sansview_foler)
+            if sys.platform == 'darwin':
+                os.system("chmod -R g+w %s"% sansview_foler) 
+            else:
+                os.system("chmod 777 -R %s"% sansview_foler)
         except:
             pass
         os.chdir(sansview_folder)
