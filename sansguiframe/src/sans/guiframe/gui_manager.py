@@ -158,9 +158,12 @@ except:
     PLUGINS_WLIST = ''
 APPLICATION_WLIST = config.APPLICATION_WLIST
 IS_WIN = True
+CLOSE_SHOW = True
 if sys.platform.count("win32")==0:
     IS_WIN = False
-
+    if int(wx.__version__.split('.')[0]) == 2:
+        if int(wx.__version__.split('.')[1]) < 9:
+            CLOSE_SHOW = False
     
 class ViewerFrame(wx.Frame):
     """
@@ -835,7 +838,7 @@ class ViewerFrame(wx.Frame):
                               Caption(self._data_panel.window_caption).
                               Left().
                               MinimizeButton().
-                              CloseButton(True).
+                              CloseButton(CLOSE_SHOW).
                               TopDockable(False).
                               BottomDockable(False).
                               LeftDockable(True).
