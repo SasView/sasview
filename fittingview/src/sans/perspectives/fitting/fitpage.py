@@ -2652,7 +2652,13 @@ class FitPage(BasicPage):
             ## post state to fit panel
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event) 
-     
+        param2fit = []
+        for item in self.param_toFit:
+            if item[0]:
+                param2fit.append(item[1])     
+        self.parent._manager.set_param2fit(self.uid, param2fit)
+
+        
     def select_param(self,event):
         """ 
         Select TextCtrl  checked for fitting purpose and stores them
@@ -2711,7 +2717,13 @@ class FitPage(BasicPage):
             ## post state to fit panel
             event = PageInfoEvent(page = self)
             wx.PostEvent(self.parent, event) 
-    
+        
+        param2fit = []
+        for item in self.param_toFit:
+            if item[0]:
+                param2fit.append(item[1])     
+        self.parent._manager.set_param2fit(self.uid, param2fit)
+        
     def set_model_param_sizer(self, model):
         """
         Build the panel from the model content

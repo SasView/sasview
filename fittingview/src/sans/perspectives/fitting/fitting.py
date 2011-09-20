@@ -428,7 +428,13 @@ class Plugin(PluginBase):
             self.state_index==0
             self.temp_state = []
             raise
-                 
+        
+    def set_param2fit(self, uid, param2fit):
+        """
+        Set the list of param names to fit for fitprobelm
+        """
+        self.page_finder[uid].set_param2fit(param2fit)
+                  
     def save_fit_state(self, filepath, fitstate):  
         """
         save fit page state into file

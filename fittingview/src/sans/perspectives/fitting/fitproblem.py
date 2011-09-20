@@ -67,6 +67,15 @@ class FitProblemComponent(object):
         :param name: name of the given parameter
         :param value: value of that parameter
         """
+    def set_param2fit(self, list):
+        """
+        Store param names to fit (checked)
+        :param list: list of the param names
+        """
+    def get_param2fit(self):
+        """
+        return the list param names to fit
+        """
     def get_model_param(self):
         """ 
         return list of couple of parameter name and value
@@ -294,7 +303,20 @@ class FitProblemDictionary(FitProblemComponent, dict):
         """
         if fid in self.iterkeys():
             return self[fid].get_model_param()
-      
+    
+    def set_param2fit(self, list):
+        """
+        Store param names to fit (checked)
+        :param list: list of the param names
+        """
+        self.list_param2fit = list
+        
+    def get_param2fit(self):
+        """
+        return the list param names to fit
+        """  
+        return self.list_param2fit
+          
     def schedule_tofit(self, schedule=0):
         """
         set schedule to true to decide if this fit  must be performed
@@ -522,7 +544,20 @@ class FitProblem(FitProblemComponent):
         returns weight array
         """
         return self.weight
+    
+    def set_param2fit(self, list):
+        """
+        Store param names to fit (checked)
+        :param list: list of the param names
+        """
+        self.list_param2fit = list
         
+    def get_param2fit(self):
+        """
+        return the list param names to fit
+        """  
+        return self.list_param2fit
+    
     def set_model_param(self,name,value=None):
         """ 
         Store the name and value of a parameter of this fitproblem's model
