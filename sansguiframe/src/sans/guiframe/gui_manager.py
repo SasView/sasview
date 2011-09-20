@@ -1577,7 +1577,7 @@ class ViewerFrame(wx.Frame):
                 any_hidden = True
                 self.show_panel(id)
         if not any_hidden:
-            msg = "No graph panels to show."
+            msg = "No hidden graph panel exists."
         else:
             # Make sure the Checkmenuitem checked: Need this for-loop \
             # because the check menu is not responding on floating panel 
@@ -1605,7 +1605,7 @@ class ViewerFrame(wx.Frame):
             else:
                 continue
         if not any_shown:
-            msg = "No graph panels to hide."
+            msg = "No shown graph panel exists."
         else:
             # Make sure the Checkmenuitem unchecked: Need this for-loop 
             # because the check menu is not responding on floating panel 
