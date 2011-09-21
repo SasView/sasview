@@ -2874,7 +2874,8 @@ class FitPage(BasicPage):
                         fun_box = self.ModelTextCtrl(self, -1, 
                                                      size=(_BOX_WIDTH,20),
                                 style=wx.TE_PROCESS_ENTER, name ='%s'% item)
-                        fun_box.SetToolTipString("Hit 'Enter' after typing.")
+                        fun_box.SetToolTipString(\
+                                "Hit 'Enter' after typing to update the plot.")
                         fun_box.SetValue(format_number(value, True))
                     sizer.Add(fun_box, (iy,ix),(1,1), wx.EXPAND)
                     self.str_parameters.append([None,item, fun_box,
@@ -2897,7 +2898,8 @@ class FitPage(BasicPage):
                     value= self.model.getParam(item)
                     ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                         style=wx.TE_PROCESS_ENTER)
-                    ctl1.SetToolTipString("Hit 'Enter' after typing.")
+                    ctl1.SetToolTipString(\
+                                "Hit 'Enter' after typing to update the plot.")
                     ctl1.SetValue(format_number(value, True))
                     sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
                     ## text to show error sign
@@ -2996,7 +2998,8 @@ class FitPage(BasicPage):
                     value= self.model.getParam(item)
                     ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
                                         style=wx.TE_PROCESS_ENTER)
-                    ctl1.SetToolTipString("Hit 'Enter' after typing.")
+                    ctl1.SetToolTipString(\
+                                "Hit 'Enter' after typing to update the plot.")
                     ctl1.SetValue(format_number(value, True))
                     if self.data.__class__.__name__ == "Data2D" or \
                             self.enable2D:
