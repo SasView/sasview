@@ -93,7 +93,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
     def set_scroll(self):
         """
         """
-        self.SetScrollbars(20,20,25,65)
+        #self.SetScrollbars(20,20,25,65)
         self.Layout()  
          
     def set_layout(self):
@@ -270,7 +270,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
        
         self.sizer1.Add(boxsizer1,1, wx.EXPAND | wx.ALL, 10)
         self.sizer1.Layout()
-        self.SetScrollbars(20,20,25,65)
+        #self.SetScrollbars(20,20,25,65)
         self.AdjustScrollbars()
         
     def _store_model(self):
@@ -297,9 +297,11 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         if self.show_constraint.GetValue():
             self._show_all_constraint() 
             self._show_constraint()
+            self.Layout()
             return
         else:
            self._hide_constraint()
+           self.Layout()
            return 
        
     def _show_all_constraint(self):
@@ -352,7 +354,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
 
         self.sizer_all_constraints.Layout()
         self.sizer2.Layout()
-        self.SetScrollbars(20,20,25,65)
+        #self.SetScrollbars(20,20,25,65)
     
     def _on_select_modelcb(self, event):
         """
@@ -412,7 +414,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         
         self.sizer_constraints.Layout()
         self.sizer2.Layout()
-
+        self.SetScrollbars(20,20,25,65)
+        self.Layout()
         if not has_param:
             msg= " There is no adjustable parameter (checked to fit)"
             msg += " either one of the models."
@@ -509,8 +512,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.sizer_constraints.Clear(True) 
         self.sizer_constraints.Layout()    
         self.sizer2.Layout()
-        self.SetScrollbars(20,20,25,65)
-        self.AdjustScrollbars()    
+        #self.SetScrollbars(20,20,25,65)
+        #self.AdjustScrollbars()    
             
     def _on_select_model(self, event):
         """
@@ -535,7 +538,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             
         param_cbox.Show(True)
         self.sizer2.Layout()
-        self.SetScrollbars(20,20,25,65)
+        #self.SetScrollbars(20,20,25,65)
         
     def _on_select_param(self, event):
         """
@@ -555,7 +558,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         ctl2 = self.constraints_list[length-1][3]
         ctl2.Show(True)
         #self.sizer2.Layout()
-        self.SetScrollbars(20,20,25,65)
+        #self.SetScrollbars(20,20,25,65)
         
     def _onAdd_constraint(self, event):  
         """
@@ -611,7 +614,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         boxsizer1.Add(sizer_button, flag= wx.TOP|wx.BOTTOM,border=10)
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer3.Layout()
-        self.SetScrollbars(20,20,25,65)
+        #self.SetScrollbars(20,20,25,65)
         
     def _fill_sizer_constraint(self):
         """
@@ -666,7 +669,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         
         self.sizer2.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer2.Layout()
-        self.SetScrollbars(20,20,25,65)
+        #self.SetScrollbars(20,20,25,65)
     
     def _set_constraint(self):
         """
