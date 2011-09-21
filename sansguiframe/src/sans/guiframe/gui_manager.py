@@ -1645,11 +1645,13 @@ class ViewerFrame(wx.Frame):
         if ID in self.panels.keys():
             self.panel_on_focus = None
             panel = self.panels[ID]
-            self._plotting_plugin.delete_panel(panel.group_id)
             self._mgr.DetachPane(panel)
+            self._plotting_plugin.delete_panel(panel.group_id)
             panel.Hide()
             panel.clear()
             panel.Close()
+            if panel in self.schedule_full_draw_list:
+               self.schedule_full_draw_list.remove(panel) 
             #CallAfter: make sure panel is clear before updating mgr
             wx.CallAfter(self._mgr.Update)
             #delete uid number not str(uid)

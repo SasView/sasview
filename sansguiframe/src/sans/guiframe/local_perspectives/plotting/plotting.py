@@ -174,7 +174,7 @@ class Plugin(PluginBase):
         wx.EVT_MENU(self.parent, event_id, self._on_check_menu)
 
         wx.EVT_SHOW(new_panel, self._on_close_panel)
-         
+
         
     def create_1d_panel(self, data, group_id):
         """
@@ -257,8 +257,9 @@ class Plugin(PluginBase):
             #remove menu item
             self.delete_menu_item(panel.window_caption, panel.uid)
             del self.plot_panels[group_id]
-            self.parent.delete_panel(uid)
+            #self.parent.delete_panel(uid)
             return True
+
         return False
     
     def _on_plot_event(self, event):
@@ -279,7 +280,9 @@ class Plugin(PluginBase):
             if event.action.lower() == 'hide':
                 return self.hide_panel(group_id)
             if event.action.lower() == 'delete':
-                return self.delete_panel(group_id)
+                panel = self.plot_panels[group_id]
+                uid = panel.uid
+                return self.parent.delete_panel(uid)
             if event.action.lower() == "clear":
                 return self.clear_panel_by_id(group_id)
             
