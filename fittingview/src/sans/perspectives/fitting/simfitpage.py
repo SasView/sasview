@@ -49,6 +49,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         """
         Simultaneous page display
         """
+        self.SetupScrolling()
         ##Font size
         self.SetWindowVariant(variant = FONT_VARIANT)
         self.uid = wx.NewId()
@@ -137,7 +138,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         ## making sure all parameters content a constraint
         ## validity of the constraint expression is own by fit engine
         if self.show_constraint.GetValue():
-            self._set_constraint()
+            if not self._set_constraint():
+                return
         ## model was actually selected from this page to be fit
         if len(self.model_toFit) >= 1 :
             self.manager._reset_schedule_problem(value=0)
@@ -404,7 +406,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 self.param_cbox.SetStringSelection( str(param))
                 self.ctl2.SetValue(str(model_right + "." + str(param)))
                 has_param = True
-                if num_cbox == len(param_list):
+                if num_cbox == (len(param_list) + 1):
                     break
                 self._show_constraint()
         
@@ -428,7 +430,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         if len(self.constraints_list)!= 0:
             nb_fit_param = 0
             for id, model in self.constraint_dict.iteritems():
-                nb_fit_param += len(self.page_finder[id].get_param2fit())#len(get_fittableParam(model))
+                nb_fit_param += len(self.page_finder[id].get_param2fit())
             ##Don't add anymore
             if len(self.constraints_list) == nb_fit_param:
                 msg= "Cannot add another constraint .Maximum of number "
@@ -436,14 +438,14 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
                 self.sizer_constraints.Layout()
                 self.sizer2.Layout()
-                self.SetScrollbars(20,20,25,65)
+                #self.SetScrollbars(20,20,25,65)
                 return
         if len(self.model_toFit) < 2 :
             msg= "Select at least 2 model to add constraint "
             wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
             self.sizer_constraints.Layout()
             self.sizer2.Layout()
-            self.SetScrollbars(20,20,25,65)
+            #self.SetScrollbars(20,20,25,65)
             return
             
         sizer_constraint =  wx.BoxSizer(wx.HORIZONTAL)
@@ -487,7 +489,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.nb_constraint += 1
         self.sizer_constraints.Layout()
         self.sizer2.Layout()
-        self.SetScrollbars(20,20,25,65)
+        #self.SetScrollbars(20,20,25,65)
         
     def _hide_constraint(self): 
         """
@@ -691,10 +693,27 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                         wx.PostEvent(self.parent.parent, 
                                      StatusEvent(status= msg ))
                         constraint = None
+                    if str(param) in self.page_finder[id].get_param2fit():
+                        msg = " Checking constraint for parameter: %s ", param
+                        wx.PostEvent(self.parent.parent, 
+                                    StatusEvent(info="info", status= msg ))
+                    else:
+                        model_name = item[0].GetLabel()
+                        fitpage = self.page_finder[id].get_fit_tab_caption()
+                        msg = "All constrainted parameters must be set "
+                        msg += " adjustable: '%s.%s' "% (model_name, param)
+                        msg += "is NOT checked in '%s'. "% fitpage
+                        msg += " Please check it to fit or"
+                        msg += " remove the line of the constraint."
+                        wx.PostEvent(self.parent.parent, 
+                                StatusEvent(info="error", status= msg ))
+                        return False
+                        
                     for fid in self.page_finder[id].iterkeys():
                         self.page_finder[id].set_model_param(param,
                                                         constraint, fid=fid)
                     break
+        return True
     
     def _fill_sizer_model_list(self,sizer):
         """
