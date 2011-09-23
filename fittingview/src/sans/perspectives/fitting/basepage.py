@@ -2739,7 +2739,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         # call gui_manager
         gui_manager = self.parent.parent
         # loops through the panels [dic]
-        for item1, item2 in gui_manager.panels.iteritems():
+        for item1, item2 in gui_manager.plot_panels.iteritems():
              data_title = self.data.group_id
              data_name = str(self.data.name).split(" [")[0]
             # try to get all plots belonging to this control panel

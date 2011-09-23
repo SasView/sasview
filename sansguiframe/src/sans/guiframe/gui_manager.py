@@ -972,10 +972,10 @@ class ViewerFrame(wx.Frame):
         # Append nummber
         captions = self._get_plotpanel_captions()
         while (1):
-            self.graph_num += 1
             caption = windowcaption + '%s'% str(self.graph_num)
             if caption not in captions:
                 break
+            self.graph_num += 1
 
         p.window_caption = caption
             
@@ -1669,8 +1669,10 @@ class ViewerFrame(wx.Frame):
             #CallAfter: make sure panel is clear before updating mgr
             wx.CallAfter(self._mgr.Update)
             #delete uid number not str(uid)
-            if uid in self.plot_panels.keys():
-                del self.plot_panels[uid]
+            if ID in self.plot_panels.keys():
+                del self.plot_panels[ID]
+            if ID in self.panels.keys():
+                del self.panels[ID]
             return 
       
     def clear_panel(self):
