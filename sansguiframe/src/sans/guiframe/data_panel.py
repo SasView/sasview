@@ -329,8 +329,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.Bind(wx.EVT_RADIOBUTTON, self.on_batch_mode,
                    id=self.rb_batch_mode.GetId())
         
-        self.rb_single_mode.SetValue(True)
-        self.rb_batch_mode.SetValue(False)
+        self.rb_single_mode.SetValue(not self.parent.batch_on)
+        self.rb_batch_mode.SetValue(self.parent.batch_on)
         self.sizer4.AddMany([(self.rb_single_mode,0, wx.ALL,5),
                             (self.rb_batch_mode,0, wx.ALL,5),
                             (20,80)])

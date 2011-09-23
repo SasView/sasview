@@ -74,7 +74,7 @@ class GridPage(sheet.CSheet):
         self.col_names = []
         self.data_inputs = {}
         self.data_outputs = {}
-        self.data = {}
+        self.data = None
         self._cols = 50
         self._rows = 51
         col_with = 30
@@ -309,8 +309,22 @@ class Notebook(nb, PanelBase):
         self.parent = parent
         self.manager = manager
         self.data = data
+        #add empty page
+        self.add_empty_page()
+        
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_page)
     
+    def add_empty_page(self):
+        """
+        """
+        grid = GridPage(self, panel=self.parent)
+        self.AddPage(grid, "", True)
+        pos = self.GetPageIndex(grid)
+        title = "Batch " + str(self.GetPageCount())
+        self.SetPageText(pos, title)
+        self.SetSelection(pos)
+        return grid
+        
     def enable_close_button(self):
         """
         display the close button on tab for more than 1 tabs else remove the 
@@ -433,12 +447,14 @@ class Notebook(nb, PanelBase):
     def set_data(self, data_inputs, data_outputs):
         if data_outputs is None or data_outputs == {}:
             return
-        grid = GridPage(self, panel=self.parent)
+        grid = self.add_empty_page()
+        #grid = GridPage(self, panel=self.parent)
         grid.set_data(data_inputs, data_outputs)  
-        self.AddPage(grid, "")
-        pos = self.GetPageIndex(grid)
-        title = "Batch " + str(self.GetPageCount())
-        self.SetPageText(pos, title)
+        #self.AddPage(grid, "", True)
+        #pos = self.GetPageIndex(grid)
+        #title = "Batch " + str(self.GetPageCount())
+        #self.SetPageText(pos, title)
+        #self.SetSelection(pos)
         
     def add_column(self):
         """

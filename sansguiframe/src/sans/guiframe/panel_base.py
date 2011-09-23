@@ -52,6 +52,9 @@ class PanelBase:
         self._reset_flag = False
         self._has_changed = False
         self.batch_on = False
+        if self.parent is not None and hasattr(self.parent, "batch_on"):
+            self.batch_on = self.parent.batch_on
+       
         self.group_id = None
         self.Bind(EVT_NEW_BATCH, self.on_batch_selection)
         self.Bind(wx.EVT_LEFT_DOWN, self.on_set_focus)

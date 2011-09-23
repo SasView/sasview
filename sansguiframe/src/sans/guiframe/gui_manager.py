@@ -261,6 +261,7 @@ class ViewerFrame(wx.Frame):
         self.cpanel_on_focus = None
         self.loader = Loader()   
         #data manager
+        self.batch_on = True
         from data_manager import DataManager
         self._data_manager = DataManager()
         self._data_panel = DataPanel(parent=self)
@@ -275,6 +276,7 @@ class ViewerFrame(wx.Frame):
         
         self.batch_frame = GridFrame(parent=self)
         self.batch_frame.Hide()
+        self.on_batch_selection(event=None)
         # Check for update
         #self._check_update(None)
         # Register the close event so it calls our own method
@@ -304,13 +306,17 @@ class ViewerFrame(wx.Frame):
         file_name = "Batch_" + str(plugin_name)+ "_" + time_str + ext
         file_name = self._default_save_location + str(file_name)
         #Need to save configuration for later 
+        """
         frame = BatchOutputFrame(parent=self, data_outputs=data_outputs, 
                                  data_inputs=data_inputs,
                                 file_name=file_name,
                                 details=details)
-        frame.Show(True)
+        """
+        self.open_with_localapp(data_inputs=data_inputs,
+                                    data_outputs=data_outputs)
+        #frame.Show(True)
     
-    def open_with_localapp(self, data_inputs, data_outputs):
+    def open_with_localapp(self, data_inputs=None, data_outputs=None):
         """
         Display value of data into the application grid
         :param data: dictionary of string and list of items
@@ -373,7 +379,7 @@ class ViewerFrame(wx.Frame):
                 data[c_name] = [ lines[row].split(separator)[c_index]
                                 for row in range(index + 1, len(lines)-1)]
                 c_index += 1
-        self.open_with_localapp(data=data)
+        self.open_with_localapp(data_outputs=data)
         
     def write_batch_tofile(self, data, file_name, details=""):
         """
@@ -431,13 +437,14 @@ class ViewerFrame(wx.Frame):
                                              info="error"))
             
          
-    def on_batch_selection(self, event):
+    def on_batch_selection(self, event=None):
         """
         :param event: contains parameter enable . when enable is set to True
         the application is in Batch mode
         else the application is default mode(single mode)
         """
-        self.batch_on = event.enable
+        if event is not None:
+            self.batch_on = event.enable
         for plug in self.plugins:
             plug.set_batch_selection(self.batch_on)
             
@@ -670,14 +677,13 @@ class ViewerFrame(wx.Frame):
         self._num_perspectives += 1
         is_loaded = False
         for item in self.plugins:
+            item.set_batch_selection(self.batch_on)
             if plugin.__class__ == item.__class__:
                 msg = "Plugin %s already loaded" % plugin.sub_menu
                 logging.info(msg)
                 is_loaded = True  
         if not is_loaded:
-            
-            self.plugins.append(plugin)
-             
+            self.plugins.append(plugin)  
       
     def _get_local_plugins(self):
         """
@@ -1191,6 +1197,13 @@ class ViewerFrame(wx.Frame):
             self._data_panel_menu.SetText('Hide Data Explorer')
         else:
             self._data_panel_menu.SetText('Show Data Explorer')
+            
+        self._view_menu.AppendSeparator()
+        id = wx.NewId()
+        hint = "Display batch results into a grid"
+        self._view_menu.Append(id, '&Show Batch Results', hint) 
+        wx.EVT_MENU(self, id, self.show_batch_frame)
+  
         self._view_menu.AppendSeparator()
         id = wx.NewId()
         style1 = self.__gui_style & GUIFRAME.TOOLBAR_ON
@@ -1208,6 +1221,12 @@ class ViewerFrame(wx.Frame):
             
         self._menubar.Append(self._view_menu, '&View')   
          
+    def show_batch_frame(self, event=None):
+        """
+        show the grid of result
+        """
+        self.batch_frame.Show(True)
+        
     def _on_preference_menu(self, event):     
         """
         Build a panel to allow to edit Mask
@@ -1396,12 +1415,7 @@ class ViewerFrame(wx.Frame):
                         'Save state of the current active analysis panel')
             wx.EVT_MENU(self, id, self._on_save_application)
             self._file_menu.AppendSeparator()
-        self._file_menu.AppendSeparator()
-        id = wx.NewId()
-        hint = "Display content of the file into a grid"
-        self._file_menu.Append(id, '&Open Batch Result', hint) 
-        wx.EVT_MENU(self, id, self.on_read_batch_tofile)
-        self._file_menu.AppendSeparator()
+       
         id = wx.NewId()
         self._file_menu.Append(id, '&Quit', 'Exit') 
         wx.EVT_MENU(self, id, self.Close)
