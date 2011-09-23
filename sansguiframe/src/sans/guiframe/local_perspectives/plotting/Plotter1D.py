@@ -530,10 +530,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
         selected_plot = self.plots[self.graph.selected_plottable]
         selected_plot.custom_color = self._color_labels[label]
         ## Set the view scale for all plots
-        self._onEVT_FUNC_PROPERTY()
-        wx.PostEvent(self.parent,
-                      NewColorEvent(color=selected_plot.custom_color,
-                                             id=selected_plot.id))
+        self._check_zoom_plot()
+        #self._onEVT_FUNC_PROPERTY()
+        #wx.PostEvent(self.parent,
+        #              NewColorEvent(color=selected_plot.custom_color,
+        #                                     id=selected_plot.id))
     
     def onChangeSize(self, event):
         
@@ -549,7 +550,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
             sizedial.Destroy()
 
         selected_plot.marker_size = int(label)
-        self._onEVT_FUNC_PROPERTY()
+        self._check_zoom_plot()
+        #self._onEVT_FUNC_PROPERTY()
         ## Set the view scale for all plots
         
         ## render the graph
@@ -566,7 +568,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         selected_plot = self.plots[self.graph.selected_plottable]
         selected_plot.symbol = self._symbol_labels[label]
         ## Set the view scale for all plots
-        self._onEVT_FUNC_PROPERTY()
+        self._check_zoom_plot()
+        #self._onEVT_FUNC_PROPERTY()
         ## render the graph
         #self.graph.render(self)
         #self.subplot.figure.canvas.draw_idle()
