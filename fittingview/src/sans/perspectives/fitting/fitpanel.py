@@ -199,6 +199,7 @@ class FitPanel(nb, PanelBase):
         ## list of existing fit page
         self.opened_pages = {}  
          
+        
     def set_state(self, state):
         """
         Restore state of the panel
@@ -438,6 +439,7 @@ class FitPanel(nb, PanelBase):
         pos = self.GetPageIndex(page)
         caption = "BatchPage" + str(self.batch_page_index)
         self.SetPageText(pos, caption)
+        page.batch_on = self.batch_on
         page.window_caption = caption
         page.window_name = caption
         self.opened_pages[page.uid] = page
@@ -477,7 +479,10 @@ class FitPanel(nb, PanelBase):
                 enable2D = page.get_view_mode()
                 if (data.__class__.__name__ == "Data2D" and enable2D)\
                 or (data.__class__.__name__ == "Data1D" and not enable2D):
+                    page.batch_on = self.batch_on
                     page.fill_data_combobox(data_list)
+                    caption = "FitPage" + str(self.fit_page_index)
+                    self.SetPageText(pos, caption)
                     self.SetSelection(pos)
                     return page
         #create new page and add data
