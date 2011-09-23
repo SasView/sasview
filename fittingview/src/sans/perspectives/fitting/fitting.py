@@ -1346,8 +1346,8 @@ class Plugin(PluginBase):
             if new_plot.group_id == None:
                 new_plot.group_id = data.group_id
             new_plot.id =  str(page_id) + "model"
-            if new_plot.id in self.color_dict:
-                new_plot.custom_color = self.color_dict[new_plot.id] 
+            #if new_plot.id in self.color_dict:
+            #    new_plot.custom_color = self.color_dict[new_plot.id] 
             #find if this theory was already plotted and replace that plot given
             #the same id
             theory_data = self.page_finder[page_id].get_theory_data(fid=data.id)
