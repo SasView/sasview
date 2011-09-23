@@ -261,7 +261,7 @@ class ViewerFrame(wx.Frame):
         self.cpanel_on_focus = None
         self.loader = Loader()   
         #data manager
-        self.batch_on = True
+        self.batch_on = False
         from data_manager import DataManager
         self._data_manager = DataManager()
         self._data_panel = DataPanel(parent=self)
