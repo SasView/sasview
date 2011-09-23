@@ -61,6 +61,13 @@ def parse_string(sentence, list):
                 col_dict[elt] = (label, temp_arr)
     return col_dict
 
+          
+          
+class SPanel(ScrolledPanel):
+    def __init__(self, parent, *args, **kwds):
+        ScrolledPanel.__init__(self, parent , *args, **kwds)
+        self.SetupScrolling()  
+        
 class GridPage(sheet.CSheet):
     """
     """
@@ -68,8 +75,10 @@ class GridPage(sheet.CSheet):
         """
         """
         sheet.CSheet.__init__(self, parent)
-        self.SetLabelBackgroundColour('#DBD4D4')
-        self.AutoSize()
+        
+        self.AdjustScrollbars()
+        #self.SetLabelBackgroundColour('#DBD4D4')
+        self.parent = parent
         self.panel = panel
         self.col_names = []
         self.data_inputs = {}
@@ -88,6 +97,7 @@ class GridPage(sheet.CSheet):
         self.SetRowMinimalAcceptableHeight(row_height)
         self.SetNumberRows(self._cols)
         self.SetNumberCols(self._rows)
+        self.AutoSize()
         self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.on_left_click)
         self.Bind(wx.grid.EVT_GRID_LABEL_RIGHT_CLICK, self.on_right_click)
         self.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.on_selected_cell)
@@ -285,8 +295,7 @@ class GridPage(sheet.CSheet):
                 cell_col += 1
                 if cell_row > self.max_row_touse:
                     self.max_row_touse = cell_row
-            self.AutoSize()
-           
+       
 
 class Notebook(nb, PanelBase):
     """
@@ -300,8 +309,8 @@ class Notebook(nb, PanelBase):
         """
         """
         nb.__init__(self, parent, -1,
-                    style= wx.aui.AUI_BUTTON_DOWN|
-                    wx.aui.AUI_NB_WINDOWLIST_BUTTON|
+                    style=wx.aui.AUI_NB_WINDOWLIST_BUTTON| 
+                    wx.aui.AUI_BUTTON_DOWN|
                     wx.aui.AUI_NB_DEFAULT_STYLE|
                     wx.CLIP_CHILDREN)
         PanelBase.__init__(self, parent)
@@ -323,7 +332,7 @@ class Notebook(nb, PanelBase):
         title = "Batch " + str(self.GetPageCount())
         self.SetPageText(pos, title)
         self.SetSelection(pos)
-        return grid
+        return grid , pos
         
     def enable_close_button(self):
         """
@@ -447,15 +456,18 @@ class Notebook(nb, PanelBase):
     def set_data(self, data_inputs, data_outputs):
         if data_outputs is None or data_outputs == {}:
             return
-        grid = self.add_empty_page()
-        #grid = GridPage(self, panel=self.parent)
-        grid.set_data(data_inputs, data_outputs)  
-        #self.AddPage(grid, "", True)
-        #pos = self.GetPageIndex(grid)
-        #title = "Batch " + str(self.GetPageCount())
-        #self.SetPageText(pos, title)
-        #self.SetSelection(pos)
         
+        for pos in range(self.GetPageCount()):
+            grid = self.GetPage(pos)
+            if grid.data is None:
+                #Found empty page
+                grid.set_data(data_inputs, data_outputs) 
+                self.SetSelection(pos) 
+                return
+                
+        grid, pos = self.add_empty_page()
+        grid.set_data(data_inputs, data_outputs)
+    
     def add_column(self):
         """
         Append a new column to the grid
@@ -473,18 +485,14 @@ class Notebook(nb, PanelBase):
         cols_pos = grid.GetSelectedCols() 
         for cpos in cols_pos:
             grid.DeleteCols(cpos)
-          
-          
-class SPanel(ScrolledPanel):
-    def __init__(self, parent, *args, **kwds):
-        ScrolledPanel.__init__(self, parent , *args, **kwds)
-        self.SetupScrolling()  
+
 
 
 class GridPanel(SPanel):
     def __init__(self, parent, data_inputs=None,
                  data_outputs=None, *args, **kwds):
         SPanel.__init__(self, parent , *args, **kwds)
+       
         self.vbox = wx.BoxSizer(wx.VERTICAL)
         
         self.plotting_sizer = wx.FlexGridSizer(3, 7, 10, 5)
