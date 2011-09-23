@@ -535,10 +535,13 @@ class FitPanel(nb, PanelBase):
         if selected_page == self.sim_page :
             self._manager.sim_page=None 
             return
+        """
+        # The below is not working when delete #5 and still have #6.
         if selected_page.__class__.__name__ == "FitPage":
             self.fit_page_index -= 1
         else:
             self.batch_page_index -= 1
+        """
         ## closing other pages
         state = selected_page.createMemento()
         page_name = selected_page.window_name
@@ -574,4 +577,3 @@ class FitPanel(nb, PanelBase):
                 del self.opened_pages[selected_page.uid]
                 break 
       
-  

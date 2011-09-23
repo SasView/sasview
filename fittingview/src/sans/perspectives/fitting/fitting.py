@@ -320,7 +320,12 @@ class Plugin(PluginBase):
             else:
                 selected_data_list = data_list
             try:
+                group_id = wx.NewId()
                 for data in selected_data_list:
+                    if data is not None:
+                        data.group_id = group_id
+                    if group_id not in data.list_group_id:
+                        data.list_group_id.append(group_id)
                     page = self.add_fit_page(data=[data])
             except:
                 msg = "Fitting Set_data: " + str(sys.exc_value)
@@ -333,7 +338,7 @@ class Plugin(PluginBase):
         if 'default' in self.parent.panels:
             self.parent.on_close_welcome_panel()
 
-             
+        
     def set_theory(self,  theory_list=None):
         """
         """
@@ -434,7 +439,19 @@ class Plugin(PluginBase):
         Set the list of param names to fit for fitprobelm
         """
         self.page_finder[uid].set_param2fit(param2fit)
-                  
+        
+    def set_graph_id(self, uid, graph_id):
+        """
+        Set graph_id for fitprobelm
+        """
+        self.page_finder[uid].set_graph_id(graph_id)
+        
+    def get_graph_id(self, uid):
+        """
+        Set graph_id for fitprobelm
+        """
+        return self.page_finder[uid].get_graph_id()    
+                          
     def save_fit_state(self, filepath, fitstate):  
         """
         save fit page state into file
@@ -977,6 +994,12 @@ class Plugin(PluginBase):
         """
         self.panel = event.GetEventObject()
         Plugin.on_perspective(self, event=event)
+        self.select_data(self.panel)
+        
+    def select_data(self, panel):
+        """
+        """
+        self.panel = panel
         for plottable in self.panel.graph.plottables:
             if plottable.__class__.__name__ in ["Data1D", "Theory1D"]:
                 data_id = self.panel.graph.selected_plottable
@@ -1318,7 +1341,10 @@ class Plugin(PluginBase):
             _yaxis, _yunit = data.get_yaxis() 
             _xaxis, _xunit = data.get_xaxis() 
             new_plot.title = data.name
-            new_plot.group_id = data.group_id
+
+            new_plot.group_id = self.page_finder[page_id].get_graph_id()
+            if new_plot.group_id == None:
+                new_plot.group_id = data.group_id
             new_plot.id =  str(page_id) + "model"
             if new_plot.id in self.color_dict:
                 new_plot.custom_color = self.color_dict[new_plot.id] 
@@ -1630,7 +1656,10 @@ class Plugin(PluginBase):
         ## when 2 data have the same id override the 1 st plotted
         new_plot.id = "res" + str(data_copy.id)#name + " residuals"
         ##group_id specify on which panel to plot this data
-        new_plot.group_id = new_plot.id
+        group_id = self.page_finder[page_id].get_graph_id()
+        if group_id == None:
+            group_id = data.group_id
+        new_plot.group_id ="res" + str(group_id)
         #new_plot.is_data = True
         ##post data to plot
         title = new_plot.name 

@@ -116,7 +116,14 @@ class FitProblemComponent(object):
         """
         Return the caption of the page associated with object
         """
-        
+    def set_graph_id(self, id):
+        """
+        Set graph id (from data_group_id at the time the graph produced) 
+        """
+    def get_graph_id(self): 
+        """
+        Get graph_id
+        """  
    
 class FitProblemDictionary(FitProblemComponent, dict):
     """
@@ -135,6 +142,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
         ## fitting range
         self.qmin = None
         self.qmax = None
+        self.graph_id = None
         self._smear_on = False
         self.scheduled = 0
         self.fit_tab_caption = ''
@@ -398,7 +406,19 @@ class FitProblemDictionary(FitProblemComponent, dict):
         """
         return self.result
     
-
+    def set_graph_id(self, id):
+        """
+        Set graph id (from data_group_id at the time the graph produced) 
+        """
+        self.graph_id = id
+        
+    def get_graph_id(self): 
+        """
+        Get graph_id
+        """  
+        return self.graph_id
+    
+    
 class FitProblem(FitProblemComponent):
     """  
     FitProblem class allows to link a model with the new name created in _on_model,
@@ -616,5 +636,15 @@ class FitProblem(FitProblemComponent):
         """
         return self.fit_tab_caption
     
-  
+    def set_graph_id(self, id):
+        """
+        Set graph id (from data_group_id at the time the graph produced) 
+        """
+        self.graph_id = id
+        
+    def get_graph_id(self): 
+        """
+        Get graph_id
+        """  
+        return self.graph_id
    

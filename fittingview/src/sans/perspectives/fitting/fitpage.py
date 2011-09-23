@@ -1803,20 +1803,24 @@ class FitPage(BasicPage):
         """
         reset the current data 
         """
+        from sans.guiframe.dataFitting import check_data_validity
         id = None
-        group_id = None
         flag = False
+        is_data = False
         if self.data is not None:
-            group_id = self.data.group_id
-           
-        if self.data is None and data is not None:
+            is_data = check_data_validity(self.data)  
+        if not is_data and data is not None:
                 flag = True
         if data is not None:
             id = data.id
-            if self.data is not None:
+            if is_data:
+                self.graph_id = self.data.group_id
                 flag = (data.id != self.data.id)
         self.data = data
-        self.data.group_id = group_id
+        if check_data_validity(data):
+            self.graph_id = data.group_id
+        self.data.group_id = self.graph_id
+        
         if self.data is None:
             data_min = ""
             data_max = ""
@@ -1904,6 +1908,8 @@ class FitPage(BasicPage):
         self.state.qmin = self.qmin_x
         self.state.qmax = self.qmax_x
         self.enable_fit_button()
+        # send graph_id to page_finder 
+        self._manager.set_graph_id(uid=self.uid, graph_id=self.graph_id)
         #update model plot with new data information
         if flag:
             #set model view button
@@ -1917,7 +1923,7 @@ class FitPage(BasicPage):
             #replace data plot on combo box selection
             #by removing the previous selected data
             wx.PostEvent(self._manager.parent, NewPlotEvent(action="remove",
-                                                    group_id=group_id, id=id))
+                                                    group_id=self.graph_id, id=id))
             #plot the current selected data
             wx.PostEvent(self._manager.parent, NewPlotEvent(plot=self.data, 
                                                 title=str(self.data.title)))
