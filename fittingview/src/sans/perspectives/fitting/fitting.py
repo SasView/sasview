@@ -1048,9 +1048,12 @@ class Plugin(PluginBase):
         :param elapsed: time spent at the fitting level
         """  
         self._mac_sleep(0.2)
-        if page_id[0] in self.fit_thread_list.keys():
-            del self.fit_thread_list[page_id[0]] 
-        if self.batch_on:
+        uid = page_id[0]
+        if uid in self.fit_thread_list.keys():
+            del self.fit_thread_list[uid] 
+          
+        cpage = self.fit_panel.get_page_by_id(uid)
+        if cpage.batch_on:
             wx.CallAfter(self._batch_single_fit_complete_helper,
                           result, pars, page_id, batch_outputs, 
                           batch_inputs, elapsed)
@@ -1579,10 +1582,7 @@ class Plugin(PluginBase):
             fn = data_copy.data#[index] 
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
             gn = theory_data.data#[index]
-            if self.weight == None:
-                en = data_copy.err_data
-            else:
-                en = self.weight#data_copy.err_data#[index]
+            en = self.weight#data_copy.err_data#[index]
             residuals.data = (fn - gn) / en 
             residuals.qx_data = data_copy.qx_data#[index]
             residuals.qy_data = data_copy.qy_data #[index]
@@ -1605,10 +1605,7 @@ class Plugin(PluginBase):
             else:
                 ## Set consitently w/AbstractFitengine: 
                 ## But this should be corrected later.
-                if self.weight == None:
-                    dy = data_copy.dy
-                else:
-                    dy = self.weight#deepcopy(data_copy.dy)
+                dy = self.weight#deepcopy(data_copy.dy)
                 dy[dy==0] = 1  
             fn = data_copy.y[index] 
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)

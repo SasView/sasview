@@ -332,6 +332,7 @@ class FitPanel(nb, PanelBase):
             self.fit_page_index += 1
             caption = "FitPage" + str(self.fit_page_index)
             panel.set_index_model(self.fit_page_index)
+        panel.batch_on = self.batch_on
         panel.populate_box(dict=self.model_list_box)
         panel.set_manager(self._manager)
         panel.window_caption = caption
