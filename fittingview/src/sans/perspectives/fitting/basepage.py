@@ -2750,7 +2750,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                      title = item2.data2D.title
                  # and data_names (model plot[2D], and residuals)
                  if item2.group_id == data_title or \
-                        item2.group_id.count("res" + str(self.data.id)) or \
+                        item2.group_id.count("res" + str(self.graph_id)) or \
                         item2.group_id.count(str(self.uid)) > 0:
                      #panel = gui_manager._mgr.GetPane(item2.window_name)
                      # append to the list
