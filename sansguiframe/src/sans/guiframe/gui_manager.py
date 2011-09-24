@@ -305,23 +305,23 @@ class ViewerFrame(wx.Frame):
         ext = ".csv"
         file_name = "Batch_" + str(plugin_name)+ "_" + time_str + ext
         file_name = self._default_save_location + str(file_name)
-        #Need to save configuration for later 
-        """
-        frame = BatchOutputFrame(parent=self, data_outputs=data_outputs, 
-                                 data_inputs=data_inputs,
-                                file_name=file_name,
-                                details=details)
-        """
-        self.open_with_localapp(data_inputs=data_inputs,
+        
+        self.open_with_localapp(file_name=file_name,
+                                details=details,
+                                data_inputs=data_inputs,
                                     data_outputs=data_outputs)
-        #frame.Show(True)
+     
     
-    def open_with_localapp(self, data_inputs=None, data_outputs=None):
+    def open_with_localapp(self, data_inputs=None, details="", file_name=None,
+                           data_outputs=None):
         """
         Display value of data into the application grid
         :param data: dictionary of string and list of items
         """
-        self.batch_frame.set_data(data_inputs, data_outputs)
+        self.batch_frame.set_data(data_inputs=data_inputs, 
+                                  data_outputs=data_outputs,
+                                  details=details,
+                                  file_name=file_name)
         self.batch_frame.Show(True)
         
     def on_read_batch_tofile(self, event):
@@ -342,7 +342,6 @@ class ViewerFrame(wx.Frame):
             if path is not None:
                 self._default_save_location = os.path.dirname(path)
         dlg.Destroy()
-        
         self.read_batch_tofile(file_name=path)
         
     def read_batch_tofile(self, file_name):
@@ -362,13 +361,24 @@ class ViewerFrame(wx.Frame):
         fd.close()
         column_names_line  = ""
         index = None
+        details = ""
         for index in range(len(lines)):
             line = lines[index]
+            count = 0
             if line.find(separator) != -1:
-                #found the first line containing the label
+                if line.count(separator) >= 2:
+                    #found the first line containing the label
+                    col_name_toks = line.split(separator)
+                    for item in col_name_toks:
+                        if item.strip() != "":
+                            count += 1
+            else:
+                details += line
+            if count >= 2:
                 column_names_line = line
                 first_data_index = index
                 break 
+           
         if column_names_line.strip() == "" or index is None:
             return 
         col_name_toks = column_names_line.split(separator)
@@ -379,7 +389,10 @@ class ViewerFrame(wx.Frame):
                 data[c_name] = [ lines[row].split(separator)[c_index]
                                 for row in range(index + 1, len(lines)-1)]
                 c_index += 1
-        self.open_with_localapp(data_outputs=data)
+                
+      
+        self.open_with_localapp(data_outputs=data, data_inputs=None,
+                                file_name=file_name, details=details)
         
     def write_batch_tofile(self, data, file_name, details=""):
         """

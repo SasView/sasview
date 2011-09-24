@@ -84,6 +84,8 @@ class GridPage(sheet.CSheet):
         self.data_inputs = {}
         self.data_outputs = {}
         self.data = None
+        self.details = ""
+        self.file_name = None
         self._cols = 50
         self._rows = 51
         col_with = 30
@@ -171,51 +173,66 @@ class GridPage(sheet.CSheet):
         col_label_menu  = wx.Menu()
         slicerpop.AppendSubMenu(col_label_menu , 
                                  '&Insert Column', 'Insert Column')
-        hint = 'Insert empty column before the selected column'
-        id = wx.NewId()
-        col_label_menu.Append(id, '&Empty', hint)
-        wx.EVT_MENU(self, id, self.on_insert_column)
-        col_name = [self.GetCellValue(0, col) 
-                        for col in range(self.GetNumberCols())]
-        for label in self.data.keys():
-            if label not in col_name:
-                id = wx.NewId()
-                hint = 'Insert %s column before the selected column' % str(label)
-                col_label_menu.Append(id, '&%s' % str(label), hint)
-                wx.EVT_MENU(self, id, self.on_insert_column)
+        col_name = [self.GetCellValue(0, c) 
+                        for c in range(self.GetNumberCols())]
+        row = 0
+        label = self.GetCellValue(row, col)
+        self.insert_col_menu(col_label_menu, label, self)
         id = wx.NewId()    
         hint = 'Remove selected column %s'
-        slicerpop.Append(id, 
-                                 '&Remove Column', hint)
+        slicerpop.Append(id, '&Remove Column', hint)
         wx.EVT_MENU(self, id, self.on_remove_column)
         
         pos = wx.GetMousePosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
         
-    def on_remove_column(self, event):
+    def insert_col_menu(self, menu, label, window):
+        """
+        """
+        id = wx.NewId()
+        title = "Empty"
+        hint = 'Insert empty column before %s' % str(label)
+        menu.Append(id, title, hint)
+        wx.EVT_MENU(window, id, self.on_insert_column)
+        col_name = [self.GetCellValue(0, col) 
+                        for col in range(self.GetNumberCols())]
+        for c_name in self.data.keys():
+            if c_name not in col_name:
+                id = wx.NewId()
+                hint = "Insert %s column before the " % str(c_name)
+                hint += " %s column" % str(label)
+                menu.Append(id, '&%s' % str(c_name), hint)
+                wx.EVT_MENU(window, id, self.on_insert_column)
+            
+                
+    def on_remove_column(self, event=None):
         """
         """
         if self.selected_cols is not None or len(self.selected_cols) > 0:
             col = self.selected_cols[0]
-            # add data to the grid    
-            row = 0
-            id = event.GetId()
-            col_name = self.GetCellValue(row, col)
-            self.data[col_name] = []
-            for row in range(1, self.GetNumberRows() + 1):
-                if row < self.max_row_touse:
-                    value = self.GetCellValue(row, col)
-                    self.data[col_name].append(value)
-                    for k , value_list in self.data.iteritems():
-                        if k != col_name:
-                            length = len(value_list)
-                            if length < self.max_row_touse:
-                                diff = self.max_row_touse - length
-                                for i in range(diff):
-                                    self.data[k].append("")
-            self.DeleteCols(pos=col, numCols=1, updateLabels=True)
-            self.AutoSize()
+            self.remove_column(col=col, numCols=1)
+            
+    def remove_column(self, col, numCols=1):
+        """
+        Remove column to the current grid
+        """
+        # add data to the grid    
+        row = 0
+        col_name = self.GetCellValue(row, col)
+        self.data[col_name] = []
+        for row in range(1, self.GetNumberRows() + 1):
+            if row < self.max_row_touse:
+                value = self.GetCellValue(row, col)
+                self.data[col_name].append(value)
+                for k , value_list in self.data.iteritems():
+                    if k != col_name:
+                        length = len(value_list)
+                        if length < self.max_row_touse:
+                            diff = self.max_row_touse - length
+                            for i in range(diff):
+                                self.data[k].append("")
+        self.DeleteCols(pos=col, numCols=numCols, updateLabels=True)
             
     def on_insert_column(self, event):
         """
@@ -226,17 +243,26 @@ class GridPage(sheet.CSheet):
             row = 0
             id = event.GetId()
             col_name = event.GetEventObject().GetLabelText(id)
-            self.InsertCols(pos=col, numCols=1, updateLabels=True)
-            if col_name.strip() != "Empty":
-                self.SetCellValue(row, col, str(col_name.strip()))
-            if col_name in self.data.keys():
-                value_list = self.data[col_name]
-                cell_row =  1
-                for value in value_list:
-                    self.SetCellValue(cell_row, col, str(value))
-                    cell_row += 1
-            self.AutoSize()
-                
+            self.insert_column(col=col, col_name=col_name)
+            if  not issubclass(event.GetEventObject().__class__ , wx.Menu):
+                col += 1
+                self.selected_cols[0] += 1
+           
+    def insert_column(self, col, col_name):
+        """
+        """ 
+         
+        row = 0
+        self.InsertCols(pos=col, numCols=1, updateLabels=True)
+        if col_name.strip() != "Empty":
+            self.SetCellValue(row, col, str(col_name.strip()))
+        if col_name in self.data.keys():
+            value_list = self.data[col_name]
+            cell_row =  1
+            for value in value_list:
+                self.SetCellValue(cell_row, col, str(value))
+                cell_row += 1
+       
         
     def on_set_x_axis(self, event):
         """
@@ -248,16 +274,19 @@ class GridPage(sheet.CSheet):
         """
         self.panel.set_yaxis(y=self.axis_value, label=self.axis_label)     
             
-    def set_data(self, data_inputs, data_outputs):
+    def set_data(self, data_inputs, data_outputs, details, file_name):
         """
         Add data to the grid
         :param data_inputs: data to use from the context menu of the grid
         :param data_ouputs: default columns deplayed
         """
+        self.file_name = file_name
+        self.details = details
+        
         if data_outputs is None:
             data_outputs = {}
         self.data_outputs = data_outputs
-        if self.data_inputs is None:
+        if data_inputs is None:
             data_inputs = {}
         self.data_inputs = data_inputs
         self.data = {}
@@ -295,8 +324,25 @@ class GridPage(sheet.CSheet):
                 cell_col += 1
                 if cell_row > self.max_row_touse:
                     self.max_row_touse = cell_row
-       
-
+                    
+    def get_grid_view(self):
+        """
+        Return value contained in the grid
+        """
+        grid_view = {}
+        for col in xrange(self.GetNumberCols()):
+            label = self.GetCellValue(row=0, col=col) 
+            label = label.strip()
+            if label != "":
+                grid_view[label] = []
+                for row in range(1, self.max_row_touse+1):
+                    value = self.GetCellValue(row=row, col=col)
+                    if value != "":
+                        grid_view[label].append(value)  
+                    else:
+                        grid_view[label].append(None) 
+        return grid_view
+    
 class Notebook(nb, PanelBase):
     """
     ## Internal name for the AUI manager
@@ -453,7 +499,7 @@ class Notebook(nb, PanelBase):
             event.Veto()
         self.enable_close_button()
         
-    def set_data(self, data_inputs, data_outputs):
+    def set_data(self, data_inputs, data_outputs, details="", file_name=None):
         if data_outputs is None or data_outputs == {}:
             return
         
@@ -461,7 +507,10 @@ class Notebook(nb, PanelBase):
             grid = self.GetPage(pos)
             if grid.data is None:
                 #Found empty page
-                grid.set_data(data_inputs, data_outputs) 
+                grid.set_data(data_inputs=data_inputs, 
+                              data_outputs=data_outputs,
+                              details=details,
+                              file_name=file_name) 
                 self.SetSelection(pos) 
                 return
                 
@@ -476,15 +525,7 @@ class Notebook(nb, PanelBase):
         grid = self.GetPage(pos)
         grid.AppendCols(1, True)
         
-    def on_remove_column(self):
-        """
-        Remove column to the current grid
-        """
-        pos = self.GetSelection()
-        grid = self.GetPage(pos)
-        cols_pos = grid.GetSelectedCols() 
-        for cpos in cols_pos:
-            grid.DeleteCols(cpos)
+   
 
 
 
@@ -516,13 +557,7 @@ class GridPanel(SPanel):
         self.layout_grid()
         self.layout_plotting_area()
         self.SetSizer(self.vbox)
-        
-    def set_data(self, data_inputs, data_outputs):
-        """
-        """
-        if self.notebook is not None:
-            self.notebook.set_data(data_inputs, data_outputs)
-        
+  
     def set_xaxis(self, label="", x=None):
         """
         """
@@ -737,46 +772,150 @@ class GridFrame(wx.Frame):
         self.panel = GridPanel(self, data_inputs, data_outputs)
         menubar = wx.MenuBar()
         self.SetMenuBar(menubar)
-        """
-        edit = wx.Menu()
-        menubar.Append(edit, "&File")
-        save_menu = edit.Append(wx.NewId(), 'Save As', 'Save into File')
-        wx.EVT_MENU(self, save_menu.GetId(), self.on_save_column)
-        """
+        
+        self.curr_col = None
+        self.curr_grid = None
+        self.curr_col_name = ""
+        file = wx.Menu()
+        menubar.Append(file, "&File")
+        
+        hint = "Open file containing batch results"
+        open_menu = file.Append(wx.NewId(), 'Open ', hint)
+        wx.EVT_MENU(self, open_menu.GetId(), self.on_open)
+        
+        hint = "Open the the current grid into excel"
+        open_excel_menu = file.Append(wx.NewId(), 'Open with Excel', hint)
+        wx.EVT_MENU(self, open_excel_menu.GetId(), self.open_with_excel)
+        file.AppendSeparator()
+        save_menu = file.Append(wx.NewId(), 'Save As', 'Save into File')
+        wx.EVT_MENU(self, save_menu.GetId(), self.on_save_page)
+        
+        self.edit = wx.Menu()
+        hint = "Insert column before the selected column"
+        self.insert_before_menu = wx.Menu()
+        self.insert_sub_menu = self.edit.AppendSubMenu(self.insert_before_menu, 
+                                                      'Insert Before', hint)
+ 
+        hint = "Remove the selected column"
+        self.remove_menu = self.edit.Append(-1, 'Remove Column', hint)
+        wx.EVT_MENU(self, self.remove_menu.GetId(), self.on_remove_column)
+        
+        self.Bind(wx.EVT_MENU_OPEN, self.on_menu_open)
+        menubar.Append(self.edit, "&Edit")
         self.Bind(wx.EVT_CLOSE, self.on_close)
         
-    def on_save_column(self, event):
+    def GetLabelText(self, id):
         """
         """
-        self.panel.on_save_column(self.parent)
-
+        for item in self.insert_before_menu.GetMenuItems():
+            m_id = item.GetId() 
+            if m_id == id:
+                return item.GetLabel() 
+    
+    def on_remove_column(self, event):
+        """
+        """
+        pos = self.panel.notebook.GetSelection()
+        grid = self.panel.notebook.GetPage(pos)
+        grid.on_remove_column(event=None)
+        
+    def on_menu_open(self, event):
+        """
+        
+        """
+        if self.edit == event.GetMenu():
+            #get the selected column
+            pos = self.panel.notebook.GetSelection()
+            grid = self.panel.notebook.GetPage(pos)
+            col_list = grid.GetSelectedCols()
+            if len(col_list) > 0:
+                self.remove_menu.Enable(True)
+            else:
+                self.remove_menu.Enable(False)
+            if len(col_list)== 0 or len(col_list) > 1:
+                self.insert_sub_menu.Enable(False)
+                
+                label = "Insert Column Before"
+                self.insert_sub_menu.SetText(label)
+            else:
+                self.insert_sub_menu.Enable(True)
+                
+                col = col_list[0]
+                #GetColLabelValue(self, col)
+                col_name = grid.GetCellValue(row=0, col=col)
+                label = "Insert Column Before " + str(col_name)
+                self.insert_sub_menu.SetText(label)
+                for item in self.insert_before_menu.GetMenuItems():
+                    self.insert_before_menu.DeleteItem(item)
+                grid.insert_col_menu(menu=self.insert_before_menu, 
+                                     label=col_name, window=self)
+        event.Skip()
+        
+  
+        
+    def on_save_page(self, event):
+        """
+        """
+        if self.parent is not None:
+            pos = self.panel.notebook.GetSelection()
+            grid = self.panel.notebook.GetPage(pos)
+            reader, ext = os.path.splitext(grid.file_name)
+            path = None
+            if self.parent is not None: 
+                location = os.path.dirname(grid.file_name)
+                dlg = wx.FileDialog(self, "Save Project file",
+                            location, grid.file_name, ext, wx.SAVE)
+                path = None
+                if dlg.ShowModal() == wx.ID_OK:
+                    path = dlg.GetPath()
+                dlg.Destroy()
+                if path != None:
+                    if self.parent is not None:
+                        data = grid.get_grid_view()
+                        self.parent.write_batch_tofile(data=data, 
+                                               file_name=path,
+                                               details=grid.details)
+    
+    def on_open(self, event):
+        """
+        Open file containg batch result
+        """
+        if self.parent is not None:
+            self.parent.on_read_batch_tofile(event)
+            
+    def open_with_excel(self, event):
+        """
+        open excel and display batch result in Excel
+        """
+        if self.parent is not None:
+            pos = self.panel.notebook.GetSelection()
+            grid = self.panel.notebook.GetPage(pos)
+            data = grid.get_grid_view()
+            self.parent.open_with_externalapp(data=data,
+                                               file_name=grid.file_name, 
+                                               details=grid.details)
+            
     def on_close(self, event):
         """
         """
         self.Hide()
         
-    def on_remove_column(self, event):
-        """
-        Remove the selected column to the grid
-        """
-        self.panel.on_remove_column()
-        
-    def on_insert_column(self, event):
-        """
-        Insert a new column to the grid
-        """
-        self.panel.insert_column()
-        
+   
     def on_append_column(self, event):
         """
         Append a new column to the grid
         """
         self.panel.add_column()
         
-    def set_data(self, data_inputs, data_outputs):
+    def set_data(self, data_inputs, data_outputs, details="", file_name=None):
         """
         """
-        self.panel.set_data(data_inputs, data_outputs)
+        pos = self.panel.notebook.GetSelection()
+        grid = self.panel.notebook.GetPage(pos)
+        grid.set_data(data_inputs=data_inputs, 
+                            file_name=file_name,
+                            details=details,
+                            data_outputs=data_outputs)
       
       
 class BatchOutputFrame(wx.Frame):
