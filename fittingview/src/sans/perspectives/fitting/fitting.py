@@ -1629,9 +1629,12 @@ class Plugin(PluginBase):
             if data_copy.dy == None or data_copy.dy == []:
                 dy = numpy.ones(len(data_copy.y))
             else:
+                if self.weight == None:
+                    dy = numpy.ones(len(data_copy.y))
                 ## Set consitently w/AbstractFitengine: 
                 ## But this should be corrected later.
-                dy = self.weight#deepcopy(data_copy.dy)
+                else:
+                    dy = self.weight#deepcopy(data_copy.dy)
                 dy[dy==0] = 1  
             fn = data_copy.y[index] 
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
