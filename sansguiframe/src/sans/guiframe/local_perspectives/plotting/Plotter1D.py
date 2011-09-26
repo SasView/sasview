@@ -241,7 +241,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 data.label = old_data.label
             data.custom_color = old_data.custom_color
             data.symbol = old_data.symbol
-            #data.marker_size = old_data.marker_size
+            data.markersize = old_data.markersize
             # Replace data
             self.graph.replace(data)
             self.plots[data.id] = data
@@ -561,7 +561,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 label = sizedial.getText()
             sizedial.Destroy()
 
-        selected_plot.marker_size = int(label)
+        selected_plot.markersize = int(label)
         self._check_zoom_plot()
         #self._onEVT_FUNC_PROPERTY()
         ## Set the view scale for all plots
