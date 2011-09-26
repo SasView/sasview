@@ -302,7 +302,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         Toggle error display to hide or show
         """
-        
+        # Check zoom
+        xlo, xhi = self.subplot.get_xlim()
+        ylo, yhi = self.subplot.get_ylim()
+
         selected_plot = self.plots[self.graph.selected_plottable]
         if self.hide_menu.GetText() == "Hide Error Bar":
             selected_plot.hide_error = True
@@ -311,6 +314,13 @@ class ModelPanel1D(PlotPanel, PanelBase):
         ## increment graph color
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()  
+        # Check if zoomed
+        toolbar_zoomed = self.toolbar.GetToolEnabled(self.toolbar._NTB2_BACK)
+        if self.is_zoomed or toolbar_zoomed:
+            # Recover the x,y limits
+            self.subplot.set_xlim((xlo, xhi))     
+            self.subplot.set_ylim((ylo, yhi)) 
+
           
     def _onRemove(self, event):
         """
