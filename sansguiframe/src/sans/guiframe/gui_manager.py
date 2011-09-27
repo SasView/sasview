@@ -1210,12 +1210,6 @@ class ViewerFrame(wx.Frame):
             self._data_panel_menu.SetText('Hide Data Explorer')
         else:
             self._data_panel_menu.SetText('Show Data Explorer')
-            
-        self._view_menu.AppendSeparator()
-        id = wx.NewId()
-        hint = "Display batch results into a grid"
-        self._view_menu.Append(id, '&Show Batch Results', hint) 
-        wx.EVT_MENU(self, id, self.show_batch_frame)
   
         self._view_menu.AppendSeparator()
         id = wx.NewId()
@@ -1225,7 +1219,13 @@ class ViewerFrame(wx.Frame):
         else:
             self._toolbar_menu = self._view_menu.Append(id,'&Show Toolbar', '')
         wx.EVT_MENU(self, id, self._on_toggle_toolbar)
-        
+                    
+        self._view_menu.AppendSeparator()
+        id = wx.NewId()
+        hint = "Display batch results into a grid"
+        self._view_menu.Append(id, '&Show Batch Results', hint) 
+        wx.EVT_MENU(self, id, self.show_batch_frame)
+
         if custom_config != None:
             self._view_menu.AppendSeparator()
             id = wx.NewId()
