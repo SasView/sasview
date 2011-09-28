@@ -90,8 +90,8 @@ class TestCylinder(unittest.TestCase):
         #self.model.setParam('scale', 10.0)
         print "model dispersion",self.model.dispersion
         print "lognormal",self.model.run(0.001)
-        self.assertAlmostEqual(self.model.run(0.001), 450.64237, 3)
-        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 452.58733, 3)
+        self.assertAlmostEqual(self.model.run(0.001), 554.41257, 3)
+        self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 556.77560, 3)
         
     def test_gaussian_zero(self):
         from sans.models.dispersion_models import GaussianDispersion
