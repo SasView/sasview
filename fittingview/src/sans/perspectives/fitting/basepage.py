@@ -152,6 +152,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.number_saved_state = 0
         ## dictionary of saved state
         self.saved_states = {} 
+        # clipbord str state
+        self.clipboard_str_state = None
         ## Create context menu for page
         self.popUpMenu = wx.Menu()
     
@@ -674,7 +676,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         wx.CallAfter(self.get_copy)
         
         # messages depending on the flag
-        self._copy_info(None)
+        #self._copy_info(None)
         
     def on_paste(self, event):
         """
@@ -2815,8 +2817,16 @@ class BasicPage(ScrolledPanel, PanelBase):
         # make event free
         event.Skip()
         
+    def get_copy(self):
+        """
+        Get copy params to clipboard
+        """
+        content = self.get_copy_params() 
+        flag = self.set_clipboard(content)
+        self._copy_info(flag) 
+        return flag 
             
-    def get_copy(self): 
+    def get_copy_params(self): 
         """
         Get the string copies of the param names and values in the tap
         """  
@@ -2843,14 +2853,23 @@ class BasicPage(ScrolledPanel, PanelBase):
             string = self._get_copy_helper(self.str_parameters, 
                                            self.orientation_params)
             content += string
-
+            return content
+        else:
+            return False
+    
+    def set_clipboard(self, content=None): 
+        """
+        Put the string to the clipboard
+        """   
+        if not content:
+            return False
         if wx.TheClipboard.Open():
             wx.TheClipboard.SetData(wx.TextDataObject(str(content)))
             data = wx.TextDataObject()
             success = wx.TheClipboard.GetData(data)
             text = data.GetText()
             wx.TheClipboard.Close()
-    
+            return True
         return None
     
     def _get_copy_helper(self, param, orient_param):
@@ -2878,25 +2897,38 @@ class BasicPage(ScrolledPanel, PanelBase):
             content += name + ',' + value + ':'
             
         return content
+   
+    def get_clipboard(self):   
+        """
+        Get strings in the clipboard
+        """
+        text = ""  
+        # Get text from the clip board        
+        if wx.TheClipboard.Open():
+           if wx.TheClipboard.IsSupported(wx.DataFormat(wx.DF_TEXT)):
+               data = wx.TextDataObject()
+               # get wx dataobject
+               success = wx.TheClipboard.GetData(data)
+               # get text
+               text = data.GetText()
+           # close clipboard
+           wx.TheClipboard.Close()
+           
+        return text
     
-    def get_paste(self): 
+    def get_paste(self):
+        """
+        Paste params from the clipboard
+        """
+        text = self.get_clipboard()
+        
+        return self.get_paste_from_clipboard(text)
+        
+    def get_paste_from_clipboard(self, text=''): 
         """
         Get the string copies of the param names and values in the tap
         """  
-        context = {}
-        text = ""
-        
-        # Get text from the clip board        
-        if wx.TheClipboard.Open():
-            if wx.TheClipboard.IsSupported(wx.DataFormat(wx.DF_TEXT)):
-                data = wx.TextDataObject()
-                # get wx dataobject
-                success = wx.TheClipboard.GetData(data)
-                # get text
-                text = data.GetText()
-            # close clipboard
-            wx.TheClipboard.Close()
-            
+        context = {}    
         # put the text into dictionary    
         lines = text.split(':')
         if lines[0] != 'sansview_parameter_values':
