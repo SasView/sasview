@@ -152,8 +152,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.number_saved_state = 0
         ## dictionary of saved state
         self.saved_states = {} 
-        # clipbord str state
-        self.clipboard_str_state = None
         ## Create context menu for page
         self.popUpMenu = wx.Menu()
     
@@ -619,7 +617,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         
         name = menu.GetLabel(event.GetId())
         self._on_select_model_helper()
-        
         if name in self.saved_states.keys():
             previous_state = self.saved_states[name]
             ## reset state of checkbox,textcrtl  and  regular parameters value
@@ -2921,10 +2918,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         Paste params from the clipboard
         """
         text = self.get_clipboard()
+        flag = self.get_paste_params(text)
+        self._copy_info(flag)
+        return flag
         
-        return self.get_paste_from_clipboard(text)
-        
-    def get_paste_from_clipboard(self, text=''): 
+    def get_paste_params(self, text=''): 
         """
         Get the string copies of the param names and values in the tap
         """  
@@ -2959,8 +2957,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             # go through the str params
             self._get_paste_helper(self.str_parameters, 
                                    self.orientation_params, context)
-        self._copy_info(True)
-        return True
+            return True
+        return None
     
     def _get_paste_helper(self, param, orient_param, content):
         """

@@ -1186,7 +1186,13 @@ class FitPage(BasicPage):
         call back for model selection
         """  
         
-        self.Show(False)    
+        self.Show(False) 
+        if event != None:
+            copy_flag = self.get_copy_params()
+            is_poly_enabled = self.enable_disp.GetValue() 
+        else:
+            copy_flag = '' 
+            is_poly_enabled = None 
         self._on_select_model_helper() 
         self.set_model_param_sizer(self.model)                   
         if self.model is None:
@@ -1212,9 +1218,11 @@ class FitPage(BasicPage):
             self.rename_model()
             self._set_copy_flag(True)
             self._set_paste_flag(True)
-            if self.data != None:
-                self._set_bookmark_flag(True)
-                self._keep.Enable(True)
+            if self.data is not None:
+                is_data = check_data_validity(self.data) 
+                if is_data:
+                    self._set_bookmark_flag(True)
+                    self._keep.Enable(True)
             #self._set_save_flag(True)
             # Reset smearer, model and data
             self._set_smear(self.data)
@@ -1266,6 +1274,17 @@ class FitPage(BasicPage):
                     self._show_combox_helper()
                     self.formfactorbox.SetSelection(pos)
                     self.formfactorbox.SetValue(current_val)
+            # when select a model only from guictr/button
+            if is_poly_enabled != None:
+                self.enable_disp.SetValue(is_poly_enabled)
+                self.disable_disp.SetValue(not is_poly_enabled)
+                self._set_dipers_Param(event=None)
+                self.state.enable_disp = self.enable_disp.GetValue()
+                self.state.disable_disp = self.disable_disp.GetValue()
+
+            # Keep the previous param values
+            if copy_flag:
+                self.get_paste_params(copy_flag)
             self._onDraw(event=None)
         else:
             self._draw_model()
