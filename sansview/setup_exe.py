@@ -14,6 +14,7 @@
 # See for example the 'images' directory below.
 
 import os, sys
+
 if len(sys.argv) == 1:
     sys.argv.append('py2exe')
 # When using the SansView build script, we need to be able to pass
@@ -146,7 +147,7 @@ for f in findall(plugins_dir):
 #
 
 packages = ['matplotlib', 'scipy', 'pytz', 'encodings']
-includes = []
+includes = ['site']
 excludes = [] 
 
 dll_excludes = [
