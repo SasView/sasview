@@ -179,6 +179,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             self._store_model()
             ## display constraint fields
             if self.show_constraint.GetValue():
+                self._show_all_constraint() 
                 self._show_constraint()
                 return
         else:
@@ -207,6 +208,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             self._store_model()
             if self.show_constraint.GetValue() and\
                              len(self.constraints_list)==0:
+                self._show_all_constraint() 
                 self._show_constraint()
         elif len(self.model_toFit)< 2:
             ##constraint info
@@ -462,11 +464,14 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         
         wx.EVT_COMBOBOX(param_cbox,-1, self._on_select_param)
         self.ctl2 = wx.TextCtrl(self, -1)
-        egal_txt= wx.StaticText(self,-1," = ")
-        btRemove = wx.Button(self,wx.NewId(),'Remove')
-        btRemove.Bind(wx.EVT_BUTTON, self.onRemove,id= btRemove.GetId())
-        btRemove.SetToolTipString("Remove constraint.")
-       
+        egal_txt= wx.StaticText(self,-1, " = ")
+        self.btRemove = wx.Button(self,wx.NewId(),'Remove')
+        self.btRemove.Bind(wx.EVT_BUTTON, self.onRemove, 
+                                    id=self.btRemove.GetId())
+        self.btRemove.SetToolTipString("Remove constraint.")
+        self.btRemove.Hide()
+        if hasattr(self,"btAdd"):
+            self.btAdd.Hide()
         for id, model in self.constraint_dict.iteritems():
             ## check if all parameters have been selected for constraint
             ## then do not allow add constraint on parameters
@@ -481,13 +486,14 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         sizer_constraint.Add(param_cbox, flag= wx.RIGHT|wx.EXPAND,border=5)
         sizer_constraint.Add(egal_txt, flag= wx.RIGHT|wx.EXPAND,border=5)
         sizer_constraint.Add(self.ctl2, flag= wx.RIGHT|wx.EXPAND,border=10)
-        sizer_constraint.Add(btRemove, flag= wx.RIGHT|wx.EXPAND,border=10)
+        sizer_constraint.Add(self.btRemove, flag= wx.RIGHT|wx.EXPAND,border=10)
       
         self.sizer_constraints.Insert(before=self.nb_constraint,
-                                      item=sizer_constraint, flag= wx.TOP|wx.BOTTOM|wx.EXPAND,
-                                   border=5)
+                        item=sizer_constraint, flag= wx.TOP|wx.BOTTOM|wx.EXPAND,
+                        border=5)
         ##[combobox1, combobox2,=,textcrtl, remove button ]
-        self.constraints_list.append([model_cbox, param_cbox, egal_txt, self.ctl2,btRemove,sizer_constraint])
+        self.constraints_list.append([model_cbox, param_cbox, egal_txt, 
+                                    self.ctl2,self.btRemove,sizer_constraint])
     
         self.nb_constraint += 1
         self.sizer_constraints.Layout()
@@ -537,6 +543,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             param_cbox.Append( str(param), model)
             
         param_cbox.Show(True)
+        self.btRemove.Show(True)
+        self.btAdd.Show(True)
         self.sizer2.Layout()
         #self.SetScrollbars(20,20,25,65)
         
