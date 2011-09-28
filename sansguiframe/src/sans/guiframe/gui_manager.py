@@ -1112,6 +1112,8 @@ class ViewerFrame(wx.Frame):
                         # Only create a menu if we have at least one tool
                         if self._tool_menu is None:
                             self._tool_menu = wx.Menu()
+                        if tool[0].lower().count('python') > 0:
+                            self._tool_menu.AppendSeparator()
                         id = wx.NewId()
                         self._tool_menu.Append(id, tool[0], tool[1])
                         wx.EVT_MENU(self, id, tool[2])
