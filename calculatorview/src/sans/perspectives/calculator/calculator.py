@@ -48,7 +48,7 @@ class Plugin(PluginBase):
         resolution_help = "Approximately estimates the "
         resolution_help += "resolution of Q in 2D based on the SANS "
         resolution_help += "instrumental parameter values."
-        pyconsole_help = "Python Console from a third party (PyCrust)."
+        pyconsole_help = "Python Console."
         #data_editor_help = "Meta Data Editor"
         return [("SLD Calculator", sld_help, self.on_calculate_sld),
                 ("Slit Size Calculator", slit_length_help,
@@ -57,7 +57,7 @@ class Plugin(PluginBase):
                         kiessig_help, self.on_calculate_kiessig),
                           ("SANS Resolution Estimator", 
                         resolution_help, self.on_calculate_resoltuion),
-                ("Python Console", pyconsole_help, self.on_python_console)]
+                ("Python Shell", pyconsole_help, self.on_python_console)]
               
     def on_edit_data(self, event):
         """

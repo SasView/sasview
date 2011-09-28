@@ -16,16 +16,18 @@ else:
     
 class PyConsole(wx.py.crust.CrustFrame):
     ## Internal nickname for the window, used by the AUI manager
-    window_name = "Python Console"
+    window_name = "Python Shell"
     ## Name to appear on the window title bar
-    window_caption = "Python Console"
+    window_caption = "Python Shell"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = False
     def __init__(self, parent=None, manager=None,
-                    title='Python Console by PyCrust', 
+                    title='Python Shell', 
                     size=(PANEL_WIDTH, PANEL_HEIGHT)):
         if parent != None:
             dataDir = parent._default_save_location
+        else:
+             dataDir = None
         wx.py.crust.CrustFrame.__init__(self, parent=parent, 
                                         title=title, size=size,
                                         dataDir=dataDir)
@@ -51,12 +53,12 @@ class PyConsole(wx.py.crust.CrustFrame):
         On About
         """
         message = ABOUT
-        dial = wx.MessageDialog(self, message, 'About Python',
+        dial = wx.MessageDialog(self, message, 'About',
                            wx.OK|wx.ICON_INFORMATION)  
         dial.ShowModal()
         
-ABOUT =  "Welcome to Python 2.5! \n\n"
-ABOUT += "This window uses PyCrust in wx (developed by Patrick K. O'Brien).\n"
+ABOUT =  "Welcome to Python %s! \n\n"% sys.version.split()[0]
+ABOUT += "This uses PyCrust Shell in wx (developed by Patrick K. O'Brien).\n"
 ABOUT += "If this is your first time using Python, \n"
 ABOUT += "you should definitely check out the tutorial "
 ABOUT += "on the Internet at http://www.python.org/doc/tut/."
