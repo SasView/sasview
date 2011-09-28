@@ -265,9 +265,13 @@ class DetectorDialog(wx.Dialog):
         sizer_selection.Add(wx.StaticText(self, -1,"Select Cmap: "), 0,
                              wx.LEFT|wx.ADJUST_MINSIZE, 5) 
         sizer_selection.Add(self.cmap_selector, 0, wx.EXPAND|wx.ALL, 10)
-        sizer_main.Add(sizer_params, 0, wx.EXPAND|wx.ALL, 10)
-        sizer_main.Add(sizer_selection, 0, wx.EXPAND|wx.ALL, 10)
-        sizer_main.Add(sizer_colormap, 1, wx.EXPAND|wx.ALL, 10)
+        sizer_main.Add(sizer_params, 0, wx.EXPAND|wx.ALL, 5)
+        sizer_main.Add(sizer_selection, 0, wx.EXPAND|wx.ALL, 5)
+        note = "   Note: This is one time option. " +\
+               "It will be reset on updating the image."
+        note_txt = wx.StaticText(self, -1, note)
+        sizer_main.Add(note_txt, 0, wx.EXPAND|wx.ALL, 5)
+        sizer_main.Add(sizer_colormap, 1, wx.EXPAND|wx.ALL, 5)
         sizer_main.Add(self.static_line_3, 0, wx.EXPAND, 0)
         sizer_button.Add(self.button_reset, 0, wx.LEFT|wx.ADJUST_MINSIZE, 100)
         sizer_button.Add(self.button_OK, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
