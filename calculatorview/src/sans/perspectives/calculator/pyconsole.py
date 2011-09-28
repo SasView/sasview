@@ -1,6 +1,7 @@
 """
 Console Module display Python console
 """
+import wx
 import wx.py.crust
 import sys
 
@@ -28,18 +29,39 @@ class PyConsole(wx.py.crust.CrustFrame):
         wx.py.crust.CrustFrame.__init__(self, parent=parent, 
                                         title=title, size=size,
                                         dataDir=dataDir)
-   
+        self._import_site()
         self.parent = parent
         self._manager = manager
         self.Centre()
 
+    def _import_site(self):
+        """
+        Import site for exe
+        """
+        import site
+        
     def set_manager(self, manager):
         """
         Set the manager of this window
         """
         self._manager = manager
-     
+        
+    def OnAbout(self, event):
+        """
+        On About
+        """
+        message = ABOUT
+        dial = wx.MessageDialog(self, message, 'About Python',
+                           wx.OK|wx.ICON_INFORMATION)  
+        dial.ShowModal()
+        
+ABOUT =  "Welcome to Python 2.5! \n\n"
+ABOUT += "This window uses PyCrust in wx (developed by Patrick K. O'Brien).\n"
+ABOUT += "If this is your first time using Python, \n"
+ABOUT += "you should definitely check out the tutorial "
+ABOUT += "on the Internet at http://www.python.org/doc/tut/."
  
+        
 if __name__ == "__main__":
    
     app  = wx.App()
