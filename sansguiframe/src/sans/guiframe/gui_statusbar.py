@@ -90,7 +90,8 @@ class StatusBar(wxStatusB):
         self.bitmap_bt_warning = wx.BitmapButton(self, -1,
                                                  size=(BUTTON_SIZE,-1),
                                                   style=wx.NO_BORDER)
-        console_bmp = wx.ArtProvider.GetBitmap(wx.ART_TIP, wx.ART_TOOLBAR)
+        console_bmp = wx.ArtProvider.GetBitmap(wx.ART_TIP, wx.ART_TOOLBAR,
+                                                size = (16,16))
         self.bitmap_bt_console = wx.BitmapButton(self, -1, 
                                  size=(BUTTON_SIZE-5, height-4))
         self.bitmap_bt_console.SetBitmapLabel(console_bmp)
