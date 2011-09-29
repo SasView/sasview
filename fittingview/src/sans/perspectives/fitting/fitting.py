@@ -1541,15 +1541,14 @@ class Plugin(PluginBase):
         Get handy Chisqr using the output from draw1D and 2D, 
         instead of calling expansive CalcChisqr in guithread
         """
-        data_copy = deepcopy(data)
-        
+        data_copy = deepcopy(data)  
         # default chisqr
         chisqr = None
         #to compute chisq make sure data has valid data
         # return None if data == None
-        if not check_data_validity(data_copy):
+        if not check_data_validity(data_copy) or data_copy == None:
             return chisqr
-        
+
         # Get data: data I, theory I, and data dI in order
         if data_copy.__class__.__name__ == "Data2D":
             if index == None: 
@@ -1561,6 +1560,8 @@ class Plugin(PluginBase):
             index = index & (numpy.isfinite(data_copy.data)) 
             fn = data_copy.data[index] 
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
+            if theory_data== None:
+                return chisqr
             gn = theory_data.data[index]
             en = data_copy.err_data[index]
         else:
@@ -1578,8 +1579,11 @@ class Plugin(PluginBase):
                 dy[dy==0] = 1
             fn = data_copy.y[index] 
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
+            if theory_data== None:
+                return chisqr
             gn = theory_data.y
             en = dy[index]
+            
         # residual
         res = (fn - gn) / en
         residuals = res[numpy.isfinite(res)]
