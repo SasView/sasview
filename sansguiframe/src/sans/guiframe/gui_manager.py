@@ -162,7 +162,7 @@ CLOSE_SHOW = True
 TIME_FACTOR = 1
 if sys.platform.count("win32")==0:
     IS_WIN = False
-    TIME_FACTOR = 0.5
+    TIME_FACTOR = 2
     if int(wx.__version__.split('.')[0]) == 2:
         if int(wx.__version__.split('.')[1]) < 9:
             CLOSE_SHOW = False
