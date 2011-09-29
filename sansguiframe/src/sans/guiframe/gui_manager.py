@@ -159,8 +159,10 @@ except:
 APPLICATION_WLIST = config.APPLICATION_WLIST
 IS_WIN = True
 CLOSE_SHOW = True
+TIME_FACTOR = 5
 if sys.platform.count("win32")==0:
     IS_WIN = False
+    TIME_FACTOR = 5
     if int(wx.__version__.split('.')[0]) == 2:
         if int(wx.__version__.split('.')[1]) < 9:
             CLOSE_SHOW = False
@@ -272,7 +274,7 @@ class ViewerFrame(wx.Frame):
         #self.callback = True
         self._idle_count = 0
         self.schedule_full_draw_list = []
-        self.idletimer = wx.CallLater(1, self._onDrawIdle)
+        self.idletimer = wx.CallLater(TIME_FACTOR, self._onDrawIdle)
         
         self.batch_frame = GridFrame(parent=self)
         self.batch_frame.Hide()
@@ -1523,7 +1525,7 @@ class ViewerFrame(wx.Frame):
         panel_id = str(evt.GetId())
         self.on_set_plot_focus(self.panels[panel_id])
         self.show_panel(evt.GetId(), 'on')      
-        wx.CallLater(5, self.set_schedule(True))
+        wx.CallLater(5*TIME_FACTOR, self.set_schedule(True))
         self.set_plot_unfocus()
         
     def on_close_welcome_panel(self):
@@ -2926,7 +2928,7 @@ class ViewerFrame(wx.Frame):
         Restart Idle
         """
         # restart idle   
-        self.idletimer.Restart(55, *args, **kwargs)
+        self.idletimer.Restart(55*TIME_FACTOR, *args, **kwargs)
 
         
 class DefaultPanel(wx.Panel, PanelBase):
