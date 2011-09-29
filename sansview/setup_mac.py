@@ -90,7 +90,8 @@ plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
 APP = ['sansview.py']
 DATA_FILES += ['images','test','plugins','media']
 OPTIONS = {'argv_emulation': True,
-           'packages': ['lxml','numpy', 'scipy', 'periodictable'],
+           'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings'],
+           'includes': ['site'],
            'iconfile': ICON,
            'frameworks':[libxml_path],
            'resources': RESOURCES_FILES,
