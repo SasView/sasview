@@ -1057,7 +1057,7 @@ class FitPage(BasicPage):
 
             return
         flag = self._update_paramv_on_fit()         
-        self._onparamEnter_helper()
+        wx.CallAfter(self._onparamEnter_helper)
         if not flag:
             msg= "The parameters are invalid"
             wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
