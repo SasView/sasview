@@ -969,7 +969,8 @@ class Plugin(PluginBase):
                     batch_inputs[param] = []
                 if param not in model.non_fittable:
                     batch_inputs[param].append(model.getParam(param))
-        fitter.set_model(model, fit_id, pars, constraints=listOfConstraint)
+        new_model = deepcopy(model)
+        fitter.set_model(new_model, fit_id, pars, constraints=listOfConstraint)
         fitter.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin, 
                         qmax=qmax)
         fitter.select_problem_for_fit(id=fit_id, value=1)
