@@ -76,7 +76,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.uid = wx.NewId()
         self.graph_id = None
         #Q range for data set
-        self.qmin_data_set = None
+        self.qmin_data_set = numpy.inf
         self.qmax_data_set = None
         self.npts_data_set = 0
         ## Q range

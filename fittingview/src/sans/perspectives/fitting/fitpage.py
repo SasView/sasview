@@ -108,14 +108,24 @@ class FitPage(BasicPage):
         self.dataSource.Clear()
         self.data_list = data_list
         self.enable_datasource()
-        if data_list:
+        if len(data_list) > 0:
             #find the maximum range covering all data
-            qmin, qmax, _ = self.compute_data_range(data_list[0])
-            self.qmin_data_set, self.qmax_data_set = qmin, qmax
-            self.npts_data_set = 0
+            qmin, qmax, npts = self.compute_data_set_range(data_list)
+            self.qmin_data_set = qmin
+            self.qmax_data_set = qmax
+            self.npts_data_set = npts
+
+            self.qmin.SetValue(str(self.qmin_data_set))
+            self.qmax.SetValue(str(self.qmax_data_set))
+            self.qmin.SetBackgroundColour("white")
+            self.qmax.SetBackgroundColour("white")
+            self.qmin_x = self.qmin_data_set
+            self.qmax_x =  self.qmax_data_set
+            self.state.qmin = self.qmin_x
+            self.state.qmax = self.qmax_x
+            
         for data in self.data_list:
             if data is not None:
-                self.compute_data_set_range(data)
                 self.dataSource.Append(str(data.name), clientData=data)
         self.dataSource.SetSelection(0)
         self.on_select_data(event=None)
@@ -1784,16 +1794,18 @@ class FitPage(BasicPage):
         """
         return self.enable2D
     
-    def compute_data_set_range(self, data):
+    def compute_data_set_range(self, data_list):
         """
         find the range that include all data  in the set
         return the minimum and the maximum values
         """
-        if data is not None:
-            qmin, qmax, npts = self.compute_data_range(data)
-            self.qmin_data_set = min(self.qmin_data_set, qmin)
-            self.qmax_data_set = max(self.qmax_data_set, qmax)
-            self.npts_data_set += npts
+        if data_list is not None and data_list != []:
+            for data in data_list:
+                qmin, qmax, npts = self.compute_data_range(data)
+                self.qmin_data_set = min(self.qmin_data_set, qmin)
+                self.qmax_data_set = max(self.qmax_data_set, qmax)
+                self.npts_data_set += npts
+        return self.qmin_data_set, self.qmax_data_set, self.npts_data_set
         
     def compute_data_range(self, data):
         """
@@ -1841,8 +1853,6 @@ class FitPage(BasicPage):
         self.data.group_id = self.graph_id
         
         if self.data is None:
-            data_min = ""
-            data_max = ""
             data_name = ""
             self._set_bookmark_flag(False)
             self._keep.Enable(False)
@@ -1893,8 +1903,7 @@ class FitPage(BasicPage):
             self.formfactorbox.Enable()
             self.structurebox.Enable()
             data_name = self.data.name
-            data_min, data_max = self.qmin_data_set, self.qmax_data_set
-            npts =  self.npts_data_set
+            _, _, npts =  self.compute_data_range(self.data)
             #set maximum range for x in linear scale
             if not hasattr(self.data, "data"): #Display only for 1D data fit
                 self.btEditMask.Disable()  
@@ -1911,21 +1920,7 @@ class FitPage(BasicPage):
         
         self.Npts_total.Bind(wx.EVT_MOUSE_EVENTS, self._npts_click)
         self.dataSource.SetValue(data_name)
-        self.qmin_x = data_min
-        self.qmax_x = data_max
-        #self.minimum_q.SetValue(str(data_min))
-        #self.maximum_q.SetValue(str(data_max))
-        if data_min is None:
-            data_min = ""
-        if data_max is None:
-            data_max = ""
-        self.qmin.SetValue(str(data_min))
-        self.qmax.SetValue(str(data_max))
-        self.qmin.SetBackgroundColour("white")
-        self.qmax.SetBackgroundColour("white")
         self.state.data = data
-        self.state.qmin = self.qmin_x
-        self.state.qmax = self.qmax_x
         self.enable_fit_button()
         # send graph_id to page_finder 
         self._manager.set_graph_id(uid=self.uid, graph_id=self.graph_id)
