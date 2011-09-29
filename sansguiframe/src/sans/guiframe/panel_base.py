@@ -61,6 +61,7 @@ class PanelBase:
         self.Bind(wx.EVT_TEXT_ENTER, self.on_set_focus)
         self.Bind(wx.EVT_MIDDLE_DOWN, self.on_set_focus)
         self.Bind(wx.EVT_RIGHT_DOWN, self.on_set_focus)
+        self.SetFocus()
         
     def on_batch_selection(self, event):
         """
