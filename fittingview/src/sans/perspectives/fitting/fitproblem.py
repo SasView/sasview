@@ -42,6 +42,16 @@ class FitProblemComponent(object):
         """
         :return: saved model
         """
+    def set_residuals(self, residuals):
+        """ 
+        save a copy of residual
+        :param data: data selected
+        """
+    def get_residuals(self):
+        """
+        :return: residuals
+        """
+        
     def set_theory_data(self, data):
         """ 
         save a copy of the data select to fit
@@ -176,14 +186,9 @@ class FitProblemDictionary(FitProblemComponent, dict):
         """
         return smear object
         """
-        result = []
-        if fid is None:
-            for value in self.itervalues():
-                result.append(value.get_smearer())
-        else:
-            if fid in self.iterkeys():
-                result.append(self[fid].get_smearer())
-        return result
+        if fid in self.iterkeys():
+            return self[fid].get_smearer()
+     
     
     def save_model_name(self, name, fid=None):
         """
@@ -226,7 +231,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
         :return: saved model
         """
         if fid in self.iterkeys():
-            self[fid].get_model()
+            return self[fid].get_model()
        
     def set_fit_tab_caption(self, caption):
         """
@@ -240,6 +245,21 @@ class FitProblemDictionary(FitProblemComponent, dict):
         """
         return self.fit_tab_caption
     
+    def set_residuals(self, residuals, fid):
+        """ 
+        save a copy of residual
+        :param data: data selected
+        """
+        if fid in self.iterkeys():
+            self[fid].set_residuals(residuals)
+            
+    def get_residuals(self, fid):
+        """
+        :return: residuals
+        """
+        if fid in self.iterkeys():
+            return self[fid].get_residuals()
+        
     def set_theory_data(self, fid, data=None):
         """ 
         save a copy of the data select to fit
@@ -433,6 +453,7 @@ class FitProblem(FitProblemComponent):
         ## data used for fitting
         self.fit_data = None
         self.theory_data = None
+        self.residuals = None
         # original data: should not be modified
         self.original_data = None
         ## the current model
@@ -508,7 +529,20 @@ class FitProblem(FitProblemComponent):
         :return: saved model
         """
         return self.model
-  
+   
+    def set_residuals(self, residuals):
+        """ 
+        save a copy of residual
+        :param data: data selected
+        """
+        self.residuals = residuals
+            
+    def get_residuals(self):
+        """
+        :return: residuals
+        """
+        return self.residuals
+        
     def set_theory_data(self, data):
         """ 
         save a copy of the data select to fit

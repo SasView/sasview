@@ -652,7 +652,7 @@ class Plugin(PluginBase):
         :param update_chisqr: update chisqr [bool]
              
         """
-        self.weight = weight
+        #self.weight = weight
         if issubclass(data.__class__, Data1D) or not enable2D:    
             ## draw model 1D with no loaded data
             self._draw_model1D(model=model, 
@@ -662,6 +662,7 @@ class Plugin(PluginBase):
                                smearer=smearer,
                                qmin=qmin,
                                qmax=qmax, 
+                               weight=weight,
                                toggle_mode_on=toggle_mode_on,
                                state=state,
                                update_chisqr=update_chisqr)
@@ -674,6 +675,7 @@ class Plugin(PluginBase):
                                 smearer=smearer,
                                 qmin=qmin,
                                 qmax=qmax,
+                                weigth=weight,
                                 state=state,
                                 toggle_mode_on=toggle_mode_on,
                                 update_chisqr=update_chisqr)
@@ -1047,22 +1049,51 @@ class Plugin(PluginBase):
                     for index  in range(len(pars)):
                         batch_outputs[pars[index]].append(null_value)
                         item = null_value
-                        batch_outputs["error on %s" % pars[index]].append(item)
+                        batch_inputs["error on %s" % pars[index]].append(item)
                 else:
                     batch_outputs["Chi2"].append(res.fitness)
                     for index  in range(len(pars)):
                         batch_outputs[pars[index]].append(res.pvec[index])
                         item = res.stderr[index]
-                        batch_outputs["error on %s" % pars[index]].append(item)
+                        batch_inputs["error on %s" % pars[index]].append(item)
             pid = page_id[0]
             self.page_finder[pid].set_result(result=batch_outputs)   
+           
+            """
+            draw_model(self, model, page_id, data=None, smearer=None,
+                   enable1D=True, enable2D=False,
+                   state=None,
+                   toggle_mode_on=False,
+                   qmin=None, qmax=None, 
+                   update_chisqr=True, weight=None):
+            """
+            for pid in page_id:
+                cpage = self.fit_panel.get_page_by_id(pid)
+                cpage._on_fit_complete()
+                for fid in self.page_finder[pid].keys():
+                    data = self.page_finder[pid].get_fit_data(fid)
+                    model = self.page_finder[pid].get_model(fid)
+                    smearer = self.page_finder[pid].get_smearer(fid)
+                    qmin, qmax = self.page_finder[pid].get_range(fid)
+                    weight = self.page_finder[pid].get_weight(fid)
+                    flag = issubclass(data.__class__, Data2D)
+                    self.draw_model(model=model,
+                                      page_id=pid, 
+                                      data=data, 
+                                      smearer=smearer,
+                                      enable1D=not flag, 
+                                      enable2D=flag,
+                                      state=None,
+                                      toggle_mode_on=False,
+                                      qmin=qmin, qmax=qmax, 
+                                      update_chisqr=False, 
+                                      weight=weight)
+                    
             self.parent.on_set_batch_result(data_outputs=batch_outputs, 
                                             data_inputs=batch_inputs,
                                             plugin_name=self.sub_menu)
-            for uid in page_id:
-                cpage = self.fit_panel.get_page_by_id(uid)
-                cpage._on_fit_complete()
-            
+             
+             
     def _single_fit_completed(self, result, pars, page_id, batch_outputs,
                           batch_inputs=None,  elapsed=None):
         """
@@ -1330,6 +1361,7 @@ class Plugin(PluginBase):
         wx.PostEvent(self.parent, StatusEvent(status=msg,type="update"))
         
     def _complete1D(self, x, y, page_id, elapsed, index, model,
+                    weight=None,
                     toggle_mode_on=False, state=None, 
                     data=None, update_chisqr=True):
         """
@@ -1377,10 +1409,12 @@ class Plugin(PluginBase):
                     wx.PostEvent(current_pg,
                                  Chi2UpdateEvent(output=self._cal_chisqr(
                                                                 data=data,
+                                                                weight=weight,
                                                             page_id=page_id,
                                                             index=index)))
                 else:
-                    self._plot_residuals(page_id, data, index)
+                    self._plot_residuals(page_id=page_id, data=data,
+                                          index=index, weight=weight)
 
             msg = "Computation  completed!"
             wx.PostEvent( self.parent, StatusEvent(status=msg, type="stop" ))
@@ -1399,7 +1433,8 @@ class Plugin(PluginBase):
         #self.ready_fit()
   
     def _complete2D(self, image, data, model, page_id,  elapsed, index, qmin,
-                     qmax, toggle_mode_on=False, state=None, 
+                    
+                     qmax, weight=None, toggle_mode_on=False, state=None, 
                      update_chisqr=True):
         """
         Complete get the result of modelthread and create model 2D
@@ -1449,10 +1484,12 @@ class Plugin(PluginBase):
             if update_chisqr:
                 wx.PostEvent(current_pg,
                              Chi2UpdateEvent(output=self._cal_chisqr(data=data,
+                                                                    weight=weight,
                                                          page_id=page_id,
                                                          index=index)))
             else:
-                self._plot_residuals(page_id, data, index)
+                self._plot_residuals(page_id=page_id, data=data,
+                                      index=index, weight=weight)
         msg = "Computation  completed!"
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
     
@@ -1461,6 +1498,7 @@ class Plugin(PluginBase):
                       data=None, smearer=None,
                       description=None, enable2D=False,
                       state=None,
+                      weight=None,
                       toggle_mode_on=False,
                        update_chisqr=True):
         """
@@ -1487,6 +1525,7 @@ class Plugin(PluginBase):
                                     smearer=smearer,
                                     qmin=qmin,
                                     qmax=qmax,
+                                    weight=weight, 
                                     toggle_mode_on=toggle_mode_on,
                                     state=state,
                                     completefn=self._complete2D,
@@ -1502,6 +1541,7 @@ class Plugin(PluginBase):
     def _draw_model1D(self, model, page_id, data, 
                       qmin, qmax, smearer=None,
                 state=None,
+                weight=None,
                 toggle_mode_on=False, update_chisqr=True, 
                 enable1D=True):
         """
@@ -1525,6 +1565,7 @@ class Plugin(PluginBase):
                                   qmax=qmax,
                                   smearer=smearer,
                                   state=state,
+                                  weight=weight,
                                   toggle_mode_on=toggle_mode_on,
                                   completefn=self._complete1D,
                                   #updatefn = self._update1D,
@@ -1537,7 +1578,7 @@ class Plugin(PluginBase):
     
   
     
-    def _cal_chisqr(self, page_id, data, index=None): 
+    def _cal_chisqr(self, page_id, data, weight, index=None): 
         """
         Get handy Chisqr using the output from draw1D and 2D, 
         instead of calling expansive CalcChisqr in guithread
@@ -1554,8 +1595,8 @@ class Plugin(PluginBase):
         if data_copy.__class__.__name__ == "Data2D":
             if index == None: 
                 index = numpy.ones(len(data_copy.data),ntype=bool)
-            if self.weight != None:
-                data_copy.err_data = self.weight
+            if weight != None:
+                data_copy.err_data = weight
             # get rid of zero error points
             index = index & (data_copy.err_data != 0)  
             index = index & (numpy.isfinite(data_copy.data)) 
@@ -1569,8 +1610,8 @@ class Plugin(PluginBase):
             # 1 d theory from model_thread is only in the range of index
             if index == None: 
                 index = numpy.ones(len(data_copy.y), ntype=bool)
-            if self.weight != None:
-                data_copy.dy = self.weight
+            if weight != None:
+                data_copy.dy = weight
             if data_copy.dy == None or data_copy.dy == []:
                 dy = numpy.ones(len(data_copy.y))
             else:
@@ -1590,11 +1631,12 @@ class Plugin(PluginBase):
         residuals = res[numpy.isfinite(res)]
         # get chisqr only w/finite
         chisqr = numpy.average(residuals * residuals)
-        self._plot_residuals(page_id, data_copy, index)
+        self._plot_residuals(page_id=page_id, data=data_copy, 
+                             weight=weight, index=index)
         
         return chisqr
     
-    def _plot_residuals(self, page_id, data=None, index=None): 
+    def _plot_residuals(self, page_id, weight, data=None, index=None): 
         """
         Plot the residuals
         
@@ -1614,7 +1656,7 @@ class Plugin(PluginBase):
             fn = data_copy.data#[index] 
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
             gn = theory_data.data#[index]
-            en = self.weight#data_copy.err_data#[index]
+            en = weight#data_copy.err_data#[index]
             residuals.data = (fn - gn) / en 
             residuals.qx_data = data_copy.qx_data#[index]
             residuals.qy_data = data_copy.qy_data #[index]
@@ -1635,12 +1677,12 @@ class Plugin(PluginBase):
             if data_copy.dy == None or data_copy.dy == []:
                 dy = numpy.ones(len(data_copy.y))
             else:
-                if self.weight == None:
+                if weight == None:
                     dy = numpy.ones(len(data_copy.y))
                 ## Set consitently w/AbstractFitengine: 
                 ## But this should be corrected later.
                 else:
-                    dy = self.weight#deepcopy(data_copy.dy)
+                    dy = weight#deepcopy(data_copy.dy)
                 dy[dy==0] = 1  
             fn = data_copy.y[index] 
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
@@ -1672,10 +1714,11 @@ class Plugin(PluginBase):
         #new_plot.is_data = True
         ##post data to plot
         title = new_plot.name 
+        self.page_finder[page_id].set_residuals(residuals=new_plot, fid=data.id)
         # plot data
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title)) 
         #reset weight  
-        self.weight = None
+        #self.weight = None
 #def profile(fn, *args, **kw):
 #    import cProfile, pstats, os
 #    global call_result

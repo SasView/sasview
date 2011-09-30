@@ -1927,6 +1927,7 @@ class FitPage(BasicPage):
         #update model plot with new data information
         if flag:
             #set model view button
+            self.current_smearer = smear_selection(self.data, self.model)
             if self.data.__class__.__name__ == "Data2D":
                 self.enable2D = True
                 self.model_view.SetLabel("2D Mode")
