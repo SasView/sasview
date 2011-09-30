@@ -955,6 +955,7 @@ class Plugin(PluginBase):
         model = fitproblem.get_model()
         smearer = fitproblem.get_smearer()
         qmin, qmax = fitproblem.get_range()
+
         #Extra list of parameters and their constraints
         listOfConstraint = []
         param = fitproblem.get_model_param()
@@ -969,7 +970,7 @@ class Plugin(PluginBase):
                     batch_inputs[param] = []
                 if param not in model.non_fittable:
                     batch_inputs[param].append(model.getParam(param))
-        new_model = deepcopy(model)
+        new_model = model#deepcopy(model)
         fitter.set_model(new_model, fit_id, pars, constraints=listOfConstraint)
         fitter.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin, 
                         qmax=qmax)
