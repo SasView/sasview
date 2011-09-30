@@ -161,7 +161,7 @@ class Plugin(PluginBase):
         # Set UID to allow us to reference the panel later
         new_panel.uid = event_id
         # Ship the plottable to its panel
-        new_panel.plot_data(data) 
+        wx.CallAfter(new_panel.plot_data, data) 
         self.plot_panels[new_panel.group_id] = new_panel
         
         # Set Graph menu and help string        
@@ -230,7 +230,7 @@ class Plugin(PluginBase):
         else:
             if panel.group_id not in data.list_group_id:
                 data.list_group_id.append(panel.group_id)
-            panel.plot_data( data)
+            wx.CallAfter(panel.plot_data, data)
             self.parent.show_panel(panel.uid)   
     
     def delete_menu_item(self, name, uid):
