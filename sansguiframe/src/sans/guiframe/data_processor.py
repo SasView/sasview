@@ -141,25 +141,26 @@ class GridPage(sheet.CSheet):
         """
         Catch the left click on label mouse event
         """
+        event.Skip()
         flag = event.CmdDown() or event.ControlDown()
         col = event.GetCol()
         if not flag:
             self.selected_cols = []
             self.selected_cells = []
             self.axis_label = ""
-        for row in range(1, self.GetNumberRows()+ 1):
-            cell = (row, col)
-            if row > 0 and row < self.max_row_touse:
-                if cell not in self.selected_cells:
-                    self.selected_cells.append(cell)
-        self.selected_cols.append(col)
-        self.axis_value = []
-        for cell_row, cell_col in self.selected_cells:
-            self.axis_value.append(self.GetCellValue(cell_row, cell_col))
-        self.axis_label = self.GetCellValue(0, col)
-        event.Skip()
-        
-        
+        if col != -1:
+            for row in range(1, self.GetNumberRows()+ 1):
+                cell = (row, col)
+                if row > 0 and row < self.max_row_touse:
+                    if cell not in self.selected_cells:
+                        self.selected_cells.append(cell)
+            self.selected_cols.append(col)
+            self.axis_value = []
+            for cell_row, cell_col in self.selected_cells:
+                self.axis_value.append(self.GetCellValue(cell_row, cell_col))
+            self.axis_label = self.GetCellValue(0, col)
+       
+
     def on_right_click(self, event):
         """
         Catch the right click mouse
@@ -186,6 +187,7 @@ class GridPage(sheet.CSheet):
         pos = wx.GetMousePosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
+        event.Skip()
         
     def insert_col_menu(self, menu, label, window):
         """
