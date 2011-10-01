@@ -675,7 +675,7 @@ class Plugin(PluginBase):
                                 smearer=smearer,
                                 qmin=qmin,
                                 qmax=qmax,
-                                weigth=weight,
+                                weight=weight,
                                 state=state,
                                 toggle_mode_on=toggle_mode_on,
                                 update_chisqr=update_chisqr)

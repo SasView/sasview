@@ -1239,10 +1239,10 @@ class FitPage(BasicPage):
                     self._keep.Enable(True)
             #self._set_save_flag(True)
             # Reset smearer, model and data
-            self._set_smear(self.data)
+            #self._set_smear(self.data)
     
             # more disables for 2D
-            self._set_smear_buttons()
+            #self._set_smear_buttons()
             
             try:
                 # update smearer sizer
@@ -1297,7 +1297,7 @@ class FitPage(BasicPage):
                 self.state.disable_disp = self.disable_disp.GetValue()
 
             # Keep the previous param values
-            if copy_flag  and self.structurebox.GetLabel() != 'None':
+            if copy_flag:
                 self.get_paste_params(copy_flag)
             self._onDraw(event=None)
         else:
