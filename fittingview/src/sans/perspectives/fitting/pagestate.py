@@ -360,9 +360,9 @@ class PageState(object):
         """
         rep = "\nState name: %s\n"%self.file
         t = time.localtime(self.timestamp)
-        time_str = time.strftime("%b %d %H;%M of %Y", t)
+        time_str = time.strftime("%H;%M - %b %d - %Y", t)
 
-        rep += "State created on : %s\n"%time_str
+        rep += "State created: %s\n"%time_str
         rep += "State form factor combobox selection: %s\n"%self.formfactorcombobox
         rep += "State structure factor combobox selection: %s\n"%self.structurecombobox
         rep += "is data : %s\n"%self.is_data
@@ -462,8 +462,8 @@ class PageState(object):
                 value = content[1]
             except:
                 pass
-            if name.count("State created on"):
-                repo_time = "Created on " + value
+            if name.count("State created"):
+                repo_time = "" + value
             if name.count("parameter name"):
                 val_name = value.split(".")
                 if len(val_name) > 1:
