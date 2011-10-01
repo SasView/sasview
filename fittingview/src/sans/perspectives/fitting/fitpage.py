@@ -1191,18 +1191,22 @@ class FitPage(BasicPage):
         if self.model is not None:
             self.model.name = "M" + str(self.index_model)
     
+
     def _on_select_model(self, event=None): 
         """
         call back for model selection
         """  
-        
         self.Show(False) 
+        copy_flag = '' 
+        is_poly_enabled = None 
         if event != None:
-            copy_flag = self.get_copy_params()
-            is_poly_enabled = self.enable_disp.GetValue() 
-        else:
-            copy_flag = '' 
-            is_poly_enabled = None 
+            if (event.GetEventObject() == self.formfactorbox\
+                        and self.structurebox.GetLabel() != 'None')\
+                        or event.GetEventObject() == self.structurebox\
+                        or event.GetEventObject() == self.multifactorbox:
+                copy_flag = self.get_copy_params()
+                is_poly_enabled = self.enable_disp.GetValue() 
+
         self._on_select_model_helper() 
         self.set_model_param_sizer(self.model)                   
         if self.model is None:
@@ -1293,7 +1297,7 @@ class FitPage(BasicPage):
                 self.state.disable_disp = self.disable_disp.GetValue()
 
             # Keep the previous param values
-            if copy_flag:
+            if copy_flag  and self.structurebox.GetLabel() != 'None':
                 self.get_paste_params(copy_flag)
             self._onDraw(event=None)
         else:
