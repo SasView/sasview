@@ -1656,7 +1656,10 @@ class Plugin(PluginBase):
             fn = data_copy.data#[index] 
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
             gn = theory_data.data#[index]
-            en = weight#data_copy.err_data#[index]
+            if weight == None:
+                en = data_copy.err_data
+            else:
+                en = weight
             residuals.data = (fn - gn) / en 
             residuals.qx_data = data_copy.qx_data#[index]
             residuals.qy_data = data_copy.qy_data #[index]
