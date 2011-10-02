@@ -1041,7 +1041,7 @@ class Plugin(PluginBase):
             batch_outputs["Chi2"] = []
             for index  in range(len(pars)):
                 batch_outputs[pars[index]] = []
-                batch_outputs["error on %s" % pars[index]] = []
+                batch_inputs["error on %s" % pars[index]] = []
             for res in result:
                 if res is None:
                     null_value = numpy.nan
