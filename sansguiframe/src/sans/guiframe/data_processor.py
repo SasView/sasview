@@ -517,7 +517,10 @@ class Notebook(nb, PanelBase):
                 return
                 
         grid, pos = self.add_empty_page()
-        grid.set_data(data_inputs, data_outputs)
+        grid.set_data(data_inputs=data_inputs, 
+                      data_outputs=data_outputs,
+                      file_name=file_name,
+                      details=details)
     
     def add_column(self):
         """
@@ -912,9 +915,8 @@ class GridFrame(wx.Frame):
     def set_data(self, data_inputs, data_outputs, details="", file_name=None):
         """
         """
-        pos = self.panel.notebook.GetSelection()
-        grid = self.panel.notebook.GetPage(pos)
-        grid.set_data(data_inputs=data_inputs, 
+       
+        self.panel.notebook.set_data(data_inputs=data_inputs, 
                             file_name=file_name,
                             details=details,
                             data_outputs=data_outputs)
