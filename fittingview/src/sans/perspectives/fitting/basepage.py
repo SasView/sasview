@@ -2880,6 +2880,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         content = ''
         # go through the str params
         for item in param: 
+            disfunc = ''
+            try:
+                if item[7].__class__.__name__ == 'ComboBox':
+                    disfunc = item[7].GetLabel()
+            except:
+                disfunc = ''
+                pass
             # 2D
             if self.data.__class__.__name__== "Data2D":
                 name = item[1]
@@ -2890,9 +2897,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if not item[1] in orient_param:
                     name = item[1]
                     value = item[2].GetValue()
+                else:
+                    disfunc = ''
             # add to the content
-            content += name + ',' + value + ':'
-            
+            if disfunc != '':
+                disfunc = ',' + disfunc
+            content += name + ',' + value + disfunc + ':'
+
         return content
    
     def get_clipboard(self):   
@@ -2939,7 +2950,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                 value = item[1]
                 # Transfer the text to content[dictionary]
                 context[name] = value
-        
+            # ToDo: PlugIn this poly disp function for pasting
+            if len(line) == 3:
+                poly_func = item[2]
+            else:
+                poly_func = None
         # Do it if params exist        
         if  self.parameters != []:
             # go through the parameters  
