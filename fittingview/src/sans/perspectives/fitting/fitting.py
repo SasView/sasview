@@ -731,7 +731,9 @@ class Plugin(PluginBase):
                     for element in templist:
                         name = str(element[1])
                         pars.append(name)
-                    for fitproblem in  value.get_fit_problem():
+                    fitproblem_list = value.values()
+                    fitproblem_list.sort()
+                    for fitproblem in  fitproblem_list:
                         if sim_fitter is None:
                             fitter = Fit(self._fit_engine)  
                             self._fit_helper(fitproblem=fitproblem, 
@@ -966,30 +968,12 @@ class Plugin(PluginBase):
                 ## check if constraint
                 if item[0] != None and item[1] != None:
                     listOfConstraint.append((item[0],item[1]))
-        for param in model.getParamList():
-            if param not in pars:
-                if param not in batch_inputs.keys():
-                    batch_inputs[param] = []
-                if param not in model.non_fittable:
-                    batch_inputs[param].append(model.getParam(param))
         new_model = model#deepcopy(model)
         fitter.set_model(new_model, fit_id, pars, constraints=listOfConstraint)
         fitter.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin, 
                         qmax=qmax)
         fitter.select_problem_for_fit(id=fit_id, value=1)
-        #fill batch result information
-        if "Data" not in batch_outputs.keys():
-            batch_outputs["Data"] = []
-        batch_outputs["Data"].append(data.name)
-        for key, value in data.meta_data.iteritems():
-            if key not in batch_inputs.keys():
-                batch_inputs[key] = []
-            batch_inputs[key].append(value)
-        param = "temperature"
-        if hasattr(data.sample, param):
-            if param not in  batch_inputs.keys():
-                 batch_inputs[param] = []
-            batch_inputs[param].append(data.sample.temperature)
+       
     
     def _onSelect(self,event):
         """ 
@@ -1045,13 +1029,21 @@ class Plugin(PluginBase):
             for res in result:
                 if res is None:
                     null_value = numpy.nan
-                    batch_outputs["Chi2"].append(null_value)
+                    from sans.guiframe.data_processor import BatchCell
+                    cell = BatchCell()
+                    cell.label = null_value
+                    cell.value = null_value
+                    batch_outputs["Chi2"].append(cell)
                     for index  in range(len(pars)):
                         batch_outputs[pars[index]].append(null_value)
                         item = null_value
                         batch_inputs["error on %s" % pars[index]].append(item)
                 else:
-                    batch_outputs["Chi2"].append(res.fitness)
+                    from sans.guiframe.data_processor import BatchCell
+                    cell = BatchCell()
+                    cell.label = res.fitness
+                    cell.value = res.fitness
+                    batch_outputs["Chi2"].append(cell)
                     for index  in range(len(pars)):
                         batch_outputs[pars[index]].append(res.pvec[index])
                         item = res.stderr[index]
@@ -1059,14 +1051,6 @@ class Plugin(PluginBase):
             pid = page_id[0]
             self.page_finder[pid].set_result(result=batch_outputs)   
            
-            """
-            draw_model(self, model, page_id, data=None, smearer=None,
-                   enable1D=True, enable2D=False,
-                   state=None,
-                   toggle_mode_on=False,
-                   qmin=None, qmax=None, 
-                   update_chisqr=True, weight=None):
-            """
             for pid in page_id:
                 cpage = self.fit_panel.get_page_by_id(pid)
                 cpage._on_fit_complete()
@@ -1088,8 +1072,52 @@ class Plugin(PluginBase):
                                       qmin=qmin, qmax=qmax, 
                                       update_chisqr=False, 
                                       weight=weight)
+        #get theory data and residuals of each data then send all values
+        # to the grid  
+        wx.CallAfter(self.on_set_batch_result, page_id, pars, batch_outputs, 
+                batch_inputs)
                     
-            self.parent.on_set_batch_result(data_outputs=batch_outputs, 
+    def on_set_batch_result(self, page_id, pars, batch_outputs, batch_inputs):
+        """
+        """
+        for pid in page_id:
+            fitproblem_list = self.page_finder[pid].values()
+            fitproblem_list.sort()
+            index = 0
+            for fitproblem in fitproblem_list:
+                residuals =  fitproblem.get_residuals()
+                theory_data = fitproblem.get_theory_data()
+                data = fitproblem.get_fit_data()
+                model = fitproblem.get_model()
+                 #fill batch result information
+                if "Data" not in batch_outputs.keys():
+                    batch_outputs["Data"] = []
+                from sans.guiframe.data_processor import BatchCell
+                cell = BatchCell()
+                cell.label = data.name
+                cell.value = index
+                cell.object = [data, theory_data]
+                
+                for param in model.getParamList():
+                    if param not in pars:
+                        if param not in batch_inputs.keys():
+                            batch_inputs[param] = []
+                        if param not in model.non_fittable:
+                            batch_inputs[param].append(model.getParam(param))
+                batch_outputs["Data"].append(cell)
+                for key, value in data.meta_data.iteritems():
+                    if key not in batch_inputs.keys():
+                        batch_inputs[key] = []
+                    batch_inputs[key].append(value)
+                param = "temperature"
+                if hasattr(data.sample, param):
+                    if param not in  batch_inputs.keys():
+                         batch_inputs[param] = []
+                    batch_inputs[param].append(data.sample.temperature)
+                # associate residuals plot
+                batch_outputs["Chi2"][index].object = residuals
+          
+        self.parent.on_set_batch_result(data_outputs=batch_outputs, 
                                             data_inputs=batch_inputs,
                                             plugin_name=self.sub_menu)
              
@@ -1150,11 +1178,13 @@ class Plugin(PluginBase):
                 msg += "Completed!!!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
             except ValueError:
+                raise
                 self._update_fit_button(page_id)
                 msg = "Single Fitting did not converge!!!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                       type="stop"))
             except:
+                raise
                 self._update_fit_button(page_id)
                 msg = "Single Fit completed but Following"
                 msg += " error occurred:%s" % sys.exc_value
