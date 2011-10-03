@@ -32,7 +32,7 @@ class BatchCell:
         self.value = None
         self.col = -1
         self.row = -1
-        self.object = None
+        self.object = []
         
 
 def parse_string(sentence, list):
@@ -109,8 +109,8 @@ class GridPage(sheet.CSheet):
         self.axis_label = ""
         self.selected_cells = []
         self.selected_cols = []
-        self.selected_row = []
-        self.plottable_list = []
+        self.selected_rows = []
+        self.plottable_cells = []
         self.plottable_flag = False
         self.SetColMinimalAcceptableWidth(col_with)
         self.SetRowMinimalAcceptableHeight(row_height)
@@ -155,14 +155,7 @@ class GridPage(sheet.CSheet):
             if cell_row > 0 and cell_row < self.max_row_touse:
                 self.axis_value.append(self.GetCellValue(cell_row, cell_col))
         
-    def set_plottable_list(self, prev_row, next_row, prev_col, next_col):
-        """
-        """
-        if (prev_col == -1  and next_col != -1 and prev_row != -1 ) or \
-            (prev_row == -1 and  next_row !=-1 and prev_col != -1):
-            self.plottable_flag = True
-        if self.plottable_flag:
-            print "special case"
+    
                 
     def on_left_click(self, event):
         """
@@ -172,22 +165,20 @@ class GridPage(sheet.CSheet):
         flag = event.CmdDown() or event.ControlDown()
         col = event.GetCol()
         row = event.GetRow()
-        print "on left click", row, col, flag
-    
         if not flag:
             self.selected_cols = []
+            self.selected_rows = []
             self.selected_cells = []
             self.axis_label = ""
             self.plottable_list = []
+            self.plottable_cells = []
             self.plottable_flag = False
-        else:
-            self.set_plottable_list(prev_row=self.last_selected_row,
-                                     next_row=row, 
-                                     prev_col=self.last_selected_col,
-                                      next_col=col)
-            
+       
         self.last_selected_col = col
         self.last_selected_row = row
+        if row != -1 and row not in self.selected_rows:
+             self.selected_rows.append(row)
+             
         if col != -1:
             for row in range(1, self.GetNumberRows()+ 1):
                 cell = (row, col)
@@ -199,6 +190,11 @@ class GridPage(sheet.CSheet):
             for cell_row, cell_col in self.selected_cells:
                 self.axis_value.append(self.GetCellValue(cell_row, cell_col))
             self.axis_label = self.GetCellValue(0, col)
+        
+            
+            
+            
+            
        
 
     def on_right_click(self, event):
@@ -585,10 +581,12 @@ class GridPanel(SPanel):
         self.vbox = wx.BoxSizer(wx.VERTICAL)
         
         self.plotting_sizer = wx.FlexGridSizer(3, 7, 10, 5)
+        self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.grid_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.vbox.AddMany([(self.grid_sizer, 1, wx.EXPAND, 0),
                            (wx.StaticLine(self, -1), 0, wx.EXPAND, 0),
-                           (self.plotting_sizer)])
+                           (self.plotting_sizer),
+                           (self.button_sizer)])
         self.parent = parent
         self._data_inputs = data_inputs
         self._data_outputs = data_outputs
@@ -600,6 +598,7 @@ class GridPanel(SPanel):
         self.y_axis_title = None
         self.x_axis_unit = None
         self.y_axis_unit = None
+        self.view_button = None
         self.plot_button = None
         self.notebook = None
         self.layout_grid()
@@ -644,7 +643,7 @@ class GridPanel(SPanel):
                         msg = "Invalid data in row %s column %s" % (str(row),
                                                                     str(col))
                         wx.PostEvent(self.parent.parent, 
-                             SatusEvent(status=msg, info="error")) 
+                             StatusEvent(status=msg, info="error")) 
             else:
                 axis.append(None) 
         return axis
@@ -659,6 +658,61 @@ class GridPanel(SPanel):
                                                file_name=path,
                                                details=self.details)
         
+    def on_view(self, event):
+        """
+        Get object represented buy the given cell and plot them.
+        """
+        pos = self.notebook.GetSelection()
+        grid = self.notebook.GetPage(pos)
+        title = self.notebook.GetPageText(pos)
+        
+        
+        group_id = wx.NewId()
+        for cell in grid.selected_cells:
+            row, col = cell
+            label_row = 0
+            label = grid.GetCellValue(label_row, col)
+            if label in grid.data:
+                values = grid.data[label]
+                value = values[row -1]
+                if issubclass(value.__class__, BatchCell):
+                    for new_plot in value.object:
+                        if new_plot is None:
+                            msg = "Row %s , " % str(row)
+                            msg += "Column %s doesn't have a view" % str(label)
+                            #raise ValueError, msg
+                            wx.PostEvent(self.parent.parent, 
+                                 StatusEvent(status=msg, info="error")) 
+                            return
+                        if issubclass(new_plot.__class__, Data1D):
+                            new_plot.group_id = group_id
+                            new_plot.list_group_id .append(group_id)
+                        else:
+                            if label.lower() == "data":
+                                if len(grid.selected_cells) != 1:
+                                    msg = "Can only view one"
+                                    msg += " selected data at once"
+                                    wx.PostEvent(self.parent.parent, 
+                                                 StatusEvent(status=msg,
+                                                              info="error")) 
+                                    return
+                                
+                        wx.PostEvent(self.parent.parent, 
+                                     NewPlotEvent(plot=new_plot, 
+                                  group_id=str(new_plot.group_id),
+                                   title =title))  
+                else:
+                   
+                    msg = "Row %s , " % str(row)
+                    msg += "Column %s doesn't have a view" % str(label)
+                    #raise ValueError, msg
+                    wx.PostEvent(self.parent.parent, 
+                         StatusEvent(status=msg, info="error")) 
+                    return
+    
+        
+     
+    
     def on_plot(self, event):
         """
         Evaluate the contains of textcrtl and plot result
@@ -712,7 +766,7 @@ class GridPanel(SPanel):
                         group_id=str(new_plot.group_id), title =title))    
         except:
              wx.PostEvent(self.parent.parent, 
-                             SatusEvent(status=msg, info="error")) 
+                             StatusEvent(status=msg, info="error")) 
         
     def layout_grid(self):
         """
@@ -726,6 +780,7 @@ class GridPanel(SPanel):
         """
         Draw area containing options to plot
         """
+       
         self.x_axis_title = wx.TextCtrl(self, -1)
         self.y_axis_title = wx.TextCtrl(self, -1)
         self.x_axis_label = wx.TextCtrl(self, -1, size=(200, -1))
@@ -738,7 +793,13 @@ class GridPanel(SPanel):
                             id=self.y_axis_add.GetId())
         self.x_axis_unit = wx.TextCtrl(self, -1)
         self.y_axis_unit = wx.TextCtrl(self, -1)
+        self.view_button = wx.Button(self, -1, "View")
+        wx.EVT_BUTTON(self, self.view_button.GetId(), self.on_view)
         self.plot_button = wx.Button(self, -1, "Plot")
+        self.button_sizer.AddMany( [ (500, 30),
+                                (self.view_button, 0, wx.RIGHT|wx.BOTTOM, 10),
+                                (self.plot_button, 0, wx.RIGHT|wx.BOTTOM, 10)])
+        
         wx.EVT_BUTTON(self, self.plot_button.GetId(), self.on_plot)
         self.plotting_sizer.AddMany([
                     (wx.StaticText(self, -1, "x-axis label"), 1,
@@ -766,7 +827,7 @@ class GridPanel(SPanel):
                       (-1, -1),
                       (-1, -1),
                       (-1, -1),
-                      (self.plot_button, 1, wx.LEFT|wx.BOTTOM, 10)])
+                      (-1, 1)])
    
     def on_edit_axis(self, event):
         """
