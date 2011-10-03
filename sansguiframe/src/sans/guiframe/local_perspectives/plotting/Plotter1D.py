@@ -707,8 +707,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             return
         self.toolbar.AddSeparator()
         id_delete = wx.NewId()
-        delete =  wx.ArtProvider.GetBitmap(wx.ART_DELETE, wx.ART_TOOLBAR, 
-                                           size = (18,18))
+        delete =  wx.ArtProvider.GetBitmap(wx.ART_DELETE, wx.ART_TOOLBAR)
         self.toolbar.AddSimpleTool(id_delete, delete,
                            'Delete', 'permanently Delete')
 
