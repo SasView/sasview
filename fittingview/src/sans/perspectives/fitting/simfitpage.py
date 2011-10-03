@@ -268,12 +268,13 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             self._fill_sizer_fit()
         #--------------------------------------------------------
         boxsizer1.Add(sizer_title, flag= wx.TOP|wx.BOTTOM,border=5) 
-        boxsizer1.Add(sizer_couples, flag= wx.TOP|wx.BOTTOM,border=5)
+        boxsizer1.Add(sizer_couples, 1, flag= wx.TOP|wx.BOTTOM,border=5)
        
-        self.sizer1.Add(boxsizer1,1, wx.EXPAND | wx.ALL, 10)
+        self.sizer1.Add(boxsizer1, 1, wx.EXPAND | wx.ALL, 10)
         self.sizer1.Layout()
         #self.SetScrollbars(20,20,25,65)
         self.AdjustScrollbars()
+        self.Layout()
         
     def _store_model(self):
         """
@@ -761,38 +762,39 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         for id, value in self.page_finder.iteritems():
             try:
                 ix = 0
-                iy += 1 
                 for fitproblem in value.get_fit_problem():
-                    data = fitproblem.get_fit_data()
-                    model = fitproblem.get_model()
-                    name = '_'
-                    if model is not None:
-                        name = str(model.name)
-                    cb = wx.CheckBox(self, -1, name)
-                    cb.SetValue(False)
-                    cb.Enable(model is not None and data.is_data)
-                    sizer.Add(cb, (iy, ix), (1, 1), 
-                               wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-                    wx.EVT_CHECKBOX(self, cb.GetId(), self.check_model_name)
-                    ix += 2 
-                    type = model.__class__.__name__
-                    model_type = wx.StaticText(self, -1, str(type))
-                    sizer.Add(model_type, (iy, ix), (1, 1), 
-                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                    name = '-'
-                    if data is not None and data.is_data:
-                        name = str(data.name)
-                    data_used = wx.StaticText(self, -1, name)
-                    ix += 1 
-                    sizer.Add(data_used, (iy, ix), (1, 1), 
-                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                    ix += 1 
-                    caption = value.get_fit_tab_caption()
-                    tab_caption_used= wx.StaticText(self, -1, str(caption))
-                    sizer.Add(tab_caption_used, (iy, ix), (1, 1), 
-                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    if  not self.parent.get_page_by_id(id).batch_on:
+                        iy += 1 
+                        data = fitproblem.get_fit_data()
+                        model = fitproblem.get_model()
+                        name = '_'
+                        if model is not None:
+                            name = str(model.name)
+                        cb = wx.CheckBox(self, -1, name)
+                        cb.SetValue(False)
+                        cb.Enable(model is not None and data.is_data)
+                        sizer.Add(cb, (iy, ix), (1, 1), 
+                                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                        wx.EVT_CHECKBOX(self, cb.GetId(), self.check_model_name)
+                        ix += 2 
+                        type = model.__class__.__name__
+                        model_type = wx.StaticText(self, -1, str(type))
+                        sizer.Add(model_type, (iy, ix), (1, 1), 
+                                  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                        name = '-'
+                        if data is not None and data.is_data:
+                            name = str(data.name)
+                        data_used = wx.StaticText(self, -1, name)
+                        ix += 1 
+                        sizer.Add(data_used, (iy, ix), (1, 1), 
+                                  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                        ix += 1 
+                        caption = value.get_fit_tab_caption()
+                        tab_caption_used= wx.StaticText(self, -1, str(caption))
+                        sizer.Add(tab_caption_used, (iy, ix), (1, 1), 
+                                  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                     
-                self.model_list.append([cb,value,id,model])
+                        self.model_list.append([cb,value,id,model])
                 
             except:
                 raise
@@ -801,6 +803,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         sizer.Add((20, 20), (iy, ix), (1, 1), 
                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         sizer.Layout()    
+    
 
     def on_set_focus(self, event=None):
         """
