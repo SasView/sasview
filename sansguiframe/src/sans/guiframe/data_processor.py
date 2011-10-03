@@ -688,7 +688,7 @@ class GridPanel(SPanel):
                             new_plot.group_id = group_id
                             new_plot.list_group_id .append(group_id)
                         else:
-                            if label.lower() == "data":
+                            if label.lower() in ["data", "chi2"]:
                                 if len(grid.selected_cells) != 1:
                                     msg = "Can only view one"
                                     msg += " selected data at once"
