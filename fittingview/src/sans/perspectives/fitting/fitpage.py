@@ -2169,6 +2169,16 @@ class FitPage(BasicPage):
         On Weighting radio button event, sets the weightbt_string
         """
         self.weightbt_string = event.GetEventObject().GetLabelText()
+        # compute weight for the current data
+        from .utils import get_weight
+        flag_weight = self.get_weight_flag()
+        weight = get_weight(data=self.data, 
+                            is2d=self._is_2D(), 
+                            flag=flag_weight)
+        self._manager.set_fit_weight(uid=self.uid, 
+                                     flag=flag_weight, 
+                                     is2d=self._is_2D(), 
+                                     fid=None)
     
     def onPinholeSmear(self, event):
         """
@@ -2591,6 +2601,18 @@ class FitPage(BasicPage):
         
         self.sizer_set_smearer.Layout()
         self.Layout()
+        
+        # compute weight for the current data
+        from .utils import get_weight
+        flag_weight = self.get_weight_flag()
+        weight = get_weight(data=self.data, 
+                            is2d=self._is_2D(), 
+                            flag=flag_weight)
+        self._manager.set_fit_weight(uid=self.uid, 
+                                     flag=flag_weight, 
+                                     is2d=self._is_2D(), 
+                                     fid=None)
+        
         ## set smearing value whether or not the data contain the smearing info
         self._manager.set_smearer(uid=self.uid, smearer=temp_smearer,
                                   fid=self.data.id,

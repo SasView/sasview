@@ -619,9 +619,13 @@ class Plugin(PluginBase):
             ## if user has already selected a model to plot
             ## redraw the model with data smeared
             smear = self.page_finder[uid].get_smearer(fid=fid)
+
+            # compute weight for the current data
+            weight = self.page_finder[uid].get_weight(fid=fid)
+
             self.draw_model(model=model, data=data, page_id=uid, smearer=smear,
                 enable1D=enable1D, enable2D=enable2D,
-                qmin=qmin, qmax=qmax, weight=None)
+                qmin=qmin, qmax=qmax, weight=weight)
             self._mac_sleep(0.2)
             
     def _mac_sleep(self, sec=0.2):
