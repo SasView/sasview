@@ -100,6 +100,8 @@ class GridPage(sheet.CSheet):
         self.file_name = None
         self._cols = 50
         self._rows = 51
+        self.last_selected_row = -1
+        self.last_selected_col = -1
         col_with = 30
         row_height = 20
         self.max_row_touse = 0
@@ -107,6 +109,9 @@ class GridPage(sheet.CSheet):
         self.axis_label = ""
         self.selected_cells = []
         self.selected_cols = []
+        self.selected_row = []
+        self.plottable_list = []
+        self.plottable_flag = False
         self.SetColMinimalAcceptableWidth(col_with)
         self.SetRowMinimalAcceptableHeight(row_height)
         self.SetNumberRows(self._cols)
@@ -132,10 +137,13 @@ class GridPage(sheet.CSheet):
         flag = event.CmdDown() or event.ControlDown()
         row, col = event.GetRow(), event.GetCol()
         cell = (row, col)
+        event.Skip()
         if not flag:
             self.selected_cells = []
             self.axis_value = []
             self.axis_label = ""
+        if col >= 0:
+             self.axis_label = self.GetCellValue(0, col)
         if cell not in self.selected_cells:
             if row > 0:
                 self.selected_cells.append(cell)
@@ -146,9 +154,16 @@ class GridPage(sheet.CSheet):
         for cell_row, cell_col in self.selected_cells:
             if cell_row > 0 and cell_row < self.max_row_touse:
                 self.axis_value.append(self.GetCellValue(cell_row, cell_col))
-        self.axis_label = self.GetCellValue(0, col)
-        event.Skip()
-      
+        
+    def set_plottable_list(self, prev_row, next_row, prev_col, next_col):
+        """
+        """
+        if (prev_col == -1  and next_col != -1 and prev_row != -1 ) or \
+            (prev_row == -1 and  next_row !=-1 and prev_col != -1):
+            self.plottable_flag = True
+        if self.plottable_flag:
+            print "special case"
+                
     def on_left_click(self, event):
         """
         Catch the left click on label mouse event
@@ -156,10 +171,23 @@ class GridPage(sheet.CSheet):
         event.Skip()
         flag = event.CmdDown() or event.ControlDown()
         col = event.GetCol()
+        row = event.GetRow()
+        print "on left click", row, col, flag
+    
         if not flag:
             self.selected_cols = []
             self.selected_cells = []
             self.axis_label = ""
+            self.plottable_list = []
+            self.plottable_flag = False
+        else:
+            self.set_plottable_list(prev_row=self.last_selected_row,
+                                     next_row=row, 
+                                     prev_col=self.last_selected_col,
+                                      next_col=col)
+            
+        self.last_selected_col = col
+        self.last_selected_row = row
         if col != -1:
             for row in range(1, self.GetNumberRows()+ 1):
                 cell = (row, col)
