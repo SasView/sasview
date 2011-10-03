@@ -45,6 +45,7 @@ MAX_NBR_DATA = 4
 SANS_F_TOL = 5e-05
 
 (PageInfoEvent, EVT_PAGE_INFO)   = wx.lib.newevent.NewEvent()
+(BatchDrawEvent, EVT_BATCH_DRAW)   = wx.lib.newevent.NewEvent()
 
 if sys.platform.count("darwin")==0:
     ON_MAC = False
@@ -267,6 +268,7 @@ class Plugin(PluginBase):
         self.index_theory= 0
         self.parent.Bind(EVT_SLICER_PANEL, self._on_slicer_event)
         self.parent.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PANEL)
+        self.parent.Bind(EVT_BATCH_DRAW, self.on_display_grid)
         self.parent._mgr.Bind(wx.aui.EVT_AUI_PANE_CLOSE,self._onclearslicer)    
         #Create reader when fitting panel are created
         self.state_reader = Reader(self.set_state)   
@@ -638,6 +640,7 @@ class Plugin(PluginBase):
     def draw_model(self, model, page_id, data=None, smearer=None,
                    enable1D=True, enable2D=False,
                    state=None,
+                   fid=None,
                    toggle_mode_on=False,
                    qmin=None, qmax=None, 
                    update_chisqr=True, weight=None):
@@ -666,6 +669,7 @@ class Plugin(PluginBase):
                                smearer=smearer,
                                qmin=qmin,
                                qmax=qmax, 
+                               fid=fid,
                                weight=weight,
                                toggle_mode_on=toggle_mode_on,
                                state=state,
@@ -679,6 +683,7 @@ class Plugin(PluginBase):
                                 smearer=smearer,
                                 qmin=qmin,
                                 qmax=qmax,
+                                fid=fid,
                                 weight=weight,
                                 state=state,
                                 toggle_mode_on=toggle_mode_on,
@@ -724,6 +729,7 @@ class Plugin(PluginBase):
                     continue
             try:
                 if value.get_scheduled() == 1:
+                    value.nbr_residuals_computed = 0
                     #Get list of parameters name to fit
                     pars = []
                     templist = []
@@ -1053,8 +1059,9 @@ class Plugin(PluginBase):
                         item = res.stderr[index]
                         batch_inputs["error on %s" % pars[index]].append(item)
             pid = page_id[0]
-            self.page_finder[pid].set_result(result=batch_outputs)   
-           
+            self.page_finder[pid].set_result(batch_inputs=batch_inputs,
+                                             batch_outputs=batch_outputs)   
+            count = len(self.page_finder[pid].keys())
             for pid in page_id:
                 cpage = self.fit_panel.get_page_by_id(pid)
                 cpage._on_fit_complete()
@@ -1073,59 +1080,51 @@ class Plugin(PluginBase):
                                       enable2D=flag,
                                       state=None,
                                       toggle_mode_on=False,
+                                      fid=fid,
                                       qmin=qmin, qmax=qmax, 
                                       update_chisqr=False, 
                                       weight=weight)
-        #get theory data and residuals of each data then send all values
-        # to the grid  
-        wx.CallAfter(self.on_set_batch_result, page_id, pars, batch_outputs, 
-                batch_inputs)
+           
+    
+        
                     
-    def on_set_batch_result(self, page_id, pars, batch_outputs, batch_inputs):
+    def on_set_batch_result(self, page_id, fid, batch_outputs, batch_inputs):
         """
         """
-        for pid in page_id:
-            fitproblem_list = self.page_finder[pid].values()
-            fitproblem_list.sort()
-            index = 0
-            for fitproblem in fitproblem_list:
-                residuals =  fitproblem.get_residuals()
-                theory_data = fitproblem.get_theory_data()
-                data = fitproblem.get_fit_data()
-                model = fitproblem.get_model()
-                 #fill batch result information
-                if "Data" not in batch_outputs.keys():
-                    batch_outputs["Data"] = []
-                from sans.guiframe.data_processor import BatchCell
-                cell = BatchCell()
-                cell.label = data.name
-                cell.value = index
-                cell.object = [data, theory_data]
-                
-                for param in model.getParamList():
-                    if param not in pars:
-                        if param not in batch_inputs.keys():
-                            batch_inputs[param] = []
-                        if param not in model.non_fittable:
-                            batch_inputs[param].append(model.getParam(param))
-                batch_outputs["Data"].append(cell)
-                for key, value in data.meta_data.iteritems():
-                    if key not in batch_inputs.keys():
-                        batch_inputs[key] = []
-                    batch_inputs[key].append(value)
-                param = "temperature"
-                if hasattr(data.sample, param):
-                    if param not in  batch_inputs.keys():
-                         batch_inputs[param] = []
-                    batch_inputs[param].append(data.sample.temperature)
-                # associate residuals plot
-                batch_outputs["Chi2"][index].object = residuals
-          
-        self.parent.on_set_batch_result(data_outputs=batch_outputs, 
-                                            data_inputs=batch_inputs,
-                                            plugin_name=self.sub_menu)
-             
-             
+        
+        pid =  page_id
+        if fid not in self.page_finder[pid]:
+            return
+        fitproblem = self.page_finder[pid][fid]
+        index = self.page_finder[pid].nbr_residuals_computed - 1
+        print "index", index
+        residuals =  fitproblem.get_residuals()
+        theory_data = fitproblem.get_theory_data()
+        data = fitproblem.get_fit_data()
+        model = fitproblem.get_model()
+        #fill batch result information
+        if "Data" not in batch_outputs.keys():
+            batch_outputs["Data"] = []
+        from sans.guiframe.data_processor import BatchCell
+        cell = BatchCell()
+        cell.label = data.name
+        cell.value = index
+        theory_data.id = wx.NewId()
+        cell.object = [data, theory_data]
+        
+        batch_outputs["Data"].append(cell)
+        for key, value in data.meta_data.iteritems():
+            if key not in batch_inputs.keys():
+                batch_inputs[key] = []
+            batch_inputs[key].append(value)
+        param = "temperature"
+        if hasattr(data.sample, param):
+            if param not in  batch_inputs.keys():
+                 batch_inputs[param] = []
+            batch_inputs[param].append(data.sample.temperature)
+        # associate residuals plot
+        batch_outputs["Chi2"][index].object = [residuals]
+       
     def _single_fit_completed(self, result, pars, page_id, batch_outputs,
                           batch_inputs=None,  elapsed=None):
         """
@@ -1395,7 +1394,7 @@ class Plugin(PluginBase):
         wx.PostEvent(self.parent, StatusEvent(status=msg,type="update"))
         
     def _complete1D(self, x, y, page_id, elapsed, index, model,
-                    weight=None,
+                    weight=None, fid=None,
                     toggle_mode_on=False, state=None, 
                     data=None, update_chisqr=True):
         """
@@ -1443,11 +1442,12 @@ class Plugin(PluginBase):
                     wx.PostEvent(current_pg,
                                  Chi2UpdateEvent(output=self._cal_chisqr(
                                                                 data=data,
+                                                                fid=fid,
                                                                 weight=weight,
                                                             page_id=page_id,
                                                             index=index)))
                 else:
-                    self._plot_residuals(page_id=page_id, data=data,
+                    self._plot_residuals(page_id=page_id, data=data, fid=fid,
                                           index=index, weight=weight)
 
             msg = "Computation  completed!"
@@ -1467,8 +1467,7 @@ class Plugin(PluginBase):
         #self.ready_fit()
   
     def _complete2D(self, image, data, model, page_id,  elapsed, index, qmin,
-                    
-                     qmax, weight=None, toggle_mode_on=False, state=None, 
+                qmax, fid=None, weight=None, toggle_mode_on=False, state=None, 
                      update_chisqr=True):
         """
         Complete get the result of modelthread and create model 2D
@@ -1519,10 +1518,11 @@ class Plugin(PluginBase):
                 wx.PostEvent(current_pg,
                              Chi2UpdateEvent(output=self._cal_chisqr(data=data,
                                                                     weight=weight,
+                                                                    fid=fid,
                                                          page_id=page_id,
                                                          index=index)))
             else:
-                self._plot_residuals(page_id=page_id, data=data,
+                self._plot_residuals(page_id=page_id, data=data, fid=fid,
                                       index=index, weight=weight)
         msg = "Computation  completed!"
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
@@ -1532,6 +1532,7 @@ class Plugin(PluginBase):
                       data=None, smearer=None,
                       description=None, enable2D=False,
                       state=None,
+                      fid=None,
                       weight=None,
                       toggle_mode_on=False,
                        update_chisqr=True):
@@ -1560,6 +1561,7 @@ class Plugin(PluginBase):
                                     qmin=qmin,
                                     qmax=qmax,
                                     weight=weight, 
+                                    fid=fid,
                                     toggle_mode_on=toggle_mode_on,
                                     state=state,
                                     completefn=self._complete2D,
@@ -1576,6 +1578,7 @@ class Plugin(PluginBase):
                       qmin, qmax, smearer=None,
                 state=None,
                 weight=None,
+                fid=None, 
                 toggle_mode_on=False, update_chisqr=True, 
                 enable1D=True):
         """
@@ -1600,6 +1603,7 @@ class Plugin(PluginBase):
                                   smearer=smearer,
                                   state=state,
                                   weight=weight,
+                                  fid=fid,
                                   toggle_mode_on=toggle_mode_on,
                                   completefn=self._complete1D,
                                   #updatefn = self._update1D,
@@ -1612,7 +1616,7 @@ class Plugin(PluginBase):
     
   
     
-    def _cal_chisqr(self, page_id, data, weight, index=None): 
+    def _cal_chisqr(self, page_id, data, weight, fid=None, index=None): 
         """
         Get handy Chisqr using the output from draw1D and 2D, 
         instead of calling expansive CalcChisqr in guithread
@@ -1666,11 +1670,13 @@ class Plugin(PluginBase):
         # get chisqr only w/finite
         chisqr = numpy.average(residuals * residuals)
         self._plot_residuals(page_id=page_id, data=data_copy, 
+                             fid=fid,
                              weight=weight, index=index)
         
         return chisqr
     
-    def _plot_residuals(self, page_id, weight, data=None, index=None): 
+    def _plot_residuals(self, page_id, weight, fid=None,
+                        data=None, index=None): 
         """
         Plot the residuals
         
@@ -1752,10 +1758,57 @@ class Plugin(PluginBase):
         ##post data to plot
         title = new_plot.name 
         self.page_finder[page_id].set_residuals(residuals=new_plot, fid=data.id)
+        batch_on = self.fit_panel.get_page_by_id(page_id).batch_on
+        
+        # Need all residuals before plotting
+        # Should be refactored
+        n = len(self.page_finder[page_id].keys())
+        m = self.page_finder[page_id].nbr_residuals_computed
+        flag = False
+        batch_inputs, batch_outputs = self.page_finder[page_id].get_result()
+      
+        if self.page_finder[page_id].nbr_residuals_computed == -1:
+            flag = False
+        else:
+            if m == n - 1:
+                flag = True
+            else:
+                flag = False
+                self.page_finder[page_id].nbr_residuals_computed += 1
+            
+            self.on_set_batch_result(page_id=page_id,
+                                 fid=fid,
+                              batch_outputs=batch_outputs, 
+                                batch_inputs=batch_inputs) 
         # plot data
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title)) 
+        event = BatchDrawEvent(page_id=page_id , 
+                           batch_on=batch_on,
+                           batch_outputs=batch_outputs,
+                           batch_inputs=batch_inputs,
+                           is_displayed=flag)
+        wx.PostEvent(self.parent, event)
+        
+        if not batch_on:
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
+            
         #reset weight  
         #self.weight = None
+        
+    def on_display_grid(self, event):
+        """
+        deplay batch result
+        """
+        page_id = event.page_id
+        batch_on = event.batch_on
+        flag = event.is_displayed
+        batch_outputs = event.batch_outputs
+        batch_inputs = event.batch_inputs
+        if flag and batch_on:
+            self.parent.on_set_batch_result(data_outputs=batch_outputs, 
+                                            data_inputs=batch_inputs,
+                                            plugin_name=self.sub_menu)
+            self.page_finder[page_id].nbr_residuals_computed = -1
+       
 #def profile(fn, *args, **kw):
 #    import cProfile, pstats, os
 #    global call_result

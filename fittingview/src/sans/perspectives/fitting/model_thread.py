@@ -17,6 +17,7 @@ class Calc2D(CalcThread):
     def __init__(self, data, model, smearer, qmin, qmax,  page_id,
                  state=None,
                  weight=None,
+                 fid=None,
                  toggle_mode_on=False,
                  completefn=None,
                  updatefn=None,
@@ -31,6 +32,7 @@ class Calc2D(CalcThread):
         self.qmin = qmin
         self.qmax = qmax
         self.weight = weight
+        self.fid = fid
         #self.qstep = qstep
         self.toggle_mode_on = toggle_mode_on
         self.data = data
@@ -103,6 +105,7 @@ class Calc2D(CalcThread):
                        toggle_mode_on=self.toggle_mode_on,
                        elapsed=elapsed,
                        index=index_model,
+                       fid=self.fid,
                        qmin=self.qmin,
                        qmax=self.qmax,
                        weight=self.weight,
@@ -117,6 +120,7 @@ class Calc1D(CalcThread):
     def __init__(self, model,
                  page_id,
                  data,
+                 fid=None,
                  qmin=None,
                  qmax=None,
                  weight=None,
@@ -135,6 +139,7 @@ class Calc1D(CalcThread):
                  updatefn,
                  yieldtime,
                  worktime)
+        self.fid = fid
         self.data = data
         self.qmin = qmin
         self.qmax = qmax
@@ -171,6 +176,7 @@ class Calc1D(CalcThread):
                       page_id=self.page_id,
                       state=self.state,
                       weight=self.weight,
+                      fid=self.fid,
                       toggle_mode_on=self.toggle_mode_on,
                       elapsed=elapsed,index=index, model=self.model,
                       data=self.data, 

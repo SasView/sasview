@@ -156,6 +156,10 @@ class FitProblemDictionary(FitProblemComponent, dict):
         self._smear_on = False
         self.scheduled = 0
         self.fit_tab_caption = ''
+        self.nbr_residuals_computed = 0
+        self.batch_inputs = {}
+        self.batch_outputs = {}
+       
  
     def enable_smearing(self, flag=False, fid=None):
         """
@@ -414,17 +418,18 @@ class FitProblemDictionary(FitProblemComponent, dict):
         """
         return self.itervalues()
     
-    def set_result(self, result):
+    def set_result(self, batch_inputs, batch_outputs):
         """
         set a list of result
         """
-        self.result = result
+        self.batch_inputs = batch_inputs
+        self.batch_outputs = batch_outputs
                 
     def get_result(self):
         """
         get result 
         """
-        return self.result
+        return self.batch_inputs, self.batch_outputs
     
     def set_graph_id(self, id):
         """
