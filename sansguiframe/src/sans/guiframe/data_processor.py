@@ -22,6 +22,18 @@ from sans.guiframe.dataFitting import Data1D
 FUNC_DICT = {"sqrt": "math.sqrt",
              "pow": "math.sqrt"}
 
+class BatchCell:
+    """
+    Object describing a cell in  the grid.
+    
+    """
+    def __init__(self):
+        self.label = ""
+        self.value = None
+        self.col = -1
+        self.row = -1
+        self.object = None
+        
 
 def parse_string(sentence, list):
     """
@@ -321,7 +333,10 @@ class GridPage(sheet.CSheet):
                 value_list = self.data_outputs[col_name]
                 
                 for value in value_list:
-                    self.SetCellValue(cell_row, cell_col, str(value))
+                    label = value
+                    if issubclass(value.__class__, BatchCell):
+                        label = value.label
+                    self.SetCellValue(cell_row, cell_col, str(label))
                     cell_row += 1
                 cell_col += 1
                 if cell_row > self.max_row_touse:
