@@ -92,7 +92,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.canvas.set_resizing(self.resizing)
         self.Bind(wx.EVT_SIZE, self._OnReSize)
         self._add_more_tool()
-       
+        self.parent.SetFocus() 
+        
     def get_symbol_label(self):
         """
         Associates label to symbol
