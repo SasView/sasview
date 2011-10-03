@@ -1043,6 +1043,7 @@ class Plugin(PluginBase):
                     cell = BatchCell()
                     cell.label = null_value
                     cell.value = null_value
+                    cell.object = [None]
                     batch_outputs["Chi2"].append(cell)
                     for index  in range(len(pars)):
                         batch_outputs[pars[index]].append(null_value)
@@ -1097,7 +1098,6 @@ class Plugin(PluginBase):
             return
         fitproblem = self.page_finder[pid][fid]
         index = self.page_finder[pid].nbr_residuals_computed - 1
-        print "index", index
         residuals =  fitproblem.get_residuals()
         theory_data = fitproblem.get_theory_data()
         data = fitproblem.get_fit_data()
@@ -1110,6 +1110,7 @@ class Plugin(PluginBase):
         cell.label = data.name
         cell.value = index
         theory_data.id = wx.NewId()
+        theory_data.name = data.name + "[%s]" % str(model.__class__.__name__)
         cell.object = [data, theory_data]
         
         batch_outputs["Data"].append(cell)
@@ -1123,6 +1124,7 @@ class Plugin(PluginBase):
                  batch_inputs[param] = []
             batch_inputs[param].append(data.sample.temperature)
         # associate residuals plot
+        
         batch_outputs["Chi2"][index].object = [residuals]
        
     def _single_fit_completed(self, result, pars, page_id, batch_outputs,
@@ -1766,15 +1768,15 @@ class Plugin(PluginBase):
         m = self.page_finder[page_id].nbr_residuals_computed
         flag = False
         batch_inputs, batch_outputs = self.page_finder[page_id].get_result()
-      
+         
         if self.page_finder[page_id].nbr_residuals_computed == -1:
             flag = False
         else:
-            if m == n - 1:
+            if m == n -1:
                 flag = True
             else:
                 flag = False
-                self.page_finder[page_id].nbr_residuals_computed += 1
+            self.page_finder[page_id].nbr_residuals_computed += 1
             
             self.on_set_batch_result(page_id=page_id,
                                  fid=fid,
