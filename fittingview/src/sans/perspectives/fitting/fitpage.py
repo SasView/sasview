@@ -1242,7 +1242,7 @@ class FitPage(BasicPage):
             #self._set_smear(self.data)
     
             # more disables for 2D
-            #self._set_smear_buttons()
+            self._set_smear_buttons()
             
             try:
                 # update smearer sizer
@@ -2169,15 +2169,23 @@ class FitPage(BasicPage):
         On Weighting radio button event, sets the weightbt_string
         """
         self.weightbt_string = event.GetEventObject().GetLabelText()
+        self._set_weight()
+        
+    def _set_weight(self, is_2D=None):
+        """
+        Set weight in fit problem
+        """
         # compute weight for the current data
         from .utils import get_weight
         flag_weight = self.get_weight_flag()
+        if is_2D == None:
+            is_2D = self._is_2D()
         weight = get_weight(data=self.data, 
-                            is2d=self._is_2D(), 
+                            is2d=is_2D, 
                             flag=flag_weight)
         self._manager.set_fit_weight(uid=self.uid, 
                                      flag=flag_weight, 
-                                     is2d=self._is_2D(), 
+                                     is2d=is_2D, 
                                      fid=None)
     
     def onPinholeSmear(self, event):
@@ -2601,17 +2609,7 @@ class FitPage(BasicPage):
         
         self.sizer_set_smearer.Layout()
         self.Layout()
-        
-        # compute weight for the current data
-        from .utils import get_weight
-        flag_weight = self.get_weight_flag()
-        weight = get_weight(data=self.data, 
-                            is2d=self._is_2D(), 
-                            flag=flag_weight)
-        self._manager.set_fit_weight(uid=self.uid, 
-                                     flag=flag_weight, 
-                                     is2d=self._is_2D(), 
-                                     fid=None)
+        self._set_weight()
         
         ## set smearing value whether or not the data contain the smearing info
         self._manager.set_smearer(uid=self.uid, smearer=temp_smearer,
@@ -3173,8 +3171,11 @@ class FitPage(BasicPage):
             self.model_view.SetLabel("Show 2D")
             self.enable2D = False
         self.create_default_data()
+        self._manager.store_data(self.uid, data_list=[self.data])
+
         self.set_model_param_sizer(self.model)
         self._set_sizer_dispersion()  
+        self._set_weight(is_2D= self.enable2D)
         self._set_smear_buttons()
         self._draw_model()
         

@@ -565,6 +565,8 @@ class FitProblem(FitProblemComponent):
         Store data associated with this class
         :param data: list of data selected
         """
+        self.original_data = None
+        self.fit_data = None
         # original data: should not be modified
         self.original_data = copy.deepcopy(data)
         # fit data: used for fit and can be modified for convenience
