@@ -258,7 +258,7 @@ class ModelPanel2D(ModelPanel1D):
         helpString = 'Show/Hide Graph: '
         helpString += (' ' + str(data.label) +';')
         self.parent._window_menu.SetHelpString(pos, helpString)
-        
+        print "str(data.label)", str(data.label)
     def _set_axis_labels(self):
         """
         Set axis labels
@@ -452,7 +452,7 @@ class ModelPanel2D(ModelPanel1D):
         if self.title_label != None:     
             pos = self.parent._window_menu.FindItem(self.window_caption)
             helpString = 'Show/Hide Graph: '
-            helpString += (' ' + self.title_label +';')
+            helpString += (' ' + str(self.title_label) +';')
             self.parent._window_menu.SetHelpString(pos, helpString)
 
         
