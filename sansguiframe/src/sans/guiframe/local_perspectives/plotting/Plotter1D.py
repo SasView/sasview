@@ -258,7 +258,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             pos = self.parent._window_menu.FindItem(self.window_caption)
             helpString = 'Show/Hide Graph: '
             for plot in  self.plots.itervalues():
-                helpString += (' ' + plot.label +';')
+                helpString += (' ' + str(plot.label) +';')
             self.parent._window_menu.SetHelpString(pos, helpString)
         else:
             self.plots[data.id] = data

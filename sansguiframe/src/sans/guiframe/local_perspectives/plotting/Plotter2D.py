@@ -256,7 +256,7 @@ class ModelPanel2D(ModelPanel1D):
         # Update Graph menu and help string        
         pos = self.parent._window_menu.FindItem(self.window_caption)
         helpString = 'Show/Hide Graph: '
-        helpString += (' ' + data.label +';')
+        helpString += (' ' + str(data.label) +';')
         self.parent._window_menu.SetHelpString(pos, helpString)
         
     def _set_axis_labels(self):
