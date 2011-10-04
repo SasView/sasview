@@ -204,13 +204,13 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                     self.cb1.SetValue(False)
         
         ## display constraint fields
-        if len(self.model_toFit)==2:
+        if len(self.model_toFit)==1:
             self._store_model()
             if self.show_constraint.GetValue() and\
                              len(self.constraints_list)==0:
                 self._show_all_constraint() 
                 self._show_constraint()
-        elif len(self.model_toFit)< 2:
+        elif len(self.model_toFit)< 1:
             ##constraint info
             self._hide_constraint()              
        
@@ -280,7 +280,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         """
          Store selected model
         """
-        if len(self.model_toFit) < 2:
+        if len(self.model_toFit) < 1:
             return
         for item in self.model_toFit:
             model = item[3]
@@ -291,7 +291,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         """
         Show fields to add constraint
         """
-        if len(self.model_toFit)< 2:
+        if len(self.model_toFit)< 1:
             msg= "Select at least 2 models to add constraint "
             wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
             ## hide button
@@ -446,8 +446,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 self.sizer2.Layout()
                 #self.SetScrollbars(20,20,25,65)
                 return
-        if len(self.model_toFit) < 2 :
-            msg= "Select at least 2 model to add constraint "
+        if len(self.model_toFit) < 1 :
+            msg= "Select at least 1 model to add constraint "
             wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
             self.sizer_constraints.Layout()
             self.sizer2.Layout()
@@ -613,8 +613,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.btFit.Bind(wx.EVT_BUTTON, self.onFit,id= self.btFit.GetId())
         self.btFit.SetToolTipString("Perform fit.")
         
-        text= "Hint: Park fitting engine will be selected \n"
-        text+= "automatically for more than 2 combinations checked"
+        text= "Hint: Park fitting engine will be selected automatically. \n"
+        #text+= "automatically for more than 2 combinations checked"
         text_hint = wx.StaticText(self,-1,text)
         
         sizer_button.Add(text_hint,  wx.RIGHT|wx.EXPAND, 10)

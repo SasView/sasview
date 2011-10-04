@@ -711,10 +711,20 @@ class Plugin(PluginBase):
             engineType = "Single Fit"
         fitter_list = []        
         sim_fitter = None     
+        is_single_fit = True
         if self.sim_page is not None and self.sim_page.uid == uid:
-            #simulatanous fit only one engine need to be created    
+            #simulatanous fit only one engine need to be created 
+            ## if simultaneous fit change automatically the engine to park
+            self._on_change_engine(engine='park')   
             sim_fitter = Fit(self._fit_engine)  
             fitter_list.append(sim_fitter) 
+            is_single_fit = False
+
+        self.fitproblem_count = fitproblem_count  
+        if self._fit_engine == "park":
+            engineType = "Simultaneous Fit"
+        else:
+            engineType = "Single Fit"
         
         self.current_pg = None
         list_page_id = []
@@ -783,7 +793,7 @@ class Plugin(PluginBase):
                                 improvement_delta=0.1)
         self._mac_sleep(0.2)
         ## perform single fit
-        if fitproblem_count == 1:
+        if is_single_fit:
             calc_fit = FitThread(handler = handler,
                                     fn=fitter_list,
                                     pars=pars,
