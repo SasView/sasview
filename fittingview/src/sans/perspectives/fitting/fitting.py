@@ -1076,12 +1076,14 @@ class Plugin(PluginBase):
             for pid in page_id:
                 cpage = self.fit_panel.get_page_by_id(pid)
                 cpage._on_fit_complete()
-                for fid in self.page_finder[pid].keys():
-                    data = self.page_finder[pid].get_fit_data(fid)
-                    model = self.page_finder[pid].get_model(fid)
-                    smearer = self.page_finder[pid].get_smearer(fid)
-                    qmin, qmax = self.page_finder[pid].get_range(fid)
-                    weight = self.page_finder[pid].get_weight(fid)
+                fitproblem_list = self.page_finder[pid].values()
+                fitproblem_list.sort()
+                for fitproblem in fitproblem_list:
+                    data = fitproblem.get_fit_data()
+                    model = fitproblem.get_model()
+                    smearer = fitproblem.get_smearer()
+                    qmin, qmax = fitproblem.get_range()
+                    weight = fitproblem.get_weight()
                     flag = issubclass(data.__class__, Data2D)
                     self.draw_model(model=model,
                                       page_id=pid, 
@@ -1091,7 +1093,7 @@ class Plugin(PluginBase):
                                       enable2D=flag,
                                       state=None,
                                       toggle_mode_on=False,
-                                      fid=fid,
+                                      fid=data.id,
                                       qmin=qmin, qmax=qmax, 
                                       update_chisqr=False, 
                                       weight=weight)
