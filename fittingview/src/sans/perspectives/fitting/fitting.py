@@ -1771,7 +1771,11 @@ class Plugin(PluginBase):
         title = new_plot.name 
         self.page_finder[page_id].set_residuals(residuals=new_plot, fid=data.id)
         batch_on = self.fit_panel.get_page_by_id(page_id).batch_on
-        
+        if not batch_on:
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
+            return
+        #reset weight  
+        #self.weight = None
         # Need all residuals before plotting
         # Should be refactored
         n = len(self.page_finder[page_id].keys())
@@ -1800,11 +1804,7 @@ class Plugin(PluginBase):
                            is_displayed=flag)
         wx.PostEvent(self.parent, event)
         
-        if not batch_on:
-            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
-            
-        #reset weight  
-        #self.weight = None
+
         
     def on_display_grid(self, event):
         """
