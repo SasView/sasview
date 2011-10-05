@@ -26,6 +26,7 @@ from sans.fit.AbstractFitEngine import FitEngine
 class SansFitResult(fitresult.FitResult):
     def __init__(self, *args, **kwrds):
         fitresult.FitResult.__init__(self, *args, **kwrds)
+        self.theory = None
         self.inputs = []
         
 class SansFitSimplex(FitSimplex):
@@ -42,7 +43,7 @@ class SansFitSimplex(FitSimplex):
     xtol = 1
     #xtol = 1e-4
     """Stop when simplex vertices are within xtol of each other"""
-    ftol = 1e-4
+    ftol = 5e-5
     """Stop when vertex values are within ftol of each other"""
     maxiter = None
     """Maximum number of iterations before fit terminates"""
@@ -65,6 +66,7 @@ class SansFitSimplex(FitSimplex):
         res.inputs = [(pars[i].model, pars[i].data) for i,v in enumerate(result.x)]
         # Compute the parameter uncertainties from the jacobian
         res.calc_cov(fitness)
+        res.theory = result.fx
         return res
       
 class SansFitter(Fitter):
@@ -271,7 +273,7 @@ class MyAssembly(Assembly):
             self._current_model = m
             if self._cancel: return numpy.inf
             if m.isfitted and m.weight != 0:
-                m.residuals = m.fitness.residuals()
+                m.residuals, _ = m.fitness.residuals()
                 N = len(m.residuals)
                 m.degrees_of_freedom = N-k if N>k else 1
                 m.chisq = numpy.sum(m.residuals**2)

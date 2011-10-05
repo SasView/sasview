@@ -282,7 +282,7 @@ class FitData1D(Data1D):
             msg = "FitData1D: invalid error array "
             msg += "%d <> %d" % (numpy.shape(self.dy), numpy.size(fx))                                                      
             raise RuntimeError, msg  
-        return (self.y[self.idx] - fx[self.idx]) / self.dy[self.idx]
+        return (self.y[self.idx] - fx[self.idx]) / self.dy[self.idx], fx[self.idx]
      
     def residuals_deriv(self, model, pars=[]):
         """ 
@@ -430,6 +430,7 @@ class SansAssembly:
         self.res = []
         self.true_res = []
         self.func_name = "Functor"
+        self.theory = None
         
     #def chisq(self, params):
     def chisq(self):
@@ -457,7 +458,8 @@ class SansAssembly:
         """ 
         #import thread
         self.model.set_params(self.paramlist, params)
-        self.true_res = self.data.residuals(self.model.eval)
+        
+        self.true_res, self.theory = self.data.residuals(self.model.eval)
         # check parameters range
         if self.check_param_range():
             # if the param value is outside of the bound

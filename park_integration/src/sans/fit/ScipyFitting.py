@@ -38,6 +38,7 @@ class fitresult(object):
             model = model.model
         self.model = model
         self.data = data
+        self.theory = None
         self.param_list = param_list
         self.iterations = 0
         
@@ -159,6 +160,7 @@ class ScipyFit(FitEngine):
                                                     ftol=ftol,
                                                     full_output=1,
                                                     warning=True)
+
         except KeyboardInterrupt:
             msg = "Fitting: Terminated!!!"
             handler.error(msg)
@@ -187,6 +189,7 @@ class ScipyFit(FitEngine):
             result.stderr  = stderr
             result.pvec = out
             result.success = success
+            result.theory = functor.theory
             #print "scipy", result.inputs
             if q is not None:
                 q.put(result)
