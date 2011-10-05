@@ -696,14 +696,13 @@ class Plugin(PluginBase):
         corresponding panels. 
         :param uid: id related to the panel currently calling this fit function.
         """
+        flag = True
         ##  count the number of fitproblem schedule to fit 
         fitproblem_count = 0
         for value in self.page_finder.values():
             if value.get_scheduled() == 1:
                 fitproblem_count += 1
-        ## if simultaneous fit change automatically the engine to park
-        if fitproblem_count > 1:
-            self._on_change_engine(engine='park')
+                
         self.fitproblem_count = fitproblem_count  
         if self._fit_engine == "park":
             engineType = "Simultaneous Fit"
@@ -748,6 +747,15 @@ class Plugin(PluginBase):
                                      flag=page.get_weight_flag(),
                                      is2d = page._is_2D())
                     templist = page.get_param_list()
+                    flag = page._update_paramv_on_fit() 
+                    if not flag:
+                        msg = "Fitting range or parameter values are"
+                        msg += " invalid in %s"% \
+                                    page.window_caption
+                        wx.PostEvent(page.parent.parent, 
+                                     StatusEvent(status= msg, info="error",
+                                     type="stop"))
+                        return flag
                     for element in templist:
                         name = str(element[1])
                         pars.append(name)
@@ -776,11 +784,11 @@ class Plugin(PluginBase):
                     current_page_id = page_id
                     value.clear_model_param()
             except:
-                raise
+                flag = False
                 msg= "%s error: %s" % (engineType, sys.exc_value)
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                       type="stop"))
-                return 
+                return flag
         ## If a thread is already started, stop it
         #if self.calc_fit!= None and self.calc_fit.isrunning():
         #    self.calc_fit.stop()
@@ -819,7 +827,8 @@ class Plugin(PluginBase):
         wx.PostEvent( self.parent, StatusEvent(status=msg, type="progress" ))
         
         self.ready_fit(calc_fit=calc_fit)
-        
+        return flag
+    
     def ready_fit(self, calc_fit):
         """
         Ready for another fit

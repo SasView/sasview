@@ -147,12 +147,13 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 if item[0].GetValue():
                     self.manager.schedule_for_fit(value=1, uid=item[2]) 
             try:
-                self.manager.onFit(uid=self.uid)
+                if not self.manager.onFit(uid=self.uid):
+                    return
             except:
                 msg= "Select at least one parameter to fit in the FitPages."
                 wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
         else:
-            msg= "Select at least one model to fit "
+            msg= "Select at least one model check box to fit "
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
            
     def set_manager(self, manager):
