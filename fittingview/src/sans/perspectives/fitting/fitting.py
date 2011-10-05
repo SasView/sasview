@@ -1060,7 +1060,7 @@ class Plugin(PluginBase):
                 batch_inputs["error on %s" % pars[index]] = []
             for res in result:
                 model, data = res.inputs[0]
-                temp_model = model.clone()
+                temp_model = model#.clone()
                 if res is None:
                     null_value = numpy.nan
                     from sans.guiframe.data_processor import BatchCell
@@ -1094,7 +1094,8 @@ class Plugin(PluginBase):
                 cpage._on_fit_complete()
                 self.page_finder[pid][data.id].set_result(res)
                 fitproblem = self.page_finder[pid][data.id]
-
+                
+               
                 from sans.models.qsmearing import smear_selection
                 #smearer = fitproblem.get_smearer()
                 smearer = smear_selection(data, temp_model)
@@ -1459,7 +1460,12 @@ class Plugin(PluginBase):
                                             title=str(title)))
             caption = current_pg.window_caption
             self.page_finder[page_id].set_fit_tab_caption(caption=caption)
-            
+            try:
+                # replace model cal to fit calculation if possible
+                new_plot.y = self.page_finder[page_id].get_result(fid=data.id).theory
+            except:
+                pass
+
             self.page_finder[page_id].set_theory_data(data=new_plot, 
                                                       fid=data.id)
             if toggle_mode_on:

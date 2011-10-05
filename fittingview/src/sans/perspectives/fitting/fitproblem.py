@@ -499,6 +499,7 @@ class FitProblem(FitProblemComponent):
         self.qmax = None
         # fit weight
         self.weight = None
+        self.result = None
         
         
     def enable_smearing(self, flag=False):
@@ -599,6 +600,7 @@ class FitProblem(FitProblemComponent):
         self.smearer_computer_value = smear_selection(self.fit_data,
                                                            self.model)
         self.smearer_computed = True
+        self.result = None
         
     def get_fit_data(self):
         """
