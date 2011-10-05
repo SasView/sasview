@@ -272,19 +272,21 @@ class Plugin(PluginBase):
         """
         if hasattr(event, 'action'):
             group_id = event.group_id
-            #remove data from panel
-            if event.action.lower() == 'remove':
-                id = event.id
-                return self.remove_plot(group_id, id)
-            if event.action.lower() == 'hide':
-                return self.hide_panel(group_id)
-            if event.action.lower() == 'delete':
-                panel = self.plot_panels[group_id]
-                uid = panel.uid
-                return self.parent.delete_panel(uid)
-            if event.action.lower() == "clear":
-                return self.clear_panel_by_id(group_id)
-            
+            if group_id in self.plot_panels.keys():
+                #remove data from panel
+                if event.action.lower() == 'remove':
+                    id = event.id
+                    return self.remove_plot(group_id, id)
+                if event.action.lower() == 'hide':
+                    return self.hide_panel(group_id)
+                if event.action.lower() == 'delete':
+                    panel = self.plot_panels[group_id]
+                    uid = panel.uid
+                    return self.parent.delete_panel(uid)
+                if event.action.lower() == "clear":
+                    return self.clear_panel_by_id(group_id)
+        if not hasattr(event, 'plot'):    
+            return
         title = None
         if hasattr(event, 'title'):
             title = 'Graph'#event.title
