@@ -1073,10 +1073,8 @@ class Plugin(PluginBase):
                         batch_outputs[pars[index]].append(null_value)
                         item = null_value
                         batch_inputs["error on %s" % pars[index]].append(item)
-                        """
                         if pars[index] in model.getParamList():
-                            model.setParam(pars[index], res.pvec[index])
-                            """
+                            temp_model.setParam(pars[index], res.pvec[index])
                 else:
                     from sans.guiframe.data_processor import BatchCell
                     cell = BatchCell()
@@ -1096,8 +1094,7 @@ class Plugin(PluginBase):
                 cpage._on_fit_complete()
                 self.page_finder[pid][data.id].set_result(res)
                 fitproblem = self.page_finder[pid][data.id]
-                
-               
+
                 from sans.models.qsmearing import smear_selection
                 #smearer = fitproblem.get_smearer()
                 smearer = smear_selection(data, temp_model)
@@ -1151,7 +1148,6 @@ class Plugin(PluginBase):
                  batch_inputs[param] = []
             batch_inputs[param].append(data.sample.temperature)
         # associate residuals plot
-        
         batch_outputs["Chi2"][index].object = [residuals]
        
     def _single_fit_completed(self, result, pars, page_id, batch_outputs,
