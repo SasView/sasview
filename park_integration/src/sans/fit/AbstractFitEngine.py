@@ -16,7 +16,7 @@ class SansParameter(park.Parameter):
     The parameter attribute value is redirected to the underlying
     parameter value in the SANS model.
     """
-    def __init__(self, name, model):
+    def __init__(self, name, model, data):
         """
         :param name: the name of the model parameter
         :param model: the sans model to wrap as a park model
@@ -24,6 +24,8 @@ class SansParameter(park.Parameter):
         """
         park.Parameter.__init__(self, name)
         self._model, self._name = model, name
+        self.data = data
+        self.model = model
         #set the value for the parameter of the given name
         self.set(model.getParam(name))
          
@@ -84,7 +86,7 @@ class Model(park.Model):
     """
     PARK wrapper for SANS models.
     """
-    def __init__(self, sans_model, **kw):
+    def __init__(self, sans_model, sans_data=None, **kw):
         """
         :param sans_model: the sans model to wrap using park interface
         
@@ -92,10 +94,11 @@ class Model(park.Model):
         park.Model.__init__(self, **kw)
         self.model = sans_model
         self.name = sans_model.name
+        self.data = sans_data
         #list of parameters names
         self.sansp = sans_model.getParamList()
         #list of park parameter
-        self.parkp = [SansParameter(p, sans_model) for p in self.sansp]
+        self.parkp = [SansParameter(p, sans_model, sans_data) for p in self.sansp]
         #list of parameterset 
         self.parameterset = park.ParameterSet(sans_model.name, pars=self.parkp)
         self.pars = []
@@ -539,7 +542,7 @@ class FitEngine:
         #Dictionnary of fitArrange element (fit problems)
         self.fit_arrange_dict = {}
   
-    def set_model(self, model, id, pars=[], constraints=[]):
+    def set_model(self, model,  id,  pars=[], constraints=[], data=None):
         """
         set a model on a given  in the fit engine.
         
@@ -565,7 +568,7 @@ class FitEngine:
         
         new_model = model
         if not issubclass(model.__class__, Model):
-            new_model = Model(model)
+            new_model = Model(model, data)
         
         if len(constraints) > 0:
             for constraint in constraints:

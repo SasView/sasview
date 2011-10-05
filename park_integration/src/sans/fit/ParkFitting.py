@@ -11,16 +11,185 @@ import numpy
 #import park
 from park import fit
 from park import fitresult
+from  park.fitresult import FitParameter
+import park.simplex
 from park.assembly import Assembly
+from park.assembly import Part
 from park.fitmc import FitSimplex 
 import park.fitmc
 from park.fitmc import FitMC
-
+from park.fit import Fitter
+from park.formatnum import format_uncertainty
 #from Loader import Load
 from sans.fit.AbstractFitEngine import FitEngine
+  
+class SansFitSimplex(FitSimplex):
+    """
+    Local minimizer using Nelder-Mead simplex algorithm.
 
+    Simplex is robust and derivative free, though not very efficient.
 
+    This class wraps the bounds contrained Nelder-Mead simplex
+    implementation for `park.simplex.simplex`.
+    """
+    radius = 0.05
+    """Size of the initial simplex; this is a portion between 0 and 1"""
+    xtol = 1
+    #xtol = 1e-4
+    """Stop when simplex vertices are within xtol of each other"""
+    ftol = 1e-4
+    """Stop when vertex values are within ftol of each other"""
+    maxiter = None
+    """Maximum number of iterations before fit terminates"""
+    def fit(self, fitness, x0):
+        """Run the fit"""
+        self.cancel = False
+        pars = fitness.fit_parameters()
+        bounds = numpy.array([p.range for p in pars]).T
+        result = park.simplex.simplex(fitness, x0, bounds=bounds,
+                                 radius=self.radius, xtol=self.xtol,
+                                 ftol=self.ftol, maxiter=self.maxiter,
+                                 abort_test=self._iscancelled)
+        #print "calls:",result.calls
+        #print "simplex returned",result.x,result.fx
+        # Need to make our own copy of the fit results so that the
+        # values don't get stomped on by the next fit iteration.
+        fitpars = [SansFitParameter(pars[i].name,pars[i].range,v, pars[i].model, pars[i].data)
+                   for i,v in enumerate(result.x)]
+        res = fitresult.FitResult(fitpars, result.calls, result.fx)
+        # Compute the parameter uncertainties from the jacobian
+        res.calc_cov(fitness)
+        return res
+      
+class SansFitter(Fitter):
+    """
+    """
+    def fit(self, fitness, handler):
+        """
+        Global optimizer.
 
+        This function should return immediately
+        """
+        # Determine initial value and bounds
+        pars = fitness.fit_parameters()
+        bounds = numpy.array([p.range for p in pars]).T
+        x0 = [p.value for p in pars]
+
+        # Initialize the monitor and results.
+        # Need to make our own copy of the fit results so that the
+        # values don't get stomped on by the next fit iteration.
+        handler.done = False
+        self.handler = handler
+        fitpars = [SansFitParameter(pars[i].name, pars[i].range, v,
+                                     pars[i].model, pars[i].data)
+                   for i,v in enumerate(x0)]
+        handler.result = fitresult.FitResult(fitpars, 0, numpy.NaN)
+
+        # Run the fit (fit should perform _progress and _improvement updates)
+        # This function may return before the fit is complete.
+        self._fit(fitness, x0, bounds)
+        
+class SansFitMC(SansFitter):
+    """
+    Monte Carlo optimizer.
+
+    This implements `park.fit.Fitter`.
+    """
+    localfit = SansFitSimplex()
+    start_points = 10
+
+    def _fit(self, objective, x0, bounds):
+        """
+        Run a monte carlo fit.
+
+        This procedure maps a local optimizer across a set of initial points.
+        """
+        park.fitmc.fitmc(objective, x0, bounds, self.localfit,
+              self.start_points, self.handler)
+
+        
+class SansPart(Part):
+    """
+    Part of a fitting assembly.  Part holds the model itself and
+    associated data.  The part can be initialized with a fitness
+    object or with a pair (model,data) for the default fitness function.
+
+    fitness (Fitness)
+        object implementing the `park.assembly.Fitness` interface.  In
+        particular, fitness should provide a parameterset attribute
+        containing a ParameterSet and a residuals method returning a vector
+        of residuals.
+    weight (dimensionless)
+        weight for the model.  See comments in assembly.py for details.
+    isfitted (boolean)
+        True if the model residuals should be included in the fit.
+        The model parameters may still be used in parameter
+        expressions, but there will be no comparison to the data.
+    residuals (vector)
+        Residuals for the model if they have been calculated, or None
+    degrees_of_freedom
+        Number of residuals minus number of fitted parameters.
+        Degrees of freedom for individual models does not make
+        sense in the presence of expressions combining models,
+        particularly in the case where a model has many parameters
+        but no data or many computed parameters.  The degrees of
+        freedom for the model is set to be at least one.
+    chisq
+        sum(residuals**2); use chisq/degrees_of_freedom to
+        get the reduced chisq value.
+
+        Get/set the weight on the given model.
+
+        assembly.weight(3) returns the weight on model 3 (0-origin)
+        assembly.weight(3,0.5) sets the weight on model 3 (0-origin)
+    """
+
+    def __init__(self, fitness, weight=1., isfitted=True):
+        Part.__init__(self, fitness=fitness, weight=weight,
+                       isfitted=isfitted)
+       
+        self.model, self.data = fitness[0], fitness[1]
+
+class SansFitParameter(FitParameter):
+    """
+    Fit result for an individual parameter.
+    """
+    def __init__(self, name, range, value, model, data):
+        FitParameter.__init__(self, name, range, value)
+        self.model = model
+        self.data = data
+        
+    def summarize(self):
+        """
+        Return parameter range string.
+
+        E.g.,  "       Gold .....|.... 5.2043 in [2,7]"
+        """
+        bar = ['.']*10
+        lo,hi = self.range
+        if numpy.isfinite(lo)and numpy.isfinite(hi):
+            portion = (self.value-lo)/(hi-lo)
+            if portion < 0: portion = 0.
+            elif portion >= 1: portion = 0.99999999
+            barpos = int(math.floor(portion*len(bar)))
+            bar[barpos] = '|'
+        bar = "".join(bar)
+        lostr = "[%g"%lo if numpy.isfinite(lo) else "(-inf"
+        histr = "%g]"%hi if numpy.isfinite(hi) else "inf)"
+        valstr = format_uncertainty(self.value, self.stderr)
+        model_name = str(None)
+        if self.model is not None:
+            model_name = self.model.name
+        data_name = str(None)
+        if self.data is not None:
+            data_name = self.data.name
+            
+        return "%25s %s %s in %s,%s, %s, %s"  % (self.name,bar,valstr,lostr,histr, 
+                                                 model_name, data_name)
+    def __repr__(self):
+        #return "FitParameter('%s')"%self.name
+        return str(self.__class__)
+    
 class MyAssembly(Assembly):
     def __init__(self, models, curr_thread=None):
         Assembly.__init__(self, models)
@@ -28,6 +197,40 @@ class MyAssembly(Assembly):
         self.chisq = None
         self._cancel = False
         
+    def fit_parameters(self):
+        """
+        Return an alphabetical list of the fitting parameters.
+
+        This function is called once at the beginning of a fit,
+        and serves as a convenient place to precalculate what
+        can be precalculated such as the set of fitting parameters
+        and the parameter expressions evaluator.
+        """
+        self.parameterset.setprefix()
+        self._fitparameters = self.parameterset.fitted
+        self._restraints = self.parameterset.restrained
+        pars = self.parameterset.flatten()
+        context = self.parameterset.gather_context()
+        self._fitexpression = park.expression.build_eval(pars,context)
+        #print "constraints",self._fitexpression.__doc__
+
+        self._fitparameters.sort(lambda a,b: cmp(a.path,b.path))
+        # Convert to fitparameter a object
+        
+        fitpars = [SansFitParameter(p.path,p.range,p.value, p.model, p.data)
+                   for p in self._fitparameters]
+        #print "fitpars", fitpars
+        return fitpars
+    
+    def all_results(self, result):
+        """
+        Extend result from the fit with the calculated parameters.
+        """
+        calcpars = [SansFitParameter(p.path,p.range,p.value, p.model, p.data)
+                    for p in self.parameterset.computed]
+        #print "all_results", calcpars
+        result.parameters += calcpars
+
     def eval(self):
         """
         Recalculate the theory functions, and from them, the
@@ -170,15 +373,18 @@ class ParkFit(FitEngine):
         
         """
         self.create_assembly(curr_thread=curr_thread)
-        localfit = FitSimplex()
+        localfit = SansFitSimplex()
         localfit.ftol = ftol
         
         # See `park.fitresult.FitHandler` for details.
-        fitter = FitMC(localfit=localfit, start_points=1)
+        fitter = SansFitMC(localfit=localfit, start_points=1)
         if handler == None:
             handler = fitresult.ConsoleUpdate(improvement_delta=0.1)
         result = fit.fit(self.problem, fitter=fitter, handler=handler)
         self.problem.all_results(result)
+        
+        #print "park------", self.problem.parts
+   
         if result != None:
             if q != None:
                 q.put(result)
