@@ -2883,10 +2883,10 @@ class BasicPage(ScrolledPanel, PanelBase):
             disfunc = ''
             try:
                 if item[7].__class__.__name__ == 'ComboBox':
-                    disfunc = item[7].GetLabel()
+                    disfunc = str(item[7].GetValue())
             except:
-                disfunc = ''
                 pass
+            
             # 2D
             if self.data.__class__.__name__== "Data2D":
                 name = item[1]
@@ -2897,12 +2897,14 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if not item[1] in orient_param:
                     name = item[1]
                     value = item[2].GetValue()
-                else:
-                    disfunc = ''
+
             # add to the content
             if disfunc != '':
+                
                 disfunc = ',' + disfunc
-            content += name + ',' + value + disfunc + ':'
+            # TODO: to support array func for copy/paste
+            if disfunc.count('array') == 0:
+                content += name + ',' + value + disfunc + ':'
 
         return content
    
@@ -2949,12 +2951,14 @@ class BasicPage(ScrolledPanel, PanelBase):
                 name = item[0]
                 value = item[1]
                 # Transfer the text to content[dictionary]
-                context[name] = value
+                context[name] = [value]
             # ToDo: PlugIn this poly disp function for pasting
-            if len(line) == 3:
+            try:
                 poly_func = item[2]
-            else:
+            except:
                 poly_func = None
+            context[name].append(poly_func)
+
         # Do it if params exist        
         if  self.parameters != []:
             # go through the parameters  
@@ -2963,7 +2967,8 @@ class BasicPage(ScrolledPanel, PanelBase):
 
             # go through the fittables
             self._get_paste_helper(self.fittable_param, 
-                                   self.orientation_params_disp, context)
+                                   self.orientation_params_disp, 
+                                   context)
 
             # go through the fixed params
             self._get_paste_helper(self.fixed_param, 
@@ -2989,8 +2994,33 @@ class BasicPage(ScrolledPanel, PanelBase):
             if self.data.__class__.__name__== "Data2D":
                 name = item[1]
                 if name in content.keys():
-                    item[2].SetValue(content[name])
-            # 1D
+                    
+                    if name.count('.') > 0:
+                        try:
+                            float(content[name][0])
+                        except:
+                            continue
+                    item[2].SetValue(content[name][0])
+                    if item[2].__class__.__name__ == "ComboBox":
+                        if self.model.fun_list.has_key(content[name][0]):
+                            fun_val = self.model.fun_list[content[name][0]]
+                            self.model.setParam(name,fun_val)
+                    
+                    poly_func = content[name][1]
+                    if poly_func:
+                        try:
+                            item[7].SetValue(poly_func)
+                            selection = item[7].GetCurrentSelection()
+                            param_name = item[7].Name.split('.')[0]
+                            disp_name = item[7].GetValue()
+                            dispersity= item[7].GetClientData(selection)
+                            disp_model = dispersity()
+                            #disp_model = self._disp_obj_dict[name]
+                            self.model.set_dispersion(param_name, disp_model)
+                            self.state._disp_obj_dict[param_name]= disp_model
+                        except:
+                            pass           
+        # 1D
             else:
                 ## for 1D all parameters except orientation
                 if not item[1] in orient_param:
@@ -2998,12 +3028,28 @@ class BasicPage(ScrolledPanel, PanelBase):
                     if name in content.keys():
                         # Avoid changing combox content which needs special care
                         value = content[name]
-                        item[2].SetValue(value)
+                        if name.count('.') > 0:
+                            try:
+                                float(value[0])
+                            except:
+                                continue
+                        item[2].SetValue(value[0])
                         if item[2].__class__.__name__ == "ComboBox":
-                            if self.model.fun_list.has_key(value):
-                                fun_val = self.model.fun_list[value]
+                            if self.model.fun_list.has_key(value[0]):
+                                fun_val = self.model.fun_list[value[0]]
                                 self.model.setParam(name,fun_val)
                                 # save state
                                 #self._copy_parameters_state(self.str_parameters, 
                                 #    self.state.str_parameters)
-                
+                        if value[1]:
+                            try:
+                                item[7].SetValue(value[1])
+                                selection = item[7].GetCurrentSelection()
+                                param_name = item[7].Name.split('.')[0]
+                                disp_name = item[7].GetValue()
+                                dispersity= item[7].GetClientData(selection)
+                                disp_model = dispersity()
+                                self.model.set_dispersion(param_name, disp_model)
+                                self.state._disp_obj_dict[param_name]= disp_model
+                            except:
+                                pass
