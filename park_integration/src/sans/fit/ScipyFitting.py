@@ -13,6 +13,7 @@ import sys
 from sans.fit.AbstractFitEngine import FitEngine
 from sans.fit.AbstractFitEngine import SansAssembly
 from sans.fit.AbstractFitEngine import FitAbort
+from sans.fit.AbstractFitEngine import Model
 IS_MAC = True
 if sys.platform.count("win32") > 0:
     IS_MAC = False
@@ -21,7 +22,7 @@ class fitresult(object):
     """
     Storing fit result
     """
-    def __init__(self, model=None, param_list=None):
+    def __init__(self, model=None, param_list=None, data=None):
         self.calls = None
         self.fitness = None
         self.chisqr = None
@@ -33,9 +34,14 @@ class fitresult(object):
         self.stderr = None
         self.parameters = None
         self.is_mac = IS_MAC
+        if issubclass(model.__class__, Model):
+            model = model.model
         self.model = model
+        self.data = data
         self.param_list = param_list
         self.iterations = 0
+        
+        self.inputs = [(self.model, self.data)]
      
     def set_model(self, model):
         """
@@ -138,7 +144,7 @@ class ScipyFit(FitEngine):
         # Check the initial value if it is within range
         self._check_param_range(model)
         
-        result = fitresult(model=model, param_list=self.param_list)
+        result = fitresult(model=model, data=data.sans_data, param_list=self.param_list)
         if handler is not None:
             handler.set_result(result=result)
         try:
@@ -181,6 +187,7 @@ class ScipyFit(FitEngine):
             result.stderr  = stderr
             result.pvec = out
             result.success = success
+            print "scipy", result.inputs
             if q is not None:
                 q.put(result)
                 return q

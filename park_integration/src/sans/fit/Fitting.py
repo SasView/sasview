@@ -54,11 +54,11 @@ class Fit:
         return self._engine.fit(q, handler, curr_thread=curr_thread,
                                 ftol=ftol)
      
-    def set_model(self, model, id, pars=[], constraints=[]):
+    def set_model(self, model, id, pars=[], constraints=[], data=None):
         """
         store a model model to fit at the position id of the fit engine
         """
-        self._engine.set_model(model, id, pars, constraints)
+        self._engine.set_model(model, id, pars, constraints, data=data)
    
     def set_data(self, data, id, smearer=None, qmin=None, qmax=None):
         """

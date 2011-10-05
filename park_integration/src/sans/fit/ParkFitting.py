@@ -23,6 +23,11 @@ from park.formatnum import format_uncertainty
 #from Loader import Load
 from sans.fit.AbstractFitEngine import FitEngine
   
+class SansFitResult(fitresult.FitResult):
+    def __init__(self, *args, **kwrds):
+        fitresult.FitResult.__init__(self, *args, **kwrds)
+        self.inputs = []
+        
 class SansFitSimplex(FitSimplex):
     """
     Local minimizer using Nelder-Mead simplex algorithm.
@@ -56,7 +61,8 @@ class SansFitSimplex(FitSimplex):
         # values don't get stomped on by the next fit iteration.
         fitpars = [SansFitParameter(pars[i].name,pars[i].range,v, pars[i].model, pars[i].data)
                    for i,v in enumerate(result.x)]
-        res = fitresult.FitResult(fitpars, result.calls, result.fx)
+        res = SansFitResult(fitpars, result.calls, result.fx)
+        res.inputs = [(pars[i].model, pars[i].data) for i,v in enumerate(result.x)]
         # Compute the parameter uncertainties from the jacobian
         res.calc_cov(fitness)
         return res
@@ -383,7 +389,11 @@ class ParkFit(FitEngine):
         result = fit.fit(self.problem, fitter=fitter, handler=handler)
         self.problem.all_results(result)
         
-        #print "park------", self.problem.parts
+        #print "park------", result.inputs
+        #for (model, data) in result.inputs:
+        #    print model.name, data.name
+        #for p in result.parameters:
+        #    print "simul ----", p , p.__class__, p.model.name, p.data.name
    
         if result != None:
             if q != None:
