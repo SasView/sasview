@@ -760,7 +760,6 @@ class Plugin(PluginBase):
                         name = str(element[1])
                         pars.append(name)
                     fitproblem_list = value.values()
-                    fitproblem_list.sort()
                     for fitproblem in  fitproblem_list:
                         if sim_fitter is None:
                             fitter = Fit(self._fit_engine)  
@@ -998,7 +997,8 @@ class Plugin(PluginBase):
                 if item[0] != None and item[1] != None:
                     listOfConstraint.append((item[0],item[1]))
         new_model = model#deepcopy(model)
-        fitter.set_model(new_model, fit_id, pars, constraints=listOfConstraint)
+        fitter.set_model(new_model, fit_id, pars, data=data,
+                         constraints=listOfConstraint)
         fitter.set_data(data=data, id=fit_id, smearer=smearer, qmin=qmin, 
                         qmax=qmax)
         fitter.select_problem_for_fit(id=fit_id, value=1)
@@ -1034,6 +1034,8 @@ class Plugin(PluginBase):
         """
         print "update_fit result", result
         
+   
+        
     def _batch_single_fit_complete_helper(self, result, pars, page_id, 
                             batch_outputs, batch_inputs, elapsed=None):
         """
@@ -1047,6 +1049,7 @@ class Plugin(PluginBase):
         msg = "Single Fitting complete "
         wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                                       type="stop"))
+        pid = page_id[0]
         if batch_outputs is None:
             batch_outputs = {}
         if self.batch_on:
@@ -1078,38 +1081,32 @@ class Plugin(PluginBase):
                         batch_outputs[pars[index]].append(res.pvec[index])
                         item = res.stderr[index]
                         batch_inputs["error on %s" % pars[index]].append(item)
-            pid = page_id[0]
-            self.page_finder[pid].set_result(batch_inputs=batch_inputs,
-                                             batch_outputs=batch_outputs)   
-            count = len(self.page_finder[pid].keys())
-            for pid in page_id:
+                
+               
+                self.page_finder[pid].set_batch_result(batch_inputs=batch_inputs,
+                                                 batch_outputs=batch_outputs)   
                 cpage = self.fit_panel.get_page_by_id(pid)
                 cpage._on_fit_complete()
-                fitproblem_list = self.page_finder[pid].values()
-                fitproblem_list.sort()
-                for fitproblem in fitproblem_list:
-                    data = fitproblem.get_fit_data()
-                    model = fitproblem.get_model()
-                    smearer = fitproblem.get_smearer()
-                    qmin, qmax = fitproblem.get_range()
-                    weight = fitproblem.get_weight()
-                    flag = issubclass(data.__class__, Data2D)
-                    self.draw_model(model=model,
-                                      page_id=pid, 
-                                      data=data, 
-                                      smearer=smearer,
-                                      enable1D=not flag, 
-                                      enable2D=flag,
-                                      state=None,
-                                      toggle_mode_on=False,
-                                      fid=data.id,
-                                      qmin=qmin, qmax=qmax, 
-                                      update_chisqr=False, 
-                                      weight=weight)
-           
-    
-        
-                    
+                model, data = res.inputs[0]
+                self.page_finder[pid][data.id].set_result(res)
+                fitproblem = self.page_finder[pid][data.id]
+                smearer = fitproblem.get_smearer()
+                qmin, qmax = fitproblem.get_range()
+                weight = fitproblem.get_weight()
+                flag = issubclass(data.__class__, Data2D)
+                self.draw_model(model=model,
+                                  page_id=pid, 
+                                  data=data, 
+                                  smearer=smearer,
+                                  enable1D=not flag, 
+                                  enable2D=flag,
+                                  state=None,
+                                  toggle_mode_on=False,
+                                  fid=data.id,
+                                  qmin=qmin, qmax=qmax, 
+                                  update_chisqr=False, 
+                                  weight=weight)
+       
     def on_set_batch_result(self, page_id, fid, batch_outputs, batch_inputs):
         """
         """
@@ -1261,6 +1258,7 @@ class Plugin(PluginBase):
                     small_cov = []
                     #Separate result in to data corresponding to each page
                     for p in result.parameters:
+                        #print "simul ----", p , p.__class__, p.model.name, p.data.name
                         model_name, param_name = self.split_string(p.name)  
                         if model.name == model_name:
                             p_name= model.name+"."+param_name
@@ -1792,7 +1790,7 @@ class Plugin(PluginBase):
         n = len(self.page_finder[page_id].keys())
         m = self.page_finder[page_id].nbr_residuals_computed
         flag = False
-        batch_inputs, batch_outputs = self.page_finder[page_id].get_result()
+        batch_inputs, batch_outputs = self.page_finder[page_id].get_batch_result()
          
         if self.page_finder[page_id].nbr_residuals_computed == -1:
             flag = False

@@ -134,6 +134,15 @@ class FitProblemComponent(object):
         """
         Get graph_id
         """  
+    def set_result(self, result):
+        """
+        """
+
+    def get_result(self):
+        """
+        get result 
+        """   
+
    
 class FitProblemDictionary(FitProblemComponent, dict):
     """
@@ -418,14 +427,27 @@ class FitProblemDictionary(FitProblemComponent, dict):
         """
         return self.itervalues()
     
-    def set_result(self, batch_inputs, batch_outputs):
+    def  set_result(self, result, fid):
+        """
+        """
+        if fid in self.iterkeys():
+            self[fid].set_result(result)
+            
+    def set_batch_result(self, batch_inputs, batch_outputs):
         """
         set a list of result
         """
         self.batch_inputs = batch_inputs
         self.batch_outputs = batch_outputs
-                
-    def get_result(self):
+             
+    def get_result(self, fid):
+        """
+        get result 
+        """   
+        if fid in self.iterkeys():
+            return self[fid].get_result()
+            
+    def get_batch_result(self):
         """
         get result 
         """
@@ -688,4 +710,14 @@ class FitProblem(FitProblemComponent):
         Get graph_id
         """  
         return self.graph_id
-   
+    
+    def set_result(self, result):
+        """
+        """
+        self.result = result
+        
+    def get_result(self):
+        """
+        get result 
+        """   
+        return self.result
