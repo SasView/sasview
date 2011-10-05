@@ -579,8 +579,6 @@ class FitProblem(FitProblemComponent):
         """
         self.theory_data = copy.deepcopy(data)
         
-  
-         
     def get_theory_data(self):
         """
         :return: theory generated with the current model and data of this class

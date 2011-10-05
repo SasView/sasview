@@ -1059,6 +1059,8 @@ class Plugin(PluginBase):
                 batch_outputs[pars[index]] = []
                 batch_inputs["error on %s" % pars[index]] = []
             for res in result:
+                model, data = res.inputs[0]
+                temp_model = model.clone()
                 if res is None:
                     null_value = numpy.nan
                     from sans.guiframe.data_processor import BatchCell
@@ -1071,6 +1073,10 @@ class Plugin(PluginBase):
                         batch_outputs[pars[index]].append(null_value)
                         item = null_value
                         batch_inputs["error on %s" % pars[index]].append(item)
+                        """
+                        if pars[index] in model.getParamList():
+                            model.setParam(pars[index], res.pvec[index])
+                            """
                 else:
                     from sans.guiframe.data_processor import BatchCell
                     cell = BatchCell()
@@ -1081,20 +1087,24 @@ class Plugin(PluginBase):
                         batch_outputs[pars[index]].append(res.pvec[index])
                         item = res.stderr[index]
                         batch_inputs["error on %s" % pars[index]].append(item)
-                
-               
+                        if pars[index] in temp_model.getParamList():
+                            temp_model.setParam(pars[index], res.pvec[index])
+                        
                 self.page_finder[pid].set_batch_result(batch_inputs=batch_inputs,
                                                  batch_outputs=batch_outputs)   
                 cpage = self.fit_panel.get_page_by_id(pid)
                 cpage._on_fit_complete()
-                model, data = res.inputs[0]
                 self.page_finder[pid][data.id].set_result(res)
                 fitproblem = self.page_finder[pid][data.id]
-                smearer = fitproblem.get_smearer()
+                
+               
+                from sans.models.qsmearing import smear_selection
+                #smearer = fitproblem.get_smearer()
+                smearer = smear_selection(data, temp_model)
                 qmin, qmax = fitproblem.get_range()
                 weight = fitproblem.get_weight()
                 flag = issubclass(data.__class__, Data2D)
-                self.draw_model(model=model,
+                self.draw_model(model=temp_model,
                                   page_id=pid, 
                                   data=data, 
                                   smearer=smearer,
@@ -1130,7 +1140,6 @@ class Plugin(PluginBase):
         theory_data.id = wx.NewId()
         theory_data.name = data.name + "[%s]" % str(model.__class__.__name__)
         cell.object = [data, theory_data]
-        
         batch_outputs["Data"].append(cell)
         for key, value in data.meta_data.iteritems():
             if key not in batch_inputs.keys():
@@ -1448,10 +1457,13 @@ class Plugin(PluginBase):
                                        state=state)   
             current_pg = self.fit_panel.get_page_by_id(page_id)
             title = new_plot.title
-            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
+            batch_on = self.fit_panel.get_page_by_id(page_id).batch_on
+            if not batch_on:
+                wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                             title=str(title)))
             caption = current_pg.window_caption
             self.page_finder[page_id].set_fit_tab_caption(caption=caption)
+            
             self.page_finder[page_id].set_theory_data(data=new_plot, 
                                                       fid=data.id)
             if toggle_mode_on:
@@ -1679,6 +1691,7 @@ class Plugin(PluginBase):
                 dy = deepcopy(data_copy.dy)
                 dy[dy==0] = 1
             fn = data_copy.y[index] 
+            
             theory_data = self.page_finder[page_id].get_theory_data(fid=data_copy.id)
             if theory_data== None:
                 return chisqr
@@ -1690,6 +1703,7 @@ class Plugin(PluginBase):
         residuals = res[numpy.isfinite(res)]
         # get chisqr only w/finite
         chisqr = numpy.average(residuals * residuals)
+        
         self._plot_residuals(page_id=page_id, data=data_copy, 
                              fid=fid,
                              weight=weight, index=index)
@@ -1808,6 +1822,7 @@ class Plugin(PluginBase):
         # plot data
         event = BatchDrawEvent(page_id=page_id , 
                            batch_on=batch_on,
+                           fid=fid,
                            batch_outputs=batch_outputs,
                            batch_inputs=batch_inputs,
                            is_displayed=flag)
@@ -1819,12 +1834,13 @@ class Plugin(PluginBase):
         """
         deplay batch result
         """
+        fid = event.fid
         page_id = event.page_id
         batch_on = event.batch_on
         flag = event.is_displayed
         batch_outputs = event.batch_outputs
         batch_inputs = event.batch_inputs
-        if flag and batch_on:
+        if flag and batch_on and fid is not None:
             self.parent.on_set_batch_result(data_outputs=batch_outputs, 
                                             data_inputs=batch_inputs,
                                             plugin_name=self.sub_menu)
