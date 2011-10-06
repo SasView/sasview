@@ -802,7 +802,8 @@ class Plugin(PluginBase):
         self._mac_sleep(0.2)
         ## perform single fit
         if is_single_fit:
-            calc_fit = FitThread(handler = handler,
+            if self._fit_engine == "scipy":
+                calc_fit = FitThread(handler = handler,
                                     fn=fitter_list,
                                     pars=pars,
                                     batch_inputs=batch_inputs,
@@ -810,6 +811,16 @@ class Plugin(PluginBase):
                                     page_id=list_page_id,
                                     completefn=self._single_fit_completed,
                                     ftol=self.ftol)
+            else:
+                calc_fit = FitThread(handler = handler,
+                                    fn=fitter_list,
+                                    pars=pars,
+                                    batch_inputs=batch_inputs,
+                                    batch_outputs=batch_outputs,
+                                    page_id=list_page_id,
+                                    completefn=self._simul_fit_completed,
+                                    ftol=self.ftol)
+
         else:
             current_page_id = self.sim_page.uid
             ## Perform more than 1 fit at the time
