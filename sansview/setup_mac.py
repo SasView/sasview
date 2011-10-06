@@ -91,7 +91,8 @@ APP = ['sansview.py']
 DATA_FILES += ['images','test','plugins','media']
 OPTIONS = {'argv_emulation': True,
            'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings'],
-           'includes': ['site'],
+           #'includes': ['site'],
+           'modules' : ['site'],
            'iconfile': ICON,
            'frameworks':[libxml_path],
            'resources': RESOURCES_FILES,
