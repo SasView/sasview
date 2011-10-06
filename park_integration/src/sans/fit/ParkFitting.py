@@ -222,7 +222,7 @@ class MyAssembly(Assembly):
         self._fitexpression = park.expression.build_eval(pars,context)
         #print "constraints",self._fitexpression.__doc__
 
-        self._fitparameters.sort(lambda a,b: cmp(a.path,b.path))
+        #self._fitparameters.sort(lambda a,b: cmp(a.path,b.path))
         # Convert to fitparameter a object
         
         fitpars = [SansFitParameter(p.path,p.range,p.value, p.model, p.data)
