@@ -1474,10 +1474,11 @@ class Plugin(PluginBase):
             caption = current_pg.window_caption
             self.page_finder[page_id].set_fit_tab_caption(caption=caption)
             try:
-                # replace model cal to fit calculation if possible
-                new_plot.y = self.page_finder[page_id].get_result(fid=data.id).theory
+                if batch_on:
+                    # replace model cal to fit calculation if possible
+                    new_plot.y = self.page_finder[page_id].get_result(fid=data.id).theory
             except:
-                pass
+                 pass
 
             self.page_finder[page_id].set_theory_data(data=new_plot, 
                                                       fid=data.id)
@@ -1553,13 +1554,16 @@ class Plugin(PluginBase):
                                        state=state)  
         current_pg = self.fit_panel.get_page_by_id(page_id)
         title = new_plot.title
-        wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
+        batch_on = self.fit_panel.get_page_by_id(page_id).batch_on
+        if not batch_on:
+            wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                                title=title))
-        try:
-            # replace model cal to fit calculation if possible
-            new_plot.data = self.page_finder[page_id].get_result(fid=data.id).theory
-        except:
-            pass
+        else:
+            try:
+                # replace model cal to fit calculation if possible
+                new_plot.data = self.page_finder[page_id].get_result(fid=data.id).theory
+            except:
+                pass
 
         self.page_finder[page_id].set_theory_data(data=new_plot, fid=data.id)
         if toggle_mode_on:
