@@ -233,7 +233,8 @@ class GridPage(sheet.CSheet):
         hint = 'Insert empty column before %s' % str(label)
         menu.Append(id, title, hint)
         wx.EVT_MENU(window, id, self.on_insert_column)
-        col_name = [self.GetCellValue(0, col) 
+        row = 0
+        col_name = [self.GetCellValue(row, col) 
                         for col in range(self.GetNumberCols())]
         for c_name in self.data.keys():
             if c_name not in col_name:
