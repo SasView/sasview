@@ -12,9 +12,9 @@ from wx.lib.scrolledpanel import ScrolledPanel
 import  wx.grid as  Grid
 import wx.aui
 from wx.aui import AuiNotebook as nb
-from sans.guiframe.panel_base import PanelBase
 import wx.lib.sheet as sheet
-
+from sans.guiframe.panel_base import PanelBase
+from sans.guiframe.utils import format_number
 from sans.guiframe.events import NewPlotEvent 
 from sans.guiframe.events import StatusEvent  
 from sans.guiframe.dataFitting import Data1D
@@ -102,8 +102,8 @@ class GridPage(sheet.CSheet):
         self._rows = 51
         self.last_selected_row = -1
         self.last_selected_col = -1
-        col_with = 30
-        row_height = 20
+        self.col_width = 30
+        self.row_height = 20
         self.max_row_touse = 0
         self.axis_value = []
         self.axis_label = ""
@@ -112,16 +112,20 @@ class GridPage(sheet.CSheet):
         self.selected_rows = []
         self.plottable_cells = []
         self.plottable_flag = False
-        self.SetColMinimalAcceptableWidth(col_with)
-        self.SetRowMinimalAcceptableHeight(row_height)
+        self.SetColMinimalAcceptableWidth(self.col_width)
+        self.SetRowMinimalAcceptableHeight(self.row_height)
         self.SetNumberRows(self._cols)
         self.SetNumberCols(self._rows)
         self.AutoSize()
+        self.default_col_width = 75
+        if self.GetNumberCols() > 0:
+            self.default_col_width =  self.GetColSize(0)
         self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.on_left_click)
         self.Bind(wx.grid.EVT_GRID_LABEL_RIGHT_CLICK, self.on_right_click)
         self.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.on_selected_cell)
         self.Bind(wx.grid.EVT_GRID_CMD_CELL_CHANGE, self.on_edit_cell)
-       
+        
+        
     def on_edit_cell(self, event):
         """
         """
@@ -191,12 +195,6 @@ class GridPage(sheet.CSheet):
                 self.axis_value.append(self.GetCellValue(cell_row, cell_col))
             self.axis_label = self.GetCellValue(0, col)
         
-            
-            
-            
-            
-       
-
     def on_right_click(self, event):
         """
         Catch the right click mouse
@@ -208,8 +206,10 @@ class GridPage(sheet.CSheet):
         # Slicer plot popup menu
         slicerpop = wx.Menu()
         col_label_menu  = wx.Menu()
+        c_name = self.GetCellValue(0, col) 
+        label = "Insert column before %s " % str(c_name)
         slicerpop.AppendSubMenu(col_label_menu , 
-                                 '&Insert Column', 'Insert Column')
+                                 '&%s' % str(label), str(label))
         col_name = [self.GetCellValue(0, c) 
                         for c in range(self.GetNumberCols())]
         row = 0
@@ -360,12 +360,23 @@ class GridPage(sheet.CSheet):
                     label = value
                     if issubclass(value.__class__, BatchCell):
                         label = value.label
-                    self.SetCellValue(cell_row, cell_col, str(label))
+                    try:
+                        float(label)
+                        label = format_number(label)
+                    except:
+                        label = str(label)
+                    self.SetCellValue(cell_row, cell_col, label)
+                    self.AutoSizeColumn(cell_col, True)
+                    width = self.GetColSize(cell_col)
+                    if width < self.default_col_width:
+                       self.SetColSize(cell_col, self.default_col_width)
+                    
                     cell_row += 1
                 cell_col += 1
                 if cell_row > self.max_row_touse:
                     self.max_row_touse = cell_row
-                    
+        self.ForceRefresh()
+        
     def get_grid_view(self):
         """
         Return value contained in the grid
@@ -695,8 +706,7 @@ class GridPanel(SPanel):
                                     wx.PostEvent(self.parent.parent, 
                                                  StatusEvent(status=msg,
                                                               info="error")) 
-                                    return
-                                
+                                    return  
                         wx.PostEvent(self.parent.parent, 
                                      NewPlotEvent(plot=new_plot, 
                                   group_id=str(new_plot.group_id),
@@ -724,9 +734,16 @@ class GridPanel(SPanel):
             column_names = self.notebook.get_column_labels()
         #evalue x
         sentence = self.x_axis_label.GetValue()
-        if sentence.strip() == "":
-            msg = "select value for x axis"
-            raise ValueError, msg
+        try:
+            if sentence.strip() == "":
+                msg = "select value for x axis and y axis"
+                raise ValueError, msg
+        except:
+             wx.PostEvent(self.parent.parent, 
+                             StatusEvent(status=msg, info="error")) 
+             return
+        
+        
         dict = parse_string(sentence, column_names.keys())
         for tok, (col_name, list) in dict.iteritems():
             col = column_names[col_name]
@@ -761,6 +778,8 @@ class GridPanel(SPanel):
         try:
             title = self.notebook.GetPageText(pos)
             new_plot.name = title
+            new_plot.xtransform = "x"
+            new_plot.ytransform  = "y"  
             wx.PostEvent(self.parent.parent, 
                              NewPlotEvent(plot=new_plot, 
                         group_id=str(new_plot.group_id), title =title))    
@@ -793,7 +812,7 @@ class GridPanel(SPanel):
                             id=self.y_axis_add.GetId())
         self.x_axis_unit = wx.TextCtrl(self, -1)
         self.y_axis_unit = wx.TextCtrl(self, -1)
-        self.view_button = wx.Button(self, -1, "View")
+        self.view_button = wx.Button(self, -1, "View Results")
         wx.EVT_BUTTON(self, self.view_button.GetId(), self.on_view)
         self.plot_button = wx.Button(self, -1, "Plot")
         self.button_sizer.AddMany( [ (500, 30),
