@@ -459,7 +459,8 @@ class SansAssembly:
         #import thread
         self.model.set_params(self.paramlist, params)
         
-        self.true_res, self.theory = self.data.residuals(self.model.eval)
+        self.true_res, theory = self.data.residuals(self.model.eval)
+        self.theory = copy.deepcopy(theory)
         # check parameters range
         if self.check_param_range():
             # if the param value is outside of the bound
