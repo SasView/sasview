@@ -247,7 +247,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self.graph.replace(data)
             self.plots[data.id] = data
             ## Set the view scale for all plots
-            self._onEVT_FUNC_PROPERTY()
+            try:
+                self._onEVT_FUNC_PROPERTY()
+            except:
+                msg=" Encountered sigular points..."
+                wx.PostEvent(self, StatusEvent(status=\
+                            "Plotting Erorr: %s"%msg))
             # Check if zoomed
             toolbar_zoomed = self.toolbar.GetToolEnabled(self.toolbar._NTB2_BACK)
             if self.is_zoomed or toolbar_zoomed:
@@ -264,7 +269,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self.plots[data.id] = data
             self.graph.add(self.plots[data.id]) 
             ## Set the view scale for all plots
-            self._onEVT_FUNC_PROPERTY()
+            try:
+                self._onEVT_FUNC_PROPERTY()
+            except:
+                msg=" Encountered sigular points..."
+                wx.PostEvent(self, StatusEvent(status=\
+                            "Plotting Erorr: %s"%msg))
             self.toolbar.update()
             if self.is_zoomed:
                 self.is_zoomed = False
@@ -531,8 +541,13 @@ class ModelPanel1D(PlotPanel, PanelBase):
         dial.Destroy()
         
         ## render the graph
-        self._onEVT_FUNC_PROPERTY() 
-        
+        try:
+            self._onEVT_FUNC_PROPERTY()
+        except:
+            msg=" Encountered sigular points..."
+            wx.PostEvent(self, StatusEvent(status=\
+                        "Plotting Erorr: %s"%msg)) 
+    
     def onChangeColor(self, event):
         """
         Changes the color of the graph when selected
