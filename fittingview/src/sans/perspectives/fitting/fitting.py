@@ -33,6 +33,7 @@ from sans.guiframe.events import EVT_SLICER_PANEL
 from sans.guiframe.events import EVT_SLICER_PARS_UPDATE
 from sans.guiframe.gui_style import GUIFRAME_ID
 from sans.guiframe.plugin_base import PluginBase 
+from sans.guiframe.data_processor import BatchCell
 from sans.fit.Fitting import Fit
 from .console import ConsoleUpdate
 from .fitproblem import FitProblemDictionary
@@ -1063,31 +1064,42 @@ class Plugin(PluginBase):
                 temp_model = model#.clone()
                 if res is None:
                     null_value = numpy.nan
-                    from sans.guiframe.data_processor import BatchCell
                     cell = BatchCell()
                     cell.label = null_value
                     cell.value = null_value
                     cell.object = [None]
                     batch_outputs["Chi2"].append(cell)
-                    for index  in range(len(pars)):
-                        batch_outputs[pars[index]].append(null_value)
-                        item = null_value
-                        batch_inputs["error on %s" % pars[index]].append(item)
-                        if pars[index] in model.getParamList():
-                            temp_model.setParam(pars[index], res.pvec[index])
+                    for param in temp_model.getParamList():
+                        if temp_model.is_fittable(param):
+                            for index  in range(len(pars)):
+                                #replug only fitted values
+                                if param != pars[index]:
+                                    batch_outputs[pars[index]].append(null_value)
+                                    item = null_value
+                                    batch_inputs["error on %s" % pars[index]].append(item)
+                                    if pars[index] in model.getParamList():
+                                        temp_model.setParam(pars[index], res.pvec[index])
+                                else:
+                                     batch_outputs[str(param)].append(temp_model.getParam(param))
                 else:
                     from sans.guiframe.data_processor import BatchCell
                     cell = BatchCell()
                     cell.label = res.fitness
                     cell.value = res.fitness
                     batch_outputs["Chi2"].append(cell)
-                    for index  in range(len(pars)):
-                        batch_outputs[pars[index]].append(res.pvec[index])
-                        item = res.stderr[index]
-                        batch_inputs["error on %s" % pars[index]].append(item)
-                        if pars[index] in temp_model.getParamList():
-                            temp_model.setParam(pars[index], res.pvec[index])
-                        
+                    for param in temp_model.getParamList():
+                        if temp_model.is_fittable(param):
+                            for index  in range(len(pars)):
+                                #replug only fitted values
+                                if param != pars[index]:
+                                    batch_outputs[pars[index]].append(res.pvec[index])
+                                    item = res.stderr[index]
+                                    batch_inputs["error on %s" % pars[index]].append(item)
+                                    if pars[index] in temp_model.getParamList():
+                                        temp_model.setParam(pars[index], res.pvec[index])
+                                else:
+                                     batch_outputs[str(param)].append(temp_model.getParam(param))
+                                
                 self.page_finder[pid].set_batch_result(batch_inputs=batch_inputs,
                                                  batch_outputs=batch_outputs)   
                 cpage = self.fit_panel.get_page_by_id(pid)
@@ -1142,7 +1154,8 @@ class Plugin(PluginBase):
         for key, value in data.meta_data.iteritems():
             if key not in batch_inputs.keys():
                 batch_inputs[key] = []
-            batch_inputs[key].append(value)
+            if key.lower().strip() != "loader":
+                batch_inputs[key].append(value)
         param = "temperature"
         if hasattr(data.sample, param):
             if param not in  batch_inputs.keys():
