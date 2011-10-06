@@ -391,7 +391,7 @@ class FitData2D(Data2D):
         # use only the data point within ROI range
         res = (self.data[self.index_model] - gn)/\
                     self.res_err_data[self.index_model]
-        return res
+        return res, gn
         
     def residuals_deriv(self, model, pars=[]):
         """ 
