@@ -66,7 +66,6 @@ class SansFitSimplex(FitSimplex):
         res.inputs = [(pars[i].model, pars[i].data) for i,v in enumerate(result.x)]
         # Compute the parameter uncertainties from the jacobian
         res.calc_cov(fitness)
-        res.theory = result.fx
         return res
       
 class SansFitter(Fitter):
@@ -204,6 +203,7 @@ class MyAssembly(Assembly):
         self.curr_thread = curr_thread
         self.chisq = None
         self._cancel = False
+        self.theory = None
         
     def fit_parameters(self):
         """
@@ -236,8 +236,8 @@ class MyAssembly(Assembly):
         """
         calcpars = [SansFitParameter(p.path,p.range,p.value, p.model, p.data)
                     for p in self.parameterset.computed]
-        #print "all_results", calcpars
         result.parameters += calcpars
+        result.theory = self.theory
 
     def eval(self):
         """
@@ -273,7 +273,7 @@ class MyAssembly(Assembly):
             self._current_model = m
             if self._cancel: return numpy.inf
             if m.isfitted and m.weight != 0:
-                m.residuals, _ = m.fitness.residuals()
+                m.residuals, self.theory = m.fitness.residuals()
                 N = len(m.residuals)
                 m.degrees_of_freedom = N-k if N>k else 1
                 m.chisq = numpy.sum(m.residuals**2)
