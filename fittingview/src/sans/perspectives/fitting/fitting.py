@@ -1542,6 +1542,12 @@ class Plugin(PluginBase):
         title = new_plot.title
         wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                                title=title))
+        try:
+            # replace model cal to fit calculation if possible
+            new_plot.data = self.page_finder[page_id].get_result(fid=data.id).theory
+        except:
+            pass
+
         self.page_finder[page_id].set_theory_data(data=new_plot, fid=data.id)
         if toggle_mode_on:
             wx.PostEvent(self.parent, 
