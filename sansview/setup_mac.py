@@ -92,7 +92,7 @@ DATA_FILES += ['images','test','plugins','media']
 OPTIONS = {'argv_emulation': True,
            'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings'],
            #'includes': ['site'],
-           'modules' : ['site'],
+           'modules' : ['code', 'site'],
            'iconfile': ICON,
            'frameworks':[libxml_path],
            'resources': RESOURCES_FILES,
