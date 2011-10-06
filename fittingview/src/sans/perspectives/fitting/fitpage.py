@@ -1071,7 +1071,8 @@ class FitPage(BasicPage):
         if event != None:
             event.Skip()
         if len(self.parent._manager.fit_thread_list)>0 and\
-                    self.parent._manager._fit_engine != "park":
+                    self.parent._manager._fit_engine != "park" and\
+                    self._manager.sim_page.uid == self.uid: 
             msg = "The FitEnging will be set to 'ParkMC'\n"
             msg += " to fit with more than one data set..."
             wx.MessageBox(msg, 'Info')
