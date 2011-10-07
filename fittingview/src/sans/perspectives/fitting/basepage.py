@@ -2487,6 +2487,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                         item[0].SetValue(False)
                         item[0].Disable()
                         item[2].Disable()
+                        item[3].Show(False)
+                        item[4].Show(False)
                         item[5].Disable()
                         item[6].Disable()
                     else:
@@ -2903,8 +2905,18 @@ class BasicPage(ScrolledPanel, PanelBase):
                 
                 disfunc = ',' + disfunc
             # TODO: to support array func for copy/paste
-            if disfunc.count('array') == 0:
-                content += name + ',' + value + disfunc + ':'
+            try:
+                if disfunc.count('array') > 0:
+                    disfunc += ','
+                    for val in self.values[name]:
+                        disfunc += ' ' + str(val)
+                    disfunc += ','
+                    for weight in self.weights[name]:
+                        disfunc += ' ' + str(weight)
+            except:
+                pass
+            #if disfunc.count('array') == 0:
+            content += name + ',' + value + disfunc + ':'
 
         return content
    
@@ -2955,9 +2967,21 @@ class BasicPage(ScrolledPanel, PanelBase):
             # ToDo: PlugIn this poly disp function for pasting
             try:
                 poly_func = item[2]
+                context[name].append(poly_func)
+                try:
+                    # take the vals and weights for  array 
+                    array_values = item[3].split(' ')
+                    array_weights = item[4].split(' ')
+                    val = [float(a_val) for a_val in array_values[1:]]
+                    weit = [float(a_weit) for a_weit in array_weights[1:]]
+                    
+                    context[name].append(val)
+                    context[name].append(weit)
+                except:
+                    raise
             except:
-                poly_func = None
-            context[name].append(poly_func)
+                poly_func = ''
+                context[name].append(poly_func)
 
         # Do it if params exist        
         if  self.parameters != []:
@@ -2994,32 +3018,23 @@ class BasicPage(ScrolledPanel, PanelBase):
             if self.data.__class__.__name__== "Data2D":
                 name = item[1]
                 if name in content.keys():
-                    
+                    pd = content[name][0]
                     if name.count('.') > 0:
                         try:
-                            float(content[name][0])
+                            float(pd)
                         except:
                             continue
-                    item[2].SetValue(content[name][0])
+                            #if not pd and pd != '':
+                            #    continue
+                    item[2].SetValue(str(pd))
+                    
                     if item[2].__class__.__name__ == "ComboBox":
                         if self.model.fun_list.has_key(content[name][0]):
                             fun_val = self.model.fun_list[content[name][0]]
                             self.model.setParam(name,fun_val)
                     
-                    poly_func = content[name][1]
-                    if poly_func:
-                        try:
-                            item[7].SetValue(poly_func)
-                            selection = item[7].GetCurrentSelection()
-                            param_name = item[7].Name.split('.')[0]
-                            disp_name = item[7].GetValue()
-                            dispersity= item[7].GetClientData(selection)
-                            disp_model = dispersity()
-                            #disp_model = self._disp_obj_dict[name]
-                            self.model.set_dispersion(param_name, disp_model)
-                            self.state._disp_obj_dict[param_name]= disp_model
-                        except:
-                            pass           
+                    value = content[name]
+                    self._paste_poly_help(item, value)
         # 1D
             else:
                 ## for 1D all parameters except orientation
@@ -3028,12 +3043,18 @@ class BasicPage(ScrolledPanel, PanelBase):
                     if name in content.keys():
                         # Avoid changing combox content which needs special care
                         value = content[name]
+                        pd = value[0]
                         if name.count('.') > 0:
                             try:
-                                float(value[0])
+                                pd = float(pd)
                             except:
                                 continue
-                        item[2].SetValue(value[0])
+                                #if not pd and pd != '':
+                                #    continue
+                        item[2].SetValue(str(pd))
+                        if item in self.fixed_param and pd == '':
+                            # Only array func has pd == '' case.
+                            item[2].Enable(False)
                         if item[2].__class__.__name__ == "ComboBox":
                             if self.model.fun_list.has_key(value[0]):
                                 fun_val = self.model.fun_list[value[0]]
@@ -3041,15 +3062,50 @@ class BasicPage(ScrolledPanel, PanelBase):
                                 # save state
                                 #self._copy_parameters_state(self.str_parameters, 
                                 #    self.state.str_parameters)
-                        if value[1]:
-                            try:
-                                item[7].SetValue(value[1])
-                                selection = item[7].GetCurrentSelection()
-                                param_name = item[7].Name.split('.')[0]
-                                disp_name = item[7].GetValue()
-                                dispersity= item[7].GetClientData(selection)
-                                disp_model = dispersity()
-                                self.model.set_dispersion(param_name, disp_model)
-                                self.state._disp_obj_dict[param_name]= disp_model
-                            except:
-                                pass
+                        self._paste_poly_help(item, value)
+                        
+    def _paste_poly_help(self, item, value):
+        """
+        Helps get paste for poly function
+        
+        :param item: Gui param items
+        :param value: the values for parameter ctrols
+        """
+        if len(value[1]) > 0:
+            # Only for dispersion func.s
+            try:
+                item[7].SetValue(value[1])
+                selection = item[7].GetCurrentSelection()
+                param_name = item[7].Name.split('.')[0]
+                disp_name = item[7].GetValue()
+                dispersity= item[7].GetClientData(selection)
+                disp_model = dispersity()
+                # Only for array disp
+                try:
+                    pd_vals = numpy.array(value[2])
+                    pd_weights = numpy.array(value[3])
+                    if len(pd_vals) > 0 and len(pd_vals) > 0:
+                        if len(pd_vals) == len(pd_weights):
+                            disp_model.set_weights(pd_vals, 
+                                                   pd_weights)
+                            self.values[param_name] = pd_vals
+                            self.weights[param_name] = pd_weights
+                            # disable the fixed items for array
+                            item[0].SetValue(False)
+                            item[0].Enable(False)
+                            item[2].Enable(False)
+                            item[4].Show(False)
+                            item[5].SetValue('')
+                            item[5].Enable(False)
+                            item[6].SetValue('')
+                            item[6].Enable(False)
+                except:
+                    pass 
+                self._disp_obj_dict[param_name] = disp_model
+                self.model.set_dispersion(param_name, 
+                                          disp_model)
+                self.state._disp_obj_dict[param_name] = \
+                                          disp_model
+                    
+            except:
+                pass 
