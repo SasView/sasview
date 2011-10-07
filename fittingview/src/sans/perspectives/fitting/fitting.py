@@ -327,9 +327,9 @@ class Plugin(PluginBase):
                 for data in selected_data_list:
                     if data is not None:
                         data.group_id = group_id
-                    if group_id not in data.list_group_id:
-                        data.list_group_id.append(group_id)
-                    page = self.add_fit_page(data=[data])
+                        if group_id not in data.list_group_id:
+                            data.list_group_id.append(group_id)
+                        page = self.add_fit_page(data=[data])
             except:
                 msg = "Fitting Set_data: " + str(sys.exc_value)
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
