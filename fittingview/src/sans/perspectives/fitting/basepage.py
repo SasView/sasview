@@ -3111,10 +3111,10 @@ class BasicPage(ScrolledPanel, PanelBase):
                                           disp_model)
                 self.state._disp_obj_dict[name] = \
                                           disp_model
-                self.model.set_dispersion(name, disp_model)
+                self.model.set_dispersion(param_name, disp_model)
                 state.values = self.values
                 state.weights = self.weights    
-                self.model._persistency_dict[name] = \
+                self.model._persistency_dict[param_name] = \
                                         [state.values, state.weights]
                     
                     
