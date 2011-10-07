@@ -614,15 +614,15 @@ class BasicPage(ScrolledPanel, PanelBase):
         msg = menu.GetHelpString(event.GetId())
         msg +=" reloaded"
         wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
-        
+        self.Show(False)
         name = menu.GetLabel(event.GetId())
         self._on_select_model_helper()
         if name in self.saved_states.keys():
             previous_state = self.saved_states[name]
             ## reset state of checkbox,textcrtl  and  regular parameters value
-            self.Show(False)
+            
             self.reset_page(previous_state)   
-            self.Show(True)
+        self.Show(True)
                
     def on_preview(self, event):
         """
@@ -1798,6 +1798,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             flag = self.get_weight_flag()
             weight = get_weight(data=self.data, is2d=self._is_2D(), flag=flag)
             toggle_mode_on = self.model_view.IsEnabled()
+            is_2d = self._is_2D()
             self._manager.draw_model(self.model, 
                                     data=self.data,
                                     smearer= temp_smear,
@@ -1806,7 +1807,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                                     page_id=self.uid,
                                     toggle_mode_on=toggle_mode_on, 
                                     state = self.state,
-                                    enable2D=self.enable2D,
+                                    enable2D=is_2d,
                                     update_chisqr=update_chisqr,
                                     weight=weight)
         
@@ -3023,11 +3024,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                         try:
                             float(pd)
                         except:
-                            continue
-                            #if not pd and pd != '':
-                            #    continue
+                            #continue
+                            if not pd and pd != '':
+                                continue
                     item[2].SetValue(str(pd))
-                    
+                    if item in self.fixed_param and pd == '':
+                        # Only array func has pd == '' case.
+                        item[2].Enable(False)
                     if item[2].__class__.__name__ == "ComboBox":
                         if self.model.fun_list.has_key(content[name][0]):
                             fun_val = self.model.fun_list[content[name][0]]
@@ -3048,9 +3051,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                             try:
                                 pd = float(pd)
                             except:
-                                continue
-                                #if not pd and pd != '':
-                                #    continue
+                                #continue
+                                if not pd and pd != '':
+                                    continue
                         item[2].SetValue(str(pd))
                         if item in self.fixed_param and pd == '':
                             # Only array func has pd == '' case.
@@ -3076,7 +3079,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             try:
                 item[7].SetValue(value[1])
                 selection = item[7].GetCurrentSelection()
-                param_name = item[7].Name.split('.')[0]
+                name = item[7].Name
+                param_name = name.split('.')[0]
                 disp_name = item[7].GetValue()
                 dispersity= item[7].GetClientData(selection)
                 disp_model = dispersity()
@@ -3088,12 +3092,13 @@ class BasicPage(ScrolledPanel, PanelBase):
                         if len(pd_vals) == len(pd_weights):
                             disp_model.set_weights(pd_vals, 
                                                    pd_weights)
-                            self.values[param_name] = pd_vals
-                            self.weights[param_name] = pd_weights
+                            self.values[name] = pd_vals
+                            self.weights[name] = pd_weights
                             # disable the fixed items for array
                             item[0].SetValue(False)
                             item[0].Enable(False)
                             item[2].Enable(False)
+                            item[3].Show(False)
                             item[4].Show(False)
                             item[5].SetValue('')
                             item[5].Enable(False)
@@ -3101,11 +3106,17 @@ class BasicPage(ScrolledPanel, PanelBase):
                             item[6].Enable(False)
                 except:
                     pass 
-                self._disp_obj_dict[param_name] = disp_model
-                self.model.set_dispersion(param_name, 
+                self._disp_obj_dict[name] = disp_model
+                self.model.set_dispersion(name, 
                                           disp_model)
-                self.state._disp_obj_dict[param_name] = \
+                self.state._disp_obj_dict[name] = \
                                           disp_model
+                self.model.set_dispersion(name, disp_model)
+                state.values = self.values
+                state.weights = self.weights    
+                self.model._persistency_dict[name] = \
+                                        [state.values, state.weights]
+                    
                     
             except:
                 pass 
