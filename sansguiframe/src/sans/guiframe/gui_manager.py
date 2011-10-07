@@ -1242,6 +1242,8 @@ class ViewerFrame(wx.Frame):
         """
         show the grid of result
         """
+        # Show(False) before Show(True) in order to bring it to the front
+        self.batch_frame.Show(False)
         self.batch_frame.Show(True)
         
     def _on_preference_menu(self, event):     
