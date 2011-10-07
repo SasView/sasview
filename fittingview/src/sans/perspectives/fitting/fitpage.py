@@ -2613,7 +2613,7 @@ class FitPage(BasicPage):
         self._set_weight()
         
         ## set smearing value whether or not the data contain the smearing info
-        self._manager.set_smearer(uid=self.uid, smearer=temp_smearer,
+        wx.CallAfter(self._manager.set_smearer, uid=self.uid, smearer=temp_smearer,
                                   fid=self.data.id,
                         qmin=float(self.qmin_x),
                         qmax=float(self.qmax_x),

@@ -1482,6 +1482,11 @@ class Plugin(PluginBase):
             if not batch_on:
                 wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                             title=str(title)))
+            else:
+                top_data_id = self.fit_panel.get_page_by_id(page_id).data.id
+                if data.id == top_data_id:
+                    wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
+                                            title=str(title)))    
             caption = current_pg.window_caption
             self.page_finder[page_id].set_fit_tab_caption(caption=caption)
             try:
