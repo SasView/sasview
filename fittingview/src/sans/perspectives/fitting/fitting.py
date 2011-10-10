@@ -802,8 +802,7 @@ class Plugin(PluginBase):
         self._mac_sleep(0.2)
         ## perform single fit
         if is_single_fit:
-            if self._fit_engine == "scipy":
-                calc_fit = FitThread(handler = handler,
+            calc_fit = FitThread(handler = handler,
                                     fn=fitter_list,
                                     pars=pars,
                                     batch_inputs=batch_inputs,
@@ -811,16 +810,6 @@ class Plugin(PluginBase):
                                     page_id=list_page_id,
                                     completefn=self._single_fit_completed,
                                     ftol=self.ftol)
-            else:
-                calc_fit = FitThread(handler = handler,
-                                    fn=fitter_list,
-                                    pars=pars,
-                                    batch_inputs=batch_inputs,
-                                    batch_outputs=batch_outputs,
-                                    page_id=list_page_id,
-                                    completefn=self._simul_fit_completed,
-                                    ftol=self.ftol)
-
         else:
             current_page_id = self.sim_page.uid
             ## Perform more than 1 fit at the time
@@ -1062,9 +1051,11 @@ class Plugin(PluginBase):
         wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                                       type="stop"))
         pid = page_id[0]
+        cpage = self.fit_panel.get_page_by_id(pid)
+        batch_on = cpage.batch_on
         if batch_outputs is None:
             batch_outputs = {}
-        if self.batch_on:
+        if batch_on:
             # format batch_outputs
             batch_outputs["Chi2"] = []
             for index  in range(len(pars)):
