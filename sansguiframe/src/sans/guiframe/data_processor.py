@@ -363,7 +363,7 @@ class GridPage(sheet.CSheet):
                         label = value.label
                     try:
                         float(label)
-                        label = format_number(label)
+                        label = format_number(label, high=True)
                     except:
                         label = str(label)
                     self.SetCellValue(cell_row, cell_col, label)
