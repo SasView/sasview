@@ -277,6 +277,7 @@ class MyAssembly(Assembly):
                 m.residuals, self.theory = m.fitness.residuals()
                 N = len(m.residuals)
                 m.degrees_of_freedom = N-k if N>k else 1
+                # dividing residuals by N in order to be consistent with Scipy
                 m.chisq = numpy.sum(m.residuals**2/N) 
                 resid.append(m.weight*m.residuals/math.sqrt(N))
         self.residuals = numpy.hstack(resid)
