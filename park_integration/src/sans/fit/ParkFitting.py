@@ -8,6 +8,7 @@ to perform a simple fit with park optimizer.
 """
 #import time
 import numpy
+import math
 #import park
 from park import fit
 from park import fitresult
@@ -276,8 +277,8 @@ class MyAssembly(Assembly):
                 m.residuals, self.theory = m.fitness.residuals()
                 N = len(m.residuals)
                 m.degrees_of_freedom = N-k if N>k else 1
-                m.chisq = numpy.sum(m.residuals**2)
-                resid.append(m.weight*m.residuals)
+                m.chisq = numpy.sum(m.residuals**2/N) 
+                resid.append(m.weight*m.residuals/math.sqrt(N))
         self.residuals = numpy.hstack(resid)
         N = len(self.residuals)
         self.degrees_of_freedom = N-k if N>k else 1

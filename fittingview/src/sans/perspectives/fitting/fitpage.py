@@ -2060,8 +2060,9 @@ class FitPage(BasicPage):
         #format chi2  
             if self.engine_type == "park":  
                 npt_fit = float(self.get_npts2fit()) 
-                if npt_fit > 0:
-                    chisqr =chisqr/npt_fit    
+                # Taking care this in parkemgine
+                #if npt_fit > 0:
+                #    chisqr =chisqr/npt_fit    
             chi2 = format_number(chisqr, True)    
             self.tcChi.SetValue(chi2)    
             self.tcChi.Refresh()    
