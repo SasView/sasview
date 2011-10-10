@@ -2161,7 +2161,7 @@ class FitPage(BasicPage):
             self.Refresh() 
         self._mac_sleep(0.1)  
         #plot model ( when drawing, do not update chisqr value again)
-        self._draw_model(update_chisqr=False)    
+        self._draw_model(update_chisqr=False, source = 'fit')    
         #PostStatusEvent     
         #msg = "Fit completed!dddd "
         #wx.PostEvent(self._manager.parent, StatusEvent(status=msg))

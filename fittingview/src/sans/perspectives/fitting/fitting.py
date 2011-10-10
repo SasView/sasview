@@ -644,7 +644,7 @@ class Plugin(PluginBase):
                    fid=None,
                    toggle_mode_on=False,
                    qmin=None, qmax=None, 
-                   update_chisqr=True, weight=None):
+                   update_chisqr=True, weight=None, source='model'):
         """
         Draw model.
         
@@ -674,7 +674,8 @@ class Plugin(PluginBase):
                                weight=weight,
                                toggle_mode_on=toggle_mode_on,
                                state=state,
-                               update_chisqr=update_chisqr)
+                               update_chisqr=update_chisqr,
+                               source=source)
         else:     
             ## draw model 2D with no initial data
             self._draw_model2D(model=model,
@@ -688,7 +689,8 @@ class Plugin(PluginBase):
                                 weight=weight,
                                 state=state,
                                 toggle_mode_on=toggle_mode_on,
-                                update_chisqr=update_chisqr)
+                                update_chisqr=update_chisqr,
+                                source=source)
             
     def onFit(self, uid):
         """
@@ -1177,7 +1179,8 @@ class Plugin(PluginBase):
                                   fid=data.id,
                                   qmin=qmin, qmax=qmax, 
                                   update_chisqr=False, 
-                                  weight=weight)
+                                  weight=weight,
+                                  source='fit')
        
     def on_set_batch_result(self, page_id, fid, batch_outputs, batch_inputs):
         """
@@ -1488,7 +1491,7 @@ class Plugin(PluginBase):
     def _complete1D(self, x, y, page_id, elapsed, index, model,
                     weight=None, fid=None,
                     toggle_mode_on=False, state=None, 
-                    data=None, update_chisqr=True):
+                    data=None, update_chisqr=True, source='model'):
         """
         Complete plotting 1D data
         """ 
@@ -1531,7 +1534,7 @@ class Plugin(PluginBase):
             caption = current_pg.window_caption
             self.page_finder[page_id].set_fit_tab_caption(caption=caption)
             try:
-                if batch_on:
+                if source == 'fit':
                     # replace model cal to fit calculation if possible
                     new_plot.y = self.page_finder[page_id].get_result(fid=data.id).theory
             except:
@@ -1574,7 +1577,7 @@ class Plugin(PluginBase):
   
     def _complete2D(self, image, data, model, page_id,  elapsed, index, qmin,
                 qmax, fid=None, weight=None, toggle_mode_on=False, state=None, 
-                     update_chisqr=True):
+                     update_chisqr=True, source='model'):
         """
         Complete get the result of modelthread and create model 2D
         that can be plot.
@@ -1612,7 +1615,7 @@ class Plugin(PluginBase):
         current_pg = self.fit_panel.get_page_by_id(page_id)
         title = new_plot.title
         batch_on = self.fit_panel.get_page_by_id(page_id).batch_on
-        if not batch_on:
+        if not source == 'fit':
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                                title=title))
         else:
@@ -1650,7 +1653,7 @@ class Plugin(PluginBase):
                       fid=None,
                       weight=None,
                       toggle_mode_on=False,
-                       update_chisqr=True):
+                       update_chisqr=True, source='model'):
         """
         draw model in 2D
         
@@ -1680,7 +1683,7 @@ class Plugin(PluginBase):
                                     toggle_mode_on=toggle_mode_on,
                                     state=state,
                                     completefn=self._complete2D,
-                                    update_chisqr=update_chisqr)
+                                    update_chisqr=update_chisqr, source=source)
             self.calc_2D.queue()
 
         except:
@@ -1694,7 +1697,7 @@ class Plugin(PluginBase):
                 state=None,
                 weight=None,
                 fid=None, 
-                toggle_mode_on=False, update_chisqr=True, 
+                toggle_mode_on=False, update_chisqr=True, source='model',
                 enable1D=True):
         """
         Draw model 1D from loaded data1D
@@ -1722,7 +1725,8 @@ class Plugin(PluginBase):
                                   toggle_mode_on=toggle_mode_on,
                                   completefn=self._complete1D,
                                   #updatefn = self._update1D,
-                                  update_chisqr=update_chisqr)
+                                  update_chisqr=update_chisqr,
+                                  source=source)
             self.calc_1D.queue()
         except:
             msg = " Error occurred when drawing %s Model 1D: " % model.name

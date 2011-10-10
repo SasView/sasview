@@ -22,6 +22,7 @@ class Calc2D(CalcThread):
                  completefn=None,
                  updatefn=None,
                  update_chisqr=True,
+                 source='model',
                  yieldtime=0.04,
                  worktime=0.04
                  ):
@@ -43,6 +44,7 @@ class Calc2D(CalcThread):
         self.smearer = smearer
         self.starttime = 0  
         self.update_chisqr = update_chisqr
+        self.source = source
         
     def compute(self):
         """
@@ -110,7 +112,8 @@ class Calc2D(CalcThread):
                        qmax=self.qmax,
                        weight=self.weight,
                        #qstep=self.qstep,
-                       update_chisqr = self.update_chisqr)
+                       update_chisqr = self.update_chisqr,
+                       source=self.source)
         
 
 class Calc1D(CalcThread):
@@ -129,6 +132,7 @@ class Calc1D(CalcThread):
                  state=None,
                  completefn = None,
                  update_chisqr=True,
+                 source='model',
                  updatefn=None,
                  yieldtime=0.01,
                  worktime=0.01
@@ -151,6 +155,7 @@ class Calc1D(CalcThread):
         self.smearer = smearer
         self.starttime = 0
         self.update_chisqr = update_chisqr
+        self.source = source
         
     def compute(self):
         """
@@ -180,7 +185,8 @@ class Calc1D(CalcThread):
                       toggle_mode_on=self.toggle_mode_on,
                       elapsed=elapsed,index=index, model=self.model,
                       data=self.data, 
-                      update_chisqr = self.update_chisqr)
+                      update_chisqr = self.update_chisqr,
+                      source=self.source)
         
     def results(self):
         """

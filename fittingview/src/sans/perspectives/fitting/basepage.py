@@ -1778,7 +1778,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                             break
                     break
     
-    def _draw_model(self, update_chisqr=True):
+    def _draw_model(self, update_chisqr=True, source='model'):
         """
         Method to draw or refresh a plotted model.
         The method will use the data member from the model page
@@ -1809,6 +1809,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                                     state = self.state,
                                     enable2D=is_2d,
                                     update_chisqr=update_chisqr,
+                                    source='model',
                                     weight=weight)
         
        
