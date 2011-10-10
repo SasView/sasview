@@ -801,7 +801,13 @@ class Plugin(PluginBase):
                                 improvement_delta=0.1)
         self._mac_sleep(0.2)
         ## perform single fit
-        if is_single_fit:
+        try:
+            page = self.fit_panel.get_page_by_id(uid)
+            batch_on = page.batch_on
+        except:
+            batch_on = False
+        # batch fit
+        if batch_on:
             calc_fit = FitThread(handler = handler,
                                     fn=fitter_list,
                                     pars=pars,
@@ -810,6 +816,28 @@ class Plugin(PluginBase):
                                     page_id=list_page_id,
                                     completefn=self._single_fit_completed,
                                     ftol=self.ftol)
+        # single fit: not batch and not simul fit 
+        elif is_single_fit:
+            if self._fit_engine == "park":
+                calc_fit = FitThread(handler = handler,
+                                    fn=fitter_list,
+                                    pars=pars,
+                                    batch_inputs=batch_inputs,
+                                    batch_outputs=batch_outputs,
+                                    page_id=list_page_id,
+                                    completefn=self._simul_fit_completed,
+                                    ftol=self.ftol)
+            else:
+                calc_fit = FitThread(handler = handler,
+                                    fn=fitter_list,
+                                    pars=pars,
+                                    batch_inputs=batch_inputs,
+                                    batch_outputs=batch_outputs,
+                                    page_id=list_page_id,
+                                    completefn=self._single_fit_completed,
+                                    ftol=self.ftol)
+            
+        # simul fit
         else:
             current_page_id = self.sim_page.uid
             ## Perform more than 1 fit at the time
@@ -1062,6 +1090,28 @@ class Plugin(PluginBase):
                 batch_outputs[pars[index]] = []
                 batch_inputs["error on %s" % pars[index]] = []
             for res in result:
+                #Separate result in to data corresponding to each page
+                temp_pars = []
+                temp_res_param = []
+                # Park sorts the params by itself so that we must check 
+                # param name and resort it back as it was. No effects on Scipy.
+                if res.parameters != None:
+                    model = cpage.model
+                    for fid in self.page_finder[pid]:
+                        if fid != None:
+                            # Below works only for batch using one model
+                            model = self.page_finder[pid][fid].get_model()
+                            break
+                    for p in res.parameters:
+                        model_name, param_name = self.split_string(p.name)  
+                        if model.name == model_name:
+                            p_name= model.name+"."+param_name
+                            if p.name == p_name:      
+                                temp_res_param.append(p)
+                                temp_pars.append(param_name)
+                    res.parameters = temp_res_param
+                    pars = temp_pars
+                
                 model, data = res.inputs[0]
                 temp_model = model#.clone()
                 if res is None:
