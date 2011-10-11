@@ -827,7 +827,7 @@ class Plugin(PluginBase):
                                     batch_inputs=batch_inputs,
                                     batch_outputs=batch_outputs,
                                     page_id=list_page_id,
-                                    completefn=self._simul_fit_completed,
+                                    completefn=self._fit_completed,
                                     ftol=self.ftol)
             else:
                 calc_fit = FitThread(handler = handler,
@@ -836,7 +836,7 @@ class Plugin(PluginBase):
                                     batch_inputs=batch_inputs,
                                     batch_outputs=batch_outputs,
                                     page_id=list_page_id,
-                                    completefn=self._single_fit_completed,
+                                    completefn=self._fit_completed,
                                     ftol=self.ftol)
             
         # simul fit
@@ -849,7 +849,7 @@ class Plugin(PluginBase):
                                     batch_outputs=batch_outputs,
                                     page_id=list_page_id,
                                     updatefn=handler.update_fit,
-                                    completefn=self._simul_fit_completed,
+                                    completefn=self._fit_completed,
                                     ftol=self.ftol)
         self.fit_thread_list[current_page_id] = calc_fit
         calc_fit.queue()
@@ -1066,7 +1066,6 @@ class Plugin(PluginBase):
         print "update_fit result", result
         
    
-        
     def _batch_single_fit_complete_helper(self, result, pars, page_id, 
                             batch_outputs, batch_inputs, elapsed=None):
         """
@@ -1091,84 +1090,78 @@ class Plugin(PluginBase):
             for index  in range(len(pars)):
                 batch_outputs[pars[index]] = []
                 batch_inputs["error on %s" % pars[index]] = []
+            msg = ""
             for res in result:
-                #Separate result in to data corresponding to each page
-                temp_pars = []
-                temp_res_param = []
-                # Park sorts the params by itself so that we must check 
-                # param name and resort it back as it was. No effects on Scipy.
-                if res.parameters != None:
-                    model = cpage.model
-                    for fid in self.page_finder[pid]:
-                        if fid != None:
-                            # Below works only for batch using one model
-                            model = self.page_finder[pid][fid].get_model()
-                            break
-                    for p in res.parameters:
-                        model_name, param_name = self.split_string(p.name)  
-                        if model.name == model_name:
-                            p_name= model.name+"."+param_name
-                            if p.name == p_name:      
-                                temp_res_param.append(p)
-                                temp_pars.append(param_name)
-                    res.parameters = temp_res_param
-                    pars = temp_pars
-                
                 model, data = res.inputs[0]
-                temp_model = model#.clone()
-                if res is None:
-                    null_value = numpy.nan
-                    cell = BatchCell()
-                    cell.label = null_value
-                    cell.value = null_value
-                    cell.object = [None]
-                    batch_outputs["Chi2"].append(cell)
-                    for param in temp_model.getParamList():
-                        if temp_model.is_fittable(param):
-                            for index  in range(len(pars)):
-                                #replug only fitted values
-                                if param != pars[index]:
-                                    batch_outputs[pars[index]].append(null_value)
-                                    item = null_value
-                                    batch_inputs["error on %s" % pars[index]].append(item)
-                                    if pars[index] in model.getParamList():
-                                        temp_model.setParam(pars[index], res.pvec[index])
-                                else:
-                                     batch_outputs[str(param)].append(temp_model.getParam(param))
+                if res.fitness is None or \
+                    not numpy.isfinite(res.fitness) or \
+                    numpy.any(res.pvec == None) or not \
+                    numpy.all(numpy.isfinite(res.pvec)):
+                    data_name = str(None)
+                    if data is not None:
+                        data_name = str(data.name)
+                    model_name = str(None)
+                    if model is not None:
+                        model_name = str(model.name)
+                    msg += "Data %s and Model %s did not fit.\n" % (data_name, 
+                                                                    model_name)
+                    print msg
+                    wx.PostEvent(self.parent, StatusEvent(status=msg,
+                                                          error="error",
+                                                          type="stop"))
                 else:
-                    from sans.guiframe.data_processor import BatchCell
+                    #Separate result in to data corresponding to each page
+                    temp_pars = []
+                    temp_res_param = []
+                    # Park sorts the params by itself so that we must check 
+                    # param name and resort it back as it was. No effects on Scipy.
+                    if res.parameters != None:
+                        model = cpage.model
+                        for fid in self.page_finder[pid]:
+                            if fid != None:
+                                # Below works only for batch using one model
+                                model = self.page_finder[pid][fid].get_model()
+                                break
+                        for p in res.parameters:
+                            model_name, param_name = self.split_string(p.name)  
+                            if model.name == model_name:
+                                p_name= model.name+"."+param_name
+                                if p.name == p_name:      
+                                    temp_res_param.append(p)
+                                    temp_pars.append(param_name)
+                        res.parameters = temp_res_param
+                        pars = temp_pars
                     cell = BatchCell()
                     cell.label = res.fitness
                     cell.value = res.fitness
                     batch_outputs["Chi2"].append(cell)
-                    for param in temp_model.getParamList():
-                        if temp_model.is_fittable(param):
+                    for param in model.getParamList():
+                        if model.is_fittable(param):
                             for index  in range(len(pars)):
                                 #replug only fitted values
                                 if param != pars[index]:
                                     batch_outputs[pars[index]].append(res.pvec[index])
                                     item = res.stderr[index]
                                     batch_inputs["error on %s" % pars[index]].append(item)
-                                    if pars[index] in temp_model.getParamList():
-                                        temp_model.setParam(pars[index], res.pvec[index])
+                                    if pars[index] in model.getParamList():
+                                        model.setParam(pars[index], res.pvec[index])
                                 else:
-                                     batch_outputs[str(param)].append(temp_model.getParam(param))
+                                     batch_outputs[str(param)].append(model.getParam(param))
                                 
-                self.page_finder[pid].set_batch_result(batch_inputs=batch_inputs,
-                                                 batch_outputs=batch_outputs)   
+                    self.page_finder[pid].set_batch_result(batch_inputs=batch_inputs,
+                                                     batch_outputs=batch_outputs)   
                 cpage = self.fit_panel.get_page_by_id(pid)
                 cpage._on_fit_complete()
                 self.page_finder[pid][data.id].set_result(res)
                 fitproblem = self.page_finder[pid][data.id]
                 
-               
                 from sans.models.qsmearing import smear_selection
-                #smearer = fitproblem.get_smearer()
-                smearer = smear_selection(data, temp_model)
+                smearer = smear_selection(data, model)
                 qmin, qmax = fitproblem.get_range()
                 weight = fitproblem.get_weight()
                 flag = issubclass(data.__class__, Data2D)
-                self.draw_model(model=temp_model,
+                """
+                self.draw_model(model=model,
                                   page_id=pid, 
                                   data=data, 
                                   smearer=smearer,
@@ -1181,6 +1174,7 @@ class Plugin(PluginBase):
                                   update_chisqr=False, 
                                   weight=weight,
                                   source='fit')
+                                  """
        
     def on_set_batch_result(self, page_id, fid, batch_outputs, batch_inputs):
         """
@@ -1219,7 +1213,7 @@ class Plugin(PluginBase):
         # associate residuals plot
         batch_outputs["Chi2"][index].object = [residuals]
        
-    def _single_fit_completed(self, result, pars, page_id, batch_outputs,
+    def old_single_fit_completed(self, result, pars, page_id, batch_outputs,
                           batch_inputs=None,  elapsed=None):
         """
          Display fit result on one page of the notebook.
@@ -1250,7 +1244,8 @@ class Plugin(PluginBase):
                                              info="warning",
                                              type="stop"))
                     return
-                if not numpy.isfinite(result.fitness) or \
+                if result.fitness is not None or \
+                not numpy.isfinite(result.fitness) or \
                         numpy.any(result.pvec == None) or \
                         not numpy.all(numpy.isfinite(result.pvec)):
                     msg = "Single Fitting did not converge!!!"
@@ -1289,7 +1284,7 @@ class Plugin(PluginBase):
                                                       type="stop"))
                 raise
                
-    def _simul_fit_completed(self, result, page_id, batch_outputs,
+    def _fit_completed(self, result, page_id, batch_outputs,
                              batch_inputs=None,
                               pars=None, 
                              elapsed=None):
@@ -1307,62 +1302,46 @@ class Plugin(PluginBase):
         ## fit more than 1 model at the same time 
         self._mac_sleep(0.2) 
         try:
-            msg = "" 
-            if result == None:
-                self._update_fit_button(page_id)
-                msg= "Complex Fitting did not converge!!!"
-                wx.PostEvent(self.parent, StatusEvent(status=msg,
-                                                      type="stop"))
-                return
-            if not numpy.isfinite(result.fitness) or \
-                numpy.any(result.pvec == None) or not \
-                numpy.all(numpy.isfinite(result.pvec)):
-                self._update_fit_button(page_id)
-                msg= "Simultaneous Fitting did not converge!!!"
-                wx.PostEvent(self.parent, StatusEvent(status=msg,type="stop"))
-                return
-              
-            for uid in page_id:   
-                fpdict = self.page_finder[uid]
-                for value in fpdict.itervalues():
-                    model = value.get_model()
-                    data =  value.get_fit_data()
-                    small_param_name = []
-                    small_out = []
-                    small_cov = []
-                    #Separate result in to data corresponding to each page
-                    for p in result.parameters:
-                        #print "simul ----", p , p.__class__, p.model.name, p.data.name
-                        model_name, param_name = self.split_string(p.name)  
-                        if model.name == model_name:
-                            p_name= model.name+"."+param_name
-                            if p.name == p_name:      
-                                if p.value != None and numpy.isfinite(p.value):
-                                    small_out.append(p.value)
-                                    small_param_name.append(param_name)
-                                    small_cov.append(p.stderr)
-                # Display result on each page 
+            index = 0
+            for uid in page_id:
+                res = result[index]
+                if res.fitness is not None or \
+                    not numpy.isfinite(res.fitness) or \
+                    numpy.any(res.pvec == None) or \
+                    not numpy.all(numpy.isfinite(res.pvec)):
+                    msg = "Fitting did not converge!!!"
+                    wx.PostEvent(self.parent, 
+                             StatusEvent(status=msg, 
+                                         info="warning",
+                                         type="stop"))
+                    self._update_fit_button(page_id)
                 cpage = self.fit_panel.get_page_by_id(uid)
-                wx.CallAfter(cpage.onsetValues, 
-                                    result.fitness,
-                                  small_param_name,
-                                  small_out,small_cov)
+                # Make sure we got all results 
+                #(CallAfter is important to MAC)
+                wx.CallAfter(cpage.onsetValues, res.fitness, res.param_list, 
+                             res.pvec, res.stderr)
+                index += 1
                 cpage._on_fit_complete()
-                msg = "Fit completed!"
+                if res.stderr == None:
+                    msg = "Fit Abort: "
+                else:
+                    msg = "Fitting: "
+                msg += "Completed!!!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
-        except Exception:
+        except ValueError:
+                raise
+                self._update_fit_button(page_id)
+                msg = "Single Fitting did not converge!!!"
+                wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
+                                                      type="stop"))
+        except:
             raise
             self._update_fit_button(page_id)
-            msg = "Complex Fitting did not converge!!!"
+            msg = "Single Fit completed but Following"
+            msg += " error occurred:%s" % sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                   type="stop"))
-            return
-        except:
-            self._update_fit_button(page_id)
-            msg = "Simultaneous Fit completed"
-            msg += " but Following error occurred:%s" % sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status=msg, type="stop"))
-    
+           
     def _update_fit_button(self, page_id):
         """
         Update Fit button when fit stopped

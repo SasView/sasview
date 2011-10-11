@@ -26,7 +26,6 @@ from basepage import BasicPage
 from basepage import PageInfoEvent
 from sans.models.qsmearing import smear_selection
 
-
 class FitPage(BasicPage):
     """
     FitPanel class contains fields allowing to display results when
@@ -2081,73 +2080,44 @@ class FitPage(BasicPage):
         except:
             dispersity = None
             pass
-        #set the panel when fit result are float not list
-        if out.__class__== numpy.float64:
-            self.param_toFit[0][2].SetValue(format_number(out, True))
+      
             
-            if self.param_toFit[0][4].IsShown and not self.is_mac:
-                self.param_toFit[0][4].Hide()
-            if cov !=None :
-                self.text2_3.Show(True)
-                try:
-                    if self.enable_disp.GetValue():
-                        if hasattr(self,"text_disp_1" ):
-                            if self.text_disp_1 !=None:
-                                self.text_disp_1.Show(True)
-                except:
-                    pass
+        i = 0
+        #Set the panel when fit result are list
+        for item in self.param_toFit:     
+            if len(item)>5 and item != None:     
+                ## reset error value to initial state
+                if not self.is_mac:
+                    item[3].Hide()
+                    item[4].Hide()
+                for ind in range(len(out)):
+                    if item[1] == p_name[ind]:
+                        break       
+                if len(out)<=len(self.param_toFit) and out[ind] !=None:   
+                    val_out = format_number(out[ind], True)                  
+                    item[2].SetValue(val_out)
 
-                if cov[0]==None or  not numpy.isfinite(cov[0]): 
-                    if self.param_toFit[0][3].IsShown and not self.is_mac:
-                        self.param_toFit[0][3].Hide()
-                else:                    
-                    self.param_toFit[0][3].Show(True)               
-                    self.param_toFit[0][4].Show(True)
-                    self.param_toFit[0][4].SetValue(format_number(cov[0], True))
-                    has_error = True
-        else:
-
-            i = 0
-            #Set the panel when fit result are list
-            for item in self.param_toFit:     
-                if len(item)>5 and item != None:     
-                    ## reset error value to initial state
-                    if not self.is_mac:
-                        item[3].Hide()
-                        item[4].Hide()
-                    
-                    for ind in range(len(out)):
-                        
-                        if item[1] == p_name[ind]:
-                            break        
-                    if len(out)<=len(self.param_toFit) and out[ind] !=None:   
-                        val_out = format_number(out[ind], True)                  
-                        item[2].SetValue(val_out)
-
-
-                    if(cov !=None):
-                        
-                        try:
-                            if dispersity !=None:
-                                if self.enable_disp.GetValue():
-                                    if hasattr(self,"text_disp_1" ):
-                                        if self.text_disp_1!=None:
-                                            if not self.text_disp_1.IsShown()\
-                                                and not self.is_mac:
-                                                self.text_disp_1.Show(True)
-                        except:
-                            pass    
-                   
-                        if cov[ind]!=None :
-                            if numpy.isfinite(float(cov[ind])):
-                                val_err = format_number(cov[ind], True)
-                                if not self.is_mac:
-                                    item[3].Show(True)
-                                    item[4].Show(True)
-                                item[4].SetValue(val_err)
-                                
-                                has_error = True
-                    i += 1         
+                if(cov !=None):
+                    try:
+                        if dispersity !=None:
+                            if self.enable_disp.GetValue():
+                                if hasattr(self,"text_disp_1" ):
+                                    if self.text_disp_1!=None:
+                                        if not self.text_disp_1.IsShown()\
+                                            and not self.is_mac:
+                                            self.text_disp_1.Show(True)
+                    except:
+                        pass    
+               
+                    if cov[ind]!=None :
+                        if numpy.isfinite(float(cov[ind])):
+                            val_err = format_number(cov[ind], True)
+                            if not self.is_mac:
+                                item[3].Show(True)
+                                item[4].Show(True)
+                            item[4].SetValue(val_err)
+                            has_error = True
+                i += 1         
         #Show error title when any errors displayed
         if has_error: 
             if not self.text2_3.IsShown():
