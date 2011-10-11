@@ -24,6 +24,7 @@ from park.fit import Fitter
 from park.formatnum import format_uncertainty
 #from Loader import Load
 from sans.fit.AbstractFitEngine import FitEngine
+from sans.fit.AbstractFitEngine import FResult
   
 class SansFitResult(fitresult.FitResult):
     def __init__(self, *args, **kwrds):
@@ -207,11 +208,15 @@ class SansFitParameter(FitParameter):
     
 class MyAssembly(Assembly):
     def __init__(self, models, curr_thread=None):
-        Assembly.__init__(self, models)
+        """Build an assembly from a list of models."""
+        self.parts = []
+        for m in models:
+            self.parts.append(SansPart(m))
         self.curr_thread = curr_thread
         self.chisq = None
         self._cancel = False
         self.theory = None
+        self._reset()
         
     def fit_parameters(self):
         """
@@ -397,17 +402,38 @@ class ParkFit(FitEngine):
         fitter = SansFitMC(localfit=localfit, start_points=1)
         if handler == None:
             handler = fitresult.ConsoleUpdate(improvement_delta=0.1)
+        
+        result_list = []
         try:
             result = fit.fit(self.problem, fitter=fitter, handler=handler)
             self.problem.all_results(result)
+            
         except LinAlgError:
             raise ValueError, "SVD did not converge"
-            
-        if result != None:
-            if q != None:
-                q.put(result)
-                return q
-            return result
-        else:
-            raise ValueError, "SVD did not converge"
-            
+    
+        for m in self.problem.parts:
+            residuals, theory = m.fitness.residuals()
+            small_result = FResult(model=m.model, data=m.data.sans_data)
+            small_result.theory = theory
+            small_result.residuals = residuals
+            small_result.pvec = []
+            small_result.cov = []
+            small_result.stderr = []
+            small_result.param_list = []
+            small_result.residuals = m.residuals
+            if result is not None:
+                for p in result.parameters:
+                    if p.data.name == small_result.data.name:
+                        small_result.index = m.data.idx
+                        small_result.fitness = result.fitness
+                        small_result.pvec.append(p.value)
+                        small_result.stderr.append(p.stderr)
+                        name = p.name.split('.')[1].strip()
+                        small_result.param_list.append(name)
+            result_list.append(small_result)    
+        if q != None:
+            q.put(result)
+            return q
+        print "park", len(result_list)
+        return result_list
+       

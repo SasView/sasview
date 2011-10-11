@@ -14,70 +14,7 @@ from sans.fit.AbstractFitEngine import FitEngine
 from sans.fit.AbstractFitEngine import SansAssembly
 from sans.fit.AbstractFitEngine import FitAbort
 from sans.fit.AbstractFitEngine import Model
-IS_MAC = True
-if sys.platform.count("win32") > 0:
-    IS_MAC = False
-    
-class fitresult(object):
-    """
-    Storing fit result
-    """
-    def __init__(self, model=None, param_list=None, data=None):
-        self.calls = None
-        self.fitness = None
-        self.chisqr = None
-        self.pvec = None
-        self.cov = None
-        self.info = None
-        self.mesg = None
-        self.success = None
-        self.stderr = None
-        self.parameters = None
-        self.is_mac = IS_MAC
-        if issubclass(model.__class__, Model):
-            model = model.model
-        self.model = model
-        self.data = data
-        self.theory = None
-        self.param_list = param_list
-        self.iterations = 0
-        
-        self.inputs = [(self.model, self.data)]
-     
-    def set_model(self, model):
-        """
-        """
-        self.model = model
-        
-    def set_fitness(self, fitness):
-        """
-        """
-        self.fitness = fitness
-        
-    def __str__(self):
-        """
-        """
-        if self.pvec == None and self.model is None and self.param_list is None:
-            return "No results"
-        n = len(self.model.parameterset)
-        self.iterations += 1
-        result_param = zip(xrange(n), self.model.parameterset)
-        msg1 = ["[Iteration #: %s ]" % self.iterations]
-        msg3 = ["=== goodness of fit: %s ===" % (str(self.fitness))]
-        if not self.is_mac:
-            msg2 = ["P%-3d  %s......|.....%s" % \
-                (p[0], p[1], p[1].value)\
-                  for p in result_param if p[1].name in self.param_list]
-            msg =  msg1 + msg3 + msg2
-        else:
-            msg = msg1 + msg3
-        msg = "\n".join(msg)
-        return msg
-    
-    def print_summary(self):
-        """
-        """
-        print self   
+from sans.fit.AbstractFitEngine import FResult 
 
 class ScipyFit(FitEngine):
     """ 
@@ -145,7 +82,7 @@ class ScipyFit(FitEngine):
         # Check the initial value if it is within range
         self._check_param_range(model)
         
-        result = fitresult(model=model, data=data.sans_data, param_list=self.param_list)
+        result = FResult(model=model, data=data, param_list=self.param_list)
         if handler is not None:
             handler.set_result(result=result)
         try:
@@ -196,9 +133,11 @@ class ScipyFit(FitEngine):
                 return q
             if success < 1 or success > 5:
                 result = None
-            return result
+        return [result]
+        """
         else:
             return None
+        """
         # Error will be present to the client, not here 
         #else:  
         #    raise ValueError, "SVD did not converge" + str(mesg)

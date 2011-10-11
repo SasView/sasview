@@ -1,7 +1,7 @@
 
 import  copy
 #import logging
-#import sys
+import sys
 import numpy
 import math
 import park
@@ -283,6 +283,7 @@ class FitData1D(Data1D):
             msg += "%d <> %d" % (numpy.shape(self.dy), numpy.size(fx))                                                      
             raise RuntimeError, msg  
         return (self.y[self.idx] - fx[self.idx]) / self.dy[self.idx], fx[self.idx]
+            
      
     def residuals_deriv(self, model, pars=[]):
         """ 
@@ -302,7 +303,7 @@ class FitData2D(Data2D):
         or with vectors.
         """
         self.res_err_image = []
-        self.index_model = []
+        self.idx = []
         self.qmin = None
         self.qmax = None
         self.smearer = None
@@ -339,10 +340,10 @@ class FitData2D(Data2D):
         self.radius = numpy.sqrt(self.qx_data**2 + self.qy_data**2)
         
         # Note: mask = True: for MASK while mask = False for NOT to mask
-        self.index_model = ((self.qmin <= self.radius)&\
+        self.idx = ((self.qmin <= self.radius)&\
                             (self.radius <= self.qmax))
-        self.index_model = (self.index_model) & (self.mask)
-        self.index_model = (self.index_model) & (numpy.isfinite(self.data))
+        self.idx = (self.idx) & (self.mask)
+        self.idx = (self.idx) & (numpy.isfinite(self.data))
         
     def set_smearer(self, smearer):  
         """
@@ -351,7 +352,7 @@ class FitData2D(Data2D):
         if smearer == None:
             return
         self.smearer = smearer
-        self.smearer.set_index(self.index_model)
+        self.smearer.set_index(self.idx)
         self.smearer.get_data()
 
     def set_fit_range(self, qmin=None, qmax=None):
@@ -365,9 +366,9 @@ class FitData2D(Data2D):
         self.radius = numpy.sqrt(self.qx_data**2 + self.qy_data**2)
         self.index_model = ((self.qmin <= self.radius)&\
                             (self.radius <= self.qmax))
-        self.index_model = (self.index_model) &(self.mask)
-        self.index_model = (self.index_model) & (numpy.isfinite(self.data))
-        self.index_model = (self.index_model) & (self.res_err_data != 0)
+        self.idx = (self.idx) &(self.mask)
+        self.idx = (self.idx) & (numpy.isfinite(self.data))
+        self.idx = (self.idx) & (self.res_err_data != 0)
         
     def get_fit_range(self):
         """
@@ -380,18 +381,17 @@ class FitData2D(Data2D):
         return the residuals
         """ 
         if self.smearer != None:
-            fn.set_index(self.index_model)
+            fn.set_index(self.idx)
             # Get necessary data from self.data and set the data for smearing
             fn.get_data()
 
             gn = fn.get_value()  
         else:
-            gn = fn([self.qx_data[self.index_model],
-                     self.qy_data[self.index_model]])
+            gn = fn([self.qx_data[self.idx],
+                     self.qy_data[self.idx]])
         # use only the data point within ROI range
-        res = (self.data[self.index_model] - gn)/\
-                    self.res_err_data[self.index_model]
-        return res, gn
+        res = (self.data[self.index_model] - gn)/self.res_err_data[self.idx]
+        return res, gn 
         
     def residuals_deriv(self, model, pars=[]):
         """ 
@@ -469,6 +469,8 @@ class SansAssembly:
         self.res = self.true_res       
         if self.fitresult is not None and  self.handler is not None:
             self.fitresult.set_model(model=self.model)
+            self.fitresult.residuals = self.true_res
+            self.fitresult.theory = theory
             #fitness = self.chisq(params=params)
             fitness = self.chisq()
             self.fitresult.pvec = params
@@ -759,3 +761,70 @@ class FitArrange:
         return self.selected value
         """
         return self.selected
+    
+    
+IS_MAC = True
+if sys.platform.count("win32") > 0:
+    IS_MAC = False
+    
+class FResult(object):
+    """
+    Storing fit result
+    """
+    def __init__(self, model=None, param_list=None, data=None):
+        self.calls = None
+        self.fitness = None
+        self.chisqr = None
+        self.pvec = []
+        self.cov = []
+        self.info = None
+        self.mesg = None
+        self.success = None
+        self.stderr = None
+        self.residuals = []
+        self.index = []
+        self.parameters = None
+        self.is_mac = IS_MAC
+        self.model = model
+        self.data = data
+        self.theory = []
+        self.param_list = param_list
+        self.iterations = 0
+        self.inputs = []
+        if self.model is not None and self.data is not None:
+            self.inputs = [(self.model, self.data)]
+     
+    def set_model(self, model):
+        """
+        """
+        self.model = model
+        
+    def set_fitness(self, fitness):
+        """
+        """
+        self.fitness = fitness
+        
+    def __str__(self):
+        """
+        """
+        if self.pvec == None and self.model is None and self.param_list is None:
+            return "No results"
+        n = len(self.model.parameterset)
+        self.iterations += 1
+        result_param = zip(xrange(n), self.model.parameterset)
+        msg1 = ["[Iteration #: %s ]" % self.iterations]
+        msg3 = ["=== goodness of fit: %s ===" % (str(self.fitness))]
+        if not self.is_mac:
+            msg2 = ["P%-3d  %s......|.....%s" % \
+                (p[0], p[1], p[1].value)\
+                  for p in result_param if p[1].name in self.param_list]
+            msg =  msg1 + msg3 + msg2
+        else:
+            msg = msg1 + msg3
+        msg = "\n".join(msg)
+        return msg
+    
+    def print_summary(self):
+        """
+        """
+        print self  
