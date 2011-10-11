@@ -1779,11 +1779,14 @@ class FitPage(BasicPage):
         if data is None:
             return
         self.current_smearer = smear_selection(data, self.model)
-        self.disable_smearer.SetValue(True)
+        flag =  self.disable_smearer.GetValue()
+        self.disable_smearer.SetValue(flag)
         if self.current_smearer == None:
             self.enable_smearer.Disable()
         else:
             self.enable_smearer.Enable()
+        if not flag:
+            self.onSmear(None)
 
     def _mac_sleep(self, sec=0.2):
         """
