@@ -120,7 +120,8 @@ class ScipyFit(FitEngine):
             stderr = numpy.sqrt(numpy.diag(cov_x))
         else:
             stderr = None
-
+            
+        result.index = data.idx
         if not (numpy.isnan(out).any()) and (cov_x != None):
             result.fitness = chisqr
             result.stderr  = stderr
