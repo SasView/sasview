@@ -9,6 +9,7 @@ to perform a simple fit with park optimizer.
 #import time
 import numpy
 import math
+from  numpy.linalg.linalg import LinAlgError
 #import park
 from park import fit
 from park import fitresult
@@ -48,6 +49,9 @@ class SansFitSimplex(FitSimplex):
     """Stop when vertex values are within ftol of each other"""
     maxiter = None
     """Maximum number of iterations before fit terminates"""
+    def __init__(self, ftol=5e-5):
+        self.ftol = ftol
+        
     def fit(self, fitness, x0):
         """Run the fit"""
         self.cancel = False
@@ -105,7 +109,10 @@ class SansFitMC(SansFitter):
     """
     localfit = SansFitSimplex()
     start_points = 10
-
+    def __init__(self, localfit, start_points=10):
+        self.localfit = localfit
+        self.start_points = start_points
+        
     def _fit(self, objective, x0, bounds):
         """
         Run a monte carlo fit.
@@ -390,15 +397,12 @@ class ParkFit(FitEngine):
         fitter = SansFitMC(localfit=localfit, start_points=1)
         if handler == None:
             handler = fitresult.ConsoleUpdate(improvement_delta=0.1)
-        result = fit.fit(self.problem, fitter=fitter, handler=handler)
-        self.problem.all_results(result)
-        
-        #print "park------", result.inputs
-        #for (model, data) in result.inputs:
-        #    print model.name, data.name
-        #for p in result.parameters:
-        #    print "simul ----", p , p.__class__, p.model.name, p.data.name
-   
+        try:
+            result = fit.fit(self.problem, fitter=fitter, handler=handler)
+            self.problem.all_results(result)
+        except LinAlgError:
+            raise ValueError, "SVD did not converge"
+            
         if result != None:
             if q != None:
                 q.put(result)
