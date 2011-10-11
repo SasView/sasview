@@ -1331,13 +1331,13 @@ class Plugin(PluginBase):
         except ValueError:
                 raise
                 self._update_fit_button(page_id)
-                msg = "Single Fitting did not converge!!!"
+                msg = "Fitting did not converge!!!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                       type="stop"))
         except:
             raise
             self._update_fit_button(page_id)
-            msg = "Single Fit completed but Following"
+            msg = "Fit completed but Following"
             msg += " error occurred:%s" % sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                   type="stop"))
