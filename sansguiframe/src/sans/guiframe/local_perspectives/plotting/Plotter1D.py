@@ -163,7 +163,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.graph.reset()
         self.plots      = {}
         if self.is_zoomed:
-                self.is_zoomed = False
+            self.is_zoomed = False
         
     def _OnReSize(self, event):   
         """
@@ -278,7 +278,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self.toolbar.update()
             if self.is_zoomed:
                 self.is_zoomed = False
-        
+      
           
     def draw_plot(self):
         """
@@ -286,8 +286,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         self.draw()  
 
-
-       
     def onLeftDown(self,event): 
         """ 
         left button down and ready to drag

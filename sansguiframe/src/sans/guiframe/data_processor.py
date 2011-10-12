@@ -90,6 +90,7 @@ class GridPage(sheet.CSheet):
         
         self.AdjustScrollbars()
         #self.SetLabelBackgroundColour('#DBD4D4')
+        self.uid = wx.NewId()
         self.parent = parent
         self.panel = panel
         self.col_names = []
@@ -613,6 +614,7 @@ class GridPanel(SPanel):
         self.view_button = None
         self.plot_button = None
         self.notebook = None
+        self.list_plot_panels = {}
         self.layout_grid()
         self.layout_plotting_area()
         self.SetSizer(self.vbox)
@@ -677,9 +679,7 @@ class GridPanel(SPanel):
         pos = self.notebook.GetSelection()
         grid = self.notebook.GetPage(pos)
         title = self.notebook.GetPageText(pos)
-        
-        
-        group_id = wx.NewId()
+    
         for cell in grid.selected_cells:
             row, col = cell
             label_row = 0
@@ -696,9 +696,16 @@ class GridPanel(SPanel):
                             wx.PostEvent(self.parent.parent, 
                                  StatusEvent(status=msg, info="error")) 
                             return
+                        
                         if issubclass(new_plot.__class__, Data1D):
-                            new_plot.group_id = group_id
-                            new_plot.list_group_id .append(group_id)
+                            if label in self.list_plot_panels.keys():
+                                group_id = self.list_plot_panels[label]
+                            else:
+                                group_id = str(grid.uid) + str(new_plot.group_id)
+                                self.list_plot_panels[label] = group_id
+                            if group_id not in new_plot.list_group_id:
+                                new_plot.group_id = group_id
+                                new_plot.list_group_id.append(group_id)
                         else:
                             if label.lower() in ["data", "chi2"]:
                                 if len(grid.selected_cells) != 1:
@@ -709,9 +716,13 @@ class GridPanel(SPanel):
                                                               info="error")) 
                                     return  
                         wx.PostEvent(self.parent.parent, 
+                                     NewPlotEvent(action="clear",
+                                                  group_id=str(group_id),
+                                                  title=title))  
+                        wx.PostEvent(self.parent.parent, 
                                      NewPlotEvent(plot=new_plot, 
-                                  group_id=str(new_plot.group_id),
-                                   title =title))  
+                                                  group_id=str(group_id),
+                                                  title=title))  
                 else:
                    
                     msg = "Row %s , " % str(row)

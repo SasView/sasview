@@ -124,11 +124,12 @@ class Plugin(PluginBase):
         """
         if group_id in self.plot_panels.keys():
             panel = self.plot_panels[group_id]
+            for plottable in panel.graph.plottables.keys():
+                self.remove_plot(group_id, plottable.id)
             panel.graph.reset()
             return True
         return False
             
-        
     def hide_panel(self, group_id):
         """
         hide panel with group ID = group_id
@@ -274,16 +275,16 @@ class Plugin(PluginBase):
             group_id = event.group_id
             if group_id in self.plot_panels.keys():
                 #remove data from panel
-                if event.action.lower() == 'remove':
+                if event.action.lower().strip() == 'remove':
                     id = event.id
                     return self.remove_plot(group_id, id)
-                if event.action.lower() == 'hide':
+                if event.action.lower().strip() == 'hide':
                     return self.hide_panel(group_id)
-                if event.action.lower() == 'delete':
+                if event.action.lower().strip() == 'delete':
                     panel = self.plot_panels[group_id]
                     uid = panel.uid
                     return self.parent.delete_panel(uid)
-                if event.action.lower() == "clear":
+                if event.action.lower().strip() == "clear":
                     return self.clear_panel_by_id(group_id)
         if not hasattr(event, 'plot'):    
             return
