@@ -1110,29 +1110,6 @@ class Plugin(PluginBase):
                         msg += "Data %s and Model %s did not fit.\n" % (data_name, 
                                                                         model_name)
                     else:
-                        #Separate result in to data corresponding to each page
-                        #temp_pars = []
-                        #temp_res_param = []
-                        # Park sorts the params by itself so that we must check 
-                        # param name and resort it back as it was. No effects on Scipy.
-                        """"
-                        if res.parameters != None:
-                            #model = cpage.model
-                            #for fid in self.page_finder[pid]:
-                            #    if fid != None:
-                            #        # Below works only for batch using one model
-                            #        model = self.page_finder[pid][fid].get_model()
-                            #        break
-                            for p in res.parameters:
-                                model_name, param_name = self.split_string(p.name)  
-                                if model.name == model_name:
-                                    p_name= model.name+"."+param_name
-                                    if p.name == p_name:      
-                                        temp_res_param.append(p)
-                                        temp_pars.append(param_name)
-                            res.parameters = temp_res_param
-                            pars = temp_pars
-                        """
                         cell = BatchCell()
                         cell.label = res.fitness
                         cell.value = res.fitness
@@ -1165,7 +1142,6 @@ class Plugin(PluginBase):
                     fitproblem = self.page_finder[pid][data.id]
                     qmin, qmax = fitproblem.get_range()
                     flag = issubclass(data.__class__, Data2D)
-                    correct_result = False
                     if not flag:
                         if len(res.theory) == len(res.index) and \
                             len(res.index) == len(data.y):
@@ -1177,6 +1153,10 @@ class Plugin(PluginBase):
                                          toggle_mode_on=False, state=None, 
                                          data=data, update_chisqr=False, 
                                          source='fit')
+                            self.on_set_batch_result(page_id=pid, 
+                                             fid=data.id, 
+                                             batch_outputs=batch_outputs, 
+                                             batch_inputs=batch_inputs)
                         else:
                             data_name = str(None)
                             if data is not None:
@@ -1200,6 +1180,10 @@ class Plugin(PluginBase):
                                           toggle_mode_on=False, state=None, 
                                          update_chisqr=False, 
                                          source='fit')
+                            self.on_set_batch_result(page_id=pid, 
+                                             fid=data.id, 
+                                             batch_outputs=batch_outputs, 
+                                             batch_inputs=batch_inputs)
                         else:
                             data_name = str(None)
                             if data is not None:
@@ -1209,14 +1193,7 @@ class Plugin(PluginBase):
                                 model_name = str(model.name)
                             msg += "Data %s and Model %s did not fit.\n" % (data_name, 
                                                                             model_name)
-                            
-                    if correct_result : 
-                        self.on_set_batch_result(page_id=pid, 
-                                             fid=data.id, 
-                                             batch_outputs=batch_outputs, 
-                                             batch_inputs=batch_inputs)
-          
-        #print msg
+                    
         wx.PostEvent(self.parent, StatusEvent(status=msg, error="error",
                                                               type="stop"))
         wx.CallAfter(self.parent.on_set_batch_result,batch_outputs, 
@@ -1844,6 +1821,7 @@ class Plugin(PluginBase):
         ##post data to plot
         title = new_plot.name 
         self.page_finder[page_id].set_residuals(residuals=new_plot, fid=data.id)
+        self.parent.update_theory(data_id=data.id, theory=new_plot)
         batch_on = self.fit_panel.get_page_by_id(page_id).batch_on
         if not batch_on:
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot, title=title))
