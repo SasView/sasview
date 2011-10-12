@@ -2342,7 +2342,7 @@ class FitPage(BasicPage):
         if self._is_changed_pinhole():
             msg = self._set_pinhole_smear()           
         #self._undo.Enable(True)
-        self.save_current_state()
+        wx.CallAfter(self.save_current_state)
 
         if msg != None:
             return False   
