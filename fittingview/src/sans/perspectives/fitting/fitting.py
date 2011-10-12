@@ -180,7 +180,7 @@ class Plugin(PluginBase):
         self.id_tol = wx.NewId()
         ftol_help = "Change the current FTolerance (=%s) " % str(self.ftol)
         ftol_help += "of Simple FitEngine..." 
-        self.menu1.Append(self.id_tol, "Change FTolerance [LeastSq Only]", 
+        self.menu1.Append(self.id_tol, "Change FTolerance", 
                                    ftol_help) 
         wx.EVT_MENU(owner, self.id_tol,  self.show_ftol_dialog)
         self.menu1.AppendSeparator()
