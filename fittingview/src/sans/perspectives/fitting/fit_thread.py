@@ -26,7 +26,8 @@ class FitThread(CalcThread):
                  updatefn   = None,
                  yieldtime  = 0.01,
                  worktime   = 0.01,
-                 ftol       = None):
+                 ftol       = None,
+                 reset_flag = False):
         CalcThread.__init__(self,completefn,
                  updatefn,
                  yieldtime,
@@ -41,6 +42,7 @@ class FitThread(CalcThread):
         self.updatefn = updatefn
         #Relative error desired in the sum of squares.
         self.ftol = ftol
+        self.reset_flag = reset_flag
    
     def isquit(self):
         """
@@ -62,6 +64,7 @@ class FitThread(CalcThread):
             list_handler = []
             list_curr_thread = [] 
             list_ftol = []
+            list_reset_flag = []
             list_map_get_attr = []
             list_fit_function = []
             list_q = []
@@ -70,11 +73,13 @@ class FitThread(CalcThread):
                 list_q.append(None)
                 list_curr_thread.append(None)
                 list_ftol.append(self.ftol)
+                list_reset_flag.append(self.reset_flag)
                 list_fit_function.append('fit')
                 list_map_get_attr.append(map_getattr)
             #from multiprocessing import Pool
             inputs = zip(list_map_get_attr,self.fitter, list_fit_function,
-                         list_handler, list_q, list_curr_thread,list_ftol)
+                         list_handler, list_q, list_curr_thread,list_ftol,
+                         list_reset_flag)
             result =  map(map_apply, inputs)
             self.complete(result=result,
                           batch_inputs=self.batch_inputs,

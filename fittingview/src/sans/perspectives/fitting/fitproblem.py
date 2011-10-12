@@ -594,7 +594,7 @@ class FitProblem(FitProblemComponent):
         self.original_data = None
         self.fit_data = None
         # original data: should not be modified
-        self.original_data = copy.deepcopy(data)
+        self.original_data = data
         # fit data: used for fit and can be modified for convenience
         self.fit_data = copy.deepcopy(data)
         self.smearer_computer_value = smear_selection(self.fit_data,
@@ -607,6 +607,11 @@ class FitProblem(FitProblemComponent):
         :return: data associate with this class
         """
         return self.fit_data
+    
+    def get_origin_data(self):
+        """
+        """
+        return self.original_data
     
     def set_weight(self, is2d, flag=None):
         """

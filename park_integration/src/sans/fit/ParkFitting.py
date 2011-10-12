@@ -337,7 +337,7 @@ class ParkFit(FitEngine):
         self.fit_arrange_dict = {}
         self.param_list = []
         
-    def create_assembly(self, curr_thread):
+    def create_assembly(self, curr_thread, reset_flag=False):
         """
         Extract sansmodel and sansdata from 
         self.FitArrangelist ={Uid:FitArrange}
@@ -357,6 +357,12 @@ class ParkFit(FitEngine):
             return
         for item in fitproblems:
             parkmodel = item.get_model()
+            if reset_flag:
+                # reset the initial value; useful for batch
+                for name in item.pars:
+                    ind = item.pars.index(name)
+                    parkmodel.model.setParam(name, item.vals[ind])
+            
             for p in parkmodel.parameterset:
                 ## does not allow status change for constraint parameters
                 if p.status != 'computed':
@@ -373,7 +379,8 @@ class ParkFit(FitEngine):
         self.problem = MyAssembly(models=mylist, curr_thread=curr_thread)
         
   
-    def fit(self, q=None, handler=None, curr_thread=None, ftol=1.49012e-8):
+    def fit(self, q=None, handler=None, curr_thread=None, 
+                                        ftol=1.49012e-8, reset_flag=False):
         """
         Performs fit with park.fit module.It can  perform fit with one model
         and a set of data, more than two fit of  one model and sets of data or 
@@ -394,7 +401,7 @@ class ParkFit(FitEngine):
         :return: result.cov Covariance matrix
         
         """
-        self.create_assembly(curr_thread=curr_thread)
+        self.create_assembly(curr_thread=curr_thread, reset_flag=reset_flag)
         localfit = SansFitSimplex()
         localfit.ftol = ftol
         

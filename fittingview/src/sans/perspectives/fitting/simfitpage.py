@@ -621,7 +621,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.btFit.Bind(wx.EVT_BUTTON, self.onFit,id= self.btFit.GetId())
         self.btFit.SetToolTipString("Perform fit.")
         
-        text= "Hint: Park fitting engine will be selected automatically. \n"
+        text= "Hint: Park fitting engine will be used automatically. \n"
         #text+= "automatically for more than 2 combinations checked"
         text_hint = wx.StaticText(self,-1,text)
         

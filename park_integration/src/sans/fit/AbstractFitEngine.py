@@ -458,7 +458,7 @@ class SansAssembly:
         """ 
         #import thread
         self.model.set_params(self.paramlist, params)
-        
+        print "params", params
         self.true_res, theory = self.data.residuals(self.model.eval)
         self.theory = copy.deepcopy(theory)
         # check parameters range
@@ -547,7 +547,7 @@ class FitEngine:
         self.param_list = []
         #Dictionnary of fitArrange element (fit problems)
         self.fit_arrange_dict = {}
-  
+        
     def set_model(self, model,  id,  pars=[], constraints=[], data=None):
         """
         set a model on a given  in the fit engine.
@@ -610,7 +610,10 @@ class FitEngine:
                 fitproblem.set_model(new_model)
                 fitproblem.pars = pars
                 self.fit_arrange_dict[id] = fitproblem
-                
+                vals = []
+                for name in pars:
+                    vals.append(new_model.model.getParam(name))
+                self.fit_arrange_dict[id].vals = vals
         else:
             raise ValueError, "park_integration:missing parameters"
     
@@ -697,6 +700,7 @@ class FitArrange:
         self.model = None
         self.data_list = []
         self.pars = []
+        self.vals = []
         #self.selected  is zero when this fit problem is not schedule to fit 
         #self.selected is 1 when schedule to fit 
         self.selected = 0

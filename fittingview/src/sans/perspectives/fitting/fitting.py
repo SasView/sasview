@@ -85,8 +85,10 @@ class Plugin(PluginBase):
         self.closed_page_dict = {}
         ## Fit engine
         self._fit_engine = 'scipy'
+        self._gui_engine = None
         ## Relative error desired in the sum of squares (float); scipy only
         self.ftol = SANS_F_TOL
+        self.batch_reset_flag = True
         #List of selected data
         self.selected_data_list = []
         ## list of slicer panel created to display slicer parameters and results
@@ -704,7 +706,7 @@ class Plugin(PluginBase):
         for value in self.page_finder.values():
             if value.get_scheduled() == 1:
                 fitproblem_count += 1
-                
+        self._gui_engine = self._return_engine_type()       
         self.fitproblem_count = fitproblem_count  
         if self._fit_engine == "park":
             engineType = "Simultaneous Fit"
@@ -720,6 +722,7 @@ class Plugin(PluginBase):
             sim_fitter = Fit(self._fit_engine)  
             fitter_list.append(sim_fitter) 
             is_single_fit = False
+            
 
         self.fitproblem_count = fitproblem_count  
         if self._fit_engine == "park":
@@ -817,7 +820,8 @@ class Plugin(PluginBase):
                                     batch_outputs=batch_outputs,
                                     page_id=list_page_id,
                                     completefn=self._batch_fit_complete,
-                                    ftol=self.ftol)
+                                    ftol=self.ftol,
+                                    reset_flag=self.batch_reset_flag)
         else:
             # single fit: not batch and not simul fit 
             if not is_single_fit:
@@ -1095,7 +1099,7 @@ class Plugin(PluginBase):
                             model_name = str(model.name)
                         msg += "Data %s and Model %s did not fit.\n" % (data_name, 
                                                                         model_name)
-                        #print msg
+                        print msg
                         wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                               error="error",
                                                               type="stop"))
@@ -1155,14 +1159,13 @@ class Plugin(PluginBase):
                     qmin, qmax = fitproblem.get_range()
                     flag = issubclass(data.__class__, Data2D)
                     if not flag:
-                        #print "Batch complete", len(res.theory), len(res.index)
                         self._complete1D(x=data.x, y=res.theory, page_id=pid, 
                                          elapsed=None, 
                                          index=res.index, model=model,
                                          weight=None, fid=data.id,
                                          toggle_mode_on=False, state=None, 
                                          data=data, update_chisqr=False, 
-                                         source='model')
+                                         source='fit')
                     else:
                         self._complete2D(image=data.data, data=data,
                                           model=model,
@@ -1172,7 +1175,7 @@ class Plugin(PluginBase):
                                          qmax=qmax, fid=data.id, weight=None,
                                           toggle_mode_on=False, state=None, 
                                          update_chisqr=False, 
-                                         source='model')
+                                         source='fit')
                         
                     self.on_set_batch_result(page_id=pid, 
                                              fid=data.id, 
@@ -1203,8 +1206,8 @@ class Plugin(PluginBase):
         cell = BatchCell()
         cell.label = data.name
         cell.value = index
-        theory_data.id = wx.NewId()
-        theory_data.name = data.name + "[%s]" % str(model.__class__.__name__)
+        theory_data.id = str(page_id) + "model"
+        theory_data.name =  model.name + "[%s]" % str(model.__class__.__name__)
         cell.object = [data, theory_data]
         batch_outputs["Data"].append(cell)
         for key, value in data.meta_data.iteritems():
@@ -1232,6 +1235,8 @@ class Plugin(PluginBase):
         :param page_id: list of page ids which called fit function
         :param elapsed: time spent at the fitting level
         """
+       # reset fit_engine if changed by simul_fit
+        self._on_change_engine(self._gui_engine)
         result = result[0]
         self.fit_thread_list = {}
         if page_id is None:
@@ -1449,7 +1454,7 @@ class Plugin(PluginBase):
                                             title=str(title)))    
             caption = current_pg.window_caption
             self.page_finder[page_id].set_fit_tab_caption(caption=caption)
-           
+            new_plot.id =  str(page_id) + "model"
             self.page_finder[page_id].set_theory_data(data=new_plot, 
                                                       fid=data.id)
             if toggle_mode_on:

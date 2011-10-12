@@ -55,7 +55,8 @@ class ScipyFit(FitEngine):
     #def fit(self, *args, **kw):
     #    return profile(self._fit, *args, **kw)
 
-    def fit(self, q=None, handler=None, curr_thread=None, ftol=1.49012e-8):
+    def fit(self, q=None, handler=None, curr_thread=None, 
+            ftol=1.49012e-8, reset_flag=False):
         """
         """
         fitproblem = []
@@ -69,9 +70,13 @@ class ScipyFit(FitEngine):
         elif len(fitproblem) == 0 : 
             raise RuntimeError, "No Assembly scheduled for Scipy fitting."
             return
-    
-        listdata = []
         model = fitproblem[0].get_model()
+        if reset_flag:
+            # reset the initial value; useful for batch
+            for name in fitproblem[0].pars:
+                ind = fitproblem[0].pars.index(name)
+                model.model.setParam(name, fitproblem[0].vals[ind])
+        listdata = []
         listdata = fitproblem[0].get_data()
         # Concatenate dList set (contains one or more data)before fitting
         data = listdata
