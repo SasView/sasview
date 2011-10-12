@@ -1099,10 +1099,6 @@ class Plugin(PluginBase):
                             model_name = str(model.name)
                         msg += "Data %s and Model %s did not fit.\n" % (data_name, 
                                                                         model_name)
-                        print msg
-                        wx.PostEvent(self.parent, StatusEvent(status=msg,
-                                                              error="error",
-                                                              type="stop"))
                     else:
                         #Separate result in to data corresponding to each page
                         temp_pars = []
@@ -1155,19 +1151,35 @@ class Plugin(PluginBase):
                     cpage._on_fit_complete()
                     self.page_finder[pid][data.id].set_result(res)
                     fitproblem = self.page_finder[pid][data.id]
-                
                     qmin, qmax = fitproblem.get_range()
                     flag = issubclass(data.__class__, Data2D)
+                    correct_result = False
                     if not flag:
-                        self._complete1D(x=data.x, y=res.theory, page_id=pid, 
+                        if len(res.theory) == len(res.index) and \
+                            len(res.index) == len(data.y):
+                            correct_result = True
+                            self._complete1D(x=data.x, y=res.theory, page_id=pid, 
                                          elapsed=None, 
                                          index=res.index, model=model,
                                          weight=None, fid=data.id,
                                          toggle_mode_on=False, state=None, 
                                          data=data, update_chisqr=False, 
                                          source='fit')
+                        else:
+                            data_name = str(None)
+                            if data is not None:
+                                data_name = str(data.name)
+                            model_name = str(None)
+                            if model is not None:
+                                model_name = str(model.name)
+                            msg += "Data %s and Model %s did not fit.\n" % (data_name, 
+                                                                            model_name)
+                            
                     else:
-                        self._complete2D(image=data.data, data=data,
+                        if len(res.theory)== len(res.index) and \
+                            len(res.index) == len(data.data):
+                            correct_result = True
+                            self._complete2D(image=res.theory, data=data,
                                           model=model,
                                           page_id=pid,  elapsed=None, 
                                           index=res.index, 
@@ -1176,12 +1188,25 @@ class Plugin(PluginBase):
                                           toggle_mode_on=False, state=None, 
                                          update_chisqr=False, 
                                          source='fit')
-                        
-                    self.on_set_batch_result(page_id=pid, 
+                        else:
+                            data_name = str(None)
+                            if data is not None:
+                                data_name = str(data.name)
+                            model_name = str(None)
+                            if model is not None:
+                                model_name = str(model.name)
+                            msg += "Data %s and Model %s did not fit.\n" % (data_name, 
+                                                                            model_name)
+                            
+                    if correct_result : 
+                        self.on_set_batch_result(page_id=pid, 
                                              fid=data.id, 
                                              batch_outputs=batch_outputs, 
                                              batch_inputs=batch_inputs)
           
+        #print msg
+        wx.PostEvent(self.parent, StatusEvent(status=msg, error="error",
+                                                              type="stop"))
         wx.CallAfter(self.parent.on_set_batch_result,batch_outputs, 
                                             batch_inputs,
                                            self.sub_menu)
@@ -1206,8 +1231,8 @@ class Plugin(PluginBase):
         cell = BatchCell()
         cell.label = data.name
         cell.value = index
-        theory_data.id = str(page_id) + "model"
-        theory_data.name =  model.name + "[%s]" % str(model.__class__.__name__)
+        theory_data.id = wx.NewId()
+        theory_data.name = model.name + "[%s]" % str(model.__class__.__name__)
         cell.object = [data, theory_data]
         batch_outputs["Data"].append(cell)
         for key, value in data.meta_data.iteritems():
@@ -1247,7 +1272,7 @@ class Plugin(PluginBase):
             index = 0
             for uid in page_id:
                 res = result[index]
-                if res.fitness is not None or \
+                if res.fitness is None or \
                     not numpy.isfinite(res.fitness) or \
                     numpy.any(res.pvec == None) or \
                     not numpy.all(numpy.isfinite(res.pvec)):
@@ -1257,19 +1282,20 @@ class Plugin(PluginBase):
                                          info="warning",
                                          type="stop"))
                     self._update_fit_button(page_id)
-                cpage = self.fit_panel.get_page_by_id(uid)
-                # Make sure we got all results 
-                #(CallAfter is important to MAC)
-                wx.CallAfter(cpage.onsetValues, res.fitness, res.param_list, 
-                             res.pvec, res.stderr)
-                index += 1
-                cpage._on_fit_complete()
-                if res.stderr == None:
-                    msg = "Fit Abort: "
                 else:
-                    msg = "Fitting: "
-                msg += "Completed!!!"
-                wx.PostEvent(self.parent, StatusEvent(status=msg))
+                    cpage = self.fit_panel.get_page_by_id(uid)
+                    # Make sure we got all results 
+                    #(CallAfter is important to MAC)
+                    wx.CallAfter(cpage.onsetValues, res.fitness, res.param_list, 
+                             res.pvec, res.stderr)
+                    index += 1
+                    cpage._on_fit_complete()
+                    if res.stderr == None:
+                        msg = "Fit Abort: "
+                    else:
+                        msg = "Fitting: "
+                    msg += "Completed!!!"
+                    wx.PostEvent(self.parent, StatusEvent(status=msg))
         except ValueError:
                 raise
                 self._update_fit_button(page_id)
@@ -1454,7 +1480,7 @@ class Plugin(PluginBase):
                                             title=str(title)))    
             caption = current_pg.window_caption
             self.page_finder[page_id].set_fit_tab_caption(caption=caption)
-            new_plot.id =  str(page_id) + "model"
+           
             self.page_finder[page_id].set_theory_data(data=new_plot, 
                                                       fid=data.id)
             if toggle_mode_on:
