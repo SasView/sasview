@@ -1111,17 +1111,18 @@ class Plugin(PluginBase):
                                                                         model_name)
                     else:
                         #Separate result in to data corresponding to each page
-                        temp_pars = []
-                        temp_res_param = []
+                        #temp_pars = []
+                        #temp_res_param = []
                         # Park sorts the params by itself so that we must check 
                         # param name and resort it back as it was. No effects on Scipy.
+                        """"
                         if res.parameters != None:
-                            model = cpage.model
-                            for fid in self.page_finder[pid]:
-                                if fid != None:
-                                    # Below works only for batch using one model
-                                    model = self.page_finder[pid][fid].get_model()
-                                    break
+                            #model = cpage.model
+                            #for fid in self.page_finder[pid]:
+                            #    if fid != None:
+                            #        # Below works only for batch using one model
+                            #        model = self.page_finder[pid][fid].get_model()
+                            #        break
                             for p in res.parameters:
                                 model_name, param_name = self.split_string(p.name)  
                                 if model.name == model_name:
@@ -1131,6 +1132,7 @@ class Plugin(PluginBase):
                                         temp_pars.append(param_name)
                             res.parameters = temp_res_param
                             pars = temp_pars
+                        """
                         cell = BatchCell()
                         cell.label = res.fitness
                         cell.value = res.fitness
@@ -1145,15 +1147,15 @@ class Plugin(PluginBase):
                             # save value of  fixed parameters
                             if param not in batch_outputs.keys():
                                 batch_outputs[param] = []
-                            if param not in pars:
+                            if param not in res.param_list:
                                 batch_outputs[str(param)].append(model.getParam(param))
-                        for index  in range(len(pars)):
+                        for index  in range(len(res.param_list)):
                             #save only fitted values
-                            batch_outputs[pars[index]].append(res.pvec[index])
+                            batch_outputs[res.param_list[index]].append(res.pvec[index])
                             item = res.stderr[index]
-                            batch_inputs["error on %s" % pars[index]].append(item)
-                            if pars[index] in model.getParamList():
-                                model.setParam(pars[index], res.pvec[index])
+                            batch_inputs["error on %s" % res.param_list[index]].append(item)
+                            if res.param_list[index] in model.getParamList():
+                                model.setParam(res.param_list[index], res.pvec[index])
                                     
                     self.page_finder[pid].set_batch_result(batch_inputs=batch_inputs,
                                                          batch_outputs=batch_outputs)   
