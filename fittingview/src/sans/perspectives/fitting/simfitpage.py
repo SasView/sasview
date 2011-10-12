@@ -300,7 +300,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         Show fields to add constraint
         """
         if len(self.model_toFit)< 1:
-            msg= "Select at least 2 models to add constraint "
+            msg= "Select at least 1 model to add constraint "
             wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
             ## hide button
             self._hide_constraint()
@@ -620,8 +620,9 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.btFit = wx.Button(self,wx.NewId(),'Fit')
         self.btFit.Bind(wx.EVT_BUTTON, self.onFit,id= self.btFit.GetId())
         self.btFit.SetToolTipString("Perform fit.")
-        
-        text= "Hint: Park fitting engine will be used automatically. \n"
+        text  = "     Note: Park fitting engine will be used automatically. \n"
+        text += "     This page requires at least one FitPage with a data \n"
+        text += "       and a model set for fitting."
         #text+= "automatically for more than 2 combinations checked"
         text_hint = wx.StaticText(self,-1,text)
         
