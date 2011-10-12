@@ -1093,11 +1093,28 @@ class Plugin(PluginBase):
             for list_res in result:
                 for res in list_res:
                     model, data = res.inputs[0]
+                    correct_result = False
                     if model is not None and hasattr(model, "model"):
                         model = model.model
                     if data is not None and hasattr(data, "sans_data"):
                         data = data.sans_data
-                    if res.fitness is None or \
+                    is_data2d = issubclass(data.__class__, Data2D)
+                    #check consistency of arrays
+                    if not is_data2d:
+                        if len(res.theory) == len(res.index) and \
+                            len(res.index) == len(data.y):
+                            correct_result = True
+                    else:
+                        if len(res.theory)== len(res.index) and \
+                            len(res.index) == len(data.data):
+                            correct_result = True
+                    #get all fittable parameters of the current model
+                    param_list = model.getParamList()
+                    for param in model.getDispParamList():
+                        if not model.is_fittable(param) and \
+                            param in param_list:
+                            param_list.remove(param)       
+                    if not correct_result or res.fitness is None or \
                         not numpy.isfinite(res.fitness) or \
                         numpy.any(res.pvec == None) or not \
                         numpy.all(numpy.isfinite(res.pvec)):
@@ -1109,17 +1126,27 @@ class Plugin(PluginBase):
                             model_name = str(model.name)
                         msg += "Data %s and Model %s did not fit.\n" % (data_name, 
                                                                         model_name)
+                        ERROR = numpy.NAN
+                        cell = BatchCell()
+                        cell.label = res.fitness
+                        cell.value = res.fitness
+                        batch_outputs["Chi2"].append(ERROR)
+                        for param in param_list:
+                            # save value of  fixed parameters
+                            if param not in batch_outputs.keys():
+                                batch_outputs[param] = []
+                            if param not in res.param_list:
+                                batch_outputs[str(param)].append(ERROR)
+                        for index  in range(len(res.param_list)):
+                            #save only fitted values
+                            batch_outputs[res.param_list[index]].append(ERROR)
+                            batch_inputs["error on %s" % res.param_list[index]].append(ERROR)
                     else:
                         cell = BatchCell()
                         cell.label = res.fitness
                         cell.value = res.fitness
                         batch_outputs["Chi2"].append(cell)
                         # add parameters to batch_results
-                        param_list = model.getParamList()
-                        for param in model.getDispParamList():
-                            if not model.is_fittable(param) and \
-                                param in param_list:
-                                param_list.remove(param)
                         for param in param_list:
                             # save value of  fixed parameters
                             if param not in batch_outputs.keys():
@@ -1141,11 +1168,9 @@ class Plugin(PluginBase):
                     self.page_finder[pid][data.id].set_result(res)
                     fitproblem = self.page_finder[pid][data.id]
                     qmin, qmax = fitproblem.get_range()
-                    flag = issubclass(data.__class__, Data2D)
-                    if not flag:
-                        if len(res.theory) == len(res.index) and \
-                            len(res.index) == len(data.y):
-                            correct_result = True
+                   
+                    if correct_result:
+                        if not is_data2d:
                             self._complete1D(x=data.x, y=res.theory, page_id=pid, 
                                          elapsed=None, 
                                          index=res.index, model=model,
@@ -1153,24 +1178,7 @@ class Plugin(PluginBase):
                                          toggle_mode_on=False, state=None, 
                                          data=data, update_chisqr=False, 
                                          source='fit')
-                            self.on_set_batch_result(page_id=pid, 
-                                             fid=data.id, 
-                                             batch_outputs=batch_outputs, 
-                                             batch_inputs=batch_inputs)
                         else:
-                            data_name = str(None)
-                            if data is not None:
-                                data_name = str(data.name)
-                            model_name = str(None)
-                            if model is not None:
-                                model_name = str(model.name)
-                            msg += "Data %s and Model %s did not fit.\n" % (data_name, 
-                                                                            model_name)
-                            
-                    else:
-                        if len(res.theory)== len(res.index) and \
-                            len(res.index) == len(data.data):
-                            correct_result = True
                             self._complete2D(image=res.theory, data=data,
                                           model=model,
                                           page_id=pid,  elapsed=None, 
@@ -1180,20 +1188,11 @@ class Plugin(PluginBase):
                                           toggle_mode_on=False, state=None, 
                                          update_chisqr=False, 
                                          source='fit')
-                            self.on_set_batch_result(page_id=pid, 
+                    self.on_set_batch_result(page_id=pid, 
                                              fid=data.id, 
                                              batch_outputs=batch_outputs, 
                                              batch_inputs=batch_inputs)
-                        else:
-                            data_name = str(None)
-                            if data is not None:
-                                data_name = str(data.name)
-                            model_name = str(None)
-                            if model is not None:
-                                model_name = str(model.name)
-                            msg += "Data %s and Model %s did not fit.\n" % (data_name, 
-                                                                            model_name)
-                    
+        
         wx.PostEvent(self.parent, StatusEvent(status=msg, error="error",
                                                               type="stop"))
         wx.CallAfter(self.parent.on_set_batch_result,batch_outputs, 
