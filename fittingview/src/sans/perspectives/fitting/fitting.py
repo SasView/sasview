@@ -1095,7 +1095,7 @@ class Plugin(PluginBase):
                             model_name = str(model.name)
                         msg += "Data %s and Model %s did not fit.\n" % (data_name, 
                                                                         model_name)
-                        print msg
+                        #print msg
                         wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                               error="error",
                                                               type="stop"))
@@ -1125,18 +1125,25 @@ class Plugin(PluginBase):
                         cell.label = res.fitness
                         cell.value = res.fitness
                         batch_outputs["Chi2"].append(cell)
-                        for param in model.getParamList():
-                            if model.is_fittable(param):
-                                for index  in range(len(pars)):
-                                    #replug only fitted values
-                                    if param != pars[index]:
-                                        batch_outputs[pars[index]].append(res.pvec[index])
-                                        item = res.stderr[index]
-                                        batch_inputs["error on %s" % pars[index]].append(item)
-                                        if pars[index] in model.getParamList():
-                                            model.setParam(pars[index], res.pvec[index])
-                                    else:
-                                         batch_outputs[str(param)].append(model.getParam(param))
+                        # add parameters to batch_results
+                        param_list = model.getParamList()
+                        for param in model.getDispParamList():
+                            if not model.is_fittable(param) and \
+                                param in param_list:
+                                param_list.remove(param)
+                        for param in param_list:
+                            # save value of  fixed parameters
+                            if param not in batch_outputs.keys():
+                                batch_outputs[param] = []
+                            if param not in pars:
+                                batch_outputs[str(param)].append(model.getParam(param))
+                        for index  in range(len(pars)):
+                            #save only fitted values
+                            batch_outputs[pars[index]].append(res.pvec[index])
+                            item = res.stderr[index]
+                            batch_inputs["error on %s" % pars[index]].append(item)
+                            if pars[index] in model.getParamList():
+                                model.setParam(pars[index], res.pvec[index])
                                     
                     self.page_finder[pid].set_batch_result(batch_inputs=batch_inputs,
                                                          batch_outputs=batch_outputs)   
@@ -1148,6 +1155,7 @@ class Plugin(PluginBase):
                     qmin, qmax = fitproblem.get_range()
                     flag = issubclass(data.__class__, Data2D)
                     if not flag:
+                        #print "Batch complete", len(res.theory), len(res.index)
                         self._complete1D(x=data.x, y=res.theory, page_id=pid, 
                                          elapsed=None, 
                                          index=res.index, model=model,
