@@ -214,11 +214,17 @@ class FitPanel(nb, PanelBase):
                     panel.save_current_state() 
                     page_is_opened = True
             if not page_is_opened:
-                panel = self._manager.add_fit_page(data=state.data)
+                if state.data.__class__.__name__ != 'list':
+                    #To support older state file format
+                    list_data = [state.data]
+                else:
+                    #Todo: need new file format for the list
+                    list_data = state.data
+                panel = self._manager.add_fit_page(data=list_data)
                 # add data associated to the page created
                 if panel is not None:  
                     self._manager.store_data(uid=panel.uid, 
-                                             data=state.data,
+                                             data_list=list_data,
                                              caption=panel.window_caption)
                     panel.reset_page(state=state)
                     panel.save_current_state()

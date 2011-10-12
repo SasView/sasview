@@ -1222,13 +1222,18 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.onSmear(event=None)           
         self.pinhole_smearer.SetValue(state.pinhole_smearer)
         self.slit_smearer.SetValue(state.slit_smearer)
-        
-        self.dI_noweight.SetValue(state.dI_noweight)
-        self.dI_didata.SetValue(state.dI_didata)
-        self.dI_sqrdata.SetValue(state.dI_sqrdata)
-        self.dI_idata.SetValue(state.dI_idata)
-        
-        
+        try:
+            self.dI_noweight.SetValue(state.dI_noweight)
+            self.dI_didata.SetValue(state.dI_didata)
+            self.dI_sqrdata.SetValue(state.dI_sqrdata)
+            self.dI_idata.SetValue(state.dI_idata)
+        except:
+            # to support older state file formats
+            self.dI_noweight.SetValue(False)
+            self.dI_didata.SetValue(True)
+            self.dI_sqrdata.SetValue(False)
+            self.dI_idata.SetValue(False)
+ 
         ## we have two more options for smearing
         if self.pinhole_smearer.GetValue(): self.onPinholeSmear(event=None)
         elif self.slit_smearer.GetValue(): self.onSlitSmear(event=None)
