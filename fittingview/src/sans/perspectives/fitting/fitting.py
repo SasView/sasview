@@ -183,7 +183,17 @@ class Plugin(PluginBase):
         self.menu1.Append(self.id_tol, "Change FTolerance [LeastSq Only]", 
                                    ftol_help) 
         wx.EVT_MENU(owner, self.id_tol,  self.show_ftol_dialog)
+        self.menu1.AppendSeparator()
         
+        self.id_reset_flag = wx.NewId()
+        resetf_help = "BatchFit: If checked, the initial param values will be "
+        resetf_help += "propagated from the previous results. " 
+        resetf_help += "Otherwise, the same initial param values will be used "
+        resetf_help += "for all fittings." 
+        self.menu1.AppendCheckItem(self.id_reset_flag, "Chain Fitting [BatchFit Only]", 
+                                   resetf_help) 
+        wx.EVT_MENU(owner, self.id_reset_flag,  self.on_reset_batch_flag)
+        self.menu1.FindItemById(self.id_reset_flag).Check(not self.batch_reset_flag)
         
         #create  menubar items
         return [(self.menu1, self.sub_menu)]
@@ -1326,7 +1336,26 @@ class Plugin(PluginBase):
         """
         """
         pass
+    
+    def on_reset_batch_flag(self, event):
+        """
+        Set batch_reset_flag
+        """
+        event.Skip()
+        menu_item = self.menu1.FindItemById(self.id_reset_flag)
+        flag = menu_item.IsChecked()
+        if not flag:
+            menu_item.Check(False)
+            self.batch_reset_flag = True
+        else:
+            menu_item.Check(True)
+            self.batch_reset_flag = False
         
+        ## post a message to status bar
+        msg = "Set Chain Fitting: %s" % str(not self.batch_reset_flag)
+        wx.PostEvent(self.parent, 
+                     StatusEvent(status=msg))
+
     def _onset_engine_park(self,event):
         """ 
         set engine to park
