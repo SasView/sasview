@@ -458,7 +458,6 @@ class SansAssembly:
         """ 
         #import thread
         self.model.set_params(self.paramlist, params)
-        print "params", params
         self.true_res, theory = self.data.residuals(self.model.eval)
         self.theory = copy.deepcopy(theory)
         # check parameters range
