@@ -746,7 +746,7 @@ class GridPanel(SPanel):
                         return
                     for new_plot in value.object:
                         if new_plot is None or \
-                         not issubclass(value.object.__class__, 
+                         not issubclass(new_plot.__class__, 
                                         plottables.Plottable):
                             msg = "Row %s , " % str(row)
                             msg += "Column %s doesn't have a view" % str(label)
