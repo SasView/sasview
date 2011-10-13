@@ -968,7 +968,7 @@ class GridPanel(SPanel):
         
 class GridFrame(wx.Frame):
     def __init__(self, parent=None, data_inputs=None, data_outputs=None, id=-1, 
-                 title="Batch Results", size=(700, 400)):
+                 title="Batch Window", size=(800, 500)):
         wx.Frame.__init__(self, parent=parent, id=id, title=title, size=size)
         self.parent = parent
         self.panel = GridPanel(self, data_inputs, data_outputs)
