@@ -17,6 +17,7 @@ from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.utils import format_number
 from sans.guiframe.events import NewPlotEvent 
 from sans.guiframe.events import StatusEvent  
+from danse.common.plottools import plottables
 from sans.guiframe.dataFitting import Data1D
 
 FUNC_DICT = {"sqrt": "math.sqrt",
@@ -688,8 +689,17 @@ class GridPanel(SPanel):
                 values = grid.data[label]
                 value = values[row -1]
                 if issubclass(value.__class__, BatchCell):
+                    if value.object is None or len(value.object) == 0:
+                        msg = "Row %s , " % str(row)
+                        msg += "Column %s doesn't have a view" % str(label)
+                        #raise ValueError, msg
+                        wx.PostEvent(self.parent.parent, StatusEvent(status=msg, 
+                                                                info="error")) 
+                        return
                     for new_plot in value.object:
-                        if new_plot is None:
+                        if new_plot is None or \
+                         not issubclass(value.object.__class__, 
+                                        plottables.Plottable):
                             msg = "Row %s , " % str(row)
                             msg += "Column %s doesn't have a view" % str(label)
                             #raise ValueError, msg
