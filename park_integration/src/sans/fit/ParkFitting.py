@@ -439,8 +439,7 @@ class ParkFit(FitEngine):
                         small_result.param_list.append(name)
             result_list.append(small_result)    
         if q != None:
-            q.put(result)
+            q.put(result_list)
             return q
-        print "park", len(result_list)
         return result_list
        
