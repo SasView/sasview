@@ -1216,31 +1216,33 @@ class Plugin(PluginBase):
         if "Data" not in batch_outputs.keys():
             batch_outputs["Data"] = []
         from sans.guiframe.data_processor import BatchCell
+        cell = BatchCell()
+        cell.label = data.name
+        cell.value = index
         
-        try:
+        if theory_data != None:
             #Suucessful fit
-            cell = BatchCell()
-            cell.label = data.name
-            cell.value = index
             theory_data.id = wx.NewId()
             theory_data.name = model.name + "[%s]" % str(model.__class__.__name__)
-            cell.object = [data, theory_data]
-            batch_outputs["Data"].append(cell)
-            for key, value in data.meta_data.iteritems():
-                if key not in batch_inputs.keys():
-                    batch_inputs[key] = []
-                if key.lower().strip() != "loader":
-                    batch_inputs[key].append(value)
-            param = "temperature"
-            if hasattr(data.sample, param):
-                if param not in  batch_inputs.keys():
-                     batch_inputs[param] = []
-                batch_inputs[param].append(data.sample.temperature)
-            # associate residuals plot
-            batch_outputs["Chi2"][index].object = [residuals]
-        except: 
-            # theory is None
-            pass
+            try:
+                # associate residuals plot
+                batch_outputs["Chi2"][index].object = [residuals]
+            except:
+                pass
+
+        cell.object = [data, theory_data]
+        batch_outputs["Data"].append(cell)
+        for key, value in data.meta_data.iteritems():
+            if key not in batch_inputs.keys():
+                batch_inputs[key] = []
+            if key.lower().strip() != "loader":
+                batch_inputs[key].append(value)
+        param = "temperature"
+        if hasattr(data.sample, param):
+            if param not in  batch_inputs.keys():
+                 batch_inputs[param] = []
+            batch_inputs[param].append(data.sample.temperature)
+        
 
     def _fit_completed(self, result, page_id, batch_outputs,
                              batch_inputs=None,
@@ -1811,7 +1813,7 @@ class Plugin(PluginBase):
             residuals.xaxis('\\rm{Q} ', 'A^{-1}')
             residuals.yaxis('\\rm{Residuals} ', 'normalized')
         new_plot = residuals
-        new_plot.name = "Residuals for " + str(data.name)
+        new_plot.name = "Residuals for " + str(theory_data.name.split()[0])
         ## allow to highlight data when plotted
         new_plot.interactive = True
         ## when 2 data have the same id override the 1 st plotted
