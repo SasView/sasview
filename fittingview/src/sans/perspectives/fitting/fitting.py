@@ -1223,7 +1223,7 @@ class Plugin(PluginBase):
         if theory_data != None:
             #Suucessful fit
             theory_data.id = wx.NewId()
-            theory_data.name = model.name + "[%s]" % str(model.__class__.__name__)
+            theory_data.name = model.name + "[%s]" % str(data.name)
             try:
                 # associate residuals plot
                 batch_outputs["Chi2"][index].object = [residuals]
@@ -1474,7 +1474,7 @@ class Plugin(PluginBase):
             #find if this theory was already plotted and replace that plot given
             #the same id
             theory_data = self.page_finder[page_id].get_theory_data(fid=data.id)
-            new_plot.name = model.name + " ["+ str(model.__class__.__name__)+"]"
+            new_plot.name = model.name + " ["+ str(data.name)+"]"
             new_plot.xaxis(_xaxis, _xunit)
             new_plot.yaxis(_yaxis, _yunit)
             self.page_finder[page_id].set_theory_data(data=new_plot, 
@@ -1559,7 +1559,7 @@ class Plugin(PluginBase):
             new_plot.title = "Model2D for " + data.name
         new_plot.is_data = False
         new_plot.name = model.name + " [" + \
-                                    str(model.__class__.__name__) + "-2D]"
+                                    str(data.name) + "-2D]"
         theory_data = deepcopy(new_plot)
         theory_data.name = "Unknown"
         
@@ -1813,7 +1813,7 @@ class Plugin(PluginBase):
             residuals.xaxis('\\rm{Q} ', 'A^{-1}')
             residuals.yaxis('\\rm{Residuals} ', 'normalized')
         new_plot = residuals
-        new_plot.name = "Residuals for " + str(theory_data.name.split()[0])
+        new_plot.name = "Residuals for " + str(theory_data.name.split()[0]) +"[" +  str(data.name) +"]"
         ## allow to highlight data when plotted
         new_plot.interactive = True
         ## when 2 data have the same id override the 1 st plotted
