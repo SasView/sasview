@@ -504,7 +504,6 @@ class FitPanel(nb, PanelBase):
                     page.batch_on = self.batch_on
                     page._set_save_flag(not page.batch_on)
                     page.fill_data_combobox(data_list)
-                    self.fit_page_index += 1
                     caption = "FitPage" + str(self.fit_page_index)
                     self.SetPageText(pos, caption)
                     self.SetSelection(pos)
