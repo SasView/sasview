@@ -80,17 +80,29 @@ class FitPanel(nb, PanelBase):
         return an xml node containing state of the panel
          that guiframe can write to file
         """
+        msg = ""
         for uid, page in self.opened_pages.iteritems():
-            data = page.get_data()
-            # state must be cloned
-            state = page.get_state().clone()
-            if data is not None:
-                new_doc = self._manager.state_reader.write_toXML(data, state)
-                if doc != None and hasattr(doc, "firstChild"):
-                    child = new_doc.firstChild.firstChild
-                    doc.firstChild.appendChild(child)  
-                else:
-                    doc = new_doc 
+            if page.batch_on:
+                pos = self.GetPageIndex(page)
+                if pos != -1 and page != self.sim_page:
+                    msg += "%s .\n" % str(self.GetPageText(pos))
+            else:
+                data = page.get_data()
+                # state must be cloned
+                state = page.get_state().clone()
+                if data is not None:
+                    new_doc = self._manager.state_reader.write_toXML(data, state)
+                    if doc != None and hasattr(doc, "firstChild"):
+                        child = new_doc.firstChild.firstChild
+                        doc.firstChild.appendChild(child)  
+                    else:
+                        doc = new_doc 
+        if msg.strip() != "":
+            temp = "Save Project is not supported for Batch page.\n"
+            temp += "The following pages will not be save:\n"
+            message = temp + msg
+            wx.PostEvent(self._manager.parent, StatusEvent(status=message,
+                                                            info="warning"))
         return doc    
     
     def _on_engine_change(self, name='scipy'):
@@ -442,12 +454,14 @@ class FitPanel(nb, PanelBase):
                 page.fill_data_combobox(data_1d_list)
             elif not data_1d_list and data_2d_list:
                 page.fill_data_combobox(data_2d_list)
+                
         pos = self.GetPageIndex(page)
         caption = "BatchPage" + str(self.batch_page_index)
         self.SetPageText(pos, caption)
         page.batch_on = self.batch_on
         page.window_caption = caption
         page.window_name = caption
+        self.SetSelection(pos)
         self.opened_pages[page.uid] = page
         return page
     
