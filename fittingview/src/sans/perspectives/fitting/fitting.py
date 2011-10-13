@@ -112,6 +112,13 @@ class Plugin(PluginBase):
         self.page_finder = {}
         # Log startup
         logging.info("Fitting plug-in started") 
+        self.batch_capable = self.get_batch_capable()
+    
+    def get_batch_capable(self):
+        """
+        Check if the plugin has a batch capability
+        """
+        return True
     
     def create_fit_problem(self, page_id):
         """

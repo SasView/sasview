@@ -278,7 +278,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         
         self.bt_freeze = wx.Button(self, wx.NewId(), "Freeze Theory", 
                                    size=(BUTTON_WIDTH, -1))
-        freeze_tip = "To trigger freeze a theory: making a copy to Data box,\n"
+        freeze_tip = "To trigger freeze a theory: making a copy\n"
+        freeze_tip += "of the theory checked to Data box,\n"
         freeze_tip += "     so that it can act like a real data set."
         self.bt_freeze.SetToolTipString(freeze_tip)
         wx.EVT_BUTTON(self, self.bt_freeze.GetId(), self.on_freeze)
@@ -298,16 +299,16 @@ class DataPanel(ScrolledPanel, PanelBase):
                              ((10, 10)),
                              (self.bt_remove),
                              ((10, 10)),
+                             (self.bt_freeze),
+                             ((10, 10)),
+                             (self.bt_plot),
+                             ((10, 10)),
+                             (self.bt_append_plot),
+                             (self.cb_plotpanel, wx.EXPAND|wx.ADJUST_MINSIZE, 5),
+                             ((10, 10)),
+                             ((10, 10)),
                              (self.bt_import, 0, wx.EXPAND|wx.RIGHT, 5),
-                              (self.perspective_cbox, wx.EXPAND|wx.ADJUST_MINSIZE, 5),
-                              (self.bt_append_plot),
-                              (self.cb_plotpanel, wx.EXPAND|wx.ADJUST_MINSIZE, 5),
-                              (self.bt_plot),
-                              ((10, 10)),
-                              (self.bt_freeze),
-                              #((10, 10)),
-                              #(self.bt_close_plot),
-                              ((10, 10))])
+                             (self.perspective_cbox, wx.EXPAND|wx.ADJUST_MINSIZE, 5)])
 
         self.sizer3.AddGrowableCol(1, 1)
         self.show_data_button()
@@ -802,7 +803,17 @@ class DataPanel(ScrolledPanel, PanelBase):
         if self.perspective_cbox.GetValue() != 'None':
             perspective = self.perspective_cbox.GetClientData(selection)
             perspective.on_perspective(event=None)
-        
+            flag = perspective.get_batch_capable()
+            flag_on = perspective.batch_on
+            if flag:
+                self.rb_single_mode.SetValue(not flag_on)
+                self.rb_batch_mode.SetValue(flag_on)
+            else:
+                self.rb_single_mode.SetValue(True)
+                self.rb_batch_mode.SetValue(False)
+            self.rb_single_mode.Enable(flag)
+            self.rb_batch_mode.Enable(flag)
+                
     def _on_plot_selection(self, event=None):
         """
         On source combobox selection

@@ -51,7 +51,14 @@ class PluginBase:
         #properties for color and ID of a specific plugin..
         self.color = None
         self.id = -1
-        
+        self.batch_capable = self.get_batch_capable()
+    
+    def get_batch_capable(self):
+        """
+        Check if the plugin has a batch capability
+        """
+        return False
+         
     def add_color(self, color, id):
         """
         Adds color to a plugin
