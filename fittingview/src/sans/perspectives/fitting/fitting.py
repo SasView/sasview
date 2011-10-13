@@ -1472,7 +1472,7 @@ class Plugin(PluginBase):
             _xaxis, _xunit = data.get_xaxis() 
             new_plot.title = data.name
 
-            new_plot.group_id = self.page_finder[page_id].get_graph_id()
+            new_plot.group_id = data.group_id#self.page_finder[page_id].get_graph_id()
             if new_plot.group_id == None:
                 new_plot.group_id = data.group_id
             new_plot.id =  str(page_id) + "model"
