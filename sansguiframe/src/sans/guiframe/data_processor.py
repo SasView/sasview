@@ -739,14 +739,13 @@ class GridPanel(SPanel):
             label = grid.GetCellValue(label_row, col)
             if label in grid.data:
                 values = grid.data[label]
-                if row < len(values):
-                    value = values[row -1]
-                else:
+                if row > len(values) or row < 1:
                     msg = "Invalid cell was chosen." 
-                    #raise ValueError, msg
                     wx.PostEvent(self.parent.parent, StatusEvent(status=msg, 
                                                                 info="error"))
                     continue
+                else:
+                     value = values[row -1]
                 if issubclass(value.__class__, BatchCell):
                     if value.object is None or len(value.object) == 0:
                         msg = "Row %s , " % str(row)
