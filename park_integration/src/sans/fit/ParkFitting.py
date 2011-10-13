@@ -120,9 +120,11 @@ class SansFitMC(SansFitter):
 
         This procedure maps a local optimizer across a set of initial points.
         """
-        park.fitmc.fitmc(objective, x0, bounds, self.localfit,
-              self.start_points, self.handler)
-
+        try:
+            park.fitmc.fitmc(objective, x0, bounds, self.localfit,
+                             self.start_points, self.handler)
+        except:
+            raise ValueError, "Fit did not converge.\n"
         
 class SansPart(Part):
     """

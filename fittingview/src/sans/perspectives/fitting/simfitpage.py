@@ -68,6 +68,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.model_toFit=[]
         ## number of constraint
         self.nb_constraint= 0
+        self.model_cbox_left = None
+        self.model_cbox_right = None
         self.uid = wx.NewId()
         ## draw page
         self.define_page_structure()
@@ -186,10 +188,10 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             ## constraint info
             self._store_model()
             ## display constraint fields
-            if self.show_constraint.GetValue():
+            if self.show_constraint.GetValue() and\
+                             len(self.constraints_list)==0:
                 self._show_all_constraint() 
                 self._show_constraint()
-                return
         else:
             for item in self.model_list:
                 item[0].SetValue(False) 
@@ -197,12 +199,15 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             self.model_toFit=[]
             ##constraint info
             self._hide_constraint()
+            
+        self._update_easy_setup_cb()
         
     def check_model_name(self,event):
         """
         Save information related to checkbox and their states
         """
         self.model_toFit=[]
+        cbox = event.GetEventObject()
         for item in self.model_list:
             if item[0].GetValue()==True:
                 self.model_toFit.append(item)
@@ -212,22 +217,44 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                     self.cb1.SetValue(False)
         
         ## display constraint fields
-        if len(self.model_toFit)==1:
+        if len(self.model_toFit)>=1:
             self._store_model()
             if self.show_constraint.GetValue() and\
                              len(self.constraints_list)==0:
                 self._show_all_constraint() 
                 self._show_constraint()
+
         elif len(self.model_toFit)< 1:
             ##constraint info
-            self._hide_constraint()              
-       
+            self._hide_constraint()  
+                        
+        self._update_easy_setup_cb()
         ## set the value of the main check button          
         if len(self.model_list)==len(self.model_toFit):
             self.cb1.SetValue(True)
             return
         else:
             self.cb1.SetValue(False)
+            
+    def _update_easy_setup_cb(self):   
+        """
+        Update easy setup combobox on selecting a model
+        """
+        if self.model_cbox_left != None and self.model_cbox_right != None:
+            self.model_cbox_left.Clear()
+            self.model_cbox_right.Clear()
+            #for id, model in self.constraint_dict.iteritems():
+            for item in self.model_toFit:
+                model = item[3]
+                ## check if all parameters have been selected for constraint
+                ## then do not allow add constraint on parameters
+                if str(model.name) not in self.model_cbox_left.GetItems():
+                    self.model_cbox_left.Append(str(model.name), model)
+                if str(model.name) not in self.model_cbox_right.GetItems():
+                    self.model_cbox_right.Append(str(model.name), model)
+            self.model_cbox_left.SetSelection(0)
+            self.sizer2.Layout()
+            self.sizer3.Layout()
         
     def draw_page(self):      
         """
@@ -521,6 +548,12 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         if hasattr(self,"btAdd"):
             self.btAdd.Hide()
         self._store_model()
+        if self.model_cbox_left != None:
+            self.model_cbox_left.Clear()
+            self.model_cbox_left = None
+        if self.model_cbox_right != None:
+            self.model_cbox_right.Clear()
+            self.model_cbox_right = None
         self.constraints_list = []   
         self.sizer_all_constraints.Clear(True) 
         self.sizer_all_constraints.Layout()         
@@ -534,13 +567,14 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         """
         fill combox box with list of parameters
         """
+        param_list = []
         ##This way PC/MAC both work, instead of using event.GetClientData().
         n = self.model_cbox.GetCurrentSelection()
         model = self.model_cbox.GetClientData(n)
         for id, dic_model in self.constraint_dict.iteritems():
             if model == dic_model:
                 param_list = self.page_finder[id].get_param2fit()
-                break
+                #break
         #param_list= get_fittableParam(model)
         length = len(self.constraints_list)
         if length < 1:
@@ -550,7 +584,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         ## insert only fittable paramaters
         for param in param_list:
             param_cbox.Append( str(param), model)
-            
+
         param_cbox.Show(True)
         self.btRemove.Show(True)
         self.btAdd.Show(True)
@@ -769,6 +803,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         sizer.Add(tab_used,(iy, ix),(1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         for id, value in self.page_finder.iteritems():
+            if id not in self.parent.opened_pages:
+                continue
             try:
                 ix = 0
                 for fitproblem in value.get_fit_problem():
