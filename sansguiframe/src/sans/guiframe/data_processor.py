@@ -753,7 +753,7 @@ class GridPanel(SPanel):
                             #raise ValueError, msg
                             wx.PostEvent(self.parent.parent, 
                                  StatusEvent(status=msg, info="error")) 
-                            return
+                            continue
                         
                         if issubclass(new_plot.__class__, Data1D):
                             if label in self.list_plot_panels.keys():
@@ -772,7 +772,7 @@ class GridPanel(SPanel):
                                     wx.PostEvent(self.parent.parent, 
                                                  StatusEvent(status=msg,
                                                               info="error")) 
-                                    return  
+                                    continue  
                         wx.PostEvent(self.parent.parent, 
                                      NewPlotEvent(action="clear",
                                                   group_id=str(group_id),
@@ -883,11 +883,12 @@ class GridPanel(SPanel):
         self.x_axis_unit = wx.TextCtrl(self, -1)
         self.y_axis_unit = wx.TextCtrl(self, -1)
         self.view_button = wx.Button(self, -1, "View Results")
-        view_tip = "Highlight data sets or Chi2 column first."
+        view_tip = "Highlight the data set or the Chi2 column first."
         self.view_button.SetToolTipString(view_tip)
         wx.EVT_BUTTON(self, self.view_button.GetId(), self.on_view)
         self.plot_button = wx.Button(self, -1, "Plot")
-        plot_tip = "Highlight column for axis and click the Add button first."
+        plot_tip = "Highlight a column for each axis and \n"
+        plot_tip += "click the Add buttons first."
         self.plot_button.SetToolTipString(plot_tip)
         self.button_sizer.AddMany( [ (500, 30),
                                 (self.view_button, 0, wx.RIGHT|wx.BOTTOM, 10),
