@@ -119,6 +119,7 @@ class GridPage(sheet.CSheet):
         self.SetNumberRows(self._cols)
         self.SetNumberCols(self._rows)
         self.AutoSize()
+        self.list_plot_panels = {}
         self.default_col_width = 75
         if self.GetNumberCols() > 0:
             self.default_col_width =  self.GetColSize(0)
@@ -663,7 +664,7 @@ class GridPanel(SPanel):
         self.view_button = None
         self.plot_button = None
         self.notebook = None
-        self.list_plot_panels = {}
+       
         self.layout_grid()
         self.layout_plotting_area()
         self.SetSizer(self.vbox)
@@ -766,11 +767,11 @@ class GridPanel(SPanel):
                             continue
                         
                         if issubclass(new_plot.__class__, Data1D):
-                            if label in self.list_plot_panels.keys():
-                                group_id = self.list_plot_panels[label]
+                            if label in grid.list_plot_panels.keys():
+                                group_id = grid.list_plot_panels[label]
                             else:
                                 group_id = str(grid.uid) + str(new_plot.group_id)
-                                self.list_plot_panels[label] = group_id
+                                grid.list_plot_panels[label] = group_id
                             if group_id not in new_plot.list_group_id:
                                 new_plot.group_id = group_id
                                 new_plot.list_group_id.append(group_id)
@@ -783,10 +784,12 @@ class GridPanel(SPanel):
                                                  StatusEvent(status=msg,
                                                               info="error")) 
                                     continue  
+                        """
                         wx.PostEvent(self.parent.parent, 
                                      NewPlotEvent(action="clear",
                                                   group_id=str(group_id),
-                                                  title=title))  
+                                                  title=title)) 
+                        """ 
                         wx.PostEvent(self.parent.parent, 
                                      NewPlotEvent(plot=new_plot, 
                                                   group_id=str(group_id),
