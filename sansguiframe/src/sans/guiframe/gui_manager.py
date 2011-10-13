@@ -549,6 +549,10 @@ class ViewerFrame(wx.Frame):
         panel_name = 'No panel on focus'
         application_name = 'No Selected Analysis'
         if self.panel_on_focus is not None:
+            #Disable save application if the current panel is in batch mode
+            flag = not self.panel_on_focus.batch_on
+            self._save_appl_menu.Enable(flag)
+            
             if self.panel_on_focus not in self.plot_panels.values():
                 for ID in self.panels.keys():
                     if self.panel_on_focus != self.panels[ID]:
