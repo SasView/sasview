@@ -788,7 +788,7 @@ class GridPanel(SPanel):
                     #raise ValueError, msg
                     wx.PostEvent(self.parent.parent, 
                          StatusEvent(status=msg, info="error")) 
-                    return
+                    continue
     
         
      
