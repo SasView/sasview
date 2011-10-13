@@ -1073,6 +1073,14 @@ class GridFrame(wx.Frame):
         if self.parent is not None:
             pos = self.panel.notebook.GetSelection()
             grid = self.panel.notebook.GetPage(pos)
+            if grid.file_name is None or grid.file_name.strip() == "" or \
+                grid.data is None or len(grid.data) == 0:
+                name = self.panel.notebook.GetPageText(pos)
+                msg = " %s has not data to save" % str(name)
+                wx.PostEvent(self.parent, 
+                             StatusEvent(status=msg, info="error")) 
+           
+                return
             reader, ext = os.path.splitext(grid.file_name)
             path = None
             if self.parent is not None: 
@@ -1105,6 +1113,14 @@ class GridFrame(wx.Frame):
             pos = self.panel.notebook.GetSelection()
             grid = self.panel.notebook.GetPage(pos)
             data = grid.get_grid_view()
+            if grid.file_name is None or grid.file_name.strip() == "" or \
+                grid.data is None or len(grid.data) == 0:
+                name = self.panel.notebook.GetPageText(pos)
+                msg = " %s has not data to open on excel" % str(name)
+                wx.PostEvent(self.parent, 
+                             StatusEvent(status=msg, info="error")) 
+           
+                return
             self.parent.open_with_externalapp(data=data,
                                                file_name=grid.file_name, 
                                                details=grid.details)
