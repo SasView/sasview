@@ -728,14 +728,25 @@ class GridPanel(SPanel):
         pos = self.notebook.GetSelection()
         grid = self.notebook.GetPage(pos)
         title = self.notebook.GetPageText(pos)
-    
+        if len(grid.selected_cells) == 0:
+            msg = "Highlight a Data or Chi2 column first..."
+            wx.PostEvent(self.parent.parent, 
+                             StatusEvent(status=msg, info="error")) 
+            return
         for cell in grid.selected_cells:
             row, col = cell
             label_row = 0
             label = grid.GetCellValue(label_row, col)
             if label in grid.data:
                 values = grid.data[label]
-                value = values[row -1]
+                if row < len(values):
+                    value = values[row -1]
+                else:
+                    msg = "Invalid cell was chosen." 
+                    #raise ValueError, msg
+                    wx.PostEvent(self.parent.parent, StatusEvent(status=msg, 
+                                                                info="error"))
+                    continue
                 if issubclass(value.__class__, BatchCell):
                     if value.object is None or len(value.object) == 0:
                         msg = "Row %s , " % str(row)
@@ -806,7 +817,7 @@ class GridPanel(SPanel):
         sentence = self.x_axis_label.GetValue()
         try:
             if sentence.strip() == "":
-                msg = "select value for x axis and y axis"
+                msg = "Select column values for x axis and y axis"
                 raise ValueError, msg
         except:
              wx.PostEvent(self.parent.parent, 
