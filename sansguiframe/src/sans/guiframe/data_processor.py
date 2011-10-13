@@ -915,7 +915,7 @@ class GridPanel(SPanel):
                     (wx.StaticText(self, -1, "X-axis Label"), 1, 
                      wx.TOP|wx.BOTTOM|wx.LEFT, 10),
                     (self.x_axis_title, 1, wx.TOP|wx.BOTTOM, 10),
-                    (wx.StaticText(self, -1 , "Y-axis Unit"), 1, 
+                    (wx.StaticText(self, -1 , "X-axis Unit"), 1, 
                      wx.TOP|wx.BOTTOM, 10),
                     (self.x_axis_unit, 1, wx.TOP|wx.BOTTOM, 10),
                     (wx.StaticText(self, -1, 
