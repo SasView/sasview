@@ -997,7 +997,7 @@ class ViewerFrame(wx.Frame):
             self.graph_num += 1
 
         p.window_caption = caption
-            
+        print "windowname", windowname    
         style1 = self.__gui_style & GUIFRAME.FIXED_PANEL
         style2 = self.__gui_style & GUIFRAME.FLOATING_PANEL
         if style1 == GUIFRAME.FIXED_PANEL:
