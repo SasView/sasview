@@ -217,6 +217,17 @@ class GridPage(sheet.CSheet):
         row = 0
         label = self.GetCellValue(row, col)
         self.insert_col_menu(col_label_menu, label, self)
+        
+        
+        col_after_menu  = wx.Menu()
+        label = "Insert column after %s " % str(c_name)
+        slicerpop.AppendSubMenu(col_after_menu , 
+                                 '&%s' % str(label), str(label))
+        col_name = [self.GetCellValue(0, c) 
+                        for c in range(self.GetNumberCols())]
+        self.insert_after_col_menu(col_after_menu, label, self)
+        
+        
         id = wx.NewId()    
         hint = 'Remove selected column %s'
         slicerpop.Append(id, '&Remove Column', hint)
@@ -246,7 +257,25 @@ class GridPage(sheet.CSheet):
                 menu.Append(id, '&%s' % str(c_name), hint)
                 wx.EVT_MENU(window, id, self.on_insert_column)
             
-                
+    def insert_after_col_menu(self, menu, label, window):
+        """
+        """
+        id = wx.NewId()
+        title = "Empty"
+        hint = 'Insert empty column after %s' % str(label)
+        menu.Append(id, title, hint)
+        wx.EVT_MENU(window, id, self.on_insert_after_column)
+        row = 0
+        col_name = [self.GetCellValue(row, col) 
+                        for col in range(self.GetNumberCols())]
+        for c_name in self.data.keys():
+            if c_name not in col_name:
+                id = wx.NewId()
+                hint = "Insert %s column after the " % str(c_name)
+                hint += " %s column" % str(label)
+                menu.Append(id, '&%s' % str(c_name), hint)
+                wx.EVT_MENU(window, id, self.on_insert_after_column)
+                               
     def on_remove_column(self, event=None):
         """
         """
@@ -288,6 +317,20 @@ class GridPage(sheet.CSheet):
             if  not issubclass(event.GetEventObject().__class__ , wx.Menu):
                 col += 1
                 self.selected_cols[0] += 1
+                
+    def on_insert_after_column(self, event):
+        """
+        Insert the given column after the highlighted column
+        """
+        if self.selected_cols is not None or len(self.selected_cols) > 0:
+            col = self.selected_cols[0] + 1
+            # add data to the grid    
+            row = 0
+            id = event.GetId()
+            col_name = event.GetEventObject().GetLabelText(id)
+            self.insert_column(col=col, col_name=col_name)
+            if  not issubclass(event.GetEventObject().__class__ , wx.Menu):
+                self.selected_cols[0] += 1
            
     def insert_column(self, col, col_name):
         """
@@ -301,9 +344,14 @@ class GridPage(sheet.CSheet):
             value_list = self.data[col_name]
             cell_row =  1
             for value in value_list:
-                self.SetCellValue(cell_row, col, str(value))
+                label = format_number(value, high=True)
+                self.SetCellValue(cell_row, col, str(label))
                 cell_row += 1
-       
+        self.AutoSizeColumn(col, True)
+        width = self.GetColSize(col)
+        if width < self.default_col_width:
+           self.SetColSize(col, self.default_col_width)
+        self.ForceRefresh()
         
     def on_set_x_axis(self, event):
         """
@@ -719,8 +767,8 @@ class GridPanel(SPanel):
                         else:
                             if label.lower() in ["data", "chi2"]:
                                 if len(grid.selected_cells) != 1:
-                                    msg = "Can only view one"
-                                    msg += " selected data at once"
+                                    msg = "2D View: Please select one data set"
+                                    msg += " at a time to view."
                                     wx.PostEvent(self.parent.parent, 
                                                  StatusEvent(status=msg,
                                                               info="error")) 
@@ -835,8 +883,12 @@ class GridPanel(SPanel):
         self.x_axis_unit = wx.TextCtrl(self, -1)
         self.y_axis_unit = wx.TextCtrl(self, -1)
         self.view_button = wx.Button(self, -1, "View Results")
+        view_tip = "Highlight data sets or Chi2 column first."
+        self.view_button.SetToolTipString(view_tip)
         wx.EVT_BUTTON(self, self.view_button.GetId(), self.on_view)
         self.plot_button = wx.Button(self, -1, "Plot")
+        plot_tip = "Highlight column for axis and click the Add button first."
+        self.plot_button.SetToolTipString(plot_tip)
         self.button_sizer.AddMany( [ (500, 30),
                                 (self.view_button, 0, wx.RIGHT|wx.BOTTOM, 10),
                                 (self.plot_button, 0, wx.RIGHT|wx.BOTTOM, 10)])
