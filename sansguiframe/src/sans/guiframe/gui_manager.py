@@ -552,7 +552,7 @@ class ViewerFrame(wx.Frame):
             #Disable save application if the current panel is in batch mode
             flag = not self.panel_on_focus.batch_on
             self._save_appl_menu.Enable(flag)
-            
+            self.panel_on_focus._set_save_flag(flag)
             if self.panel_on_focus not in self.plot_panels.values():
                 for ID in self.panels.keys():
                     if self.panel_on_focus != self.panels[ID]:
