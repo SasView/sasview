@@ -352,6 +352,7 @@ class FitPanel(nb, PanelBase):
             caption = "FitPage" + str(self.fit_page_index)
             panel.set_index_model(self.fit_page_index)
         panel.batch_on = self.batch_on
+        panel._set_save_flag(not panel.batch_on)
         panel.populate_box(dict=self.model_list_box)
         panel.set_manager(self._manager)
         panel.window_caption = caption
@@ -459,6 +460,7 @@ class FitPanel(nb, PanelBase):
         caption = "BatchPage" + str(self.batch_page_index)
         self.SetPageText(pos, caption)
         page.batch_on = self.batch_on
+        page._set_save_flag(not page.batch_on)
         page.window_caption = caption
         page.window_name = caption
         self.SetSelection(pos)
@@ -500,6 +502,7 @@ class FitPanel(nb, PanelBase):
                 if (data.__class__.__name__ == "Data2D" and enable2D)\
                 or (data.__class__.__name__ == "Data1D" and not enable2D):
                     page.batch_on = self.batch_on
+                    page._set_save_flag(not page.batch_on)
                     page.fill_data_combobox(data_list)
                     caption = "FitPage" + str(self.fit_page_index)
                     self.SetPageText(pos, caption)
