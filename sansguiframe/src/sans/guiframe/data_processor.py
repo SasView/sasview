@@ -439,7 +439,7 @@ class GridPage(sheet.CSheet):
             label = label.strip()
             if label != "":
                 grid_view[label] = []
-                for row in range(1, self.max_row_touse+1):
+                for row in range(1, self.max_row_touse):
                     value = self.GetCellValue(row=row, col=col)
                     if value != "":
                         grid_view[label].append(value)  
@@ -750,7 +750,8 @@ class GridPanel(SPanel):
                 if issubclass(value.__class__, BatchCell):
                     if value.object is None or len(value.object) == 0:
                         msg = "Row %s , " % str(row)
-                        msg += "Column %s doesn't have a view" % str(label)
+                        msg += "Column %s is NOT " % str(label)
+                        msg += "the results of fits to view..."
                         #raise ValueError, msg
                         wx.PostEvent(self.parent.parent, StatusEvent(status=msg, 
                                                                 info="error")) 
@@ -760,7 +761,8 @@ class GridPanel(SPanel):
                          not issubclass(new_plot.__class__, 
                                         plottables.Plottable):
                             msg = "Row %s , " % str(row)
-                            msg += "Column %s doesn't have a view" % str(label)
+                            msg += "Column %s is NOT " % str(label)
+                            msg += "the results of fits to view..."
                             #raise ValueError, msg
                             wx.PostEvent(self.parent.parent, 
                                  StatusEvent(status=msg, info="error")) 
@@ -779,7 +781,7 @@ class GridPanel(SPanel):
                             if label.lower() in ["data", "chi2"]:
                                 if len(grid.selected_cells) != 1:
                                     msg = "2D View: Please select one data set"
-                                    msg += " at a time to view."
+                                    msg += " at a time for View Results."
                                     wx.PostEvent(self.parent.parent, 
                                                  StatusEvent(status=msg,
                                                               info="error")) 
@@ -794,10 +796,14 @@ class GridPanel(SPanel):
                                      NewPlotEvent(plot=new_plot, 
                                                   group_id=str(group_id),
                                                   title=title))  
+                        msg = "Plotting the View Results  completed!"
+                        wx.PostEvent( self.parent.parent, 
+                                      StatusEvent(status=msg))  
                 else:
                    
                     msg = "Row %s , " % str(row)
-                    msg += "Column %s doesn't have a view" % str(label)
+                    msg += "Column %s is NOT " % str(label)
+                    msg += "the results of fits to view..."
                     #raise ValueError, msg
                     wx.PostEvent(self.parent.parent, 
                          StatusEvent(status=msg, info="error")) 
@@ -865,11 +871,14 @@ class GridPanel(SPanel):
             new_plot.ytransform  = "y"  
             wx.PostEvent(self.parent.parent, 
                              NewPlotEvent(plot=new_plot, 
-                        group_id=str(new_plot.group_id), title =title))    
+                        group_id=str(new_plot.group_id), title =title)) 
+            msg = "Plotting completed!"
+            wx.PostEvent( self.parent.parent, 
+                                      StatusEvent(status=msg))   
         except:
              wx.PostEvent(self.parent.parent, 
                              StatusEvent(status=msg, info="error")) 
-        
+
     def layout_grid(self):
         """
         Draw the area related to the grid
