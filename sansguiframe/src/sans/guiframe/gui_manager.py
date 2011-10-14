@@ -279,6 +279,7 @@ class ViewerFrame(wx.Frame):
         self.batch_frame = GridFrame(parent=self)
         self.batch_frame.Hide()
         self.on_batch_selection(event=None)
+        self.add_icon()
         # Check for update
         #self._check_update(None)
         # Register the close event so it calls our own method
@@ -293,6 +294,21 @@ class ViewerFrame(wx.Frame):
         self.Bind(EVT_NEW_COLOR, self.on_color_selection)
         self.setup_custom_conf()
     
+    def add_icon(self):
+        """
+        get list of child and attempt to add the default icon 
+        """
+        
+        list_children = self.GetChildren() 
+        for frame in list_children:
+            if hasattr(frame, "IsIconized"):
+                if not frame.IsIconized():
+                    try:
+                        icon = self.GetIcon()
+                        frame.SetIcon(icon)
+                    except:
+                        pass
+        
     def on_set_batch_result(self, data_outputs, data_inputs=None,
                              plugin_name=""):
         """
