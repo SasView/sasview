@@ -245,8 +245,14 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         Update easy setup combobox on selecting a model
         """
         if self.model_cbox_left != None and self.model_cbox_right != None:
-            self.model_cbox_left.Clear()
-            self.model_cbox_right.Clear()
+            try:
+                # when there is something
+                self.model_cbox_left.Clear()
+                self.model_cbox_right.Clear()
+                self.model_cbox.Clear()
+            except:
+                # when there is nothing
+                pass
             #for id, model in self.constraint_dict.iteritems():
             for item in self.model_toFit:
                 model = item[3]
@@ -256,6 +262,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                     self.model_cbox_left.Append(str(model.name), model)
                 if str(model.name) not in self.model_cbox_right.GetItems():
                     self.model_cbox_right.Append(str(model.name), model)
+                if str(model.name) not in self.model_cbox.GetItems():
+                    self.model_cbox.Append(str(model.name), model)
             self.model_cbox_left.SetSelection(0)
             self.sizer2.Layout()
             self.sizer3.Layout()
