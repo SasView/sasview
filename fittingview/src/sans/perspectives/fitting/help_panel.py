@@ -20,7 +20,11 @@ class HelpWindow(wx.Frame):
         """
         contains help info
         """
-      
+        from sans.perspectives.fitting import get_data_path as fit_path
+        fitting_path = fit_path(media='media')
+        ico_file = os.path.join(fitting_path,'ball.ico')
+        if os.path.isfile(ico_file):
+            self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         splitter = MultiSplitterWindow(self, style=wx.SP_LIVE_UPDATE)
         rpanel = wx.Panel(splitter, -1)
         lpanel = wx.Panel(splitter, -1,style=wx.BORDER_SUNKEN)
@@ -65,8 +69,7 @@ class HelpWindow(wx.Frame):
         self.path = os.path.join(path,"model_functions.html")
         self.path_pd = os.path.join(path,"pd_help.html")
         self.path_sm = os.path.join(path,"smear_computation.html")
-        from sans.perspectives.fitting import get_data_path as fit_path
-        fitting_path = fit_path(media='media')
+       
         
         _html_file = [("load_data_help.html", "Load a File"),
                       ("single_fit_help.html", "Single Fit"),

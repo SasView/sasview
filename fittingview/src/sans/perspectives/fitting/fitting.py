@@ -225,7 +225,14 @@ class Plugin(PluginBase):
         Show a general help dialog. 
         """
         from help_panel import  HelpWindow
-        frame = HelpWindow(None, -1, 'HelpWindow')    
+        frame = HelpWindow(None, -1, 'HelpWindow')  
+        if hasattr(frame, "IsIconized"):
+            if not frame.IsIconized():
+                try:
+                    icon = self.parent.GetIcon()
+                    frame.SetIcon(icon)
+                except:
+                    pass  
         frame.Show(True)
         
     def get_context_menu(self, plotpanel=None):
