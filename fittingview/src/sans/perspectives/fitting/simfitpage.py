@@ -201,6 +201,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             self._hide_constraint()
             
         self._update_easy_setup_cb()
+        self.Refresh()
         
     def check_model_name(self,event):
         """
@@ -232,9 +233,11 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         ## set the value of the main check button          
         if len(self.model_list)==len(self.model_toFit):
             self.cb1.SetValue(True)
+            self.Layout()
             return
         else:
             self.cb1.SetValue(False)
+            self.Layout()
             
     def _update_easy_setup_cb(self):   
         """
@@ -651,7 +654,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
           
-        self.btFit = wx.Button(self,wx.NewId(),'Fit')
+        self.btFit = wx.Button(self,wx.NewId(),'Fit', size=wx.DefaultSize)
         self.btFit.Bind(wx.EVT_BUTTON, self.onFit,id= self.btFit.GetId())
         self.btFit.SetToolTipString("Perform fit.")
         text  = "     Note: Park fitting engine will be used automatically. \n"
@@ -661,7 +664,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         text_hint = wx.StaticText(self,-1,text)
         
         sizer_button.Add(text_hint,  wx.RIGHT|wx.EXPAND, 10)
-        sizer_button.Add(self.btFit, 0, wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
+        sizer_button.Add(self.btFit, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
         
         boxsizer1.Add(sizer_button, flag= wx.TOP|wx.BOTTOM,border=10)
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
