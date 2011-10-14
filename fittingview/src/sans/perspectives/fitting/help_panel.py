@@ -5,7 +5,13 @@ import wx.html as html
 from wx.lib.splitter import MultiSplitterWindow
 import os
 
+from wx.lib.scrolledpanel import ScrolledPanel
 
+class HelpPanel(ScrolledPanel):
+    def __init__(self, parent, **kwargs):
+        ScrolledPanel.__init__(self, parent, **kwargs)
+        self.SetupScrolling()
+        
 class HelpWindow(wx.Frame):
     """
     """
@@ -62,13 +68,17 @@ class HelpWindow(wx.Frame):
         from sans.perspectives.fitting import get_data_path as fit_path
         fitting_path = fit_path(media='media')
         
-        _html_file = {"status_bar_help.html":"Status Bar Help",
-                      "load_data_help.html":"Load a File",
-                      "simultaneous_fit_help.html":"Simultaneous Fit",
-                      "single_fit_help.html":"Single Fit",
-                      "model_use_help.html":"Model Selection",
-                      "key_help.html":"Key Combination",
-                      }
+        _html_file = [("load_data_help.html", "Load a File"),
+                      ("single_fit_help.html", "Single Fit"),
+                      ("simultaneous_fit_help.html", "Simultaneous Fit"),
+                      ("batch_help.html", "Batch Fit"),
+                      ("model_use_help.html", "Model Selection"),
+                      ("%s" % self.path, "Model Functions"),
+                      ("%s" % self.path_pd, "Polydispersion Distributions"),
+                      ("%s" % self.path_sm, "Smear Computation"),
+                      ("key_help.html", "Key Combination"),
+                      ("status_bar_help.html", "Status Bar Help"),
+                      ]
 
                     
         page1="""<html>
@@ -80,17 +90,20 @@ class HelpWindow(wx.Frame):
             <body>
             <ul>
             """
-        for p, title in _html_file.iteritems():
+        for (p, title) in _html_file:
             pp = os.path.join(fitting_path, p)
             page += """<li><a href ="%s" target="showframe">%s</a><br></li>""" % (pp, title)
-          
-        page += """
-            <li><a href ="%s" target="showframe">Model Functions</a><br></li>
-            <li><a href ="%s" target="showframe">Polydispersion Distributions</a><br></li>
-            <li><a href ="%s" target="showframe">Smear Computation</a><br></li>
-            </ul>
-            </body>
-            </html>""" % (self.path, self.path_pd, self.path_sm)
+        page += """</ul>
+                    </body>
+                    </html>
+                """
+        #page += """
+        #    <li><a href ="%s" target="showframe">Model Functions</a><br></li>
+        #   <li><a href ="%s" target="showframe">Polydispersion Distributions</a><br></li>
+        #    <li><a href ="%s" target="showframe">Smear Computation</a><br></li>
+        #    </ul>
+        #    </body>
+        #    </html>""" % (self.path, self.path_pd, self.path_sm)
         
         self.rhelp.SetPage(page1)
         self.lhelp.SetPage(page)
@@ -129,6 +142,7 @@ class HelpWindow(wx.Frame):
         link= event.GetLinkInfo().GetHref()
         
         self.rhelp.LoadPage(os.path.abspath(link))
+    
         
 """
 Example: ::
