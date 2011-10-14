@@ -4,6 +4,7 @@ Implement grid used to store data
 import wx
 import numpy
 import math
+import time
 import re
 import os
 import sys
@@ -744,6 +745,7 @@ class GridPanel(SPanel):
                     msg = "Invalid cell was chosen." 
                     wx.PostEvent(self.parent.parent, StatusEvent(status=msg, 
                                                                 info="error"))
+                    time.sleep(0.5)
                     continue
                 else:
                      value = values[row -1]
@@ -766,6 +768,7 @@ class GridPanel(SPanel):
                             #raise ValueError, msg
                             wx.PostEvent(self.parent.parent, 
                                  StatusEvent(status=msg, info="error")) 
+                            time.sleep(0.5)
                             continue
                         
                         if issubclass(new_plot.__class__, Data1D):
@@ -784,7 +787,8 @@ class GridPanel(SPanel):
                                     msg += " at a time for View Results."
                                     wx.PostEvent(self.parent.parent, 
                                                  StatusEvent(status=msg,
-                                                              info="error")) 
+                                                              info="error"))
+                                    time.sleep(0.5) 
                                     continue  
                         """
                         wx.PostEvent(self.parent.parent, 
@@ -794,8 +798,8 @@ class GridPanel(SPanel):
                         """ 
                         wx.PostEvent(self.parent.parent, 
                                      NewPlotEvent(plot=new_plot, 
-                                                  group_id=str(group_id),
-                                                  title=title))  
+                                                group_id=str(new_plot.group_id),
+                                                title=title))  
                         msg = "Plotting the View Results  completed!"
                         wx.PostEvent( self.parent.parent, 
                                       StatusEvent(status=msg))  
@@ -807,6 +811,7 @@ class GridPanel(SPanel):
                     #raise ValueError, msg
                     wx.PostEvent(self.parent.parent, 
                          StatusEvent(status=msg, info="error")) 
+                    time.sleep(0.5)
                     continue
     
         
@@ -862,15 +867,17 @@ class GridPanel(SPanel):
         new_plot.group_id = wx.NewId()
         title = "%s vs %s" % (self.y_axis_title.GetValue(), 
                               self.x_axis_title.GetValue())
-        new_plot.xaxis(self.x_axis_title.GetValue(), self.x_axis_unit.GetValue())
-        new_plot.yaxis(self.y_axis_title.GetValue(), self.y_axis_unit.GetValue())
+        new_plot.xaxis(self.x_axis_title.GetValue(), 
+                       self.x_axis_unit.GetValue())
+        new_plot.yaxis(self.y_axis_title.GetValue(), 
+                       self.y_axis_unit.GetValue())
         try:
             title = self.notebook.GetPageText(pos)
             new_plot.name = title
             new_plot.xtransform = "x"
             new_plot.ytransform  = "y"  
             wx.PostEvent(self.parent.parent, 
-                             NewPlotEvent(plot=new_plot, 
+                        NewPlotEvent(plot=new_plot, 
                         group_id=str(new_plot.group_id), title =title)) 
             msg = "Plotting completed!"
             wx.PostEvent( self.parent.parent, 

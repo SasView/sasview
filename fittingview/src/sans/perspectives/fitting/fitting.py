@@ -1464,6 +1464,8 @@ class Plugin(PluginBase):
         Complete plotting 1D data
         """ 
         try:
+            numpy.nan_to_num(y)
+            
             new_plot = Data1D(x=x, y=y)
             new_plot.is_data = False
             new_plot.dy = numpy.zeros(len(y))
@@ -1550,6 +1552,7 @@ class Plugin(PluginBase):
         Complete get the result of modelthread and create model 2D
         that can be plot.
         """
+        numpy.nan_to_num(image)
         new_plot= Data2D(image=image, err_image=data.err_data)
         new_plot.name = model.name
         new_plot.title = "Analytical model 2D "
