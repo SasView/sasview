@@ -1481,7 +1481,13 @@ class Plugin(PluginBase):
             #find if this theory was already plotted and replace that plot given
             #the same id
             theory_data = self.page_finder[page_id].get_theory_data(fid=data.id)
-            new_plot.name = model.name + " ["+ str(data.name)+"]"
+            
+            if data.is_data:
+                data_name = str(data.name)
+            else:
+                data_name = str(model.__class__.__name__)
+            
+            new_plot.name = model.name + " ["+ data_name +"]"
             new_plot.xaxis(_xaxis, _xunit)
             new_plot.yaxis(_yaxis, _yunit)
             self.page_finder[page_id].set_theory_data(data=new_plot, 
@@ -1562,11 +1568,17 @@ class Plugin(PluginBase):
         new_plot.xmin = data.xmin
         new_plot.xmax = data.xmax
         title = data.title
-        if len(title) > 1:
-            new_plot.title = "Model2D for " + data.name
+        
         new_plot.is_data = False
+        if data.is_data:
+            data_name = str(data.name)
+        else:
+            data_name = str(model.__class__.__name__)
+
+        if len(title) > 1:
+            new_plot.title = "Model2D for " + data_name
         new_plot.name = model.name + " [" + \
-                                    str(data.name) + "-2D]"
+                                    data_name + "-2D]"
         theory_data = deepcopy(new_plot)
         theory_data.name = "Unknown"
         
