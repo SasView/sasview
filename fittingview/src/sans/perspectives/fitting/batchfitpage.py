@@ -36,6 +36,7 @@ class BatchFitPage(FitPage):
         FitPage.__init__(self, parent, color=color)
         self.window_name = "BatchFit"
         self.window_caption  = "BatchFit"
+        self._set_save_flag(False)
         
     def _fill_range_sizer(self):
         """
