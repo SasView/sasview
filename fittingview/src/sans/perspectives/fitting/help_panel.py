@@ -127,9 +127,11 @@ class HelpWindow(wx.Frame):
         splitter.AppendWindow(lpanel, 200)
         splitter.AppendWindow(rpanel)
         self.SetSizer(vbox1)
-       
+
+        self.splitter = splitter
         self.Centre()
         self.Show(True)
+        self.Bind(wx.EVT_SIZE, self.on_Size)
         
     def OnButtonClicked(self, event):
         """
@@ -145,6 +147,19 @@ class HelpWindow(wx.Frame):
         link= event.GetLinkInfo().GetHref()
         
         self.rhelp.LoadPage(os.path.abspath(link))
+        
+    def on_Size(self, event):
+        """
+        Recover the scroll position On Size
+        """
+        pos = self.rhelp.GetScrollPos(wx.VERTICAL)
+        size = self.GetClientSize()
+        self.splitter.SetSize(size)
+        self.rhelp.Show(False)
+        self.rhelp.ScrollLines(pos)
+        self.rhelp.Show(True)
+        #self.rhelp.SetScrollPos(wx.VERTICAL, pos1, True)
+
     
         
 """
