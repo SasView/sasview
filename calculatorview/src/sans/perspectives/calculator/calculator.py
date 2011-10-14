@@ -33,7 +33,14 @@ class Plugin(PluginBase):
             provide more hint on the SLD calculator
         """
         from help_panel import  HelpWindow
-        frame = HelpWindow(None, -1)    
+        frame = HelpWindow(None, -1) 
+        if hasattr(frame, "IsIconized"):
+            if not frame.IsIconized():
+                try:
+                    icon = self.parent.GetIcon()
+                    frame.SetIcon(icon)
+                except:
+                    pass  
         frame.Show(True)
 
     def get_tools(self):
