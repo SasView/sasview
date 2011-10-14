@@ -995,6 +995,9 @@ class ViewerFrame(wx.Frame):
             if caption not in captions:
                 break
             self.graph_num += 1
+            # protection from forever-loop: max num = 1000
+            if self.graph_num > 1000:
+                break
 
         p.window_caption = caption
    
