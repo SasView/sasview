@@ -171,7 +171,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.vbox.Add(self.sizer5, 0, wx.EXPAND|wx.ALL,1)
         self.vbox.Add(self.sizer1, 1, wx.EXPAND|wx.ALL,0)
         self.vbox.Add(self.sizer2, 0, wx.EXPAND|wx.ALL,1)
-        self.vbox.Add(self.sizer3, 0, wx.EXPAND|wx.ALL,5)
+        self.vbox.Add(self.sizer3, 0, wx.EXPAND|wx.ALL,10)
         self.vbox.Add(self.sizer4, 0, wx.EXPAND|wx.ALL,5)
         
         self.SetSizer(self.vbox)
@@ -332,7 +332,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         
         self.rb_single_mode.SetValue(not self.parent.batch_on)
         self.rb_batch_mode.SetValue(self.parent.batch_on)
-        self.sizer4.AddMany([(self.rb_single_mode,0, wx.ALL,5),
+        self.sizer4.AddMany([((5, 5)),
+                             (self.rb_single_mode,0, wx.ALL,5),
                             (self.rb_batch_mode,0, wx.ALL,5),
                             (20,80)])
         
