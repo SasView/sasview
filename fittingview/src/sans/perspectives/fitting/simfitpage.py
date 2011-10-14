@@ -75,6 +75,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.define_page_structure()
         self.draw_page()
         self.set_layout()
+        self._set_save_flag(False)
         
     def define_page_structure(self):
         """
