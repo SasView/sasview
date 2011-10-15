@@ -2128,6 +2128,13 @@ class ViewerFrame(wx.Frame):
                     from sans.guiframe.pdfview import PDFFrame
                     
                     dialog = PDFFrame(None, -1, "Tutorial", path)
+                    if hasattr(dialog, "IsIconized"):
+                        if not dialog.IsIconized():
+                            try:
+                                icon = self.GetIcon()
+                                dialog.SetIcon(icon)
+                            except:
+                                pass   
                     #self.SetTopWindow(dialog)
                     dialog.Show(True) 
                 except:

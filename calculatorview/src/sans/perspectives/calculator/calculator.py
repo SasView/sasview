@@ -73,6 +73,7 @@ class Plugin(PluginBase):
         from data_editor import DataEditorWindow
         frame = DataEditorWindow(parent=self.parent, data=[],
                                   title="Data Editor")
+        self.put_icon(frame)
         frame.Show(True)
         event.Skip()
 
@@ -82,6 +83,7 @@ class Plugin(PluginBase):
         """
         from kiessig_calculator_panel import KiessigWindow
         frame = KiessigWindow()
+        self.put_icon(frame)
         frame.Show(True) 
     
     def on_calculate_sld(self, event):
@@ -90,6 +92,7 @@ class Plugin(PluginBase):
         """
         from sld_panel import SldWindow
         frame = SldWindow(base=self.parent)
+        self.put_icon(frame)
         frame.Show(True) 
        
     def on_calculate_slit_size(self, event):
@@ -97,7 +100,8 @@ class Plugin(PluginBase):
         Compute the slit size a given data
         """
         from slit_length_calculator_panel import SlitLengthCalculatorWindow
-        frame = SlitLengthCalculatorWindow(parent=self.parent)    
+        frame = SlitLengthCalculatorWindow(parent=self.parent)  
+        self.put_icon(frame)  
         frame.Show(True)
         
     def on_calculate_resoltuion(self, event):
@@ -106,6 +110,7 @@ class Plugin(PluginBase):
         """
         from resolution_calculator_panel import ResolutionWindow
         frame = ResolutionWindow(parent=self.parent)
+        self.put_icon(frame)
         frame.Show(True) 
   
         #def on_perspective(self, event):
@@ -128,8 +133,19 @@ class Plugin(PluginBase):
         """
         from pyconsole import PyConsole
         frame = PyConsole(parent=self.parent)
+        self.put_icon(frame)
         frame.Show(True) 
     
-    
+    def put_icon(self, frame):
+        """
+        Put icon in the frame title bar
+        """
+        if hasattr(frame, "IsIconized"):
+            if not frame.IsIconized():
+                try:
+                    icon = self.parent.GetIcon()
+                    frame.SetIcon(icon)
+                except:
+                    pass      
   
     
