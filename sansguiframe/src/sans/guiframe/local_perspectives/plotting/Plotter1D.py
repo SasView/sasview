@@ -177,7 +177,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 self.canvas.set_resizing(self.resizing)
                 return
         self.x_size = self.GetSize()
-
+        print "x", self.x_size
         # Ready for another event
         # Do not remove this Skip. Otherwise it will get runtime error on wx>=2.9.
         event.Skip() 
@@ -187,8 +187,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.parent.set_schedule(True)
         pos_x, pos_y = self.GetPositionTuple()
         if pos_x != 0 and pos_y != 0:
-            self.size, _ = self.GetClientSizeTuple()
-        
+            self.size, y_size = self.GetClientSizeTuple()
+            x_size = self.size
+        else:
+            x_size, y_size = self.GetClientSizeTuple()
+        print "client", self.size,y_size
+        self.SetSize(self.x_size)
     def set_resizing(self, resizing=False):
         """
         Set the resizing (True/False)
