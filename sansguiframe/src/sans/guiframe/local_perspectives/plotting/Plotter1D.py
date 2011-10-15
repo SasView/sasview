@@ -170,14 +170,15 @@ class ModelPanel1D(PlotPanel, PanelBase):
         On response of the resize of a panel, set axes_visiable False
         """
         # It was found that wx >= 2.9.3 sends an event even if no size changed.
-        # So manually recode the size (=x_size) and compare here.
+        # So manually record the size (=x_size) and compare here.
+        print "x", self.x_size, self.GetSize()
         if self.x_size != None:
             if self.x_size == self.GetSize():
                 self.resizing = False
                 self.canvas.set_resizing(self.resizing)
                 return
-        self.x_size = self.GetSize()
-        print "x", self.x_size, self.resizing
+        #self.x_size = self.GetSize()
+        
         # Ready for another event
         # Do not remove this Skip. Otherwise it will get runtime error on wx>=2.9.
         event.Skip() 
@@ -191,9 +192,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self.size, y_size = self.GetClientSizeTuple()
             x_size = self.size
         else:
+            tw, th = self.toolbar.GetSizeTuple()
             x_size, y_size = self.GetClientSizeTuple()
-        print "client", self.size,y_size, self.GetClientSize()
-        self.canvas.SetSize(client_size)
+            self.canvas.SetSize(wx.Size(x_size, th+y_size))
+        #print "client", self.size,y_size, self.GetClientSize()
+        
     def set_resizing(self, resizing=False):
         """
         Set the resizing (True/False)
