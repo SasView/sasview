@@ -296,7 +296,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         if self._manager is not None:
             wx.PostEvent(self._manager.parent, PanelOnFocusEvent(panel=self))
-        
+            chain_menu = self._manager.menu1.FindItemById(self._manager.id_reset_flag)
+            chain_menu.Enable(self.batch_on)
+
     class ModelTextCtrl(wx.TextCtrl):
         """
         Text control for model and fit parameters.

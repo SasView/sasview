@@ -200,8 +200,9 @@ class Plugin(PluginBase):
         self.menu1.AppendCheckItem(self.id_reset_flag, "Chain Fitting [BatchFit Only]", 
                                    resetf_help) 
         wx.EVT_MENU(owner, self.id_reset_flag,  self.on_reset_batch_flag)
-        self.menu1.FindItemById(self.id_reset_flag).Check(not self.batch_reset_flag)
-        
+        chain_menu = self.menu1.FindItemById(self.id_reset_flag)
+        chain_menu.Check(not self.batch_reset_flag)
+        chain_menu.Enable(self.batch_on)
         #create  menubar items
         return [(self.menu1, self.sub_menu)]
                
