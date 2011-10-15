@@ -263,9 +263,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_import)
         self.perspective_cbox = wx.ComboBox(self, -1,
                                 style=wx.CB_READONLY)
-        if IS_MAC: w_factor = 1
-        else: w_factor = 1.6
-        self.perspective_cbox.SetMinSize((BUTTON_WIDTH*w_factor, -1))
+        if not IS_MAC:
+            self.perspective_cbox.SetMinSize((BUTTON_WIDTH*1.6, -1))
         wx.EVT_COMBOBOX(self.perspective_cbox,-1, 
                         self._on_perspective_selection)
     
