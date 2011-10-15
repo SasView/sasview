@@ -598,6 +598,7 @@ class ViewerFrame(wx.Frame):
         elif self.panel_on_focus != self._data_panel:
             cpanel = self.panel_on_focus
             if self.cpanel_on_focus != cpanel:
+                cpanel.on_set_focus(None)
                 self.cpanel_on_focus = self.panel_on_focus
                 
     def reset_bookmark_menu(self, panel):
