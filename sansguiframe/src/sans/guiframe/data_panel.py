@@ -151,8 +151,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.define_panel_structure()
         self.layout_selection()
         self.layout_data_list()
-        self.layout_button()
         self.layout_batch()
+        self.layout_button()
+        
    
     def define_panel_structure(self):
         """
@@ -165,14 +166,14 @@ class DataPanel(ScrolledPanel, PanelBase):
       
         self.sizer2 = wx.BoxSizer(wx.VERTICAL)
         self.sizer3 = wx.FlexGridSizer(7, 2, 4, 1)
-        self.sizer4 = wx.BoxSizer(wx.HORIZONTAL)
+        self.sizer4 = wx.BoxSizer(wx.VERTICAL)
         self.sizer5 = wx.BoxSizer(wx.VERTICAL)
        
         self.vbox.Add(self.sizer5, 0, wx.EXPAND|wx.ALL,1)
         self.vbox.Add(self.sizer1, 1, wx.EXPAND|wx.ALL,0)
         self.vbox.Add(self.sizer2, 0, wx.EXPAND|wx.ALL,1)
         self.vbox.Add(self.sizer3, 0, wx.EXPAND|wx.ALL,10)
-        self.vbox.Add(self.sizer4, 0, wx.EXPAND|wx.ALL,5)
+        #self.vbox.Add(self.sizer4, 0, wx.EXPAND|wx.ALL,5)
         
         self.SetSizer(self.vbox)
         
@@ -262,7 +263,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         wx.EVT_BUTTON(self, self.bt_import.GetId(), self.on_import)
         self.perspective_cbox = wx.ComboBox(self, -1,
                                 style=wx.CB_READONLY)
-        #self.perspective_cbox.SetMinSize((CBOX_WIDTH, -1))
+        self.perspective_cbox.SetMinSize((BUTTON_WIDTH*1.6, -1))
         wx.EVT_COMBOBOX(self.perspective_cbox,-1, 
                         self._on_perspective_selection)
     
@@ -291,7 +292,7 @@ class DataPanel(ScrolledPanel, PanelBase):
        
         self.cb_plotpanel = wx.ComboBox(self, -1, 
                                 style=wx.CB_READONLY|wx.CB_SORT)
-        #self.cb_plotpanel.SetMinSize((CBOX_WIDTH, -1))
+        #self.cb_plotpanel.SetMinSize((BUTTON_WIDTH*2, -1))
         wx.EVT_COMBOBOX(self.cb_plotpanel,-1, self._on_plot_selection)
         self.cb_plotpanel.Disable()
 
@@ -305,10 +306,14 @@ class DataPanel(ScrolledPanel, PanelBase):
                              ((10, 10)),
                              (self.bt_append_plot),
                              (self.cb_plotpanel, wx.EXPAND|wx.ADJUST_MINSIZE, 5),
-                             ((10, 10)),
-                             ((10, 10)),
+                             ((5, 5)),
+                             ((5, 5)),
                              (self.bt_import, 0, wx.EXPAND|wx.RIGHT, 5),
-                             (self.perspective_cbox, wx.EXPAND|wx.ADJUST_MINSIZE, 5)])
+                             (self.perspective_cbox, wx.EXPAND|wx.ADJUST_MINSIZE, 5),
+                             ((10, 10)),
+                             (self.sizer4),
+                             ((10, 40)),
+                             ((10, 40))])
 
         self.sizer3.AddGrowableCol(1, 1)
         self.show_data_button()
@@ -332,10 +337,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         
         self.rb_single_mode.SetValue(not self.parent.batch_on)
         self.rb_batch_mode.SetValue(self.parent.batch_on)
-        self.sizer4.AddMany([((5, 5)),
-                             (self.rb_single_mode,0, wx.ALL,5),
-                            (self.rb_batch_mode,0, wx.ALL,5),
-                            (20,80)])
+        self.sizer4.AddMany([(self.rb_single_mode,0, wx.ALL, 4),
+                             (self.rb_batch_mode,0, wx.ALL, 4)])
         
     def on_single_mode(self, event):
         """
