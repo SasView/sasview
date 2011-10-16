@@ -193,8 +193,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             pixels = self.GetClientSize()
             self._SetSize(pixels)
             self.figure.Update()
-            #self.canvas.Update()
-            #self.Update()
+            self.Update()
         except:
             pass
         
