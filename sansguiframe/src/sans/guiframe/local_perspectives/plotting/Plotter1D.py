@@ -190,6 +190,13 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self.size, _ = self.GetClientSizeTuple()
         self.SetSizer(self.sizer)
         
+        try:
+            self.figure.Update()
+            self.Update()
+            self.parent.Update()
+        except:
+            pass
+        
     def set_resizing(self, resizing=False):
         """
         Set the resizing (True/False)
