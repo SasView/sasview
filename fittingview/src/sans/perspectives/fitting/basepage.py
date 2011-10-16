@@ -293,11 +293,18 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def on_set_focus(self, event):
         """
+        On Set Focus, update guimanger and menu
         """
         if self._manager is not None:
             wx.PostEvent(self._manager.parent, PanelOnFocusEvent(panel=self))
-            chain_menu = self._manager.menu1.FindItemById(self._manager.id_reset_flag)
-            chain_menu.Enable(self.batch_on)
+            if self._manager.menu1 != None:
+                chain_menu = self._manager.menu1.FindItemById(\
+                                                        self._manager.id_reset_flag)
+                chain_menu.Enable(self.batch_on)
+                sim_menu = self._manager.menu1.FindItemById(self._manager.id_simfit)
+                sim_menu.Enable(not self.batch_on and self.data.is_data\
+                                and (self.model!=None))
+               
 
     class ModelTextCtrl(wx.TextCtrl):
         """
@@ -2131,7 +2138,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.model = None
                 return self.model
             
-
         ## post state to fit panel
         self.state.parameters =[]
         self.state.model =self.model

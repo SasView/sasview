@@ -77,8 +77,13 @@ class FitPage(BasicPage):
         """
         fill sizer 0 with data info
         """
-        box_description= wx.StaticBox(self, -1, 'I(q) Data Source')
-        boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
+        self.data_box_description = wx.StaticBox(self, -1, 'I(q) Data Source')
+        if check_data_validity(self.data):
+            dname_color = wx.BLUE
+        else:
+            dname_color = wx.RED
+        self.data_box_description.SetForegroundColour(dname_color)
+        boxsizer1 = wx.StaticBoxSizer(self.data_box_description, wx.VERTICAL)
         #----------------------------------------------------------
         sizer_data = wx.BoxSizer(wx.HORIZONTAL)
         self.dataSource = wx.ComboBox(self, -1, style=wx.CB_READONLY)
@@ -122,10 +127,12 @@ class FitPage(BasicPage):
             self.qmax_x =  self.qmax_data_set
             self.state.qmin = self.qmin_x
             self.state.qmax = self.qmax_x
-            
+        is_data = False    
         for data in self.data_list:
             if data is not None:
                 self.dataSource.Append(str(data.name), clientData=data)
+                if not is_data:
+                    is_data = check_data_validity(data)
         self.dataSource.SetSelection(0)
         self.on_select_data(event=None)
                 
@@ -211,6 +218,7 @@ class FitPage(BasicPage):
         
         #Sizers
         box_description_range = wx.StaticBox(self, -1,str(title))
+        box_description_range.SetForegroundColour(wx.BLUE)
         boxsizer_range = wx.StaticBoxSizer(box_description_range, wx.VERTICAL)      
         self.sizer_set_smearer = wx.BoxSizer(wx.VERTICAL)
         sizer_smearer = wx.BoxSizer(wx.HORIZONTAL)
@@ -570,7 +578,7 @@ class FitPage(BasicPage):
         self.multifactorbox = None
         self.mbox_description= wx.StaticBox(self, -1,str(title))
         boxsizer1 = wx.StaticBoxSizer(self.mbox_description, wx.VERTICAL)
-        
+        self.mbox_description.SetForegroundColour(wx.RED)
         id = wx.NewId()
         self.model_help =wx.Button(self,id,'Details', size=(80,23))
         self.model_help.Bind(wx.EVT_BUTTON, self.on_model_help_clicked,id=id)
@@ -1269,7 +1277,8 @@ class FitPage(BasicPage):
                                      qmax=float(self.qmax_x)) 
    
             self._manager._on_model_panel(evt=evt)
-            self.mbox_description.SetLabel("Model [%s]" % str(self.model.name))
+            self.mbox_description.SetLabel("Model [ %s ]" % str(self.model.name))
+            self.mbox_description.SetForegroundColour(wx.BLUE)
             self.state.model = self.model.clone()
             self.state.model.name = self.model.name
 
@@ -1918,6 +1927,7 @@ class FitPage(BasicPage):
             else:
                 self.btEditMask.Enable()  
                 self.EditMask_title.Enable() 
+    
         self.Npts_total.SetValue(str(npts))
         #default:number of data points selected to fit
         self.Npts_fit.SetValue(str(npts))
@@ -1931,6 +1941,11 @@ class FitPage(BasicPage):
         self.enable_fit_button()
         # send graph_id to page_finder 
         self._manager.set_graph_id(uid=self.uid, graph_id=self.graph_id)
+        #focus the page
+        if check_data_validity(data):
+            self.data_box_description.SetForegroundColour(wx.BLUE)
+        self.on_set_focus(None)
+        self.Refresh()
         #update model plot with new data information
         if flag:
             #set model view button

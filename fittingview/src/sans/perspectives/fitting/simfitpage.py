@@ -794,24 +794,28 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         list=[]
         sizer.Clear(True)
         
-        new_name = wx.StaticText(self, -1, 'New Model Name', 
+        new_name = wx.StaticText(self, -1, '  Model Title ',
                                  style=wx.ALIGN_CENTER)
         new_name.SetBackgroundColour('orange')
+        new_name.SetForegroundColour(wx.WHITE)
         sizer.Add(new_name,(iy, ix),(1,1),
                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 2 
-        model_type = wx.StaticText(self, -1, '  Model Type')
+        model_type = wx.StaticText(self, -1, '  Model ')
         model_type.SetBackgroundColour('grey')
+        model_type.SetForegroundColour(wx.WHITE)
         sizer.Add(model_type,(iy, ix),(1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix += 1 
-        data_used = wx.StaticText(self, -1, '  Used Data')
+        data_used = wx.StaticText(self, -1, '  Data ')
         data_used.SetBackgroundColour('grey')
+        data_used.SetForegroundColour(wx.WHITE)
         sizer.Add(data_used,(iy, ix),(1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         ix += 1 
-        tab_used = wx.StaticText(self, -1, '  Fit Tab')
+        tab_used = wx.StaticText(self, -1, '  FitPage ')
         tab_used.SetBackgroundColour('grey')
+        tab_used.SetForegroundColour(wx.WHITE)
         sizer.Add(tab_used,(iy, ix),(1,1),
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         for id, value in self.page_finder.iteritems():
@@ -820,39 +824,43 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             try:
                 ix = 0
                 for fitproblem in value.get_fit_problem():
-                    if  not self.parent.get_page_by_id(id).batch_on:
-                        iy += 1 
-                        data = fitproblem.get_fit_data()
-                        model = fitproblem.get_model()
-                        name = '_'
-                        if model is not None:
-                            name = str(model.name)
-                        cb = wx.CheckBox(self, -1, name)
-                        cb.SetValue(False)
-                        cb.Enable(model is not None and data.is_data)
-                        sizer.Add(cb, (iy, ix), (1, 1), 
-                                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-                        wx.EVT_CHECKBOX(self, cb.GetId(), self.check_model_name)
-                        ix += 2 
-                        type = model.__class__.__name__
-                        model_type = wx.StaticText(self, -1, str(type))
-                        sizer.Add(model_type, (iy, ix), (1, 1), 
-                                  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        name = '-'
-                        if data is not None and data.is_data:
-                            name = str(data.name)
-                        data_used = wx.StaticText(self, -1, name)
-                        ix += 1 
-                        sizer.Add(data_used, (iy, ix), (1, 1), 
-                                  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                        ix += 1 
-                        caption = value.get_fit_tab_caption()
-                        tab_caption_used= wx.StaticText(self, -1, str(caption))
-                        sizer.Add(tab_caption_used, (iy, ix), (1, 1), 
-                                  wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                    
-                        self.model_list.append([cb,value,id,model])
+                    if  self.parent.get_page_by_id(id).batch_on:
+                        continue
+                    data = fitproblem.get_fit_data()
+                    if not data.is_data:
+                        continue
+                    model = fitproblem.get_model()
+                    if model == None:
+                        continue
+                    iy += 1 
+                    name = '_'
+                    if model is not None:
+                        name = str(model.name)
+                    cb = wx.CheckBox(self, -1, name)
+                    cb.SetValue(False)
+                    cb.Enable(model is not None and data.is_data)
+                    sizer.Add(cb, (iy, ix), (1, 1), 
+                               wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                    wx.EVT_CHECKBOX(self, cb.GetId(), self.check_model_name)
+                    ix += 2 
+                    type = model.__class__.__name__
+                    model_type = wx.StaticText(self, -1, str(type))
+                    sizer.Add(model_type, (iy, ix), (1, 1), 
+                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    name = '-'
+                    if data is not None and data.is_data:
+                        name = str(data.name)
+                    data_used = wx.StaticText(self, -1, name)
+                    ix += 1 
+                    sizer.Add(data_used, (iy, ix), (1, 1), 
+                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    ix += 1 
+                    caption = value.get_fit_tab_caption()
+                    tab_caption_used= wx.StaticText(self, -1, str(caption))
+                    sizer.Add(tab_caption_used, (iy, ix), (1, 1), 
+                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 
+                    self.model_list.append([cb,value,id,model])   
             except:
                 raise
                 #pass

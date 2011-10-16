@@ -104,6 +104,7 @@ class Plugin(PluginBase):
         self._extensions = '.fitv'
         self.scipy_id = wx.NewId()
         self.park_id = wx.NewId()
+        self.menu1 = None
         
         self.temp_state = []
         self.state_index = 0
@@ -164,13 +165,15 @@ class Plugin(PluginBase):
         self.menu1.Append(id1, '&New Fit Page',simul_help)
         wx.EVT_MENU(owner, id1, self.on_add_new_page)
         self.menu1.AppendSeparator()
-        id1 = wx.NewId()
+        self.id_simfit = wx.NewId()
         simul_help = "Simultaneous Fit"
-        self.menu1.Append(id1, '&Simultaneous Fit',simul_help)
-        wx.EVT_MENU(owner, id1, self.on_add_sim_page)
+        self.menu1.Append(self.id_simfit, '&Simultaneous Fit',simul_help)
+        wx.EVT_MENU(owner, self.id_simfit, self.on_add_sim_page)
+        sim_menu = self.menu1.FindItemById(self.id_simfit)
+        sim_menu.Enable(False) 
+        
         self.menu1.AppendSeparator()
         #Set park engine
-        
         scipy_help= "Scipy Engine: Perform Simple fit. More in Help window...."
         self.menu1.AppendCheckItem(self.scipy_id, "Simple FitEngine [LeastSq]",
                                    scipy_help) 
@@ -584,7 +587,8 @@ class Plugin(PluginBase):
         # update ftol menu help strings
         ftol_help = "Change the current FTolerance (=%s) " % str(self.ftol)
         ftol_help += "of Simple FitEngine..." 
-        self.menu1.SetHelpString(self.id_tol, ftol_help)
+        if self.menu1 != None:
+            self.menu1.SetHelpString(self.id_tol, ftol_help)
         
     def show_ftol_dialog(self, event=None):
         """
@@ -1342,6 +1346,8 @@ class Plugin(PluginBase):
         Set batch_reset_flag
         """
         event.Skip()
+        if self.menu1 == None:
+            return
         menu_item = self.menu1.FindItemById(self.id_reset_flag)
         flag = menu_item.IsChecked()
         if not flag:

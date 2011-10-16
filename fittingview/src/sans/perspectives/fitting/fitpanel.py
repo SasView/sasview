@@ -363,6 +363,7 @@ class FitPanel(nb, PanelBase):
         self._manager.create_fit_problem(panel.uid)
         self._manager.page_finder[panel.uid].add_data(panel.get_data())
         self.enable_close_button()
+        panel.on_set_focus(None)
         return panel 
     
     def enable_close_button(self):
@@ -425,9 +426,9 @@ class FitPanel(nb, PanelBase):
         page = None
         for p in self.opened_pages.values():
             #check if there is an empty page to fill up 
-            if not check_data_validity(p.get_data()):
+            if not check_data_validity(p.get_data()) and p.batch_on:
                 page = p
-                self.batch_page_index += 1
+                #self.batch_page_index += 1
                 break
         if data_1d_list and data_2d_list:
             # need to warning the user that this batch is a special case
@@ -495,7 +496,7 @@ class FitPanel(nb, PanelBase):
         for page in self.opened_pages.values():
             #check if the selected data existing in the fitpanel
             pos = self.GetPageIndex(page)
-            if not check_data_validity(page.get_data()):
+            if not check_data_validity(page.get_data()) and not page.batch_on:
                 #make sure data get placed in 1D empty tab if data is 1D
                 #else data get place on 2D tab empty tab
                 enable2D = page.get_view_mode()
@@ -504,8 +505,8 @@ class FitPanel(nb, PanelBase):
                     page.batch_on = self.batch_on
                     page._set_save_flag(not page.batch_on)
                     page.fill_data_combobox(data_list)
-                    caption = "FitPage" + str(self.fit_page_index)
-                    self.SetPageText(pos, caption)
+                    #caption = "FitPage" + str(self.fit_page_index)
+                    self.SetPageText(pos, page.window_caption)
                     self.SetSelection(pos)
                     return page
         #create new page and add data
