@@ -118,13 +118,13 @@ def write_registry(data_extension=None, app_extension=None):
             file_type = ''
             msg += """ValueName: "%s";\t""" % str('')
             msg += """ValueData: "{app}\%s";\t""" % str(APPLICATION)
-            msg += """ Flags: %s""" % str('uninsdeletevalue')
+            msg += """ Flags: %s""" % str('uninsdeletevalue  noerror')
             msg += "\n"
     msg += """Root: HKCR; Subkey: "{app}\%s";\t""" % str(APPLICATION)
     msg += """ValueType: %s; """ % str('string')
     msg += """ValueName: "%s";\t""" % str('') 
     msg += """ValueData: "{app}\%s";\t""" % str("SansView File") 
-    msg += """ Flags: %s \t""" % str("uninsdeletekey")
+    msg += """ Flags: %s \t""" % str("uninsdeletekey  noerror")
     msg += "\n"
         
     #execute the file on double-click
@@ -139,7 +139,9 @@ def write_registry(data_extension=None, app_extension=None):
     msg += """Root: HKCR; Subkey: "{app}\%s";\t""" % str(SetupIconFile)
     msg += """ValueType: %s; """ % str('string')
     msg += """ValueName: "%s";\t""" % str('') 
-    msg += """ValueData: "{app}\%s,0"\n""" % str(APPLICATION)
+    msg += """ValueData: "{app}\%s,0";\t""" % str(APPLICATION)
+    msg += """ Flags: %s \t""" % str("uninsdeletevalue noerror")
+    msg += "\n"  
 
     
     #SANSVIEWPATH
@@ -147,7 +149,7 @@ def write_registry(data_extension=None, app_extension=None):
     msg += """ValueType: %s; """ % str('expandsz')
     msg += """ValueName: "%s";\t""" % str('SANSVIEWPATH') 
     msg += """ValueData: "{app}";\t"""
-    msg += """ Flags: %s""" % str('uninsdeletevalue')
+    msg += """ Flags: %s""" % str('uninsdeletevalue noerror')
     msg += "\n"
     
     #PATH

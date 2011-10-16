@@ -43,14 +43,14 @@ Root: HKCU;	Subkey: "Software\Classes\.abs\OpenWithList\SansView.exe";	 Flags: u
 Root: HKCU;	Subkey: "Software\Classes\.d1d\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCU;	Subkey: "Software\Classes\.sans\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCU; Subkey: "Software\Classes\applications\SansView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SansView.exe""  ""%1"""; 	 Flags: uninsdeletevalue noerror
-Root: HKCR;	Subkey: ".svs";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
-Root: HKCR;	Subkey: ".fitv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
-Root: HKCR;	Subkey: ".inv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
-Root: HKCR;	Subkey: ".prv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue
-Root: HKCR; Subkey: "{app}\SansView.exe";	ValueType: string; ValueName: "";	ValueData: "{app}\SansView File";	 Flags: uninsdeletekey 	
+Root: HKCR;	Subkey: ".svs";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue  noerror
+Root: HKCR;	Subkey: ".fitv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue  noerror
+Root: HKCR;	Subkey: ".inv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue  noerror
+Root: HKCR;	Subkey: ".prv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue  noerror
+Root: HKCR; Subkey: "{app}\SansView.exe";	ValueType: string; ValueName: "";	ValueData: "{app}\SansView File";	 Flags: uninsdeletekey  noerror 	
 Root: HKCR; Subkey: "{app}\SansView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SansView.exe""  ""%1""";	 Flags: uninsdeletevalue noerror 	
-Root: HKCR; Subkey: "{app}\images\ball.ico";	ValueType: string; ValueName: "";	ValueData: "{app}\SansView.exe,0"
-Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment";	ValueType: expandsz; ValueName: "SANSVIEWPATH";	ValueData: "{app}";	 Flags: uninsdeletevalue
+Root: HKCR; Subkey: "{app}\images\ball.ico";	ValueType: string; ValueName: "";	ValueData: "{app}\SansView.exe,0";	 Flags: uninsdeletevalue noerror 	
+Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment";	ValueType: expandsz; ValueName: "SANSVIEWPATH";	ValueData: "{app}";	 Flags: uninsdeletevalue noerror
 ; Write to PATH (below) is disabled; need more tests
 ;Root: HKCU; Subkey: "Environment";	ValueType: expandsz; ValueName: "PATH";	ValueData: "%SANSVIEWPATH%;{olddata}";	 Check: NeedsAddPath()
 
