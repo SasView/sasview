@@ -81,6 +81,10 @@ Name: "{commondesktop}\SansView-1.9.2dev_oct";	Filename: "{app}\SansView.exe";	T
 Filename: "{app}\SansView.exe";	Description: "{cm:LaunchProgram, SansView}";	Flags: nowait postinstall skipifsilent
 
 
+[Dirs]
+Name: "{app}\";	Permissions: everyone-modify	
+
+
 [Code]
 function NeedsAddPath(): boolean;
 var

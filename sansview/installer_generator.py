@@ -228,6 +228,16 @@ def write_run():
     msg += """Flags: nowait postinstall skipifsilent\n"""
     return msg
 
+def write_dirs():
+    """
+    Define Dir permission
+    """
+    msg = """\n\n[Dirs]\n"""
+    msg += """Name: "{app}\%s";\t""" % str('')
+    msg += """Permissions: everyone-modify\t""" 
+    msg += """\n"""  
+    return msg
+
 def write_code():
     """
     Code that checks the existing path and snaviewpath 
@@ -299,6 +309,7 @@ if __name__ == "__main__":
     TEMPLATE += write_file()
     TEMPLATE += write_icon()
     TEMPLATE += write_run()
+    TEMPLATE += write_dirs()
     TEMPLATE += write_code()
     path = '%s.iss' % str(INSTALLER_FILE)
     f = open(path,'w') 
