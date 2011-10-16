@@ -2138,7 +2138,6 @@ class ViewerFrame(wx.Frame):
                     #self.SetTopWindow(dialog)
                     dialog.Show(True) 
                 except:
-                    raise
                     msg = "This feature requires 'Adobe pdf Reader'\n"
                     msg += "Please install it first (Free)..."
                     wx.MessageBox(msg, 'Error')
