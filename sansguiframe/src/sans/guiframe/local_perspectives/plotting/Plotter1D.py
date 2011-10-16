@@ -192,8 +192,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         
         try:
             self.figure.Update()
+            self.canvas.Update()
             self.Update()
-            self.parent.Update()
         except:
             pass
         
