@@ -45,6 +45,7 @@ class PDFPanel(wx.Panel):
 
         self.SetSizer(sizer)
         self.SetAutoLayout(True)
+        wx.EVT_CLOSE(self.parent, self.OnClose)
         
     def OnOpenButton(self, event):
         """
@@ -60,6 +61,8 @@ class PDFPanel(wx.Panel):
             self.parent.SetTitle(os.path.basename(file.split('.')[0]))
             wx.EndBusyCursor()
         dlg.Destroy()
+        # Let Panel know the file changed: Avoiding C++ error
+        self.Update()
         
     def OnLoad(self, event=None, path=None):
         """
