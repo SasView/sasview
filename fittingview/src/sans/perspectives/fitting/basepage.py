@@ -560,6 +560,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.sizer4.Clear(True)
         name="Polydispersity and Orientational Distribution"
         box_description= wx.StaticBox(self, -1,name)
+        box_description.SetForegroundColour(wx.BLUE)
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         #----------------------------------------------------
         self.disable_disp = wx.RadioButton(self, -1, 'Off', (10, 10),
