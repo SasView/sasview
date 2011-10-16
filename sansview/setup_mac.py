@@ -91,7 +91,7 @@ APP = ['sansview.py']
 DATA_FILES += ['images','test','plugins','media']
 OPTIONS = {'argv_emulation': True,
            'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings'],
-           'includes': ['code', 'site'],
+           #'includes': ['code', 'site'],
            #'modules' : ['code', 'site'],
            'iconfile': ICON,
            'frameworks':[libxml_path],
@@ -102,6 +102,34 @@ setup(
     app=APP,
     data_files=DATA_FILES,
     include_package_data= True,
+    package_data={
+            'py2app.apptemplate': [
+            'prebuilt/main-i386',
+            'prebuilt/main-ppc',
+            'prebuilt/main-x86_64',
+            'prebuilt/main-ppc64',
+            'prebuilt/main-fat',
+            'prebuilt/main-fat3',
+            'prebuilt/main-intel',
+            'prebuilt/main-universal',
+            'lib/__error__.sh',
+            'lib/site.py',
+            'src/main.c'
+        ],
+            'py2app.bundletemplate': [
+            'prebuilt/main-i386',
+            'prebuilt/main-ppc',
+            'prebuilt/main-x86_64',
+            'prebuilt/main-ppc64',
+            'prebuilt/main-fat',
+            'prebuilt/main-fat3',
+            'prebuilt/main-intel',
+            'prebuilt/main-universal',
+            'lib/__error__.sh',
+            'lib/site.py',
+            'src/main.m',
+        ],
+    },
     options={'py2app': OPTIONS},
     setup_requires=['py2app'],
 )
