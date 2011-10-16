@@ -188,12 +188,13 @@ class ModelPanel1D(PlotPanel, PanelBase):
         pos_x, pos_y = self.GetPositionTuple()
         if pos_x != 0 and pos_y != 0:
             self.size, _ = self.GetClientSizeTuple()
-        self.SetSizer(self.sizer)
-        
+        #self.SetSizer(self.sizer)
         try:
+            pixels = self.GetClientSize()
+            self._SetSize(pixels)
             self.figure.Update()
-            self.canvas.Update()
-            self.Update()
+            #self.canvas.Update()
+            #self.Update()
         except:
             pass
         
