@@ -335,6 +335,13 @@ class PanelBase:
         if self._manager is not None and self._manager.parent is not None:
             self._manager.parent.cpanel_on_focus = self
             self._manager.parent.enable_reset()
+            
+    def on_tap_focus(self):
+        """
+        Update menu on clicking the panel tap
+        """
+        #Implemented only on fitting note book 
+        pass
       
     def get_reset_flag(self):
         """
