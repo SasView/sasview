@@ -6,7 +6,7 @@ import os
 from sans.guiframe.gui_style import GUIFRAME
 # Version of the application
 __appname__ = "SansViewTool"
-__version__ = '0.9.2dev'
+__version__ = '1.0.0'
 __download_page__ = 'http://danse.chem.utk.edu'
 #__update_URL__ = 'http://danse.chem.utk.edu/sansview_version.php'
 
@@ -44,7 +44,7 @@ _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = "images/icons/angles_flat.png"
 _welcome_image = "images/icons/SVwelcome.png"
-_copyright = "(c) 2009, University of Tennessee"
+_copyright = "(c) 2009-2011, University of Tennessee"
 
 
 #edit the list of file state your plugin can read

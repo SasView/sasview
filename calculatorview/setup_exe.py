@@ -121,7 +121,7 @@ for f in findall(path):
 # packages
 #
 packages = ['matplotlib', 'pytz','encodings', 'scipy']
-includes = []
+includes = ['site']
 excludes = [] 
 
 dll_excludes = [
