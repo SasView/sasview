@@ -24,6 +24,7 @@ class Plugin(PluginBase):
         PluginBase.__init__(self, name="Calculator", standalone=standalone)
         # Log startup
         logging.info("Calculator plug-in started")   
+        self.sub_menu = "Tool" 
   
     def help(self, evt):
         """

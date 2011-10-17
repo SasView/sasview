@@ -11,11 +11,12 @@ from sans.guiframe import get_media_path
 class HelpWindow(wx.Frame):
     """
     """
-    def __init__(self, parent, title='Plotting Help', pageToOpen=None):
+    def __init__(self, parent, title='DataLoader Help', pageToOpen=None):
         wx.Frame.__init__(self, parent, title, size=(700, 450))
         """
              contains help info
         """
+        self.SetTitle('DataLoader Help') 
         splitter = MultiSplitterWindow(self, style=wx.SP_LIVE_UPDATE)
         rpanel = wx.Panel(splitter, -1)
         lpanel = wx.Panel(splitter, -1, style=wx.BORDER_SUNKEN)

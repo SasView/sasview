@@ -15,11 +15,12 @@ class HelpPanel(ScrolledPanel):
 class HelpWindow(wx.Frame):
     """
     """
-    def __init__(self, parent, id, title= 'HelpWindow', pageToOpen=None):
+    def __init__(self, parent, id, title='Fitting Help', pageToOpen=None):
         wx.Frame.__init__(self, parent, id, title, size=(850, 530))
         """
         contains help info
         """
+        self.SetTitle('Fitting Help') 
         from sans.perspectives.fitting import get_data_path as fit_path
         fitting_path = fit_path(media='media')
         ico_file = os.path.join(fitting_path,'ball.ico')

@@ -17,6 +17,7 @@ class HelpWindow(wx.Frame):
         """
              contains help info
         """
+        self.SetTitle('Plotting Help') 
         splitter = MultiSplitterWindow(self, style=wx.SP_LIVE_UPDATE)
         rpanel = wx.Panel(splitter, -1)
         lpanel = wx.Panel(splitter, -1, style=wx.BORDER_SUNKEN)
