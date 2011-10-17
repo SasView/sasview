@@ -5,7 +5,7 @@ from distutils.core import setup
 
 setup(
     name="sansinvariant",
-    version = "0.9",
+    version = "1.0.0",
     description = "Python module for invariant calculation",
     author = "University of Tennessee",
     url = "http://danse.chem.utk.edu",

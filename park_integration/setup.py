@@ -1,14 +1,12 @@
 """
      Installation script for SANS fitting
 """
-
 # Then build and install the modules
 from distutils.core import setup, Extension
 
-
 setup(
     name="park_integration",
-    version = "0.9.1",
+    version = "1.0.0",
     description = "Python module for fitting",
     author = "University of Tennessee",
     #author_email = "",

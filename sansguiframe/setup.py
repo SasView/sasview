@@ -2,7 +2,6 @@
 """
 Installs the guiframe package
 """
-
 from distutils.core import setup
 import os
 
@@ -27,7 +26,7 @@ for dir in os.listdir(path):
 
 setup(
     name="sansguiframe",
-    version = "0.9.1",
+    version = "1.0.0",
     description = "Python module for SANS gui framework",
     author = "University of Tennessee",
     url = "http://danse.chem.utk.edu",

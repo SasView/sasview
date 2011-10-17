@@ -1,12 +1,11 @@
 """
     Setup for Calculator plug-in
 """
-
 from distutils.core import setup
 
 setup(
     name="sanscalculator",
-    version = "0.9.1",
+    version = "1.0.0",
     description = "Python module for sld  calculation",
     author = "University of Tennessee",
     url = "http://danse.chem.utk.edu",

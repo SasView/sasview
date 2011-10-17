@@ -5,8 +5,11 @@ of their main application when using this framework.
 
 Documentation to come...
 
-1- Version 0.1.7
-
+1- Version 1.0.0
+	- Release date: Oct. 2011
+	
+   Version 0.1.7
+   
 	- Release date: 7/4/2009
 
    Version 0.1.5

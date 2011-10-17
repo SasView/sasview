@@ -1,7 +1,6 @@
 """
     Setup script for the P(r) inversion module
 """
-import sys
 import os
 # Then build and install the modules
 from distutils.core import setup, Extension
@@ -14,7 +13,7 @@ srcdir  = os.path.join("src", "sans", "pr", "c_extensions")
 
 setup(
     name="pr_inversion",
-    version="0.9",
+    version="1.0.0",
     description="Python module inversion of the scattering intensity to P(r)",
     author="University of Tennessee",
     url="danse.chem.utk.edu",

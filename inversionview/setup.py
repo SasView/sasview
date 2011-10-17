@@ -5,7 +5,7 @@
 from distutils.core import setup
 
 setup(
-      version="0.9.1",
+      version="1.0.0",
       name="inversionview",
       description="P(r) inversion perspective for SansView",
       package_dir={"sans":"src/sans",

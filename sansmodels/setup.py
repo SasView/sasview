@@ -11,7 +11,9 @@
 """
 import sys
 import os
-
+#import sys
+if len(sys.argv) == 1:
+    sys.argv.append('install')
     
 from numpy.distutils.misc_util import get_numpy_include_dirs
 numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
@@ -121,7 +123,7 @@ append_file(file_list=smear_sources, dir_path=smear_dir)
 
 dist = setup(
     name="sansmodels",
-    version = "0.9.1",
+    version = "1.0.0",
     description = "Python module for SANS scattering models",
     author = "SANS/DANSE",
     author_email = "sansdanse@gmail.gov",

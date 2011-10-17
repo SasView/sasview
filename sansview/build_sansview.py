@@ -57,22 +57,22 @@ logging.basicConfig(level=logging.INFO,
 SVN    = "svn"
 INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
 
-# Release version 1.9
-SANSMODELS = "0.9.1"
-DATALOADER = "0.9"
-GUIFRAME   = "0.9.1"
-SANSVIEW   = "1.9.1"
-PLOTTOOLS  = "0.9.1"
-UTIL       = "0.9.1"
+# Release version 2.0
+SANSMODELS = "1.0.0"
+DATALOADER = "1.0.0"
+GUIFRAME   = "1.0.0"
+SANSVIEW   = "2.0.0"
+PLOTTOOLS  = "1.0.0"
+UTIL       = "1.0.0"
 PARK       = "1.2.1"
-PARK_INTEG = "0.9.1"
-PRVIEW     = "0.9.1"
-PR_INV     = "0.9"
-CALCULATOR = "0.9.1"
-CALC_VIEW  = "0.9"
-INVARIANT  = "0.9.1"
-INV_VIEW   = "0.9"
-FIT_VIEW   = "0.9.1"
+PARK_INTEG = "1.0.0"
+PRVIEW     = "1.0.0"
+PR_INV     = "1.0.0"
+CALCULATOR = "1.0.0"
+CALC_VIEW  = "1.0.0"
+INVARIANT  = "1.0.0"
+INV_VIEW   = "1.0.0"
+FIT_VIEW   = "1.0.0"
 
 # URLs for SVN repos
 SANSMODELS_URL = "svn://danse.us/sans/releases/sansmodels-%s" % SANSMODELS
