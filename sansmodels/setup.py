@@ -9,11 +9,10 @@
       python setup.py odb
 
 """
+
 import sys
 import os
-#import sys
-if len(sys.argv) == 1:
-    sys.argv.append('install')
+
     
 from numpy.distutils.misc_util import get_numpy_include_dirs
 numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
