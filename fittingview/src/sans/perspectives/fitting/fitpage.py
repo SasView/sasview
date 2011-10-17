@@ -1944,6 +1944,7 @@ class FitPage(BasicPage):
         #focus the page
         if check_data_validity(data):
             self.data_box_description.SetForegroundColour(wx.BLUE)
+        self.on_set_focus(None)
         self.Refresh()
         #update model plot with new data information
         if flag:
