@@ -239,6 +239,7 @@ class ReportDialog(wx.Dialog):
         f = open(fName, 'w')
         f.write(report)
         f.close()
+        self.Update()
         #save png file using pic_fname
         for num in range(self.nimages):
             self.report_list[2][num].savefig(pic_fname[num])
@@ -254,6 +255,7 @@ class ReportDialog(wx.Dialog):
         previewh.PreviewText(self.report_html)
         if event is not None:
             event.Skip()
+        self.Update()
     
     def onPrint(self, event=None):
         """
@@ -265,7 +267,8 @@ class ReportDialog(wx.Dialog):
         printh.PrintText(self.report_html)
         if event is not None:
             event.Skip()
-
+        self.Update()
+        
     def OnClose(self,event=None):
         """
         Close the Dialog
@@ -293,7 +296,7 @@ class ReportDialog(wx.Dialog):
         # close the file here otherwise it will be open until quitting
         #the application.
         f.close()
-
+        self.Update()
         return not pdf.err
 
         
