@@ -12,11 +12,12 @@ import sans.perspectives.calculator as calculator
 class HelpWindow(wx.Frame):
     """
     """
-    def __init__(self, parent, title='HelpWindow', pageToOpen=None):
+    def __init__(self, parent, title="Tool Help", pageToOpen=None):
         wx.Frame.__init__(self, parent, title, size=(700, 450))
         """
              contains help info
         """
+        self.SetTitle("Tool Help",) 
         splitter = MultiSplitterWindow(self, style=wx.SP_LIVE_UPDATE)
         rpanel = wx.Panel(splitter, -1)
         lpanel = wx.Panel(splitter, -1, style=wx.BORDER_SUNKEN)
@@ -70,6 +71,8 @@ class HelpWindow(wx.Frame):
             target ="showframe">Kiessig Thickness Calculator</a><br></li>
             <li><a href ="resolution_calculator_help.html" 
             target ="showframe">Resolution Estimator</a><br></li>
+            <li><a href ="pycrust_help.html" 
+            target ="showframe">Python Shell</a><br></li>
             </ul>
             </body>
             </html>"""
