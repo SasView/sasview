@@ -690,7 +690,7 @@ class FitPage(BasicPage):
         ## fill a sizer with the combobox to select dispersion type
         #sizer_select_dispers = wx.BoxSizer(wx.HORIZONTAL)  
         model_disp = wx.StaticText(self, -1, 'Function')
-            
+        CHECK_STATE = self.cb1.GetValue()     
         import sans.models.dispersion_models 
         self.polydisp= sans.models.dispersion_models.models
 
@@ -765,6 +765,7 @@ class FitPage(BasicPage):
                     if p=="width":
                         ix = 0
                         cb = wx.CheckBox(self, -1, name0, (10, 10))
+                        cb.SetValue(CHECK_STATE)
                         cb.SetToolTipString("Check mark to fit")
                         wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                         self.sizer4_4.Add( cb,( iy, ix),(1,1),  
@@ -887,6 +888,7 @@ class FitPage(BasicPage):
                     if p=="width":
                         ix = 0
                         cb = wx.CheckBox(self, -1, name0, (10, 10))
+                        cb.SetValue(CHECK_STATE)
                         cb.SetToolTipString("Check mark to fit")
                         wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                         self.sizer4_4.Add( cb,( iy, ix),(1,1),  
@@ -1049,8 +1051,8 @@ class FitPage(BasicPage):
         wx.PostEvent(self.parent, StatusEvent(status=\
                         " Selected Distribution: Gaussian"))   
         #Fill the list of fittable parameters
-        self.select_all_param(event=None)
-        
+        #self.select_all_param(event=None)
+        self.get_all_checked_params()
         self.Layout()
 
     
@@ -1308,6 +1310,7 @@ class FitPage(BasicPage):
             # Keep the previous param values
             if copy_flag:
                 self.get_paste_params(copy_flag)
+                
             self._onDraw(event=None)
         else:
             self._draw_model()
@@ -2631,12 +2634,35 @@ class FitPage(BasicPage):
         except:
             pass  
             
-
-    def select_all_param(self,event): 
+    
+    def get_all_checked_params(self):
+        """
+        Found all parameters current check and add them to list of parameters to 
+        fit
+        """
+        self.param_toFit = []
+        for item in self.parameters:
+            if item[0].GetValue() and item not in self.param_toFit:
+                self.param_toFit.append(item)
+        for item in self.fittable_param:
+            if item[0].GetValue() and item not in self.param_toFit:
+                self.param_toFit.append(item)
+        self.save_current_state_fit()  
+       
+      
+        event = PageInfoEvent(page = self)
+        wx.PostEvent(self.parent, event) 
+        param2fit = []
+        for item in self.param_toFit:
+            if item[0]:
+                param2fit.append(item[1])     
+        self.parent._manager.set_param2fit(self.uid, param2fit)
+                
+    def select_all_param(self, event): 
         """
         set to true or false all checkBox given the main checkbox value cb1
         """            
-        self.param_toFit=[]
+        self.param_toFit = []
         if  self.parameters !=[]:
             if  self.cb1.GetValue():
                 for item in self.parameters:
@@ -2644,7 +2670,7 @@ class FitPage(BasicPage):
                     if self.data.__class__.__name__==  "Data2D" or \
                             self.enable2D:
                         item[0].SetValue(True)
-                        self.param_toFit.append(item )
+                        self.param_toFit.append(item)
                     else:
                         ## for 1D all parameters except orientation
                         if not item in self.orientation_params:
@@ -2655,7 +2681,7 @@ class FitPage(BasicPage):
                     if self.data.__class__.__name__== "Data2D" or \
                             self.enable2D:
                         item[0].SetValue(True)
-                        self.param_toFit.append(item )
+                        self.param_toFit.append(item)
                         try:
                             if len(self.values[item[1]]) > 0:
                                 item[0].SetValue(False)
@@ -2699,7 +2725,7 @@ class FitPage(BasicPage):
         Select TextCtrl  checked for fitting purpose and stores them
         in  self.param_toFit=[] list
         """
-        self.param_toFit=[]
+        self.param_toFit = []
         for item in self.parameters:
             #Skip t ifhe angle parameters if 1D data
             if self.data.__class__.__name__ != "Data2D" and\
@@ -2740,12 +2766,15 @@ class FitPage(BasicPage):
         #Total num. of angle parameters
         if len(self.fittable_param) > 0:
             len_orient_para *= 2
-        #Set the value of checkbox that selected every checkbox or not            
+        #Set the value of checkbox that selected every checkbox or not        
         if len(self.parameters)+len(self.fittable_param)-len_orient_para ==\
                 len(self.param_toFit):
             self.cb1.SetValue(True)
         else:
             self.cb1.SetValue(False)
+       
+       
+       
         self.save_current_state_fit()
         if event !=None:
             #self._undo.Enable(True)
@@ -2876,6 +2905,7 @@ class FitPage(BasicPage):
                             wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
         self.text2_4.Hide()
         
+        CHECK_STATE = self.cb1.GetValue()
         for item in keys:
             if not item in self.disp_list and not item in \
                     self.model.orientation_params:
@@ -2920,7 +2950,8 @@ class FitPage(BasicPage):
                     
                 else:
                     ## add parameters name with checkbox for selecting to fit
-                    cb = wx.CheckBox(self, -1, item )              
+                    cb = wx.CheckBox(self, -1, item)  
+                    cb.SetValue(CHECK_STATE)            
                     cb.SetToolTipString(" Check mark to fit.")
                     #cb.SetValue(True)
                     wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
@@ -3017,7 +3048,7 @@ class FitPage(BasicPage):
                     ix = 0
                     ## add parameters name with checkbox for selecting to fit
                     cb = wx.CheckBox(self, -1, item )
-                    cb.SetValue(False)
+                    cb.SetValue(CHECK_STATE)
                     cb.SetToolTipString("Check mark to fit")
                     wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                     if self.data.__class__.__name__ == "Data2D" or \
@@ -3114,8 +3145,7 @@ class FitPage(BasicPage):
             if self.model.details.has_key(item):
                 self.text2_4.Show()
         #Fill the list of fittable parameters
-        self.select_all_param(event=None)
-
+        self.get_all_checked_params()
         self.save_current_state_fit()
         boxsizer1.Add(sizer)
         self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
