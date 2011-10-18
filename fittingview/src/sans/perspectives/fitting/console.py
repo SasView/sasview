@@ -117,7 +117,6 @@ class ConsoleUpdate(FitHandler):
         self.elapsed_time = time.time() - self.elapsed_time
         dt = self.elapsed_time-self.progress_time
         if dt > 5:
-            print "self.progress_time", dt
             msg = " Updating fit... \n Chi2/Npts = %s \n"\
                            % (self.result.fitness)
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
