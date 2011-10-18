@@ -1658,7 +1658,10 @@ class ViewerFrame(wx.Frame):
         for ID in self.plot_panels.keys():
             if self._mgr.GetPane(self.plot_panels[ID].window_name).IsShown():
                 any_shown = True
-                self.hide_panel(ID)
+                try:
+                    self.hide_panel(ID)
+                except:
+                    print "hide_panel: No such plot id %s" % ID
             else:
                 continue
         if not any_shown:
@@ -1698,7 +1701,11 @@ class ViewerFrame(wx.Frame):
         """
         ID = str(uid)
         config.printEVT("delete_panel: %s" % ID)
-        caption = self.panels[ID].window_caption
+        try:
+            caption = self.panels[ID].window_caption
+        except:
+            print "delete_panel: No such plot id as %s" % ID
+            return
         if ID in self.panels.keys():
             self.panel_on_focus = None
             panel = self.panels[ID]
