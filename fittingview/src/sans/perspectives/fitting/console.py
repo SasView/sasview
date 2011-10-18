@@ -115,10 +115,14 @@ class ConsoleUpdate(FitHandler):
         """
         """
         self.elapsed_time = time.time() - self.elapsed_time
-        msg = " Updating fit ...\n result:\n %s \n"%self.result.fitness
-        wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
+        dt = self.elapsed_time-self.progress_time
+        if dt > 5:
+            print "self.progress_time", dt
+            msg = " Updating fit... \n Chi2/Npts = %s \n"\
+                           % (self.result.fitness)
+            wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                               type="progress"))
-        time.sleep(0.01)
+            #time.sleep(0.001)
         
     def starting_fit(self):
         """
