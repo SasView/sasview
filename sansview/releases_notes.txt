@@ -1,21 +1,26 @@
 Release Notes
 =============
 
-SansView 1.9.2Dev_JUN
+SansView 2.0.0
 
-1	- version 1.9.2Dev_JUN: Devel release in Jun. 2011
+1	- version 2.0.0: 
 
-	- version 1.9.1 : bug-fix release
-
+	- Release date: 10/21/2011
+	- Batch Fit included.
+	- More Graph modifications.
+	- Added a Python (PyCrust) shell in the 'Tool' menu.
+	- The 'Sartup Setting' in the View menu can remember the last data file folder.
+	- Updated the resolution computation for the gravitational effect and added TOF estimation  capability.
+	- Fixed the problem of displaying the fit results in the wrong parameter (with ParkMC FitEngine).
+	
+	-version 1.9
+	
 	- Release date: 06/22/2011
 	- MAC: Fixed some causes of crashing during fitting 
 	- Pr Inversion: Fixed a missing Rg output
 	- Startup Setting: fixed a problem with DataExplorer ON/OFF
 	- Fixed a bug w/ 2D color map dialog
-	- Minor feature added: Enable to load a data folder from the command line
-	
-	-version 1.9
-	
+	- Minor feature added: Enable to load a data folder from the command line	
 	- Much easier graphical user interface
 	- Optimized for the speed and accuracy of the computations
 	- Added Many shape, polymer, and other models including SphericalSLD, OnionExponetialShell, and even ReflectivityModels
@@ -35,8 +40,7 @@ SansView 1.9.2Dev_JUN
 	- More Help
 	- etc
 
-	
-	- Version 1.3
+	- Previous Versions
 	
 	- Improved the speed of loading 2D data.
 	- Improved the speed of P*S calculations.
@@ -52,9 +56,6 @@ SansView 1.9.2Dev_JUN
 	- Support more format options to save a graph.
 	- Enable to display multiple data sets in one graph by loading a data into the graph.
 	- Added a tool bar in a plot panel.
-	
- 	- Previous Versions
- 	
   	- Implemented P(r) inversion (Indirect Fourier transformations).
 	- Improved fitting and model calculation speed by a factor of ten.
   	- Supporting many more model functions.
