@@ -69,7 +69,7 @@ class FitThread(CalcThread):
             list_fit_function = []
             list_q = []
             for i in range(len(self.fitter)):
-                list_handler.append(None)
+                list_handler.append(self.handler)
                 list_q.append(None)
                 list_curr_thread.append(None)
                 list_ftol.append(self.ftol)
@@ -78,7 +78,7 @@ class FitThread(CalcThread):
                 list_map_get_attr.append(map_getattr)
             #from multiprocessing import Pool
             inputs = zip(list_map_get_attr,self.fitter, list_fit_function,
-                         list_handler, list_q, list_curr_thread,list_ftol,
+                          list_q, list_q, list_handler,list_curr_thread,list_ftol,
                          list_reset_flag)
             result =  map(map_apply, inputs)
             self.complete(result=result,
