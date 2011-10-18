@@ -127,32 +127,25 @@ class ScipyFit(FitEngine):
         except:
             raise
         chisqr = functor.chisq()
+
         if cov_x is not None and numpy.isfinite(cov_x).all():
             stderr = numpy.sqrt(numpy.diag(cov_x))
         else:
-            stderr = None
+            stderr = []
             
         result.index = data.idx
-        if not (numpy.isnan(out).any()) and (cov_x != None):
-            result.fitness = chisqr
-            result.stderr  = stderr
-            result.pvec = out
-            result.success = success
-            result.theory = functor.theory
-            #print "scipy", result.inputs
-            if q is not None:
-                q.put(result)
-                return q
-            if success < 1 or success > 5:
-                result = None
+        result.fitness = chisqr
+        result.stderr  = stderr
+        result.pvec = out
+        result.success = success
+        result.theory = functor.theory
+        if q is not None:
+            q.put(result)
+            return q
+        if success < 1 or success > 5:
+            result.fitness = None
         return [result]
-        """
-        else:
-            return None
-        """
-        # Error will be present to the client, not here 
-        #else:  
-        #    raise ValueError, "SVD did not converge" + str(mesg)
+
         
     def _check_param_range(self, model):
         """

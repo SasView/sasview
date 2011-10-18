@@ -1120,11 +1120,11 @@ class Plugin(PluginBase):
                     is_data2d = issubclass(data.__class__, Data2D)
                     #check consistency of arrays
                     if not is_data2d:
-                        if len(res.theory) == len(res.index) and \
+                        if len(res.theory) == len(res.index[res.index]) and \
                             len(res.index) == len(data.y):
                             correct_result = True
                     else:
-                        if len(res.theory)== len(res.index) and \
+                        if len(res.theory)== len(res.index[res.index]) and \
                             len(res.index) == len(data.data):
                             correct_result = True
                     #get all fittable parameters of the current model
@@ -1175,8 +1175,9 @@ class Plugin(PluginBase):
                         for index  in range(len(res.param_list)):
                             #save only fitted values
                             batch_outputs[res.param_list[index]].append(res.pvec[index])
-                            item = res.stderr[index]
-                            batch_inputs["error on %s" % res.param_list[index]].append(item)
+                            if res.stderr is not None and len(res.stderr) == len(res.param_list):
+                                item = res.stderr[index]
+                                batch_inputs["error on %s" % res.param_list[index]].append(item)
                             if res.param_list[index] in model.getParamList():
                                 model.setParam(res.param_list[index], res.pvec[index])
                                     
@@ -1304,7 +1305,7 @@ class Plugin(PluginBase):
                              res.pvec, res.stderr)
                     index += 1
                     cpage._on_fit_complete()
-                    if res.stderr == None:
+                    if res.fitness == None:
                         msg = "Fit Abort: "
                     else:
                         msg = "Fitting: "

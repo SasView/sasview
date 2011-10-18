@@ -115,7 +115,7 @@ class ConsoleUpdate(FitHandler):
         """
         """
         self.elapsed_time = time.time() - self.elapsed_time
-        msg = " Updating fit ...\n result:\n %s \n"%self.result.__str__()
+        msg = " Updating fit ...\n result:\n %s \n"%self.result.fitness
         wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                               type="progress"))
         time.sleep(0.01)

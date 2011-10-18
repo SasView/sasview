@@ -2115,7 +2115,7 @@ class FitPage(BasicPage):
                     val_out = format_number(out[ind], True)                  
                     item[2].SetValue(val_out)
 
-                if(cov !=None):
+                if(cov !=None and len(cov) == len(out)):
                     try:
                         if dispersity !=None:
                             if self.enable_disp.GetValue():
@@ -2126,7 +2126,7 @@ class FitPage(BasicPage):
                                             self.text_disp_1.Show(True)
                     except:
                         pass    
-               
+                    
                     if cov[ind]!=None :
                         if numpy.isfinite(float(cov[ind])):
                             val_err = format_number(cov[ind], True)
