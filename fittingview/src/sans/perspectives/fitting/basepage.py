@@ -2537,7 +2537,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 
             # Make sure the check box updated when all checked
             if self.cb1.GetValue():
-                self.select_all_param(None)
+                #self.select_all_param(None)
+                self.get_all_checked_params()
 
             # update params
             self._update_paramv_on_fit() 
@@ -2912,12 +2913,20 @@ class BasicPage(ScrolledPanel, PanelBase):
             
             # 2D
             if self.data.__class__.__name__== "Data2D":
+                try:
+                    check = item[0].GetValue()
+                except:
+                    check = None
                 name = item[1]
                 value = item[2].GetValue()
             # 1D
             else:
                 ## for 1D all parameters except orientation
                 if not item[1] in orient_param:
+                    try:
+                        check = item[0].GetValue()
+                    except:
+                        check = None
                     name = item[1]
                     value = item[2].GetValue()
 
@@ -2937,7 +2946,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             except:
                 pass
             #if disfunc.count('array') == 0:
-            content += name + ',' + value + disfunc + ':'
+            content +=  name + ',' + str(check) + ',' + value + disfunc + ':'
 
         return content
    
@@ -2981,18 +2990,19 @@ class BasicPage(ScrolledPanel, PanelBase):
         for line in lines[1:-1]:
             if len(line) != 0:
                 item =line.split(',')
+                check = item[1]
                 name = item[0]
-                value = item[1]
+                value = item[2]
                 # Transfer the text to content[dictionary]
-                context[name] = [value]
+                context[name] = [check, value]
             # ToDo: PlugIn this poly disp function for pasting
             try:
-                poly_func = item[2]
+                poly_func = item[3]
                 context[name].append(poly_func)
                 try:
                     # take the vals and weights for  array 
-                    array_values = item[3].split(' ')
-                    array_weights = item[4].split(' ')
+                    array_values = item[4].split(' ')
+                    array_weights = item[5].split(' ')
                     val = [float(a_val) for a_val in array_values[1:]]
                     weit = [float(a_weit) for a_weit in array_weights[1:]]
                     
@@ -3039,7 +3049,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             if self.data.__class__.__name__== "Data2D":
                 name = item[1]
                 if name in content.keys():
-                    pd = content[name][0]
+                    check = content[name][0]
+                    pd = content[name][1]
                     if name.count('.') > 0:
                         try:
                             float(pd)
@@ -3052,20 +3063,29 @@ class BasicPage(ScrolledPanel, PanelBase):
                         # Only array func has pd == '' case.
                         item[2].Enable(False)
                     if item[2].__class__.__name__ == "ComboBox":
-                        if self.model.fun_list.has_key(content[name][0]):
-                            fun_val = self.model.fun_list[content[name][0]]
+                        if self.model.fun_list.has_key(content[name][1]):
+                            fun_val = self.model.fun_list[content[name][1]]
                             self.model.setParam(name,fun_val)
                     
-                    value = content[name]
+                    value = content[name][1:]
                     self._paste_poly_help(item, value)
-        # 1D
+                    if check == 'True':
+                        is_true = True
+                    elif check == 'False':
+                        is_true = False
+                    else:
+                        is_true = None
+                    if is_true != None:
+                        item[0].SetValue(is_true)
+            # 1D
             else:
                 ## for 1D all parameters except orientation
                 if not item[1] in orient_param:
                     name = item[1]
                     if name in content.keys():
+                        check = content[name][0]
                         # Avoid changing combox content which needs special care
-                        value = content[name]
+                        value = content[name][1:]
                         pd = value[0]
                         if name.count('.') > 0:
                             try:
@@ -3086,6 +3106,14 @@ class BasicPage(ScrolledPanel, PanelBase):
                                 #self._copy_parameters_state(self.str_parameters, 
                                 #    self.state.str_parameters)
                         self._paste_poly_help(item, value)
+                        if check == 'True':
+                            is_true = True
+                        elif check == 'False':
+                            is_true = False
+                        else:
+                            is_true = None
+                        if is_true != None:
+                            item[0].SetValue(is_true)
                         
     def _paste_poly_help(self, item, value):
         """
