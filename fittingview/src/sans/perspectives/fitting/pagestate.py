@@ -368,6 +368,10 @@ class PageState(object):
         rep += "is data : %s\n"%self.is_data
         rep += "data's name : %s\n"%self.data_name
         rep += "data's id : %s\n"%self.data_id
+        if self.model != None:
+            rep += "model name : %s\n"% self.model.__class__.__name__
+        else:
+            rep += "model name : None\n"
         rep += "model type (form factor) selected: %s\n"%self.shape_rbutton 
         rep += "multi_factor : %s\n"% str(self.multi_factor)
         rep += "model type (shape independent) selected: %s\n"%self.shape_indep_rbutton
@@ -499,6 +503,13 @@ class PageState(object):
                         title_name = HEADER % title
                 except:
                     pass
+            if name == "model name ":
+                try:
+                    modelname = "Model name:" + content[1]
+                except:
+                    modelname = "Model name:" + " NAN"
+                model_name = CENTRE %  modelname
+                 
             if name == "Plotting Range":
                 try:
                     q_range = content[1] + " = " + content[2] \
@@ -533,6 +544,7 @@ class PageState(object):
         title = self._check_html_format(title)
                                   
         html_string = title_name + "\n" + file_name + \
+                                   "\n" + model_name +\
                                    "\n" + q_range + \
                                    "\n" + chi2_string + \
                                    "\n" + ELINE + \
