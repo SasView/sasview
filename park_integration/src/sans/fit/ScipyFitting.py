@@ -55,7 +55,8 @@ class ScipyFit(FitEngine):
     #def fit(self, *args, **kw):
     #    return profile(self._fit, *args, **kw)
 
-    def fit(self, q=None, handler=None, curr_thread=None, 
+    def fit(self, msg_q=None,
+            q=None, handler=None, curr_thread=None, 
             ftol=1.49012e-8, reset_flag=False):
         """
         """
@@ -95,8 +96,13 @@ class ScipyFit(FitEngine):
             # than one thread exist.
             from scipy import optimize
             
-            functor = SansAssembly(self.param_list, model, data, handler=handler,\
-                         fitresult=result, curr_thread= curr_thread)
+            functor = SansAssembly(paramlist=self.param_list, 
+                                   model=model, 
+                                   data=data,
+                                    handler=handler,
+                                    fitresult=result,
+                                     curr_thread=curr_thread,
+                                     msg_q=msg_q)
             out, cov_x, _, mesg, success = optimize.leastsq(functor,
                                             model.get_params(self.param_list),
                                                     ftol=ftol,

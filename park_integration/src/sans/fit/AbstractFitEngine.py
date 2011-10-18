@@ -415,7 +415,7 @@ class SansAssembly:
     Sans Assembly class a class wrapper to be call in optimizer.leastsq method
     """
     def __init__(self, paramlist, model=None , data=None, fitresult=None,
-                 handler=None, curr_thread=None):
+                 handler=None, curr_thread=None, msg_q=None):
         """
         :param Model: the model wrapper fro sans -model
         :param Data: the data wrapper for sans data
@@ -424,6 +424,7 @@ class SansAssembly:
         self.model = model
         self.data  = data
         self.paramlist = paramlist
+        self.msg_q = msg_q
         self.curr_thread = curr_thread
         self.handler = handler
         self.fitresult = fitresult
@@ -466,16 +467,22 @@ class SansAssembly:
             # just silent return res = inf
             return self.res
         self.res = self.true_res       
-        if self.fitresult is not None and  self.handler is not None:
+        
+        if self.fitresult is not None:
             self.fitresult.set_model(model=self.model)
             self.fitresult.residuals = self.true_res
             self.fitresult.theory = theory
+           
             #fitness = self.chisq(params=params)
             fitness = self.chisq()
             self.fitresult.pvec = params
             self.fitresult.set_fitness(fitness=fitness)
-            self.handler.set_result(result=self.fitresult)
-            self.handler.update_fit()
+            if self.msg_q is not None:
+                self.msg_q.put(self.fitresult)
+                
+            if self.handler is not None:
+                self.handler.set_result(result=self.fitresult)
+                self.handler.update_fit()
 
             if self.curr_thread != None :
                 try:

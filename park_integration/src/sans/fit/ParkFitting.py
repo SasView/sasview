@@ -381,7 +381,8 @@ class ParkFit(FitEngine):
         self.problem = MyAssembly(models=mylist, curr_thread=curr_thread)
         
   
-    def fit(self, q=None, handler=None, curr_thread=None, 
+    def fit(self, msg_q=None, 
+            q=None, handler=None, curr_thread=None, 
                                         ftol=1.49012e-8, reset_flag=False):
         """
         Performs fit with park.fit module.It can  perform fit with one model
