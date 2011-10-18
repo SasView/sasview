@@ -1124,9 +1124,13 @@ class Plugin(PluginBase):
                             len(res.index) == len(data.y):
                             correct_result = True
                     else:
-                        if len(res.theory)== len(res.index[res.index]) and \
-                            len(res.index) == len(data.data):
-                            correct_result = True
+                        copy_data = deepcopy(data)
+                        new_theory = copy_data.data
+                        new_theory[res.index] = res.theory
+                        new_theory[res.index[res.index == False]] = 0
+                        #if len(res.theory)== len(res.index[res.index]) and \
+                        #len(res.index) == len(data.data[res.index]):
+                        correct_result = True
                     #get all fittable parameters of the current model
                     param_list = model.getParamList()
                     for param in model.getDispParamList():
@@ -1199,7 +1203,7 @@ class Plugin(PluginBase):
                                          data=data, update_chisqr=False, 
                                          source='fit')
                         else:
-                            self._complete2D(image=res.theory, data=data,
+                            self._complete2D(image=new_theory, data=data,
                                           model=model,
                                           page_id=pid,  elapsed=None, 
                                           index=res.index, 
