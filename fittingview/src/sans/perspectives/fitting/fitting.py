@@ -1246,8 +1246,19 @@ class Plugin(PluginBase):
             #Suucessful fit
             theory_data.id = wx.NewId()
             theory_data.name = model.name + "[%s]" % str(data.name)
+            if issubclass(theory_data.__class__, Data2D):
+                group_id = wx.NewId()
+                theory_data.group_id = group_id
+                if group_id not in theory_data.list_group_id:
+                    theory_data.list_group_id.append(group_id)
+                
             try:
                 # associate residuals plot
+                if issubclass(residuals.__class__, Data2D):
+                    group_id = wx.NewId()
+                    residuals.group_id = group_id
+                    if group_id not in residuals.list_group_id:
+                        residuals.list_group_id.append(group_id)
                 batch_outputs["Chi2"][index].object = [residuals]
             except:
                 pass
