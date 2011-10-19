@@ -250,7 +250,7 @@ class FitData1D(Data1D):
         self.idx = self.idx & (self.dy != 0)  
         self.idx_unsmeared = (self.x >= self._qmin_unsmeared) \
                             & (self.x <= self._qmax_unsmeared)
-  
+
     def get_fit_range(self):
         """
         return the range of data.x to fit
@@ -344,7 +344,7 @@ class FitData2D(Data2D):
                             (self.radius <= self.qmax))
         self.idx = (self.idx) & (self.mask)
         self.idx = (self.idx) & (numpy.isfinite(self.data))
-        
+
     def set_smearer(self, smearer):  
         """
         Set smearer
@@ -364,12 +364,12 @@ class FitData2D(Data2D):
         if qmax != None:
             self.qmax = qmax        
         self.radius = numpy.sqrt(self.qx_data**2 + self.qy_data**2)
-        self.index_model = ((self.qmin <= self.radius)&\
+        self.idx = ((self.qmin <= self.radius)&\
                             (self.radius <= self.qmax))
         self.idx = (self.idx) &(self.mask)
         self.idx = (self.idx) & (numpy.isfinite(self.data))
         self.idx = (self.idx) & (self.res_err_data != 0)
-        
+
     def get_fit_range(self):
         """
         return the range of data.x to fit
@@ -391,6 +391,7 @@ class FitData2D(Data2D):
                      self.qy_data[self.idx]])
         # use only the data point within ROI range
         res = (self.data[self.idx] - gn)/self.res_err_data[self.idx]
+
         return res, gn 
         
     def residuals_deriv(self, model, pars=[]):
@@ -459,6 +460,7 @@ class SansAssembly:
         """ 
         #import thread
         self.model.set_params(self.paramlist, params)
+        #print "params", params
         self.true_res, theory = self.data.residuals(self.model.eval)
         self.theory = copy.deepcopy(theory)
         # check parameters range
