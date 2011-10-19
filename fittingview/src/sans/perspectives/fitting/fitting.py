@@ -513,8 +513,8 @@ class Plugin(PluginBase):
         :param qmax: maximum  value of the fit range
         """
         if uid in self.page_finder.keys():
-            self.page_finder[uid].set_range(qmin=qmin, qmax=qmax)
-                    
+            self.page_finder[uid].set_range(qmin=qmin, qmax=qmax, fid=fid)
+      
     def schedule_for_fit(self, value=0, uid=None):  
         """
         Set the fit problem field to 0 or 1 to schedule that problem to fit.
