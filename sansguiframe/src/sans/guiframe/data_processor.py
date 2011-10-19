@@ -801,7 +801,7 @@ class GridPanel(SPanel):
                             if label in grid.list_plot_panels.keys():
                                 group_id = grid.list_plot_panels[label]
                             else:
-                                group_id = str(grid.uid) + str(new_plot.group_id)
+                                group_id = str(new_plot.group_id) + str(grid.uid)
                                 grid.list_plot_panels[label] = group_id
                             if group_id not in new_plot.list_group_id:
                                 new_plot.group_id = group_id
