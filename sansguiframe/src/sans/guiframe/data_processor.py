@@ -53,7 +53,11 @@ def parse_string(sentence, list):
         temp_arr = []
         for label in  list:
             label_pos =  elt.find(label)
-            if label_pos != -1:
+            separator_pos  = label_pos + len(label)
+            if label_pos != -1 and len(elt) >= separator_pos  and\
+                elt[separator_pos]== "[":
+                # the label contain , meaning the range selected is not 
+                # continuous
                 if elt.count(',') > 0:
                     new_temp = []
                     temp = elt.split(label)
@@ -65,13 +69,15 @@ def parse_string(sentence, list):
                                 new_temp.append(i)
                     temp_arr += new_temp
                 else:
+                    # continuous range
                     temp = elt.split(label)
                     for item in temp:
-                        range_pos = item.find(":")
-                        if range_pos != -1:
-                            rang = p2.findall(item)
-                            for i in xrange(int(rang[0]), int(rang[1])+1 ):
-                                temp_arr.append(i)
+                        if item.strip() != "":
+                            range_pos = item.find(":")
+                            if range_pos != -1:
+                                rang = p2.findall(item)
+                                for i in xrange(int(rang[0]), int(rang[1])+1 ):
+                                    temp_arr.append(i)
                 col_dict[elt] = (label, temp_arr)
     return col_dict
 
@@ -147,14 +153,24 @@ class GridPage(sheet.CSheet):
         cell = (row, col)
         event.Skip()
         if not flag:
+            self.selected_cols = []
+            self.selected_rows = []
             self.selected_cells = []
-            self.axis_value = []
             self.axis_label = ""
+            self.axis_value = []
+            self.plottable_list = []
+            self.plottable_cells = []
+            self.plottable_flag = False
+        self.last_selected_col = col
+        self.last_selected_row = row
         if col >= 0:
-             self.axis_label = self.GetCellValue(0, col)
+            label_row = 0
+            self.axis_label = self.GetCellValue(label_row, col)
+            self.selected_cols.append(col)
         if cell not in self.selected_cells:
             if row > 0:
                 self.selected_cells.append(cell)
+                self.selected_rows.append(row)
         else:
             if flag:
                 self.selected_cells.remove(cell)
@@ -162,8 +178,7 @@ class GridPage(sheet.CSheet):
         for cell_row, cell_col in self.selected_cells:
             if cell_row > 0 and cell_row < self.max_row_touse:
                 self.axis_value.append(self.GetCellValue(cell_row, cell_col))
-        
-    
+
                 
     def on_left_click(self, event):
         """
@@ -178,6 +193,7 @@ class GridPage(sheet.CSheet):
             self.selected_rows = []
             self.selected_cells = []
             self.axis_label = ""
+            self.axis_value = []
             self.plottable_list = []
             self.plottable_cells = []
             self.plottable_flag = False
@@ -193,6 +209,9 @@ class GridPage(sheet.CSheet):
                 if row > 0 and row < self.max_row_touse:
                     if cell not in self.selected_cells:
                         self.selected_cells.append(cell)
+                    else:
+                        if flag:
+                             self.selected_cells.remove(cell)
             self.selected_cols.append(col)
             self.axis_value = []
             for cell_row, cell_col in self.selected_cells:
@@ -505,22 +524,29 @@ class Notebook(nb, PanelBase):
               
     def on_edit_axis(self):
         """
-        Return the select cell of a given selected column
+        Return the select cell of a given selected column. Check that all cells
+        are from the same column
         """
         pos = self.GetSelection()
         grid = self.GetPage(pos)
-        if len(grid.selected_cols) > 1:
-            msg = "Edit axis doesn't understand this selection.\n"
-            msg += "Please select only one column"
-            raise ValueError, msg
-        if len(grid.selected_cols) == 1:
+        if len(grid.selected_cols) >= 1:
             col = grid.selected_cols[0]
-            if len(grid.selected_cells) > 0:
-                cell_row, cell_col = grid.selected_cells[0]
-                if cell_col  != col:
+            for c in grid.selected_cols:
+                if c != col:
                     msg = "Edit axis doesn't understand this selection.\n"
-                    msg += "Please select element of the same col"
+                    msg += "Please select only one column"
                     raise ValueError, msg
+            for (cell_row, cell_col) in grid.selected_cells:
+                if cell_col != col:
+                    msg = "Cannot use cells from different columns for "
+                    msg += "this operation.\n"
+                    msg += "Please select elements of the same col.\n"
+                    raise ValueError, msg
+        else:
+            msg = "No item selected.\n"
+            msg += "Please select only one column or one cell"
+            raise ValueError, msg
+       
         return grid.selected_cells
        
     
@@ -560,8 +586,8 @@ class Notebook(nb, PanelBase):
                      result = str(col_name) + "[" + str(row_min) + ":"
                 else:
                     result = str(col_name) +  "[" + str(row_min) + ":"
-                    result += str(col_name) + str(row_max) + "]"
-            return result
+                    result += str(row_max) + "]"
+            return str(result)
             
         if len(cell_list) > 0:
             if len(cell_list) == 1:
@@ -582,7 +608,7 @@ class Notebook(nb, PanelBase):
                         new_row, _ = temp_list[index]
                         if row != new_row:
                             temp_list.insert(index, (None, None))
-                            if index -1 >=0:
+                            if index -1 >= 0:
                                 new_row, _ = temp_list[index-1]
                                 label += create_label(col_name, None, new_row +1)
                                 label += ","
@@ -826,18 +852,17 @@ class GridPanel(SPanel):
         column_names = {}
         if grid is not None:
             column_names = self.notebook.get_column_labels()
-        #evalue x
+        #evaluate x
         sentence = self.x_axis_label.GetValue()
         try:
             if sentence.strip() == "":
-                msg = "Select column values for x axis and y axis"
+                msg = "Select column values for x axis"
                 raise ValueError, msg
         except:
              wx.PostEvent(self.parent.parent, 
                              StatusEvent(status=msg, info="error")) 
              return
-        
-        
+
         dict = parse_string(sentence, column_names.keys())
         for tok, (col_name, list) in dict.iteritems():
             col = column_names[col_name]
@@ -861,6 +886,15 @@ class GridPanel(SPanel):
         for key, value in FUNC_DICT.iteritems():
             sentence = sentence.replace(key, value)
         y = eval(sentence)
+        if len(x) != len(y) and (len(x) == 0 or len(y) == 0):
+            msg = "Need same length for X and Y axis and both greater than 0"
+            msg += " to plot.\n"
+            msg += "Got X length = %s, Y length = %s" % (str(len(x)),
+                                                          str(len(y)))
+            wx.PostEvent(self.parent.parent, 
+                             StatusEvent(status=msg, info="error")) 
+            return
+            
         #plotting
         new_plot = Data1D(x=x, y=y)
         new_plot.id =  wx.NewId()
@@ -958,7 +992,13 @@ class GridPanel(SPanel):
         """
         Get the selected column on  the visible grid and set values for axis
         """
-        cell_list = self.notebook.on_edit_axis()
+        try:
+            cell_list = self.notebook.on_edit_axis()
+        except:
+            msg = str(sys.exc_value)
+            wx.PostEvent(self.parent.parent, 
+                             StatusEvent(status=msg, info="error")) 
+            return 
         label, title = self.create_axis_label(cell_list)
         tcrtl = event.GetEventObject()
         if tcrtl == self.x_axis_add:
