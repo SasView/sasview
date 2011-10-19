@@ -2696,6 +2696,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             y= max(math.fabs(self.data.ymin), math.fabs(self.data.ymax))
             self.qmin_x = data_min
             self.qmax_x = math.sqrt(x*x + y*y)
+            #self.data.mask = numpy.ones(len(self.data.data),dtype=bool)
             # check smearing
             if not self.disable_smearer.GetValue():
                 temp_smearer= self.current_smearer

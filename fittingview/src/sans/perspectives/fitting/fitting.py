@@ -1127,9 +1127,7 @@ class Plugin(PluginBase):
                         copy_data = deepcopy(data)
                         new_theory = copy_data.data
                         new_theory[res.index] = res.theory
-                        new_theory[res.index[res.index == False]] = 0
-                        #if len(res.theory)== len(res.index[res.index]) and \
-                        #len(res.index) == len(data.data[res.index]):
+                        new_theory[res.index == False] = numpy.nan 
                         correct_result = True
                     #get all fittable parameters of the current model
                     param_list = model.getParamList()

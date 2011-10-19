@@ -1129,6 +1129,7 @@ class FitPage(BasicPage):
         self._manager.schedule_for_fit(uid=self.uid,value=1) 
         self._manager.set_fit_range(uid=self.uid,qmin=self.qmin_x, 
                                    qmax=self.qmax_x)
+
         #single fit 
         self._manager.onFit(uid=self.uid)
         self.btFit.SetLabel("Stop")
@@ -1470,7 +1471,7 @@ class FitPage(BasicPage):
                                  StatusEvent(status=msg))
                     return
                 else:
-                    self.data.mask = index_data
+                    #self.data.mask = index_data
                     #self.Npts_fit.SetValue(str(len(self.data.mask)))
                     self.set_npts2fit() 
             else:
