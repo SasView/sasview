@@ -996,13 +996,13 @@ class ViewerFrame(wx.Frame):
         self.panels[str(ID)] = p
         count = 0
         for item in self.panels:
-            if self.panels[item].window_name.startswith(p.window_name): 
+            if self.panels[item].window_name.startswith(p.window_name)\
+                and not self._mgr.GetPane(p.window_name).IsOk(): 
                 count += 1
         windowname = p.window_name
         windowcaption = 'Graph'#p.window_caption
         if count > 0:
             windowname += str(count+1)
-            #caption += (' '+str(count))
         p.window_name = windowname
 
         # Append nummber
@@ -2405,7 +2405,7 @@ class ViewerFrame(wx.Frame):
                 wx.CallAfter(self._remove_res_plot, id)
         self._data_manager.delete_data(data_id=data_id, 
                                        theory_id=theory_id)
-            
+        
     def _remove_res_plot(self, id):
         """
         Try to remove corresponding res plot
