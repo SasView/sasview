@@ -137,6 +137,8 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.tree_ctrl = None
         self.tree_ctrl_theory = None
         self.perspective_cbox = None
+        ## Create context menu for page
+        self.data_menu = None
        
         self.owner = None
         self.do_layout()
@@ -357,6 +359,12 @@ class DataPanel(ScrolledPanel, PanelBase):
                 wx.PostEvent(self.parent, 
                              NewBatchEvent(enable=True))
       
+    def on_edit_data(self, event):
+        """
+        Pop Up Data Editor
+        """
+        print "Edit Data"
+        
     def layout_data_list(self):
         """
         Add a listcrtl in the panel
@@ -365,6 +373,15 @@ class DataPanel(ScrolledPanel, PanelBase):
         tree_ctrl_label.SetForegroundColour('blue')
         self.tree_ctrl = DataTreeCtrl(parent=self, style=wx.SUNKEN_BORDER)
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKING, self.on_check_item)
+        self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_MENU, self.on_right_click)
+        ## Create context menu for page
+        self.data_menu = wx.Menu()
+        id = wx.NewId()
+        name = "Edit"
+        msg = "Edit the current Data"
+        self.data_menu.Append(id, name, msg)
+        wx.EVT_MENU(self, id, self.on_edit_data)
+    
         tree_ctrl_theory_label = wx.StaticText(self, -1, "Theory")
         tree_ctrl_theory_label.SetForegroundColour('blue')
         self.tree_ctrl_theory = DataTreeCtrl(parent=self, 
@@ -376,6 +393,15 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer1.Add(tree_ctrl_theory_label, 0,  wx.LEFT, 10)
         self.sizer1.Add(self.tree_ctrl_theory, 1, wx.EXPAND|wx.ALL, 10)
            
+           
+    def on_right_click(self, event):
+        """
+        Allow Editing Data
+        """
+        print "on_right_click"
+        if self.data_menu is not None:
+            self.PopupMenu(self.data_menu) 
+        
     def onContextMenu(self, event): 
         """
         Retrieve the state selected state
