@@ -2198,29 +2198,29 @@ class BasicPage(ScrolledPanel, PanelBase):
         # Theory
         if self.data == None and self.enable2D:
             return flag
+        for data in self.data_list:
+            # q value from qx and qy
+            radius= numpy.sqrt( data.qx_data * data.qx_data + 
+                                data.qy_data * data.qy_data )
+            #get unmasked index
+            index_data = (float(self.qmin.GetValue()) <= radius) & \
+                            (radius <= float(self.qmax.GetValue()))
+            index_data = (index_data) & (data.mask) 
+            index_data = (index_data) & (numpy.isfinite(data.data))
 
-        # q value from qx and qy
-        radius= numpy.sqrt( self.data.qx_data * self.data.qx_data + 
-                            self.data.qy_data * self.data.qy_data )
-        #get unmasked index
-        index_data = (float(self.qmin.GetValue()) <= radius) & \
-                        (radius <= float(self.qmax.GetValue()))
-        index_data = (index_data) & (self.data.mask) 
-        index_data = (index_data) & (numpy.isfinite(self.data.data))
-
-        if len(index_data[index_data]) < 10:
-            # change the color pink.
-            self.qmin.SetBackgroundColour("pink")
-            self.qmin.Refresh()
-            self.qmax.SetBackgroundColour("pink")
-            self.qmax.Refresh()
-            msg= "Cannot Plot :No or too little npts in that data range!!!  "
-            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-            self.fitrange = False
-            flag = False
-        else:
-            self.Npts_fit.SetValue(str(len(self.data.mask[index_data==True])))
-            self.fitrange = True
+            if len(index_data[index_data]) < 10:
+                # change the color pink.
+                self.qmin.SetBackgroundColour("pink")
+                self.qmin.Refresh()
+                self.qmax.SetBackgroundColour("pink")
+                self.qmax.Refresh()
+                msg= "Npts of Data Error :No or too little npts of %s."% data.name
+                wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                self.fitrange = False
+                flag = False
+            else:
+                self.Npts_fit.SetValue(str(len(index_data[index_data==True])))
+                self.fitrange = True
             
         return flag
     
