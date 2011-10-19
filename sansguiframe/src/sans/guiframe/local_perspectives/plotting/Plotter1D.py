@@ -253,7 +253,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             except:
                 msg=" Encountered singular points..."
                 wx.PostEvent(self.parent, StatusEvent(status=\
-                    "Plotting Erorr: %s"% msg, info="error")) 
+                    "Plotting Error: %s"% msg, info="error")) 
             # Check if zoomed
             toolbar_zoomed = self.toolbar.GetToolEnabled(self.toolbar._NTB2_BACK)
             if self.is_zoomed or toolbar_zoomed:
@@ -275,7 +275,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             except:
                 msg=" Encountered singular points..."
                 wx.PostEvent(self.parent, StatusEvent(status=\
-                    "Plotting Erorr: %s"% msg, info="error")) 
+                    "Plotting Error: %s"% msg, info="error")) 
             self.toolbar.update()
             if self.is_zoomed:
                 self.is_zoomed = False
