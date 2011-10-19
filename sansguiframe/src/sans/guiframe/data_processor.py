@@ -499,7 +499,7 @@ class Notebook(nb, PanelBase):
         grid = GridPage(self, panel=self.parent)
         self.AddPage(grid, "", True)
         pos = self.GetPageIndex(grid)
-        title = "Batch " + str(self.GetPageCount())
+        title = "Batch" + str(self.GetPageCount())
         self.SetPageText(pos, title)
         self.SetSelection(pos)
         return grid , pos
@@ -796,7 +796,7 @@ class GridPanel(SPanel):
                                  StatusEvent(status=msg, info="error")) 
                             time.sleep(0.5)
                             continue
-                        
+                        #new_plot.name =  title + ': ' + new_plot.title
                         if issubclass(new_plot.__class__, Data1D):
                             if label in grid.list_plot_panels.keys():
                                 group_id = grid.list_plot_panels[label]

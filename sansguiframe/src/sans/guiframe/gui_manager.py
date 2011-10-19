@@ -997,7 +997,7 @@ class ViewerFrame(wx.Frame):
         count = 0
         for item in self.panels:
             if self.panels[item].window_name.startswith(p.window_name)\
-                and not self._mgr.GetPane(p.window_name).IsOk(): 
+               or self._mgr.GetPane(p.window_name).IsOk(): 
                 count += 1
         windowname = p.window_name
         windowcaption = 'Graph'#p.window_caption
@@ -1716,13 +1716,14 @@ class ViewerFrame(wx.Frame):
             panel.Close()
             if panel in self.schedule_full_draw_list:
                self.schedule_full_draw_list.remove(panel) 
-            #CallAfter: make sure panel is clear before updating mgr
-            wx.CallAfter(self._mgr.Update)
+            
             #delete uid number not str(uid)
             if ID in self.plot_panels.keys():
                 del self.plot_panels[ID]
             if ID in self.panels.keys():
                 del self.panels[ID]
+            #CallAfter: make sure panel is clear before updating mgr
+            wx.CallAfter(self._mgr.Update)
             return 
       
     def clear_panel(self):
