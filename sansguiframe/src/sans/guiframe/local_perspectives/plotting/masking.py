@@ -107,6 +107,9 @@ class MaskPanel(wx.Dialog):
         """
         Set up the layout
         """
+        note = "Note: This editing applies\n     only to %s." % self.data.name
+        note_txt = wx.StaticText(self, -1, note) 
+        note_txt.SetForegroundColour(wx.RED)
         shape = "Select a Shape for Masking:"
         #  panel
         sizer = wx.GridBagSizer(10, 10)
@@ -146,6 +149,7 @@ class MaskPanel(wx.Dialog):
         self.Bind(wx.EVT_RADIOBUTTON, self.onOuterBoxMask, 
                   id=self.outerbox_rb.GetId())
         sizer.Add(self.outerbox_rb, (7, 1), flag=wx.RIGHT|wx.BOTTOM, border=5)
+        sizer.Add(note_txt, (8, 1), flag=wx.RIGHT|wx.BOTTOM, border=5)
         self.innercircle_rb.SetValue(False)
         self.outercircle_rb.SetValue(False)        
         self.innerbox_rb.SetValue(False)
