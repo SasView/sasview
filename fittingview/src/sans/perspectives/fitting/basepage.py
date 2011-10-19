@@ -2592,7 +2592,18 @@ class BasicPage(ScrolledPanel, PanelBase):
         # Tell the user that we are about to apply the distribution
         msg = "Applying loaded %s distribution: %s" % (name, path)
         wx.PostEvent(self.parent.parent, StatusEvent(status=msg))  
-
+        self._set_array_disp_model(name=name, disp=disp,
+                                    values=values, weights=weights)
+        return basename
+    
+    def _set_array_disp_model(self, name=None, disp=None, 
+                              values=[], weights=[]):
+        """
+        Set array dispersion model
+        
+        :param name: name of the parameter for the dispersion to be set
+        :param disp: the polydisperion object
+        """
         disp.set_weights(values, weights)
         self._disp_obj_dict[name] = disp
         self.model.set_dispersion(name.split('.')[0], disp)
@@ -2619,8 +2630,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                                         [values, weights]
         self.state.model._persistency_dict[name.split('.')[0]] = \
                                         [values,weights]
-        return basename
-    
+                                        
+
     def _del_array_values(self, name=None):  
         """
         Reset array dispersion
@@ -3033,6 +3044,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             # go through the str params
             self._get_paste_helper(self.str_parameters, 
                                    self.orientation_params, context)
+                
             return True
         return None
     
@@ -3123,6 +3135,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param item: Gui param items
         :param value: the values for parameter ctrols
         """
+        is_array = False
         if len(value[1]) > 0:
             # Only for dispersion func.s
             try:
@@ -3139,33 +3152,41 @@ class BasicPage(ScrolledPanel, PanelBase):
                     pd_weights = numpy.array(value[3])
                     if len(pd_vals) > 0 and len(pd_vals) > 0:
                         if len(pd_vals) == len(pd_weights):
-                            disp_model.set_weights(pd_vals, 
-                                                   pd_weights)
-                            self.values[name] = pd_vals
-                            self.weights[name] = pd_weights
-                            # disable the fixed items for array
-                            item[0].SetValue(False)
-                            item[0].Enable(False)
-                            item[2].Enable(False)
-                            item[3].Show(False)
-                            item[4].Show(False)
-                            item[5].SetValue('')
-                            item[5].Enable(False)
-                            item[6].SetValue('')
-                            item[6].Enable(False)
+                            self._set_disp_array_cb(item=item)
+                            self._set_array_disp_model(name=name, 
+                                                       disp=disp_model,
+                                                       values=pd_vals, 
+                                                       weights=pd_weights)
+                            is_array = True
                 except:
                     pass 
-                self._disp_obj_dict[name] = disp_model
-                self.model.set_dispersion(name, 
-                                          disp_model)
-                self.state._disp_obj_dict[name] = \
-                                          disp_model
-                self.model.set_dispersion(param_name, disp_model)
-                state.values = self.values
-                state.weights = self.weights    
-                self.model._persistency_dict[param_name] = \
-                                        [state.values, state.weights]
-                    
-                    
+                if not is_array:
+                    self._disp_obj_dict[name] = disp_model
+                    self.model.set_dispersion(name, 
+                                              disp_model)
+                    self.state._disp_obj_dict[name] = \
+                                              disp_model
+                    self.model.set_dispersion(param_name, disp_model)
+                    self.state.values = self.values
+                    self.state.weights = self.weights    
+                    self.model._persistency_dict[param_name] = \
+                                            [state.values, state.weights]
+                         
             except:
                 pass 
+    
+    def _set_disp_array_cb(self, item):
+        """
+        Set cb for array disp
+        """
+        item[0].SetValue(False)
+        item[0].Enable(False)
+        item[2].Enable(False)
+        item[3].Show(False)
+        item[4].Show(False)
+        item[5].SetValue('')
+        item[5].Enable(False)
+        item[6].SetValue('')
+        item[6].Enable(False)
+
+        
