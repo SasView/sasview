@@ -473,6 +473,7 @@ class SansAssembly:
         if self.fitresult is not None:
             self.fitresult.set_model(model=self.model)
             self.fitresult.residuals = self.true_res
+            self.fitresult.iterations += 1
             self.fitresult.theory = theory
            
             #fitness = self.chisq(params=params)
@@ -822,7 +823,7 @@ class FResult(object):
         if self.pvec == None and self.model is None and self.param_list is None:
             return "No results"
         n = len(self.model.parameterset)
-        self.iterations += 1
+        
         result_param = zip(xrange(n), self.model.parameterset)
         msg1 = ["[Iteration #: %s ]" % self.iterations]
         msg3 = ["=== goodness of fit: %s ===" % (str(self.fitness))]
