@@ -1261,6 +1261,8 @@ class FitPage(BasicPage):
             
             try:
                 # update smearer sizer
+                if not self.enable_smearer.GetValue():
+                    self.disable_smearer.SetValue(True)
                 self.onSmear(None)
                 temp_smear = None
                 if not self.disable_smearer.GetValue():
@@ -1967,7 +1969,11 @@ class FitPage(BasicPage):
         #update model plot with new data information
         if flag:
             #set model view button
-            self.current_smearer = smear_selection(self.data, self.model)
+            if not self.enable_smearer.GetValue():
+                    self.disable_smearer.SetValue(True)
+            self.onSmear(None)
+            #self._set_smear(self.data)
+
             if self.data.__class__.__name__ == "Data2D":
                 self.enable2D = True
                 self.model_view.SetLabel("2D Mode")
@@ -2205,11 +2211,10 @@ class FitPage(BasicPage):
                      None for 1D
                      
         """
-
-        #if self.check_invalid_panel():
-        #    return
-        if self.model ==None:
+        if self.model == None:
             self.disable_smearer.SetValue(True)
+            if event == None:
+                return
             msg="Please select a Model first..."
             wx.MessageBox(msg, 'Info')
             wx.PostEvent(self._manager.parent, StatusEvent(status=\
@@ -2387,13 +2392,10 @@ class FitPage(BasicPage):
         Create a custom slit smear object that will change the way residuals
         are compute when fitting
         """
- 
-        #if self.check_invalid_panel():
-        #    return
-
-        if self.model ==None:
+        if self.model == None:
             self.disable_smearer.SetValue(True)
-            
+            if event == None:
+                return
             msg="Please select a Model first..."
             wx.MessageBox(msg, 'Info')
             wx.PostEvent(self._manager.parent, StatusEvent(status=\
@@ -2566,9 +2568,11 @@ class FitPage(BasicPage):
             event.Skip()    
         if self.data is None:
             return
-        
+
         if self.model == None:
             self.disable_smearer.SetValue(True)
+            if event == None:
+                return
             msg="Please select a Model first..."
             wx.MessageBox(msg, 'Info')
             wx.PostEvent(self._manager.parent, StatusEvent(status=\

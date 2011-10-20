@@ -643,7 +643,8 @@ class Plugin(PluginBase):
             if data is None:
                 msg = "set_mearer requires at least data.\n"
                 msg += "Got data = %s .\n" % str(data)
-                raise ValueError, msg
+                return
+                #raise ValueError, msg
             model = self.page_finder[uid].get_model(fid=fid)
             if model is None:
                 return
