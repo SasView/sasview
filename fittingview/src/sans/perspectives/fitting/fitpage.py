@@ -1320,9 +1320,9 @@ class FitPage(BasicPage):
             self.slit_smearer.Enable(False)
             self.pinhole_smearer.Enable(False)
             
+        self.Show(True)      
         self.SetupScrolling()
-        self.Show(True)   
-      
+         
     def _onparamEnter(self,event):
         """ 
         when enter value on panel redraw model according to changed

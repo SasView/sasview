@@ -1920,9 +1920,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         #if self.check_invalid_panel():
         #    self.shape_rbutton.SetValue(True)
         #    return
-
+        self.Show(False)
         self._show_combox_helper()
         self._on_select_model(event=None)
+        self.Show(True)
         self._save_typeOfmodel()
         self.sizer4_4.Layout()
         self.sizer4.Layout()
