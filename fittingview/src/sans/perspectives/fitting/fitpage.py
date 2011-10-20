@@ -1109,6 +1109,10 @@ class FitPage(BasicPage):
             return 
         
         flag = self._update_paramv_on_fit() 
+        
+        if self.batch_on and not self._is_2D():
+            if not self._validate_Npts_1D():
+                return
                 
         if not flag:
             msg= "Fitting range or parameters are invalid"

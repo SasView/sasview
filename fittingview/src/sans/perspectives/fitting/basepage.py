@@ -1440,7 +1440,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                     
             else:
                 self.fitrange = False    
-            
             ## if any value is modify draw model with new value
             if not self.fitrange:
                 #self.btFit.Disable()
@@ -2224,6 +2223,42 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.fitrange = True
             
         return flag
+
+    def _validate_Npts_1D(self):  
+        """
+        Validate the number of points for fitting is more than 5 points.
+        If valid, setvalues Npts_fit otherwise post msg.
+        """
+        #default flag
+        flag = True
+        # Theory
+        if self.data == None:
+            return flag
+        for data in self.data_list:
+            # q value from qx and qy
+            radius= data.x
+            #get unmasked index
+            index_data = (float(self.qmin.GetValue()) <= radius) & \
+                            (radius <= float(self.qmax.GetValue()))
+            index_data = (index_data) & (numpy.isfinite(data.y))
+
+            if len(index_data[index_data]) < 5:
+                # change the color pink.
+                self.qmin.SetBackgroundColour("pink")
+                self.qmin.Refresh()
+                self.qmax.SetBackgroundColour("pink")
+                self.qmax.Refresh()
+                msg= "Npts of Data Error :No or too little npts of %s."% data.name
+                wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+                self.fitrange = False
+                flag = False
+            else:
+                self.Npts_fit.SetValue(str(len(index_data[index_data==True])))
+                self.fitrange = True
+            
+        return flag
+
+
     
     def _check_value_enter(self, list, modified):
         """
