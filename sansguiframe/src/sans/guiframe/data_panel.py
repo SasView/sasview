@@ -363,7 +363,17 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         Pop Up Data Editor
         """
-        print "Edit Data"
+        selection = event.GetSelection()
+        id, _, _ = self.tree_ctrl.GetSelection().GetData()
+        data_list, _= self.parent._data_manager.get_by_id(id_list=[id])
+        
+        data = data_list.values()[0]
+        from sans.guiframe.local_perspectives.plotting.masking \
+            import MaskPanel as MaskDialog
+        
+        panel = MaskDialog(base=self, data=data, id=wx.NewId())
+        #self.panel.Bind(wx.EVT_CLOSE, self._draw_masked_model)
+        panel.ShowModal()
         
     def layout_data_list(self):
         """
@@ -377,7 +387,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         ## Create context menu for page
         self.data_menu = wx.Menu()
         id = wx.NewId()
-        name = "Edit"
+        name = "Edit Mask"
         msg = "Edit the current Data"
         self.data_menu.Append(id, name, msg)
         wx.EVT_MENU(self, id, self.on_edit_data)
@@ -398,8 +408,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         Allow Editing Data
         """
-        print "on_right_click"
-        if self.data_menu is not None:
+        selection = event.GetSelection()
+        _, data_class_name, _ = self.tree_ctrl.GetSelection().GetData()
+        if data_class_name == "Data2D" and self.data_menu is not None:
             self.PopupMenu(self.data_menu) 
         
     def onContextMenu(self, event): 
