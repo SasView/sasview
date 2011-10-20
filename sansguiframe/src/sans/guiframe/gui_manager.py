@@ -994,17 +994,19 @@ class ViewerFrame(wx.Frame):
         """
         ID = wx.NewId()
         self.panels[str(ID)] = p
+        self.graph_num += 1
+        windowcaption = 'Graph'#p.window_caption
+        windowname = p.window_name
+        """
         count = 0
         for item in self.panels:
             if self.panels[item].window_name.startswith(p.window_name)\
                or self._mgr.GetPane(p.window_name).IsOk(): 
                 count += 1
-        windowname = p.window_name
-        windowcaption = 'Graph'#p.window_caption
+        
         if count > 0:
             windowname += str(count+1)
-        p.window_name = windowname
-
+        """
         # Append nummber
         captions = self._get_plotpanel_captions()
         while (1):
@@ -1015,9 +1017,10 @@ class ViewerFrame(wx.Frame):
             # protection from forever-loop: max num = 1000
             if self.graph_num > 1000:
                 break
-
-        p.window_caption = caption
-   
+        p.window_caption = caption + str(self.graph_num)
+        #p.window_caption = windowcaption+ str(self.graph_num)
+        p.window_name = windowname + str(self.graph_num)
+        
         style1 = self.__gui_style & GUIFRAME.FIXED_PANEL
         style2 = self.__gui_style & GUIFRAME.FLOATING_PANEL
         if style1 == GUIFRAME.FIXED_PANEL:

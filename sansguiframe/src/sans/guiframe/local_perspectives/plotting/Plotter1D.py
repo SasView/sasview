@@ -241,9 +241,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
             old_data = self.plots[data.id]
             if self._is_changed_legend_label:
                 data.label = old_data.label
-            data.custom_color = old_data.custom_color
-            data.symbol = old_data.symbol
-            data.markersize = old_data.markersize
+            if old_data.__class__.__name__ == 'Data1D':
+                data.custom_color = old_data.custom_color
+                data.symbol = old_data.symbol
+                data.markersize = old_data.markersize
             # Replace data
             self.graph.replace(data)
             self.plots[data.id] = data
