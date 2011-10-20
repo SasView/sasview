@@ -502,7 +502,12 @@ class MaskPanel(wx.Dialog):
     def OnClose(self, event):
         """
         """
-        self.parent._draw_masked_model(event)
+        try:
+            self.parent._draw_masked_model(event)
+        except:
+            # when called by data panel
+            event.Skip()
+            pass
         
 class Maskplotpanel(PlotPanel):
     """
