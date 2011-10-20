@@ -234,6 +234,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         
         :param event: data event
         """
+        if data.__class__.__name__ == 'Data2D':
+            return
         if data.id in self.plots.keys():
             #Recover panel prop.s
             xlo, xhi = self.subplot.get_xlim()

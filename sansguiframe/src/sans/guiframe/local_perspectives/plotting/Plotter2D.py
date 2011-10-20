@@ -184,6 +184,8 @@ class ModelPanel2D(ModelPanel1D):
         xhi = None
         ylo = None 
         yhi = None
+        if data.__class__.__name__ == 'Data1D':
+            return
         ## Update self.data2d with the current plot
         self.data2D = data
         if data.id in self.plots.keys():
