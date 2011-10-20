@@ -39,6 +39,7 @@ class GUIFRAME_ID:
     
 class GUIFRAME_ICON:
     PATH = get_data_path(media='images')
+    FRAME_ICON_PATH = os.path.join(PATH, 'ball.ico')
     SAVE_ICON_PATH = os.path.join(PATH, 'save.png')
     UNDO_ICON_PATH = os.path.join(PATH, 'undo.png')
     REDO_ICON_PATH = os.path.join(PATH, 'redo.png')
@@ -53,6 +54,7 @@ class GUIFRAME_ICON:
     PREVIEW_ID_PATH = os.path.join(PATH, 'report.png')
     PRINT_ID_PATH = os.path.join(PATH, 'printer.png')
     
+  
     SAVE_ICON = wx.Image(os.path.join(PATH, 'save.png'))
     UNDO_ICON = wx.Image(os.path.join(PATH, 'undo.png'))
     REDO_ICON = wx.Image(os.path.join(PATH, 'redo.png'))

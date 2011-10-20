@@ -3,6 +3,7 @@ from wx import StatusBar as wxStatusB
 from wx.lib import newevent
 import wx.richtext
 import time
+from sans.guiframe.gui_style import GUIFRAME_ICON
 #numner of fields of the status bar 
 NB_FIELDS = 4
 #position of the status bar's fields
@@ -136,6 +137,18 @@ class StatusBar(wxStatusB):
         self.frame = None
         self.list_msg = []
         self.frame = Console(parent=self)
+        if hasattr(self.frame, "IsIconized"):
+            if not self.frame.IsIconized():
+                try:
+                    icon = self.parent.GetIcon()
+                    self.frame.SetIcon(icon)
+                except:
+                    try:
+                        FRAME_ICON = wx.Icon(GUIFRAME_ICON.FRAME_ICON_PATH,
+                                              wx.BITMAP_TYPE_ICON)
+                        self.frame.SetIcon(FRAME_ICON)
+                    except:
+                        pass
         self.frame.set_multiple_messages(self.list_msg)
         self.frame.Hide()
         self.progress = 0      
@@ -248,7 +261,7 @@ class StatusBar(wxStatusB):
         when available. No icon is displayed if the message is empty
         """
         if hasattr(event, "status"):
-            status = str(status)
+            status = str(event.status)
             if status.strip() == "":
                 return
         else:
