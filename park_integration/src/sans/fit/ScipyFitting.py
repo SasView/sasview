@@ -140,7 +140,7 @@ class ScipyFit(FitEngine):
         result.success = success
         result.theory = functor.theory
         if handler is not None:
-            handler.set_result(result=self.fitresult)
+            handler.set_result(result=result)
             handler.update_fit()
         if q is not None:
             q.put(result)
