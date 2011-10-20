@@ -3206,6 +3206,7 @@ class FitPage(BasicPage):
         else:
             self.model_view.SetLabel("Show 2D")
             self.enable2D = False
+        self.Show(False)
         self.create_default_data()
         self._manager.store_data(self.uid, data_list=[self.data])
 
@@ -3213,6 +3214,7 @@ class FitPage(BasicPage):
         self._set_sizer_dispersion()  
         self._set_weight(is_2D= self.enable2D)
         self._set_smear_buttons()
+        self.Show(True)
         self._draw_model()
         
         
