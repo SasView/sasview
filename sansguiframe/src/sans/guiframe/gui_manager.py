@@ -1017,7 +1017,7 @@ class ViewerFrame(wx.Frame):
             # protection from forever-loop: max num = 1000
             if self.graph_num > 1000:
                 break
-        p.window_caption = caption + str(self.graph_num)
+        p.window_caption = caption 
         #p.window_caption = windowcaption+ str(self.graph_num)
         p.window_name = windowname + str(self.graph_num)
         
