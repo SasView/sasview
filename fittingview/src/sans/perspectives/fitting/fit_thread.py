@@ -72,7 +72,7 @@ class FitThread(CalcThread):
             for i in range(len(self.fitter)):
                 list_handler.append(self.handler)
                 list_q.append(None)
-                list_curr_thread.append(None)
+                list_curr_thread.append(self)
                 list_ftol.append(self.ftol)
                 list_reset_flag.append(self.reset_flag)
                 list_fit_function.append('fit')

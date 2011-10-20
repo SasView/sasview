@@ -129,10 +129,8 @@ class ConsoleUpdate(FitHandler):
         if self.fit_duration >= UPDATE_INTERVAL:
             self.fit_duration = 0
             u_flag = True
-            
         if not last:
-            msg += "About %s s elapsed......... \n" % str (UPDATE_INTERVAL)
-            msg += "Fit Updates ........... %s \n" % str_time
+            msg = "Fit Updates ... %s \n" % str_time    
         else:
             msg = "Final updates ........."
         if u_flag or last:
@@ -149,10 +147,13 @@ class ConsoleUpdate(FitHandler):
                 if m_flag:
                     model_name = str(self.result.model.name)
                 if m_flag and d_flag:
-                    msg += "Data : %s  , Model : %s \n"  % (str(data_name),
-                                                     str(model_name))
+                    msg += "Data : %s \n"  % (str(data_name))#,
+                                                     #str(model_name))
                 msg +=  str(self.result)
                 msg += "\n"
+                if not last:
+                    msg += "About %s s elapsed......... \n" % \
+                                            str (UPDATE_INTERVAL)
             else:
                 msg += "No result available\n"
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
