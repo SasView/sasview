@@ -360,7 +360,7 @@ class PageState(object):
         """
         rep = "\nState name: %s\n"%self.file
         t = time.localtime(self.timestamp)
-        time_str = time.strftime("%H;%M - %b %d - %Y", t)
+        time_str = time.strftime("%b %d %Y %H;%M;%S ", t)
 
         rep += "State created: %s\n"%time_str
         rep += "State form factor combobox selection: %s\n"%self.formfactorcombobox
