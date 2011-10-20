@@ -1025,8 +1025,8 @@ class ViewerFrame(wx.Frame):
         style2 = self.__gui_style & GUIFRAME.FLOATING_PANEL
         if style1 == GUIFRAME.FIXED_PANEL:
             self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
-                              Name(windowname).
-                              Caption(caption).
+                              Name(p.window_name).
+                              Caption(p.window_caption).
                               Position(10).
                               Floatable().
                               Right().
@@ -1042,7 +1042,7 @@ class ViewerFrame(wx.Frame):
     
         elif style2 == GUIFRAME.FLOATING_PANEL:
             self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
-                              Name(windowname).Caption(caption).
+                              Name(p.window_name).Caption(p.window_caption).
                               MinimizeButton().
                               Resizable(True).
                               # Use a large best size to make sure the AUI
