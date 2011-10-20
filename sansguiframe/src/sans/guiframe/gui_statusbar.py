@@ -1,6 +1,7 @@
 import wx
 from wx import StatusBar as wxStatusB
 from wx.lib import newevent
+import wx.richtext
 import time
 #numner of fields of the status bar 
 NB_FIELDS = 4
@@ -11,8 +12,8 @@ GAUGE_POSITION  = 2
 CONSOLE_POSITION  = 3
 BUTTON_SIZE = 40
 
-CONSOLE_WIDTH = 340
-CONSOLE_HEIGHT = 240
+CONSOLE_WIDTH = 500
+CONSOLE_HEIGHT = 300
 
 class ConsolePanel(wx.Panel):
     """
@@ -23,19 +24,46 @@ class ConsolePanel(wx.Panel):
         wx.Panel.__init__(self, parent=parent, *args, **kwargs)
         self.parent = parent
         self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.msg_txt = wx.TextCtrl(self, size=(CONSOLE_WIDTH-40,
-                                                CONSOLE_HEIGHT-60), 
-                                        style=wx.TE_MULTILINE)
+        
+        self.msg_txt = wx.richtext.RichTextCtrl(self, size=(CONSOLE_WIDTH-40,
+                                                CONSOLE_HEIGHT-60),
+                                   style=wx.VSCROLL|wx.HSCROLL|wx.NO_BORDER)
+        
         self.msg_txt.SetEditable(False)
         self.msg_txt.SetValue('No message available')
         self.sizer.Add(self.msg_txt, 1, wx.EXPAND|wx.ALL, 10)
         self.SetSizer(self.sizer)
         
-    def set_message(self, status=""):
+    def set_message(self, status="", event=None):
         """
         """
-        msg = status + "\n"  
-        self.msg_txt.AppendText(str(msg))
+        status = str(status)
+        if status.strip() == "":
+            return
+        color = (0, 0, 0) #black
+        icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_INFORMATION,
+                                                 wx.ART_TOOLBAR)
+        if hasattr(event, "info"):
+            icon_type = event.info.lower()
+            if icon_type == "warning":
+                color = (0, 0, 255) # blue
+                icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_WARNING,
+                                                      wx.ART_TOOLBAR)
+            if icon_type == "error":
+                color = (255, 0, 0) # red
+                icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_ERROR, 
+                                                     wx.ART_TOOLBAR)
+            if icon_type == "info":
+                icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_INFORMATION,
+                                                     wx.ART_TOOLBAR)
+        self.msg_txt.Newline()
+        self.msg_txt.WriteBitmap(icon_bmp)
+        self.msg_txt.BeginTextColour(color)
+        self.msg_txt.WriteText("\t")
+        self.msg_txt.AppendText(status)
+        self.msg_txt.EndTextColour()
+        
+           
         
 class Console(wx.Frame):
     """
@@ -54,12 +82,12 @@ class Console(wx.Frame):
         """
         if messages:
             for status in messages:
-                self.panel.set_message(status)
+                self.panel.set_message(status=status)
                 
-    def set_message(self, message):
+    def set_message(self, status, event=None):
         """
         """
-        self.panel.set_message(str(message))
+        self.panel.set_message(status=str(status), event=event)
         
     def Close(self, event):
         """
@@ -147,7 +175,7 @@ class StatusBar(wxStatusB):
         """
         return self.msg_position
     
-    def SetStatusText(self, text="", number=MSG_POSITION):
+    def SetStatusText(self, text="", number=MSG_POSITION, event=None):
         """
         """
         wxStatusB.SetStatusText(self, text, number)
@@ -156,7 +184,7 @@ class StatusBar(wxStatusB):
         self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
       
         if self.frame is not None :
-            self.frame.set_message(text)
+            self.frame.set_message(status=text, event=event)
         
     def PopStatusText(self, *args, **kwds):
         """
@@ -216,9 +244,15 @@ class StatusBar(wxStatusB):
          
     def set_icon(self, event):
         """
-        display icons related to the type of message sent to the statusbar
-        when available
+        Display icons related to the type of message sent to the statusbar
+        when available. No icon is displayed if the message is empty
         """
+        if hasattr(event, "status"):
+            status = str(status)
+            if status.strip() == "":
+                return
+        else:
+            return
         if not hasattr(event, "info"):
             return 
         msg = event.info.lower()
@@ -238,7 +272,7 @@ class StatusBar(wxStatusB):
         display received message on the statusbar
         """
         if hasattr(event, "status"):
-            self.SetStatusText(str(event.status))
+            self.SetStatusText(text=str(event.status), event=event)
        
  
     def set_gauge(self, event):
