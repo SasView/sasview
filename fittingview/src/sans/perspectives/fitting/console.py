@@ -130,9 +130,9 @@ class ConsoleUpdate(FitHandler):
             self.fit_duration = 0
             u_flag = True
         if not last:
-            msg = "Fit Updates ... %s \n" % str_time    
+            msg += "Fit Updates ... %s \n" % str_time    
         else:
-            msg = "Final updates ........."
+            msg += "Final updates ........."
         if u_flag or last:
             if self.result is not None:
                 data_name, model_name = None, None
