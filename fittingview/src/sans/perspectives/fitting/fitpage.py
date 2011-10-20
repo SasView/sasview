@@ -1216,7 +1216,7 @@ class FitPage(BasicPage):
         is_poly_enabled = None 
         if event != None:
             if (event.GetEventObject() == self.formfactorbox\
-                        and self.structurebox.GetLabel() != 'None')\
+                        and self.structurebox.GetValue() != 'None')\
                         or event.GetEventObject() == self.structurebox\
                         or event.GetEventObject() == self.multifactorbox:
                 copy_flag = self.get_copy_params()
