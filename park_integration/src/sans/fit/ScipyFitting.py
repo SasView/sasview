@@ -141,7 +141,7 @@ class ScipyFit(FitEngine):
         result.theory = functor.theory
         if handler is not None:
             handler.set_result(result=result)
-            handler.update_fit()
+            handler.update_fit(last=True)
         if q is not None:
             q.put(result)
             return q
