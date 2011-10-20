@@ -139,6 +139,9 @@ class ScipyFit(FitEngine):
         result.pvec = out
         result.success = success
         result.theory = functor.theory
+        if handler is not None:
+            handler.set_result(result=self.fitresult)
+            handler.update_fit()
         if q is not None:
             q.put(result)
             return q
