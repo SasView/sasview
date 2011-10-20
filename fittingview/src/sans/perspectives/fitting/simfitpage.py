@@ -744,8 +744,14 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         and its appropriates parameters
         """
         for item in self.constraints_list:
-            model = item[0].GetClientData(item[0].GetCurrentSelection())
-            param = item[1].GetString(item[1].GetCurrentSelection())
+            select0 = item[0].GetSelection()
+            if select0 == wx.NOT_FOUND:
+                continue
+            model = item[0].GetClientData(select0)
+            select1 = item[1].GetSelection()
+            if select1 == wx.NOT_FOUND:
+                continue
+            param = item[1].GetString(select1)
             constraint = item[3].GetValue().lstrip().rstrip()
             if param.lstrip().rstrip()=="":
                 param= None
