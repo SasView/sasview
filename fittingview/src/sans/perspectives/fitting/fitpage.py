@@ -2571,14 +2571,15 @@ class FitPage(BasicPage):
         if self.smear_type != None:
             self.smear_description_smear_type.SetValue(str(self.smear_type))
             self.smear_data_left.SetValue(str(self.dq_l))   
-            self.smear_data_right.SetValue(str(self.dq_r))       
+            self.smear_data_right.SetValue(str(self.dq_r)) 
 
         self._hide_all_smear_info()
         
         data = copy.deepcopy(self.data)
         # make sure once more if it is smearer
-        self.current_smearer = smear_selection(data, self.model)
-        
+        temp_smearer = smear_selection(data, self.model)
+        if self.current_smearer != temp_smearer:
+            self.current_smearer = temp_smearer
         if self.enable_smearer.GetValue():
             if hasattr(self.data,"dxl"):
                 
@@ -2598,6 +2599,10 @@ class FitPage(BasicPage):
             temp_smearer= self.current_smearer
         elif self.disable_smearer.GetValue():
             self.smear_description_none.Show(True)
+        elif self.pinhole_smearer.GetValue():
+            self.onPinholeSmear(None)
+        elif self.slit_smearer.GetValue():
+            self.onSlitSmear(None)
             
         self._show_smear_sizer()
         
