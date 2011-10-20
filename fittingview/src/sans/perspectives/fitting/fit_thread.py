@@ -1,5 +1,6 @@
 
 import sys
+import time
 from data_util.calcthread import CalcThread
 
 def map_getattr(classInstance, classFunc, *args):
@@ -38,7 +39,7 @@ class FitThread(CalcThread):
         self.batch_inputs = batch_inputs
         self.batch_outputs = batch_outputs
         self.page_id = page_id
-        self.starttime = 0
+        self.starttime = time.time()
         self.updatefn = updatefn
         #Relative error desired in the sum of squares.
         self.ftol = ftol
@@ -81,11 +82,13 @@ class FitThread(CalcThread):
                           list_q, list_q, list_handler,list_curr_thread,list_ftol,
                          list_reset_flag)
             result =  map(map_apply, inputs)
+    
             self.complete(result=result,
                           batch_inputs=self.batch_inputs,
                            batch_outputs=self.batch_outputs,
                           page_id=self.page_id,
-                          pars = self.pars)
+                          pars = self.pars,
+                          elapsed=time.time()-self.starttime)
            
         except KeyboardInterrupt, msg:
             # Thread was interrupted, just proceed and re-raise.
@@ -93,11 +96,10 @@ class FitThread(CalcThread):
             #print "keyboard exception"
             #Stop on exception during fitting. Todo: need to put 
             #some mssg and reset progress bar.
-            raise
-            #if self.handler is not None:
-            #    self.handler.error(msg=msg)
+            
+            if self.handler is not None:
+                self.handler.error(msg=msg)
         except:
-            raise
             if self.handler is not None:
                 self.handler.error(msg=str(sys.exc_value))
            

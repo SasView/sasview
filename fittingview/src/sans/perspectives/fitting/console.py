@@ -35,7 +35,10 @@ class ConsoleUpdate(FitHandler):
         self.quiet = quiet
         self.progress_delta = progress_delta
         self.improvement_delta = improvement_delta
-        self.elapsed_time = self.progress_time
+        self.elapsed_time = time.time()
+        self.update_duration = time.time()
+        self.fit_duration = 0
+        
         
     def progress(self, k, n):
         """
@@ -49,12 +52,10 @@ class ConsoleUpdate(FitHandler):
         # Show improvements if there are any
         dt = t - self.improvement_time
         if self.isbetter and dt > self.improvement_delta:
-            self.result.print_summary()
+            #self.result.print_summary()
+            self.update_fit()
             self.isbetter = False
             self.improvement_time = t
-            
-            wx.PostEvent(self.parent, StatusEvent(status=\
-             "%d%% complete ..."%(p),type="progress"))
        
         # Update percent complete
         dp = p-self.progress_percent
@@ -64,22 +65,16 @@ class ConsoleUpdate(FitHandler):
             if 1 <= dp <= 2:
                 self.progress_percent = p
                 self.progress_time = t
-                wx.PostEvent(self.parent, StatusEvent(status=\
-                                                      "%d%% complete ..."%(p),
-                                                      type="progress"))
-       
+                self.update_fit()
             elif 2 < dp <= 5:
                 if p//5 != self.progress_percent//5:
-                    wx.PostEvent(self.parent, StatusEvent(status=\
-                        "%d%% complete ..."%(5*(p//5)),type="progress"))
                     self.progress_percent = p
                     self.progress_time = t
             else:
                 if p//10 != self.progress_percent//10:
                     self.progress_percent = p
                     self.progress_time = t
-                    wx.PostEvent(self.parent, StatusEvent(status=\
-                   "%d%% complete ..."%(10*(p//10)),type="progress"))
+                    self.update_fit()
         
     def improvement(self):
         """
@@ -88,41 +83,81 @@ class ConsoleUpdate(FitHandler):
         """
         self.isbetter = True
     
+    def print_result(self):
+        """
+        Print result object
+        """
+        msg = " \n %s \n" % self.result.__str__()
+        wx.PostEvent(self.parent, StatusEvent(status=msg))
+                     
     def error(self, msg):
         """
         Model had an error; print traceback
         """
         if self.isbetter:
-            self.result.print_summary()
-        message = "Fit Abort:"
-        message = str(msg)+ " \n %s"%self.result.__str__()
+            #self.result.print_summary()
+            self.update_fit()
+
+        message = str(msg) + " \n %s \n" % self.result.__str__()
         wx.PostEvent(self.parent, StatusEvent(status=message,
                                    info="error", type="stop"))
     def finalize(self):
         """
         """
         if self.isbetter:
-            self.result.print_summary()
+            #self.result.print_summary()
+            self.update_fit()
 
     def abort(self):
         """
         """
         if self.isbetter:
-            self.result.print_summary()
+            #self.result.print_summary()
+            self.update_fit()
             
         
-    def update_fit(self, msg=""):
+    def update_fit(self, msg="", last=False):
         """
         """
-        self.elapsed_time = time.time() - self.elapsed_time
-        dt = self.elapsed_time - self.progress_time
-        if dt > 5:
-            msg = " Updating fit... \n Chi2/Npts = %s \n"\
-                           % (self.result.fitness)
+        t1 = time.time()
+        self.elapsed_time =  t1 - self.update_duration
+        self.update_duration = t1
+        self.fit_duration += self.elapsed_time
+        str_time = time.strftime("%a, %d %b %Y %H:%M:%S ", time.localtime(t1))
+        UPDATE_INTERVAL = 0.5
+        u_flag = False
+        if self.fit_duration >= UPDATE_INTERVAL:
+            self.fit_duration = 0
+            u_flag = True
+            
+        if not last:
+            msg += "About %s s elapsed......... \n" % str (UPDATE_INTERVAL)
+            msg += "Fit Updates ........... %s \n" % str_time
+        else:
+            msg = "Final updates ........."
+        if u_flag or last:
+            if self.result is not None:
+                data_name, model_name = None, None
+                d_flag = (hasattr(self.result, "data") and \
+                    self.result.data is not None and \
+                    hasattr(self.result.data, "sans_data") and 
+                    self.result.data.sans_data is not None)
+                m_flag = (hasattr(self.result, "model") and \
+                          self.result.model is not None)
+                if d_flag:
+                    data_name = self.result.data.sans_data.name
+                if m_flag:
+                    model_name = str(self.result.model.name)
+                if m_flag and d_flag:
+                    msg += "Data : %s  , Model : %s \n"  % (str(data_name),
+                                                     str(model_name))
+                msg +=  str(self.result)
+                msg += "\n"
+            else:
+                msg += "No result available\n"
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                               type="progress"))
-            #time.sleep(0.001)
-        
+     
     def starting_fit(self):
         """
         """

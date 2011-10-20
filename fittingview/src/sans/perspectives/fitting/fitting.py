@@ -1094,7 +1094,10 @@ class Plugin(PluginBase):
             del self.fit_thread_list[uid] 
           
         self._update_fit_button(page_id)
-        msg = "Single Fitting complete "
+        t1 = time.time()
+        str_time = time.strftime("%a, %d %b %Y %H:%M:%S ", time.localtime(t1))
+        msg = "Fit completed on %s \n" % str_time
+        msg += "Duration time: %s s.\n" % str(elapsed)
         wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                                       type="stop"))
         pid = page_id[0]
@@ -1288,8 +1291,15 @@ class Plugin(PluginBase):
         :param page_id: list of page ids which called fit function
         :param elapsed: time spent at the fitting level
         """
+        t1 = time.time()
+        str_time = time.strftime("%a, %d %b %Y %H:%M:%S ", time.localtime(t1))
+        msg = "Fit completed on %s \n" % str_time
+        msg += "Duration time: %s s.\n" % str(elapsed)
+        wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
+                                                      type="stop"))
        # reset fit_engine if changed by simul_fit
         self._on_change_engine(self._gui_engine)
+        self._update_fit_button(page_id)
         result = result[0]
         self.fit_thread_list = {}
         if page_id is None:
@@ -1311,6 +1321,7 @@ class Plugin(PluginBase):
                                          type="stop"))
                     self._update_fit_button(page_id)
                 else:
+                    
                     cpage = self.fit_panel.get_page_by_id(uid)
                     # Make sure we got all results 
                     #(CallAfter is important to MAC)
@@ -1318,21 +1329,11 @@ class Plugin(PluginBase):
                              res.pvec, res.stderr)
                     index += 1
                     cpage._on_fit_complete()
-                    if res.fitness == None:
-                        msg = "Fit Abort: "
-                    else:
-                        msg = "Fitting: "
-                    msg += "Completed!!!"
-                    wx.PostEvent(self.parent, StatusEvent(status=msg))
         except ValueError:
-                raise
-                self._update_fit_button(page_id)
                 msg = "Fitting did not converge!!!"
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                       type="stop"))
         except:
-            raise
-            self._update_fit_button(page_id)
             msg = "Fit completed but Following"
             msg += " error occurred:%s" % sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
