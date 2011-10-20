@@ -1315,6 +1315,11 @@ class FitPage(BasicPage):
             self._onDraw(event=None)
         else:
             self._draw_model()
+            
+        if self.batch_on:
+            self.slit_smearer.Enable(False)
+            self.pinhole_smearer.Enable(False)
+            
         self.SetupScrolling()
         self.Show(True)   
       
@@ -1948,6 +1953,11 @@ class FitPage(BasicPage):
         #focus the page
         if check_data_validity(data):
             self.data_box_description.SetForegroundColour(wx.BLUE)
+        
+        if self.batch_on:
+            self.slit_smearer.Enable(False)
+            self.pinhole_smearer.Enable(False)
+        
         self.on_set_focus(None)
         self.Refresh()
         #update model plot with new data information
