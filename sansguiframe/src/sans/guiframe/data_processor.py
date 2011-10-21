@@ -365,7 +365,7 @@ class GridPage(sheet.CSheet):
             value_list = self.data[col_name]
             cell_row =  1
             for value in value_list:
-                label = format_number(value, high=True)
+                label = value#format_number(value, high=True)
                 self.SetCellValue(cell_row, col, str(label))
                 cell_row += 1
         self.AutoSizeColumn(col, True)
@@ -434,7 +434,7 @@ class GridPage(sheet.CSheet):
                         label = value.label
                     try:
                         float(label)
-                        label = format_number(label, high=True)
+                        label = str(label)#format_number(label, high=True)
                     except:
                         label = str(label)
                     self.SetCellValue(cell_row, cell_col, label)
