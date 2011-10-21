@@ -1376,11 +1376,14 @@ class Plugin(PluginBase):
                     return
                 msg += "Prview does not allow multiple data!\n"
                 msg += "Please select one.\n"
-                from pr_widgets import DataDialog
-                dlg = DataDialog(data_list=data_1d_list, text=msg)
-                if dlg.ShowModal() == wx.ID_OK:
-                    data = dlg.get_data()
-                dlg.Destroy()
+                if len(data_list) > 1:
+                    from pr_widgets import DataDialog
+                    dlg = DataDialog(data_list=data_1d_list, text=msg)
+                    if dlg.ShowModal() == wx.ID_OK:
+                        data = dlg.get_data()
+                    else:
+                        data = None
+                    dlg.Destroy()
             if data is None:
                 msg += "PrView receives no data. \n"
                 wx.PostEvent(self.parent, 

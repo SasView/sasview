@@ -179,11 +179,15 @@ class Plugin(PluginBase):
                     return
                 msg += "Invariant panel does not allow multiple data!\n"
                 msg += "Please select one.\n"
-                from invariant_widgets import DataDialog
-                dlg = DataDialog(data_list=data_1d_list, text=msg)
-                if dlg.ShowModal() == wx.ID_OK:
-                    data = dlg.get_data()
-                dlg.Destroy()
+                if len(data_list) > 1:
+                    from invariant_widgets import DataDialog
+                    dlg = DataDialog(data_list=data_1d_list, text=msg)
+                    if dlg.ShowModal() == wx.ID_OK:
+                        data = dlg.get_data()
+                    else:
+                        data = None
+                    dlg.Destroy()
+
             if data is None:
                 msg += "invariant receives no data. \n"
                 wx.PostEvent(self.parent, 

@@ -104,8 +104,6 @@ class DataDialog(wx.Dialog):
         kwds['title'] = "Data Selection"
         wx.Dialog.__init__(self, parent, *args, **kwds)
         self.list_of_ctrl = []
-        if not data_list:
-            return 
         self._sizer_main = wx.BoxSizer(wx.VERTICAL)
         self._sizer_txt = wx.BoxSizer(wx.VERTICAL)
         self._sizer_button = wx.BoxSizer(wx.HORIZONTAL)
@@ -120,8 +118,6 @@ class DataDialog(wx.Dialog):
         """
         layout the dialog
         """
-        if not data_list or len(data_list) <= 1:
-            return 
         #add text
         if text.strip() == "":
             text = "This Perspective does not allow multiple data !\n"
