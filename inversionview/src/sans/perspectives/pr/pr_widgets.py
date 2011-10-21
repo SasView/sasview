@@ -16,6 +16,17 @@ Text controls for input/output of the main PrView panel
 import wx
 import os
 from wx.lib.scrolledpanel import ScrolledPanel
+
+WIDTH = 400
+HEIGHT = 350
+
+
+class DialogPanel(ScrolledPanel):
+    def __init__(self, *args, **kwds):
+        ScrolledPanel.__init__(self, *args, **kwds)
+        self.SetupScrolling()
+        
+        
 class PrTextCtrl(wx.TextCtrl):
     """
     Text control for model and fit parameters.
@@ -119,80 +130,9 @@ class DataFileTextCtrl(OutputTextCtrl):
         """
         return self._complete_path
     
-class DataDialog(wx.Dialog):
-    """
-    Allow file selection at loading time
-    """
-    def __init__(self, data_list, parent=None, text='', *args, **kwds):
-        wx.Dialog.__init__(self, parent, *args, **kwds)
-        self.list_of_ctrl = []
-        self._do_layout(data_list, text=text)
-        
-    def _do_layout(self, data_list, text=''):
-        """
-        layout the dialog
-        """
-        if not data_list or len(data_list) <= 1:
-            return 
-        # Dialog box properties
-        self.SetTitle("Data Selection")
-        w = 400
-        h = 200
-        self.SetSize((w, h))
-        sizer_main = wx.BoxSizer(wx.VERTICAL)
-        sizer_txt = wx.BoxSizer(wx.VERTICAL)
-        sizer_button = wx.BoxSizer(wx.HORIZONTAL)
-        choice_sizer = wx.GridBagSizer(5, 5)
-        #choice_sizer.SetMinSize((w-20, h-50))
-        panel = ScrolledPanel(self, style=wx.RAISED_BORDER, size=(w-20, h-50))
-        panel.SetupScrolling()
-        #add text
-        if text.strip() == "":
-            text = "This Perspective does not allow multiple data !\n"
-            text += "Please select only one Data.\n"
-        text_ctrl = wx.StaticText(self, -1, str(text))
-        sizer_txt.Add(text_ctrl)
-        iy = 0
-        ix = 0
-        rbox = wx.RadioButton(panel, -1, str(data_list[0].name), 
-                                  (10, 10), style= wx.RB_GROUP)
-        rbox.SetValue(True)
-        self.list_of_ctrl.append((rbox, data_list[0]))
-        choice_sizer.Add(rbox, (iy, ix), (1, 1),
-                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        for i in range(1, len(data_list)):
-            iy += 1
-            rbox = wx.RadioButton(panel, -1, str(data_list[i].name), (10, 10))
-            rbox.SetValue(False)
-            self.list_of_ctrl.append((rbox, data_list[i]))
-            choice_sizer.Add(rbox, (iy, ix),
-                           (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        panel.SetSizer(choice_sizer)
-        #add sizer
-        sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        button_cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
-        sizer_button.Add(button_cancel, 0,
-                          wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
-        button_OK = wx.Button(self, wx.ID_OK, "Ok")
-        button_OK.SetFocus()
-        sizer_button.Add(button_OK, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
-        static_line = wx.StaticLine(self, -1)
-        
-        sizer_txt.Add(panel, 1, wx.EXPAND|wx.LEFT|wx.RIGHT, 5)
-        sizer_main.Add(sizer_txt, 1, wx.EXPAND|wx.ALL, 10)
-        sizer_main.Add(static_line, 0, wx.EXPAND, 0)
-        sizer_main.Add(sizer_button, 0, wx.EXPAND|wx.ALL, 10)
-        self.SetSizer(sizer_main)
-        self.Layout()
-        
-    def get_data(self):
-        """
-        return the selected data
-        """
-        for item in self.list_of_ctrl:
-            rbox, data = item
-            if rbox.GetValue():
-                return data 
+
+            
+            
 def load_error(error=None):
     """
     Pop up an error message.
@@ -210,3 +150,85 @@ def load_error(error=None):
                             wx.OK | wx.ICON_EXCLAMATION)
     dial.ShowModal()    
 
+    
+class DataDialog(wx.Dialog):
+    """
+    Allow file selection at loading time
+    """
+    def __init__(self, data_list, parent=None, text='', *args, **kwds):
+        kwds['size'] = (WIDTH, HEIGHT)
+        kwds['title'] = "Data Selection"
+        wx.Dialog.__init__(self, parent, *args, **kwds)
+        self.list_of_ctrl = []
+        if not data_list:
+            return 
+        self._sizer_main = wx.BoxSizer(wx.VERTICAL)
+        self._sizer_txt = wx.BoxSizer(wx.VERTICAL)
+        self._sizer_button = wx.BoxSizer(wx.HORIZONTAL)
+        self._choice_sizer = wx.GridBagSizer(5, 5)
+        self._panel = DialogPanel(self, style=wx.RAISED_BORDER,
+                               size=(WIDTH-20, HEIGHT/3))
+        self.SetSizer(self._sizer_main)
+        self.__do_layout(data_list, text=text)
+        self.Layout()
+        
+    def __do_layout(self, data_list, text=''):
+        """
+        layout the dialog
+        """
+        if not data_list or len(data_list) <= 1:
+            return 
+        #add text
+        if text.strip() == "":
+            text = "This Perspective does not allow multiple data !\n"
+            text += "Please select only one Data.\n"
+        text_ctrl = wx.TextCtrl(self, -1, str(text), style=wx.TE_MULTILINE,
+                                size=(-1, HEIGHT/3))
+        text_ctrl.SetEditable(False)
+        self._sizer_txt.Add(text_ctrl , 1, wx.EXPAND|wx.ALL, 10)
+        iy = 0
+        ix = 0
+        rbox = wx.RadioButton(self._panel, -1, str(data_list[0].name), 
+                                  (10, 10), style= wx.RB_GROUP)
+        rbox.SetValue(True)
+        self.list_of_ctrl.append((rbox, data_list[0]))
+        self._choice_sizer.Add(rbox, (iy, ix), (1, 1),
+                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        for i in range(1, len(data_list)):
+            iy += 1
+            rbox = wx.RadioButton(self._panel, -1, 
+                                  str(data_list[i].name), (10, 10))
+            rbox.SetValue(False)
+            self.list_of_ctrl.append((rbox, data_list[i]))
+            self._choice_sizer.Add(rbox, (iy, ix),
+                           (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        self._panel.SetSizer(self._choice_sizer)
+        #add sizer
+        self._sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        button_cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
+        self._sizer_button.Add(button_cancel, 0,
+                          wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+        button_OK = wx.Button(self, wx.ID_OK, "Ok")
+        button_OK.SetFocus()
+        self._sizer_button.Add(button_OK, 0,
+                                wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+        static_line = wx.StaticLine(self, -1)
+        
+        self._sizer_txt.Add(self._panel, 0, wx.EXPAND|wx.ALL, 5)
+        self._sizer_main.Add(self._sizer_txt, 0, wx.EXPAND|wx.ALL, 5)
+        self._sizer_main.Add(static_line, 0, wx.EXPAND, 0)
+        self._sizer_main.Add(self._sizer_button, 0, wx.EXPAND|wx.ALL, 10)
+        
+        
+    def get_data(self):
+        """
+        return the selected data
+        """
+        for item in self.list_of_ctrl:
+            rbox, data = item
+            if rbox.GetValue():
+                return data 
+
+    
+
+ 

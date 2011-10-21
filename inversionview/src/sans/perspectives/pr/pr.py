@@ -1355,13 +1355,35 @@ class Plugin(PluginBase):
             if len(data_list) == 1:
                 data = data_list[0]
             else:
-                msg = "Pr panel does not allow multiple Data.\n"
-                msg += "Please select one!\n"
+                data_1d_list = []
+                data_2d_list = []
+                error_msg = ""
+                # separate data into data1d and data2d list
+                for data in data_list:
+                    if data is not None:
+                        if issubclass(data.__class__, Data1D):
+                            data_1d_list.append(data)
+                        else:
+                            error_msg += " %s  type %s \n" % (str(data.name),
+                                             str(data.__class__.__name__))
+                            data_2d_list.append(data)
+                if len(data_2d_list) > 0:
+                    msg = "PrView does not support the following data types:\n"
+                    msg += error_msg
+                if len(data_1d_list) == 0:
+                    wx.PostEvent(self.parent, 
+                    StatusEvent(status=msg, info='error'))
+                    return
+                msg += "Prview does not allow multiple data!\n"
+                msg += "Please select one.\n"
                 from pr_widgets import DataDialog
-                dlg = DataDialog(data_list=data_list, text=msg)
+                dlg = DataDialog(data_list=data_1d_list, text=msg)
                 if dlg.ShowModal() == wx.ID_OK:
                     data = dlg.get_data()
             if data is None:
+                msg += "PrView receives no data. \n"
+                wx.PostEvent(self.parent, 
+                     StatusEvent(status=msg, info='error'))
                 return
             if issubclass(data.__class__, Data1D):
                 try:
