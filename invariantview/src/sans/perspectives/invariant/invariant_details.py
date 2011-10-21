@@ -27,6 +27,10 @@ else:
     PANEL_HEIGHT = 430
     FONT_VARIANT = 1
     
+ERROR_COLOR = wx.Colour(255,  0, 0, 128)
+EXTRAPOLATION_COLOR = wx.Colour(169,  169, 168, 128)
+INVARIANT_COLOR =  wx.Colour(67,  208,  128, 128)    
+  
   
 class InvariantContainer(wx.Object):
     """
@@ -196,9 +200,9 @@ class InvariantDetailsPanel(wx.Dialog):
                                          scale_name="Extrapolated at High Q")
        
         #Default color the extrapolation bar is grey
-        self.extrapolation_color_low = wx.Colour(169,  169, 168, 128)
-        self.extrapolation_color_high = wx.Colour(169,  169, 168, 128)
-        self.invariant_color = wx.Colour(67,  208,  128, 128)
+        self.extrapolation_color_low = EXTRAPOLATION_COLOR
+        self.extrapolation_color_high = EXTRAPOLATION_COLOR
+        self.invariant_color = INVARIANT_COLOR
         #change color of high and low bar when necessary
         self.set_color_bar()
         #draw the panel itself
@@ -419,15 +423,17 @@ class InvariantDetailsPanel(wx.Dialog):
         """
         Change the color for low and high bar when necessary
         """
-        ERROR_COLOR = wx.Colour(255,  0, 0, 128)
+        self.extrapolation_color_low = EXTRAPOLATION_COLOR
+        self.extrapolation_color_high = EXTRAPOLATION_COLOR
+        self.invariant_color = INVARIANT_COLOR
         #warning to the user when the extrapolated invariant is greater than %5
         if self.low_scale >= 0.05 or self.low_scale > 1 or self.low_scale < 0:
             self.extrapolation_color_low = ERROR_COLOR 
         if self.high_scale >= 0.05 or self.high_scale > 1 or self.high_scale < 0:
             self.extrapolation_color_high = ERROR_COLOR 
-        if self.inv_scale >= 0.05 or self.inv_scale > 1 or self.inv_scale < 0:
+        if self.inv_scale > 1 or self.inv_scale < 0:
             self.invariant_color = ERROR_COLOR  
-            
+    
     def on_close(self, event):
         """
         Close the current window

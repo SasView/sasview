@@ -16,7 +16,12 @@ import wx
 from wx.lib.scrolledpanel import ScrolledPanel
 
 WIDTH = 400
-HEIGHT = 200
+HEIGHT = 350
+
+class DialogPanel(ScrolledPanel):
+    def __init__(self, *args, **kwds):
+        ScrolledPanel.__init__(self, *args, **kwds)
+        self.SetupScrolling()
         
 class InvTextCtrl(wx.TextCtrl):
     """
@@ -95,9 +100,9 @@ class DataDialog(wx.Dialog):
     Allow file selection at loading time
     """
     def __init__(self, data_list, parent=None, text='', *args, **kwds):
+        kwds['size'] = (WIDTH, HEIGHT)
+        kwds['title'] = "Data Selection"
         wx.Dialog.__init__(self, parent, *args, **kwds)
-        self.SetTitle("Data Selection")
-        self.SetSize((WIDTH, HEIGHT))
         self.list_of_ctrl = []
         if not data_list:
             return 
@@ -105,10 +110,11 @@ class DataDialog(wx.Dialog):
         self._sizer_txt = wx.BoxSizer(wx.VERTICAL)
         self._sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         self._choice_sizer = wx.GridBagSizer(5, 5)
-        self._panel = ScrolledPanel(self, style=wx.RAISED_BORDER,
-                               size=(WIDTH-20, HEIGHT-50))
-        self._panel.SetupScrolling()
+        self._panel = DialogPanel(self, style=wx.RAISED_BORDER,
+                               size=(WIDTH-20, HEIGHT/3))
+        self.SetSizer(self._sizer_main)
         self.__do_layout(data_list, text=text)
+        self.Layout()
         
     def __do_layout(self, data_list, text=''):
         """
@@ -120,8 +126,10 @@ class DataDialog(wx.Dialog):
         if text.strip() == "":
             text = "This Perspective does not allow multiple data !\n"
             text += "Please select only one Data.\n"
-        text_ctrl = wx.StaticText(self, -1, str(text))
-        self._sizer_txt.Add(text_ctrl)
+        text_ctrl = wx.TextCtrl(self, -1, str(text), style=wx.TE_MULTILINE,
+                                size=(-1, HEIGHT/3))
+        text_ctrl.SetEditable(False)
+        self._sizer_txt.Add(text_ctrl , 1, wx.EXPAND|wx.ALL, 10)
         iy = 0
         ix = 0
         rbox = wx.RadioButton(self._panel, -1, str(data_list[0].name), 
@@ -150,12 +158,11 @@ class DataDialog(wx.Dialog):
                                 wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         static_line = wx.StaticLine(self, -1)
         
-        self._sizer_txt.Add(self._panel, 1, wx.EXPAND|wx.LEFT|wx.RIGHT, 5)
-        self._sizer_main.Add(self._sizer_txt, 1, wx.EXPAND|wx.ALL, 10)
+        self._sizer_txt.Add(self._panel, 0, wx.EXPAND|wx.ALL, 5)
+        self._sizer_main.Add(self._sizer_txt, 0, wx.EXPAND|wx.ALL, 5)
         self._sizer_main.Add(static_line, 0, wx.EXPAND, 0)
         self._sizer_main.Add(self._sizer_button, 0, wx.EXPAND|wx.ALL, 10)
-        self.SetSizer(self._sizer_main)
-        self.Layout()
+        
         
     def get_data(self):
         """

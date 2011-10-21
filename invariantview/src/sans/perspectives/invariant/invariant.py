@@ -19,6 +19,7 @@ import logging
 
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.events import NewPlotEvent
+from sans.guiframe.events import StatusEvent
 from sans.guiframe.gui_style import GUIFRAME_ID
 from .invariant_state import Reader as reader
 from sans.dataloader.loader import Loader
@@ -149,6 +150,7 @@ class Plugin(PluginBase):
         """
         receive a list of data and compute invariant
         """
+        msg = ""
         data = None
         if data_list is None:
             data_list = []
@@ -156,21 +158,49 @@ class Plugin(PluginBase):
             if len(data_list) == 1:
                 data = data_list[0]
             else:
-                msg = "invariant panel does not allow multiple data!\n"
+                data_1d_list = []
+                data_2d_list = []
+                error_msg = ""
+                # separate data into data1d and data2d list
+                for data in data_list:
+                    if data is not None:
+                        if issubclass(data.__class__, Data1D):
+                            data_1d_list.append(data)
+                        else:
+                            error_msg += " %s  type %s \n" % (str(data.name),
+                                             str(data.__class__.__name__))
+                            data_2d_list.append(data)
+                if len(data_2d_list) > 0:
+                    msg = "Invariant does not support the following data types:\n"
+                    msg += error_msg
+                if len(data_1d_list) == 0:
+                    wx.PostEvent(self.parent, 
+                    StatusEvent(status=msg, info='error'))
+                    return
+                msg += "Invariant panel does not allow multiple data!\n"
                 msg += "Please select one.\n"
                 from invariant_widgets import DataDialog
-                dlg = DataDialog(data_list=data_list, text=msg)
+                dlg = DataDialog(data_list=data_1d_list, text=msg)
                 if dlg.ShowModal() == wx.ID_OK:
                     data = dlg.get_data()
             if data is None:
+                msg += "invariant receives no data. \n"
+                wx.PostEvent(self.parent, 
+                     StatusEvent(status=msg, info='error'))
                 return
-            if issubclass(data.__class__, Data1D):
+            if not issubclass(data.__class__, Data1D):
+                 msg += "invariant cannot be computed for data of "
+                 msg += "type %s\n" % (data.__class__.__name__)
+                 wx.PostEvent(self.parent, 
+                     StatusEvent(status=msg, info='error'))
+                 return
+            else:
                 wx.PostEvent(self.parent, NewPlotEvent(plot=data,
                                            title=data.title))
                 try:
                     self.compute_helper(data)
                 except:
-                    msg = "Prview Set_data: " + str(sys.exc_value)
+                    msg = "Invariant Set_data: " + str(sys.exc_value)
                     wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                                 info="error"))
         else:    
