@@ -427,9 +427,14 @@ class FitPanel(nb, PanelBase):
         for p in self.opened_pages.values():
             #check if there is an empty page to fill up 
             if not check_data_validity(p.get_data()) and p.batch_on:
-                page = p
-                #self.batch_page_index += 1
-                break
+                
+                #make sure data get placed in 1D empty tab if data is 1D
+                #else data get place on 2D tab empty tab
+                enable2D = p.get_view_mode()
+                if (data.__class__.__name__ == "Data2D" and enable2D)\
+                or (data.__class__.__name__ == "Data1D" and not enable2D):
+                    page = p
+                    break
         if data_1d_list and data_2d_list:
             # need to warning the user that this batch is a special case
             from .fitting_widgets import BatchDataDialog
@@ -458,12 +463,8 @@ class FitPanel(nb, PanelBase):
                 page.fill_data_combobox(data_2d_list)
                 
         pos = self.GetPageIndex(page)
-        caption = "BatchPage" + str(self.batch_page_index)
-        self.SetPageText(pos, caption)
         page.batch_on = self.batch_on
         page._set_save_flag(not page.batch_on)
-        page.window_caption = caption
-        page.window_name = caption
         self.SetSelection(pos)
         self.opened_pages[page.uid] = page
         return page
