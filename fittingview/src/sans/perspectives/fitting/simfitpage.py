@@ -277,6 +277,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.constraints_list=[]
         self.constraint_dict={}
         self.nb_constraint= 0
+        self.model_cbox_left = None
+        self.model_cbox_right = None
         
         if len(self.model_list)>0:
             for item in self.model_list:
@@ -561,10 +563,16 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             self.btAdd.Hide()
         self._store_model()
         if self.model_cbox_left != None:
-            self.model_cbox_left.Clear()
+            try:
+                self.model_cbox_left.Clear()
+            except:
+                pass
             self.model_cbox_left = None
         if self.model_cbox_right != None:
-            self.model_cbox_right.Clear()
+            try:
+                self.model_cbox_right.Clear()
+            except:
+                pass
             self.model_cbox_right = None
         self.constraints_list = []   
         self.sizer_all_constraints.Clear(True) 

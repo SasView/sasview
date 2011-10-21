@@ -591,13 +591,7 @@ class FitPanel(nb, PanelBase):
                     self._manager.remove_plot(uid, theory=False)
                     break 
             del page_finder[selected_page]
-        ##remove the check box link to the model name of this page (selected_page)
-        try:
-            self.sim_page.draw_page()
-        except:
-            ## that page is already deleted no need to remove check box on
-            ##non existing page
-            pass
+
                 
         #Delete the name of the page into the list of open page
         for uid, list in self.opened_pages.iteritems():
@@ -605,4 +599,10 @@ class FitPanel(nb, PanelBase):
             if selected_page.uid == uid:
                 del self.opened_pages[selected_page.uid]
                 break 
-      
+        ##remove the check box link to the model name of this page (selected_page)
+        try:
+            self.sim_page.draw_page()
+        except:
+            ## that page is already deleted no need to remove check box on
+            ##non existing page
+            pass     
