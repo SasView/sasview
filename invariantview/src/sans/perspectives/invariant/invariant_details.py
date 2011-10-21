@@ -1,6 +1,7 @@
 
 import wx
 import sys
+
 import numpy
 from sans.guiframe.utils import format_number
 from sans.guiframe.utils import check_float
@@ -115,25 +116,42 @@ class InvariantContainer(wx.Object):
         if self.qstar_percent == 'error':
             self.existing_warning = True
             msg = 'Error occurred when computing invariant from data.\n '
-      
+        if self.qstar_percent > 1:
+            self.existing_warning = True
+            msg += "Invariant Q  contribution is greater "
+            msg += "than 100% .\n"
         if self.qstar_low_percent == 'error':
             self.existing_warning = True
             msg = "Error occurred when computing extrapolated invariant"
             msg += " at low-Q region.\n"
-        elif self.qstar_low_percent is not None and \
-             self.qstar_low_percent >= 0.05:
-            self.existing_warning = True
-            msg += "Extrapolated contribution at Low Q is higher "
-            msg += "than 5% of the invariant.\n"
+        elif self.qstar_low_percent is not None :
+            if self.qstar_low_percent >= 0.05:
+                self.existing_warning = True
+                msg += "Extrapolated contribution at Low Q is higher "
+                msg += "than 5% of the invariant.\n"
+            elif self.qstar_low_percent < 0:
+                self.existing_warning = True
+                msg += "Extrapolated contribution at Low Q < 0.\n"
+            elif self.qstar_low_percent > 1:
+                self.existing_warning = True
+                msg += "Extrapolated contribution at Low Q is greater "
+                msg += "than 100% .\n"
         if self.qstar_high_percent == 'error':
             self.existing_warning = True
             msg += 'Error occurred when computing extrapolated'
             msg += ' invariant at high-Q region.\n'
-        elif self.qstar_high_percent is not None and \
-            self.qstar_high_percent >= 0.05:
-            self.existing_warning = True
-            msg += "Extrapolated contribution at High Q is higher "
-            msg += "than 5% of the invariant.\n"
+        elif self.qstar_high_percent is not None:
+            if self.qstar_high_percent >= 0.05:
+                self.existing_warning = True
+                msg += "Extrapolated contribution at High Q is higher "
+                msg += "than 5% of the invariant.\n"
+            elif self.qstar_high_percent < 0:
+                self.existing_warning = True
+                msg += "Extrapolated contribution at High Q < 0.\n"
+            elif self.qstar_high_percent > 1:
+                self.existing_warning = True
+                msg += "Extrapolated contribution at High Q is greater "
+                msg += "than 100% .\n"
         if (self.qstar_low_percent not in [None, "error"]) and \
             (self.qstar_high_percent not in [None, "error"])\
             and self.qstar_low_percent + self.qstar_high_percent >= 0.05:
@@ -180,6 +198,7 @@ class InvariantDetailsPanel(wx.Dialog):
         #Default color the extrapolation bar is grey
         self.extrapolation_color_low = wx.Colour(169,  169, 168, 128)
         self.extrapolation_color_high = wx.Colour(169,  169, 168, 128)
+        self.invariant_color = wx.Colour(67,  208,  128, 128)
         #change color of high and low bar when necessary
         self.set_color_bar()
         #draw the panel itself
@@ -385,7 +404,10 @@ class InvariantDetailsPanel(wx.Dialog):
             if percentage in [None, 0.0, "error"]:
                  scale = RECTANGLE_SCALE
                  return scale
-            scale = float(percentage) 
+            elif percentage < 0:
+                scale = RECTANGLE_SCALE
+                return scale
+            scale = float(percentage)
         except:
             scale = RECTANGLE_SCALE
             self.warning_msg += "Receive an invalid scale for %s\n"
@@ -397,11 +419,14 @@ class InvariantDetailsPanel(wx.Dialog):
         """
         Change the color for low and high bar when necessary
         """
+        ERROR_COLOR = wx.Colour(255,  0, 0, 128)
         #warning to the user when the extrapolated invariant is greater than %5
-        if self.low_scale >= 0.05:
-            self.extrapolation_color_low = wx.Colour(255,  0, 0, 128)
-        if self.high_scale >= 0.05:
-            self.extrapolation_color_high = wx.Colour(255,  0, 0, 128)
+        if self.low_scale >= 0.05 or self.low_scale > 1 or self.low_scale < 0:
+            self.extrapolation_color_low = ERROR_COLOR 
+        if self.high_scale >= 0.05 or self.high_scale > 1 or self.high_scale < 0:
+            self.extrapolation_color_high = ERROR_COLOR 
+        if self.inv_scale >= 0.05 or self.inv_scale > 1 or self.inv_scale < 0:
+            self.invariant_color = ERROR_COLOR  
             
     def on_close(self, event):
         """
@@ -433,7 +458,7 @@ class InvariantDetailsPanel(wx.Dialog):
         y_origine = 15
         #Draw low rectangle
         gc.PushState()        
-        label = "Q* from Low-Q"
+        label = "Q* from Low-Q "
         PathFunc = gc.DrawPath
         w, h = gc.GetTextExtent(label)
         gc.DrawText(label, x_origine, y_origine)
@@ -459,13 +484,13 @@ class InvariantDetailsPanel(wx.Dialog):
         #Draw rectangle for invariant   
         gc.PushState()    # save it again
         y_origine += 20         
-        gc.DrawText("Q* from Data", x_origine, y_origine)
+        gc.DrawText("Q* from Data ", x_origine, y_origine)
         # offset to the lower part of the window
         x_center = x_origine + RECTANGLE_WIDTH * self.inv_scale/2 + w + 10
         y_center = y_origine + h
         gc.Translate(x_center, y_center)
         # 128 == half transparent
-        gc.SetBrush(wx.Brush(wx.Colour(67,  208,  128, 128))) 
+        gc.SetBrush(wx.Brush(self.invariant_color)) 
         # Increase width by self.inv_scale
         if self.inv_percent is None:
             inv_percent = 'Not Computed'
@@ -483,7 +508,7 @@ class InvariantDetailsPanel(wx.Dialog):
         #Draw rectangle for high invariant
         gc.PushState() 
         y_origine += 20 
-        gc.DrawText("Q* from High-Q", x_origine, y_origine) 
+        gc.DrawText("Q* from High-Q ", x_origine, y_origine) 
         #define the position of the new rectangle
         x_center = x_origine + RECTANGLE_WIDTH * self.high_scale/2 + w + 10
         y_center = y_origine + h

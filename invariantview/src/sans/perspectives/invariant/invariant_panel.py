@@ -162,7 +162,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         if self.inv_container is not None:
             if self.inv_container.existing_warning:
                 msg = "Warning! Computations on invariant require your "
-                msg += "attention.\n Please click on Details button."
+                msg += "attention.\nPlease click on Details button."
                 self.hint_msg_txt.SetForegroundColour("red")
     
                 wx.PostEvent(self.parent,
@@ -173,7 +173,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 wx.PostEvent(self.parent,
                              StatusEvent(status=msg,info="info"))
             self.hint_msg_txt.SetLabel(msg)
-            
+        self.Layout()
        
     def set_manager(self, manager):
         """
