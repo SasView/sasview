@@ -1641,12 +1641,13 @@ class ViewerFrame(wx.Frame):
         else:
             # Make sure the Checkmenuitem checked: Need this for-loop \
             # because the check menu is not responding on floating panel 
-            try:
-                for item in self._plotting_plugin.menu.GetMenuItems():
-                    item.Check(True)
-            except:
-                # MAC is not using checkmenuitem
-                pass
+            if IS_WIN:
+                try:
+                    for item in self._plotting_plugin.menu.GetMenuItems():
+                        item.Check(True)
+                except:
+                    # MAC is not using checkmenuitem
+                    pass
             msg = "All graph panels are shown."
         wx.PostEvent(self, StatusEvent(status=msg))
             
@@ -1672,12 +1673,13 @@ class ViewerFrame(wx.Frame):
         else:
             # Make sure the Checkmenuitem unchecked: Need this for-loop 
             # because the check menu is not responding on floating panel 
-            try:
-                for item in self._plotting_plugin.menu.GetMenuItems():
-                    item.Check(False)
-            except:
-                # MAC is not using checkmenuitem
-                pass
+            if IS_WIN:
+                try:
+                    for item in self._plotting_plugin.menu.GetMenuItems():
+                        item.Check(False)
+                except:
+                    # MAC is not using checkmenuitem
+                    pass
             msg = "All graph panels are hidden."
         wx.PostEvent(self, StatusEvent(status=msg))
                     
