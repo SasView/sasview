@@ -2571,6 +2571,25 @@ class ViewerFrame(wx.Frame):
     
         return is_data1d and not is_data2d and not is_theory and not is_state_data
     
+    def check_multimode(self, perspective=None):
+        """
+        Check the perspective have batch mode capablitity
+        """
+        if perspective == None or self._data_panel == None:
+            return
+        flag = perspective.get_batch_capable()
+        flag_on = perspective.batch_on
+        if flag:
+            self._data_panel.rb_single_mode.SetValue(not flag_on)
+            self._data_panel.rb_batch_mode.SetValue(flag_on)
+        else:
+            self._data_panel.rb_single_mode.SetValue(True)
+            self._data_panel.rb_batch_mode.SetValue(False)
+        self._data_panel.rb_single_mode.Enable(flag)
+        self._data_panel.rb_batch_mode.Enable(flag)
+                
+
+    
     def enable_edit_menu(self):
         """
         enable menu item under edit menu depending on the panel on focus

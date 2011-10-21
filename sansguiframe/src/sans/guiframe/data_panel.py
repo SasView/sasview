@@ -841,20 +841,10 @@ class DataPanel(ScrolledPanel, PanelBase):
         select the current perspective for guiframe
         """
         selection = self.perspective_cbox.GetSelection()
-
         if self.perspective_cbox.GetValue() != 'None':
             perspective = self.perspective_cbox.GetClientData(selection)
             perspective.on_perspective(event=None)
-            flag = perspective.get_batch_capable()
-            flag_on = perspective.batch_on
-            if flag:
-                self.rb_single_mode.SetValue(not flag_on)
-                self.rb_batch_mode.SetValue(flag_on)
-            else:
-                self.rb_single_mode.SetValue(True)
-                self.rb_batch_mode.SetValue(False)
-            self.rb_single_mode.Enable(flag)
-            self.rb_batch_mode.Enable(flag)
+            self.parent.check_multimode(perspective=perspective)
                 
     def _on_plot_selection(self, event=None):
         """

@@ -211,8 +211,10 @@ class PluginBase:
         :param event: menu event
         
         """
+        self.parent.check_multimode(self)
         self.parent.set_current_perspective(self)
         self.parent.set_perspective(self.perspective)
+        
         
     def set_batch_selection(self, flag):
         """
