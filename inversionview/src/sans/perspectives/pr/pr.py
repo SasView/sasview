@@ -1380,6 +1380,7 @@ class Plugin(PluginBase):
                 dlg = DataDialog(data_list=data_1d_list, text=msg)
                 if dlg.ShowModal() == wx.ID_OK:
                     data = dlg.get_data()
+                dlg.Destroy()
             if data is None:
                 msg += "PrView receives no data. \n"
                 wx.PostEvent(self.parent, 
