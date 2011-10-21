@@ -1446,7 +1446,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if is_2Ddata: self.btEditMask.Disable()
             else:
                 #self.btFit.Enable(True)
-                if is_2Ddata: self.btEditMask.Enable(True)
+                if is_2Ddata  and not self.batch_on: 
+                    self.btEditMask.Enable(True)
             if is_modified and self.fitrange:
                 #if self.data == None:
                 # Theory case: need to get npts value to draw
@@ -1543,7 +1544,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.btEditMask.Disable()
         else:
             #self.btFit.Enable(True)
-            if self._is_2D() and  self.data != None:
+            if self._is_2D() and  self.data != None and not self.batch_on:
                 self.btEditMask.Enable(True)
 
         if not flag:

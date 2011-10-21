@@ -1325,6 +1325,8 @@ class FitPage(BasicPage):
         if self.batch_on:
             self.slit_smearer.Enable(False)
             self.pinhole_smearer.Enable(False)
+            self.btEditMask.Disable()  
+            self.EditMask_title.Disable()
             
         self.Show(True)      
         self.SetupScrolling()
