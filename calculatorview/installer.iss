@@ -33,7 +33,7 @@ Source: "dist\media\*";	DestDir: "{app}\media";	Flags: ignoreversion recursesubd
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\SansViewTool"; Filename: "{app}\SansViewTool-1.0_dev.exe"; WorkingDir: "{app}"
+Name: "{group}\SansViewTool"; Filename: "{app}\SansViewTool-1.0.exe"; WorkingDir: "{app}"
 Name: "{group}\{cm:UninstallProgram,SansViewTool}"; Filename: "{uninstallexe}"
 Name: "{commondesktop}\SansViewTool"; Filename: "{app}\SansViewTool.exe"; Tasks: desktopicon; WorkingDir: "{app}"
 
