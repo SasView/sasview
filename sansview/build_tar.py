@@ -340,6 +340,18 @@ def checkout(release=False):
         pass
     
     os.chdir(wd)
+    for folder in os.listdir(wd):
+        package_dir = os.path.join(wd, folder)
+        if os.path.isdir(package_dir):
+            try:
+                if sys.platform == 'darwin':
+                    os.system("chmod -R g+w %s"% package_dir) 
+                else:
+                    os.system("chmod 777 -R %s"% package_dir)
+            except:
+                pass
+    os.chdir(wd)
+    
     
 def prepare(wipeout = False):
     """
