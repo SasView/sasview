@@ -13,10 +13,16 @@
 import wx
 from wx.lib.scrolledpanel import ScrolledPanel
 
-WIDTH = 400
-HEIGHT = 300
-MAX_NBR_DATA = 4
 
+MAX_NBR_DATA = 4
+WIDTH = 430
+HEIGHT = 350
+
+class DialogPanel(ScrolledPanel):
+    def __init__(self, *args, **kwds):
+        ScrolledPanel.__init__(self, *args, **kwds)
+        self.SetupScrolling()
+        
 class BatchDataDialog(wx.Dialog):
     """
     The current design of Batch  fit allows only of type of data in the data
@@ -25,7 +31,7 @@ class BatchDataDialog(wx.Dialog):
     """
     def __init__(self, parent=None,  *args, **kwds):
         wx.Dialog.__init__(self, parent, *args, **kwds)
-        self.SetSize((WIDTH, 250))
+        self.SetSize((WIDTH, HEIGHT))
         self.data_1d_selected = None
         self.data_2d_selected = None
         self._do_layout()
@@ -69,6 +75,7 @@ class BatchDataDialog(wx.Dialog):
         vbox.Add(wx.StaticLine(self, -1),  0, wx.EXPAND, 0)
         vbox.Add(button_sizer, 0 , wx.TOP|wx.BOTTOM, 10)
         self.SetSizer(vbox)
+        self.Layout()
         
     def get_data(self):
         """
@@ -98,14 +105,14 @@ class DataDialog(wx.Dialog):
             return 
         select_data_text = " %s Data selected.\n" % str(self._nb_selected_data)
         self._data_text_ctrl = wx.StaticText(self, -1, str(select_data_text))
+                               
         self._data_text_ctrl.SetForegroundColour('blue')
         self._sizer_main = wx.BoxSizer(wx.VERTICAL)
         self._sizer_txt = wx.BoxSizer(wx.VERTICAL)
         self._sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         self._choice_sizer = wx.GridBagSizer(5, 5)
-        self._panel = ScrolledPanel(self, style=wx.RAISED_BORDER,
-                               size=(WIDTH-20, HEIGHT-50))
-        self._panel.SetupScrolling()
+        self._panel = DialogPanel(self, style=wx.RAISED_BORDER,
+                               size=(WIDTH-20, HEIGHT/3))
         self.__do_layout(data_list, text=text)
         
     def __do_layout(self, data_list, text=''):
@@ -149,10 +156,9 @@ class DataDialog(wx.Dialog):
                                 wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         static_line = wx.StaticLine(self, -1)
         
-        self._sizer_txt.Add(self._panel, 1, wx.EXPAND|wx.LEFT|wx.RIGHT, 5)
-        self._sizer_main.Add(self._sizer_txt, 1, wx.EXPAND|wx.ALL, 10)
-        self._sizer_main.Add(self._data_text_ctrl, 0, 
-                             wx.EXPAND|wx.LEFT|wx.RIGHT, 10)
+        self._sizer_txt.Add(self._panel, 0, wx.EXPAND|wx.ALL, 10)
+        self._sizer_main.Add(self._sizer_txt, 0, wx.EXPAND|wx.ALL, 10)
+        self._sizer_main.Add(self._data_text_ctrl, 0,  wx.EXPAND|wx.ALL, 10)
         self._sizer_main.Add(static_line, 0, wx.EXPAND, 0)
         self._sizer_main.Add(self._sizer_button, 0, wx.EXPAND|wx.ALL, 10)
         self.SetSizer(self._sizer_main)
