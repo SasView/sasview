@@ -107,7 +107,7 @@ class MaskPanel(wx.Dialog):
         """
         Set up the layout
         """
-        note = "Note: This editing applies\n     only to %s." % self.data.name
+        note = "Note: This masking applies\n     only to %s." % self.data.name
         note_txt = wx.StaticText(self, -1, note) 
         note_txt.SetForegroundColour(wx.RED)
         shape = "Select a Shape for Masking:"
