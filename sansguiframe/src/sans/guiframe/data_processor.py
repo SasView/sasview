@@ -128,6 +128,7 @@ class GridPage(sheet.CSheet):
         self.AutoSize()
         self.list_plot_panels = {}
         self.default_col_width = 75
+        self.EnableEditing(False)
         if self.GetNumberCols() > 0:
             self.default_col_width =  self.GetColSize(0)
         self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.on_left_click)
@@ -262,6 +263,8 @@ class GridPage(sheet.CSheet):
     def insert_col_menu(self, menu, label, window):
         """
         """
+        if self.data is None:
+            return
         id = wx.NewId()
         title = "Empty"
         hint = 'Insert empty column before %s' % str(label)
@@ -281,6 +284,8 @@ class GridPage(sheet.CSheet):
     def insert_after_col_menu(self, menu, label, window):
         """
         """
+        if self.data is None:
+            return
         id = wx.NewId()
         title = "Empty"
         hint = 'Insert empty column after %s' % str(label)
@@ -402,6 +407,11 @@ class GridPage(sheet.CSheet):
         self.data = {}
         for item in (self.data_outputs, self.data_inputs):
             self.data.update(item)
+            
+        if len(self.data) + len(self.data_inputs) +len(self.data_outputs) == 0:
+            self.EnableEditing(False)
+        else:
+            self.EnableEditing(True)
         if  len(self.data_outputs) > 0:
             self._cols = self.GetNumberCols()
             self._rows = self.GetNumberRows()
