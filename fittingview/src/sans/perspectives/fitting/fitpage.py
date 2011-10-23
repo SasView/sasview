@@ -1261,8 +1261,8 @@ class FitPage(BasicPage):
             
             try:
                 # update smearer sizer
-                if not self.enable_smearer.GetValue():
-                    self.disable_smearer.SetValue(True)
+                #if not self.enable_smearer.GetValue():
+                #    self.disable_smearer.SetValue(True)
                 self.onSmear(None)
                 temp_smear = None
                 if not self.disable_smearer.GetValue():
@@ -1318,9 +1318,9 @@ class FitPage(BasicPage):
             if copy_flag:
                 self.get_paste_params(copy_flag)
                 
-            self._onDraw(event=None)
+                wx.CallAfter(self._onDraw, None)
         else:
-            self._draw_model()
+            wx.CallAfter(self._draw_model)
             
         if self.batch_on:
             self.slit_smearer.Enable(False)

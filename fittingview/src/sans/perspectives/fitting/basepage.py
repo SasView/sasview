@@ -624,6 +624,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Reset model state
         """
+        if event != None:
+            event.Skip()
         menu = event.GetEventObject()
         ## post help message for the selected model 
         msg = menu.GetHelpString(event.GetId())
@@ -770,6 +772,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         self._manager.on_perspective(event)
         self.onResetModel(event)
+        wx.CallAfter(self._onDraw, None)
+        
     def old_on_bookmark(self, event):
         """
         save history of the data and model
@@ -893,6 +897,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.dI_didata = copy.deepcopy(self.dI_didata.GetValue())
         self.state.dI_sqrdata = copy.deepcopy(self.dI_sqrdata.GetValue())
         self.state.dI_idata = copy.deepcopy(self.dI_idata.GetValue())
+        self.state.dq_l = self.dq_l
+        self.state.dq_r = self.dq_r
         if hasattr(self,"enable_disp"):
             self.state.enable_disp= self.enable_disp.GetValue()
             self.state.disable_disp = self.disable_disp.GetValue()
