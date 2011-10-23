@@ -160,6 +160,7 @@ APPLICATION_WLIST = config.APPLICATION_WLIST
 IS_WIN = True
 CLOSE_SHOW = True
 TIME_FACTOR = 1
+NOT_SO_GRAPH_LIST = ["BoxSum"]
 if sys.platform.count("win32")==0:
     IS_WIN = False
     TIME_FACTOR = 2
@@ -995,7 +996,10 @@ class ViewerFrame(wx.Frame):
         ID = wx.NewId()
         self.panels[str(ID)] = p
         self.graph_num += 1
-        windowcaption = 'Graph'#p.window_caption
+        if p.window_caption.split()[0] in NOT_SO_GRAPH_LIST:
+            windowcaption = p.window_caption
+        else:
+            windowcaption = 'Graph'#p.window_caption
         windowname = p.window_name
         """
         count = 0
@@ -1017,7 +1021,8 @@ class ViewerFrame(wx.Frame):
             # protection from forever-loop: max num = 1000
             if self.graph_num > 1000:
                 break
-        p.window_caption = caption 
+        if p.window_caption.split()[0] not in NOT_SO_GRAPH_LIST:
+            p.window_caption = caption 
         #p.window_caption = windowcaption+ str(self.graph_num)
         p.window_name = windowname + str(self.graph_num)
         
