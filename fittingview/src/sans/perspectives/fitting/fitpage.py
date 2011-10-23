@@ -1212,7 +1212,7 @@ class FitPage(BasicPage):
         call back for model selection
         """  
         self.Show(False) 
-        copy_flag = '' 
+        copy_flag = False 
         is_poly_enabled = None 
         if event != None:
             if (event.GetEventObject() == self.formfactorbox\
@@ -1254,7 +1254,9 @@ class FitPage(BasicPage):
                     self._keep.Enable(True)
             #self._set_save_flag(True)
             # Reset smearer, model and data
-            #self._set_smear(self.data)
+            if not copy_flag:
+                self.disable_smearer.SetValue(True)
+                self.enable_smearer.SetValue(False)
     
             # more disables for 2D
             self._set_smear_buttons()
@@ -1317,8 +1319,8 @@ class FitPage(BasicPage):
             # Keep the previous param values
             if copy_flag:
                 self.get_paste_params(copy_flag)
-                
                 wx.CallAfter(self._onDraw, None)
+                
         else:
             wx.CallAfter(self._draw_model)
             

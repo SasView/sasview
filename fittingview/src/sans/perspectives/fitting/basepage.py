@@ -633,7 +633,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
         self.Show(False)
         name = menu.GetLabel(event.GetId())
-        self._on_select_model_helper()
+        self._on_select_model_helper(reset=True)
         if name in self.saved_states.keys():
             previous_state = self.saved_states[name]
             ## reset state of checkbox,textcrtl  and  regular parameters value
