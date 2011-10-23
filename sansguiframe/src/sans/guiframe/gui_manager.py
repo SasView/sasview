@@ -941,7 +941,7 @@ class ViewerFrame(wx.Frame):
         data_state = self._data_manager.update_theory(data_id=data_id, 
                                          theory=theory,
                                          state=state)  
-        self._data_panel.load_data_list(data_state)
+        wx.CallAfter(self._data_panel.load_data_list, data_state)
         
     def onfreeze(self, theory_id):
         """

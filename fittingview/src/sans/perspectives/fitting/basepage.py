@@ -624,8 +624,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Reset model state
         """
-        if event != None:
-            event.Skip()
         menu = event.GetEventObject()
         ## post help message for the selected model 
         msg = menu.GetHelpString(event.GetId())
@@ -773,6 +771,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._manager.on_perspective(event)
         self.onResetModel(event)
         self._draw_model()
+        #self.save_current_state()
         
         
     def old_on_bookmark(self, event):
