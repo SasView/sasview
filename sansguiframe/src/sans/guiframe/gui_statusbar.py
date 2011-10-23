@@ -339,6 +339,7 @@ class StatusBar(wxStatusB):
         """
         Pop up a frame with messages sent to the status bar
         """
+        self.frame.Show(False)
         self.frame.Show(True)
         
         
