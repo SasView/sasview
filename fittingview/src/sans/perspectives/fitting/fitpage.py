@@ -2011,12 +2011,6 @@ class FitPage(BasicPage):
         reset the state
         """
         self.reset_page_helper(state)
-        #import sans.guiframe.gui_manager
-        #evt = ModelEventbox(model=state.model)
-        #wx.PostEvent(self.event_owner, evt)  
-   
-        if self.engine_type != None:
-            self._manager._on_change_engine(engine=self.engine_type)
 
         self.select_param(event = None) 
         #Save state_fit

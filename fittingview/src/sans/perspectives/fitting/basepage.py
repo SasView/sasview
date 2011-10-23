@@ -774,6 +774,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.onResetModel(event)
         wx.CallAfter(self._onDraw, None)
         
+        
     def old_on_bookmark(self, event):
         """
         save history of the data and model
@@ -1211,7 +1212,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.model_view.SetLabel("1D Mode")
         # else:
                 
-        if self._manager !=None:
+        if self._manager !=None and self.engine_type != None:
             self._manager._on_change_engine(engine=self.engine_type)
         ## set the select all check box to the a given state
         self.cb1.SetValue(state.cb1)

@@ -1298,8 +1298,9 @@ class Plugin(PluginBase):
         msg += "Duration time: %s s.\n" % str(elapsed)
         wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                                       type="stop"))
-       # reset fit_engine if changed by simul_fit
-        self._on_change_engine(self._gui_engine)
+        # reset fit_engine if changed by simul_fit
+        if self._fit_engine != self._gui_engine:
+            self._on_change_engine(self._gui_engine)
         self._update_fit_button(page_id)
         result = result[0]
         self.fit_thread_list = {}
