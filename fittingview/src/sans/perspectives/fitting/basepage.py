@@ -772,7 +772,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         self._manager.on_perspective(event)
         self.onResetModel(event)
-        wx.CallAfter(self._onDraw, None)
+        self._draw_model()
         
         
     def old_on_bookmark(self, event):
@@ -1804,8 +1804,18 @@ class BasicPage(ScrolledPanel, PanelBase):
                             self.formfactorbox.SetSelection(i)
                             break
                     break
-    
+                
     def _draw_model(self, update_chisqr=True, source='model'):
+        """
+        Method to draw or refresh a plotted model.
+        The method will use the data member from the model page
+        to build a call to the fitting perspective manager.
+        
+        :param chisqr: update chisqr value [bool]
+        """
+        wx.CallAfter(self._draw_model_after, update_chisqr, source)
+        
+    def _draw_model_after(self, update_chisqr=True, source='model'):
         """
         Method to draw or refresh a plotted model.
         The method will use the data member from the model page

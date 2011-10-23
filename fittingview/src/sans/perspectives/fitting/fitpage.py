@@ -1322,7 +1322,7 @@ class FitPage(BasicPage):
                 wx.CallAfter(self._onDraw, None)
                 
         else:
-            wx.CallAfter(self._draw_model)
+            self._draw_model()
             
         if self.batch_on:
             self.slit_smearer.Enable(False)
