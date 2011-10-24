@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>BaseModel &mdash; sansmodels v0.1.0 documentation</title>
+    <title>BaseModel &mdash; sansmodels 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="sansmodels v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="sansmodels 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="BCCrystalModel" href="BCCrystalModel.html" />
     <link rel="prev" title="BaseComponent" href="BaseComponent.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="BaseComponent.html" title="BaseComponent"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,9 +58,9 @@
             
   <div class="section" id="basemodel">
 <h1>BaseModel<a class="headerlink" href="#basemodel" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.models.BaseModel">
-<span id="sans-models-basemodel"></span><h2><a class="reference internal" href="#module-sans.models.BaseModel" title="sans.models.BaseModel"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.BaseModel</span></tt></a><a class="headerlink" href="#module-sans.models.BaseModel" title="Permalink to this headline">¶</a></h2>
-<p>Provide base functionality for all model components</p>
+<div class="section" id="sans-models-basemodel">
+<h2><a class="reference internal" href="#module-sans.models.BaseModel" title="sans.models.BaseModel"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.BaseModel</span></tt></a><a class="headerlink" href="#sans-models-basemodel" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.models.BaseModel"></span><p>Provide base functionality for all model components</p>
 <p>The following has changed since going from BaseComponent to BaseModel:</p>
 <blockquote>
 <div><ul class="simple">
@@ -73,6 +76,122 @@ the necessary extra information like limits, units, etc...</li>
 <dd><p>Bases: <a class="reference internal" href="ModelAdaptor.html#sans.models.ModelAdaptor.ModelAdaptor" title="sans.models.ModelAdaptor.ModelAdaptor"><tt class="xref py py-class docutils literal"><span class="pre">sans.models.ModelAdaptor.ModelAdaptor</span></tt></a></p>
 <p>Basic model component</p>
 <dl class="method">
+<dt id="sans.models.BaseModel.BaseModel.__add__">
+<tt class="descname">__add__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__add__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BaseModel.BaseModel.__call__">
+<tt class="descname">__call__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the model. Equivalent to runXY(x)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; input value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">value of the model</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.BaseModel.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.BaseModel.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.BaseModel.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x01DD5790&gt;</em><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BaseModel.BaseModel.__div__">
+<tt class="descname">__div__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__div__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.BaseModel.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.BaseModel.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BaseModel.BaseModel.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.BaseModel.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.BaseModel'</em><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BaseModel.BaseModel.__mul__">
+<tt class="descname">__mul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.models.BaseModel.BaseModel.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.models.BaseModel.BaseModel.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BaseModel.BaseModel.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BaseModel.BaseModel.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.BaseModel.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.BaseModel.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.BaseModel.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BaseModel.BaseModel.__sub__">
+<tt class="descname">__sub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.BaseModel.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.models.BaseModel.BaseModel.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="sans.models.BaseModel.BaseModel.calculate_ER">
 <tt class="descname">calculate_ER</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.calculate_ER" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -85,13 +204,13 @@ the necessary extra information like limits, units, etc...</li>
 
 <dl class="method">
 <dt id="sans.models.BaseModel.BaseModel.getParam">
-<tt class="descname">getParam</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.getParam" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParam</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.getParam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the value of a model parameter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> &#8211; name of the parameter</li>
 <li><strong>value</strong> &#8211; value of the parameter</li>
 </ul>
@@ -109,33 +228,38 @@ the necessary extra information like limits, units, etc...</li>
 
 <dl class="method">
 <dt id="sans.models.BaseModel.BaseModel.getParamListWithToken">
-<tt class="descname">getParamListWithToken</tt><big>(</big><em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.getParamListWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParamListWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.getParamListWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.models.BaseModel.BaseModel.getParamWithToken">
-<tt class="descname">getParamWithToken</tt><big>(</big><em>name</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.getParamWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParamWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.getParamWithToken" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.BaseModel.name">
+<tt class="descname">name</tt><em class="property"> = 'BaseModel'</em><a class="headerlink" href="#sans.models.BaseModel.BaseModel.name" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.models.BaseModel.BaseModel.run">
-<tt class="descname">run</tt><big>(</big><em>x=0</em><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.run" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.run" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.models.BaseModel.BaseModel.runXY">
-<tt class="descname">runXY</tt><big>(</big><em>x=0</em><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.runXY" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">runXY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.runXY" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.models.BaseModel.BaseModel.setParam">
-<tt class="descname">setParam</tt><big>(</big><em>name</em>, <em>value</em><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.setParam" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setParam</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.setParam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the value of a model parameter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> &#8211; name of the parameter</li>
 <li><strong>value</strong> &#8211; value of the parameter</li>
 </ul>
@@ -147,16 +271,105 @@ the necessary extra information like limits, units, etc...</li>
 
 <dl class="method">
 <dt id="sans.models.BaseModel.BaseModel.setParamWithToken">
-<tt class="descname">setParamWithToken</tt><big>(</big><em>name</em>, <em>value</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.setParamWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setParamWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.BaseModel.setParamWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="sans.models.BaseModel.Parameter">
-<em class="property">class </em><tt class="descclassname">sans.models.BaseModel.</tt><tt class="descname">Parameter</tt><big>(</big><em>name</em>, <em>value</em><big>)</big><a class="headerlink" href="#sans.models.BaseModel.Parameter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.models.BaseModel.</tt><tt class="descname">Parameter</tt><a class="headerlink" href="#sans.models.BaseModel.Parameter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>Parameter class</p>
+<dl class="attribute">
+<dt id="sans.models.BaseModel.Parameter.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.models.BaseModel.Parameter.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.Parameter.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.models.BaseModel.Parameter.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.Parameter.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x01DD53B0&gt;</em><a class="headerlink" href="#sans.models.BaseModel.Parameter.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.Parameter.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.models.BaseModel.Parameter.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.Parameter.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.models.BaseModel.Parameter.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BaseModel.Parameter.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.Parameter.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.Parameter.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.BaseModel'</em><a class="headerlink" href="#sans.models.BaseModel.Parameter.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.models.BaseModel.Parameter.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.models.BaseModel.Parameter.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BaseModel.Parameter.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.Parameter.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BaseModel.Parameter.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.Parameter.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.Parameter.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.models.BaseModel.Parameter.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.Parameter.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.models.BaseModel.Parameter.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BaseModel.Parameter.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BaseModel.Parameter.__str__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.Parameter.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.models.BaseModel.Parameter.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.Parameter.name">
+<tt class="descname">name</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.models.BaseModel.Parameter.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BaseModel.Parameter.value">
+<tt class="descname">value</tt><em class="property"> = 0.0</em><a class="headerlink" href="#sans.models.BaseModel.Parameter.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="attribute">
@@ -178,7 +391,7 @@ the parameter values</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">BaseModel</a><ul>
-<li><a class="reference internal" href="#module-sans.models.BaseModel"><tt class="docutils literal"><span class="pre">sans.models.BaseModel</span></tt></a></li>
+<li><a class="reference internal" href="#sans-models-basemodel"><tt class="docutils literal"><span class="pre">sans.models.BaseModel</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -197,7 +410,7 @@ the parameter values</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -226,13 +439,13 @@ the parameter values</p>
         <li class="right" >
           <a href="BaseComponent.html" title="BaseComponent"
              >previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

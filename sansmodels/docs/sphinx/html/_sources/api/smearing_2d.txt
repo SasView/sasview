@@ -12,4 +12,6 @@ smearing_2d
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+   :special-members:
+   :private-members:
 

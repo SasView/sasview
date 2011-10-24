@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>LineModel &mdash; sansmodels v0.1.0 documentation</title>
+    <title>LineModel &mdash; sansmodels 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="sansmodels v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="sansmodels 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="LogNormal" href="LogNormal.html" />
     <link rel="prev" title="LamellarPSModel" href="LamellarPSModel.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="LamellarPSModel.html" title="LamellarPSModel"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,9 +58,9 @@
             
   <div class="section" id="linemodel">
 <h1>LineModel<a class="headerlink" href="#linemodel" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.models.LineModel">
-<span id="sans-models-linemodel"></span><h2><a class="reference internal" href="#module-sans.models.LineModel" title="sans.models.LineModel"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.LineModel</span></tt></a><a class="headerlink" href="#module-sans.models.LineModel" title="Permalink to this headline">¶</a></h2>
-<p>Provide Line function (y= A + Bx) as a BaseComponent model</p>
+<div class="section" id="sans-models-linemodel">
+<h2><a class="reference internal" href="#module-sans.models.LineModel" title="sans.models.LineModel"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.LineModel</span></tt></a><a class="headerlink" href="#sans-models-linemodel" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.models.LineModel"></span><p>Provide Line function (y= A + Bx) as a BaseComponent model</p>
 <dl class="class">
 <dt id="sans.models.LineModel.LineModel">
 <em class="property">class </em><tt class="descclassname">sans.models.LineModel.</tt><tt class="descname">LineModel</tt><a class="headerlink" href="#sans.models.LineModel.LineModel" title="Permalink to this definition">¶</a></dt>
@@ -82,7 +85,7 @@ B = 1.0</dd>
 
 <dl class="method">
 <dt id="sans.models.LineModel.LineModel.evalDistribution">
-<tt class="descname">evalDistribution</tt><big>(</big><em>qdist</em><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.evalDistribution" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">evalDistribution</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.evalDistribution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate a distribution of q-values.</p>
 <ul>
 <li><p class="first">For 1D, a numpy array is expected as input:</p>
@@ -100,7 +103,7 @@ where 1D arrays,</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>qdist</strong> &#8211; ndarray of scalar q-values or list [qx,qy] 
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>qdist</strong> &#8211; ndarray of scalar q-values or list [qx,qy] 
 where qx,qy are 1D ndarrays</td>
 </tr>
 </tbody>
@@ -115,13 +118,13 @@ where qx,qy are 1D ndarrays</td>
 
 <dl class="method">
 <dt id="sans.models.LineModel.LineModel.getParam">
-<tt class="descname">getParam</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.getParam" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParam</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.getParam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the value of a model parameter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; name of the parameter</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; name of the parameter</td>
 </tr>
 </tbody>
 </table>
@@ -135,23 +138,23 @@ where qx,qy are 1D ndarrays</td>
 
 <dl class="method">
 <dt id="sans.models.LineModel.LineModel.getParamListWithToken">
-<tt class="descname">getParamListWithToken</tt><big>(</big><em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.getParamListWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParamListWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.getParamListWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.models.LineModel.LineModel.getParamWithToken">
-<tt class="descname">getParamWithToken</tt><big>(</big><em>name</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.getParamWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParamWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.getParamWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.models.LineModel.LineModel.is_fittable">
-<tt class="descname">is_fittable</tt><big>(</big><em>par_name</em><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.is_fittable" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_fittable</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.is_fittable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if a given parameter is fittable or not</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par_name</strong> &#8211; the parameter name to check</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par_name</strong> &#8211; the parameter name to check</td>
 </tr>
 </tbody>
 </table>
@@ -159,7 +162,7 @@ where qx,qy are 1D ndarrays</td>
 
 <dl class="method">
 <dt id="sans.models.LineModel.LineModel.run">
-<tt class="descname">run</tt><big>(</big><em>x=0.0</em><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.run" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the model
 &#64;param x: simple value
 &#64;return: (Line value)</p>
@@ -167,7 +170,7 @@ where qx,qy are 1D ndarrays</td>
 
 <dl class="method">
 <dt id="sans.models.LineModel.LineModel.runXY">
-<tt class="descname">runXY</tt><big>(</big><em>x=0.0</em><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.runXY" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">runXY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.runXY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the model
 &#64;param x: simple value
 &#64;return: Line value</p>
@@ -175,13 +178,13 @@ where qx,qy are 1D ndarrays</td>
 
 <dl class="method">
 <dt id="sans.models.LineModel.LineModel.setParam">
-<tt class="descname">setParam</tt><big>(</big><em>name</em>, <em>value</em><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.setParam" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setParam</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.setParam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the value of a model parameter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> &#8211; name of the parameter</li>
 <li><strong>value</strong> &#8211; value of the parameter</li>
 </ul>
@@ -193,7 +196,7 @@ where qx,qy are 1D ndarrays</td>
 
 <dl class="method">
 <dt id="sans.models.LineModel.LineModel.setParamWithToken">
-<tt class="descname">setParamWithToken</tt><big>(</big><em>name</em>, <em>value</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.setParamWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setParamWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.LineModel.LineModel.setParamWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -210,7 +213,7 @@ where qx,qy are 1D ndarrays</td>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">LineModel</a><ul>
-<li><a class="reference internal" href="#module-sans.models.LineModel"><tt class="docutils literal"><span class="pre">sans.models.LineModel</span></tt></a></li>
+<li><a class="reference internal" href="#sans-models-linemodel"><tt class="docutils literal"><span class="pre">sans.models.LineModel</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -229,7 +232,7 @@ where qx,qy are 1D ndarrays</td>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -258,13 +261,13 @@ where qx,qy are 1D ndarrays</td>
         <li class="right" >
           <a href="LamellarPSModel.html" title="LamellarPSModel"
              >previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

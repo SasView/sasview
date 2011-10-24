@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>BroadPeakModel &mdash; sansmodels v0.1.0 documentation</title>
+    <title>BroadPeakModel &mdash; sansmodels 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="sansmodels v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="sansmodels 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="CappedCylinderModel" href="CappedCylinderModel.html" />
     <link rel="prev" title="BinaryHSPSF11Model" href="BinaryHSPSF11Model.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="BinaryHSPSF11Model.html" title="BinaryHSPSF11Model"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,9 +58,9 @@
             
   <div class="section" id="broadpeakmodel">
 <h1>BroadPeakModel<a class="headerlink" href="#broadpeakmodel" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.models.BroadPeakModel">
-<span id="sans-models-broadpeakmodel"></span><h2><a class="reference internal" href="#module-sans.models.BroadPeakModel" title="sans.models.BroadPeakModel"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.BroadPeakModel</span></tt></a><a class="headerlink" href="#module-sans.models.BroadPeakModel" title="Permalink to this headline">¶</a></h2>
-<p>BroadPeakModel function as a BaseComponent model</p>
+<div class="section" id="sans-models-broadpeakmodel">
+<h2><a class="reference internal" href="#module-sans.models.BroadPeakModel" title="sans.models.BroadPeakModel"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.BroadPeakModel</span></tt></a><a class="headerlink" href="#sans-models-broadpeakmodel" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.models.BroadPeakModel"></span><p>BroadPeakModel function as a BaseComponent model</p>
 <dl class="class">
 <dt id="sans.models.BroadPeakModel.BroadPeakModel">
 <em class="property">class </em><tt class="descclassname">sans.models.BroadPeakModel.</tt><tt class="descname">BroadPeakModel</tt><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel" title="Permalink to this definition">¶</a></dt>
@@ -65,6 +68,63 @@
 <p>Class that evaluates a BroadPeakModel.
 I(q) = I(q) = scale_p/pow(qval,exponent)+scale_l/
 (1.0 + pow((qval*length_l),exponent_l) )+ background</p>
+<dl class="method">
+<dt id="sans.models.BroadPeakModel.BroadPeakModel.__add__">
+<tt class="descname">__add__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.__add__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BroadPeakModel.BroadPeakModel.__div__">
+<tt class="descname">__div__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.__div__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BroadPeakModel.BroadPeakModel.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.BroadPeakModel.BroadPeakModel.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.BroadPeakModel'</em><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BroadPeakModel.BroadPeakModel.__mul__">
+<tt class="descname">__mul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BroadPeakModel.BroadPeakModel.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">string representatio</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BroadPeakModel.BroadPeakModel.__sub__">
+<tt class="descname">__sub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BroadPeakModel.BroadPeakModel._broadpeak">
+<tt class="descname">_broadpeak</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel._broadpeak" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model definition</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.BroadPeakModel.BroadPeakModel._clone">
+<tt class="descname">_clone</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel._clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal utility function to copy the internal
+data members to a fresh copy.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="sans.models.BroadPeakModel.BroadPeakModel.calculate_ER">
 <tt class="descname">calculate_ER</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.calculate_ER" title="Permalink to this definition">¶</a></dt>
@@ -78,7 +138,7 @@ I(q) = I(q) = scale_p/pow(qval,exponent)+scale_l/
 
 <dl class="method">
 <dt id="sans.models.BroadPeakModel.BroadPeakModel.evalDistribution">
-<tt class="descname">evalDistribution</tt><big>(</big><em>qdist</em><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.evalDistribution" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">evalDistribution</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.evalDistribution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate a distribution of q-values.</p>
 <ul>
 <li><p class="first">For 1D, a numpy array is expected as input:</p>
@@ -103,7 +163,7 @@ q = [q[0], q[1], q[2], ....]</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Note :</th><td class="field-body"><p class="first">Due to 2D speed issue, no anisotropic scattering 
+<tr class="field-odd field"><th class="field-name">Note :</th><td class="field-body"><p class="first">Due to 2D speed issue, no anisotropic scattering 
 is supported for python models, thus C-models should have</p>
 <blockquote class="last">
 <div><p>their own evalDistribution methods.</p>
@@ -119,7 +179,7 @@ where q is a numpy array.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>qdist</strong> &#8211; ndarray of scalar q-values or list [qx,qy] 
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>qdist</strong> &#8211; ndarray of scalar q-values or list [qx,qy] 
 where qx,qy are 1D ndarrays</td>
 </tr>
 </tbody>
@@ -134,13 +194,13 @@ where qx,qy are 1D ndarrays</td>
 
 <dl class="method">
 <dt id="sans.models.BroadPeakModel.BroadPeakModel.getParam">
-<tt class="descname">getParam</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.getParam" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParam</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.getParam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the value of a model parameter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; name of the parameter</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; name of the parameter</td>
 </tr>
 </tbody>
 </table>
@@ -154,23 +214,23 @@ where qx,qy are 1D ndarrays</td>
 
 <dl class="method">
 <dt id="sans.models.BroadPeakModel.BroadPeakModel.getParamListWithToken">
-<tt class="descname">getParamListWithToken</tt><big>(</big><em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.getParamListWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParamListWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.getParamListWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.models.BroadPeakModel.BroadPeakModel.getParamWithToken">
-<tt class="descname">getParamWithToken</tt><big>(</big><em>name</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.getParamWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParamWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.getParamWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.models.BroadPeakModel.BroadPeakModel.is_fittable">
-<tt class="descname">is_fittable</tt><big>(</big><em>par_name</em><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.is_fittable" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_fittable</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.is_fittable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if a given parameter is fittable or not</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par_name</strong> &#8211; the parameter name to check</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par_name</strong> &#8211; the parameter name to check</td>
 </tr>
 </tbody>
 </table>
@@ -178,7 +238,7 @@ where qx,qy are 1D ndarrays</td>
 
 <dl class="method">
 <dt id="sans.models.BroadPeakModel.BroadPeakModel.run">
-<tt class="descname">run</tt><big>(</big><em>x=0.0</em><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.run" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the model</p>
 <p>param x: input q-value (float or [float, float] as [r, theta])
 return: (scattering value)</p>
@@ -186,7 +246,7 @@ return: (scattering value)</p>
 
 <dl class="method">
 <dt id="sans.models.BroadPeakModel.BroadPeakModel.runXY">
-<tt class="descname">runXY</tt><big>(</big><em>x=0.0</em><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.runXY" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">runXY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.runXY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the model</p>
 <p>param x: input q-value (float or [float, float] as [qx, qy])
 return: scattering value</p>
@@ -194,13 +254,13 @@ return: scattering value</p>
 
 <dl class="method">
 <dt id="sans.models.BroadPeakModel.BroadPeakModel.setParam">
-<tt class="descname">setParam</tt><big>(</big><em>name</em>, <em>value</em><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.setParam" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setParam</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.setParam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the value of a model parameter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> &#8211; name of the parameter</li>
 <li><strong>value</strong> &#8211; value of the parameter</li>
 </ul>
@@ -212,7 +272,7 @@ return: scattering value</p>
 
 <dl class="method">
 <dt id="sans.models.BroadPeakModel.BroadPeakModel.setParamWithToken">
-<tt class="descname">setParamWithToken</tt><big>(</big><em>name</em>, <em>value</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.setParamWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setParamWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.BroadPeakModel.BroadPeakModel.setParamWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -229,7 +289,7 @@ return: scattering value</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">BroadPeakModel</a><ul>
-<li><a class="reference internal" href="#module-sans.models.BroadPeakModel"><tt class="docutils literal"><span class="pre">sans.models.BroadPeakModel</span></tt></a></li>
+<li><a class="reference internal" href="#sans-models-broadpeakmodel"><tt class="docutils literal"><span class="pre">sans.models.BroadPeakModel</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -248,7 +308,7 @@ return: scattering value</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -277,13 +337,13 @@ return: scattering value</p>
         <li class="right" >
           <a href="BinaryHSPSF11Model.html" title="BinaryHSPSF11Model"
              >previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

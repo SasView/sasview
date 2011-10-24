@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>TeubnerStreyModel &mdash; sansmodels v0.1.0 documentation</title>
+    <title>TeubnerStreyModel &mdash; sansmodels 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="sansmodels v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="sansmodels 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="TriaxialEllipsoidModel" href="TriaxialEllipsoidModel.html" />
     <link rel="prev" title="SubComponent" href="SubComponent.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="SubComponent.html" title="SubComponent"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,9 +58,9 @@
             
   <div class="section" id="teubnerstreymodel">
 <h1>TeubnerStreyModel<a class="headerlink" href="#teubnerstreymodel" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.models.TeubnerStreyModel">
-<span id="sans-models-teubnerstreymodel"></span><h2><a class="reference internal" href="#module-sans.models.TeubnerStreyModel" title="sans.models.TeubnerStreyModel"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.TeubnerStreyModel</span></tt></a><a class="headerlink" href="#module-sans.models.TeubnerStreyModel" title="Permalink to this headline">¶</a></h2>
-<p>Provide F(x) = 1/( scale + c1*(x)^(2)+  c2*(x)^(4)) + bkd
+<div class="section" id="sans-models-teubnerstreymodel">
+<h2><a class="reference internal" href="#module-sans.models.TeubnerStreyModel" title="sans.models.TeubnerStreyModel"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.TeubnerStreyModel</span></tt></a><a class="headerlink" href="#sans-models-teubnerstreymodel" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.models.TeubnerStreyModel"></span><p>Provide F(x) = 1/( scale + c1*(x)^(2)+  c2*(x)^(4)) + bkd
 Teubner-Strey function as a BaseComponent model</p>
 <dl class="class">
 <dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel">
@@ -73,6 +76,63 @@ c2     =  constant
 bkd    =  incoherent background</dd>
 </dl>
 <dl class="method">
+<dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel._TeubnerStrey">
+<tt class="descname">_TeubnerStrey</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel._TeubnerStrey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate  F(x) = 1/( scale + c1*(x)^(2)+  c2*(x)^(4)) + bkd</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.__add__">
+<tt class="descname">__add__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.__add__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.__div__">
+<tt class="descname">__div__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.__div__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.TeubnerStreyModel'</em><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.__mul__">
+<tt class="descname">__mul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">string representatio</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.__sub__">
+<tt class="descname">__sub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel._clone">
+<tt class="descname">_clone</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel._clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal utility function to copy the internal
+data members to a fresh copy.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.calculate_ER">
 <tt class="descname">calculate_ER</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.calculate_ER" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -85,7 +145,7 @@ bkd    =  incoherent background</dd>
 
 <dl class="method">
 <dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.evalDistribution">
-<tt class="descname">evalDistribution</tt><big>(</big><em>qdist</em><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.evalDistribution" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">evalDistribution</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.evalDistribution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate a distribution of q-values.</p>
 <ul>
 <li><p class="first">For 1D, a numpy array is expected as input:</p>
@@ -110,7 +170,7 @@ q = [q[0], q[1], q[2], ....]</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Note :</th><td class="field-body"><p class="first">Due to 2D speed issue, no anisotropic scattering 
+<tr class="field-odd field"><th class="field-name">Note :</th><td class="field-body"><p class="first">Due to 2D speed issue, no anisotropic scattering 
 is supported for python models, thus C-models should have</p>
 <blockquote class="last">
 <div><p>their own evalDistribution methods.</p>
@@ -126,7 +186,7 @@ where q is a numpy array.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>qdist</strong> &#8211; ndarray of scalar q-values or list [qx,qy] 
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>qdist</strong> &#8211; ndarray of scalar q-values or list [qx,qy] 
 where qx,qy are 1D ndarrays</td>
 </tr>
 </tbody>
@@ -141,13 +201,13 @@ where qx,qy are 1D ndarrays</td>
 
 <dl class="method">
 <dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.getParam">
-<tt class="descname">getParam</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.getParam" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParam</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.getParam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the value of a model parameter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; name of the parameter</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; name of the parameter</td>
 </tr>
 </tbody>
 </table>
@@ -161,23 +221,23 @@ where qx,qy are 1D ndarrays</td>
 
 <dl class="method">
 <dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.getParamListWithToken">
-<tt class="descname">getParamListWithToken</tt><big>(</big><em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.getParamListWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParamListWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.getParamListWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.getParamWithToken">
-<tt class="descname">getParamWithToken</tt><big>(</big><em>name</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.getParamWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParamWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.getParamWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.is_fittable">
-<tt class="descname">is_fittable</tt><big>(</big><em>par_name</em><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.is_fittable" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_fittable</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.is_fittable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if a given parameter is fittable or not</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par_name</strong> &#8211; the parameter name to check</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par_name</strong> &#8211; the parameter name to check</td>
 </tr>
 </tbody>
 </table>
@@ -185,7 +245,7 @@ where qx,qy are 1D ndarrays</td>
 
 <dl class="method">
 <dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.run">
-<tt class="descname">run</tt><big>(</big><em>x=0.0</em><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.run" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the model
 &#64;param x: input q-value (float or [float, float] as [r, theta])
 &#64;return: (PowerLaw value)</p>
@@ -193,7 +253,7 @@ where qx,qy are 1D ndarrays</td>
 
 <dl class="method">
 <dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.runXY">
-<tt class="descname">runXY</tt><big>(</big><em>x=0.0</em><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.runXY" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">runXY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.runXY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the model
 &#64;param x: input q-value (float or [float, float] as [qx, qy])
 &#64;return: PowerLaw value</p>
@@ -201,13 +261,13 @@ where qx,qy are 1D ndarrays</td>
 
 <dl class="method">
 <dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.setParam">
-<tt class="descname">setParam</tt><big>(</big><em>name</em>, <em>value</em><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.setParam" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setParam</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.setParam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the value of a model parameter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> &#8211; name of the parameter</li>
 <li><strong>value</strong> &#8211; value of the parameter</li>
 </ul>
@@ -219,7 +279,7 @@ where qx,qy are 1D ndarrays</td>
 
 <dl class="method">
 <dt id="sans.models.TeubnerStreyModel.TeubnerStreyModel.setParamWithToken">
-<tt class="descname">setParamWithToken</tt><big>(</big><em>name</em>, <em>value</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.setParamWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setParamWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.TeubnerStreyModel.TeubnerStreyModel.setParamWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -250,7 +310,7 @@ where qx,qy are 1D ndarrays</td>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">TeubnerStreyModel</a><ul>
-<li><a class="reference internal" href="#module-sans.models.TeubnerStreyModel"><tt class="docutils literal"><span class="pre">sans.models.TeubnerStreyModel</span></tt></a></li>
+<li><a class="reference internal" href="#sans-models-teubnerstreymodel"><tt class="docutils literal"><span class="pre">sans.models.TeubnerStreyModel</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -269,7 +329,7 @@ where qx,qy are 1D ndarrays</td>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -298,13 +358,13 @@ where qx,qy are 1D ndarrays</td>
         <li class="right" >
           <a href="SubComponent.html" title="SubComponent"
              >previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

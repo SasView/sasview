@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>FractalAbsModel &mdash; sansmodels v0.1.0 documentation</title>
+    <title>FractalAbsModel &mdash; sansmodels 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="sansmodels v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="sansmodels 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="FractalCoreShellModel" href="FractalCoreShellModel.html" />
     <link rel="prev" title="FlexibleCylinderModel" href="FlexibleCylinderModel.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="FlexibleCylinderModel.html" title="FlexibleCylinderModel"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,16 +58,16 @@
             
   <div class="section" id="fractalabsmodel">
 <h1>FractalAbsModel<a class="headerlink" href="#fractalabsmodel" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.models.FractalAbsModel">
-<span id="sans-models-fractalabsmodel"></span><h2><a class="reference internal" href="#module-sans.models.FractalAbsModel" title="sans.models.FractalAbsModel"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.FractalAbsModel</span></tt></a><a class="headerlink" href="#module-sans.models.FractalAbsModel" title="Permalink to this headline">¶</a></h2>
-<p>Provide F(x)= P(<a href="#id1"><span class="problematic" id="id2">|x|</span></a>)*S(<a href="#id3"><span class="problematic" id="id4">|x|</span></a>) + bkd
+<div class="section" id="sans-models-fractalabsmodel">
+<h2><a class="reference internal" href="#module-sans.models.FractalAbsModel" title="sans.models.FractalAbsModel"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.FractalAbsModel</span></tt></a><a class="headerlink" href="#sans-models-fractalabsmodel" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.models.FractalAbsModel"></span><p>Provide F(x)= P(<a href="#id3"><span class="problematic" id="id4">|x|</span></a>)*S(<a href="#id5"><span class="problematic" id="id6">|x|</span></a>) + bkd
 Fractal as a BaseComponent model</p>
 <dl class="class">
 <dt id="sans.models.FractalAbsModel.FractalAbsModel">
 <em class="property">class </em><tt class="descclassname">sans.models.FractalAbsModel.</tt><tt class="descname">FractalAbsModel</tt><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="FractalModel.html#sans.models.FractalModel.FractalModel" title="sans.models.FractalModel.FractalModel"><tt class="xref py py-class docutils literal"><span class="pre">sans.models.FractalModel.FractalModel</span></tt></a></p>
 <p>Class that evaluates a Fractal function.</p>
-<p>F(<a href="#id5"><span class="problematic" id="id6">|x|</span></a>)= P(<a href="#id7"><span class="problematic" id="id8">|x|</span></a>)*S(<a href="#id9"><span class="problematic" id="id10">|x|</span></a>) + bkd
+<p>F(<a href="#id7"><span class="problematic" id="id8">|x|</span></a>)= P(<a href="#id9"><span class="problematic" id="id10">|x|</span></a>)*S(<a href="#id11"><span class="problematic" id="id12">|x|</span></a>) + bkd
 The model has Seven parameters:</p>
 <blockquote>
 <div>scale        =  Volume fraction
@@ -75,6 +78,126 @@ block_sld    =  SDL block
 solvent_sld  =  SDL solvent
 background   =  background</div></blockquote>
 <dl class="method">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel._Fractal">
+<tt class="descname">_Fractal</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel._Fractal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__add__">
+<tt class="descname">__add__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__add__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x02270330&gt;</em><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__div__">
+<tt class="descname">__div__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__div__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.FractalAbsModel'</em><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__mul__">
+<tt class="descname">__mul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overwrite the __reduce_ex__ of PyTypeObject <a href="#id1"><span class="problematic" id="id2">*</span></a>type call in the init of 
+c model.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__setstate__">
+<tt class="descname">__setstate__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__setstate__" title="Permalink to this definition">¶</a></dt>
+<dd><p>restore the state of a model from pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__sub__">
+<tt class="descname">__sub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.FractalAbsModel.FractalAbsModel._clone">
+<tt class="descname">_clone</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel._clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal utility function to copy the internal
+data members to a fresh copy.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="sans.models.FractalAbsModel.FractalAbsModel.calculate_ER">
 <tt class="descname">calculate_ER</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.calculate_ER" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the effective radius for P(q)*S(q)</p>
@@ -82,7 +205,7 @@ background   =  background</div></blockquote>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">the value of the effective radius</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the value of the effective radius</td>
 </tr>
 </tbody>
 </table>
@@ -102,15 +225,15 @@ background   =  background</div></blockquote>
 
 <dl class="method">
 <dt id="sans.models.FractalAbsModel.FractalAbsModel.evalDistribution">
-<tt class="descname">evalDistribution</tt><big>(</big><em>x=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.evalDistribution" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">evalDistribution</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.evalDistribution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the model in cartesian coordinates</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; input q[], or [qx[], qy[]]</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; input q[], or [qx[], qy[]]</td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">scattering function P(q[])</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">scattering function P(q[])</td>
 </tr>
 </tbody>
 </table>
@@ -124,13 +247,13 @@ background   =  background</div></blockquote>
 
 <dl class="method">
 <dt id="sans.models.FractalAbsModel.FractalAbsModel.getParam">
-<tt class="descname">getParam</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.getParam" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParam</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.getParam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the value of a model parameter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; name of the parameter</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; name of the parameter</td>
 </tr>
 </tbody>
 </table>
@@ -144,23 +267,23 @@ background   =  background</div></blockquote>
 
 <dl class="method">
 <dt id="sans.models.FractalAbsModel.FractalAbsModel.getParamListWithToken">
-<tt class="descname">getParamListWithToken</tt><big>(</big><em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.getParamListWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParamListWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.getParamListWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.models.FractalAbsModel.FractalAbsModel.getParamWithToken">
-<tt class="descname">getParamWithToken</tt><big>(</big><em>name</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.getParamWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParamWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.getParamWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.models.FractalAbsModel.FractalAbsModel.is_fittable">
-<tt class="descname">is_fittable</tt><big>(</big><em>par_name</em><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.is_fittable" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_fittable</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.is_fittable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if a given parameter is fittable or not</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par_name</strong> &#8211; the parameter name to check</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par_name</strong> &#8211; the parameter name to check</td>
 </tr>
 </tbody>
 </table>
@@ -178,23 +301,23 @@ background   =  background</div></blockquote>
 <dd><p>Parameters</p>
 </dd></dl>
 
-<dl class="attribute">
+<dl class="method">
 <dt id="sans.models.FractalAbsModel.FractalAbsModel.reset">
-<tt class="descname">reset</tt><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.reset" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.reset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reset pair correlation</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.models.FractalAbsModel.FractalAbsModel.run">
-<tt class="descname">run</tt><big>(</big><em>x=0.0</em><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.run" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the model</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; input q, or [q,phi]</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; input q, or [q,phi]</td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">scattering function P(q)</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">scattering function P(q)</td>
 </tr>
 </tbody>
 </table>
@@ -202,15 +325,15 @@ background   =  background</div></blockquote>
 
 <dl class="method">
 <dt id="sans.models.FractalAbsModel.FractalAbsModel.runXY">
-<tt class="descname">runXY</tt><big>(</big><em>x=0.0</em><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.runXY" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">runXY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.runXY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the model in cartesian coordinates</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; input q, or [qx, qy]</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>x</strong> &#8211; input q, or [qx, qy]</td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">scattering function P(q)</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">scattering function P(q)</td>
 </tr>
 </tbody>
 </table>
@@ -218,13 +341,13 @@ background   =  background</div></blockquote>
 
 <dl class="method">
 <dt id="sans.models.FractalAbsModel.FractalAbsModel.setParam">
-<tt class="descname">setParam</tt><big>(</big><em>name</em>, <em>value</em><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.setParam" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setParam</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.setParam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the value of a model parameter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> &#8211; name of the parameter</li>
 <li><strong>value</strong> &#8211; value of the parameter</li>
 </ul>
@@ -236,18 +359,18 @@ background   =  background</div></blockquote>
 
 <dl class="method">
 <dt id="sans.models.FractalAbsModel.FractalAbsModel.setParamWithToken">
-<tt class="descname">setParamWithToken</tt><big>(</big><em>name</em>, <em>value</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.setParamWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setParamWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.setParamWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.models.FractalAbsModel.FractalAbsModel.set_dispersion">
-<tt class="descname">set_dispersion</tt><big>(</big><em>parameter</em>, <em>dispersion</em><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.set_dispersion" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dispersion</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.FractalAbsModel.FractalAbsModel.set_dispersion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the dispersion object for a model parameter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>parameter</strong> &#8211; name of the parameter [string]</li>
 <li><strong>dispersion</strong> &#8211; dispersion object of type DispersionModel</li>
 </ul>
@@ -271,7 +394,7 @@ background   =  background</div></blockquote>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">FractalAbsModel</a><ul>
-<li><a class="reference internal" href="#module-sans.models.FractalAbsModel"><tt class="docutils literal"><span class="pre">sans.models.FractalAbsModel</span></tt></a></li>
+<li><a class="reference internal" href="#sans-models-fractalabsmodel"><tt class="docutils literal"><span class="pre">sans.models.FractalAbsModel</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -290,7 +413,7 @@ background   =  background</div></blockquote>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -319,13 +442,13 @@ background   =  background</div></blockquote>
         <li class="right" >
           <a href="FlexibleCylinderModel.html" title="FlexibleCylinderModel"
              >previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

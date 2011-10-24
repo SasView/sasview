@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dispersion_models &mdash; sansmodels v0.1.0 documentation</title>
+    <title>dispersion_models &mdash; sansmodels 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="sansmodels v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="sansmodels 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="DivComponent" href="DivComponent.html" />
     <link rel="prev" title="DisperseModel" href="DisperseModel.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="DisperseModel.html" title="DisperseModel"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,9 +58,9 @@
             
   <div class="section" id="dispersion-models">
 <h1>dispersion_models<a class="headerlink" href="#dispersion-models" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.models.dispersion_models">
-<span id="sans-models-dispersion-models"></span><h2><a class="reference internal" href="#module-sans.models.dispersion_models" title="sans.models.dispersion_models"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.dispersion_models</span></tt></a><a class="headerlink" href="#module-sans.models.dispersion_models" title="Permalink to this headline">¶</a></h2>
-<p>Class definitions for python dispersion model for 
+<div class="section" id="sans-models-dispersion-models">
+<h2><a class="reference internal" href="#module-sans.models.dispersion_models" title="sans.models.dispersion_models"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.dispersion_models</span></tt></a><a class="headerlink" href="#sans-models-dispersion-models" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.models.dispersion_models"></span><p>Class definitions for python dispersion model for 
 model parameters. These classes are bridges to the C++
 dispersion object.</p>
 <p>The ArrayDispersion class takes in numpy arrays only.</p>
@@ -75,7 +78,7 @@ parameter through the dispersion dictionary:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">TODO:</th><td class="field-body">For backward compatibility, the model parameters are still kept in
+<tr class="field-odd field"><th class="field-name">TODO:</th><td class="field-body">For backward compatibility, the model parameters are still kept in
 a dictionary. The next iteration of refactoring work should involve moving
 away from value-based parameters to object-based parameter. We want to
 store parameters as objects so that we can unify the &#8216;params&#8217; and &#8216;dispersion&#8217;
@@ -93,15 +96,25 @@ The user has to set a weight distribution that
 will be used in the averaging the model parameter
 it is applied to.</p>
 <dl class="method">
+<dt id="sans.models.dispersion_models.ArrayDispersion.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.ArrayDispersion.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.dispersion_models.ArrayDispersion.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.dispersion_models'</em><a class="headerlink" href="#sans.models.dispersion_models.ArrayDispersion.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="sans.models.dispersion_models.ArrayDispersion.set_weights">
-<tt class="descname">set_weights</tt><big>(</big><em>values</em>, <em>weights</em><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.ArrayDispersion.set_weights" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_weights</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.ArrayDispersion.set_weights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the weights of an array dispersion
 Only accept numpy arrays.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>values</strong> &#8211; numpy array of values</li>
 <li><strong>weights</strong> &#8211; numpy array of weights for each value entry</li>
 </ul>
@@ -119,8 +132,18 @@ Only accept numpy arrays.</p>
 <dd><p>Python bridge class for a basic dispersion model 
 class with a constant parameter value distribution</p>
 <dl class="method">
+<dt id="sans.models.dispersion_models.DispersionModel.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.DispersionModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.dispersion_models.DispersionModel.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.dispersion_models'</em><a class="headerlink" href="#sans.models.dispersion_models.DispersionModel.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="sans.models.dispersion_models.DispersionModel.set_weights">
-<tt class="descname">set_weights</tt><big>(</big><em>values</em>, <em>weights</em><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.DispersionModel.set_weights" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_weights</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.DispersionModel.set_weights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the weights of an array dispersion</p>
 </dd></dl>
 
@@ -133,8 +156,18 @@ class with a constant parameter value distribution</p>
 <p>Python bridge class for a dispersion model based 
 on a Gaussian distribution.</p>
 <dl class="method">
+<dt id="sans.models.dispersion_models.GaussianDispersion.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.GaussianDispersion.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.dispersion_models.GaussianDispersion.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.dispersion_models'</em><a class="headerlink" href="#sans.models.dispersion_models.GaussianDispersion.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="sans.models.dispersion_models.GaussianDispersion.set_weights">
-<tt class="descname">set_weights</tt><big>(</big><em>values</em>, <em>weights</em><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.GaussianDispersion.set_weights" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_weights</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.GaussianDispersion.set_weights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the weights of an array dispersion</p>
 </dd></dl>
 
@@ -147,8 +180,18 @@ on a Gaussian distribution.</p>
 <p>Python bridge class for a dispersion model based 
 on a Log Normal distribution.</p>
 <dl class="method">
+<dt id="sans.models.dispersion_models.LogNormalDispersion.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.LogNormalDispersion.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.dispersion_models.LogNormalDispersion.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.dispersion_models'</em><a class="headerlink" href="#sans.models.dispersion_models.LogNormalDispersion.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="sans.models.dispersion_models.LogNormalDispersion.set_weights">
-<tt class="descname">set_weights</tt><big>(</big><em>values</em>, <em>weights</em><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.LogNormalDispersion.set_weights" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_weights</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.LogNormalDispersion.set_weights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the weights of an array dispersion</p>
 </dd></dl>
 
@@ -161,8 +204,18 @@ on a Log Normal distribution.</p>
 <p>Python bridge class for a dispersion model based 
 on a Gaussian distribution.</p>
 <dl class="method">
+<dt id="sans.models.dispersion_models.RectangleDispersion.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.RectangleDispersion.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.dispersion_models.RectangleDispersion.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.dispersion_models'</em><a class="headerlink" href="#sans.models.dispersion_models.RectangleDispersion.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="sans.models.dispersion_models.RectangleDispersion.set_weights">
-<tt class="descname">set_weights</tt><big>(</big><em>values</em>, <em>weights</em><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.RectangleDispersion.set_weights" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_weights</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.RectangleDispersion.set_weights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the weights of an array dispersion</p>
 </dd></dl>
 
@@ -175,8 +228,18 @@ on a Gaussian distribution.</p>
 <p>Python bridge class for a dispersion model based 
 on a Schulz distribution.</p>
 <dl class="method">
+<dt id="sans.models.dispersion_models.SchulzDispersion.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.SchulzDispersion.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.dispersion_models.SchulzDispersion.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.dispersion_models'</em><a class="headerlink" href="#sans.models.dispersion_models.SchulzDispersion.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="sans.models.dispersion_models.SchulzDispersion.set_weights">
-<tt class="descname">set_weights</tt><big>(</big><em>values</em>, <em>weights</em><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.SchulzDispersion.set_weights" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_weights</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.dispersion_models.SchulzDispersion.set_weights" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the weights of an array dispersion</p>
 </dd></dl>
 
@@ -194,7 +257,7 @@ on a Schulz distribution.</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">dispersion_models</a><ul>
-<li><a class="reference internal" href="#module-sans.models.dispersion_models"><tt class="docutils literal"><span class="pre">sans.models.dispersion_models</span></tt></a></li>
+<li><a class="reference internal" href="#sans-models-dispersion-models"><tt class="docutils literal"><span class="pre">sans.models.dispersion_models</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -213,7 +276,7 @@ on a Schulz distribution.</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -242,13 +305,13 @@ on a Schulz distribution.</p>
         <li class="right" >
           <a href="DisperseModel.html" title="DisperseModel"
              >previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

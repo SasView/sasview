@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>qsmearing &mdash; sansmodels v0.1.0 documentation</title>
+    <title>qsmearing &mdash; sansmodels 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="sansmodels v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="sansmodels 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="ReflAdvModel" href="ReflAdvModel.html" />
     <link rel="prev" title="ProlateModel" href="ProlateModel.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="ProlateModel.html" title="ProlateModel"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,21 +58,154 @@
             
   <div class="section" id="qsmearing">
 <h1>qsmearing<a class="headerlink" href="#qsmearing" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.models.qsmearing">
-<span id="sans-models-qsmearing"></span><h2><a class="reference internal" href="#module-sans.models.qsmearing" title="sans.models.qsmearing"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.qsmearing</span></tt></a><a class="headerlink" href="#module-sans.models.qsmearing" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<div class="section" id="sans-models-qsmearing">
+<h2><a class="reference internal" href="#module-sans.models.qsmearing" title="sans.models.qsmearing"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.qsmearing</span></tt></a><a class="headerlink" href="#sans-models-qsmearing" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.models.qsmearing"></span><dl class="class">
 <dt id="sans.models.qsmearing.QSmearer">
-<em class="property">class </em><tt class="descclassname">sans.models.qsmearing.</tt><tt class="descname">QSmearer</tt><big>(</big><em>data1D</em>, <em>model=None</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.models.qsmearing._QSmearer</span></tt></p>
+<em class="property">class </em><tt class="descclassname">sans.models.qsmearing.</tt><tt class="descname">QSmearer</tt><a class="headerlink" href="#sans.models.qsmearing.QSmearer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sans.models.qsmearing._QSmearer" title="sans.models.qsmearing._QSmearer"><tt class="xref py py-class docutils literal"><span class="pre">sans.models.qsmearing._QSmearer</span></tt></a></p>
 <p>Adaptor for Gaussian Q smearing class and SANS data</p>
 <dl class="method">
+<dt id="sans.models.qsmearing.QSmearer.__call__">
+<tt class="descname">__call__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform smearing</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.QSmearer.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.models.qsmearing.QSmearer.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.QSmearer.__deepcopy__">
+<tt class="descname">__deepcopy__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer.__deepcopy__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a valid copy of self.
+Avoid copying the _smearer C object and force a matrix recompute
+when the copy is used.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.QSmearer.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.models.qsmearing.QSmearer.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.QSmearer.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x02933CD0&gt;</em><a class="headerlink" href="#sans.models.qsmearing.QSmearer.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.QSmearer.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.models.qsmearing.QSmearer.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.QSmearer.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.models.qsmearing.QSmearer.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.QSmearer.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assumption: equally spaced bins of increasing q-values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data1D</strong> &#8211; data used to set the smearing parameters</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.QSmearer.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.qsmearing'</em><a class="headerlink" href="#sans.models.qsmearing.QSmearer.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.models.qsmearing.QSmearer.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.models.qsmearing.QSmearer.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.QSmearer.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.QSmearer.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.QSmearer.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.models.qsmearing.QSmearer.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.QSmearer.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.models.qsmearing.QSmearer.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.QSmearer.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.models.qsmearing.QSmearer.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.QSmearer.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.models.qsmearing.QSmearer.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.QSmearer._compute_matrix">
+<tt class="descname">_compute_matrix</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer._compute_matrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.QSmearer._get_extrapolated_bin">
+<tt class="descname">_get_extrapolated_bin</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer._get_extrapolated_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get extrapolated first bin and the last bin</p>
+<p>: param first_bin: unextrapolated first_bin
+: param last_bin: unextrapolated last_bin</p>
+<p>: return first_bin, last_bin: extrapolated first and last bin</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.QSmearer._get_unextrapolated_bin">
+<tt class="descname">_get_unextrapolated_bin</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer._get_unextrapolated_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get unextrapolated first bin and the last bin</p>
+<p>: param first_bin: extrapolated first_bin
+: param last_bin: extrapolated last_bin</p>
+<p>: return fist_bin, last_bin: unextrapolated first and last bin</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.QSmearer._initialize_smearer">
+<tt class="descname">_initialize_smearer</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer._initialize_smearer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the C++ smearer object.
+This method HAS to be called before smearing</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="sans.models.qsmearing.QSmearer.get_bin_range">
-<tt class="descname">get_bin_range</tt><big>(</big><em>q_min=None</em>, <em>q_max=None</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer.get_bin_range" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_bin_range</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer.get_bin_range" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>q_min</strong> &#8211; minimum q-value to smear</li>
 <li><strong>q_max</strong> &#8211; maximum q-value to smear</li>
 </ul>
@@ -81,7 +217,7 @@
 
 <dl class="method">
 <dt id="sans.models.qsmearing.QSmearer.get_unsmeared_range">
-<tt class="descname">get_unsmeared_range</tt><big>(</big><em>q_min</em>, <em>q_max</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer.get_unsmeared_range" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_unsmeared_range</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.QSmearer.get_unsmeared_range" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determine the range needed in unsmeared-Q to cover
 the smeared Q range
 Take 3 sigmas as the offset between smeared and unsmeared space</p>
@@ -91,17 +227,150 @@ Take 3 sigmas as the offset between smeared and unsmeared space</p>
 
 <dl class="class">
 <dt id="sans.models.qsmearing.SlitSmearer">
-<em class="property">class </em><tt class="descclassname">sans.models.qsmearing.</tt><tt class="descname">SlitSmearer</tt><big>(</big><em>data1D</em>, <em>model=None</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.models.qsmearing._SlitSmearer</span></tt></p>
+<em class="property">class </em><tt class="descclassname">sans.models.qsmearing.</tt><tt class="descname">SlitSmearer</tt><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sans.models.qsmearing._SlitSmearer" title="sans.models.qsmearing._SlitSmearer"><tt class="xref py py-class docutils literal"><span class="pre">sans.models.qsmearing._SlitSmearer</span></tt></a></p>
 <p>Adaptor for slit smearing class and SANS data</p>
 <dl class="method">
+<dt id="sans.models.qsmearing.SlitSmearer.__call__">
+<tt class="descname">__call__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform smearing</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.SlitSmearer.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.SlitSmearer.__deepcopy__">
+<tt class="descname">__deepcopy__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__deepcopy__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a valid copy of self.
+Avoid copying the _smearer C object and force a matrix recompute
+when the copy is used.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.SlitSmearer.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.SlitSmearer.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x02933CB0&gt;</em><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.SlitSmearer.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.SlitSmearer.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.SlitSmearer.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assumption: equally spaced bins of increasing q-values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data1D</strong> &#8211; data used to set the smearing parameters</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.SlitSmearer.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.qsmearing'</em><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.models.qsmearing.SlitSmearer.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.SlitSmearer.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.SlitSmearer.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.SlitSmearer.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.SlitSmearer.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.SlitSmearer.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing.SlitSmearer.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.SlitSmearer._compute_matrix">
+<tt class="descname">_compute_matrix</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer._compute_matrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.SlitSmearer._get_extrapolated_bin">
+<tt class="descname">_get_extrapolated_bin</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer._get_extrapolated_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get extrapolated first bin and the last bin</p>
+<p>: param first_bin: unextrapolated first_bin
+: param last_bin: unextrapolated last_bin</p>
+<p>: return first_bin, last_bin: extrapolated first and last bin</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.SlitSmearer._get_unextrapolated_bin">
+<tt class="descname">_get_unextrapolated_bin</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer._get_unextrapolated_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get unextrapolated first bin and the last bin</p>
+<p>: param first_bin: extrapolated first_bin
+: param last_bin: extrapolated last_bin</p>
+<p>: return fist_bin, last_bin: unextrapolated first and last bin</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing.SlitSmearer._initialize_smearer">
+<tt class="descname">_initialize_smearer</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer._initialize_smearer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the C++ smearer object.
+This method HAS to be called before smearing</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="sans.models.qsmearing.SlitSmearer.get_bin_range">
-<tt class="descname">get_bin_range</tt><big>(</big><em>q_min=None</em>, <em>q_max=None</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.get_bin_range" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_bin_range</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.get_bin_range" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>q_min</strong> &#8211; minimum q-value to smear</li>
 <li><strong>q_max</strong> &#8211; maximum q-value to smear</li>
 </ul>
@@ -113,7 +382,494 @@ Take 3 sigmas as the offset between smeared and unsmeared space</p>
 
 <dl class="method">
 <dt id="sans.models.qsmearing.SlitSmearer.get_unsmeared_range">
-<tt class="descname">get_unsmeared_range</tt><big>(</big><em>q_min</em>, <em>q_max</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.get_unsmeared_range" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_unsmeared_range</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.SlitSmearer.get_unsmeared_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the range needed in unsmeared-Q to cover
+the smeared Q range</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.models.qsmearing._BaseSmearer">
+<em class="property">class </em><tt class="descclassname">sans.models.qsmearing.</tt><tt class="descname">_BaseSmearer</tt><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="sans.models.qsmearing._BaseSmearer.__call__">
+<tt class="descname">__call__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform smearing</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._BaseSmearer.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._BaseSmearer.__deepcopy__">
+<tt class="descname">__deepcopy__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__deepcopy__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a valid copy of self.
+Avoid copying the _smearer C object and force a matrix recompute
+when the copy is used.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._BaseSmearer.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._BaseSmearer.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x026EAB70&gt;</em><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._BaseSmearer.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._BaseSmearer.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._BaseSmearer.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._BaseSmearer.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.qsmearing'</em><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.models.qsmearing._BaseSmearer.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._BaseSmearer.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._BaseSmearer.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._BaseSmearer.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._BaseSmearer.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._BaseSmearer.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._BaseSmearer.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._BaseSmearer._compute_matrix">
+<tt class="descname">_compute_matrix</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer._compute_matrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._BaseSmearer._get_extrapolated_bin">
+<tt class="descname">_get_extrapolated_bin</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer._get_extrapolated_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get extrapolated first bin and the last bin</p>
+<p>: param first_bin: unextrapolated first_bin
+: param last_bin: unextrapolated last_bin</p>
+<p>: return first_bin, last_bin: extrapolated first and last bin</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._BaseSmearer._get_unextrapolated_bin">
+<tt class="descname">_get_unextrapolated_bin</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer._get_unextrapolated_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get unextrapolated first bin and the last bin</p>
+<p>: param first_bin: extrapolated first_bin
+: param last_bin: extrapolated last_bin</p>
+<p>: return fist_bin, last_bin: unextrapolated first and last bin</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._BaseSmearer._initialize_smearer">
+<tt class="descname">_initialize_smearer</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer._initialize_smearer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._BaseSmearer.get_bin_range">
+<tt class="descname">get_bin_range</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._BaseSmearer.get_bin_range" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>q_min</strong> &#8211; minimum q-value to smear</li>
+<li><strong>q_max</strong> &#8211; maximum q-value to smear</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.models.qsmearing._QSmearer">
+<em class="property">class </em><tt class="descclassname">sans.models.qsmearing.</tt><tt class="descname">_QSmearer</tt><a class="headerlink" href="#sans.models.qsmearing._QSmearer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sans.models.qsmearing._BaseSmearer" title="sans.models.qsmearing._BaseSmearer"><tt class="xref py py-class docutils literal"><span class="pre">sans.models.qsmearing._BaseSmearer</span></tt></a></p>
+<p>Perform Gaussian Q smearing</p>
+<dl class="method">
+<dt id="sans.models.qsmearing._QSmearer.__call__">
+<tt class="descname">__call__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._QSmearer.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform smearing</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._QSmearer.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.models.qsmearing._QSmearer.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._QSmearer.__deepcopy__">
+<tt class="descname">__deepcopy__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._QSmearer.__deepcopy__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a valid copy of self.
+Avoid copying the _smearer C object and force a matrix recompute
+when the copy is used.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._QSmearer.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.models.qsmearing._QSmearer.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._QSmearer.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x02933890&gt;</em><a class="headerlink" href="#sans.models.qsmearing._QSmearer.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._QSmearer.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.models.qsmearing._QSmearer.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._QSmearer.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.models.qsmearing._QSmearer.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._QSmearer.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._QSmearer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nbins</strong> &#8211; number of Q bins</li>
+<li><strong>width</strong> &#8211; array standard deviation in Q [A-1]</li>
+<li><strong>min</strong> &#8211; Q_min [A-1]</li>
+<li><strong>max</strong> &#8211; Q_max [A-1]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._QSmearer.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.qsmearing'</em><a class="headerlink" href="#sans.models.qsmearing._QSmearer.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.models.qsmearing._QSmearer.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.models.qsmearing._QSmearer.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._QSmearer.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._QSmearer.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._QSmearer.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._QSmearer.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._QSmearer.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.models.qsmearing._QSmearer.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._QSmearer.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.models.qsmearing._QSmearer.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._QSmearer.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.models.qsmearing._QSmearer.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._QSmearer.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.models.qsmearing._QSmearer.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._QSmearer._compute_matrix">
+<tt class="descname">_compute_matrix</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._QSmearer._compute_matrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._QSmearer._get_extrapolated_bin">
+<tt class="descname">_get_extrapolated_bin</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._QSmearer._get_extrapolated_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get extrapolated first bin and the last bin</p>
+<p>: param first_bin: unextrapolated first_bin
+: param last_bin: unextrapolated last_bin</p>
+<p>: return first_bin, last_bin: extrapolated first and last bin</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._QSmearer._get_unextrapolated_bin">
+<tt class="descname">_get_unextrapolated_bin</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._QSmearer._get_unextrapolated_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get unextrapolated first bin and the last bin</p>
+<p>: param first_bin: extrapolated first_bin
+: param last_bin: extrapolated last_bin</p>
+<p>: return fist_bin, last_bin: unextrapolated first and last bin</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._QSmearer._initialize_smearer">
+<tt class="descname">_initialize_smearer</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._QSmearer._initialize_smearer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the C++ smearer object.
+This method HAS to be called before smearing</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._QSmearer.get_bin_range">
+<tt class="descname">get_bin_range</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._QSmearer.get_bin_range" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>q_min</strong> &#8211; minimum q-value to smear</li>
+<li><strong>q_max</strong> &#8211; maximum q-value to smear</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._QSmearer.get_unsmeared_range">
+<tt class="descname">get_unsmeared_range</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._QSmearer.get_unsmeared_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the range needed in unsmeared-Q to cover
+the smeared Q range
+Take 3 sigmas as the offset between smeared and unsmeared space</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.models.qsmearing._SlitSmearer">
+<em class="property">class </em><tt class="descclassname">sans.models.qsmearing.</tt><tt class="descname">_SlitSmearer</tt><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sans.models.qsmearing._BaseSmearer" title="sans.models.qsmearing._BaseSmearer"><tt class="xref py py-class docutils literal"><span class="pre">sans.models.qsmearing._BaseSmearer</span></tt></a></p>
+<p>Slit smearing for I(q) array</p>
+<dl class="method">
+<dt id="sans.models.qsmearing._SlitSmearer.__call__">
+<tt class="descname">__call__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform smearing</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._SlitSmearer.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._SlitSmearer.__deepcopy__">
+<tt class="descname">__deepcopy__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__deepcopy__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a valid copy of self.
+Avoid copying the _smearer C object and force a matrix recompute
+when the copy is used.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._SlitSmearer.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._SlitSmearer.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x01926250&gt;</em><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._SlitSmearer.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._SlitSmearer.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._SlitSmearer.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>iq</strong> &#8211; I(q) array [cm-1]</li>
+<li><strong>width</strong> &#8211; slit width [A-1]</li>
+<li><strong>height</strong> &#8211; slit height [A-1]</li>
+<li><strong>min</strong> &#8211; Q_min [A-1]</li>
+<li><strong>max</strong> &#8211; Q_max [A-1]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._SlitSmearer.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.qsmearing'</em><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.models.qsmearing._SlitSmearer.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._SlitSmearer.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._SlitSmearer.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._SlitSmearer.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._SlitSmearer.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._SlitSmearer.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.qsmearing._SlitSmearer.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._SlitSmearer._compute_matrix">
+<tt class="descname">_compute_matrix</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer._compute_matrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._SlitSmearer._get_extrapolated_bin">
+<tt class="descname">_get_extrapolated_bin</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer._get_extrapolated_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get extrapolated first bin and the last bin</p>
+<p>: param first_bin: unextrapolated first_bin
+: param last_bin: unextrapolated last_bin</p>
+<p>: return first_bin, last_bin: extrapolated first and last bin</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._SlitSmearer._get_unextrapolated_bin">
+<tt class="descname">_get_unextrapolated_bin</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer._get_unextrapolated_bin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get unextrapolated first bin and the last bin</p>
+<p>: param first_bin: extrapolated first_bin
+: param last_bin: extrapolated last_bin</p>
+<p>: return fist_bin, last_bin: unextrapolated first and last bin</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._SlitSmearer._initialize_smearer">
+<tt class="descname">_initialize_smearer</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer._initialize_smearer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the C++ smearer object.
+This method HAS to be called before smearing</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._SlitSmearer.get_bin_range">
+<tt class="descname">get_bin_range</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.get_bin_range" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>q_min</strong> &#8211; minimum q-value to smear</li>
+<li><strong>q_max</strong> &#8211; maximum q-value to smear</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.qsmearing._SlitSmearer.get_unsmeared_range">
+<tt class="descname">get_unsmeared_range</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing._SlitSmearer.get_unsmeared_range" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determine the range needed in unsmeared-Q to cover
 the smeared Q range</p>
 </dd></dl>
@@ -122,7 +878,7 @@ the smeared Q range</p>
 
 <dl class="function">
 <dt id="sans.models.qsmearing.get_qextrapolate">
-<tt class="descclassname">sans.models.qsmearing.</tt><tt class="descname">get_qextrapolate</tt><big>(</big><em>width</em>, <em>data_x</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.get_qextrapolate" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">sans.models.qsmearing.</tt><tt class="descname">get_qextrapolate</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.get_qextrapolate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make fake data_x points extrapolated outside of the data_x points</p>
 <p>: param width: array of std of q resolution
 : param Data1D.x: Data1D.x array</p>
@@ -140,7 +896,7 @@ the smeared Q range</p>
 
 <dl class="function">
 <dt id="sans.models.qsmearing.smear_selection">
-<tt class="descclassname">sans.models.qsmearing.</tt><tt class="descname">smear_selection</tt><big>(</big><em>data1D</em>, <em>model=None</em><big>)</big><a class="headerlink" href="#sans.models.qsmearing.smear_selection" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">sans.models.qsmearing.</tt><tt class="descname">smear_selection</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.qsmearing.smear_selection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates the right type of smearer according 
 to the data.</p>
 <p>The canSAS format has a rule that either
@@ -155,7 +911,7 @@ resolution smearing data.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>data1D</strong> &#8211; Data1D object</li>
 <li><strong>model</strong> &#8211; sans.model instance</li>
 </ul>
@@ -177,7 +933,7 @@ resolution smearing data.</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">qsmearing</a><ul>
-<li><a class="reference internal" href="#module-sans.models.qsmearing"><tt class="docutils literal"><span class="pre">sans.models.qsmearing</span></tt></a></li>
+<li><a class="reference internal" href="#sans-models-qsmearing"><tt class="docutils literal"><span class="pre">sans.models.qsmearing</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -196,7 +952,7 @@ resolution smearing data.</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -225,13 +981,13 @@ resolution smearing data.</p>
         <li class="right" >
           <a href="ProlateModel.html" title="ProlateModel"
              >previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ModelIO &mdash; sansmodels v0.1.0 documentation</title>
+    <title>ModelIO &mdash; sansmodels 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="sansmodels v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="sansmodels 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="MulComponent" href="MulComponent.html" />
     <link rel="prev" title="ModelFactory" href="ModelFactory.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="ModelFactory.html" title="ModelFactory"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,9 +58,9 @@
             
   <div class="section" id="modelio">
 <h1>ModelIO<a class="headerlink" href="#modelio" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.models.ModelIO">
-<span id="sans-models-modelio"></span><h2><a class="reference internal" href="#module-sans.models.ModelIO" title="sans.models.ModelIO"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.ModelIO</span></tt></a><a class="headerlink" href="#module-sans.models.ModelIO" title="Permalink to this headline">¶</a></h2>
-<p>Model IO
+<div class="section" id="sans-models-modelio">
+<h2><a class="reference internal" href="#module-sans.models.ModelIO" title="sans.models.ModelIO"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.ModelIO</span></tt></a><a class="headerlink" href="#sans-models-modelio" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.models.ModelIO"></span><p>Model IO
 Class that saves and loads composite models from files
 The parameters of the models are not set. The loaded
 model object will have the default parameters for all
@@ -66,11 +69,23 @@ sub-models.</p>
 &#64;contact: <a class="reference external" href="mailto:mathieu&#46;doucet&#37;&#52;&#48;nist&#46;gov">mathieu<span>&#46;</span>doucet<span>&#64;</span>nist<span>&#46;</span>gov</a></p>
 <dl class="class">
 <dt id="sans.models.ModelIO.ModelIO">
-<em class="property">class </em><tt class="descclassname">sans.models.ModelIO.</tt><tt class="descname">ModelIO</tt><big>(</big><em>factory</em><big>)</big><a class="headerlink" href="#sans.models.ModelIO.ModelIO" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.models.ModelIO.</tt><tt class="descname">ModelIO</tt><a class="headerlink" href="#sans.models.ModelIO.ModelIO" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class to create composite models from file or save a model</p>
 <dl class="method">
+<dt id="sans.models.ModelIO.ModelIO.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.ModelIO.ModelIO.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initizalization 
+&#64;param factory: ModelFactory object</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.ModelIO.ModelIO.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.ModelIO'</em><a class="headerlink" href="#sans.models.ModelIO.ModelIO.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="sans.models.ModelIO.ModelIO.load">
-<tt class="descname">load</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#sans.models.ModelIO.ModelIO.load" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">load</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.ModelIO.ModelIO.load" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load a model from a file
 &#64;param file: file to load
 &#64;return: a new BaseComponent</p>
@@ -78,7 +93,7 @@ sub-models.</p>
 
 <dl class="method">
 <dt id="sans.models.ModelIO.ModelIO.lookupComponentNodes">
-<tt class="descname">lookupComponentNodes</tt><big>(</big><em>node</em><big>)</big><a class="headerlink" href="#sans.models.ModelIO.ModelIO.lookupComponentNodes" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">lookupComponentNodes</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.ModelIO.ModelIO.lookupComponentNodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Look up a component node among the children of a node 
 &#64;param node: the minidom node to investigate
 &#64;return: the model object described by the component node, None otherwise</p>
@@ -86,7 +101,7 @@ sub-models.</p>
 
 <dl class="method">
 <dt id="sans.models.ModelIO.ModelIO.modelToXML">
-<tt class="descname">modelToXML</tt><big>(</big><em>model</em><big>)</big><a class="headerlink" href="#sans.models.ModelIO.ModelIO.modelToXML" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">modelToXML</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.ModelIO.ModelIO.modelToXML" title="Permalink to this definition">¶</a></dt>
 <dd><p>Saves XML representation of the component
 &#64;param model: model to save
 &#64;param file: name of file to write to (if None, a string is returned)</p>
@@ -94,7 +109,7 @@ sub-models.</p>
 
 <dl class="method">
 <dt id="sans.models.ModelIO.ModelIO.processComponentNode">
-<tt class="descname">processComponentNode</tt><big>(</big><em>node</em>, <em>model</em><big>)</big><a class="headerlink" href="#sans.models.ModelIO.ModelIO.processComponentNode" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">processComponentNode</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.ModelIO.ModelIO.processComponentNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process an XML &#8216;Component&#8217; node in a model file 
 &#64;param node: XML minidom node to process
 &#64;param model: model object to build from</p>
@@ -102,7 +117,7 @@ sub-models.</p>
 
 <dl class="method">
 <dt id="sans.models.ModelIO.ModelIO.save">
-<tt class="descname">save</tt><big>(</big><em>model</em>, <em>filename</em><big>)</big><a class="headerlink" href="#sans.models.ModelIO.ModelIO.save" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.ModelIO.ModelIO.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the XML representation of a model to a file
 &#64;param model: XML representation of the model
 &#64;param filename: the path of the file to write to
@@ -123,7 +138,7 @@ sub-models.</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">ModelIO</a><ul>
-<li><a class="reference internal" href="#module-sans.models.ModelIO"><tt class="docutils literal"><span class="pre">sans.models.ModelIO</span></tt></a></li>
+<li><a class="reference internal" href="#sans-models-modelio"><tt class="docutils literal"><span class="pre">sans.models.ModelIO</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -142,7 +157,7 @@ sub-models.</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -171,13 +186,13 @@ sub-models.</p>
         <li class="right" >
           <a href="ModelFactory.html" title="ModelFactory"
              >previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>MultiplicationModel &mdash; sansmodels v0.1.0 documentation</title>
+    <title>MultiplicationModel &mdash; sansmodels 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="sansmodels v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="sansmodels 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="MultiShellModel" href="MultiShellModel.html" />
     <link rel="prev" title="MulComponent" href="MulComponent.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="MulComponent.html" title="MulComponent"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,11 +58,11 @@
             
   <div class="section" id="multiplicationmodel">
 <h1>MultiplicationModel<a class="headerlink" href="#multiplicationmodel" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.models.MultiplicationModel">
-<span id="sans-models-multiplicationmodel"></span><h2><a class="reference internal" href="#module-sans.models.MultiplicationModel" title="sans.models.MultiplicationModel"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.MultiplicationModel</span></tt></a><a class="headerlink" href="#module-sans.models.MultiplicationModel" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<div class="section" id="sans-models-multiplicationmodel">
+<h2><a class="reference internal" href="#module-sans.models.MultiplicationModel" title="sans.models.MultiplicationModel"><tt class="xref py py-mod docutils literal"><span class="pre">sans.models.MultiplicationModel</span></tt></a><a class="headerlink" href="#sans-models-multiplicationmodel" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.models.MultiplicationModel"></span><dl class="class">
 <dt id="sans.models.MultiplicationModel.MultiplicationModel">
-<em class="property">class </em><tt class="descclassname">sans.models.MultiplicationModel.</tt><tt class="descname">MultiplicationModel</tt><big>(</big><em>p_model</em>, <em>s_model</em><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.models.MultiplicationModel.</tt><tt class="descname">MultiplicationModel</tt><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="BaseComponent.html#sans.models.BaseComponent.BaseComponent" title="sans.models.BaseComponent.BaseComponent"><tt class="xref py py-class docutils literal"><span class="pre">sans.models.BaseComponent.BaseComponent</span></tt></a></p>
 <p>Use for P(Q)*S(Q); function call must be in the order of P(Q) and then S(Q):
 The model parameters are combined from both models, P(Q) and S(Q), except 1) &#8216;effect_radius&#8217; of S(Q)
@@ -68,6 +71,101 @@ and 2) &#8216;scale&#8217; in P model which is synchronized w/ volfraction in S
 then P*S is multiplied by a new param, &#8216;scale_factor&#8217;.
 The polydispersion is applicable only to P(Q), not to S(Q).
 Note: P(Q) refers to &#8216;form factor&#8217; model while S(Q) does to &#8216;structure factor&#8217;.</p>
+<dl class="method">
+<dt id="sans.models.MultiplicationModel.MultiplicationModel.__add__">
+<tt class="descname">__add__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.__add__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.MultiplicationModel.MultiplicationModel.__div__">
+<tt class="descname">__div__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.__div__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.MultiplicationModel.MultiplicationModel.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.models.MultiplicationModel.MultiplicationModel.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.models.MultiplicationModel'</em><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.MultiplicationModel.MultiplicationModel.__mul__">
+<tt class="descname">__mul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.MultiplicationModel.MultiplicationModel.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">string representatio</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.MultiplicationModel.MultiplicationModel.__sub__">
+<tt class="descname">__sub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.models.MultiplicationModel.MultiplicationModel._clone">
+<tt class="descname">_clone</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel._clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal utility function to copy the internal
+data members to a fresh copy.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.MultiplicationModel.MultiplicationModel._setParamHelper">
+<tt class="descname">_setParamHelper</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel._setParamHelper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to setparam</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.MultiplicationModel.MultiplicationModel._set_details">
+<tt class="descname">_set_details</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel._set_details" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenate details of the two models to create
+this model details</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.MultiplicationModel.MultiplicationModel._set_dispersion">
+<tt class="descname">_set_dispersion</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel._set_dispersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>combined the two models dispersions
+Polydispersion should not be applied to s_model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.MultiplicationModel.MultiplicationModel._set_effect_radius">
+<tt class="descname">_set_effect_radius</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel._set_effect_radius" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set effective radius to S(Q) model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.MultiplicationModel.MultiplicationModel._set_fixed_params">
+<tt class="descname">_set_fixed_params</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel._set_fixed_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>fill the self.fixed list with the p_model fixed list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.MultiplicationModel.MultiplicationModel._set_params">
+<tt class="descname">_set_params</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel._set_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenate the parameters of the two models to create
+this model parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.models.MultiplicationModel.MultiplicationModel._set_scale_factor">
+<tt class="descname">_set_scale_factor</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel._set_scale_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set scale=volfraction to P model</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="sans.models.MultiplicationModel.MultiplicationModel.calculate_ER">
 <tt class="descname">calculate_ER</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.calculate_ER" title="Permalink to this definition">¶</a></dt>
@@ -81,7 +179,7 @@ Note: P(Q) refers to &#8216;form factor&#8217; model while S(Q) does to &#8216;s
 
 <dl class="method">
 <dt id="sans.models.MultiplicationModel.MultiplicationModel.evalDistribution">
-<tt class="descname">evalDistribution</tt><big>(</big><em>x=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.evalDistribution" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">evalDistribution</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.evalDistribution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the model in cartesian coordinates
 &#64;param x: input q[], or [qx[], qy[]]
 &#64;return: scattering function P(q[])</p>
@@ -89,7 +187,7 @@ Note: P(Q) refers to &#8216;form factor&#8217; model while S(Q) does to &#8216;s
 
 <dl class="method">
 <dt id="sans.models.MultiplicationModel.MultiplicationModel.fill_description">
-<tt class="descname">fill_description</tt><big>(</big><em>p_model</em>, <em>s_model</em><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.fill_description" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">fill_description</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.fill_description" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fill the description for P(Q)*S(Q)</p>
 </dd></dl>
 
@@ -101,13 +199,13 @@ Note: P(Q) refers to &#8216;form factor&#8217; model while S(Q) does to &#8216;s
 
 <dl class="method">
 <dt id="sans.models.MultiplicationModel.MultiplicationModel.getParam">
-<tt class="descname">getParam</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.getParam" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParam</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.getParam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the value of a model parameter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; name of the parameter</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; name of the parameter</td>
 </tr>
 </tbody>
 </table>
@@ -121,12 +219,12 @@ Note: P(Q) refers to &#8216;form factor&#8217; model while S(Q) does to &#8216;s
 
 <dl class="method">
 <dt id="sans.models.MultiplicationModel.MultiplicationModel.getParamListWithToken">
-<tt class="descname">getParamListWithToken</tt><big>(</big><em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.getParamListWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParamListWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.getParamListWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.models.MultiplicationModel.MultiplicationModel.getParamWithToken">
-<tt class="descname">getParamWithToken</tt><big>(</big><em>name</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.getParamWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getParamWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.getParamWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -142,13 +240,13 @@ Note: P(Q) refers to &#8216;form factor&#8217; model while S(Q) does to &#8216;s
 
 <dl class="method">
 <dt id="sans.models.MultiplicationModel.MultiplicationModel.is_fittable">
-<tt class="descname">is_fittable</tt><big>(</big><em>par_name</em><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.is_fittable" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_fittable</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.is_fittable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if a given parameter is fittable or not</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par_name</strong> &#8211; the parameter name to check</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>par_name</strong> &#8211; the parameter name to check</td>
 </tr>
 </tbody>
 </table>
@@ -156,7 +254,7 @@ Note: P(Q) refers to &#8216;form factor&#8217; model while S(Q) does to &#8216;s
 
 <dl class="method">
 <dt id="sans.models.MultiplicationModel.MultiplicationModel.run">
-<tt class="descname">run</tt><big>(</big><em>x=0.0</em><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.run" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the model
 &#64;param x: input q-value (float or [float, float] as [r, theta])
 &#64;return: (scattering function value)</p>
@@ -164,7 +262,7 @@ Note: P(Q) refers to &#8216;form factor&#8217; model while S(Q) does to &#8216;s
 
 <dl class="method">
 <dt id="sans.models.MultiplicationModel.MultiplicationModel.runXY">
-<tt class="descname">runXY</tt><big>(</big><em>x=0.0</em><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.runXY" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">runXY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.runXY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate the model
 &#64;param x: input q-value (float or [float, float] as [qx, qy])
 &#64;return: scattering function value</p>
@@ -172,7 +270,7 @@ Note: P(Q) refers to &#8216;form factor&#8217; model while S(Q) does to &#8216;s
 
 <dl class="method">
 <dt id="sans.models.MultiplicationModel.MultiplicationModel.setParam">
-<tt class="descname">setParam</tt><big>(</big><em>name</em>, <em>value</em><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.setParam" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setParam</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.setParam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the value of a model parameter</p>
 <p>&#64;param name: name of the parameter
 &#64;param value: value of the parameter</p>
@@ -180,12 +278,12 @@ Note: P(Q) refers to &#8216;form factor&#8217; model while S(Q) does to &#8216;s
 
 <dl class="method">
 <dt id="sans.models.MultiplicationModel.MultiplicationModel.setParamWithToken">
-<tt class="descname">setParamWithToken</tt><big>(</big><em>name</em>, <em>value</em>, <em>token</em>, <em>member</em><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.setParamWithToken" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setParamWithToken</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.setParamWithToken" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.models.MultiplicationModel.MultiplicationModel.set_dispersion">
-<tt class="descname">set_dispersion</tt><big>(</big><em>parameter</em>, <em>dispersion</em><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.set_dispersion" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_dispersion</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.models.MultiplicationModel.MultiplicationModel.set_dispersion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the dispersion object for a model parameter
 &#64;param parameter: name of the parameter [string]
 &#64;dispersion: dispersion object of type DispersionModel</p>
@@ -205,7 +303,7 @@ Note: P(Q) refers to &#8216;form factor&#8217; model while S(Q) does to &#8216;s
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">MultiplicationModel</a><ul>
-<li><a class="reference internal" href="#module-sans.models.MultiplicationModel"><tt class="docutils literal"><span class="pre">sans.models.MultiplicationModel</span></tt></a></li>
+<li><a class="reference internal" href="#sans-models-multiplicationmodel"><tt class="docutils literal"><span class="pre">sans.models.MultiplicationModel</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -224,7 +322,7 @@ Note: P(Q) refers to &#8216;form factor&#8217; model while S(Q) does to &#8216;s
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -253,13 +351,13 @@ Note: P(Q) refers to &#8216;form factor&#8217; model while S(Q) does to &#8216;s
         <li class="right" >
           <a href="MulComponent.html" title="MulComponent"
              >previous</a> |</li>
-        <li><a href="../index.html">sansmodels v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">sansmodels 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

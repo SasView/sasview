@@ -12,4 +12,6 @@ RPA10Model
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+   :special-members:
+   :private-members:
 
