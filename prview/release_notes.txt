@@ -5,7 +5,13 @@ PrView 0.3
 
 Package name: prview
 
-1- Version 0.3.0
+1- Version 1.0.0
+	- Release date: 10/24/2011
+	- Use a different version of Frame
+	- Allow more user customization of the Frame
+	- Fix intensity error display
+	
+	Version 0.3.0
 	- Release date: 7/4/2009
 	- Added installer for compatibility with guiframe/sansview
 	- Added functionality to save inversion results
@@ -46,19 +52,24 @@ Package name: prview
 		- Python version >= 2.4 should be running on the system
 
 	2.2- Installing:
-		- Get the code from svn://danse.us/sans/releases/prview-0.2.4
+		- Get the code from sans repository:
+			svn://danse.us/sans/releases/prview-1.0.0
+			svn://danse.us/sans/releases/DataLoader-1.0.0 
+			svn://danse.us/sans/releases/guiframe-1.0.0
+			svn://danse.us/sans/releases/pr_inversion-1.0.0 
 		- This application is also dependent on the following DANSE code:
-			svn://danse.us/common/releases/plottools-0.1.6
-			svn://danse.us/common/releases/util-0.1.2 
-			svn://danse.us/sans/releases/DataLoader-0.2.4 
-			svn://danse.us/sans/releases/guicomm-0.1.3 
-			svn://danse.us/sans/releases/guiframe-0.1.7
-			svn://danse.us/sans/releases/pr_inversion-0.2.2 
+			svn://danse.us/common/releases/plottools-1.0.0
+			svn://danse.us/common/releases/util-1.0.0 
 		- The following modules are required:
-			* matplotlib
-			* numpy
-			* scipy
-			* wxpython
+			* matplotlib = 0.99.0(WIN), 0.99.1.1(MAC)
+			* numpy = 1.4.1
+			* scipy >= 0.7.2
+			* wxpython 2.8.11 unicode(WIN), 2.8.12.0(MAC)
+			* lxml >= 2.2.2
+			* multiprocessing-2.6.2(X)
+			* comtypes (for PDF window)(WIN)
+			* pywin32 (to read ms office)(WIN)
+			* PIL (Python Image Library)
 			* PyXML (for cansas reader)
 
 3- Known Issues
