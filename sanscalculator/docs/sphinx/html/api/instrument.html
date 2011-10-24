@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Instrument &mdash; calculator v0.1.0 documentation</title>
+    <title>instrument &mdash; calculator 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,9 +25,9 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="calculator v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="calculator 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
-    <link rel="next" title="Slit Length Calculator" href="slit_length_calculator.html" />
+    <link rel="next" title="kiessig_calculator" href="kiessig_calculator.html" />
     <link rel="prev" title="Reference" href="index.html" /> 
   </head>
   <body>
@@ -38,12 +41,12 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="slit_length_calculator.html" title="Slit Length Calculator"
+          <a href="kiessig_calculator.html" title="kiessig_calculator"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Reference"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">calculator v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">calculator 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -54,31 +57,111 @@
           <div class="body">
             
   <div class="section" id="instrument">
-<h1>Instrument<a class="headerlink" href="#instrument" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.calculator.instrument">
-<span id="sans-calculator-instrument"></span><h2><a class="reference internal" href="#module-sans.calculator.instrument" title="sans.calculator.instrument"><tt class="xref py py-mod docutils literal"><span class="pre">sans.calculator.instrument</span></tt></a><a class="headerlink" href="#module-sans.calculator.instrument" title="Permalink to this headline">¶</a></h2>
-<p>This module is a small tool to allow user to 
+<h1>instrument<a class="headerlink" href="#instrument" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="sans-calculator-instrument">
+<h2><a class="reference internal" href="#module-sans.calculator.instrument" title="sans.calculator.instrument"><tt class="xref py py-mod docutils literal"><span class="pre">sans.calculator.instrument</span></tt></a><a class="headerlink" href="#sans-calculator-instrument" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.calculator.instrument"></span><p>This module is a small tool to allow user to 
 control instrumental parameters</p>
 <dl class="class">
 <dt id="sans.calculator.instrument.Aperture">
 <em class="property">class </em><tt class="descclassname">sans.calculator.instrument.</tt><tt class="descname">Aperture</tt><a class="headerlink" href="#sans.calculator.instrument.Aperture" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>An object class that defines the aperture variables</p>
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Aperture.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.calculator.instrument.Aperture.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Aperture.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.calculator.instrument.Aperture.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Aperture.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x01A48250&gt;</em><a class="headerlink" href="#sans.calculator.instrument.Aperture.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Aperture.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.calculator.instrument.Aperture.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Aperture.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.calculator.instrument.Aperture.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Aperture.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Aperture.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Aperture.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.calculator.instrument'</em><a class="headerlink" href="#sans.calculator.instrument.Aperture.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.calculator.instrument.Aperture.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.calculator.instrument.Aperture.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Aperture.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Aperture.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Aperture.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Aperture.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Aperture.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.calculator.instrument.Aperture.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Aperture.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.calculator.instrument.Aperture.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Aperture.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.calculator.instrument.Aperture.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Aperture.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.calculator.instrument.Aperture.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="sans.calculator.instrument.Aperture.set_sample_distance">
-<tt class="descname">set_sample_distance</tt><big>(</big><em>distance=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Aperture.set_sample_distance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_sample_distance</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Aperture.set_sample_distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the sample aperture distance</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.Aperture.set_sample_size">
-<tt class="descname">set_sample_size</tt><big>(</big><em>size=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Aperture.set_sample_size" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_sample_size</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Aperture.set_sample_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the sample aperture size</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.Aperture.set_source_size">
-<tt class="descname">set_source_size</tt><big>(</big><em>size=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Aperture.set_source_size" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_source_size</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Aperture.set_source_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the source aperture size</p>
 </dd></dl>
 
@@ -89,21 +172,101 @@ control instrumental parameters</p>
 <em class="property">class </em><tt class="descclassname">sans.calculator.instrument.</tt><tt class="descname">Detector</tt><a class="headerlink" href="#sans.calculator.instrument.Detector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>An object class that defines the detector variables</p>
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Detector.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.calculator.instrument.Detector.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Detector.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.calculator.instrument.Detector.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Detector.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x01A3DEF0&gt;</em><a class="headerlink" href="#sans.calculator.instrument.Detector.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Detector.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.calculator.instrument.Detector.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Detector.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.calculator.instrument.Detector.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Detector.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Detector.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Detector.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.calculator.instrument'</em><a class="headerlink" href="#sans.calculator.instrument.Detector.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.calculator.instrument.Detector.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.calculator.instrument.Detector.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Detector.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Detector.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Detector.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Detector.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Detector.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.calculator.instrument.Detector.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Detector.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.calculator.instrument.Detector.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Detector.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.calculator.instrument.Detector.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Detector.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.calculator.instrument.Detector.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="sans.calculator.instrument.Detector.set_distance">
-<tt class="descname">set_distance</tt><big>(</big><em>distance=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Detector.set_distance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_distance</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Detector.set_distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the detector distance</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.Detector.set_pix_size">
-<tt class="descname">set_pix_size</tt><big>(</big><em>size=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Detector.set_pix_size" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_pix_size</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Detector.set_pix_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the detector pix_size</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.Detector.set_size">
-<tt class="descname">set_size</tt><big>(</big><em>size=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Detector.set_size" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_size</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Detector.set_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the detector  size</p>
 </dd></dl>
 
@@ -114,6 +277,86 @@ control instrumental parameters</p>
 <em class="property">class </em><tt class="descclassname">sans.calculator.instrument.</tt><tt class="descname">Neutron</tt><a class="headerlink" href="#sans.calculator.instrument.Neutron" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>An object that defines the wavelength variables</p>
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Neutron.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.calculator.instrument.Neutron.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Neutron.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.calculator.instrument.Neutron.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Neutron.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x01A4F410&gt;</em><a class="headerlink" href="#sans.calculator.instrument.Neutron.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Neutron.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.calculator.instrument.Neutron.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Neutron.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.calculator.instrument.Neutron.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Neutron.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.calculator.instrument'</em><a class="headerlink" href="#sans.calculator.instrument.Neutron.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.calculator.instrument.Neutron.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.calculator.instrument.Neutron.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Neutron.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Neutron.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.calculator.instrument.Neutron.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Neutron.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.calculator.instrument.Neutron.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Neutron.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.calculator.instrument.Neutron.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Neutron.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.calculator.instrument.Neutron.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="sans.calculator.instrument.Neutron.get_band">
 <tt class="descname">get_band</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.get_band" title="Permalink to this definition">¶</a></dt>
@@ -171,13 +414,13 @@ control instrumental parameters</p>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.Neutron.set_band">
-<tt class="descname">set_band</tt><big>(</big><em>band=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_band" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_band</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_band" title="Permalink to this definition">¶</a></dt>
 <dd><p>To set the wavelength band</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>band</strong> &#8211; array of [min, max]</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>band</strong> &#8211; array of [min, max]</td>
 </tr>
 </tbody>
 </table>
@@ -191,25 +434,25 @@ control instrumental parameters</p>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.Neutron.set_intensity">
-<tt class="descname">set_intensity</tt><big>(</big><em>intensity=368428</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_intensity" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_intensity</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_intensity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the intensity in counts/sec</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.Neutron.set_mass">
-<tt class="descname">set_mass</tt><big>(</big><em>mass=1.6749272900000001e-024</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_mass" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_mass</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_mass" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the wavelength</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.Neutron.set_spectrum">
-<tt class="descname">set_spectrum</tt><big>(</big><em>spectrum</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_spectrum" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_spectrum</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_spectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set spectrum</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>spectrum</strong> &#8211; numpy array</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>spectrum</strong> &#8211; numpy array</td>
 </tr>
 </tbody>
 </table>
@@ -217,13 +460,13 @@ control instrumental parameters</p>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.Neutron.set_wavelength">
-<tt class="descname">set_wavelength</tt><big>(</big><em>wavelength=6.0</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_wavelength" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_wavelength</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_wavelength" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the wavelength</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.Neutron.set_wavelength_spread">
-<tt class="descname">set_wavelength_spread</tt><big>(</big><em>spread=0.125</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_wavelength_spread" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_wavelength_spread</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Neutron.set_wavelength_spread" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the wavelength spread</p>
 </dd></dl>
 
@@ -241,21 +484,101 @@ wavelength is already within the spectrum</p>
 <em class="property">class </em><tt class="descclassname">sans.calculator.instrument.</tt><tt class="descname">Sample</tt><a class="headerlink" href="#sans.calculator.instrument.Sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>An object class that defines the sample variables</p>
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Sample.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.calculator.instrument.Sample.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Sample.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.calculator.instrument.Sample.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Sample.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x01A4F530&gt;</em><a class="headerlink" href="#sans.calculator.instrument.Sample.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Sample.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.calculator.instrument.Sample.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Sample.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.calculator.instrument.Sample.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Sample.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Sample.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Sample.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.calculator.instrument'</em><a class="headerlink" href="#sans.calculator.instrument.Sample.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.calculator.instrument.Sample.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.calculator.instrument.Sample.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Sample.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Sample.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.Sample.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Sample.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Sample.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.calculator.instrument.Sample.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Sample.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.calculator.instrument.Sample.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Sample.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.calculator.instrument.Sample.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.Sample.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.calculator.instrument.Sample.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="sans.calculator.instrument.Sample.set_distance">
-<tt class="descname">set_distance</tt><big>(</big><em>distance=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Sample.set_distance" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_distance</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Sample.set_distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the sample distance</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.Sample.set_size">
-<tt class="descname">set_size</tt><big>(</big><em>size=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Sample.set_size" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_size</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Sample.set_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the sample size</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.Sample.set_thickness">
-<tt class="descname">set_thickness</tt><big>(</big><em>thickness=0.0</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Sample.set_thickness" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_thickness</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.Sample.set_thickness" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the sample thickness</p>
 </dd></dl>
 
@@ -266,6 +589,87 @@ wavelength is already within the spectrum</p>
 <em class="property">class </em><tt class="descclassname">sans.calculator.instrument.</tt><tt class="descname">TOF</tt><a class="headerlink" href="#sans.calculator.instrument.TOF" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sans.calculator.instrument.Neutron" title="sans.calculator.instrument.Neutron"><tt class="xref py py-class docutils literal"><span class="pre">sans.calculator.instrument.Neutron</span></tt></a></p>
 <p>TOF: make list of wavelength and wave length spreads</p>
+<dl class="attribute">
+<dt id="sans.calculator.instrument.TOF.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.calculator.instrument.TOF.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.TOF.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.calculator.instrument.TOF.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.TOF.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x01A5B830&gt;</em><a class="headerlink" href="#sans.calculator.instrument.TOF.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.TOF.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.calculator.instrument.TOF.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.TOF.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.calculator.instrument.TOF.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Init</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.TOF.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.calculator.instrument'</em><a class="headerlink" href="#sans.calculator.instrument.TOF.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.calculator.instrument.TOF.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.calculator.instrument.TOF.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.calculator.instrument.TOF.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.TOF.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.calculator.instrument.TOF.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.TOF.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.calculator.instrument.TOF.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.TOF.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.calculator.instrument.TOF.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.calculator.instrument.TOF.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.calculator.instrument.TOF.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="sans.calculator.instrument.TOF.get_band">
 <tt class="descname">get_band</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.get_band" title="Permalink to this definition">¶</a></dt>
@@ -335,13 +739,13 @@ wavelength is already within the spectrum</p>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.TOF.set_band">
-<tt class="descname">set_band</tt><big>(</big><em>band=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_band" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_band</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_band" title="Permalink to this definition">¶</a></dt>
 <dd><p>To set the wavelength band</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>band</strong> &#8211; array of [min, max]</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>band</strong> &#8211; array of [min, max]</td>
 </tr>
 </tbody>
 </table>
@@ -355,25 +759,25 @@ wavelength is already within the spectrum</p>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.TOF.set_intensity">
-<tt class="descname">set_intensity</tt><big>(</big><em>intensity=368428</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_intensity" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_intensity</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_intensity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the intensity in counts/sec</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.TOF.set_mass">
-<tt class="descname">set_mass</tt><big>(</big><em>mass=1.6749272900000001e-024</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_mass" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_mass</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_mass" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the wavelength</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.TOF.set_spectrum">
-<tt class="descname">set_spectrum</tt><big>(</big><em>spectrum</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_spectrum" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_spectrum</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_spectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set spectrum</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>spectrum</strong> &#8211; numpy array</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>spectrum</strong> &#8211; numpy array</td>
 </tr>
 </tbody>
 </table>
@@ -381,13 +785,13 @@ wavelength is already within the spectrum</p>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.TOF.set_wave_list">
-<tt class="descname">set_wave_list</tt><big>(</big><em>wavelength=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_wave_list" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_wave_list</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_wave_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set wavelength list</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>wavelength</strong> &#8211; list of wavelengths</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>wavelength</strong> &#8211; list of wavelengths</td>
 </tr>
 </tbody>
 </table>
@@ -395,13 +799,13 @@ wavelength is already within the spectrum</p>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.TOF.set_wave_spread_list">
-<tt class="descname">set_wave_spread_list</tt><big>(</big><em>wavelength_spread=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_wave_spread_list" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_wave_spread_list</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_wave_spread_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set wavelength_spread list</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>wavelength_spread</strong> &#8211; list of wavelength spreads</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>wavelength_spread</strong> &#8211; list of wavelength spreads</td>
 </tr>
 </tbody>
 </table>
@@ -409,13 +813,13 @@ wavelength is already within the spectrum</p>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.TOF.set_wavelength">
-<tt class="descname">set_wavelength</tt><big>(</big><em>wavelength=6.0</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_wavelength" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_wavelength</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_wavelength" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the wavelength</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.calculator.instrument.TOF.set_wavelength_spread">
-<tt class="descname">set_wavelength_spread</tt><big>(</big><em>spread=0.125</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_wavelength_spread" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_wavelength_spread</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.TOF.set_wavelength_spread" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets the wavelength spread</p>
 </dd></dl>
 
@@ -430,13 +834,13 @@ wavelength is already within the spectrum</p>
 
 <dl class="function">
 <dt id="sans.calculator.instrument.validate">
-<tt class="descclassname">sans.calculator.instrument.</tt><tt class="descname">validate</tt><big>(</big><em>value=None</em><big>)</big><a class="headerlink" href="#sans.calculator.instrument.validate" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">sans.calculator.instrument.</tt><tt class="descname">validate</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.calculator.instrument.validate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if the value is folat &gt; 0.0</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Return value:</th><td class="field-body">True / False</td>
+<tr class="field-odd field"><th class="field-name">Return value:</th><td class="field-body">True / False</td>
 </tr>
 </tbody>
 </table>
@@ -453,8 +857,8 @@ wavelength is already within the spectrum</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Instrument</a><ul>
-<li><a class="reference internal" href="#module-sans.calculator.instrument"><tt class="docutils literal"><span class="pre">sans.calculator.instrument</span></tt></a></li>
+<li><a class="reference internal" href="#">instrument</a><ul>
+<li><a class="reference internal" href="#sans-calculator-instrument"><tt class="docutils literal"><span class="pre">sans.calculator.instrument</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -463,8 +867,8 @@ wavelength is already within the spectrum</p>
   <p class="topless"><a href="index.html"
                         title="previous chapter">Reference</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="slit_length_calculator.html"
-                        title="next chapter">Slit Length Calculator</a></p>
+  <p class="topless"><a href="kiessig_calculator.html"
+                        title="next chapter">kiessig_calculator</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../_sources/api/instrument.txt"
@@ -473,7 +877,7 @@ wavelength is already within the spectrum</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -497,18 +901,18 @@ wavelength is already within the spectrum</p>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="slit_length_calculator.html" title="Slit Length Calculator"
+          <a href="kiessig_calculator.html" title="kiessig_calculator"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Reference"
              >previous</a> |</li>
-        <li><a href="../index.html">calculator v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">calculator 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, Gervaise Alina.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

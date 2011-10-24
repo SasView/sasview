@@ -14,6 +14,6 @@
 .. toctree::
 
    instrument.rst
-   slit_length_calculator.rst
    kiessig_calculator.rst
    resolution_calculator.rst
+   slit_length_calculator.rst
