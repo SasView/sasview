@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>data_info &mdash; DataLoader v0.1.0 documentation</title>
+    <title>data_info &mdash; DataLoader 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="DataLoader v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="DataLoader 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="loader" href="loader.html" />
     <link rel="prev" title="Reference" href="index.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="index.html" title="Reference"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">DataLoader 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,43 +58,339 @@
             
   <div class="section" id="data-info">
 <h1>data_info<a class="headerlink" href="#data-info" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-DataLoader.data_info">
-<span id="dataloader-data-info"></span><h2><a class="reference internal" href="#module-DataLoader.data_info" title="DataLoader.data_info"><tt class="xref py py-mod docutils literal"><span class="pre">DataLoader.data_info</span></tt></a><a class="headerlink" href="#module-DataLoader.data_info" title="Permalink to this headline">¶</a></h2>
-<p>Module that contains classes to hold information read from 
+<div class="section" id="sans-dataloader-data-info">
+<h2><a class="reference internal" href="#module-sans.dataloader.data_info" title="sans.dataloader.data_info"><tt class="xref py py-mod docutils literal"><span class="pre">sans.dataloader.data_info</span></tt></a><a class="headerlink" href="#sans-dataloader-data-info" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.dataloader.data_info"></span><p>Module that contains classes to hold information read from 
 reduced data files.</p>
 <p>A good description of the data members can be found in 
 the CanSAS 1D XML data format:</p>
 <p><a class="reference external" href="http://www.smallangles.net/wgwiki/index.php/cansas1d_documentation">http://www.smallangles.net/wgwiki/index.php/cansas1d_documentation</a></p>
 <dl class="class">
-<dt id="DataLoader.data_info.Aperture">
-<em class="property">class </em><tt class="descclassname">DataLoader.data_info.</tt><tt class="descname">Aperture</tt><a class="headerlink" href="#DataLoader.data_info.Aperture" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Aperture">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.data_info.</tt><tt class="descname">Aperture</tt><a class="headerlink" href="#sans.dataloader.data_info.Aperture" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="sans.dataloader.data_info.Aperture.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Aperture.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="class">
-<dt id="DataLoader.data_info.Collimation">
-<em class="property">class </em><tt class="descclassname">DataLoader.data_info.</tt><tt class="descname">Collimation</tt><a class="headerlink" href="#DataLoader.data_info.Collimation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class to hold collimation information</p>
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Aperture.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.data_info'</em><a class="headerlink" href="#sans.dataloader.data_info.Aperture.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Aperture.distance">
+<tt class="descname">distance</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Aperture.distance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Aperture.distance_unit">
+<tt class="descname">distance_unit</tt><em class="property"> = 'mm'</em><a class="headerlink" href="#sans.dataloader.data_info.Aperture.distance_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Aperture.name">
+<tt class="descname">name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Aperture.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Aperture.size">
+<tt class="descname">size</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Aperture.size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Aperture.size_name">
+<tt class="descname">size_name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Aperture.size_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Aperture.size_unit">
+<tt class="descname">size_unit</tt><em class="property"> = 'mm'</em><a class="headerlink" href="#sans.dataloader.data_info.Aperture.size_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Aperture.type">
+<tt class="descname">type</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Aperture.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
-<dt id="DataLoader.data_info.Data1D">
-<em class="property">class </em><tt class="descclassname">DataLoader.data_info.</tt><tt class="descname">Data1D</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.Data1D" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#DataLoader.data_info.plottable_1D" title="DataLoader.data_info.plottable_1D"><tt class="xref py py-class docutils literal"><span class="pre">DataLoader.data_info.plottable_1D</span></tt></a>, <a class="reference internal" href="#DataLoader.data_info.DataInfo" title="DataLoader.data_info.DataInfo"><tt class="xref py py-class docutils literal"><span class="pre">DataLoader.data_info.DataInfo</span></tt></a></p>
+<dt id="sans.dataloader.data_info.Collimation">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.data_info.</tt><tt class="descname">Collimation</tt><a class="headerlink" href="#sans.dataloader.data_info.Collimation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to hold collimation information</p>
+<dl class="method">
+<dt id="sans.dataloader.data_info.Collimation.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Collimation.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Collimation.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.data_info'</em><a class="headerlink" href="#sans.dataloader.data_info.Collimation.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Collimation.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Collimation.__str__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Collimation.aperture">
+<tt class="descname">aperture</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Collimation.aperture" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Collimation.length">
+<tt class="descname">length</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Collimation.length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Collimation.length_unit">
+<tt class="descname">length_unit</tt><em class="property"> = 'mm'</em><a class="headerlink" href="#sans.dataloader.data_info.Collimation.length_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Collimation.name">
+<tt class="descname">name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Collimation.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.dataloader.data_info.Data1D">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.data_info.</tt><tt class="descname">Data1D</tt><a class="headerlink" href="#sans.dataloader.data_info.Data1D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sans.dataloader.data_info.plottable_1D" title="sans.dataloader.data_info.plottable_1D"><tt class="xref py py-class docutils literal"><span class="pre">sans.dataloader.data_info.plottable_1D</span></tt></a>, <a class="reference internal" href="#sans.dataloader.data_info.DataInfo" title="sans.dataloader.data_info.DataInfo"><tt class="xref py py-class docutils literal"><span class="pre">sans.dataloader.data_info.DataInfo</span></tt></a></p>
 <p>1D data class</p>
 <dl class="method">
-<dt id="DataLoader.data_info.Data1D.add_notes">
-<tt class="descname">add_notes</tt><big>(</big><em>message=''</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.Data1D.add_notes" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Data1D.__add__">
+<tt class="descname">__add__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.__add__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to add to the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data1D.__div__">
+<tt class="descname">__div__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.__div__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divided a data set by another</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set that the current one is divided by</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data1D.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.data_info'</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data1D.__mul__">
+<tt class="descname">__mul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data1D.__radd__">
+<tt class="descname">__radd__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.__radd__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to add to the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data1D.__rdiv__">
+<tt class="descname">__rdiv__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.__rdiv__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divided a data set by another</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set that the current one is divided by</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data1D.__rmul__">
+<tt class="descname">__rmul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.__rmul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data1D.__rsub__">
+<tt class="descname">__rsub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.__rsub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data1D.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nice printout</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data1D.__sub__">
+<tt class="descname">__sub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data1D._perform_operation">
+<tt class="descname">_perform_operation</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D._perform_operation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data1D._validity_check">
+<tt class="descname">_validity_check</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D._validity_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks that the data lengths are compatible.
+Checks that the x vectors are compatible.
+Returns errors vectors equal to original
+errors vectors if they were present or vectors
+of zeros when none was found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; other data set for operation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dy for self, dy for other [numpy arrays]</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">when lengths are not compatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D._xaxis">
+<tt class="descname">_xaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D._xaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D._xunit">
+<tt class="descname">_xunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D._xunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D._yaxis">
+<tt class="descname">_yaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D._yaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D._yunit">
+<tt class="descname">_yunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D._yunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data1D.add_notes">
+<tt class="descname">add_notes</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.add_notes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add notes to datainfo</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="DataLoader.data_info.Data1D.append_empty_process">
-<tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#DataLoader.data_info.Data1D.append_empty_process" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Data1D.append_empty_process">
+<tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.append_empty_process" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="DataLoader.data_info.Data1D.clone_without_data">
-<tt class="descname">clone_without_data</tt><big>(</big><em>length=0</em>, <em>clone=None</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.Data1D.clone_without_data" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Data1D.clone_without_data">
+<tt class="descname">clone_without_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.clone_without_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clone the current object, without copying the data (which
 will be filled out by a subsequent operation).
 The data arrays will be initialized to zero.</p>
@@ -99,7 +398,7 @@ The data arrays will be initialized to zero.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>length</strong> &#8211; length of the data array to be initialized</li>
 <li><strong>clone</strong> &#8211; if provided, the data will be copied to clone</li>
 </ul>
@@ -109,53 +408,406 @@ The data arrays will be initialized to zero.</p>
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.collimation">
+<tt class="descname">collimation</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.collimation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.detector">
+<tt class="descname">detector</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.detector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.dx">
+<tt class="descname">dx</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.dx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.dxl">
+<tt class="descname">dxl</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.dxl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.dxw">
+<tt class="descname">dxw</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.dxw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.dy">
+<tt class="descname">dy</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.dy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.errors">
+<tt class="descname">errors</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.errors" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.filename">
+<tt class="descname">filename</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.instrument">
+<tt class="descname">instrument</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.instrument" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
-<dt id="DataLoader.data_info.Data1D.is_slit_smeared">
-<tt class="descname">is_slit_smeared</tt><big>(</big><big>)</big><a class="headerlink" href="#DataLoader.data_info.Data1D.is_slit_smeared" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Data1D.is_slit_smeared">
+<tt class="descname">is_slit_smeared</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.is_slit_smeared" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether the data has slit smearing information</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">True is slit smearing info is present, False otherwise</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True is slit smearing info is present, False otherwise</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.meta_data">
+<tt class="descname">meta_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.meta_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.notes">
+<tt class="descname">notes</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.notes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.process">
+<tt class="descname">process</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.run">
+<tt class="descname">run</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.run_name">
+<tt class="descname">run_name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.run_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.sample">
+<tt class="descname">sample</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.sample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.source">
+<tt class="descname">source</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.source" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.title">
+<tt class="descname">title</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.x">
+<tt class="descname">x</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.x_unit">
+<tt class="descname">x_unit</tt><em class="property"> = '1/A'</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.x_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
-<dt id="DataLoader.data_info.Data1D.xaxis">
-<tt class="descname">xaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.Data1D.xaxis" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Data1D.xaxis">
+<tt class="descname">xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.xaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>set the x axis label and unit</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.y">
+<tt class="descname">y</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.y" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data1D.y_unit">
+<tt class="descname">y_unit</tt><em class="property"> = '1/cm'</em><a class="headerlink" href="#sans.dataloader.data_info.Data1D.y_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
-<dt id="DataLoader.data_info.Data1D.yaxis">
-<tt class="descname">yaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.Data1D.yaxis" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Data1D.yaxis">
+<tt class="descname">yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data1D.yaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>set the y axis label and unit</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="DataLoader.data_info.Data2D">
-<em class="property">class </em><tt class="descclassname">DataLoader.data_info.</tt><tt class="descname">Data2D</tt><big>(</big><em>data=None</em>, <em>err_data=None</em>, <em>qx_data=None</em>, <em>qy_data=None</em>, <em>q_data=None</em>, <em>mask=None</em>, <em>dqx_data=None</em>, <em>dqy_data=None</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.Data2D" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#DataLoader.data_info.plottable_2D" title="DataLoader.data_info.plottable_2D"><tt class="xref py py-class docutils literal"><span class="pre">DataLoader.data_info.plottable_2D</span></tt></a>, <a class="reference internal" href="#DataLoader.data_info.DataInfo" title="DataLoader.data_info.DataInfo"><tt class="xref py py-class docutils literal"><span class="pre">DataLoader.data_info.DataInfo</span></tt></a></p>
+<dt id="sans.dataloader.data_info.Data2D">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.data_info.</tt><tt class="descname">Data2D</tt><a class="headerlink" href="#sans.dataloader.data_info.Data2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sans.dataloader.data_info.plottable_2D" title="sans.dataloader.data_info.plottable_2D"><tt class="xref py py-class docutils literal"><span class="pre">sans.dataloader.data_info.plottable_2D</span></tt></a>, <a class="reference internal" href="#sans.dataloader.data_info.DataInfo" title="sans.dataloader.data_info.DataInfo"><tt class="xref py py-class docutils literal"><span class="pre">sans.dataloader.data_info.DataInfo</span></tt></a></p>
 <p>2D data class</p>
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.I_unit">
+<tt class="descname">I_unit</tt><em class="property"> = '1/cm'</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.I_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.Q_unit">
+<tt class="descname">Q_unit</tt><em class="property"> = '1/A'</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.Q_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
-<dt id="DataLoader.data_info.Data2D.add_notes">
-<tt class="descname">add_notes</tt><big>(</big><em>message=''</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.Data2D.add_notes" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Data2D.__add__">
+<tt class="descname">__add__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.__add__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to add to the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data2D.__div__">
+<tt class="descname">__div__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.__div__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divided a data set by another</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set that the current one is divided by</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data2D.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.data_info'</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data2D.__mul__">
+<tt class="descname">__mul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data2D.__radd__">
+<tt class="descname">__radd__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.__radd__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to add to the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data2D.__rdiv__">
+<tt class="descname">__rdiv__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.__rdiv__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divided a data set by another</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set that the current one is divided by</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data2D.__rmul__">
+<tt class="descname">__rmul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.__rmul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data2D.__rsub__">
+<tt class="descname">__rsub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.__rsub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data2D.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.__str__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data2D.__sub__">
+<tt class="descname">__sub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data2D._perform_operation">
+<tt class="descname">_perform_operation</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D._perform_operation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform 2D operations between data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>other</strong> &#8211; other data set</li>
+<li><strong>operation</strong> &#8211; function defining the operation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data2D._validity_check">
+<tt class="descname">_validity_check</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D._validity_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks that the data lengths are compatible.
+Checks that the x vectors are compatible.
+Returns errors vectors equal to original
+errors vectors if they were present or vectors
+of zeros when none was found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; other data set for operation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dy for self, dy for other [numpy arrays]</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">when lengths are not compatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D._xaxis">
+<tt class="descname">_xaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D._xaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D._xunit">
+<tt class="descname">_xunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D._xunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D._yaxis">
+<tt class="descname">_yaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D._yaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D._yunit">
+<tt class="descname">_yunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D._yunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D._zaxis">
+<tt class="descname">_zaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D._zaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D._zunit">
+<tt class="descname">_zunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D._zunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Data2D.add_notes">
+<tt class="descname">add_notes</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.add_notes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add notes to datainfo</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="DataLoader.data_info.Data2D.append_empty_process">
-<tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#DataLoader.data_info.Data2D.append_empty_process" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Data2D.append_empty_process">
+<tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.append_empty_process" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="DataLoader.data_info.Data2D.clone_without_data">
-<tt class="descname">clone_without_data</tt><big>(</big><em>length=0</em>, <em>clone=None</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.Data2D.clone_without_data" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Data2D.clone_without_data">
+<tt class="descname">clone_without_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.clone_without_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clone the current object, without copying the data (which
 will be filled out by a subsequent operation).
 The data arrays will be initialized to zero.</p>
@@ -163,7 +815,7 @@ The data arrays will be initialized to zero.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>length</strong> &#8211; length of the data array to be initialized</li>
 <li><strong>clone</strong> &#8211; if provided, the data will be copied to clone</li>
 </ul>
@@ -173,114 +825,977 @@ The data arrays will be initialized to zero.</p>
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.collimation">
+<tt class="descname">collimation</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.collimation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.data">
+<tt class="descname">data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.detector">
+<tt class="descname">detector</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.detector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.dqx_data">
+<tt class="descname">dqx_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.dqx_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.dqy_data">
+<tt class="descname">dqy_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.dqy_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.err_data">
+<tt class="descname">err_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.err_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.errors">
+<tt class="descname">errors</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.errors" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.filename">
+<tt class="descname">filename</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.instrument">
+<tt class="descname">instrument</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.instrument" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.mask">
+<tt class="descname">mask</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.meta_data">
+<tt class="descname">meta_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.meta_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.notes">
+<tt class="descname">notes</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.notes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.process">
+<tt class="descname">process</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.q_data">
+<tt class="descname">q_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.q_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.qx_data">
+<tt class="descname">qx_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.qx_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.qy_data">
+<tt class="descname">qy_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.qy_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.run">
+<tt class="descname">run</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.run_name">
+<tt class="descname">run_name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.run_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.sample">
+<tt class="descname">sample</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.sample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.source">
+<tt class="descname">source</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.source" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.title">
+<tt class="descname">title</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.x_bins">
+<tt class="descname">x_bins</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.x_bins" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
-<dt id="DataLoader.data_info.Data2D.xaxis">
-<tt class="descname">xaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.Data2D.xaxis" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Data2D.xaxis">
+<tt class="descname">xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.xaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>set the x axis label and unit</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.xmax">
+<tt class="descname">xmax</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.xmax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.xmin">
+<tt class="descname">xmin</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.xmin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.y_bins">
+<tt class="descname">y_bins</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.y_bins" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
-<dt id="DataLoader.data_info.Data2D.yaxis">
-<tt class="descname">yaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.Data2D.yaxis" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Data2D.yaxis">
+<tt class="descname">yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.yaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>set the y axis label and unit</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.ymax">
+<tt class="descname">ymax</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.ymax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Data2D.ymin">
+<tt class="descname">ymin</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Data2D.ymin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
-<dt id="DataLoader.data_info.Data2D.zaxis">
-<tt class="descname">zaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.Data2D.zaxis" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Data2D.zaxis">
+<tt class="descname">zaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Data2D.zaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>set the z axis label and unit</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="DataLoader.data_info.DataInfo">
-<em class="property">class </em><tt class="descclassname">DataLoader.data_info.</tt><tt class="descname">DataInfo</tt><a class="headerlink" href="#DataLoader.data_info.DataInfo" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.DataInfo">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.data_info.</tt><tt class="descname">DataInfo</tt><a class="headerlink" href="#sans.dataloader.data_info.DataInfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class to hold the data read from a file.
 It includes four blocks of data for the
 instrument description, the sample description,
 the data itself and any other meta data.</p>
 <dl class="method">
-<dt id="DataLoader.data_info.DataInfo.add_notes">
-<tt class="descname">add_notes</tt><big>(</big><em>message=''</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.DataInfo.add_notes" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.DataInfo.__add__">
+<tt class="descname">__add__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.__add__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to add to the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.DataInfo.__div__">
+<tt class="descname">__div__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.__div__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divided a data set by another</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set that the current one is divided by</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.DataInfo.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.DataInfo.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.data_info'</em><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.DataInfo.__mul__">
+<tt class="descname">__mul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.DataInfo.__radd__">
+<tt class="descname">__radd__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.__radd__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to add to the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.DataInfo.__rdiv__">
+<tt class="descname">__rdiv__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.__rdiv__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divided a data set by another</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set that the current one is divided by</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.DataInfo.__rmul__">
+<tt class="descname">__rmul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.__rmul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.DataInfo.__rsub__">
+<tt class="descname">__rsub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.__rsub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.DataInfo.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nice printout</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.DataInfo.__sub__">
+<tt class="descname">__sub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.DataInfo._perform_operation">
+<tt class="descname">_perform_operation</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.DataInfo._perform_operation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Private method to perform operation. Not implemented for DataInfo,
+but should be implemented for each data class inherited from DataInfo
+that holds actual data (ex.: Data1D)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.DataInfo.add_notes">
+<tt class="descname">add_notes</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.add_notes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add notes to datainfo</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="DataLoader.data_info.DataInfo.append_empty_process">
-<tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#DataLoader.data_info.DataInfo.append_empty_process" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.DataInfo.append_empty_process">
+<tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.append_empty_process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.DataInfo.collimation">
+<tt class="descname">collimation</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.collimation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.DataInfo.detector">
+<tt class="descname">detector</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.detector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.DataInfo.errors">
+<tt class="descname">errors</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.errors" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.DataInfo.filename">
+<tt class="descname">filename</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.DataInfo.instrument">
+<tt class="descname">instrument</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.instrument" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.DataInfo.meta_data">
+<tt class="descname">meta_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.meta_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.DataInfo.notes">
+<tt class="descname">notes</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.notes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.DataInfo.process">
+<tt class="descname">process</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.DataInfo.run">
+<tt class="descname">run</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.DataInfo.run_name">
+<tt class="descname">run_name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.run_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.DataInfo.sample">
+<tt class="descname">sample</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.sample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.DataInfo.source">
+<tt class="descname">source</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.source" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.DataInfo.title">
+<tt class="descname">title</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.DataInfo.title" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="DataLoader.data_info.Detector">
-<em class="property">class </em><tt class="descclassname">DataLoader.data_info.</tt><tt class="descname">Detector</tt><a class="headerlink" href="#DataLoader.data_info.Detector" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Detector">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.data_info.</tt><tt class="descname">Detector</tt><a class="headerlink" href="#sans.dataloader.data_info.Detector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class to hold detector information</p>
+<dl class="method">
+<dt id="sans.dataloader.data_info.Detector.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Detector.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize class attribute that are objects...</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Detector.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.data_info'</em><a class="headerlink" href="#sans.dataloader.data_info.Detector.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Detector.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Detector.__str__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Detector.beam_center">
+<tt class="descname">beam_center</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Detector.beam_center" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Detector.beam_center_unit">
+<tt class="descname">beam_center_unit</tt><em class="property"> = 'mm'</em><a class="headerlink" href="#sans.dataloader.data_info.Detector.beam_center_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Detector.distance">
+<tt class="descname">distance</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Detector.distance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Detector.distance_unit">
+<tt class="descname">distance_unit</tt><em class="property"> = 'mm'</em><a class="headerlink" href="#sans.dataloader.data_info.Detector.distance_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Detector.name">
+<tt class="descname">name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Detector.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Detector.offset">
+<tt class="descname">offset</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Detector.offset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Detector.offset_unit">
+<tt class="descname">offset_unit</tt><em class="property"> = 'm'</em><a class="headerlink" href="#sans.dataloader.data_info.Detector.offset_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Detector.orientation">
+<tt class="descname">orientation</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Detector.orientation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Detector.orientation_unit">
+<tt class="descname">orientation_unit</tt><em class="property"> = 'degree'</em><a class="headerlink" href="#sans.dataloader.data_info.Detector.orientation_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Detector.pixel_size">
+<tt class="descname">pixel_size</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Detector.pixel_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Detector.pixel_size_unit">
+<tt class="descname">pixel_size_unit</tt><em class="property"> = 'mm'</em><a class="headerlink" href="#sans.dataloader.data_info.Detector.pixel_size_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Detector.slit_length">
+<tt class="descname">slit_length</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Detector.slit_length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Detector.slit_length_unit">
+<tt class="descname">slit_length_unit</tt><em class="property"> = 'mm'</em><a class="headerlink" href="#sans.dataloader.data_info.Detector.slit_length_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
-<dt id="DataLoader.data_info.Process">
-<em class="property">class </em><tt class="descclassname">DataLoader.data_info.</tt><tt class="descname">Process</tt><a class="headerlink" href="#DataLoader.data_info.Process" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Process">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.data_info.</tt><tt class="descname">Process</tt><a class="headerlink" href="#sans.dataloader.data_info.Process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class that holds information about the processes
 performed on the data.</p>
+<dl class="method">
+<dt id="sans.dataloader.data_info.Process.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Process.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Process.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.data_info'</em><a class="headerlink" href="#sans.dataloader.data_info.Process.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Process.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Process.__str__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Process.date">
+<tt class="descname">date</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Process.date" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Process.description">
+<tt class="descname">description</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Process.description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Process.name">
+<tt class="descname">name</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Process.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Process.notes">
+<tt class="descname">notes</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Process.notes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Process.term">
+<tt class="descname">term</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Process.term" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
-<dt id="DataLoader.data_info.Sample">
-<em class="property">class </em><tt class="descclassname">DataLoader.data_info.</tt><tt class="descname">Sample</tt><a class="headerlink" href="#DataLoader.data_info.Sample" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Sample">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.data_info.</tt><tt class="descname">Sample</tt><a class="headerlink" href="#sans.dataloader.data_info.Sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class to hold the sample description</p>
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Sample.ID">
+<tt class="descname">ID</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Sample.ID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Sample.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Sample.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Sample.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.data_info'</em><a class="headerlink" href="#sans.dataloader.data_info.Sample.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Sample.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Sample.__str__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Sample.details">
+<tt class="descname">details</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Sample.details" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Sample.name">
+<tt class="descname">name</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.Sample.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Sample.orientation">
+<tt class="descname">orientation</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Sample.orientation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Sample.orientation_unit">
+<tt class="descname">orientation_unit</tt><em class="property"> = 'degree'</em><a class="headerlink" href="#sans.dataloader.data_info.Sample.orientation_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Sample.position">
+<tt class="descname">position</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Sample.position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Sample.position_unit">
+<tt class="descname">position_unit</tt><em class="property"> = 'mm'</em><a class="headerlink" href="#sans.dataloader.data_info.Sample.position_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Sample.temperature">
+<tt class="descname">temperature</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Sample.temperature" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Sample.temperature_unit">
+<tt class="descname">temperature_unit</tt><em class="property"> = 'C'</em><a class="headerlink" href="#sans.dataloader.data_info.Sample.temperature_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Sample.thickness">
+<tt class="descname">thickness</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Sample.thickness" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Sample.thickness_unit">
+<tt class="descname">thickness_unit</tt><em class="property"> = 'mm'</em><a class="headerlink" href="#sans.dataloader.data_info.Sample.thickness_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Sample.transmission">
+<tt class="descname">transmission</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Sample.transmission" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
-<dt id="DataLoader.data_info.Source">
-<em class="property">class </em><tt class="descclassname">DataLoader.data_info.</tt><tt class="descname">Source</tt><a class="headerlink" href="#DataLoader.data_info.Source" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Source">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.data_info.</tt><tt class="descname">Source</tt><a class="headerlink" href="#sans.dataloader.data_info.Source" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class to hold source information</p>
+<dl class="method">
+<dt id="sans.dataloader.data_info.Source.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Source.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Source.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.data_info'</em><a class="headerlink" href="#sans.dataloader.data_info.Source.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Source.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Source.__str__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Source.beam_shape">
+<tt class="descname">beam_shape</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Source.beam_shape" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Source.beam_size">
+<tt class="descname">beam_size</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Source.beam_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Source.beam_size_name">
+<tt class="descname">beam_size_name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Source.beam_size_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Source.beam_size_unit">
+<tt class="descname">beam_size_unit</tt><em class="property"> = 'mm'</em><a class="headerlink" href="#sans.dataloader.data_info.Source.beam_size_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Source.name">
+<tt class="descname">name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Source.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Source.radiation">
+<tt class="descname">radiation</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Source.radiation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Source.wavelength">
+<tt class="descname">wavelength</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Source.wavelength" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Source.wavelength_max">
+<tt class="descname">wavelength_max</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Source.wavelength_max" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Source.wavelength_max_unit">
+<tt class="descname">wavelength_max_unit</tt><em class="property"> = 'nm'</em><a class="headerlink" href="#sans.dataloader.data_info.Source.wavelength_max_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Source.wavelength_min">
+<tt class="descname">wavelength_min</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Source.wavelength_min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Source.wavelength_min_unit">
+<tt class="descname">wavelength_min_unit</tt><em class="property"> = 'nm'</em><a class="headerlink" href="#sans.dataloader.data_info.Source.wavelength_min_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Source.wavelength_spread">
+<tt class="descname">wavelength_spread</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Source.wavelength_spread" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Source.wavelength_spread_unit">
+<tt class="descname">wavelength_spread_unit</tt><em class="property"> = 'percent'</em><a class="headerlink" href="#sans.dataloader.data_info.Source.wavelength_spread_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Source.wavelength_unit">
+<tt class="descname">wavelength_unit</tt><em class="property"> = 'A'</em><a class="headerlink" href="#sans.dataloader.data_info.Source.wavelength_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
-<dt id="DataLoader.data_info.Vector">
-<em class="property">class </em><tt class="descclassname">DataLoader.data_info.</tt><tt class="descname">Vector</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>z=None</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.Vector" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.Vector">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.data_info.</tt><tt class="descname">Vector</tt><a class="headerlink" href="#sans.dataloader.data_info.Vector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Vector class to hold multi-dimensional objects</p>
+<dl class="method">
+<dt id="sans.dataloader.data_info.Vector.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Vector.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization. Components that are not
+set a set to None by default.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; x component</li>
+<li><strong>y</strong> &#8211; y component</li>
+<li><strong>z</strong> &#8211; z component</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Vector.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.data_info'</em><a class="headerlink" href="#sans.dataloader.data_info.Vector.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.Vector.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.Vector.__str__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Vector.x">
+<tt class="descname">x</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Vector.x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Vector.y">
+<tt class="descname">y</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Vector.y" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.Vector.z">
+<tt class="descname">z</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.Vector.z" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
-<dt id="DataLoader.data_info.plottable_1D">
-<em class="property">class </em><tt class="descclassname">DataLoader.data_info.</tt><tt class="descname">plottable_1D</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em>, <em>dxl=None</em>, <em>dxw=None</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.plottable_1D" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.plottable_1D">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.data_info.</tt><tt class="descname">plottable_1D</tt><a class="headerlink" href="#sans.dataloader.data_info.plottable_1D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data1D is a place holder for 1D plottables.</p>
 <dl class="method">
-<dt id="DataLoader.data_info.plottable_1D.xaxis">
-<tt class="descname">xaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.plottable_1D.xaxis" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.plottable_1D.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.plottable_1D.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_1D.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.data_info'</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_1D.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_1D._xaxis">
+<tt class="descname">_xaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_1D._xaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_1D._xunit">
+<tt class="descname">_xunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_1D._xunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_1D._yaxis">
+<tt class="descname">_yaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_1D._yaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_1D._yunit">
+<tt class="descname">_yunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_1D._yunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_1D.dx">
+<tt class="descname">dx</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_1D.dx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_1D.dxl">
+<tt class="descname">dxl</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_1D.dxl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_1D.dxw">
+<tt class="descname">dxw</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_1D.dxw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_1D.dy">
+<tt class="descname">dy</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_1D.dy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_1D.x">
+<tt class="descname">x</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_1D.x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.plottable_1D.xaxis">
+<tt class="descname">xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.plottable_1D.xaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>set the x axis label and unit</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_1D.y">
+<tt class="descname">y</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_1D.y" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
-<dt id="DataLoader.data_info.plottable_1D.yaxis">
-<tt class="descname">yaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.plottable_1D.yaxis" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.plottable_1D.yaxis">
+<tt class="descname">yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.plottable_1D.yaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>set the y axis label and unit</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="DataLoader.data_info.plottable_2D">
-<em class="property">class </em><tt class="descclassname">DataLoader.data_info.</tt><tt class="descname">plottable_2D</tt><big>(</big><em>data=None</em>, <em>err_data=None</em>, <em>qx_data=None</em>, <em>qy_data=None</em>, <em>q_data=None</em>, <em>mask=None</em>, <em>dqx_data=None</em>, <em>dqy_data=None</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.plottable_2D" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.plottable_2D">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.data_info.</tt><tt class="descname">plottable_2D</tt><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data2D is a place holder for 2D plottables.</p>
 <dl class="method">
-<dt id="DataLoader.data_info.plottable_2D.xaxis">
-<tt class="descname">xaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.plottable_2D.xaxis" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.plottable_2D.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.data_info'</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D._xaxis">
+<tt class="descname">_xaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D._xaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D._xunit">
+<tt class="descname">_xunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D._xunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D._yaxis">
+<tt class="descname">_yaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D._yaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D._yunit">
+<tt class="descname">_yunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D._yunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D._zaxis">
+<tt class="descname">_zaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D._zaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D._zunit">
+<tt class="descname">_zunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D._zunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D.data">
+<tt class="descname">data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D.dqx_data">
+<tt class="descname">dqx_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.dqx_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D.dqy_data">
+<tt class="descname">dqy_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.dqy_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D.err_data">
+<tt class="descname">err_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.err_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D.mask">
+<tt class="descname">mask</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D.q_data">
+<tt class="descname">q_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.q_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D.qx_data">
+<tt class="descname">qx_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.qx_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D.qy_data">
+<tt class="descname">qy_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.qy_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.data_info.plottable_2D.xaxis">
+<tt class="descname">xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.xaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>set the x axis label and unit</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D.xmax">
+<tt class="descname">xmax</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.xmax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D.xmin">
+<tt class="descname">xmin</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.xmin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
-<dt id="DataLoader.data_info.plottable_2D.yaxis">
-<tt class="descname">yaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.plottable_2D.yaxis" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.plottable_2D.yaxis">
+<tt class="descname">yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.yaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>set the y axis label and unit</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D.ymax">
+<tt class="descname">ymax</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.ymax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.data_info.plottable_2D.ymin">
+<tt class="descname">ymin</tt><em class="property"> = None</em><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.ymin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
-<dt id="DataLoader.data_info.plottable_2D.zaxis">
-<tt class="descname">zaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#DataLoader.data_info.plottable_2D.zaxis" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.data_info.plottable_2D.zaxis">
+<tt class="descname">zaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.data_info.plottable_2D.zaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>set the z axis label and unit</p>
 </dd></dl>
 
@@ -298,7 +1813,7 @@ performed on the data.</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">data_info</a><ul>
-<li><a class="reference internal" href="#module-DataLoader.data_info"><tt class="docutils literal"><span class="pre">DataLoader.data_info</span></tt></a></li>
+<li><a class="reference internal" href="#sans-dataloader-data-info"><tt class="docutils literal"><span class="pre">sans.dataloader.data_info</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -317,7 +1832,7 @@ performed on the data.</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -346,13 +1861,13 @@ performed on the data.</p>
         <li class="right" >
           <a href="index.html" title="Reference"
              >previous</a> |</li>
-        <li><a href="../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">DataLoader 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

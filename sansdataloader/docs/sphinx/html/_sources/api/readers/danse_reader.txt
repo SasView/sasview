@@ -4,12 +4,14 @@
 danse_reader
 ******************************************************************************
 
-:mod:`DataLoader.readers.danse_reader`
+:mod:`sans.dataloader.readers.danse_reader`
 ==============================================================================
 
-.. automodule:: DataLoader.readers.danse_reader
+.. automodule:: sans.dataloader.readers.danse_reader
    :members:
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+   :special-members:
+   :private-members:
 

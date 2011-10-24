@@ -4,12 +4,14 @@
 red2d_reader
 ******************************************************************************
 
-:mod:`DataLoader.readers.red2d_reader`
+:mod:`sans.dataloader.readers.red2d_reader`
 ==============================================================================
 
-.. automodule:: DataLoader.readers.red2d_reader
+.. automodule:: sans.dataloader.readers.red2d_reader
    :members:
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+   :special-members:
+   :private-members:
 

@@ -4,12 +4,14 @@
 abs_reader
 ******************************************************************************
 
-:mod:`DataLoader.readers.abs_reader`
+:mod:`sans.dataloader.readers.abs_reader`
 ==============================================================================
 
-.. automodule:: DataLoader.readers.abs_reader
+.. automodule:: sans.dataloader.readers.abs_reader
    :members:
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+   :special-members:
+   :private-members:
 

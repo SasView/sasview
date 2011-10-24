@@ -4,12 +4,14 @@
 IgorReader
 ******************************************************************************
 
-:mod:`DataLoader.readers.IgorReader`
+:mod:`sans.dataloader.readers.IgorReader`
 ==============================================================================
 
-.. automodule:: DataLoader.readers.IgorReader
+.. automodule:: sans.dataloader.readers.IgorReader
    :members:
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+   :special-members:
+   :private-members:
 

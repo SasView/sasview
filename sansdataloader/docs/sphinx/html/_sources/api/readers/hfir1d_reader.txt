@@ -4,12 +4,14 @@
 hfir1d_reader
 ******************************************************************************
 
-:mod:`DataLoader.readers.hfir1d_reader`
+:mod:`sans.dataloader.readers.hfir1d_reader`
 ==============================================================================
 
-.. automodule:: DataLoader.readers.hfir1d_reader
+.. automodule:: sans.dataloader.readers.hfir1d_reader
    :members:
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+   :special-members:
+   :private-members:
 

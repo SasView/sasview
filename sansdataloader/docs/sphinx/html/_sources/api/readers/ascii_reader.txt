@@ -4,12 +4,14 @@
 ascii_reader
 ******************************************************************************
 
-:mod:`DataLoader.readers.ascii_reader`
+:mod:`sans.dataloader.readers.ascii_reader`
 ==============================================================================
 
-.. automodule:: DataLoader.readers.ascii_reader
+.. automodule:: sans.dataloader.readers.ascii_reader
    :members:
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+   :special-members:
+   :private-members:
 

@@ -4,12 +4,14 @@
 tiff_reader
 ******************************************************************************
 
-:mod:`DataLoader.readers.tiff_reader`
+:mod:`sans.dataloader.readers.tiff_reader`
 ==============================================================================
 
-.. automodule:: DataLoader.readers.tiff_reader
+.. automodule:: sans.dataloader.readers.tiff_reader
    :members:
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+   :special-members:
+   :private-members:
 

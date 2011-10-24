@@ -13,4 +13,6 @@
 
 .. toctree::
 
-   
+   data_info.rst
+   loader.rst
+   manipulations.rst

@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>abs_reader &mdash; DataLoader v0.1.0 documentation</title>
+    <title>abs_reader &mdash; DataLoader 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="DataLoader v0.1.0 documentation" href="../../index.html" />
+    <link rel="top" title="DataLoader 0.1.0 documentation" href="../../index.html" />
     <link rel="up" title="Readers" href="index.html" />
     <link rel="next" title="ascii_reader" href="ascii_reader.html" />
     <link rel="prev" title="Readers" href="index.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="index.html" title="Readers"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">DataLoader 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Readers</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,27 +58,37 @@
             
   <div class="section" id="abs-reader">
 <h1>abs_reader<a class="headerlink" href="#abs-reader" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-DataLoader.readers.abs_reader">
-<span id="dataloader-readers-abs-reader"></span><h2><a class="reference internal" href="#module-DataLoader.readers.abs_reader" title="DataLoader.readers.abs_reader"><tt class="xref py py-mod docutils literal"><span class="pre">DataLoader.readers.abs_reader</span></tt></a><a class="headerlink" href="#module-DataLoader.readers.abs_reader" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="DataLoader.readers.abs_reader.Reader">
-<em class="property">class </em><tt class="descclassname">DataLoader.readers.abs_reader.</tt><tt class="descname">Reader</tt><a class="headerlink" href="#DataLoader.readers.abs_reader.Reader" title="Permalink to this definition">¶</a></dt>
+<div class="section" id="sans-dataloader-readers-abs-reader">
+<h2><a class="reference internal" href="#module-sans.dataloader.readers.abs_reader" title="sans.dataloader.readers.abs_reader"><tt class="xref py py-mod docutils literal"><span class="pre">sans.dataloader.readers.abs_reader</span></tt></a><a class="headerlink" href="#sans-dataloader-readers-abs-reader" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.dataloader.readers.abs_reader"></span><dl class="class">
+<dt id="sans.dataloader.readers.abs_reader.Reader">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.readers.abs_reader.</tt><tt class="descname">Reader</tt><a class="headerlink" href="#sans.dataloader.readers.abs_reader.Reader" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class to load IGOR reduced .ABS files</p>
+<dl class="attribute">
+<dt id="sans.dataloader.readers.abs_reader.Reader.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.readers.abs_reader'</em><a class="headerlink" href="#sans.dataloader.readers.abs_reader.Reader.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.readers.abs_reader.Reader.ext">
+<tt class="descname">ext</tt><em class="property"> = ['.abs', '.ABS']</em><a class="headerlink" href="#sans.dataloader.readers.abs_reader.Reader.ext" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
-<dt id="DataLoader.readers.abs_reader.Reader.read">
-<tt class="descname">read</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#DataLoader.readers.abs_reader.Reader.read" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.readers.abs_reader.Reader.read">
+<tt class="descname">read</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.readers.abs_reader.Reader.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load data file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>path</strong> &#8211; file path</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>path</strong> &#8211; file path</p>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Data1D object, or None</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Data1D object, or None</p>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
 <li><strong>RuntimeError</strong> &#8211; when the file can&#8217;t be opened</li>
 <li><strong>ValueError</strong> &#8211; when the length of the data vectors are inconsistent</li>
 </ul>
@@ -84,6 +97,16 @@
 </tbody>
 </table>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.readers.abs_reader.Reader.type">
+<tt class="descname">type</tt><em class="property"> = ['IGOR 1D files (*.abs)|*.abs']</em><a class="headerlink" href="#sans.dataloader.readers.abs_reader.Reader.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.readers.abs_reader.Reader.type_name">
+<tt class="descname">type_name</tt><em class="property"> = 'IGOR 1D'</em><a class="headerlink" href="#sans.dataloader.readers.abs_reader.Reader.type_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -99,7 +122,7 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">abs_reader</a><ul>
-<li><a class="reference internal" href="#module-DataLoader.readers.abs_reader"><tt class="docutils literal"><span class="pre">DataLoader.readers.abs_reader</span></tt></a></li>
+<li><a class="reference internal" href="#sans-dataloader-readers-abs-reader"><tt class="docutils literal"><span class="pre">sans.dataloader.readers.abs_reader</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -118,7 +141,7 @@
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -147,13 +170,13 @@
         <li class="right" >
           <a href="index.html" title="Readers"
              >previous</a> |</li>
-        <li><a href="../../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">DataLoader 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Readers</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

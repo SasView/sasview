@@ -4,12 +4,14 @@
 associations
 ******************************************************************************
 
-:mod:`DataLoader.readers.associations`
+:mod:`sans.dataloader.readers.associations`
 ==============================================================================
 
-.. automodule:: DataLoader.readers.associations
+.. automodule:: sans.dataloader.readers.associations
    :members:
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+   :special-members:
+   :private-members:
 

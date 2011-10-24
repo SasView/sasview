@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>danse_reader &mdash; DataLoader v0.1.0 documentation</title>
+    <title>danse_reader &mdash; DataLoader 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="DataLoader v0.1.0 documentation" href="../../index.html" />
+    <link rel="top" title="DataLoader 0.1.0 documentation" href="../../index.html" />
     <link rel="up" title="Readers" href="index.html" />
     <link rel="next" title="hfir1d_reader" href="hfir1d_reader.html" />
     <link rel="prev" title="cansas_reader" href="cansas_reader.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="cansas_reader.html" title="cansas_reader"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">DataLoader 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Readers</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,19 +58,39 @@
             
   <div class="section" id="danse-reader">
 <h1>danse_reader<a class="headerlink" href="#danse-reader" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-DataLoader.readers.danse_reader">
-<span id="dataloader-readers-danse-reader"></span><h2><a class="reference internal" href="#module-DataLoader.readers.danse_reader" title="DataLoader.readers.danse_reader"><tt class="xref py py-mod docutils literal"><span class="pre">DataLoader.readers.danse_reader</span></tt></a><a class="headerlink" href="#module-DataLoader.readers.danse_reader" title="Permalink to this headline">¶</a></h2>
-<p>DANSE/SANS file reader</p>
+<div class="section" id="sans-dataloader-readers-danse-reader">
+<h2><a class="reference internal" href="#module-sans.dataloader.readers.danse_reader" title="sans.dataloader.readers.danse_reader"><tt class="xref py py-mod docutils literal"><span class="pre">sans.dataloader.readers.danse_reader</span></tt></a><a class="headerlink" href="#sans-dataloader-readers-danse-reader" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.dataloader.readers.danse_reader"></span><p>DANSE/SANS file reader</p>
 <dl class="class">
-<dt id="DataLoader.readers.danse_reader.Reader">
-<em class="property">class </em><tt class="descclassname">DataLoader.readers.danse_reader.</tt><tt class="descname">Reader</tt><a class="headerlink" href="#DataLoader.readers.danse_reader.Reader" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.readers.danse_reader.Reader">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.readers.danse_reader.</tt><tt class="descname">Reader</tt><a class="headerlink" href="#sans.dataloader.readers.danse_reader.Reader" title="Permalink to this definition">¶</a></dt>
 <dd><p>Example data manipulation</p>
+<dl class="attribute">
+<dt id="sans.dataloader.readers.danse_reader.Reader.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.readers.danse_reader'</em><a class="headerlink" href="#sans.dataloader.readers.danse_reader.Reader.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.readers.danse_reader.Reader.ext">
+<tt class="descname">ext</tt><em class="property"> = ['.sans', '.SANS']</em><a class="headerlink" href="#sans.dataloader.readers.danse_reader.Reader.ext" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
-<dt id="DataLoader.readers.danse_reader.Reader.read">
-<tt class="descname">read</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#DataLoader.readers.danse_reader.Reader.read" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.readers.danse_reader.Reader.read">
+<tt class="descname">read</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.readers.danse_reader.Reader.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open and read the data in a file
 &#64;param file: path of the file</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.readers.danse_reader.Reader.type">
+<tt class="descname">type</tt><em class="property"> = ['DANSE files (*.sans)|*.sans']</em><a class="headerlink" href="#sans.dataloader.readers.danse_reader.Reader.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.readers.danse_reader.Reader.type_name">
+<tt class="descname">type_name</tt><em class="property"> = 'DANSE'</em><a class="headerlink" href="#sans.dataloader.readers.danse_reader.Reader.type_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -83,7 +106,7 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">danse_reader</a><ul>
-<li><a class="reference internal" href="#module-DataLoader.readers.danse_reader"><tt class="docutils literal"><span class="pre">DataLoader.readers.danse_reader</span></tt></a></li>
+<li><a class="reference internal" href="#sans-dataloader-readers-danse-reader"><tt class="docutils literal"><span class="pre">sans.dataloader.readers.danse_reader</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -102,7 +125,7 @@
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -131,13 +154,13 @@
         <li class="right" >
           <a href="cansas_reader.html" title="cansas_reader"
              >previous</a> |</li>
-        <li><a href="../../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">DataLoader 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Readers</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

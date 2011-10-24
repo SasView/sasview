@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>tiff_reader &mdash; DataLoader v0.1.0 documentation</title>
+    <title>tiff_reader &mdash; DataLoader 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="DataLoader v0.1.0 documentation" href="../../index.html" />
+    <link rel="top" title="DataLoader 0.1.0 documentation" href="../../index.html" />
     <link rel="up" title="Readers" href="index.html" />
     <link rel="prev" title="red2d_reader" href="red2d_reader.html" /> 
   </head>
@@ -39,7 +42,7 @@
         <li class="right" >
           <a href="red2d_reader.html" title="red2d_reader"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">DataLoader 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Readers</a> &raquo;</li> 
       </ul>
     </div>  
@@ -51,26 +54,46 @@
             
   <div class="section" id="tiff-reader">
 <h1>tiff_reader<a class="headerlink" href="#tiff-reader" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-DataLoader.readers.tiff_reader">
-<span id="dataloader-readers-tiff-reader"></span><h2><a class="reference internal" href="#module-DataLoader.readers.tiff_reader" title="DataLoader.readers.tiff_reader"><tt class="xref py py-mod docutils literal"><span class="pre">DataLoader.readers.tiff_reader</span></tt></a><a class="headerlink" href="#module-DataLoader.readers.tiff_reader" title="Permalink to this headline">¶</a></h2>
-<p>Image reader. Untested.</p>
+<div class="section" id="sans-dataloader-readers-tiff-reader">
+<h2><a class="reference internal" href="#module-sans.dataloader.readers.tiff_reader" title="sans.dataloader.readers.tiff_reader"><tt class="xref py py-mod docutils literal"><span class="pre">sans.dataloader.readers.tiff_reader</span></tt></a><a class="headerlink" href="#sans-dataloader-readers-tiff-reader" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.dataloader.readers.tiff_reader"></span><p>Image reader. Untested.</p>
 <dl class="class">
-<dt id="DataLoader.readers.tiff_reader.Reader">
-<em class="property">class </em><tt class="descclassname">DataLoader.readers.tiff_reader.</tt><tt class="descname">Reader</tt><a class="headerlink" href="#DataLoader.readers.tiff_reader.Reader" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.readers.tiff_reader.Reader">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.readers.tiff_reader.</tt><tt class="descname">Reader</tt><a class="headerlink" href="#sans.dataloader.readers.tiff_reader.Reader" title="Permalink to this definition">¶</a></dt>
 <dd><p>Example data manipulation</p>
+<dl class="attribute">
+<dt id="sans.dataloader.readers.tiff_reader.Reader.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.readers.tiff_reader'</em><a class="headerlink" href="#sans.dataloader.readers.tiff_reader.Reader.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.readers.tiff_reader.Reader.ext">
+<tt class="descname">ext</tt><em class="property"> = ['.tif', '.tiff']</em><a class="headerlink" href="#sans.dataloader.readers.tiff_reader.Reader.ext" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
-<dt id="DataLoader.readers.tiff_reader.Reader.read">
-<tt class="descname">read</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#DataLoader.readers.tiff_reader.Reader.read" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.readers.tiff_reader.Reader.read">
+<tt class="descname">read</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.readers.tiff_reader.Reader.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Open and read the data in a file</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file</strong> &#8211; path of the file</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file</strong> &#8211; path of the file</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.readers.tiff_reader.Reader.type">
+<tt class="descname">type</tt><em class="property"> = ['TIF files (*.tif)|*.tif', 'TIFF files (*.tiff)|*.tiff']</em><a class="headerlink" href="#sans.dataloader.readers.tiff_reader.Reader.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.readers.tiff_reader.Reader.type_name">
+<tt class="descname">type_name</tt><em class="property"> = 'TIF'</em><a class="headerlink" href="#sans.dataloader.readers.tiff_reader.Reader.type_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -86,7 +109,7 @@
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">tiff_reader</a><ul>
-<li><a class="reference internal" href="#module-DataLoader.readers.tiff_reader"><tt class="docutils literal"><span class="pre">DataLoader.readers.tiff_reader</span></tt></a></li>
+<li><a class="reference internal" href="#sans-dataloader-readers-tiff-reader"><tt class="docutils literal"><span class="pre">sans.dataloader.readers.tiff_reader</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -102,7 +125,7 @@
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -128,13 +151,13 @@
         <li class="right" >
           <a href="red2d_reader.html" title="red2d_reader"
              >previous</a> |</li>
-        <li><a href="../../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">DataLoader 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Readers</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

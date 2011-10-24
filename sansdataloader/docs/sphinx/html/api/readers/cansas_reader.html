@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>cansas_reader &mdash; DataLoader v0.1.0 documentation</title>
+    <title>cansas_reader &mdash; DataLoader 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="DataLoader v0.1.0 documentation" href="../../index.html" />
+    <link rel="top" title="DataLoader 0.1.0 documentation" href="../../index.html" />
     <link rel="up" title="Readers" href="index.html" />
     <link rel="next" title="danse_reader" href="danse_reader.html" />
     <link rel="prev" title="associations" href="associations.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="associations.html" title="associations"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">DataLoader 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Readers</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,37 +58,139 @@
             
   <div class="section" id="cansas-reader">
 <h1>cansas_reader<a class="headerlink" href="#cansas-reader" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-DataLoader.readers.cansas_reader">
-<span id="dataloader-readers-cansas-reader"></span><h2><a class="reference internal" href="#module-DataLoader.readers.cansas_reader" title="DataLoader.readers.cansas_reader"><tt class="xref py py-mod docutils literal"><span class="pre">DataLoader.readers.cansas_reader</span></tt></a><a class="headerlink" href="#module-DataLoader.readers.cansas_reader" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="DataLoader.readers.cansas_reader.Reader">
-<em class="property">class </em><tt class="descclassname">DataLoader.readers.cansas_reader.</tt><tt class="descname">Reader</tt><a class="headerlink" href="#DataLoader.readers.cansas_reader.Reader" title="Permalink to this definition">¶</a></dt>
+<div class="section" id="sans-dataloader-readers-cansas-reader">
+<h2><a class="reference internal" href="#module-sans.dataloader.readers.cansas_reader" title="sans.dataloader.readers.cansas_reader"><tt class="xref py py-mod docutils literal"><span class="pre">sans.dataloader.readers.cansas_reader</span></tt></a><a class="headerlink" href="#sans-dataloader-readers-cansas-reader" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.dataloader.readers.cansas_reader"></span><dl class="class">
+<dt id="sans.dataloader.readers.cansas_reader.Reader">
+<em class="property">class </em><tt class="descclassname">sans.dataloader.readers.cansas_reader.</tt><tt class="descname">Reader</tt><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.Reader" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class to load cansas 1D XML files</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Dependencies :</th><td class="field-body">The CanSas reader requires PyXML 0.8.4 or later.</td>
+<tr class="field-odd field"><th class="field-name">Dependencies :</th><td class="field-body">The CanSas reader requires PyXML 0.8.4 or later.</td>
 </tr>
 </tbody>
 </table>
 <dl class="method">
-<dt id="DataLoader.readers.cansas_reader.Reader.read">
-<tt class="descname">read</tt><big>(</big><em>path</em><big>)</big><a class="headerlink" href="#DataLoader.readers.cansas_reader.Reader.read" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.readers.cansas_reader.Reader.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.Reader.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.readers.cansas_reader.Reader.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.dataloader.readers.cansas_reader'</em><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.Reader.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.readers.cansas_reader.Reader._parse_entry">
+<tt class="descname">_parse_entry</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.Reader._parse_entry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a SASentry</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>node</strong> &#8211; SASentry node</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Data1D object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.readers.cansas_reader.Reader._store_content">
+<tt class="descname">_store_content</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.Reader._store_content" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the content of a xpath location and store
+the result. The value is treated as a string.</p>
+<p>The xpath location might or might not exist.
+If it does not exist, nothing is done</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>location</strong> &#8211; xpath location to fetch</li>
+<li><strong>node</strong> &#8211; node to read the data from</li>
+<li><strong>variable</strong> &#8211; name of the data member to store it in [string]</li>
+<li><strong>storage</strong> &#8211; data object that has the &#8216;variable&#8217; data member</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">return a list of errors</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.readers.cansas_reader.Reader._store_float">
+<tt class="descname">_store_float</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.Reader._store_float" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the content of a xpath location and store
+the result. Check that the units are compatible
+with the destination. The value is expected to
+be a float.</p>
+<p>The xpath location might or might not exist.
+If it does not exist, nothing is done</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>location</strong> &#8211; xpath location to fetch</li>
+<li><strong>node</strong> &#8211; node to read the data from</li>
+<li><strong>variable</strong> &#8211; name of the data member to store it in [string]</li>
+<li><strong>storage</strong> &#8211; data object that has the &#8216;variable&#8217; data member</li>
+<li><strong>optional</strong> &#8211; if True, no exception will be raised 
+if unit conversion can&#8217;t be done</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">raised when the units are not recognized</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.readers.cansas_reader.Reader._to_xml_doc">
+<tt class="descname">_to_xml_doc</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.Reader._to_xml_doc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an XML document to contain the content of a Data1D</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>datainfo</strong> &#8211; Data1D object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.readers.cansas_reader.Reader.ext">
+<tt class="descname">ext</tt><em class="property"> = ['.xml', '.XML', '.avex', '.AVEx', '.absx', 'ABSx']</em><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.Reader.ext" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.dataloader.readers.cansas_reader.Reader.read">
+<tt class="descname">read</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.Reader.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load data file</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>path</strong> &#8211; file path</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>path</strong> &#8211; file path</p>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Data1D object if a single SASentry was found, 
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Data1D object if a single SASentry was found, 
 or a list of Data1D objects if multiple entries were found,
 or None of nothing was found</p>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
 <li><strong>RuntimeError</strong> &#8211; when the file can&#8217;t be opened</li>
 <li><strong>ValueError</strong> &#8211; when the length of the data vectors are inconsistent</li>
 </ul>
@@ -95,15 +200,30 @@ or None of nothing was found</p>
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.dataloader.readers.cansas_reader.Reader.type">
+<tt class="descname">type</tt><em class="property"> = ['CanSAS 1D files (*.xml)|*.xml', 'CanSAS 1D AVE files (*.AVEx)|*.AVEx', 'CanSAS 1D AVE files (*.ABSx)|*.ABSx']</em><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.Reader.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.readers.cansas_reader.Reader.type_name">
+<tt class="descname">type_name</tt><em class="property"> = 'CanSAS 1D'</em><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.Reader.type_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.dataloader.readers.cansas_reader.Reader.version">
+<tt class="descname">version</tt><em class="property"> = '1.0'</em><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.Reader.version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
-<dt id="DataLoader.readers.cansas_reader.Reader.write">
-<tt class="descname">write</tt><big>(</big><em>filename</em>, <em>datainfo</em><big>)</big><a class="headerlink" href="#DataLoader.readers.cansas_reader.Reader.write" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.readers.cansas_reader.Reader.write">
+<tt class="descname">write</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.Reader.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the content of a Data1D as a CanSAS XML file</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>filename</strong> &#8211; name of the file to write</li>
 <li><strong>datainfo</strong> &#8211; Data1D object</li>
 </ul>
@@ -116,20 +236,20 @@ or None of nothing was found</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="DataLoader.readers.cansas_reader.get_content">
-<tt class="descclassname">DataLoader.readers.cansas_reader.</tt><tt class="descname">get_content</tt><big>(</big><em>location</em>, <em>node</em><big>)</big><a class="headerlink" href="#DataLoader.readers.cansas_reader.get_content" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.readers.cansas_reader.get_content">
+<tt class="descclassname">sans.dataloader.readers.cansas_reader.</tt><tt class="descname">get_content</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.get_content" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the first instance of the content of a xpath location.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>location</strong> &#8211; xpath location</li>
 <li><strong>node</strong> &#8211; node to start at</li>
 </ul>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Element, or None</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Element, or None</p>
 </td>
 </tr>
 </tbody>
@@ -137,14 +257,14 @@ or None of nothing was found</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="DataLoader.readers.cansas_reader.get_float">
-<tt class="descclassname">DataLoader.readers.cansas_reader.</tt><tt class="descname">get_float</tt><big>(</big><em>location</em>, <em>node</em><big>)</big><a class="headerlink" href="#DataLoader.readers.cansas_reader.get_float" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.readers.cansas_reader.get_float">
+<tt class="descclassname">sans.dataloader.readers.cansas_reader.</tt><tt class="descname">get_float</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.get_float" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the content of a node as a float</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>location</strong> &#8211; xpath location</li>
 <li><strong>node</strong> &#8211; node to start at</li>
 </ul>
@@ -155,13 +275,13 @@ or None of nothing was found</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="DataLoader.readers.cansas_reader.write_node">
-<tt class="descclassname">DataLoader.readers.cansas_reader.</tt><tt class="descname">write_node</tt><big>(</big><em>doc</em>, <em>parent</em>, <em>name</em>, <em>value</em>, <em>attr={}</em><big>)</big><a class="headerlink" href="#DataLoader.readers.cansas_reader.write_node" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.readers.cansas_reader.write_node">
+<tt class="descclassname">sans.dataloader.readers.cansas_reader.</tt><tt class="descname">write_node</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.readers.cansas_reader.write_node" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>doc</strong> &#8211; document DOM</li>
 <li><strong>parent</strong> &#8211; parent node</li>
 <li><strong>name</strong> &#8211; tag of the element</li>
@@ -170,7 +290,7 @@ or None of nothing was found</p>
 </ul>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if something was appended, otherwise False</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if something was appended, otherwise False</p>
 </td>
 </tr>
 </tbody>
@@ -189,7 +309,7 @@ or None of nothing was found</p>
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">cansas_reader</a><ul>
-<li><a class="reference internal" href="#module-DataLoader.readers.cansas_reader"><tt class="docutils literal"><span class="pre">DataLoader.readers.cansas_reader</span></tt></a></li>
+<li><a class="reference internal" href="#sans-dataloader-readers-cansas-reader"><tt class="docutils literal"><span class="pre">sans.dataloader.readers.cansas_reader</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -208,7 +328,7 @@ or None of nothing was found</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -237,13 +357,13 @@ or None of nothing was found</p>
         <li class="right" >
           <a href="associations.html" title="associations"
              >previous</a> |</li>
-        <li><a href="../../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">DataLoader 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Readers</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

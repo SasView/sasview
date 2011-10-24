@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>associations &mdash; DataLoader v0.1.0 documentation</title>
+    <title>associations &mdash; DataLoader 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="DataLoader v0.1.0 documentation" href="../../index.html" />
+    <link rel="top" title="DataLoader 0.1.0 documentation" href="../../index.html" />
     <link rel="up" title="Readers" href="index.html" />
     <link rel="next" title="cansas_reader" href="cansas_reader.html" />
     <link rel="prev" title="ascii_reader" href="ascii_reader.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="ascii_reader.html" title="ascii_reader"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">DataLoader 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Readers</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,21 +58,21 @@
             
   <div class="section" id="associations">
 <h1>associations<a class="headerlink" href="#associations" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-DataLoader.readers.associations">
-<span id="dataloader-readers-associations"></span><h2><a class="reference internal" href="#module-DataLoader.readers.associations" title="DataLoader.readers.associations"><tt class="xref py py-mod docutils literal"><span class="pre">DataLoader.readers.associations</span></tt></a><a class="headerlink" href="#module-DataLoader.readers.associations" title="Permalink to this headline">¶</a></h2>
-<p>Module to associate default readers to file extensions.
+<div class="section" id="sans-dataloader-readers-associations">
+<h2><a class="reference internal" href="#module-sans.dataloader.readers.associations" title="sans.dataloader.readers.associations"><tt class="xref py py-mod docutils literal"><span class="pre">sans.dataloader.readers.associations</span></tt></a><a class="headerlink" href="#sans-dataloader-readers-associations" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.dataloader.readers.associations"></span><p>Module to associate default readers to file extensions.
 The module reads an xml file to get the readers for each file extension.
 The readers are tried in order they appear when reading a file.</p>
 <dl class="function">
-<dt id="DataLoader.readers.associations.read_associations">
-<tt class="descclassname">DataLoader.readers.associations.</tt><tt class="descname">read_associations</tt><big>(</big><em>loader</em>, <em>settings='defaults.xml'</em><big>)</big><a class="headerlink" href="#DataLoader.readers.associations.read_associations" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.readers.associations.read_associations">
+<tt class="descclassname">sans.dataloader.readers.associations.</tt><tt class="descname">read_associations</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.readers.associations.read_associations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read the specified settings file to associate
 default readers to file extension.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>loader</strong> &#8211; Loader object</li>
 <li><strong>settings</strong> &#8211; path to the XML settings file [string]</li>
 </ul>
@@ -80,17 +83,17 @@ default readers to file extension.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="DataLoader.readers.associations.register_readers">
-<tt class="descclassname">DataLoader.readers.associations.</tt><tt class="descname">register_readers</tt><big>(</big><em>registry_function</em><big>)</big><a class="headerlink" href="#DataLoader.readers.associations.register_readers" title="Permalink to this definition">¶</a></dt>
+<dt id="sans.dataloader.readers.associations.register_readers">
+<tt class="descclassname">sans.dataloader.readers.associations.</tt><tt class="descname">register_readers</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.dataloader.readers.associations.register_readers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function called by the registry/loader object to register
 all default readers using a call back function.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Warning :</th><td class="field-body">this method is now obsolete</td>
+<tr class="field-odd field"><th class="field-name">Warning :</th><td class="field-body">this method is now obsolete</td>
 </tr>
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>registry_function</strong> &#8211; function to be called to register each reader</td>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>registry_function</strong> &#8211; function to be called to register each reader</td>
 </tr>
 </tbody>
 </table>
@@ -108,7 +111,7 @@ all default readers using a call back function.</p>
   <h3><a href="../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">associations</a><ul>
-<li><a class="reference internal" href="#module-DataLoader.readers.associations"><tt class="docutils literal"><span class="pre">DataLoader.readers.associations</span></tt></a></li>
+<li><a class="reference internal" href="#sans-dataloader-readers-associations"><tt class="docutils literal"><span class="pre">sans.dataloader.readers.associations</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -127,7 +130,7 @@ all default readers using a call back function.</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -156,13 +159,13 @@ all default readers using a call back function.</p>
         <li class="right" >
           <a href="ascii_reader.html" title="ascii_reader"
              >previous</a> |</li>
-        <li><a href="../../index.html">DataLoader v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../index.html">DataLoader 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Readers</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

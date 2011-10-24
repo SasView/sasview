@@ -4,12 +4,14 @@
 cansas_reader
 ******************************************************************************
 
-:mod:`DataLoader.readers.cansas_reader`
+:mod:`sans.dataloader.readers.cansas_reader`
 ==============================================================================
 
-.. automodule:: DataLoader.readers.cansas_reader
+.. automodule:: sans.dataloader.readers.cansas_reader
    :members:
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+   :special-members:
+   :private-members:
 

@@ -4,12 +4,14 @@
 manipulations
 ******************************************************************************
 
-:mod:`DataLoader.manipulations`
+:mod:`sans.dataloader.manipulations`
 ==============================================================================
 
-.. automodule:: DataLoader.manipulations
+.. automodule:: sans.dataloader.manipulations
    :members:
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+   :special-members:
+   :private-members:
 

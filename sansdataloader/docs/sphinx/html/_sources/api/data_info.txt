@@ -4,12 +4,14 @@
 data_info
 ******************************************************************************
 
-:mod:`DataLoader.data_info`
+:mod:`sans.dataloader.data_info`
 ==============================================================================
 
-.. automodule:: DataLoader.data_info
+.. automodule:: sans.dataloader.data_info
    :members:
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+   :special-members:
+   :private-members:
 

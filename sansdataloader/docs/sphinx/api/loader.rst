@@ -4,12 +4,14 @@
 loader
 ******************************************************************************
 
-:mod:`DataLoader.loader`
+:mod:`sans.dataloader.loader`
 ==============================================================================
 
-.. automodule:: DataLoader.loader
+.. automodule:: sans.dataloader.loader
    :members:
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+   :special-members:
+   :private-members:
 
