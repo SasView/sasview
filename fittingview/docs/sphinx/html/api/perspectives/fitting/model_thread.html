@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>model_thread &mdash; sansview v0.1.0 documentation</title>
+    <title>model_thread &mdash; sansview 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
@@ -22,10 +25,10 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="sansview v0.1.0 documentation" href="../../../index.html" />
+    <link rel="top" title="sansview 0.1.0 documentation" href="../../../index.html" />
     <link rel="up" title="Reference" href="index.html" />
-    <link rel="next" title="models" href="models.html" />
-    <link rel="prev" title="hint_fitpage" href="hint_fitpage.html" /> 
+    <link rel="next" title="pagestate" href="pagestate.html" />
+    <link rel="prev" title="models" href="models.html" /> 
   </head>
   <body>
     <div class="related">
@@ -38,12 +41,12 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="models.html" title="models"
+          <a href="pagestate.html" title="pagestate"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="hint_fitpage.html" title="hint_fitpage"
+          <a href="models.html" title="models"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../index.html">sansview v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">sansview 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,16 +58,32 @@
             
   <div class="section" id="model-thread">
 <h1>model_thread<a class="headerlink" href="#model-thread" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.perspectives.fitting.model_thread">
-<span id="sans-perspectives-fitting-model-thread"></span><h2><a class="reference internal" href="#module-sans.perspectives.fitting.model_thread" title="sans.perspectives.fitting.model_thread"><tt class="xref py py-mod docutils literal"><span class="pre">sans.perspectives.fitting.model_thread</span></tt></a><a class="headerlink" href="#module-sans.perspectives.fitting.model_thread" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<div class="section" id="sans-perspectives-fitting-model-thread">
+<h2><a class="reference internal" href="#module-sans.perspectives.fitting.model_thread" title="sans.perspectives.fitting.model_thread"><tt class="xref py py-mod docutils literal"><span class="pre">sans.perspectives.fitting.model_thread</span></tt></a><a class="headerlink" href="#sans-perspectives-fitting-model-thread" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.perspectives.fitting.model_thread"></span><dl class="class">
 <dt id="sans.perspectives.fitting.model_thread.Calc1D">
-<em class="property">class </em><tt class="descclassname">sans.perspectives.fitting.model_thread.</tt><tt class="descname">Calc1D</tt><big>(</big><em>x</em>, <em>model</em>, <em>page_id</em>, <em>data=None</em>, <em>qmin=None</em>, <em>qmax=None</em>, <em>smearer=None</em>, <em>toggle_mode_on=False</em>, <em>state=None</em>, <em>completefn=None</em>, <em>update_chisqr=True</em>, <em>updatefn=None</em>, <em>yieldtime=0.01</em>, <em>worktime=0.01</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.perspectives.fitting.model_thread.</tt><tt class="descname">Calc1D</tt><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">data_util.calcthread.CalcThread</span></tt></p>
 <p>Compute 1D data</p>
 <dl class="method">
+<dt id="sans.perspectives.fitting.model_thread.Calc1D.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.fitting.model_thread.Calc1D.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.perspectives.fitting.model_thread'</em><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.model_thread.Calc1D._run">
+<tt class="descname">_run</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D._run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal function to manage the thread.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="sans.perspectives.fitting.model_thread.Calc1D.complete">
-<tt class="descname">complete</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D.complete" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">complete</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D.complete" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the GUI with the completed results from a work unit.</p>
 </dd></dl>
 
@@ -96,14 +115,14 @@ threads, which is required for good performance on OS X.</p>
 
 <dl class="method">
 <dt id="sans.perspectives.fitting.model_thread.Calc1D.queue">
-<tt class="descname">queue</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D.queue" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">queue</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D.queue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a work unit to the end of the queue.  See the compute()
 method for details of the arguments to the work unit.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.perspectives.fitting.model_thread.Calc1D.ready">
-<tt class="descname">ready</tt><big>(</big><em>delay=0.0</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D.ready" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">ready</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D.ready" title="Permalink to this definition">¶</a></dt>
 <dd><p>Ready for another update after delay=t seconds.  Call
 this for threads which can show intermediate results from
 long calculations.</p>
@@ -111,14 +130,14 @@ long calculations.</p>
 
 <dl class="method">
 <dt id="sans.perspectives.fitting.model_thread.Calc1D.requeue">
-<tt class="descname">requeue</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D.requeue" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">requeue</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D.requeue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Replace the work unit on the end of the queue.  See the compute()
 method for details of the arguments to the work unit.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.perspectives.fitting.model_thread.Calc1D.reset">
-<tt class="descname">reset</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D.reset" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D.reset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clear the queue and start a new work unit.  See the compute()
 method for details of the arguments to the work unit.</p>
 </dd></dl>
@@ -139,7 +158,7 @@ continue the rest of the queue call the interrupt method</p>
 
 <dl class="method">
 <dt id="sans.perspectives.fitting.model_thread.Calc1D.update">
-<tt class="descname">update</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D.update" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">update</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc1D.update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update GUI with the lastest results from the current work unit.</p>
 </dd></dl>
 
@@ -147,15 +166,31 @@ continue the rest of the queue call the interrupt method</p>
 
 <dl class="class">
 <dt id="sans.perspectives.fitting.model_thread.Calc2D">
-<em class="property">class </em><tt class="descclassname">sans.perspectives.fitting.model_thread.</tt><tt class="descname">Calc2D</tt><big>(</big><em>x</em>, <em>y</em>, <em>data</em>, <em>model</em>, <em>smearer</em>, <em>qmin</em>, <em>qmax</em>, <em>qstep</em>, <em>page_id</em>, <em>state=None</em>, <em>toggle_mode_on=False</em>, <em>completefn=None</em>, <em>updatefn=None</em>, <em>update_chisqr=True</em>, <em>yieldtime=0.040000000000000001</em>, <em>worktime=0.040000000000000001</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.perspectives.fitting.model_thread.</tt><tt class="descname">Calc2D</tt><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">data_util.calcthread.CalcThread</span></tt></p>
 <p>Compute 2D model
 This calculation assumes a 2-fold symmetry of the model
 where points are computed for one half of the detector
 and I(qx, qy) = I(-qx, -qy) is assumed.</p>
 <dl class="method">
+<dt id="sans.perspectives.fitting.model_thread.Calc2D.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.fitting.model_thread.Calc2D.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.perspectives.fitting.model_thread'</em><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.model_thread.Calc2D._run">
+<tt class="descname">_run</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D._run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal function to manage the thread.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="sans.perspectives.fitting.model_thread.Calc2D.complete">
-<tt class="descname">complete</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D.complete" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">complete</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D.complete" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the GUI with the completed results from a work unit.</p>
 </dd></dl>
 
@@ -187,14 +222,14 @@ threads, which is required for good performance on OS X.</p>
 
 <dl class="method">
 <dt id="sans.perspectives.fitting.model_thread.Calc2D.queue">
-<tt class="descname">queue</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D.queue" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">queue</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D.queue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a work unit to the end of the queue.  See the compute()
 method for details of the arguments to the work unit.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.perspectives.fitting.model_thread.Calc2D.ready">
-<tt class="descname">ready</tt><big>(</big><em>delay=0.0</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D.ready" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">ready</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D.ready" title="Permalink to this definition">¶</a></dt>
 <dd><p>Ready for another update after delay=t seconds.  Call
 this for threads which can show intermediate results from
 long calculations.</p>
@@ -202,14 +237,14 @@ long calculations.</p>
 
 <dl class="method">
 <dt id="sans.perspectives.fitting.model_thread.Calc2D.requeue">
-<tt class="descname">requeue</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D.requeue" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">requeue</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D.requeue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Replace the work unit on the end of the queue.  See the compute()
 method for details of the arguments to the work unit.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.perspectives.fitting.model_thread.Calc2D.reset">
-<tt class="descname">reset</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D.reset" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D.reset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clear the queue and start a new work unit.  See the compute()
 method for details of the arguments to the work unit.</p>
 </dd></dl>
@@ -224,7 +259,7 @@ continue the rest of the queue call the interrupt method</p>
 
 <dl class="method">
 <dt id="sans.perspectives.fitting.model_thread.Calc2D.update">
-<tt class="descname">update</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D.update" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">update</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.model_thread.Calc2D.update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update GUI with the lastest results from the current work unit.</p>
 </dd></dl>
 
@@ -242,17 +277,17 @@ continue the rest of the queue call the interrupt method</p>
   <h3><a href="../../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">model_thread</a><ul>
-<li><a class="reference internal" href="#module-sans.perspectives.fitting.model_thread"><tt class="docutils literal"><span class="pre">sans.perspectives.fitting.model_thread</span></tt></a></li>
+<li><a class="reference internal" href="#sans-perspectives-fitting-model-thread"><tt class="docutils literal"><span class="pre">sans.perspectives.fitting.model_thread</span></tt></a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="hint_fitpage.html"
-                        title="previous chapter">hint_fitpage</a></p>
-  <h4>Next topic</h4>
   <p class="topless"><a href="models.html"
-                        title="next chapter">models</a></p>
+                        title="previous chapter">models</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pagestate.html"
+                        title="next chapter">pagestate</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../../../_sources/api/perspectives/fitting/model_thread.txt"
@@ -261,7 +296,7 @@ continue the rest of the queue call the interrupt method</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -285,18 +320,18 @@ continue the rest of the queue call the interrupt method</p>
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="models.html" title="models"
+          <a href="pagestate.html" title="pagestate"
              >next</a> |</li>
         <li class="right" >
-          <a href="hint_fitpage.html" title="hint_fitpage"
+          <a href="models.html" title="models"
              >previous</a> |</li>
-        <li><a href="../../../index.html">sansview v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">sansview 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

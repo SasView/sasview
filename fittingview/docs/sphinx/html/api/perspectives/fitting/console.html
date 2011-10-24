@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>console &mdash; sansview v0.1.0 documentation</title>
+    <title>console &mdash; sansview 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
@@ -22,10 +25,10 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="sansview v0.1.0 documentation" href="../../../index.html" />
+    <link rel="top" title="sansview 0.1.0 documentation" href="../../../index.html" />
     <link rel="up" title="Reference" href="index.html" />
-    <link rel="next" title="fit_thread" href="fit_thread.html" />
-    <link rel="prev" title="basepage" href="basepage.html" /> 
+    <link rel="next" title="fitpage" href="fitpage.html" />
+    <link rel="prev" title="batchfitpage" href="batchfitpage.html" /> 
   </head>
   <body>
     <div class="related">
@@ -38,12 +41,12 @@
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="fit_thread.html" title="fit_thread"
+          <a href="fitpage.html" title="fitpage"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="basepage.html" title="basepage"
+          <a href="batchfitpage.html" title="batchfitpage"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../index.html">sansview v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">sansview 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,21 +58,116 @@
             
   <div class="section" id="console">
 <h1>console<a class="headerlink" href="#console" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.perspectives.fitting.console">
-<span id="sans-perspectives-fitting-console"></span><h2><a class="reference internal" href="#module-sans.perspectives.fitting.console" title="sans.perspectives.fitting.console"><tt class="xref py py-mod docutils literal"><span class="pre">sans.perspectives.fitting.console</span></tt></a><a class="headerlink" href="#module-sans.perspectives.fitting.console" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<div class="section" id="sans-perspectives-fitting-console">
+<h2><a class="reference internal" href="#module-sans.perspectives.fitting.console" title="sans.perspectives.fitting.console"><tt class="xref py py-mod docutils literal"><span class="pre">sans.perspectives.fitting.console</span></tt></a><a class="headerlink" href="#sans-perspectives-fitting-console" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.perspectives.fitting.console"></span><dl class="class">
 <dt id="sans.perspectives.fitting.console.ConsoleUpdate">
-<em class="property">class </em><tt class="descclassname">sans.perspectives.fitting.console.</tt><tt class="descname">ConsoleUpdate</tt><big>(</big><em>parent</em>, <em>manager=None</em>, <em>quiet=False</em>, <em>progress_delta=60</em>, <em>improvement_delta=5</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.perspectives.fitting.console.</tt><tt class="descname">ConsoleUpdate</tt><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">park.fitresult.FitHandler</span></tt></p>
 <p>Print progress to the console.</p>
+<dl class="attribute">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x06CF05D0&gt;</em><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>If quiet is true, only print out final summary, not progress and
+improvements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Attr parent:</th><td class="field-body">the object that handle the messages</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.perspectives.fitting.console'</em><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="sans.perspectives.fitting.console.ConsoleUpdate.abort">
 <tt class="descname">abort</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.abort" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="attribute">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.done">
+<tt class="descname">done</tt><em class="property"> = False</em><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.done" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.perspectives.fitting.console.ConsoleUpdate.error">
-<tt class="descname">error</tt><big>(</big><em>msg</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.error" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">error</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Model had an error; print traceback</p>
 </dd></dl>
 
@@ -92,31 +190,42 @@ results from the fit.</p>
 
 <dl class="attribute">
 <dt id="sans.perspectives.fitting.console.ConsoleUpdate.improvement_delta">
-<tt class="descname">improvement_delta</tt><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.improvement_delta" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">improvement_delta</tt><em class="property"> = 5</em><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.improvement_delta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of seconds between improvement updates</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="sans.perspectives.fitting.console.ConsoleUpdate.isbetter">
-<tt class="descname">isbetter</tt><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.isbetter" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">isbetter</tt><em class="property"> = False</em><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.isbetter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Record whether results improved since last update</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.print_result">
+<tt class="descname">print_result</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.print_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print result object</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="sans.perspectives.fitting.console.ConsoleUpdate.progress">
-<tt class="descname">progress</tt><big>(</big><em>k</em>, <em>n</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.progress" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">progress</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.progress" title="Permalink to this definition">¶</a></dt>
 <dd><p>Report on progress.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="sans.perspectives.fitting.console.ConsoleUpdate.progress_delta">
-<tt class="descname">progress_delta</tt><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.progress_delta" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">progress_delta</tt><em class="property"> = 60</em><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.progress_delta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of seconds between progress updates</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.perspectives.fitting.console.ConsoleUpdate.result">
+<tt class="descname">result</tt><em class="property"> = None</em><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.result" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.perspectives.fitting.console.ConsoleUpdate.set_result">
-<tt class="descname">set_result</tt><big>(</big><em>result</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.set_result" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_result</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.set_result" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -126,7 +235,7 @@ results from the fit.</p>
 
 <dl class="method">
 <dt id="sans.perspectives.fitting.console.ConsoleUpdate.update_fit">
-<tt class="descname">update_fit</tt><big>(</big><em>msg=''</em><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.update_fit" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">update_fit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.fitting.console.ConsoleUpdate.update_fit" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -143,17 +252,17 @@ results from the fit.</p>
   <h3><a href="../../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">console</a><ul>
-<li><a class="reference internal" href="#module-sans.perspectives.fitting.console"><tt class="docutils literal"><span class="pre">sans.perspectives.fitting.console</span></tt></a></li>
+<li><a class="reference internal" href="#sans-perspectives-fitting-console"><tt class="docutils literal"><span class="pre">sans.perspectives.fitting.console</span></tt></a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="basepage.html"
-                        title="previous chapter">basepage</a></p>
+  <p class="topless"><a href="batchfitpage.html"
+                        title="previous chapter">batchfitpage</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="fit_thread.html"
-                        title="next chapter">fit_thread</a></p>
+  <p class="topless"><a href="fitpage.html"
+                        title="next chapter">fitpage</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../../../_sources/api/perspectives/fitting/console.txt"
@@ -162,7 +271,7 @@ results from the fit.</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -186,18 +295,18 @@ results from the fit.</p>
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="fit_thread.html" title="fit_thread"
+          <a href="fitpage.html" title="fitpage"
              >next</a> |</li>
         <li class="right" >
-          <a href="basepage.html" title="basepage"
+          <a href="batchfitpage.html" title="batchfitpage"
              >previous</a> |</li>
-        <li><a href="../../../index.html">sansview v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">sansview 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

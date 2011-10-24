@@ -14,15 +14,20 @@
 .. toctree::
 
    basepage.rst
+   batchfitpage.rst
    console.rst
-   fit_thread.rst
    fitpage.rst
    fitpanel.rst
    fitproblem.rst
    fitting.rst
+   fitting_widgets.rst
+   fit_thread.rst
+   ftol_dialog.rst
    help_panel.rst
    hint_fitpage.rst
-   model_thread.rst
    models.rst
+   model_thread.rst
    pagestate.rst
+   report_dialog.rst
    simfitpage.rst
+   utils.rst
