@@ -12,4 +12,6 @@ data_loader
    :undoc-members:
    :inherited-members:
    :show-inheritance:
+   :special-members:
+   :private-members:
 

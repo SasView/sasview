@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>binder &mdash; guiframe v0.1.0 documentation</title>
+    <title>binder &mdash; guiframe 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="guiframe v0.1.0 documentation" href="../../../index.html" />
+    <link rel="top" title="guiframe 0.1.0 documentation" href="../../../index.html" />
     <link rel="up" title="Local Perspective: plotting" href="index.html" />
     <link rel="next" title="boxMask" href="boxMask.html" />
     <link rel="prev" title="BaseInteractor" href="BaseInteractor.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="BaseInteractor.html" title="BaseInteractor"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Local Perspective: plotting</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,19 +58,176 @@
             
   <div class="section" id="binder">
 <h1>binder<a class="headerlink" href="#binder" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.guiframe.local_perspectives.plotting.binder">
-<span id="sans-guiframe-local-perspectives-plotting-binder"></span><h2><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.binder" title="sans.guiframe.local_perspectives.plotting.binder"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.binder</span></tt></a><a class="headerlink" href="#module-sans.guiframe.local_perspectives.plotting.binder" title="Permalink to this headline">¶</a></h2>
-<p>Extension to MPL to support the binding of artists to key/mouse events.</p>
+<div class="section" id="sans-guiframe-local-perspectives-plotting-binder">
+<h2><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.binder" title="sans.guiframe.local_perspectives.plotting.binder"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.binder</span></tt></a><a class="headerlink" href="#sans-guiframe-local-perspectives-plotting-binder" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.guiframe.local_perspectives.plotting.binder"></span><p>Extension to MPL to support the binding of artists to key/mouse events.</p>
 <dl class="class">
 <dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist">
-<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.binder.</tt><tt class="descname">BindArtist</tt><big>(</big><em>figure</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.binder.</tt><tt class="descname">BindArtist</tt><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
-<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist.clear">
-<tt class="descname">clear</tt><big>(</big><em>*artists</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist.clear" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>self.clear(h1,h2,...)</dt>
-<dd>Remove connections for artists h1, h2, ...</dd>
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist.__call__">
+<tt class="descname">__call__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a callback for an artist to a particular trigger event.</p>
+<dl class="docutils">
+<dt>usage:</dt>
+<dd>self.connect(eventname,artist,action)</dd>
+<dt>where:</dt>
+<dd>eventname is a string
+artist is the particular graph object to respond to the event
+action(event,**kw) is called when the event is triggered</dd>
 </dl>
+<p>The action callback is associated with particular artists.
+Different artists will have different kwargs.  See documentation
+on the contains() method for each artist.  One common properties
+are ind for the index of the item under the cursor, which is
+returned by Line2D and by collections.</p>
+<dl class="docutils">
+<dt>The following events are supported:</dt>
+<dd>enter: mouse cursor moves into the artist or to a new index
+leave: mouse cursor leaves the artist
+click: mouse button pressed on the artist
+drag: mouse button pressed on the artist and cursor moves
+release: mouse button released for the artist
+key: key pressed when mouse is on the artist
+keyrelease: key released for the artist</dd>
+<dt>The event received by action has a number of attributes:</dt>
+<dd><p class="first">name is the event name which was triggered
+artist is the object which triggered the event
+x,y are the screen coordinates of the mouse
+xdata,ydata are the graph coordinates of the mouse
+button is the mouse button being pressed/released
+key is the key being pressed/released
+shift,control,alt,meta are flags which are true if the</p>
+<blockquote>
+<div>corresponding key is pressed at the time of the event.</div></blockquote>
+<dl class="last docutils">
+<dt>details is a dictionary of artist specific details, such as the </dt>
+<dd>id(s) of the point that were clicked.</dd>
+</dl>
+</dd>
+</dl>
+<p>When receiving an event, first check the modifier state to be
+sure it applies.  E.g., the callback for &#8216;press&#8217; might be:</p>
+<blockquote>
+<div>if event.button == 1 and event.shift: process Shift-click</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Todo :</th><td class="field-body">Only receive events with the correct modifiers (e.g., S-click,</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Todo :</th><td class="field-body">or <a href="#id1"><span class="problematic" id="id2">*</span></a>-click for any modifiers).</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Todo :</th><td class="field-body">Only receive button events for the correct button (e.g., click1</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Todo :</th><td class="field-body">release3, or dclick* for any button)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Todo :</th><td class="field-body">Support virtual artist, so that and artist can be flagged as</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Todo :</th><td class="field-body">having a tag list and receive the correct events</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Todo :</th><td class="field-body">Support virtual events for binding to button-3 vs shift button-1</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Todo :</th><td class="field-body">without changing callback code</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Todo :</th><td class="field-body">Attach multiple callbacks to the same event?</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Todo :</th><td class="field-body">Clean up interaction with toolbar modes</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Todo :</th><td class="field-body">push/pushclear/pop context so that binding changes 
+for the duration</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Todo :</th><td class="field-body">e.g., to support ? context sensitive help</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist.__del__">
+<tt class="descname">__del__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist.__del__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.local_perspectives.plotting.binder'</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist._find_current">
+<tt class="descname">_find_current</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist._find_current" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the artist who will receive the event.  Only search
+registered artists.  All others are invisible to the mouse.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist._last_button">
+<tt class="descname">_last_button</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist._last_button" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist._last_time">
+<tt class="descname">_last_time</tt><em class="property"> = 0</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist._last_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist._onClick">
+<tt class="descname">_onClick</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist._onClick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process button click</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist._onDClick">
+<tt class="descname">_onDClick</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist._onDClick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process button double click</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist._onKey">
+<tt class="descname">_onKey</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist._onKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process key click</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist._onKeyRelease">
+<tt class="descname">_onKeyRelease</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist._onKeyRelease" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process key release</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist._onMotion">
+<tt class="descname">_onMotion</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist._onMotion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Track enter/leave/motion through registered artists; all
+other artists are invisible.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist._onRelease">
+<tt class="descname">_onRelease</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist._onRelease" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process release release</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist._onScroll">
+<tt class="descname">_onScroll</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist._onScroll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process scroll event</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist.alt">
+<tt class="descname">alt</tt><em class="property"> = False</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist.alt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist.clear">
+<tt class="descname">clear</tt><big>(</big><em>h1</em>, <em>h2</em>, <em>...</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist.clear" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Remove connections for artists h1, h2, ...</div></blockquote>
 <p>Use clearall() to reset all connections.</p>
 </dd></dl>
 
@@ -78,15 +238,40 @@
 <p>Use clear(h1,h2,...) to reset specific artists.</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist.control">
+<tt class="descname">control</tt><em class="property"> = False</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist.control" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist.dclick_threshhold">
+<tt class="descname">dclick_threshhold</tt><em class="property"> = 0.25</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist.dclick_threshhold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist.disconnect">
 <tt class="descname">disconnect</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist.disconnect" title="Permalink to this definition">¶</a></dt>
 <dd><p>In case we need to disconnect from the canvas...</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist.events">
+<tt class="descname">events</tt><em class="property"> = ['enter', 'leave', 'motion', 'click', 'dclick', 'drag', 'release', 'scroll', 'key', 'keyup']</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist.events" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist.meta">
+<tt class="descname">meta</tt><em class="property"> = False</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist.meta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist.shift">
+<tt class="descname">shift</tt><em class="property"> = False</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist.shift" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.binder.BindArtist.trigger">
-<tt class="descname">trigger</tt><big>(</big><em>actor</em>, <em>action</em>, <em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist.trigger" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">trigger</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.BindArtist.trigger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trigger a particular event for the artist.  Fallback to axes,
 to figure, and to &#8216;all&#8217; if the event is not processed.</p>
 </dd></dl>
@@ -95,8 +280,43 @@ to figure, and to &#8216;all&#8217; if the event is not processed.</p>
 
 <dl class="class">
 <dt id="sans.guiframe.local_perspectives.plotting.binder.Selection">
-<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.binder.</tt><tt class="descname">Selection</tt><big>(</big><em>artist=None</em>, <em>prop={}</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.Selection" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.binder.</tt><tt class="descname">Selection</tt><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.Selection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Store and compare selections.</p>
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.Selection.__eq__">
+<tt class="descname">__eq__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.Selection.__eq__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.Selection.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.Selection.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.Selection.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.local_perspectives.plotting.binder'</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.Selection.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.Selection.__ne__">
+<tt class="descname">__ne__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.Selection.__ne__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.Selection.__nonzero__">
+<tt class="descname">__nonzero__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.Selection.__nonzero__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.Selection.artist">
+<tt class="descname">artist</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.Selection.artist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.binder.Selection.prop">
+<tt class="descname">prop</tt><em class="property"> = {}</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.binder.Selection.prop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
@@ -111,7 +331,7 @@ to figure, and to &#8216;all&#8217; if the event is not processed.</p>
   <h3><a href="../../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">binder</a><ul>
-<li><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.binder"><tt class="docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.binder</span></tt></a></li>
+<li><a class="reference internal" href="#sans-guiframe-local-perspectives-plotting-binder"><tt class="docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.binder</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -130,7 +350,7 @@ to figure, and to &#8216;all&#8217; if the event is not processed.</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -159,13 +379,13 @@ to figure, and to &#8216;all&#8217; if the event is not processed.</p>
         <li class="right" >
           <a href="BaseInteractor.html" title="BaseInteractor"
              >previous</a> |</li>
-        <li><a href="../../../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Local Perspective: plotting</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

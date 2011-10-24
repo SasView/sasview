@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>plotting &mdash; guiframe v0.1.0 documentation</title>
+    <title>plotting &mdash; guiframe 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="guiframe v0.1.0 documentation" href="../../../index.html" />
+    <link rel="top" title="guiframe 0.1.0 documentation" href="../../../index.html" />
     <link rel="up" title="Local Perspective: plotting" href="index.html" />
     <link rel="next" title="profile_dialog" href="profile_dialog.html" />
     <link rel="prev" title="Plotter2D" href="Plotter2D.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="Plotter2D.html" title="Plotter2D"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Local Perspective: plotting</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,16 +58,60 @@
             
   <div class="section" id="plotting">
 <h1>plotting<a class="headerlink" href="#plotting" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.guiframe.local_perspectives.plotting.plotting">
-<span id="sans-guiframe-local-perspectives-plotting-plotting"></span><h2><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.plotting" title="sans.guiframe.local_perspectives.plotting.plotting"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.plotting</span></tt></a><a class="headerlink" href="#module-sans.guiframe.local_perspectives.plotting.plotting" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<div class="section" id="sans-guiframe-local-perspectives-plotting-plotting">
+<h2><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.plotting" title="sans.guiframe.local_perspectives.plotting.plotting"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.plotting</span></tt></a><a class="headerlink" href="#sans-guiframe-local-perspectives-plotting-plotting" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.guiframe.local_perspectives.plotting.plotting"></span><dl class="class">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin">
-<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.plotting.</tt><tt class="descname">Plugin</tt><big>(</big><em>standalone=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.plotting.</tt><tt class="descname">Plugin</tt><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../plugin_base.html#sans.guiframe.plugin_base.PluginBase" title="sans.guiframe.plugin_base.PluginBase"><tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.plugin_base.PluginBase</span></tt></a></p>
 <p>Plug-in class to be instantiated by the GUI manager</p>
 <dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.local_perspectives.plotting.plotting'</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin._on_check_menu">
+<tt class="descname">_on_check_menu</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin._on_check_menu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check mark on menu</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin._on_close_panel">
+<tt class="descname">_on_close_panel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin._on_close_panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update check mark on panel&#8217;s show and hide event</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin._on_plot_event">
+<tt class="descname">_on_plot_event</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin._on_plot_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>A new plottable is being shipped to the plotting plug-in.
+Check whether we have a panel to put in on, or create
+a new one</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; EVT_NEW_PLOT event</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin._on_show_panel">
+<tt class="descname">_on_show_panel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin._on_show_panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>show plug-in panel</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.add_color">
-<tt class="descname">add_color</tt><big>(</big><em>color</em>, <em>id</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.add_color" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">add_color</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.add_color" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds color to a plugin</p>
 </dd></dl>
 
@@ -82,44 +129,50 @@
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.clear_panel_by_id">
-<tt class="descname">clear_panel_by_id</tt><big>(</big><em>group_id</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.clear_panel_by_id" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">clear_panel_by_id</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.clear_panel_by_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>clear the graph</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.create_1d_panel">
-<tt class="descname">create_1d_panel</tt><big>(</big><em>data</em>, <em>group_id</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.create_1d_panel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">create_1d_panel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.create_1d_panel" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.create_2d_panel">
-<tt class="descname">create_2d_panel</tt><big>(</big><em>data</em>, <em>group_id</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.create_2d_panel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">create_2d_panel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.create_2d_panel" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.create_panel_helper">
-<tt class="descname">create_panel_helper</tt><big>(</big><em>new_panel</em>, <em>data</em>, <em>group_id</em>, <em>title=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.create_panel_helper" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">create_panel_helper</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.create_panel_helper" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.delete_data">
-<tt class="descname">delete_data</tt><big>(</big><em>data_id</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.delete_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">delete_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.delete_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Delete all references of data which id are in data_list.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.delete_menu_item">
-<tt class="descname">delete_menu_item</tt><big>(</big><em>name</em>, <em>uid</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.delete_menu_item" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">delete_menu_item</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.delete_menu_item" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.delete_panel">
-<tt class="descname">delete_panel</tt><big>(</big><em>group_id</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.delete_panel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">delete_panel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.delete_panel" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.get_batch_capable">
+<tt class="descname">get_batch_capable</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.get_batch_capable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the plugin has a batch capability</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.get_context_menu">
-<tt class="descname">get_context_menu</tt><big>(</big><em>plotpanel=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.get_context_menu" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_context_menu</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.get_context_menu" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is optional.</p>
 <p>When the context menu of a plot is rendered, the 
 get_context_menu method will be called to give you a 
@@ -135,9 +188,9 @@ call-back method.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> &#8211; the Graph object to which we attach the context menu</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> &#8211; the Graph object to which we attach the context menu</td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">a list of menu items with call-back function</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of menu items with call-back function</td>
 </tr>
 </tbody>
 </table>
@@ -151,7 +204,7 @@ call-back method.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.get_panels">
-<tt class="descname">get_panels</tt><big>(</big><em>parent</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.get_panels" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_panels</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.get_panels" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create and return a list of panel objects</p>
 </dd></dl>
 
@@ -169,13 +222,13 @@ call-back method.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.help">
-<tt class="descname">help</tt><big>(</big><em>evt</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.help" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">help</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.help" title="Permalink to this definition">¶</a></dt>
 <dd><p>Show a general help dialog.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.hide_panel">
-<tt class="descname">hide_panel</tt><big>(</big><em>group_id</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.hide_panel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">hide_panel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.hide_panel" title="Permalink to this definition">¶</a></dt>
 <dd><p>hide panel with group ID = group_id</p>
 </dd></dl>
 
@@ -188,7 +241,7 @@ switching between perspectives</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.is_in_use">
-<tt class="descname">is_in_use</tt><big>(</big><em>data_id</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.is_in_use" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_in_use</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.is_in_use" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>get a  data id a list of data name if data data is</dt>
 <dd>currently used by the plugin and the name of the plugin</dd>
@@ -200,25 +253,25 @@ example [(data_name, self.sub_menu)]</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.load_data">
-<tt class="descname">load_data</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.load_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">load_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.load_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load  data</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.load_folder">
-<tt class="descname">load_folder</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.load_folder" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">load_folder</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.load_folder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load entire folder</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.on_batch_selection">
-<tt class="descname">on_batch_selection</tt><big>(</big><em>flag</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.on_batch_selection" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">on_batch_selection</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.on_batch_selection" title="Permalink to this definition">¶</a></dt>
 <dd><p>need to be overwritten by the derivated class</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.on_perspective">
-<tt class="descname">on_perspective</tt><big>(</big><em>event=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.on_perspective" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">on_perspective</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.on_perspective" title="Permalink to this definition">¶</a></dt>
 <dd><p>Call back function for the perspective menu item.
 We notify the parent window that the perspective
 has changed.</p>
@@ -226,7 +279,7 @@ has changed.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; menu event</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; menu event</td>
 </tr>
 </tbody>
 </table>
@@ -234,7 +287,7 @@ has changed.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.on_set_state_helper">
-<tt class="descname">on_set_state_helper</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.on_set_state_helper" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">on_set_state_helper</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.on_set_state_helper" title="Permalink to this definition">¶</a></dt>
 <dd><p>update state</p>
 </dd></dl>
 
@@ -246,14 +299,14 @@ has changed.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.populate_menu">
-<tt class="descname">populate_menu</tt><big>(</big><em>parent</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.populate_menu" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">populate_menu</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.populate_menu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a &#8216;Plot&#8217; menu to list the panels
 available for displaying</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>id</strong> &#8211; next available unique ID for wx events</li>
 <li><strong>parent</strong> &#8211; parent window</li>
 </ul>
@@ -271,19 +324,19 @@ available for displaying</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.remove_plot">
-<tt class="descname">remove_plot</tt><big>(</big><em>group_id</em>, <em>id</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.remove_plot" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">remove_plot</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.remove_plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>remove plot of ID = id from a panel of group ID =group_id</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_batch_selection">
-<tt class="descname">set_batch_selection</tt><big>(</big><em>flag</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_batch_selection" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_batch_selection</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_batch_selection" title="Permalink to this definition">¶</a></dt>
 <dd><p>the plugin to its batch state if flag is True</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_data">
-<tt class="descname">set_data</tt><big>(</big><em>data_list=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>receive a list of data and use it in the current perspective</p>
 </dd></dl>
 
@@ -298,37 +351,37 @@ default perspective setting</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_is_active">
-<tt class="descname">set_is_active</tt><big>(</big><em>active=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_is_active" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_is_active</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_is_active" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_panel_on_focus">
-<tt class="descname">set_panel_on_focus</tt><big>(</big><em>panel</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_panel_on_focus" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_panel_on_focus</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_panel_on_focus" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_state">
-<tt class="descname">set_state</tt><big>(</big><em>state=None</em>, <em>datainfo=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_state" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_state</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>update state</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_theory">
-<tt class="descname">set_theory</tt><big>(</big><em>theory_list=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_theory" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_theory</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.set_theory" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>theory_list</strong> &#8211; list of information 
-related to available theory state</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>theory_list</strong> &#8211; list of information</td>
 </tr>
 </tbody>
 </table>
+<p>related to available theory state</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.plotting.Plugin.update_panel">
-<tt class="descname">update_panel</tt><big>(</big><em>data</em>, <em>panel</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.update_panel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">update_panel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.plotting.Plugin.update_panel" title="Permalink to this definition">¶</a></dt>
 <dd><p>update the graph of a given panel</p>
 </dd></dl>
 
@@ -352,7 +405,7 @@ related to available theory state</td>
   <h3><a href="../../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">plotting</a><ul>
-<li><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.plotting"><tt class="docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.plotting</span></tt></a></li>
+<li><a class="reference internal" href="#sans-guiframe-local-perspectives-plotting-plotting"><tt class="docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.plotting</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -371,7 +424,7 @@ related to available theory state</td>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -400,13 +453,13 @@ related to available theory state</td>
         <li class="right" >
           <a href="Plotter2D.html" title="Plotter2D"
              >previous</a> |</li>
-        <li><a href="../../../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Local Perspective: plotting</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

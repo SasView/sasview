@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>sectorMask &mdash; guiframe v0.1.0 documentation</title>
+    <title>sectorMask &mdash; guiframe 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="guiframe v0.1.0 documentation" href="../../../index.html" />
+    <link rel="top" title="guiframe 0.1.0 documentation" href="../../../index.html" />
     <link rel="up" title="Local Perspective: plotting" href="index.html" />
     <link rel="next" title="SectorSlicer" href="SectorSlicer.html" />
     <link rel="prev" title="profile_dialog" href="profile_dialog.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="profile_dialog.html" title="profile_dialog"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Local Perspective: plotting</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,13 +58,29 @@
             
   <div class="section" id="sectormask">
 <h1>sectorMask<a class="headerlink" href="#sectormask" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.guiframe.local_perspectives.plotting.sectorMask">
-<span id="sans-guiframe-local-perspectives-plotting-sectormask"></span><h2><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.sectorMask" title="sans.guiframe.local_perspectives.plotting.sectorMask"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.sectorMask</span></tt></a><a class="headerlink" href="#module-sans.guiframe.local_perspectives.plotting.sectorMask" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<div class="section" id="sans-guiframe-local-perspectives-plotting-sectormask">
+<h2><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.sectorMask" title="sans.guiframe.local_perspectives.plotting.sectorMask"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.sectorMask</span></tt></a><a class="headerlink" href="#sans-guiframe-local-perspectives-plotting-sectormask" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.guiframe.local_perspectives.plotting.sectorMask"></span><dl class="class">
 <dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask">
-<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.sectorMask.</tt><tt class="descname">SectorMask</tt><big>(</big><em>base</em>, <em>axes</em>, <em>color='gray'</em>, <em>zorder=3</em>, <em>side=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor</span></tt></p>
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.sectorMask.</tt><tt class="descname">SectorMask</tt><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="BaseInteractor.html#sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor" title="sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor"><tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor</span></tt></a></p>
 <p>Draw a sector slicer.Allow to find the data 2D inside of the sector lines</p>
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.local_perspectives.plotting.sectorMask'</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask._post_data">
+<tt class="descname">_post_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask._post_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>compute sector averaging of data into data1D</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.clear">
 <tt class="descname">clear</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.clear" title="Permalink to this definition">¶</a></dt>
@@ -76,13 +95,13 @@
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.connect_markers">
-<tt class="descname">connect_markers</tt><big>(</big><em>markers</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.connect_markers" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">connect_markers</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.connect_markers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connect markers to callbacks</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.dpixel">
-<tt class="descname">dpixel</tt><big>(</big><em>x</em>, <em>y</em>, <em>nudge=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.dpixel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">dpixel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.dpixel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the step size in data coordinates for a small
 step in screen coordinates.  If nudge is False (default)
 the step size is one pixel.  If nudge is True, the step
@@ -107,7 +126,7 @@ size is 0.2 pixels.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Return params:</th><td class="field-body">the dictionary created</td>
+<tr class="field-odd field"><th class="field-name">Return params:</th><td class="field-body">the dictionary created</td>
 </tr>
 </tbody>
 </table>
@@ -115,40 +134,40 @@ size is 0.2 pixels.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.move">
-<tt class="descname">move</tt><big>(</big><em>x</em>, <em>y</em>, <em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.move" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">move</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.move" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process move to a new position, making sure that the move is allowed.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.moveend">
-<tt class="descname">moveend</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.moveend" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">moveend</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.moveend" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called a dragging motion ends.Get slicer event</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onClick">
-<tt class="descname">onClick</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onClick" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onClick</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onClick" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare to move the artist.  Calls save() to preserve the state for
 later restore().</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onDrag">
-<tt class="descname">onDrag</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onDrag" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onDrag</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onDrag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Move the artist.  Calls move() to update the state, or restore() if
 the mouse leaves the window.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onHilite">
-<tt class="descname">onHilite</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onHilite" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onHilite</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onHilite" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hilite the artist reporting the event, indicating that it is
 ready to receive a click.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onKey">
-<tt class="descname">onKey</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onKey" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onKey</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onKey" title="Permalink to this definition">¶</a></dt>
 <dd><p>Respond to keyboard events.  Arrow keys move the widget.  Escape
 restores it to the position before the last click.</p>
 <p>Calls move() to update the state.  Calls restore() on escape.</p>
@@ -156,13 +175,13 @@ restores it to the position before the last click.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onLeave">
-<tt class="descname">onLeave</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onLeave" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onLeave</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onLeave" title="Permalink to this definition">¶</a></dt>
 <dd><p>Restore the artist to the original colour when the cursor leaves.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onRelease">
-<tt class="descname">onRelease</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onRelease" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onRelease</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.onRelease" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -173,26 +192,26 @@ restores it to the position before the last click.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.save">
-<tt class="descname">save</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.save" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remember the roughness for this layer and the next so that we
 can restore on Esc.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.set_cursor">
-<tt class="descname">set_cursor</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.set_cursor" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_cursor</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.set_cursor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.set_params">
-<tt class="descname">set_params</tt><big>(</big><em>params</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.set_params" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_params</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.sectorMask.SectorMask.set_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Receive a dictionary and reset the slicer with values contained 
 in the values of the dictionary.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> &#8211; a dictionary containing name of slicer parameters and 
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> &#8211; a dictionary containing name of slicer parameters and 
 values the user assigned to the slicer.</td>
 </tr>
 </tbody>
@@ -225,7 +244,7 @@ resetting the widgets.</p>
   <h3><a href="../../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">sectorMask</a><ul>
-<li><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.sectorMask"><tt class="docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.sectorMask</span></tt></a></li>
+<li><a class="reference internal" href="#sans-guiframe-local-perspectives-plotting-sectormask"><tt class="docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.sectorMask</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -244,7 +263,7 @@ resetting the widgets.</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -273,13 +292,13 @@ resetting the widgets.</p>
         <li class="right" >
           <a href="profile_dialog.html" title="profile_dialog"
              >previous</a> |</li>
-        <li><a href="../../../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Local Perspective: plotting</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dataFitting &mdash; guiframe v0.1.0 documentation</title>
+    <title>dataFitting &mdash; guiframe 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="guiframe v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="guiframe 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="data_manager" href="data_manager.html" />
     <link rel="prev" title="custom_pstats" href="custom_pstats.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="custom_pstats.html" title="custom_pstats"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,158 +58,327 @@
             
   <div class="section" id="datafitting">
 <h1>dataFitting<a class="headerlink" href="#datafitting" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.guiframe.dataFitting">
-<span id="sans-guiframe-datafitting"></span><h2><a class="reference internal" href="#module-sans.guiframe.dataFitting" title="sans.guiframe.dataFitting"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.dataFitting</span></tt></a><a class="headerlink" href="#module-sans.guiframe.dataFitting" title="Permalink to this headline">¶</a></h2>
-<p>Adapters for fitting module</p>
+<div class="section" id="sans-guiframe-datafitting">
+<h2><a class="reference internal" href="#module-sans.guiframe.dataFitting" title="sans.guiframe.dataFitting"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.dataFitting</span></tt></a><a class="headerlink" href="#sans-guiframe-datafitting" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.guiframe.dataFitting"></span><p>Adapters for fitting module</p>
 <dl class="class">
 <dt id="sans.guiframe.dataFitting.Data1D">
-<em class="property">class </em><tt class="descclassname">sans.guiframe.dataFitting.</tt><tt class="descname">Data1D</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.guiframe.dataFitting.</tt><tt class="descname">Data1D</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">danse.common.plottools.plottables.Data1D</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">sans.dataloader.data_info.Data1D</span></tt></p>
-<dl class="class">
-<dt id="sans.guiframe.dataFitting.Data1D.View">
-<em class="property">class </em><tt class="descname">View</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View" title="Permalink to this definition">¶</a></dt>
-<dd><p>Representation of the data that might include a transformation</p>
 <dl class="method">
-<dt id="sans.guiframe.dataFitting.Data1D.View.check_data_logX">
-<tt class="descname">check_data_logX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.check_data_logX" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove negative value in x vector to avoid plotting negative
-value of Log10</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.guiframe.dataFitting.Data1D.View.check_data_logY">
-<tt class="descname">check_data_logY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.check_data_logY" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove negative value in y vector 
-to avoid plotting negative value of Log10</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.guiframe.dataFitting.Data1D.View.onFitRangeView">
-<tt class="descname">onFitRangeView</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.onFitRangeView" title="Permalink to this definition">¶</a></dt>
-<dd><p>It limits View data range to plot from min to max</p>
+<dt id="sans.guiframe.dataFitting.Data1D.__add__">
+<tt class="descname">__add__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__add__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add two data sets</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>xmin</strong> &#8211; the minimum value of x to plot.</li>
-<li><strong>xmax</strong> &#8211; the maximum value of x to plot</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to add to the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x044B2450&gt;</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.__div__">
+<tt class="descname">__div__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__div__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divided a data set by another</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set that the current one is divided by</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.dataFitting'</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.__mul__">
+<tt class="descname">__mul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dataFitting.Data1D.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.__radd__">
+<tt class="descname">__radd__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__radd__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to add to the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="sans.guiframe.dataFitting.Data1D.View.onResetView">
-<tt class="descname">onResetView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.onResetView" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reset x,y,dx and y in their full range  and in the initial scale
-in case their previous range has changed</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.guiframe.dataFitting.Data1D.View.returnXview">
-<tt class="descname">returnXview</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.returnXview" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return View  x,y,dx,dy</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.guiframe.dataFitting.Data1D.View.setTransformX">
-<tt class="descname">setTransformX</tt><big>(</big><em>funcx</em>, <em>funcdx</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.setTransformX" title="Permalink to this definition">¶</a></dt>
-<dd><p>Receive pointers to function that transform x and dx 
-and set corresponding View pointers</p>
+<dt id="sans.guiframe.dataFitting.Data1D.__rdiv__">
+<tt class="descname">__rdiv__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__rdiv__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divided a data set by another</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>transx</strong> &#8211; pointer to function that transforms x</li>
-<li><strong>transdx</strong> &#8211; pointer to function that transforms dx</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set that the current one is divided by</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="sans.guiframe.dataFitting.Data1D.View.setTransformY">
-<tt class="descname">setTransformY</tt><big>(</big><em>funcy</em>, <em>funcdy</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.setTransformY" title="Permalink to this definition">¶</a></dt>
-<dd><p>Receive pointers to function that transform y and dy 
-and set corresponding View pointers</p>
+<dt id="sans.guiframe.dataFitting.Data1D.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.__rmul__">
+<tt class="descname">__rmul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__rmul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply two data sets</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>transx</strong> &#8211; pointer to function that transforms y</li>
-<li><strong>transdx</strong> &#8211; pointer to function that transforms dy</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="sans.guiframe.dataFitting.Data1D.View.transform">
-<tt class="descname">transform</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.View.transform" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Transforms the x,y,dx and dy vectors and stores</dt>
-<dd>the output in View parameters</dd>
-</dl>
+<dt id="sans.guiframe.dataFitting.Data1D.__rsub__">
+<tt class="descname">__rsub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__rsub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract two data sets</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>x</strong> &#8211; array of x values</li>
-<li><strong>y</strong> &#8211; array of y values</li>
-<li><strong>dx</strong> &#8211; array of  errors values on x</li>
-<li><strong>dy</strong> &#8211; array of error values on y</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.__setattr__">
+<tt class="descname">__setattr__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take care of changes in View when data is changed.
+This method is provided for backward compatibility.</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>print data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D.__sub__">
+<tt class="descname">__sub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D._perform_operation">
+<tt class="descname">_perform_operation</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D._perform_operation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data1D._validity_check">
+<tt class="descname">_validity_check</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D._validity_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks that the data lengths are compatible.
+Checks that the x vectors are compatible.
+Returns errors vectors equal to original
+errors vectors if they were present or vectors
+of zeros when none was found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; other data set for operation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dy for self, dy for other [numpy arrays]</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">when lengths are not compatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D._xaxis">
+<tt class="descname">_xaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D._xaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D._xunit">
+<tt class="descname">_xunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D._xunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D._yaxis">
+<tt class="descname">_yaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D._yaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D._yunit">
+<tt class="descname">_yunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D._yunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.add_notes">
-<tt class="descclassname">Data1D.</tt><tt class="descname">add_notes</tt><big>(</big><em>message=''</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.add_notes" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">add_notes</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.add_notes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add notes to datainfo</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.append_empty_process">
-<tt class="descclassname">Data1D.</tt><tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.append_empty_process" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.append_empty_process" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.changed">
-<tt class="descclassname">Data1D.</tt><tt class="descname">changed</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.changed" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">changed</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.changed" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.check_data_PlottableX">
-<tt class="descclassname">Data1D.</tt><tt class="descname">check_data_PlottableX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.check_data_PlottableX" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">check_data_PlottableX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.check_data_PlottableX" title="Permalink to this definition">¶</a></dt>
 <dd><p>Since no transformation is made for log10(x), check that 
 no negative values is plot in log scale</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.check_data_PlottableY">
-<tt class="descclassname">Data1D.</tt><tt class="descname">check_data_PlottableY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.check_data_PlottableY" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">check_data_PlottableY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.check_data_PlottableY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Since no transformation is made for log10(y), check that 
 no negative values is plot in log scale</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.clone_without_data">
-<tt class="descclassname">Data1D.</tt><tt class="descname">clone_without_data</tt><big>(</big><em>length=0</em>, <em>clone=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.clone_without_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">clone_without_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.clone_without_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clone the current object, without copying the data (which
 will be filled out by a subsequent operation).
 The data arrays will be initialized to zero.</p>
@@ -214,7 +386,7 @@ The data arrays will be initialized to zero.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>length</strong> &#8211; length of the data array to be initialized</li>
 <li><strong>clone</strong> &#8211; if provided, the data will be copied to clone</li>
 </ul>
@@ -224,45 +396,105 @@ The data arrays will be initialized to zero.</p>
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.collimation">
+<tt class="descname">collimation</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.collimation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.colors">
-<tt class="descclassname">Data1D.</tt><tt class="descname">colors</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.colors" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">colors</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.colors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the number of colors need to render the object</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.copy_from_datainfo">
-<tt class="descclassname">Data1D.</tt><tt class="descname">copy_from_datainfo</tt><big>(</big><em>data1d</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.copy_from_datainfo" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">copy_from_datainfo</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.copy_from_datainfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>copy values of Data1D of type DataLaoder.Data_info</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.custom_color">
+<tt class="descname">custom_color</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.custom_color" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.detector">
+<tt class="descname">detector</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.detector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.dx">
+<tt class="descname">dx</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.dx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.dxl">
+<tt class="descname">dxl</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.dxl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.dxw">
+<tt class="descname">dxw</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.dxw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.dy">
+<tt class="descname">dy</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.dy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.errors">
+<tt class="descname">errors</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.errors" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.filename">
+<tt class="descname">filename</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.get_xaxis">
-<tt class="descclassname">Data1D.</tt><tt class="descname">get_xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.get_xaxis" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.get_xaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the units and name of x-axis</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.get_yaxis">
-<tt class="descclassname">Data1D.</tt><tt class="descname">get_yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.get_yaxis" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.get_yaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the units and name of y- axis</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.hidden">
+<tt class="descname">hidden</tt><em class="property"> = False</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.hidden" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.instrument">
+<tt class="descname">instrument</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.instrument" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.interactive">
+<tt class="descname">interactive</tt><em class="property"> = True</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.interactive" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.is_empty">
-<tt class="descclassname">Data1D.</tt><tt class="descname">is_empty</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.is_empty" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_empty</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.is_empty" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if there is no data stored in the plottable</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.is_slit_smeared">
-<tt class="descclassname">Data1D.</tt><tt class="descname">is_slit_smeared</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.is_slit_smeared" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_slit_smeared</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.is_slit_smeared" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether the data has slit smearing information</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">True is slit smearing info is present, False otherwise</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True is slit smearing info is present, False otherwise</td>
 </tr>
 </tbody>
 </table>
@@ -270,19 +502,39 @@ The data arrays will be initialized to zero.</p>
 
 <dl class="classmethod">
 <dt id="sans.guiframe.dataFitting.Data1D.labels">
-<em class="property">classmethod </em><tt class="descclassname">Data1D.</tt><tt class="descname">labels</tt><big>(</big><em>collection</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.labels" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><tt class="descname">labels</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.labels" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build a label mostly unique within a collection</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.markersize">
+<tt class="descname">markersize</tt><em class="property"> = 5</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.markersize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.meta_data">
+<tt class="descname">meta_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.meta_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.name">
+<tt class="descname">name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.notes">
+<tt class="descname">notes</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.notes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.onFitRange">
-<tt class="descclassname">Data1D.</tt><tt class="descname">onFitRange</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.onFitRange" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onFitRange</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.onFitRange" title="Permalink to this definition">¶</a></dt>
 <dd><p>It limits View data range to plot from min to max</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>xmin</strong> &#8211; the minimum value of x to plot.</li>
 <li><strong>xmax</strong> &#8211; the maximum value of x to plot</li>
 </ul>
@@ -294,37 +546,57 @@ The data arrays will be initialized to zero.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.onReset">
-<tt class="descclassname">Data1D.</tt><tt class="descname">onReset</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.onReset" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onReset</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.onReset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reset x, y, dx, dy view with its parameters</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.process">
+<tt class="descname">process</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.render">
-<tt class="descclassname">Data1D.</tt><tt class="descname">render</tt><big>(</big><em>plot</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.render" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">render</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.render" title="Permalink to this definition">¶</a></dt>
 <dd><p>Renders the plottable on the graph</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.reset_view">
-<tt class="descclassname">Data1D.</tt><tt class="descname">reset_view</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.reset_view" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">reset_view</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.reset_view" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reload view with new value to plot</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.returnValuesOfView">
-<tt class="descclassname">Data1D.</tt><tt class="descname">returnValuesOfView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.returnValuesOfView" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">returnValuesOfView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.returnValuesOfView" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return View parameters and it is used by Fit Dialog</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.run">
+<tt class="descname">run</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.run_name">
+<tt class="descname">run_name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.run_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.sample">
+<tt class="descname">sample</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.sample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.setLabel">
-<tt class="descclassname">Data1D.</tt><tt class="descname">setLabel</tt><big>(</big><em>labelx</em>, <em>labely</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.setLabel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setLabel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.setLabel" title="Permalink to this definition">¶</a></dt>
 <dd><p>It takes a label of the x and y transformation and set View parameters</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>transx</strong> &#8211; The label of x transformation is sent by Properties Dialog</li>
 <li><strong>transy</strong> &#8211; The label of y transformation is sent Properties Dialog</li>
 </ul>
@@ -336,31 +608,46 @@ The data arrays will be initialized to zero.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.set_View">
-<tt class="descclassname">Data1D.</tt><tt class="descname">set_View</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.set_View" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_View</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.set_View" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load View</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.set_data">
-<tt class="descclassname">Data1D.</tt><tt class="descname">set_data</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.set_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.set_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.short_name">
+<tt class="descname">short_name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.short_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.source">
+<tt class="descname">source</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.source" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.title">
+<tt class="descname">title</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.title" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.transformView">
-<tt class="descclassname">Data1D.</tt><tt class="descname">transformView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.transformView" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">transformView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.transformView" title="Permalink to this definition">¶</a></dt>
 <dd><p>It transforms x, y before displaying</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.transformX">
-<tt class="descclassname">Data1D.</tt><tt class="descname">transformX</tt><big>(</big><em>transx</em>, <em>transdx</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.transformX" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">transformX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.transformX" title="Permalink to this definition">¶</a></dt>
 <dd><p>Receive pointers to function that transform x and dx 
 and set corresponding View pointers</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>transx</strong> &#8211; pointer to function that transforms x</li>
 <li><strong>transdx</strong> &#8211; pointer to function that transforms dx</li>
 </ul>
@@ -372,14 +659,14 @@ and set corresponding View pointers</p>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.transformY">
-<tt class="descclassname">Data1D.</tt><tt class="descname">transformY</tt><big>(</big><em>transy</em>, <em>transdy</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.transformY" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">transformY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.transformY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Receive pointers to function that transform y and dy 
 and set corresponding View pointers</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>transy</strong> &#8211; pointer to function that transforms y</li>
 <li><strong>transdy</strong> &#8211; pointer to function that transforms dy</li>
 </ul>
@@ -389,15 +676,25 @@ and set corresponding View pointers</p>
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.x">
+<tt class="descname">x</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.x_unit">
+<tt class="descname">x_unit</tt><em class="property"> = '1/A'</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.x_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.xaxis">
-<tt class="descclassname">Data1D.</tt><tt class="descname">xaxis</tt><big>(</big><em>name</em>, <em>units</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.xaxis" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.xaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the name and unit of x_axis</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> &#8211; the name of x-axis</li>
 <li><strong>units</strong> &#8211; the units of x_axis</li>
 </ul>
@@ -407,15 +704,25 @@ and set corresponding View pointers</p>
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.y">
+<tt class="descname">y</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.y" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data1D.y_unit">
+<tt class="descname">y_unit</tt><em class="property"> = '1/cm'</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.y_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data1D.yaxis">
-<tt class="descclassname">Data1D.</tt><tt class="descname">yaxis</tt><big>(</big><em>name</em>, <em>units</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.yaxis" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data1D.yaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the name and unit of y_axis</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> &#8211; the name of y-axis</li>
 <li><strong>units</strong> &#8211; the units of y_axis</li>
 </ul>
@@ -429,37 +736,262 @@ and set corresponding View pointers</p>
 
 <dl class="class">
 <dt id="sans.guiframe.dataFitting.Data2D">
-<em class="property">class </em><tt class="descclassname">sans.guiframe.dataFitting.</tt><tt class="descname">Data2D</tt><big>(</big><em>image=None</em>, <em>err_image=None</em>, <em>xmin=None</em>, <em>xmax=None</em>, <em>ymin=None</em>, <em>ymax=None</em>, <em>zmin=None</em>, <em>zmax=None</em>, <em>qx_data=None</em>, <em>qy_data=None</em>, <em>q_data=None</em>, <em>mask=None</em>, <em>dqx_data=None</em>, <em>dqy_data=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.guiframe.dataFitting.</tt><tt class="descname">Data2D</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">danse.common.plottools.plottables.Data2D</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">sans.dataloader.data_info.Data2D</span></tt></p>
-<dl class="class">
-<dt id="sans.guiframe.dataFitting.Data2D.View">
-<em class="property">class </em><tt class="descname">View</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View" title="Permalink to this definition">¶</a></dt>
-<dd><p>Representation of the data that might include a transformation</p>
-<dl class="method">
-<dt id="sans.guiframe.dataFitting.Data2D.View.check_data_logX">
-<tt class="descname">check_data_logX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.check_data_logX" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove negative value in x vector to avoid plotting negative
-value of Log10</p>
-</dd></dl>
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.I_unit">
+<tt class="descname">I_unit</tt><em class="property"> = '1/cm'</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.I_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.Q_unit">
+<tt class="descname">Q_unit</tt><em class="property"> = '1/A'</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.Q_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
-<dt id="sans.guiframe.dataFitting.Data2D.View.check_data_logY">
-<tt class="descname">check_data_logY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.check_data_logY" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove negative value in y vector 
-to avoid plotting negative value of Log10</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.guiframe.dataFitting.Data2D.View.onFitRangeView">
-<tt class="descname">onFitRangeView</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.onFitRangeView" title="Permalink to this definition">¶</a></dt>
-<dd><p>It limits View data range to plot from min to max</p>
+<dt id="sans.guiframe.dataFitting.Data2D.__add__">
+<tt class="descname">__add__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__add__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add two data sets</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>xmin</strong> &#8211; the minimum value of x to plot.</li>
-<li><strong>xmax</strong> &#8211; the maximum value of x to plot</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to add to the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x044B2DD0&gt;</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.__div__">
+<tt class="descname">__div__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__div__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divided a data set by another</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set that the current one is divided by</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.dataFitting'</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.__mul__">
+<tt class="descname">__mul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dataFitting.Data2D.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.__radd__">
+<tt class="descname">__radd__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__radd__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to add to the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.__rdiv__">
+<tt class="descname">__rdiv__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__rdiv__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divided a data set by another</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set that the current one is divided by</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.__rmul__">
+<tt class="descname">__rmul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__rmul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.__rsub__">
+<tt class="descname">__rsub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__rsub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.__setattr__">
+<tt class="descname">__setattr__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take care of changes in View when data is changed.
+This method is provided for backward compatibility.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>print data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D.__sub__">
+<tt class="descname">__sub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Data2D._perform_operation">
+<tt class="descname">_perform_operation</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D._perform_operation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform 2D operations between data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>other</strong> &#8211; other data set</li>
+<li><strong>operation</strong> &#8211; function defining the operation</li>
 </ul>
 </td>
 </tr>
@@ -468,114 +1000,91 @@ to avoid plotting negative value of Log10</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="sans.guiframe.dataFitting.Data2D.View.onResetView">
-<tt class="descname">onResetView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.onResetView" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reset x,y,dx and y in their full range  and in the initial scale
-in case their previous range has changed</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.guiframe.dataFitting.Data2D.View.returnXview">
-<tt class="descname">returnXview</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.returnXview" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return View  x,y,dx,dy</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.guiframe.dataFitting.Data2D.View.setTransformX">
-<tt class="descname">setTransformX</tt><big>(</big><em>funcx</em>, <em>funcdx</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.setTransformX" title="Permalink to this definition">¶</a></dt>
-<dd><p>Receive pointers to function that transform x and dx 
-and set corresponding View pointers</p>
+<dt id="sans.guiframe.dataFitting.Data2D._validity_check">
+<tt class="descname">_validity_check</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D._validity_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks that the data lengths are compatible.
+Checks that the x vectors are compatible.
+Returns errors vectors equal to original
+errors vectors if they were present or vectors
+of zeros when none was found.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>transx</strong> &#8211; pointer to function that transforms x</li>
-<li><strong>transdx</strong> &#8211; pointer to function that transforms dx</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; other data set for operation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dy for self, dy for other [numpy arrays]</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">when lengths are not compatible</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
-<dl class="method">
-<dt id="sans.guiframe.dataFitting.Data2D.View.setTransformY">
-<tt class="descname">setTransformY</tt><big>(</big><em>funcy</em>, <em>funcdy</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.setTransformY" title="Permalink to this definition">¶</a></dt>
-<dd><p>Receive pointers to function that transform y and dy 
-and set corresponding View pointers</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>transx</strong> &#8211; pointer to function that transforms y</li>
-<li><strong>transdx</strong> &#8211; pointer to function that transforms dy</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D._xaxis">
+<tt class="descname">_xaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D._xaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
-<dl class="method">
-<dt id="sans.guiframe.dataFitting.Data2D.View.transform">
-<tt class="descname">transform</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.View.transform" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Transforms the x,y,dx and dy vectors and stores</dt>
-<dd>the output in View parameters</dd>
-</dl>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>x</strong> &#8211; array of x values</li>
-<li><strong>y</strong> &#8211; array of y values</li>
-<li><strong>dx</strong> &#8211; array of  errors values on x</li>
-<li><strong>dy</strong> &#8211; array of error values on y</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D._xunit">
+<tt class="descname">_xunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D._xunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
-</dd></dl>
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D._yaxis">
+<tt class="descname">_yaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D._yaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D._yunit">
+<tt class="descname">_yunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D._yunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D._zaxis">
+<tt class="descname">_zaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D._zaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D._zunit">
+<tt class="descname">_zunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D._zunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.add_notes">
-<tt class="descclassname">Data2D.</tt><tt class="descname">add_notes</tt><big>(</big><em>message=''</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.add_notes" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">add_notes</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.add_notes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add notes to datainfo</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.append_empty_process">
-<tt class="descclassname">Data2D.</tt><tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.append_empty_process" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.append_empty_process" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.changed">
-<tt class="descclassname">Data2D.</tt><tt class="descname">changed</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.changed" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">changed</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.changed" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.check_data_PlottableX">
-<tt class="descclassname">Data2D.</tt><tt class="descname">check_data_PlottableX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.check_data_PlottableX" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">check_data_PlottableX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.check_data_PlottableX" title="Permalink to this definition">¶</a></dt>
 <dd><p>Since no transformation is made for log10(x), check that 
 no negative values is plot in log scale</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.check_data_PlottableY">
-<tt class="descclassname">Data2D.</tt><tt class="descname">check_data_PlottableY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.check_data_PlottableY" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">check_data_PlottableY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.check_data_PlottableY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Since no transformation is made for log10(y), check that 
 no negative values is plot in log scale</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.clone_without_data">
-<tt class="descclassname">Data2D.</tt><tt class="descname">clone_without_data</tt><big>(</big><em>length=0</em>, <em>clone=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.clone_without_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">clone_without_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.clone_without_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clone the current object, without copying the data (which
 will be filled out by a subsequent operation).
 The data arrays will be initialized to zero.</p>
@@ -583,7 +1092,7 @@ The data arrays will be initialized to zero.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>length</strong> &#8211; length of the data array to be initialized</li>
 <li><strong>clone</strong> &#8211; if provided, the data will be copied to clone</li>
 </ul>
@@ -593,51 +1102,146 @@ The data arrays will be initialized to zero.</p>
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.collimation">
+<tt class="descname">collimation</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.collimation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.colors">
-<tt class="descclassname">Data2D.</tt><tt class="descname">colors</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.colors" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">colors</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.colors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the number of colors need to render the object</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.copy_from_datainfo">
-<tt class="descclassname">Data2D.</tt><tt class="descname">copy_from_datainfo</tt><big>(</big><em>data2d</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.copy_from_datainfo" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">copy_from_datainfo</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.copy_from_datainfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>copy value of Data2D of type DataLoader.data_info</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.custom_color">
+<tt class="descname">custom_color</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.custom_color" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.data">
+<tt class="descname">data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.detector">
+<tt class="descname">detector</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.detector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.dqx_data">
+<tt class="descname">dqx_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.dqx_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.dqy_data">
+<tt class="descname">dqy_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.dqy_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.dx">
+<tt class="descname">dx</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.dx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.dy">
+<tt class="descname">dy</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.dy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.err_data">
+<tt class="descname">err_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.err_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.errors">
+<tt class="descname">errors</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.errors" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.filename">
+<tt class="descname">filename</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.get_xaxis">
-<tt class="descclassname">Data2D.</tt><tt class="descname">get_xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.get_xaxis" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.get_xaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the units and name of x-axis</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.get_yaxis">
-<tt class="descclassname">Data2D.</tt><tt class="descname">get_yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.get_yaxis" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.get_yaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the units and name of y- axis</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.hidden">
+<tt class="descname">hidden</tt><em class="property"> = False</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.hidden" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.instrument">
+<tt class="descname">instrument</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.instrument" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.interactive">
+<tt class="descname">interactive</tt><em class="property"> = True</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.interactive" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.is_empty">
-<tt class="descclassname">Data2D.</tt><tt class="descname">is_empty</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.is_empty" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_empty</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.is_empty" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if there is no data stored in the plottable</p>
 </dd></dl>
 
 <dl class="classmethod">
 <dt id="sans.guiframe.dataFitting.Data2D.labels">
-<em class="property">classmethod </em><tt class="descclassname">Data2D.</tt><tt class="descname">labels</tt><big>(</big><em>collection</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.labels" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><tt class="descname">labels</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.labels" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build a label mostly unique within a collection</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.markersize">
+<tt class="descname">markersize</tt><em class="property"> = 5</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.markersize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.mask">
+<tt class="descname">mask</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.mask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.meta_data">
+<tt class="descname">meta_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.meta_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.name">
+<tt class="descname">name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.notes">
+<tt class="descname">notes</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.notes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.onFitRange">
-<tt class="descclassname">Data2D.</tt><tt class="descname">onFitRange</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.onFitRange" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onFitRange</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.onFitRange" title="Permalink to this definition">¶</a></dt>
 <dd><p>It limits View data range to plot from min to max</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>xmin</strong> &#8211; the minimum value of x to plot.</li>
 <li><strong>xmax</strong> &#8211; the maximum value of x to plot</li>
 </ul>
@@ -649,37 +1253,72 @@ The data arrays will be initialized to zero.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.onReset">
-<tt class="descclassname">Data2D.</tt><tt class="descname">onReset</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.onReset" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onReset</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.onReset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reset x, y, dx, dy view with its parameters</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.process">
+<tt class="descname">process</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.q_data">
+<tt class="descname">q_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.q_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.qx_data">
+<tt class="descname">qx_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.qx_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.qy_data">
+<tt class="descname">qy_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.qy_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.render">
-<tt class="descclassname">Data2D.</tt><tt class="descname">render</tt><big>(</big><em>plot</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.render" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">render</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.render" title="Permalink to this definition">¶</a></dt>
 <dd><p>Renders the plottable on the graph</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.reset_view">
-<tt class="descclassname">Data2D.</tt><tt class="descname">reset_view</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.reset_view" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">reset_view</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.reset_view" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reload view with new value to plot</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.returnValuesOfView">
-<tt class="descclassname">Data2D.</tt><tt class="descname">returnValuesOfView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.returnValuesOfView" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">returnValuesOfView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.returnValuesOfView" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return View parameters and it is used by Fit Dialog</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.run">
+<tt class="descname">run</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.run_name">
+<tt class="descname">run_name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.run_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.sample">
+<tt class="descname">sample</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.sample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.setLabel">
-<tt class="descclassname">Data2D.</tt><tt class="descname">setLabel</tt><big>(</big><em>labelx</em>, <em>labely</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.setLabel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setLabel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.setLabel" title="Permalink to this definition">¶</a></dt>
 <dd><p>It takes a label of the x and y transformation and set View parameters</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>transx</strong> &#8211; The label of x transformation is sent by Properties Dialog</li>
 <li><strong>transy</strong> &#8211; The label of y transformation is sent Properties Dialog</li>
 </ul>
@@ -691,13 +1330,13 @@ The data arrays will be initialized to zero.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.setValues">
-<tt class="descclassname">Data2D.</tt><tt class="descname">setValues</tt><big>(</big><em>datainfo=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.setValues" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setValues</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.setValues" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use datainfo object to initialize data2D</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>datainfo</strong> &#8211; object</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>datainfo</strong> &#8211; object</td>
 </tr>
 </tbody>
 </table>
@@ -705,36 +1344,51 @@ The data arrays will be initialized to zero.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.set_View">
-<tt class="descclassname">Data2D.</tt><tt class="descname">set_View</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.set_View" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_View</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.set_View" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load View</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.set_data">
-<tt class="descclassname">Data2D.</tt><tt class="descname">set_data</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.set_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.set_data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.set_zrange">
-<tt class="descclassname">Data2D.</tt><tt class="descname">set_zrange</tt><big>(</big><em>zmin=None</em>, <em>zmax=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.set_zrange" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_zrange</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.set_zrange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.short_name">
+<tt class="descname">short_name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.short_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.source">
+<tt class="descname">source</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.source" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.title">
+<tt class="descname">title</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.title" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.transformView">
-<tt class="descclassname">Data2D.</tt><tt class="descname">transformView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.transformView" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">transformView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.transformView" title="Permalink to this definition">¶</a></dt>
 <dd><p>It transforms x, y before displaying</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.transformX">
-<tt class="descclassname">Data2D.</tt><tt class="descname">transformX</tt><big>(</big><em>transx</em>, <em>transdx</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.transformX" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">transformX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.transformX" title="Permalink to this definition">¶</a></dt>
 <dd><p>Receive pointers to function that transform x and dx 
 and set corresponding View pointers</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>transx</strong> &#8211; pointer to function that transforms x</li>
 <li><strong>transdx</strong> &#8211; pointer to function that transforms dx</li>
 </ul>
@@ -746,14 +1400,14 @@ and set corresponding View pointers</p>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.transformY">
-<tt class="descclassname">Data2D.</tt><tt class="descname">transformY</tt><big>(</big><em>transy</em>, <em>transdy</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.transformY" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">transformY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.transformY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Receive pointers to function that transform y and dy 
 and set corresponding View pointers</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>transy</strong> &#8211; pointer to function that transforms y</li>
 <li><strong>transdy</strong> &#8211; pointer to function that transforms dy</li>
 </ul>
@@ -763,15 +1417,25 @@ and set corresponding View pointers</p>
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.x">
+<tt class="descname">x</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.x_bins">
+<tt class="descname">x_bins</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.x_bins" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.xaxis">
-<tt class="descclassname">Data2D.</tt><tt class="descname">xaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.xaxis" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.xaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>set x-axis</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>label</strong> &#8211; x-axis label</li>
 <li><strong>unit</strong> &#8211; x-axis unit</li>
 </ul>
@@ -781,15 +1445,35 @@ and set corresponding View pointers</p>
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.xmax">
+<tt class="descname">xmax</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.xmax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.xmin">
+<tt class="descname">xmin</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.xmin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.y">
+<tt class="descname">y</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.y" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.y_bins">
+<tt class="descname">y_bins</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.y_bins" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.yaxis">
-<tt class="descclassname">Data2D.</tt><tt class="descname">yaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.yaxis" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.yaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>set y-axis</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>label</strong> &#8211; y-axis label</li>
 <li><strong>unit</strong> &#8211; y-axis unit</li>
 </ul>
@@ -799,15 +1483,25 @@ and set corresponding View pointers</p>
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.ymax">
+<tt class="descname">ymax</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.ymax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Data2D.ymin">
+<tt class="descname">ymin</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.ymin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Data2D.zaxis">
-<tt class="descclassname">Data2D.</tt><tt class="descname">zaxis</tt><big>(</big><em>label</em>, <em>unit</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.zaxis" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">zaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Data2D.zaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>set z-axis</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>label</strong> &#8211; z-axis label</li>
 <li><strong>unit</strong> &#8211; z-axis unit</li>
 </ul>
@@ -821,153 +1515,322 @@ and set corresponding View pointers</p>
 
 <dl class="class">
 <dt id="sans.guiframe.dataFitting.Theory1D">
-<em class="property">class </em><tt class="descclassname">sans.guiframe.dataFitting.</tt><tt class="descname">Theory1D</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.guiframe.dataFitting.</tt><tt class="descname">Theory1D</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">danse.common.plottools.plottables.Theory1D</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">sans.dataloader.data_info.Data1D</span></tt></p>
-<dl class="class">
-<dt id="sans.guiframe.dataFitting.Theory1D.View">
-<em class="property">class </em><tt class="descname">View</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View" title="Permalink to this definition">¶</a></dt>
-<dd><p>Representation of the data that might include a transformation</p>
 <dl class="method">
-<dt id="sans.guiframe.dataFitting.Theory1D.View.check_data_logX">
-<tt class="descname">check_data_logX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.check_data_logX" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove negative value in x vector to avoid plotting negative
-value of Log10</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.guiframe.dataFitting.Theory1D.View.check_data_logY">
-<tt class="descname">check_data_logY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.check_data_logY" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove negative value in y vector 
-to avoid plotting negative value of Log10</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.guiframe.dataFitting.Theory1D.View.onFitRangeView">
-<tt class="descname">onFitRangeView</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.onFitRangeView" title="Permalink to this definition">¶</a></dt>
-<dd><p>It limits View data range to plot from min to max</p>
+<dt id="sans.guiframe.dataFitting.Theory1D.__add__">
+<tt class="descname">__add__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__add__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add two data sets</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>xmin</strong> &#8211; the minimum value of x to plot.</li>
-<li><strong>xmax</strong> &#8211; the maximum value of x to plot</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to add to the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x039C78D0&gt;</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.__div__">
+<tt class="descname">__div__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__div__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divided a data set by another</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set that the current one is divided by</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.dataFitting'</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.__mul__">
+<tt class="descname">__mul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__mul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dataFitting.Theory1D.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.__radd__">
+<tt class="descname">__radd__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__radd__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to add to the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="sans.guiframe.dataFitting.Theory1D.View.onResetView">
-<tt class="descname">onResetView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.onResetView" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reset x,y,dx and y in their full range  and in the initial scale
-in case their previous range has changed</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.guiframe.dataFitting.Theory1D.View.returnXview">
-<tt class="descname">returnXview</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.returnXview" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return View  x,y,dx,dy</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="sans.guiframe.dataFitting.Theory1D.View.setTransformX">
-<tt class="descname">setTransformX</tt><big>(</big><em>funcx</em>, <em>funcdx</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.setTransformX" title="Permalink to this definition">¶</a></dt>
-<dd><p>Receive pointers to function that transform x and dx 
-and set corresponding View pointers</p>
+<dt id="sans.guiframe.dataFitting.Theory1D.__rdiv__">
+<tt class="descname">__rdiv__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__rdiv__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divided a data set by another</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>transx</strong> &#8211; pointer to function that transforms x</li>
-<li><strong>transdx</strong> &#8211; pointer to function that transforms dx</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set that the current one is divided by</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="sans.guiframe.dataFitting.Theory1D.View.setTransformY">
-<tt class="descname">setTransformY</tt><big>(</big><em>funcy</em>, <em>funcdy</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.setTransformY" title="Permalink to this definition">¶</a></dt>
-<dd><p>Receive pointers to function that transform y and dy 
-and set corresponding View pointers</p>
+<dt id="sans.guiframe.dataFitting.Theory1D.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.__rmul__">
+<tt class="descname">__rmul__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__rmul__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply two data sets</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>transx</strong> &#8211; pointer to function that transforms y</li>
-<li><strong>transdx</strong> &#8211; pointer to function that transforms dy</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="sans.guiframe.dataFitting.Theory1D.View.transform">
-<tt class="descname">transform</tt><big>(</big><em>x=None</em>, <em>y=None</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.View.transform" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Transforms the x,y,dx and dy vectors and stores</dt>
-<dd>the output in View parameters</dd>
-</dl>
+<dt id="sans.guiframe.dataFitting.Theory1D.__rsub__">
+<tt class="descname">__rsub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__rsub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract two data sets</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>x</strong> &#8211; array of x values</li>
-<li><strong>y</strong> &#8211; array of y values</li>
-<li><strong>dx</strong> &#8211; array of  errors values on x</li>
-<li><strong>dy</strong> &#8211; array of error values on y</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.__setattr__">
+<tt class="descname">__setattr__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take care of changes in View when data is changed.
+This method is provided for backward compatibility.</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>print data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D.__sub__">
+<tt class="descname">__sub__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtract two data sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; data set to subtract from the current one</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">new data set</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">raised when two data sets are incompatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D._perform_operation">
+<tt class="descname">_perform_operation</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D._perform_operation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dataFitting.Theory1D._validity_check">
+<tt class="descname">_validity_check</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D._validity_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks that the data lengths are compatible.
+Checks that the x vectors are compatible.
+Returns errors vectors equal to original
+errors vectors if they were present or vectors
+of zeros when none was found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>other</strong> &#8211; other data set for operation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">dy for self, dy for other [numpy arrays]</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Raises ValueError:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">when lengths are not compatible</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D._xaxis">
+<tt class="descname">_xaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D._xaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D._xunit">
+<tt class="descname">_xunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D._xunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D._yaxis">
+<tt class="descname">_yaxis</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D._yaxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D._yunit">
+<tt class="descname">_yunit</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D._yunit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.add_notes">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">add_notes</tt><big>(</big><em>message=''</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.add_notes" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">add_notes</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.add_notes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add notes to datainfo</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.append_empty_process">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.append_empty_process" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">append_empty_process</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.append_empty_process" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.changed">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">changed</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.changed" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">changed</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.changed" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.check_data_PlottableX">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">check_data_PlottableX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.check_data_PlottableX" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">check_data_PlottableX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.check_data_PlottableX" title="Permalink to this definition">¶</a></dt>
 <dd><p>Since no transformation is made for log10(x), check that 
 no negative values is plot in log scale</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.check_data_PlottableY">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">check_data_PlottableY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.check_data_PlottableY" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">check_data_PlottableY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.check_data_PlottableY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Since no transformation is made for log10(y), check that 
 no negative values is plot in log scale</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.clone_without_data">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">clone_without_data</tt><big>(</big><em>length=0</em>, <em>clone=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.clone_without_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">clone_without_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.clone_without_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Clone the current object, without copying the data (which
 will be filled out by a subsequent operation).
 The data arrays will be initialized to zero.</p>
@@ -975,7 +1838,7 @@ The data arrays will be initialized to zero.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>length</strong> &#8211; length of the data array to be initialized</li>
 <li><strong>clone</strong> &#8211; if provided, the data will be copied to clone</li>
 </ul>
@@ -985,45 +1848,105 @@ The data arrays will be initialized to zero.</p>
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.collimation">
+<tt class="descname">collimation</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.collimation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.colors">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">colors</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.colors" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">colors</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.colors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the number of colors need to render the object</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.copy_from_datainfo">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">copy_from_datainfo</tt><big>(</big><em>data1d</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.copy_from_datainfo" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">copy_from_datainfo</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.copy_from_datainfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>copy values of Data1D of type DataLaoder.Data_info</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.custom_color">
+<tt class="descname">custom_color</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.custom_color" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.detector">
+<tt class="descname">detector</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.detector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.dx">
+<tt class="descname">dx</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.dx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.dxl">
+<tt class="descname">dxl</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.dxl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.dxw">
+<tt class="descname">dxw</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.dxw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.dy">
+<tt class="descname">dy</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.dy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.errors">
+<tt class="descname">errors</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.errors" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.filename">
+<tt class="descname">filename</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.get_xaxis">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">get_xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.get_xaxis" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.get_xaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the units and name of x-axis</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.get_yaxis">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">get_yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.get_yaxis" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.get_yaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the units and name of y- axis</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.hidden">
+<tt class="descname">hidden</tt><em class="property"> = False</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.hidden" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.instrument">
+<tt class="descname">instrument</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.instrument" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.interactive">
+<tt class="descname">interactive</tt><em class="property"> = True</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.interactive" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.is_empty">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">is_empty</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.is_empty" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_empty</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.is_empty" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns True if there is no data stored in the plottable</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.is_slit_smeared">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">is_slit_smeared</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.is_slit_smeared" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_slit_smeared</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.is_slit_smeared" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check whether the data has slit smearing information</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">True is slit smearing info is present, False otherwise</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True is slit smearing info is present, False otherwise</td>
 </tr>
 </tbody>
 </table>
@@ -1031,19 +1954,39 @@ The data arrays will be initialized to zero.</p>
 
 <dl class="classmethod">
 <dt id="sans.guiframe.dataFitting.Theory1D.labels">
-<em class="property">classmethod </em><tt class="descclassname">Theory1D.</tt><tt class="descname">labels</tt><big>(</big><em>collection</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.labels" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><tt class="descname">labels</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.labels" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build a label mostly unique within a collection</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.markersize">
+<tt class="descname">markersize</tt><em class="property"> = 5</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.markersize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.meta_data">
+<tt class="descname">meta_data</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.meta_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.name">
+<tt class="descname">name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.notes">
+<tt class="descname">notes</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.notes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.onFitRange">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">onFitRange</tt><big>(</big><em>xmin=None</em>, <em>xmax=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.onFitRange" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onFitRange</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.onFitRange" title="Permalink to this definition">¶</a></dt>
 <dd><p>It limits View data range to plot from min to max</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>xmin</strong> &#8211; the minimum value of x to plot.</li>
 <li><strong>xmax</strong> &#8211; the maximum value of x to plot</li>
 </ul>
@@ -1055,36 +1998,56 @@ The data arrays will be initialized to zero.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.onReset">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">onReset</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.onReset" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onReset</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.onReset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reset x, y, dx, dy view with its parameters</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.process">
+<tt class="descname">process</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.render">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">render</tt><big>(</big><em>plot</em>, <em>**kw</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.render" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">render</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.render" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.reset_view">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">reset_view</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.reset_view" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">reset_view</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.reset_view" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reload view with new value to plot</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.returnValuesOfView">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">returnValuesOfView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.returnValuesOfView" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">returnValuesOfView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.returnValuesOfView" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return View parameters and it is used by Fit Dialog</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.run">
+<tt class="descname">run</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.run_name">
+<tt class="descname">run_name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.run_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.sample">
+<tt class="descname">sample</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.sample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.setLabel">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">setLabel</tt><big>(</big><em>labelx</em>, <em>labely</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.setLabel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">setLabel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.setLabel" title="Permalink to this definition">¶</a></dt>
 <dd><p>It takes a label of the x and y transformation and set View parameters</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>transx</strong> &#8211; The label of x transformation is sent by Properties Dialog</li>
 <li><strong>transy</strong> &#8211; The label of y transformation is sent Properties Dialog</li>
 </ul>
@@ -1096,31 +2059,46 @@ The data arrays will be initialized to zero.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.set_View">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">set_View</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.set_View" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_View</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.set_View" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load View</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.set_data">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">set_data</tt><big>(</big><em>x</em>, <em>y</em>, <em>dx=None</em>, <em>dy=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.set_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.set_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.short_name">
+<tt class="descname">short_name</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.short_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.source">
+<tt class="descname">source</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.source" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.title">
+<tt class="descname">title</tt><em class="property"> = ''</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.title" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.transformView">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">transformView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.transformView" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">transformView</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.transformView" title="Permalink to this definition">¶</a></dt>
 <dd><p>It transforms x, y before displaying</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.transformX">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">transformX</tt><big>(</big><em>transx</em>, <em>transdx</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.transformX" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">transformX</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.transformX" title="Permalink to this definition">¶</a></dt>
 <dd><p>Receive pointers to function that transform x and dx 
 and set corresponding View pointers</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>transx</strong> &#8211; pointer to function that transforms x</li>
 <li><strong>transdx</strong> &#8211; pointer to function that transforms dx</li>
 </ul>
@@ -1132,14 +2110,14 @@ and set corresponding View pointers</p>
 
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.transformY">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">transformY</tt><big>(</big><em>transy</em>, <em>transdy</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.transformY" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">transformY</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.transformY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Receive pointers to function that transform y and dy 
 and set corresponding View pointers</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>transy</strong> &#8211; pointer to function that transforms y</li>
 <li><strong>transdy</strong> &#8211; pointer to function that transforms dy</li>
 </ul>
@@ -1149,15 +2127,25 @@ and set corresponding View pointers</p>
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.x">
+<tt class="descname">x</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.x_unit">
+<tt class="descname">x_unit</tt><em class="property"> = '1/A'</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.x_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.xaxis">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">xaxis</tt><big>(</big><em>name</em>, <em>units</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.xaxis" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">xaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.xaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the name and unit of x_axis</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> &#8211; the name of x-axis</li>
 <li><strong>units</strong> &#8211; the units of x_axis</li>
 </ul>
@@ -1167,15 +2155,25 @@ and set corresponding View pointers</p>
 </table>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.y">
+<tt class="descname">y</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.y" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dataFitting.Theory1D.y_unit">
+<tt class="descname">y_unit</tt><em class="property"> = '1/cm'</em><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.y_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.dataFitting.Theory1D.yaxis">
-<tt class="descclassname">Theory1D.</tt><tt class="descname">yaxis</tt><big>(</big><em>name</em>, <em>units</em><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.yaxis" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">yaxis</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.Theory1D.yaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the name and unit of y_axis</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> &#8211; the name of y-axis</li>
 <li><strong>units</strong> &#8211; the units of y_axis</li>
 </ul>
@@ -1185,6 +2183,12 @@ and set corresponding View pointers</p>
 </table>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="function">
+<dt id="sans.guiframe.dataFitting.check_data_validity">
+<tt class="descclassname">sans.guiframe.dataFitting.</tt><tt class="descname">check_data_validity</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dataFitting.check_data_validity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True is data is valid enough to compute chisqr, else False</p>
 </dd></dl>
 
 </div>
@@ -1199,7 +2203,7 @@ and set corresponding View pointers</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">dataFitting</a><ul>
-<li><a class="reference internal" href="#module-sans.guiframe.dataFitting"><tt class="docutils literal"><span class="pre">sans.guiframe.dataFitting</span></tt></a></li>
+<li><a class="reference internal" href="#sans-guiframe-datafitting"><tt class="docutils literal"><span class="pre">sans.guiframe.dataFitting</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -1218,7 +2222,7 @@ and set corresponding View pointers</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -1247,13 +2251,13 @@ and set corresponding View pointers</p>
         <li class="right" >
           <a href="custom_pstats.html" title="custom_pstats"
              >previous</a> |</li>
-        <li><a href="../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

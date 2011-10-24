@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>utils &mdash; guiframe v0.1.0 documentation</title>
+    <title>utils &mdash; guiframe 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="guiframe v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="guiframe 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="version" href="version.html" />
     <link rel="prev" title="state_reader" href="state_reader.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="state_reader.html" title="state_reader"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,79 +58,69 @@
             
   <div class="section" id="utils">
 <h1>utils<a class="headerlink" href="#utils" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.guiframe.utils">
-<span id="sans-guiframe-utils"></span><h2><a class="reference internal" href="#module-sans.guiframe.utils" title="sans.guiframe.utils"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.utils</span></tt></a><a class="headerlink" href="#module-sans.guiframe.utils" title="Permalink to this headline">¶</a></h2>
-<p>Contains common classes and functions</p>
+<div class="section" id="sans-guiframe-utils">
+<h2><a class="reference internal" href="#module-sans.guiframe.utils" title="sans.guiframe.utils"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.utils</span></tt></a><a class="headerlink" href="#sans-guiframe-utils" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.guiframe.utils"></span><p>Contains common classes and functions</p>
 <dl class="class">
 <dt id="sans.guiframe.utils.PanelMenu">
-<em class="property">class </em><tt class="descclassname">sans.guiframe.utils.</tt><tt class="descname">PanelMenu</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.guiframe.utils.</tt><tt class="descname">PanelMenu</tt><a class="headerlink" href="#sans.guiframe.utils.PanelMenu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">wx._core.Menu</span></tt></p>
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.AddPendingEvent">
-<tt class="descname">AddPendingEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.AddPendingEvent" title="Permalink to this definition">¶</a></dt>
-<dd><p>AddPendingEvent(self, Event event)</p>
-</dd></dl>
+<tt class="descname">AddPendingEvent</tt><big>(</big><em>self</em>, <em>Event event</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.AddPendingEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.Append">
-<tt class="descname">Append</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Append" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Append(self, int id, String text=EmptyString, String help=EmptyString, </dt>
-<dd>int kind=ITEM_NORMAL) -&gt; MenuItem</dd>
-</dl>
+<tt class="descname">Append</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append(self, int id, String text=EmptyString, String help=EmptyString, 
+int kind=ITEM_NORMAL) -&gt; MenuItem</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.AppendCheckItem">
-<tt class="descname">AppendCheckItem</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.AppendCheckItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>AppendCheckItem(self, int id, String text, String help=EmptyString) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">AppendCheckItem</tt><big>(</big><em>self</em>, <em>int id</em>, <em>String text</em>, <em>String help=EmptyString</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.AppendCheckItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.AppendItem">
-<tt class="descname">AppendItem</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.AppendItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>AppendItem(self, MenuItem item) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">AppendItem</tt><big>(</big><em>self</em>, <em>MenuItem item</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.AppendItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.AppendMenu">
-<tt class="descname">AppendMenu</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.AppendMenu" title="Permalink to this definition">¶</a></dt>
-<dd><p>AppendMenu(self, int id, String text, Menu submenu, String help=EmptyString) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">AppendMenu</tt><big>(</big><em>self</em>, <em>int id</em>, <em>String text</em>, <em>Menu submenu</em>, <em>String help=EmptyString</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.AppendMenu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.AppendRadioItem">
-<tt class="descname">AppendRadioItem</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.AppendRadioItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>AppendRadioItem(self, int id, String text, String help=EmptyString) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">AppendRadioItem</tt><big>(</big><em>self</em>, <em>int id</em>, <em>String text</em>, <em>String help=EmptyString</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.AppendRadioItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.AppendSeparator">
-<tt class="descname">AppendSeparator</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.AppendSeparator" title="Permalink to this definition">¶</a></dt>
-<dd><p>AppendSeparator(self) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">AppendSeparator</tt><big>(</big><em>self</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.AppendSeparator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.AppendSubMenu">
-<tt class="descname">AppendSubMenu</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.AppendSubMenu" title="Permalink to this definition">¶</a></dt>
-<dd><p>AppendSubMenu(self, Menu submenu, String text, String help=EmptyString) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">AppendSubMenu</tt><big>(</big><em>self</em>, <em>Menu submenu</em>, <em>String text</em>, <em>String help=EmptyString</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.AppendSubMenu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.Attach">
-<tt class="descname">Attach</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Attach" title="Permalink to this definition">¶</a></dt>
-<dd><p>Attach(self, wxMenuBarBase menubar)</p>
-</dd></dl>
+<tt class="descname">Attach</tt><big>(</big><em>self</em>, <em>wxMenuBarBase menubar</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Attach" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.Bind">
-<tt class="descname">Bind</tt><big>(</big><em>event</em>, <em>handler</em>, <em>source=None</em>, <em>id=-1</em>, <em>id2=-1</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Bind" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">Bind</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Bind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bind an event to an event handler.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>event</strong> &#8211; One of the EVT_* objects that specifies the
 type of event to bind,</li>
 <li><strong>handler</strong> &#8211; A callable object to be invoked when the
@@ -154,15 +147,13 @@ to a range of IDs, such as with EVT_MENU_RANGE.</li>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.Break">
-<tt class="descname">Break</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Break" title="Permalink to this definition">¶</a></dt>
-<dd><p>Break(self)</p>
-</dd></dl>
+<tt class="descname">Break</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Break" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.Check">
-<tt class="descname">Check</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Check" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check(self, int id, bool check)</p>
-</dd></dl>
+<tt class="descname">Check</tt><big>(</big><em>self</em>, <em>int id</em>, <em>bool check</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="sans.guiframe.utils.PanelMenu.ClassName">
@@ -172,61 +163,51 @@ to a range of IDs, such as with EVT_MENU_RANGE.</li>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.Connect">
-<tt class="descname">Connect</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Connect(self, int id, int lastId, int eventType, PyObject func)</p>
-</dd></dl>
+<tt class="descname">Connect</tt><big>(</big><em>self</em>, <em>int id</em>, <em>int lastId</em>, <em>int eventType</em>, <em>PyObject func</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Connect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.Delete">
-<tt class="descname">Delete</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Delete" title="Permalink to this definition">¶</a></dt>
-<dd><p>Delete(self, int id) -&gt; bool</p>
-</dd></dl>
+<tt class="descname">Delete</tt><big>(</big><em>self</em>, <em>int id</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Delete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.DeleteItem">
-<tt class="descname">DeleteItem</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.DeleteItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>DeleteItem(self, MenuItem item) -&gt; bool</p>
-</dd></dl>
+<tt class="descname">DeleteItem</tt><big>(</big><em>self</em>, <em>MenuItem item</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.DeleteItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.Destroy">
-<tt class="descname">Destroy</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Destroy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Destroy(self)</p>
-<p>Deletes the C++ object this Python object is a proxy for.</p>
+<tt class="descname">Destroy</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Destroy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes the C++ object this Python object is a proxy for.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.DestroyId">
-<tt class="descname">DestroyId</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.DestroyId" title="Permalink to this definition">¶</a></dt>
-<dd><p>DestroyId(self, int id) -&gt; bool</p>
-</dd></dl>
+<tt class="descname">DestroyId</tt><big>(</big><em>self</em>, <em>int id</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.DestroyId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.DestroyItem">
-<tt class="descname">DestroyItem</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.DestroyItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>DestroyItem(self, MenuItem item) -&gt; bool</p>
-</dd></dl>
+<tt class="descname">DestroyItem</tt><big>(</big><em>self</em>, <em>MenuItem item</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.DestroyItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.Detach">
-<tt class="descname">Detach</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Detach" title="Permalink to this definition">¶</a></dt>
-<dd><p>Detach(self)</p>
-</dd></dl>
+<tt class="descname">Detach</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Detach" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.Disconnect">
-<tt class="descname">Disconnect</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Disconnect" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Disconnect(self, int id, int lastId=-1, EventType eventType=wxEVT_NULL, </dt>
-<dd>PyObject func=None) -&gt; bool</dd>
-</dl>
+<tt class="descname">Disconnect</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnect(self, int id, int lastId=-1, EventType eventType=wxEVT_NULL, 
+PyObject func=None) -&gt; bool</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.Enable">
-<tt class="descname">Enable</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Enable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Enable(self, int id, bool enable)</p>
-</dd></dl>
+<tt class="descname">Enable</tt><big>(</big><em>self</em>, <em>int id</em>, <em>bool enable</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Enable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="sans.guiframe.utils.PanelMenu.EventHandler">
@@ -242,112 +223,94 @@ to a range of IDs, such as with EVT_MENU_RANGE.</li>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.FindItem">
-<tt class="descname">FindItem</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.FindItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>FindItem(self, String item) -&gt; int</p>
-</dd></dl>
+<tt class="descname">FindItem</tt><big>(</big><em>self</em>, <em>String item</em><big>)</big> &rarr; int<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.FindItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.FindItemById">
-<tt class="descname">FindItemById</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.FindItemById" title="Permalink to this definition">¶</a></dt>
-<dd><p>FindItemById(self, int id) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">FindItemById</tt><big>(</big><em>self</em>, <em>int id</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.FindItemById" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.FindItemByPosition">
-<tt class="descname">FindItemByPosition</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.FindItemByPosition" title="Permalink to this definition">¶</a></dt>
-<dd><p>FindItemByPosition(self, size_t position) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">FindItemByPosition</tt><big>(</big><em>self</em>, <em>size_t position</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.FindItemByPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.GetClassName">
-<tt class="descname">GetClassName</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetClassName" title="Permalink to this definition">¶</a></dt>
-<dd><p>GetClassName(self) -&gt; String</p>
-<p>Returns the class name of the C++ class using wxRTTI.</p>
+<tt class="descname">GetClassName</tt><big>(</big><em>self</em><big>)</big> &rarr; String<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetClassName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the class name of the C++ class using wxRTTI.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.GetEventHandler">
-<tt class="descname">GetEventHandler</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetEventHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>GetEventHandler(self) -&gt; EvtHandler</p>
-</dd></dl>
+<tt class="descname">GetEventHandler</tt><big>(</big><em>self</em><big>)</big> &rarr; EvtHandler<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetEventHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.GetEvtHandlerEnabled">
-<tt class="descname">GetEvtHandlerEnabled</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetEvtHandlerEnabled" title="Permalink to this definition">¶</a></dt>
-<dd><p>GetEvtHandlerEnabled(self) -&gt; bool</p>
-</dd></dl>
+<tt class="descname">GetEvtHandlerEnabled</tt><big>(</big><em>self</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetEvtHandlerEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.GetHelpString">
-<tt class="descname">GetHelpString</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetHelpString" title="Permalink to this definition">¶</a></dt>
-<dd><p>GetHelpString(self, int id) -&gt; String</p>
-</dd></dl>
+<tt class="descname">GetHelpString</tt><big>(</big><em>self</em>, <em>int id</em><big>)</big> &rarr; String<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetHelpString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.GetInvokingWindow">
-<tt class="descname">GetInvokingWindow</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetInvokingWindow" title="Permalink to this definition">¶</a></dt>
-<dd><p>GetInvokingWindow(self) -&gt; Window</p>
-</dd></dl>
+<tt class="descname">GetInvokingWindow</tt><big>(</big><em>self</em><big>)</big> &rarr; Window<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetInvokingWindow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.GetLabel">
-<tt class="descname">GetLabel</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetLabel" title="Permalink to this definition">¶</a></dt>
-<dd><p>GetLabel(self, int id) -&gt; String</p>
-</dd></dl>
+<tt class="descname">GetLabel</tt><big>(</big><em>self</em>, <em>int id</em><big>)</big> &rarr; String<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetLabel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.GetLabelText">
-<tt class="descname">GetLabelText</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetLabelText" title="Permalink to this definition">¶</a></dt>
-<dd><p>GetLabelText(self, int itemid) -&gt; String</p>
-</dd></dl>
+<tt class="descname">GetLabelText</tt><big>(</big><em>self</em>, <em>int itemid</em><big>)</big> &rarr; String<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetLabelText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.GetMenuBar">
-<tt class="descname">GetMenuBar</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetMenuBar" title="Permalink to this definition">¶</a></dt>
-<dd><p>GetMenuBar(self) -&gt; MenuBar</p>
-</dd></dl>
+<tt class="descname">GetMenuBar</tt><big>(</big><em>self</em><big>)</big> &rarr; MenuBar<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetMenuBar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.GetMenuItemCount">
-<tt class="descname">GetMenuItemCount</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetMenuItemCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>GetMenuItemCount(self) -&gt; size_t</p>
-</dd></dl>
+<tt class="descname">GetMenuItemCount</tt><big>(</big><em>self</em><big>)</big> &rarr; size_t<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetMenuItemCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.GetMenuItems">
-<tt class="descname">GetMenuItems</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetMenuItems" title="Permalink to this definition">¶</a></dt>
-<dd><p>GetMenuItems(self) -&gt; MenuItemList</p>
-</dd></dl>
+<tt class="descname">GetMenuItems</tt><big>(</big><em>self</em><big>)</big> &rarr; MenuItemList<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetMenuItems" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.GetNextHandler">
-<tt class="descname">GetNextHandler</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetNextHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>GetNextHandler(self) -&gt; EvtHandler</p>
-</dd></dl>
+<tt class="descname">GetNextHandler</tt><big>(</big><em>self</em><big>)</big> &rarr; EvtHandler<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetNextHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.GetParent">
-<tt class="descname">GetParent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetParent" title="Permalink to this definition">¶</a></dt>
-<dd><p>GetParent(self) -&gt; Menu</p>
-</dd></dl>
+<tt class="descname">GetParent</tt><big>(</big><em>self</em><big>)</big> &rarr; Menu<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetParent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.GetPreviousHandler">
-<tt class="descname">GetPreviousHandler</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetPreviousHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>GetPreviousHandler(self) -&gt; EvtHandler</p>
-</dd></dl>
+<tt class="descname">GetPreviousHandler</tt><big>(</big><em>self</em><big>)</big> &rarr; EvtHandler<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetPreviousHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.GetStyle">
-<tt class="descname">GetStyle</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetStyle" title="Permalink to this definition">¶</a></dt>
-<dd><p>GetStyle(self) -&gt; long</p>
-</dd></dl>
+<tt class="descname">GetStyle</tt><big>(</big><em>self</em><big>)</big> &rarr; long<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetStyle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.GetTitle">
-<tt class="descname">GetTitle</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetTitle" title="Permalink to this definition">¶</a></dt>
-<dd><p>GetTitle(self) -&gt; String</p>
-</dd></dl>
+<tt class="descname">GetTitle</tt><big>(</big><em>self</em><big>)</big> &rarr; String<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.GetTitle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="sans.guiframe.utils.PanelMenu.HelpString">
@@ -357,42 +320,35 @@ to a range of IDs, such as with EVT_MENU_RANGE.</li>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.Insert">
-<tt class="descname">Insert</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Insert" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Insert(self, size_t pos, int id, String text=EmptyString, String help=EmptyString, </dt>
-<dd>int kind=ITEM_NORMAL) -&gt; MenuItem</dd>
-</dl>
+<tt class="descname">Insert</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert(self, size_t pos, int id, String text=EmptyString, String help=EmptyString, 
+int kind=ITEM_NORMAL) -&gt; MenuItem</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.InsertCheckItem">
-<tt class="descname">InsertCheckItem</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.InsertCheckItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>InsertCheckItem(self, size_t pos, int id, String text, String help=EmptyString) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">InsertCheckItem</tt><big>(</big><em>self</em>, <em>size_t pos</em>, <em>int id</em>, <em>String text</em>, <em>String help=EmptyString</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.InsertCheckItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.InsertItem">
-<tt class="descname">InsertItem</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.InsertItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>InsertItem(self, size_t pos, MenuItem item) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">InsertItem</tt><big>(</big><em>self</em>, <em>size_t pos</em>, <em>MenuItem item</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.InsertItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.InsertMenu">
-<tt class="descname">InsertMenu</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.InsertMenu" title="Permalink to this definition">¶</a></dt>
-<dd><p>InsertMenu(self, size_t pos, int id, String text, Menu submenu, String help=EmptyString) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">InsertMenu</tt><big>(</big><em>self</em>, <em>size_t pos</em>, <em>int id</em>, <em>String text</em>, <em>Menu submenu</em>, <em>String help=EmptyString</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.InsertMenu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.InsertRadioItem">
-<tt class="descname">InsertRadioItem</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.InsertRadioItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>InsertRadioItem(self, size_t pos, int id, String text, String help=EmptyString) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">InsertRadioItem</tt><big>(</big><em>self</em>, <em>size_t pos</em>, <em>int id</em>, <em>String text</em>, <em>String help=EmptyString</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.InsertRadioItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.InsertSeparator">
-<tt class="descname">InsertSeparator</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.InsertSeparator" title="Permalink to this definition">¶</a></dt>
-<dd><p>InsertSeparator(self, size_t pos) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">InsertSeparator</tt><big>(</big><em>self</em>, <em>size_t pos</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.InsertSeparator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="sans.guiframe.utils.PanelMenu.InvokingWindow">
@@ -402,27 +358,23 @@ to a range of IDs, such as with EVT_MENU_RANGE.</li>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.IsAttached">
-<tt class="descname">IsAttached</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.IsAttached" title="Permalink to this definition">¶</a></dt>
-<dd><p>IsAttached(self) -&gt; bool</p>
-</dd></dl>
+<tt class="descname">IsAttached</tt><big>(</big><em>self</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.IsAttached" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.IsChecked">
-<tt class="descname">IsChecked</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.IsChecked" title="Permalink to this definition">¶</a></dt>
-<dd><p>IsChecked(self, int id) -&gt; bool</p>
-</dd></dl>
+<tt class="descname">IsChecked</tt><big>(</big><em>self</em>, <em>int id</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.IsChecked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.IsEnabled">
-<tt class="descname">IsEnabled</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.IsEnabled" title="Permalink to this definition">¶</a></dt>
-<dd><p>IsEnabled(self, int id) -&gt; bool</p>
-</dd></dl>
+<tt class="descname">IsEnabled</tt><big>(</big><em>self</em>, <em>int id</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.IsEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.IsSameAs">
-<tt class="descname">IsSameAs</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.IsSameAs" title="Permalink to this definition">¶</a></dt>
-<dd><p>IsSameAs(self, Object p) -&gt; bool</p>
-<p>For wx.Objects that use C++ reference counting internally, this method
+<tt class="descname">IsSameAs</tt><big>(</big><em>self</em>, <em>Object p</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.IsSameAs" title="Permalink to this definition">¶</a></dt>
+<dd><p>For wx.Objects that use C++ reference counting internally, this method
 can be used to determine if two objects are referencing the same data
 object.</p>
 </dd></dl>
@@ -459,42 +411,35 @@ object.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.Prepend">
-<tt class="descname">Prepend</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Prepend" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Prepend(self, int id, String text=EmptyString, String help=EmptyString, </dt>
-<dd>int kind=ITEM_NORMAL) -&gt; MenuItem</dd>
-</dl>
+<tt class="descname">Prepend</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Prepend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepend(self, int id, String text=EmptyString, String help=EmptyString, 
+int kind=ITEM_NORMAL) -&gt; MenuItem</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.PrependCheckItem">
-<tt class="descname">PrependCheckItem</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.PrependCheckItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>PrependCheckItem(self, int id, String text, String help=EmptyString) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">PrependCheckItem</tt><big>(</big><em>self</em>, <em>int id</em>, <em>String text</em>, <em>String help=EmptyString</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.PrependCheckItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.PrependItem">
-<tt class="descname">PrependItem</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.PrependItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>PrependItem(self, MenuItem item) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">PrependItem</tt><big>(</big><em>self</em>, <em>MenuItem item</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.PrependItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.PrependMenu">
-<tt class="descname">PrependMenu</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.PrependMenu" title="Permalink to this definition">¶</a></dt>
-<dd><p>PrependMenu(self, int id, String text, Menu submenu, String help=EmptyString) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">PrependMenu</tt><big>(</big><em>self</em>, <em>int id</em>, <em>String text</em>, <em>Menu submenu</em>, <em>String help=EmptyString</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.PrependMenu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.PrependRadioItem">
-<tt class="descname">PrependRadioItem</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.PrependRadioItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>PrependRadioItem(self, int id, String text, String help=EmptyString) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">PrependRadioItem</tt><big>(</big><em>self</em>, <em>int id</em>, <em>String text</em>, <em>String help=EmptyString</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.PrependRadioItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.PrependSeparator">
-<tt class="descname">PrependSeparator</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.PrependSeparator" title="Permalink to this definition">¶</a></dt>
-<dd><p>PrependSeparator(self) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">PrependSeparator</tt><big>(</big><em>self</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.PrependSeparator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="sans.guiframe.utils.PanelMenu.PreviousHandler">
@@ -504,81 +449,68 @@ object.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.ProcessEvent">
-<tt class="descname">ProcessEvent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.ProcessEvent" title="Permalink to this definition">¶</a></dt>
-<dd><p>ProcessEvent(self, Event event) -&gt; bool</p>
-</dd></dl>
+<tt class="descname">ProcessEvent</tt><big>(</big><em>self</em>, <em>Event event</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.ProcessEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.ProcessPendingEvents">
-<tt class="descname">ProcessPendingEvents</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.ProcessPendingEvents" title="Permalink to this definition">¶</a></dt>
-<dd><p>ProcessPendingEvents(self)</p>
-</dd></dl>
+<tt class="descname">ProcessPendingEvents</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.ProcessPendingEvents" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.Remove">
-<tt class="descname">Remove</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Remove" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove(self, int id) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">Remove</tt><big>(</big><em>self</em>, <em>int id</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Remove" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.RemoveItem">
-<tt class="descname">RemoveItem</tt><big>(</big><em>item</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.RemoveItem" title="Permalink to this definition">¶</a></dt>
-<dd><p>RemoveItem(self, MenuItem item) -&gt; MenuItem</p>
-</dd></dl>
+<tt class="descname">RemoveItem</tt><big>(</big><em>self</em>, <em>MenuItem item</em><big>)</big> &rarr; MenuItem<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.RemoveItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.SetEventHandler">
-<tt class="descname">SetEventHandler</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetEventHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>SetEventHandler(self, EvtHandler handler)</p>
-</dd></dl>
+<tt class="descname">SetEventHandler</tt><big>(</big><em>self</em>, <em>EvtHandler handler</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetEventHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.SetEvtHandlerEnabled">
-<tt class="descname">SetEvtHandlerEnabled</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetEvtHandlerEnabled" title="Permalink to this definition">¶</a></dt>
-<dd><p>SetEvtHandlerEnabled(self, bool enabled)</p>
-</dd></dl>
+<tt class="descname">SetEvtHandlerEnabled</tt><big>(</big><em>self</em>, <em>bool enabled</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetEvtHandlerEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.SetHelpString">
-<tt class="descname">SetHelpString</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetHelpString" title="Permalink to this definition">¶</a></dt>
-<dd><p>SetHelpString(self, int id, String helpString)</p>
-</dd></dl>
+<tt class="descname">SetHelpString</tt><big>(</big><em>self</em>, <em>int id</em>, <em>String helpString</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetHelpString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.SetInvokingWindow">
-<tt class="descname">SetInvokingWindow</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetInvokingWindow" title="Permalink to this definition">¶</a></dt>
-<dd><p>SetInvokingWindow(self, Window win)</p>
-</dd></dl>
+<tt class="descname">SetInvokingWindow</tt><big>(</big><em>self</em>, <em>Window win</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetInvokingWindow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.SetLabel">
-<tt class="descname">SetLabel</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetLabel" title="Permalink to this definition">¶</a></dt>
-<dd><p>SetLabel(self, int id, String label)</p>
-</dd></dl>
+<tt class="descname">SetLabel</tt><big>(</big><em>self</em>, <em>int id</em>, <em>String label</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetLabel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.SetNextHandler">
-<tt class="descname">SetNextHandler</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetNextHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>SetNextHandler(self, EvtHandler handler)</p>
-</dd></dl>
+<tt class="descname">SetNextHandler</tt><big>(</big><em>self</em>, <em>EvtHandler handler</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetNextHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.SetParent">
-<tt class="descname">SetParent</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetParent" title="Permalink to this definition">¶</a></dt>
-<dd><p>SetParent(self, Menu parent)</p>
-</dd></dl>
+<tt class="descname">SetParent</tt><big>(</big><em>self</em>, <em>Menu parent</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetParent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.SetPreviousHandler">
-<tt class="descname">SetPreviousHandler</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetPreviousHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>SetPreviousHandler(self, EvtHandler handler)</p>
-</dd></dl>
+<tt class="descname">SetPreviousHandler</tt><big>(</big><em>self</em>, <em>EvtHandler handler</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetPreviousHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.SetTitle">
-<tt class="descname">SetTitle</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetTitle" title="Permalink to this definition">¶</a></dt>
-<dd><p>SetTitle(self, String title)</p>
-</dd></dl>
+<tt class="descname">SetTitle</tt><big>(</big><em>self</em>, <em>String title</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.SetTitle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="sans.guiframe.utils.PanelMenu.Style">
@@ -594,25 +526,118 @@ object.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.Unbind">
-<tt class="descname">Unbind</tt><big>(</big><em>event</em>, <em>source=None</em>, <em>id=-1</em>, <em>id2=-1</em>, <em>handler=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Unbind" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">Unbind</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.Unbind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Disconnects the event handler binding for event from self.
 Returns True if successful.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.UpdateUI">
-<tt class="descname">UpdateUI</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.UpdateUI" title="Permalink to this definition">¶</a></dt>
-<dd><p>UpdateUI(self, EvtHandler source=None)</p>
+<tt class="descname">UpdateUI</tt><big>(</big><em>self</em>, <em>EvtHandler source=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.UpdateUI" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.utils.PanelMenu.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.utils.PanelMenu.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.utils.PanelMenu.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x05EA0D50&gt;</em><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.utils.PanelMenu.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.utils.PanelMenu.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="sans.guiframe.utils.PanelMenu.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>self</em>, <em>String title=EmptyString</em>, <em>long style=0</em><big>)</big> &rarr; Menu<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.utils.PanelMenu.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.utils'</em><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.utils.PanelMenu.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.guiframe.utils.PanelMenu.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.utils.PanelMenu.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.utils.PanelMenu.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.utils.PanelMenu.__repr__">
+<tt class="descname">__repr__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.utils.PanelMenu.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.utils.PanelMenu.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.utils.PanelMenu.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.utils.PanelMenu._setOORInfo">
+<tt class="descname">_setOORInfo</tt><big>(</big><em>self</em>, <em>PyObject _self</em>, <em>bool incref=True</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu._setOORInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.utils.PanelMenu.graph">
+<tt class="descname">graph</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.graph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.utils.PanelMenu.plots">
+<tt class="descname">plots</tt><em class="property"> = None</em><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.plots" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.set_graph">
-<tt class="descname">set_graph</tt><big>(</big><em>graph</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.set_graph" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_graph</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.set_graph" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.utils.PanelMenu.set_plots">
-<tt class="descname">set_plots</tt><big>(</big><em>plots</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.set_plots" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_plots</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.PanelMenu.set_plots" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -625,12 +650,12 @@ Returns True if successful.</p>
 
 <dl class="function">
 <dt id="sans.guiframe.utils.check_float">
-<tt class="descclassname">sans.guiframe.utils.</tt><tt class="descname">check_float</tt><big>(</big><em>item</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.check_float" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">sans.guiframe.utils.</tt><tt class="descname">check_float</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.check_float" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> &#8211; txtcrtl containing a value</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>item</strong> &#8211; txtcrtl containing a value</td>
 </tr>
 </tbody>
 </table>
@@ -638,27 +663,27 @@ Returns True if successful.</p>
 
 <dl class="function">
 <dt id="sans.guiframe.utils.format_number">
-<tt class="descclassname">sans.guiframe.utils.</tt><tt class="descname">format_number</tt><big>(</big><em>value</em>, <em>high=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.format_number" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">sans.guiframe.utils.</tt><tt class="descname">format_number</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.format_number" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a float in a standardized, human-readable formatted string</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="sans.guiframe.utils.look_for_tag">
-<tt class="descclassname">sans.guiframe.utils.</tt><tt class="descname">look_for_tag</tt><big>(</big><em>string1</em>, <em>begin</em>, <em>end=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.look_for_tag" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">sans.guiframe.utils.</tt><tt class="descname">look_for_tag</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.look_for_tag" title="Permalink to this definition">¶</a></dt>
 <dd><p>this method  remove the begin and end tags given by the user
 from the string .</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>begin</strong> &#8211; the initial tag</li>
 <li><strong>end</strong> &#8211; the final tag</li>
 <li><strong>string</strong> &#8211; the string to check</li>
 </ul>
 </td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">begin_flag==True if begin was found,
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">begin_flag==True if begin was found,
 end_flag==if end was found else return false, false</p>
 </td>
 </tr>
@@ -668,19 +693,19 @@ end_flag==if end was found else return false, false</p>
 
 <dl class="function">
 <dt id="sans.guiframe.utils.parse_name">
-<tt class="descclassname">sans.guiframe.utils.</tt><tt class="descname">parse_name</tt><big>(</big><em>name</em>, <em>expression</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.parse_name" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">sans.guiframe.utils.</tt><tt class="descname">parse_name</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.parse_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>remove &#8220;_&#8221; in front of a name</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="sans.guiframe.utils.split_list">
-<tt class="descclassname">sans.guiframe.utils.</tt><tt class="descname">split_list</tt><big>(</big><em>separator</em>, <em>mylist</em>, <em>n=0</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.split_list" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">sans.guiframe.utils.</tt><tt class="descname">split_list</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.split_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>returns a list of string without white space of separator</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>separator</strong> &#8211; the string to remove</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>separator</strong> &#8211; the string to remove</td>
 </tr>
 </tbody>
 </table>
@@ -688,13 +713,13 @@ end_flag==if end was found else return false, false</p>
 
 <dl class="function">
 <dt id="sans.guiframe.utils.split_text">
-<tt class="descclassname">sans.guiframe.utils.</tt><tt class="descname">split_text</tt><big>(</big><em>separator</em>, <em>string1</em>, <em>n=0</em><big>)</big><a class="headerlink" href="#sans.guiframe.utils.split_text" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">sans.guiframe.utils.</tt><tt class="descname">split_text</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.utils.split_text" title="Permalink to this definition">¶</a></dt>
 <dd><p>return a list of string without white space of separator</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>separator</strong> &#8211; the string to remove</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>separator</strong> &#8211; the string to remove</td>
 </tr>
 </tbody>
 </table>
@@ -712,7 +737,7 @@ end_flag==if end was found else return false, false</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">utils</a><ul>
-<li><a class="reference internal" href="#module-sans.guiframe.utils"><tt class="docutils literal"><span class="pre">sans.guiframe.utils</span></tt></a></li>
+<li><a class="reference internal" href="#sans-guiframe-utils"><tt class="docutils literal"><span class="pre">sans.guiframe.utils</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -731,7 +756,7 @@ end_flag==if end was found else return false, false</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -760,13 +785,13 @@ end_flag==if end was found else return false, false</p>
         <li class="right" >
           <a href="state_reader.html" title="state_reader"
              >previous</a> |</li>
-        <li><a href="../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

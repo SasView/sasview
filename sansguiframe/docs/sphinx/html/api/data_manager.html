@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>data_manager &mdash; guiframe v0.1.0 documentation</title>
+    <title>data_manager &mdash; guiframe 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="guiframe v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="guiframe 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="data_panel" href="data_panel.html" />
     <link rel="prev" title="dataFitting" href="dataFitting.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="dataFitting.html" title="dataFitting"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,9 +58,9 @@
             
   <div class="section" id="data-manager">
 <h1>data_manager<a class="headerlink" href="#data-manager" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.guiframe.data_manager">
-<span id="sans-guiframe-data-manager"></span><h2><a class="reference internal" href="#module-sans.guiframe.data_manager" title="sans.guiframe.data_manager"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.data_manager</span></tt></a><a class="headerlink" href="#module-sans.guiframe.data_manager" title="Permalink to this headline">¶</a></h2>
-<p>This module manages all data loaded into the application. Data_manager makes 
+<div class="section" id="sans-guiframe-data-manager">
+<h2><a class="reference internal" href="#module-sans.guiframe.data_manager" title="sans.guiframe.data_manager"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.data_manager</span></tt></a><a class="headerlink" href="#sans-guiframe-data-manager" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.guiframe.data_manager"></span><p>This module manages all data loaded into the application. Data_manager makes 
 available all data loaded  for the current perspective.</p>
 <p>All modules &#8220;creating Data&#8221; posts their data to data_manager . 
 Data_manager  make these new data available for all other perspectives.</p>
@@ -66,48 +69,140 @@ Data_manager  make these new data available for all other perspectives.</p>
 <em class="property">class </em><tt class="descclassname">sans.guiframe.data_manager.</tt><tt class="descname">DataManager</tt><a class="headerlink" href="#sans.guiframe.data_manager.DataManager" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>Manage a list of data</p>
+<dl class="attribute">
+<dt id="sans.guiframe.data_manager.DataManager.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.data_manager.DataManager.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.data_manager.DataManager.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x04892450&gt;</em><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.data_manager.DataManager.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.data_manager.DataManager.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.data_manager.DataManager.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store opened path and data object created at the loading time
+:param auto_plot: if True the datamanager sends data to plotting</p>
+<blockquote>
+<div>plugin.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>auto_set_data</strong> &#8211; if True the datamanager sends to the current</td>
+</tr>
+</tbody>
+</table>
+<p>perspective</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.data_manager.DataManager.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.data_manager'</em><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.data_manager.DataManager.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.guiframe.data_manager.DataManager.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.data_manager.DataManager.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.data_manager.DataManager.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.data_manager.DataManager.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.data_manager.DataManager.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.data_manager.DataManager.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.__str__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.data_manager.DataManager.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.data_manager.DataManager.add_data">
-<tt class="descname">add_data</tt><big>(</big><em>data_list</em><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.add_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">add_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.add_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>receive a list of</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.data_manager.DataManager.create_gui_data">
-<tt class="descname">create_gui_data</tt><big>(</big><em>data</em>, <em>path=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.create_gui_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">create_gui_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.create_gui_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Receive data from loader and create a data to use for guiframe</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.data_manager.DataManager.delete_by_id">
-<tt class="descname">delete_by_id</tt><big>(</big><em>id_list=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.delete_by_id" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">delete_by_id</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.delete_by_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>save data and path</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.data_manager.DataManager.delete_by_name">
-<tt class="descname">delete_by_name</tt><big>(</big><em>name_list=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.delete_by_name" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">delete_by_name</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.delete_by_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>save data and path</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.data_manager.DataManager.delete_data">
-<tt class="descname">delete_data</tt><big>(</big><em>data_id</em>, <em>theory_id=None</em>, <em>delete_all=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.delete_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">delete_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.delete_data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.data_manager.DataManager.delete_theory">
-<tt class="descname">delete_theory</tt><big>(</big><em>data_id</em>, <em>theory_id</em><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.delete_theory" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">delete_theory</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.delete_theory" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.data_manager.DataManager.freeze">
-<tt class="descname">freeze</tt><big>(</big><em>theory_id</em><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.freeze" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">freeze</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.freeze" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.data_manager.DataManager.freeze_theory">
-<tt class="descname">freeze_theory</tt><big>(</big><em>data_id</em>, <em>theory_id</em><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.freeze_theory" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">freeze_theory</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.freeze_theory" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -118,18 +213,18 @@ Data_manager  make these new data available for all other perspectives.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.data_manager.DataManager.get_by_id">
-<tt class="descname">get_by_id</tt><big>(</big><em>id_list=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.get_by_id" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_by_id</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.get_by_id" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.data_manager.DataManager.get_by_name">
-<tt class="descname">get_by_name</tt><big>(</big><em>name_list=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.get_by_name" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_by_name</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.get_by_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>return a list of data given a list of data names</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.data_manager.DataManager.get_data_state">
-<tt class="descname">get_data_state</tt><big>(</big><em>data_id</em><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.get_data_state" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_data_state</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.get_data_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send list of selected data</p>
 </dd></dl>
 
@@ -141,18 +236,18 @@ Data_manager  make these new data available for all other perspectives.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.data_manager.DataManager.rename">
-<tt class="descname">rename</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.rename" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">rename</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.rename" title="Permalink to this definition">¶</a></dt>
 <dd><p>rename data</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.data_manager.DataManager.update_data">
-<tt class="descname">update_data</tt><big>(</big><em>prev_data</em>, <em>new_data</em><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.update_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">update_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.update_data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.data_manager.DataManager.update_theory">
-<tt class="descname">update_theory</tt><big>(</big><em>theory</em>, <em>data_id=None</em>, <em>state=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.update_theory" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">update_theory</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.data_manager.DataManager.update_theory" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -169,7 +264,7 @@ Data_manager  make these new data available for all other perspectives.</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">data_manager</a><ul>
-<li><a class="reference internal" href="#module-sans.guiframe.data_manager"><tt class="docutils literal"><span class="pre">sans.guiframe.data_manager</span></tt></a></li>
+<li><a class="reference internal" href="#sans-guiframe-data-manager"><tt class="docutils literal"><span class="pre">sans.guiframe.data_manager</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -188,7 +283,7 @@ Data_manager  make these new data available for all other perspectives.</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -217,13 +312,13 @@ Data_manager  make these new data available for all other perspectives.</p>
         <li class="right" >
           <a href="dataFitting.html" title="dataFitting"
              >previous</a> |</li>
-        <li><a href="../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

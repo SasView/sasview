@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dummyapp &mdash; guiframe v0.1.0 documentation</title>
+    <title>dummyapp &mdash; guiframe 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="guiframe v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="guiframe 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="events" href="events.html" />
     <link rel="prev" title="data_state" href="data_state.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="data_state.html" title="data_state"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -56,7 +59,1052 @@
   <div class="section" id="dummyapp">
 <h1>dummyapp<a class="headerlink" href="#dummyapp" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="sans-guiframe-dummyapp">
-<h2><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.dummyapp</span></tt><a class="headerlink" href="#sans-guiframe-dummyapp" title="Permalink to this headline">¶</a></h2>
+<h2><a class="reference internal" href="#module-sans.guiframe.dummyapp" title="sans.guiframe.dummyapp"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.dummyapp</span></tt></a><a class="headerlink" href="#sans-guiframe-dummyapp" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.guiframe.dummyapp"></span><p>Dummy application.
+Allows the user to set an external data manager</p>
+<dl class="class">
+<dt id="sans.guiframe.dummyapp.DummyView">
+<em class="property">class </em><tt class="descclassname">sans.guiframe.dummyapp.</tt><tt class="descname">DummyView</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="gui_manager.html#sans.guiframe.gui_manager.ViewApp" title="sans.guiframe.gui_manager.ViewApp"><tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.gui_manager.ViewApp</span></tt></a></p>
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.Active">
+<tt class="descname">Active</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.Active" title="Permalink to this definition">¶</a></dt>
+<dd><p>IsActive(self) -&gt; bool</p>
+<p>Return True if our app has focus.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.AddPendingEvent">
+<tt class="descname">AddPendingEvent</tt><big>(</big><em>self</em>, <em>Event event</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.AddPendingEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.AppName">
+<tt class="descname">AppName</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.AppName" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>GetAppName</cite> and <cite>SetAppName</cite></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.AssertMode">
+<tt class="descname">AssertMode</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.AssertMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>GetAssertMode</cite> and <cite>SetAssertMode</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.Bind">
+<tt class="descname">Bind</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.Bind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bind an event to an event handler.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>event</strong> &#8211; One of the EVT_* objects that specifies the
+type of event to bind,</li>
+<li><strong>handler</strong> &#8211; A callable object to be invoked when the
+event is delivered to self.  Pass None to
+disconnect an event handler.</li>
+<li><strong>source</strong> &#8211; Sometimes the event originates from a
+different window than self, but you still
+want to catch it in self.  (For example, a
+button event delivered to a frame.)  By
+passing the source of the event, the event
+handling system is able to differentiate
+between the same event type from different
+controls.</li>
+<li><strong>id</strong> &#8211; Used to spcify the event source by ID instead
+of instance.</li>
+<li><strong>id2</strong> &#8211; Used when it is desirable to bind a handler
+to a range of IDs, such as with EVT_MENU_RANGE.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.ClassName">
+<tt class="descname">ClassName</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.ClassName" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>GetClassName</cite> and <cite>SetClassName</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.Connect">
+<tt class="descname">Connect</tt><big>(</big><em>self</em>, <em>int id</em>, <em>int lastId</em>, <em>int eventType</em>, <em>PyObject func</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.Connect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.Destroy">
+<tt class="descname">Destroy</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.Destroy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.Disconnect">
+<tt class="descname">Disconnect</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.Disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnect(self, int id, int lastId=-1, EventType eventType=wxEVT_NULL, 
+PyObject func=None) -&gt; bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.Dispatch">
+<tt class="descname">Dispatch</tt><big>(</big><em>self</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.Dispatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the first event in the event queue (blocks until an event
+appears if there are none currently)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.EvtHandlerEnabled">
+<tt class="descname">EvtHandlerEnabled</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.EvtHandlerEnabled" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>GetEvtHandlerEnabled</cite> and <cite>SetEvtHandlerEnabled</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.Exit">
+<tt class="descname">Exit</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.Exit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exit the main loop thus terminating the application.
+:see: <cite>wx.Exit</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.ExitMainLoop">
+<tt class="descname">ExitMainLoop</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.ExitMainLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exit the main GUI loop during the next iteration of the main
+loop, (i.e. it does not stop the program immediately!)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.ExitOnFrameDelete">
+<tt class="descname">ExitOnFrameDelete</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.ExitOnFrameDelete" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>GetExitOnFrameDelete</cite> and <cite>SetExitOnFrameDelete</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.FilterEvent">
+<tt class="descname">FilterEvent</tt><big>(</big><em>self</em>, <em>Event event</em><big>)</big> &rarr; int<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.FilterEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters all events. <cite>SetCallFilterEvent</cite> controls whether or not your
+override is called.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.GetAppName">
+<tt class="descname">GetAppName</tt><big>(</big><em>self</em><big>)</big> &rarr; String<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetAppName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the application name.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.GetAssertMode">
+<tt class="descname">GetAssertMode</tt><big>(</big><em>self</em><big>)</big> &rarr; int<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetAssertMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current OnAssert behaviour setting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.GetCallFilterEvent">
+<tt class="descname">GetCallFilterEvent</tt><big>(</big><em>self</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetCallFilterEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the state of the Call FilterEvent flag.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.GetClassName">
+<tt class="descname">GetClassName</tt><big>(</big><em>self</em><big>)</big> &rarr; String<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetClassName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the application&#8217;s class name.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dummyapp.DummyView.GetComCtl32Version">
+<em class="property">static </em><tt class="descname">GetComCtl32Version</tt><big>(</big><big>)</big> &rarr; int<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetComCtl32Version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns 400, 470, 471, etc. for comctl32.dll 4.00, 4.70, 4.71 or 0 if
+it wasn&#8217;t found at all.  Raises an exception on non-Windows platforms.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.GetEvtHandlerEnabled">
+<tt class="descname">GetEvtHandlerEnabled</tt><big>(</big><em>self</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetEvtHandlerEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.GetExitOnFrameDelete">
+<tt class="descname">GetExitOnFrameDelete</tt><big>(</big><em>self</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetExitOnFrameDelete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current exit behaviour setting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.GetLayoutDirection">
+<tt class="descname">GetLayoutDirection</tt><big>(</big><em>self</em><big>)</big> &rarr; int<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetLayoutDirection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the layout direction for the current locale.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dummyapp.DummyView.GetMacAboutMenuItemId">
+<em class="property">static </em><tt class="descname">GetMacAboutMenuItemId</tt><big>(</big><big>)</big> &rarr; long<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetMacAboutMenuItemId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dummyapp.DummyView.GetMacExitMenuItemId">
+<em class="property">static </em><tt class="descname">GetMacExitMenuItemId</tt><big>(</big><big>)</big> &rarr; long<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetMacExitMenuItemId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dummyapp.DummyView.GetMacHelpMenuTitleName">
+<em class="property">static </em><tt class="descname">GetMacHelpMenuTitleName</tt><big>(</big><big>)</big> &rarr; String<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetMacHelpMenuTitleName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dummyapp.DummyView.GetMacPreferencesMenuItemId">
+<em class="property">static </em><tt class="descname">GetMacPreferencesMenuItemId</tt><big>(</big><big>)</big> &rarr; long<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetMacPreferencesMenuItemId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dummyapp.DummyView.GetMacSupportPCMenuShortcuts">
+<em class="property">static </em><tt class="descname">GetMacSupportPCMenuShortcuts</tt><big>(</big><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetMacSupportPCMenuShortcuts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.GetNextHandler">
+<tt class="descname">GetNextHandler</tt><big>(</big><em>self</em><big>)</big> &rarr; EvtHandler<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetNextHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.GetPreviousHandler">
+<tt class="descname">GetPreviousHandler</tt><big>(</big><em>self</em><big>)</big> &rarr; EvtHandler<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetPreviousHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.GetPrintMode">
+<tt class="descname">GetPrintMode</tt><big>(</big><em>self</em><big>)</big> &rarr; int<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetPrintMode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.GetTopWindow">
+<tt class="descname">GetTopWindow</tt><big>(</big><em>self</em><big>)</big> &rarr; Window<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetTopWindow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the <em>main</em> top level window (if it hadn&#8217;t been set previously
+with SetTopWindow(), will return just some top level window and, if
+there not any, will return None)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.GetTraits">
+<tt class="descname">GetTraits</tt><big>(</big><em>self</em><big>)</big> &rarr; wxAppTraits<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetTraits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return (and create if necessary) the app traits object to which we
+delegate for everything which either should be configurable by the
+user (then he can change the default behaviour simply by overriding
+CreateTraits() and returning his own traits object) or which is
+GUI/console dependent as then wx.AppTraits allows us to abstract the
+differences behind the common facade.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Todo :</th><td class="field-body">Add support for overriding CreateAppTraits in wxPython.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.GetUseBestVisual">
+<tt class="descname">GetUseBestVisual</tt><big>(</big><em>self</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetUseBestVisual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get current UseBestVisual setting.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.GetVendorName">
+<tt class="descname">GetVendorName</tt><big>(</big><em>self</em><big>)</big> &rarr; String<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.GetVendorName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the application&#8217;s vendor name.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.IsActive">
+<tt class="descname">IsActive</tt><big>(</big><em>self</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.IsActive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if our app has focus.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dummyapp.DummyView.IsDisplayAvailable">
+<em class="property">static </em><tt class="descname">IsDisplayAvailable</tt><big>(</big><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.IsDisplayAvailable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if it is possible to create a GUI in the current environment.
+This will mean different things on the different platforms.</p>
+<blockquote>
+<div><ul class="simple">
+<li>On X Windows systems this function will return <tt class="docutils literal"><span class="pre">False</span></tt> if it is
+not able to open a connection to the X display, which can happen
+if $DISPLAY is not set, or is not set correctly.</li>
+<li>On Mac OS X a <tt class="docutils literal"><span class="pre">False</span></tt> return value will mean that wx is not
+able to access the window manager, which can happen if logged in
+remotely or if running from the normal version of python instead
+of the framework version, (i.e., pythonw.)</li>
+<li>On MS Windows...</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dummyapp.DummyView.IsMainLoopRunning">
+<em class="property">static </em><tt class="descname">IsMainLoopRunning</tt><big>(</big><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.IsMainLoopRunning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if we&#8217;re running the main loop, i.e. if the events can
+currently be dispatched.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.IsSameAs">
+<tt class="descname">IsSameAs</tt><big>(</big><em>self</em>, <em>Object p</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.IsSameAs" title="Permalink to this definition">¶</a></dt>
+<dd><p>For wx.Objects that use C++ reference counting internally, this method
+can be used to determine if two objects are referencing the same data
+object.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.LayoutDirection">
+<tt class="descname">LayoutDirection</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.LayoutDirection" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>GetLayoutDirection</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.MacHideApp">
+<tt class="descname">MacHideApp</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.MacHideApp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hide all application windows just as the user can do with the system
+Hide command.  Mac only.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.MacRequestUserAttention">
+<tt class="descname">MacRequestUserAttention</tt><big>(</big><em>self</em>, <em>int ?</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.MacRequestUserAttention" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.MainLoop">
+<tt class="descname">MainLoop</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.MainLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute the main GUI event loop</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.NextHandler">
+<tt class="descname">NextHandler</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.NextHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>GetNextHandler</cite> and <cite>SetNextHandler</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.OnInit">
+<tt class="descname">OnInit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.OnInit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.OnPreInit">
+<tt class="descname">OnPreInit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.OnPreInit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Things that must be done after _BootstrapApp has done its
+thing, but would be nice if they were already done by the time
+that OnInit is called.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.Pending">
+<tt class="descname">Pending</tt><big>(</big><em>self</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.Pending" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if there are unprocessed events in the event queue.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.PreviousHandler">
+<tt class="descname">PreviousHandler</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.PreviousHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>GetPreviousHandler</cite> and <cite>SetPreviousHandler</cite></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.PrintMode">
+<tt class="descname">PrintMode</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.PrintMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>GetPrintMode</cite> and <cite>SetPrintMode</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.ProcessEvent">
+<tt class="descname">ProcessEvent</tt><big>(</big><em>self</em>, <em>Event event</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.ProcessEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.ProcessIdle">
+<tt class="descname">ProcessIdle</tt><big>(</big><em>self</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.ProcessIdle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called from the MainLoop when the application becomes idle (there are
+no pending events) and sends a <cite>wx.IdleEvent</cite> to all interested
+parties.  Returns True if more idle events are needed, False if not.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.ProcessPendingEvents">
+<tt class="descname">ProcessPendingEvents</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.ProcessPendingEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process all events in the Pending Events list &#8211; it is necessary to
+call this function to process posted events. This normally happens
+during each event loop iteration.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.RedirectStdio">
+<tt class="descname">RedirectStdio</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.RedirectStdio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Redirect sys.stdout and sys.stderr to a file or a popup window.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.RestoreStdio">
+<tt class="descname">RestoreStdio</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.RestoreStdio" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.SendIdleEvents">
+<tt class="descname">SendIdleEvents</tt><big>(</big><em>self</em>, <em>Window win</em>, <em>IdleEvent event</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SendIdleEvents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send idle event to window and all subwindows.  Returns True if more
+idle time is requested.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.SetAppName">
+<tt class="descname">SetAppName</tt><big>(</big><em>self</em>, <em>String name</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetAppName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the application name. This value may be used automatically by
+<cite>wx.Config</cite> and such.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.SetAssertMode">
+<tt class="descname">SetAssertMode</tt><big>(</big><em>self</em>, <em>int mode</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetAssertMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the OnAssert behaviour for debug and hybrid builds.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.SetCallFilterEvent">
+<tt class="descname">SetCallFilterEvent</tt><big>(</big><em>self</em>, <em>bool callFilterEvent=True</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetCallFilterEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the Call FilterEvent flag. When set your override of FilterEvent
+will be called.  SetCallFilterEvent&#8217;s purpose is to avoid any
+performance penalty when you have overriden FilterEvent, but don&#8217;t
+want it to be called, and also to reduce the runtime overhead when it
+is not overridden.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.SetClassName">
+<tt class="descname">SetClassName</tt><big>(</big><em>self</em>, <em>String name</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetClassName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the application&#8217;s class name. This value may be used for
+X-resources if applicable for the platform</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.SetEvtHandlerEnabled">
+<tt class="descname">SetEvtHandlerEnabled</tt><big>(</big><em>self</em>, <em>bool enabled</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetEvtHandlerEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.SetExitOnFrameDelete">
+<tt class="descname">SetExitOnFrameDelete</tt><big>(</big><em>self</em>, <em>bool flag</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetExitOnFrameDelete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control the exit behaviour: by default, the program will exit the main
+loop (and so, usually, terminate) when the last top-level program
+window is deleted.  Beware that if you disable this behaviour (with
+SetExitOnFrameDelete(False)), you&#8217;ll have to call ExitMainLoop()
+explicitly from somewhere.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dummyapp.DummyView.SetMacAboutMenuItemId">
+<em class="property">static </em><tt class="descname">SetMacAboutMenuItemId</tt><big>(</big><em>long val</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetMacAboutMenuItemId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dummyapp.DummyView.SetMacExitMenuItemId">
+<em class="property">static </em><tt class="descname">SetMacExitMenuItemId</tt><big>(</big><em>long val</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetMacExitMenuItemId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dummyapp.DummyView.SetMacHelpMenuTitleName">
+<em class="property">static </em><tt class="descname">SetMacHelpMenuTitleName</tt><big>(</big><em>String val</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetMacHelpMenuTitleName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dummyapp.DummyView.SetMacPreferencesMenuItemId">
+<em class="property">static </em><tt class="descname">SetMacPreferencesMenuItemId</tt><big>(</big><em>long val</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetMacPreferencesMenuItemId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dummyapp.DummyView.SetMacSupportPCMenuShortcuts">
+<em class="property">static </em><tt class="descname">SetMacSupportPCMenuShortcuts</tt><big>(</big><em>bool val</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetMacSupportPCMenuShortcuts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.SetNextHandler">
+<tt class="descname">SetNextHandler</tt><big>(</big><em>self</em>, <em>EvtHandler handler</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetNextHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.SetOutputWindowAttributes">
+<tt class="descname">SetOutputWindowAttributes</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetOutputWindowAttributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the title, position and/or size of the output window if
+the stdio has been redirected.  This should be called before
+any output would cause the output window to be created.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.SetPreviousHandler">
+<tt class="descname">SetPreviousHandler</tt><big>(</big><em>self</em>, <em>EvtHandler handler</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetPreviousHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.SetPrintMode">
+<tt class="descname">SetPrintMode</tt><big>(</big><em>self</em>, <em>int mode</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetPrintMode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.SetTopWindow">
+<tt class="descname">SetTopWindow</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetTopWindow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the &#8220;main&#8221; top level window</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.SetUseBestVisual">
+<tt class="descname">SetUseBestVisual</tt><big>(</big><em>self</em>, <em>bool flag</em>, <em>bool forceTrueColour=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetUseBestVisual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set whether the app should try to use the best available visual on
+systems where more than one is available, (Sun, SGI, XFree86 4, etc.)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.SetVendorName">
+<tt class="descname">SetVendorName</tt><big>(</big><em>self</em>, <em>String name</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.SetVendorName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the application&#8217;s vendor name. This value may be used
+automatically by <cite>wx.Config</cite> and such.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.TopWindow">
+<tt class="descname">TopWindow</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.TopWindow" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>GetTopWindow</cite> and <cite>SetTopWindow</cite></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.Traits">
+<tt class="descname">Traits</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.Traits" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>GetTraits</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.Unbind">
+<tt class="descname">Unbind</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.Unbind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnects the event handler binding for event from self.
+Returns True if successful.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.UseBestVisual">
+<tt class="descname">UseBestVisual</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.UseBestVisual" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>GetUseBestVisual</cite> and <cite>SetUseBestVisual</cite></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.VendorName">
+<tt class="descname">VendorName</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.VendorName" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>GetVendorName</cite> and <cite>SetVendorName</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.WakeUpIdle">
+<tt class="descname">WakeUpIdle</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.WakeUpIdle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make sure that idle events are sent again.
+:see: <cite>wx.WakeUpIdle</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.Yield">
+<tt class="descname">Yield</tt><big>(</big><em>self</em>, <em>bool onlyIfNeeded=False</em><big>)</big> &rarr; bool<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.Yield" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process all currently pending events right now, instead of waiting
+until return to the event loop.  It is an error to call <tt class="docutils literal"><span class="pre">Yield</span></tt>
+recursively unless the value of <tt class="docutils literal"><span class="pre">onlyIfNeeded</span></tt> is True.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Warning :</th><td class="field-body">This function is dangerous as it can lead to unexpected
+reentrancies (i.e. when called from an event handler it may
+result in calling the same event handler again), use with
+extreme care or, better, don&#8217;t use at all!</td>
+</tr>
+<tr class="field-even field"><th class="field-name">See :</th><td class="field-body"><cite>wx.Yield</cite>, <cite>wx.YieldIfNeeded</cite>, <cite>wx.SafeYield</cite></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView._BootstrapApp">
+<tt class="descname">_BootstrapApp</tt><big>(</big><em>self</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView._BootstrapApp" title="Permalink to this definition">¶</a></dt>
+<dd><p>For internal use only</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.__del__">
+<tt class="descname">__del__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__del__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x03DF2BB0&gt;</em><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a <tt class="docutils literal"><span class="pre">wx.App</span></tt> object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>redirect</strong> &#8211; Should <tt class="docutils literal"><span class="pre">sys.stdout</span></tt> and <tt class="docutils literal"><span class="pre">sys.stderr</span></tt> be
+redirected?  Defaults to True on Windows and Mac, False
+otherwise.  If <cite>filename</cite> is None then output will be
+redirected to a window that pops up as needed.  (You can
+control what kind of window is created for the output by
+resetting the class variable <tt class="docutils literal"><span class="pre">outputWindowClass</span></tt> to a
+class of your choosing.)</li>
+<li><strong>filename</strong> &#8211; The name of a file to redirect output to, if
+redirect is True.</li>
+<li><strong>useBestVisual</strong> &#8211; Should the app try to use the best
+available visual provided by the system (only relevant on
+systems that have more than one visual.)  This parameter
+must be used instead of calling <cite>SetUseBestVisual</cite> later
+on because it must be set before the underlying GUI
+toolkit is initialized.</li>
+<li><strong>clearSigInt</strong> &#8211; Should SIGINT be cleared?  This allows the
+app to terminate upon a Ctrl-C in the console like other
+GUI apps will.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Note :</th><td class="field-body"><p class="first last">You should override OnInit to do applicaition
+initialization to ensure that the system, toolkit and
+wxWidgets are fully initialized.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.dummyapp'</em><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.guiframe.dummyapp.DummyView.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.__repr__">
+<tt class="descname">__repr__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.__swig_destroy__">
+<tt class="descname">__swig_destroy__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__swig_destroy__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView._setCallbackInfo">
+<tt class="descname">_setCallbackInfo</tt><big>(</big><em>self</em>, <em>PyObject self</em>, <em>PyObject _class</em>, <em>bool incref=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView._setCallbackInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView._setOORInfo">
+<tt class="descname">_setOORInfo</tt><big>(</big><em>self</em>, <em>PyObject _self</em>, <em>bool incref=True</em><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView._setOORInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.add_perspective">
+<tt class="descname">add_perspective</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.add_perspective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Manually add a perspective to the application GUI</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.build_gui">
+<tt class="descname">build_gui</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.build_gui" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build the GUI</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.display_splash_screen">
+<tt class="descname">display_splash_screen</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.display_splash_screen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays the splash screen.  It will exactly cover the main frame.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.on_close_splash_screen">
+<tt class="descname">on_close_splash_screen</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.on_close_splash_screen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.open_file">
+<tt class="descname">open_file</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.open_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>open a state file at the start of the application</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.outputWindowClass">
+<tt class="descname">outputWindowClass</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.outputWindowClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">PyOnDemandOutputWindow</span></tt></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.set_manager">
+<tt class="descname">set_manager</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.set_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a reference to the application manager
+of the GUI manager (Frame)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.set_welcome_panel">
+<tt class="descname">set_welcome_panel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.set_welcome_panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the welcome panel</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>panel_class</strong> &#8211; class of the welcome panel to be instantiated</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.DummyView.thisown">
+<tt class="descname">thisown</tt><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.thisown" title="Permalink to this definition">¶</a></dt>
+<dd><p>The membership flag</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.DummyView.window_placement">
+<tt class="descname">window_placement</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.DummyView.window_placement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the position and size of the application frame such that it
+fits on the user&#8217;s screen without obstructing (or being obstructed by)
+the Windows task bar.  The maximum initial size in pixels is bounded by
+WIDTH x HEIGHT.  For most monitors, the application
+will be centered on the screen; for very large monitors it will be
+placed on the left side of the screen.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.guiframe.dummyapp.SansView">
+<em class="property">class </em><tt class="descclassname">sans.guiframe.dummyapp.</tt><tt class="descname">SansView</tt><a class="headerlink" href="#sans.guiframe.dummyapp.SansView" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="sans.guiframe.dummyapp.SansView.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.SansView.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.SansView.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.dummyapp'</em><a class="headerlink" href="#sans.guiframe.dummyapp.SansView.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.guiframe.dummyapp.TestPlugin">
+<em class="property">class </em><tt class="descclassname">sans.guiframe.dummyapp.</tt><tt class="descname">TestPlugin</tt><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="plugin_base.html#sans.guiframe.plugin_base.PluginBase" title="sans.guiframe.plugin_base.PluginBase"><tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.plugin_base.PluginBase</span></tt></a></p>
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract class for gui_manager Plugins.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.dummyapp.TestPlugin.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.dummyapp'</em><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.add_color">
+<tt class="descname">add_color</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.add_color" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds color to a plugin</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.can_load_data">
+<tt class="descname">can_load_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.can_load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>if return True, then call handler to laod data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.clear_panel">
+<tt class="descname">clear_panel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.clear_panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>clear all related panels</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.delete_data">
+<tt class="descname">delete_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.delete_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete all references of data which id are in data_list.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.get_batch_capable">
+<tt class="descname">get_batch_capable</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.get_batch_capable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the plugin has a batch capability</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.get_context_menu">
+<tt class="descname">get_context_menu</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.get_context_menu" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is optional.</p>
+<p>When the context menu of a plot is rendered, the 
+get_context_menu method will be called to give you a 
+chance to add a menu item to the context menu.</p>
+<p>A ref to a Graph object is passed so that you can
+investigate the plot content and decide whether you
+need to add items to the context menu.</p>
+<p>This method returns a list of menu items.
+Each item is itself a list defining the text to 
+appear in the menu, a tool-tip help text, and a
+call-back method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> &#8211; the Graph object to which we attach the context menu</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of menu items with call-back function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.get_extensions">
+<tt class="descname">get_extensions</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.get_extensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>return state reader and its extensions</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.get_panels">
+<tt class="descname">get_panels</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.get_panels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create and return the list of wx.Panels for your plug-in.
+Define the plug-in perspective.</p>
+<p>Panels should inherit from DefaultPanel defined below,
+or should present the same interface. They must define
+&#8220;window_caption&#8221; and &#8220;window_name&#8221;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> &#8211; parent window</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of panels</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.get_perspective">
+<tt class="descname">get_perspective</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.get_perspective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the list of panel names for this perspective</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.get_tools">
+<tt class="descname">get_tools</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.get_tools" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a set of menu entries for tools</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.is_always_active">
+<tt class="descname">is_always_active</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.is_always_active" title="Permalink to this definition">¶</a></dt>
+<dd><p>return True is this plugin is always active and it is local to guiframe
+even if the user is switching between perspectives</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.is_in_use">
+<tt class="descname">is_in_use</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.is_in_use" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>get a  data id a list of data name if data data is</dt>
+<dd>currently used by the plugin and the name of the plugin</dd>
+</dl>
+<p>data_name = &#8216;None&#8217;
+in_use = False
+example [(data_name, self.sub_menu)]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.load_data">
+<tt class="descname">load_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load  data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.load_folder">
+<tt class="descname">load_folder</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.load_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load entire folder</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.on_batch_selection">
+<tt class="descname">on_batch_selection</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.on_batch_selection" title="Permalink to this definition">¶</a></dt>
+<dd><p>need to be overwritten by the derivated class</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.on_perspective">
+<tt class="descname">on_perspective</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.on_perspective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call back function for the perspective menu item.
+We notify the parent window that the perspective
+has changed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; menu event</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.on_set_state_helper">
+<tt class="descname">on_set_state_helper</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.on_set_state_helper" title="Permalink to this definition">¶</a></dt>
+<dd><p>update state</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.populate_file_menu">
+<tt class="descname">populate_file_menu</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.populate_file_menu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append menu item under file menu item of the frame</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.populate_menu">
+<tt class="descname">populate_menu</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.populate_menu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create and return the list of application menu
+items for the plug-in. 
+:param parent: parent window</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">plug-in menu</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.post_init">
+<tt class="descname">post_init</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.post_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post initialization call back to close the loose ends</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.set_batch_selection">
+<tt class="descname">set_batch_selection</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.set_batch_selection" title="Permalink to this definition">¶</a></dt>
+<dd><p>the plugin to its batch state if flag is True</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.set_data">
+<tt class="descname">set_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.set_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>receive a list of data and use it in the current perspective</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.set_default_perspective">
+<tt class="descname">set_default_perspective</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.set_default_perspective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call back method that True to notify the parent that the current plug-in
+can be set as default  perspective.
+when returning False, the plug-in is not candidate for an automatic 
+default perspective setting</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.set_is_active">
+<tt class="descname">set_is_active</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.set_is_active" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.set_state">
+<tt class="descname">set_state</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.set_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>update state</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.set_theory">
+<tt class="descname">set_theory</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.set_theory" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>theory_list</strong> &#8211; list of information</td>
+</tr>
+</tbody>
+</table>
+<p>related to available theory state</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.dummyapp.TestPlugin.use_data">
+<tt class="descname">use_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.dummyapp.TestPlugin.use_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>return True if these plugin use data</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
@@ -88,7 +1136,7 @@
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -117,13 +1165,13 @@
         <li class="right" >
           <a href="data_state.html" title="data_state"
              >previous</a> |</li>
-        <li><a href="../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

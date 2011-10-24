@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>plugin_base &mdash; guiframe v0.1.0 documentation</title>
+    <title>plugin_base &mdash; guiframe 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="guiframe v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="guiframe 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="startup_configuration" href="startup_configuration.html" />
     <link rel="prev" title="pdfview" href="pdfview.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="pdfview.html" title="pdfview"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,11 +58,11 @@
             
   <div class="section" id="plugin-base">
 <h1>plugin_base<a class="headerlink" href="#plugin-base" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.guiframe.plugin_base">
-<span id="sans-guiframe-plugin-base"></span><h2><a class="reference internal" href="#module-sans.guiframe.plugin_base" title="sans.guiframe.plugin_base"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.plugin_base</span></tt></a><a class="headerlink" href="#module-sans.guiframe.plugin_base" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<div class="section" id="sans-guiframe-plugin-base">
+<h2><a class="reference internal" href="#module-sans.guiframe.plugin_base" title="sans.guiframe.plugin_base"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.plugin_base</span></tt></a><a class="headerlink" href="#sans-guiframe-plugin-base" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.guiframe.plugin_base"></span><dl class="class">
 <dt id="sans.guiframe.plugin_base.PluginBase">
-<em class="property">class </em><tt class="descclassname">sans.guiframe.plugin_base.</tt><tt class="descname">PluginBase</tt><big>(</big><em>name='Test_plugin'</em>, <em>standalone=True</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.guiframe.plugin_base.</tt><tt class="descname">PluginBase</tt><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class defines the interface for a Plugin class
 that can be used by the gui_manager.</p>
 <p>Plug-ins should be placed in a sub-directory called &#8220;perspectives&#8221;.
@@ -76,8 +79,19 @@ should follow the interface of the class you are looking at.</p>
 </div></blockquote>
 <p>See dummyapp.py for a plugin example.</p>
 <dl class="method">
+<dt id="sans.guiframe.plugin_base.PluginBase.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract class for gui_manager Plugins.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.plugin_base.PluginBase.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.plugin_base'</em><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.add_color">
-<tt class="descname">add_color</tt><big>(</big><em>color</em>, <em>id</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.add_color" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">add_color</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.add_color" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds color to a plugin</p>
 </dd></dl>
 
@@ -95,13 +109,19 @@ should follow the interface of the class you are looking at.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.delete_data">
-<tt class="descname">delete_data</tt><big>(</big><em>data_id</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.delete_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">delete_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.delete_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Delete all references of data which id are in data_list.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="sans.guiframe.plugin_base.PluginBase.get_batch_capable">
+<tt class="descname">get_batch_capable</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.get_batch_capable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the plugin has a batch capability</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.get_context_menu">
-<tt class="descname">get_context_menu</tt><big>(</big><em>plotpanel=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.get_context_menu" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_context_menu</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.get_context_menu" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is optional.</p>
 <p>When the context menu of a plot is rendered, the 
 get_context_menu method will be called to give you a 
@@ -117,9 +137,9 @@ call-back method.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> &#8211; the Graph object to which we attach the context menu</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> &#8211; the Graph object to which we attach the context menu</td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">a list of menu items with call-back function</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of menu items with call-back function</td>
 </tr>
 </tbody>
 </table>
@@ -133,7 +153,7 @@ call-back method.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.get_panels">
-<tt class="descname">get_panels</tt><big>(</big><em>parent</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.get_panels" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_panels</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.get_panels" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create and return the list of wx.Panels for your plug-in.
 Define the plug-in perspective.</p>
 <p>Panels should inherit from DefaultPanel defined below,
@@ -143,9 +163,9 @@ or should present the same interface. They must define
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> &#8211; parent window</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> &#8211; parent window</td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">list of panels</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of panels</td>
 </tr>
 </tbody>
 </table>
@@ -172,7 +192,7 @@ even if the user is switching between perspectives</p>
 
 <dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.is_in_use">
-<tt class="descname">is_in_use</tt><big>(</big><em>data_id</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.is_in_use" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_in_use</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.is_in_use" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>get a  data id a list of data name if data data is</dt>
 <dd>currently used by the plugin and the name of the plugin</dd>
@@ -184,25 +204,25 @@ example [(data_name, self.sub_menu)]</p>
 
 <dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.load_data">
-<tt class="descname">load_data</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.load_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">load_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.load_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load  data</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.load_folder">
-<tt class="descname">load_folder</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.load_folder" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">load_folder</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.load_folder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load entire folder</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.on_batch_selection">
-<tt class="descname">on_batch_selection</tt><big>(</big><em>flag</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.on_batch_selection" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">on_batch_selection</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.on_batch_selection" title="Permalink to this definition">¶</a></dt>
 <dd><p>need to be overwritten by the derivated class</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.on_perspective">
-<tt class="descname">on_perspective</tt><big>(</big><em>event=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.on_perspective" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">on_perspective</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.on_perspective" title="Permalink to this definition">¶</a></dt>
 <dd><p>Call back function for the perspective menu item.
 We notify the parent window that the perspective
 has changed.</p>
@@ -210,7 +230,7 @@ has changed.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; menu event</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; menu event</td>
 </tr>
 </tbody>
 </table>
@@ -218,7 +238,7 @@ has changed.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.on_set_state_helper">
-<tt class="descname">on_set_state_helper</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.on_set_state_helper" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">on_set_state_helper</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.on_set_state_helper" title="Permalink to this definition">¶</a></dt>
 <dd><p>update state</p>
 </dd></dl>
 
@@ -230,16 +250,16 @@ has changed.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.populate_menu">
-<tt class="descname">populate_menu</tt><big>(</big><em>parent</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.populate_menu" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">populate_menu</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.populate_menu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create and return the list of application menu
 items for the plug-in.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> &#8211; parent window</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> &#8211; parent window</td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">plug-in menu</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">plug-in menu</td>
 </tr>
 </tbody>
 </table>
@@ -253,13 +273,13 @@ items for the plug-in.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.set_batch_selection">
-<tt class="descname">set_batch_selection</tt><big>(</big><em>flag</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.set_batch_selection" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_batch_selection</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.set_batch_selection" title="Permalink to this definition">¶</a></dt>
 <dd><p>the plugin to its batch state if flag is True</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.set_data">
-<tt class="descname">set_data</tt><big>(</big><em>data_list=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.set_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.set_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>receive a list of data and use it in the current perspective</p>
 </dd></dl>
 
@@ -274,27 +294,27 @@ default perspective setting</p>
 
 <dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.set_is_active">
-<tt class="descname">set_is_active</tt><big>(</big><em>active=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.set_is_active" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_is_active</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.set_is_active" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.set_state">
-<tt class="descname">set_state</tt><big>(</big><em>state=None</em>, <em>datainfo=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.set_state" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_state</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.set_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>update state</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.plugin_base.PluginBase.set_theory">
-<tt class="descname">set_theory</tt><big>(</big><em>theory_list=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.set_theory" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_theory</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.plugin_base.PluginBase.set_theory" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>theory_list</strong> &#8211; list of information 
-related to available theory state</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>theory_list</strong> &#8211; list of information</td>
 </tr>
 </tbody>
 </table>
+<p>related to available theory state</p>
 </dd></dl>
 
 <dl class="method">
@@ -317,7 +337,7 @@ related to available theory state</td>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">plugin_base</a><ul>
-<li><a class="reference internal" href="#module-sans.guiframe.plugin_base"><tt class="docutils literal"><span class="pre">sans.guiframe.plugin_base</span></tt></a></li>
+<li><a class="reference internal" href="#sans-guiframe-plugin-base"><tt class="docutils literal"><span class="pre">sans.guiframe.plugin_base</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -336,7 +356,7 @@ related to available theory state</td>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -365,13 +385,13 @@ related to available theory state</td>
         <li class="right" >
           <a href="pdfview.html" title="pdfview"
              >previous</a> |</li>
-        <li><a href="../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

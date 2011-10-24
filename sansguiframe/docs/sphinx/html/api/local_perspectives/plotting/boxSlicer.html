@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>boxSlicer &mdash; guiframe v0.1.0 documentation</title>
+    <title>boxSlicer &mdash; guiframe 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="guiframe v0.1.0 documentation" href="../../../index.html" />
+    <link rel="top" title="guiframe 0.1.0 documentation" href="../../../index.html" />
     <link rel="up" title="Local Perspective: plotting" href="index.html" />
     <link rel="next" title="boxSum" href="boxSum.html" />
     <link rel="prev" title="boxMask" href="boxMask.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="boxMask.html" title="boxMask"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Local Perspective: plotting</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,14 +58,44 @@
             
   <div class="section" id="boxslicer">
 <h1>boxSlicer<a class="headerlink" href="#boxslicer" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.guiframe.local_perspectives.plotting.boxSlicer">
-<span id="sans-guiframe-local-perspectives-plotting-boxslicer"></span><h2><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.boxSlicer" title="sans.guiframe.local_perspectives.plotting.boxSlicer"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.boxSlicer</span></tt></a><a class="headerlink" href="#module-sans.guiframe.local_perspectives.plotting.boxSlicer" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<div class="section" id="sans-guiframe-local-perspectives-plotting-boxslicer">
+<h2><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.boxSlicer" title="sans.guiframe.local_perspectives.plotting.boxSlicer"><tt class="xref py py-mod docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.boxSlicer</span></tt></a><a class="headerlink" href="#sans-guiframe-local-perspectives-plotting-boxslicer" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.guiframe.local_perspectives.plotting.boxSlicer"></span><dl class="class">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor">
-<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.boxSlicer.</tt><tt class="descname">BoxInteractor</tt><big>(</big><em>base</em>, <em>axes</em>, <em>color='black'</em>, <em>zorder=3</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor</span></tt></p>
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.boxSlicer.</tt><tt class="descname">BoxInteractor</tt><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="BaseInteractor.html#sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor" title="sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor"><tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor</span></tt></a></p>
 <p>BoxInteractor define a rectangle that return data1D average of Data2D
 in a rectangle area defined by -x, x ,y, -y</p>
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.local_perspectives.plotting.boxSlicer'</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor._onEVT_SLICER_PARS">
+<tt class="descname">_onEVT_SLICER_PARS</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor._onEVT_SLICER_PARS" title="Permalink to this definition">¶</a></dt>
+<dd><p>receive an event containing parameters values to reset the slicer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; event of type SlicerParameterEvent with params as 
+attribute</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor._post_data">
+<tt class="descname">_post_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor._post_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.clear">
 <tt class="descname">clear</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.clear" title="Permalink to this definition">¶</a></dt>
@@ -77,13 +110,13 @@ in a rectangle area defined by -x, x ,y, -y</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.connect_markers">
-<tt class="descname">connect_markers</tt><big>(</big><em>markers</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.connect_markers" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">connect_markers</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.connect_markers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connect markers to callbacks</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.dpixel">
-<tt class="descname">dpixel</tt><big>(</big><em>x</em>, <em>y</em>, <em>nudge=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.dpixel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">dpixel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.dpixel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the step size in data coordinates for a small
 step in screen coordinates.  If nudge is False (default)
 the step size is one pixel.  If nudge is True, the step
@@ -108,7 +141,7 @@ size is 0.2 pixels.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Return params:</th><td class="field-body">the dictionary created</td>
+<tr class="field-odd field"><th class="field-name">Return params:</th><td class="field-body">the dictionary created</td>
 </tr>
 </tbody>
 </table>
@@ -116,13 +149,13 @@ size is 0.2 pixels.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.move">
-<tt class="descname">move</tt><big>(</big><em>x</em>, <em>y</em>, <em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.move" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">move</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.move" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process move to a new position, making sure that the move is allowed.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.moveend">
-<tt class="descname">moveend</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.moveend" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">moveend</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.moveend" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called after a dragging event.
 Post the slicer new parameters and creates a new Data1D 
 corresponding to the new average</p>
@@ -130,28 +163,28 @@ corresponding to the new average</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onClick">
-<tt class="descname">onClick</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onClick" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onClick</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onClick" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare to move the artist.  Calls save() to preserve the state for
 later restore().</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onDrag">
-<tt class="descname">onDrag</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onDrag" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onDrag</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onDrag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Move the artist.  Calls move() to update the state, or restore() if
 the mouse leaves the window.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onHilite">
-<tt class="descname">onHilite</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onHilite" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onHilite</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onHilite" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hilite the artist reporting the event, indicating that it is
 ready to receive a click.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onKey">
-<tt class="descname">onKey</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onKey" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onKey</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onKey" title="Permalink to this definition">¶</a></dt>
 <dd><p>Respond to keyboard events.  Arrow keys move the widget.  Escape
 restores it to the position before the last click.</p>
 <p>Calls move() to update the state.  Calls restore() on escape.</p>
@@ -159,24 +192,24 @@ restores it to the position before the last click.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onLeave">
-<tt class="descname">onLeave</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onLeave" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onLeave</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onLeave" title="Permalink to this definition">¶</a></dt>
 <dd><p>Restore the artist to the original colour when the cursor leaves.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onRelease">
-<tt class="descname">onRelease</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onRelease" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onRelease</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.onRelease" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.post_data">
-<tt class="descname">post_data</tt><big>(</big><em>new_slab=None</em>, <em>nbins=None</em>, <em>direction=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.post_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">post_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.post_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>post data averaging in Qx or Qy given new_slab type</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>new_slab</strong> &#8211; slicer that determine with direction to average</li>
 <li><strong>nbins</strong> &#8211; the number of points plotted when averaging</li>
 <li><strong>direction</strong> &#8211; the direction of averaging</li>
@@ -195,25 +228,25 @@ restores it to the position before the last click.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.save">
-<tt class="descname">save</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.save" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remember the roughness for this layer and the next so that we
 can restore on Esc.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.set_cursor">
-<tt class="descname">set_cursor</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.set_cursor" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_cursor</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.set_cursor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.set_layer">
-<tt class="descname">set_layer</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.set_layer" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_layer</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.set_layer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Allow adding plot to the same panel</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; the number of layer</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; the number of layer</td>
 </tr>
 </tbody>
 </table>
@@ -221,14 +254,14 @@ can restore on Esc.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.set_params">
-<tt class="descname">set_params</tt><big>(</big><em>params</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.set_params" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_params</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor.set_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Receive a dictionary and reset the slicer with values contained 
 in the values of the dictionary.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> &#8211; a dictionary containing name of slicer parameters and 
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> &#8211; a dictionary containing name of slicer parameters and 
 values the user assigned to the slicer.</td>
 </tr>
 </tbody>
@@ -257,9 +290,40 @@ resetting the widgets.</p>
 
 <dl class="class">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX">
-<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.boxSlicer.</tt><tt class="descname">BoxInteractorX</tt><big>(</big><em>base</em>, <em>axes</em>, <em>color='black'</em>, <em>zorder=3</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.boxSlicer.</tt><tt class="descname">BoxInteractorX</tt><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor" title="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor"><tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor</span></tt></a></p>
 <p>Average in Qx direction</p>
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.local_perspectives.plotting.boxSlicer'</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX._onEVT_SLICER_PARS">
+<tt class="descname">_onEVT_SLICER_PARS</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX._onEVT_SLICER_PARS" title="Permalink to this definition">¶</a></dt>
+<dd><p>receive an event containing parameters values to reset the slicer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; event of type SlicerParameterEvent with params as 
+attribute</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX._post_data">
+<tt class="descname">_post_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX._post_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post data creating by averaging in Qx direction</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.clear">
 <tt class="descname">clear</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.clear" title="Permalink to this definition">¶</a></dt>
@@ -274,13 +338,13 @@ resetting the widgets.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.connect_markers">
-<tt class="descname">connect_markers</tt><big>(</big><em>markers</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.connect_markers" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">connect_markers</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.connect_markers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connect markers to callbacks</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.dpixel">
-<tt class="descname">dpixel</tt><big>(</big><em>x</em>, <em>y</em>, <em>nudge=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.dpixel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">dpixel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.dpixel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the step size in data coordinates for a small
 step in screen coordinates.  If nudge is False (default)
 the step size is one pixel.  If nudge is True, the step
@@ -305,7 +369,7 @@ size is 0.2 pixels.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Return params:</th><td class="field-body">the dictionary created</td>
+<tr class="field-odd field"><th class="field-name">Return params:</th><td class="field-body">the dictionary created</td>
 </tr>
 </tbody>
 </table>
@@ -313,13 +377,13 @@ size is 0.2 pixels.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.move">
-<tt class="descname">move</tt><big>(</big><em>x</em>, <em>y</em>, <em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.move" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">move</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.move" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process move to a new position, making sure that the move is allowed.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.moveend">
-<tt class="descname">moveend</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.moveend" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">moveend</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.moveend" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called after a dragging event.
 Post the slicer new parameters and creates a new Data1D 
 corresponding to the new average</p>
@@ -327,28 +391,28 @@ corresponding to the new average</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onClick">
-<tt class="descname">onClick</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onClick" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onClick</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onClick" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare to move the artist.  Calls save() to preserve the state for
 later restore().</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onDrag">
-<tt class="descname">onDrag</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onDrag" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onDrag</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onDrag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Move the artist.  Calls move() to update the state, or restore() if
 the mouse leaves the window.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onHilite">
-<tt class="descname">onHilite</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onHilite" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onHilite</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onHilite" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hilite the artist reporting the event, indicating that it is
 ready to receive a click.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onKey">
-<tt class="descname">onKey</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onKey" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onKey</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onKey" title="Permalink to this definition">¶</a></dt>
 <dd><p>Respond to keyboard events.  Arrow keys move the widget.  Escape
 restores it to the position before the last click.</p>
 <p>Calls move() to update the state.  Calls restore() on escape.</p>
@@ -356,24 +420,24 @@ restores it to the position before the last click.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onLeave">
-<tt class="descname">onLeave</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onLeave" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onLeave</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onLeave" title="Permalink to this definition">¶</a></dt>
 <dd><p>Restore the artist to the original colour when the cursor leaves.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onRelease">
-<tt class="descname">onRelease</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onRelease" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onRelease</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.onRelease" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.post_data">
-<tt class="descname">post_data</tt><big>(</big><em>new_slab=None</em>, <em>nbins=None</em>, <em>direction=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.post_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">post_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.post_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>post data averaging in Qx or Qy given new_slab type</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>new_slab</strong> &#8211; slicer that determine with direction to average</li>
 <li><strong>nbins</strong> &#8211; the number of points plotted when averaging</li>
 <li><strong>direction</strong> &#8211; the direction of averaging</li>
@@ -392,25 +456,25 @@ restores it to the position before the last click.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.save">
-<tt class="descname">save</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.save" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remember the roughness for this layer and the next so that we
 can restore on Esc.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.set_cursor">
-<tt class="descname">set_cursor</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.set_cursor" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_cursor</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.set_cursor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.set_layer">
-<tt class="descname">set_layer</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.set_layer" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_layer</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.set_layer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Allow adding plot to the same panel</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; the number of layer</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; the number of layer</td>
 </tr>
 </tbody>
 </table>
@@ -418,14 +482,14 @@ can restore on Esc.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.set_params">
-<tt class="descname">set_params</tt><big>(</big><em>params</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.set_params" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_params</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorX.set_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Receive a dictionary and reset the slicer with values contained 
 in the values of the dictionary.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> &#8211; a dictionary containing name of slicer parameters and 
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> &#8211; a dictionary containing name of slicer parameters and 
 values the user assigned to the slicer.</td>
 </tr>
 </tbody>
@@ -454,9 +518,40 @@ resetting the widgets.</p>
 
 <dl class="class">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY">
-<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.boxSlicer.</tt><tt class="descname">BoxInteractorY</tt><big>(</big><em>base</em>, <em>axes</em>, <em>color='black'</em>, <em>zorder=3</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.boxSlicer.</tt><tt class="descname">BoxInteractorY</tt><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor" title="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor"><tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractor</span></tt></a></p>
 <p>Average in Qy direction</p>
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.local_perspectives.plotting.boxSlicer'</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY._onEVT_SLICER_PARS">
+<tt class="descname">_onEVT_SLICER_PARS</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY._onEVT_SLICER_PARS" title="Permalink to this definition">¶</a></dt>
+<dd><p>receive an event containing parameters values to reset the slicer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; event of type SlicerParameterEvent with params as 
+attribute</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY._post_data">
+<tt class="descname">_post_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY._post_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post data creating by averaging in Qy direction</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.clear">
 <tt class="descname">clear</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.clear" title="Permalink to this definition">¶</a></dt>
@@ -471,13 +566,13 @@ resetting the widgets.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.connect_markers">
-<tt class="descname">connect_markers</tt><big>(</big><em>markers</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.connect_markers" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">connect_markers</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.connect_markers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connect markers to callbacks</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.dpixel">
-<tt class="descname">dpixel</tt><big>(</big><em>x</em>, <em>y</em>, <em>nudge=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.dpixel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">dpixel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.dpixel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the step size in data coordinates for a small
 step in screen coordinates.  If nudge is False (default)
 the step size is one pixel.  If nudge is True, the step
@@ -502,7 +597,7 @@ size is 0.2 pixels.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Return params:</th><td class="field-body">the dictionary created</td>
+<tr class="field-odd field"><th class="field-name">Return params:</th><td class="field-body">the dictionary created</td>
 </tr>
 </tbody>
 </table>
@@ -510,13 +605,13 @@ size is 0.2 pixels.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.move">
-<tt class="descname">move</tt><big>(</big><em>x</em>, <em>y</em>, <em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.move" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">move</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.move" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process move to a new position, making sure that the move is allowed.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.moveend">
-<tt class="descname">moveend</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.moveend" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">moveend</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.moveend" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called after a dragging event.
 Post the slicer new parameters and creates a new Data1D 
 corresponding to the new average</p>
@@ -524,28 +619,28 @@ corresponding to the new average</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onClick">
-<tt class="descname">onClick</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onClick" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onClick</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onClick" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare to move the artist.  Calls save() to preserve the state for
 later restore().</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onDrag">
-<tt class="descname">onDrag</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onDrag" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onDrag</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onDrag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Move the artist.  Calls move() to update the state, or restore() if
 the mouse leaves the window.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onHilite">
-<tt class="descname">onHilite</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onHilite" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onHilite</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onHilite" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hilite the artist reporting the event, indicating that it is
 ready to receive a click.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onKey">
-<tt class="descname">onKey</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onKey" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onKey</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onKey" title="Permalink to this definition">¶</a></dt>
 <dd><p>Respond to keyboard events.  Arrow keys move the widget.  Escape
 restores it to the position before the last click.</p>
 <p>Calls move() to update the state.  Calls restore() on escape.</p>
@@ -553,24 +648,24 @@ restores it to the position before the last click.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onLeave">
-<tt class="descname">onLeave</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onLeave" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onLeave</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onLeave" title="Permalink to this definition">¶</a></dt>
 <dd><p>Restore the artist to the original colour when the cursor leaves.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onRelease">
-<tt class="descname">onRelease</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onRelease" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onRelease</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.onRelease" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.post_data">
-<tt class="descname">post_data</tt><big>(</big><em>new_slab=None</em>, <em>nbins=None</em>, <em>direction=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.post_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">post_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.post_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>post data averaging in Qx or Qy given new_slab type</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>new_slab</strong> &#8211; slicer that determine with direction to average</li>
 <li><strong>nbins</strong> &#8211; the number of points plotted when averaging</li>
 <li><strong>direction</strong> &#8211; the direction of averaging</li>
@@ -589,25 +684,25 @@ restores it to the position before the last click.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.save">
-<tt class="descname">save</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.save" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remember the roughness for this layer and the next so that we
 can restore on Esc.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.set_cursor">
-<tt class="descname">set_cursor</tt><big>(</big><em>x</em>, <em>y</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.set_cursor" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_cursor</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.set_cursor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.set_layer">
-<tt class="descname">set_layer</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.set_layer" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_layer</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.set_layer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Allow adding plot to the same panel</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; the number of layer</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; the number of layer</td>
 </tr>
 </tbody>
 </table>
@@ -615,14 +710,14 @@ can restore on Esc.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.set_params">
-<tt class="descname">set_params</tt><big>(</big><em>params</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.set_params" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_params</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.BoxInteractorY.set_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Receive a dictionary and reset the slicer with values contained 
 in the values of the dictionary.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> &#8211; a dictionary containing name of slicer parameters and 
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>params</strong> &#8211; a dictionary containing name of slicer parameters and 
 values the user assigned to the slicer.</td>
 </tr>
 </tbody>
@@ -651,10 +746,20 @@ resetting the widgets.</p>
 
 <dl class="class">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines">
-<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.boxSlicer.</tt><tt class="descname">HorizontalLines</tt><big>(</big><em>base</em>, <em>axes</em>, <em>color='black'</em>, <em>zorder=5</em>, <em>x=0.5</em>, <em>y=0.5</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor</span></tt></p>
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.boxSlicer.</tt><tt class="descname">HorizontalLines</tt><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="BaseInteractor.html#sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor" title="sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor"><tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor</span></tt></a></p>
 <p>Draw 2 Horizontal lines centered on (0,0) that can move 
 on the x- direction and in opposite direction</p>
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.local_perspectives.plotting.boxSlicer'</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.clear">
 <tt class="descname">clear</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.clear" title="Permalink to this definition">¶</a></dt>
@@ -669,13 +774,13 @@ on the x- direction and in opposite direction</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.connect_markers">
-<tt class="descname">connect_markers</tt><big>(</big><em>markers</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.connect_markers" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">connect_markers</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.connect_markers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connect markers to callbacks</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.dpixel">
-<tt class="descname">dpixel</tt><big>(</big><em>x</em>, <em>y</em>, <em>nudge=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.dpixel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">dpixel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.dpixel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the step size in data coordinates for a small
 step in screen coordinates.  If nudge is False (default)
 the step size is one pixel.  If nudge is True, the step
@@ -684,41 +789,41 @@ size is 0.2 pixels.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.move">
-<tt class="descname">move</tt><big>(</big><em>x</em>, <em>y</em>, <em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.move" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">move</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.move" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process move to a new position, making sure that the move is allowed.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.moveend">
-<tt class="descname">moveend</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.moveend" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">moveend</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.moveend" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called after a dragging this edge and set self.has_move to False
 to specify the end of dragging motion</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onClick">
-<tt class="descname">onClick</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onClick" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onClick</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onClick" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare to move the artist.  Calls save() to preserve the state for
 later restore().</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onDrag">
-<tt class="descname">onDrag</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onDrag" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onDrag</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onDrag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Move the artist.  Calls move() to update the state, or restore() if
 the mouse leaves the window.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onHilite">
-<tt class="descname">onHilite</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onHilite" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onHilite</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onHilite" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hilite the artist reporting the event, indicating that it is
 ready to receive a click.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onKey">
-<tt class="descname">onKey</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onKey" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onKey</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onKey" title="Permalink to this definition">¶</a></dt>
 <dd><p>Respond to keyboard events.  Arrow keys move the widget.  Escape
 restores it to the position before the last click.</p>
 <p>Calls move() to update the state.  Calls restore() on escape.</p>
@@ -726,13 +831,13 @@ restores it to the position before the last click.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onLeave">
-<tt class="descname">onLeave</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onLeave" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onLeave</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onLeave" title="Permalink to this definition">¶</a></dt>
 <dd><p>Restore the artist to the original colour when the cursor leaves.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onRelease">
-<tt class="descname">onRelease</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onRelease" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onRelease</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.onRelease" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -743,20 +848,20 @@ restores it to the position before the last click.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.save">
-<tt class="descname">save</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.save" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remember the roughness for this layer and the next so that we
 can restore on Esc.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.set_layer">
-<tt class="descname">set_layer</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.set_layer" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_layer</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.set_layer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Allow adding plot to the same panel</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; the number of layer</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; the number of layer</td>
 </tr>
 </tbody>
 </table>
@@ -764,13 +869,13 @@ can restore on Esc.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.update">
-<tt class="descname">update</tt><big>(</big><em>x=None</em>, <em>y=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.update" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">update</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.HorizontalLines.update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draw the new roughness on the graph.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>x</strong> &#8211; x-coordinates to reset current class x</li>
 <li><strong>y</strong> &#8211; y-coordinates to reset current class y</li>
 </ul>
@@ -784,9 +889,19 @@ can restore on Esc.</p>
 
 <dl class="class">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines">
-<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.boxSlicer.</tt><tt class="descname">VerticalLines</tt><big>(</big><em>base</em>, <em>axes</em>, <em>color='black'</em>, <em>zorder=5</em>, <em>x=0.5</em>, <em>y=0.5</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor</span></tt></p>
+<em class="property">class </em><tt class="descclassname">sans.guiframe.local_perspectives.plotting.boxSlicer.</tt><tt class="descname">VerticalLines</tt><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="BaseInteractor.html#sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor" title="sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor"><tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.BaseInteractor._BaseInteractor</span></tt></a></p>
 <p>Select an annulus through a 2D plot</p>
+<dl class="method">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.guiframe.local_perspectives.plotting.boxSlicer'</em><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.clear">
 <tt class="descname">clear</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.clear" title="Permalink to this definition">¶</a></dt>
@@ -801,13 +916,13 @@ can restore on Esc.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.connect_markers">
-<tt class="descname">connect_markers</tt><big>(</big><em>markers</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.connect_markers" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">connect_markers</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.connect_markers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connect markers to callbacks</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.dpixel">
-<tt class="descname">dpixel</tt><big>(</big><em>x</em>, <em>y</em>, <em>nudge=False</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.dpixel" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">dpixel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.dpixel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the step size in data coordinates for a small
 step in screen coordinates.  If nudge is False (default)
 the step size is one pixel.  If nudge is True, the step
@@ -816,41 +931,41 @@ size is 0.2 pixels.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.move">
-<tt class="descname">move</tt><big>(</big><em>x</em>, <em>y</em>, <em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.move" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">move</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.move" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process move to a new position, making sure that the move is allowed.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.moveend">
-<tt class="descname">moveend</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.moveend" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">moveend</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.moveend" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called after a dragging this edge and set self.has_move to False
 to specify the end of dragging motion</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onClick">
-<tt class="descname">onClick</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onClick" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onClick</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onClick" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepare to move the artist.  Calls save() to preserve the state for
 later restore().</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onDrag">
-<tt class="descname">onDrag</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onDrag" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onDrag</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onDrag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Move the artist.  Calls move() to update the state, or restore() if
 the mouse leaves the window.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onHilite">
-<tt class="descname">onHilite</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onHilite" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onHilite</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onHilite" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hilite the artist reporting the event, indicating that it is
 ready to receive a click.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onKey">
-<tt class="descname">onKey</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onKey" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onKey</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onKey" title="Permalink to this definition">¶</a></dt>
 <dd><p>Respond to keyboard events.  Arrow keys move the widget.  Escape
 restores it to the position before the last click.</p>
 <p>Calls move() to update the state.  Calls restore() on escape.</p>
@@ -858,13 +973,13 @@ restores it to the position before the last click.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onLeave">
-<tt class="descname">onLeave</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onLeave" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onLeave</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onLeave" title="Permalink to this definition">¶</a></dt>
 <dd><p>Restore the artist to the original colour when the cursor leaves.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onRelease">
-<tt class="descname">onRelease</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onRelease" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">onRelease</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.onRelease" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -875,20 +990,20 @@ restores it to the position before the last click.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.save">
-<tt class="descname">save</tt><big>(</big><em>ev</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.save" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remember the roughness for this layer and the next so that we
 can restore on Esc.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.set_layer">
-<tt class="descname">set_layer</tt><big>(</big><em>n</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.set_layer" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_layer</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.set_layer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Allow adding plot to the same panel</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; the number of layer</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; the number of layer</td>
 </tr>
 </tbody>
 </table>
@@ -896,13 +1011,13 @@ can restore on Esc.</p>
 
 <dl class="method">
 <dt id="sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.update">
-<tt class="descname">update</tt><big>(</big><em>x=None</em>, <em>y=None</em><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.update" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">update</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.guiframe.local_perspectives.plotting.boxSlicer.VerticalLines.update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Draw the new roughness on the graph.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>x</strong> &#8211; x-coordinates to reset current class x</li>
 <li><strong>y</strong> &#8211; y-coordinates to reset current class y</li>
 </ul>
@@ -926,7 +1041,7 @@ can restore on Esc.</p>
   <h3><a href="../../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">boxSlicer</a><ul>
-<li><a class="reference internal" href="#module-sans.guiframe.local_perspectives.plotting.boxSlicer"><tt class="docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.boxSlicer</span></tt></a></li>
+<li><a class="reference internal" href="#sans-guiframe-local-perspectives-plotting-boxslicer"><tt class="docutils literal"><span class="pre">sans.guiframe.local_perspectives.plotting.boxSlicer</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -945,7 +1060,7 @@ can restore on Esc.</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -974,13 +1089,13 @@ can restore on Esc.</p>
         <li class="right" >
           <a href="boxMask.html" title="boxMask"
              >previous</a> |</li>
-        <li><a href="../../../index.html">guiframe v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">guiframe 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Local Perspective: plotting</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>
