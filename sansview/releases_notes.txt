@@ -92,12 +92,12 @@ SansView 2.0.0
 		- Get the code from svn://danse.us/sans/releases/sansview-2.0.0
 			(after all dependent packages/modules are installed/compiled, run 'python sansview.py' under the 'sansview-1.9' folder)
 		- This application is also dependent on the following DANSE code:
-			svn://danse.us/sans/releases/calculator-1.0.0 (run 'python setup.py install' under the 'calculator-0.9.1' folder)
+			svn://danse.us/sans/releases/sanscalculator-1.0.0 (run 'python setup.py install' under the 'calculator-0.9.1' folder)
 			svn://danse.us/sans/releases/calculatorview-1.0.0 (run 'python setup.py install' under the 'calculatorview-0.9' folder)
-			svn://danse.us/sans/releases/Invariant-1.0.0 (run 'python setup.py install' under the 'Invariant-0.9.1' folder)
+			svn://danse.us/sans/releases/sansinvariant-1.0.0 (run 'python setup.py install' under the 'Invariant-0.9.1' folder)
 			svn://danse.us/sans/releases/invariantview-1.0.0 (run 'python setup.py install' under the 'invariantview-0.1.1' folder)
-			svn://danse.us/sans/releases/guiframe-1.0.0 (run 'python setup.py install' under the 'guiframe-0.9.1' folder)
-			svn://danse.us/sans/releases/DataLoader-1.0.0 (run 'python setup.py install' under the 'DataLoader-0.9' folder)
+			svn://danse.us/sans/releases/sansguiframe-1.0.0 (run 'python setup.py install' under the 'guiframe-0.9.1' folder)
+			svn://danse.us/sans/releases/sansdataloader-1.0.0 (run 'python setup.py install' under the 'DataLoader-0.9' folder)
 			svn://danse.us/sans/releases/park_integration-1.0.0 (run 'python setup.py install' under the 'park_integration-0.9.1' folder)
 			svn://danse.us/sans/releases/sansmodels-1.0.0 (run 'python setup.py install' under the 'sansmodels-0.9.1\src\' folder)
 			svn://danse.us/park/releases/park-1.2.1 (run 'python setup.py install' under the 'park-1.2.1' folder)
