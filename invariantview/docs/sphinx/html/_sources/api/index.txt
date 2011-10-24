@@ -14,7 +14,9 @@
 .. toctree::
 
    help_panel.rst
+   invariant.rst
    invariant_details.rst
    invariant_panel.rst
+   invariant_state.rst
    invariant_widgets.rst
-   invariant.rst
+   report_dialog.rst
