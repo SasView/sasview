@@ -15,5 +15,6 @@
 
    AbstractFitEngine.rst
    Fitting.rst
+   Loader.rst
    ParkFitting.rst
    ScipyFitting.rst

@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ParkFitting &mdash; park_integration v0.1.0 documentation</title>
+    <title>ParkFitting &mdash; park_integration 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,10 +25,10 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="park_integration v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="park_integration 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="ScipyFitting" href="ScipyFitting.html" />
-    <link rel="prev" title="Fitting" href="Fitting.html" /> 
+    <link rel="prev" title="Loader" href="Loader.html" /> 
   </head>
   <body>
     <div class="related">
@@ -41,9 +44,9 @@
           <a href="ScipyFitting.html" title="ScipyFitting"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="Fitting.html" title="Fitting"
+          <a href="Loader.html" title="Loader"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">park_integration v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">park_integration 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -57,6 +60,1202 @@
 <h1>ParkFitting<a class="headerlink" href="#parkfitting" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="mod-sans-fit-parkfitting">
 <h2>:mod:` sans.fit.ParkFitting`<a class="headerlink" href="#mod-sans-fit-parkfitting" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.fit.ParkFitting"></span><p>ParkFitting module contains SansParameter,Model,Data
+FitArrange, ParkFit,Parameter classes.All listed classes work together
+to perform a simple fit with park optimizer.</p>
+<dl class="class">
+<dt id="sans.fit.ParkFitting.MyAssembly">
+<em class="property">class </em><tt class="descclassname">sans.fit.ParkFitting.</tt><tt class="descname">MyAssembly</tt><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">park.assembly.Assembly</span></tt></p>
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.__call__">
+<tt class="descname">__call__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cost function.</p>
+<p>Evaluate the system for the parameter vector pvec, returning chisq
+as the cost function to be minimized.</p>
+<p>Raises a runtime error if the number of fit parameters is
+different than the length of the vector.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.MyAssembly.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.MyAssembly.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.__delitem__">
+<tt class="descname">__delitem__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__delitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete the nth model</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.MyAssembly.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x01E46BB0&gt;</em><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.MyAssembly.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.__getitem__">
+<tt class="descname">__getitem__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the nth model</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.MyAssembly.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build an assembly from a list of models.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.__iter__">
+<tt class="descname">__iter__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__iter__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate through the models in order</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.MyAssembly.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.fit.ParkFitting'</em><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.fit.ParkFitting.MyAssembly.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.MyAssembly.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.MyAssembly.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.__setitem__">
+<tt class="descname">__setitem__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__setitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace the nth model</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.MyAssembly.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.MyAssembly.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly._reset">
+<tt class="descname">_reset</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly._reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adjust the parameter set after the addition of a new model.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.abort">
+<tt class="descname">abort</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.abort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interrupt the current function evaluation.</p>
+<p>Forward this to the currently executing model if possible.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.all_results">
+<tt class="descname">all_results</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.all_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extend result from the fit with the calculated parameters.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.append">
+<tt class="descname">append</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a model to the end of set.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fitness</strong> &#8211; the fitting model</td>
+</tr>
+</tbody>
+</table>
+<p>The fitting model can be an instance of <cite>park.assembly.Fitness</cite>,
+or a tuple of (<cite>park.model.Model</cite>,`park.data.Data1D`)
+:param weight: model weighting (usually 1.0)
+:param isfitted: whether model should be fit (equivalent to weight 0.)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.cov">
+<tt class="descname">cov</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.cov" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the covariance matrix inv(J&#8217;J) at point p.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.eval">
+<tt class="descname">eval</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.eval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recalculate the theory functions, and from them, the
+residuals and chisq.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note :</th><td class="field-body">Call this after the parameters have been updated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.fit_parameters">
+<tt class="descname">fit_parameters</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.fit_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an alphabetical list of the fitting parameters.</p>
+<p>This function is called once at the beginning of a fit,
+and serves as a convenient place to precalculate what
+can be precalculated such as the set of fitting parameters
+and the parameter expressions evaluator.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.fresiduals">
+<tt class="descname">fresiduals</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.fresiduals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.insert">
+<tt class="descname">insert</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a model to a particular position in the set.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.isfeasible">
+<tt class="descname">isfeasible</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.isfeasible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the parameter set is in a feasible region of the
+modeling space.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.isfitted">
+<tt class="descname">isfitted</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.isfitted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query if a particular model is fitted.</p>
+<p>Set isfitted to value if value is supplied.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>idx</strong> (<em>integer</em>) &#8211; model number</li>
+<li><strong>value</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.jacobian">
+<tt class="descname">jacobian</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.jacobian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the derivative wrt the fit parameters at point p.</p>
+<p>Numeric derivatives are calculated based on step, where step is
+the portion of the total range for parameter j, or the portion of
+point value p_j if the range on parameter j is infinite.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.result">
+<tt class="descname">result</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Details to send back to the fitting client on an improved fit.</p>
+<p>status is &#8216;start&#8217;, &#8216;step&#8217; or &#8216;end&#8217; depending if this is the
+first result to return, an improved result, or the final result.</p>
+<p>[Not implemented]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.set_result">
+<tt class="descname">set_result</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.set_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the parameters resulting from the fit into the parameter set,
+and update the calculated expression.</p>
+<p>The parameter values may be retrieved by walking the assembly.parameterset
+tree, checking each parameter for isfitted, iscomputed, or isfixed.
+For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">assembly</span><span class="o">.</span><span class="n">set_result</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">assembly</span><span class="o">.</span><span class="n">parameterset</span><span class="o">.</span><span class="n">flatten</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">isfitted</span><span class="p">():</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%g</span><span class="s"> in [</span><span class="si">%g</span><span class="s">,</span><span class="si">%g</span><span class="s">]&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">path</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="n">p</span><span class="o">.</span><span class="n">range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">p</span><span class="o">.</span><span class="n">range</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">p</span><span class="o">.</span><span class="n">iscomputed</span><span class="p">():</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> computed as </span><span class="si">%g</span><span class="s">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This does not calculate the function or the residuals for these parameters.
+You can call assembly.eval() to do this.  The residuals will be set in
+assembly[i].residuals.  The theory and data are model specific, and can
+be found in assembly[i].fitness.data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.stderr">
+<tt class="descname">stderr</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.stderr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return parameter uncertainty.</p>
+<p>This is just the sqrt diagonal of covariance matrix inv(J&#8217;J) at point p.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.MyAssembly.weight">
+<tt class="descname">weight</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.MyAssembly.weight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query the weight on a particular model.</p>
+<p>Set weight to value if value is supplied.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><dl class="first docutils">
+<dt>idx <span class="classifier-delimiter">:</span> <span class="classifier">integer</span></dt>
+<dd><p class="first last">model number</p>
+</dd>
+<dt>value <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd><p class="first last">model weight</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">model weight</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.fit.ParkFitting.ParkFit">
+<em class="property">class </em><tt class="descclassname">sans.fit.ParkFitting.</tt><tt class="descname">ParkFit</tt><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="AbstractFitEngine.html#sans.fit.AbstractFitEngine.FitEngine" title="sans.fit.AbstractFitEngine.FitEngine"><tt class="xref py py-class docutils literal"><span class="pre">sans.fit.AbstractFitEngine.FitEngine</span></tt></a></p>
+<p>ParkFit performs the Fit.This class can be used as follow:
+#Do the fit Park
+create an engine: engine = ParkFit()
+Use data must be of type plottable
+Use a sans model</p>
+<p>Add data with a dictionnary of FitArrangeList where Uid is a key and data
+is saved in FitArrange object.
+engine.set_data(data,Uid)</p>
+<p>Set model parameter &#8220;M1&#8221;= model.name add {model.parameter.name:value}.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note :</th><td class="field-body">Set_param() if used must always preceded set_model()
+for the fit to be performed.</td>
+</tr>
+</tbody>
+</table>
+<p>engine.set_param( model,&#8221;M1&#8221;, {&#8216;A&#8217;:2,&#8217;B&#8217;:4})</p>
+<p>Add model with a dictionnary of FitArrangeList{} where Uid is a key
+and model
+is save in FitArrange object.
+engine.set_model(model,Uid)</p>
+<p>engine.fit return chisqr,[model.parameter 1,2,..],[[err1....][..err2...]]
+chisqr1, out1, cov1=engine.fit({model.parameter.name:value},qmin,qmax)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note :</th><td class="field-body">{model.parameter.name:value} is ignored in fit function since 
+the user should make sure to call set_param himself.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a dictionary (self.fitArrangeList={})of FitArrange elements
+with Uid as keys</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.ParkFit.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.fit.ParkFitting'</em><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.create_assembly">
+<tt class="descname">create_assembly</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.create_assembly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract sansmodel and sansdata from 
+self.FitArrangelist ={Uid:FitArrange}
+Create parkmodel and park data ,form a list couple of parkmodel 
+and parkdata
+create an assembly self.problem=  park.Assembly([(parkmodel,parkdata)])</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.fit">
+<tt class="descname">fit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs fit with park.fit module.It can  perform fit with one model
+and a set of data, more than two fit of  one model and sets of data or 
+fit with more than two model associated with their set of data and 
+constraints</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pars</strong> &#8211; Dictionary of parameter names for the model and their 
+values.</li>
+<li><strong>qmin</strong> &#8211; The minimum value of data&#8217;s range to be fit</li>
+<li><strong>qmax</strong> &#8211; The maximum value of data&#8217;s range to be fit</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Note :</th><td class="field-body"><p class="first">all parameter are ignored most of the time.Are just there 
+to keep ScipyFit and ParkFit interface the same.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">result.fitness Value of the goodness of fit metric</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">result.pvec list of parameter with the best value 
+found during fitting</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">result.cov Covariance matrix</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.get_model">
+<tt class="descname">get_model</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.get_model" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> &#8211; id is key in the dictionary containing the model to return</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a model at this id or None if no FitArrange element was 
+created with this id</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.get_problem_to_fit">
+<tt class="descname">get_problem_to_fit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.get_problem_to_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the self.selected value of the fit problem of id</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> &#8211; the id of the problem</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.remove_fit_problem">
+<tt class="descname">remove_fit_problem</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.remove_fit_problem" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove   fitarrange in id</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.select_problem_for_fit">
+<tt class="descname">select_problem_for_fit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.select_problem_for_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>select a couple of model and data at the id position in dictionary
+and set in self.selected value to value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; the value to allow fitting. 
+can only have the value one or zero</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.set_data">
+<tt class="descname">set_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.set_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receives plottable, creates a list of data to fit,set data
+in a FitArrange object and adds that object in a dictionary 
+with key id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> &#8211; data added</li>
+<li><strong>id</strong> &#8211; unique key corresponding to a fitArrange object with data</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.ParkFit.set_model">
+<tt class="descname">set_model</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.ParkFit.set_model" title="Permalink to this definition">¶</a></dt>
+<dd><p>set a model on a given  in the fit engine.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>model</strong> &#8211; sans.models type</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>:param <span class="classifier-delimiter">:</span> <span class="classifier">is the key of the fitArrange dictionary where model is </span></dt>
+<dd>saved as a value</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pars</strong> &#8211; the list of parameters to fit</li>
+<li><strong>constraints</strong> &#8211; <p>list of 
+tuple (name of parameter, value of parameters)
+the value of parameter must be a string to constraint 2 different
+parameters.
+Example:  
+we want to fit 2 model M1 and M2 both have parameters A and B.
+constraints can be:</p>
+<blockquote>
+<div>constraints = [(M1.A, M2.B+2), (M1.B= M2.A <a href="#id1"><span class="problematic" id="id2">*</span></a>5),...,]</div></blockquote>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Note :</th><td class="field-body"><p class="first last">pars must contains only name of existing model&#8217;s parameters</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.fit.ParkFitting.SansFitMC">
+<em class="property">class </em><tt class="descclassname">sans.fit.ParkFitting.</tt><tt class="descname">SansFitMC</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sans.fit.ParkFitting.SansFitter" title="sans.fit.ParkFitting.SansFitter"><tt class="xref py py-class docutils literal"><span class="pre">sans.fit.ParkFitting.SansFitter</span></tt></a></p>
+<p>Monte Carlo optimizer.</p>
+<p>This implements <cite>park.fit.Fitter</cite>.</p>
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitMC.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitMC.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitMC.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x01D351B0&gt;</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitMC.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitMC.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitMC.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitMC.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.fit.ParkFitting'</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.fit.ParkFitting.SansFitMC.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitMC.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitMC.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitMC.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitMC.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitMC.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitMC.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitMC._fit">
+<tt class="descname">_fit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC._fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run a monte carlo fit.</p>
+<p>This procedure maps a local optimizer across a set of initial points.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitMC._threaded">
+<tt class="descname">_threaded</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC._threaded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitMC.fit">
+<tt class="descname">fit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Global optimizer.</p>
+<p>This function should return immediately</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitMC.localfit">
+<tt class="descname">localfit</tt><em class="property"> = &lt;sans.fit.ParkFitting.SansFitSimplex object at 0x01D084F0&gt;</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.localfit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitMC.start_points">
+<tt class="descname">start_points</tt><em class="property"> = 10</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitMC.start_points" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.fit.ParkFitting.SansFitParameter">
+<em class="property">class </em><tt class="descclassname">sans.fit.ParkFitting.</tt><tt class="descname">SansFitParameter</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">park.fitresult.FitParameter</span></tt></p>
+<p>Fit result for an individual parameter.</p>
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitParameter.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitParameter.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitParameter.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x01D352D0&gt;</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitParameter.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitParameter.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitParameter.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitParameter.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.fit.ParkFitting'</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.fit.ParkFitting.SansFitParameter.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitParameter.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitParameter.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitParameter.__repr__">
+<tt class="descname">__repr__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitParameter.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitParameter.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitParameter.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitParameter.summarize">
+<tt class="descname">summarize</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitParameter.summarize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return parameter range string.</p>
+<p>E.g.,  &#8221;       Gold .....|.... 5.2043 in [2,7]&#8221;</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.fit.ParkFitting.SansFitResult">
+<em class="property">class </em><tt class="descclassname">sans.fit.ParkFitting.</tt><tt class="descname">SansFitResult</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">park.fitresult.FitResult</span></tt></p>
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitResult.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitResult.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitResult.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x01D358D0&gt;</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitResult.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitResult.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitResult.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitResult.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.fit.ParkFitting'</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.fit.ParkFitting.SansFitResult.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitResult.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitResult.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitResult.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitResult.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitResult.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.__str__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitResult.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitResult.calc_cov">
+<tt class="descname">calc_cov</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.calc_cov" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the covariance matrix inv(J&#8217;J) at point p.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitResult.print_summary">
+<tt class="descname">print_summary</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.print_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitResult.set_cov">
+<tt class="descname">set_cov</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.set_cov" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the covariance matrix inv(J&#8217;J) at point p.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitResult.update">
+<tt class="descname">update</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitResult.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.fit.ParkFitting.SansFitSimplex">
+<em class="property">class </em><tt class="descclassname">sans.fit.ParkFitting.</tt><tt class="descname">SansFitSimplex</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">park.fitmc.FitSimplex</span></tt></p>
+<p>Local minimizer using Nelder-Mead simplex algorithm.</p>
+<p>Simplex is robust and derivative free, though not very efficient.</p>
+<p>This class wraps the bounds contrained Nelder-Mead simplex
+implementation for <cite>park.simplex.simplex</cite>.</p>
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x01D35CB0&gt;</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.fit.ParkFitting'</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitSimplex._iscancelled">
+<tt class="descname">_iscancelled</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex._iscancelled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.abort">
+<tt class="descname">abort</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.abort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cancel the fit in progress from another thread of execution</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.fit">
+<tt class="descname">fit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the fit</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.ftol">
+<tt class="descname">ftol</tt><em class="property"> = 5.0000000000000002e-005</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.ftol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop when vertex values are within ftol of each other</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.maxiter">
+<tt class="descname">maxiter</tt><em class="property"> = None</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.maxiter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum number of iterations before fit terminates</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.radius">
+<tt class="descname">radius</tt><em class="property"> = 0.050000000000000003</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.radius" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of the initial simplex; this is a portion between 0 and 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitSimplex.xtol">
+<tt class="descname">xtol</tt><em class="property"> = 1</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitSimplex.xtol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop when simplex vertices are within xtol of each other</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.fit.ParkFitting.SansFitter">
+<em class="property">class </em><tt class="descclassname">sans.fit.ParkFitting.</tt><tt class="descname">SansFitter</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">park.fit.Fitter</span></tt></p>
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitter.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitter.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitter.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x01D35B10&gt;</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitter.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitter.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitter.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitter.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.fit.ParkFitting'</em><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.fit.ParkFitting.SansFitter.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.fit.ParkFitting.SansFitter.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitter.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitter.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitter.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitter.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitter.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansFitter.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitter._fit">
+<tt class="descname">_fit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter._fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the actual fit in a separate thread</p>
+<dl class="docutils">
+<dt>Each cycle k of n:</dt>
+<dd>self.handler.progress(k,n)</dd>
+<dt>Each improvement:</dt>
+<dd>self.handler.result.update(x,fx,ncalls)
+self.handler.improvement()</dd>
+<dt>On completion (if not already performed):</dt>
+<dd>self.hander.result.update(x,fx,ncalls)
+self.handler.done
+self.handler.finalize()</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitter._threaded">
+<tt class="descname">_threaded</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter._threaded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansFitter.fit">
+<tt class="descname">fit</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansFitter.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Global optimizer.</p>
+<p>This function should return immediately</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.fit.ParkFitting.SansPart">
+<em class="property">class </em><tt class="descclassname">sans.fit.ParkFitting.</tt><tt class="descname">SansPart</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansPart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">park.assembly.Part</span></tt></p>
+<p>Part of a fitting assembly.  Part holds the model itself and
+associated data.  The part can be initialized with a fitness
+object or with a pair (model,data) for the default fitness function.</p>
+<dl class="docutils">
+<dt>fitness (Fitness)</dt>
+<dd>object implementing the <cite>park.assembly.Fitness</cite> interface.  In
+particular, fitness should provide a parameterset attribute
+containing a ParameterSet and a residuals method returning a vector
+of residuals.</dd>
+<dt>weight (dimensionless)</dt>
+<dd>weight for the model.  See comments in assembly.py for details.</dd>
+<dt>isfitted (boolean)</dt>
+<dd>True if the model residuals should be included in the fit.
+The model parameters may still be used in parameter
+expressions, but there will be no comparison to the data.</dd>
+<dt>residuals (vector)</dt>
+<dd>Residuals for the model if they have been calculated, or None</dd>
+<dt>degrees_of_freedom</dt>
+<dd>Number of residuals minus number of fitted parameters.
+Degrees of freedom for individual models does not make
+sense in the presence of expressions combining models,
+particularly in the case where a model has many parameters
+but no data or many computed parameters.  The degrees of
+freedom for the model is set to be at least one.</dd>
+<dt>chisq</dt>
+<dd><p class="first">sum(residuals**2); use chisq/degrees_of_freedom to
+get the reduced chisq value.</p>
+<p>Get/set the weight on the given model.</p>
+<p class="last">assembly.weight(3) returns the weight on model 3 (0-origin)
+assembly.weight(3,0.5) sets the weight on model 3 (0-origin)</p>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansPart.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansPart.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansPart.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansPart.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansPart.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x01D29050&gt;</em><a class="headerlink" href="#sans.fit.ParkFitting.SansPart.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansPart.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansPart.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansPart.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansPart.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansPart.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansPart.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansPart.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.fit.ParkFitting'</em><a class="headerlink" href="#sans.fit.ParkFitting.SansPart.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.fit.ParkFitting.SansPart.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.fit.ParkFitting.SansPart.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansPart.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansPart.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.fit.ParkFitting.SansPart.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.fit.ParkFitting.SansPart.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansPart.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansPart.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansPart.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansPart.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansPart.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansPart.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.fit.ParkFitting.SansPart.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.fit.ParkFitting.SansPart.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
@@ -75,8 +1274,8 @@
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="Fitting.html"
-                        title="previous chapter">Fitting</a></p>
+  <p class="topless"><a href="Loader.html"
+                        title="previous chapter">Loader</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="ScipyFitting.html"
                         title="next chapter">ScipyFitting</a></p>
@@ -88,7 +1287,7 @@
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -115,15 +1314,15 @@
           <a href="ScipyFitting.html" title="ScipyFitting"
              >next</a> |</li>
         <li class="right" >
-          <a href="Fitting.html" title="Fitting"
+          <a href="Loader.html" title="Loader"
              >previous</a> |</li>
-        <li><a href="../index.html">park_integration v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">park_integration 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>
