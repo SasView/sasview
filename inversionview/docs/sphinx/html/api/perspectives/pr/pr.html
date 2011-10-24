@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>pr &mdash; prview v0.1.0 documentation</title>
+    <title>pr &mdash; prview 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
@@ -22,9 +25,10 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="prview v0.1.0 documentation" href="../../../index.html" />
+    <link rel="top" title="prview 0.1.0 documentation" href="../../../index.html" />
     <link rel="up" title="Reference" href="index.html" />
-    <link rel="prev" title="pr_widgets" href="pr_widgets.html" /> 
+    <link rel="next" title="pr_thread" href="pr_thread.html" />
+    <link rel="prev" title="inversion_state" href="inversion_state.html" /> 
   </head>
   <body>
     <div class="related">
@@ -34,9 +38,15 @@
           <a href="../../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="pr_widgets.html" title="pr_widgets"
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pr_thread.html" title="pr_thread"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="inversion_state.html" title="inversion_state"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../index.html">prview v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">prview 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -49,7 +59,406 @@
   <div class="section" id="pr">
 <h1>pr<a class="headerlink" href="#pr" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="sans-perspectives-pr-pr">
-<h2><tt class="xref py py-mod docutils literal"><span class="pre">sans.perspectives.pr.pr</span></tt><a class="headerlink" href="#sans-perspectives-pr-pr" title="Permalink to this headline">¶</a></h2>
+<h2><a class="reference internal" href="#module-sans.perspectives.pr.pr" title="sans.perspectives.pr.pr"><tt class="xref py py-mod docutils literal"><span class="pre">sans.perspectives.pr.pr</span></tt></a><a class="headerlink" href="#sans-perspectives-pr-pr" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.perspectives.pr.pr"></span><dl class="class">
+<dt id="sans.perspectives.pr.pr.Plugin">
+<em class="property">class </em><tt class="descclassname">sans.perspectives.pr.pr.</tt><tt class="descname">Plugin</tt><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.plugin_base.PluginBase</span></tt></p>
+<dl class="attribute">
+<dt id="sans.perspectives.pr.pr.Plugin.DEFAULT_ALPHA">
+<tt class="descname">DEFAULT_ALPHA</tt><em class="property"> = 0.0001</em><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.DEFAULT_ALPHA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.pr.pr.Plugin.DEFAULT_DMAX">
+<tt class="descname">DEFAULT_DMAX</tt><em class="property"> = 140.0</em><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.DEFAULT_DMAX" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.pr.pr.Plugin.DEFAULT_NFUNC">
+<tt class="descname">DEFAULT_NFUNC</tt><em class="property"> = 10</em><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.DEFAULT_NFUNC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.add_color">
+<tt class="descname">add_color</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.add_color" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds color to a plugin</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.can_load_data">
+<tt class="descname">can_load_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.can_load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>if return True, then call handler to laod data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.clear_panel">
+<tt class="descname">clear_panel</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.clear_panel" title="Permalink to this definition">¶</a></dt>
+<dd><p>clear all related panels</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.delete_data">
+<tt class="descname">delete_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.delete_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>delete the data association with prview</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.estimate_file_inversion">
+<tt class="descname">estimate_file_inversion</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.estimate_file_inversion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.estimate_plot_inversion">
+<tt class="descname">estimate_plot_inversion</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.estimate_plot_inversion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.get_batch_capable">
+<tt class="descname">get_batch_capable</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.get_batch_capable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the plugin has a batch capability</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.get_context_menu">
+<tt class="descname">get_context_menu</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.get_context_menu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the context menu items available for P(r)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> &#8211; the Graph object to which we attach the context menu</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of menu items with call-back function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.get_data">
+<tt class="descname">get_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.get_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.get_extensions">
+<tt class="descname">get_extensions</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.get_extensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>return state reader and its extensions</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.get_npts">
+<tt class="descname">get_npts</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.get_npts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of points in the I(q) data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.get_panels">
+<tt class="descname">get_panels</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.get_panels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create and return a list of panel objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.get_perspective">
+<tt class="descname">get_perspective</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.get_perspective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the list of panel names for this perspective</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.get_tools">
+<tt class="descname">get_tools</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.get_tools" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a set of menu entries for tools</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.help">
+<tt class="descname">help</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.help" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show a general help dialog.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Todo :</th><td class="field-body">replace the text with a nice image</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.is_always_active">
+<tt class="descname">is_always_active</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.is_always_active" title="Permalink to this definition">¶</a></dt>
+<dd><p>return True is this plugin is always active and it is local to guiframe
+even if the user is switching between perspectives</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.is_in_use">
+<tt class="descname">is_in_use</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.is_in_use" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>get a  data id a list of data name if data data is</dt>
+<dd>currently used by the plugin and the name of the plugin</dd>
+</dl>
+<p>data_name = &#8216;None&#8217;
+in_use = False
+example [(data_name, self.sub_menu)]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.load">
+<tt class="descname">load</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load data. This will eventually be replaced
+by our standard DataLoader class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.load_abs">
+<tt class="descname">load_abs</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.load_abs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load an IGOR .ABS reduced file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; file path</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">x, y, err vectors</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.load_columns">
+<tt class="descname">load_columns</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.load_columns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load 2- or 3- column ascii</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.load_data">
+<tt class="descname">load_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load  data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.load_folder">
+<tt class="descname">load_folder</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.load_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load entire folder</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.on_batch_selection">
+<tt class="descname">on_batch_selection</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.on_batch_selection" title="Permalink to this definition">¶</a></dt>
+<dd><p>need to be overwritten by the derivated class</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.on_perspective">
+<tt class="descname">on_perspective</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.on_perspective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call back function for the perspective menu item.
+We notify the parent window that the perspective
+has changed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; menu event</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.on_set_state_helper">
+<tt class="descname">on_set_state_helper</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.on_set_state_helper" title="Permalink to this definition">¶</a></dt>
+<dd><p>update state</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.perform_estimate">
+<tt class="descname">perform_estimate</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.perform_estimate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.perform_estimateNT">
+<tt class="descname">perform_estimateNT</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.perform_estimateNT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.perform_inversion">
+<tt class="descname">perform_inversion</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.perform_inversion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.populate_file_menu">
+<tt class="descname">populate_file_menu</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.populate_file_menu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append menu item under file menu item of the frame</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.populate_menu">
+<tt class="descname">populate_menu</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.populate_menu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create and return the list of application menu
+items for the plug-in.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> &#8211; parent window</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">plug-in menu</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.post_init">
+<tt class="descname">post_init</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.post_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post initialization call back to close the loose ends
+[Somehow openGL needs this call]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.pr_theory">
+<tt class="descname">pr_theory</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.pr_theory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.save_data">
+<tt class="descname">save_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.save_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save data in provided state object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Todo :</th><td class="field-body"><p class="first">move the state code away from inversion_panel and move it here. 
+Then remove the &#8220;prstate&#8221; input and make this method private.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filepath</strong> &#8211; path of file to write to</li>
+<li><strong>prstate</strong> &#8211; P(r) inversion state</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.set_batch_selection">
+<tt class="descname">set_batch_selection</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.set_batch_selection" title="Permalink to this definition">¶</a></dt>
+<dd><p>the plugin to its batch state if flag is True</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.set_data">
+<tt class="descname">set_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.set_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>receive a list of data to compute pr</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.set_default_perspective">
+<tt class="descname">set_default_perspective</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.set_default_perspective" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call back method that True to notify the parent that the current plug-in
+can be set as default  perspective.
+when returning False, the plug-in is not candidate for an automatic 
+default perspective setting</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.set_is_active">
+<tt class="descname">set_is_active</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.set_is_active" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.set_state">
+<tt class="descname">set_state</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.set_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call-back method for the inversion state reader.
+This method is called when a .prv file is loaded.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>state</strong> &#8211; InversionState object</li>
+<li><strong>datainfo</strong> &#8211; Data1D object [optional]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.set_theory">
+<tt class="descname">set_theory</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.set_theory" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>theory_list</strong> &#8211; list of information</td>
+</tr>
+</tbody>
+</table>
+<p>related to available theory state</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.setup_file_inversion">
+<tt class="descname">setup_file_inversion</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.setup_file_inversion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.setup_plot_inversion">
+<tt class="descname">setup_plot_inversion</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.setup_plot_inversion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.show_data">
+<tt class="descname">show_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.show_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show data read from a file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>path</strong> &#8211; file path</li>
+<li><strong>reset</strong> &#8211; if True all other plottables will be cleared</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.show_iq">
+<tt class="descname">show_iq</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.show_iq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.show_pr">
+<tt class="descname">show_pr</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.show_pr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.show_shpere">
+<tt class="descname">show_shpere</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.show_shpere" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.start_thread">
+<tt class="descname">start_thread</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.start_thread" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.pr.Plugin.use_data">
+<tt class="descname">use_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.pr.Plugin.use_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>return True if these plugin use data</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
@@ -68,8 +477,11 @@
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="pr_widgets.html"
-                        title="previous chapter">pr_widgets</a></p>
+  <p class="topless"><a href="inversion_state.html"
+                        title="previous chapter">inversion_state</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pr_thread.html"
+                        title="next chapter">pr_thread</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../../../_sources/api/perspectives/pr/pr.txt"
@@ -78,7 +490,7 @@
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -99,15 +511,21 @@
           <a href="../../../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="pr_widgets.html" title="pr_widgets"
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pr_thread.html" title="pr_thread"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="inversion_state.html" title="inversion_state"
              >previous</a> |</li>
-        <li><a href="../../../index.html">prview v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">prview 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>

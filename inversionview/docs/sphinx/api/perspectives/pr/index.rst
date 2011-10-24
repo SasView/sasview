@@ -16,6 +16,6 @@
    explore_dialog.rst
    inversion_panel.rst
    inversion_state.rst
+   pr.rst
    pr_thread.rst
    pr_widgets.rst
-   pr.rst

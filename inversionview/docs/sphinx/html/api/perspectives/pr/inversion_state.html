@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>inversion_state &mdash; prview v0.1.0 documentation</title>
+    <title>inversion_state &mdash; prview 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
@@ -22,9 +25,9 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="prview v0.1.0 documentation" href="../../../index.html" />
+    <link rel="top" title="prview 0.1.0 documentation" href="../../../index.html" />
     <link rel="up" title="Reference" href="index.html" />
-    <link rel="next" title="pr_thread" href="pr_thread.html" />
+    <link rel="next" title="pr" href="pr.html" />
     <link rel="prev" title="inversion_panel" href="inversion_panel.html" /> 
   </head>
   <body>
@@ -35,12 +38,15 @@
           <a href="../../../genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="pr_thread.html" title="pr_thread"
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pr.html" title="pr"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="inversion_panel.html" title="inversion_panel"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../index.html">prview v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">prview 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -53,7 +59,125 @@
   <div class="section" id="inversion-state">
 <h1>inversion_state<a class="headerlink" href="#inversion-state" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="sans-perspectives-pr-inversion-state">
-<h2><tt class="xref py py-mod docutils literal"><span class="pre">sans.perspectives.pr.inversion_state</span></tt><a class="headerlink" href="#sans-perspectives-pr-inversion-state" title="Permalink to this headline">¶</a></h2>
+<h2><a class="reference internal" href="#module-sans.perspectives.pr.inversion_state" title="sans.perspectives.pr.inversion_state"><tt class="xref py py-mod docutils literal"><span class="pre">sans.perspectives.pr.inversion_state</span></tt></a><a class="headerlink" href="#sans-perspectives-pr-inversion-state" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.perspectives.pr.inversion_state"></span><dl class="class">
+<dt id="sans.perspectives.pr.inversion_state.InversionState">
+<em class="property">class </em><tt class="descclassname">sans.perspectives.pr.inversion_state.</tt><tt class="descname">InversionState</tt><a class="headerlink" href="#sans.perspectives.pr.inversion_state.InversionState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Class to hold the state information of the InversionControl panel.</p>
+<dl class="method">
+<dt id="sans.perspectives.pr.inversion_state.InversionState.fromXML">
+<tt class="descname">fromXML</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.inversion_state.InversionState.fromXML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a P(r) inversion state from a file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file</strong> &#8211; .prv file</li>
+<li><strong>node</strong> &#8211; node of a XML document to read from</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.inversion_state.InversionState.toXML">
+<tt class="descname">toXML</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.inversion_state.InversionState.toXML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the state of the InversionControl panel to file, as XML.</p>
+<p>Compatible with standalone writing, or appending to an
+already existing XML document. In that case, the XML document
+is required. An optional entry node in the XML document 
+may also be given.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file</strong> &#8211; file to write to</li>
+<li><strong>doc</strong> &#8211; XML document object [optional]</li>
+<li><strong>entry_node</strong> &#8211; XML node within the XML document at which 
+we will append the data [optional]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="sans.perspectives.pr.inversion_state.Reader">
+<em class="property">class </em><tt class="descclassname">sans.perspectives.pr.inversion_state.</tt><tt class="descname">Reader</tt><a class="headerlink" href="#sans.perspectives.pr.inversion_state.Reader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.dataloader.readers.cansas_reader.Reader</span></tt></p>
+<p>Class to load a .prv P(r) inversion file</p>
+<dl class="attribute">
+<dt id="sans.perspectives.pr.inversion_state.Reader.ext">
+<tt class="descname">ext</tt><em class="property"> = ['.prv', '.PRV', '.svs', '.SVS']</em><a class="headerlink" href="#sans.perspectives.pr.inversion_state.Reader.ext" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.inversion_state.Reader.read">
+<tt class="descname">read</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.inversion_state.Reader.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a new P(r) inversion state from file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; file path</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.pr.inversion_state.Reader.type">
+<tt class="descname">type</tt><em class="property"> = ['P(r) files (*.prv)|*.prv', 'SANSView files (*.svs)|*.svs']</em><a class="headerlink" href="#sans.perspectives.pr.inversion_state.Reader.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.pr.inversion_state.Reader.type_name">
+<tt class="descname">type_name</tt><em class="property"> = 'P(r)'</em><a class="headerlink" href="#sans.perspectives.pr.inversion_state.Reader.type_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.perspectives.pr.inversion_state.Reader.version">
+<tt class="descname">version</tt><em class="property"> = '1.0'</em><a class="headerlink" href="#sans.perspectives.pr.inversion_state.Reader.version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.inversion_state.Reader.write">
+<tt class="descname">write</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.inversion_state.Reader.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the content of a Data1D as a CanSAS XML file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> &#8211; name of the file to write</li>
+<li><strong>datainfo</strong> &#8211; Data1D object</li>
+<li><strong>prstate</strong> &#8211; InversionState object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.pr.inversion_state.Reader.write_toXML">
+<tt class="descname">write_toXML</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.pr.inversion_state.Reader.write_toXML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write toXML, a helper for write()</p>
+<p>: return: xml doc</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
@@ -75,8 +199,8 @@
   <p class="topless"><a href="inversion_panel.html"
                         title="previous chapter">inversion_panel</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="pr_thread.html"
-                        title="next chapter">pr_thread</a></p>
+  <p class="topless"><a href="pr.html"
+                        title="next chapter">pr</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="../../../_sources/api/perspectives/pr/inversion_state.txt"
@@ -85,7 +209,7 @@
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -106,18 +230,21 @@
           <a href="../../../genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="pr_thread.html" title="pr_thread"
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pr.html" title="pr"
              >next</a> |</li>
         <li class="right" >
           <a href="inversion_panel.html" title="inversion_panel"
              >previous</a> |</li>
-        <li><a href="../../../index.html">prview v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">prview 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>
