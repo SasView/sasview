@@ -8,8 +8,9 @@ SansView 2.0.0
 	- Release date: 10/21/2011
 	- Batch Fit included.
 	- More Graph modifications.
+	- More options for the fit weighting.
 	- Added a Python (PyCrust) shell in the 'Tool' menu.
-	- The 'Sartup Setting' in the View menu can remember the last data file folder.
+	- The 'Startup Setting' in the View menu can remember the last data file folder.
 	- Updated the resolution computation for the gravitational effect and added TOF estimation  capability.
 	- Fixed the problem of displaying the fit results in the wrong parameter (with ParkMC FitEngine).
 	
