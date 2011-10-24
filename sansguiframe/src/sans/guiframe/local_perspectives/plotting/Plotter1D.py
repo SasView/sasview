@@ -584,15 +584,13 @@ class ModelPanel1D(PlotPanel, PanelBase):
                     wx.PostEvent( self.parent, 
                           StatusEvent(status= msg, info='error'))
             sizedial.Destroy()
-
-        selected_plot.markersize = int(label)
-        self._check_zoom_plot()
-        #self._onEVT_FUNC_PROPERTY()
-        ## Set the view scale for all plots
-        
-        ## render the graph
-        #self.graph.render(self)
-        #self.subplot.figure.canvas.draw_idle()
+        try:
+            selected_plot.markersize = int(label)
+            self._check_zoom_plot()
+        except:
+            msg = 'Symbol Size: Got an invalid Value.'
+            wx.PostEvent( self.parent, 
+                          StatusEvent(status= msg, info='error'))
 
     
     def onChangeSymbol(self, event):
