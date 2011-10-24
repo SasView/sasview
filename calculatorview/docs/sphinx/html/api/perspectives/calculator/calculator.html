@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>calculator &mdash; calculatorview v0.1.0 documentation</title>
+    <title>calculator &mdash; calculatorview 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../../../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
-    <link rel="top" title="calculatorview v0.1.0 documentation" href="../../../index.html" />
+    <link rel="top" title="calculatorview 0.1.0 documentation" href="../../../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="calculator_widgets" href="calculator_widgets.html" />
     <link rel="prev" title="aperture_editor" href="aperture_editor.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="aperture_editor.html" title="aperture_editor"
              accesskey="P">previous</a> |</li>
-        <li><a href="../../../index.html">calculatorview v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">calculatorview 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,18 +58,18 @@
             
   <div class="section" id="calculator">
 <h1>calculator<a class="headerlink" href="#calculator" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.perspectives.calculator.calculator">
-<span id="sans-perspectives-calculator-calculator"></span><h2><a class="reference internal" href="#module-sans.perspectives.calculator.calculator" title="sans.perspectives.calculator.calculator"><tt class="xref py py-mod docutils literal"><span class="pre">sans.perspectives.calculator.calculator</span></tt></a><a class="headerlink" href="#module-sans.perspectives.calculator.calculator" title="Permalink to this headline">¶</a></h2>
-<p>Calculator Module</p>
+<div class="section" id="sans-perspectives-calculator-calculator">
+<h2><a class="reference internal" href="#module-sans.perspectives.calculator.calculator" title="sans.perspectives.calculator.calculator"><tt class="xref py py-mod docutils literal"><span class="pre">sans.perspectives.calculator.calculator</span></tt></a><a class="headerlink" href="#sans-perspectives-calculator-calculator" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.perspectives.calculator.calculator"></span><p>Calculator Module</p>
 <dl class="class">
 <dt id="sans.perspectives.calculator.calculator.Plugin">
-<em class="property">class </em><tt class="descclassname">sans.perspectives.calculator.calculator.</tt><tt class="descname">Plugin</tt><big>(</big><em>standalone=True</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.perspectives.calculator.calculator.</tt><tt class="descname">Plugin</tt><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">sans.guiframe.plugin_base.PluginBase</span></tt></p>
 <p>This class defines the interface for a Plugin class
 for calculator perspective</p>
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.add_color">
-<tt class="descname">add_color</tt><big>(</big><em>color</em>, <em>id</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.add_color" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">add_color</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.add_color" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds color to a plugin</p>
 </dd></dl>
 
@@ -84,13 +87,19 @@ for calculator perspective</p>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.delete_data">
-<tt class="descname">delete_data</tt><big>(</big><em>data_id</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.delete_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">delete_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.delete_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Delete all references of data which id are in data_list.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="sans.perspectives.calculator.calculator.Plugin.get_batch_capable">
+<tt class="descname">get_batch_capable</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.get_batch_capable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the plugin has a batch capability</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.get_context_menu">
-<tt class="descname">get_context_menu</tt><big>(</big><em>plotpanel=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.get_context_menu" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_context_menu</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.get_context_menu" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is optional.</p>
 <p>When the context menu of a plot is rendered, the 
 get_context_menu method will be called to give you a 
@@ -106,9 +115,9 @@ call-back method.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> &#8211; the Graph object to which we attach the context menu</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> &#8211; the Graph object to which we attach the context menu</td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">a list of menu items with call-back function</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of menu items with call-back function</td>
 </tr>
 </tbody>
 </table>
@@ -122,7 +131,7 @@ call-back method.</p>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.get_panels">
-<tt class="descname">get_panels</tt><big>(</big><em>parent</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.get_panels" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_panels</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.get_panels" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create and return the list of wx.Panels for your plug-in.
 Define the plug-in perspective.</p>
 <p>Panels should inherit from DefaultPanel defined below,
@@ -132,9 +141,9 @@ or should present the same interface. They must define
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> &#8211; parent window</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> &#8211; parent window</td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">list of panels</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of panels</td>
 </tr>
 </tbody>
 </table>
@@ -154,13 +163,13 @@ or should present the same interface. They must define
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.help">
-<tt class="descname">help</tt><big>(</big><em>evt</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.help" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">help</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.help" title="Permalink to this definition">¶</a></dt>
 <dd><p>Show a general help dialog.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Todo :</th><td class="field-body">replace the text with a nice image
+<tr class="field-odd field"><th class="field-name">Todo :</th><td class="field-body">replace the text with a nice image
 provide more hint on the SLD calculator</td>
 </tr>
 </tbody>
@@ -176,7 +185,7 @@ even if the user is switching between perspectives</p>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.is_in_use">
-<tt class="descname">is_in_use</tt><big>(</big><em>data_id</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.is_in_use" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">is_in_use</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.is_in_use" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>get a  data id a list of data name if data data is</dt>
 <dd>currently used by the plugin and the name of the plugin</dd>
@@ -188,55 +197,55 @@ example [(data_name, self.sub_menu)]</p>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.load_data">
-<tt class="descname">load_data</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.load_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">load_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.load_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load  data</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.load_folder">
-<tt class="descname">load_folder</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.load_folder" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">load_folder</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.load_folder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load entire folder</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.on_batch_selection">
-<tt class="descname">on_batch_selection</tt><big>(</big><em>flag</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_batch_selection" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">on_batch_selection</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_batch_selection" title="Permalink to this definition">¶</a></dt>
 <dd><p>need to be overwritten by the derivated class</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.on_calculate_kiessig">
-<tt class="descname">on_calculate_kiessig</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_calculate_kiessig" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">on_calculate_kiessig</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_calculate_kiessig" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the Kiessig thickness</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.on_calculate_resoltuion">
-<tt class="descname">on_calculate_resoltuion</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_calculate_resoltuion" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">on_calculate_resoltuion</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_calculate_resoltuion" title="Permalink to this definition">¶</a></dt>
 <dd><p>Estimate the instrumental resolution</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.on_calculate_sld">
-<tt class="descname">on_calculate_sld</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_calculate_sld" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">on_calculate_sld</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_calculate_sld" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the scattering length density of molecula</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.on_calculate_slit_size">
-<tt class="descname">on_calculate_slit_size</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_calculate_slit_size" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">on_calculate_slit_size</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_calculate_slit_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the slit size a given data</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.on_edit_data">
-<tt class="descname">on_edit_data</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_edit_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">on_edit_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_edit_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Edit meta data</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.on_perspective">
-<tt class="descname">on_perspective</tt><big>(</big><em>event=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_perspective" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">on_perspective</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_perspective" title="Permalink to this definition">¶</a></dt>
 <dd><p>Call back function for the perspective menu item.
 We notify the parent window that the perspective
 has changed.</p>
@@ -244,7 +253,21 @@ has changed.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; menu event</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; menu event</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.perspectives.calculator.calculator.Plugin.on_python_console">
+<tt class="descname">on_python_console</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_python_console" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open Python Console</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; menu event</td>
 </tr>
 </tbody>
 </table>
@@ -252,7 +275,7 @@ has changed.</p>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.on_set_state_helper">
-<tt class="descname">on_set_state_helper</tt><big>(</big><em>event</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_set_state_helper" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">on_set_state_helper</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.on_set_state_helper" title="Permalink to this definition">¶</a></dt>
 <dd><p>update state</p>
 </dd></dl>
 
@@ -264,16 +287,16 @@ has changed.</p>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.populate_menu">
-<tt class="descname">populate_menu</tt><big>(</big><em>parent</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.populate_menu" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">populate_menu</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.populate_menu" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create and return the list of application menu
 items for the plug-in.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> &#8211; parent window</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> &#8211; parent window</td>
 </tr>
-<tr class="field"><th class="field-name">Returns:</th><td class="field-body">plug-in menu</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">plug-in menu</td>
 </tr>
 </tbody>
 </table>
@@ -286,14 +309,20 @@ items for the plug-in.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="sans.perspectives.calculator.calculator.Plugin.put_icon">
+<tt class="descname">put_icon</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.put_icon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Put icon in the frame title bar</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.set_batch_selection">
-<tt class="descname">set_batch_selection</tt><big>(</big><em>flag</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.set_batch_selection" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_batch_selection</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.set_batch_selection" title="Permalink to this definition">¶</a></dt>
 <dd><p>the plugin to its batch state if flag is True</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.set_data">
-<tt class="descname">set_data</tt><big>(</big><em>data_list=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.set_data" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_data</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.set_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>receive a list of data and use it in the current perspective</p>
 </dd></dl>
 
@@ -308,27 +337,27 @@ default perspective setting</p>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.set_is_active">
-<tt class="descname">set_is_active</tt><big>(</big><em>active=False</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.set_is_active" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_is_active</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.set_is_active" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.set_state">
-<tt class="descname">set_state</tt><big>(</big><em>state=None</em>, <em>datainfo=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.set_state" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_state</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.set_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>update state</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="sans.perspectives.calculator.calculator.Plugin.set_theory">
-<tt class="descname">set_theory</tt><big>(</big><em>theory_list=None</em><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.set_theory" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">set_theory</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.perspectives.calculator.calculator.Plugin.set_theory" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>theory_list</strong> &#8211; list of information 
-related to available theory state</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>theory_list</strong> &#8211; list of information</td>
 </tr>
 </tbody>
 </table>
+<p>related to available theory state</p>
 </dd></dl>
 
 <dl class="method">
@@ -351,7 +380,7 @@ related to available theory state</td>
   <h3><a href="../../../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">calculator</a><ul>
-<li><a class="reference internal" href="#module-sans.perspectives.calculator.calculator"><tt class="docutils literal"><span class="pre">sans.perspectives.calculator.calculator</span></tt></a></li>
+<li><a class="reference internal" href="#sans-perspectives-calculator-calculator"><tt class="docutils literal"><span class="pre">sans.perspectives.calculator.calculator</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -370,7 +399,7 @@ related to available theory state</td>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -399,13 +428,13 @@ related to available theory state</td>
         <li class="right" >
           <a href="aperture_editor.html" title="aperture_editor"
              >previous</a> |</li>
-        <li><a href="../../../index.html">calculatorview v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../../../index.html">calculatorview 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>
