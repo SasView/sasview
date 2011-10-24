@@ -30,8 +30,11 @@ try:
         import local_config as config
 except:
     # Didn't find local config, load the default 
-    import config
+    import sans.guiframe.config as config
 
+if config is None:
+    import sans.guiframe.config as config
+    
        
 extension_list = []
 if config.APPLICATION_STATE_EXTENSION is not None:

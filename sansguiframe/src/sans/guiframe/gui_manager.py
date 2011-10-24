@@ -84,6 +84,11 @@ try:
 except:
     # Didn't find local config, load the default 
     import sans.guiframe.config as config
+ 
+if config is None:
+    # Didn't find local config, load the default 
+    import sans.guiframe.config as config
+       
 custom_config = None
 try:
     path = PATH_APP

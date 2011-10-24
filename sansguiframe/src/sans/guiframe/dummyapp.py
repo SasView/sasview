@@ -2,7 +2,7 @@
 Dummy application.
 Allows the user to set an external data manager
 """
-import gui_manager
+import sans.guiframe.gui_manager as gui_manager
 
 from sans.guiframe.plugin_base import PluginBase
 
