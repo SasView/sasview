@@ -90,21 +90,22 @@ SansView 2.0.0
 
 	2.2- Installing:
 		- Get the code from svn://danse.us/sans/releases/sansview-2.0.0
-			(after all dependent packages/modules are installed/compiled, run 'python sansview.py' under the 'sansview-1.9' folder)
+			(after all dependent packages/modules are installed/compiled, run 'python sansview.py' under the 'sansview-2.0.0' folder)
 		- This application is also dependent on the following DANSE code:
-			svn://danse.us/sans/releases/sanscalculator-1.0.0 (run 'python setup.py install' under the 'calculator-0.9.1' folder)
-			svn://danse.us/sans/releases/calculatorview-1.0.0 (run 'python setup.py install' under the 'calculatorview-0.9' folder)
-			svn://danse.us/sans/releases/sansinvariant-1.0.0 (run 'python setup.py install' under the 'Invariant-0.9.1' folder)
-			svn://danse.us/sans/releases/invariantview-1.0.0 (run 'python setup.py install' under the 'invariantview-0.1.1' folder)
-			svn://danse.us/sans/releases/sansguiframe-1.0.0 (run 'python setup.py install' under the 'guiframe-0.9.1' folder)
-			svn://danse.us/sans/releases/sansdataloader-1.0.0 (run 'python setup.py install' under the 'DataLoader-0.9' folder)
-			svn://danse.us/sans/releases/park_integration-1.0.0 (run 'python setup.py install' under the 'park_integration-0.9.1' folder)
-			svn://danse.us/sans/releases/sansmodels-1.0.0 (run 'python setup.py install' under the 'sansmodels-0.9.1\src\' folder)
+			svn://danse.us/sans/releases/fittingview-1.0.0 (run 'python setup.py install' under the 'fittingview-1.0.0' folder)
+			svn://danse.us/sans/releases/sanscalculator-1.0.0 (run 'python setup.py install' under the 'sanscalculator-1.0.0' folder)
+			svn://danse.us/sans/releases/sanscalculator-1.0.0 (run 'python setup.py install' under the 'sanscalculator-1.0.0' folder)
+			svn://danse.us/sans/releases/sansinvariant-1.0.0 (run 'python setup.py install' under the 'sansinvariant-1.0.0' folder)
+			svn://danse.us/sans/releases/invariantview-1.0.0 (run 'python setup.py install' under the 'invariantview-1.0.0' folder)
+			svn://danse.us/sans/releases/sansguiframe-1.0.0 (run 'python setup.py install' under the 'sansguiframe-1.0.0' folder)
+			svn://danse.us/sans/releases/sansdataloader-1.0.0 (run 'python setup.py install' under the 'sansdataloader-1.0.0' folder)
+			svn://danse.us/sans/releases/park_integration-1.0.0 (run 'python setup.py install' under the 'park_integration-1.0.0' folder)
+			svn://danse.us/sans/releases/sansmodels-1.0.0 (run 'python setup.py install' under the 'sansmodels-1.0.0' folder)
 			svn://danse.us/park/releases/park-1.2.1 (run 'python setup.py install' under the 'park-1.2.1' folder)
-	        svn://danse.us/common/releases/plottools-1.0.0 (run 'python setup.py install'under the 'plottools-0.9.1\trunk\' folder)
-	        svn://danse.us/common/releases/util-1.0.0 (run 'python setup.py install'under the 'util-0.1.5' folder)
-	        svn://danse.us/sans/releases/pr_inversion-1.0.0(run 'python setup.py install'under the 'pr_inversion-0.9' folder)
-	        svn://danse.us/sans/releases/inversionview-1.0.0 (run 'python setup.py install'under the 'prview-0.9.1' folder)
+	        svn://danse.us/common/releases/plottools-1.0.0 (run 'python setup.py install'under the 'plottools-1.0.0' folder)
+	        svn://danse.us/common/releases/util-1.0.0 (run 'python setup.py install'under the 'util-1.0.0' folder)
+	        svn://danse.us/sans/releases/pr_inversion-1.0.0(run 'python setup.py install'under the 'pr_inversion-1.0.0' folder)
+	        svn://danse.us/sans/releases/inversionview-1.0.0 (run 'python setup.py install'under the 'inversionview-1.0.0' folder)
 		- The following modules are required:
 			* matplotlib = 0.99.0(WIN), 0.99.1.1(MAC)
 			* numpy = 1.4.1
