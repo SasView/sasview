@@ -21,7 +21,11 @@
    data_editor.rst
    detector_editor.rst
    help_panel.rst
+   kiessig_calculator_panel.rst
    load_thread.rst
+   pyconsole.rst
+   resolcal_thread.rst
+   resolution_calculator_panel.rst
    sample_editor.rst
    sld_panel.rst
    slit_length_calculator_panel.rst
