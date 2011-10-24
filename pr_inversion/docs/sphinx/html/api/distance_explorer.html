@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>distance_explorer &mdash; pr_inversion v0.1.0 documentation</title>
+    <title>distance_explorer &mdash; pr_inversion 0.1.0 documentation</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -22,7 +25,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="pr_inversion v0.1.0 documentation" href="../index.html" />
+    <link rel="top" title="pr_inversion 0.1.0 documentation" href="../index.html" />
     <link rel="up" title="Reference" href="index.html" />
     <link rel="next" title="invertor" href="invertor.html" />
     <link rel="prev" title="Reference" href="index.html" /> 
@@ -43,7 +46,7 @@
         <li class="right" >
           <a href="index.html" title="Reference"
              accesskey="P">previous</a> |</li>
-        <li><a href="../index.html">pr_inversion v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">pr_inversion 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
       </ul>
     </div>  
@@ -55,17 +58,125 @@
             
   <div class="section" id="distance-explorer">
 <h1>distance_explorer<a class="headerlink" href="#distance-explorer" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-sans.pr.distance_explorer">
-<span id="sans-pr-distance-explorer"></span><h2><a class="reference internal" href="#module-sans.pr.distance_explorer" title="sans.pr.distance_explorer"><tt class="xref py py-mod docutils literal"><span class="pre">sans.pr.distance_explorer</span></tt></a><a class="headerlink" href="#module-sans.pr.distance_explorer" title="Permalink to this headline">¶</a></h2>
-<p>Module to explore the P(r) inversion results for a range
+<div class="section" id="sans-pr-distance-explorer">
+<h2><a class="reference internal" href="#module-sans.pr.distance_explorer" title="sans.pr.distance_explorer"><tt class="xref py py-mod docutils literal"><span class="pre">sans.pr.distance_explorer</span></tt></a><a class="headerlink" href="#sans-pr-distance-explorer" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-sans.pr.distance_explorer"></span><p>Module to explore the P(r) inversion results for a range
 of D_max value. User picks a number of points and a range of
 distances, then get a series of outputs as a function of D_max
 over that range.</p>
 <dl class="class">
 <dt id="sans.pr.distance_explorer.DistExplorer">
-<em class="property">class </em><tt class="descclassname">sans.pr.distance_explorer.</tt><tt class="descname">DistExplorer</tt><big>(</big><em>pr_state</em><big>)</big><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">sans.pr.distance_explorer.</tt><tt class="descname">DistExplorer</tt><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
 <p>The explorer class</p>
+<dl class="method">
+<dt id="sans.pr.distance_explorer.DistExplorer.__call__">
+<tt class="descname">__call__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the outputs as a function of D_max.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dmin</strong> &#8211; minimum value for D_max</li>
+<li><strong>dmax</strong> &#8211; maximum value for D_max</li>
+<li><strong>npts</strong> &#8211; number of points for D_max</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.pr.distance_explorer.DistExplorer.__class__">
+<tt class="descname">__class__</tt><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer.__class__" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <tt class="xref py py-class docutils literal"><span class="pre">type</span></tt></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.pr.distance_explorer.DistExplorer.__delattr__">
+<tt class="descname">__delattr__</tt><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer.__delattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__delattr__(&#8216;name&#8217;) &lt;==&gt; del x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.pr.distance_explorer.DistExplorer.__dict__">
+<tt class="descname">__dict__</tt><em class="property"> = &lt;dictproxy object at 0x018F9B90&gt;</em><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="sans.pr.distance_explorer.DistExplorer.__getattribute__">
+<tt class="descname">__getattribute__</tt><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer.__getattribute__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__getattribute__(&#8216;name&#8217;) &lt;==&gt; x.name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.pr.distance_explorer.DistExplorer.__hash__">
+<tt class="descname">__hash__</tt><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__hash__() &lt;==&gt; hash(x)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.pr.distance_explorer.DistExplorer.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pr_state</strong> &#8211; sans.pr.invertor.Invertor object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.pr.distance_explorer.DistExplorer.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.pr.distance_explorer'</em><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="sans.pr.distance_explorer.DistExplorer.__new__">
+<em class="property">static </em><tt class="descname">__new__</tt><big>(</big><em>S</em>, <em>...</em><big>)</big> &rarr; a new object with type S, a subtype of T<a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer.__new__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="sans.pr.distance_explorer.DistExplorer.__reduce__">
+<tt class="descname">__reduce__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer.__reduce__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="sans.pr.distance_explorer.DistExplorer.__reduce_ex__">
+<tt class="descname">__reduce_ex__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer.__reduce_ex__" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper for pickle</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.pr.distance_explorer.DistExplorer.__repr__">
+<tt class="descname">__repr__</tt><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__repr__() &lt;==&gt; repr(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.pr.distance_explorer.DistExplorer.__setattr__">
+<tt class="descname">__setattr__</tt><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer.__setattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__setattr__(&#8216;name&#8217;, value) &lt;==&gt; x.name = value</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.pr.distance_explorer.DistExplorer.__str__">
+<tt class="descname">__str__</tt><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__str__() &lt;==&gt; str(x)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.pr.distance_explorer.DistExplorer.__weakref__">
+<tt class="descname">__weakref__</tt><a class="headerlink" href="#sans.pr.distance_explorer.DistExplorer.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -73,6 +184,18 @@ over that range.</p>
 <em class="property">class </em><tt class="descclassname">sans.pr.distance_explorer.</tt><tt class="descname">Results</tt><a class="headerlink" href="#sans.pr.distance_explorer.Results" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class to hold the inversion output parameters
 as a function of D_max</p>
+<dl class="method">
+<dt id="sans.pr.distance_explorer.Results.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#sans.pr.distance_explorer.Results.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization. Create empty arrays
+and dictionary of labels.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="sans.pr.distance_explorer.Results.__module__">
+<tt class="descname">__module__</tt><em class="property"> = 'sans.pr.distance_explorer'</em><a class="headerlink" href="#sans.pr.distance_explorer.Results.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
@@ -87,7 +210,7 @@ as a function of D_max</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">distance_explorer</a><ul>
-<li><a class="reference internal" href="#module-sans.pr.distance_explorer"><tt class="docutils literal"><span class="pre">sans.pr.distance_explorer</span></tt></a></li>
+<li><a class="reference internal" href="#sans-pr-distance-explorer"><tt class="docutils literal"><span class="pre">sans.pr.distance_explorer</span></tt></a></li>
 </ul>
 </li>
 </ul>
@@ -106,7 +229,7 @@ as a function of D_max</p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" size="18" />
+      <input type="text" name="q" />
       <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
@@ -135,13 +258,13 @@ as a function of D_max</p>
         <li class="right" >
           <a href="index.html" title="Reference"
              >previous</a> |</li>
-        <li><a href="../index.html">pr_inversion v0.1.0 documentation</a> &raquo;</li>
+        <li><a href="../index.html">pr_inversion 0.1.0 documentation</a> &raquo;</li>
           <li><a href="index.html" >Reference</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, sans group.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
     </div>
   </body>
 </html>
