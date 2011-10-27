@@ -1,0 +1,212 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>binder &mdash; plottools 0.10 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="plottools 0.10 documentation" href="../index.html" />
+    <link rel="up" title="Reference" href="index.html" />
+    <link rel="next" title="canvas" href="canvas.html" />
+    <link rel="prev" title="BaseInteractor" href="BaseInteractor.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="canvas.html" title="canvas"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="BaseInteractor.html" title="BaseInteractor"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">plottools 0.10 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="binder">
+<h1>binder<a class="headerlink" href="#binder" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="danse-common-plottools-binder">
+<h2><a class="reference internal" href="#module-danse.common.plottools.binder" title="danse.common.plottools.binder"><tt class="xref py py-mod docutils literal"><span class="pre">danse.common.plottools.binder</span></tt></a><a class="headerlink" href="#danse-common-plottools-binder" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-danse.common.plottools.binder"></span><p>Extension to MPL to support the binding of artists to key/mouse events.</p>
+<dl class="class">
+<dt id="danse.common.plottools.binder.BindArtist">
+<em class="property">class </em><tt class="descclassname">danse.common.plottools.binder.</tt><tt class="descname">BindArtist</tt><a class="headerlink" href="#danse.common.plottools.binder.BindArtist" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="danse.common.plottools.binder.BindArtist.alt">
+<tt class="descname">alt</tt><em class="property"> = False</em><a class="headerlink" href="#danse.common.plottools.binder.BindArtist.alt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="danse.common.plottools.binder.BindArtist.clear">
+<tt class="descname">clear</tt><big>(</big><em>h1</em>, <em>h2</em>, <em>...</em><big>)</big><a class="headerlink" href="#danse.common.plottools.binder.BindArtist.clear" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>Remove connections for artists h1, h2, ...</div></blockquote>
+<p>Use clearall() to reset all connections.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="danse.common.plottools.binder.BindArtist.clearall">
+<tt class="descname">clearall</tt><big>(</big><big>)</big><a class="headerlink" href="#danse.common.plottools.binder.BindArtist.clearall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear connections to all artists.</p>
+<p>Use clear(h1,h2,...) to reset specific artists.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="danse.common.plottools.binder.BindArtist.control">
+<tt class="descname">control</tt><em class="property"> = False</em><a class="headerlink" href="#danse.common.plottools.binder.BindArtist.control" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="danse.common.plottools.binder.BindArtist.dclick_threshhold">
+<tt class="descname">dclick_threshhold</tt><em class="property"> = 0.25</em><a class="headerlink" href="#danse.common.plottools.binder.BindArtist.dclick_threshhold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="danse.common.plottools.binder.BindArtist.disconnect">
+<tt class="descname">disconnect</tt><big>(</big><big>)</big><a class="headerlink" href="#danse.common.plottools.binder.BindArtist.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>In case we need to disconnect from the canvas...</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="danse.common.plottools.binder.BindArtist.events">
+<tt class="descname">events</tt><em class="property"> = ['enter', 'leave', 'motion', 'click', 'dclick', 'drag', 'release', 'scroll', 'key', 'keyup']</em><a class="headerlink" href="#danse.common.plottools.binder.BindArtist.events" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="danse.common.plottools.binder.BindArtist.meta">
+<tt class="descname">meta</tt><em class="property"> = False</em><a class="headerlink" href="#danse.common.plottools.binder.BindArtist.meta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="danse.common.plottools.binder.BindArtist.shift">
+<tt class="descname">shift</tt><em class="property"> = False</em><a class="headerlink" href="#danse.common.plottools.binder.BindArtist.shift" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="danse.common.plottools.binder.BindArtist.trigger">
+<tt class="descname">trigger</tt><big>(</big><big>)</big><a class="headerlink" href="#danse.common.plottools.binder.BindArtist.trigger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trigger a particular event for the artist.  Fallback to axes,
+to figure, and to &#8216;all&#8217; if the event is not processed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="danse.common.plottools.binder.Selection">
+<em class="property">class </em><tt class="descclassname">danse.common.plottools.binder.</tt><tt class="descname">Selection</tt><a class="headerlink" href="#danse.common.plottools.binder.Selection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store and compare selections.</p>
+<dl class="attribute">
+<dt id="danse.common.plottools.binder.Selection.artist">
+<tt class="descname">artist</tt><em class="property"> = None</em><a class="headerlink" href="#danse.common.plottools.binder.Selection.artist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="danse.common.plottools.binder.Selection.prop">
+<tt class="descname">prop</tt><em class="property"> = {}</em><a class="headerlink" href="#danse.common.plottools.binder.Selection.prop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">binder</a><ul>
+<li><a class="reference internal" href="#danse-common-plottools-binder"><tt class="docutils literal"><span class="pre">danse.common.plottools.binder</span></tt></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="BaseInteractor.html"
+                        title="previous chapter">BaseInteractor</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="canvas.html"
+                        title="next chapter">canvas</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/api/binder.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="canvas.html" title="canvas"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="BaseInteractor.html" title="BaseInteractor"
+             >previous</a> |</li>
+        <li><a href="../index.html">plottools 0.10 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, sans/reflectometry group.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.
+    </div>
+  </body>
+</html>
