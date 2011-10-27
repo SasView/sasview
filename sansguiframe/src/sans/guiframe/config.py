@@ -22,6 +22,7 @@ __EVT_DEBUG_FILENAME__ = "debug.log"
 
 # About box info
 _do_aboutbox = True
+_do_tutorial = True
 _acknowledgement =  \
 '''This software was developed by the University of Tennessee as part of the
 Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
