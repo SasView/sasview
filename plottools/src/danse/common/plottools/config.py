@@ -33,12 +33,11 @@ plot_version = "0.98"
 plot_backend = "WXAgg"
 
 # Sort out matplotlib version
+import matplotlib
 try:
-    import matplotlib
     import pkg_resources
     pkg_resources.require("matplotlib>=" + plot_version)
 except:
-    #import matplotlib
     from distutils.version import LooseVersion as Version
     if Version(matplotlib.__version__) < Version(plot_version):
         msg = "Matplotlib version must be %s or newer" % (plot_version, )
