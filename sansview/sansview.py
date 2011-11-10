@@ -15,7 +15,7 @@ import sys
 # The below will make sure that sansview application uses the matplotlib font 
 # bundled with sansview. 
 if hasattr(sys, 'frozen'):
-    mplconfigdir = os.path.join(os.path.expenduser("~"), '.matplotlib')
+    mplconfigdir = os.path.join(os.path.expanduser("~"), '.matplotlib')
     if not os.path.exists(mplconfigdir):
         os.mkdir(mplconfigdir)
     os.environ['MPLCONFIGDIR'] = mplconfigdir
