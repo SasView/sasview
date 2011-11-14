@@ -632,7 +632,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 except:
                     has_errors = False
             if has_errors:
-                if data.dx != None or data.dx != []:
+                if data.dx != None and data.dx != []:
                     out.write("<X>   <Y>   <dY>   <dX>\n")
                 else:
                     out.write("<X>   <Y>   <dY>\n")
@@ -641,7 +641,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 
             for i in range(len(data.x)):
                 if has_errors:
-                    if data.dx != None or data.dx != []:
+                    if data.dx != None and data.dx != []:
                         out.write("%g  %g  %g  %g\n" % (data.x[i], 
                                                     data.y[i],
                                                     data.dy[i],
