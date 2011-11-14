@@ -519,7 +519,6 @@ class PageState(object):
                 except:
                     pass
         paramval = ""
-        paramval_string += "<table> <tr>"
         for lines in param_string.split(":"): 
             line = lines.split(",")
             if len(lines) > 0: 
@@ -532,8 +531,7 @@ class PageState(object):
                 if not paramval.count(param):
                     paramval +=  param + "\n"
                     paramval_string += CENTRE % param + "\n"
-            paramval_string += '</tr>'
-        paramval_string += '</table>'
+        
         text_string = "\n\n\n" + title + "\n\n" + file + \
                               "\n" + q_name + \
                               "\n" + chi2 + \
@@ -1569,18 +1567,20 @@ HEADER += "%s</center></span></center></b></p>"
 HEADER += "<p class=MsoNormal>&nbsp;</p>"
 PARA = "<p class=MsoNormal> %s \n"
 PARA += "</p>"
-CENTRE = "<center> %s \n"
-CENTRE += "</center>"
+CENTRE = "<p class=MsoNormal><center> %s \n"
+CENTRE += "</center></p>"
 FEET_1 = \
 """
+<p class=MsoNormal>&nbsp;</p>
 <p class=MsoNormal><b><span ><center> Graph</span></center></b></p> 
+<p class=MsoNormal>&nbsp;</p> 
 <center> 
 <br>Model Computation<br> 
 <br>Data: "%s"<br> 
 """
 FEET_2 = \
 """
-<img src="%s" > 
+<img src="file://%s" > 
 </img>
 """
 FEET_3 = \
