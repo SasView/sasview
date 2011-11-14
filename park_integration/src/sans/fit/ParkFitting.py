@@ -438,7 +438,10 @@ class ParkFit(FitEngine):
                         small_result.fitness = result.fitness
                         small_result.pvec.append(p.value)
                         small_result.stderr.append(p.stderr)
-                        name = p.name.split('.')[1].strip()
+                        name_split = p.name.split('.')
+                        name = name_split[1].strip()
+                        if len(name_split) > 2:
+                            name += '.' + name_split[2].strip()
                         small_result.param_list.append(name)
             result_list.append(small_result)    
         if q != None:
