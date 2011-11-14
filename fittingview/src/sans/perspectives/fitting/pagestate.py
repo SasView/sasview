@@ -1580,7 +1580,7 @@ FEET_1 = \
 """
 FEET_2 = \
 """
-<img src="file://%s" > 
+<img src="%s" > 
 </img>
 """
 FEET_3 = \
