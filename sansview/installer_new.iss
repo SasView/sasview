@@ -7,14 +7,14 @@
 
 ChangesAssociations=yes
 AppName=SansView
-AppVerName=SansView-2.0.0
+AppVerName=SansView-2.0.1
 AppPublisher=(c) 2009 - 2011, University of Tennessee
 AppPublisherURL=http://danse.chem.utk.edu
 AppSupportURL=http://danse.chem.utk.edu
 AppUpdatesURL=http://danse.chem.utk.edu 
 ChangesEnvironment=true 
 DefaultDirName={pf}\SansView
-DefaultGroupName=DANSE\SansView-2.0.0
+DefaultGroupName=DANSE\SansView-2.0.1
 DisableProgramGroupPage=yes
 LicenseFile=license.txt
 OutputBaseFilename=setupSansView
@@ -74,7 +74,7 @@ Source: "media\*";	DestDir: "{app}\media";	Flags: ignoreversion recursesubdirs c
 [Icons]
 Name: "{group}\SansView";	Filename: "{app}\SansView.exe";	WorkingDir: "{app}" 
 Name: "{group}\{cm:UninstallProgram, SansView}";	 Filename: "{uninstallexe}" 
-Name: "{commondesktop}\SansView-2.0.0";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" 
+Name: "{commondesktop}\SansView-2.0.1";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" 
 
 
 [Run]

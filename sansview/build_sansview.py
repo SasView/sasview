@@ -60,36 +60,36 @@ INNO   = "\"c:\Program Files\Inno Setup 5\ISCC\""
 # Release version 2.0
 SANSMODELS = "1.0.0"
 DATALOADER = "1.0.0"
-GUIFRAME   = "1.0.0"
-SANSVIEW   = "2.0.0"
+GUIFRAME   = "1.0.1"
+SANSVIEW   = "2.0.1"
 PLOTTOOLS  = "1.0.0"
 UTIL       = "1.0.0"
 PARK       = "1.2.1"
-PARK_INTEG = "1.0.0"
+PARK_INTEG = "1.0.1"
 PRVIEW     = "1.0.0"
 PR_INV     = "1.0.0"
 CALCULATOR = "1.0.0"
 CALC_VIEW  = "1.0.0"
 INVARIANT  = "1.0.0"
 INV_VIEW   = "1.0.0"
-FIT_VIEW   = "1.0.0"
+FIT_VIEW   = "1.0.1"
 
 # URLs for SVN repos
-SANSMODELS_URL = "svn://danse.us/sans/releases/sansmodels-%s" % SANSMODELS
-DATALOADER_URL = "svn://danse.us/sans/releases/sansdataloader-%s" % DATALOADER
-GUIFRAME_URL = "svn://danse.us/sans/releases/sansguiframe-%s" % GUIFRAME
-PLOTTOOLS_URL = "svn://danse.us/common/releases/plottools-%s" % PLOTTOOLS
-UTIL_URL = "svn://danse.us/common/releases/util-%s" % UTIL
-SANSVIEW_URL = "svn://danse.us/sans/releases/sansview-%s" % SANSVIEW
-FIT_URL = "svn://danse.us/sans/releases/fittingview-%s" % FIT_VIEW
-PARK_INTEG_URL = "svn://danse.us/sans/releases/park_integration-%s" % PARK_INTEG
+SANSMODELS_URL = "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/sansmodels-%s" % SANSMODELS
+DATALOADER_URL = "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/sansdataloader-%s" % DATALOADER
+GUIFRAME_URL = "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/sansguiframe-%s" % GUIFRAME
+PLOTTOOLS_URL = "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/common-releases/plottools-%s" % PLOTTOOLS
+UTIL_URL = "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/common-releases/util-%s" % UTIL
+SANSVIEW_URL = "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/sansview-%s" % SANSVIEW
+FIT_URL = "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/fittingview-%s" % FIT_VIEW
+PARK_INTEG_URL = "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/park_integration-%s" % PARK_INTEG
 PARK_URL = "svn://danse.us/park/releases/park-%s" % PARK
-PRVIEW_URL = "svn://danse.us/sans/releases/inversionview-%s" % PRVIEW
-PR_INV_URL = "svn://danse.us/sans/releases/pr_inversion-%s" % PR_INV
-CALC_URL = "svn://danse.us/sans/releases/sanscalculator-%s" % CALCULATOR
-CALC_VIEW_URL = "svn://danse.us/sans/releases/calculatorview-%s" % CALC_VIEW
-INV_URL = "svn://danse.us/sans/releases/sansinvariant-%s" % INVARIANT
-INV_VIEW_URL = "svn://danse.us/sans/releases/invariantview-%s" % INV_VIEW
+PRVIEW_URL = "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/inversionview-%s" % PRVIEW
+PR_INV_URL = "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/pr_inversion-%s" % PR_INV
+CALC_URL = "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/sanscalculator-%s" % CALCULATOR
+CALC_VIEW_URL = "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/calculatorview-%s" % CALC_VIEW
+INV_URL = "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/sansinvariant-%s" % INVARIANT
+INV_VIEW_URL = "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/invariantview-%s" % INV_VIEW
 
 def check_system():
     """
@@ -170,92 +170,92 @@ def checkout(release=False):
     if release:
         install_pkg(".", "sansdataloader-%s" % DATALOADER, DATALOADER_URL)
     else:
-        install_pkg(".", "sansdataloader", "svn://danse.us/sans/trunk/sansdataloader")
+        install_pkg(".", "sansdataloader", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/sansdataloader")
     
     os.chdir(wd)
     if release:
         install_pkg(".", "sansmodels-%s" % SANSMODELS, SANSMODELS_URL)
     else:
-        install_pkg(".", "sansmodels", "svn://danse.us/sans/trunk/sansmodels")
+        install_pkg(".", "sansmodels", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/sansmodels")
     
     os.chdir(wd)
     if release:
         install_pkg(".", "sansguiframe-%s" % GUIFRAME, GUIFRAME_URL)
     else:
-        install_pkg(".", "sansguiframe", "svn://danse.us/sans/trunk/sansguiframe")
+        install_pkg(".", "sansguiframe", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/sansguiframe")
     
     os.chdir(wd)
     if release:
         install_pkg(".", "plottools-%s" % PLOTTOOLS, PLOTTOOLS_URL)
     else:
-        install_pkg(".", "plottools", "svn://danse.us/common/plottools")
+        install_pkg(".", "plottools", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/plottools")
     
     os.chdir(wd)
     if release:
         install_pkg(".", "util-%s" % UTIL, UTIL_URL)
     else:
-        install_pkg(".", "util", "svn://danse.us/common/util")
+        install_pkg(".", "util", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/sansutil")
     
     os.chdir(wd)
     if release:
         install_pkg(".", "park_integration-%s" % PARK_INTEG, PARK_INTEG_URL)
     else:
-        install_pkg(".", "park_integration", "svn://danse.us/sans/trunk/park_integration")
+        install_pkg(".", "park_integration", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/park_integration")
     
     os.chdir(wd)
     if release:
         install_pkg(".", "inversionview-%s" % PRVIEW, PRVIEW_URL)
     else:
-        install_pkg(".", "inversionview", "svn://danse.us/sans/trunk/inversionview")
+        install_pkg(".", "inversionview", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/inversionview")
     
     os.chdir(wd)
     if release:
         install_pkg(".", "pr_inversion-%s" % PR_INV, PR_INV_URL)
     else:
-        install_pkg(".", "pr_inversion", "svn://danse.us/sans/trunk/pr_inversion")
+        install_pkg(".", "pr_inversion", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/pr_inversion")
     
     os.chdir(wd)
     if release:
         install_pkg(".", "sansinvariant-%s" % INVARIANT, INV_URL)
     else:
-        install_pkg(".", "sansinvariant", "svn://danse.us/sans/trunk/sansinvariant")
+        install_pkg(".", "sansinvariant", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/sansinvariant")
     
     os.chdir(wd)
     if release:
         install_pkg(".", "invariantview-%s" % INV_VIEW, INV_VIEW_URL)
     else:
-        install_pkg(".", "invariantview", "svn://danse.us/sans/trunk/invariantview")
+        install_pkg(".", "invariantview", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/invariantview")
     
     os.chdir(wd)
     if release:
         install_pkg(".", "calculatorview-%s" % CALC_VIEW, CALC_VIEW_URL)
     else:
-        install_pkg(".", "calculatorview", "svn://danse.us/sans/trunk/calculatorview")
+        install_pkg(".", "calculatorview", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/calculatorview")
     
     os.chdir(wd)
     if release:
         install_pkg(".", "sanscalculator-%s" % CALCULATOR, CALC_URL)
     else:
-        install_pkg(".", "sanscalculator", "svn://danse.us/sans/trunk/sanscalculator")
+        install_pkg(".", "sanscalculator", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/sanscalculator")
 
 
     os.chdir(wd)
     if release:
         install_pkg(".", "park-%s" % PARK, PARK_URL)
     else:
-        install_pkg(".", "park-1.2", "svn://danse.us/park/branches/park-1.2")
+        install_pkg(".", "park-1.2", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/park-1.2")
         
     os.chdir(wd)
     if release:
         install_pkg(".", "fittingview-%s" % FIT_VIEW, FIT_URL)
     else:
-        install_pkg(".", "fittingview", "svn://danse.us/sans/trunk/fittingview")
+        install_pkg(".", "fittingview", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/fittingview")
             
     os.chdir(wd)
     if release:
         os.system("%s checkout -q %s" % (SVN, SANSVIEW_URL))
     else:
-        os.system("%s checkout -q svn://danse.us/sans/trunk/sansview" % SVN)
+        os.system("%s checkout -q https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/sansview" % SVN)
     # put build number to local_config
     try:
         build_num = os.path.basename(wd).split('_')[1] 
