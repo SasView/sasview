@@ -18,17 +18,19 @@ import sys
 import os
 import wx.html as html
 
-if sys.platform.count("win32") > 0:
+_STATICBOX_WIDTH = 480
+PANEL_WIDTH = 530
+PANEL_HEIGHT = 700
+FONT_VARIANT = 1
+ISMAC = False
+
+if sys.platform == "win32":
     _STATICBOX_WIDTH = 450
     PANEL_WIDTH = 500 
     PANEL_HEIGHT = 700
     FONT_VARIANT = 0
     ISMAC = False
-else:
-    _STATICBOX_WIDTH = 480
-    PANEL_WIDTH = 530
-    PANEL_HEIGHT = 700
-    FONT_VARIANT = 1
+elif sys.platform == "darwin":
     ISMAC = True
     
 
