@@ -27,6 +27,12 @@ from welcome_panel import WelcomePanel
 import local_config
 import logging
 
+def run():
+    """
+        Run function for linux/OSX installations
+    """
+    module_path,_ = os.path.split(__file__)
+    os.system("cd %s;python sansview.py" % module_path)
 
 class SansViewApp(gui_manager.ViewApp):
     """
