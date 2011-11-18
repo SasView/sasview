@@ -287,7 +287,7 @@ class ViewerFrame(wx.Frame):
         self.on_batch_selection(event=None)
         self.add_icon()
         # Check for update
-        #self._check_update(None)
+        self._check_update(None)
         # Register the close event so it calls our own method
         wx.EVT_CLOSE(self, self.Close)
         # Register to status events
@@ -656,7 +656,7 @@ class ViewerFrame(wx.Frame):
         # Set up extra custom tool menu
         self._setup_extra_custom()
         #self.Show(True)
-        #self._check_update(None)
+        self._check_update(None)
     
     def _setup_extra_custom(self):  
         """
@@ -697,13 +697,13 @@ class ViewerFrame(wx.Frame):
         """
         """
         number = self.sb.get_msg_position()
-        wx.Frame.SetStatusText(number=number, *args, **kwds)
+        wx.Frame.SetStatusText(self, number=number, *args, **kwds)
         
     def PopStatusText(self, *args, **kwds):
         """
         """
         field = self.sb.get_msg_position()
-        wx.Frame.PopStatusText(field=field)
+        wx.Frame.PopStatusText(self, field=field)
         
     def PushStatusText(self, *args, **kwds):
         """
@@ -1232,7 +1232,7 @@ class ViewerFrame(wx.Frame):
         #id = wx.NewId()
         #self._help_menu.Append(id,'&Check for update', 
         #'Check for the latest version of %s' % config.__appname__)
-        #wx.EVT_MENU(self, id, self._check_update)
+        wx.EVT_MENU(self, id, self._check_update)
         self._menubar.Append(self._help_menu, '&Help')
             
     def _add_menu_view(self):
@@ -2084,9 +2084,10 @@ class ViewerFrame(wx.Frame):
         A thread is started for the connecting with the server. The thread calls
         a call-back method when the current version number has been obtained.
         """
+        
         if hasattr(config, "__update_URL__"):
             import version
-            checker = version.VersionThread(config.__update_URL__,
+            checker = version.VersionThread2(config.__update_URL__,
                                             self._process_version,
                                             baggage=event==None)
             checker.start()  
@@ -2105,8 +2106,8 @@ class ViewerFrame(wx.Frame):
         """
         try:
             if cmp(version, config.__version__) > 0:
-                msg = "Version %s is available! See the Help "
-                msg += "menu to download it." % version
+                msg = "Version %s is available! See the Help " % str(version)
+                msg += "menu to download it." 
                 self.SetStatusText(msg)
                 if not standalone:
                     import webbrowser
@@ -2114,7 +2115,7 @@ class ViewerFrame(wx.Frame):
             else:
                 if not standalone:
                     msg = "You have the latest version"
-                    msg += " of %s" % config.__appname__
+                    msg += " of %s" % str(config.__appname__)
                     self.SetStatusText(msg)
         except:
             msg = "guiframe: could not get latest application"
@@ -3205,7 +3206,7 @@ class ViewApp(wx.App):
         """
         self.frame.Show(True)
         event.Skip()
-      
+
 if __name__ == "__main__": 
     app = ViewApp(0)
     app.MainLoop()

@@ -13,6 +13,8 @@
 import sys
 import time
 import subprocess
+import urllib
+import re
 import os
 import getopt
 from threading import Thread
@@ -21,6 +23,8 @@ from threading import Thread
 MAX_WAIT_TIME = 20
 ## Local storage file name
 VERSION_FILE  = '.current_version'
+
+DEFAULT_VERSION = '0.0.0'
 
 class VersionChecker(object):
     """
@@ -70,7 +74,7 @@ class VersionChecker(object):
             f = open(VERSION_FILE, 'r')
             return f.read()
         except:
-            return '0.0.0'
+            return DEFAULT_VERSION
 
 class VersionThread(Thread):
     """
@@ -95,6 +99,63 @@ class VersionThread(Thread):
         while(not checker.is_complete()):
             time.sleep(1)
         self._call_back(checker.get_version(), self._baggage)
+        
+  
+def get_version(url, q=None):
+    """
+    """
+    h = urllib.urlopen(url)
+    for line in h.readlines():
+        version = line.strip()
+        if len(re.findall('\d+\.\d+\.\d+$', version)) > 0:
+            if q is not None:
+                q.put(version)
+            return version
+    if q is not None:
+        q.put(DEFAULT_VERSION)
+    return DEFAULT_VERSION
+      
+class VersionThread2(Thread):
+    """
+    Thread used to start the process of reading the current version of an
+    application from the deployment server. 
+   
+    The VersionChecker is user in a Thread to allow the main application
+    to continue dealing with UI requests from the user. The main application
+    provides a call-back method for when the version number is obtained. 
+    """
+    def __init__ (self, url, call_back=None, baggage=None):
+        Thread.__init__(self)
+        self._url = url
+        self._call_back = call_back
+        self._baggage = baggage
+        self._t_0 = time.time()
+      
+    def run(self):
+        """
+        Execute the process of reading the current application version number.
+        """
+        def is_complete(p):
+            """
+            """
+            if(time.time() - self._t_0 < MAX_WAIT_TIME):
+                if p.is_alive():
+                    return True
+                return False
+            else:
+                return False
+            
+        from multiprocessing import Process, Queue
+        q = Queue()
+        p = Process(target=get_version, args=(self._url, q,))
+        p.start()
+        while(not is_complete(p)):
+            time.sleep(1)
+        version = q.get()
+        p.join()
+        p.terminate()
+        self._call_back(version, self._baggage)
+    
             
 def write_version(version, filename=VERSION_FILE):
     """
@@ -113,18 +174,13 @@ def _get_version_from_server(url):
     :param url: URL to read the version number from
     
     """
-    import urllib
-    import re
     try: 
-        h = urllib.urlopen(url)
-        for line in h.readlines():
-            version = line.strip()
-            if len(re.findall('\d+\.\d+\.\d+$', version)) > 0:
-                write_version(version)
-                return       
-        write_version('0.0.0')
+        version = _get_version(url)
+        write_version(version)
     except:
-        write_version('0.0.0')
+        write_version(DEFAULT_VERSION)
+        
+        
         
 if __name__ == "__main__": 
     _get_version = False
