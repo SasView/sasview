@@ -6,8 +6,11 @@ import sys
 import os
 #from distutils.core import setup, Extension
 from setuptools import setup, Extension, find_packages
-from numpy.distutils.misc_util import get_numpy_include_dirs
-
+try:
+    from numpy.distutils.misc_util import get_numpy_include_dirs
+except:
+    print "\nNumpy is needed to build SansView. Try easy_install numpy.\n"
+    sys.exit(0)
 
 package_dir = {}
 package_data = {}
