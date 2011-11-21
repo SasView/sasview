@@ -3,15 +3,18 @@ For Mac and Windows, run the appropriate installer found at https://sourceforge.
 
 
 * LINUX INSTALLATION
+
+Create a directory where you want to install SansView. For example:
+	mkdir ~/my_username/sansview_dir
+	
+Make sure that this directory is on the python path:
+	export PYTHONPATH=~/my_username/sansview_dir
+
 Download the .egg file and run the following:
 
-easy_install --user sansview[...].egg
+easy_install -d=~/my_username/sansview_dir sansview[...].egg
 
-Alternatively, you can run:
+SansView can then be started by calling:
 
-easy_install --prefix [path to install directory] sansview[...].egg
-
-SansView can then be started by bin calling:
-
-[path to install directory]/sansview
+~/my_username/sansview_dir/sansview
 
