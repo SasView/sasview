@@ -308,8 +308,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                                                     self._manager.id_reset_flag)
             chain_menu.Enable(self.batch_on)
             sim_menu = self._manager.menu1.FindItemById(self._manager.id_simfit)
-            sim_menu.Enable(not self.batch_on and self.data.is_data\
-                            and (self.model!=None)) 
+            flag = self.data.is_data\
+                            and (self.model!=None)
+            sim_menu.Enable(not self.batch_on and flag)
+            batch_menu = self._manager.menu1.FindItemById(self._manager.id_batchfit)
+            batch_menu.Enable(self.batch_on and flag) 
     
     class ModelTextCtrl(wx.TextCtrl):
         """

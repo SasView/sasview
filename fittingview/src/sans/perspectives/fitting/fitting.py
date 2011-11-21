@@ -97,6 +97,9 @@ class Plugin(PluginBase):
         self.model2D_id = None
         #keep reference of the simultaneous fit page
         self.sim_page = None
+        self.sim_menu = None
+        self.batch_page = None
+        self.batch_menu = None
         self.index_model = 0
         self.test_model_color = None
         #Create a reader for fit page's state
@@ -169,12 +172,18 @@ class Plugin(PluginBase):
         simul_help = "Simultaneous Fit"
         self.menu1.Append(self.id_simfit, '&Simultaneous Fit',simul_help)
         wx.EVT_MENU(owner, self.id_simfit, self.on_add_sim_page)
-        sim_menu = self.menu1.FindItemById(self.id_simfit)
-        sim_menu.Enable(False) 
-        
+        self.sim_menu = self.menu1.FindItemById(self.id_simfit)
+        self.sim_menu.Enable(False) 
+        #combined Batch
+        self.id_batchfit = wx.NewId()
+        batch_help = "Batch Fit"
+        self.menu1.Append(self.id_batchfit, '&Combine Batch Fit', batch_help)
+        wx.EVT_MENU(owner, self.id_batchfit,  self.on_add_sim_page)
+        self.batch_menu = self.menu1.FindItemById(self.id_batchfit)
+        self.batch_menu.Enable(False) 
         self.menu1.AppendSeparator()
         #Set park engine
-        scipy_help= "Scipy Engine: Perform Simple fit. More in Help window...."
+        scipy_help = "Scipy Engine: Perform Simple fit. More in Help window...."
         self.menu1.AppendCheckItem(self.scipy_id, "Simple FitEngine [LeastSq]",
                                    scipy_help) 
         wx.EVT_MENU(owner, self.scipy_id,  self._onset_engine_scipy)
@@ -208,21 +217,33 @@ class Plugin(PluginBase):
         chain_menu.Enable(self.batch_on)
         #create  menubar items
         return [(self.menu1, self.sub_menu)]
-               
+            
+   
     def on_add_sim_page(self, event):
         """
         Create a page to access simultaneous fit option
         """
-        if self.sim_page != None:
-            self.sim_page.Show(True)
-            self.sim_page.Refresh()
-            self.sim_page.SetFocus()
+        id = event.GetId()
+        caption = "Simultaneous Fit"
+        page = self.sim_page
+        if id == self.id_batchfit:
+            caption = "Batch Fit"
+            page = self.batch_page
+            
+        def set_focus_page(page):
+            page.Show(True)
+            page.Refresh()
+            page.SetFocus()
             self.parent._mgr.Update()
-            msg= "Simultaneous Fit page already opened"
-            wx.PostEvent(self.parent, StatusEvent(status= msg))
-            return 
-        
-        self.sim_page= self.fit_panel.add_sim_page()
+            msg = "%s already opened\n" % str(page.window_caption)
+            wx.PostEvent(self.parent, StatusEvent(status=msg))
+            
+        if page != None:
+            return set_focus_page(page)
+        if caption == "Simultaneous Fit":
+            self.sim_page = self.fit_panel.add_sim_page(caption=caption)
+        else:
+            self.batch_page = self.fit_panel.add_sim_page(caption=caption)
         
     def help(self, evt):
         """
@@ -546,7 +567,7 @@ class Plugin(PluginBase):
         """  
         sim_page_id = self.sim_page.uid
         for uid, value in self.page_finder.iteritems():
-            if uid != sim_page_id:
+            if uid != sim_page_id and uid != self.batch_page.uid:
                 list = value.get_model()
                 model = list[0]
                 if model.name == modelname:
@@ -613,12 +634,14 @@ class Plugin(PluginBase):
             del self.fit_thread_list[uid]
         #set the fit button label of page when fit stop is trigger from
         #simultaneous fit pane
-        if  self.sim_page is not None and uid == self.sim_page.uid:
+        sim_flag = self.sim_page is not None and uid == self.sim_page.uid
+        batch_flag = self.batch_page is not None and uid == self.batch_page.uid
+        if sim_flag or batch_flag:
             for uid, value in self.page_finder.iteritems():
                 if value.get_scheduled() == 1:
                     if uid in self.fit_panel.opened_pages.keys():
                         panel = self.fit_panel.opened_pages[uid]
-                        panel. _on_fit_complete()
+                        panel._on_fit_complete()
   
     def set_smearer(self, uid, smearer, fid, qmin=None, qmax=None, draw=True,
                     enable_smearer=False):
@@ -745,13 +768,16 @@ class Plugin(PluginBase):
         fitter_list = []        
         sim_fitter = None     
         is_single_fit = True
+        batch_on = False
         if self.sim_page is not None and self.sim_page.uid == uid:
             #simulatanous fit only one engine need to be created 
             ## if simultaneous fit change automatically the engine to park
             self._on_change_engine(engine='park')   
             sim_fitter = Fit(self._fit_engine)  
+            sim_fitter.fitter_id = self.sim_page.uid
             fitter_list.append(sim_fitter) 
             is_single_fit = False
+            batch_on = self.sim_page.batch_on
             
 
         self.fitproblem_count = fitproblem_count  
@@ -769,8 +795,10 @@ class Plugin(PluginBase):
             # For simulfit (uid give with None), do for-loop
             # if uid is specified (singlefit), do it only on the page.
             if engineType == "Single Fit":
-                if page_id != uid:
-                    continue
+                #combine more than 1 batch page on single mode
+                if self.batch_page is None or self.batch_page.uid != uid:
+                    if page_id != uid:
+                        continue
             try:
                 if value.get_scheduled() == 1:
                     value.nbr_residuals_computed = 0
@@ -798,6 +826,7 @@ class Plugin(PluginBase):
                     for fitproblem in  fitproblem_list:
                         if sim_fitter is None:
                             fitter = Fit(self._fit_engine)  
+                            fitter.fitter_id = page_id
                             self._fit_helper(fitproblem=fitproblem, 
                                                 pars=pars, 
                                                 fitter=fitter,
@@ -839,8 +868,16 @@ class Plugin(PluginBase):
             page = self.fit_panel.get_page_by_id(uid)
             batch_on = page.batch_on
         except:
-            batch_on = False
-
+            try:
+                #if the id cannot be found then  we deal with a self.sim_page 
+                #or a self.batch_page
+                if self.sim_page is not None and uid == self.sim_page.uid:
+                    batch_on = self.sim_page.uid
+                if self.batch_page is not None and uid == self.batch_page.uid:
+                    batch_on = self.batch_page.uid
+            except:
+                raise
+  
         # batch fit
         if batch_on:
             calc_fit = FitThread(handler = handler,
@@ -977,6 +1014,9 @@ class Plugin(PluginBase):
                         caption=page.window_caption)
         if self.sim_page is not None and not self.batch_on:
             self.sim_page.draw_page()
+        if self.batch_page is not None and self.batch_on:
+            self.batch_page.draw_page()
+            
         return page
             
     def _onEVT_SLICER_PANEL(self, event):
@@ -1101,123 +1141,150 @@ class Plugin(PluginBase):
         msg += "Duration time: %s s.\n" % str(elapsed)
         wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                                       type="stop"))
-        pid = page_id[0]
-        cpage = self.fit_panel.get_page_by_id(pid)
-        batch_on = cpage.batch_on
+       
         if batch_outputs is None:
             batch_outputs = {}
-        if batch_on:
-            # format batch_outputs
-            batch_outputs["Chi2"] = []
-            for index  in range(len(pars)):
-                batch_outputs[pars[index]] = []
-                batch_inputs["error on %s" % pars[index]] = []
-            msg = ""
-            for list_res in result:
-                for res in list_res:
-                    model, data = res.inputs[0]
-                    correct_result = False
-                    if model is not None and hasattr(model, "model"):
-                        model = model.model
-                    if data is not None and hasattr(data, "sans_data"):
-                        data = data.sans_data
-                    is_data2d = issubclass(data.__class__, Data2D)
-                    #check consistency of arrays
-                    if not is_data2d:
-                        if len(res.theory) == len(res.index[res.index]) and \
-                            len(res.index) == len(data.y):
-                            correct_result = True
-                    else:
-                        copy_data = deepcopy(data)
-                        new_theory = copy_data.data
-                        new_theory[res.index] = res.theory
-                        new_theory[res.index == False] = numpy.nan 
+        
+        # format batch_outputs
+        batch_outputs["Chi2"] = []
+        #Don't like these loops
+        # Need to create dictionary of all fitted parameters 
+        # since the number of parameters can differ between each fit result
+        for list_res in result:
+            for res in list_res:
+                model, data = res.inputs[0]
+                if model is not None and hasattr(model, "model"):
+                    model = model.model
+                #get all fittable parameters of the current model
+                for param in  model.getParamList():
+                    if param  not in batch_outputs.keys():
+                        batch_outputs[param] = []
+                for param in model.getDispParamList():
+                    if not model.is_fittable(param) and \
+                        param in batch_outputs.keys():
+                        del batch_outputs[param]
+                # Add fitted parameters and their error
+                for param in res.param_list:
+                    if param not in batch_outputs.keys():
+                        batch_outputs[param] = []
+                    err_param = "error on %s" % str(param)
+                    if err_param not in batch_inputs.keys():
+                        batch_inputs[err_param] = []
+        msg = ""
+        for list_res in result:
+            for res in list_res:
+                pid = res.fitter_id
+                model, data = res.inputs[0]
+                correct_result = False
+                if model is not None and hasattr(model, "model"):
+                    model = model.model
+                if data is not None and hasattr(data, "sans_data"):
+                    data = data.sans_data
+                
+                is_data2d = issubclass(data.__class__, Data2D)
+                #check consistency of arrays
+                if not is_data2d:
+                    if len(res.theory) == len(res.index[res.index]) and \
+                        len(res.index) == len(data.y):
                         correct_result = True
-                    #get all fittable parameters of the current model
-                    param_list = model.getParamList()
-                    for param in model.getDispParamList():
-                        if not model.is_fittable(param) and \
-                            param in param_list:
-                            param_list.remove(param)       
-                    if not correct_result or res.fitness is None or \
-                        not numpy.isfinite(res.fitness) or \
-                        numpy.any(res.pvec == None) or not \
-                        numpy.all(numpy.isfinite(res.pvec)):
-                        data_name = str(None)
-                        if data is not None:
-                            data_name = str(data.name)
-                        model_name = str(None)
-                        if model is not None:
-                            model_name = str(model.name)
-                        msg += "Data %s and Model %s did not fit.\n" % (data_name, 
-                                                                        model_name)
-                        ERROR = numpy.NAN
-                        cell = BatchCell()
-                        cell.label = res.fitness
-                        cell.value = res.fitness
-                        batch_outputs["Chi2"].append(ERROR)
-                        for param in param_list:
-                            # save value of  fixed parameters
-                            if param not in batch_outputs.keys():
-                                batch_outputs[param] = []
-                            if param not in res.param_list:
-                                batch_outputs[str(param)].append(ERROR)
-                        for index  in range(len(res.param_list)):
-                            #save only fitted values
-                            batch_outputs[res.param_list[index]].append(ERROR)
-                            batch_inputs["error on %s" % res.param_list[index]].append(ERROR)
-                    else:
-                        cell = BatchCell()
-                        cell.label = res.fitness
-                        cell.value = res.fitness
-                        batch_outputs["Chi2"].append(cell)
-                        # add parameters to batch_results
-                        for param in param_list:
-                            # save value of  fixed parameters
-                            if param not in batch_outputs.keys():
-                                batch_outputs[param] = []
-                            if param not in res.param_list:
-                                batch_outputs[str(param)].append(model.getParam(param))
-                        for index  in range(len(res.param_list)):
-                            #save only fitted values
-                            batch_outputs[res.param_list[index]].append(res.pvec[index])
-                            if res.stderr is not None and len(res.stderr) == len(res.param_list):
-                                item = res.stderr[index]
-                                batch_inputs["error on %s" % res.param_list[index]].append(item)
-                            if res.param_list[index] in model.getParamList():
-                                model.setParam(res.param_list[index], res.pvec[index])
-                                    
-                    self.page_finder[pid].set_batch_result(batch_inputs=batch_inputs,
-                                                         batch_outputs=batch_outputs)   
-                    cpage = self.fit_panel.get_page_by_id(pid)
-                    cpage._on_fit_complete()
-                    self.page_finder[pid][data.id].set_result(res)
-                    fitproblem = self.page_finder[pid][data.id]
-                    qmin, qmax = fitproblem.get_range()
-                   
-                    if correct_result:
-                        if not is_data2d:
-                            self._complete1D(x=data.x, y=res.theory, page_id=pid, 
-                                         elapsed=None, 
-                                         index=res.index, model=model,
-                                         weight=None, fid=data.id,
-                                         toggle_mode_on=False, state=None, 
-                                         data=data, update_chisqr=False, 
-                                         source='fit')
+                else:
+                    copy_data = deepcopy(data)
+                    new_theory = copy_data.data
+                    new_theory[res.index] = res.theory
+                    new_theory[res.index == False] = numpy.nan 
+                    correct_result = True
+                #get all fittable parameters of the current model
+                param_list = model.getParamList()
+                for param in model.getDispParamList():
+                    if not model.is_fittable(param) and \
+                        param in param_list:
+                        param_list.remove(param)       
+                if not correct_result or res.fitness is None or \
+                    not numpy.isfinite(res.fitness) or \
+                    numpy.any(res.pvec == None) or not \
+                    numpy.all(numpy.isfinite(res.pvec)):
+                    data_name = str(None)
+                    if data is not None:
+                        data_name = str(data.name)
+                    model_name = str(None)
+                    if model is not None:
+                        model_name = str(model.name)
+                    msg += "Data %s and Model %s did not fit.\n" % (data_name, 
+                                                                    model_name)
+                    ERROR = numpy.NAN
+                    cell = BatchCell()
+                    cell.label = res.fitness
+                    cell.value = res.fitness
+                    batch_outputs["Chi2"].append(ERROR)
+                    for param in param_list:
+                        # save value of  fixed parameters
+                        if param not in res.param_list:
+                            batch_outputs[str(param)].append(ERROR)
                         else:
-                            self._complete2D(image=new_theory, data=data,
-                                          model=model,
-                                          page_id=pid,  elapsed=None, 
-                                          index=res.index, 
-                                          qmin=qmin,
-                                         qmax=qmax, fid=data.id, weight=None,
-                                          toggle_mode_on=False, state=None, 
-                                         update_chisqr=False, 
-                                         source='fit')
-                    self.on_set_batch_result(page_id=pid, 
-                                             fid=data.id, 
-                                             batch_outputs=batch_outputs, 
-                                             batch_inputs=batch_inputs)
+                            #save only fitted values
+                            batch_outputs[param].append(ERROR)
+                            batch_inputs["error on %s" % str(param)].append(ERROR)
+                else:
+                    cell = BatchCell()
+                    cell.label = res.fitness
+                    cell.value = res.fitness
+                    batch_outputs["Chi2"].append(cell)
+                    # add parameters to batch_results
+                    for param in param_list:
+                        # save value of  fixed parameters
+                        if param not in res.param_list:
+                            batch_outputs[str(param)].append(model.getParam(param))
+                        else:
+                            index = res.param_list.index(param)
+                            #save only fitted values
+                            batch_outputs[param].append(res.pvec[index])
+                            if res.stderr is not None and \
+                                len(res.stderr) == len(res.param_list):
+                                item = res.stderr[index]
+                                batch_inputs["error on %s" % param].append(item)
+                            model.setParam(param, res.pvec[index])
+                #fill the batch result with emtpy value if not in the current 
+                #model
+                EMPTY = "-"
+                for key in batch_outputs.keys():
+                    if key not in param_list and key not in ["Chi2", "Data"]:
+                        batch_outputs[key].append(EMPTY)
+                for key in batch_inputs.keys():
+                    if key not in param_list and key not in ["Chi2", "Data"]:
+                        batch_inputs[key].append(EMPTY)
+                                
+                self.page_finder[pid].set_batch_result(batch_inputs=batch_inputs,
+                                                     batch_outputs=batch_outputs) 
+               
+                cpage = self.fit_panel.get_page_by_id(pid)
+                cpage._on_fit_complete()
+                self.page_finder[pid][data.id].set_result(res)
+                fitproblem = self.page_finder[pid][data.id]
+                qmin, qmax = fitproblem.get_range()
+               
+                if correct_result:
+                    if not is_data2d:
+                        self._complete1D(x=data.x, y=res.theory, page_id=pid, 
+                                     elapsed=None, 
+                                     index=res.index, model=model,
+                                     weight=None, fid=data.id,
+                                     toggle_mode_on=False, state=None, 
+                                     data=data, update_chisqr=False, 
+                                     source='fit')
+                    else:
+                        self._complete2D(image=new_theory, data=data,
+                                      model=model,
+                                      page_id=pid,  elapsed=None, 
+                                      index=res.index, 
+                                      qmin=qmin,
+                                     qmax=qmax, fid=data.id, weight=None,
+                                      toggle_mode_on=False, state=None, 
+                                     update_chisqr=False, 
+                                     source='fit')
+                self.on_set_batch_result(page_id=pid, 
+                                         fid=data.id, 
+                                         batch_outputs=batch_outputs, 
+                                         batch_inputs=batch_inputs)
         
         wx.PostEvent(self.parent, StatusEvent(status=msg, error="error",
                                                               type="stop"))
@@ -1479,6 +1546,8 @@ class Plugin(PluginBase):
         self.page_finder[uid].set_fit_tab_caption(caption=caption)
         if self.sim_page is not None and not self.batch_on:
             self.sim_page.draw_page()
+        if self.batch_page is not None and self.batch_on:
+            self.batch_page.draw_page()
         
     def _update1D(self, x, output):
         """

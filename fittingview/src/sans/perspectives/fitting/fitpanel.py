@@ -60,6 +60,7 @@ class FitPanel(nb, PanelBase):
         self.batch_page_index = 0
         #page of simultaneous fit 
         self.sim_page = None
+        self.batch_page = None
         self.fit_engine_type = "scipy"
         ## get the state of a page
         self.Bind(basepage.EVT_PAGE_INFO, self._onGetstate)
@@ -84,7 +85,7 @@ class FitPanel(nb, PanelBase):
         for uid, page in self.opened_pages.iteritems():
             if page.batch_on:
                 pos = self.GetPageIndex(page)
-                if pos != -1 and page != self.sim_page:
+                if pos != -1 and page not in [self.sim_page, self.batch_page]:
                     msg += "%s .\n" % str(self.GetPageText(pos))
             else:
                 data = page.get_data()
@@ -115,7 +116,7 @@ class FitPanel(nb, PanelBase):
         """
         """
         self.fit_engine_type = name
-        if panel != self.sim_page:
+        if panel not in[self.batch_page, self.sim_page]:
             panel._on_engine_change(name=self.fit_engine_type)
                 
     def update_model_list(self):
@@ -313,18 +314,32 @@ class FitPanel(nb, PanelBase):
         """
         return self.GetPage(self.GetSelection())
     
-    def add_sim_page(self):
+    def add_sim_page(self, caption="Simultaneous Fit"):
         """
         Add the simultaneous fit page
         """
         from simfitpage import SimultaneousFitPage
-        page_finder= self._manager.get_page_finder()
-        self.sim_page = SimultaneousFitPage(self,page_finder=page_finder, id=-1)
-        self.sim_page.uid = wx.NewId()
-        self.AddPage(self.sim_page,"Simultaneous Fit", True)
-        self.sim_page.set_manager(self._manager)
-        self.enable_close_button()
-        return self.sim_page
+        page_finder = self._manager.get_page_finder()
+        if caption == "Simultanous Fit":
+            self.sim_page = SimultaneousFitPage(self,page_finder=page_finder,
+                                                 id=-1, batch_on=False)
+            self.sim_page.window_caption = caption
+            self.sim_page.window_name = caption
+            self.sim_page.uid = wx.NewId()
+            self.AddPage(self.sim_page, caption, True)
+            self.sim_page.set_manager(self._manager)
+            self.enable_close_button()
+            return self.sim_page
+        else:
+            self.batch_page = SimultaneousFitPage(self, batch_on=True,
+                                                   page_finder=page_finder)
+            self.batch_page.window_caption = caption
+            self.batch_page.window_name = caption
+            self.batch_page.uid = wx.NewId()
+            self.AddPage(self.batch_page, caption, True)
+            self.batch_page.set_manager(self._manager)
+            self.enable_close_button()
+            return self.batch_page
         
  
     def add_empty_page(self):
@@ -565,6 +580,9 @@ class FitPanel(nb, PanelBase):
         if selected_page == self.sim_page :
             self._manager.sim_page=None 
             return
+        if selected_page == self.batch_page :
+            self._manager.batch_page=None 
+            return
         """
         # The below is not working when delete #5 and still have #6.
         if selected_page.__class__.__name__ == "FitPage":
@@ -607,3 +625,10 @@ class FitPanel(nb, PanelBase):
             ## that page is already deleted no need to remove check box on
             ##non existing page
             pass     
+        try:
+            self.batch_page.draw_page()
+        except:
+            ## that page is already deleted no need to remove check box on
+            ##non existing page
+            pass     
+        

@@ -43,8 +43,11 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
     window_caption = "Simultaneous Fit Page"
     
     
-    def __init__(self, parent,page_finder ={}, *args, **kwargs):
-        ScrolledPanel.__init__(self, parent,style= wx.FULL_REPAINT_ON_RESIZE )
+    def __init__(self, parent,page_finder ={}, id=-1, batch_on=False,
+                     *args, **kwargs):
+        ScrolledPanel.__init__(self, parent, id=id,
+                               style= wx.FULL_REPAINT_ON_RESIZE, 
+                               *args, **kwargs)
         PanelBase.__init__(self, parent)
         """
         Simultaneous page display
@@ -54,6 +57,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.SetWindowVariant(variant = FONT_VARIANT)
         self.uid = wx.NewId()
         self.parent = parent
+        self.batch_on = batch_on
         ## store page_finder
         self.page_finder = page_finder
         ## list contaning info to set constraint 
@@ -138,10 +142,14 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         signal for fitting
         
         """
+        flag = False
+        # check if the current page a simultaneous fit page or a batch page
+        if self == self._manager.sim_page:
+            flag = (self._manager.sim_page.uid == self.uid)
+
         ## making sure all parameters content a constraint
         ## validity of the constraint expression is own by fit engine
-        if self.parent._manager._fit_engine != "park" and\
-                    self._manager.sim_page.uid == self.uid: 
+        if self.parent._manager._fit_engine != "park" and flag: 
             msg = "The FitEnging will be set to 'Park' fit engine\n"
             msg += " for the simultaneous fit..."
             #wx.MessageBox(msg, 'Info')
@@ -175,7 +183,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         """
         self.manager = manager
        
-    def check_all_model_name(self,event):
+    def check_all_model_name(self, event=None):
         """
         check all models names
         """
@@ -188,18 +196,20 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 
             ## constraint info
             self._store_model()
-            ## display constraint fields
-            if self.show_constraint.GetValue() and\
-                             len(self.constraints_list)==0:
-                self._show_all_constraint() 
-                self._show_constraint()
+            if not self.batch_on:
+                ## display constraint fields
+                if self.show_constraint.GetValue() and\
+                                 len(self.constraints_list)==0:
+                    self._show_all_constraint() 
+                    self._show_constraint()
         else:
             for item in self.model_list:
                 item[0].SetValue(False) 
                 
             self.model_toFit=[]
-            ##constraint info
-            self._hide_constraint()
+            if not self.batch_on:
+                ##constraint info
+                self._hide_constraint()
             
         self._update_easy_setup_cb()
         self.Refresh()
@@ -302,6 +312,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         
             self.cb1 = wx.CheckBox(self, -1,'Select all')
             self.cb1.SetValue(False)
+            
             wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.check_all_model_name)
             
             sizer_title.Add((10,10),0,
@@ -312,7 +323,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             ## draw list of model and data name
             self._fill_sizer_model_list(sizer_couples)
             ## draw the sizer containing constraint info
-            self._fill_sizer_constraint()
+            if not self.batch_on:
+                self._fill_sizer_constraint()
             ## draw fit button 
             self._fill_sizer_fit()
         #--------------------------------------------------------
@@ -674,11 +686,14 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.btFit = wx.Button(self,wx.NewId(),'Fit', size=wx.DefaultSize)
         self.btFit.Bind(wx.EVT_BUTTON, self.onFit,id= self.btFit.GetId())
         self.btFit.SetToolTipString("Perform fit.")
-        text  = "     Note: Park fitting engine will be used automatically. \n"
-        text += "     This page requires at least one FitPage with a data \n"
-        text += "       and a model set for fitting."
-        #text+= "automatically for more than 2 combinations checked"
-        text_hint = wx.StaticText(self,-1,text)
+        if self.batch_on:
+            text = " Fit in Parallel all Data set and model selected.\n"
+        else:
+            text  = "     Note: Park fitting engine will be used automatically. \n"
+            text += "     This page requires at least one FitPage with a data \n"
+            text += "       and a model set for fitting."
+            #text+= "automatically for more than 2 combinations checked"
+        text_hint = wx.StaticText(self, -1, text)
         
         sizer_button.Add(text_hint,  wx.RIGHT|wx.EXPAND, 10)
         sizer_button.Add(self.btFit, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
@@ -696,6 +711,9 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
         
         self.sizer2.Clear(True)
+        if self.batch_on:
+            self.sizer2.Hide()
+            return
         box_description= wx.StaticBox(self, -1,"Fit Constraints")
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         sizer_title = wx.BoxSizer(wx.HORIZONTAL)
@@ -708,18 +726,24 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.show_constraint = wx.RadioButton(self, -1, 'Yes', (10, 30))
         self.Bind( wx.EVT_RADIOBUTTON, self._display_constraint,
                     id= self.hide_constraint.GetId() )
-        self.Bind(  wx.EVT_RADIOBUTTON, self._display_constraint,
-                         id= self.show_constraint.GetId()    )
+        self.Bind(wx.EVT_RADIOBUTTON, self._display_constraint,
+                         id= self.show_constraint.GetId())
+        if self.batch_on:
+            self.hide_constraint.Enable(False)
+            self.show_constraint.Enable(False)
         self.hide_constraint.SetValue(True)
-        sizer_title.Add( wx.StaticText(self,-1," Model") )
+        self.show_constraint.SetValue(False)
+        
+        sizer_title.Add(wx.StaticText(self,-1," Model"))
         sizer_title.Add(( 10,10) )
-        sizer_title.Add( wx.StaticText(self,-1," Parameter") )
+        sizer_title.Add( wx.StaticText(self,-1," Parameter"))
         sizer_title.Add(( 10,10) )
         sizer_title.Add( wx.StaticText(self,-1," Add Constraint?") )
         sizer_title.Add(( 10,10) )
         sizer_title.Add( self.show_constraint )
         sizer_title.Add( self.hide_constraint )
         sizer_title.Add(( 10,10) )
+       
         
         self.btAdd =wx.Button(self,wx.NewId(),'Add')
         self.btAdd.Bind(wx.EVT_BUTTON, self._onAdd_constraint, 
@@ -741,6 +765,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         
         self.sizer2.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
         self.sizer2.Layout()
+       
         #self.SetScrollbars(20,20,25,65)
     
     def _set_constraint(self):
@@ -835,49 +860,66 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         for id, value in self.page_finder.iteritems():
             if id not in self.parent.opened_pages:
                 continue
-            try:
-                ix = 0
-                for fitproblem in value.get_fit_problem():
-                    if  self.parent.get_page_by_id(id).batch_on:
-                        continue
-                    data = fitproblem.get_fit_data()
-                    if not data.is_data:
-                        continue
-                    model = fitproblem.get_model()
-                    if model == None:
-                        continue
-                    iy += 1 
-                    name = '_'
-                    if model is not None:
-                        name = str(model.name)
-                    cb = wx.CheckBox(self, -1, name)
-                    cb.SetValue(False)
-                    cb.Enable(model is not None and data.is_data)
-                    sizer.Add(cb, (iy, ix), (1, 1), 
-                               wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-                    wx.EVT_CHECKBOX(self, cb.GetId(), self.check_model_name)
-                    ix += 2 
-                    type = model.__class__.__name__
-                    model_type = wx.StaticText(self, -1, str(type))
-                    sizer.Add(model_type, (iy, ix), (1, 1), 
-                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                    name = '-'
-                    if data is not None and data.is_data:
-                        name = str(data.name)
-                    data_used = wx.StaticText(self, -1, name)
-                    ix += 1 
-                    sizer.Add(data_used, (iy, ix), (1, 1), 
-                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                    ix += 1 
-                    caption = value.get_fit_tab_caption()
-                    tab_caption_used= wx.StaticText(self, -1, str(caption))
-                    sizer.Add(tab_caption_used, (iy, ix), (1, 1), 
-                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+
+            if self.batch_on != self.parent.get_page_by_id(id).batch_on:
+                continue
+            
+            data_list = []
+            model_list = []
+            # get data name and model objetta
+            for fitproblem in value.get_fit_problem():
                 
-                    self.model_list.append([cb,value,id,model])   
-            except:
-                raise
-                #pass
+                data = fitproblem.get_fit_data()
+                if not data.is_data:
+                    continue
+                name = '-'
+                if data is not None and data.is_data:
+                    name = str(data.name)
+                data_list.append(name)
+                    
+                model = fitproblem.get_model()
+                if model is None:
+                    continue
+                model_list.append(model)
+           
+            if len(model_list) == 0:   
+                continue
+            # Draw sizer
+            ix = 0
+            iy += 1 
+            model = model_list[0]
+            name = '_'
+            if model is not None:
+                name = str(model.name)
+            cb = wx.CheckBox(self, -1, name)
+            cb.SetValue(False)
+            cb.Enable(model is not None and data.is_data)
+            sizer.Add(cb, (iy, ix), (1, 1), 
+                       wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+            wx.EVT_CHECKBOX(self, cb.GetId(), self.check_model_name)
+            ix += 2 
+            type = model.__class__.__name__
+            model_type = wx.StaticText(self, -1, str(type))
+            sizer.Add(model_type, (iy, ix), (1, 1), 
+                      wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            if self.batch_on:
+                data_used = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+                data_used.AppendItems(data_list)
+                data_used.SetSelection(0)
+            else:
+                data_used = wx.StaticText(self, -1, data_list[0])
+            
+            ix += 1 
+            sizer.Add(data_used, (iy, ix), (1, 1), 
+                      wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            ix += 1 
+            caption = value.get_fit_tab_caption()
+            tab_caption_used= wx.StaticText(self, -1, str(caption))
+            sizer.Add(tab_caption_used, (iy, ix), (1, 1), 
+                          wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            
+            self.model_list.append([cb, value, id, model])   
+            
         iy += 1
         sizer.Add((20, 20), (iy, ix), (1, 1), 
                   wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
