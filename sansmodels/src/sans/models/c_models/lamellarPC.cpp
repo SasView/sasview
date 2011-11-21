@@ -117,4 +117,5 @@ double LamellarPCrystalModel :: evaluate_rphi(double q, double phi) {
  */
 double LamellarPCrystalModel :: calculate_ER() {
 //NOT implemented yet!!!
+	return 0.0;
 }

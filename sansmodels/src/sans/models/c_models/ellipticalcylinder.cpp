@@ -83,15 +83,15 @@ double EllipticalCylinderModel :: operator()(double q) {
 	double vol = 0.0;
 
 	// Loop over r_minor weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp[1] = weights_rad[i].value;
 
 		// Loop over r_ratio weight points
-		for(int j=0; j<weights_rat.size(); j++) {
+		for(size_t j=0; j<weights_rat.size(); j++) {
 			dp[2] = weights_rat[j].value;
 
 			// Loop over length weight points
-			for(int k=0; k<weights_len.size(); k++) {
+			for(size_t k=0; k<weights_len.size(); k++) {
 				dp[3] = weights_len[k].value;
 				//Un-normalize  by volume
 				sum += weights_rad[i].weight
@@ -171,28 +171,28 @@ double EllipticalCylinderModel :: operator()(double qx, double qy) {
 	double vol = 0.0;
 	double pi = 4.0*atan(1.0);
 	// Loop over minor radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp.r_minor = weights_rad[i].value;
 
 
 		// Loop over length weight points
-		for(int j=0; j<weights_len.size(); j++) {
+		for(size_t j=0; j<weights_len.size(); j++) {
 			dp.length = weights_len[j].value;
 
 			// Loop over r_ration weight points
-			for(int m=0; m<weights_rat.size(); m++) {
+			for(size_t m=0; m<weights_rat.size(); m++) {
 				dp.r_ratio = weights_rat[m].value;
 
 			// Average over theta distribution
-			for(int k=0; k<weights_theta.size(); k++) {
+			for(size_t k=0; k<weights_theta.size(); k++) {
 				dp.cyl_theta = weights_theta[k].value;
 
 				// Average over phi distribution
-				for(int l=0; l<weights_phi.size(); l++) {
+				for(size_t l=0; l<weights_phi.size(); l++) {
 					dp.cyl_phi = weights_phi[l].value;
 
 				// Average over phi distribution
-				for(int o=0; o<weights_psi.size(); o++) {
+				for(size_t o=0; o<weights_psi.size(); o++) {
 					dp.cyl_psi = weights_psi[o].value;
 					//Un-normalize by volume
 					double _ptvalue = weights_rad[i].weight
@@ -269,7 +269,6 @@ double EllipticalCylinderModel :: calculate_ER() {
 	dp.r_ratio    = r_ratio();
 	dp.length     = length();
 	double rad_out = 0.0;
-	double pi = 4.0*atan(1.0);
 	double suf_rad = sqrt(dp.r_minor*dp.r_minor*dp.r_ratio);
 
 	// Perform the computation, with all weight points
@@ -289,15 +288,15 @@ double EllipticalCylinderModel :: calculate_ER() {
 	length.get_weights(weights_len);
 
 	// Loop over minor radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp.r_minor = weights_rad[i].value;
 
 		// Loop over length weight points
-		for(int j=0; j<weights_len.size(); j++) {
+		for(size_t j=0; j<weights_len.size(); j++) {
 			dp.length = weights_len[j].value;
 
 			// Loop over r_ration weight points
-			for(int m=0; m<weights_rat.size(); m++) {
+			for(size_t m=0; m<weights_rat.size(); m++) {
 				dp.r_ratio = weights_rat[m].value;
 				//Calculate surface averaged radius
 				suf_rad = sqrt(dp.r_minor * dp.r_minor * dp.r_ratio);

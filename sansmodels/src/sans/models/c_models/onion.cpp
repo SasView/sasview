@@ -222,31 +222,31 @@ double OnionModel :: operator()(double q) {
 	double vol = 0.0;
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp[2] = weights_rad[i].value;
 		// Loop over radius weight points
-		for(int j=0; j<weights_s1.size(); j++) {
+		for(size_t j=0; j<weights_s1.size(); j++) {
 			dp[36] = weights_s1[j].value;
 			// Loop over radius weight points
-			for(int k=0; k<weights_s2.size(); k++) {
+			for(size_t k=0; k<weights_s2.size(); k++) {
 				dp[37] = weights_s2[k].value;
 				// Loop over radius weight points
-				for(int l=0; l<weights_s3.size(); l++) {
+				for(size_t l=0; l<weights_s3.size(); l++) {
 					dp[38] = weights_s3[l].value;
 					// Loop over radius weight points
-					for(int m=0; m<weights_s4.size(); m++) {
+					for(size_t m=0; m<weights_s4.size(); m++) {
 						dp[39] = weights_s4[m].value;
-						for(int n=0; n<weights_s5.size(); n++) {
+						for(size_t n=0; n<weights_s5.size(); n++) {
 							dp[40] = weights_s5[n].value;
-							for(int o=0; o<weights_s6.size(); o++) {
+							for(size_t o=0; o<weights_s6.size(); o++) {
 								dp[41] = weights_s6[o].value;
-								for(int p=0; p<weights_s7.size(); p++) {
+								for(size_t p=0; p<weights_s7.size(); p++) {
 									dp[42] = weights_s7[p].value;
-									for(int t=0; t<weights_s8.size(); t++) {
+									for(size_t t=0; t<weights_s8.size(); t++) {
 										dp[43] = weights_s8[t].value;
-										for(int r=0; r<weights_s9.size(); r++) {
+										for(size_t r=0; r<weights_s9.size(); r++) {
 											dp[44] = weights_s9[r].value;
-											for(int s=0; s<weights_s10.size(); s++) {
+											for(size_t s=0; s<weights_s10.size(); s++) {
 												dp[45] = weights_s10[s].value;
 												//Un-normalize Shells by volume
 												sum += weights_rad[i].weight*weights_s1[j].weight*weights_s2[k].weight*weights_s3[l].weight*weights_s4[m].weight
@@ -374,37 +374,37 @@ double OnionModel :: calculate_ER() {
 
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp.rad_core0 = weights_rad[i].value;
 		// Loop over radius weight points
-		for(int j=0; j<weights_s1.size(); j++) {
+		for(size_t j=0; j<weights_s1.size(); j++) {
 			dp.thick_shell1 = weights_s1[j].value;
 			// Loop over radius weight points
-			for(int k=0; k<weights_s2.size(); k++) {
+			for(size_t k=0; k<weights_s2.size(); k++) {
 				dp.thick_shell2 = weights_s2[k].value;
 				// Loop over radius weight points
-				for(int l=0; l<weights_s3.size(); l++) {
+				for(size_t l=0; l<weights_s3.size(); l++) {
 					dp.thick_shell3 = weights_s3[l].value;
 					// Loop over radius weight points
-					for(int m=0; m<weights_s4.size(); m++) {
+					for(size_t m=0; m<weights_s4.size(); m++) {
 						dp.thick_shell4 = weights_s4[m].value;
 						// Loop over radius weight points
-						for(int n=0; j<weights_s5.size(); n++) {
+						for(size_t n=0; j<weights_s5.size(); n++) {
 							dp.thick_shell5 = weights_s5[n].value;
 							// Loop over radius weight points
-							for(int o=0; k<weights_s6.size(); o++) {
+							for(size_t o=0; k<weights_s6.size(); o++) {
 								dp.thick_shell6 = weights_s6[o].value;
 								// Loop over radius weight points
-								for(int p=0; l<weights_s7.size(); p++) {
+								for(size_t p=0; l<weights_s7.size(); p++) {
 									dp.thick_shell7 = weights_s7[p].value;
 									// Loop over radius weight points
-									for(int t=0; m<weights_s8.size(); t++) {
+									for(size_t t=0; m<weights_s8.size(); t++) {
 										dp.thick_shell8 = weights_s8[t].value;
 										// Loop over radius weight points
-										for(int r=0; l<weights_s9.size(); r++) {
+										for(size_t r=0; l<weights_s9.size(); r++) {
 											dp.thick_shell8 = weights_s9[r].value;
 											// Loop over radius weight points
-											for(int s=0; m<weights_s10.size(); s++) {
+											for(size_t s=0; m<weights_s10.size(); s++) {
 												dp.thick_shell10 = weights_s10[s].value;
 												//Un-normalize FourShell by volume
 												sum += weights_rad[i].weight*weights_s1[j].weight*weights_s2[k].weight*weights_s3[l].weight*weights_s4[m].weight

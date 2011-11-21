@@ -74,7 +74,7 @@ double BCCrystalModel :: operator()(double q) {
 	double result;
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp[3] = weights_rad[i].value;
 
 		//Un-normalize SphereForm by volume
@@ -106,7 +106,6 @@ double BCCrystalModel :: operator()(double q) {
  */
 double BCCrystalModel :: operator()(double qx, double qy) {
 	BCParameters dp;
-	double q = sqrt(qx*qx + qy*qy);
 	dp.scale      = scale();
 	dp.dnn   = dnn();
 	dp.d_factor   = d_factor();
@@ -141,16 +140,16 @@ double BCCrystalModel :: operator()(double qx, double qy) {
 	double vol = 0.0;
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp.radius = weights_rad[i].value;
 		// Average over theta distribution
-		for(int j=0; j< weights_theta.size(); j++) {
+		for(size_t j=0; j< weights_theta.size(); j++) {
 			dp.theta = weights_theta[j].value;
 			// Average over phi distribution
-			for(int k=0; k< weights_phi.size(); k++) {
+			for(size_t k=0; k< weights_phi.size(); k++) {
 				dp.phi = weights_phi[k].value;
 				// Average over phi distribution
-				for(int l=0; l< weights_psi.size(); l++) {
+				for(size_t l=0; l< weights_psi.size(); l++) {
 					dp.psi = weights_psi[l].value;
 					//Un-normalize SphereForm by volume
 					double _ptvalue = weights_rad[i].weight
@@ -206,4 +205,5 @@ double BCCrystalModel :: evaluate_rphi(double q, double phi) {
  */
 double BCCrystalModel :: calculate_ER() {
 	//NOT implemented yet!!!
+	return 0.0;
 }

@@ -66,7 +66,7 @@ double SphereModel :: operator()(double q) {
 	double vol = 0.0;
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp[1] = weights_rad[i].value;
 
 		//Un-normalize SphereForm by volume
@@ -112,12 +112,6 @@ double SphereModel :: evaluate_rphi(double q, double phi) {
  * @return: effective radius value
  */
 double SphereModel :: calculate_ER() {
-	SphereParameters dp;
-	dp.scale = scale();
-	dp.radius = radius();
-	dp.sldSph = sldSph();
-	dp.sldSolv = sldSolv();
-	dp.background = background();
 	double rad_out = 0.0;
 
 	// Perform the computation, with all weight points
@@ -128,7 +122,7 @@ double SphereModel :: calculate_ER() {
 	vector<WeightPoint> weights_rad;
 	radius.get_weights(weights_rad);
 	// Loop over radius weight points to average the radius value
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		sum += weights_rad[i].weight
 			* weights_rad[i].value;
 		norm += weights_rad[i].weight;

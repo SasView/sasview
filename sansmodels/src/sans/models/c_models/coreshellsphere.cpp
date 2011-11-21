@@ -77,11 +77,11 @@ double CoreShellModel :: operator()(double q) {
 	double vol = 0.0;
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp[1] = weights_rad[i].value;
 
 		// Loop over thickness weight points
-		for(int j=0; j<weights_thick.size(); j++) {
+		for(size_t j=0; j<weights_thick.size(); j++) {
 			dp[2] = weights_thick[j].value;
 			//Un-normalize SphereForm by volume
 			sum += weights_rad[i].weight

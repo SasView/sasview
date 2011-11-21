@@ -82,11 +82,11 @@ double CappedCylinderModel :: operator()(double q) {
 	double vol_i = 0.0;
 	pi = 4.0*atan(1.0);
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad_cyl.size(); i++) {
+	for(size_t i=0; i<weights_rad_cyl.size(); i++) {
 		dp[1] = weights_rad_cyl[i].value;
-		for(int j=0; j<weights_len_cyl.size(); j++) {
+		for(size_t j=0; j<weights_len_cyl.size(); j++) {
 			dp[2] = weights_len_cyl[j].value;
-			for(int k=0; k<weights_rad_cap.size(); k++) {
+			for(size_t k=0; k<weights_rad_cap.size(); k++) {
 				dp[3] = weights_rad_cap[k].value;
 
 				//Un-normalize SphereForm by volume
@@ -124,7 +124,6 @@ double CappedCylinderModel :: operator()(double q) {
 double CappedCylinderModel :: operator()(double qx, double qy) {
 	CapCylParameters dp;
 
-	double q = sqrt(qx*qx + qy*qy);
 	dp.scale = scale();
 	dp.rad_cyl = rad_cyl();
 	dp.len_cyl = len_cyl();
@@ -161,22 +160,22 @@ double CappedCylinderModel :: operator()(double qx, double qy) {
 	double norm = 0.0;
 	double norm_vol = 0.0;
 	double vol = 0.0;
-	double pi,hDist,result;
+	double pi,hDist;
 	double vol_i = 0.0;
 	pi = 4.0*atan(1.0);
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad_cyl.size(); i++) {
+	for(size_t i=0; i<weights_rad_cyl.size(); i++) {
 		dp.rad_cyl = weights_rad_cyl[i].value;
-		for(int j=0; j<weights_len_cyl.size(); j++) {
+		for(size_t j=0; j<weights_len_cyl.size(); j++) {
 			dp.len_cyl = weights_len_cyl[j].value;
-			for(int k=0; k<weights_rad_cap.size(); k++) {
+			for(size_t k=0; k<weights_rad_cap.size(); k++) {
 				dp.rad_cap = weights_rad_cap[k].value;
 				// Average over theta distribution
-				for(int l=0; l< weights_theta.size(); l++) {
+				for(size_t l=0; l< weights_theta.size(); l++) {
 					dp.theta = weights_theta[l].value;
 					// Average over phi distribution
-					for(int m=0; m< weights_phi.size(); m++) {
+					for(size_t m=0; m< weights_phi.size(); m++) {
 						dp.phi = weights_phi[m].value;
 						//Un-normalize Form by volume
 						hDist = -1.0*sqrt(fabs(dp.rad_cap*dp.rad_cap-dp.rad_cyl*dp.rad_cyl));
@@ -249,4 +248,5 @@ double CappedCylinderModel :: evaluate_rphi(double q, double phi) {
  */
 double CappedCylinderModel :: calculate_ER() {
 	//NOT implemented yet!!!
+	return 0.0;
 }

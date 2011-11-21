@@ -70,7 +70,7 @@ double FractalModel :: operator()(double q) {
 	double vol = 0.0;
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp[1] = weights_rad[i].value;
 
 		//Un-normalize Fractal by volume
@@ -117,4 +117,5 @@ double FractalModel :: evaluate_rphi(double q, double phi) {
  */
 double FractalModel :: calculate_ER() {
 	//NOT implemented yet!!! 'cause None shape Model
+	return 0.0;
 }

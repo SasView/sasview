@@ -105,4 +105,5 @@ double LamellarModel :: evaluate_rphi(double q, double phi) {
  */
 double LamellarModel :: calculate_ER() {
 //NOT implemented yet!!!
+	return 0.0;
 }

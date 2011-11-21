@@ -169,4 +169,5 @@ double ReflModel :: evaluate_rphi(double q, double phi) {
  */
 double ReflModel :: calculate_ER() {
 	//NOT implemented yet!!!
+	return 0.0;
 }

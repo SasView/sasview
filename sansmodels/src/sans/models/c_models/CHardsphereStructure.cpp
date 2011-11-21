@@ -174,7 +174,7 @@ static PyObject *evaluateOneDim(HardsphereStructure* model, PyArrayObject *q){
                               PyArrayObject *x, PyArrayObject *y)
  {
     PyArrayObject *result;
-    int i,j, x_len, y_len, dims[1];
+    int i, x_len, dims[1];
     //check validity of input vectors
     if (x->nd != 1 || x->descr->type_num != PyArray_DOUBLE
         || y->nd != 1 || y->descr->type_num != PyArray_DOUBLE
@@ -187,7 +187,6 @@ static PyObject *evaluateOneDim(HardsphereStructure* model, PyArrayObject *q){
 	if (PyArray_Check(x) && PyArray_Check(y)) {
 		
 	    x_len = dims[0]= x->dimensions[0];
-        y_len = dims[0]= y->dimensions[0];
 	    
 	    // Make a new double matrix of same dims
         result=(PyArrayObject *) PyArray_FromDims(1,dims,NPY_DOUBLE);
@@ -345,9 +344,6 @@ static PyObject * run(CHardsphereStructure *self, PyObject *args) {
  */
 static PyObject * calculate_ER(CHardsphereStructure *self) {
 
-	PyObject* pars;
-	int npars;
-	
 	// Get parameters
 	
 	    // Reader parameter dictionary

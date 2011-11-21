@@ -102,19 +102,19 @@ double CoreFourShellModel :: operator()(double q) {
 	double vol = 0.0;
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp[1] = weights_rad[i].value;
 		// Loop over radius weight points
-		for(int j=0; j<weights_s1.size(); j++) {
+		for(size_t j=0; j<weights_s1.size(); j++) {
 			dp[3] = weights_s1[j].value;
 			// Loop over radius weight points
-			for(int k=0; k<weights_s2.size(); k++) {
+			for(size_t k=0; k<weights_s2.size(); k++) {
 				dp[5] = weights_s2[k].value;
 				// Loop over radius weight points
-				for(int l=0; l<weights_s3.size(); l++) {
+				for(size_t l=0; l<weights_s3.size(); l++) {
 					dp[7] = weights_s3[l].value;
 					// Loop over radius weight points
-					for(int m=0; m<weights_s4.size(); m++) {
+					for(size_t m=0; m<weights_s4.size(); m++) {
 						dp[9] = weights_s4[m].value;
 						//Un-normalize FourShell by volume
 						sum += weights_rad[i].weight*weights_s1[j].weight*weights_s2[k].weight*weights_s3[l].weight*weights_s4[m].weight
@@ -205,19 +205,19 @@ double CoreFourShellModel :: calculate_ER() {
 	double norm = 0.0;
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp.rad_core0 = weights_rad[i].value;
 		// Loop over radius weight points
-		for(int j=0; j<weights_s1.size(); j++) {
+		for(size_t j=0; j<weights_s1.size(); j++) {
 			dp.thick_shell1 = weights_s1[j].value;
 			// Loop over radius weight points
-			for(int k=0; k<weights_s2.size(); k++) {
+			for(size_t k=0; k<weights_s2.size(); k++) {
 				dp.thick_shell2 = weights_s2[k].value;
 				// Loop over radius weight points
-				for(int l=0; l<weights_s3.size(); l++) {
+				for(size_t l=0; l<weights_s3.size(); l++) {
 					dp.thick_shell3 = weights_s3[l].value;
 					// Loop over radius weight points
-					for(int m=0; m<weights_s4.size(); m++) {
+					for(size_t m=0; m<weights_s4.size(); m++) {
 						dp.thick_shell4 = weights_s4[m].value;
 						//Un-normalize FourShell by volume
 						sum += weights_rad[i].weight*weights_s1[j].weight*weights_s2[k].weight*weights_s3[l].weight*weights_s4[m].weight

@@ -67,10 +67,10 @@ double FuzzySphereModel :: operator()(double q) {
 	double vol = 0.0;
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_radius.size(); i++) {
+	for(size_t i=0; i<weights_radius.size(); i++) {
 		dp[1] = weights_radius[i].value;
 		// Loop over fuzziness weight points
-		for(int j=0; j<weights_fuzziness.size(); j++) {
+		for(size_t j=0; j<weights_fuzziness.size(); j++) {
 			dp[2] = weights_fuzziness[j].value;
 
 			//Un-normalize SphereForm by volume
@@ -118,13 +118,6 @@ double FuzzySphereModel :: evaluate_rphi(double q, double phi) {
  * @return: effective radius value
  */
 double FuzzySphereModel :: calculate_ER() {
-	FuzzySphereParameters dp;
-	dp.scale = scale();
-	dp.radius = radius();
-	dp.fuzziness = fuzziness();
-	dp.sldSph = sldSph();
-	dp.sldSolv = sldSolv();
-	dp.background = background();
 	double rad_out = 0.0;
 
 	// Perform the computation, with all weight points
@@ -136,7 +129,7 @@ double FuzzySphereModel :: calculate_ER() {
 	vector<WeightPoint> weights_radius;
 	radius.get_weights(weights_radius);
 	// Loop over radius weight points to average the radius value
-	for(int i=0; i<weights_radius.size(); i++) {
+	for(size_t i=0; i<weights_radius.size(); i++) {
 		sum += weights_radius[i].weight
 			* weights_radius[i].value;
 		norm += weights_radius[i].weight;

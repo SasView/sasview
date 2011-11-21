@@ -82,11 +82,11 @@ double BarBellModel :: operator()(double q) {
 	double vol_i = 0.0;
 	pi = 4.0*atan(1.0);
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad_bar.size(); i++) {
+	for(size_t i=0; i<weights_rad_bar.size(); i++) {
 		dp[1] = weights_rad_bar[i].value;
-		for(int j=0; j<weights_len_bar.size(); j++) {
+		for(size_t j=0; j<weights_len_bar.size(); j++) {
 			dp[2] = weights_len_bar[j].value;
-			for(int k=0; k<weights_rad_bell.size(); k++) {
+			for(size_t k=0; k<weights_rad_bell.size(); k++) {
 				dp[3] = weights_rad_bell[k].value;
 
 				//Un-normalize SphereForm by volume
@@ -124,7 +124,6 @@ double BarBellModel :: operator()(double q) {
 double BarBellModel :: operator()(double qx, double qy) {
 	BarBellParameters dp;
 
-	double q = sqrt(qx*qx + qy*qy);
 	dp.scale = scale();
 	dp.rad_bar = rad_bar();
 	dp.len_bar = len_bar();
@@ -162,22 +161,22 @@ double BarBellModel :: operator()(double qx, double qy) {
 	double norm = 0.0;
 	double norm_vol = 0.0;
 	double vol = 0.0;
-	double pi,hDist,result;
+	double pi,hDist;
 	double vol_i = 0.0;
 	pi = 4.0*atan(1.0);
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad_bar.size(); i++) {
+	for(size_t i=0; i<weights_rad_bar.size(); i++) {
 		dp.rad_bar = weights_rad_bar[i].value;
-		for(int j=0; j<weights_len_bar.size(); j++) {
+		for(size_t j=0; j<weights_len_bar.size(); j++) {
 			dp.len_bar = weights_len_bar[j].value;
-			for(int k=0; k<weights_rad_bell.size(); k++) {
+			for(size_t k=0; k<weights_rad_bell.size(); k++) {
 				dp.rad_bell = weights_rad_bell[k].value;
 				// Average over theta distribution
-				for(int l=0; l< weights_theta.size(); l++) {
+				for(size_t l=0; l< weights_theta.size(); l++) {
 					dp.theta = weights_theta[l].value;
 					// Average over phi distribution
-					for(int m=0; m< weights_phi.size(); m++) {
+					for(size_t m=0; m< weights_phi.size(); m++) {
 						dp.phi = weights_phi[m].value;
 						//Un-normalize Form by volume
 						hDist = sqrt(fabs(dp.rad_bell*dp.rad_bell-dp.rad_bar*dp.rad_bar));
@@ -250,4 +249,5 @@ double BarBellModel :: evaluate_rphi(double q, double phi) {
  */
 double BarBellModel :: calculate_ER() {
 	//NOT implemented yet!!!
+	return 0.0;
 }

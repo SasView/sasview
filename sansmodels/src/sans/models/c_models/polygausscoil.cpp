@@ -66,7 +66,7 @@ double Poly_GaussCoil :: operator()(double q) {
 	double vol = 0.0;
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp[1] = weights_rad[i].value;
 
 		//Un-normalize SphereForm by volume
@@ -116,11 +116,6 @@ double Poly_GaussCoil :: evaluate_rphi(double q, double phi) {
  * @return: effective radius value
  */
 double Poly_GaussCoil :: calculate_ER() {
-	PolyGaussCoilParameters dp;
-	dp.scale = scale();
-	dp.rg= rg();
-	dp.poly_m = poly_m();
-	dp.background = background();
 	double rad_out = 0.0;
 
 	// Perform the computation, with all weight points
@@ -131,7 +126,7 @@ double Poly_GaussCoil :: calculate_ER() {
 	vector<WeightPoint> weights_rad;
 	rg.get_weights(weights_rad);
 	// Loop over radius weight points to average the radius value
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		sum += weights_rad[i].weight
 			* weights_rad[i].value;
 		norm += weights_rad[i].weight;

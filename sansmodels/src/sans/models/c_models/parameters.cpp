@@ -170,7 +170,6 @@ void RectangleDispersion :: accept_as_destination(DispersionVisitor* visitor, vo
 }
 
 double rectangle_weight(double mean, double sigma, double x) {
-	double vary, expo_value;
     double wid = fabs(sigma) * sqrt(3.0);
     if (x>= (mean-wid) && x<=(mean+wid)){
     	return 1.0;
@@ -264,7 +263,6 @@ void LogNormalDispersion :: operator() (void *param, vector<WeightPoint> &weight
 	Parameter* par = (Parameter*)param;
 	double value = (*par)();
 	double sig;
-	double log_value;
 	if (npts<2) {
 		weights.insert(weights.end(), WeightPoint(value, 1.0));
 	} else {
@@ -315,7 +313,6 @@ void SchulzDispersion :: accept_as_destination(DispersionVisitor* visitor, void*
 }
 
 double schulz_weight(double mean, double sigma, double x) {
-	double vary, expo_value;
     double z = pow(mean/ sigma, 2.0)-1.0;
 	double R= x/mean;
 	double zz= z+1.0;
@@ -462,4 +459,5 @@ double Parameter :: operator()() {
 
 double Parameter :: operator=(double _value){
 	value = _value;
+	return value;
 }

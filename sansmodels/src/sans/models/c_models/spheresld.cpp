@@ -173,10 +173,10 @@ double SphereSLDModel :: operator()(double q) {
 	double vol = 0.0;
 
 	// Loop over core weight points
-	for(int i=0; i<weights_rad_core0.size(); i++) {
+	for(size_t i=0; i<weights_rad_core0.size(); i++) {
 		dp[59] = weights_rad_core0[i].value;
 		// Loop over thick_inter0 weight points
-		for(int j=0; j<weights_thick_inter0.size(); j++) {
+		for(size_t j=0; j<weights_thick_inter0.size(); j++) {
 			dp[2] = weights_thick_inter0[j].value;
 
 			//Un-normalize Sphere by volume
@@ -272,10 +272,10 @@ double SphereSLDModel :: calculate_ER() {
 	vector<WeightPoint> weights_thick_inter0;
 	thick_inter0.get_weights(weights_thick_inter0);
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad_core0.size(); i++) {
+	for(size_t i=0; i<weights_rad_core0.size(); i++) {
 		dp.rad_core0 = weights_rad_core0[i].value;
 		// Loop over radius weight points
-		for(int j=0; j<weights_thick_inter0.size(); j++) {
+		for(size_t j=0; j<weights_thick_inter0.size(); j++) {
 			dp.thick_inter0 = weights_thick_inter0[j].value;
 			rad_out = dp.rad_core0 + dp.thick_inter0;
 			if (dp.n_shells > 0)

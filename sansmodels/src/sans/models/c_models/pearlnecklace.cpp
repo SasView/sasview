@@ -59,10 +59,10 @@ double PearlNecklaceModel :: operator()(double q) {
 	double pearl_vol = 0.0;
 	double tot_vol = 0.0;
 	// Loop over core weight points
-	for(int i=0; i<weights_radius.size(); i++) {
+	for(size_t i=0; i<weights_radius.size(); i++) {
 		dp[1] = weights_radius[i].value;
 		// Loop over thick_inter0 weight points
-		for(int j=0; j<weights_edge_separation.size(); j++) {
+		for(size_t j=0; j<weights_edge_separation.size(); j++) {
 			dp[2] = weights_edge_separation[j].value;
 			pearl_vol = 4.0 /3.0 * pi * pow(dp[1], 3);
 			string_vol =dp[2] * pi * pow((dp[3] / 2.0), 2);
@@ -141,10 +141,10 @@ double PearlNecklaceModel :: calculate_ER() {
 	double pearl_vol = 0.0;
 	double tot_vol = 0.0;
 	// Loop over core weight points
-	for(int i=0; i<weights_radius.size(); i++) {
+	for(size_t i=0; i<weights_radius.size(); i++) {
 		dp.radius = weights_radius[i].value;
 		// Loop over thick_inter0 weight points
-		for(int j=0; j<weights_edge_separation.size(); j++) {
+		for(size_t j=0; j<weights_edge_separation.size(); j++) {
 			dp.edge_separation = weights_edge_separation[j].value;
 			pearl_vol = 4.0 /3.0 * pi * pow(dp.radius , 3);
 			string_vol =dp.edge_separation * pi * pow((dp.thick_string / 2.0), 2);

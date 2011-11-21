@@ -118,4 +118,5 @@ double LamellarFFHGModel :: evaluate_rphi(double q, double phi) {
  */
 double LamellarFFHGModel :: calculate_ER() {
 //NOT implemented yet!!!
+	return 0.0;
 }

@@ -121,6 +121,6 @@ double BinaryHSModel :: evaluate_rphi(double q, double phi) {
  */
 double BinaryHSModel :: calculate_ER() {
 	//NOT implemented yet!!!
-	double rad_out;
+	return 0.0;
 }
 

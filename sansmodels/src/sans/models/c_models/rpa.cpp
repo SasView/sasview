@@ -148,4 +148,5 @@ double RPAModel :: evaluate_rphi(double q, double phi) {
  */
 double RPAModel :: calculate_ER() {
 //NOT implemented!!!
+	return 0.0;
 }

@@ -134,6 +134,7 @@ double LamellarPSHGModel :: evaluate_rphi(double q, double phi) {
  */
 double LamellarPSHGModel :: calculate_ER() {
 //NOT implemented yet!!!
+	return 0.0;
 }
 
 /*

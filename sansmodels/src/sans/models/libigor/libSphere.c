@@ -652,6 +652,7 @@ LogNormalPolySphere(double dp[], double q)
 	return(inten);
 }
 
+/*
 static double
 LogNormal_distr(double sig, double mu, double pt)
 {	
@@ -671,6 +672,7 @@ Gauss_distr(double sig, double avg, double pt)
 	retval = (1.0/ (sig*sqrt(2.0*Pi)) )*exp(-(avg-pt)*(avg-pt)/sig/sig/2.0);
 	return(retval);
 }
+*/
 
 // scattering from a core shell sphere with a (Schulz) polydisperse core and constant ratio (shell thickness)/(core radius)
 // - the polydispersity is of the WHOLE sphere
@@ -1219,6 +1221,7 @@ MultiShellGuts(double x,double rcore,double ts,double tw,double rhocore,double r
     return(fval);	// this result still needs to be multiplied by scale and have background added
 }
 
+/*
 static double
 SchulzPoint(double x, double avg, double zz) {
 	
@@ -1244,6 +1247,7 @@ gammln(double xx) {
     for (j=0;j<=5;j++) ser += cof[j]/++y;
     return -tmp+log(2.5066282746310005*ser/x);
 }
+*/
 
 double
 F_func(double qr) {
@@ -1261,9 +1265,9 @@ OneShell(double dp[], double q)
 {
 	// variables are:
 	//[0] scale factor
-	//[1] radius of core []
-	//[2] SLD of the core	[-2]
-	//[3] thickness of the shell	[]
+	//[1] radius of core [ï¿½]
+	//[2] SLD of the core	[ï¿½-2]
+	//[3] thickness of the shell	[ï¿½]
 	//[4] SLD of the shell
 	//[5] SLD of the solvent
 	//[6] background	[cm-1]
@@ -1304,7 +1308,7 @@ OneShell(double dp[], double q)
 	vol = 4.0*pi/3.0*pow((rcore+thick),3);
 	f += vol*bes*contr;
 	
-	// normalize to particle volume and rescale from [-1] to [cm-1]
+	// normalize to particle volume and rescale from [ï¿½-1] to [cm-1]
 	f2 = f*f/vol*1.0e8;
 	
 	//scale if desired
@@ -1320,11 +1324,11 @@ TwoShell(double dp[], double q)
 {
 	// variables are:
 	//[0] scale factor
-	//[1] radius of core []
-	//[2] SLD of the core	[-2]
-	//[3] thickness of shell 1 []
+	//[1] radius of core [ï¿½]
+	//[2] SLD of the core	[ï¿½-2]
+	//[3] thickness of shell 1 [ï¿½]
 	//[4] SLD of shell 1
-	//[5] thickness of shell 2 []
+	//[5] thickness of shell 2 [ï¿½]
 	//[6] SLD of shell 2
 	//[7] SLD of the solvent
 	//[8] background	[cm-1]
@@ -1378,7 +1382,7 @@ TwoShell(double dp[], double q)
 	f += vol*bes*contr;
 	
 		
-	// normalize to particle volume and rescale from [-1] to [cm-1]
+	// normalize to particle volume and rescale from [ï¿½-1] to [cm-1]
 	f2 = f*f/vol*1.0e8;
 	
 	//scale if desired
@@ -1394,11 +1398,11 @@ ThreeShell(double dp[], double q)
 {
 	// variables are:
 	//[0] scale factor
-	//[1] radius of core []
-	//[2] SLD of the core	[-2]
-	//[3] thickness of shell 1 []
+	//[1] radius of core [ï¿½]
+	//[2] SLD of the core	[ï¿½-2]
+	//[3] thickness of shell 1 [ï¿½]
 	//[4] SLD of shell 1
-	//[5] thickness of shell 2 []
+	//[5] thickness of shell 2 [ï¿½]
 	//[6] SLD of shell 2
 	//[7] thickness of shell 3
 	//[8] SLD of shell 3
@@ -1466,7 +1470,7 @@ ThreeShell(double dp[], double q)
 	vol = 4.0*pi/3.0*(rcore+thick1+thick2+thick3)*(rcore+thick1+thick2+thick3)*(rcore+thick1+thick2+thick3);
 	f += vol*bes*contr;
 		
-	// normalize to particle volume and rescale from [-1] to [cm-1]
+	// normalize to particle volume and rescale from [ï¿½-1] to [cm-1]
 	f2 = f*f/vol*1.0e8;
 	
 	//scale if desired
@@ -1482,11 +1486,11 @@ FourShell(double dp[], double q)
 {
 	// variables are:
 	//[0] scale factor
-	//[1] radius of core []
-	//[2] SLD of the core	[-2]
-	//[3] thickness of shell 1 []
+	//[1] radius of core [ï¿½]
+	//[2] SLD of the core	[ï¿½-2]
+	//[3] thickness of shell 1 [ï¿½]
 	//[4] SLD of shell 1
-	//[5] thickness of shell 2 []
+	//[5] thickness of shell 2 [ï¿½]
 	//[6] SLD of shell 2
 	//[7] thickness of shell 3
 	//[8] SLD of shell 3
@@ -1569,7 +1573,7 @@ FourShell(double dp[], double q)
 	f += vol*bes*contr;
 	
 		
-	// normalize to particle volume and rescale from [-1] to [cm-1]
+	// normalize to particle volume and rescale from [ï¿½-1] to [cm-1]
 	f2 = f*f/vol*1.0e8;
 	
 	//scale if desired
@@ -1996,7 +2000,7 @@ SphereForm_Paracrystal(double radius, double delrho, double x) {
 	
 	bes = 3.0*(sin(x*radius)-x*radius*cos(x*radius))/(x*x*x)/(radius*radius*radius);
 	vol = 4.0*pi/3.0*radius*radius*radius;
-	f = vol*bes*delrho	;	// [=] 
+	f = vol*bes*delrho	;	// [=] ï¿½
 	// normalize to single particle volume, convert to 1/cm
 	f2 = f * f / vol * 1.0e8;		// [=] 1/cm
 	

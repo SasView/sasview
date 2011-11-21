@@ -119,4 +119,5 @@ double BinaryHSPSF11Model :: evaluate_rphi(double q, double phi) {
  */
 double BinaryHSPSF11Model :: calculate_ER() {
 //NOT implemented yet!!!
+	return 0.0;
 }

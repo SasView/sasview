@@ -84,15 +84,15 @@ double CoreShellCylinderModel :: operator()(double q) {
 	double vol = 0.0;
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp[1] = weights_rad[i].value;
 
 		// Loop over length weight points
-		for(int j=0; j<weights_len.size(); j++) {
+		for(size_t j=0; j<weights_len.size(); j++) {
 			dp[3] = weights_len[j].value;
 
 			// Loop over thickness weight points
-			for(int k=0; k<weights_thick.size(); k++) {
+			for(size_t k=0; k<weights_thick.size(); k++) {
 				dp[2] = weights_thick[k].value;
 				//Un-normalize by volume
 				sum += weights_rad[i].weight
@@ -168,24 +168,24 @@ double CoreShellCylinderModel :: operator()(double qx, double qy) {
 	double vol = 0.0;
 	double pi = 4.0*atan(1.0);
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp.radius = weights_rad[i].value;
 
 
 		// Loop over length weight points
-		for(int j=0; j<weights_len.size(); j++) {
+		for(size_t j=0; j<weights_len.size(); j++) {
 			dp.length = weights_len[j].value;
 
 			// Loop over thickness weight points
-			for(int m=0; m<weights_thick.size(); m++) {
+			for(size_t m=0; m<weights_thick.size(); m++) {
 				dp.thickness = weights_thick[m].value;
 
 			// Average over theta distribution
-			for(int k=0; k<weights_theta.size(); k++) {
+			for(size_t k=0; k<weights_theta.size(); k++) {
 				dp.axis_theta = weights_theta[k].value;
 
 				// Average over phi distribution
-				for(int l=0; l<weights_phi.size(); l++) {
+				for(size_t l=0; l<weights_phi.size(); l++) {
 					dp.axis_phi = weights_phi[l].value;
 					//Un-normalize by volume
 					double _ptvalue = weights_rad[i].weight
