@@ -8,17 +8,13 @@ import os
 from setuptools import setup, Extension, find_packages
 try:
     from numpy.distutils.misc_util import get_numpy_include_dirs
-    print get_numpy_include_dirs()
     NUMPY_INC = get_numpy_include_dirs()[0]
 except:
     try:
         import numpy
-        print numpy.__file__
-        
         NUMPY_INC = os.path.join(os.path.split(numpy.__file__)[0],"core","include")
     except:
-        print "\nNumpy is needed to build SansView. Try easy_install numpy.\n"
-        print sys.exc_value
+        print "\nNumpy is needed to build SansView. Try easy_install numpy.\n  %s" % str(sys.exc_value)
         sys.exit(0)
 
 package_dir = {}
