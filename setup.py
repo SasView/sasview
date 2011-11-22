@@ -8,6 +8,7 @@ import os
 from setuptools import setup, Extension, find_packages
 try:
     from numpy.distutils.misc_util import get_numpy_include_dirs
+    print get_numpy_include_dirs()
     NUMPY_INC = get_numpy_include_dirs()[0]
 except:
     try:
