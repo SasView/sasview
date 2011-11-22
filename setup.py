@@ -15,6 +15,7 @@ except:
         NUMPY_INC = os.path.join(os.path.split(numpy.__file__),"core","include")
     except:
         print "\nNumpy is needed to build SansView. Try easy_install numpy.\n"
+        print sys.exc_value
         sys.exit(0)
 
 package_dir = {}
