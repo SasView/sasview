@@ -699,9 +699,14 @@ static PyObject * get_pr_err(Cinvertor *self, PyObject *args) {
 
 	if (!PyArg_ParseTuple(args, "OOd", &data_obj, &err_obj, &r)) return NULL;
 	OUTVECTOR(data_obj,pars,npars);
-	OUTVECTOR(err_obj,pars_err,npars2);
 
-	pr_err(pars, pars_err, self->params.d_max, npars, r, &pr_value, &pr_err_value);
+	if (err_obj == Py_None) {
+		pr_value = pr(pars, self->params.d_max, npars, r);
+		pr_err_value = 0.0;
+	} else {
+		OUTVECTOR(err_obj,pars_err,npars2);
+		pr_err(pars, pars_err, self->params.d_max, npars, r, &pr_value, &pr_err_value);
+	}
 	return Py_BuildValue("ff", pr_value, pr_err_value);
 }
 

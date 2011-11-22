@@ -318,8 +318,7 @@ class Invertor(Cinvertor):
         p = numpy.ones(nfunc)
         t_0 = time.time()
         out, cov_x, _, _, _ = optimize.leastsq(self.residuals,
-                                                            p, full_output=1,
-                                                             warning=True)
+                                                            p, full_output=1)
         
         # Compute chi^2
         res = self.residuals(out)
@@ -332,6 +331,9 @@ class Invertor(Cinvertor):
         # Store computation time
         self.elapsed = time.time() - t_0
         
+        if cov_x is None:
+            cov_x = numpy.ones([nfunc,nfunc])
+            cov_x *= math.fabs(chisqr)
         return out, cov_x
     
     def pr_fit(self, nfunc=5):
@@ -352,8 +354,7 @@ class Invertor(Cinvertor):
         p = numpy.ones(nfunc)
         t_0 = time.time()
         out, cov_x, info, mesg, success = optimize.leastsq(self.pr_residuals, p,
-                                                            full_output=1,
-                                                            warning=True)
+                                                            full_output=1)
         
         # Compute chi^2
         res = self.pr_residuals(out)

@@ -480,7 +480,7 @@ class TestErrorConditions(unittest.TestCase):
         self.invertor.y   = y
         self.invertor.err = err
         # Perform inversion
-        self.assertRaises(ValueError, self.invertor.invert, 10)
+        self.assertRaises(numpy.linalg.LinAlgError, self.invertor.invert, 10)
          
         
     def test_invalid(self):
