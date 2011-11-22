@@ -13,7 +13,9 @@ try:
 except:
     try:
         import numpy
-        NUMPY_INC = os.path.join(os.path.split(numpy.__file__),"core","include")
+        print numpy.__file__
+        
+        NUMPY_INC = os.path.join(os.path.split(numpy.__file__)[0],"core","include")
     except:
         print "\nNumpy is needed to build SansView. Try easy_install numpy.\n"
         print sys.exc_value
