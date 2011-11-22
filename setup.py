@@ -8,9 +8,14 @@ import os
 from setuptools import setup, Extension, find_packages
 try:
     from numpy.distutils.misc_util import get_numpy_include_dirs
+    NUMPY_INC = get_numpy_include_dirs()[0]
 except:
-    print "\nNumpy is needed to build SansView. Try easy_install numpy.\n"
-    sys.exit(0)
+    try:
+        import numpy
+        NUMPY_INC = os.path.join(os.path.split(numpy.__file__),"core","include")
+    except:
+        print "\nNumpy is needed to build SansView. Try easy_install numpy.\n"
+        sys.exit(0)
 
 package_dir = {}
 package_data = {}
@@ -46,7 +51,7 @@ package_dir["sans.calculator"] = "sanscalculator/src/sans/calculator"
 packages.extend(["sans.calculator"])
     
 # sans.pr
-numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
+numpy_incl_path = os.path.join(NUMPY_INC, "numpy")
 srcdir  = os.path.join("pr_inversion", "src", "sans", "pr", "c_extensions")
 
 
@@ -185,7 +190,7 @@ package_data['sans.sansview'] = ['images/*', 'media/*', 'plugins/*', 'test/*']
 packages.append("sans.sansview")
 
 required = ['lxml>=2.2.2', 'numpy>=1.4.1', 'matplotlib>=0.99.1.1', 'wxPython>=2.8.11',
-            'pil','periodictable>=1.3.0']
+            'pil','periodictable>=1.3.0', 'scipy>=0.7.2']
 if sys.platform=='win32':
     required.extend(['comtypes','pywin32', 'pisa', 'html5lib', 'reportlab'])
    
