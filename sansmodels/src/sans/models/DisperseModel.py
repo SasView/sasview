@@ -23,7 +23,7 @@ class DisperseModel(Disperser, BaseComponent):
 	
 	Example: ::
 	
-		cyl = ModelFactory().getModel("CylinderModel")
+		cyl = CylinderModel()
 		disp = DisperseModel(cyl, ['cyl_phi'], [0.3])
 		disp.run([0.01, 1.57])
 		

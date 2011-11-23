@@ -1,5 +1,4 @@
 
-from sans.models.ModelFactory import ModelFactory
 from sans.models.BaseComponent import BaseComponent
 import math
 
@@ -14,7 +13,6 @@ class Smear:
 
         
         ## Model to smear
-        #self.model = factory.getModel(model_name)
         self.model = model
         ## Standard deviation of the smearing
         self.sigmas = sigma
@@ -52,7 +50,6 @@ class Smear:
                 return self.smearParam(id+1,x)
             
             # Gaussian function used to weigh points
-            #gaussian = ModelFactory().getModel("Gaussian")
             gaussian = Gaussian()
             gaussian.setParam('sigma', self.sigmas[id])
             gaussian.setParam('mean', self.centers[id])
@@ -161,37 +158,3 @@ class Gaussian(BaseComponent):
         value = self.params['scale'] *  math.exp(expo_value)
         
         return value
-        
-# main
-if __name__ == '__main__':
-    import math
-    if True:
-        cyl = ModelFactory().getModel("CylinderModel")
-        cyl.setParam('length', 2000.0)
-        cyl.setParam('cyl_phi', .45)
-        cyl.setParam('cyl_theta', 2.)
-        #app = Smear(cyl,['cyl_theta', 'cyl_phi'], [.01, .01])
-        #app = Smear(cyl,['cyl_theta', 'cyl_phi'], [2.0, 2.0])
-        #app = Smear(cyl,['cyl_theta'], [2.5])
-        app = Smear(cyl, ['cyl_phi', 'cyl_theta'], [math.pi, math.pi])
-        #app = Smear(cyl,['scale', 'scale'],[.5,1.0])
-        val_no = cyl.run([.001, 1.0])
-        print "Cylinder (no smear) f(.1):", val_no
-        val_sm =  app.run([.001, 1.0])
-        print "Cylinder (smear)    f(.1):", val_sm, app.error, app.error/val_sm
-        print "Cylinder (1D)    f(.1):", cyl.run(.001), cyl.run(.001)/val_sm
-      
-      
-    print "--------------"
-    sinsin = ModelFactory().getModel("SinSin")
-    sinsin.setParam('a', -1.7)
-    sinsin.setParam('b', 5.45)
-    #app = Smear(sinsin, ['A'], [3.1])
-    #app = Smear(sinsin, ['A', 'b'], [math.pi/2.0, .0])
-    app = Smear(sinsin, ['A'], [math.pi/2.0])
-    #app = Smear(cyl,['scale', 'scale'],[.5,1.0])
-    val_no = sinsin.run(1.0)
-    print "SinSin (no smear) :", val_no
-    val_sm =  app.run(1.0)
-    print "SinSin (smear)    : %g +- %g" % (val_sm, app.error)
-      

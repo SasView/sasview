@@ -14,14 +14,14 @@ from SmearList import Smear
 # pylint: disable-msg=R0201
 
 from sans.models.sans_extension.c_models import Disperser
-from sans.models.ModelFactory import ModelFactory
+from sans.models.CylinderModel import CylinderModel
 from sans.models.DisperseModel import DisperseModel
       
 class TestDisperser(unittest.TestCase):
     """ Unit tests for sphere model """
     
     def setUp(self):
-        self.model = ModelFactory().getModel("CylinderModel")
+        self.model = CylinderModel()
         self.model.setParam("cyl_theta", 1.57)
         self.model.setParam("cyl_phi", 0.1)
         
@@ -83,7 +83,7 @@ class TestDisperserModel(unittest.TestCase):
     """ Unit tests for sphere model """
     
     def setUp(self):
-        self.model = ModelFactory().getModel("CylinderModel")
+        self.model = CylinderModel()
         self.model.setParam("cyl_theta", 1.57)
         self.model.setParam("cyl_phi", 0.1)
         

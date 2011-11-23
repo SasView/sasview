@@ -24,7 +24,7 @@ class Validate1D:
             Perform test on a data file
             @param filename: name of the test data set
         """
-        from sans.models.ModelFactory import ModelFactory
+        from sans.models.CylinderModel import CylinderModel
         
         # Read the data file
         file_obj = open(filename,'r')
@@ -45,7 +45,8 @@ class Validate1D:
                     toks = line.split('=')
                     print "Found class", toks[1]
                     classname = toks[1].lstrip().rstrip()
-                    model_object = ModelFactory().getModel(classname)
+                    exec "from sans.models.%s import %s" % (classname, classname)
+                    exec "model_object = %s()" % classname
                 
                     # Output file for plotting
                     file_out = open("%s_out.txt" % classname, 'w')

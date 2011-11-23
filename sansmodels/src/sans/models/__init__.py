@@ -47,8 +47,8 @@
 # \subsection Tutorial
 # To create a model:
 # \verbatim
-#from sans.models.ModelFactory import ModelFactory
-#    cyl = ModelFactory().getModel('CylinderModel')
+#from sans.models.CylinderModel import CylinderModel
+#    cyl = CylinderModel()
 # \endverbatim
 #
 # To evaluate a model (at x=0.1 in this example):

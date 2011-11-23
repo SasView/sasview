@@ -62,66 +62,7 @@ class TestCyl(unittest.TestCase):
         self.comp.setParam('cyl_theta', 1*180/math.pi)
         self.comp.setParam('cyl_phi', 1*180/math.pi)
         self.assertAlmostEqual(self.comp.run([0.2, 2.5]), 
-                               0.038176446608393366, 4)
-       
-    def testIO(self):
-        from sans.models.ModelFactory import ModelFactory
-        from sans.models.ModelIO import ModelIO
-        factory = ModelFactory()
-        io = ModelIO(factory)
-        io.save(self.comp,"myModel.xml")
-        value = self.comp.run(1)
-        loaded = io.load("myModel.xml")
-        self.assertEqual(value, loaded.run(1))
-        
-    def testIO_add(self):
-        # version 0.5.0: No longer supported
-        return
-        from sans.models.ModelFactory import ModelFactory
-        from sans.models.ModelIO import ModelIO
-        factory = ModelFactory()
-        io = ModelIO(factory)
-        sph = factory.getModel("SphereModel")
-        cyl = factory.getModel("CylinderModel")
-        combo = sph - cyl
-        io.save(combo,"myModel.xml")
-        value = combo.run(1)
-        loaded = io.load("myModel.xml")
-        self.assertEqual(value, loaded.run(1))
-        
-    def testIO_add2(self):
-        # version 0.5.0: No longer supported
-        return
-        from sans.models.ModelFactory import ModelFactory
-        #from sans.models.ModelIO import ModelIO
-        factory = ModelFactory()
-        #io = ModelIO(factory)
-        sph = factory.getModel("SphereModel")
-        cyl = factory.getModel("CylinderModel")
-        sph2 = factory.getModel("SphereModel")
-        combo1 = cyl - sph
-        combo = combo1 / sph2
-        #combo1 = sph
-        #io.save(combo,"myModel.xml")
-        # Just check that we have some output
-        self.assertTrue(math.fabs(combo.run(1))>0)
-        #loaded = io.load("myModel.xml")
-        #self.assertEqual(value, loaded.run(1))
-        
-        
-      
-       
-class TestFactory(unittest.TestCase):
-    """Unit tests for Model Factory"""
-    
-    def setUp(self):
-        from sans.models.ModelFactory import ModelFactory
-        self.comp = ModelFactory().getModel('CylinderModel')
-        
-    def test1D(self):
-        """ Test 1D model of a cylinder """ 
-        self.assertAlmostEqual(self.comp.run(0.2), 0.041761386790780453, 4)
-        
+                               0.038176446608393366, 4) 
  
 class TestGaussian(unittest.TestCase):
     """Unit tests for Gaussian function"""
