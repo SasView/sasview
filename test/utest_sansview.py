@@ -31,7 +31,7 @@ def run_tests():
                     proc = subprocess.Popen(code, shell=True, stdout=subprocess.PIPE, stderr = subprocess.STDOUT)
                     std_out, std_err = proc.communicate()
                     has_failed = True
-                    m = re.search("Ran ([0-9]+) tests", std_out)
+                    m = re.search("Ran ([0-9]+) test", std_out)
                     if m is not None:
                         has_failed = False
                         n_tests += int(m.group(1))
@@ -48,7 +48,7 @@ def run_tests():
                     
                     if has_failed:
                         failed += 1
-                        print "Result for %s: FAILED" % module_name
+                        print "Result for %s (%s): FAILED" % (module_name, module_dir)
                         print std_out
                     else:
                         passed += 1

@@ -9,8 +9,8 @@ copyright 2010, University of Tennessee
 """
 import unittest
 import numpy, math
-from DataLoader.loader import  Loader
-from DataLoader.data_info import Data1D
+from sans.dataloader.loader import  Loader
+from sans.dataloader.data_info import Data1D
 from sans.invariant import invariant
     
 class TestLinearFit(unittest.TestCase):

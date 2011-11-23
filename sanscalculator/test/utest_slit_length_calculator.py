@@ -3,7 +3,7 @@
 """
 
 import unittest
-from DataLoader.readers.ascii_reader import Reader
+from sans.dataloader.readers.ascii_reader import Reader
 from  sans.calculator.slit_length_calculator import SlitlengthCalculator as calculator
 
 import os.path
