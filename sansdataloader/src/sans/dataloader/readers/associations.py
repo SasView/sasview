@@ -76,7 +76,7 @@ def read_associations(loader, settings='defaults.xml'):
                     msg += " for %s\n  %s" % (attr['extension'], sys.exc_value)
                     logging.error(msg)
     else:
-        raise RuntimeError, "Could not find reader association settings\n  %s" % __file__
+        print "Could not find reader association settings\n  %s [%s]" % (__file__, os.getcwd())
          
          
 def register_readers(registry_function):
