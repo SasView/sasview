@@ -44,7 +44,7 @@ def read_associations(loader, settings='defaults.xml'):
     if not os.path.isfile(path):
         path = os.path.join(os.getcwd(), settings)
     if not os.path.isfile(path):
-        path = os.path.join(os.path.dirname(os.path.sys.path[0]), settings)
+        path = os.path.join(sys.path[0], settings)
     if os.path.isfile(path):
         tree = etree.parse(path, parser=etree.ETCompatXMLParser())
         
