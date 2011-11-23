@@ -454,7 +454,10 @@ class Invertor(Cinvertor):
         
         # Construct the a matrix and b vector that represent the problem
         t_0 = time.time()
-        self._get_matrix(nfunc, nq, a, b)
+        try:
+            self._get_matrix(nfunc, nq, a, b)
+        except:
+            raise RuntimeError, "Invertor: could not invert I(Q)\n  %s" % sys.exc_value
              
         # Perform the inversion (least square fit)
         c, chi2, rank, n = lstsq(a, b)

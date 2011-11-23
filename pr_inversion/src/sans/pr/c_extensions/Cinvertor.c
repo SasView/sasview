@@ -15,7 +15,7 @@
 
 
 /// Error object for raised exceptions
-static PyObject * CinvertorError = NULL;
+PyObject * CinvertorError;
 
 #define INVECTOR(obj,buf,len)										\
     do { \
@@ -902,6 +902,11 @@ static PyObject * get_matrix(Cinvertor *self, PyObject *args) {
 
     for (j=0; j<nfunc; j++) {
         for (i=0; i<self->params.npoints; i++) {
+            if (self->params.err[i]==0.0) {
+              PyErr_SetString(CinvertorError,
+                "Cinvertor.get_matrix: Some I(Q) points have no error.");
+              return NULL;
+            }
             if (accept_q(self, self->params.x[i])){
                 if (self->params.has_bck==1 && j==0) {
                     a[i*nfunc+j] = 1.0/self->params.err[i];
@@ -1125,7 +1130,7 @@ void addCinvertor(PyObject *module) {
     PyModule_AddObject(module, "Cinvertor", (PyObject *)&CinvertorType);
 
     d = PyModule_GetDict(module);
-    CinvertorError = PyErr_NewException("Cinvertor.error", NULL, NULL);
+    CinvertorError = PyErr_NewException("sans.pr.invertor.Cinvertor.InvertorError", PyExc_RuntimeError, NULL);
     PyDict_SetItemString(d, "CinvertorError", CinvertorError);
 }
 

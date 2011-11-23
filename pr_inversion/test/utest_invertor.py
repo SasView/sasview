@@ -480,8 +480,7 @@ class TestErrorConditions(unittest.TestCase):
         self.invertor.y   = y
         self.invertor.err = err
         # Perform inversion
-        self.assertRaises(numpy.linalg.LinAlgError, self.invertor.invert, 10)
-         
+        self.assertRaises(RuntimeError, self.invertor.invert, 10)
         
     def test_invalid(self):
         """
@@ -598,4 +597,4 @@ def load(path = "sphere_60_q0_2.txt"):
     return data_x, data_y, data_err 
        
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(testRunner=unittest.TextTestRunner(verbosity=2))
