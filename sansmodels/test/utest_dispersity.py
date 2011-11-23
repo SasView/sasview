@@ -375,8 +375,7 @@ class TestSphere(unittest.TestCase):
             Numbers taken from model that passed validation, before
             the update to C++ underlying class.
         """
-        self.assertAlmostEqual(self.model.run(0.001), 
-                               90412744456148.094, delta=50.0)
+        self.assertTrue(math.fabs(self.model.run(0.001)-90412744456148.094)<=50.0)
         self.assertAlmostEqual(self.model.runXY([0.001,0.001]), 
                                90347660670656.391, 1)
 
@@ -389,7 +388,7 @@ class TestSphere(unittest.TestCase):
         disp.setParam('n_pts', 10)
         disp.setParam('radius.npts', 10)
         disp.setParam('radius.nsigmas', 2.5)
-        self.assertAlmostEqual(disp.run(0.001), 96795008379475.219, delta=50.0)
+        self.assertTrue(math.fabs(disp.run(0.001)-96795008379475.219<50.0))
         
     def test_new_disp(self):
         from sans.models.dispersion_models import GaussianDispersion
