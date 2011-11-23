@@ -27,13 +27,13 @@ def run_tests():
                     module_name,_ = os.path.splitext(f)
                     code = "cd %s;python -c \"import sys;import xmlrunner;import unittest;sys.path.insert(0, '%s');" % (module_dir, module_dir)
                     code += "from %s import *;" % module_name
-                    code += "unittest.main(testRunner=xmlrunner.XMLTestRunner(output='Logs')\""
+                    code += "unittest.main(testRunner=xmlrunner.XMLTestRunner(output='logs'))\""
                     proc = subprocess.Popen(code, shell=True, stdout=subprocess.PIPE, stderr = subprocess.STDOUT)
                     std_out, std_err = proc.communicate()
-                    
-                    has_failed = False
+                    has_failed = True
                     m = re.search("Ran ([0-9]+) tests", std_out)
                     if m is not None:
+                        has_failed = False
                         n_tests += int(m.group(1))
 
                     m = re.search("FAILED \(errors=([0-9]+)\)", std_out)
@@ -54,7 +54,6 @@ def run_tests():
                         passed += 1
                         print "Result for %s: SUCCESS" % module_name
                         
-    
     print "\n----------------------------------------------"
     print "Results by test modules:"
     print "    PASSED: %d" % passed
