@@ -15,7 +15,7 @@ class abs_reader(unittest.TestCase):
         from sans.dataloader.readers.abs_reader import Reader
         self.data = Reader().read("jan08002.ABS")
         
-    def test_checkdata(self):
+    def test_abs_checkdata(self):
         """
             Check the data content to see whether 
             it matches the specific file we loaded.
@@ -64,7 +64,7 @@ class hfir_reader(unittest.TestCase):
     def setUp(self):
         self.data = Loader().load("S2-30dq.d1d")
         
-    def test_checkdata(self):
+    def test_hfir_checkdata(self):
         """
             Check the data content to see whether 
             it matches the specific file we loaded.
@@ -87,7 +87,7 @@ class igor_reader(unittest.TestCase):
     def setUp(self):
         self.data = Loader().load("MAR07232_rest.ASC")
         
-    def test_checkdata(self):
+    def test_igor_checkdata(self):
         """
             Check the data content to see whether 
             it matches the specific file we loaded.
@@ -120,9 +120,10 @@ class igor_reader(unittest.TestCase):
 class danse_reader(unittest.TestCase):
     
     def setUp(self):
-        self.data = Loader().load("MP_New.sans")
-
-    def test_checkdata(self):
+        #self.data = Loader().load("MP_New.sans")
+        from sans.dataloader.readers.danse_reader import Reader as r
+        self.data = r().read("MP_New.sans")
+    def test_danse_checkdata(self):
         """
             Check the data content to see whether 
             it matches the specific file we loaded.
@@ -160,7 +161,7 @@ class cansas_reader(unittest.TestCase):
     def setUp(self):
         self.data = Loader().load("cansas1d.xml")
  
-    def test_checkdata(self):
+    def test_cansas_checkdata(self):
         self.assertEqual(self.data.filename, "cansas1d.xml")
         self._checkdata()
         
@@ -379,10 +380,4 @@ class cansas_reader(unittest.TestCase):
             
 
 if __name__ == '__main__':
-    import logging
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(levelname)s %(message)s',
-                        filename='utest_abs_reader.log',
-                        filemode='w')
-    unittest.main()
-   
+    unittest.main(testRunner=unittest.TextTestRunner(verbosity=2))
