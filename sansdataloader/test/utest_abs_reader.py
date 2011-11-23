@@ -120,10 +120,9 @@ class igor_reader(unittest.TestCase):
 class danse_reader(unittest.TestCase):
     
     def setUp(self):
-        #self.data = Loader().load("MP_New.sans")
-        from sans.dataloader.readers.danse_reader import Reader as r
-        self.data = r().read("MP_New.sans")
-    def test_danse_checkdata(self):
+        self.data = Loader().load("MP_New.sans")
+
+    def test_checkdata(self):
         """
             Check the data content to see whether 
             it matches the specific file we loaded.
