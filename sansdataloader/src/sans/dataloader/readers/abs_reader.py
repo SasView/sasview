@@ -229,12 +229,6 @@ class Reader:
                 if len(x) == 0:
                     raise ValueError, "ascii_reader: could not load file"
                 
-                # Zeros in dx, dy 
-                if not numpy.all(dx==0):
-                    dx[dx==0] = _ZERO
-                if not numpy.all(dy==0):
-                    dy[dy==0] = _ZERO
-
                 output.x = x[x!=0]
                 output.y = y[x!=0]
                 output.dy = dy[x!=0]
