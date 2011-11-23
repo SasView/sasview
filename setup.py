@@ -213,6 +213,7 @@ setup(
     ext_modules = ext_modules,
     install_requires = required,
     zip_safe = False,
+    include_package_data = True,
     entry_points = {
                     'console_scripts':[
                                        "sansview = sans.sansview.sansview:run",
