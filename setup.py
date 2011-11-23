@@ -29,7 +29,7 @@ package_dir["sans.invariant"] = "sansinvariant/src/sans/invariant"
 packages.extend(["sans.invariant"])
 
 # sans.guiframe
-guiframe_path = os.path.join(os.getcwd(), "sansguiframe", "src", "sans", "guiframe")
+guiframe_path = os.path.join("sansguiframe", "src", "sans", "guiframe")
 package_dir["sans.guiframe"] = guiframe_path
 package_dir["sans.guiframe.local_perspectives"] = os.path.join(guiframe_path, "local_perspectives")
 package_data["sans.guiframe"] = ['images/*', 'media/*']
