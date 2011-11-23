@@ -75,6 +75,8 @@ def read_associations(loader, settings='defaults.xml'):
                     msg = "read_associations: skipping association"
                     msg += " for %s\n  %s" % (attr['extension'], sys.exc_value)
                     logging.error(msg)
+    else:
+        raise RuntimeError, "Could not find reader association settings\n  %s" % __file__
          
          
 def register_readers(registry_function):
