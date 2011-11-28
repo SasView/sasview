@@ -65,7 +65,7 @@ class Plugin(PluginBase):
                         kiessig_help, self.on_calculate_kiessig),
                           ("SANS Resolution Estimator", 
                         resolution_help, self.on_calculate_resoltuion),
-                ("Python Shell", pyconsole_help, self.on_python_console)]
+                ("Python Shell/Editor", pyconsole_help, self.on_python_console)]
               
     def on_edit_data(self, event):
         """
@@ -132,11 +132,19 @@ class Plugin(PluginBase):
         
         :param event: menu event
         """
+        self.get_python_panel(filename=None)
+        
+    def get_python_panel(self, filename=None):
+        """
+        Get the python shell panel
+        
+        :param filename: file name to open in editor
+        """
         from pyconsole import PyConsole
-        frame = PyConsole(parent=self.parent)
+        frame = PyConsole(parent=self.parent, filename=filename)
         self.put_icon(frame)
         frame.Show(True) 
-    
+        
     def put_icon(self, frame):
         """
         Put icon in the frame title bar
