@@ -13,6 +13,7 @@
 
 import re
 import sys
+import os
 import wx
 import logging
 import numpy
@@ -215,10 +216,39 @@ class Plugin(PluginBase):
         chain_menu = self.menu1.FindItemById(self.id_reset_flag)
         chain_menu.Check(not self.batch_reset_flag)
         chain_menu.Enable(self.batch_on)
+        
+        self.menu1.AppendSeparator()
+        self.id_editmodel = wx.NewId()
+        editmodel_help = "Edit cusomized model sample file" 
+        self.menu1.Append(self.id_editmodel, "Edit Custom Model", 
+                                   editmodel_help) 
+        wx.EVT_MENU(owner, self.id_editmodel,  self.edit_custom_model)
+        
         #create  menubar items
         return [(self.menu1, self.sub_menu)]
-            
-   
+    
+    def edit_custom_model(self, event):
+        """
+        Get the python editor panel
+        """
+        from editmodel import PyConsole
+        filename = os.path.join("plugins", "testmodel.py")
+        frame = PyConsole(parent=self.parent, filename=filename)
+        self.put_icon(frame)
+        frame.Show(True) 
+        
+    def put_icon(self, frame):
+        """
+        Put icon in the frame title bar
+        """
+        if hasattr(frame, "IsIconized"):
+            if not frame.IsIconized():
+                try:
+                    icon = self.parent.GetIcon()
+                    frame.SetIcon(icon)
+                except:
+                    pass      
+                     
     def on_add_sim_page(self, event):
         """
         Create a page to access simultaneous fit option
