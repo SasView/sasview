@@ -2,7 +2,7 @@ import os
 import subprocess
 import re
 
-SKIPPED_DIRS = ["sansrealspace"]
+SKIPPED_DIRS = ["sansrealspace", "calculatorview"]
 SANSVIEW_DIR = ".."
 
 def run_tests():
