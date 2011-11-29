@@ -68,8 +68,7 @@ ext_modules.append( Extension("sans.pr.core.pr_inversion",
  sources = [ os.path.join(srcdir, "Cinvertor.c"),
             os.path.join(srcdir, "invertor.c"),
             ],
-         include_dirs=[numpy_incl_path],
-         undef_opts=['mno-cygwin']
+         include_dirs=[numpy_incl_path]
  ) )
         
 # sans.fit (park integration)
