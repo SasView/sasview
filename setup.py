@@ -6,16 +6,21 @@ import sys
 import os
 #from distutils.core import setup, Extension
 from setuptools import setup, Extension, find_packages
-try:
-    from numpy.distutils.misc_util import get_numpy_include_dirs
-    NUMPY_INC = get_numpy_include_dirs()[0]
-except:
+
+if sys.platform is not 'win32':
     try:
-        import numpy
-        NUMPY_INC = os.path.join(os.path.split(numpy.__file__)[0],"core","include")
+        from numpy.distutils.misc_util import get_numpy_include_dirs
+        NUMPY_INC = get_numpy_include_dirs()[0]
     except:
-        print "\nNumpy is needed to build SansView. Try easy_install numpy.\n  %s" % str(sys.exc_value)
-        sys.exit(0)
+        try:
+            import numpy
+            NUMPY_INC = os.path.join(os.path.split(numpy.__file__)[0],"core","include")
+        except:
+            print "\nNumpy is needed to build SansView. Try easy_install numpy.\n  %s" % str(sys.exc_value)
+            sys.exit(0)
+else:
+    v_info = sys.version_info
+    NUMPY_INC = os.path.join("C:\\python%1g%1g\\Lib\\site-packages\\numpy\\core\\include" % (v_info[0], v_info[1]))
 
 package_dir = {}
 package_data = {}
@@ -63,7 +68,8 @@ ext_modules.append( Extension("sans.pr.core.pr_inversion",
  sources = [ os.path.join(srcdir, "Cinvertor.c"),
             os.path.join(srcdir, "invertor.c"),
             ],
-         include_dirs=[numpy_incl_path]
+         include_dirs=[numpy_incl_path],
+         undef_opts=['mno-cygwin']
  ) )
         
 # sans.fit (park integration)
