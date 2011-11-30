@@ -8,23 +8,26 @@
 #include <stdlib.h>
 // some details can be found in sld_cal.c
 double so_kernel(double dp[], double q) {
-	int n = dp[0];
+	const int n = dp[0];
 	double scale = dp[1];
 	double rad_core0 = dp[2];
 	double sld_core0 = dp[3];
 	double sld_solv = dp[4];
 	double background = dp[5];
-	double sld_out[n+2];
-	double slope[n+2];
-	double sld_in[n+2];
-	double thick[n+2];
-	double A[n+2];
-	int fun_type[n+2];
 	int i,j;
   double bes,fun,alpha,f,vol,vol_pre,vol_sub,qr,r,contr,f2;
   double sign;
   double pi;
   double r0 = 0.0;
+
+
+  double sld_out[n+2];
+  double slope[n+2];
+  double sld_in[n+2];
+  double thick[n+2];
+  double A[n+2];
+  int fun_type[n+2];
+
 
 	for (i =1; i<=n; i++){
 		sld_out[i] = dp[i+5];
