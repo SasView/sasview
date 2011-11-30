@@ -6,7 +6,9 @@
 #include "libmultifunc/librefl.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+#if defined(_MSC_VER)
+#include "winFuncs.h"
+#endif
 
 complex cassign(real, imag)
 	double real, imag;
@@ -124,7 +126,7 @@ complex csqrt(z)    //see Schaum`s Math Handbook p. 22, 6.6 and 6.10
 complex ccos(b)
 	complex b;
 {
-	complex neg,negb,zero,two,z,i,bi,negbi;
+	complex zero,two,z,i,bi,negbi;
 	zero = cassign(0.0,0.0);
 	two = cassign(2.0,0.0);
 	i = cassign(0.0,1.0);
@@ -151,12 +153,13 @@ complex ccos(b)
 double err_mod_func(n_sub, ind, nu)
 	double n_sub,nu, ind;
 {
-	if (nu == 0.0)
+  double center, func;
+  if (nu == 0.0)
 		nu = 1e-14;
 	if (n_sub == 0.0)
 		n_sub = 1.0;
 
-	double center, func;
+
 	//ind = (n_sub-1.0)/2.0-1.0 +ind;
 	center = n_sub/2.0;
 	// transform it so that min(ind) = 0
