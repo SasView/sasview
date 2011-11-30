@@ -27,7 +27,6 @@ static __huge_valf_t __huge_valf = { __HUGE_VALF_bytes };
 # endif
 
 static union { unsigned char __c[4]; float __d; } __nan_union
-    __attribute_used__ = { __nan_bytes };
 # define NAN  (__nan_union.__d)
 
 
