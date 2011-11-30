@@ -1,6 +1,9 @@
 """
     Check dependencies
 """
+import sys
+print sys.path
+
 try:
     import matplotlib
     print "matplotlib ", matplotlib.__version__
