@@ -180,13 +180,13 @@ ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
                     Extension("sans.models.sans_extension.smearer",
                               sources = [os.path.join(smear_dir, "smearer.cpp"),
                                          os.path.join(smear_dir, "smearer_module.cpp"),],
-                              include_dirs=[smear_dir, numpy_incl_path]),
+                              include_dirs=[igordir, smear_dir, numpy_incl_path]),
                     
                     Extension("sans.models.sans_extension.smearer2d_helper",
                               sources = [os.path.join(smear_dir, 
                                           "smearer2d_helper_module.cpp"),
                                           os.path.join(smear_dir, "smearer2d_helper.cpp"),],
-                              include_dirs=[smear_dir,numpy_incl_path])
+                              include_dirs=[igordir, smear_dir,numpy_incl_path])
                     ] )
         
 # SansView
