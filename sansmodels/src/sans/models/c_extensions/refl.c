@@ -14,7 +14,7 @@
 
 double re_kernel(double dp[], double q) {
 	int n = dp[0];
-	int i,j,fun_type[n+2];
+	int i,j;
 
 	double scale = dp[1];
 	double thick_inter_sub = dp[2];
@@ -22,12 +22,22 @@ double re_kernel(double dp[], double q) {
 	double sld_super = dp[5];
 	double background = dp[6];
 
-	double sld[n+2],thick_inter[n+2],thick[n+2],total_thick;
+  double total_thick;
   double nsl=21.0; //nsl = Num_sub_layer:
   int n_s;
   double sld_i,sldim_i,dz,phi,R,ko2;
   double sign,erfunc, fun;
   double pi;
+
+  double* sld;
+  double* thick_inter;
+  double* thick;
+  int*fun_type;
+
+  sld = (double*)malloc(n+2);
+  thick_inter = (double*)malloc(n+2);
+  thick = (double*)malloc(n+2);
+  fun_type = (int*)malloc(n+2);
 
   fun_type[0] = dp[3];
 	for (i =1; i<=n; i++){
@@ -117,6 +127,11 @@ double re_kernel(double dp[], double q) {
     }
     R *= scale;
     R += background;
+
+    free(sld);
+    free(thick_inter);
+    free(thick);
+    free(fun_type);
 
     return R;
 
