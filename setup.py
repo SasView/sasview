@@ -130,11 +130,11 @@ IGNORED_FILES = ["a.exe",
                    "CLorentzian.cpp",
                    "CSchulz.cpp",
                    "WrapperGenerator.py",
-                   "wrapping.py",
-                   "winFuncs.c"]
+                   "wrapping.py"
+                   ]
 
 if not os.name=='nt':
-    IGNORED_FILES.append("gamma_win.cpp")
+    IGNORED_FILES.extend(["gamma_win.cpp","winFuncs.c"])
 
 
 EXTENSIONS = [".c", ".cpp"]
