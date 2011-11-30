@@ -35,10 +35,10 @@ double re_kernel(double dp[], double q) {
   int*fun_type;
   complex  inv_n,phi1,alpha,alpha2,kn,fnm,fnp,rn,Xn,nn,nn2,an,nnp1,one,zero,two,n_sub,n_sup,knp1,Xnp1;
 
-  sld = (double*)malloc(n+2);
-  thick_inter = (double*)malloc(n+2);
-  thick = (double*)malloc(n+2);
-  fun_type = (int*)malloc(n+2);
+  sld = (double*)malloc((n+2)*sizeof(double));
+  thick_inter = (double*)malloc((n+2)*sizeof(double));
+  thick = (double*)malloc((n+2)*sizeof(double));
+  fun_type = (int*)malloc((n+2)*sizeof(int));
 
   fun_type[0] = dp[3];
 	for (i =1; i<=n; i++){

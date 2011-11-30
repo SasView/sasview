@@ -37,11 +37,11 @@ double sphere_sld_kernel(double dp[], double q) {
 
 	double total_thick;
 
-	fun_type = (int*)malloc(n+2);
-  sld = (double*)malloc(n+2);
-  thick_inter = (double*)malloc(n+2);
-  thick = (double*)malloc(n+2);
-  fun_coef = (double*)malloc(n+2);
+	fun_type = (int*)malloc((n+2)*sizeof(int));
+  sld = (double*)malloc((n+2)*sizeof(double));
+  thick_inter = (double*)malloc((n+2)*sizeof(double));
+  thick = (double*)malloc((n+2)*sizeof(double));
+  fun_coef = (double*)malloc((n+2)*sizeof(double));
 
 	fun_type[0] = dp[3];
 	fun_coef[0] = fabs(dp[58]);

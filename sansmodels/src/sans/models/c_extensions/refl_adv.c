@@ -39,12 +39,12 @@ double re_adv_kernel(double dp[], double q) {
   double* fun_coef;
   complex  inv_n,phi1,alpha,alpha2,kn,fnm,fnp,rn,Xn,nn,nn2,an,nnp1,one,zero,two,n_sub,n_sup,knp1,Xnp1;
 
-  fun_type = (int*)malloc(n+2);
-  sld = (double*)malloc(n+2);
-  sld_im = (double*)malloc(n+2);
-  thick_inter = (double*)malloc(n+2);
-  thick = (double*)malloc(n+2);
-  fun_coef = (double*)malloc(n+2);
+  fun_type = (int*)malloc((n+2)*sizeof(int));
+  sld = (double*)malloc((n+2)*sizeof(double));
+  sld_im = (double*)malloc((n+2)*sizeof(double));
+  thick_inter = (double*)malloc((n+2)*sizeof(double));
+  thick = (double*)malloc((n+2)*sizeof(double));
+  fun_coef = (double*)malloc((n+2)*sizeof(double));
 
   fun_type[0] = dp[3];
 	fun_coef[0] = fabs(dp[70]);

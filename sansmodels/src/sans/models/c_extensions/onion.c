@@ -27,12 +27,12 @@ double so_kernel(double dp[], double q) {
   double *A;
   int *fun_type;
 
-  sld_out = (double*) malloc(n+2);
-  slope = (double*) malloc(n+2);
-  sld_in = (double*) malloc(n+2);
-  thick = (double*) malloc(n+2);
-  A = (double*) malloc(n+2);
-  fun_type = (int*) malloc(n+2);
+  sld_out = (double*)malloc((n+2)*sizeof(double));
+  slope = (double*)malloc((n+2)*sizeof(double));
+  sld_in = (double*)malloc((n+2)*sizeof(double));
+  thick = (double*)malloc((n+2)*sizeof(double));
+  A = (double*)malloc((n+2)*sizeof(double));
+  fun_type = (int*)malloc((n+2)*sizeof(int));
 
 	for (i =1; i<=n; i++){
 		sld_out[i] = dp[i+5];
