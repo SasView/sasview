@@ -16,6 +16,10 @@
 #include <math.h>
 using namespace std;
 
+#if defined(_MSC_VER)
+#include "gamma_win.h"
+#endif
+
 /**
  * TODO: normalize all dispersion weight lists
  */
