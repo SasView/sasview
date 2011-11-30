@@ -132,6 +132,11 @@ IGNORED_FILES = ["a.exe",
                    "WrapperGenerator.py",
                    "wrapping.py",
                    "winFuncs.c"]
+
+if not os.name=='nt':
+    IGNORED_FILES.append("gamma_win.cpp")
+
+
 EXTENSIONS = [".c", ".cpp"]
 
 def append_file(file_list, dir_path):
