@@ -173,20 +173,25 @@ package_dir["sans.models.sans_extension"] = srcdir
 package_data['sans.models'] = [os.path.join('media', "*")]
 packages.extend(["sans","sans.models","sans.models.sans_extension"])
     
+smearer_sources = [os.path.join(smear_dir, "smearer.cpp"),
+                  os.path.join(smear_dir, "smearer_module.cpp")]
+
+if not os.name=='nt':
+    smearer_sources.append("winFuncs.c")
+
 ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
                                 sources=model_sources,                 
                                 include_dirs=[igordir, srcdir, c_model_dir, numpy_incl_path]),       
                     # Smearer extension
                     Extension("sans.models.sans_extension.smearer",
-                              sources = [os.path.join(smear_dir, "smearer.cpp"),
-                                         os.path.join(smear_dir, "smearer_module.cpp"),],
+                              sources = smearer_sources,
                               include_dirs=[igordir, smear_dir, numpy_incl_path]),
                     
                     Extension("sans.models.sans_extension.smearer2d_helper",
                               sources = [os.path.join(smear_dir, 
                                           "smearer2d_helper_module.cpp"),
                                           os.path.join(smear_dir, "smearer2d_helper.cpp"),],
-                              include_dirs=[igordir, smear_dir,numpy_incl_path])
+                              include_dirs=[smear_dir,numpy_incl_path])
                     ] )
         
 # SansView
