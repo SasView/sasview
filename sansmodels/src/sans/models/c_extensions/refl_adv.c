@@ -33,7 +33,7 @@ double re_adv_kernel(double dp[], double q) {
 
   int* fun_type;
   double* sld;
-  double* sld_im
+  double* sld_im;
   double* thick_inter;
   double* thick;
   double* fun_coef;
