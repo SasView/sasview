@@ -74,7 +74,7 @@ double gamma(double x)
       if (arg_was_less_than_one==1) {
           y += 1.0;
       } else {
-          n = static_cast<int> (floor(y)) - 1;  // will use n later
+          n = (int) (floor(y)) - 1;  // will use n later
           y -= n;
       }
 
@@ -98,16 +98,6 @@ double gamma(double x)
       }
 
       return result;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // Third interval: [12, infinity)
-
-    if (x > 171.624)
-    {
-      // Correct answer too large to display. Force +infinity.
-      temp = DBL_MAX;
-      return temp*2.0;
     }
 
     return exp(lgamma(x));
