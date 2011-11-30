@@ -19,14 +19,14 @@ double so_kernel(double dp[], double q) {
   double sign;
   double pi;
   double r0 = 0.0;
+  const array_size = n+2;
 
-
-  double sld_out[n+2];
-  double slope[n+2];
-  double sld_in[n+2];
-  double thick[n+2];
-  double A[n+2];
-  int fun_type[n+2];
+  double sld_out[array_size];
+  double slope[array_size];
+  double sld_in[array_size];
+  double thick[array_size];
+  double A[array_size];
+  int fun_type[array_size];
 
 
 	for (i =1; i<=n; i++){
