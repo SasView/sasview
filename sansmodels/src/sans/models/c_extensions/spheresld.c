@@ -158,7 +158,6 @@ double sphere_sld_kernel(double dp[], double q) {
 
   free(fun_type);
   free(sld);
-  free(sld_im);
   free(thick_inter);
   free(thick);
   free(fun_coef);
