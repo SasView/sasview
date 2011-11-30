@@ -12,7 +12,7 @@
 
 double sphere_sld_kernel(double dp[], double q) {
 	int n = dp[0];
-	int i,j,k,fun_type[n+2];
+	int i,j,k;
 
 	double scale = dp[1];
 	double thick_inter_core = dp[2];
