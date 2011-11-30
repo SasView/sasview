@@ -4,6 +4,7 @@
 #include "bcc.h"
 #include "libSphere.h"
 #include <math.h>
+#include <stdio.h>
 
 
 /**
@@ -66,18 +67,18 @@ double bc_analytical_2D_scaled(BCParameters *pars, double q, double q_x, double 
 	double Pi = 4.0*atan(1.0);
 	double aa, Da, qDa_2, latticeScale, Zq, Fkq, Fkq_2;
 
-	double dp[5];
+  //convert angle degree to radian
+  double pi = 4.0*atan(1.0);
+  double theta = pars->theta * pi/180.0;
+  double phi = pars->phi * pi/180.0;
+  double psi = pars->psi * pi/180.0;
+
+  double dp[5];
 	dp[0] = 1.0;
 	dp[1] = pars->radius;
 	dp[2] = pars->sldSph;
 	dp[3] = pars->sldSolv;
 	dp[4] = 0.0;
-
-	//convert angle degree to radian
-	double pi = 4.0*atan(1.0);
-	double theta = pars->theta * pi/180.0;
-	double phi = pars->phi * pi/180.0;
-	double psi = pars->psi * pi/180.0;
 
 	aa = pars->dnn;
 	Da = pars->d_factor*aa;
