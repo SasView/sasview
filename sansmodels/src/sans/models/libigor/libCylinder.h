@@ -6,7 +6,7 @@
 #include <windows.h>
 #define fmax max
 
-typedef union { unsigned char __c[4]; float __f; } INFINITY;
+typedef union { unsigned char __c[4]; float __f; } __huge_valf_t;
 
 # if __BYTE_ORDER == __BIG_ENDIAN
 #  define __HUGE_VALF_bytes { 0x7f, 0x80, 0, 0 }
