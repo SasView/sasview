@@ -44,9 +44,10 @@ double sphere_sld_kernel(double dp[], double q) {
 	int n_s;
 	int floor_nsl;
 
-    double sld_i,sld_f,dz,bes,fun,f,vol,vol_pre,vol_sub,qr,r,contr,f2;
-    double sign,slope=0.0;
-    double pi;
+  double sld_i,sld_f,dz,bes,fun,f,vol,vol_pre,vol_sub,qr,r,contr,f2;
+  double sign,slope=0.0;
+  double pi;
+  double r0 = 0.0, thick_inter_f;
 
     pi = 4.0*atan(1.0);
     f = 0.0;
@@ -55,7 +56,6 @@ double sphere_sld_kernel(double dp[], double q) {
     vol_pre = 0.0;
     vol_sub = 0.0;
     sld_f = sld_core;
-    double r0 = 0.0, thick_inter_f;
 
 	//floor_nsl = floor(nsl/2.0);
 

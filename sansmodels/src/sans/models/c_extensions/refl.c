@@ -23,7 +23,13 @@ double re_kernel(double dp[], double q) {
 	double background = dp[6];
 
 	double sld[n+2],thick_inter[n+2],thick[n+2],total_thick;
-	fun_type[0] = dp[3];
+  double nsl=21.0; //nsl = Num_sub_layer:
+  int n_s;
+  double sld_i,sldim_i,dz,phi,R,ko2;
+  double sign,erfunc, fun;
+  double pi;
+
+  fun_type[0] = dp[3];
 	for (i =1; i<=n; i++){
 		sld[i] = dp[i+6];
 		thick_inter[i]= dp[i+16];
@@ -39,11 +45,6 @@ double re_kernel(double dp[], double q) {
 	thick_inter[0] = thick_inter_sub;
 	thick_inter[n+1] = 0.0;
 
-	double nsl=21.0; //nsl = Num_sub_layer:
-	int n_s;
-    double sld_i,sldim_i,dz,phi,R,ko2;
-    double sign,erfunc, fun;
-    double pi;
 	complex  inv_n,phi1,alpha,alpha2,kn,fnm,fnp,rn,Xn,nn,nn2,an,nnp1,one,zero,two,n_sub,n_sup,knp1,Xnp1;
 	pi = 4.0*atan(1.0);
     one = cassign(1.0,0.0);

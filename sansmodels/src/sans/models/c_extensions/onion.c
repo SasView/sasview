@@ -21,6 +21,10 @@ double so_kernel(double dp[], double q) {
 	double A[n+2];
 	int fun_type[n+2];
 	int i,j;
+  double bes,fun,alpha,f,vol,vol_pre,vol_sub,qr,r,contr,f2;
+  double sign;
+  double pi;
+  double r0 = 0.0;
 
 	for (i =1; i<=n; i++){
 		sld_out[i] = dp[i+5];
@@ -40,9 +44,6 @@ double so_kernel(double dp[], double q) {
 	fun_type[0] = 0;
 	fun_type[n+1] = 0;
 
-    double bes,fun,alpha,f,vol,vol_pre,vol_sub,qr,r,contr,f2;
-    double sign;
-    double pi;
 
     pi = 4.0*atan(1.0);
     f = 0.0;
@@ -50,7 +51,6 @@ double so_kernel(double dp[], double q) {
     vol = 0.0;
     vol_pre = 0.0;
     vol_sub = 0.0;
-    double r0 = 0.0;
 
     for (i =0; i<= n+1; i++){
     	if (thick[i] == 0.0){

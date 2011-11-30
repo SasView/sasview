@@ -15,6 +15,7 @@
 double re_adv_kernel(double dp[], double q) {
 	int n = dp[0];
 	int i,j,fun_type[n+2];
+	double nsl;
 
 	double scale = dp[1];
 	double thick_inter_sub = dp[2];
@@ -24,7 +25,13 @@ double re_adv_kernel(double dp[], double q) {
 	double npts = dp[69]; //number of sub_layers in each interface
 
 	double sld[n+2],sld_im[n+2],thick_inter[n+2],thick[n+2],fun_coef[n+2],total_thick;
-	fun_type[0] = dp[3];
+
+  int n_s;
+  double sld_i,sldim_i,dz,phi,R,ko2;
+  double sign,erfunc;
+  double pi;
+
+  fun_type[0] = dp[3];
 	fun_coef[0] = fabs(dp[70]);
 	for (i =1; i<=n; i++){
 		sld[i] = dp[i+6];
@@ -47,12 +54,8 @@ double re_adv_kernel(double dp[], double q) {
 	thick_inter[n+1] = 0.0;
 	fun_coef[n+1] = 0.0;
 
-	double nsl=npts;//21.0; //nsl = Num_sub_layer:  MUST ODD number in double //no other number works now
-	int n_s;
+	nsl=npts;//21.0; //nsl = Num_sub_layer:  MUST ODD number in double //no other number works now
 
-    double sld_i,sldim_i,dz,phi,R,ko2;
-    double sign,erfunc;
-    double pi;
 	complex  inv_n,phi1,alpha,alpha2,kn,fnm,fnp,rn,Xn,nn,nn2,an,nnp1,one,zero,two,n_sub,n_sup,knp1,Xnp1;
 	pi = 4.0*atan(1.0);
     one = cassign(1.0,0.0);

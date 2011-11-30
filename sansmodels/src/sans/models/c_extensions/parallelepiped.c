@@ -105,14 +105,15 @@ double parallelepiped_analytical_2D_scaled(ParallelepipedParameters *pars, doubl
 	double answer;
 	double pi = 4.0*atan(1.0);
 
+  //convert angle degree to radian
+  double theta = pars->parallel_theta * pi/180.0;
+  double phi = pars->parallel_phi * pi/180.0;
+  double psi = pars->parallel_psi * pi/180.0;
+
 	edgeA = pars->short_a;
 	edgeB = pars->short_b;
 	edgeC = pars->long_c;
 
-	//convert angle degree to radian
-	double theta = pars->parallel_theta * pi/180.0;
-	double phi = pars->parallel_phi * pi/180.0;
-	double psi = pars->parallel_psi * pi/180.0;
 
     // parallelepiped c axis orientation
     cparallel_x = sin(theta) * cos(phi);

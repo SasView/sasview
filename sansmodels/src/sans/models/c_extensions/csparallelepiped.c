@@ -159,6 +159,16 @@ double csparallelepiped_analytical_2D(CSParallelepipedParameters *pars, double q
  */
 double csparallelepiped_analytical_2D_scaled(CSParallelepipedParameters *pars, double q, double q_x, double q_y) {
 	double dp[13];
+  double cparallel_x, cparallel_y, cparallel_z, bparallel_x, bparallel_y, parallel_x, parallel_y, parallel_z;
+  double q_z;
+  double alpha, vol, cos_val_c, cos_val_b, cos_val_a, edgeA, edgeB, edgeC;
+
+  double answer;
+  //convert angle degree to radian
+  double pi = 4.0*atan(1.0);
+  double theta = pars->parallel_theta * pi/180.0;
+  double phi = pars->parallel_phi * pi/180.0;
+  double psi = pars->parallel_psi* pi/180.0;
 
 	// Fill paramater array
 	dp[0] = 1.0;
@@ -175,21 +185,11 @@ double csparallelepiped_analytical_2D_scaled(CSParallelepipedParameters *pars, d
 	dp[11] = pars->sld_solv;
 	dp[12] = 0.0;
 
-	double cparallel_x, cparallel_y, cparallel_z, bparallel_x, bparallel_y, parallel_x, parallel_y, parallel_z;
-	double q_z;
-	double alpha, vol, cos_val_c, cos_val_b, cos_val_a, edgeA, edgeB, edgeC;
-
-	double answer;
 
 	edgeA = pars->shortA;
 	edgeB = pars->midB;
 	edgeC = pars->longC;
 
-	//convert angle degree to radian
-	double pi = 4.0*atan(1.0);
-	double theta = pars->parallel_theta * pi/180.0;
-	double phi = pars->parallel_phi * pi/180.0;
-	double psi = pars->parallel_psi* pi/180.0;
 
     // parallelepiped c axis orientation
     cparallel_x = sin(theta) * cos(phi);

@@ -16,6 +16,7 @@
  */
 double sld_cal_analytical_1D(SLDCalParameters *pars, double x) {
 	double fun, nsl, n_s, fun_coef, sld_l, sld_r, sld_out;
+	int fun_type;
 
 	fun = pars->fun_type;
 	nsl = pars->npts_inter;
@@ -24,7 +25,7 @@ double sld_cal_analytical_1D(SLDCalParameters *pars, double x) {
 	sld_l = pars-> sld_left;
 	sld_r = pars-> sld_right;
 
-	int fun_type = floor(fun);
+	fun_type = floor(fun);
 
 	sld_out = intersldfunc(fun_type, nsl, n_s, fun_coef, sld_l, sld_r);
 

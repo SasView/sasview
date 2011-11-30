@@ -4,6 +4,7 @@
 #include "sc.h"
 #include "libSphere.h"
 #include <math.h>
+#include <stdio.h>
 
 
 /**
@@ -66,16 +67,16 @@ double sc_analytical_2D_scaled(SCParameters *pars, double q, double q_x, double 
 	double aa, Da, qDa_2, latticeScale, Zq;
 
 	double dp[5];
+  //convert angle degree to radian
+  double theta = pars->theta * Pi/180.0;
+  double phi = pars->phi * Pi/180.0;
+  double psi = pars->psi * Pi/180.0;
 	dp[0] = 1.0;
 	dp[1] = pars->radius;
 	dp[2] = pars->sldSph;
 	dp[3] = pars->sldSolv;
 	dp[4] = 0.0;
 
-	//convert angle degree to radian
-	double theta = pars->theta * Pi/180.0;
-	double phi = pars->phi * Pi/180.0;
-	double psi = pars->psi * Pi/180.0;
 
 	aa = pars->dnn;
 	Da = pars->d_factor*aa;

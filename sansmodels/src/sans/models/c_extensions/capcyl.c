@@ -5,6 +5,7 @@
 #include <math.h>
 #include "GaussWeights.h"
 #include "libCylinder.h"
+#include <stdio.h>
 
 /**
  * Function to evaluate 1D scattering function
@@ -132,6 +133,10 @@ double capcyl_analytical_2D_scaled(CapCylParameters *pars, double q, double q_x,
 	double alpha, vol, cos_val;
 	double answer;
 	double dp[7];
+  //convert angle degree to radian
+  double pi = 4.0*atan(1.0);
+  double theta = pars->theta * pi/180.0;
+  double phi = pars->phi * pi/180.0;
 
 	dp[0] = pars->scale;
 	dp[1] = pars->rad_cyl;
@@ -140,11 +145,6 @@ double capcyl_analytical_2D_scaled(CapCylParameters *pars, double q, double q_x,
 	dp[4] = pars->sld_capcyl;
 	dp[5] = pars->sld_solv;
 	dp[6] = pars->background;
-
-	//convert angle degree to radian
-	double pi = 4.0*atan(1.0);
-	double theta = pars->theta * pi/180.0;
-	double phi = pars->phi * pi/180.0;
 
 
 	//double Pi = 4.0*atan(1.0);
