@@ -34,4 +34,10 @@ try:
 except:
     print "No lxml"
     
+try:
+    import reportlab
+    print "reportlab ", reportlab.Version
+except:
+    print "No reportlab"
+    
     
