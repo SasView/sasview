@@ -1,7 +1,7 @@
 // Visit http://www.johndcook.com/stand_alone_code.html for the source of this code and more like it.
 // Modified for the DANSE project.
 
-#include <math>
+#include <math.h>
 
 #include "gamma_win.h"
 
