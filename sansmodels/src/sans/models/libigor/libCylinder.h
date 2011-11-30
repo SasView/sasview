@@ -1,7 +1,9 @@
 /*
 	libCylinderFit.h -- equates for CylinderFit XOP
 */
-
+#if defined(_MSC_VER)
+#define fmax max
+#endif
 
 /* Prototypes */
 /* IGOR Fit Functions */
