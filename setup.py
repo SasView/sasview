@@ -176,7 +176,7 @@ packages.extend(["sans","sans.models","sans.models.sans_extension"])
 smearer_sources = [os.path.join(smear_dir, "smearer.cpp"),
                   os.path.join(smear_dir, "smearer_module.cpp")]
 
-if not os.name=='nt':
+if os.name=='nt':
     smearer_sources.append(os.path.join(igordir, "winFuncs.c"))
 
 ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
