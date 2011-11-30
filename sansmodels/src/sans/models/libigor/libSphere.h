@@ -1,4 +1,7 @@
 // header for SphereFit.c
+#if defined(_MSC_VER)
+#include "winFuncs.h"
+#endif
 
 /* IGOR Fit Functions */
 double MultiShell(double dp[], double q);
