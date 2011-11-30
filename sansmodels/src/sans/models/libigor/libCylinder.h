@@ -5,6 +5,32 @@
 #define NOMINMAX
 #include <windows.h>
 #define fmax max
+
+typedef union { unsigned char __c[4]; float __f; } INFINITY;
+
+# if __BYTE_ORDER == __BIG_ENDIAN
+#  define __HUGE_VALF_bytes { 0x7f, 0x80, 0, 0 }
+# endif
+# if __BYTE_ORDER == __LITTLE_ENDIAN
+#  define __HUGE_VALF_bytes { 0, 0, 0x80, 0x7f }
+# endif
+
+static __huge_valf_t __huge_valf = { __HUGE_VALF_bytes };
+# define INFINITY  (__huge_valf.__f)
+
+
+# if __BYTE_ORDER == __BIG_ENDIAN
+#  define __nan_bytes   { 0x7f, 0xc0, 0, 0 }
+# endif
+# if __BYTE_ORDER == __LITTLE_ENDIAN
+#  define __nan_bytes   { 0, 0, 0xc0, 0x7f }
+# endif
+
+static union { unsigned char __c[4]; float __d; } __nan_union
+    __attribute_used__ = { __nan_bytes };
+# define NAN  (__nan_union.__d)
+
+
 #endif
 
 /* Prototypes */
