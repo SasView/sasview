@@ -52,7 +52,6 @@ double gamma(double x)
   int i;
   double z;
   double result;
-  double temp;
 
   if (x < 0.001)
       return 1.0/(x*(1.0 + gamma*x));
@@ -121,6 +120,7 @@ double lgamma (double x)
   static const double halfLogTwoPi = 0.91893853320467274178032973640562;
   double series;
   double logGamma;
+  int i;
 
   if (x < 12.0) {
      return log(fabs(gamma(x)));
@@ -131,7 +131,7 @@ double lgamma (double x)
   // For error analysis, see Whittiker and Watson
   // A Course in Modern Analysis (1927), page 252
 
-  for (int i=6; i >= 0; i--) {
+  for (i=6; i >= 0; i--) {
       sum *= z;
       sum += c[i];
   }
