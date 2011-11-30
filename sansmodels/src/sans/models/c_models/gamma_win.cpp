@@ -126,7 +126,7 @@ double gamma
     return temp*2.0;
     }
 
-    return exp(LogGamma(x));
+    return exp(lgamma(x));
 }
 
 double lgamma
@@ -143,7 +143,7 @@ double lgamma
 
     if (x < 12.0)
     {
-        return log(fabs(Gamma(x)));
+        return log(fabs(gamma(x)));
     }
 
   // Abramowitz and Stegun 6.1.41
