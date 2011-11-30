@@ -100,4 +100,5 @@ double HardsphereStructure :: evaluate_rphi(double q, double phi) {
  */
 double HardsphereStructure :: calculate_ER() {
 //NOT implemented yet!!!
+  return 0.0;
 }

@@ -109,6 +109,7 @@ double HayterMSAStructure :: evaluate_rphi(double q, double phi) {
  */
 double HayterMSAStructure :: calculate_ER() {
 //NOT implemented yet!!!
+  return 0.0;
 }
 
 // Testing code
