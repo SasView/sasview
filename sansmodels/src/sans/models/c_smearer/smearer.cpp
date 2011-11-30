@@ -17,7 +17,9 @@
 using namespace std;
 
 #if defined(_MSC_VER)
+extern "C" {
 #include "winFuncs.h"
+}
 #endif
 /**
  * Constructor for BaseSmearer
