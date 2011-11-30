@@ -10,7 +10,6 @@
 #include "gamma_win.h"
 #endif
 
-
 /**
  * Function to evaluate 1D Schulz function.
  * The function is normalized to the 'scale' parameter.

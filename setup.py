@@ -134,7 +134,7 @@ IGNORED_FILES = ["a.exe",
                    ]
 
 if not os.name=='nt':
-    IGNORED_FILES.extend(["gamma_win.cpp","winFuncs.c"])
+    IGNORED_FILES.extend(["gamma_win.c","winFuncs.c"])
 
 
 EXTENSIONS = [".c", ".cpp"]

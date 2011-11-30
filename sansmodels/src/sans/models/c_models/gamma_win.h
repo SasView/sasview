@@ -4,8 +4,16 @@
 #define GAMMA_H
 
 // Note that the functions Gamma and LogGamma are mutually dependent.
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 double lgamma(double);
 double gamma(double);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 
