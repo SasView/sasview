@@ -179,10 +179,10 @@ double err_mod_func(n_sub, ind, nu)
 double linearfunc(n_sub, ind, nu)
 	double n_sub,nu, ind;
 {
+  double bin_size, func;
 	if (n_sub == 0.0)
 		n_sub = 1.0;
 
-	double bin_size, func;
 	bin_size = 1.0/n_sub;  //size of each sub-layer
 	// rescale
 	ind *= bin_size;
@@ -194,12 +194,12 @@ double linearfunc(n_sub, ind, nu)
 double power_r(n_sub, ind, nu)
 	double n_sub, nu, ind;
 {
+  double bin_size,func;
 	if (nu == 0.0)
 		nu = 1e-14;
 	if (n_sub == 0.0)
 		n_sub = 1.0;
 
-	double bin_size,func;
 	bin_size = 1.0/n_sub;  //size of each sub-layer
 	// rescale
 	ind *= bin_size;
@@ -211,12 +211,12 @@ double power_r(n_sub, ind, nu)
 double power_l(n_sub, ind, nu)
 	double n_sub, nu, ind;
 {
+  double bin_size, func;
 	if (nu == 0.0)
 		nu = 1e-14;
 	if (n_sub == 0.0)
 		n_sub = 1.0;
 
-	double bin_size, func;
 	bin_size = 1.0/n_sub;  //size of each sub-layer
 	// rescale
 	ind *= bin_size;
@@ -228,12 +228,12 @@ double power_l(n_sub, ind, nu)
 double exp_r(n_sub, ind, nu)
 	double n_sub, nu, ind;
 {
+  double bin_size, func;
 	if (nu == 0.0)
 		nu = 1e-14;
 	if (n_sub == 0.0)
 		n_sub = 1.0;
 
-	double bin_size, func;
 	bin_size = 1.0/n_sub;  //size of each sub-layer
 	// rescale
 	ind *= bin_size;
@@ -249,12 +249,12 @@ double exp_r(n_sub, ind, nu)
 double exp_l(n_sub, ind, nu)
 	double n_sub, nu, ind;
 {
+  double bin_size, func;
 	if (nu == 0.0)
 		nu = 1e-14;
 	if (n_sub == 0.0)
 		n_sub = 1.0;
 
-	double bin_size, func;
 	bin_size = 1.0/n_sub;  //size of each sub-layer
 	// rescale
 	ind *= bin_size;
