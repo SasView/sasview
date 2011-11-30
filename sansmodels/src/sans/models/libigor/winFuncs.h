@@ -1,3 +1,5 @@
+#if !defined(WINFUNCS_H)
+#define WINFUNCS_H
 /* winFuncs.h
    Definitions for missing math lib functions
    Andrew Jackson, October 2007
@@ -45,3 +47,4 @@ static __huge_valf_t __huge_valf = { __HUGE_VALF_bytes };
 static union { unsigned char __c[4]; float __d; } __nan_union;
 # define NAN  (__nan_union.__d)
 
+#endif
