@@ -2,7 +2,7 @@
 	libCylinderFit.h -- equates for CylinderFit XOP
 */
 #if defined(_MSC_VER)
-#include <math.h>
+#include <cmath.h>
 #define fmax max
 #endif
 
