@@ -33,6 +33,7 @@ double re_kernel(double dp[], double q) {
   double* thick_inter;
   double* thick;
   int*fun_type;
+  complex  inv_n,phi1,alpha,alpha2,kn,fnm,fnp,rn,Xn,nn,nn2,an,nnp1,one,zero,two,n_sub,n_sup,knp1,Xnp1;
 
   sld = (double*)malloc(n+2);
   thick_inter = (double*)malloc(n+2);
@@ -55,7 +56,6 @@ double re_kernel(double dp[], double q) {
 	thick_inter[0] = thick_inter_sub;
 	thick_inter[n+1] = 0.0;
 
-	complex  inv_n,phi1,alpha,alpha2,kn,fnm,fnp,rn,Xn,nn,nn2,an,nnp1,one,zero,two,n_sub,n_sup,knp1,Xnp1;
 	pi = 4.0*atan(1.0);
     one = cassign(1.0,0.0);
 	//zero = cassign(0.0,0.0);
