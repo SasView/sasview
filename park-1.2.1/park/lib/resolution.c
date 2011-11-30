@@ -21,8 +21,8 @@ double erf(double x)
     // Save the sign of x
     int sign = 1;
 
-    double t;
-    double y;
+    double t = 1.0;
+    double y = 1.0;
     if (x < 0)
         sign = -1;
     x = fabs(x);
@@ -178,6 +178,7 @@ convolve_point(const double Qin[], const double Rin[], int k, int n,
 {
   const double two_sigma_sq = 2. * sigma * sigma;
   double z, Glo, erflo, erfmin, R;
+  double zhi, Ghi, erfhi, m, b;
   
   z = Qo - Qin[k];
   Glo = exp(-z*z/two_sigma_sq);
@@ -189,11 +190,11 @@ convolve_point(const double Qin[], const double Rin[], int k, int n,
   	if (Qin[k] == Qin[k-1]) continue;
  
     /* Compute the next endpoint */
-    const double zhi = Qo - Qin[k];
-    const double Ghi = exp(-zhi*zhi/two_sigma_sq);
-    const double erfhi = erf(-zhi/(SQRT2*sigma));
-    const double m = (Rin[k]-Rin[k-1])/(Qin[k]-Qin[k-1]);
-    const double b = Rin[k] - m * Qin[k];
+    zhi = Qo - Qin[k];
+    Ghi = exp(-zhi*zhi/two_sigma_sq);
+    erfhi = erf(-zhi/(SQRT2*sigma));
+    m = (Rin[k]-Rin[k-1])/(Qin[k]-Qin[k-1]);
+    b = Rin[k] - m * Qin[k];
 
     /* Add the integrals. */
     R += 0.5*(m*Qo+b)*(erfhi-erflo) - sigma/SQRT2PI*m*(Ghi-Glo);
@@ -234,6 +235,7 @@ resolution(int Nin, const double Qin[], const double Rin[],
            int N, const double Q[], const double dQ[], double R[])
 {
   int lo,out;
+  double sigma, Qo, limit;
 
   /* FIXME fails if Qin are not sorted; slow if Q not sorted */
   assert(Nin>1);
@@ -242,9 +244,9 @@ resolution(int Nin, const double Qin[], const double Rin[],
   lo = 0;
   for (out=0; out < N; out++) {
     /* width of resolution window for Q is w = 2 dQ^2. */
-    const double sigma = dQ[out];
-    const double Qo = Q[out];
-    const double limit = sqrt(-2.*sigma*sigma* LOG_RESLIMIT);
+    sigma = dQ[out];
+    Qo = Q[out];
+    limit = sqrt(-2.*sigma*sigma* LOG_RESLIMIT);
 
     /* if (out%20==0) printf("%d: Q,dQ = %g,%g\n",out,Qo,sigma); */
 
