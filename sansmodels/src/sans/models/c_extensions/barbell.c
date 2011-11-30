@@ -132,6 +132,10 @@ double barbell_analytical_2D_scaled(BarBellParameters *pars, double q, double q_
 	double alpha, vol, cos_val;
 	double answer;
 	double dp[7];
+  //convert angle degree to radian
+  double pi = 4.0*atan(1.0);
+  double theta = pars->theta * pi/180.0;
+  double phi = pars->phi * pi/180.0;
 
 	dp[0] = pars->scale;
 	dp[1] = pars->rad_bar;
@@ -140,11 +144,6 @@ double barbell_analytical_2D_scaled(BarBellParameters *pars, double q, double q_
 	dp[4] = pars->sld_barbell;
 	dp[5] = pars->sld_solv;
 	dp[6] = pars->background;
-
-	//convert angle degree to radian
-	double pi = 4.0*atan(1.0);
-	double theta = pars->theta * pi/180.0;
-	double phi = pars->phi * pi/180.0;
 
 	//double Pi = 4.0*atan(1.0);
     // Cylinder orientation
@@ -161,7 +160,6 @@ double barbell_analytical_2D_scaled(BarBellParameters *pars, double q, double q_
 
     // The following test should always pass
     if (fabs(cos_val)>1.0) {
-    	printf("cyl_ana_2D: Unexpected error: cos(alpha)>1\n");
      	return 0;
     }
 
