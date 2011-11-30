@@ -20,13 +20,16 @@ double erf(double x)
 
     // Save the sign of x
     int sign = 1;
+
+    double t;
+    double y;
     if (x < 0)
         sign = -1;
     x = fabs(x);
 
     // A&S formula 7.1.26
-    double t = 1.0/(1.0 + p*x);
-    double y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t*exp(-x*x);
+    t = 1.0/(1.0 + p*x);
+    y = 1.0 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t*exp(-x*x);
 
     return sign*y;
 }
