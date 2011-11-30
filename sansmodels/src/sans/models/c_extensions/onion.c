@@ -8,7 +8,7 @@
 #include <stdlib.h>
 // some details can be found in sld_cal.c
 double so_kernel(double dp[], double q) {
-	const int n = dp[0];
+	int n = dp[0];
 	double scale = dp[1];
 	double rad_core0 = dp[2];
 	double sld_core0 = dp[3];
@@ -19,15 +19,20 @@ double so_kernel(double dp[], double q) {
   double sign;
   double pi;
   double r0 = 0.0;
-  const array_size = n+2;
 
-  double sld_out[array_size];
-  double slope[array_size];
-  double sld_in[array_size];
-  double thick[array_size];
-  double A[array_size];
-  int fun_type[array_size];
+  double *sld_out;
+  double *slope;
+  double *sld_in;
+  double *thick;
+  double *A;
+  int *fun_type;
 
+  sld_out = (double*) malloc(n+2);
+  slope = (double*) malloc(n+2);
+  sld_in = (double*) malloc(n+2);
+  thick = (double*) malloc(n+2);
+  A = (double*) malloc(n+2);
+  fun_type = (int*) malloc(n+2);
 
 	for (i =1; i<=n; i++){
 		sld_out[i] = dp[i+5];
@@ -163,6 +168,14 @@ double so_kernel(double dp[], double q) {
     f2 = f * f / vol * 1.0e8;
 	f2 *= scale;
 	f2 += background;
+
+  free(sld_out);
+  free(slope);
+  free(sld_in);
+  free(thick);
+  free(A);
+  free(fun_type);
+
     return (f2);
 }
 /**
