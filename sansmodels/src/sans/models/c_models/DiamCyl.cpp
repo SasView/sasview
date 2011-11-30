@@ -109,6 +109,7 @@ double DiamCylFunc :: evaluate_rphi(double q, double phi) {
  */
 double DiamCylFunc :: calculate_ER() {
 //NOT implemented yet!!!
+  return 0.0;
 }
 // Testing code
 
