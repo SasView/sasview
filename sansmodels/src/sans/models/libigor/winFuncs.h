@@ -5,6 +5,10 @@
    Andrew Jackson, October 2007
    */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 double fmax(double x, double y);
 //long double fmaxl (long double x, long double y);
 //float fmaxf (float x, float y);
@@ -22,6 +26,9 @@ double erf(double x);
 //long double erfcl(long double x);
 //float erfcf(float x;
 
+#ifdef __cplusplus
+}
+#endif
 
 // Define INFINITY and NAN
 typedef union { unsigned char __c[4]; float __f; } __huge_valf_t;
