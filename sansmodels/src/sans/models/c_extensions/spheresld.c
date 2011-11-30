@@ -20,8 +20,29 @@ double sphere_sld_kernel(double dp[], double q) {
 	double sld_solv = dp[5];
 	double background = dp[6];
 	double npts = dp[57]; //number of sub_layers in each interface
+  double nsl=npts;//21.0; //nsl = Num_sub_layer:  MUST ODD number in double //no other number works now
+  int n_s;
+  int floor_nsl;
 
-	double sld[n+2],thick_inter[n+2],thick[n+2],fun_coef[n+2],total_thick;
+  double sld_i,sld_f,dz,bes,fun,f,vol,vol_pre,vol_sub,qr,r,contr,f2;
+  double sign,slope=0.0;
+  double pi;
+  double r0 = 0.0, thick_inter_f;
+
+  int* fun_type;
+  double* sld;
+  double* thick_inter;
+  double* thick;
+  double* fun_coef;
+
+	double total_thick;
+
+	fun_type = (int*)malloc(n+2);
+  sld = (double*)malloc(n+2);
+  thick_inter = (double*)malloc(n+2);
+  thick = (double*)malloc(n+2);
+  fun_coef = (double*)malloc(n+2);
+
 	fun_type[0] = dp[3];
 	fun_coef[0] = fabs(dp[58]);
 	for (i =1; i<=n; i++){
@@ -39,15 +60,6 @@ double sphere_sld_kernel(double dp[], double q) {
 	thick_inter[0] = thick_inter_core;
 	thick_inter[n+1] = 0.0;
 	fun_coef[n+1] = 0.0;
-
-	double nsl=npts;//21.0; //nsl = Num_sub_layer:  MUST ODD number in double //no other number works now
-	int n_s;
-	int floor_nsl;
-
-  double sld_i,sld_f,dz,bes,fun,f,vol,vol_pre,vol_sub,qr,r,contr,f2;
-  double sign,slope=0.0;
-  double pi;
-  double r0 = 0.0, thick_inter_f;
 
     pi = 4.0*atan(1.0);
     f = 0.0;
@@ -143,6 +155,14 @@ double sphere_sld_kernel(double dp[], double q) {
     f2 = f * f / vol * 1.0e8;
 	f2 *= scale;
 	f2 += background;
+
+  free(fun_type);
+  free(sld);
+  free(sld_im);
+  free(thick_inter);
+  free(thick);
+  free(fun_coef);
+
     return (f2);
 }
 
