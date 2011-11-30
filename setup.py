@@ -204,8 +204,8 @@ packages.append("sans.sansview")
 required = ['lxml', 'numpy>=1.3.0', 'matplotlib',
             'pil','periodictable>=1.3.0', 'unittest-xml-reporting']
 if os.name=='nt':
-    #required.extend(['comtypes','pywin32', 'pisa', 'html5lib', 'reportlab'])
-    required.extend(['comtypes','pywin32', 'pisa', 'html5lib'])
+    #required.extend(['comtypes', 'pisa', 'html5lib', 'reportlab'])
+    required.extend(['comtypes', 'pisa', 'html5lib'])
    
  # Set up SansView    
 setup(
