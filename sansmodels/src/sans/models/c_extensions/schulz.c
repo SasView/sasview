@@ -6,6 +6,9 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#if defined(_MSC_VER)
+#include "gamma_win.h"
+#endif
 
 
 /**
