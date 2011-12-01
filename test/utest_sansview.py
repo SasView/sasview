@@ -3,7 +3,7 @@ import subprocess
 import re
 
 SKIPPED_DIRS = ["sansrealspace", "calculatorview"]
-SANSVIEW_DIR = ".."
+SANSVIEW_DIR = os.pardir
 
 def run_tests():
     passed = 0
@@ -19,7 +19,7 @@ def run_tests():
             continue
         
         # Go through modules looking for unit tests
-        module_dir = os.path.join(SANSVIEW_DIR,d,"test")
+        module_dir = os.path.join(os.getcwd(),SANSVIEW_DIR,d,"test")
         if os.path.isdir(module_dir):
             for f in os.listdir(module_dir):
                 file_path = os.path.join(module_dir,f)
