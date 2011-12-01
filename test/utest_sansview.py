@@ -52,7 +52,6 @@ def run_tests():
                     if has_failed:
                         failed += 1
                         print "Result for %s (%s): FAILED" % (module_name, module_dir)
-                        print code
                         print std_out
                     else:
                         passed += 1
