@@ -4,6 +4,9 @@ import re
 
 SKIPPED_DIRS = ["sansrealspace", "calculatorview"]
 SANSVIEW_DIR = os.pardir
+COMMAND_SEP = ';'
+if os.name == 'nt':
+    COMMAND_SEP = '&'
 
 def run_tests():
     passed = 0
@@ -25,7 +28,7 @@ def run_tests():
                 file_path = os.path.join(module_dir,f)
                 if os.path.isfile(file_path) and f.startswith("utest_") and f.endswith(".py"):
                     module_name,_ = os.path.splitext(f)
-                    code = "cd %s;python -c \"import sys;import xmlrunner;import unittest;sys.path.insert(0, '%s');" % (module_dir, module_dir)
+                    code = "cd %s%spython -c \"import sys;import xmlrunner;import unittest;sys.path.insert(0, '%s');" % (module_dir, COMMAND_SEP, module_dir)
                     code += "from %s import *;" % module_name
                     code += "unittest.main(testRunner=xmlrunner.XMLTestRunner(output='logs'))\""
                     proc = subprocess.Popen(code, shell=True, stdout=subprocess.PIPE, stderr = subprocess.STDOUT)
