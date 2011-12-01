@@ -190,7 +190,7 @@ setup(
             "compressed": 1,
             "optimize": 0,
             #"bundle_files":2,
-            "bundle_files":1,
+            "bundle_files":3,
             },
     },
     data_files=data_files,
