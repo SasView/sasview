@@ -106,9 +106,6 @@ OPTIONS = {'argv_emulation': True,
            'plist':plist,
            'excludes' : EXCLUDES,
            }
-
-pytz.zoneinfo = pytz.tzinfo
-
 setup(
     app=APP,
     data_files=DATA_FILES,
