@@ -157,7 +157,9 @@ for f in findall(plugins_dir):
 
 packages = ['matplotlib', 'scipy', 'pytz', 'encodings']
 includes = ['site']
-excludes = [] 
+
+# Exclude packages that are not needed but are often found on build systems
+excludes = ['PyQt4','sip','pylab'] 
 
 dll_excludes = [
     'libgdk_pixbuf-2.0-0.dll', 
