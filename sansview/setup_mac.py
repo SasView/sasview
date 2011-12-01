@@ -96,7 +96,7 @@ plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
 APP = ['sansview.py']
 DATA_FILES += ['images','test','plugins','media']
 
-EXCLUDES = ['PyQt4', 'sip']
+EXCLUDES = ['PyQt4', 'sip', 'QtGui']
 
 OPTIONS = {'argv_emulation': True,
            'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings'],
