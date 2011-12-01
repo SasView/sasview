@@ -11,6 +11,7 @@ from distutils.sysconfig import get_python_lib
 import os
 import string
 import local_config
+import pytz
 
 ICON = local_config.SetupIconFile_mac
 EXTENSIONS_LIST = []
@@ -96,6 +97,9 @@ OPTIONS = {'argv_emulation': True,
            'resources': RESOURCES_FILES,
            'plist':plist,
            }
+
+pytz.zoneinfo = pytz.tzinfo
+
 setup(
     app=APP,
     data_files=DATA_FILES,
