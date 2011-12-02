@@ -207,7 +207,7 @@ if os.name=='nt':
     #required.extend(['comtypes', 'pisa', 'html5lib', 'reportlab'])
     required.extend(['comtypes', 'pisa', 'html5lib'])
 else:
-    required.extend(['numpy>=1.3.0','pil'])
+    required.extend(['pil'])
    
  # Set up SansView    
 setup(
