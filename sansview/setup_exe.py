@@ -14,6 +14,7 @@
 # See for example the 'images' directory below.
 
 import os, sys
+import platform
 
 if len(sys.argv) == 1:
     sys.argv.append('py2exe')
@@ -175,7 +176,9 @@ target_wx_client = Target(
     dest_base = "SansView"
     )
 
-
+bundle_option = 2
+if platform.architecture()[0] == '64bit':
+    bundle_option = 3
 
 setup(
     windows=[target_wx_client],
@@ -189,8 +192,7 @@ setup(
             'excludes':excludes,
             "compressed": 1,
             "optimize": 0,
-            #"bundle_files":2,
-            "bundle_files":3,
+            "bundle_files":bundle_option,
             },
     },
     data_files=data_files,
