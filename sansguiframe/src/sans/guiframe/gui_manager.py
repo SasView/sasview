@@ -287,7 +287,7 @@ class ViewerFrame(wx.Frame):
         self.on_batch_selection(event=None)
         self.add_icon()
         # Check for update
-        self._check_update(None)
+        #self._check_update(None)
         # Register the close event so it calls our own method
         wx.EVT_CLOSE(self, self.Close)
         # Register to status events
@@ -656,7 +656,7 @@ class ViewerFrame(wx.Frame):
         # Set up extra custom tool menu
         self._setup_extra_custom()
         #self.Show(True)
-        self._check_update(None)
+        #self._check_update(None)
     
     def _setup_extra_custom(self):  
         """
