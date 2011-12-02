@@ -9,7 +9,7 @@ from sans.fit.ScipyFitting import ScipyFit
 from sans.fit.ParkFitting import ParkFit
 
 
-class Fit:
+class Fit(object):
     """ 
     Wrap class that allows to select the fitting type.this class 
     can be used as follow : ::
@@ -30,8 +30,24 @@ class Fit:
         """
         #self._engine will contain an instance of ScipyFit or ParkFit
         self._engine = None
+        self.fitter_id = None
         self.set_engine(engine)
           
+    def __setattr__(self, name, value):
+        """
+        set fitter_id and its engine at the same time
+        """
+        if name == "fitter_id":
+            self.__dict__[name] = value
+            if hasattr(self, "_engine") and self._engine is not None:
+                self._engine.fitter_id = value    
+        elif name == "_engine":
+            self.__dict__[name] = value
+            if hasattr(self, "fitter_id") and self.fitter_id is not None:
+                self._engine.fitter_id = self.fitter_id
+        else:
+            self.__dict__[name] = value
+                
     def set_engine(self, word):
         """
         Select the type of Fit 

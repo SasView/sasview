@@ -89,6 +89,8 @@ class ScipyFit(FitEngine):
         self._check_param_range(model)
         
         result = FResult(model=model, data=data, param_list=self.param_list)
+        result.pars = fitproblem[0].pars
+        result.fitter_id = self.fitter_id
         if handler is not None:
             handler.set_result(result=result)
         try:

@@ -556,6 +556,7 @@ class FitEngine:
         self.param_list = []
         #Dictionnary of fitArrange element (fit problems)
         self.fit_arrange_dict = {}
+        self.fitter_id = None
         
     def set_model(self, model,  id,  pars=[], constraints=[], data=None):
         """
@@ -786,6 +787,7 @@ class FResult(object):
     """
     def __init__(self, model=None, param_list=None, data=None):
         self.calls = None
+        self.pars = []
         self.fitness = None
         self.chisqr = None
         self.pvec = []
@@ -804,6 +806,7 @@ class FResult(object):
         self.param_list = param_list
         self.iterations = 0
         self.inputs = []
+        self.fitter_id = None
         if self.model is not None and self.data is not None:
             self.inputs = [(self.model, self.data)]
      

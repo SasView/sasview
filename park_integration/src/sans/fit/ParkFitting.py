@@ -424,6 +424,7 @@ class ParkFit(FitEngine):
         for m in self.problem.parts:
             residuals, theory = m.fitness.residuals()
             small_result = FResult(model=m.model, data=m.data.sans_data)
+            small_result.fitter_id = self.fitter_id
             small_result.theory = theory
             small_result.residuals = residuals
             small_result.pvec = []

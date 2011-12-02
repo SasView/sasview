@@ -155,7 +155,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             #wx.MessageBox(msg, 'Info')
             wx.PostEvent(self._manager.parent, StatusEvent(status=\
                             "Fitting: %s"%msg, info="info"))
-        if self.show_constraint.GetValue():
+        if not self.batch_on and self.show_constraint.GetValue():
             if not self._set_constraint():
                 return
         ## model was actually selected from this page to be fit
@@ -231,7 +231,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         ## display constraint fields
         if len(self.model_toFit)>=1:
             self._store_model()
-            if self.show_constraint.GetValue() and\
+            if not self.batch_on and self.show_constraint.GetValue() and\
                              len(self.constraints_list)==0:
                 self._show_all_constraint() 
                 self._show_constraint()
@@ -733,6 +733,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             self.show_constraint.Enable(False)
         self.hide_constraint.SetValue(True)
         self.show_constraint.SetValue(False)
+        print "self.show_constraint", self.show_constraint
         
         sizer_title.Add(wx.StaticText(self,-1," Model"))
         sizer_title.Add(( 10,10) )
