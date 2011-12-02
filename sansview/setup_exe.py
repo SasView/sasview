@@ -40,37 +40,63 @@ import py2exe
 
 origIsSystemDLL = py2exe.build_exe.isSystemDLL
 def isSystemDLL(pathname):
-        if os.path.basename(pathname).lower() in ("msvcp71.dll", "msvcr90.dll", "dwmapi.dll"):
+        if os.path.basename(pathname).lower() in ("msvcp71.dll", "comctl32.dll", "msvcr90.dll", "dwmapi.dll"):
                 return 0
         return origIsSystemDLL(pathname)
 py2exe.build_exe.isSystemDLL = isSystemDLL
 
-
-manifest = """
-   <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-   <assembly xmlns="urn:schemas-microsoft-com:asm.v1"
-   manifestVersion="1.0">
-   <assemblyIdentity
-       version="0.64.1.0"
-       processorArchitecture="x86"
-       name="Controls"
-       type="win32"
-   />
-   <description>SansView</description>
-   <dependency>
-       <dependentAssembly>
-           <assemblyIdentity
-               type="win32"
-               name="Microsoft.Windows.Common-Controls"
-               version="6.0.0.0"
-               processorArchitecture="X86"
-               publicKeyToken="6595b64144ccf1df"
-               language="*"
-           />
-       </dependentAssembly>
-   </dependency>
-   </assembly>
-  """
+if platform.architecture()[0] == '64bit':
+    manifest = """
+       <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+       <assembly xmlns="urn:schemas-microsoft-com:asm.v1"
+       manifestVersion="1.0">
+       <assemblyIdentity
+           version="0.64.1.0"
+           processorArchitecture="amd86"
+           name="Controls"
+           type="win32"
+       />
+       <description>SansView</description>
+       <dependency>
+           <dependentAssembly>
+               <assemblyIdentity
+                   type="win32"
+                   name="Microsoft.Windows.Common-Controls"
+                   version="6.0.0.0"
+                   processorArchitecture="amd86"
+                   publicKeyToken="6595b64144ccf1df"
+                   language="*"
+               />
+           </dependentAssembly>
+       </dependency>
+       </assembly>
+      """
+else:
+    manifest = """
+       <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+       <assembly xmlns="urn:schemas-microsoft-com:asm.v1"
+       manifestVersion="1.0">
+       <assemblyIdentity
+           version="0.64.1.0"
+           processorArchitecture="x86"
+           name="Controls"
+           type="win32"
+       />
+       <description>SansView</description>
+       <dependency>
+           <dependentAssembly>
+               <assemblyIdentity
+                   type="win32"
+                   name="Microsoft.Windows.Common-Controls"
+                   version="6.0.0.0"
+                   processorArchitecture="X86"
+                   publicKeyToken="6595b64144ccf1df"
+                   language="*"
+               />
+           </dependentAssembly>
+       </dependency>
+       </assembly>
+      """
 
     
 class Target:
