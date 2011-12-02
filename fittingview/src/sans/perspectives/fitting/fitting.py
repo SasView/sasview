@@ -177,7 +177,7 @@ class Plugin(PluginBase):
         self.sim_menu.Enable(False) 
         #combined Batch
         self.id_batchfit = wx.NewId()
-        batch_help = "Batch Fit"
+        batch_help = "Combined Batch"
         self.menu1.Append(self.id_batchfit, '&Combine Batch Fit', batch_help)
         wx.EVT_MENU(owner, self.id_batchfit,  self.on_add_sim_page)
         self.batch_menu = self.menu1.FindItemById(self.id_batchfit)
@@ -257,7 +257,7 @@ class Plugin(PluginBase):
         caption = "Simultaneous Fit"
         page = self.sim_page
         if id == self.id_batchfit:
-            caption = "Batch Fit"
+            caption = "Combined Batch"
             page = self.batch_page
             
         def set_focus_page(page):
@@ -902,12 +902,13 @@ class Plugin(PluginBase):
                 #if the id cannot be found then  we deal with a self.sim_page 
                 #or a self.batch_page
                 if self.sim_page is not None and uid == self.sim_page.uid:
-                    batch_on = self.sim_page.uid
+                    batch_on = self.sim_page.batch_on
                 if self.batch_page is not None and uid == self.batch_page.uid:
-                    batch_on = self.batch_page.uid
+                    batch_on = self.batch_page.batch_on
             except:
-                raise
-  
+                 batch_on = False
+                 #raise
+        
         # batch fit
         if batch_on:
             calc_fit = FitThread(handler = handler,
