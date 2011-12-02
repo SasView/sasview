@@ -52,7 +52,7 @@ if platform.architecture()[0] == '64bit':
        manifestVersion="1.0">
        <assemblyIdentity
            version="0.64.1.0"
-           processorArchitecture="amd86"
+           processorArchitecture="amd64"
            name="Controls"
            type="win32"
        />
@@ -63,7 +63,7 @@ if platform.architecture()[0] == '64bit':
                    type="win32"
                    name="Microsoft.Windows.Common-Controls"
                    version="6.0.0.0"
-                   processorArchitecture="amd86"
+                   processorArchitecture="amd64"
                    publicKeyToken="6595b64144ccf1df"
                    language="*"
                />
