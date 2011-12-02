@@ -733,7 +733,6 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
             self.show_constraint.Enable(False)
         self.hide_constraint.SetValue(True)
         self.show_constraint.SetValue(False)
-        print "self.show_constraint", self.show_constraint
         
         sizer_title.Add(wx.StaticText(self,-1," Model"))
         sizer_title.Add(( 10,10) )
