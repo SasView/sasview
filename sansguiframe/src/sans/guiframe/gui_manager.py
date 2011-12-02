@@ -1231,8 +1231,8 @@ class ViewerFrame(wx.Frame):
         # run if we spawn a new background process.
         #id = wx.NewId()
         #self._help_menu.Append(id,'&Check for update', 
-        #'Check for the latest version of %s' % config.__appname__)
-        wx.EVT_MENU(self, id, self._check_update)
+        # 'Check for the latest version of %s' % config.__appname__)
+        #wx.EVT_MENU(self, id, self._check_update)
         self._menubar.Append(self._help_menu, '&Help')
             
     def _add_menu_view(self):
