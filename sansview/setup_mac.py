@@ -110,7 +110,7 @@ argv_emulation = True
 if platform.architecture()[0] == '64bit':
     argv_emulation = False
 
-OPTIONS = {'argv_emulation': False,
+OPTIONS = {'argv_emulation': argv_emulation,
            'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings'],
            'iconfile': ICON,
            'frameworks':[libxml_path],
