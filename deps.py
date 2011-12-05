@@ -46,3 +46,30 @@ try:
 except:
     print "No PIL"
     
+# The following is necessary to build an app
+try:
+    import py2app
+    print "py2app ", py2app.__version__
+except:
+    print "No py2app: recommending version >= 0.6.4"
+    
+try:
+    import altgraph
+    print "altgraph ", altgraph.__version__
+except:
+    print "No altgraph"    
+    
+try:
+    import modulegraph
+    print "modulegraph ", modulegraph.__version__
+except:
+    print "No modulegraph: recommending version >= 0.9.1"
+    
+try:
+    import macholib
+    print "macholib ", macholib.__version__
+except:
+    print "No macholib: recommending version >= 1.4.3"
+    
+  
+    
