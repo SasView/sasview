@@ -116,9 +116,9 @@ OPTIONS = {'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings'],
 # ---> argv_emulation is not supported for 64-bit apps
 print platform.architecture()[0]
 if not platform.architecture()[0] == '64bit':
-    OPTIONS['argv-emulation'] = True
+    OPTIONS['argv_emulation'] = True
 else:
-    OPTIONS['argv-emulation'] = False
+    OPTIONS['argv_emulation'] = False
     
 setup(
     app=APP,
