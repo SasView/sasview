@@ -103,21 +103,20 @@ DATA_FILES += ['images','test','plugins','media']
 
 EXCLUDES = ['PyQt4', 'sip', 'QtGui']
 
-# Cross-platform applications generally expect sys.argv to
-# be used for opening files. This requires argv_emulation = True
-argv_emulation = True
-# argv_emulation is not supported for 64-bit apps
-if platform.architecture()[0] == '64bit':
-    argv_emulation = False
-
-OPTIONS = {'argv_emulation': argv_emulation,
-           'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings'],
+OPTIONS = {'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings'],
            'iconfile': ICON,
            'frameworks':[libxml_path],
            'resources': RESOURCES_FILES,
            'plist':plist,
            'excludes' : EXCLUDES,
            }
+
+# Cross-platform applications generally expect sys.argv to
+# be used for opening files. This requires argv_emulation = True
+# ---> argv_emulation is not supported for 64-bit apps
+if not platform.architecture()[0] == '64bit':
+    OPTIONS['argv_emulation'] = True
+
 setup(
     app=APP,
     data_files=DATA_FILES,
