@@ -17,6 +17,7 @@ import os
 import string
 import local_config
 import pytz
+import sys
 
 ICON = local_config.SetupIconFile_mac
 EXTENSIONS_LIST = []
@@ -68,20 +69,22 @@ def find_extension():
             if ext.strip() not in EXCEPTION_LIST and ext.strip() not in list:
                 list.append(ext)
     except:
-        pass
+        print sys.exc_value
+        
     try:
         file_type, ext = string.split(local_config.APPLICATION_WLIST, "|*.", 1)
         if ext.strip() not in EXCEPTION_LIST and ext.strip() not in list:
             list.append(ext)
     except:
-        pass
+        print sys.exc_value
+        
     try:
         for item in local_config.PLUGINS_WLIST:
             file_type, ext = string.split(item, "|*.", 1)
             if ext.strip() not in EXCEPTION_LIST and ext.strip() not in list:
                 list.append(ext) 
     except:
-        pass
+        print sys.exc_value
     
     return list
 
