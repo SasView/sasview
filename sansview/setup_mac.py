@@ -9,19 +9,6 @@ NOTES:
    12/01/2011: When seeing an error related to pytz.zoneinfo not being found, change the following line in py2app/recipes/matplotlib.py
                mf.import_hook('pytz.tzinfo', m, ['UTC'])
    12/05/2011: Needs macholib >= 1.4.3 and py2app >= 0.6.4 to create a 64-bit app
-               The ORNL build server uses:
-                - setuptools
-                - python 2.7 (Apple’s python won’t work)
-                - macholib 1.4.3
-                - altgraph 0.9
-                - modulegraph 0.9.1
-                - py2app 0.6.4
-                - lxml 2.3.2
-                - scipy 0.1.0
-                - numpy  1.6.1
-                - wx  2.9.2.4
-                - PIL 1.1.7
-
 """
 from setuptools import setup
 import periodictable.xsf
