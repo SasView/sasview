@@ -114,8 +114,9 @@ OPTIONS = {'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings'],
 # Cross-platform applications generally expect sys.argv to
 # be used for opening files. This requires argv_emulation = True
 # ---> argv_emulation is not supported for 64-bit apps
-if not platform.architecture()[0] == '64bit':
-    OPTIONS['argv_emulation'] = True
+print platform.architecture()[0]
+#if not platform.architecture()[0] == '64bit':
+#    OPTIONS['argv_emulation'] = True
 
 setup(
     app=APP,
