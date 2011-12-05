@@ -8,6 +8,7 @@ Usage:
 NOTES:
    12/01/2011: When seeing an error related to pytz.zoneinfo not being found, change the following line in py2app/recipes/matplotlib.py
                mf.import_hook('pytz.tzinfo', m, ['UTC'])
+   12/05/2011: Generally needs a recent version of macholib, modulegraph, and altgraph (through easy_install) on OSX >= 10.6
 """
 from setuptools import setup
 import periodictable.xsf
@@ -18,6 +19,7 @@ import string
 import local_config
 import pytz
 import sys
+import platform
 
 ICON = local_config.SetupIconFile_mac
 EXTENSIONS_LIST = []
@@ -101,7 +103,14 @@ DATA_FILES += ['images','test','plugins','media']
 
 EXCLUDES = ['PyQt4', 'sip', 'QtGui']
 
-OPTIONS = {'argv_emulation': True,
+# Cross-platform applications generally expect sys.argv to
+# be used for opening files. This requires argv_emulation = True
+argv_emulation = True
+# argv_emulation is not supported for 64-bit apps
+if platform.architecture()[0] == '64bit':
+    argv_emulation = False
+
+OPTIONS = {'argv_emulation': False,
            'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings'],
            'iconfile': ICON,
            'frameworks':[libxml_path],
