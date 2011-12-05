@@ -29,8 +29,11 @@ IGNORED_FILES = ["a.exe",
                    "CLorentzian.cpp",
                    "CSchulz.cpp",
                    "WrapperGenerator.py",
-                   "wrapping.py",
-                   "winFuncs.c"]
+                   "wrapping.py"
+                   ]
+if not os.name=='nt':
+    IGNORED_FILES.extend(["gamma_win.c","winFuncs.c"])
+
 EXTENSIONS = [".c", ".cpp"]
 
 def append_file(file_list, dir_path):
@@ -60,6 +63,11 @@ smear_sources = []
 append_file(file_list=smear_sources, dir_path=smear_dir)
 
 
+smearer_sources = [os.path.join(smear_dir, "smearer.cpp"),
+                  os.path.join(smear_dir, "smearer_module.cpp")]
+if os.name=='nt':
+    smearer_sources.append(os.path.join(igordir, "winFuncs.c"))
+
 dist = setup(
     name="sansmodels",
     version = "1.0.0",
@@ -86,15 +94,13 @@ dist = setup(
         include_dirs=[igordir, srcdir, c_model_dir, numpy_incl_path]),       
         # Smearer extension
         Extension("sans.models.sans_extension.smearer",
-                   sources = [os.path.join(smear_dir, 
-                                          "smearer.cpp"),
-                             os.path.join(smear_dir, "smearer_module.cpp"),],
-        include_dirs=[smear_dir, numpy_incl_path]),
+                   sources = smearer_sources,
+                   include_dirs=[smear_dir, numpy_incl_path]),
         Extension("sans.models.sans_extension.smearer2d_helper",
                   sources = [os.path.join(smear_dir, 
                                           "smearer2d_helper_module.cpp"),
                              os.path.join(smear_dir, "smearer2d_helper.cpp"),],
-        include_dirs=[smear_dir,numpy_incl_path]
+                  include_dirs=[smear_dir,numpy_incl_path]
         )
         ]
     )
