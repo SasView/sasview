@@ -2,7 +2,7 @@
     Check dependencies
 """
 import sys
-print sys.path
+print sys.version
 
 try:
     import matplotlib
@@ -40,4 +40,9 @@ try:
 except:
     print "No reportlab"
     
+try:
+    import PIL
+    print "PIL"
+except:
+    print "No PIL"
     
