@@ -8,7 +8,20 @@ Usage:
 NOTES:
    12/01/2011: When seeing an error related to pytz.zoneinfo not being found, change the following line in py2app/recipes/matplotlib.py
                mf.import_hook('pytz.tzinfo', m, ['UTC'])
-   12/05/2011: Generally needs a recent version of macholib, modulegraph, and altgraph (through easy_install) on OSX >= 10.6
+   12/05/2011: Needs macholib >= 1.4.3 and py2app >= 0.6.4 to create a 64-bit app
+               The ORNL build server uses:
+                - setuptools
+                - python 2.7 (Apple’s python won’t work)
+                - macholib 1.4.3
+                - altgraph 0.9
+                - modulegraph 0.9.1
+                - py2app 0.6.4
+                - lxml 2.3.2
+                - scipy 0.1.0
+                - numpy  1.6.1
+                - wx  2.9.2.4
+                - PIL 1.1.7
+
 """
 from setuptools import setup
 import periodictable.xsf
@@ -71,22 +84,20 @@ def find_extension():
             if ext.strip() not in EXCEPTION_LIST and ext.strip() not in list:
                 list.append(ext)
     except:
-        print sys.exc_value
-        
+        pass
     try:
         file_type, ext = string.split(local_config.APPLICATION_WLIST, "|*.", 1)
         if ext.strip() not in EXCEPTION_LIST and ext.strip() not in list:
             list.append(ext)
     except:
-        print sys.exc_value
-        
+        pass
     try:
         for item in local_config.PLUGINS_WLIST:
             file_type, ext = string.split(item, "|*.", 1)
             if ext.strip() not in EXCEPTION_LIST and ext.strip() not in list:
                 list.append(ext) 
     except:
-        print sys.exc_value
+        pass
     
     return list
 
@@ -103,23 +114,14 @@ DATA_FILES += ['images','test','plugins','media']
 
 EXCLUDES = ['PyQt4', 'sip', 'QtGui']
 
-OPTIONS = {'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings'],
+OPTIONS = {'argv_emulation': True,
+           'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings','matplotlib'],
            'iconfile': ICON,
            'frameworks':[libxml_path],
            'resources': RESOURCES_FILES,
            'plist':plist,
            'excludes' : EXCLUDES,
            }
-
-# Cross-platform applications generally expect sys.argv to
-# be used for opening files. This requires argv_emulation = True
-# ---> argv_emulation is not supported for 64-bit apps
-print platform.architecture()[0]
-if not platform.architecture()[0] == '64bit':
-    OPTIONS['argv_emulation'] = 1
-else:
-    OPTIONS['argv_emulation'] = 0
-    
 setup(
     app=APP,
     data_files=DATA_FILES,
