@@ -12,6 +12,7 @@ This module provides Graphic interface for the data_manager module.
 """
 import os
 import wx
+from wx.build import build_options
 # Check version
 toks = wx.__version__.split('.')
 if int(toks[1]) < 9:
@@ -293,8 +294,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         #self.bt_close_plot.SetToolTipString("Delete the plot panel on focus")
         #wx.EVT_BUTTON(self, self.bt_close_plot.GetId(), self.on_close_plot)
        
-        self.cb_plotpanel = wx.ComboBox(self, -1, 
-                                style=wx.CB_READONLY|wx.CB_SORT)
+        if sys.platform == 'darwin' and build_options.WXPORT == 'osx_cocoa':
+            self.cb_plotpanel = wx.ComboBox(self, -1, 
+                                            style=wx.CB_READONLY)
+        else:
+            self.cb_plotpanel = wx.ComboBox(self, -1, 
+                                            style=wx.CB_READONLY|wx.CB_SORT)
         #self.cb_plotpanel.SetMinSize((BUTTON_WIDTH*2, -1))
         wx.EVT_COMBOBOX(self.cb_plotpanel,-1, self._on_plot_selection)
         self.cb_plotpanel.Disable()
