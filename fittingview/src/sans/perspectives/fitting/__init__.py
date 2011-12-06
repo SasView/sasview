@@ -1,6 +1,4 @@
 PLUGIN_ID = "Fitting plug-in 1.0"
-from fitting import *
-from distutils.filelist import findall
 import os
 def get_data_path(media):
     """
@@ -38,6 +36,6 @@ def data_files():
     """
     data_files = []
     path = get_data_path(media="media")
-    for f in findall(path):
+    for f in os.listdir(path):
         data_files.append(('media/fitting_media', [f]))
     return data_files

@@ -13,7 +13,6 @@ NOTES:
 from setuptools import setup
 import periodictable.xsf
 import sans.dataloader.readers 
-from distutils.sysconfig import get_python_lib
 import os
 import string
 import local_config
