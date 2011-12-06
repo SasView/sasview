@@ -41,20 +41,7 @@ from sans.guiframe.data_processor import BatchOutputFrame
 from sans.guiframe.events import EVT_NEW_BATCH
 from sans.dataloader.loader import Loader
 
-DATAPATH = os.getcwd()
-def _change_current_dir():
-    """
-    Get the path of the current ran file and change the application current
-    directory to the directory of that file
-    """
-    tem_path = sys.path[0]
-    if os.path.isfile(tem_path):
-        tem_path = os.path.dirname(tem_path)
-    
-    os.chdir(os.path.abspath(tem_path))
-    
-    
-_change_current_dir()    
+DATAPATH = os.getcwd()  
 PATH_APP = os.getcwd()
 
 def _find_local_config(file, path):
@@ -3039,10 +3026,6 @@ class ViewApp(wx.App):
         self.frame.Hide()
         self.s_screen = None
         temp_path = None
-        try:
-            _change_current_dir()
-        except:
-            pass
         try:
             self.open_file()
         except:
