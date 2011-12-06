@@ -5,18 +5,7 @@ import wx.lib.newevent
 
 # Try a normal import first
 # If it fails, try specifying a version
-try:
-    import matplotlib
-    # Check version
-    toks = matplotlib.__version__.split('.')
-    if len(toks) < 3 or int(toks[1]) < 98:
-        raise RuntimeError, "PlotPanel depends on matplotlib > 0.98"
-except:
-    logging.warning("Could not load matplotlib: trying setuptools")
-    import pkg_resources
-    pkg_resources.require("matplotlib>=0.98.1")
-    import matplotlib
-
+import matplotlib
 matplotlib.interactive(False)
 #Use the WxAgg back end. The Wx one takes too long to render
 matplotlib.use('WXAgg')
