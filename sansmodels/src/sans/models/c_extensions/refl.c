@@ -57,7 +57,8 @@ double re_kernel(double dp[], double q) {
 	thick_inter[n+1] = 0.0;
 
 	pi = 4.0*atan(1.0);
-  Xn = cassign(0.0,0.0);
+  	Xn = cassign(0.0,0.0);
+  	one = cassign(1.0,0.0);
 	two = cassign(0.0,-2.0);
 
 	//Checking if floor is available.
