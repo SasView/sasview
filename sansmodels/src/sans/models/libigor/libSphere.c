@@ -8,6 +8,50 @@ The fitting function is a simple polynomial. It works but is of no practical use
 #include "GaussWeights.h"
 #include "libSphere.h"
 
+
+static double
+gammln(double xx) {
+    double x,y,tmp,ser;
+    static double cof[6]={76.18009172947146,-86.50532032941677,
+    24.01409824083091,-1.231739572450155,
+    0.1208650973866179e-2,-0.5395239384953e-5};
+    int j;
+
+    y=x=xx;
+    tmp=x+5.5;
+    tmp -= (x+0.5)*log(tmp);
+    ser=1.000000000190015;
+    for (j=0;j<=5;j++) ser += cof[j]/++y;
+    return -tmp+log(2.5066282746310005*ser/x);
+}
+
+static double
+LogNormal_distr(double sig, double mu, double pt)
+{
+  double retval,pi;
+
+  pi = 4.0*atan(1.0);
+  retval = (1.0/ (sig*pt*sqrt(2.0*pi)) )*exp( -0.5*(log(pt) - mu)*(log(pt) - mu)/sig/sig );
+  return(retval);
+}
+
+static double
+Gauss_distr(double sig, double avg, double pt)
+{
+  double retval,Pi;
+
+  Pi = 4.0*atan(1.0);
+  retval = (1.0/ (sig*sqrt(2.0*Pi)) )*exp(-(avg-pt)*(avg-pt)/sig/sig/2.0);
+  return(retval);
+}
+
+static double SchulzPoint(double x, double avg, double zz) {
+    double dr;
+    dr = zz*log(x) - gammln(zz+1.0)+(zz+1.0)*log((zz+1.0)/avg)-(x/avg*(zz+1.0));
+    return (exp(dr));
+};
+
+
 // scattering from a sphere - hardly needs to be an XOP...
 double
 SphereForm(double dp[], double q)
