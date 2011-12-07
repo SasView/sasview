@@ -12,17 +12,17 @@
 double rpa_kernel(double dp[], double q) {
 	int lCASE = dp[0];
 
-	double Na,Nb,Nc,Nd,Nab,Nac,Nad,Nba,Nbc,Nbd,Nca,Ncb,Ncd;
+	double Na,Nb,Nc,Nd,Nab,Nac,Nad,Nbc,Nbd,Ncd;
 	double Phia,Phib,Phic,Phid,Phiab,Phiac,Phiad;
-	double Phiba,Phibc,Phibd,Phica,Phicb,Phicd,Phida,Phidb,Phidc;
-	double va,vb,vc,vd,vab,vac,vad,vba,vbc,vbd,vca,vcb,vcd,vda,vdb,vdc;
+	double Phibc,Phibd,Phicd;
+	double va,vb,vc,vd,vab,vac,vad,vbc,vbd,vcd;
 	double m;
 	double ba,bb,bc,bd;
 	double Xa,Xb,Xc,Xd;
 	double Paa,S0aa,Pab,S0ab,Pac,S0ac,Pad,S0ad;
-	double Pba,S0ba,Pbb,S0bb,Pbc,S0bc,Pbd,S0bd;
-	double Pca,S0ca,Pcb,S0cb,Pcc,S0cc,Pcd,S0cd;
-	double Pda,S0da,Pdb,S0db,Pdc,S0dc,Pdd,S0dd;
+	double S0ba,Pbb,S0bb,Pbc,S0bc,Pbd,S0bd;
+	double S0ca,S0cb,Pcc,S0cc,Pcd,S0cd;
+	double S0da,S0db,S0dc,Pdd,S0dd;
 	double Kaa,Kab,Kac,Kad,Kba,Kbb,Kbc,Kbd;
 	double Kca,Kcb,Kcc,Kcd,Kda,Kdb,Kdc,Kdd;
 	double Zaa,Zab,Zac,Zba,Zbb,Zbc,Zca,Zcb,Zcc;

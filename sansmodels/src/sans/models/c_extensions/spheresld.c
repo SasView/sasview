@@ -22,12 +22,10 @@ double sphere_sld_kernel(double dp[], double q) {
 	double npts = dp[57]; //number of sub_layers in each interface
   double nsl=npts;//21.0; //nsl = Num_sub_layer:  MUST ODD number in double //no other number works now
   int n_s;
-  int floor_nsl;
 
   double sld_i,sld_f,dz,bes,fun,f,vol,vol_pre,vol_sub,qr,r,contr,f2;
   double sign,slope=0.0;
   double pi;
-  double r0 = 0.0, thick_inter_f;
 
   int* fun_type;
   double* sld;
@@ -35,7 +33,7 @@ double sphere_sld_kernel(double dp[], double q) {
   double* thick;
   double* fun_coef;
 
-	double total_thick;
+	double total_thick=0.0;
 
 	fun_type = (int*)malloc((n+2)*sizeof(int));
   sld = (double*)malloc((n+2)*sizeof(double));
