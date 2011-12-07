@@ -64,10 +64,10 @@ double DiamEllipFunc :: operator()(double q) {
 	double norm = 0.0;
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad_a.size(); i++) {
+	for(size_t i=0; i<weights_rad_a.size(); i++) {
 		dp[0] = weights_rad_a[i].value;
 		// Loop over length weight points
-		for(int j=0; j<weights_rad_b.size(); j++) {
+		for(size_t j=0; j<weights_rad_b.size(); j++) {
 			dp[1] = weights_rad_b[j].value;
 
 			sum += weights_rad_a[i].weight*weights_rad_b[j].weight

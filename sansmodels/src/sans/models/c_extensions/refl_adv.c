@@ -24,11 +24,10 @@ double re_adv_kernel(double dp[], double q) {
 	double background = dp[6];
 	double npts = dp[69]; //number of sub_layers in each interface
 
-	double total_thick;
+	double total_thick=0.0;
 
   int n_s;
   double sld_i,sldim_i,dz,phi,R,ko2;
-  double sign,erfunc;
   double pi;
 
   int* fun_type;
@@ -37,7 +36,7 @@ double re_adv_kernel(double dp[], double q) {
   double* thick_inter;
   double* thick;
   double* fun_coef;
-  complex  inv_n,phi1,alpha,alpha2,kn,fnm,fnp,rn,Xn,nn,nn2,an,nnp1,one,zero,two,n_sub,n_sup,knp1,Xnp1;
+  complex  phi1,alpha,alpha2,kn,fnm,fnp,rn,Xn,nn,nn2,an,nnp1,one,two,n_sub,n_sup,knp1,Xnp1;
 
   fun_type = (int*)malloc((n+2)*sizeof(int));
   sld = (double*)malloc((n+2)*sizeof(double));
@@ -73,8 +72,8 @@ double re_adv_kernel(double dp[], double q) {
 
 	pi = 4.0*atan(1.0);
     one = cassign(1.0,0.0);
-	//zero = cassign(0.0,0.0);
-	two= cassign(0.0,-2.0);
+	Xn = cassign(0.0,0.0);
+	two = cassign(0.0,-2.0);
 
 	//Checking if floor is available.
 	//no imaginary sld inputs in this function yet

@@ -68,6 +68,7 @@ Rgsquare(double q, double L, double b)
 }
 
 // ?? funciton is not used - but should the log actually be log10???
+/*
 static double
 miu(double x)
 {
@@ -76,6 +77,7 @@ miu(double x)
 
     return (yy);
 }
+*/
 
 //WR named this w (too generic)
 static double

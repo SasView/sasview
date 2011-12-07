@@ -1,4 +1,4 @@
-#if !defined(o_h)
+#if !defined(librefl_h)
 #define librefl_h
 
 typedef struct {

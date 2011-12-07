@@ -35,7 +35,6 @@ double triaxial_ellipsoid_analytical_1D(TriaxialEllipsoidParameters *pars, doubl
 double triaxial_ellipsoid_kernel(TriaxialEllipsoidParameters *pars, double q, double alpha, double nu) {
 	double t,a,b,c;
 	double kernel;
-	double pi = 4.0*atan(1.0);
 
 	a = pars->semi_axisA ;
 	b = pars->semi_axisB ;

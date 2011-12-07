@@ -320,8 +320,8 @@ double disperseParam(Disperser *self, int iPar, PyObject * pars) {
 	PyObject *result;
 	PyObject *temp;
 	
-	
-    n_pts = PyInt_AsLong( PyDict_GetItemString(self->params, "n_pts") );
+	step = 0.0;
+  n_pts = PyInt_AsLong( PyDict_GetItemString(self->params, "n_pts") );
     
 	// If we exhausted the parameter array, simply evaluate
     // the model
@@ -446,9 +446,9 @@ static PyTypeObject DisperserType = {
 };
 
 
-static PyMethodDef module_methods[] = {
-    {NULL} 
-};
+//static PyMethodDef module_methods[] = {
+//    {NULL}
+//};
 
 /**
  * Function used to add the model class to a module

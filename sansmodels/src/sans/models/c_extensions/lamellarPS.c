@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 /*LamellarPS_kernel() was moved from libigor to get rid of polydipersity in del(thickness) that we provide from control panel.
-/*	LamellarPSX  :  calculates the form factor of a lamellar structure - with S(q) effects included
+	LamellarPSX  :  calculates the form factor of a lamellar structure - with S(q) effects included
 -------
 ------- resolution effects ARE NOT included, but only a CONSTANT default value, not the real q-dependent resolution!!
 

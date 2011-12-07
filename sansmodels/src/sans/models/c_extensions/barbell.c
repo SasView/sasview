@@ -34,7 +34,7 @@ double barbell_analytical_1D(BarBellParameters *pars, double q) {
 
 
 double bar2d_kernel(double dp[], double q, double alpha) {
-	int i,j;
+	int j;
 	double Pi;
 	double scale,contr,bkg,sldc,slds;
 	double len,rad,hDist,endRad;
@@ -129,7 +129,7 @@ double barbell_analytical_2D(BarBellParameters *pars, double q, double phi) {
 double barbell_analytical_2D_scaled(BarBellParameters *pars, double q, double q_x, double q_y) {
 	double cyl_x, cyl_y, cyl_z;
 	double q_z;
-	double alpha, vol, cos_val;
+	double alpha, cos_val;
 	double answer;
 	double dp[7];
   //convert angle degree to radian

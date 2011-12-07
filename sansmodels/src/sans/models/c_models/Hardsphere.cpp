@@ -61,7 +61,7 @@ double HardsphereStructure :: operator()(double q) {
 	double norm = 0.0;
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp[0] = weights_rad[i].value;
 
 		sum += weights_rad[i].weight

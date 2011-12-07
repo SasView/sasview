@@ -35,7 +35,7 @@ double capcyl_analytical_1D(CapCylParameters *pars, double q) {
 
 
 double capcyl2d_kernel(double dp[], double q, double alpha) {
-	int i,j;
+	int j;
 	double Pi;
 	double scale,contr,bkg,sldc,slds;
 	double len,rad,hDist,endRad;
@@ -130,7 +130,7 @@ double capcyl_analytical_2D(CapCylParameters *pars, double q, double phi) {
 double capcyl_analytical_2D_scaled(CapCylParameters *pars, double q, double q_x, double q_y) {
 	double cyl_x, cyl_y, cyl_z;
 	double q_z;
-	double alpha, vol, cos_val;
+	double alpha, cos_val;
 	double answer;
 	double dp[7];
   //convert angle degree to radian
