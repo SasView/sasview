@@ -186,7 +186,7 @@ packages = ['matplotlib', 'scipy', 'pytz', 'encodings']
 includes = ['site']
 
 # Exclude packages that are not needed but are often found on build systems
-excludes = ['PyQt4','sip','pylab'] 
+excludes = ['PyQt4','sip'] 
 
 dll_excludes = [
     'libgdk_pixbuf-2.0-0.dll', 
