@@ -566,7 +566,8 @@ void addCFuzzySphereModel(PyObject *module) {
     PyModule_AddObject(module, "CFuzzySphereModel", (PyObject *)&CFuzzySphereModelType);
     
     d = PyModule_GetDict(module);
-    CFuzzySphereModelError = PyErr_NewException("CFuzzySphereModel.error", NULL, NULL);
+    static char error_name[] = "CFuzzySphereModel.error";
+    CFuzzySphereModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CFuzzySphereModelError", CFuzzySphereModelError);
 }
 

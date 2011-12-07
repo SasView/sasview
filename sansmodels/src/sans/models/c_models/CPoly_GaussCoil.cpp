@@ -543,7 +543,8 @@ void addCPoly_GaussCoil(PyObject *module) {
     PyModule_AddObject(module, "CPoly_GaussCoil", (PyObject *)&CPoly_GaussCoilType);
     
     d = PyModule_GetDict(module);
-    CPoly_GaussCoilError = PyErr_NewException("CPoly_GaussCoil.error", NULL, NULL);
+    static char error_name[] = "CPoly_GaussCoil.error";
+    CPoly_GaussCoilError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CPoly_GaussCoilError", CPoly_GaussCoilError);
 }
 

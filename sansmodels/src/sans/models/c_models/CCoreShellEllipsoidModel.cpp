@@ -643,7 +643,8 @@ void addCCoreShellEllipsoidModel(PyObject *module) {
     PyModule_AddObject(module, "CCoreShellEllipsoidModel", (PyObject *)&CCoreShellEllipsoidModelType);
     
     d = PyModule_GetDict(module);
-    CCoreShellEllipsoidModelError = PyErr_NewException("CCoreShellEllipsoidModel.error", NULL, NULL);
+    static char error_name[] = "CCoreShellEllipsoidModel.error";
+    CCoreShellEllipsoidModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CCoreShellEllipsoidModelError", CCoreShellEllipsoidModelError);
 }
 

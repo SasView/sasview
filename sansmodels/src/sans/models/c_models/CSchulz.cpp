@@ -525,7 +525,8 @@ void addCSchulz(PyObject *module) {
     PyModule_AddObject(module, "CSchulz", (PyObject *)&CSchulzType);
     
     d = PyModule_GetDict(module);
-    CSchulzError = PyErr_NewException("CSchulz.error", NULL, NULL);
+    static char error_name[] = "CSchulz.error";
+    CSchulzError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CSchulzError", CSchulzError);
 }
 

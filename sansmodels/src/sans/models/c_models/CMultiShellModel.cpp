@@ -589,7 +589,8 @@ void addCMultiShellModel(PyObject *module) {
     PyModule_AddObject(module, "CMultiShellModel", (PyObject *)&CMultiShellModelType);
     
     d = PyModule_GetDict(module);
-    CMultiShellModelError = PyErr_NewException("CMultiShellModel.error", NULL, NULL);
+    static char error_name[] = "CMultiShellModel.error";
+    CMultiShellModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CMultiShellModelError", CMultiShellModelError);
 }
 

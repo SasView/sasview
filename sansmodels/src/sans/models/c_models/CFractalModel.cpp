@@ -558,7 +558,8 @@ void addCFractalModel(PyObject *module) {
     PyModule_AddObject(module, "CFractalModel", (PyObject *)&CFractalModelType);
     
     d = PyModule_GetDict(module);
-    CFractalModelError = PyErr_NewException("CFractalModel.error", NULL, NULL);
+    static char error_name[] = "CFractalModel.error";
+    CFractalModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CFractalModelError", CFractalModelError);
 }
 

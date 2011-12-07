@@ -758,7 +758,8 @@ void addCReflModel(PyObject *module) {
     PyModule_AddObject(module, "CReflModel", (PyObject *)&CReflModelType);
     
     d = PyModule_GetDict(module);
-    CReflModelError = PyErr_NewException("CReflModel.error", NULL, NULL);
+    static char error_name[] = "CReflModel.error";
+    CReflModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CReflModelError", CReflModelError);
 }
 

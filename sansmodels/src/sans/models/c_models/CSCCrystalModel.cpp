@@ -612,7 +612,8 @@ void addCSCCrystalModel(PyObject *module) {
     PyModule_AddObject(module, "CSCCrystalModel", (PyObject *)&CSCCrystalModelType);
     
     d = PyModule_GetDict(module);
-    CSCCrystalModelError = PyErr_NewException("CSCCrystalModel.error", NULL, NULL);
+    static char error_name[] = "CSCCrystalModel.error";
+    CSCCrystalModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CSCCrystalModelError", CSCCrystalModelError);
 }
 

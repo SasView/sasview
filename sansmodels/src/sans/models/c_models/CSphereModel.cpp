@@ -548,7 +548,8 @@ void addCSphereModel(PyObject *module) {
     PyModule_AddObject(module, "CSphereModel", (PyObject *)&CSphereModelType);
     
     d = PyModule_GetDict(module);
-    CSphereModelError = PyErr_NewException("CSphereModel.error", NULL, NULL);
+    static char error_name[] = "CSphereModel.error";
+    CSphereModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CSphereModelError", CSphereModelError);
 }
 

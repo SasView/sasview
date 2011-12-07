@@ -546,7 +546,8 @@ void addCDiamCylFunc(PyObject *module) {
     PyModule_AddObject(module, "CDiamCylFunc", (PyObject *)&CDiamCylFuncType);
     
     d = PyModule_GetDict(module);
-    CDiamCylFuncError = PyErr_NewException("CDiamCylFunc.error", NULL, NULL);
+    static char error_name[] = "CDiamCylFunc.error";
+    CDiamCylFuncError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CDiamCylFuncError", CDiamCylFuncError);
 }
 

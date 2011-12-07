@@ -638,7 +638,8 @@ void addCTriaxialEllipsoidModel(PyObject *module) {
     PyModule_AddObject(module, "CTriaxialEllipsoidModel", (PyObject *)&CTriaxialEllipsoidModelType);
     
     d = PyModule_GetDict(module);
-    CTriaxialEllipsoidModelError = PyErr_NewException("CTriaxialEllipsoidModel.error", NULL, NULL);
+    static char error_name[] = "CTriaxialEllipsoidModel.error";
+    CTriaxialEllipsoidModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CTriaxialEllipsoidModelError", CTriaxialEllipsoidModelError);
 }
 

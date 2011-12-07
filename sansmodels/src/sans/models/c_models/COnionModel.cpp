@@ -933,7 +933,8 @@ void addCOnionModel(PyObject *module) {
     PyModule_AddObject(module, "COnionModel", (PyObject *)&COnionModelType);
     
     d = PyModule_GetDict(module);
-    COnionModelError = PyErr_NewException("COnionModel.error", NULL, NULL);
+    static char error_name[] = "COnionModel.error";
+    COnionModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "COnionModelError", COnionModelError);
 }
 

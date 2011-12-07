@@ -576,7 +576,8 @@ void addCBinaryHSModel(PyObject *module) {
     PyModule_AddObject(module, "CBinaryHSModel", (PyObject *)&CBinaryHSModelType);
     
     d = PyModule_GetDict(module);
-    CBinaryHSModelError = PyErr_NewException("CBinaryHSModel.error", NULL, NULL);
+    static char error_name[] = "CBinaryHSModel.error";
+    CBinaryHSModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CBinaryHSModelError", CBinaryHSModelError);
 }
 

@@ -576,7 +576,8 @@ void addCLamellarPSModel(PyObject *module) {
     PyModule_AddObject(module, "CLamellarPSModel", (PyObject *)&CLamellarPSModelType);
     
     d = PyModule_GetDict(module);
-    CLamellarPSModelError = PyErr_NewException("CLamellarPSModel.error", NULL, NULL);
+    static char error_name[] = "CLamellarPSModel.error";
+    CLamellarPSModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CLamellarPSModelError", CLamellarPSModelError);
 }
 

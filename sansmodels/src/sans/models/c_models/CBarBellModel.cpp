@@ -620,7 +620,8 @@ void addCBarBellModel(PyObject *module) {
     PyModule_AddObject(module, "CBarBellModel", (PyObject *)&CBarBellModelType);
     
     d = PyModule_GetDict(module);
-    CBarBellModelError = PyErr_NewException("CBarBellModel.error", NULL, NULL);
+    static char error_name[] = "CBarBellModel.error";
+    CBarBellModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CBarBellModelError", CBarBellModelError);
 }
 

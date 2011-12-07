@@ -599,7 +599,8 @@ void addCLamellarPSHGModel(PyObject *module) {
     PyModule_AddObject(module, "CLamellarPSHGModel", (PyObject *)&CLamellarPSHGModelType);
     
     d = PyModule_GetDict(module);
-    CLamellarPSHGModelError = PyErr_NewException("CLamellarPSHGModel.error", NULL, NULL);
+    static char error_name[] = "CLamellarPSHGModel.error";
+    CLamellarPSHGModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CLamellarPSHGModelError", CLamellarPSHGModelError);
 }
 

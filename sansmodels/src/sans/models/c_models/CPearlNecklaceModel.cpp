@@ -581,7 +581,8 @@ void addCPearlNecklaceModel(PyObject *module) {
     PyModule_AddObject(module, "CPearlNecklaceModel", (PyObject *)&CPearlNecklaceModelType);
     
     d = PyModule_GetDict(module);
-    CPearlNecklaceModelError = PyErr_NewException("CPearlNecklaceModel.error", NULL, NULL);
+    static char error_name[] = "CPearlNecklaceModel.error";
+    CPearlNecklaceModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CPearlNecklaceModelError", CPearlNecklaceModelError);
 }
 

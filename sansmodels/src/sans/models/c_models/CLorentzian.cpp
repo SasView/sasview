@@ -525,7 +525,8 @@ void addCLorentzian(PyObject *module) {
     PyModule_AddObject(module, "CLorentzian", (PyObject *)&CLorentzianType);
     
     d = PyModule_GetDict(module);
-    CLorentzianError = PyErr_NewException("CLorentzian.error", NULL, NULL);
+    static char error_name[] = "CLorentzian.error";
+    CLorentzianError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CLorentzianError", CLorentzianError);
 }
 

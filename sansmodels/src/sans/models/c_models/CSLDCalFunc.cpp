@@ -553,7 +553,8 @@ void addCSLDCalFunc(PyObject *module) {
     PyModule_AddObject(module, "CSLDCalFunc", (PyObject *)&CSLDCalFuncType);
     
     d = PyModule_GetDict(module);
-    CSLDCalFuncError = PyErr_NewException("CSLDCalFunc.error", NULL, NULL);
+    static char error_name[] = "CSLDCalFunc.error";
+    CSLDCalFuncError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CSLDCalFuncError", CSLDCalFuncError);
 }
 

@@ -571,7 +571,8 @@ void addCLamellarFFHGModel(PyObject *module) {
     PyModule_AddObject(module, "CLamellarFFHGModel", (PyObject *)&CLamellarFFHGModelType);
     
     d = PyModule_GetDict(module);
-    CLamellarFFHGModelError = PyErr_NewException("CLamellarFFHGModel.error", NULL, NULL);
+    static char error_name[] = "CLamellarFFHGModel.error";
+    CLamellarFFHGModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CLamellarFFHGModelError", CLamellarFFHGModelError);
 }
 

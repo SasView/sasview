@@ -878,7 +878,8 @@ void addCReflAdvModel(PyObject *module) {
     PyModule_AddObject(module, "CReflAdvModel", (PyObject *)&CReflAdvModelType);
     
     d = PyModule_GetDict(module);
-    CReflAdvModelError = PyErr_NewException("CReflAdvModel.error", NULL, NULL);
+    static char error_name[] = "CReflAdvModel.error";
+    CReflAdvModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CReflAdvModelError", CReflAdvModelError);
 }
 

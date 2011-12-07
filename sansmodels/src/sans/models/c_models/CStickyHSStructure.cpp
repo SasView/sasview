@@ -543,7 +543,8 @@ void addCStickyHSStructure(PyObject *module) {
     PyModule_AddObject(module, "CStickyHSStructure", (PyObject *)&CStickyHSStructureType);
     
     d = PyModule_GetDict(module);
-    CStickyHSStructureError = PyErr_NewException("CStickyHSStructure.error", NULL, NULL);
+    static char error_name[] = "CStickyHSStructure.error";
+    CStickyHSStructureError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CStickyHSStructureError", CStickyHSStructureError);
 }
 

@@ -485,6 +485,7 @@ void add[PYTHONCLASS](PyObject *module) {
     PyModule_AddObject(module, "[PYTHONCLASS]", (PyObject *)&[PYTHONCLASS]Type);
     
     d = PyModule_GetDict(module);
-    [PYTHONCLASS]Error = PyErr_NewException("[PYTHONCLASS].error", NULL, NULL);
+    static char error_name[] = "[PYTHONCLASS].error";
+    [PYTHONCLASS]Error = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "[PYTHONCLASS]Error", [PYTHONCLASS]Error);
 }

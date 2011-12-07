@@ -548,7 +548,8 @@ void addCLamellarModel(PyObject *module) {
     PyModule_AddObject(module, "CLamellarModel", (PyObject *)&CLamellarModelType);
     
     d = PyModule_GetDict(module);
-    CLamellarModelError = PyErr_NewException("CLamellarModel.error", NULL, NULL);
+    static char error_name[] = "CLamellarModel.error";
+    CLamellarModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CLamellarModelError", CLamellarModelError);
 }
 

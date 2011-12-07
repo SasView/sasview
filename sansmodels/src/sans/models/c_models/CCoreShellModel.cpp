@@ -571,7 +571,8 @@ void addCCoreShellModel(PyObject *module) {
     PyModule_AddObject(module, "CCoreShellModel", (PyObject *)&CCoreShellModelType);
     
     d = PyModule_GetDict(module);
-    CCoreShellModelError = PyErr_NewException("CCoreShellModel.error", NULL, NULL);
+    static char error_name[] = "CCoreShellModel.error";
+    CCoreShellModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CCoreShellModelError", CCoreShellModelError);
 }
 

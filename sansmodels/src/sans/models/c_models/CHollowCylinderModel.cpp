@@ -620,7 +620,8 @@ void addCHollowCylinderModel(PyObject *module) {
     PyModule_AddObject(module, "CHollowCylinderModel", (PyObject *)&CHollowCylinderModelType);
     
     d = PyModule_GetDict(module);
-    CHollowCylinderModelError = PyErr_NewException("CHollowCylinderModel.error", NULL, NULL);
+    static char error_name[] = "CHollowCylinderModel.error";
+    CHollowCylinderModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CHollowCylinderModelError", CHollowCylinderModelError);
 }
 

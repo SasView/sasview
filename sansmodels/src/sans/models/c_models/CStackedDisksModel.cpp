@@ -635,7 +635,8 @@ void addCStackedDisksModel(PyObject *module) {
     PyModule_AddObject(module, "CStackedDisksModel", (PyObject *)&CStackedDisksModelType);
     
     d = PyModule_GetDict(module);
-    CStackedDisksModelError = PyErr_NewException("CStackedDisksModel.error", NULL, NULL);
+    static char error_name[] = "CStackedDisksModel.error";
+    CStackedDisksModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CStackedDisksModelError", CStackedDisksModelError);
 }
 

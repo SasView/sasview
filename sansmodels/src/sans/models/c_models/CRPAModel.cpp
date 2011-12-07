@@ -668,7 +668,8 @@ void addCRPAModel(PyObject *module) {
     PyModule_AddObject(module, "CRPAModel", (PyObject *)&CRPAModelType);
     
     d = PyModule_GetDict(module);
-    CRPAModelError = PyErr_NewException("CRPAModel.error", NULL, NULL);
+    static char error_name[] = "CRPAModel.error";
+    CRPAModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CRPAModelError", CRPAModelError);
 }
 

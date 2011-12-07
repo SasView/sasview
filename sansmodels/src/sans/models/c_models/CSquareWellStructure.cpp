@@ -543,7 +543,8 @@ void addCSquareWellStructure(PyObject *module) {
     PyModule_AddObject(module, "CSquareWellStructure", (PyObject *)&CSquareWellStructureType);
     
     d = PyModule_GetDict(module);
-    CSquareWellStructureError = PyErr_NewException("CSquareWellStructure.error", NULL, NULL);
+    static char error_name[] = "CSquareWellStructure.error";
+    CSquareWellStructureError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CSquareWellStructureError", CSquareWellStructureError);
 }
 

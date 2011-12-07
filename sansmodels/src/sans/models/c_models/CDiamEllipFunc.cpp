@@ -546,7 +546,8 @@ void addCDiamEllipFunc(PyObject *module) {
     PyModule_AddObject(module, "CDiamEllipFunc", (PyObject *)&CDiamEllipFuncType);
     
     d = PyModule_GetDict(module);
-    CDiamEllipFuncError = PyErr_NewException("CDiamEllipFunc.error", NULL, NULL);
+    static char error_name[] = "CDiamEllipFunc.error";
+    CDiamEllipFuncError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CDiamEllipFuncError", CDiamEllipFuncError);
 }
 

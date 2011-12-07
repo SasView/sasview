@@ -638,7 +638,8 @@ void addCParallelepipedModel(PyObject *module) {
     PyModule_AddObject(module, "CParallelepipedModel", (PyObject *)&CParallelepipedModelType);
     
     d = PyModule_GetDict(module);
-    CParallelepipedModelError = PyErr_NewException("CParallelepipedModel.error", NULL, NULL);
+    static char error_name[] = "CParallelepipedModel.error";
+    CParallelepipedModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CParallelepipedModelError", CParallelepipedModelError);
 }
 

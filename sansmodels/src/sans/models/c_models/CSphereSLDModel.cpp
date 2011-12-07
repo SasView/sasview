@@ -836,7 +836,8 @@ void addCSphereSLDModel(PyObject *module) {
     PyModule_AddObject(module, "CSphereSLDModel", (PyObject *)&CSphereSLDModelType);
     
     d = PyModule_GetDict(module);
-    CSphereSLDModelError = PyErr_NewException("CSphereSLDModel.error", NULL, NULL);
+    static char error_name[] = "CSphereSLDModel.error";
+    CSphereSLDModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CSphereSLDModelError", CSphereSLDModelError);
 }
 

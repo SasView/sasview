@@ -602,7 +602,8 @@ void addCFlexCylEllipXModel(PyObject *module) {
     PyModule_AddObject(module, "CFlexCylEllipXModel", (PyObject *)&CFlexCylEllipXModelType);
     
     d = PyModule_GetDict(module);
-    CFlexCylEllipXModelError = PyErr_NewException("CFlexCylEllipXModel.error", NULL, NULL);
+    static char error_name[] = "CFlexCylEllipXModel.error";
+    CFlexCylEllipXModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CFlexCylEllipXModelError", CFlexCylEllipXModelError);
 }
 

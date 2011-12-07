@@ -640,7 +640,8 @@ void addCCoreFourShellModel(PyObject *module) {
     PyModule_AddObject(module, "CCoreFourShellModel", (PyObject *)&CCoreFourShellModelType);
     
     d = PyModule_GetDict(module);
-    CCoreFourShellModelError = PyErr_NewException("CCoreFourShellModel.error", NULL, NULL);
+    static char error_name[] = "CCoreFourShellModel.error";
+    CCoreFourShellModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CCoreFourShellModelError", CCoreFourShellModelError);
 }
 

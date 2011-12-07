@@ -553,7 +553,8 @@ void addCHayterMSAStructure(PyObject *module) {
     PyModule_AddObject(module, "CHayterMSAStructure", (PyObject *)&CHayterMSAStructureType);
     
     d = PyModule_GetDict(module);
-    CHayterMSAStructureError = PyErr_NewException("CHayterMSAStructure.error", NULL, NULL);
+    static char error_name[] = "CHayterMSAStructure.error";
+    CHayterMSAStructureError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CHayterMSAStructureError", CHayterMSAStructureError);
 }
 

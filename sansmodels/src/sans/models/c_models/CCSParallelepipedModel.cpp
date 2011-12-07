@@ -668,7 +668,8 @@ void addCCSParallelepipedModel(PyObject *module) {
     PyModule_AddObject(module, "CCSParallelepipedModel", (PyObject *)&CCSParallelepipedModelType);
     
     d = PyModule_GetDict(module);
-    CCSParallelepipedModelError = PyErr_NewException("CCSParallelepipedModel.error", NULL, NULL);
+    static char error_name[] = "CCSParallelepipedModel.error";
+    CCSParallelepipedModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CCSParallelepipedModelError", CCSParallelepipedModelError);
 }
 

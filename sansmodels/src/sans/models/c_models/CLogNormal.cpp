@@ -525,7 +525,8 @@ void addCLogNormal(PyObject *module) {
     PyModule_AddObject(module, "CLogNormal", (PyObject *)&CLogNormalType);
     
     d = PyModule_GetDict(module);
-    CLogNormalError = PyErr_NewException("CLogNormal.error", NULL, NULL);
+    static char error_name[] = "CLogNormal.error";
+    CLogNormalError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CLogNormalError", CLogNormalError);
 }
 

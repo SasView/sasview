@@ -566,7 +566,8 @@ void addCVesicleModel(PyObject *module) {
     PyModule_AddObject(module, "CVesicleModel", (PyObject *)&CVesicleModelType);
     
     d = PyModule_GetDict(module);
-    CVesicleModelError = PyErr_NewException("CVesicleModel.error", NULL, NULL);
+    static char error_name[] = "CVesicleModel.error";
+    CVesicleModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CVesicleModelError", CVesicleModelError);
 }
 

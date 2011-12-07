@@ -525,7 +525,8 @@ void addCGaussian(PyObject *module) {
     PyModule_AddObject(module, "CGaussian", (PyObject *)&CGaussianType);
     
     d = PyModule_GetDict(module);
-    CGaussianError = PyErr_NewException("CGaussian.error", NULL, NULL);
+    static char error_name[] = "CGaussian.error";
+    CGaussianError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CGaussianError", CGaussianError);
 }
 

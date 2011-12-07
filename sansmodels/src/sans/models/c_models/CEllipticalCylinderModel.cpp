@@ -638,7 +638,8 @@ void addCEllipticalCylinderModel(PyObject *module) {
     PyModule_AddObject(module, "CEllipticalCylinderModel", (PyObject *)&CEllipticalCylinderModelType);
     
     d = PyModule_GetDict(module);
-    CEllipticalCylinderModelError = PyErr_NewException("CEllipticalCylinderModel.error", NULL, NULL);
+    static char error_name[] = "CEllipticalCylinderModel.error";
+    CEllipticalCylinderModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CEllipticalCylinderModelError", CEllipticalCylinderModelError);
 }
 

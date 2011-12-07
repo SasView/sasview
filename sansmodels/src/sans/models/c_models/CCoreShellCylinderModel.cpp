@@ -625,7 +625,8 @@ void addCCoreShellCylinderModel(PyObject *module) {
     PyModule_AddObject(module, "CCoreShellCylinderModel", (PyObject *)&CCoreShellCylinderModelType);
     
     d = PyModule_GetDict(module);
-    CCoreShellCylinderModelError = PyErr_NewException("CCoreShellCylinderModel.error", NULL, NULL);
+    static char error_name[] = "CCoreShellCylinderModel.error";
+    CCoreShellCylinderModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CCoreShellCylinderModelError", CCoreShellCylinderModelError);
 }
 

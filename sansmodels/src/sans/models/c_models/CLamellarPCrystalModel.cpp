@@ -563,7 +563,8 @@ void addCLamellarPCrystalModel(PyObject *module) {
     PyModule_AddObject(module, "CLamellarPCrystalModel", (PyObject *)&CLamellarPCrystalModelType);
     
     d = PyModule_GetDict(module);
-    CLamellarPCrystalModelError = PyErr_NewException("CLamellarPCrystalModel.error", NULL, NULL);
+    static char error_name[] = "CLamellarPCrystalModel.error";
+    CLamellarPCrystalModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CLamellarPCrystalModelError", CLamellarPCrystalModelError);
 }
 

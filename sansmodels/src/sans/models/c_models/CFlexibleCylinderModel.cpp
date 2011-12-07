@@ -584,7 +584,8 @@ void addCFlexibleCylinderModel(PyObject *module) {
     PyModule_AddObject(module, "CFlexibleCylinderModel", (PyObject *)&CFlexibleCylinderModelType);
     
     d = PyModule_GetDict(module);
-    CFlexibleCylinderModelError = PyErr_NewException("CFlexibleCylinderModel.error", NULL, NULL);
+    static char error_name[] = "CFlexibleCylinderModel.error";
+    CFlexibleCylinderModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CFlexibleCylinderModelError", CFlexibleCylinderModelError);
 }
 

@@ -533,7 +533,8 @@ void addCHardsphereStructure(PyObject *module) {
     PyModule_AddObject(module, "CHardsphereStructure", (PyObject *)&CHardsphereStructureType);
     
     d = PyModule_GetDict(module);
-    CHardsphereStructureError = PyErr_NewException("CHardsphereStructure.error", NULL, NULL);
+    static char error_name[] = "CHardsphereStructure.error";
+    CHardsphereStructureError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CHardsphereStructureError", CHardsphereStructureError);
 }
 

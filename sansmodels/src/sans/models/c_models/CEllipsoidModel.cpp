@@ -602,7 +602,8 @@ void addCEllipsoidModel(PyObject *module) {
     PyModule_AddObject(module, "CEllipsoidModel", (PyObject *)&CEllipsoidModelType);
     
     d = PyModule_GetDict(module);
-    CEllipsoidModelError = PyErr_NewException("CEllipsoidModel.error", NULL, NULL);
+    static char error_name[] = "CEllipsoidModel.error";
+    CEllipsoidModelError = PyErr_NewException(error_name, NULL, NULL);
     PyDict_SetItemString(d, "CEllipsoidModelError", CEllipsoidModelError);
 }
 
