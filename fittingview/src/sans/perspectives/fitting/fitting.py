@@ -218,12 +218,17 @@ class Plugin(PluginBase):
         chain_menu.Enable(self.batch_on)
         
         self.menu1.AppendSeparator()
-        self.id_editmodel = wx.NewId()
-        editmodel_help = "Edit cusomized model sample file" 
-        self.menu1.Append(self.id_editmodel, "Edit Custom Model", 
-                                   editmodel_help) 
-        wx.EVT_MENU(owner, self.id_editmodel,  self.edit_custom_model)
+        self.edit_model_menu = wx.Menu()
+        # Find and put files name in menu
+        try:
+            self.set_edit_menu(owner=owner)
+        except:
+            raise
         
+        self.id_edit = wx.NewId()
+        editmodel_help = "Edit cusomized model sample file" 
+        self.menu1.AppendMenu(self.id_edit, "Edit Custom Model", 
+                              self.edit_model_menu, editmodel_help)
         #create  menubar items
         return [(self.menu1, self.sub_menu)]
     
@@ -231,12 +236,34 @@ class Plugin(PluginBase):
         """
         Get the python editor panel
         """
-        from editmodel import PyConsole
-        filename = os.path.join("plugins", "testmodel.py")
-        frame = PyConsole(parent=self.parent, filename=filename)
+        id = event.GetId()
+        label = self.edit_model_menu.GetLabel(id)
+        from sans.perspectives.calculator.pyconsole import PyConsole
+        filename = os.path.join(models.find_plugins_dir(), label)
+        frame = PyConsole(parent=self.parent, manager=self, panel= self.fit_panel,
+                          title='Custom Model Editor', filename=filename)
         self.put_icon(frame)
         frame.Show(True) 
         
+    def set_edit_menu(self, owner):    
+        """
+        Set list of the edit model menu labels
+        """
+        list_fnames = os.listdir(models.find_plugins_dir())
+        for item in list_fnames:
+            name = os.path.basename(item)
+            toks = os.path.splitext(name)
+            if toks[1]=='.py' and not toks[0]=='__init__':
+                has_file = False
+                for item in self.edit_model_menu.GetMenuItems():
+                    if name == self.edit_model_menu.GetLabel(item.GetId()):
+                        has_file = True
+                if not has_file:
+                    id = wx.NewId()
+                    self.edit_model_menu.Append(id, name) 
+                    wx.EVT_MENU(owner, id,  self.edit_custom_model)
+                    has_file = False
+
     def put_icon(self, frame):
         """
         Put icon in the frame title bar

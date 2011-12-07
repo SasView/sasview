@@ -9,7 +9,7 @@ import os.path
 # Time is needed by the log method
 import time
 import logging
-
+import py_compile
 from sans.guiframe.events import StatusEvent  
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
@@ -68,7 +68,41 @@ def _check_plugin(model, name):
        return None
     return model
   
-  
+def find_plugins_dir():
+    """
+    Find path of the plugins dir
+    """
+    dir = os.path.abspath(PLUGIN_DIR)
+    if not os.path.isdir(dir):
+        dir = os.path.join(os.getcwd(), PLUGIN_DIR)
+    if not os.path.isdir(dir):
+        dir = os.path.join(os.path.dirname(__file__), PLUGIN_DIR)
+    if not os.path.isdir(dir):
+        dir = os.path.join(os.path.dirname(os.path.sys.path[0]), PLUGIN_DIR)
+    return dir
+
+class ReportProblem:
+    def __nonzero__(self):
+        type, value, traceback = sys.exc_info()
+        if type is not None and issubclass(type, py_compile.PyCompileError):
+            print "Problem with", repr(value)
+            raise type, value, traceback
+        return 1
+    
+report_problem = ReportProblem()
+
+def compile_file(dir):
+    """
+    Compile a py file
+    """
+    try:
+        import compileall
+        compileall.compile_dir(dir=dir, ddir=dir, force=1, quiet=report_problem)
+    except:
+        type, value, traceback = sys.exc_info()
+        return value
+    return None
+
 def _findModels(dir):
     """
     """
@@ -77,13 +111,7 @@ def _findModels(dir):
     # Go through files in plug-in directory
     #always recompile the folder plugin
     import compileall
-    dir = os.path.abspath(PLUGIN_DIR)
-    if not os.path.isdir(dir):
-        dir = os.path.join(os.getcwd(), PLUGIN_DIR)
-    if not os.path.isdir(dir):
-        dir = os.path.join(os.path.dirname(__file__), PLUGIN_DIR)
-    if not os.path.isdir(dir):
-        dir = os.path.join(os.path.dirname(os.path.sys.path[0]), PLUGIN_DIR)
+    dir = find_plugins_dir()
     if not os.path.isdir(dir):
         msg = "SansView couldn't locate Model plugin folder."
         msg += """ "%s" does not exist""" % dir
@@ -91,7 +119,7 @@ def _findModels(dir):
         return plugins
     else:
         log("looking for models in: %s" % str(dir))
-        compileall.compile_dir(dir=dir, ddir=dir, force=1, quiet=True)
+        compile_file(dir)
         logging.info("pluging model dir: %s\n" % str(dir))
     try:
         list = os.listdir(dir)
@@ -437,7 +465,8 @@ class ModelManagerBase:
         """
         is_modified = False
         if os.path.isdir(PLUGIN_DIR):
-            temp =  os.path.getmtime(PLUGIN_DIR)
+            # getmtime doesn't seem to work well: use getatime
+            temp =  os.path.getatime(PLUGIN_DIR)
             if  self.last_time_dir_modified != temp:
                 is_modified = True
                 self.last_time_dir_modified = temp
@@ -459,7 +488,8 @@ class ModelManagerBase:
             return self.model_combobox.get_list()
         else:
             return {}
-        
+    
+             
     def populate_menu(self, modelmenu, event_owner):
         """
         Populate a menu with our models
