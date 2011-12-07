@@ -124,13 +124,17 @@ CFlexCylEllipXModel_init(CFlexCylEllipXModel *self, PyObject *args, PyObject *kw
     return 0;
 }
 
+static char name_params[] = "params";
+static char def_params[] = "Parameters";
+static char name_dispersion[] = "dispersion";
+static char def_dispersion[] = "Dispersion parameters";
+static char name_log[] = "log";
+static char def_log[] = "Log";
+
 static PyMemberDef CFlexCylEllipXModel_members[] = {
-    {"params", T_OBJECT, offsetof(CFlexCylEllipXModel, params), 0,
-     "Parameters"},
-	{"dispersion", T_OBJECT, offsetof(CFlexCylEllipXModel, dispersion), 0,
-	  "Dispersion parameters"},     
-    {"log", T_OBJECT, offsetof(CFlexCylEllipXModel, log), 0,
-     "Log"},
+    {name_params, T_OBJECT, offsetof(CFlexCylEllipXModel, params), 0, def_params},
+	{name_dispersion, T_OBJECT, offsetof(CFlexCylEllipXModel, dispersion), 0, def_dispersion},     
+    {name_log, T_OBJECT, offsetof(CFlexCylEllipXModel, log), 0, def_log},
     {NULL}  /* Sentinel */
 };
 

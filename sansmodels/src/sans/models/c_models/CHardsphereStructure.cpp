@@ -109,13 +109,17 @@ CHardsphereStructure_init(CHardsphereStructure *self, PyObject *args, PyObject *
     return 0;
 }
 
+static char name_params[] = "params";
+static char def_params[] = "Parameters";
+static char name_dispersion[] = "dispersion";
+static char def_dispersion[] = "Dispersion parameters";
+static char name_log[] = "log";
+static char def_log[] = "Log";
+
 static PyMemberDef CHardsphereStructure_members[] = {
-    {"params", T_OBJECT, offsetof(CHardsphereStructure, params), 0,
-     "Parameters"},
-	{"dispersion", T_OBJECT, offsetof(CHardsphereStructure, dispersion), 0,
-	  "Dispersion parameters"},     
-    {"log", T_OBJECT, offsetof(CHardsphereStructure, log), 0,
-     "Log"},
+    {name_params, T_OBJECT, offsetof(CHardsphereStructure, params), 0, def_params},
+	{name_dispersion, T_OBJECT, offsetof(CHardsphereStructure, dispersion), 0, def_dispersion},     
+    {name_log, T_OBJECT, offsetof(CHardsphereStructure, log), 0, def_log},
     {NULL}  /* Sentinel */
 };
 
@@ -174,7 +178,7 @@ static PyObject *evaluateOneDim(HardsphereStructure* model, PyArrayObject *q){
                               PyArrayObject *x, PyArrayObject *y)
  {
     PyArrayObject *result;
-    int i, x_len, dims[1];
+    int i,j, x_len, y_len, dims[1];
     //check validity of input vectors
     if (x->nd != 1 || x->descr->type_num != PyArray_DOUBLE
         || y->nd != 1 || y->descr->type_num != PyArray_DOUBLE
@@ -187,6 +191,7 @@ static PyObject *evaluateOneDim(HardsphereStructure* model, PyArrayObject *q){
 	if (PyArray_Check(x) && PyArray_Check(y)) {
 		
 	    x_len = dims[0]= x->dimensions[0];
+        y_len = dims[0]= y->dimensions[0];
 	    
 	    // Make a new double matrix of same dims
         result=(PyArrayObject *) PyArray_FromDims(1,dims,NPY_DOUBLE);
@@ -344,6 +349,9 @@ static PyObject * run(CHardsphereStructure *self, PyObject *args) {
  */
 static PyObject * calculate_ER(CHardsphereStructure *self) {
 
+	PyObject* pars;
+	int npars;
+	
 	// Get parameters
 	
 	    // Reader parameter dictionary

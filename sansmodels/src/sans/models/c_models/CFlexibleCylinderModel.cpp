@@ -120,13 +120,17 @@ CFlexibleCylinderModel_init(CFlexibleCylinderModel *self, PyObject *args, PyObje
     return 0;
 }
 
+static char name_params[] = "params";
+static char def_params[] = "Parameters";
+static char name_dispersion[] = "dispersion";
+static char def_dispersion[] = "Dispersion parameters";
+static char name_log[] = "log";
+static char def_log[] = "Log";
+
 static PyMemberDef CFlexibleCylinderModel_members[] = {
-    {"params", T_OBJECT, offsetof(CFlexibleCylinderModel, params), 0,
-     "Parameters"},
-	{"dispersion", T_OBJECT, offsetof(CFlexibleCylinderModel, dispersion), 0,
-	  "Dispersion parameters"},     
-    {"log", T_OBJECT, offsetof(CFlexibleCylinderModel, log), 0,
-     "Log"},
+    {name_params, T_OBJECT, offsetof(CFlexibleCylinderModel, params), 0, def_params},
+	{name_dispersion, T_OBJECT, offsetof(CFlexibleCylinderModel, dispersion), 0, def_dispersion},     
+    {name_log, T_OBJECT, offsetof(CFlexibleCylinderModel, log), 0, def_log},
     {NULL}  /* Sentinel */
 };
 
