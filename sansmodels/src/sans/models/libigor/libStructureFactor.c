@@ -7,6 +7,7 @@ The fitting function is a simple polynomial. It works but is of no practical use
 #include "StandardHeaders.h"			// Include ANSI headers, Mac headers, IgorXOP.h, XOP.h and XOPSupport.h
 #include "libStructureFactor.h"
 
+static double gMSAWave[17]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17};
 
 //Hard Sphere Structure Factor
 //
