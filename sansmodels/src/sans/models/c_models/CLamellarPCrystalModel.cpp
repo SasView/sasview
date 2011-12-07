@@ -184,7 +184,7 @@ static PyObject *evaluateOneDim(LamellarPCrystalModel* model, PyArrayObject *q){
                               PyArrayObject *x, PyArrayObject *y)
  {
     PyArrayObject *result;
-    int i,j, x_len, y_len, dims[1];
+    int i, x_len, y_len, dims[1];
     //check validity of input vectors
     if (x->nd != 1 || x->descr->type_num != PyArray_DOUBLE
         || y->nd != 1 || y->descr->type_num != PyArray_DOUBLE
@@ -367,9 +367,6 @@ static PyObject * run(CLamellarPCrystalModel *self, PyObject *args) {
  */
 static PyObject * calculate_ER(CLamellarPCrystalModel *self) {
 
-	PyObject* pars;
-	int npars;
-	
 	// Get parameters
 	
 	    // Reader parameter dictionary
