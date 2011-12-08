@@ -100,7 +100,6 @@ dist = setup(
     
     ext_modules = [ Extension("sans.models.sans_extension.c_models",
                               sources=model_sources,                 
-      
                               include_dirs=[igordir, srcdir, c_model_dir, numpy_incl_path],   
                               extra_compile_args=extra_compile_args,
                               extra_link_args=extra_link_args
@@ -109,7 +108,7 @@ dist = setup(
         # Smearer extension
         Extension("sans.models.sans_extension.smearer",
                    sources = smearer_sources,
-                   include_dirs=[smear_dir, numpy_incl_path]),
+                   include_dirs=[igordir, smear_dir, numpy_incl_path]),
         Extension("sans.models.sans_extension.smearer2d_helper",
                   sources = [os.path.join(smear_dir, 
                                           "smearer2d_helper_module.cpp"),
