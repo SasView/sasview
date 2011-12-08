@@ -231,7 +231,7 @@ class TestLamellar(unittest.TestCase):
     def test(self):
         """ Test 1D model for a Lamellar """
         #No finite number should return from Lamellar models.
-        self.assertFalse(numpy.isfinite(self.comp.calculate_ER())) 
+        self.assertTrue(numpy.isfinite(self.comp.calculate_ER())) 
          
 class TestGuinier(unittest.TestCase):
     """ Unit tests for calculate_ER (Guinier model) """
