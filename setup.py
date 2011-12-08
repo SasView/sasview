@@ -24,6 +24,13 @@ ext_modules = []
 
 # TODO check for sans/__init__.py
 
+# Enable OpenMP
+extra_compile_args = []
+extra_link_args = []
+if not os.name=='nt':
+    extra_compile_args = ['-fopenmp']
+    extra_link_args = ['-lgomp']
+
 # sans.invariant
 package_dir["sans.invariant"] = "sansinvariant/src/sans/invariant"
 packages.extend(["sans.invariant"])
@@ -60,11 +67,13 @@ package_dir["sans.pr.core"] = srcdir
 package_dir["sans.pr"] = os.path.join("pr_inversion", "src","sans", "pr")
 packages.extend(["sans.pr","sans.pr.core"])
 ext_modules.append( Extension("sans.pr.core.pr_inversion",
- sources = [ os.path.join(srcdir, "Cinvertor.c"),
-            os.path.join(srcdir, "invertor.c"),
-            ],
-         include_dirs=[numpy_incl_path]
- ) )
+                              sources = [ os.path.join(srcdir, "Cinvertor.c"),
+                                         os.path.join(srcdir, "invertor.c"),
+                                         ],
+                              include_dirs=[numpy_incl_path],
+                              extra_compile_args=extra_compile_args,
+                              extra_link_args=extra_link_args                              
+                              ) )
         
 # sans.fit (park integration)
 package_dir["sans.fit"] = "park_integration/src/sans/fit"
@@ -110,9 +119,12 @@ package_dir["park"]="park-1.2.1/park"
 packages.extend(["park"])
 package_data["park"] = ['park-1.2.1/*.txt', 'park-1.2.1/park.epydoc']
 ext_modules.append( Extension("park._modeling",
-                    sources = [ os.path.join("park-1.2.1", "park", "lib", "modeling.cc"),
-                                os.path.join("park-1.2.1", "park", "lib", "resolution.c"),
-                                ] ) )
+                              sources = [ os.path.join("park-1.2.1", "park", "lib", "modeling.cc"),
+                                         os.path.join("park-1.2.1", "park", "lib", "resolution.c"),
+                                         ],
+                              extra_compile_args=extra_compile_args,
+                              extra_link_args=extra_link_args
+                              ) )
 
 # Sans models
 srcdir  = os.path.join("sansmodels", "src", "sans", "models", "c_extensions")
@@ -181,17 +193,26 @@ if os.name=='nt':
 
 ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
                                 sources=model_sources,                 
-                                include_dirs=[igordir, srcdir, c_model_dir, numpy_incl_path]),       
+                                include_dirs=[igordir, srcdir, c_model_dir, numpy_incl_path],
+                                extra_compile_args=extra_compile_args,
+                                extra_link_args=extra_link_args
+                                ),       
                     # Smearer extension
                     Extension("sans.models.sans_extension.smearer",
                               sources = smearer_sources,
-                              include_dirs=[igordir, smear_dir, numpy_incl_path]),
+                              include_dirs=[igordir, smear_dir, numpy_incl_path],
+                              extra_compile_args=extra_compile_args,
+                              extra_link_args=extra_link_args
+                              ),
                     
                     Extension("sans.models.sans_extension.smearer2d_helper",
                               sources = [os.path.join(smear_dir, 
-                                          "smearer2d_helper_module.cpp"),
-                                          os.path.join(smear_dir, "smearer2d_helper.cpp"),],
-                              include_dirs=[smear_dir,numpy_incl_path])
+                                                      "smearer2d_helper_module.cpp"),
+                                         os.path.join(smear_dir, "smearer2d_helper.cpp"),],
+                              include_dirs=[smear_dir,numpy_incl_path],
+                              extra_compile_args=extra_compile_args,
+                              extra_link_args=extra_link_args
+                              )
                     ] )
         
 # SansView
