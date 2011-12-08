@@ -30,6 +30,8 @@ extra_link_args = []
 if not os.name=='nt':
     extra_compile_args = ['-fopenmp']
     extra_link_args = ['-lgomp']
+else:
+    extra_compile_args = ['/openmp']
 
 # sans.invariant
 package_dir["sans.invariant"] = "sansinvariant/src/sans/invariant"
