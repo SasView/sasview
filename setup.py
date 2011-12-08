@@ -4,6 +4,7 @@
 """
 import sys
 import os
+import platform
 #from distutils.core import setup, Extension
 from setuptools import setup, Extension, find_packages
 try:
@@ -27,10 +28,10 @@ ext_modules = []
 # Enable OpenMP
 extra_compile_args = []
 extra_link_args = []
-if not os.name=='nt':
+if sys.platform=='linux2' or (sys.platform=='darwin' and platform.architecture()[0]=='64bit'):
     extra_compile_args = ['-fopenmp']
     extra_link_args = ['-lgomp']
-else:
+elif os.name=='nt':
     extra_compile_args = ['/openmp']
 
 # sans.invariant
