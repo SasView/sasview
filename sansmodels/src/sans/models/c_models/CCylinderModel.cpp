@@ -176,6 +176,7 @@ static PyObject *evaluateOneDim(CylinderModel* model, PyArrayObject *q){
         PyErr_SetString(PyExc_RuntimeError , message);
 		return NULL;
 	}
+#pragma omp parallel for
 	 for (int i = 0; i < q->dimensions[0]; i++){
       double q_value  = *(double *)(q->data + i*q->strides[0]);
       double *result_value = (double *)(result->data + i*result->strides[0]);
@@ -282,12 +283,12 @@ static PyObject * evalDistribution(CCylinderModel *self, PyObject *args){
 	        // input is a numpy array
 	        if (PyArray_Check(pars)) {
 		        return evaluateOneDim(self->model, (PyArrayObject*)pars); 
-		    }
-		}else{
+	        }
+	    }else{
 		    PyErr_SetString(CCylinderModelError, 
                    "CCylinderModel.evalDistribution expect numpy array of one dimension.");
 	        return NULL;
-		}
+	    }
     }else if( PyList_Check(pars)==1) {
     	// Length of list should be 2 for I(qx,qy)
 	    mpars = PyList_GET_SIZE(pars); 
