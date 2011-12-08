@@ -1448,12 +1448,20 @@ class Plugin(PluginBase):
                                          type="stop"))
                     self._update_fit_button(page_id)
                 else:
-                    
+                    #set the panel when fit result are float not list
+                    if res.pvec.__class__== numpy.float64:
+                        pvec = [res.pvec]
+                    else:
+                        pvec = res.pvec
+                    if res.stderr.__class__== numpy.float64:
+                        stderr = [res.stderr]
+                    else:
+                        stderr = res.stderr
                     cpage = self.fit_panel.get_page_by_id(uid)
                     # Make sure we got all results 
                     #(CallAfter is important to MAC)
                     wx.CallAfter(cpage.onsetValues, res.fitness, res.param_list, 
-                             res.pvec, res.stderr)
+                             pvec, stderr)
                     index += 1
                     cpage._on_fit_complete()
         except ValueError:
