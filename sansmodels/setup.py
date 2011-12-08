@@ -75,8 +75,9 @@ extra_link_args = []
 if sys.platform=='linux2' or (sys.platform=='darwin' and platform.architecture()[0]=='64bit'):
     extra_compile_args = ['-fopenmp']
     extra_link_args = ['-lgomp']
-elif os.name=='nt':
+elif sys.platform=='win32':
     extra_compile_args = ['/openmp']    
+    extra_link_args = ['/MANIFEST']
 
 dist = setup(
     name="sansmodels",
