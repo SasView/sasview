@@ -4,6 +4,7 @@
 
 import sys
 import os
+import platform
 from numpy.distutils.misc_util import get_numpy_include_dirs
 numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
    
@@ -68,6 +69,15 @@ smearer_sources = [os.path.join(smear_dir, "smearer.cpp"),
 if os.name=='nt':
     smearer_sources.append(os.path.join(igordir, "winFuncs.c"))
 
+# Enable OpenMP
+extra_compile_args = []
+extra_link_args = []
+if sys.platform=='linux2' or (sys.platform=='darwin' and platform.architecture()[0]=='64bit'):
+    extra_compile_args = ['-fopenmp']
+    extra_link_args = ['-lgomp']
+elif os.name=='nt':
+    extra_compile_args = ['/openmp']    
+
 dist = setup(
     name="sansmodels",
     version = "1.0.0",
@@ -89,9 +99,13 @@ dist = setup(
                 "sans.models.sans_extension",],
     
     ext_modules = [ Extension("sans.models.sans_extension.c_models",
-             sources=model_sources,                 
+                              sources=model_sources,                 
       
-        include_dirs=[igordir, srcdir, c_model_dir, numpy_incl_path]),       
+                              include_dirs=[igordir, srcdir, c_model_dir, numpy_incl_path],   
+                              extra_compile_args=extra_compile_args,
+                              extra_link_args=extra_link_args
+                              ),
+    
         # Smearer extension
         Extension("sans.models.sans_extension.smearer",
                    sources = smearer_sources,
@@ -100,7 +114,9 @@ dist = setup(
                   sources = [os.path.join(smear_dir, 
                                           "smearer2d_helper_module.cpp"),
                              os.path.join(smear_dir, "smearer2d_helper.cpp"),],
-                  include_dirs=[smear_dir,numpy_incl_path]
+                  include_dirs=[smear_dir,numpy_incl_path],
+                  extra_compile_args=extra_compile_args,
+                  extra_link_args=extra_link_args
         )
         ]
     )

@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
 ##############################################################################
-#    This software was developed by the University of Tennessee as part of the
-#    Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#    project funded by the US National Science Foundation.
+#	This software was developed by the University of Tennessee as part of the
+#	Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#	project funded by the US National Science Foundation.
 #
-#    If you use DANSE applications to do scientific research that leads to
-#    publication, we ask that you acknowledge the use of the software with the
-#    following sentence:
+#	If you use DANSE applications to do scientific research that leads to
+#	publication, we ask that you acknowledge the use of the software with the
+#	following sentence:
 #
-#    "This work benefited from DANSE software developed under NSF award DMR-0520547."
+#	"This work benefited from DANSE software developed under NSF award DMR-0520547."
 #
-#    copyright 2008, University of Tennessee
+#	copyright 2008, University of Tennessee
 ##############################################################################
 
 
@@ -126,23 +126,23 @@ class ReflAdvModel(CReflAdvModel, BaseComponent):
         self.name = "ReflAdvModel"
         ## Model description
         self.description ="""Calculate neutron reflectivity using the Parratt iterative formula
-        Parameters:
-        background:background
-        scale: scale factor
-        sld_bottom0: the SLD of the substrate
-        sld_medium: the SLD of the incident medium
-        or superstrate
-        sld_flatN: the SLD of the flat region of
-        the N'th layer
-        thick_flatN: the thickness of the flat
-        region of the N'th layer
-        func_interN: the function used to describe
-        the interface of the N'th layer
-        nu_interN: the coefficient for the func_interN
-        thick_interN: the thickness of the interface
-        of the N'th layer
-        Note: the layer number starts to increase
-        from the bottom (substrate) to the top."""
+		Parameters:
+		background:background
+		scale: scale factor
+		sld_bottom0: the SLD of the substrate
+		sld_medium: the SLD of the incident medium
+		or superstrate
+		sld_flatN: the SLD of the flat region of
+		the N'th layer
+		thick_flatN: the thickness of the flat
+		region of the N'th layer
+		func_interN: the function used to describe
+		the interface of the N'th layer
+		nu_interN: the coefficient for the func_interN
+		thick_interN: the thickness of the interface
+		of the N'th layer
+		Note: the layer number starts to increase
+		from the bottom (substrate) to the top."""
        
         ## Parameter details [units, min, max]
         self.details = {}
@@ -244,7 +244,7 @@ class ReflAdvModel(CReflAdvModel, BaseComponent):
     def clone(self):
         """ Return a identical copy of self """
         return self._clone(ReflAdvModel())   
-           
+       	
    
     def run(self, x=0.0):
         """ 

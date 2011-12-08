@@ -166,6 +166,7 @@ static PyObject *evaluateOneDim(FractalModel* model, PyArrayObject *q){
         PyErr_SetString(PyExc_RuntimeError , message);
 		return NULL;
 	}
+#pragma omp parallel for
 	 for (int i = 0; i < q->dimensions[0]; i++){
       double q_value  = *(double *)(q->data + i*q->strides[0]);
       double *result_value = (double *)(result->data + i*result->strides[0]);
@@ -183,7 +184,7 @@ static PyObject *evaluateOneDim(FractalModel* model, PyArrayObject *q){
                               PyArrayObject *x, PyArrayObject *y)
  {
     PyArrayObject *result;
-    int i, x_len, y_len, dims[1];
+    int x_len, y_len, dims[1];
     //check validity of input vectors
     if (x->nd != 1 || x->descr->type_num != PyArray_DOUBLE
         || y->nd != 1 || y->descr->type_num != PyArray_DOUBLE
@@ -207,7 +208,8 @@ static PyObject *evaluateOneDim(FractalModel* model, PyArrayObject *q){
 	    }
        
         /* Do the calculation. */
-        for ( i=0; i< x_len; i++) {
+#pragma omp parallel for
+        for (int i=0; i< x_len; i++) {
             double x_value = *(double *)(x->data + i*x->strides[0]);
   		    double y_value = *(double *)(y->data + i*y->strides[0]);
   			double *result_value = (double *)(result->data +
