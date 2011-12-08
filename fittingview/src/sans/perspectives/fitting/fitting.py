@@ -1283,6 +1283,11 @@ class Plugin(PluginBase):
                             batch_outputs[param].append(ERROR)
                             batch_inputs["error on %s" % str(param)].append(ERROR)
                 else:
+                    # ToDo: Why sometimes res.pvec comes with numpy.float64? 
+                    # Need to fix it within ScipyEngine
+                    if res.pvec.__class__== numpy.float64:
+                        res.pvec = [res.pvec]
+                        
                     cell = BatchCell()
                     cell.label = res.fitness
                     cell.value = res.fitness
@@ -1464,10 +1469,6 @@ class Plugin(PluginBase):
                              pvec, stderr)
                     index += 1
                     cpage._on_fit_complete()
-        except ValueError:
-                msg = "Fitting did not converge!!!"
-                wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
-                                                      type="stop"))
         except:
             msg = "Fit completed but Following"
             msg += " error occurred:%s" % sys.exc_value
