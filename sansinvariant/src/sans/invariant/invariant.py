@@ -299,11 +299,12 @@ class Extrapolator:
 
         # Uncertainty
         if type(self.data.dy)==numpy.ndarray and \
-            len(self.data.dy)==len(self.data.x):
+            len(self.data.dy)==len(self.data.x) and \
+            numpy.all(self.data.dy>0):
             sigma = self.data.dy
         else:
             sigma = numpy.ones(len(self.data.x))
-            
+
         # Compute theory data f(x)
         fx[idx] = self.data.y[idx]
         
@@ -329,7 +330,7 @@ class Extrapolator:
             deltas = linearized_data.x*a + \
                     numpy.ones(len(linearized_data.x))*b-linearized_data.y
             residuals = numpy.sum(deltas*deltas/sigma2)
-            
+
             err = math.fabs(residuals) / numpy.sum(1.0/sigma2)
             return [a, b], [0, math.sqrt(err)]
         else:
