@@ -720,7 +720,7 @@ class TestLamellarHayterM(unittest.TestCase):
         #Check run       
         self.assertFalse(numpy.isfinite(self.model3.run(0.1)))
         #check effective radius . 
-        self.assertFalse(numpy.isfinite(self.model.calculate_ER()))      
+        self.assertTrue(numpy.isfinite(self.model.calculate_ER()))      
                 
 if __name__ == '__main__':
     unittest.main()
