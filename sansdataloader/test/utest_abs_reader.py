@@ -71,7 +71,7 @@ class hfir_reader(unittest.TestCase):
         """
         self.assertEqual(self.data.filename, "S2-30dq.d1d")
         # THIS FILE FORMAT IS CURRENTLY READ BY THE ASCII READER
-        self.assertEqual(self.data.meta_data['loader'], "ASCII")
+        self.assertEqual(self.data.meta_data['loader'], "HFIR 1D")
         self.assertEqual(len(self.data.x), 134)
         self.assertEqual(len(self.data.y), 134)
         #          Q           I               dI          dQ  
