@@ -146,7 +146,7 @@ class PyConsole(editor.EditorNotebookFrame):
         """
         try:
             page = self.panel.get_current_page()
-            temp = self.panel.update_model_list()
+            temp = self.panel.reset_pmodel_list()
             if temp:
                 page.model_list_box = temp
                 current_val = page.formfactorbox.GetValue()

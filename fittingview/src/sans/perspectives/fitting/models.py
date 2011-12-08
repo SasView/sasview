@@ -174,8 +174,14 @@ class ModelList(object):
         
         """
         if name not in self.mydict.keys():
-            self.mydict[name] = mylist
+            self.reset_list(name, mylist)
             
+    def reset_list(self, name, mylist):
+        """
+        :param name: the type of the list
+        :param mylist: the list to add
+        """
+        self.mydict[name] = mylist         
             
     def get_list(self):
         """
@@ -465,8 +471,7 @@ class ModelManagerBase:
         """
         is_modified = False
         if os.path.isdir(PLUGIN_DIR):
-            # getmtime doesn't seem to work well: use getatime
-            temp =  os.path.getatime(PLUGIN_DIR)
+            temp =  os.path.getmtime(PLUGIN_DIR)
             if  self.last_time_dir_modified != temp:
                 is_modified = True
                 self.last_time_dir_modified = temp
@@ -489,7 +494,26 @@ class ModelManagerBase:
         else:
             return {}
     
-             
+    def pulgins_reset(self):
+        """
+        return a dictionary of model
+        """
+        self.plugins = []
+        new_plugins = _findModels(dir)
+        for name, plug in  new_plugins.iteritems():
+            for stored_name, stored_plug in self.stored_plugins.iteritems():
+                if name == stored_name:
+                    del self.stored_plugins[name]
+                    break
+            self.stored_plugins[name] = plug
+            self.plugins.append(plug)
+        from sans.models.ReflectivityModel import ReflectivityModel
+        from sans.models.ReflectivityIIModel import ReflectivityIIModel
+        self.plugins.append(ReflectivityModel)
+        self.plugins.append(ReflectivityIIModel)
+        self.model_combobox.reset_list("Customized Models", self.plugins)
+        return self.model_combobox.get_list()
+       
     def populate_menu(self, modelmenu, event_owner):
         """
         Populate a menu with our models
@@ -679,6 +703,9 @@ class ModelManager(object):
     
     def update(self):
         return self.__modelmanager.update()
+    
+    def pulgins_reset(self):
+        return self.__modelmanager.pulgins_reset()
     
     def populate_menu(self, modelmenu, event_owner):
         return self.__modelmanager.populate_menu(modelmenu, event_owner)

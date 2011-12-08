@@ -126,7 +126,15 @@ class FitPanel(nb, PanelBase):
         if len(temp):
             self.model_list_box = temp
         return temp
-
+    
+    def reset_pmodel_list(self):
+        """
+        """
+        temp = self.menu_mng.pulgins_reset()
+        if len(temp):
+            self.model_list_box = temp
+        return temp
+    
     def get_page_by_id(self, uid):  
         """
         """
