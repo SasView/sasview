@@ -2,6 +2,10 @@ import os
 import subprocess
 import re
 import sys
+try:
+    import xmlrunner
+except:
+    print "xmlrunner needs to be installed to run these tests"
 
 SKIPPED_DIRS = ["sansrealspace", "calculatorview"]
 SANSVIEW_DIR = os.pardir
