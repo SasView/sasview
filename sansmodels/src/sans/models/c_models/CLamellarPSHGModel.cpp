@@ -168,8 +168,7 @@ static PyObject *evaluateOneDim(LamellarPSHGModel* model, PyArrayObject *q){
         //PyErr_SetString(PyExc_ValueError , message);
         return NULL;
     }
-    result = (PyArrayObject *)PyArray_FromDims(q->nd, (int *)(q->dimensions), 
-										  PyArray_DOUBLE);
+	result = (PyArrayObject *)PyArray_SimpleNew(q->nd, (npy_intp *)(q->dimensions), PyArray_DOUBLE);										  
 	if (result == NULL) {
         const char * message= "Could not create result ";
         PyErr_SetString(PyExc_RuntimeError , message);
@@ -209,7 +208,7 @@ static PyObject *evaluateOneDim(LamellarPSHGModel* model, PyArrayObject *q){
         y_len = dims[0]= y->dimensions[0];
 	    
 	    // Make a new double matrix of same dims
-        result=(PyArrayObject *) PyArray_FromDims(1,dims,NPY_DOUBLE);
+        result=(PyArrayObject *) PyArray_SimpleNew(1,(npy_intp *)dims,NPY_DOUBLE);
         if (result == NULL){
 	    const char * message= "Could not create result ";
         PyErr_SetString(PyExc_RuntimeError , message);
