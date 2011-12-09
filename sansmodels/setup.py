@@ -10,7 +10,33 @@ numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
    
 # Then build and install the modules
 from distutils.core import Extension, setup
-#from setuptools import setup#, find_packages
+from distutils.command.build_ext import build_ext
+
+# Options to enable OpenMP
+copt =  {'msvc': ['/openmp'],
+         'mingw32' : ['-fopenmp'],
+         'unix' : ['-fopenmp']}
+lopt =  {'msvc': ['/MANIFEST'],
+         'mingw32' : ['-fopenmp'],
+         'unix' : ['-lgomp']}
+
+class build_ext_subclass( build_ext ):
+    def build_extensions(self):
+        # Get 64-bitness
+        is_64bits = sys.maxsize > 2**32
+        
+        c = self.compiler.compiler_type
+        print "Compiling with %s (64bit=%s)" % (c, str(is_64bits))
+        
+        if not (sys.platform=='darwin' and not is_64bits):
+            if copt.has_key(c):
+               for e in self.extensions:
+                   e.extra_compile_args = copt[ c ]
+            if lopt.has_key(c):
+                for e in self.extensions:
+                    e.extra_link_args = lopt[ c ]
+                    
+        build_ext.build_extensions(self)
 
 # Build the module name
 srcdir  = os.path.join("src", "sans", "models", "c_extensions")
@@ -69,16 +95,6 @@ smearer_sources = [os.path.join(smear_dir, "smearer.cpp"),
 if os.name=='nt':
     smearer_sources.append(os.path.join(igordir, "winFuncs.c"))
 
-# Enable OpenMP
-extra_compile_args = []
-extra_link_args = []
-if sys.platform=='linux2' or (sys.platform=='darwin' and platform.architecture()[0]=='64bit'):
-    extra_compile_args = ['-fopenmp']
-    extra_link_args = ['-lgomp']
-elif sys.platform=='win32':
-    extra_compile_args = ['/openmp']    
-    extra_link_args = ['/MANIFEST']
-
 dist = setup(
     name="sansmodels",
     version = "1.0.0",
@@ -102,22 +118,21 @@ dist = setup(
     ext_modules = [ Extension("sans.models.sans_extension.c_models",
                               sources=model_sources,                 
                               include_dirs=[igordir, srcdir, c_model_dir, numpy_incl_path],   
-                              extra_compile_args=extra_compile_args,
-                              extra_link_args=extra_link_args
                               ),
     
         # Smearer extension
         Extension("sans.models.sans_extension.smearer",
                    sources = smearer_sources,
-                   include_dirs=[igordir, smear_dir, numpy_incl_path]),
+                   include_dirs=[igordir, smear_dir, numpy_incl_path],
+                   ),
+                   
         Extension("sans.models.sans_extension.smearer2d_helper",
                   sources = [os.path.join(smear_dir, 
                                           "smearer2d_helper_module.cpp"),
                              os.path.join(smear_dir, "smearer2d_helper.cpp"),],
                   include_dirs=[smear_dir,numpy_incl_path],
-                  extra_compile_args=extra_compile_args,
-                  extra_link_args=extra_link_args
-        )
-        ]
+                  )
+        ],
+    cmdclass = {'build_ext': build_ext_subclass }
     )
         
