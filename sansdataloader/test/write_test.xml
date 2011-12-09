@@ -18,6 +18,12 @@
 				<Qdev unit="1/A">
 					0.01
 				</Qdev>
+				<dQl unit="1/A">
+					0.0
+				</dQl>
+				<dQw unit="1/A">
+					0.0
+				</dQw>
 				<Idev unit="1/cm">
 					3.0
 				</Idev>
@@ -32,6 +38,12 @@
 				<Qdev unit="1/A">
 					0.02
 				</Qdev>
+				<dQl unit="1/A">
+					0.0
+				</dQl>
+				<dQw unit="1/A">
+					0.0
+				</dQw>
 				<Idev unit="1/cm">
 					4.0
 				</Idev>

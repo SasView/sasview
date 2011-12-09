@@ -124,6 +124,7 @@ class data_info_tests(unittest.TestCase):
         r.nbins_phi = 20
         
         o = r(self.data)
+
         answer = Loader().load('avg_testdata.txt')
         for i in range(r.nbins_phi):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
@@ -139,13 +140,13 @@ class data_info_tests(unittest.TestCase):
         
         r = Boxsum(x_min=.01, x_max=.015, y_min=0.01, y_max=0.015)
         s, ds = r(self.data)
-        self.assertAlmostEqual(s, 151.81809601016641, 4)
-        self.assertAlmostEqual(ds, 16.245399156009537, 4)
+        self.assertAlmostEqual(s, 34.278990899999997, 4)
+        self.assertAlmostEqual(ds, 7.8007981835194293, 4)
     
         r = Boxavg(x_min=.01, x_max=.015, y_min=0.01, y_max=0.015)
         s, ds = r(self.data)
-        self.assertAlmostEqual(s, 0.11195555855955155, 4)
-        self.assertAlmostEqual(ds, 0.011979881083557541, 4)
+        self.assertAlmostEqual(s, 0.10579935462962962, 4)
+        self.assertAlmostEqual(ds, 0.024076537603455028, 4)
             
     def test_slabX(self):
         """
@@ -157,7 +158,7 @@ class data_info_tests(unittest.TestCase):
         r = SlabX(x_min=-.01, x_max=.01, y_min=-0.0002, y_max=0.0002, bin_width=0.0004)
         r.fold = False
         o = r(self.data)
-    
+
         answer = Loader().load('slabx_testdata.txt')
         for i in range(len(o.x)):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
@@ -174,7 +175,7 @@ class data_info_tests(unittest.TestCase):
         r = SlabY(x_min=.005, x_max=.01, y_min=-0.01, y_max=0.01, bin_width=0.0004)
         r.fold = False
         o = r(self.data)
-    
+
         answer = Loader().load('slaby_testdata.txt')
         for i in range(len(o.x)):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
@@ -194,7 +195,7 @@ class data_info_tests(unittest.TestCase):
         r = SectorPhi(r_min=.005, r_max=.01, phi_min=0, phi_max=math.pi*2.0)
         r.nbins_phi = 20
         o = r(self.data)
-    
+
         answer = Loader().load('ring_testdata.txt')
         for i in range(len(o.x)):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
@@ -212,7 +213,7 @@ class data_info_tests(unittest.TestCase):
         r = SectorPhi(r_min=.005, r_max=.01, phi_min=0, phi_max=math.pi/2.0)
         r.nbins_phi = 20
         o = r(self.data)
-    
+
         answer = Loader().load('sectorphi_testdata.txt')
         for i in range(len(o.x)):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
@@ -230,7 +231,7 @@ class data_info_tests(unittest.TestCase):
         r = SectorQ(r_min=.005, r_max=.01, phi_min=0, phi_max=math.pi/2.0)
         r.nbins_phi = 20
         o = r(self.data)
-    
+
         answer = Loader().load('sectorq_testdata.txt')
         for i in range(len(o.x)):
             self.assertAlmostEqual(o.x[i], answer.x[i], 4)
