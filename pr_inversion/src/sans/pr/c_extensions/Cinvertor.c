@@ -504,8 +504,6 @@ const char residuals_doc[] =
 static PyObject * residuals(Cinvertor *self, PyObject *args) {
 	double *pars;
 	PyObject* residuals;
-	PyObject* temp;
-	double *res;
 	int i;
 	double residual, diff;
 	// Regularization factor
@@ -561,8 +559,6 @@ const char pr_residuals_doc[] =
 static PyObject * pr_residuals(Cinvertor *self, PyObject *args) {
 	double *pars;
 	PyObject* residuals;
-	PyObject* temp;
-	double *res;
 	int i;
 	double residual, diff;
 	// Regularization factor
@@ -695,7 +691,6 @@ static PyObject * get_pr_err(Cinvertor *self, PyObject *args) {
 	Py_ssize_t npars;
 	PyObject *err_obj;
 	Py_ssize_t npars2;
-	int i;
 
 	if (!PyArg_ParseTuple(args, "OOd", &data_obj, &err_obj, &r)) return NULL;
 	OUTVECTOR(data_obj,pars,npars);
@@ -820,10 +815,8 @@ const char get_rg_doc[] =
 
 static PyObject * get_rg(Cinvertor *self, PyObject *args) {
 	double *pars;
-	double *pars_err;
 	PyObject *data_obj;
 	Py_ssize_t npars;
-	Py_ssize_t npars2;
 	double value;
 
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;
@@ -842,10 +835,8 @@ const char get_iq0_doc[] =
 
 static PyObject * get_iq0(Cinvertor *self, PyObject *args) {
 	double *pars;
-	double *pars_err;
 	PyObject *data_obj;
 	Py_ssize_t npars;
-	Py_ssize_t npars2;
 	double value;
 
 	if (!PyArg_ParseTuple(args, "O", &data_obj)) return NULL;

@@ -61,7 +61,7 @@ double ortho_transformed(double d_max, int n, double q) {
  * Smearing follows Lake, Acta Cryst. (1967) 23, 191.
  */
 double ortho_transformed_smeared(double d_max, int n, double height, double width, double q, int npts) {
-	double sum, value, y, z;
+	double sum, y, z;
 	int i, j, n_height, n_width;
 	double count_w;
 	double fnpts;
@@ -276,7 +276,6 @@ double positive_integral(double *pars, double d_max, int n_c, int nslice) {
  */
 double positive_errors(double *pars, double *err, double d_max, int n_c, int nslice) {
     double r;
-    double value;
 	int i;
 	double sum_pos = 0.0;
 	double sum = 0.0;
