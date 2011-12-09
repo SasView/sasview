@@ -168,20 +168,18 @@ void SlitSmearer :: compute_matrix(){
 	for(int i=0; i<nbins; i++) {
 		// Find Weights
 		// Find q where the resolution smearing calculation of I(q) occurs
-		double q, q_min, q_max, q_0;
+		double q, q_min, q_max, q_0=0.0;
 		get_bin_range(i, &q, &q_min, &q_max);
 		// Block q becomes <=0
 		if (q <= 0){
 			continue;
 		}
-		bool last_qpoint = true;
 		// Find q[0] value to normalize the weight later,
 		//  otherwise, we will have a precision problem.
 		if (i == 0){
 			q_0 = q;
 		}
 		// Loop over all qj-values
-		bool first_w = true;
 		for(int j=0; j<nbins; j++) {
 			double q_j, q_high, q_low;
 			// Calculate bin size of q_j
@@ -262,9 +260,6 @@ void SlitSmearer :: compute_matrix(){
 						// where q_high - q_low gets to very small.
 						// Later, it will be normalized again.
 
-						double q_shift_min = q - width;
-
-						double u = (q_j * q_j - (q_shift) * (q_shift));
 						// The fabs below are not necessary but in case: the weight should never be imaginary.
 						// At the edge of each sub_width. weight += u(at q_high bin) - u(0), where u(0) = 0,
 						// and weighted by (2.0* npts_w -1.0)once for each q.
@@ -291,7 +286,6 @@ void QSmearer :: compute_matrix(){
 	weights = new vector<double>(nbins*nbins,0);
 
 	// Loop over all q-values
-	double step = (qmax-qmin)/((double)nbins-1.0);
 	double q, q_min, q_max;
 	double q_j, q_jmax, q_jmin;
 	for(int i=0; i<nbins; i++) {

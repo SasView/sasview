@@ -266,9 +266,9 @@ static PyTypeObject CGaussianType = {
 };
 
 
-static PyMethodDef module_methods[] = {
-    {NULL} 
-};
+//static PyMethodDef module_methods[] = {
+//    {NULL}
+//};
 
 /**
  * Function used to add the model class to a module

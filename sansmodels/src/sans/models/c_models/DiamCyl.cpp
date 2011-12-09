@@ -65,10 +65,10 @@ double DiamCylFunc :: operator()(double q) {
 	double norm = 0.0;
 
 	// Loop over radius weight points
-	for(int i=0; i<weights_rad.size(); i++) {
+	for(size_t i=0; i<weights_rad.size(); i++) {
 		dp[0] = weights_rad[i].value;
 		// Loop over length weight points
-		for(int j=0; j<weights_len.size(); j++) {
+		for(size_t j=0; j<weights_len.size(); j++) {
 			dp[1] = weights_len[j].value;
 
 			sum += weights_rad[i].weight
