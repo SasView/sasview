@@ -5,8 +5,9 @@
 import sys
 import os
 import platform
-#from distutils.core import setup, Extension
 from setuptools import setup, Extension, find_packages
+from distutils.command.build_ext import build_ext
+
 try:
     from numpy.distutils.misc_util import get_numpy_include_dirs
     NUMPY_INC = get_numpy_include_dirs()[0]
