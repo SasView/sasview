@@ -1335,7 +1335,7 @@ class PlotPanel(wx.Panel):
         #TODO: make the size and location interactive to the image plot.
         cbax = self.subplot.figure.add_axes([0.84,0.2,0.02,0.7])
         cb = self.subplot.figure.colorbar(im, cax=cbax)
-        cb.update_bruteforce(cbax)
+        cb.update_bruteforce(im)
         cb.set_label(self.scale)
         self.subplot.figure.canvas.draw_idle()
     
