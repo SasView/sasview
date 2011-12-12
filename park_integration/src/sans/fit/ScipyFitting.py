@@ -108,8 +108,7 @@ class ScipyFit(FitEngine):
             out, cov_x, _, mesg, success = optimize.leastsq(functor,
                                             model.get_params(self.param_list),
                                                     ftol=ftol,
-                                                    full_output=1,
-                                                    warning=True)
+                                                    full_output=1)
 
         except KeyboardInterrupt:
             msg = "Fitting: Terminated!!!"
