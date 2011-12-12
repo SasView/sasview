@@ -45,7 +45,6 @@ void Smearer_helper :: smear2d(double *weights, double *qx_out, double *qy_out){
 
 	double rbin_size = rlimit / double(nrbins);
 	double phibin_size = 0.0;
-	int tot_nbins = nrbins * nphibins;
 	double rbin = 0.0;
 	double phibin = 0.0;
 	double qr = 0.0;

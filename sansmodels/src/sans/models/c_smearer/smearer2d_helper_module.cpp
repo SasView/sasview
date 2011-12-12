@@ -1,5 +1,5 @@
 /**
- *  Smearer module to perform point and slit smearing calculations
+  Smearer module to perform point and slit smearing calculations
 
 	This software was developed by the University of Tennessee as part of the
 	Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
@@ -38,7 +38,6 @@ void del_smearer2d_helper(void *ptr){
 	return;
 }
 
-/**
 /**
  * Create a QSmearer as a python object by supplying a q array
  */
