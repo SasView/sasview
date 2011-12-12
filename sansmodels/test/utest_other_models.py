@@ -1108,13 +1108,13 @@ class TestHayterMSAStructure(unittest.TestCase):
         
     def testEval_1D(self):
         """ Test 1D model for a HayterMSAStructure with evalDistribution"""
-        self.assertEquals(self.comp.run(0.4),self.x_array[0])
-        self.assertEquals(self.comp.run(1.3),self.x_array[1])
+        self.assertAlmostEquals(self.comp.run(0.4),self.x_array[0])
+        self.assertAlmostEquals(self.comp.run(1.3),self.x_array[1])
         
     def testEval_2D(self):
         """ Test 2D model for a HayterMSAStructure with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0])
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1])
 
     
     def testCriticalPoint(self):
