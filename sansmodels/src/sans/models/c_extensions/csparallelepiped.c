@@ -159,9 +159,9 @@ double csparallelepiped_analytical_2D(CSParallelepipedParameters *pars, double q
  */
 double csparallelepiped_analytical_2D_scaled(CSParallelepipedParameters *pars, double q, double q_x, double q_y) {
 	double dp[13];
-  double cparallel_x, cparallel_y, cparallel_z, bparallel_x, bparallel_y, parallel_x, parallel_y, parallel_z;
+  double cparallel_x, cparallel_y, cparallel_z, bparallel_x, bparallel_y, parallel_x, parallel_y;
   double q_z;
-  double alpha, vol, cos_val_c, cos_val_b, cos_val_a, edgeA, edgeB, edgeC;
+  double alpha, cos_val_c, cos_val_b, cos_val_a, edgeA, edgeB, edgeC;
 
   double answer;
   //convert angle degree to radian

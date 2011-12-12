@@ -63,8 +63,8 @@ double core_shell_cylinder_analytical_2D(CoreShellCylinderParameters *pars, doub
  */
 double core_shell_cylinder_analytical_2D_scaled(CoreShellCylinderParameters *pars, double q, double q_x, double q_y) {
 	double cyl_x, cyl_y, cyl_z;
-	double q_z, lenq;
-	double alpha, f, vol, sin_val, cos_val;
+	double q_z;
+	double alpha, vol, cos_val;
 	double answer;
 	//convert angle degree to radian
 	double pi = 4.0*atan(1.0);
