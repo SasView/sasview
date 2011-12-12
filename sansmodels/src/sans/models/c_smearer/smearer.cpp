@@ -165,10 +165,10 @@ void SlitSmearer :: compute_matrix(){
 	wbin_size = shift_w / nbins;
 
 	// Loop over all q-values
+	double q, q_min, q_max, q_0=0.0;
 	for(int i=0; i<nbins; i++) {
 		// Find Weights
 		// Find q where the resolution smearing calculation of I(q) occurs
-		double q, q_min, q_max, q_0=0.0;
 		get_bin_range(i, &q, &q_min, &q_max);
 		// Block q becomes <=0
 		if (q <= 0){
