@@ -257,6 +257,7 @@ dll_excludes = ['libgdk_pixbuf-2.0-0.dll',
                 'tk84.dll',
                 'QtGui4.dll',
                 'QtCore4.dll',
+                'msvcp90.dll',
                 'w9xpopen.exe',
                 'cygwin1.dll']
 
