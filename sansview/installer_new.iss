@@ -61,24 +61,31 @@ Name: "english";	MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon";	Description: "{cm:CreateDesktopIcon}";	GroupDescription: "{cm:AdditionalIcons}";	Flags: unchecked
+Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 
 [Files]
 Source: "dist\SansView.exe";	DestDir: "{app}";	Flags: ignoreversion
 Source: "dist\*";	DestDir: "{app}";	Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "images\*";	DestDir: "{app}\images";	Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "test\*";	DestDir: "{app}\test";	Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "media\*";	DestDir: "{app}\media";	Flags: ignoreversion recursesubdirs createallsubdirs
 ;	NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\SansView";	Filename: "{app}\SansView.exe";	WorkingDir: "{app}" 
+Name: "{group}\SansView";	Filename: "{app}\SansView.exe";	WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico"
 Name: "{group}\{cm:UninstallProgram, SansView}";	 Filename: "{uninstallexe}" 
-Name: "{commondesktop}\SansView-2.0.1";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" 
+Name: "{commondesktop}\SansView-2.0.1";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" ; IconFilename: "{app}\images\ball.ico"
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\SansView-2.0.1"; Filename: "{app}\SansView"; Tasks: quicklaunchicon; WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico"
 
 
 [Run]
 Filename: "{app}\SansView.exe";	Description: "{cm:LaunchProgram, SansView}";	Flags: nowait postinstall skipifsilent
+; Install the Microsoft C++ DLL redistributable package if it is provided and the DLLs are not present on the target system.
+; Note that the redistributable package is included if the app was built using Python 2.6 or 2.7, but not with 2.5.
+; Parameter options:
+; - for silent install use: "/q"
+; - for silent install with progress bar use: "/qb"
+; - for silent install with progress bar but disallow cancellation of operation use: "/qb!"
+; Note that we do not use the postinstall flag as this would display a checkbox and thus require the user to decide what to do.
+;Filename: "{app}\vcredist_x86.exe"; Parameters: "/qb!"; WorkingDir: "{tmp}"; StatusMsg: "Installing Microsoft Visual C++ 2008 Redistributable Package ..."; Check: InstallVC90CRT(); Flags: skipifdoesntexist waituntilterminated
 
 
 [Dirs]
@@ -86,6 +93,11 @@ Name: "{app}\";	Permissions: everyone-modify
 
 
 [Code]
+function InstallVC90CRT(): Boolean;
+begin
+    Result := not DirExists('C:\WINDOWS\WinSxS\x86_Microsoft.VC90.CRT_1fc8b3b9a1e18e3b_9.0.21022.8_x-ww_d08d0375');
+end;
+
 function NeedsAddPath(): boolean;
 var
   oldpath: string;
@@ -112,3 +124,13 @@ begin
   Result := True;
 end;
 
+[UninstallDelete]
+; Delete directories and files that are dynamically created by the application (i.e. at runtime).
+Type: filesandordirs; Name: "{app}\.matplotlib"
+Type: files; Name: "{app}\*.*"
+; The following is a workaround for the case where the application is installed and uninstalled but the
+;{app} directory is not deleted because it has user files.  Then the application is installed into the
+; existing directory, user files are deleted, and the application is un-installed again.  Without the
+; directive below, {app} will not be deleted because Inno Setup did not create it during the previous
+; installation.
+Type: dirifempty; Name: "{app}"

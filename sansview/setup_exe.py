@@ -36,16 +36,21 @@ from distutils.core import setup
 from distutils.filelist import findall
 import matplotlib
 import py2exe
+import shutil
+# Remove the build folder
+shutil.rmtree("build", ignore_errors=True)
+# do the same for dist folder
+shutil.rmtree("dist", ignore_errors=True)
 
+if sys.version_info < (2, 6):
+    origIsSystemDLL = py2exe.build_exe.isSystemDLL
+    def isSystemDLL(pathname):
+            if os.path.basename(pathname).lower() in ("msvcp71.dll", "comctl32.dll"):
+                    return 0
+            return origIsSystemDLL(pathname)
+    py2exe.build_exe.isSystemDLL = isSystemDLL
 
-origIsSystemDLL = py2exe.build_exe.isSystemDLL
-def isSystemDLL(pathname):
-        if os.path.basename(pathname).lower() in ("msvcp71.dll", "comctl32.dll", "msvcr90.dll", "dwmapi.dll"):
-                return 0
-        return origIsSystemDLL(pathname)
-py2exe.build_exe.isSystemDLL = isSystemDLL
-
-if platform.architecture()[0] == '64bit':
+if platform.architecture()[0] == '64bit' and sys.version_info >= (2, 6):
     manifest = """
        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
        <assembly xmlns="urn:schemas-microsoft-com:asm.v1"
@@ -72,7 +77,52 @@ if platform.architecture()[0] == '64bit':
        </assembly>
       """
 else:
-    manifest = """
+    manifest_for_python26 = """
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+          <assemblyIdentity
+            version="5.0.0.0"
+            processorArchitecture="x86"
+            name="SansView"
+            type="win32">
+          </assemblyIdentity>
+          <description>SansView</description>
+          <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+            <security>
+              <requestedPrivileges>
+                <requestedExecutionLevel
+                  level="asInvoker"
+                  uiAccess="false">
+                </requestedExecutionLevel>
+              </requestedPrivileges>
+            </security>
+          </trustInfo>
+          <dependency>
+            <dependentAssembly>
+              <assemblyIdentity
+                type="win32"
+                name="Microsoft.VC90.CRT"
+                version="9.0.21022.8"
+                processorArchitecture="x86"
+                publicKeyToken="1fc8b3b9a1e18e3b">
+              </assemblyIdentity>
+            </dependentAssembly>
+          </dependency>
+          <dependency>
+            <dependentAssembly>
+              <assemblyIdentity
+                type="win32"
+                name="Microsoft.Windows.Common-Controls"
+                version="6.0.0.0"
+                processorArchitecture="x86"
+                publicKeyToken="6595b64144ccf1df"
+                language="*">
+              </assemblyIdentity>
+            </dependentAssembly>
+          </dependency>
+        </assembly>
+        """
+    manifest_for_python25 = """
        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
        <assembly xmlns="urn:schemas-microsoft-com:asm.v1"
        manifestVersion="1.0">
@@ -98,6 +148,17 @@ else:
        </assembly>
       """
 
+# Select the appropriate manifest to use.
+if sys.version_info >= (3, 0) or sys.version_info < (2, 5):
+    print "*** This script only works with Python 2.5, 2.6, or 2.7."
+    sys.exit()
+elif sys.version_info >= (2, 6):
+    manifest = manifest_for_python26
+    from glob import glob
+    py26MSdll = glob(r"C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
+elif sys.version_info >= (2, 5):
+    manifest = manifest_for_python25
+    py26MSdll = None
     
 class Target:
     def __init__(self, **kw):
@@ -176,23 +237,28 @@ for f in findall(test_dir):
 for f in findall(plugins_dir):
     if os.path.split(f)[0].count('.svn')==0:
         data_files.append(('plugins', [f]))
+        
+if py26MSdll != None:
+    # install the MSVC 9 runtime dll's into the application folder
+    data_files.append(("Microsoft.VC90.CRT", py26MSdll))
 
-    
-#
 # packages
 #
-
 packages = ['matplotlib', 'scipy', 'pytz', 'encodings']
 includes = ['site']
 
 # Exclude packages that are not needed but are often found on build systems
-excludes = ['PyQt4','sip'] 
+excludes = ['Tkinter', 'PyQt4', '_ssl', '_tkagg', 'sip']
 
-dll_excludes = [
-    'libgdk_pixbuf-2.0-0.dll', 
-    'libgobject-2.0-0.dll',
-    'libgdk-win32-2.0-0.dll',
-    ]
+dll_excludes = ['libgdk_pixbuf-2.0-0.dll',
+                'libgobject-2.0-0.dll',
+                'libgdk-win32-2.0-0.dll',
+                'tcl84.dll',
+                'tk84.dll',
+                'QtGui4.dll',
+                'QtCore4.dll',
+                'w9xpopen.exe',
+                'cygwin1.dll']
 
 target_wx_client = Target(
     description = 'SansView',
