@@ -6,6 +6,7 @@ try:
     import xmlrunner
 except:
     print "xmlrunner needs to be installed to run these tests"
+    print "Try easy_install unittest-xml-reporting"
 
 SKIPPED_DIRS = ["sansrealspace", "calculatorview"]
 SANSVIEW_DIR = os.pardir
