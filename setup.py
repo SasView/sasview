@@ -236,7 +236,9 @@ required = ['lxml','periodictable>=1.3.0', 'unittest-xml-reporting']
 
 if os.name=='nt':
     #required.extend(['comtypes', 'pisa', 'html5lib', 'reportlab'])
-    required.extend(['comtypes', 'pisa', 'html5lib'])
+    required.extend(['pisa', 'html5lib'])
+    if sys.version_info < (2, 7):
+        required.append('comtypes')
 else:
     required.extend(['pil'])
    
