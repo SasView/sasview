@@ -35,7 +35,11 @@ lopt =  {'msvc': ['/MANIFEST'],
 class build_ext_subclass( build_ext ):
     def build_extensions(self):
         # Get 64-bitness
-        is_64bits = sys.maxsize > 2**32
+        if sys.version_info >= (2, 6):
+            is_64bits = sys.maxsize > 2**32
+        else:
+            # 'sys.maxsize' and 64bit: Not supported for python2.5
+            is_64bits = False
         
         c = self.compiler.compiler_type
         print "Compiling with %s (64bit=%s)" % (c, str(is_64bits))
