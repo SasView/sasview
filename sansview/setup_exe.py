@@ -50,7 +50,8 @@ if sys.version_info < (2, 6):
             return origIsSystemDLL(pathname)
     py2exe.build_exe.isSystemDLL = isSystemDLL
 
-if platform.architecture()[0] == '64bit' and sys.version_info >= (2, 6):
+is_64bits = sys.maxsize > 2**32
+if is_64bits and sys.version_info >= (2, 6):
     manifest = """
        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
        <assembly xmlns="urn:schemas-microsoft-com:asm.v1"
@@ -270,7 +271,7 @@ target_wx_client = Target(
     )
 
 bundle_option = 2
-if platform.architecture()[0] == '64bit':
+if is_64bits:
     bundle_option = 3
 
 setup(
