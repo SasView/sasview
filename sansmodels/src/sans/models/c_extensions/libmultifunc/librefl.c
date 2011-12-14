@@ -20,7 +20,7 @@ complex cassign(real, imag)
 }
 
 
-complex cadd(x,y)
+complex cplx_add(x,y)
 	complex x,y;
 {
 	complex z;
@@ -39,7 +39,7 @@ complex rcmult(x,y)
 	return z;
 }
 
-complex csub(x,y)
+complex cplx_sub(x,y)
 	complex x,y;
 {
 	complex z;
@@ -49,7 +49,7 @@ complex csub(x,y)
 }
 
 
-complex cmult(x,y)
+complex cplx_mult(x,y)
 	complex x,y;
 {
 	complex z;
@@ -58,7 +58,7 @@ complex cmult(x,y)
 	return z;
 }
 
-complex cdiv(x,y)
+complex cplx_div(x,y)
 	complex x,y;
 {
 	complex z;
@@ -67,7 +67,7 @@ complex cdiv(x,y)
 	return z;
 }
 
-complex cexp(b)
+complex cplx_exp(b)
 	complex b;
 {
 	complex z;
@@ -80,7 +80,7 @@ complex cexp(b)
 }
 
 
-complex csqrt(z)    //see Schaum`s Math Handbook p. 22, 6.6 and 6.10
+complex cplx_sqrt(z)    //see Schaum`s Math Handbook p. 22, 6.6 and 6.10
 	complex z;
 {
 	complex c;
@@ -123,16 +123,16 @@ complex csqrt(z)    //see Schaum`s Math Handbook p. 22, 6.6 and 6.10
 	}
 }
 
-complex ccos(b)
+complex cplx_cos(b)
 	complex b;
 {
 	complex zero,two,z,i,bi,negbi;
 	zero = cassign(0.0,0.0);
 	two = cassign(2.0,0.0);
 	i = cassign(0.0,1.0);
-	bi = cmult(b,i);
-	negbi = csub(zero,bi);
-	z = cdiv(cadd(cexp(bi),cexp(negbi)),two);
+	bi = cplx_mult(b,i);
+	negbi = cplx_sub(zero,bi);
+	z = cplx_div(cplx_add(cplx_exp(bi),cplx_exp(negbi)),two);
 	return z;
 }
 

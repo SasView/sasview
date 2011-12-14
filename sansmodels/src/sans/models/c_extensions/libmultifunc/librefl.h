@@ -15,21 +15,21 @@ typedef struct {
 
 complex cassign(double real, double imag);
 
-complex cadd(complex x,complex y);
+complex cplx_add(complex x,complex y);
 
 complex rcmult(double x,complex y);
 
-complex csub(complex x,complex y);
+complex cplx_sub(complex x,complex y);
 
-complex cmult(complex x,complex y);
+complex cplx_mult(complex x,complex y);
 
-complex cdiv(complex x,complex y);
+complex cplx_div(complex x,complex y);
 
-complex cexp(complex b);
+complex cplx_exp(complex b);
 
-complex csqrt(complex z);
+complex cplx_sqrt(complex z);
 
-complex ccos(complex b);
+complex cplx_cos(complex b);
 
 double intersldfunc(int fun_type, double n_sub, double i, double nu, double sld_l, double sld_r);
 double interfunc(int fun_type, double n_sub, double i, double sld_l, double sld_r);

@@ -82,12 +82,12 @@ double re_adv_kernel(double dp[], double q) {
     ko2 = pow(2.0*pi/lamda,2.0);
 
     phi = asin(lamda*q/(4.0*pi));
-    phi1 = cdiv(rcmult(phi,one),n_sup);
-    alpha = cmult(n_sup,ccos(phi1));
-	alpha2 = cmult(alpha,alpha);
+    phi1 = cplx_div(rcmult(phi,one),n_sup);
+    alpha = cplx_mult(n_sup,cplx_cos(phi1));
+	alpha2 = cplx_mult(alpha,alpha);
 
     nnp1=n_sub;
-    knp1=csqrt(rcmult(ko2,csub(cmult(nnp1,nnp1),alpha2)));  //nnp1*ko*sin(phinp1)
+    knp1=cplx_sqrt(rcmult(ko2,cplx_sub(cplx_mult(nnp1,nnp1),alpha2)));  //nnp1*ko*sin(phinp1)
     Xnp1=cassign(0.0,0.0);
     dz = 0.0;
     // iteration for # of layers +sub from the top
@@ -123,15 +123,15 @@ double re_adv_kernel(double dp[], double q) {
 					}
 				}
 				nn = cassign(1.0-sld_i*pow(lamda,2.0)/(2.0*pi),pow(lamda,2.0)/(2.0*pi)*sldim_i);
-				nn2=cmult(nn,nn);
+				nn2=cplx_mult(nn,nn);
 
-				kn=csqrt(rcmult(ko2,csub(nn2,alpha2)));        //nn*ko*sin(phin)
-				an=cexp(rcmult(dz,cmult(two,kn)));
+				kn=cplx_sqrt(rcmult(ko2,cplx_sub(nn2,alpha2)));        //nn*ko*sin(phin)
+				an=cplx_exp(rcmult(dz,cplx_mult(two,kn)));
 
-				fnm=csub(kn,knp1);
-				fnp=cadd(kn,knp1);
-				rn=cdiv(fnm,fnp);
-				Xn=cmult(an,cdiv(cadd(rn,Xnp1),cadd(one,cmult(rn,Xnp1))));    //Xn=an*((rn+Xnp1*anp1)/(1+rn*Xnp1*anp1))
+				fnm=cplx_sub(kn,knp1);
+				fnp=cplx_add(kn,knp1);
+				rn=cplx_div(fnm,fnp);
+				Xn=cplx_mult(an,cplx_div(cplx_add(rn,Xnp1),cplx_add(one,cplx_mult(rn,Xnp1))));    //Xn=an*((rn+Xnp1*anp1)/(1+rn*Xnp1*anp1))
 
 				Xnp1=Xn;
 				knp1=kn;
