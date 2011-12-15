@@ -231,7 +231,6 @@ ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
         
 # SansView
 package_dir["sans.sansview"] = "sansview"
-#package_data['sans.sansview'] = ['images/*', 'media/*', 'plugins/*', 'test/*']
 package_data['sans.sansview'] = ['images/*', 'media/*', 'test/*']
 packages.append("sans.sansview")
 

@@ -176,7 +176,6 @@ class Target:
 #
 path = os.getcwd()
 
-#plugins_dir = os.path.join(path, "plugins")
 media_dir = os.path.join(path, "media")
 images_dir = os.path.join(path, "images")
 test_dir = os.path.join(path, "test")
@@ -233,11 +232,6 @@ for f in findall(media_dir):
 for f in findall(test_dir):
     if os.path.split(f)[0].count('.svn')==0:
         data_files.append(("test", [f]))
-        
-# Copying the sample data user data
-#for f in findall(plugins_dir):
-#    if os.path.split(f)[0].count('.svn')==0:
-#        data_files.append(('plugins', [f]))
         
 if py26MSdll != None:
     # install the MSVC 9 runtime dll's into the application folder
