@@ -27,13 +27,6 @@ from welcome_panel import WelcomePanel
 import local_config
 import logging
 
-def run_old():
-    """
-        Run function for linux/OSX installations
-    """
-    module_path,_ = os.path.split(__file__)
-    os.system("cd %s;python sansview.py" % module_path)
-
 def run():
     from multiprocessing import freeze_support
     freeze_support()
