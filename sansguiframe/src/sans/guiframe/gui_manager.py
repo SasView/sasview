@@ -41,26 +41,24 @@ from sans.guiframe.data_processor import BatchOutputFrame
 from sans.guiframe.events import EVT_NEW_BATCH
 from sans.dataloader.loader import Loader
 
-DATAPATH = os.getcwd()  
-PATH_APP = os.getcwd()
+from sans import sansview
+PATH_APP = os.path.dirname(sansview.__file__)
+DATAPATH = PATH_APP
 
 def _find_local_config(file, path):
     """
-    Find configuration file for the current application
-    """
-    
-    file_path = os.path.abspath(os.path.join(path, "%s.py" % file))
-    if(os.path.isfile(file_path)):
-        py_compile.compile(file=file_path)
+        Find configuration file for the current application
+    """    
+    config_module = None
+    try:
         fObj, path_config, descr = imp.find_module(file, [path])
-        try:
-            return imp.load_module(file, fObj, path_config, descr) 
-        except:
-            raise
-        finally:
-            if fObj:
-                fObj.close()
-        
+        config_module = imp.load_module(file, fObj, path_config, descr) 
+    except:
+        pass
+    finally:
+        if fObj:
+            fObj.close()
+    return config_module
               
 try:
     path = PATH_APP
