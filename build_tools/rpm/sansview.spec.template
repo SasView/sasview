@@ -1,6 +1,6 @@
 Name:       SansView          
 Version:        2.0.1
-Release:        1%{?dist}
+Release:        $Revision: 5752 $
 Summary:        Data analysis for Small Angle Scattering
 
 License:        BSD
