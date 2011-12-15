@@ -1,4 +1,2 @@
-__version__ = filter(str.isdigit, "$Revision$")
-
-if __name__ == "__main__":
-    print sys.argv
+__revision__ = filter(str.isdigit, "$Revision$")
+__version__ = "2.0.1"

@@ -1,11 +1,11 @@
 Name:       SansView          
-Version:        2.0.1
-Release:        $Revision: 5752 $
+Version:        [VERSION]
+Release:        r[REVISION]
 Summary:        Data analysis for Small Angle Scattering
 
 License:        BSD
 URL:            http://danse.chem.utk.edu
-Source0:    sansview-2.0.1_r5743-py2.6-linux-x86_64.egg
+Source0:        sansview-[VERSION]_[REVISION]-py2.6-linux-x86_64.egg
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
