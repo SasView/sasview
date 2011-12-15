@@ -117,7 +117,7 @@ packages.extend(["sans.perspectives","sans.perspectives.invariant"])
 # Fitting view
 package_dir["sans.perspectives"] = os.path.join("fittingview", "src", "sans", "perspectives"),
 package_dir["sans.perspectives.fitting"] = os.path.join("fittingview", "src", "sans", "perspectives", "fitting")
-package_data['sans.perspectives.fitting'] = ['media/*']
+package_data['sans.perspectives.fitting'] = ['media/*','plugin_models/*']
 packages.extend(["sans.perspectives", "sans.perspectives.fitting"])
 
 # Calculator view

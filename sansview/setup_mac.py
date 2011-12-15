@@ -97,7 +97,8 @@ plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
                                    CFBundleTypeRole="Shell" )],)
 
 APP = ['sansview.py']
-DATA_FILES += ['images','test','plugins','media']
+#DATA_FILES += ['images','test','plugins','media']
+DATA_FILES += ['images','test','media']
 
 EXCLUDES = ['PyQt4', 'sip', 'QtGui']
 
