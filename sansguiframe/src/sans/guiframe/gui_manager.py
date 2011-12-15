@@ -50,38 +50,31 @@ def _find_local_config(file, path):
         Find configuration file for the current application
     """    
     config_module = None
+    fObj = None
     try:
         fObj, path_config, descr = imp.find_module(file, [path])
         config_module = imp.load_module(file, fObj, path_config, descr) 
     except:
         pass
     finally:
-        if fObj:
+        if fObj is not None:
             fObj.close()
     return config_module
-              
-try:
-    path = PATH_APP
-    config = _find_local_config('local_config', path)
-    if config is None:
-        path, _ = os.path.split(PATH_APP)
-        config = _find_local_config('local_config', path)
-except:
-    # Didn't find local config, load the default 
-    import sans.guiframe.config as config
- 
+
+# Read in the local config, which can either be with the main
+# application or in the installation directory
+config = _find_local_config('local_config', PATH_APP)
+if config is None:
+    config = _find_local_config('local_config', os.getcwd())
 if config is None:
     # Didn't find local config, load the default 
-    import sans.guiframe.config as config
+    import sans.guiframe.config as config          
        
-custom_config = None
-try:
-    path = PATH_APP
-    custom_config = _find_local_config('custom_config', path)
-    if custom_config is None:
-        path, _ = os.path.split(PATH_APP)
-        custom_config = _find_local_config('custom_config', path)
-except:
+
+custom_config = _find_local_config('custom_config', PATH_APP)
+if custom_config is None:
+    custom_config = _find_local_config('custom_config', os.getcwd())
+if custom_config is None:
     msg = "Custom_config file was not imported"
     logging.info(msg)
     
