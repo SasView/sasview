@@ -33,7 +33,7 @@ buf = input.read()
 lines = buf.split('\n')
 for l in lines:
     new_line = replaceToken(l, "[VERSION]", get_version.__version__)
-    new_line = replaceToken(new_line, "[REVISION]", get_version.__revision__)
+    new_line = replaceToken(new_line, "[REVISION]", revision)
     output.write(new_line+'\n')
     
 input.close()
