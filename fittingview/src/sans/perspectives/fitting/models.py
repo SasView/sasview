@@ -10,6 +10,7 @@ import os.path
 import time
 import logging
 import py_compile
+import shutil
 from sans.guiframe.events import StatusEvent  
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
@@ -70,15 +71,23 @@ def _check_plugin(model, name):
   
 def find_plugins_dir():
     """
-    Find path of the plugins dir
+        Find path of the plugins directory.
+        The plugin directory is located in the user's home directory.
     """
-    dir = os.path.abspath(PLUGIN_DIR)
+    dir = os.path.join(os.path.expanduser("~"),'.sansview',PLUGIN_DIR)
+    
+    # If the plugin directory doesn't exist, create it
     if not os.path.isdir(dir):
-        dir = os.path.join(os.getcwd(), PLUGIN_DIR)
-    if not os.path.isdir(dir):
-        dir = os.path.join(os.path.dirname(__file__), PLUGIN_DIR)
-    if not os.path.isdir(dir):
-        dir = os.path.join(os.path.dirname(os.path.sys.path[0]), PLUGIN_DIR)
+        os.makedirs(dir)
+        
+    # Place example user models as needed
+    if not os.path.isfile(os.path.join(dir,"testmodel.py")):
+        shutil.copy(os.path.join(os.path.dirname(__file__),"plugin_models","testmodel.py"), dir)
+    if not os.path.isfile(os.path.join(dir,"testmodel_2.py")):
+        shutil.copy(os.path.join(os.path.dirname(__file__),"plugin_models","testmodel_2.py"), dir)
+    if not os.path.isfile(os.path.join(dir,"sum_p1_p2.py")):
+        shutil.copy(os.path.join(os.path.dirname(__file__),"plugin_models","sum_p1_p2.py"), dir)
+        
     return dir
 
 class ReportProblem:
@@ -470,8 +479,9 @@ class ModelManagerBase:
          is the directory was modified else return false
         """
         is_modified = False
-        if os.path.isdir(PLUGIN_DIR):
-            temp =  os.path.getmtime(PLUGIN_DIR)
+        plugin_dir = find_plugins_dir()
+        if os.path.isdir(plugin_dir):
+            temp =  os.path.getmtime(plugin_dir)
             if  self.last_time_dir_modified != temp:
                 is_modified = True
                 self.last_time_dir_modified = temp
