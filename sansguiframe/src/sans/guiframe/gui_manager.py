@@ -176,12 +176,7 @@ class ViewerFrame(wx.Frame):
         self.title = title
         # Preferred window size
         self._window_width, self._window_height = size
-        self.__gui_style = gui_style
-        # Logging info
-        logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s %(message)s',
-                    filename='sans_app.log',
-                    filemode='w')        
+        self.__gui_style = gui_style       
         path = os.path.dirname(__file__)
         temp_path = os.path.join(path,'images')
         ico_file = os.path.join(temp_path,'ball.ico')
