@@ -2,6 +2,13 @@ import sys
 sys.path.append("..")
 import get_version
 
+revision = get_version.__revision__
+if len(sys.argv)>1:
+    try:
+        revision = int(sys.argv[1].strip())
+    except:
+        pass
+
 def replaceToken(line, key, value): #pylint: disable-msg=R0201
     """ Replace a token in the template file 
         @param line: line of text to inspect
