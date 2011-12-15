@@ -38,9 +38,9 @@ _paper = "http://danse.us/trac/sans/newticket"
 _license = "mailto:sansdanse@gmail.com"
 
 
-icon_path = os.path.join(os.path.dirname(__file__), "images")
-media_path = os.path.join(os.path.dirname(__file__), "media")
-test_path =  os.path.join(os.path.dirname(__file__), "test")
+icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "images"))
+media_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "media"))
+test_path =  os.path.abspath(os.path.join(os.path.dirname(__file__), "test"))
 
 _nsf_logo = os.path.join(icon_path, "nsf_logo.png")
 _danse_logo = os.path.join(icon_path, "danse_logo.png")
