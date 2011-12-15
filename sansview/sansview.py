@@ -28,6 +28,7 @@ import local_config
 import logging
 
 def run():
+    sys.path.append(os.path.join("..","..",".."))
     from multiprocessing import freeze_support
     freeze_support()
     sansview = SansView()
