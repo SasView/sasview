@@ -43,8 +43,19 @@ INSTALL_FOLDER = "install_%s" % str(timestamp)
 
 # On Windows, the python executable is not always on the path.
 # Use its most frequent location as the default.
+# Select the appropriate python version to use.
+if sys.version_info >= (3, 0) or sys.version_info < (2, 5):
+    print "*** This script only works with Python 2.5, 2.6, or 2.7."
+    sys.exit()
+elif sys.version_info > (2, 6):
+    P_version = 27
+elif sys.version_info > (2, 5):
+    P_version = 26
+else:
+    P_version = 25
+    
 if sys.platform == 'win32':
-    PYTHON = "c:\python25\python"
+    PYTHON = "c:\python%s\python"% str(P_version)
     LIB_FOLDER = "%s/%s" % (CWD, INSTALL_FOLDER)
 else:
     PYTHON = 'python'
@@ -192,9 +203,9 @@ def checkout(release=False):
     
     os.chdir(wd)
     if release:
-        install_pkg(".", "util-%s" % UTIL, UTIL_URL)
+        install_pkg(".", "sansutil-%s" % UTIL, UTIL_URL)
     else:
-        install_pkg(".", "util", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/sansutil")
+        install_pkg(".", "sansutil", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/sansutil")
     
     os.chdir(wd)
     if release:
@@ -243,7 +254,7 @@ def checkout(release=False):
     if release:
         install_pkg(".", "park-%s" % PARK, PARK_URL)
     else:
-        install_pkg(".", "park-1.2", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/park-1.2")
+        install_pkg(".", "park-1.2.1", "https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/trunk/park-1.2.1")
         
     os.chdir(wd)
     if release:
