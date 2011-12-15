@@ -45,6 +45,12 @@ from sans import sansview
 PATH_APP = os.path.dirname(sansview.__file__)
 DATAPATH = PATH_APP
 
+def get_user_directory():
+    USERDIR = os.path.join(os.path.expanduser("~"),".sansview")
+    if not os.path.isdir(USERDIR):
+        os.makedirs(USERDIR)
+    return USERDIR
+    
 def _find_local_config(file, path):
     """
         Find configuration file for the current application

@@ -26,6 +26,10 @@ from welcome_panel import WelcomePanel
 # For py2exe, import config here
 import local_config
 import logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    filename=os.path.join(gui_manager.get_user_directory(),'sansview.log'),
+                    filemode='w')
 
 def run():
     sys.path.append(os.path.join("..","..",".."))
