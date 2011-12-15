@@ -7,7 +7,7 @@ if len(sys.argv)>1:
     try:
         revision = int(sys.argv[1].strip())
     except:
-        pass
+        print "Could not process bad revision number: %s" % str(sys.argv)
 
 def replaceToken(line, key, value): #pylint: disable-msg=R0201
     """ Replace a token in the template file 
