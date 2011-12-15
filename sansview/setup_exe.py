@@ -43,14 +43,16 @@ shutil.rmtree("build", ignore_errors=True)
 shutil.rmtree("dist", ignore_errors=True)
 
 if sys.version_info < (2, 6):
+    is_64bits = False 
     origIsSystemDLL = py2exe.build_exe.isSystemDLL
     def isSystemDLL(pathname):
             if os.path.basename(pathname).lower() in ("msvcp71.dll", "comctl32.dll"):
                     return 0
             return origIsSystemDLL(pathname)
     py2exe.build_exe.isSystemDLL = isSystemDLL
+else:
+    is_64bits = sys.maxsize > 2**32
 
-is_64bits = sys.maxsize > 2**32
 if is_64bits and sys.version_info >= (2, 6):
     manifest = """
        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
