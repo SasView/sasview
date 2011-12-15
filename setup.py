@@ -231,7 +231,8 @@ ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
         
 # SansView
 package_dir["sans.sansview"] = "sansview"
-package_data['sans.sansview'] = ['images/*', 'media/*', 'plugins/*', 'test/*']
+#package_data['sans.sansview'] = ['images/*', 'media/*', 'plugins/*', 'test/*']
+package_data['sans.sansview'] = ['images/*', 'media/*', 'test/*']
 packages.append("sans.sansview")
 
 #required = ['lxml>=2.2.2', 'numpy>=1.4.1', 'matplotlib>=0.99.1.1', 'wxPython>=2.8.11',

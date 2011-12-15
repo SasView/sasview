@@ -53,7 +53,8 @@ if libxml_path == None:
     raise RuntimeError, "Could not find libxml2 on the system"
 
 APP = ['sansview.py']
-DATA_FILES += ['images','test','plugins','media', 'custom_config.py', 'local_config.py']
+#DATA_FILES += ['images','test','plugins','media', 'custom_config.py', 'local_config.py']
+DATA_FILES += ['images','test','media', 'custom_config.py', 'local_config.py']
 # locate file extensions
 def find_extension():
     """
