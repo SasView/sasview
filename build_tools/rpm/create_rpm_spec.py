@@ -3,7 +3,10 @@ sys.path.append("..")
 import get_version
 
 revision = get_version.__revision__
-if len(sys.argv)>1:
+
+# If the revision we got from get_version is None, it's because it's
+# release. Otherwise, use the input revision if provided
+if len(sys.argv)>1 and revision is not None:
     try:
         revision = int(sys.argv[1].strip())
     except:
@@ -25,7 +28,6 @@ def replaceToken(line, key, value): #pylint: disable-msg=R0201
     
     return newline
 
-
 input=open("sansview.spec.template",'r')
 output=open("sansview.spec",'w')
 
@@ -34,6 +36,11 @@ lines = buf.split('\n')
 for l in lines:
     new_line = replaceToken(l, "[VERSION]", get_version.__version__)
     new_line = replaceToken(new_line, "[REVISION]", str(revision))
+    
+    # If this is a release, the revision number will come out as None
+    if revision is None and new_line.find("Release")>=0:
+        continue
+    
     output.write(new_line+'\n')
     
 input.close()

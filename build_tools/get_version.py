@@ -1,10 +1,5 @@
 __revision__ = filter(str.isdigit, "$Revision$")
 __version__ = "0.0.0"
-try:
-    import sans.sansview
-    __version__ = sans.sansview.__version__
-except:
-    print "Could not load sansview module"
     
 def get_svn_revision(path=None):
     rev = None
@@ -39,4 +34,14 @@ try:
 except:
     print "Could not extract revision number"
 
+# Get the version number from the sansview module
+# Check to see if we are dealing with a release
+try:
+    import sans.sansview
+    __version__ = sans.sansview.__version__
+    
+    if sans.sansview.__is_release__:
+        __revision__ = None
+except:
+    print "Could not load sansview module"
     
