@@ -1,6 +1,6 @@
 Name:       sansview          
 Version:        [VERSION]
-Release:        r[REVISION]
+Release:        r[REVISION]%{?dist}
 Summary:        Data analysis for Small Angle Scattering
 
 License:        BSD
@@ -21,6 +21,7 @@ mkdir -p $RPM_BUILD_ROOT/opt/sansview
 mkdir -p $RPM_BUILD_ROOT/usr/local/bin
 export PYTHONPATH=$RPM_BUILD_ROOT/opt/sansview
 easy_install -d $RPM_BUILD_ROOT/opt/sansview ../SOURCES/sansview*.egg
+easy_install -d $RPM_BUILD_ROOT/opt/sansview PIL
 cd $RPM_BUILD_ROOT/usr/local/bin
 ln -sf /opt/sansview/sansview sansview
 
