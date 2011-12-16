@@ -36,11 +36,6 @@ lines = buf.split('\n')
 for l in lines:
     new_line = replaceToken(l, "[VERSION]", get_version.__version__)
     new_line = replaceToken(new_line, "[REVISION]", str(revision))
-    
-    # If this is a release, the revision number will come out as None
-    if revision is None and new_line.find("Release")>=0:
-        continue
-    
     output.write(new_line+'\n')
     
 input.close()
