@@ -1,3 +1,4 @@
+import os
 __revision__ = filter(str.isdigit, "$Revision$")
 __version__ = "0.0.0"
     
@@ -42,3 +43,4 @@ try:
 except:
     print "Could not load sansview module"
     
+print "SansView v ", __version__, __revision__

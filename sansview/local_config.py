@@ -4,10 +4,12 @@
 import time
 import os
 from sans.guiframe.gui_style import GUIFRAME
+import sans.sansview
+
 # Version of the application
 __appname__ = "SansView"
-__version__ = '2.0.1'
-__build__ = '2.0.1'
+__version__ = sans.sansview.__version__
+__build__ = sans.sansview.__build__
 __download_page__ = 'http://danse.chem.utk.edu'
 __update_URL__ = 'http://danse.chem.utk.edu/sansview_version.php'
 
