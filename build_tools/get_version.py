@@ -39,9 +39,6 @@ except:
 try:
     import sans.sansview
     __version__ = sans.sansview.__version__
-    
-    if sans.sansview.__is_release__:
-        __revision__ = None
 except:
     print "Could not load sansview module"
     
