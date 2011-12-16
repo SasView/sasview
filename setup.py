@@ -19,6 +19,15 @@ except:
         print "\nNumpy is needed to build SansView. Try easy_install numpy.\n  %s" % str(sys.exc_value)
         sys.exit(0)
 
+# Manage version number ######################################
+IS_RELEASE = False
+VERSION = "2.0.1"
+##############################################################
+vfile = open("sansview/__init__.py", 'w')
+vfile.write("__version__ = %s\n" % VERSION)
+vfile.write("__is_release__ = %s\n" % str(IS_RELEASE))
+vfile.close()
+
 package_dir = {}
 package_data = {}
 packages = []
@@ -249,7 +258,7 @@ else:
  # Set up SansView    
 setup(
     name="sansview",
-    version = "2.0.1",
+    version = VERSION,
     description = "SansView application",
     author = "University of Tennessee",
     author_email = "sansdanse@gmail.com",
