@@ -24,7 +24,7 @@ IS_RELEASE = False
 VERSION = "2.0.1"
 ##############################################################
 vfile = open("sansview/__init__.py", 'w')
-vfile.write("__version__ = %s\n" % VERSION)
+vfile.write("__version__ = \"%s\"\n" % VERSION)
 vfile.write("__is_release__ = %s\n" % str(IS_RELEASE))
 vfile.close()
 
