@@ -76,8 +76,9 @@ if config is None:
     # Didn't find local config, load the default 
     import sans.guiframe.config as config          
        
-
-custom_config = _find_local_config('custom_config', PATH_APP)
+from sans.guiframe.customdir  import SetupCustom
+c_conf_dir = SetupCustom().setup_dir(PATH_APP)
+custom_config = _find_local_config('custom_config', c_conf_dir)
 if custom_config is None:
     custom_config = _find_local_config('custom_config', os.getcwd())
 if custom_config is None:

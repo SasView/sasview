@@ -16,6 +16,7 @@ import copy
 from sans.guiframe.events import StatusEvent  
 from sans.guiframe.gui_style import GUIFRAME
 from sans.guiframe import gui_manager as CURRENT
+from sans.guiframe.customdir  import SetupCustom
 # default configuration
 DEFAULT_STRINGS = {'GUIFRAME_WIDTH':1150,
                    'GUIFRAME_HEIGHT':840,
@@ -64,7 +65,7 @@ class StartupConfiguration(wx.Dialog):
                            size=(PANEL_WIDTH, PANEL_HEIGHT))
         # parent
         self.parent = parent
-        self.path = parent.path
+        self.path = SetupCustom().find_dir()
         self._gui = gui
         # font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
