@@ -2,7 +2,7 @@
 import sys
 import os.path
 import shutil
-from sans import sansview
+
 CONF_DIR = 'config' 
 APPLICATION_NAME = 'sansview'
 
