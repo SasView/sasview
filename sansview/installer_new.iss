@@ -67,8 +67,8 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 [Files]
 Source: "dist\SansView.exe";	DestDir: "{app}";	Flags: ignoreversion
 Source: "dist\*";	DestDir: "{app}";	Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "dist\plugin_models\*";	DestDir: "{userappdata}\..\.sansview\plugins";	Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "dist\custom_config.py";	DestDir: "{userappdata}\..\.sansview\config";	Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "dist\plugin_models\*";	DestDir: "{userappdata}\..\.sansview\plugins";	Flags: recursesubdirs createallsubdirs
+Source: "dist\config\custom_config.py"; DestDir: "{userappdata}\..\.sansview\config";	Flags: recursesubdirs createallsubdirs
 ;	NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

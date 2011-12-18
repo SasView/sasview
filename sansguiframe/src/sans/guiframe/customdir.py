@@ -23,10 +23,10 @@ def _setup_conf_dir(path):
     # If the plugin directory doesn't exist, create it
     if not os.path.isdir(dir):
         os.makedirs(dir)
- 
+    file = os.path.join(dir, "custom_config.py")
     # Place example user models as needed
-    if not os.path.isfile(os.path.join(dir,"custom_config.py")):
-        shutil.copy(os.path.join(path, "custom_config.py"), dir)
+    if not os.path.isfile(file):
+        shutil.copyfile(os.path.join(path, "custom_config.py"), file)
         
     return dir
   
