@@ -61,12 +61,14 @@ Name: "english";	MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon";	Description: "{cm:CreateDesktopIcon}";	GroupDescription: "{cm:AdditionalIcons}";	Flags: unchecked
-Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
 
 [Files]
 Source: "dist\SansView.exe";	DestDir: "{app}";	Flags: ignoreversion
 Source: "dist\*";	DestDir: "{app}";	Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "dist\plugin_models\*";	DestDir: "{userappdata}\..\.sansview\plugins";	Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "dist\custom_config.py";	DestDir: "{userappdata}\..\.sansview\config";	Flags: ignoreversion recursesubdirs createallsubdirs
 ;	NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
