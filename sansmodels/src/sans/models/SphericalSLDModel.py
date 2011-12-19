@@ -179,7 +179,7 @@ class SphericalSLDModel(BaseComponent):
                 beta is a list of the corresponding SLD values 
         """
         # max_pts for each layers
-        n_sub = self.params['npts_inter']
+        n_sub = int(self.params['npts_inter'])
         z = []
         beta = []
         z0 = 0
