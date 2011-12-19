@@ -59,7 +59,7 @@ class PyConsole(editor.EditorNotebookFrame):
         self.dataDir = dataDir
         self.Centre()
         self.fileMenu.FindItemById(wx.ID_NEW).Enable(False)
-        self.fileMenu.Enable(wx.ID_OPEN, False)
+        self.Bind(wx.EVT_MENU, self.OnOpenFile, id=wx.ID_OPEN)
         self.Bind(wx.EVT_MENU, self.OnSaveFile, id=wx.ID_SAVE)
         self.Bind(wx.EVT_MENU, self.OnSaveAsFile, id=wx.ID_SAVEAS)
         self.Bind(wx.EVT_MENU, self.OnCompile, id=ID_COMPILE)
@@ -108,6 +108,14 @@ class PyConsole(editor.EditorNotebookFrame):
         dial = wx.MessageDialog(self, message, 'About',
                            wx.OK|wx.ICON_INFORMATION)  
         dial.ShowModal()
+
+    def OnOpenFile(self, event):
+        """
+        OnFileOpen  
+        """
+        self.OnFileOpen(event)
+        self.Show(False)
+        self.Show(True)
         
     def OnSaveFile(self, event):
         """
