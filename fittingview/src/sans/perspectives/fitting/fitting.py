@@ -210,7 +210,8 @@ class Plugin(PluginBase):
         resetf_help += "propagated from the previous results. " 
         resetf_help += "Otherwise, the same initial param values will be used "
         resetf_help += "for all fittings." 
-        self.menu1.AppendCheckItem(self.id_reset_flag, "Chain Fitting [BatchFit Only]", 
+        self.menu1.AppendCheckItem(self.id_reset_flag, 
+                                   "Chain Fitting [BatchFit Only]", 
                                    resetf_help) 
         wx.EVT_MENU(owner, self.id_reset_flag,  self.on_reset_batch_flag)
         chain_menu = self.menu1.FindItemById(self.id_reset_flag)
@@ -237,30 +238,88 @@ class Plugin(PluginBase):
         Get the python editor panel
         """
         id = event.GetId()
-        label = self.edit_model_menu.GetLabel(id)
+        label = self.edit_menu.GetLabel(id)
         from sans.perspectives.calculator.pyconsole import PyConsole
         filename = os.path.join(models.find_plugins_dir(), label)
         frame = PyConsole(parent=self.parent, manager=self, panel= self.fit_panel,
                           title='Custom Model Editor', filename=filename)
         self.put_icon(frame)
         frame.Show(True) 
-        
+    
+    def make_sum_model(self, event):
+        """
+        Edit summodel template and make one
+        """
+        id = event.GetId()
+        model_list = []
+        model_manager = models.ModelManager()
+        model_list = model_manager.get_model_name_list()
+
+        from sans.perspectives.fitting.fitting_widgets import TextDialog
+        textdial = TextDialog(None, -1, 'Easy Custom Sum(p1,p2)', model_list)
+        self.put_icon(textdial)
+        if textdial.ShowModal() == wx.ID_OK:
+            try:
+                label = textdial.getText()
+                plug_dir = models.find_plugins_dir()
+                fname = os.path.join(plug_dir, "sum_temp.py")
+                name1 = label[0]
+                name2 = label[1]
+                textdial.write_string(fname, name1, name2)
+                textdial.compile_file(fname)
+
+                page = self.fit_panel.get_current_page()
+                temp = self.fit_panel.reset_pmodel_list()
+                if temp:
+                    page.model_list_box = temp
+                    current_val = page.formfactorbox.GetValue()
+                    pos = page.formfactorbox.GetSelection()
+                    page._show_combox_helper()
+                    page.formfactorbox.SetSelection(pos)
+                    page.formfactorbox.SetValue(current_val)
+                #wx.CallAfter(textdial.delete_file, fname)
+            except:
+                raise
+                if self.parent != None:
+                    from sans.guiframe.events import StatusEvent 
+                    msg= "Easy Custom Sum: Error occurred..."
+                    wx.PostEvent(self.parent, StatusEvent(status = msg ))
+                else:
+                    raise
+        textdial.Destroy()
+
+  
     def set_edit_menu(self, owner):    
         """
         Set list of the edit model menu labels
+        """
+        id = wx.NewId()
+        self.edit_model_menu.Append(id, 'Easy Custom Sum(p1, p2)', 
+                                    'Sum two models') 
+        wx.EVT_MENU(owner, id,  self.make_sum_model)
+        e_id = wx.NewId()
+        self.edit_menu =wx.Menu()
+        self.edit_model_menu.AppendMenu(e_id, 
+                                    'Edit Sample File', self.edit_menu) 
+        self.set_edit_menu_helper(owner)
+    
+    def set_edit_menu_helper(self, owner):
+        """
+        help for setting list of the edit model menu labels
         """
         list_fnames = os.listdir(models.find_plugins_dir())
         for item in list_fnames:
             name = os.path.basename(item)
             toks = os.path.splitext(name)
-            if toks[1]=='.py' and not toks[0]=='__init__':
+            if toks[1]=='.py' and not toks[0] =='__init__' \
+                                and not toks[0] =='sum_temp':
                 has_file = False
-                for item in self.edit_model_menu.GetMenuItems():
-                    if name == self.edit_model_menu.GetLabel(item.GetId()):
+                for item in self.edit_menu.GetMenuItems():
+                    if name == self.edit_menu.GetLabel(item.GetId()):
                         has_file = True
                 if not has_file:
                     id = wx.NewId()
-                    self.edit_model_menu.Append(id, name) 
+                    self.edit_menu.Append(id, name) 
                     wx.EVT_MENU(owner, id,  self.edit_custom_model)
                     has_file = False
 
@@ -640,15 +699,15 @@ class Plugin(PluginBase):
             Will return model_name = M1 , parameter name = A
             
         """
-        if string.find(item,".")!=-1:
-            param_names= re.split("\.",item)
-            model_name=param_names[0]           
+        if string.find(item, ".") != -1:
+            param_names = re.split("\.", item)
+            model_name = param_names[0]           
             ##Assume max len is 3; eg., M0.radius.width
             if len(param_names) == 3:
-                param_name=param_names[1]+"."+param_names[2]
+                param_name = param_names[1] + "." + param_names[2]
             else:
-                param_name=param_names[1]                    
-            return model_name,param_name
+                param_name = param_names[1]                    
+            return model_name, param_name
    
     def set_ftol(self, ftol=None):
         """

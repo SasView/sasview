@@ -1,4 +1,4 @@
-# A sample of an experimental model function for Sum(Pmodel1,Pmodel2)
+# A sample of an experimental model function for Sum(APmodel1,(1-A)Pmodel2)
 import copy
 from sans.models.pluginmodel import Model1DPlugin
 # Possible model names
@@ -17,11 +17,12 @@ PorodModel, PowerLawAbsModel, SCCrystalModel, SphereModel, SquareWellStructure,
 StackedDisksModel, StickyHSStructure, TeubnerStreyModel, TriaxialEllipsoidModel,
 TwoLorentzianModel, TwoPowerLawModel, VesicleModel
 """
-## This is same as the Easy Custom Sum(p1 + p2) 
+## This is DIFFERENT from the Easy Custom Sum(p1 + p2) 
+## by definition of the scale factor *****************************************
 #
-#     Custom model = scale_factor * (P1 + P2)
+#     Custom model = scale_factor * P1 + (1 - scale_factor) * P2
 #
-## User can REPLACE model names below two arrowed lines (two names per line)
+## User can REPLACE model names below arrowed two lines (twice per line)
 from sans.models.CylinderModel import CylinderModel as P1          #<========
 from sans.models.PolymerExclVolume import PolymerExclVolume as P2  #<========
 
@@ -29,7 +30,7 @@ from sans.models.PolymerExclVolume import PolymerExclVolume as P2  #<========
 #####------------------------------------------------------------------------
 class Model(Model1DPlugin):
     """
-    Use for p1(Q)+p2(Q); 
+    Use for A*p1(Q)+(1-A)*p2(Q); 
     Note: P(Q) refers to 'form factor' model.
     """
     name = ""
@@ -68,11 +69,11 @@ class Model(Model1DPlugin):
         ## Define parameters
         self._set_params()
         ## New parameter:Scaling factor
-        self.params['scale_factor'] = 1
+        self.params['scale_factor'] = 0.5
         
         ## Parameter details [units, min, max]
         self._set_details()
-        self.details['scale_factor'] = ['',  None, None]
+        self.details['scale_factor'] = ['',     None, None]
 
         
         #list of parameter that can be fitted
@@ -120,8 +121,9 @@ class Model(Model1DPlugin):
         """
         Get combined name from two model names
         """
-        name = self._get_upper_name(name1)
-        name += "+"
+        name = "A*"
+        name += self._get_upper_name(name1)
+        name += "+(1-A)*"
         name += self._get_upper_name(name2)
         return name
     
@@ -319,8 +321,8 @@ class Model(Model1DPlugin):
         :return: (scattering function value)
         """
         self._set_scale_factor()
-        return self.params['scale_factor'] * \
-                (self.p_model1.run(x) + self.p_model2.run(x))
+        return (self.params['scale_factor'] * self.p_model1.run(x) + \
+                (1 - self.params['scale_factor']) * self.p_model2.run(x))
     
     def runXY(self, x = 0.0):
         """ 
@@ -330,8 +332,8 @@ class Model(Model1DPlugin):
         :return: scattering function value
         """  
         self._set_scale_factor()
-        return self.params['scale_factor'] * \
-                (self.p_model1.runXY(x) + self.p_model2.runXY(x))
+        return (self.params['scale_factor'] * self.p_model1.runXY(x) + \
+                (1 - self.params['scale_factor']) * self.p_model2.runXY(x))
     
     ## Now (May27,10) directly uses the model eval function 
     ## instead of the for-loop in Base Component.
@@ -343,9 +345,8 @@ class Model(Model1DPlugin):
         :return: scattering function P(q[])
         """
         self._set_scale_factor()
-        return self.params['scale_factor'] * \
-                    (self.p_model1.evalDistribution(x) + \
-                                 self.p_model2.evalDistribution(x))
+        return (self.params['scale_factor'] * self.p_model1.evalDistribution(x) + \
+                (1 - self.params['scale_factor']) * self.p_model2.evalDistribution(x))
 
     def set_dispersion(self, parameter, dispersion):
         """
@@ -377,7 +378,7 @@ class Model(Model1DPlugin):
         description +="This model gives the summation of  %s and %s.\n"% \
                                         ( p_model1.name, p_model2.name )
         self.description += description
-        
+                
 if __name__ == "__main__": 
     m1= Model() 
     #m1.setParam("p1_scale", 25)  
@@ -391,7 +392,7 @@ if __name__ == "__main__":
     #m2.p_model1.setParam("length", 1000) 
     #m2.p_model2.setParam("scale", 100)
     #m2.p_model2.setParam("rg", 100)
-    out2 = m2.p_model1.runXY(0.01) + m2.p_model2.runXY(0.01)
+    out2 = 0.5 * m2.p_model1.runXY(0.01) + 0.5 * m2.p_model2.runXY(0.01)
     print "Testing at Q = 0.01:"
     print out1, " = ", out2
     if out1 == out2:

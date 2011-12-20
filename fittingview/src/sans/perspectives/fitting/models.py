@@ -225,10 +225,8 @@ class ModelManagerBase:
     def __init__(self):
         """
         """
-       
         self.stored_plugins = {}
         self._getModelList()
-        
         
     def findModels(self):
         """
@@ -249,20 +247,26 @@ class ModelManagerBase:
         :return: the next free event ID following the new menu events
         
         """
+        # regular model names only
+        self.model_name_list = []
         from sans.models.SphereModel import SphereModel
         self.shape_list.append(SphereModel)
         self.multiplication_factor.append(SphereModel)
+        self.model_name_list.append(SphereModel.__name__)
         
         from sans.models.BinaryHSModel import BinaryHSModel
         self.shape_list.append(BinaryHSModel)
+        self.model_name_list.append(BinaryHSModel.__name__)
                         
         from sans.models.FuzzySphereModel import FuzzySphereModel
         self.shape_list.append(FuzzySphereModel)
         self.multiplication_factor.append(FuzzySphereModel)
+        self.model_name_list.append(FuzzySphereModel.__name__)
            
         from sans.models.CoreShellModel import CoreShellModel
         self.shape_list.append(CoreShellModel)
         self.multiplication_factor.append(CoreShellModel)
+        self.model_name_list.append(CoreShellModel.__name__)
         
         from sans.models.CoreMultiShellModel import CoreMultiShellModel
         self.shape_list.append(CoreMultiShellModel)
@@ -272,10 +276,12 @@ class ModelManagerBase:
         from sans.models.VesicleModel import VesicleModel
         self.shape_list.append(VesicleModel)
         self.multiplication_factor.append(VesicleModel)
+        self.model_name_list.append(VesicleModel.__name__)
         
         from sans.models.MultiShellModel import MultiShellModel
         self.shape_list.append(MultiShellModel)
         self.multiplication_factor.append(MultiShellModel)
+        self.model_name_list.append(MultiShellModel.__name__)
         
         from sans.models.OnionExpShellModel import OnionExpShellModel
         self.shape_list.append(OnionExpShellModel)
@@ -289,154 +295,198 @@ class ModelManagerBase:
         
         from sans.models.PearlNecklaceModel import PearlNecklaceModel
         self.shape_list.append(PearlNecklaceModel)
+        self.model_name_list.append(PearlNecklaceModel.__name__)
         #self.multiplication_factor.append(PearlNecklaceModel)
         
         from sans.models.CylinderModel import CylinderModel
         self.shape_list.append(CylinderModel)
         self.multiplication_factor.append(CylinderModel)
+        self.model_name_list.append(CylinderModel.__name__)
         
         from sans.models.CoreShellCylinderModel import CoreShellCylinderModel
         self.shape_list.append(CoreShellCylinderModel)
         self.multiplication_factor.append(CoreShellCylinderModel)
+        self.model_name_list.append(CoreShellCylinderModel.__name__)
         
         from sans.models.HollowCylinderModel import HollowCylinderModel
         self.shape_list.append(HollowCylinderModel)
         self.multiplication_factor.append(HollowCylinderModel)
+        self.model_name_list.append(HollowCylinderModel.__name__)
               
         from sans.models.FlexibleCylinderModel import FlexibleCylinderModel
         self.shape_list.append(FlexibleCylinderModel)
+        self.model_name_list.append(FlexibleCylinderModel.__name__)
 
         from sans.models.FlexCylEllipXModel import FlexCylEllipXModel
         self.shape_list.append(FlexCylEllipXModel)
+        self.model_name_list.append(FlexCylEllipXModel.__name__)
         
         from sans.models.StackedDisksModel import StackedDisksModel
         self.shape_list.append(StackedDisksModel)
         self.multiplication_factor.append(StackedDisksModel)
+        self.model_name_list.append(StackedDisksModel.__name__)
         
         from sans.models.ParallelepipedModel import ParallelepipedModel
         self.shape_list.append(ParallelepipedModel)
         self.multiplication_factor.append(ParallelepipedModel)
+        self.model_name_list.append(ParallelepipedModel.__name__)
         
         from sans.models.CSParallelepipedModel import CSParallelepipedModel
         self.shape_list.append(CSParallelepipedModel)
         self.multiplication_factor.append(CSParallelepipedModel)
+        self.model_name_list.append(CSParallelepipedModel.__name__)
         
         from sans.models.EllipticalCylinderModel import EllipticalCylinderModel
         self.shape_list.append(EllipticalCylinderModel)
         self.multiplication_factor.append(EllipticalCylinderModel)
+        self.model_name_list.append(EllipticalCylinderModel.__name__)
         
         from sans.models.BarBellModel import BarBellModel
         self.shape_list.append(BarBellModel)
+        self.model_name_list.append(BarBellModel.__name__)
         # not implemeted yet!
         #self.multiplication_factor.append(BarBellModel)
         
         from sans.models.CappedCylinderModel import CappedCylinderModel
         self.shape_list.append(CappedCylinderModel)
+        self.model_name_list.append(CappedCylinderModel.__name__)
         # not implemeted yet!
         #self.multiplication_factor.append(CappedCylinderModel)
         
         from sans.models.EllipsoidModel import EllipsoidModel
         self.shape_list.append(EllipsoidModel)
         self.multiplication_factor.append(EllipsoidModel)
+        self.model_name_list.append(EllipsoidModel.__name__)
       
         from sans.models.CoreShellEllipsoidModel import CoreShellEllipsoidModel
         self.shape_list.append(CoreShellEllipsoidModel)
         self.multiplication_factor.append(CoreShellEllipsoidModel)
+        self.model_name_list.append(CoreShellEllipsoidModel.__name__)
          
         from sans.models.TriaxialEllipsoidModel import TriaxialEllipsoidModel
         self.shape_list.append(TriaxialEllipsoidModel)
         self.multiplication_factor.append(TriaxialEllipsoidModel)
+        self.model_name_list.append(TriaxialEllipsoidModel.__name__)
         
         from sans.models.LamellarModel import LamellarModel
         self.shape_list.append(LamellarModel)
+        self.model_name_list.append(LamellarModel.__name__)
         
         from sans.models.LamellarFFHGModel import LamellarFFHGModel
         self.shape_list.append(LamellarFFHGModel)
+        self.model_name_list.append(LamellarFFHGModel.__name__)
         
         from sans.models.LamellarPSModel import LamellarPSModel
         self.shape_list.append(LamellarPSModel)
+        self.model_name_list.append(LamellarPSModel.__name__)
      
         from sans.models.LamellarPSHGModel import LamellarPSHGModel
         self.shape_list.append(LamellarPSHGModel)
+        self.model_name_list.append(LamellarPSHGModel.__name__)
         
         from sans.models.LamellarPCrystalModel import LamellarPCrystalModel
         self.shape_list.append(LamellarPCrystalModel)
+        self.model_name_list.append(LamellarPCrystalModel.__name__)
         
         from sans.models.SCCrystalModel import SCCrystalModel
         self.shape_list.append(SCCrystalModel)
+        self.model_name_list.append(SCCrystalModel.__name__)
         
         from sans.models.FCCrystalModel import FCCrystalModel
         self.shape_list.append(FCCrystalModel)
+        self.model_name_list.append(FCCrystalModel.__name__)
         
         from sans.models.BCCrystalModel import BCCrystalModel
         self.shape_list.append(BCCrystalModel)
+        self.model_name_list.append(BCCrystalModel.__name__)
       
         ## Structure factor 
         from sans.models.SquareWellStructure import SquareWellStructure
         self.struct_list.append(SquareWellStructure)
+        self.model_name_list.append(SquareWellStructure.__name__)
         
         from sans.models.HardsphereStructure import HardsphereStructure
         self.struct_list.append(HardsphereStructure)
+        self.model_name_list.append(HardsphereStructure.__name__)
          
         from sans.models.StickyHSStructure import StickyHSStructure
         self.struct_list.append(StickyHSStructure)
+        self.model_name_list.append(StickyHSStructure.__name__)
         
         from sans.models.HayterMSAStructure import HayterMSAStructure
         self.struct_list.append(HayterMSAStructure)
+        self.model_name_list.append(HayterMSAStructure.__name__)
         
         ##shape-independent models
         from sans.models.PowerLawAbsModel import PowerLawAbsModel
         self.shape_indep_list.append( PowerLawAbsModel )
+        self.model_name_list.append(PowerLawAbsModel.__name__)
         
         from sans.models.BEPolyelectrolyte import BEPolyelectrolyte
         self.shape_indep_list.append(BEPolyelectrolyte )
+        self.model_name_list.append(BEPolyelectrolyte.__name__)
         self.form_factor_dict[str(wx.NewId())] =  [SphereModel]
         
         from sans.models.BroadPeakModel import BroadPeakModel
         self.shape_indep_list.append(BroadPeakModel)
+        self.model_name_list.append(BroadPeakModel.__name__)
         
         from sans.models.CorrLengthModel import CorrLengthModel
         self.shape_indep_list.append(CorrLengthModel)
+        self.model_name_list.append(CorrLengthModel.__name__)
         
         from sans.models.DABModel import DABModel
         self.shape_indep_list.append(DABModel )
+        self.model_name_list.append(DABModel.__name__)
         
         from sans.models.DebyeModel import DebyeModel
         self.shape_indep_list.append(DebyeModel )
+        self.model_name_list.append(DebyeModel.__name__)
         
         #FractalModel (a c-model)is now being used instead of FractalAbsModel.
         from sans.models.FractalModel import FractalModel
         self.shape_indep_list.append(FractalModel )
+        self.model_name_list.append(FractalModel.__name__)
         
         from sans.models.FractalCoreShellModel import FractalCoreShellModel
         self.shape_indep_list.append(FractalCoreShellModel )
+        self.model_name_list.append(FractalCoreShellModel.__name__)
         
         from sans.models.GaussLorentzGelModel import GaussLorentzGelModel
         self.shape_indep_list.append(GaussLorentzGelModel) 
+        self.model_name_list.append(GaussLorentzGelModel.__name__)
                 
         from sans.models.GuinierModel import GuinierModel
         self.shape_indep_list.append(GuinierModel )
+        self.model_name_list.append(GuinierModel.__name__)
         
         from sans.models.GuinierPorodModel import GuinierPorodModel
         self.shape_indep_list.append(GuinierPorodModel )
+        self.model_name_list.append(GuinierPorodModel.__name__)
 
         from sans.models.LorentzModel import LorentzModel
         self.shape_indep_list.append( LorentzModel) 
+        self.model_name_list.append(LorentzModel.__name__)
         
         from sans.models.PeakGaussModel import PeakGaussModel
         self.shape_indep_list.append(PeakGaussModel)
+        self.model_name_list.append(PeakGaussModel.__name__)
         
         from sans.models.PeakLorentzModel import PeakLorentzModel
         self.shape_indep_list.append(PeakLorentzModel)
+        self.model_name_list.append( PeakLorentzModel.__name__)
         
         from sans.models.Poly_GaussCoil import Poly_GaussCoil
         self.shape_indep_list.append(Poly_GaussCoil)
+        self.model_name_list.append(Poly_GaussCoil.__name__)
         
         from sans.models.PolymerExclVolume import PolymerExclVolume
         self.shape_indep_list.append(PolymerExclVolume)
+        self.model_name_list.append(PolymerExclVolume.__name__)
         
         from sans.models.PorodModel import PorodModel
-        self.shape_indep_list.append(PorodModel )      
+        self.shape_indep_list.append(PorodModel )  
+        self.model_name_list.append(PorodModel.__name__)    
         
         from sans.models.RPA10Model import RPA10Model
         self.shape_indep_list.append(RPA10Model)
@@ -444,12 +494,15 @@ class ModelManagerBase:
         
         from sans.models.TeubnerStreyModel import TeubnerStreyModel
         self.shape_indep_list.append(TeubnerStreyModel )
+        self.model_name_list.append(TeubnerStreyModel.__name__)
         
         from sans.models.TwoLorentzianModel import TwoLorentzianModel
         self.shape_indep_list.append(TwoLorentzianModel )
+        self.model_name_list.append(TwoLorentzianModel.__name__)
         
         from sans.models.TwoPowerLawModel import TwoPowerLawModel
         self.shape_indep_list.append(TwoPowerLawModel )
+        self.model_name_list.append(TwoPowerLawModel.__name__)
         
         from sans.models.UnifiedPowerRgModel import UnifiedPowerRgModel
         self.shape_indep_list.append(UnifiedPowerRgModel )
@@ -457,6 +510,7 @@ class ModelManagerBase:
         
         from sans.models.LineModel import LineModel
         self.shape_indep_list.append(LineModel)
+        self.model_name_list.append(LineModel.__name__)
         
         from sans.models.ReflectivityModel import ReflectivityModel
         self.multi_func_list.append(ReflectivityModel)
@@ -694,6 +748,11 @@ class ModelManagerBase:
         self.model_combobox.set_list("Multi-Functions", self.multi_func_list)
         return self.model_combobox.get_list()
     
+    def get_model_name_list(self):
+        """
+        return regular model name list
+        """
+        return self.model_name_list
   
         
 class ModelManager(object):
@@ -728,6 +787,9 @@ class ModelManager(object):
     
     def get_model_list(self): 
         return self.__modelmanager.get_model_list()
+    
+    def get_model_name_list(self):
+        return self.__modelmanager.get_model_name_list()
     
     
   

@@ -6,8 +6,8 @@ http://docs.python.org/library/math.html
 http://www.scipy.org/Numpy_Functions_by_Category
 """
 from sans.models.pluginmodel import Model1DPlugin  ##DO NOT CHANGE THIS LINE!!!
-from math import *                    ##DO NOT CHANGE THIS LINE!!!
-from numpy import *                ##DO NOT CHANGE THIS LINE!!!
+import math                  ##DO NOT CHANGE THIS LINE!!!
+import numpy               ##DO NOT CHANGE THIS LINE!!!
 
 ##PLEASE READ COMMENTS CAREFULLY !!! COMMENT ARE IN CAPITAL LETTERS AND AFTER ##
 ## THESE COMMENTS ARE THERE TO GUIDE YOU. YOU CAN REMOVE THEM ONLY WHEN YOU ARE
@@ -82,5 +82,20 @@ class Model(Model1DPlugin):##DO NOT CHANGE THIS LINE!!!
         ##  AVAILABLE http://www.scipy.org/Numpy_Functions_by_Category
         ## numpy FUNCTIONS ARE FOR EXPERT USER
         
-        return self.params['A']+self.params['B']*cos(2.0*x)+self.params['C']*math.sin(2.0*x)
-   
+        return self.params['A']+self.params['B']*math.cos(2.0*x)+self.params['C']*math.sin(2.0*x)
+    
+## DO NOT MODIFY THE FOLLOWING LINES!!!!!!!!!!!!!!!!       
+if __name__ == "__main__": 
+    m= Model() 
+    out1 = m.runXY(0.0)
+    out2 = m.runXY(0.01)
+    isfine1 = numpy.isfinite(out1)
+    isfine2 = numpy.isfinite(out2)
+    print "Testing the value at Q = 0.0:"
+    print out1, " : finite? ", isfine1
+    print "Testing the value at Q = 0.01:"
+    print out2, " : finite? ", isfine2
+    if isfine1 and isfine2:
+        print "===> Simple Test: Passed!"
+    else:
+        print "===> Simple Test: Failed!"
