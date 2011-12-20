@@ -705,11 +705,11 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         # Clear the plot
         if self.image != None:
             self.image.clf()
-            #self.image.draw()
+            # reset image
+            self.image = None
         # Close panel
-        self.parent.Close()
-        # reset image
-        self.image = None
+        self.parent.OnClose(None)
+        
     
     def on_compute(self, event = None):  
         """
@@ -1402,6 +1402,15 @@ class ResolutionWindow(wx.Frame):
         self.panel = ResolutionCalculatorPanel(parent=self)
         self.Centre()
         self.Show(True)
+        wx.EVT_CLOSE(self, self.OnClose)
+    
+    def OnClose(self, event):  
+        """
+        On close event
+        """
+        _pylab_helpers.Gcf.figs = {}
+        self.Destroy()  
+
         
 if __name__ == "__main__": 
     app = wx.PySimpleApp()
