@@ -24,7 +24,7 @@ class ReflectivityModel(BaseComponent):
         self.model = model
         self.name = "ReflectivityModel"
         self.description=model.description
-        self.n_layers = multfactor
+        self.n_layers = int(multfactor)
         ## Define parameters
         self.params = {}
 
@@ -175,7 +175,7 @@ class ReflectivityModel(BaseComponent):
         n_sub = 21
         z = []
         beta = []
-        sub_range = floor(n_sub/2.0)
+        sub_range = int(floor(n_sub/2.0))
         z.append(0)
         beta.append(self.params['sld_bottom0']) 
        

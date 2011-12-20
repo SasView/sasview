@@ -26,7 +26,7 @@ class ReflectivityIIModel(BaseComponent):
         self.model = model
         self.name = "ReflectivityIIModel"
         self.description=model.description
-        self.n_layers = multfactor
+        self.n_layers = int(multfactor)
         ## Define parameters
         self.params = {}
         
@@ -182,10 +182,10 @@ class ReflectivityIIModel(BaseComponent):
                 beta is a list of the corresponding SLD values 
         """
         # max_pts for each layers
-        n_sub = self.params['npts_inter']
+        n_sub = int(self.params['npts_inter'])
         z = []
         beta = []
-        sub_range = floor(n_sub/2.0)
+        sub_range = int(floor(n_sub/2.0))
         z.append(0)
         beta.append(self.params['sld_bottom0']) 
        
