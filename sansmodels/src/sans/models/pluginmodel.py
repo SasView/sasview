@@ -11,7 +11,7 @@ class Model1DPlugin(BaseComponent):
         self.name = name
         self.details = {}
         self.params  = {}
-        self.description=''
+        self.description = 'plugin model'
         
     def function(self, x):
         """
@@ -53,3 +53,13 @@ class Model1DPlugin(BaseComponent):
             raise ValueError, "Tuples are not allowed as input to BaseComponent models"
         else:
             return self.function(x)
+        
+    def set_details(self):
+        """
+        Set default details
+        """
+        if not self.params:
+            return {}
+            
+        for key in self.params.keys():
+            self.details[key] = ['', None, None]
