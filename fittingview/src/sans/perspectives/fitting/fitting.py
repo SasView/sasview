@@ -23,7 +23,6 @@ from copy import deepcopy
 import models
 import fitpage
 
-
 from sans.dataloader.loader import Loader
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.dataFitting import Data1D
@@ -42,6 +41,7 @@ from .fitpanel import FitPanel
 from .fit_thread import FitThread
 from .pagestate import Reader
 from .fitpage import Chi2UpdateEvent
+from .fitting_widgets import TextDialog
 
 MAX_NBR_DATA = 4
 SANS_F_TOL = 5e-05
@@ -255,7 +255,6 @@ class Plugin(PluginBase):
         model_manager = models.ModelManager()
         model_list = model_manager.get_model_name_list()
 
-        from sans.perspectives.fitting.fitting_widgets import TextDialog
         textdial = TextDialog(None, -1, 'Easy Custom Sum(p1,p2)', model_list)
         self.put_icon(textdial)
         if textdial.ShowModal() == wx.ID_OK:
@@ -277,7 +276,6 @@ class Plugin(PluginBase):
                     page._show_combox_helper()
                     page.formfactorbox.SetSelection(pos)
                     page.formfactorbox.SetValue(current_val)
-                #wx.CallAfter(textdial.delete_file, fname)
             except:
                 raise
                 if self.parent != None:

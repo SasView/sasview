@@ -216,6 +216,8 @@ class TextDialog(wx.Dialog):
         self.SetWindowVariant(variant=FONT_VARIANT)
         # default
         self.model_list = model_list
+        self.model1_string = "SphereModel"
+        self.model2_string = "CylinderModel"
         self._build_sizer()
         self.model1_name = str(self.model1.GetValue())
         self.model2_name = str(self.model2.GetValue())
@@ -242,8 +244,7 @@ class TextDialog(wx.Dialog):
         self.model2.SetMinSize((_BOX_WIDTH, -1))
         self.model2.SetToolTipString("model2")
         self._set_model_list()
-        self.model1.SetSelection(0)
-        self.model2.SetSelection(1)
+        
          # Buttons on the bottom
         self.static_line_1 = wx.StaticLine(self, -1)
         self.okButton = wx.Button(self,wx.ID_OK, 'OK', size=(_BOX_WIDTH/2, 25))
@@ -293,6 +294,8 @@ class TextDialog(wx.Dialog):
         for idx in range(len(list)):
             self.model1.Append(list[idx],idx) 
             self.model2.Append(list[idx],idx)
+        self.model1.SetStringSelection(self.model1_string)
+        self.model2.SetStringSelection(self.model2_string)
            
     def on_model1(self, event):
         """
@@ -300,6 +303,7 @@ class TextDialog(wx.Dialog):
         """
         event.Skip()
         self.model1_name = str(self.model1.GetValue())
+        self.model1_string = self.model1_name
             
     def on_model2(self, event):
         """
@@ -307,6 +311,7 @@ class TextDialog(wx.Dialog):
         """
         event.Skip()
         self.model2_name = str(self.model2.GetValue())
+        self.model2_string = self.model2_name
  
     def getText(self):
         """
