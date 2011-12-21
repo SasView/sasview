@@ -47,19 +47,11 @@ class Model(Model1DPlugin):##DO NOT CHANGE THIS LINE!!!
         ## YOU CAN ALSO DELETE THIS LINE    
         self.params['C'] = 10.0      ## <-----  
 
-        ## STORING PARAMETERS  [UNIT, MINIMUM VALUE, MAXIMUM VALUE]
-        self.details = {}       ##DO NOT CHANGE THIS LINE!!!
-        ## YOU CAN MODIFY THE LINE BELLOW.CHANGE WORD BETWEEN ' ',WORD BETWEEN
-        ## ' ', TWO OTHER NUMBERS TO NEW VALUE OR YOU CAN ALSO DELETE TH LINE    
-        self.details['A'] = ['', -1e16, 1e16]        ## <----- 
-        ## YOU CAN MODIFY THE LINE BELLOW.CHANGE WORD BETWEEN ' ',WORD BETWEEN
-        ## ' ', TWO OTHER NUMBERS TO NEW VALUE OR YOU CAN ALSO DELETE TH LINE    
-        self.details['B'] = ['', -1e16, 1e16]         ## <----- 
-        ## YOU CAN MODIFY THE LINE BELLOW.CHANGE WORD BETWEEN ' ',WORD BETWEEN
-        ## ' ', TWO OTHER NUMBERS TO NEW VALUE OR YOU CAN ALSO DELETE TH LINE    
-        self.details['C'] = ['', -1e16, 1e16]         ## <----- 
+        ## DEFINE DEFAULT DETAILS
+        self.set_details()      ##DO NOT DELETE OR CHANGE THIS LINE!!!
+        
         ## YOU CAN MODIFY THE LINE BELLOW.MODIFY WORDS BETWEEN """   """  ONLY!!!!
-        self.description = "F(x)=A+Bcos(2x)+Csin(2x) " ## <----- 
+        self.description = "F(x)=A+Bcos(2x)+Csin(2x) "     ## <----- 
    
     def function(self, x = 0.0):  ##DO NOT CHANGE THIS LINE!!!
         """

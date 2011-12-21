@@ -266,16 +266,7 @@ class Plugin(PluginBase):
                 name2 = label[1]
                 textdial.write_string(fname, name1, name2)
                 textdial.compile_file(fname)
-
-                page = self.fit_panel.get_current_page()
-                temp = self.fit_panel.reset_pmodel_list()
-                if temp:
-                    page.model_list_box = temp
-                    current_val = page.formfactorbox.GetValue()
-                    pos = page.formfactorbox.GetSelection()
-                    page._show_combox_helper()
-                    page.formfactorbox.SetSelection(pos)
-                    page.formfactorbox.SetValue(current_val)
+                self.update_custom_combo()
             except:
                 raise
                 if self.parent != None:
@@ -286,7 +277,26 @@ class Plugin(PluginBase):
                     raise
         textdial.Destroy()
 
-  
+    def update_custom_combo(self):
+        """
+        Update custom model list in the fitpage combo box
+        """
+        try:
+            temp = self.fit_panel.reset_pmodel_list()
+            if temp:
+                # Set the new custom model list for all fit pages
+                for uid, page in self.fit_panel.opened_pages.iteritems():
+                    if hasattr(page, "formfactorbox"):
+                        page.model_list_box = temp
+                        current_val = page.formfactorbox.GetValue()
+                        pos = page.formfactorbox.GetSelection()
+                        page._show_combox_helper()
+                        page.formfactorbox.SetSelection(pos)
+                        page.formfactorbox.SetValue(current_val)
+        except:
+            pass
+        
+        
     def set_edit_menu(self, owner):    
         """
         Set list of the edit model menu labels

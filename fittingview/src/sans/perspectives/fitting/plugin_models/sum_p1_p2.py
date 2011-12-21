@@ -1,7 +1,7 @@
 # A sample of an experimental model function for Sum(Pmodel1,Pmodel2)
 import copy
 from sans.models.pluginmodel import Model1DPlugin
-# Possible model names
+# Available model names for this sum model
 """
 BCCrystalModel, BEPolyelectrolyte, BarBellModel, BinaryHSModel, BroadPeakModel,
 CSParallelepipedModel, CappedCylinderModel, CoreShellCylinderModel,
@@ -26,7 +26,7 @@ from sans.models.CylinderModel import CylinderModel as P1          #<========
 from sans.models.PolymerExclVolume import PolymerExclVolume as P2  #<========
 
 #####DO NOT CHANGE ANYTHING BELOW THIS LINE 
-#####------------------------------------------------------------------------
+#####---------------------------------------------------------------------------
 class Model(Model1DPlugin):
     """
     Use for p1(Q)+p2(Q); 

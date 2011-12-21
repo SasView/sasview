@@ -53,24 +53,9 @@ class Model(Model1DPlugin): ##DO NOT CHANGE THIS LINE!!!
         ## YOU CAN ALSO DELETE THIS LINE                 
         self.params['n'] = 1      ## <----- 
  
-        ## STORING PARAMETERS  [UNIT, MINIMUM VALUE, MAXIMUM VALUE]
-        self.details = {}    ##DO NOT CHANGE THIS LINE!!!
-        ## YOU CAN MODIFY THE LINE BELLOW.CHANGE WORD BETWEEN ' ',WORD BETWEEN
-        ## ' ', TWO OTHER NUMBESR TO NEW VALUE OR YOU CAN ALSO DELETE TH LINE      
-        self.details['C'] = ['',None, None]    ## <-----   
-        ## YOU CAN MODIFY THE LINE BELLOW.CHANGE WORD BETWEEN ' ',WORD BETWEEN
-        ## ' ', TWO OTHER NUMBERS TO NEW VALUE OR YOU CAN ALSO DELETE TH LINE     
-        self.details['A'] = ['', None, None]        ## <-----   
-        ## YOU CAN MODIFY THE LINE BELLOW.CHANGE WORD BETWEEN ' ',WORD BETWEEN
-        ## ' ', TWO OTHER NUMBERS TO NEW VALUE OR YOU CAN ALSO DELETE TH LINE     
-        self.details['B'] = ['', None, None]        ## <-----   
-        ## YOU CAN MODIFY THE LINE BELLOW.CHANGE WORD BETWEEN ' ',WORD BETWEEN
-        ## ' ', TWO OTHER NUMBERS TO NEW VALUE OR YOU CAN ALSO DELETE TH LINE     
-        self.details['D'] = ['', None, None]        ## <-----   
-        ## YOU CAN MODIFY THE LINE BELLOW.CHANGE WORD BETWEEN ' ',WORD BETWEEN
-        ## ' ', TWO OTHER NUMBERS TO NEW VALUE OR YOU CAN ALSO DELETE TH LINE     
-        self.details['n'] = ['', None, None]        ## <-----   
-
+        ## DEFINE DEFAULT DETAILS
+        self.set_details()      ##DO NOT DELETE OR CHANGE THIS LINE!!!
+        
         ## YOU CAN MODIFY THE LINE BELLOW.MODIFY WORDS BETWEEN """   """  ONLY!!!!
         self.description = """
             Spherical Bessel Function: C*sph_jn(n, Ax+B)+D
@@ -110,13 +95,15 @@ class Model(Model1DPlugin): ##DO NOT CHANGE THIS LINE!!!
         #Remove a singular point (lim poly --> 0) for sin(poly)/poly
         #(Just note: In Python, indentation defines the belongings of 'if', 'for', and so on..)
         input = a * x + b
-        # sph_out and _ are in array from scipy upto n'th order
+        # sph_out and _ are in array types from scipy upto n'th order
+        # where _ is not used for this function.
         sph_out, _ = scipy.special.sph_jn(n, input)
         # Take only n'th value
         result = c * sph_out[n] + d      ## <-----                
 
         return result ## MODIFY ONLY RESULT. DON'T DELETE RETURN!!!!
-    
+
+###############################################################################   
 ## DO NOT MODIFY THE FOLLOWING LINES!!!!!!!!!!!!!!!!       
 if __name__ == "__main__": 
     m= Model() 

@@ -1,7 +1,7 @@
 # A sample of an experimental model function for Sum(APmodel1,(1-A)Pmodel2)
 import copy
 from sans.models.pluginmodel import Model1DPlugin
-# Possible model names
+# Available model names for this sum model
 """
 BCCrystalModel, BEPolyelectrolyte, BarBellModel, BinaryHSModel, BroadPeakModel,
 CSParallelepipedModel, CappedCylinderModel, CoreShellCylinderModel,
@@ -17,7 +17,7 @@ PorodModel, PowerLawAbsModel, SCCrystalModel, SphereModel, SquareWellStructure,
 StackedDisksModel, StickyHSStructure, TeubnerStreyModel, TriaxialEllipsoidModel,
 TwoLorentzianModel, TwoPowerLawModel, VesicleModel
 """
-## This is DIFFERENT from the Easy Custom Sum(p1 + p2) 
+## This model is DIFFERENT from the Easy Custom Sum(p1 + p2) 
 ## by definition of the scale factor *****************************************
 #
 #     Custom model = scale_factor * P1 + (1 - scale_factor) * P2
@@ -27,7 +27,7 @@ from sans.models.CylinderModel import CylinderModel as P1          #<========
 from sans.models.PolymerExclVolume import PolymerExclVolume as P2  #<========
 
 #####DO NOT CHANGE ANYTHING BELOW THIS LINE 
-#####------------------------------------------------------------------------
+#####---------------------------------------------------------------------------
 class Model(Model1DPlugin):
     """
     Use for A*p1(Q)+(1-A)*p2(Q); 
@@ -378,20 +378,12 @@ class Model(Model1DPlugin):
         description +="This model gives the summation of  %s and %s.\n"% \
                                         ( p_model1.name, p_model2.name )
         self.description += description
-                
+
+### FOR TEST                
 if __name__ == "__main__": 
     m1= Model() 
-    #m1.setParam("p1_scale", 25)  
-    #m1.setParam("p1_length", 1000)
-    #m1.setParam("p2_scale", 100) 
-    #m1.setParam("p2_rg", 100) 
     out1 = m1.runXY(0.01)
-
     m2= Model()
-    #m2.p_model1.setParam("scale", 25) 
-    #m2.p_model1.setParam("length", 1000) 
-    #m2.p_model2.setParam("scale", 100)
-    #m2.p_model2.setParam("rg", 100)
     out2 = 0.5 * m2.p_model1.runXY(0.01) + 0.5 * m2.p_model2.runXY(0.01)
     print "Testing at Q = 0.01:"
     print out1, " = ", out2
