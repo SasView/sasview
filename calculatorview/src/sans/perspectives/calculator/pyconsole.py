@@ -69,7 +69,7 @@ class PyConsole(editor.EditorNotebookFrame):
         self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateCompileMenu, id=ID_RUN)
         if not title.count('Python Shell'):
             # Delete menu item (open and new) if not python shell
-            self.fileMenu.Delete(wx.ID_NEW)
+            #self.fileMenu.Delete(wx.ID_NEW)
             self.fileMenu.Delete(wx.ID_OPEN)
         
    
@@ -156,6 +156,8 @@ class PyConsole(editor.EditorNotebookFrame):
         filedir = ''
         if self.buffer and self.buffer.doc.filedir:
             filedir = self.buffer.doc.filedir
+        if not filedir:
+            filedir = self.dataDir
         result = editor.openSingle(directory=filedir,  
                             wildcard='Python Files (*.py)|*.py')
         if result.path:
@@ -170,6 +172,8 @@ class PyConsole(editor.EditorNotebookFrame):
         filedir = ''
         if self.buffer and self.buffer.doc.filedir:
             filedir = self.buffer.doc.filedir
+        if not filedir:
+            filedir = self.dataDir
         result = editor.saveSingle(directory=filedir, 
                                    filename='untitled.py',
                                    wildcard='Python Files (*.py)|*.py')
