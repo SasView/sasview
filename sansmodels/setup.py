@@ -3,6 +3,7 @@
 """
 
 import sys
+
 import os
 import platform
 from numpy.distutils.misc_util import get_numpy_include_dirs
@@ -13,7 +14,7 @@ from distutils.core import Extension, setup
 from distutils.command.build_ext import build_ext
 
 # Options to enable OpenMP
-if sys.argv[1] == "-nomp":
+if sys.argv[-1] == "-nomp":
     # Disable OpenMP
     copt = {}
     lopt = {}

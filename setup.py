@@ -3,6 +3,7 @@
     #TODO: Add checks to see that all the dependencies are on the system
 """
 import sys
+
 import os
 import platform
 from setuptools import setup, Extension, find_packages
@@ -29,7 +30,7 @@ package_data = {}
 packages = []
 ext_modules = []
 
-if sys.argv[1] == "-nomp":
+if sys.argv[-1] == "-nomp":
     # Disable OpenMP
     copt = {}
     lopt = {}
