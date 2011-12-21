@@ -152,6 +152,7 @@ else:
       """
 
 # Select the appropriate manifest to use.
+py26MSdll_x86 = None
 if sys.version_info >= (3, 0) or sys.version_info < (2, 5):
     print "*** This script only works with Python 2.5, 2.6, or 2.7."
     sys.exit()
@@ -159,6 +160,10 @@ elif sys.version_info >= (2, 6):
     manifest = manifest_for_python26
     from glob import glob
     py26MSdll = glob(r"C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
+    try:
+        py26MSdll_x86 = glob(r"C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
+    except:
+        pass
 elif sys.version_info >= (2, 5):
     manifest = manifest_for_python25
     py26MSdll = None
@@ -238,6 +243,10 @@ for f in findall(test_dir):
 if py26MSdll != None:
     # install the MSVC 9 runtime dll's into the application folder
     data_files.append(("Microsoft.VC90.CRT", py26MSdll))
+if py26MSdll_x86 != None:
+    # install the MSVC 9 runtime dll's into the application folder
+    data_files.append(("Microsoft.VC90.CRT", py26MSdll_x86))
+
 
 # packages
 #
