@@ -179,24 +179,6 @@ class PyConsole(editor.EditorNotebookFrame):
         else:
             cancel = True
         return cancel
-    
-    
-    def update_custom_combo(self):
-        """
-        Update custom model combo box in fit_panel
-        """
-        try:
-            page = self.panel.get_current_page()
-            temp = self.panel.reset_pmodel_list()
-            if temp:
-                page.model_list_box = temp
-                current_val = page.formfactorbox.GetValue()
-                pos = page.formfactorbox.GetSelection()
-                page._show_combox_helper()
-                page.formfactorbox.SetSelection(pos)
-                page.formfactorbox.SetValue(current_val)
-        except:
-            pass
         
     def OnRun(self, event):
         """
@@ -229,7 +211,8 @@ class PyConsole(editor.EditorNotebookFrame):
         if self._get_err_msg(run_out):
             if self._manager != None and self.panel != None:
                 self._manager.set_edit_menu_helper(self.parent)
-                wx.CallAfter(self.update_custom_combo)
+                # Update custom model list in fitpage combobox
+                wx.CallAfter(self._manager.update_custom_combo)
     
     def _check_changed(self):   
         """
