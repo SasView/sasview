@@ -30,7 +30,7 @@ packages = []
 ext_modules = []
 
 if sys.argv[1] == "-nomp":
-    # Disnable OpenMP
+    # Disable OpenMP
     copt = {}
     lopt = {}
 else:
