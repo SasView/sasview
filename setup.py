@@ -29,13 +29,18 @@ package_data = {}
 packages = []
 ext_modules = []
 
-# Options to enable OpenMP
-copt =  {'msvc': ['/openmp'],
-         'mingw32' : ['-fopenmp'],
-         'unix' : ['-fopenmp']}
-lopt =  {'msvc': ['/MANIFEST'],
-         'mingw32' : ['-fopenmp'],
-         'unix' : ['-lgomp']}
+if sys.argv[1] == "-nomp":
+    # Disnable OpenMP
+    copt = {}
+    lopt = {}
+else:
+    # Options to enable OpenMP
+    copt =  {'msvc': ['/openmp'],
+             'mingw32' : ['-fopenmp'],
+             'unix' : ['-fopenmp']}
+    lopt =  {'msvc': ['/MANIFEST'],
+             'mingw32' : ['-fopenmp'],
+             'unix' : ['-lgomp']}
 
 class build_ext_subclass( build_ext ):
     def build_extensions(self):
@@ -242,7 +247,7 @@ packages.append("sans.sansview")
 #required = ['lxml>=2.2.2', 'numpy>=1.4.1', 'matplotlib>=0.99.1.1', 'wxPython>=2.8.11',
 #            'pil','periodictable>=1.3.0', 'scipy>=0.7.2']
 required = ['lxml','periodictable>=1.3.0']
-
+"""
 if os.name=='nt':
     #required.extend(['comtypes', 'pisa', 'html5lib', 'reportlab'])
     required.extend(['pisa', 'html5lib'])
@@ -250,7 +255,7 @@ if os.name=='nt':
         required.append('comtypes')
 else:
     required.extend(['pil'])
-   
+"""   
  # Set up SansView    
 setup(
     name="sansview",
