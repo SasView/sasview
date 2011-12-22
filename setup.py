@@ -6,6 +6,7 @@
 #   -nomp: no openmp: Use this flag; C-lib without openmp as well as numpy < 1.6
 
 import sys
+
 import os
 import platform
 from setuptools import setup, Extension, find_packages
@@ -47,20 +48,24 @@ plugin_model_list = ['polynominal5.py', 'sph_bessel_jn.py',
 sans_dir = os.path.join(os.path.expanduser("~"),'.sansview')
 if os.path.isdir(sans_dir):
     f_path = os.path.join(sans_dir, "sansview.log")
-    if sys.platform =='darwin' or sys.platform == 'win32':
-        if os.path.isfile(f_path):
-            os.remove(f_path)
-        f_path = os.path.join(sans_dir, 'config', "custom_config.py")
-        if os.path.isfile(f_path):
-            os.remove(f_path)
-        f_path = os.path.join(sans_dir, 'plugin_models')
-        if os.path.isdir(f_path):
-            for file in os.listdir(f_path): 
-                if file in plugin_model_list:
-                    file_path =  os.path.join(f_path, file)
-                    os.remove(file_path)
-
-
+    if os.path.isfile(f_path):
+        os.remove(f_path)
+    f_path = os.path.join(sans_dir, 'config', "custom_config.py")
+    if os.path.isfile(f_path):
+        os.remove(f_path)
+    f_path = os.path.join(sans_dir, 'plugin_models')
+    if os.path.isdir(f_path):
+        for file in os.listdir(f_path): 
+            if file in plugin_model_list:
+                file_path =  os.path.join(f_path, file)
+                os.remove(file_path)
+                    
+# 'sys.maxsize' and 64bit: Not supported for python2.5
+is_64bits = False
+if sys.version_info >= (2, 6):
+    is_64bits = sys.maxsize > 2**32
+    
+    
 enable_openmp = True                    
 if sys.argv[-1] == "-nomp":
     # Disable OpenMP
@@ -80,12 +85,6 @@ lopt =  {'msvc': ['/MANIFEST'],
 class build_ext_subclass( build_ext ):
     def build_extensions(self):
         # Get 64-bitness
-        if sys.version_info >= (2, 6):
-            is_64bits = sys.maxsize > 2**32
-        else:
-            # 'sys.maxsize' and 64bit: Not supported for python2.5
-            is_64bits = False
-        
         c = self.compiler.compiler_type
         print "Compiling with %s (64bit=%s)" % (c, str(is_64bits))
         
