@@ -1,6 +1,5 @@
 graft docs
 graft images
-graft plugins
 include README.txt
 include license.txt
 include release_notes.txt
