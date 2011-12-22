@@ -6,6 +6,7 @@
 #   -nomp: no openmp: Use this flag; C-lib without openmp as well as numpy < 1.6
 
 import sys
+
 import os
 import platform
 from setuptools import setup, Extension, find_packages
@@ -40,7 +41,10 @@ ext_modules = []
 # Todo : make this list generic
 plugin_model_list = ['polynominal5.py', 'sph_bessel_jn.py', 
                      'sum_Ap1_1_Ap2.py', 'sum_p1_p2.py', 
-                     'testmodel_2.py', 'testmodel.py']
+                     'testmodel_2.py', 'testmodel.py',
+                     'polynominal5.pyc', 'sph_bessel_jn.pyc', 
+                     'sum_Ap1_1_Ap2.pyc', 'sum_p1_p2.pyc', 
+                     'testmodel_2.pyc', 'testmodel.pyc']
 sans_dir = os.path.join(os.path.expanduser("~"),'.sansview')
 if os.path.isdir(sans_dir):
     f_path = os.path.join(sans_dir, "sansview.log")
@@ -55,19 +59,22 @@ if os.path.isdir(sans_dir):
             if file in plugin_model_list:
                 file_path =  os.path.join(f_path, file)
                 os.remove(file_path)
-                    
+
+enable_openmp = True                    
 if sys.argv[-1] == "-nomp":
     # Disable OpenMP
-    copt = {}
-    lopt = {}
-else:
-    # Options to enable OpenMP
-    copt =  {'msvc': ['/openmp'],
-             'mingw32' : ['-fopenmp'],
-             'unix' : ['-fopenmp']}
-    lopt =  {'msvc': ['/MANIFEST'],
-             'mingw32' : ['-fopenmp'],
-             'unix' : ['-lgomp']}
+    enable_openmp = False
+if sys.platform =='darwin' and not is_64bits:
+    # Disable OpenMP
+    enable_openmp = False
+
+# Options to enable OpenMP
+copt =  {'msvc': ['/openmp'],
+         'mingw32' : ['-fopenmp'],
+         'unix' : ['-fopenmp']}
+lopt =  {'msvc': ['/MANIFEST'],
+         'mingw32' : ['-fopenmp'],
+         'unix' : ['-lgomp']}
 
 class build_ext_subclass( build_ext ):
     def build_extensions(self):
@@ -81,11 +88,12 @@ class build_ext_subclass( build_ext ):
         c = self.compiler.compiler_type
         print "Compiling with %s (64bit=%s)" % (c, str(is_64bits))
         
-        if not (sys.platform =='darwin' and not is_64bits):
+        if enable_openmp:
             if copt.has_key(c):
                for e in self.extensions:
                    e.extra_compile_args = copt[ c ]
             if lopt.has_key(c):
+                
                 for e in self.extensions:
                     e.extra_link_args = lopt[ c ]
                     

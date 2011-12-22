@@ -22,7 +22,8 @@ PLUGIN_DIR = 'plugin_models'
 def log(message):
     """
     """
-    out = open("plugins.log", 'a')
+    dir = os.path.join(os.path.expanduser("~"),'.sansview', PLUGIN_DIR)
+    out = open(os.path.join(dir, "plugins.log"), 'a')
     out.write("%10g:  %s\n" % (time.clock(), message))
     out.close()
 
