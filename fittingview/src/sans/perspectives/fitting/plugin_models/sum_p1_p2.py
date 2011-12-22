@@ -1,6 +1,12 @@
 # A sample of an experimental model function for Sum(Pmodel1,Pmodel2)
 import copy
 from sans.models.pluginmodel import Model1DPlugin
+
+## *****************************************************************************
+## For safety of your model, saving as a different file name is recommended.
+## Otherwise, it could be removed in the future re-installation of the SansView.
+## *****************************************************************************
+
 # Available model names for this sum model
 """
 BCCrystalModel, BEPolyelectrolyte, BarBellModel, BinaryHSModel, BroadPeakModel,

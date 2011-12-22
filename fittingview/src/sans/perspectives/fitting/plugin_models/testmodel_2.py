@@ -5,6 +5,12 @@ These are links of available functions:
 http://docs.python.org/library/math.html
 http://www.scipy.org/Numpy_Functions_by_Category
 """
+
+## *****************************************************************************
+## For safety of your model, saving as a different file name is recommended.
+## Otherwise, it could be removed in the future re-installation of the SansView.
+## *****************************************************************************
+
 from sans.models.pluginmodel import Model1DPlugin  ##DO NOT CHANGE THIS LINE!!!
 from math import *                    ##DO NOT CHANGE THIS LINE!!!
 from numpy import *                ##DO NOT CHANGE THIS LINE!!!
