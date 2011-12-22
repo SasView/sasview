@@ -46,17 +46,16 @@ manifest = """
        type="win32"
    />
    <description>SansView</description>
-   <dependency>
-       <dependentAssembly>
-           <assemblyIdentity
-               type="win32"
-               name="Microsoft.Windows.Common-Controls"
-               version="6.0.0.0"
-               processorArchitecture="X86"
-               publicKeyToken="6595b64144ccf1df"
-               language="*"
-           />
-       </dependentAssembly>
+     <dependency>
+    <dependentAssembly>
+      <assemblyIdentity
+            type="win32"
+             name="Microsoft.VC90.CRT"
+           version="9.0.21022.8"
+            processorArchitecture="x86"
+            publicKeyToken="1fc8b3b9a1e18e3b">
+      </assemblyIdentity>
+    </dependentAssembly>
    </dependency>
    </assembly>
   """
@@ -115,6 +114,17 @@ for f in findall(path):
     if os.path.split(f)[0].count('.svn')==0:
         data_files.append((os.path.split(f)[0], [f]))
 
+from glob import glob
+py26MSdll = glob(r"C:\Program Files\Microsoft Visual Studio 9.0\VC\redist\x86\Microsoft.VC90.CRT\*.*")
+# install the MSVC 9 runtime dll's into the application folder
+#data_files += [("", py26MSdll),]
+data_files.append(("Microsoft.VC90.CRT", py26MSdll))
+#                        ("lib\Microsoft.VC90.CRT", py26MSdll)]
+#sys.path.append("Microsoft.VC90.CRT")
+
+mfcdir = "C:\Python27\Lib\site-packages\pythonwin"
+mfcfiles = [os.path.join(mfcdir, i) for i in ["mfc90.dll", "mfc90u.dll", "mfcm90.dll", "mfcm90u.dll", "Microsoft.VC90.MFC.manifest"]]
+data_files.append(("Microsoft.VC90.MFC", mfcfiles))
 
     
 #
@@ -122,13 +132,18 @@ for f in findall(path):
 #
 packages = ['matplotlib', 'pytz','encodings', 'scipy']
 includes = ['site']
-excludes = [] 
 
-dll_excludes = [
-    'libgdk_pixbuf-2.0-0.dll', 
-    'libgobject-2.0-0.dll',
-    'libgdk-win32-2.0-0.dll',
-    ]
+excludes = ['Tkinter', 'PyQt4', '_ssl', '_tkagg']
+
+dll_excludes = ['libgdk_pixbuf-2.0-0.dll',
+                'libgobject-2.0-0.dll',
+                'libgdk-win32-2.0-0.dll',
+                'tcl84.dll',
+                'tk84.dll',
+                'QtGui4.dll',
+                'QtCore4.dll',
+                'w9xpopen.exe',
+                'cygwin1.dll']
 
 target_wx_client = Target(
     description = 'SansViewTool',
