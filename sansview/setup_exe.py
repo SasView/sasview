@@ -221,6 +221,7 @@ if os.path.isfile(f):
     data_files.append(('.', [f]))
 f = 'custom_config.py'
 if os.path.isfile(f):
+    data_files.append(('.', [f]))
     data_files.append(('config', [f]))
 f = 'local_config.py'
 if os.path.isfile(f):

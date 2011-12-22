@@ -2,8 +2,10 @@
     Setup for SansView
     #TODO: Add checks to see that all the dependencies are on the system
 """
-import sys
+# [command] can be any of the following:
+#   -nomp: no openmp: Use this flag; C-lib without openmp as well as numpy < 1.6
 
+import sys
 import os
 import platform
 from setuptools import setup, Extension, find_packages
@@ -15,9 +17,11 @@ try:
 except:
     try:
         import numpy
-        NUMPY_INC = os.path.join(os.path.split(numpy.__file__)[0],"core","include")
+        NUMPY_INC = os.path.join(os.path.split(numpy.__file__)[0], 
+                                 "core","include")
     except:
-        print "\nNumpy is needed to build SansView. Try easy_install numpy.\n  %s" % str(sys.exc_value)
+        msg = "\nNumpy is needed to build SansView. "
+        print msg, "Try easy_install numpy.\n  %s" % str(sys.exc_value)
         sys.exit(0)
 
 # Manage version number ######################################
@@ -30,6 +34,28 @@ package_data = {}
 packages = []
 ext_modules = []
 
+# Remove all files that should be updated by this setup
+# We do this here because application updates these files from .sansview
+# except when there is no such file
+# Todo : make this list generic
+plugin_model_list = ['polynominal5.py', 'sph_bessel_jn.py', 
+                     'sum_Ap1_1_Ap2.py', 'sum_p1_p2.py', 
+                     'testmodel_2.py', 'testmodel.py']
+sans_dir = os.path.join(os.path.expanduser("~"),'.sansview')
+if os.path.isdir(sans_dir):
+    f_path = os.path.join(sans_dir, "sansview.log")
+    if os.path.isfile(f_path):
+        os.remove(f_path)
+    f_path = os.path.join(sans_dir, 'config', "custom_config.py")
+    if os.path.isfile(f_path):
+        os.remove(f_path)
+    f_path = os.path.join(sans_dir, 'plugin_models')
+    if os.path.isdir(f_path):
+        for file in os.listdir(f_path): 
+            if file in plugin_model_list:
+                file_path =  os.path.join(f_path, file)
+                os.remove(file_path)
+                    
 if sys.argv[-1] == "-nomp":
     # Disable OpenMP
     copt = {}
@@ -55,7 +81,7 @@ class build_ext_subclass( build_ext ):
         c = self.compiler.compiler_type
         print "Compiling with %s (64bit=%s)" % (c, str(is_64bits))
         
-        if not (sys.platform=='darwin' and not is_64bits):
+        if not (sys.platform =='darwin' and not is_64bits):
             if copt.has_key(c):
                for e in self.extensions:
                    e.extra_compile_args = copt[ c ]
@@ -73,7 +99,8 @@ packages.extend(["sans.invariant"])
 # sans.guiframe
 guiframe_path = os.path.join("sansguiframe", "src", "sans", "guiframe")
 package_dir["sans.guiframe"] = guiframe_path
-package_dir["sans.guiframe.local_perspectives"] = os.path.join(guiframe_path, "local_perspectives")
+package_dir["sans.guiframe.local_perspectives"] = os.path.join(guiframe_path, 
+                                                        "local_perspectives")
 package_data["sans.guiframe"] = ['images/*', 'media/*']
 packages.extend(["sans.guiframe", "sans.guiframe.local_perspectives"])
 # build local plugin
@@ -81,10 +108,12 @@ for dir in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
     if dir not in ['.svn','__init__.py', '__init__.pyc']:
         package_name = "sans.guiframe.local_perspectives." + dir
         packages.append(package_name)
-        package_dir[package_name] = os.path.join(guiframe_path, "local_perspectives", dir)
+        package_dir[package_name] = os.path.join(guiframe_path, 
+                                                 "local_perspectives", dir)
 
 # sans.dataloader
-package_dir["sans.dataloader"] = os.path.join("sansdataloader", "src", "sans", "dataloader")
+package_dir["sans.dataloader"] = os.path.join("sansdataloader", 
+                                              "src", "sans", "dataloader")
 package_data["sans.dataloader.readers"] = ['defaults.xml']
 packages.extend(["sans.dataloader","sans.dataloader.readers"])
 
@@ -119,21 +148,30 @@ packages.extend(["sans.perspectives","sans.perspectives.pr"])
 package_data["sans.perspectives.pr"] = ['images/*']
 
 # Invariant view
-package_dir["sans.perspectives"] = os.path.join("invariantview", "src", "sans", "perspectives")
-package_dir["sans.perspectives.invariant"] = os.path.join("invariantview", "src", "sans", "perspectives", "invariant")
+package_dir["sans.perspectives"] = os.path.join("invariantview", "src", 
+                                                "sans", "perspectives")
+package_dir["sans.perspectives.invariant"] = os.path.join("invariantview", 
+                                    "src", "sans", "perspectives", "invariant")
                 
 package_data['sans.perspectives.invariant'] = [os.path.join("media",'*')]
 packages.extend(["sans.perspectives","sans.perspectives.invariant"]) 
 
 # Fitting view
-package_dir["sans.perspectives"] = os.path.join("fittingview", "src", "sans", "perspectives"),
-package_dir["sans.perspectives.fitting"] = os.path.join("fittingview", "src", "sans", "perspectives", "fitting")
+fitting_path = os.path.join("fittingview", "src", "sans", 
+                            "perspectives", "fitting")
+package_dir["sans.perspectives"] = os.path.join("fittingview", 
+                                            "src", "sans", "perspectives"),
+package_dir["sans.perspectives.fitting"] = fitting_path
+package_dir["sans.perspectives.fitting.plugin_models"] = \
+                                os.path.join(fitting_path, "plugin_models")
 package_data['sans.perspectives.fitting'] = ['media/*','plugin_models/*']
-packages.extend(["sans.perspectives", "sans.perspectives.fitting"])
+packages.extend(["sans.perspectives", "sans.perspectives.fitting", 
+                 "sans.perspectives.fitting.plugin_models"])
 
 # Calculator view
 package_dir["sans.perspectives"] = "calculatorview/src/sans/perspectives"
-package_dir["sans.perspectives.calculator"] = os.path.join("calculatorview", "src", "sans", "perspectives", "calculator")
+package_dir["sans.perspectives.calculator"] = os.path.join("calculatorview", 
+                                "src", "sans", "perspectives", "calculator")
 package_data['sans.perspectives.calculator'] = ['images/*', 'media/*']
 packages.extend(["sans.perspectives", "sans.perspectives.calculator"])
      
@@ -143,8 +181,10 @@ packages.extend(["data_util"])
 
 # Plottools
 package_dir["danse"] = os.path.join("plottools", "src", "danse")
-package_dir["danse.common"] = os.path.join("plottools", "src", "danse", "common")
-package_dir["danse.common.plottools"] = os.path.join("plottools", "src", "danse", "common", "plottools")
+package_dir["danse.common"] = os.path.join("plottools", "src", 
+                                           "danse", "common")
+package_dir["danse.common.plottools"] = os.path.join("plottools", 
+                                    "src", "danse", "common", "plottools")
 packages.extend(["danse", "danse.common", "danse.common.plottools"])
 
 # Park 1.2.1
@@ -152,8 +192,10 @@ package_dir["park"]="park-1.2.1/park"
 packages.extend(["park"])
 package_data["park"] = ['park-1.2.1/*.txt', 'park-1.2.1/park.epydoc']
 ext_modules.append( Extension("park._modeling",
-                              sources = [ os.path.join("park-1.2.1", "park", "lib", "modeling.cc"),
-                                         os.path.join("park-1.2.1", "park", "lib", "resolution.c"),
+                              sources = [ os.path.join("park-1.2.1", 
+                                                "park", "lib", "modeling.cc"),
+                                         os.path.join("park-1.2.1", 
+                                                "park", "lib", "resolution.c"),
                                          ],
                               ) )
 
@@ -224,18 +266,21 @@ if os.name=='nt':
 
 ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
                                 sources=model_sources,                 
-                                include_dirs=[igordir, srcdir, c_model_dir, numpy_incl_path],
+                                include_dirs=[igordir, srcdir, 
+                                              c_model_dir, numpy_incl_path],
                                 ),       
                     # Smearer extension
                     Extension("sans.models.sans_extension.smearer",
                               sources = smearer_sources,
-                              include_dirs=[igordir, smear_dir, numpy_incl_path],
+                              include_dirs=[igordir, 
+                                            smear_dir, numpy_incl_path],
                               ),
                     
                     Extension("sans.models.sans_extension.smearer2d_helper",
                               sources = [os.path.join(smear_dir, 
-                                                      "smearer2d_helper_module.cpp"),
-                                         os.path.join(smear_dir, "smearer2d_helper.cpp"),],
+                                                "smearer2d_helper_module.cpp"),
+                                         os.path.join(smear_dir, 
+                                                "smearer2d_helper.cpp"),],
                               include_dirs=[smear_dir,numpy_incl_path],
                               )
                     ] )
@@ -245,13 +290,14 @@ package_dir["sans.sansview"] = "sansview"
 package_data['sans.sansview'] = ['images/*', 'media/*', 'test/*']
 packages.append("sans.sansview")
 
-#required = ['lxml>=2.2.2', 'numpy>=1.4.1', 'matplotlib>=0.99.1.1', 'wxPython>=2.8.11',
-#            'pil','periodictable>=1.3.0', 'scipy>=0.7.2']
+#required = ['lxml>=2.2.2', 'numpy>=1.4.1', 'matplotlib>=0.99.1.1', 
+#            'wxPython>=2.8.11', 'pil',
+#            'periodictable>=1.3.0', 'scipy>=0.7.2']
 required = ['lxml','periodictable>=1.3.0']
 """
 if os.name=='nt':
     #required.extend(['comtypes', 'pisa', 'html5lib', 'reportlab'])
-    required.extend(['pisa', 'html5lib'])
+    #required.extend(['pisa', 'html5lib'])
     if sys.version_info < (2, 7):
         required.append('comtypes')
 else:

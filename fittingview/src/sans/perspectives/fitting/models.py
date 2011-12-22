@@ -17,7 +17,7 @@ from sans.guiframe.events import StatusEvent
 # as the base class of plug-in models.
 from sans.models.pluginmodel import Model1DPlugin
    
-PLUGIN_DIR = 'plugins' 
+PLUGIN_DIR = 'plugin_models' 
 
 def log(message):
     """
@@ -74,20 +74,43 @@ def find_plugins_dir():
         Find path of the plugins directory.
         The plugin directory is located in the user's home directory.
     """
-    dir = os.path.join(os.path.expanduser("~"),'.sansview',PLUGIN_DIR)
+    dir = os.path.join(os.path.expanduser("~"),'.sansview', PLUGIN_DIR)
     
     # If the plugin directory doesn't exist, create it
     if not os.path.isdir(dir):
         os.makedirs(dir)
         
+    # Find paths needed
+    try:
+        # For source
+        if os.path.isdir(os.path.dirname(__file__)):
+            p_dir =  os.path.join(os.path.dirname(__file__), PLUGIN_DIR)
+        else:
+            raise
+    except:
+        # Check for data path next to exe/zip file.
+        #Look for maximum n_dir up of the current dir to find plugins dir
+        n_dir = 12
+        p_dir = None
+        f_dir = os.path.join(os.path.dirname(__file__))
+        for i in range(n_dir):
+            if i > 1:
+                f_dir, _ = os.path.split(f_dir)
+            plugin_path = os.path.join(f_dir, PLUGIN_DIR)
+            if os.path.isdir(plugin_path):
+                p_dir = plugin_path
+                break
+        if not p_dir:
+            raise
+
     # Place example user models as needed
-    if not os.path.isfile(os.path.join(dir,"testmodel.py")):
-        shutil.copy(os.path.join(os.path.dirname(__file__),"plugin_models","testmodel.py"), dir)
-    if not os.path.isfile(os.path.join(dir,"testmodel_2.py")):
-        shutil.copy(os.path.join(os.path.dirname(__file__),"plugin_models","testmodel_2.py"), dir)
-    if not os.path.isfile(os.path.join(dir,"sum_p1_p2.py")):
-        shutil.copy(os.path.join(os.path.dirname(__file__),"plugin_models","sum_p1_p2.py"), dir)
-        
+    for file in os.listdir(p_dir): 
+        file_path = os.path.join(p_dir, file)
+        if os.path.isfile(file_path):
+            if file.split(".")[-1] == 'py' and\
+                file.split(".")[0] != '__init__':
+                if not os.path.isfile(os.path.join(dir, file)):
+                    shutil.copy(file_path, dir)
     return dir
 
 class ReportProblem:
