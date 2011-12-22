@@ -1,6 +1,8 @@
 """
      Installation script for DANSE P(r) inversion perspective for SansView
 """
+import sys
+
 import os
 
 from distutils.core import setup
@@ -14,9 +16,15 @@ setup(
                    "sans.perspectives.fitting":os.path.join("src",
                                                        "sans",
                                                        "perspectives",
-                                                       "fitting")},
+                                                       "fitting"),
+                   "sans.perspectives.fitting.plugin_models":os.path.join("src",
+                                                       "sans",
+                                                       "perspectives",
+                                                       "fitting",
+                                                       "plugin_models")},
     package_data={'sans.perspectives.fitting': ['media/*']},
     packages = ["sans.perspectives", 'sans',
-                "sans.perspectives.fitting"],
+                "sans.perspectives.fitting",
+                "sans.perspectives.fitting.plugin_models"],
     )
 
