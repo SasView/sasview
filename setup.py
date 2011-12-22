@@ -6,7 +6,6 @@
 #   -nomp: no openmp: Use this flag; C-lib without openmp as well as numpy < 1.6
 
 import sys
-
 import os
 import platform
 from setuptools import setup, Extension, find_packages
@@ -304,7 +303,7 @@ packages.append("sans.sansview")
 #            'wxPython>=2.8.11', 'pil',
 #            'periodictable>=1.3.0', 'scipy>=0.7.2']
 required = ['lxml','periodictable>=1.3.0']
-"""
+
 if os.name=='nt':
     #required.extend(['comtypes', 'pisa', 'html5lib', 'reportlab'])
     #required.extend(['pisa', 'html5lib'])
@@ -312,7 +311,7 @@ if os.name=='nt':
         required.append('comtypes')
 else:
     required.extend(['pil'])
-"""   
+   
  # Set up SansView    
 setup(
     name="sansview",
