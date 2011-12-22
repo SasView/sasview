@@ -48,7 +48,7 @@ plugin_model_list = ['polynominal5.py', 'sph_bessel_jn.py',
 sans_dir = os.path.join(os.path.expanduser("~"),'.sansview')
 if os.path.isdir(sans_dir):
     f_path = os.path.join(sans_dir, "sansview.log")
-    try:
+    if sys.platform =='darwin' or sys.platform == 'win32':
         if os.path.isfile(f_path):
             os.remove(f_path)
         f_path = os.path.join(sans_dir, 'config', "custom_config.py")
@@ -60,8 +60,7 @@ if os.path.isdir(sans_dir):
                 if file in plugin_model_list:
                     file_path =  os.path.join(f_path, file)
                     os.remove(file_path)
-    except:
-        pass
+
 
 enable_openmp = True                    
 if sys.argv[-1] == "-nomp":
