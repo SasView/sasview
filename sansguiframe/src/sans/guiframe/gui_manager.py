@@ -45,6 +45,18 @@ from sans import sansview
 PATH_APP = os.path.dirname(sansview.__file__)
 DATAPATH = PATH_APP
 
+def _change_current_dir():
+    """
+    Get the path of the current file
+    This is for openning sansview/data file from command line
+    """
+    tem_path = sys.path[0]
+    if os.path.isfile(tem_path):
+        tem_path = os.path.dirname(tem_path)
+    
+    os.chdir(os.path.abspath(tem_path))
+_change_current_dir()   
+
 def get_user_directory():
     USERDIR = os.path.join(os.path.expanduser("~"),".sansview")
     if not os.path.isdir(USERDIR):
@@ -3020,6 +3032,10 @@ class ViewApp(wx.App):
         self.frame.Hide()
         self.s_screen = None
         temp_path = None
+        try:
+            _change_current_dir()
+        except:
+            pass
         try:
             self.open_file()
         except:
