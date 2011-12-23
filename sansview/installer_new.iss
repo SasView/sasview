@@ -61,21 +61,21 @@ Name: "english";	MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon";	Description: "{cm:CreateDesktopIcon}";	GroupDescription: "{cm:AdditionalIcons}";	Flags: unchecked
-Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}";
+Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}";	GroupDescription: "{cm:AdditionalIcons}";
 
 
 [Files]
 Source: "dist\SansView.exe";	DestDir: "{app}";	Flags: ignoreversion
 Source: "dist\*";	DestDir: "{app}";	Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "dist\plugin_models\*";	DestDir: "{userappdata}\..\.sansview\plugin_models";	Flags: recursesubdirs createallsubdirs 
-Source: "dist\config\custom_config.py"; DestDir: "{userappdata}\..\.sansview\config";	Flags: recursesubdirs createallsubdirs 
+Source: "dist\plugin_models\*";	DestDir: "{userappdata}\..\.sansview\plugin_models";	Flags: recursesubdirs createallsubdirs
+Source: "dist\config\custom_config.py";	DestDir: "{userappdata}\..\.sansview\config";	Flags: recursesubdirs createallsubdirs
 ;	NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\SansView";	Filename: "{app}\SansView.exe";	WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico"
+Name: "{group}\SansView";	Filename: "{app}\SansView.exe";	WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico" 
 Name: "{group}\{cm:UninstallProgram, SansView}";	 Filename: "{uninstallexe}" 
-Name: "{commondesktop}\SansView-2.0.1";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" ; IconFilename: "{app}\images\ball.ico"
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\SansView-2.0.1"; Filename: "{app}\SansView"; Tasks: quicklaunchicon; WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico"
+Name: "{commondesktop}\SansView-2.0.1";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" ; IconFilename: "{app}\images\ball.ico" 
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\SansView-2.0.1";	Filename: "{app}\SansView.exe";	Tasks: quicklaunchicon; WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico" 
 
 
 [Run]
@@ -126,6 +126,7 @@ begin
   Result := True;
 end;
 
+
 [UninstallDelete]
 ; Delete directories and files that are dynamically created by the application (i.e. at runtime).
 Type: filesandordirs; Name: "{app}\.matplotlib"
@@ -136,3 +137,4 @@ Type: files; Name: "{app}\*.*"
 ; directive below, {app} will not be deleted because Inno Setup did not create it during the previous
 ; installation.
 Type: dirifempty; Name: "{app}"
+

@@ -23,7 +23,7 @@ DefaultDirName = os.path.join("{pf}" , AppName+Dev)
 DefaultGroupName = os.path.join(local_config.DefaultGroupName, AppVerName)
                                 
 OutputBaseFilename = local_config.OutputBaseFilename
-SetupIconFile = local_config.SetupIconFile_win
+SetupIconFile = "images\\ball.ico"
 LicenseFile = 'license.txt'
 DisableProgramGroupPage = 'yes'
 Compression = 'lzma'
@@ -182,6 +182,8 @@ def write_tasks():
     msg = """\n\n[Tasks]\n"""
     msg += """Name: "desktopicon";\tDescription: "{cm:CreateDesktopIcon}";\t"""
     msg += """GroupDescription: "{cm:AdditionalIcons}";\tFlags: unchecked\n"""
+    msg += """Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}";\t"""
+    msg += """GroupDescription: "{cm:AdditionalIcons}";\n"""
     return msg
 
 dist_path = "dist"
@@ -194,12 +196,10 @@ def write_file():
     msg += """DestDir: "{app}";\tFlags: ignoreversion\n"""
     msg += """Source: "dist\*";\tDestDir: "{app}";\t"""
     msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
-    msg += """Source: "%s\*";\tDestDir: "{app}\%s";\t""" % (str(icon_path), str("images"))
-    msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
-    msg += """Source: "%s\*";\tDestDir: "{app}\%s";\t""" % (str(test_path), str("test"))
-    msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
-    msg += """Source: "%s\*";\tDestDir: "{app}\%s";\t""" % (str(media_path), str("media"))
-    msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
+    msg += """Source: "dist\plugin_models\*";\tDestDir: "{userappdata}\..\.sansview\plugin_models";\t""" 
+    msg += """Flags: recursesubdirs createallsubdirs\n"""
+    msg += """Source: "dist\config\custom_config.py";\tDestDir: "{userappdata}\..\.sansview\config";\t""" 
+    msg += """Flags: recursesubdirs createallsubdirs\n"""
     msg += """;\tNOTE: Don't use "Flags: ignoreversion" on any shared system files"""
     return msg
 
@@ -210,12 +210,15 @@ def write_icon():
     msg = """\n\n[Icons]\n"""
     msg += """Name: "{group}\%s";\t""" % str(AppName)
     msg += """Filename: "{app}\%s";\t"""  % str(APPLICATION)
-    msg += """WorkingDir: "{app}" \n"""
+    msg += """WorkingDir: "{app}"; IconFilename: "{app}\images\\ball.ico" \n"""
     msg += """Name: "{group}\{cm:UninstallProgram, %s}";\t""" % str(AppName)
     msg += """ Filename: "{uninstallexe}" \n"""
     msg += """Name: "{commondesktop}\%s";\t""" % str(AppVerName)
     msg += """Filename: "{app}\%s";\t""" % str(APPLICATION)
-    msg += """Tasks: desktopicon; WorkingDir: "{app}" \n"""
+    msg += """Tasks: desktopicon; WorkingDir: "{app}" ; IconFilename: "{app}\images\\ball.ico" \n"""
+    msg += """Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\%s";\t""" % str(AppVerName)
+    msg += """Filename: "{app}\%s";\t""" % str(APPLICATION)
+    msg += """Tasks: quicklaunchicon; WorkingDir: "{app}"; IconFilename: "{app}\images\\ball.ico" \n"""
     return msg
 
 def write_run():
@@ -226,6 +229,21 @@ def write_run():
     msg += """Filename: "{app}\%s";\t""" % str(APPLICATION)
     msg += """Description: "{cm:LaunchProgram, %s}";\t""" %str(AppName) 
     msg += """Flags: nowait postinstall skipifsilent\n"""
+    msg += """; Install the Microsoft C++ DLL redistributable package if it is """
+    msg += """provided and the DLLs are not present on the target system.\n"""
+    msg += """; Note that the redistributable package is included if the app was """
+    msg += """built using Python 2.6 or 2.7, but not with 2.5.\n"""
+    msg += """; Parameter options:\n"""
+    msg += """; - for silent install use: "/q"\n"""
+    msg += """; - for silent install with progress bar use: "/qb"\n"""
+    msg += """; - for silent install with progress bar but disallow """
+    msg += """cancellation of operation use: "/qb!"\n"""
+    msg += """; Note that we do not use the postinstall flag as this would """
+    msg += """display a checkbox and thus require the user to decide what to do.\n"""
+    msg += """;Filename: "{app}\\vcredist_x86.exe"; Parameters: "/qb!"; """
+    msg += """WorkingDir: "{tmp}"; StatusMsg: "Installing Microsoft Visual """
+    msg += """C++ 2008 Redistributable Package ..."; Check: InstallVC90CRT(); """
+    msg += """Flags: skipifdoesntexist waituntilterminated\n"""
     return msg
 
 def write_dirs():
@@ -244,6 +262,11 @@ def write_code():
     in the environmental viriables/PATH
     """
     msg = """\n\n[Code]\n"""
+    msg += """function InstallVC90CRT(): Boolean;\n""" 
+    msg += """begin\n"""
+    msg += """    Result := not DirExists('C:\WINDOWS\WinSxS\\x86_Microsoft.VC90."""
+    msg += """CRT_1fc8b3b9a1e18e3b_9.0.21022.8_x-ww_d08d0375');\n"""
+    msg += """end;\n\n"""
     msg += """function NeedsAddPath(): boolean;\n""" 
     msg += """var\n""" 
     msg += """  oldpath: string;\n"""
@@ -272,12 +295,29 @@ def write_code():
     msg += """  Result := True;\n"""
     msg += """end;\n"""
     msg += """\n"""
-    
-    
-    
-    
     return msg
 
+def write_uninstalldelete():
+    """
+    Define uninstalldelete
+    """
+    msg = """\n[UninstallDelete]\n"""
+    msg += """; Delete directories and files that are dynamically created by """
+    msg += """the application (i.e. at runtime).\n"""
+    msg += """Type: filesandordirs; Name: "{app}\.matplotlib"\n"""
+    msg += """Type: files; Name: "{app}\*.*"\n"""
+    msg += """; The following is a workaround for the case where the """
+    msg += """application is installed and uninstalled but the\n"""
+    msg += """;{app} directory is not deleted because it has user files.  """
+    msg += """Then the application is installed into the\n"""
+    msg += """; existing directory, user files are deleted, and the """
+    msg += """application is un-installed again.  Without the\n"""
+    msg += """; directive below, {app} will not be deleted because Inno Setup """
+    msg += """did not create it during the previous\n"""
+    msg += """; installation.\n"""
+    msg += """Type: dirifempty; Name: "{app}"\n"""
+    msg += """\n"""  
+    return msg
 
 if __name__ == "__main__":
     TEMPLATE = "\n; Script generated by the Inno Setup Script Wizard\n"
@@ -311,6 +351,7 @@ if __name__ == "__main__":
     TEMPLATE += write_run()
     TEMPLATE += write_dirs()
     TEMPLATE += write_code()
+    TEMPLATE += write_uninstalldelete()
     path = '%s.iss' % str(INSTALLER_FILE)
     f = open(path,'w') 
     f.write(TEMPLATE)
