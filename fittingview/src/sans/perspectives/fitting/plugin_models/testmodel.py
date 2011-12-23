@@ -6,10 +6,13 @@ http://docs.python.org/library/math.html
 http://www.scipy.org/Numpy_Functions_by_Category
 """
 
+"""
 ## *****************************************************************************
-## For safety of your model, saving as a different file name is recommended.
-## Otherwise, it could be removed in the future re-installation of the SansView.
+Please select the 'Compile' from the menubar after the modification and saving.
+Note that we recommend to save the file as a different file name.
+Otherwise, it could be removed in the future on re-installation of the SansView.
 ## *****************************************************************************
+"""
 
 from sans.models.pluginmodel import Model1DPlugin  ##DO NOT CHANGE THIS LINE!!!
 import math                  ##DO NOT CHANGE THIS LINE!!!
