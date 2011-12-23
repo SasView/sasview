@@ -7,6 +7,8 @@
 
 import sys
 
+if len(sys.argv) == 1:
+    sys.argv.append('install')
 import os
 import platform
 from setuptools import setup, Extension, find_packages
@@ -44,7 +46,7 @@ plugin_model_list = ['polynominal5.py', 'sph_bessel_jn.py',
                      'testmodel_2.py', 'testmodel.py',
                      'polynominal5.pyc', 'sph_bessel_jn.pyc', 
                      'sum_Ap1_1_Ap2.pyc', 'sum_p1_p2.pyc', 
-                     'testmodel_2.pyc', 'testmodel.pyc']
+                     'testmodel_2.pyc', 'testmodel.pyc', 'plugins.log']
 sans_dir = os.path.join(os.path.expanduser("~"),'.sansview')
 if os.path.isdir(sans_dir):
     f_path = os.path.join(sans_dir, "sansview.log")
