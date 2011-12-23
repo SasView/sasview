@@ -41,21 +41,19 @@ from sans.guiframe.data_processor import BatchOutputFrame
 from sans.guiframe.events import EVT_NEW_BATCH
 from sans.dataloader.loader import Loader
 
-from sans import sansview
-PATH_APP = os.path.dirname(sansview.__file__)
-DATAPATH = PATH_APP
+# gui_manager should not know about sansview
+#from sans import sansview
+#PATH_APP = os.path.dirname(sansview.__file__)
 
-def _change_current_dir():
+def get_app_dir():
     """
-    Get the path of the current file
-    This is for openning sansview/data file from command line
+    Get the path of the current app (whatever among SansView/PrView/...) 
+    This is mainly for running app/data file from the command line
     """
     tem_path = sys.path[0]
     if os.path.isfile(tem_path):
         tem_path = os.path.dirname(tem_path)
-    
-    os.chdir(os.path.abspath(tem_path))
-_change_current_dir()   
+    return os.path.abspath(tem_path)
 
 def get_user_directory():
     USERDIR = os.path.join(os.path.expanduser("~"),".sansview")
@@ -79,6 +77,12 @@ def _find_local_config(file, path):
             fObj.close()
     return config_module
 
+# Get APP folder
+PATH_APP = get_app_dir() 
+DATAPATH = PATH_APP
+
+# GUI always starts from the App folder 
+os.chdir(PATH_APP)
 # Read in the local config, which can either be with the main
 # application or in the installation directory
 config = _find_local_config('local_config', PATH_APP)
@@ -291,7 +295,7 @@ class ViewerFrame(wx.Frame):
         self.Bind(EVT_NEW_BATCH, self.on_batch_selection)
         self.Bind(EVT_NEW_COLOR, self.on_color_selection)
         self.setup_custom_conf()
-    
+        
     def add_icon(self):
         """
         get list of child and attempt to add the default icon 
@@ -3031,11 +3035,7 @@ class ViewApp(wx.App):
                                  size=size) 
         self.frame.Hide()
         self.s_screen = None
-        temp_path = None
-        try:
-            _change_current_dir()
-        except:
-            pass
+
         try:
             self.open_file()
         except:
