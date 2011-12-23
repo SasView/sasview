@@ -259,7 +259,7 @@ class PyConsole(editor.EditorNotebookFrame):
         else:
             mssg += "Successful.\n\n"
             if text:
-                if text.count('Failed'):
+                if text.count('Failed') or text.count('Error:') > 0:
                     mssg += "But Simple Test FAILED: Please check your code.\n"
                 mssg += "Run-Test results:\n"
                 mssg += str(text)
