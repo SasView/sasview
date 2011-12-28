@@ -3,7 +3,6 @@
 """
 
 import sys
-
 import os
 import platform
 from numpy.distutils.misc_util import get_numpy_include_dirs
@@ -14,18 +13,17 @@ from distutils.core import Extension, setup
 from distutils.command.build_ext import build_ext
 
 # Options to enable OpenMP
+copt =  {'msvc': ['/openmp'],
+         'mingw32' : ['-fopenmp'],
+         'unix' : ['-fopenmp']}
+lopt =  {'msvc': ['/MANIFEST'],
+         'mingw32' : ['-fopenmp'],
+         'unix' : ['-lgomp']}
+
+# Options for non-openmp builds. MSVC always needs MANIFEST
 if sys.argv[-1] == "-nomp":
-    # Disable OpenMP
     copt = {}
-    lopt = {}
-else:
-    print "openmp ENABLED"
-    copt =  {'msvc': ['/openmp'],
-             'mingw32' : ['-fopenmp'],
-             'unix' : ['-fopenmp']}
-    lopt =  {'msvc': ['/MANIFEST'],
-             'mingw32' : ['-fopenmp'],
-             'unix' : ['-lgomp']}
+    lopt = {'msvc': ['/MANIFEST']}
 
 class build_ext_subclass( build_ext ):
     def build_extensions(self):
@@ -36,8 +34,8 @@ class build_ext_subclass( build_ext ):
             # 'sys.maxsize' and 64bit: Not supported for python2.5
             is_64bits = False
         c = self.compiler.compiler_type
-
         print "Compiling with %s (64bit=%s)" % (c, str(is_64bits))
+        
         if not (sys.platform=='darwin' and not is_64bits):
             if copt.has_key(c):
                for e in self.extensions:

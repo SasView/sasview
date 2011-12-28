@@ -84,21 +84,29 @@ lopt =  {'msvc': ['/MANIFEST'],
          'mingw32' : ['-fopenmp'],
          'unix' : ['-lgomp']}
 
+# Platform-specific link options
+platform_lopt = {'msvc' : ['/MANIFEST']}
+
 class build_ext_subclass( build_ext ):
     def build_extensions(self):
         # Get 64-bitness
         c = self.compiler.compiler_type
         print "Compiling with %s (64bit=%s)" % (c, str(is_64bits))
         
+        # OpenMP build options
         if enable_openmp:
             if copt.has_key(c):
                for e in self.extensions:
                    e.extra_compile_args = copt[ c ]
             if lopt.has_key(c):
-                
                 for e in self.extensions:
                     e.extra_link_args = lopt[ c ]
                     
+        # Platform-specific build options
+        if platform_lopt.has_key(c):
+            for e in self.extensions:
+                e.extra_link_args = platform_lopt[ c ]
+
         build_ext.build_extensions(self)
 
 
