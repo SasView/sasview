@@ -2,13 +2,8 @@
     Setup for SansView
     #TODO: Add checks to see that all the dependencies are on the system
 """
-# [command] can be any of the following:
-#   -nomp: no openmp: Use this flag; C-lib without openmp as well as numpy < 1.6
-
 import sys
 
-if len(sys.argv) == 1:
-    sys.argv.append('install')
 import os
 import platform
 from setuptools import setup, Extension, find_packages
@@ -69,9 +64,7 @@ if sys.version_info >= (2, 6):
     
     
 enable_openmp = True                    
-if sys.argv[-1] == "-nomp":
-    # Disable OpenMP
-    enable_openmp = False
+
 if sys.platform =='darwin' and not is_64bits:
     # Disable OpenMP
     enable_openmp = False
