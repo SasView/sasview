@@ -58,8 +58,9 @@ class Properties(wx.Dialog):
         self.xvalue.SetValue("ln(x)")
         self.xvalue.Insert("x", 0)
         self.xvalue.Insert("x^(2)", 1)
-        self.xvalue.Insert("ln(x)", 2)
-        self.xvalue.Insert("log10(x)", 3)
+        self.xvalue.Insert("x^(4)", 2)
+        self.xvalue.Insert("ln(x)", 3)
+        self.xvalue.Insert("log10(x)", 4)
         
         # scale value for y
         self.yvalue.SetValue("ln(y)")

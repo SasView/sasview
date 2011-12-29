@@ -48,7 +48,31 @@ def fromX2(x, y=None):
         raise ValueError, "square root of a negative value "
     else:
         return math.sqrt(x)
+
+def toX4(x, y=None):
+    """
+    This function is used to load value on Plottable.View
+    
+    Calculate x^(4)
+    
+    :param x: float value
+    
+    """
+    return x * x * x * x
+
+def fromX4(x, y=None):
+    """
+    This function is used to load value on Plottable.View
+    Calculate square root of x
      
+    :param x: float value
+     
+    """
+    if not x >= 0 :
+        raise ValueError, "double square root of a negative value "
+    else:
+        return math.sqrt(math.sqrt(x))
+         
 def toLogX(x, y=None):
     """
     This function is used to load value on Plottable.View
@@ -162,7 +186,39 @@ def errFromX2(x, y=None, dx=None, dy=None):
     else:
         msg = "transform.errFromX2: can't compute error of negative x"
         raise ValueError, msg
+
+def errToX4(x, y=None, dx=None, dy=None):
+    """
+    calculate error of x**4
     
+    :param x: float value
+    :param dx: float value
+    
+    """
+    if  dx != None:
+        err = 4 * math.pow(x, 3) * dx
+        return math.fabs(err)
+    else:
+        return 0.0
+    
+def errFromX4(x, y=None, dx=None, dy=None):
+    """
+    calculate error of x^1/4
+    
+    :param x: float value
+    :param dx: float value
+    
+    """
+    if (x > 0):
+        if(dx != None):
+            err = dx/(4 * math.pow(x, 3/4))
+        else:
+            err = 0
+        return math.fabs(err)
+    else:
+        msg = "transform.errFromX4: can't compute error of negative x"
+        raise ValueError, msg
+ 
 def errToLog10X(x, y=None, dx=None, dy=None):
     """
     calculate error of Log(x)

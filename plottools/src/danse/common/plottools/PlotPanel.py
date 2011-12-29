@@ -1599,6 +1599,10 @@ class PlotPanel(wx.Panel):
                 item.transformX(transform.toX2, transform.errToX2)
                 xunits = convertUnit(2,xunits) 
                 self.graph._xaxis_transformed("%s^{2}" % xname, "%s" % xunits)
+            if(self.xLabel == "x^(4)"):
+                item.transformX(transform.toX4, transform.errToX4)
+                xunits = convertUnit(4,xunits) 
+                self.graph._xaxis_transformed("%s^{4}" % xname, "%s" % xunits)
             if(self.xLabel == "ln(x)"):
                 item.transformX(transform.toLogX,transform.errToLogX)
                 self.graph._xaxis_transformed("\ln\\ %s" % xname, "%s" % xunits) 

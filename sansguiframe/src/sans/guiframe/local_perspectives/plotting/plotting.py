@@ -219,10 +219,10 @@ class Plugin(PluginBase):
         _, y_unit =  data.get_yaxis()
         flag_x = (panel.graph.prop["xunit"] is not None) and \
                     (panel.graph.prop["xunit"].strip() != "") and\
-                    (x_unit != panel.graph.prop["xunit"])
+                    (x_unit != panel.graph.prop["xunit"]) and False
         flag_y = (panel.graph.prop["yunit"] is not None) and \
                     (panel.graph.prop["yunit"].strip() != "") and\
-                    (y_unit != panel.graph.prop["yunit"])
+                    (y_unit != panel.graph.prop["yunit"]) and False
         if (flag_x and flag_y):
             msg = "Cannot add %s" % str(data.name)
             msg += " to panel %s\n" % str(panel.window_caption)
