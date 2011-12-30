@@ -363,22 +363,50 @@ class DataPanel(ScrolledPanel, PanelBase):
         if self.parent is not None:
                 wx.PostEvent(self.parent, 
                              NewBatchEvent(enable=True))
-      
+    
+    def _get_data_selection(self, event):  
+        """
+        Get data selection from the right click
+        """
+        selection = event.GetSelection()
+        id, _, _ = self.FindFocus().GetSelection().GetData()
+        data_list, theory_list = \
+                            self.parent._data_manager.get_by_id(id_list=[id])
+        if data_list:
+            data = data_list.values()[0]
+        else:
+            data = theory_list.values()[0][0]
+        return data
+    
     def on_edit_data(self, event):
         """
         Pop Up Data Editor
         """
-        selection = event.GetSelection()
-        id, _, _ = self.tree_ctrl.GetSelection().GetData()
-        data_list, _= self.parent._data_manager.get_by_id(id_list=[id])
-        
-        data = data_list.values()[0]
+        data = self._get_data_selection(event)
         from sans.guiframe.local_perspectives.plotting.masking \
             import MaskPanel as MaskDialog
         
         panel = MaskDialog(base=self, data=data, id=wx.NewId())
         #self.panel.Bind(wx.EVT_CLOSE, self._draw_masked_model)
         panel.ShowModal()
+        
+    def on_save_as(self, event):
+        """
+        Save data as a file
+        """
+        data = self._get_data_selection(event)
+        path = None
+        default_name = data.name
+        if default_name.count('.') > 0:
+            default_name = default_name.split('.')[0]
+        default_name += "_out"
+        if self.parent != None:
+            if issubclass(data.__class__, Data1D):
+                self.parent.save_data1d(data, default_name)
+            elif issubclass(data.__class__, Data2D):
+                self.parent.save_data2d(data, default_name)
+            else:
+                print "unable to save this type of data"
         
     def layout_data_list(self):
         """
@@ -388,34 +416,59 @@ class DataPanel(ScrolledPanel, PanelBase):
         tree_ctrl_label.SetForegroundColour('blue')
         self.tree_ctrl = DataTreeCtrl(parent=self, style=wx.SUNKEN_BORDER)
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_CHECKING, self.on_check_item)
-        self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_MENU, self.on_right_click)
+        self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_MENU, self.on_right_click_data)
         ## Create context menu for page
         self.data_menu = wx.Menu()
         id = wx.NewId()
-        name = "Edit Mask"
-        msg = "Edit the current Data"
+        name = "Save As"
+        msg = "Save Theory/Data as a file"
         self.data_menu.Append(id, name, msg)
-        wx.EVT_MENU(self, id, self.on_edit_data)
+        wx.EVT_MENU(self, id, self.on_save_as)
     
+        self.editmask_id = wx.NewId()
+        name = "Edit Mask"
+        msg = "Edit Mask for the current 2D Data"
+        self.data_menu.Append(self.editmask_id, name, msg)
+        wx.EVT_MENU(self, self.editmask_id, self.on_edit_data)
+
         tree_ctrl_theory_label = wx.StaticText(self, -1, "Theory")
         tree_ctrl_theory_label.SetForegroundColour('blue')
         self.tree_ctrl_theory = DataTreeCtrl(parent=self, 
                                                     style=wx.SUNKEN_BORDER)
         self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_CHECKING, 
                                                     self.on_check_item)
+        self.tree_ctrl_theory.Bind(CT.EVT_TREE_ITEM_MENU, 
+                                   self.on_right_click_theory)
         self.sizer1.Add(tree_ctrl_label, 0, wx.LEFT, 10)
         self.sizer1.Add(self.tree_ctrl, 1, wx.EXPAND|wx.ALL, 10)
         self.sizer1.Add(tree_ctrl_theory_label, 0,  wx.LEFT, 10)
         self.sizer1.Add(self.tree_ctrl_theory, 1, wx.EXPAND|wx.ALL, 10)
            
-           
-    def on_right_click(self, event):
+    def on_right_click_theory(self, event):
+        """
+        On click theory data
+        """
+        if self.data_menu is not None:
+            self.data_menu.Enable(self.editmask_id, False)
+            self.PopupMenu(self.data_menu) 
+                   
+    def on_right_click_data(self, event):
         """
         Allow Editing Data
         """
         selection = event.GetSelection()
-        _, data_class_name, _ = self.tree_ctrl.GetSelection().GetData()
-        if data_class_name == "Data2D" and self.data_menu is not None:
+        is_data = True
+        try:
+            id, data_class_name, _ = self.tree_ctrl.GetSelection().GetData()
+            data_list, _ = \
+                            self.parent._data_manager.get_by_id(id_list=[id])
+            if not data_list:
+                is_data = False
+        except:
+            return
+        if self.data_menu is not None:
+            menu_enable = (data_class_name == "Data2D" and is_data)
+            self.data_menu.Enable(self.editmask_id, menu_enable)
             self.PopupMenu(self.data_menu) 
         
     def onContextMenu(self, event): 

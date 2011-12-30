@@ -756,45 +756,6 @@ class ModelPanel2D(ModelPanel1D):
             default_name = default_name.split('.')[0]
         default_name += "_out"
         if id in self.action_ids:         
-            
             path = None
-            wildcard = "IGOR/DAT 2D file in Q_map (*.dat)|*.DAT"
-            dlg = wx.FileDialog(self, "Choose a file",
-                                self._default_save_location,
-                                default_name, wildcard , wx.SAVE)
-           
-            if dlg.ShowModal() == wx.ID_OK:
-                path = dlg.GetPath()
-                # ext_num = 0 for .txt, ext_num = 1 for .xml
-                # This is MAC Fix
-                ext_num = dlg.GetFilterIndex()
-                if ext_num == 0:
-                    format = '.dat'
-                else:
-                    format = ''
-                path = os.path.splitext(path)[0] + format
-                mypath = os.path.basename(path)
-                
-                #TODO: This is bad design. The DataLoader is designed 
-                #to recognize extensions.
-                # It should be a simple matter of calling the .
-                #save(file, data, '.xml') method
-                # of the DataLoader.loader.Loader class.
-                from sans.dataloader.loader import  Loader
-                #Instantiate a loader 
-                loader = Loader() 
-                data = self.data2D
-
-                format = ".dat"
-                if os.path.splitext(mypath)[1].lower() == format:
-                    # Make sure the ext included in the file name
-                    # especially on MAC
-                    fName = os.path.splitext(path)[0] + format
-                    loader.save(fName, data, format)
-                try:
-                    self._default_save_location = os.path.dirname(path)
-                    self.parent._default_save_location = \
-                                            self._default_save_location 
-                except:
-                    pass    
-            dlg.Destroy()
+            self.parent.save_data2d(self.data2D, default_name)
+        

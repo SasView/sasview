@@ -607,59 +607,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         ## render the graph
         #self.graph.render(self)
         #self.subplot.figure.canvas.draw_idle()
-        
-        
-        
-    def _onsaveTXT(self, path):
-        """
-        Save file as txt
-            
-        :TODO: Refactor and remove this method. See TODO in _onSave.
-        
-        """
-        data = self.plots[self.graph.selected_plottable]
-       
-        if not path == None:
-            out = open(path, 'w')
-            has_errors = True
-            if data.dy == None or data.dy == []:
-                has_errors = False
-            # Sanity check
-            if has_errors:
-                try:
-                    if len(data.y) != len(data.dy):
-                        has_errors = False
-                except:
-                    has_errors = False
-            if has_errors:
-                if data.dx != None and data.dx != []:
-                    out.write("<X>   <Y>   <dY>   <dX>\n")
-                else:
-                    out.write("<X>   <Y>   <dY>\n")
-            else:
-                out.write("<X>   <Y>\n")
-                
-            for i in range(len(data.x)):
-                if has_errors:
-                    if data.dx != None and data.dx != []:
-                        out.write("%g  %g  %g  %g\n" % (data.x[i], 
-                                                    data.y[i],
-                                                    data.dy[i],
-                                                    data.dx[i]))
-                    else:
-                        out.write("%g  %g  %g\n" % (data.x[i], 
-                                                    data.y[i],
-                                                    data.dy[i]))
-                else:
-                    out.write("%g  %g\n" % (data.x[i], 
-                                            data.y[i]))
-            out.close()                 
-            try:
-                self._default_save_location = os.path.dirname(path)
-                self.parent._default_save_location = self._default_save_location
-            except:
-                pass    
-                
+                       
     def _onSave(self, evt):
         """
         Save a data set to a text file
@@ -667,59 +615,13 @@ class ModelPanel1D(PlotPanel, PanelBase):
         :param evt: Menu event
         
         """
-       
-        path = None
-        wildcard = "Text files (*.txt)|*.txt|"\
-                    "CanSAS 1D files(*.xml)|*.xml" 
-        default_name = self.plots[self.graph.selected_plottable].label
+        data = self.plots[self.graph.selected_plottable]
+        default_name = data.label
         if default_name.count('.') > 0:
             default_name = default_name.split('.')[0]
         default_name += "_out"
         if self.parent != None:
-            self._default_save_location = self.parent._default_save_location
-        dlg = wx.FileDialog(self, "Choose a file",
-                            self._default_save_location,
-                            default_name, wildcard , wx.SAVE)
-       
-        if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.GetPath()
-            # ext_num = 0 for .txt, ext_num = 1 for .xml
-            # This is MAC Fix
-            ext_num = dlg.GetFilterIndex()
-            if ext_num == 0:
-                format = '.txt'
-            else:
-                format = '.xml'
-            path = os.path.splitext(path)[0] + format
-            mypath = os.path.basename(path)
-            
-            #TODO: This is bad design. The DataLoader is designed 
-            #to recognize extensions.
-            # It should be a simple matter of calling the .
-            #save(file, data, '.xml') method
-            # of the sans.dataloader.loader.Loader class.
-            from sans.dataloader.loader import  Loader
-            #Instantiate a loader 
-            loader = Loader() 
-            data = self.plots[self.graph.selected_plottable]
-            format = ".txt"
-            if os.path.splitext(mypath)[1].lower() == format:
-                # Make sure the ext included in the file name
-                # especially on MAC
-                fName = os.path.splitext(path)[0] + format
-                self._onsaveTXT(fName)
-            format = ".xml"
-            if os.path.splitext(mypath)[1].lower() == format:
-                # Make sure the ext included in the file name
-                # especially on MAC
-                fName = os.path.splitext(path)[0] + format
-                loader.save(fName, data, format)
-            try:
-                self._default_save_location = os.path.dirname(path)
-                self.parent._default_save_location = self._default_save_location
-            except:
-                pass    
-        dlg.Destroy()
+            self.parent.save_data1d(data, default_name)
 
     def _add_more_tool(self):
         """
