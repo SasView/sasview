@@ -448,6 +448,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         On click theory data
         """
+        try:
+            id, _, _ = self.tree_ctrl_theory.GetSelection().GetData()
+            data_list, _ = \
+                            self.parent._data_manager.get_by_id(id_list=[id])
+        except:
+            return
         if self.data_menu is not None:
             self.data_menu.Enable(self.editmask_id, False)
             self.PopupMenu(self.data_menu) 
