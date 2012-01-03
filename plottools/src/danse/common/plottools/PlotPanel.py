@@ -1610,6 +1610,11 @@ class PlotPanel(wx.Panel):
                 item.transformX(transform.toX_pos, transform.errToX_pos)
                 _xscale = 'log'
                 self.graph._xaxis_transformed("%s" % xname, "%s" % xunits)
+            if(self.xLabel == "log10(x^(4))"):
+                item.transformX(transform.toX4, transform.errToX4)
+                xunits = convertUnit(4,xunits) 
+                self.graph._xaxis_transformed("%s^{4}" % xname, "%s" % xunits)
+                _xscale = 'log'
             if(self.yLabel == "ln(y)"):
                 item.transformY(transform.toLogX, transform.errToLogX)
                 self.graph._yaxis_transformed("\ln\\ %s" % yname, "%s" % yunits)
@@ -1628,6 +1633,11 @@ class PlotPanel(wx.Panel):
                 item.transformY(transform.toOneOverX, transform.errOneOverX)
                 yunits = convertUnit(-1, yunits)
                 self.graph._yaxis_transformed("1/%s" % yname, "%s" % yunits)
+            if(self.yLabel == "y*x^(4)"):
+                item.transformY(transform.toYX4, transform.errToYX4)
+                xunits = convertUnit(4, xunits) 
+                self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname,xname), 
+                                               "%s%s" % (yunits,xunits))
             if(self.yLabel == "1/sqrt(y)"):
                 item.transformY(transform.toOneOverSqrtX,
                                 transform.errOneOverSqrtX )
@@ -1646,6 +1656,12 @@ class PlotPanel(wx.Panel):
                 item.transformY(transform.toLogYX4, transform.errToLogYX4)
                 xunits = convertUnit(4, xunits) 
                 self.graph._yaxis_transformed("\ln (%s \ \ %s^{4})" % (yname,xname), 
+                                               "%s%s" % (yunits,xunits))
+            if(self.yLabel == "log10(y*x^(4))"):
+                item.transformY(transform.toYX4, transform.errToYX4)
+                xunits = convertUnit(4, xunits) 
+                _yscale = 'log' 
+                self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname,xname), 
                                                "%s%s" % (yunits,xunits))
             if(self.viewModel == "Guinier lny vs x^(2)"):
                 item.transformX(transform.toX2, transform.errToX2)

@@ -61,6 +61,7 @@ class Properties(wx.Dialog):
         self.xvalue.Insert("x^(4)", 2)
         self.xvalue.Insert("ln(x)", 3)
         self.xvalue.Insert("log10(x)", 4)
+        self.xvalue.Insert("log10(x^(4))", 5)
         
         # scale value for y
         self.yvalue.SetValue("ln(y)")
@@ -68,11 +69,13 @@ class Properties(wx.Dialog):
         self.yvalue.Insert("1/y", 1)
         self.yvalue.Insert("ln(y)", 2)
         self.yvalue.Insert("y^(2)", 3)
-        self.yvalue.Insert("1/sqrt(y)", 4)
-        self.yvalue.Insert("log10(y)", 5)
-        self.yvalue.Insert("ln(y*x)", 6)
-        self.yvalue.Insert("ln(y*x^(2))", 7)
-        self.yvalue.Insert("ln(y*x^(4))", 8)
+        self.yvalue.Insert("y*x^(4)", 4)
+        self.yvalue.Insert("1/sqrt(y)", 5)
+        self.yvalue.Insert("log10(y)", 6)
+        self.yvalue.Insert("ln(y*x)", 7)
+        self.yvalue.Insert("ln(y*x^(2))", 8)
+        self.yvalue.Insert("ln(y*x^(4))", 9)
+        self.yvalue.Insert("log10(y*x^(4))", 10)
         # type of view or model used 
         self.view.SetValue("--")
         self.view.Insert("--", 0)

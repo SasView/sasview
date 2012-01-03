@@ -117,6 +117,11 @@ def toLogYX4(y, x):
         return math.log(math.pow(x,4) * y)
     else:
          raise ValueError,"transform.toLogYX4: input error"
+     
+def toYX4(y, x):
+    """
+    """
+    return math.pow(x, 4) * y
 
 def toLogXY(y, x):
     """
@@ -359,4 +364,20 @@ def errToLogYX4(x, y=None, dx=None, dy=None):
     err = math.sqrt((4.0 * dx/x)**2  + (dy/y)**2)
     return err 
 
+def errToYX4(x, y=None, dx=None, dy=None):
+    """
+    error for (y*x^(4))
+    
+    :param x: float value
+    
+    """
+    # Check that the point on the graph is positive
+    # within errors
+
+    if dx == None:
+        dx = 0
+    if dy == None:
+        dy = 0
+    err = math.sqrt((dy * pow(x, 4))**2  + (4 * y * dx * math.pow(x, 3))**2)
+    return err 
            
