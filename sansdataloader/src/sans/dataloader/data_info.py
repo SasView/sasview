@@ -683,6 +683,7 @@ class Data1D(plottable_1D, DataInfo):
         clone.title       = self.title
         clone.run         = self.run
         clone.filename    = self.filename
+        clone.instrument   = self.instrument
         clone.notes       = deepcopy(self.notes) 
         clone.process     = deepcopy(self.process) 
         clone.detector    = deepcopy(self.detector) 
@@ -827,6 +828,7 @@ class Data2D(plottable_2D, DataInfo):
         clone.title       = self.title
         clone.run         = self.run
         clone.filename    = self.filename
+        clone.instrument  = self.instrument
         clone.notes       = deepcopy(self.notes) 
         clone.process     = deepcopy(self.process) 
         clone.detector    = deepcopy(self.detector) 
