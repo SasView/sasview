@@ -20,7 +20,6 @@
  */
 
 #include <math.h>
-//#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
@@ -202,8 +201,8 @@ double BarBellModel :: operator()(double qx, double qy) {
   dp[5] = sld_solv();
   dp[6] = 0.0;
 
-  double _theta = 0.0;
-  double _phi = 0.0;
+  double _theta = theta();
+  double _phi = phi();
 
 	// Get the dispersion points for the rad_bar
 	vector<WeightPoint> weights_rad_bar;
