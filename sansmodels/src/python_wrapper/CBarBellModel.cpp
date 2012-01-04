@@ -32,7 +32,7 @@ extern "C" {
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-#include "barbell.h"
+//#include "barbell.h"
 }
 
 #include "models.hh"

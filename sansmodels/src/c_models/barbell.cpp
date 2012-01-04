@@ -27,6 +27,7 @@ using namespace std;
 
 extern "C" {
 	#include "libCylinder.h"
+  #include "GaussWeights.h"
 	#include "barbell.h"
 }
 
@@ -45,6 +46,73 @@ BarBellModel :: BarBellModel() {
 	phi    = Parameter(0.0, true);
 }
 
+double bar2d_kernel(double dp[], double q, double alpha) {
+  int j;
+  double Pi;
+  double scale,contr,bkg,sldc,slds;
+  double len,rad,hDist,endRad;
+  int nordj=76;
+  double zi=alpha,yyy,answer;     //running tally of integration
+  double summj,vaj,vbj,zij;     //for the inner integration
+  double arg1,arg2,inner,be;
+
+
+  scale = dp[0];
+  rad = dp[1];
+  len = dp[2];
+  endRad = dp[3];
+  sldc = dp[4];
+  slds = dp[5];
+  bkg = dp[6];
+
+  hDist = sqrt(fabs(endRad*endRad-rad*rad));    //by definition for this model
+
+  contr = sldc-slds;
+
+  Pi = 4.0*atan(1.0);
+  vaj = -1.0*hDist/endRad;
+  vbj = 1.0;    //endpoints of inner integral
+
+  summj=0.0;
+
+  for(j=0;j<nordj;j++) {
+    //20 gauss points for the inner integral
+    zij = ( Gauss76Z[j]*(vbj-vaj) + vaj + vbj )/2.0;    //the "t" dummy
+    yyy = Gauss76Wt[j] * Dumb_kernel(dp,q,zij,zi);    //uses the same Kernel as the Dumbbell, here L>0
+    summj += yyy;
+  }
+  //now calculate the value of the inner integral
+  inner = (vbj-vaj)/2.0*summj;
+  inner *= 4.0*Pi*endRad*endRad*endRad;
+
+  //now calculate outer integrand
+  arg1 = q*len/2.0*cos(zi);
+  arg2 = q*rad*sin(zi);
+  yyy = inner;
+
+  if(arg2 == 0) {
+    be = 0.5;
+  } else {
+    be = NR_BessJ1(arg2)/arg2;
+  }
+
+  if(arg1 == 0.0) {   //limiting value of sinc(0) is 1; sinc is not defined in math.h
+    yyy += Pi*rad*rad*len*2.0*be;
+  } else {
+    yyy += Pi*rad*rad*len*sin(arg1)/arg1*2.0*be;
+  }
+  yyy *= yyy;   //sin(zi);
+  answer = yyy;
+
+
+  answer /= Pi*rad*rad*len + 2.0*Pi*(2.0*endRad*endRad*endRad/3.0+endRad*endRad*hDist-hDist*hDist*hDist/3.0);   //divide by volume
+  answer *= 1.0e8;    //convert to cm^-1
+  answer *= contr*contr;
+  answer *= scale;
+  answer += bkg;
+
+  return answer;
+}
 /**
  * Function to evaluate 1D scattering function
  * The NIST IGOR library is used for the actual calculation.
@@ -122,18 +190,20 @@ double BarBellModel :: operator()(double q) {
  * @return: function value
  */
 double BarBellModel :: operator()(double qx, double qy) {
-	BarBellParameters dp;
+  double dp[7];
 
-	dp.scale = scale();
-	dp.rad_bar = rad_bar();
-	dp.len_bar = len_bar();
-	dp.rad_bell = rad_bell();
-	dp.sld_barbell = sld_barbell();
-	dp.sld_solv = sld_solv();
-	dp.background = 0.0;
-	dp.theta  = theta();
-	dp.phi    = phi();
+  // Fill parameter array for IGOR library
+  // Add the background after averaging
+  dp[0] = scale();
+  dp[1] = rad_bar();
+  dp[2] = len_bar();
+  dp[3] = rad_bell();
+  dp[4] = sld_barbell();
+  dp[5] = sld_solv();
+  dp[6] = 0.0;
 
+  double _theta = 0.0;
+  double _phi = 0.0;
 
 	// Get the dispersion points for the rad_bar
 	vector<WeightPoint> weights_rad_bar;
@@ -167,21 +237,45 @@ double BarBellModel :: operator()(double qx, double qy) {
 
 	// Loop over radius weight points
 	for(size_t i=0; i<weights_rad_bar.size(); i++) {
-		dp.rad_bar = weights_rad_bar[i].value;
+		dp[1] = weights_rad_bar[i].value;
 		for(size_t j=0; j<weights_len_bar.size(); j++) {
-			dp.len_bar = weights_len_bar[j].value;
+			dp[2] = weights_len_bar[j].value;
 			for(size_t k=0; k<weights_rad_bell.size(); k++) {
-				dp.rad_bell = weights_rad_bell[k].value;
+				dp[3] = weights_rad_bell[k].value;
 				// Average over theta distribution
 				for(size_t l=0; l< weights_theta.size(); l++) {
-					dp.theta = weights_theta[l].value;
+					_theta = weights_theta[l].value;
 					// Average over phi distribution
 					for(size_t m=0; m< weights_phi.size(); m++) {
-						dp.phi = weights_phi[m].value;
+						_phi = weights_phi[m].value;
 						//Un-normalize Form by volume
-						hDist = sqrt(fabs(dp.rad_bell*dp.rad_bell-dp.rad_bar*dp.rad_bar));
-						vol_i = pi*dp.rad_bar*dp.rad_bar*dp.len_bar+2.0*pi*(2.0*dp.rad_bell*dp.rad_bell*dp.rad_bell/3.0
-										+dp.rad_bell*dp.rad_bell*hDist-hDist*hDist*hDist/3.0);
+						hDist = sqrt(fabs(dp[3]*dp[3]-dp[1]*dp[1]));
+						vol_i = pi*dp[1]*dp[1]*dp[2]+2.0*pi*(2.0*dp[3]*dp[3]*dp[3]/3.0
+										+dp[3]*dp[3]*hDist-hDist*hDist*hDist/3.0);
+
+					  const double q = sqrt(qx*qx+qy*qy);
+					  //convert angle degree to radian
+					  const double pi = 4.0*atan(1.0);
+
+					  // Cylinder orientation
+				    const double cyl_x = sin(_theta * pi/180.0) * cos(_phi * pi/180.0);
+				    const double cyl_y = sin(_theta * pi/180.0) * sin(_phi * pi/180.0);
+
+				    // Compute the angle btw vector q and the
+				    // axis of the cylinder (assume qz = 0)
+				    const double cos_val = cyl_x*qx + cyl_y*qy;
+
+				    // The following test should always pass
+				    if (fabs(cos_val)>1.0) {
+				      return 0;
+				    }
+
+				    // Note: cos(alpha) = 0 and 1 will get an
+				    // undefined value from CylKernel
+				    const double alpha = acos( cos_val );
+
+            // Call the IGOR library function to get the kernel
+            const double output = bar2d_kernel(dp, q, alpha)/sin(alpha);
 
 						double _ptvalue = weights_rad_bar[i].weight
 											* weights_len_bar[j].weight
@@ -189,8 +283,9 @@ double BarBellModel :: operator()(double qx, double qy) {
 											* weights_theta[l].weight
 											* weights_phi[m].weight
 											* vol_i
-											* barbell_analytical_2DXY(&dp, qx, qy);
+											* output;
 											//* pow(weights_rad[i].value,3.0);
+
 						// Consider when there is infinte or nan.
 						if ( _ptvalue == INFINITY || _ptvalue == NAN){
 							_ptvalue = 0.0;
