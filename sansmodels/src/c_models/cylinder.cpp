@@ -17,11 +17,9 @@
  * The classes use the IGOR library found in
  *   sansmodels/src/libigor
  *
- *	TODO: refactor so that we pull in the old sansmodels.c_extensions
  */
 
 #include <math.h>
-#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
@@ -31,6 +29,18 @@ extern "C" {
 	#include "libStructureFactor.h"
 	#include "cylinder.h"
 }
+
+// Convenience parameter structure
+typedef struct {
+    double scale;
+    double radius;
+    double length;
+    double sldCyl;
+    double sldSolv;
+    double background;
+    double cyl_theta;
+    double cyl_phi;
+} CylinderParameters;
 
 CylinderModel :: CylinderModel() {
 	scale      = Parameter(1.0);
@@ -100,6 +110,81 @@ double CylinderModel :: operator()(double q) {
 		sum = sum/(vol/norm);}
 
 	return sum/norm + background();
+}
+
+/**
+ * Function to evaluate 2D scattering function
+ * @param pars: parameters of the cylinder
+ * @param q: q-value
+ * @param q_x: q_x / q
+ * @param q_y: q_y / q
+ * @return: function value
+ */
+static double cylinder_analytical_2D_scaled(CylinderParameters *pars, double q, double q_x, double q_y) {
+  double cyl_x, cyl_y, cyl_z;
+  double q_z;
+  double alpha, vol, cos_val;
+  double answer;
+  //convert angle degree to radian
+  double pi = 4.0*atan(1.0);
+  double theta = pars->cyl_theta * pi/180.0;
+  double phi = pars->cyl_phi * pi/180.0;
+
+    // Cylinder orientation
+    cyl_x = sin(theta) * cos(phi);
+    cyl_y = sin(theta) * sin(phi);
+    cyl_z = cos(theta);
+
+    // q vector
+    q_z = 0;
+
+    // Compute the angle btw vector q and the
+    // axis of the cylinder
+    cos_val = cyl_x*q_x + cyl_y*q_y + cyl_z*q_z;
+
+    // The following test should always pass
+    if (fabs(cos_val)>1.0) {
+      printf("cyl_ana_2D: Unexpected error: cos(alpha)>1\n");
+      return 0;
+    }
+
+    // Note: cos(alpha) = 0 and 1 will get an
+    // undefined value from CylKernel
+  alpha = acos( cos_val );
+
+  // Call the IGOR library function to get the kernel
+  answer = CylKernel(q, pars->radius, pars->length/2.0, alpha) / sin(alpha);
+
+  // Multiply by contrast^2
+  answer *= (pars->sldCyl - pars->sldSolv)*(pars->sldCyl - pars->sldSolv);
+
+  //normalize by cylinder volume
+  //NOTE that for this (Fournet) definition of the integral, one must MULTIPLY by Vcyl
+    vol = acos(-1.0) * pars->radius * pars->radius * pars->length;
+  answer *= vol;
+
+  //convert to [cm-1]
+  answer *= 1.0e8;
+
+  //Scale
+  answer *= pars->scale;
+
+  // add in the background
+  answer += pars->background;
+
+  return answer;
+}
+
+/**
+ * Function to evaluate 2D scattering function
+ * @param pars: parameters of the cylinder
+ * @param q: q-value
+ * @return: function value
+ */
+static double cylinder_analytical_2DXY(CylinderParameters *pars, double qx, double qy) {
+  double q;
+  q = sqrt(qx*qx+qy*qy);
+  return cylinder_analytical_2D_scaled(pars, q, qx/q, qy/q);
 }
 
 /**
@@ -253,54 +338,3 @@ double CylinderModel :: calculate_ER() {
 
 	return rad_out;
 }
-// Testing code
-int main(void)
-{
-	CylinderModel c = CylinderModel();
-
-	printf("Length = %g\n", c.length());
-	printf("I(Qx=%g,Qy=%g) = %g\n", 0.001, 0.001, c(0.001, 0.001));
-	printf("I(Q=%g) = %g\n", 0.001, c(0.001));
-	c.radius.dispersion = new GaussianDispersion();
-	c.radius.dispersion->npts = 100;
-	c.radius.dispersion->width = 5;
-
-	//c.length.dispersion = GaussianDispersion();
-	//c.length.dispersion.npts = 20;
-	//c.length.dispersion.width = 65;
-
-	printf("I(Q=%g) = %g\n", 0.001, c(0.001));
-	c.scale = 10.0;
-	printf("I(Q=%g) = %g\n", 0.001, c(0.001));
-	printf("I(Qx=%g, Qy=%g) = %g\n", 0.001, 0.001, c(0.001, 0.001));
-	printf("I(Q=%g,  Phi=%g) = %g\n", 0.00447, .7854, c.evaluate_rphi(sqrt(0.00002), .7854));
-
-	// Average over phi at theta=90 deg
-	c.cyl_theta = 1.57;
-	double values_th[100];
-	double values[100];
-	double weights[100];
-	double pi = acos(-1.0);
-	printf("pi=%g\n", pi);
-	for(int i=0; i<100; i++){
-		values[i] = (float)i*2.0*pi/99.0;
-		values_th[i] = (float)i*pi/99.0;
-		weights[i] = 1.0;
-	}
-	//c.radius.dispersion->width = 0;
-	c.cyl_phi.dispersion = new ArrayDispersion();
-	c.cyl_theta.dispersion = new ArrayDispersion();
-	(*c.cyl_phi.dispersion).set_weights(100, values, weights);
-	(*c.cyl_theta.dispersion).set_weights(100, values_th, weights);
-
-	double i_avg = c(0.01, 0.01);
-	double i_1d = c(sqrt(0.0002));
-
-	printf("\nI(Qx=%g, Qy=%g) = %g\n", 0.01, 0.01, i_avg);
-	printf("I(Q=%g)         = %g\n", sqrt(0.0002), i_1d);
-	printf("ratio %g %g\n", i_avg/i_1d, i_1d/i_avg);
-
-
-	return 0;
-}
-

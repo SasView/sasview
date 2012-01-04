@@ -1,5 +1,7 @@
 #if !defined(cylinder_h)
 #define cylinder_h
+#include "parameters.hh"
+
 /** Structure definition for cylinder parameters
  * [PYTHONCLASS] = CylinderModel
  * [DISP_PARAMS] = radius, length, cyl_theta, cyl_phi
@@ -22,42 +24,50 @@
 
 
  **/
-typedef struct {
-    /// Scale factor
-    //  [DEFAULT]=scale=1.0
-    double scale;
-    /// Radius of the cylinder [A]
-    //  [DEFAULT]=radius=20.0 [A]
-    double radius;
-    /// Length of the cylinder [A]
-    //  [DEFAULT]=length=400.0 [A]
-    double length;
-    /// Contrast [1/A^(2)]
-    //  [DEFAULT]=sldCyl=4.0e-6 [1/A^(2)]
-    double sldCyl;
-    /// sldCyl [1/A^(2)]
-    //  [DEFAULT]=sldSolv=1.0e-6 [1/A^(2)]
-    double sldSolv;
-	/// Incoherent Background [1/cm] 0.00
-	//  [DEFAULT]=background=0.0 [1/cm]
-	double background;
-    /// Orientation of the cylinder axis w/respect incoming beam [deg]
-    //  [DEFAULT]=cyl_theta=60.0 [deg]
-    double cyl_theta;
-    /// Orientation of the cylinder in the plane of the detector [deg]
-    //  [DEFAULT]=cyl_phi=60.0 [deg]
-    double cyl_phi;
+class CylinderModel{
+public:
+  // Model parameters
 
-} CylinderParameters;
+  /// Scale factor
+  //  [DEFAULT]=scale=1.0
+  Parameter scale;
 
+  /// Radius of the cylinder [A]
+  //  [DEFAULT]=radius=20.0 [A]
+  Parameter radius;
 
+  /// Length of the cylinder [A]
+  //  [DEFAULT]=length=400.0 [A]
+  Parameter length;
 
-/// 1D scattering function
-double cylinder_analytical_1D(CylinderParameters *pars, double q);
+  /// Contrast [1/A^(2)]
+  //  [DEFAULT]=sldCyl=4.0e-6 [1/A^(2)]
+  Parameter sldCyl;
 
-/// 2D scattering function
-double cylinder_analytical_2D(CylinderParameters *pars, double q, double phi);
-double cylinder_analytical_2DXY(CylinderParameters *pars, double qx, double qy);
-double cylinder_analytical_2D_scaled(CylinderParameters *pars, double q, double q_x, double q_y);
+  /// sldCyl [1/A^(2)]
+  //  [DEFAULT]=sldSolv=1.0e-6 [1/A^(2)]
+  Parameter sldSolv;
+
+  /// Incoherent Background [1/cm] 0.00
+  //  [DEFAULT]=background=0.0 [1/cm]
+  Parameter background;
+
+  /// Orientation of the cylinder axis w/respect incoming beam [deg]
+  //  [DEFAULT]=cyl_theta=60.0 [deg]
+  Parameter cyl_theta;
+
+  /// Orientation of the cylinder in the plane of the detector [deg]
+  //  [DEFAULT]=cyl_phi=60.0 [deg]
+  Parameter cyl_phi;
+
+  // Constructor
+  CylinderModel();
+
+  // Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx, double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
 #endif

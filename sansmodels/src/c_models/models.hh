@@ -26,27 +26,6 @@ extern "C" {
 
 using namespace std;
 
-class CylinderModel{
-public:
-	// Model parameters
-	Parameter radius;
-	Parameter scale;
-	Parameter length;
-	Parameter sldCyl;
-	Parameter sldSolv;
-	Parameter background;
-	Parameter cyl_theta;
-	Parameter cyl_phi;
-
-	// Constructor
-	CylinderModel();
-
-	// Operators to get I(Q)
-	double operator()(double q);
-	double operator()(double qx, double qy);
-	double calculate_ER();
-	double evaluate_rphi(double q, double phi);
-};
 
 class CappedCylinderModel{
 public:
