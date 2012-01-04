@@ -118,6 +118,10 @@ class PlotPanel(wx.Panel):
         """
         wx.Panel.__init__(self, parent, id=id, **kwargs)
         self.parent = parent
+        self.gotLegend = 0  #to begin, legend is not picked. 
+        self.legend_pos_loc = None
+        self.legend = None
+        self.line_collections_list = [] 
         self.figure = Figure(None, dpi, linewidth=2.0)
         self.color = '#b3b3b3'  
         from canvas import FigureCanvas
@@ -125,7 +129,7 @@ class PlotPanel(wx.Panel):
         self.SetColor(color)
         #self.SetBackgroundColour(parent.GetBackgroundColour())
         self._resizeflag = True
-        self._SetSize()
+        self._SetInitialSize() 
         self.subplot = self.figure.add_subplot(111)
         self.figure.subplots_adjust(left=0.2, bottom=.2)
         self.yscale = 'linear'
@@ -177,7 +181,9 @@ class PlotPanel(wx.Panel):
         #taking care of dragging
         self.canvas.mpl_connect('motion_notify_event', self.onMouseMotion)
         self.canvas.mpl_connect('button_press_event', self.onLeftDown)
+        self.canvas.mpl_connect('pick_event', self.onPick)
         self.canvas.mpl_connect('button_release_event', self.onLeftUp)
+        
         wx.EVT_RIGHT_DOWN(self, self.onLeftDown)
         # to turn axis off whenn resizing the panel
         self.resizing = False
@@ -191,7 +197,7 @@ class PlotPanel(wx.Panel):
         # Interactor
         self.connect = BindArtist(self.subplot.figure)
         #self.selected_plottable = None
-
+        
         # new data for the fit 
         self.fit_result = Data1D(x=[], y=[], dy=None)
         self.fit_result.symbol = 13
@@ -263,10 +269,19 @@ class PlotPanel(wx.Panel):
         self._default_save_location = os.getcwd()    
         # let canvas know about axes
         self.canvas.set_panel(self)
-        #Bind focus to change the border color       
+        
+        #Bind focus to change the border color      
         self.canvas.Bind(wx.EVT_SET_FOCUS, self.on_set_focus)
         self.canvas.Bind(wx.EVT_KILL_FOCUS, self.on_kill_focus)
-        
+
+    def _SetInitialSize(self,):
+        """
+        """
+        pixels = self.parent.GetClientSize()
+        self.canvas.SetSize(pixels)
+        self.figure.set_size_inches( (pixels[0])/self.figure.get_dpi(),
+         (pixels[1])/self.figure.get_dpi(), forward=True )   
+          
     def On_Paint(self, event):
         """
         """
@@ -368,7 +383,72 @@ class PlotPanel(wx.Panel):
             self.leftdown = False
             self.mousemotion = False 
             self.leftup = True
+            
+        #release the legend    
+        if self.gotLegend == 1:
+            self.gotLegend = 0
+            self.set_legend_alpha(1)
+            
+    def set_legend_alpha(self, alpha=1):
+        """
+        Set legend alpha
+        """
+        if self.legend != None:
+            self.legend.legendPatch.set_alpha(alpha)
         
+    def onPick(self, event):    
+        """
+        On pick legend
+        """
+        legend = self.legend
+        if event.artist == legend:
+            #gets the box of the legend.
+            bbox = self.legend.get_window_extent()  
+            #get mouse coordinates at time of pick.
+            self.mouse_x = event.mouseevent.x  
+            self.mouse_y = event.mouseevent.y
+            #get legend coordinates at time of pick.
+            self.legend_x = bbox.xmin          
+            self.legend_y = bbox.ymin
+            #indicates we picked up the legend.
+            self.gotLegend = 1   
+            self.set_legend_alpha(0.5)
+  
+            
+    def _on_legend_motion(self, event): 
+        """
+        On legend in motion
+        """
+        ax = event.inaxes
+        if ax == None:
+            return
+        # Event occurred inside a plotting area
+        lo_x, hi_x = ax.get_xlim()
+        lo_y, hi_y = ax.get_ylim()
+        # How much the mouse moved.
+        x = mouse_diff_x = self.mouse_x - event.x  
+        y = mouse_diff_y = self.mouse_y - event.y
+        # Put back inside
+        if x < lo_x:
+            x = lo_x
+        if x > hi_x:
+            x = hi_x
+        if y < lo_y:
+            y = lo_y
+        if y> hi_y:
+            y = hi_y
+        # Move the legend from its previous location by that same amount
+        loc_in_canvas = self.legend_x - mouse_diff_x, \
+                        self.legend_y - mouse_diff_y
+        # Transform into legend coordinate system
+        trans_axes = self.legend.parent.transAxes.inverted()
+        loc_in_norm_axes = trans_axes.transform_point(loc_in_canvas)
+        self.legend_pos_loc = tuple(loc_in_norm_axes)
+        self.legend._loc = self.legend_pos_loc
+        self.resizing = True
+        self.canvas.set_resizing(self.resizing)
+        self.canvas.draw() 
+           
     def onMouseMotion(self, event): 
         """
         check if the left button is press and the mouse in moving.
@@ -376,6 +456,9 @@ class PlotPanel(wx.Panel):
         to perform the drag
         
         """
+        if self.gotLegend == 1:
+            self._on_legend_motion(event)
+            return
         if self.enable_toolbar:
             #Disable dragging without the toolbar to allow zooming with toolbar
             return
@@ -399,6 +482,7 @@ class PlotPanel(wx.Panel):
                 self._dragHelper(xdelta, ydelta)
             else:# no dragging is perform elsewhere
                 self._dragHelper(0,0)
+
                 
     def _offset_graph(self):
         """
@@ -700,10 +784,10 @@ class PlotPanel(wx.Panel):
          
         """
         if not pixels:
-            pixels = self.GetClientSize()
+            pixels = tuple(self.GetClientSize())
         self.canvas.SetSize(pixels)
-        self.figure.set_size_inches(pixels[0]/self.figure.get_dpi(),
-        pixels[1]/self.figure.get_dpi())
+        self.figure.set_size_inches( float( pixels[0] )/self.figure.get_dpi(),
+                                     float( pixels[1] )/self.figure.get_dpi() ) 
 
     def draw(self):
         """
@@ -712,6 +796,10 @@ class PlotPanel(wx.Panel):
         """
         self.figure.canvas.draw_idle()
         
+       
+    #pick up the legend patch
+    def legend_picker(self, legend, event):
+        return self.legend.legendPatch.contains(event)      
         
     def get_loc_label(self):
         """
@@ -845,9 +933,13 @@ class PlotPanel(wx.Panel):
             hl = sorted(zip(handles, labels),
                         key=operator.itemgetter(1))
             handles2, labels2 = zip(*hl)
-            self.subplot.legend(handles2, labels2, 
+            self.line_collections_list = handles2
+            self.legend = self.subplot.legend(handles2, labels2, 
                                 prop=FontProperties(size=10), numpoints=1,
                                 handletextsep=.05, loc=self.legendLoc)
+            if self.legend != None:
+                self.legend.set_picker(self.legend_picker) 
+                self.legend.set_axes(self.subplot) 
         
         self.subplot.figure.canvas.draw_idle()       
         self.legend_on = not self.legend_on
@@ -861,14 +953,19 @@ class PlotPanel(wx.Panel):
         label =  menu.GetLabel(id)
         
         self.legendLoc = label
+        self.legend_pos_loc = None
         # sort them by labels
         handles, labels = self.subplot.get_legend_handles_labels()
         hl = sorted(zip(handles, labels),
                     key=operator.itemgetter(1))
         handles2, labels2 = zip(*hl)
-        self.subplot.legend(handles2, labels2, 
+        self.line_collections_list = handles2
+        self.legend = self.subplot.legend(handles2, labels2, 
                             prop=FontProperties(size=10),  numpoints=1,
                             handletextsep=.05, loc=self.legendLoc)
+        if self.legend != None:
+                self.legend.set_picker(self.legend_picker) 
+                self.legend.set_axes(self.subplot) 
         self.subplot.figure.canvas.draw_idle()  
         #self._onEVT_FUNC_PROPERTY()
         
@@ -1117,13 +1214,18 @@ class PlotPanel(wx.Panel):
                 hl = sorted(zip(handles, labels),
                             key=operator.itemgetter(1))
                 handles2, labels2 = zip(*hl)
-                leg = ax.legend(handles2, labels2,  numpoints=1,
+                self.line_collections_list = handles2
+                self.legend = ax.legend(handles2, labels2,  numpoints=1,
                                 prop=FontProperties(size=10), 
                                 handletextsep=.05, loc=self.legendLoc)
-            except:
-                leg = ax.legend(prop=FontProperties(size=10),  numpoints=1,
-                                handletextsep=.05, loc=self.legendLoc)
+                if self.legend != None:
+                    self.legend.set_picker(self.legend_picker)
+                    self.legend.set_axes(self.subplot) 
                 
+            except:
+                self.legend = ax.legend(prop=FontProperties(size=10),  numpoints=1,
+                                handletextsep=.05, loc=self.legendLoc)
+                 
     def xaxis(self, label, units, font=None, color='black'):
         """xaxis label and units.
         
@@ -1635,7 +1737,7 @@ class PlotPanel(wx.Panel):
                 self.graph._yaxis_transformed("1/%s" % yname, "%s" % yunits)
             if(self.yLabel == "y*x^(4)"):
                 item.transformY(transform.toYX4, transform.errToYX4)
-                xunits = convertUnit(4, xunits) 
+                xunits = convertUnit(4, self.xaxis_unit) 
                 self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname,xname), 
                                                "%s%s" % (yunits,xunits))
             if(self.yLabel == "1/sqrt(y)"):
@@ -1646,20 +1748,20 @@ class PlotPanel(wx.Panel):
             if(self.yLabel == "ln(y*x)"):
                 item.transformY(transform.toLogXY, transform.errToLogXY)
                 self.graph._yaxis_transformed("\ln (%s \ \ %s)" % (yname,xname),
-                                                "%s%s" % (yunits, xunits))
+                                                "%s%s" % (yunits, self.xaxis_unit))
             if(self.yLabel == "ln(y*x^(2))"):
                 item.transformY( transform.toLogYX2, transform.errToLogYX2) 
-                xunits = convertUnit(2,xunits) 
+                xunits = convertUnit(2, self.xaxis_unit) 
                 self.graph._yaxis_transformed("\ln (%s \ \ %s^{2})" % (yname,xname), 
                                                "%s%s" % (yunits,xunits))
             if(self.yLabel == "ln(y*x^(4))"):
                 item.transformY(transform.toLogYX4, transform.errToLogYX4)
-                xunits = convertUnit(4, xunits) 
+                xunits = convertUnit(4, self.xaxis_unit) 
                 self.graph._yaxis_transformed("\ln (%s \ \ %s^{4})" % (yname,xname), 
                                                "%s%s" % (yunits,xunits))
             if(self.yLabel == "log10(y*x^(4))"):
                 item.transformY(transform.toYX4, transform.errToYX4)
-                xunits = convertUnit(4, xunits) 
+                xunits = convertUnit(4, self.xaxis_unit) 
                 _yscale = 'log' 
                 self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname,xname), 
                                                "%s%s" % (yunits,xunits))

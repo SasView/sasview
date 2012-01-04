@@ -67,11 +67,11 @@ class BindArtist:
             
 
         # Turn off picker if it hasn't already been done
-        try:
-            canvas.mpl_disconnect(canvas.button_pick_id)
-            canvas.mpl_disconnect(canvas.scroll_pick_id)
-        except: 
-            pass
+        #try:
+        #    canvas.mpl_disconnect(canvas.button_pick_id)
+        #    canvas.mpl_disconnect(canvas.scroll_pick_id)
+        #except: 
+        #    pass
         self._current = None
         self._actions = {}
         self.canvas = canvas
