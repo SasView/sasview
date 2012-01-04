@@ -27,29 +27,6 @@ extern "C" {
 using namespace std;
 
 
-class CappedCylinderModel{
-public:
-	// Model parameters
-	Parameter scale;
-	Parameter rad_cyl;
-	Parameter len_cyl;
-	Parameter rad_cap;
-	Parameter sld_capcyl;
-	Parameter sld_solv;
-	Parameter background;
-	Parameter theta;
-	Parameter phi;
-
-	// Constructor
-	CappedCylinderModel();
-
-	// Operators to get I(Q)
-	double operator()(double q);
-	double operator()(double qx, double qy);
-	double calculate_ER();
-	double evaluate_rphi(double q, double phi);
-};
-
 
 class ParallelepipedModel{
 public:

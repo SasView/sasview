@@ -27,8 +27,8 @@ using namespace std;
 extern "C" {
 	#include "libCylinder.h"
 	#include "libStructureFactor.h"
-	#include "cylinder.h"
 }
+#include "cylinder.h"
 
 // Convenience parameter structure
 typedef struct {
