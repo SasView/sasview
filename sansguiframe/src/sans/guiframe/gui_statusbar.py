@@ -229,7 +229,6 @@ class StatusBar(wxStatusB):
         """ 
         count = 0
         while(count <= 100):
-            print "count=", count
             count += 1
         self.timer_stop.Stop() 
         self.clear_gauge(msg="")
