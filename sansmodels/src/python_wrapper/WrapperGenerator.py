@@ -67,6 +67,7 @@ class WrapperGenerator:
         self.pythonClass = None
         ## Parser in struct section
         self.inStruct = False
+        self.foundCPP = False
         ## Name of struct for the c object
         self.structName = None
         ## Dictionary of parameters
@@ -208,6 +209,20 @@ class WrapperGenerator:
                     raise ValueError, "Could not parse file %s" % self.file
                 
             # Catch struct name
+            # C++ class definition
+            if line.count("class")>0:
+                # We are entering a class definition
+                self.inStruct = True
+                self.foundCPP = True
+                class_name = line.replace('}','')
+                class_name = class_name.replace('class','')
+                self.inStruct = class_name.strip()
+            
+            if self.inStruct and line.count("}")>0:
+                # We are exiting a struct block
+                self.inStruct = False
+                
+            # Old-Style C struct definition
             if line.count("typedef struct")>0:
                 # We are entering a struct block
                 self.inStruct = True
@@ -351,7 +366,17 @@ class WrapperGenerator:
             # Include file
             basename = os.path.basename(self.file)
             newline = self.replaceToken(newline, 
-                                        "[INCLUDE_FILE]", basename)           
+                                        "[INCLUDE_FILE]", self.file)  
+            if self.foundCPP:
+                newline = self.replaceToken(newline, 
+                                            "[C_INCLUDE_FILE]", "")  
+                newline = self.replaceToken(newline, 
+                                            "[CPP_INCLUDE_FILE]", "#include \"%s\"" % basename)  
+            else:  
+                newline = self.replaceToken(newline, 
+                                            "[C_INCLUDE_FILE]", "#include \"%s\"" % basename)   
+                newline = self.replaceToken(newline, 
+                                            "[CPP_INCLUDE_FILE]", "#include \"models.hh\"")  
                 
             # Numerical calcs dealloc
             dealloc_str = "\n"
