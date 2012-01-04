@@ -32,10 +32,10 @@ extern "C" {
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-#include "[INCLUDE_FILE]"
+[C_INCLUDE_FILE]
 }
 
-#include "models.hh"
+[CPP_INCLUDE_FILE]
 #include "dispersion_visitor.hh"
 
 /// Error object for raised exceptions
