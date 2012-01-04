@@ -211,10 +211,11 @@ ext_modules.append( Extension("park._modeling",
                               ) )
 
 # Sans models
-srcdir  = os.path.join("sansmodels", "src", "sans", "models", "c_extensions")
-igordir = os.path.join("sansmodels", "src","sans", "models", "libigor")
-c_model_dir = os.path.join("sansmodels", "src", "sans", "models", "c_models")
-smear_dir  = os.path.join("sansmodels", "src", "sans", "models", "c_smearer")
+srcdir  = os.path.join("sansmodels", "src", "c_extensions")
+igordir = os.path.join("sansmodels", "src", "libigor")
+c_model_dir = os.path.join("sansmodels", "src", "c_models")
+smear_dir  = os.path.join("sansmodels", "src", "c_smearer")
+wrapper_dir  = os.path.join("sansmodels", "src", "python_wrapper")
 
 IGNORED_FILES = ["a.exe",
                  "__init__.py"
@@ -258,6 +259,8 @@ model_sources = []
 append_file(file_list=model_sources, dir_path=srcdir)
 append_file(file_list=model_sources, dir_path=igordir)
 append_file(file_list=model_sources, dir_path=c_model_dir)
+append_file(file_list=model_sources, dir_path=wrapper_dir)
+
 smear_sources = []
 append_file(file_list=smear_sources, dir_path=smear_dir)
 

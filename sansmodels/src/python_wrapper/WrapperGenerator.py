@@ -396,7 +396,7 @@ class WrapperGenerator:
             The file is written in ../[PYTHONCLASS].py
         """
         
-        file = open("../"+self.pythonClass+'.py', 'w')
+        file = open("../sans/models/"+self.pythonClass+'.py', 'w')
         template = open("modelTemplate.txt", 'r')
         
         tmp_buf = template.read()

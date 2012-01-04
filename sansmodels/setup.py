@@ -47,10 +47,11 @@ class build_ext_subclass( build_ext ):
         build_ext.build_extensions(self)
 
 # Build the module name
-srcdir  = os.path.join("src", "sans", "models", "c_extensions")
-igordir = os.path.join("src","sans", "models", "libigor")
-c_model_dir = os.path.join("src", "sans", "models", "c_models")
-smear_dir  = os.path.join("src", "sans", "models", "c_smearer")
+srcdir  = os.path.join("src", "c_extensions")
+igordir = os.path.join("src", "libigor")
+c_model_dir = os.path.join("src", "c_models")
+smear_dir  = os.path.join("src", "c_smearer")
+wrapper_dir  = os.path.join("src", "python_wrapper")
 print "Installing SANS models"
 
 
@@ -94,6 +95,7 @@ model_sources = []
 append_file(file_list=model_sources, dir_path=srcdir)
 append_file(file_list=model_sources, dir_path=igordir)
 append_file(file_list=model_sources, dir_path=c_model_dir)
+append_file(file_list=model_sources, dir_path=wrapper_dir)
 smear_sources = []
 append_file(file_list=smear_sources, dir_path=smear_dir)
 
@@ -123,11 +125,13 @@ dist = setup(
     packages = ["sans","sans.models",
                 "sans.models.sans_extension",],
     
-    ext_modules = [ Extension("sans.models.sans_extension.c_models",
-                              sources=model_sources,                 
-                              include_dirs=[igordir, srcdir, c_model_dir, numpy_incl_path],   
-                              ),
-    
+    ext_modules = [ 
+                   
+        Extension("sans.models.sans_extension.c_models",
+                    sources=model_sources,                 
+                    include_dirs=[igordir, srcdir, c_model_dir, numpy_incl_path],   
+                    ),
+
         # Smearer extension
         Extension("sans.models.sans_extension.smearer",
                    sources = smearer_sources,
