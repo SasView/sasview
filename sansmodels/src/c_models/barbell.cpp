@@ -20,7 +20,7 @@
  */
 
 #include <math.h>
-#include "models.hh"
+//#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;

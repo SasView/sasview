@@ -48,29 +48,6 @@ public:
 	double evaluate_rphi(double q, double phi);
 };
 
-class BarBellModel{
-public:
-	// Model parameters
-	Parameter scale;
-	Parameter rad_bar;
-	Parameter len_bar;
-	Parameter rad_bell;
-	Parameter sld_barbell;
-	Parameter sld_solv;
-	Parameter background;
-	Parameter theta;
-	Parameter phi;
-
-	// Constructor
-	BarBellModel();
-
-	// Operators to get I(Q)
-	double operator()(double q);
-	double operator()(double qx, double qy);
-	double calculate_ER();
-	double evaluate_rphi(double q, double phi);
-};
-
 class CappedCylinderModel{
 public:
 	// Model parameters

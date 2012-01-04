@@ -1,6 +1,6 @@
 #if !defined(barbell_h)
 #define barbell_h
-
+#include "parameters.hh"
 /**
  * Structure definition for BarBell parameters
  */
@@ -28,52 +28,54 @@
  //[FIXED]=  rad_bar.width;len_bar;rad_bell;phi.width; theta.width
  //[ORIENTATION_PARAMS]= <text> phi; theta; phi.width; theta.width</text>
 
-typedef struct {
-    /// Scale factor
-    //  [DEFAULT]=scale= 1.0
-    double scale;
+class BarBellModel {
+public:
+  // Model parameters
 
-    ///	rad_bar [A]
-    //  [DEFAULT]=rad_bar=20.0 [A]
-    double rad_bar;
+  /// Scale factor
+  //  [DEFAULT]=scale= 1.0
+  Parameter scale;
 
-    ///	length of the bar [A]
-    //  [DEFAULT]=len_bar=400.0 [A]
-    double len_bar;
+  /// rad_bar [A]
+  //  [DEFAULT]=rad_bar=20.0 [A]
+  Parameter rad_bar;
 
-    ///	Radius of sphere [A]
-    //  [DEFAULT]=rad_bell=40.0 [A]
-    double rad_bell;
+  /// length of the bar [A]
+  //  [DEFAULT]=len_bar=400.0 [A]
+  Parameter len_bar;
 
-    ///	sld_barbell [1/A^(2)]
-    //  [DEFAULT]=sld_barbell= 1.0e-6 [1/A^(2)]
-    double sld_barbell;
+  /// Radius of sphere [A]
+  //  [DEFAULT]=rad_bell=40.0 [A]
+  Parameter rad_bell;
 
-    ///	sld_solv [1/A^(2)]
-    //  [DEFAULT]=sld_solv= 6.3e-6 [1/A^(2)]
-    double sld_solv;
+  /// sld_barbell [1/A^(2)]
+  //  [DEFAULT]=sld_barbell= 1.0e-6 [1/A^(2)]
+  Parameter sld_barbell;
 
-	/// Incoherent Background [1/cm]
-	//  [DEFAULT]=background=0.0 [1/cm]
-	double background;
+  /// sld_solv [1/A^(2)]
+  //  [DEFAULT]=sld_solv= 6.3e-6 [1/A^(2)]
+  Parameter sld_solv;
 
-    /// Angle of the main axis against z-axis in detector plane [deg]
-    //  [DEFAULT]=theta=0.0 [deg]
-    double theta;
-    /// Azimuthal angle around z-axis in detector plane [deg]
-    //  [DEFAULT]=phi=0.0 [deg]
-    double phi;
+  /// Incoherent Background [1/cm]
+  //  [DEFAULT]=background=0.0 [1/cm]
+  Parameter background;
 
-} BarBellParameters;
+  /// Angle of the main axis against z-axis in detector plane [deg]
+  //  [DEFAULT]=theta=0.0 [deg]
+  Parameter theta;
 
+  /// Azimuthal angle around z-axis in detector plane [deg]
+  //  [DEFAULT]=phi=0.0 [deg]
+  Parameter phi;
 
+  // Constructor
+  BarBellModel();
 
-/// 1D scattering function
-double barbell_analytical_1D(BarBellParameters *pars, double q);
-
-/// 2D scattering function
-double barbell_analytical_2D(BarBellParameters *pars, double q, double phi);
-double barbell_analytical_2DXY(BarBellParameters *pars, double qx, double qy);
-double barbell_analytical_2D_scaled(BarBellParameters *pars, double q, double q_x, double q_y);
+  // Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx, double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
 #endif
