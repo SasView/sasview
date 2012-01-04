@@ -26,33 +26,6 @@ extern "C" {
 
 using namespace std;
 
-
-
-class ParallelepipedModel{
-public:
-	// Model parameters
-	Parameter scale;
-	Parameter short_a;
-	Parameter short_b;
-	Parameter long_c;
-	Parameter sldPipe;
-	Parameter sldSolv;
-	Parameter background;
-	Parameter parallel_theta;
-	Parameter parallel_phi;
-	Parameter parallel_psi;
-
-	// Constructor
-	ParallelepipedModel();
-
-	// Operators to get I(Q)
-	double operator()(double q);
-	double operator()(double qx, double qy);
-	double calculate_ER();
-	double evaluate_rphi(double q, double phi);
-};
-
-
 class CSParallelepipedModel{
 public:
 	// Model parameters
