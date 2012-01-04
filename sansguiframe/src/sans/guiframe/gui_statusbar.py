@@ -229,6 +229,7 @@ class StatusBar(wxStatusB):
         """ 
         count = 0
         while(count <= 100):
+            print "count=", count
             count += 1
         self.timer_stop.Stop() 
         self.clear_gauge(msg="")
@@ -348,7 +349,9 @@ class SPageStatusbar(wxStatusB):
         wxStatusB.__init__(self, parent, *args, **kwds)
         self.SetFieldsCount(1) 
         self.timeout = timeout
-        self.gauge = wx.Gauge(self,style=wx.GA_HORIZONTAL, size=parent.GetSize())
+        width, height = parent.GetSizeTuple()
+        self.gauge = wx.Gauge(self, style=wx.GA_HORIZONTAL, 
+                              size=(width, height/10))
         rect = self.GetFieldRect(0)
         self.gauge.SetPosition((rect.x , rect.y ))
         if self.timeout is not None:
