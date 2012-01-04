@@ -68,6 +68,7 @@ class WrapperGenerator:
         ## Parser in struct section
         self.inStruct = False
         self.foundCPP = False
+        self.inParDefs = False
         ## Name of struct for the c object
         self.structName = None
         ## Dictionary of parameters
@@ -212,39 +213,31 @@ class WrapperGenerator:
             # C++ class definition
             if line.count("class")>0:
                 # We are entering a class definition
-                self.inStruct = True
+                self.inParDefs = True
                 self.foundCPP = True
-                class_name = line.replace('}','')
-                class_name = class_name.replace('class','')
-                self.inStruct = class_name.strip()
-            
-            if self.inStruct and line.count("}")>0:
-                # We are exiting a struct block
-                self.inStruct = False
                 
             # Old-Style C struct definition
             if line.count("typedef struct")>0:
                 # We are entering a struct block
+                self.inParDefs = True
                 self.inStruct = True
             
-            if self.inStruct and line.count("}")>0:
+            if self.inParDefs and line.count("}")>0:
                 # We are exiting a struct block
-                self.inStruct = False
-    
-                # Catch the name of the struct
-                index = line.index("}")
-                #toks = string.split(line[index+1:],";")
-                toks = line[index+1:].split(";")
-                # Catch pointer definition
-                #toks2 = string.split(toks[0],',')
-                toks2 = toks[0].split(',')
-                self.structName = toks2[0].lstrip().rstrip()
-           
+                self.inParDefs = False
                 
+                if self.inStruct:
+                    self.inStruct = False
+                    # Catch the name of the struct
+                    index = line.index("}")
+                    toks = line[index+1:].split(";")
+                    # Catch pointer definition
+                    toks2 = toks[0].split(',')
+                    self.structName = toks2[0].lstrip().rstrip()
            
             # Catch struct content
             key = "[DEFAULT]"
-            if self.inStruct and line.count(key)>0:
+            if self.inParDefs and line.count(key)>0:
                 # Found a new parameter
                 try:
                     index = line.index(key)
