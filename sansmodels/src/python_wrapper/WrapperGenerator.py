@@ -55,7 +55,7 @@ class WrapperGenerator:
         @contact: mathieu.doucet@nist.gov
     """
     
-    def __init__(self, filename):
+    def __init__(self, filename, output_dir='.'):
         """ Initialization """
         
         ## Name of .h file to generate wrapper from
@@ -89,6 +89,8 @@ class WrapperGenerator:
         self.non_fittable= []
         ## parameters with orientation
         self.orientation_params =[]
+        ## output directory for wrappers
+        self.output_dir = output_dir
         
         
     def __repr__(self):
@@ -288,9 +290,10 @@ class WrapperGenerator:
         """ Writes the C file to create the python extension class 
             The file is written in C[PYTHONCLASS].c
         """
+        file_path = os.path.join(self.output_dir, "C"+self.pythonClass+'.cpp')
+        file = open(file_path, 'w')
         
-        file = open("C"+self.pythonClass+'.cpp', 'w')
-        template = open("classTemplate.txt", 'r')
+        template = open(os.path.join(os.path.dirname(__file__), "classTemplate.txt"), 'r')
         
         tmp_buf = template.read()
         #tmp_lines = string.split(tmp_buf,'\n')
@@ -413,9 +416,9 @@ class WrapperGenerator:
         """ Writes the python file to create the python extension class 
             The file is written in ../[PYTHONCLASS].py
         """
-        
-        file = open("../sans/models/"+self.pythonClass+'.py', 'w')
-        template = open("modelTemplate.txt", 'r')
+        file_path = os.path.join(self.output_dir, "../sans/models/"+self.pythonClass+'.py')
+        file = open(file_path, 'w')
+        template = open(os.path.join(os.path.dirname(__file__), "modelTemplate.txt"), 'r')
         
         tmp_buf = template.read()
         tmp_lines = tmp_buf.split('\n')

@@ -217,6 +217,10 @@ c_model_dir = os.path.join("sansmodels", "src", "c_models")
 smear_dir  = os.path.join("sansmodels", "src", "c_smearer")
 wrapper_dir  = os.path.join("sansmodels", "src", "python_wrapper")
 
+sys.path.append(wrapper_dir)
+from wrapping import generate_wrappers
+generate_wrappers(header_dir=srcdir, output_dir=wrapper_dir)
+
 IGNORED_FILES = ["a.exe",
                  "__init__.py"
                  ".svn",
