@@ -21,14 +21,13 @@
  */
 
 #include <math.h>
-#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
+#include "StickyHS.h"
 
 extern "C" {
 	#include "libStructureFactor.h"
-	#include "StickyHS.h"
 }
 
 StickyHSStructure :: StickyHSStructure() {

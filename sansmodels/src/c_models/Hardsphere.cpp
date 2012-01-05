@@ -21,21 +21,20 @@
  */
 
 #include <math.h>
-#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
+#include "Hardsphere.h"
 
 extern "C" {
-	#include "libStructureFactor.h"
-	#include "Hardsphere.h"
+#include "libStructureFactor.h"
 }
 
 HardsphereStructure :: HardsphereStructure() {
-	effect_radius      = Parameter(50.0, true);
-	effect_radius.set_min(0.0);
-	volfraction = Parameter(0.20, true);
-	volfraction.set_min(0.0);
+  effect_radius      = Parameter(50.0, true);
+  effect_radius.set_min(0.0);
+  volfraction = Parameter(0.20, true);
+  volfraction.set_min(0.0);
 }
 
 /**
@@ -45,30 +44,30 @@ HardsphereStructure :: HardsphereStructure() {
  * @return: function value
  */
 double HardsphereStructure :: operator()(double q) {
-	double dp[2];
+  double dp[2];
 
-	// Fill parameter array for IGOR library
-	// Add the background after averaging
-	dp[0] = effect_radius();
-	dp[1] = volfraction();
+  // Fill parameter array for IGOR library
+  // Add the background after averaging
+  dp[0] = effect_radius();
+  dp[1] = volfraction();
 
-	// Get the dispersion points for the radius
-	vector<WeightPoint> weights_rad;
-	effect_radius.get_weights(weights_rad);
+  // Get the dispersion points for the radius
+  vector<WeightPoint> weights_rad;
+  effect_radius.get_weights(weights_rad);
 
-	// Perform the computation, with all weight points
-	double sum = 0.0;
-	double norm = 0.0;
+  // Perform the computation, with all weight points
+  double sum = 0.0;
+  double norm = 0.0;
 
-	// Loop over radius weight points
-	for(size_t i=0; i<weights_rad.size(); i++) {
-		dp[0] = weights_rad[i].value;
+  // Loop over radius weight points
+  for(size_t i=0; i<weights_rad.size(); i++) {
+    dp[0] = weights_rad[i].value;
 
-		sum += weights_rad[i].weight
-				* HardSphereStruct(dp, q);
-		norm += weights_rad[i].weight;
-	}
-	return sum/norm ;
+    sum += weights_rad[i].weight
+        * HardSphereStruct(dp, q);
+    norm += weights_rad[i].weight;
+  }
+  return sum/norm ;
 }
 
 /**
@@ -78,8 +77,8 @@ double HardsphereStructure :: operator()(double q) {
  * @return: function value
  */
 double HardsphereStructure :: operator()(double qx, double qy) {
-	double q = sqrt(qx*qx + qy*qy);
-	return (*this).operator()(q);
+  double q = sqrt(qx*qx + qy*qy);
+  return (*this).operator()(q);
 }
 
 /**
@@ -90,15 +89,15 @@ double HardsphereStructure :: operator()(double qx, double qy) {
  * @return: function value
  */
 double HardsphereStructure :: evaluate_rphi(double q, double phi) {
-	double qx = q*cos(phi);
-	double qy = q*sin(phi);
-	return (*this).operator()(qx, qy);
+  double qx = q*cos(phi);
+  double qy = q*sin(phi);
+  return (*this).operator()(qx, qy);
 }
 /**
  * Function to calculate effective radius
  * @return: effective radius value
  */
 double HardsphereStructure :: calculate_ER() {
-//NOT implemented yet!!!
+  //NOT implemented yet!!!
   return 0.0;
 }

@@ -1,8 +1,9 @@
 #if !defined(SquareWell_h)
 #define SquareWell_h
+#include "parameters.hh"
 
 /**Structure definition for SquareWell parameters
-*/
+ */
 //   [PYTHONCLASS] = SquareWellStructure
 //   [DISP_PARAMS] = effect_radius
 //   [DESCRIPTION] = <text> Structure Factor for interacting particles:             .
@@ -25,33 +26,33 @@
 //   [FIXED]= effect_radius.width
 //[ORIENTATION_PARAMS]= <text> </text>
 
+class SquareWellStructure{
+public:
+  // Model parameters
+  /// effective radius of particle [A]
+  //  [DEFAULT]=effect_radius=50.0 [A]
+  Parameter effect_radius;
 
-typedef struct {
-    ///	effective radius of particle [A]
-    //  [DEFAULT]=effect_radius=50.0 [A]
-    double effect_radius;
+  /// Volume fraction
+  //  [DEFAULT]=volfraction= 0.040
+  Parameter volfraction;
 
-    /// Volume fraction
-    //  [DEFAULT]=volfraction= 0.040
-    double volfraction;
+  /// Well depth [kT]
+  //  [DEFAULT]=welldepth= 1.50 [kT]
+  Parameter welldepth;
 
-    ///	Well depth [kT]
-    //  [DEFAULT]=welldepth= 1.50 [kT]
-    double welldepth;
+  /// Well width
+  //  [DEFAULT]=wellwidth= 1.20
+  Parameter wellwidth;
 
-    ///	Well width
-    //  [DEFAULT]=wellwidth= 1.20
-    double wellwidth;
+  // Constructor
+  SquareWellStructure();
 
-} SquareWellParameters;
-
-
-
-/// 1D scattering function
-//double SquareWell_analytical_1D(SquareWellParameters *pars, double q);
-
-/// 2D scattering function
-//double SquareWell_analytical_2D(SquareWellParameters *pars, double q, double phi);
-//double SquareWell_analytical_2DXY(SquareWellParameters *pars, double qx, double qy);
+  // Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx, double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
 #endif

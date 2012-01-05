@@ -216,7 +216,8 @@ igordir = os.path.join("sansmodels", "src", "libigor")
 c_model_dir = os.path.join("sansmodels", "src", "c_models")
 smear_dir  = os.path.join("sansmodels", "src", "c_smearer")
 wrapper_dir  = os.path.join("sansmodels", "src", "python_wrapper", "generated")
-os.makedirs(wrapper_dir)
+if not os.path.isdir(wrapper_dir):
+    os.makedirs(wrapper_dir)
 
 sys.path.append(os.path.join("sansmodels", "src", "python_wrapper"))
 from wrapping import generate_wrappers

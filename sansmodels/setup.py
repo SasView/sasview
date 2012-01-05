@@ -54,6 +54,11 @@ smear_dir  = os.path.join("src", "c_smearer")
 wrapper_dir  = os.path.join("src", "python_wrapper")
 print "Installing SANS models"
 
+sys.path.append(wrapper_dir)
+from wrapping import generate_wrappers
+generate_wrappers(header_dir=srcdir, 
+                  output_dir=os.path.join("src", "sans", "models"), 
+                  c_wrapper_dir=wrapper_dir)
 
 IGNORED_FILES = ["a.exe",
                  "__init__.py"

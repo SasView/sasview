@@ -17,18 +17,16 @@
  * The classes use the IGOR library found in
  *   sansmodels/src/libigor
  *
- *	TODO: refactor so that we pull in the old sansmodels.c_extensions
  */
 
 #include <math.h>
-#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
+#include "DiamCyl.h"
 
 extern "C" {
 	#include "libStructureFactor.h"
-	#include "DiamCyl.h"
 }
 
 DiamCylFunc :: DiamCylFunc() {
@@ -111,38 +109,3 @@ double DiamCylFunc :: calculate_ER() {
 //NOT implemented yet!!!
   return 0.0;
 }
-// Testing code
-
-/**
-int main(void)
-{
-	DiamCylFunc c = DiamCylFunc();
-
-	printf("I(Qx=%g,Qy=%g) = %g\n", 0.001, 0.001, c(0.001, 0.001));
-	printf("I(Q=%g) = %g\n", 0.001, c(0.001));
-	c.radius.dispersion = new GaussianDispersion();
-	c.radius.dispersion->npts = 100;
-	c.radius.dispersion->width = 20;
-
-	//c.length.dispersion = GaussianDispersion();
-	//c.length.dispersion.npts = 20;
-	//c.length.dispersion.width = 65;
-
-	//printf("I(Q=%g) = %g\n", 0.001, c(0.001));
-	//printf("I(Q=%g) = %g\n", 0.001, c(0.001));
-	//printf("I(Qx=%g, Qy=%g) = %g\n", 0.001, 0.001, c(0.001, 0.001));
-	//printf("I(Q=%g,  Phi=%g) = %g\n", 0.00447, .7854, c.evaluate_rphi(sqrt(0.00002), .7854));
-
-
-
-	double i_avg = c(0.01, 0.01);
-	double i_1d = c(sqrt(0.0002));
-
-	printf("\nI(Qx=%g, Qy=%g) = %g\n", 0.01, 0.01, i_avg);
-	printf("I(Q=%g)         = %g\n", sqrt(0.0002), i_1d);
-	printf("ratio %g %g\n", i_avg/i_1d, i_1d/i_avg);
-
-
-	return 0;
-}
- **/

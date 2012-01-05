@@ -1,81 +1,83 @@
 #if !defined(bcc_h)
 #define bcc_h
+#include "parameters.hh"
 
 /**
  * Structure definition for BCC_ParaCrystal parameters
  */
- //[PYTHONCLASS] = BCCrystalModel
- //[DISP_PARAMS] = radius,phi, psi, theta
- //[DESCRIPTION] =<text>P(q)=(scale/Vp)*V_lattice*P(q)*Z(q)+bkg where scale is the volume
- //					 fraction of sphere,
- //				Vp = volume of the primary particle,
- //				V_lattice = volume correction for
- //					for the crystal structure,
- //				P(q)= form factor of the sphere (normalized),
- //				Z(q)= paracrystalline structure factor
- //					for a face centered cubic structure.
- //				[Body Centered Cubic ParaCrystal Model]
- //				Parameters;
- //				scale: volume fraction of spheres
- //				bkg:background, R: radius of sphere
- //				dnn: Nearest neighbor distance
- //				d_factor: Paracrystal distortion factor
- //				radius: radius of the spheres
- //				sldSph: SLD of the sphere
- //				sldSolv: SLD of the solvent
- //
- //		</text>
- //[FIXED]=  radius.width;phi.width;psi.width; theta.width
- //[ORIENTATION_PARAMS]= <text> phi;psi; theta; phi.width;psi.width; theta.width</text>
+//[PYTHONCLASS] = BCCrystalModel
+//[DISP_PARAMS] = radius,phi, psi, theta
+//[DESCRIPTION] =<text>P(q)=(scale/Vp)*V_lattice*P(q)*Z(q)+bkg where scale is the volume
+//					 fraction of sphere,
+//				Vp = volume of the primary particle,
+//				V_lattice = volume correction for
+//					for the crystal structure,
+//				P(q)= form factor of the sphere (normalized),
+//				Z(q)= paracrystalline structure factor
+//					for a face centered cubic structure.
+//				[Body Centered Cubic ParaCrystal Model]
+//				Parameters;
+//				scale: volume fraction of spheres
+//				bkg:background, R: radius of sphere
+//				dnn: Nearest neighbor distance
+//				d_factor: Paracrystal distortion factor
+//				radius: radius of the spheres
+//				sldSph: SLD of the sphere
+//				sldSolv: SLD of the solvent
+//
+//		</text>
+//[FIXED]=  radius.width;phi.width;psi.width; theta.width
+//[ORIENTATION_PARAMS]= <text> phi;psi; theta; phi.width;psi.width; theta.width</text>
 
-typedef struct {
-    /// Scale factor
-    //  [DEFAULT]=scale= 1.0
-    double scale;
+class BCCrystalModel{
+public:
+  // Model parameters
+  /// Scale factor
+  //  [DEFAULT]=scale= 1.0
+  Parameter scale;
 
-    ///	Nearest neighbor distance [A]
-    //  [DEFAULT]=dnn=220.0 [A]
-    double dnn;
+  /// Nearest neighbor distance [A]
+  //  [DEFAULT]=dnn=220.0 [A]
+  Parameter dnn;
 
-    ///	Paracrystal distortion factor g
-    //  [DEFAULT]=d_factor=0.06
-    double d_factor;
+  /// Paracrystal distortion factor g
+  //  [DEFAULT]=d_factor=0.06
+  Parameter d_factor;
 
-    ///	Radius of sphere [A]
-    //  [DEFAULT]=radius=40.0 [A]
-    double radius;
+  /// Radius of sphere [A]
+  //  [DEFAULT]=radius=40.0 [A]
+  Parameter radius;
 
-    ///	sldSph [1/A^(2)]
-    //  [DEFAULT]=sldSph= 3.0e-6 [1/A^(2)]
-    double sldSph;
+  /// sldSph [1/A^(2)]
+  //  [DEFAULT]=sldSph= 3.0e-6 [1/A^(2)]
+  Parameter sldSph;
 
-    ///	sldSolv [1/A^(2)]
-    //  [DEFAULT]=sldSolv= 6.3e-6 [1/A^(2)]
-    double sldSolv;
+  /// sldSolv [1/A^(2)]
+  //  [DEFAULT]=sldSolv= 6.3e-6 [1/A^(2)]
+  Parameter sldSolv;
 
-	/// Incoherent Background [1/cm]
-	//  [DEFAULT]=background=0 [1/cm]
-	double background;
-    /// Orientation of the a1 axis w/respect incoming beam [deg]
-    //  [DEFAULT]=theta=0.0 [deg]
-    double theta;
-    /// Orientation of the a2 in the plane of the detector [deg]
-    //  [DEFAULT]=phi=0.0 [deg]
-    double phi;
-    /// Orientation of the a3 in the plane of the detector [deg]
-    //  [DEFAULT]=psi=0.0 [deg]
-    double psi;
+  /// Incoherent Background [1/cm]
+  //  [DEFAULT]=background=0 [1/cm]
+  Parameter background;
+  /// Orientation of the a1 axis w/respect incoming beam [deg]
+  //  [DEFAULT]=theta=0.0 [deg]
+  Parameter theta;
+  /// Orientation of the a2 in the plane of the detector [deg]
+  //  [DEFAULT]=phi=0.0 [deg]
+  Parameter phi;
+  /// Orientation of the a3 in the plane of the detector [deg]
+  //  [DEFAULT]=psi=0.0 [deg]
+  Parameter psi;
 
-} BCParameters;
+  // Constructor
+  BCCrystalModel();
 
+  // Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx, double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
-
-/// 1D scattering function
-double bc_analytical_1D(BCParameters *pars, double q);
-
-/// 2D scattering function
-double bc_analytical_2D(BCParameters *pars, double q, double phi);
-double bc_analytical_2DXY(BCParameters *pars, double qx, double qy);
-double bc_analytical_2D_scaled(BCParameters *pars, double q, double q_x, double q_y);
 
 #endif

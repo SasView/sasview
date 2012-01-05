@@ -5,13 +5,47 @@
  */
 
 #include <math.h>
-#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
+#include "sld_cal.h"
 
 extern "C" {
-	#include "sld_cal.h"
+#include "libmultifunc/librefl.h"
+}
+
+// Convenience structure
+typedef struct {
+    double fun_type;
+    double npts_inter;
+    double shell_num;
+    double nu_inter;
+    double sld_left;
+    double sld_right;
+} SLDCalParameters;
+
+/**
+ * Function to calculate sld
+ * @param pars: parameters
+ * @param x: independent param-value
+ * @return: sld value
+ */
+static double sld_cal_analytical_1D(SLDCalParameters *pars, double x) {
+  double fun, nsl, n_s, fun_coef, sld_l, sld_r, sld_out;
+  int fun_type;
+
+  fun = pars->fun_type;
+  nsl = pars->npts_inter;
+  n_s = pars->shell_num;
+  fun_coef = pars->nu_inter;
+  sld_l = pars-> sld_left;
+  sld_r = pars-> sld_right;
+
+  fun_type = floor(fun);
+
+  sld_out = intersldfunc(fun_type, nsl, n_s, fun_coef, sld_l, sld_r);
+
+  return sld_out;
 }
 
 SLDCalFunc :: SLDCalFunc() {

@@ -1,5 +1,6 @@
 #if !defined(sld_cal_h)
 #define sld_cal_h
+#include "parameters.hh"
 
 /**
  * To calculate the sld value
@@ -11,40 +12,44 @@
 			</text>
 
  **/
-typedef struct {
-    ///	fun_type
-    //  [DEFAULT]=fun_type=0
-    double fun_type;
 
-    /// npts_inter
-    //  [DEFAULT]=npts_inter= 21
-    double npts_inter;
+class SLDCalFunc{
+public:
+  // Model parameters
+  /// fun_type
+  //  [DEFAULT]=fun_type=0
+  Parameter fun_type;
 
-    /// shell_num
-    //  [DEFAULT]=shell_num= 0
-    double shell_num;
+  /// npts_inter
+  //  [DEFAULT]=npts_inter= 21
+  Parameter npts_inter;
 
-    /// nu_inter
-    //  [DEFAULT]=nu_inter= 2.5
-    double nu_inter;
+  /// shell_num
+  //  [DEFAULT]=shell_num= 0
+  Parameter shell_num;
 
-    /// sld_left [1/A^(2)]
-    //  [DEFAULT]=sld_left= 0 [1/A^(2)]
-    double sld_left;
+  /// nu_inter
+  //  [DEFAULT]=nu_inter= 2.5
+  Parameter nu_inter;
 
-    /// sld_right [1/A^(2)]
-    //  [DEFAULT]=sld_right= 0 [1/A^(2)]
-    double sld_right;
+  /// sld_left [1/A^(2)]
+  //  [DEFAULT]=sld_left= 0 [1/A^(2)]
+  Parameter sld_left;
 
-} SLDCalParameters;
+  /// sld_right [1/A^(2)]
+  //  [DEFAULT]=sld_right= 0 [1/A^(2)]
+  Parameter sld_right;
+
+  // Constructor
+  SLDCalFunc();
+
+  // Operators to get SLD
+  double operator()(double q);
+  double operator()(double qx, double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
 
-
-/// 1D function
-double sld_cal_analytical_1D(SLDCalParameters *pars, double q);
-
-/// 2D function
-double sld_cal_analytical_2D(SLDCalParameters *pars, double q, double phi);
-double sld_cal_analytical_2DXY(SLDCalParameters *pars, double qx, double qy);
 
 #endif

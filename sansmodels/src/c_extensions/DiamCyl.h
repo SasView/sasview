@@ -1,5 +1,6 @@
 #if !defined(DiamCyl_h)
 #define DiamCyl_h
+#include "parameters.hh"
 
 /**
 * To calculate the 2nd virial coefficient
@@ -15,24 +16,24 @@
 			</text>
 **/
 
-typedef struct {
-    ///	Radius [A]
-    //  [DEFAULT]=radius=20.0 A
-    double radius;
+class DiamCylFunc{
+public:
+  // Model parameters
+  /// Radius [A]
+  //  [DEFAULT]=radius=20.0 A
+  Parameter radius;
+  /// Length [A]
+  //  [DEFAULT]=length= 400 A
+  Parameter length;
 
-    /// Length [A]
-    //  [DEFAULT]=length= 400 A
-    double length;
+  // Constructor
+  DiamCylFunc();
 
-} DiamCyldParameters;
-
-
-
-/// 1D scattering function
-//double DiamCyld_analytical_1D(DiamCyldParameters *pars, double q);
-
-/// 2D scattering function
-//double DiamCyld_analytical_2D(DiamCyldParameters *pars, double q, double phi);
-//double DiamCyld_analytical_2DXY(DiamCyldParameters *pars, double qx, double qy);
+  // Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx, double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
 #endif

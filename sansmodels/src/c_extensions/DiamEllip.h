@@ -1,5 +1,6 @@
 #if !defined(DiamEllip_h)
 #define DiamEllip_h
+#include "parameters.hh"
 
 /**
  * To calculate the 2nd virial coefficient
@@ -19,24 +20,26 @@
 			</text>
 
  **/
-typedef struct {
-    ///	Polar radius [A]
-    //  [DEFAULT]=radius_a=20.0 A
-    double radius_a;
 
-    /// Equatorial radius [A]
-    //  [DEFAULT]=radius_b= 400 A
-    double radius_b;
+class DiamEllipFunc{
+public:
+  // Model parameters
+  /// Polar radius [A]
+  //  [DEFAULT]=radius_a=20.0 A
+  Parameter radius_a;
 
-} DiamEllipsParameters;
+  /// Equatorial radius [A]
+  //  [DEFAULT]=radius_b= 400 A
+  Parameter radius_b;
 
+  // Constructor
+  DiamEllipFunc();
 
-
-/// 1D scattering function
-//double DiamEllips_analytical_1D(DiamEllipsParameters *pars, double q);
-
-/// 2D scattering function
-//double DiamEllips_analytical_2D(DiamEllipsParameters *pars, double q, double phi);
-//double DiamEllips_analytical_2DXY(DiamEllipsParameters *pars, double qx, double qy);
+  // Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx, double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
 #endif

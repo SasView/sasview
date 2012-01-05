@@ -1,5 +1,6 @@
 #if !defined(fcc_h)
 #define fcc_h
+#include "parameters.hh"
 
 /**
  * Structure definition for FCC_ParaCrystal parameters
@@ -28,54 +29,54 @@
  //[FIXED]=  radius.width;phi.width;psi.width; theta.width
  //[ORIENTATION_PARAMS]= <text> phi;psi; theta; phi.width;psi.width; theta.width</text>
 
-typedef struct {
-    /// Scale factor
-    //  [DEFAULT]=scale= 1.0
-    double scale;
+class FCCrystalModel{
+public:
+  // Model parameters
+  /// Scale factor
+  //  [DEFAULT]=scale= 1.0
+  Parameter scale;
 
-    ///	Nearest neighbor distance [A]
-    //  [DEFAULT]=dnn=220.0 [A]
-    double dnn;
+  /// Nearest neighbor distance [A]
+  //  [DEFAULT]=dnn=220.0 [A]
+  Parameter dnn;
 
-    ///	Paracrystal distortion factor g
-    //  [DEFAULT]=d_factor=0.06
-    double d_factor;
+  /// Paracrystal distortion factor g
+  //  [DEFAULT]=d_factor=0.06
+  Parameter d_factor;
 
-    ///	Radius of sphere [A]
-    //  [DEFAULT]=radius=40.0 [A]
-    double radius;
+  /// Radius of sphere [A]
+  //  [DEFAULT]=radius=40.0 [A]
+  Parameter radius;
 
-    ///	sldSph [1/A^(2)]
-    //  [DEFAULT]=sldSph= 3.0e-6 [1/A^(2)]
-    double sldSph;
+  /// sldSph [1/A^(2)]
+  //  [DEFAULT]=sldSph= 3.0e-6 [1/A^(2)]
+  Parameter sldSph;
 
-    ///	sldSolv [1/A^(2)]
-    //  [DEFAULT]=sldSolv= 6.3e-6 [1/A^(2)]
-    double sldSolv;
+  /// sldSolv [1/A^(2)]
+  //  [DEFAULT]=sldSolv= 6.3e-6 [1/A^(2)]
+  Parameter sldSolv;
 
-	/// Incoherent Background [1/cm]
-	//  [DEFAULT]=background=0 [1/cm]
-	double background;
-    /// Orientation of the a1 axis w/respect incoming beam [deg]
-    //  [DEFAULT]=theta=0.0 [deg]
-    double theta;
-    /// Orientation of the a2 in the plane of the detector [deg]
-    //  [DEFAULT]=phi=0.0 [deg]
-    double phi;
-    /// Orientation of the a3 in the plane of the detector [deg]
-    //  [DEFAULT]=psi=0.0 [deg]
-    double psi;
+/// Incoherent Background [1/cm]
+//  [DEFAULT]=background=0 [1/cm]
+Parameter background;
+  /// Orientation of the a1 axis w/respect incoming beam [deg]
+  //  [DEFAULT]=theta=0.0 [deg]
+  Parameter theta;
+  /// Orientation of the a2 in the plane of the detector [deg]
+  //  [DEFAULT]=phi=0.0 [deg]
+  Parameter phi;
+  /// Orientation of the a3 in the plane of the detector [deg]
+  //  [DEFAULT]=psi=0.0 [deg]
+  Parameter psi;
 
-} FCParameters;
+  // Constructor
+  FCCrystalModel();
 
-
-
-/// 1D scattering function
-double fc_analytical_1D(FCParameters *pars, double q);
-
-/// 2D scattering function
-double fc_analytical_2D(FCParameters *pars, double q, double phi);
-double fc_analytical_2DXY(FCParameters *pars, double qx, double qy);
-double fc_analytical_2D_scaled(FCParameters *pars, double q, double q_x, double q_y);
+  // Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx, double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
 #endif
