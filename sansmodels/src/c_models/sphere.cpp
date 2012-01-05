@@ -24,10 +24,10 @@
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
+#include "sphere.h"
 
 extern "C" {
 	#include "libSphere.h"
-	#include "sphere.h"
 }
 
 SphereModel :: SphereModel() {

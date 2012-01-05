@@ -1,5 +1,6 @@
 #if !defined(sphere_h)
 #define sphere_h
+#include "parameters.hh"
 
 /**
  * Structure definition for sphere parameters
@@ -18,35 +19,38 @@
  //[FIXED]=  radius.width
  //[ORIENTATION_PARAMS]= <text> </text>
 
-typedef struct {
-    /// Scale factor
-    //  [DEFAULT]=scale= 1.0
-    double scale;
+class SphereModel{
+public:
+  // Model parameters
+  /// Scale factor
+  //  [DEFAULT]=scale= 1.0
+  Parameter scale;
 
-    ///	Radius of sphere [A]
-    //  [DEFAULT]=radius=60.0 [A]
-    double radius;
+  /// Radius of sphere [A]
+  //  [DEFAULT]=radius=60.0 [A]
+  Parameter radius;
 
-    ///	sldSph [1/A^(2)]
-    //  [DEFAULT]=sldSph= 2.0e-6 [1/A^(2)]
-    double sldSph;
+  /// sldSph [1/A^(2)]
+  //  [DEFAULT]=sldSph= 2.0e-6 [1/A^(2)]
+  Parameter sldSph;
 
-    ///	sldSolv [1/A^(2)]
-    //  [DEFAULT]=sldSolv= 1.0e-6 [1/A^(2)]
-    double sldSolv;
+  /// sldSolv [1/A^(2)]
+  //  [DEFAULT]=sldSolv= 1.0e-6 [1/A^(2)]
+  Parameter sldSolv;
 
-	/// Incoherent Background [1/cm]
-	//  [DEFAULT]=background=0 [1/cm]
-	double background;
-} SphereParameters;
+/// Incoherent Background [1/cm]
+//  [DEFAULT]=background=0 [1/cm]
+Parameter background;
 
+  // Constructor
+  SphereModel();
 
+  // Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx, double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
-/// 1D scattering function
-//double sphere_analytical_1D(SphereParameters *pars, double q);
-
-/// 2D scattering function
-//double sphere_analytical_2D(SphereParameters *pars, double q, double phi);
-//double sphere_analytical_2DXY(SphereParameters *pars, double qx, double qy);
 
 #endif

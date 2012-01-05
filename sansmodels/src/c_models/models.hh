@@ -29,25 +29,6 @@ using namespace std;
 
 
 
-class SphereModel{
-public:
-	// Model parameters
-	Parameter radius;
-	Parameter scale;
-	Parameter sldSph;
-	Parameter sldSolv;
-	Parameter background;
-
-	// Constructor
-	SphereModel();
-
-	// Operators to get I(Q)
-	double operator()(double q);
-	double operator()(double qx, double qy);
-	double calculate_ER();
-	double evaluate_rphi(double q, double phi);
-};
-
 
 class SphereSLDModel{
 public:
