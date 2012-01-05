@@ -1,9 +1,11 @@
 /*
 	TODO: Add 2D model
-*/
+ */
 
 #if !defined(lamellarPS_h)
 #define lamellarPS_h
+#include "parameters.hh"
+
 /** Structure definition for concentrated lamellar form factor parameters
  * [PYTHONCLASS] = LamellarPSModel
  * [DISP_PARAMS] = delta, spacing
@@ -18,7 +20,7 @@
 		be applied to large, multi-lamellar vesicles.
 		No resolution smeared version is included
 		in the structure factor of this model.
-		*Parameters: spacing = repeat spacing,
+ *Parameters: spacing = repeat spacing,
 		delta = bilayer thickness,
 		sld_bi = SLD_bilayer
 		sld_sol = SLD_solvent
@@ -31,41 +33,42 @@
    [ORIENTATION_PARAMS]=
 
  **/
-typedef struct {
-    /// Scale factor
-    //  [DEFAULT]=scale=1.0
-    double scale;
-    /// repeat spacing of the lamellar [A]
-    //  [DEFAULT]=spacing=400 [A]
-    double spacing;
-	/// bilayer thicknes [A]
-    //  [DEFAULT]=delta=30 [A]
-    double delta;
-    /// SLD of bilayer [1/A^(2)]
-    //  [DEFAULT]=sld_bi=6.3e-6 [1/A^(2)]
-    double sld_bi;
-    /// SLD of solvent [1/A^(2)]
-    //  [DEFAULT]=sld_sol=1.0e-6 [1/A^(2)]
-    double sld_sol;
-	 /// Number of lamellar plates
-    //  [DEFAULT]=n_plates=20
-    double n_plates;
-    /// caille parameters
-    //  [DEFAULT]=caille=0.1
-    double caille;
-	/// Incoherent Background [1/cm]
-	//  [DEFAULT]=background=0.0 [1/cm]
-	double background;
 
-} LamellarPSParameters;
+class LamellarPSModel{
+public:
+  // Model parameters
+  /// Scale factor
+  //  [DEFAULT]=scale=1.0
+  Parameter scale;
+  /// repeat spacing of the lamellar [A]
+  //  [DEFAULT]=spacing=400 [A]
+  Parameter spacing;
+  /// bilayer thicknes [A]
+  //  [DEFAULT]=delta=30 [A]
+  Parameter delta;
+  /// SLD of bilayer [1/A^(2)]
+  //  [DEFAULT]=sld_bi=6.3e-6 [1/A^(2)]
+  Parameter sld_bi;
+  /// SLD of solvent [1/A^(2)]
+  //  [DEFAULT]=sld_sol=1.0e-6 [1/A^(2)]
+  Parameter sld_sol;
+  /// Number of lamellar plates
+  //  [DEFAULT]=n_plates=20
+  Parameter n_plates;
+  /// caille parameters
+  //  [DEFAULT]=caille=0.1
+  Parameter caille;
+  /// Incoherent Background [1/cm]
+  //  [DEFAULT]=background=0.0 [1/cm]
+  Parameter background;
+  // Constructor
+  LamellarPSModel();
 
-/// kernel
-double LamellarPS_kernel(double dp[], double q);
-/// 1D scattering function
-double lamellarPS_analytical_1D(LamellarPSParameters *pars, double q);
-
-/// 2D scattering function
-double lamellarPS_analytical_2D(LamellarPSParameters *pars, double q, double phi);
-double lamellarPS_analytical_2DXY(LamellarPSParameters *pars, double qx, double qy);
+  // Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx, double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
 #endif

@@ -232,7 +232,6 @@ IGNORED_FILES = ["a.exe",
                    "run.py",
                    "CGaussian.cpp",
                    "CLogNormal.cpp",
-                   "CLorentzian.cpp",
                    "CSchulz.cpp",
                    "WrapperGenerator.py",
                    "wrapping.py"

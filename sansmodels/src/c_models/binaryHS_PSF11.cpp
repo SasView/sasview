@@ -20,7 +20,6 @@
  */
 
 #include <math.h>
-#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
@@ -28,6 +27,28 @@ using namespace std;
 extern "C" {
 	#include "libSphere.h"
 }
+
+class BinaryHSPSF11Model{
+public:
+  // Model parameters
+  Parameter l_radius;
+  Parameter s_radius;
+  Parameter vol_frac_ls;
+  Parameter vol_frac_ss;
+  Parameter ls_sld;
+  Parameter ss_sld;
+  Parameter solvent_sld;
+  Parameter background;
+
+  //Constructor
+  BinaryHSPSF11Model();
+
+  //Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx , double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
 BinaryHSPSF11Model :: BinaryHSPSF11Model() {
 

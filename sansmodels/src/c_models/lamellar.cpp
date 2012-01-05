@@ -17,18 +17,41 @@
  * The classes use the IGOR library found in
  *   sansmodels/src/libigor
  *
- *	TODO: refactor so that we pull in the old sansmodels.c_extensions
  */
 
 #include <math.h>
-#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
+#include "lamellar.h"
 
-extern "C" {
-//	#include "libCylinder.h"
-	#include "lamellar.h"
+/*  LamellarFFX  :  calculates the form factor of a lamellar structure - no S(q) effects included
+            -NO polydispersion included
+*/
+static double lamellar_kernel(double dp[], double q){
+  double scale,del,sld_bi,sld_sol,contr,bkg;    //local variables of coefficient wave
+  double inten, qval,Pq;
+  double Pi;
+
+
+  Pi = 4.0*atan(1.0);
+  scale = dp[0];
+  del = dp[1];
+  sld_bi = dp[2];
+  sld_sol = dp[3];
+  bkg = dp[4];
+  qval = q;
+  contr = sld_bi -sld_sol;
+
+  Pq = 2.0*contr*contr/qval/qval*(1.0-cos(qval*del));
+
+  inten = 2.0*Pi*scale*Pq/(qval*qval);    //this is now dimensionless...
+
+  inten /= del;     //normalize by the thickness (in A)
+
+  inten *= 1.0e8;   // 1/A to 1/cm
+
+  return(inten+bkg);
 }
 
 LamellarModel :: LamellarModel() {
@@ -38,7 +61,6 @@ LamellarModel :: LamellarModel() {
 	sld_bi    = Parameter(1.0e-6);
 	sld_sol    = Parameter(6.3e-6);
 	background = Parameter(0.0);
-
 }
 
 /**

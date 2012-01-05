@@ -1,5 +1,6 @@
 #if !defined(multishell_h)
 #define multishell_h
+#include "parameters.hh"
 
 /**
  * Structure definition for sphere parameters
@@ -19,48 +20,50 @@
 	[FIXED]=  core_radius.width; s_thickness.width; w_thickness.width
 	[ORIENTATION_PARAMS]= <text> </text>
  */
-typedef struct {
-    /// Scale factor
-    //  [DEFAULT]=scale= 1.0
-    double scale;
 
-    ///	Core radius of the multishell [A]
-    //  [DEFAULT]=core_radius=60.0 [A]
-    double core_radius;
+class MultiShellModel{
+public:
+  // Model parameters
+  /// Scale factor
+  //  [DEFAULT]=scale= 1.0
+  Parameter scale;
 
-	///	shell thickness [A]
-    //  [DEFAULT]=s_thickness= 10.0 [A]
-    double s_thickness;
+  /// Core radius of the multishell [A]
+  //  [DEFAULT]=core_radius=60.0 [A]
+  Parameter core_radius;
 
-    ///	water thickness [A]
-    //  [DEFAULT]=w_thickness= 10.0 [A]
-    double w_thickness;
+  /// shell thickness [A]
+  //  [DEFAULT]=s_thickness= 10.0 [A]
+  Parameter s_thickness;
 
-	///	core scattering length density [1/A^(2)]
-    //  [DEFAULT]=core_sld= 6.4e-6 [1/A^(2)]
-    double core_sld;
+  /// water thickness [A]
+  //  [DEFAULT]=w_thickness= 10.0 [A]
+  Parameter w_thickness;
 
-    ///	shell scattering length density [1/A^(2)]
-    //  [DEFAULT]=shell_sld= 4.0e-7 [1/A^(2)]
-    double shell_sld;
+  /// core scattering length density [1/A^(2)]
+  //  [DEFAULT]=core_sld= 6.4e-6 [1/A^(2)]
+  Parameter core_sld;
 
-	///	number of pairs of water and shell
-    //  [DEFAULT]=n_pairs= 2
-    double n_pairs;
+  /// shell scattering length density [1/A^(2)]
+  //  [DEFAULT]=shell_sld= 4.0e-7 [1/A^(2)]
+  Parameter shell_sld;
 
-	/// Incoherent Background [1/cm]
-	//  [DEFAULT]=background=0 [1/cm]
-	double background;
+  /// number of pairs of water and shell
+  //  [DEFAULT]=n_pairs= 2
+  Parameter n_pairs;
 
-} MultiShellParameters;
+  /// Incoherent Background [1/cm]
+  //  [DEFAULT]=background=0 [1/cm]
+  Parameter background;
 
+  //Constructor
+  MultiShellModel();
 
-
-/// 1D scattering function
-//double multishell_analytical_1D(MultiShellParameters *pars, double q);
-
-/// 2D scattering function
-//double multishell_analytical_2D(MultiShellParameters *pars, double q, double phi);
-//double multishell_analytical_2DXY(MultiShellParameters *pars, double qx, double qy);
+  //Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx , double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
 #endif

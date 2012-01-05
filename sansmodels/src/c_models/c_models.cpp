@@ -67,10 +67,10 @@ extern "C" {
 	//void addCEllipticalCylinderModel(PyObject *module);
 	void addDisperser(PyObject *module);
 	void addCGaussian(PyObject *module);
-	void addCLorentzian(PyObject *module);
 	void addCLogNormal(PyObject *module);
 	void addCSchulz(PyObject *module);
 }
+void addCLorentzian(PyObject *module);
 
 /**
  * Delete a dispersion model object

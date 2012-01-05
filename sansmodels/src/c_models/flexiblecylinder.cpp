@@ -17,21 +17,29 @@
  * The classes use the IGOR library found in
  *   sansmodels/src/libigor
  *
- *	TODO: refactor so that we pull in the old sansmodels.c_extensions
  *	TODO: add 2d
  */
 
 #include <math.h>
-#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
+#include "flexible_cylinder.h"
 
 extern "C" {
 	#include "libCylinder.h"
 	#include "libStructureFactor.h"
-	#include "flexible_cylinder.h"
 }
+
+typedef struct {
+  double scale;
+  double length;
+  double kuhn_length;
+  double radius;
+  double sldCyl;
+  double sldSolv;
+  double background;
+} FlexibleCylinderParameters;
 
 FlexibleCylinderModel :: FlexibleCylinderModel() {
 	scale      = Parameter(1.0);

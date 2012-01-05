@@ -1,9 +1,11 @@
 /*
 	TODO: Add 2D model
-*/
+ */
 
 #if !defined(stacked_disks_h)
 #define stacked_disks_h
+#include "parameters.hh"
+
 /** Structure definition for stacked disks parameters
  * [PYTHONCLASS] = StackedDisksModel
  * [DISP_PARAMS] = core_thick, layer_thick, radius, axis_theta, axis_phi
@@ -22,55 +24,56 @@
 
 
  **/
-typedef struct {
-    /// Scale factor
-    //  [DEFAULT]=scale=0.01
-    double scale;
-	/// radius of the staked disk [A]
-    //  [DEFAULT]=radius=3000 [A]
-    double radius;
-    /// Thickness of the core disk [A]
-    //  [DEFAULT]=core_thick=10.0 [A]
-    double core_thick;
-	/// Thickness of the staked disk [A]
-    //  [DEFAULT]=layer_thick=15.0 [A]
-    double layer_thick;
-	/// Core scattering length density[1/A^(2)]
-    //  [DEFAULT]=core_sld=4e-6 [1/A^(2)]
-    double core_sld;
-	/// layer scattering length density[1/A^(2)]
-    //  [DEFAULT]=layer_sld=-4e-7 [1/A^(2)]
-    double layer_sld;
-	/// solvent scattering length density[1/A^(2)]
-    //  [DEFAULT]=solvent_sld=5.0e-6 [1/A^(2)]
-    double solvent_sld;
-    /// number of stacking
-    //  [DEFAULT]=n_stacking=1
-	double n_stacking;
-    /// GSD of disks sigma_d
-    //  [DEFAULT]=sigma_d=0
-    double sigma_d;
-	/// Incoherent Background [1/cm]
-	//  [DEFAULT]=background=0.001 [1/cm]
-	double background;
-    /// Orientation of the staked disk axis w/respect incoming beam [rad]
-    //  [DEFAULT]=axis_theta=0.0 [rad]
-    double axis_theta;
-    /// Orientation of the  staked disk in the plane of the detector [rad]
-    //  [DEFAULT]=axis_phi=0.0 [rad]
-    double axis_phi;
 
+class StackedDisksModel{
+public:
+  // Model parameters
 
-} StackedDisksParameters;
+  /// Scale factor
+  //  [DEFAULT]=scale=0.01
+  Parameter scale;
+  /// Thickness of the core disk [A]
+  //  [DEFAULT]=core_thick=10.0 [A]
+  Parameter core_thick;
+  /// radius of the staked disk [A]
+  //  [DEFAULT]=radius=3000 [A]
+  Parameter radius;
+  /// Thickness of the staked disk [A]
+  //  [DEFAULT]=layer_thick=15.0 [A]
+  Parameter layer_thick;
+  /// Core scattering length density[1/A^(2)]
+  //  [DEFAULT]=core_sld=4e-6 [1/A^(2)]
+  Parameter core_sld;
+  /// layer scattering length density[1/A^(2)]
+  //  [DEFAULT]=layer_sld=-4e-7 [1/A^(2)]
+  Parameter layer_sld;
+  /// solvent scattering length density[1/A^(2)]
+  //  [DEFAULT]=solvent_sld=5.0e-6 [1/A^(2)]
+  Parameter solvent_sld;
+  /// number of stacking
+  //  [DEFAULT]=n_stacking=1
+  Parameter n_stacking;
+  /// GSD of disks sigma_d
+  //  [DEFAULT]=sigma_d=0
+  Parameter sigma_d;
+  /// Incoherent Background [1/cm]
+  //  [DEFAULT]=background=0.001 [1/cm]
+  Parameter background;
+  /// Orientation of the staked disk axis w/respect incoming beam [rad]
+  //  [DEFAULT]=axis_theta=0.0 [rad]
+  Parameter axis_theta;
+  /// Orientation of the  staked disk in the plane of the detector [rad]
+  //  [DEFAULT]=axis_phi=0.0 [rad]
+  Parameter axis_phi;
 
+  // Constructor
+  StackedDisksModel();
 
-
-/// 1D scattering function
-double stacked_disks_analytical_1D(StackedDisksParameters *pars, double q);
-
-/// 2D scattering function
-double stacked_disks_analytical_2D(StackedDisksParameters *pars, double q, double phi);
-double stacked_disks_analytical_2DXY(StackedDisksParameters *pars, double qx, double qy);
-double stacked_disks_analytical_2D_scaled(StackedDisksParameters *pars, double q, double q_x, double q_y);
+  // Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx, double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
 #endif

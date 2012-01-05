@@ -20,14 +20,13 @@
  */
 
 #include <math.h>
-#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
+#include "polygausscoil.h"
 
 extern "C" {
 	#include "libTwoPhase.h"
-	#include "polygausscoil.h"
 }
 
 Poly_GaussCoil :: Poly_GaussCoil() {

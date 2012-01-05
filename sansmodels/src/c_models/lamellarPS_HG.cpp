@@ -17,19 +17,17 @@
  * The classes use the IGOR library found in
  *   sansmodels/src/libigor
  *
- *	TODO: refactor so that we pull in the old sansmodels.c_extensions
  *	TODO: add 2D function
  */
 
 #include <math.h>
-#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
+#include "lamellarPS_HG.h"
 
 extern "C" {
 	#include "libCylinder.h"
-	#include "lamellarPS_HG.h"
 }
 
 LamellarPSHGModel :: LamellarPSHGModel() {
@@ -136,48 +134,3 @@ double LamellarPSHGModel :: calculate_ER() {
 //NOT implemented yet!!!
 	return 0.0;
 }
-
-/*
-double LamellarPSHGModel :: operator()(double qx, double qy) {
-	LamellarPSHGParameters dp;
-	// Fill parameter array
-	dp.scale      = scale();
-	dp.spacing   = spacing();
-	dp.deltaT  = deltaT();
-	dp.deltaH = deltaH();
-	dp.sld_tail   = sld_tail();
-	dp.sld_head = sld_head();
-	dp.sld_solvent   = sld_solvent();
-	dp.n_plates = n_plates();
-	dp.caille = caille();
-	dp.background    = background();
-
-	// Get the dispersion points for the deltaT
-	vector<WeightPoint> weights_deltaT;
-	deltaT.get_weights(weights_deltaT);
-
-	// Get the dispersion points for the deltaH
-	vector<WeightPoint> weights_deltaH;
-	deltaH.get_weights(weights_deltaH);
-
-	// Perform the computation, with all weight points
-	double sum = 0.0;
-	double norm = 0.0;
-
-	// Loop over deltaT weight points
-	for(int i=0; i< (int)weights_deltaT.size(); i++) {
-		dp.deltaT = weights_deltaT[i].value;
-
-		// Loop over deltaH weight points
-		for(int j=0; j< (int)weights_deltaH.size(); j++) {
-			dp.deltaH = weights_deltaH[j].value;
-
-			sum += weights_deltaT[i].weight *weights_deltaH[j].weight *lamellarPS_HG_analytical_2DXY(&dp, qx, qy);
-			norm += weights_deltaT[i].weight * weights_deltaH[j].weight;
-		}
-	}
-	return sum/norm + background();
-}
-*/
-
-

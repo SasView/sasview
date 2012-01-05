@@ -1,48 +1,51 @@
 #if !defined(polygausscoil_h)
 #define polygausscoil_h
+#include "parameters.hh"
 
 /**
  * Structure definition for sphere parameters
  */
- //[PYTHONCLASS] = Poly_GaussCoil
- //[DISP_PARAMS] = rg
- //[DESCRIPTION] =<text>I(q)=(scale)*2*[(1+U*x)^(-1/U)+x-1]/[(1+U)*x^2] + background
- //				where x = [rg^2*q^2]
- //					and the polydispersity is
- //					U = [M_w/M_n]-1.
- //				scale = scale factor * volume fraction
- //				rg = radius of gyration
- //				poly_m = polydispersity of molecular weight
- //				background = incoherent background
- //		</text>
- //[FIXED]=
- //[ORIENTATION_PARAMS]= <text> </text>
+//[PYTHONCLASS] = Poly_GaussCoil
+//[DISP_PARAMS] = rg
+//[DESCRIPTION] =<text>I(q)=(scale)*2*[(1+U*x)^(-1/U)+x-1]/[(1+U)*x^2] + background
+//				where x = [rg^2*q^2]
+//					and the polydispersity is
+//					U = [M_w/M_n]-1.
+//				scale = scale factor * volume fraction
+//				rg = radius of gyration
+//				poly_m = polydispersity of molecular weight
+//				background = incoherent background
+//		</text>
+//[FIXED]=
+//[ORIENTATION_PARAMS]= <text> </text>
 
-typedef struct {
-    /// Scale factor
-    //  [DEFAULT]=scale= 1.0
-    double scale;
+class Poly_GaussCoil{
+public:
+  // Model parameters
+  /// Radius of gyration [A]
+  //  [DEFAULT]=rg=60.0 [A]
+  Parameter rg;
 
-    ///	Radius of gyration [A]
-    //  [DEFAULT]=rg=60.0 [A]
-    double rg;
+  /// Scale factor
+  //  [DEFAULT]=scale= 1.0
+  Parameter scale;
 
-    ///	polydispersity of molecular weight
-    //  [DEFAULT]=poly_m= 2.0 [Mw/Mn]
-    double poly_m;
+  /// polydispersity of molecular weight
+  //  [DEFAULT]=poly_m= 2.0 [Mw/Mn]
+  Parameter poly_m;
 
-	/// Incoherent Background [1/cm]
-	//  [DEFAULT]=background=0.001 [1/cm]
-	double background;
-} PolyGaussCoilParameters;
+  /// Incoherent Background [1/cm]
+  //  [DEFAULT]=background=0.001 [1/cm]
+  Parameter background;
 
+  // Constructor
+  Poly_GaussCoil();
 
-
-/// 1D scattering function
-//double polygausscoil_analytical_1D(PolyGaussCoilParameters *pars, double q);
-
-/// 2D scattering function
-//double polygausscoil_analytical_2D(PolyGaussCoilParameters *pars, double q, double phi);
-//double polygausscoil_analytical_2DXY(PolyGaussCoilParameters *pars, double qx, double qy);
+  // Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx, double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
 #endif

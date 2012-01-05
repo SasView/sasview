@@ -1,5 +1,6 @@
 #if !defined(vesicle_h)
 #define vesicle_h
+#include "parameters.hh"
 
 /**
  * Structure definition for vesicle parameters
@@ -15,40 +16,42 @@
 [FIXED]=  radius.width; thickness.width
 [ORIENTATION_PARAMS]= <text> </text>
  */
-typedef struct {
-    /// Scale factor
-    //  [DEFAULT]=scale= 1.0
-    double scale;
 
-    ///	Core radius of the vesicle [A]
-    //  [DEFAULT]=radius= 100.0 [A]
-    double radius;
+class VesicleModel{
+public:
+  // Model parameters
+  /// Scale factor
+  //  [DEFAULT]=scale= 1.0
+  Parameter scale;
 
-	///	shell thickness [A]
-    //  [DEFAULT]=thickness= 30.0 [A]
-    double thickness;
+  /// Core radius of the vesicle [A]
+  //  [DEFAULT]=radius= 100.0 [A]
+  Parameter radius;
 
-	///	core scattering length density [1/A^(2)]
-    //  [DEFAULT]=core_sld= 6.36e-6 [1/A^(2)]
-    double core_sld;
+  /// shell thickness [A]
+  //  [DEFAULT]=thickness= 30.0 [A]
+  Parameter thickness;
 
-    ///	shell scattering length density [1/A^(2)]
-    //  [DEFAULT]=shell_sld= 5.0e-7 [1/A^(2)]
-    double shell_sld;
+  /// core scattering length density [1/A^(2)]
+  //  [DEFAULT]=core_sld= 6.36e-6 [1/A^(2)]
+  Parameter core_sld;
 
-	/// Incoherent Background [1/cm]
-	//  [DEFAULT]=background=0 [1/cm]
-	double background;
+  /// shell scattering length density [1/A^(2)]
+  //  [DEFAULT]=shell_sld= 5.0e-7 [1/A^(2)]
+  Parameter shell_sld;
 
-} VesicleParameters;
+  /// Incoherent Background [1/cm]
+  //  [DEFAULT]=background=0 [1/cm]
+  Parameter background;
 
+  //Constructor
+  VesicleModel();
 
-
-/// 1D scattering function
-//double vesicle_analytical_1D(VesicleParameters *pars, double q);
-
-/// 2D scattering function
-//double vesicle_analytical_2D(VesicleParameters *pars, double q, double phi);
-//double vesicle_analytical_2DXY(VesicleParameters *pars, double qx, double qy);
+  //Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx , double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
 #endif
