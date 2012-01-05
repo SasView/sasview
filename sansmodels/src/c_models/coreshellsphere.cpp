@@ -20,26 +20,35 @@
  */
 
 #include <math.h>
-#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
+#include "core_shell.h"
 
 extern "C" {
-	#include "libSphere.h"
-	#include "core_shell.h"
+#include "libSphere.h"
 }
 
+typedef struct {
+  double scale;
+  double radius;
+  double thickness;
+  double core_sld;
+  double shell_sld;
+  double solvent_sld;
+  double background;
+} CoreShellParameters;
+
 CoreShellModel :: CoreShellModel() {
-	scale      = Parameter(1.0);
-	radius     = Parameter(60.0, true);
-	radius.set_min(0.0);
-	thickness  = Parameter(10.0, true);
-	thickness.set_min(0.0);
-	core_sld   = Parameter(1.e-6);
-	shell_sld  = Parameter(2.e-6);
-	solvent_sld = Parameter(3.e-6);
-	background = Parameter(0.0);
+  scale      = Parameter(1.0);
+  radius     = Parameter(60.0, true);
+  radius.set_min(0.0);
+  thickness  = Parameter(10.0, true);
+  thickness.set_min(0.0);
+  core_sld   = Parameter(1.e-6);
+  shell_sld  = Parameter(2.e-6);
+  solvent_sld = Parameter(3.e-6);
+  background = Parameter(0.0);
 }
 
 /**
@@ -49,57 +58,57 @@ CoreShellModel :: CoreShellModel() {
  * @return: function value
  */
 double CoreShellModel :: operator()(double q) {
-	double dp[7];
+  double dp[7];
 
-	// Fill parameter array for IGOR library
-	// Add the background after averaging
+  // Fill parameter array for IGOR library
+  // Add the background after averaging
 
-	dp[0] = scale();
-	dp[1] = radius();
-	dp[2] = thickness();
-	dp[3] = core_sld();
-	dp[4] = shell_sld();
-	dp[5] = solvent_sld();
-	dp[6] = 0.0;
+  dp[0] = scale();
+  dp[1] = radius();
+  dp[2] = thickness();
+  dp[3] = core_sld();
+  dp[4] = shell_sld();
+  dp[5] = solvent_sld();
+  dp[6] = 0.0;
 
 
-	// Get the dispersion points for the radius
-	vector<WeightPoint> weights_rad;
-	radius.get_weights(weights_rad);
+  // Get the dispersion points for the radius
+  vector<WeightPoint> weights_rad;
+  radius.get_weights(weights_rad);
 
-	// Get the dispersion points for the thickness
-	vector<WeightPoint> weights_thick;
-	thickness.get_weights(weights_thick);
+  // Get the dispersion points for the thickness
+  vector<WeightPoint> weights_thick;
+  thickness.get_weights(weights_thick);
 
-	// Perform the computation, with all weight points
-	double sum = 0.0;
-	double norm = 0.0;
-	double vol = 0.0;
+  // Perform the computation, with all weight points
+  double sum = 0.0;
+  double norm = 0.0;
+  double vol = 0.0;
 
-	// Loop over radius weight points
-	for(size_t i=0; i<weights_rad.size(); i++) {
-		dp[1] = weights_rad[i].value;
+  // Loop over radius weight points
+  for(size_t i=0; i<weights_rad.size(); i++) {
+    dp[1] = weights_rad[i].value;
 
-		// Loop over thickness weight points
-		for(size_t j=0; j<weights_thick.size(); j++) {
-			dp[2] = weights_thick[j].value;
-			//Un-normalize SphereForm by volume
-			sum += weights_rad[i].weight
-				* weights_thick[j].weight * CoreShellForm(dp, q)* pow(weights_rad[i].value+weights_thick[j].value,3);
+    // Loop over thickness weight points
+    for(size_t j=0; j<weights_thick.size(); j++) {
+      dp[2] = weights_thick[j].value;
+      //Un-normalize SphereForm by volume
+      sum += weights_rad[i].weight
+          * weights_thick[j].weight * CoreShellForm(dp, q)* pow(weights_rad[i].value+weights_thick[j].value,3);
 
-			//Find average volume
-			vol += weights_rad[i].weight * weights_thick[j].weight
-				* pow(weights_rad[i].value+weights_thick[j].value,3);
-			norm += weights_rad[i].weight
-				* weights_thick[j].weight;
-		}
-	}
+      //Find average volume
+      vol += weights_rad[i].weight * weights_thick[j].weight
+          * pow(weights_rad[i].value+weights_thick[j].value,3);
+      norm += weights_rad[i].weight
+          * weights_thick[j].weight;
+    }
+  }
 
-	if (vol != 0.0 && norm != 0.0) {
-		//Re-normalize by avg volume
-		sum = sum/(vol/norm);}
+  if (vol != 0.0 && norm != 0.0) {
+    //Re-normalize by avg volume
+    sum = sum/(vol/norm);}
 
-	return sum/norm + background();
+  return sum/norm + background();
 }
 
 /**
@@ -109,8 +118,8 @@ double CoreShellModel :: operator()(double q) {
  * @return: function value
  */
 double CoreShellModel :: operator()(double qx, double qy) {
-	double q = sqrt(qx*qx + qy*qy);
-	return (*this).operator()(q);
+  double q = sqrt(qx*qx + qy*qy);
+  return (*this).operator()(q);
 }
 
 /**
@@ -121,49 +130,49 @@ double CoreShellModel :: operator()(double qx, double qy) {
  * @return: function value
  */
 double CoreShellModel :: evaluate_rphi(double q, double phi) {
-	return (*this).operator()(q);
+  return (*this).operator()(q);
 }
 /**
  * Function to calculate effective radius
  * @return: effective radius value
  */
 double CoreShellModel :: calculate_ER() {
-	CoreShellParameters dp;
+  CoreShellParameters dp;
 
-	dp.radius     = radius();
-	dp.thickness  = thickness();
+  dp.radius     = radius();
+  dp.thickness  = thickness();
 
-	double rad_out = 0.0;
+  double rad_out = 0.0;
 
-	// Perform the computation, with all weight points
-	double sum = 0.0;
-	double norm = 0.0;
+  // Perform the computation, with all weight points
+  double sum = 0.0;
+  double norm = 0.0;
 
 
-	// Get the dispersion points for the major shell
-	vector<WeightPoint> weights_thickness;
-	thickness.get_weights(weights_thickness);
+  // Get the dispersion points for the major shell
+  vector<WeightPoint> weights_thickness;
+  thickness.get_weights(weights_thickness);
 
-	// Get the dispersion points for the minor shell
-	vector<WeightPoint> weights_radius ;
-	radius.get_weights(weights_radius);
+  // Get the dispersion points for the minor shell
+  vector<WeightPoint> weights_radius ;
+  radius.get_weights(weights_radius);
 
-	// Loop over major shell weight points
-	for(int j=0; j< (int)weights_thickness.size(); j++) {
-		dp.thickness = weights_thickness[j].value;
-		for(int k=0; k< (int)weights_radius.size(); k++) {
-			dp.radius = weights_radius[k].value;
-			sum += weights_thickness[j].weight
-				* weights_radius[k].weight*(dp.radius+dp.thickness);
-			norm += weights_thickness[j].weight* weights_radius[k].weight;
-		}
-	}
-	if (norm != 0){
-		//return the averaged value
-		rad_out =  sum/norm;}
-	else{
-		//return normal value
-		rad_out = (dp.radius+dp.thickness);}
+  // Loop over major shell weight points
+  for(int j=0; j< (int)weights_thickness.size(); j++) {
+    dp.thickness = weights_thickness[j].value;
+    for(int k=0; k< (int)weights_radius.size(); k++) {
+      dp.radius = weights_radius[k].value;
+      sum += weights_thickness[j].weight
+          * weights_radius[k].weight*(dp.radius+dp.thickness);
+      norm += weights_thickness[j].weight* weights_radius[k].weight;
+    }
+  }
+  if (norm != 0){
+    //return the averaged value
+    rad_out =  sum/norm;}
+  else{
+    //return normal value
+    rad_out = (dp.radius+dp.thickness);}
 
-	return rad_out;
+  return rad_out;
 }

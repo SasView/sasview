@@ -20,15 +20,30 @@
  */
 
 #include <math.h>
-#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
+#include "corefourshell.h"
 
 extern "C" {
 	#include "libSphere.h"
-	#include "corefourshell.h"
 }
+
+typedef struct {
+  double scale;
+  double rad_core0;
+  double sld_core0;
+  double thick_shell1;
+  double sld_shell1;
+  double thick_shell2;
+  double sld_shell2;
+  double thick_shell3;
+  double sld_shell3;
+  double thick_shell4;
+  double sld_shell4;
+  double sld_solv;
+  double background;
+} CoreFourShellParameters;
 
 CoreFourShellModel :: CoreFourShellModel() {
 	scale      = Parameter(1.0);

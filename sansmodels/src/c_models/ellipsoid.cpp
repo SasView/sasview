@@ -17,19 +17,101 @@
  * The classes use the IGOR library found in
  *   sansmodels/src/libigor
  *
- *	TODO: refactor so that we pull in the old sansmodels.c_extensions
  */
 
 #include <math.h>
-#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
+#include "ellipsoid.h"
 
 extern "C" {
 	#include "libCylinder.h"
 	#include "libStructureFactor.h"
-	#include "ellipsoid.h"
+}
+
+typedef struct {
+  double scale;
+  double radius_a;
+  double radius_b;
+  double sldEll;
+  double sldSolv;
+  double background;
+  double axis_theta;
+  double axis_phi;
+} EllipsoidParameters;
+
+/**
+ * Function to evaluate 2D scattering function
+ * @param pars: parameters of the ellipsoid
+ * @param q: q-value
+ * @param q_x: q_x / q
+ * @param q_y: q_y / q
+ * @return: function value
+ */
+static double ellipsoid_analytical_2D_scaled(EllipsoidParameters *pars, double q, double q_x, double q_y) {
+  double cyl_x, cyl_y, cyl_z;
+  double q_z;
+  double alpha, vol, cos_val;
+  double answer;
+  //convert angle degree to radian
+  double pi = 4.0*atan(1.0);
+  double theta = pars->axis_theta * pi/180.0;
+  double phi = pars->axis_phi * pi/180.0;
+
+    // Ellipsoid orientation
+    cyl_x = sin(theta) * cos(phi);
+    cyl_y = sin(theta) * sin(phi);
+    cyl_z = cos(theta);
+
+    // q vector
+    q_z = 0.0;
+
+    // Compute the angle btw vector q and the
+    // axis of the cylinder
+    cos_val = cyl_x*q_x + cyl_y*q_y + cyl_z*q_z;
+
+    // The following test should always pass
+    if (fabs(cos_val)>1.0) {
+      printf("ellipsoid_ana_2D: Unexpected error: cos(alpha)>1\n");
+      return 0;
+    }
+
+    // Angle between rotation axis and q vector
+  alpha = acos( cos_val );
+
+  // Call the IGOR library function to get the kernel
+  answer = EllipsoidKernel(q, pars->radius_b, pars->radius_a, cos_val);
+
+  // Multiply by contrast^2
+  answer *= (pars->sldEll - pars->sldSolv) * (pars->sldEll - pars->sldSolv);
+
+  //normalize by cylinder volume
+    vol = 4.0/3.0 * acos(-1.0) * pars->radius_b * pars->radius_b * pars->radius_a;
+  answer *= vol;
+
+  //convert to [cm-1]
+  answer *= 1.0e8;
+
+  //Scale
+  answer *= pars->scale;
+
+  // add in the background
+  answer += pars->background;
+
+  return answer;
+}
+
+/**
+ * Function to evaluate 2D scattering function
+ * @param pars: parameters of the ellipsoid
+ * @param q: q-value
+ * @return: function value
+ */
+static double ellipsoid_analytical_2DXY(EllipsoidParameters *pars, double qx, double qy) {
+  double q;
+  q = sqrt(qx*qx+qy*qy);
+    return ellipsoid_analytical_2D_scaled(pars, q, qx/q, qy/q);
 }
 
 EllipsoidModel :: EllipsoidModel() {

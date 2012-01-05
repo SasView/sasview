@@ -1,5 +1,6 @@
 #if !defined(core_shell_h)
 #define core_shell_h
+#include "parameters.hh"
 
 /**
  * Structure definition for core-shell parameters
@@ -20,37 +21,41 @@
  //[FIXED]= <text> thickness.width;radius.width</text>
 
 
-typedef struct {
-    /// Scale factor
-    //  [DEFAULT]=scale=1.0
-    double scale;
-    ///	Core Radius [A] 60.0
-    //  [DEFAULT]=radius=60.0 [A]
-    double radius;
-    /// Shell Thickness [A] 10.0
-    //  [DEFAULT]=thickness=10 [A]
-    double thickness;
-    ///	Core SLD [1/A^(2)] 1.0e-6
-    //  [DEFAULT]=core_sld=1.0e-6 [1/A^(2)]
-    double core_sld;
-	/// Shell SLD [1/A^(2)] 2.0e-6
-	//  [DEFAULT]=shell_sld=2.0e-6 [1/A^(2)]
-	double shell_sld;
-	/// Solvent SLD [1/A^(2)] 3.0e-6
-	//  [DEFAULT]=solvent_sld=3.0e-6 [1/A^(2)]
-	double solvent_sld;
-	/// Incoherent Background [1/cm] 0.000
-	//  [DEFAULT]=background=0 [1/cm]
-	double background;
-} CoreShellParameters;
+class CoreShellModel{
+public:
+  // Model parameters
 
+  /// Core Radius [A] 60.0
+  //  [DEFAULT]=radius=60.0 [A]
+  Parameter radius;
+  /// Scale factor
+  //  [DEFAULT]=scale=1.0
+  Parameter scale;
+  /// Shell Thickness [A] 10.0
+  //  [DEFAULT]=thickness=10 [A]
+  Parameter thickness;
+  /// Core SLD [1/A^(2)] 1.0e-6
+  //  [DEFAULT]=core_sld=1.0e-6 [1/A^(2)]
+  Parameter core_sld;
+/// Shell SLD [1/A^(2)] 2.0e-6
+//  [DEFAULT]=shell_sld=2.0e-6 [1/A^(2)]
+  Parameter shell_sld;
+/// Solvent SLD [1/A^(2)] 3.0e-6
+//  [DEFAULT]=solvent_sld=3.0e-6 [1/A^(2)]
+  Parameter solvent_sld;
+/// Incoherent Background [1/cm] 0.000
+//  [DEFAULT]=background=0 [1/cm]
+  Parameter background;
 
+  // Constructor
+  CoreShellModel();
 
-/// 1D scattering function
-//double core_shell_analytical_1D(CoreShellParameters *pars, double q);
+  // Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx, double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
-/// 2D scattering function
-//double core_shell_analytical_2D(CoreShellParameters *pars, double q, double phi);
-//double core_shell_analytical_2DXY(CoreShellParameters *pars, double qx, double qy);
 
 #endif
