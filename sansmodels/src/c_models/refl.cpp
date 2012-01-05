@@ -12,7 +12,7 @@ extern "C" {
 
 #define lamda 4.62
 
-double re_kernel(double dp[], double q) {
+static double re_kernel(double dp[], double q) {
   int n = dp[0];
   int i,j;
 
