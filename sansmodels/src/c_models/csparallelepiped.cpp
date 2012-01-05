@@ -19,40 +19,39 @@
  */
 
 #include <math.h>
-#include "models.hh"
 #include "parameters.hh"
 #include <stdio.h>
 using namespace std;
 
 extern "C" {
-	#include "libCylinder.h"
-	#include "libStructureFactor.h"
-	#include "csparallelepiped.h"
+#include "libCylinder.h"
+#include "libStructureFactor.h"
 }
+#include "csparallelepiped.h"
 
 // Convenience parameter structure
 typedef struct {
-    double scale;
-    double shortA;
-    double midB;
-    double longC;
-    double rimA;
-    double rimB;
-    double rimC;
-    double sld_rimA;
-    double sld_rimB;
-    double sld_rimC;
-    double sld_pcore;
-    double sld_solv;
-    double background;
-    double parallel_theta;
-    double parallel_phi;
-    double parallel_psi;
+  double scale;
+  double shortA;
+  double midB;
+  double longC;
+  double rimA;
+  double rimB;
+  double rimC;
+  double sld_rimA;
+  double sld_rimB;
+  double sld_rimC;
+  double sld_pcore;
+  double sld_solv;
+  double background;
+  double parallel_theta;
+  double parallel_phi;
+  double parallel_psi;
 } CSParallelepipedParameters;
 
 static double cspkernel(double dp[],double q, double ala, double alb, double alc){
-    // mu passed in is really mu*sqrt(1-sig^2)
-    double argA,argB,argC,argtA,argtB,argtC,tmp1,tmp2,tmp3,tmpt1,tmpt2,tmpt3;     //local variables
+  // mu passed in is really mu*sqrt(1-sig^2)
+  double argA,argB,argC,argtA,argtB,argtC,tmp1,tmp2,tmp3,tmpt1,tmpt2,tmpt3;     //local variables
 
   double aa,bb,cc, ta,tb,tc;
   double Vin,Vot,V1,V2,V3;
@@ -84,52 +83,52 @@ static double cspkernel(double dp[],double q, double ala, double alb, double alc
   ta=(aa+2.0*ta);///bb;
   tb=(aa+2.0*tb);///bb;
   tc=(aa+2.0*tc);
-    //handle arg=0 separately, as sin(t)/t -> 1 as t->0
-    argA = q*aa*ala/2.0;
-    argB = q*bb*alb/2.0;
-    argC = q*cc*alc/2.0;
-    argtA = q*ta*ala/2.0;
+  //handle arg=0 separately, as sin(t)/t -> 1 as t->0
+  argA = q*aa*ala/2.0;
+  argB = q*bb*alb/2.0;
+  argC = q*cc*alc/2.0;
+  argtA = q*ta*ala/2.0;
   argtB = q*tb*alb/2.0;
   argtC = q*tc*alc/2.0;
 
-    if(argA==0.0) {
+  if(argA==0.0) {
     tmp1 = 1.0;
   } else {
     tmp1 = sin(argA)/argA;
-    }
-    if (argB==0.0) {
+  }
+  if (argB==0.0) {
     tmp2 = 1.0;
   } else {
     tmp2 = sin(argB)/argB;
-    }
+  }
 
-    if (argC==0.0) {
+  if (argC==0.0) {
     tmp3 = 1.0;
   } else {
     tmp3 = sin(argC)/argC;
-    }
-    if(argtA==0.0) {
+  }
+  if(argtA==0.0) {
     tmpt1 = 1.0;
   } else {
     tmpt1 = sin(argtA)/argtA;
-    }
-    if (argtB==0.0) {
+  }
+  if (argtB==0.0) {
     tmpt2 = 1.0;
   } else {
     tmpt2 = sin(argtB)/argtB;
-    }
-    if (argtC==0.0) {
+  }
+  if (argtC==0.0) {
     tmpt3 = 1.0;
   } else {
     tmpt3 = sin(argtC)*sin(argtC)/argtC/argtC;
-    }
-    // This expression is different from NIST/IGOR package (I strongly believe the IGOR is wrong!!!). 10/15/2010.
-    retVal =( dr0*tmp1*tmp2*tmp3*Vin + drA*(tmpt1-tmp1)*tmp2*tmp3*V1+ drB*tmp1*(tmpt2-tmp2)*tmp3*V2 + drC*tmp1*tmp2*(tmpt3-tmp3)*V3)*
-        ( dr0*tmp1*tmp2*tmp3*Vin + drA*(tmpt1-tmp1)*tmp2*tmp3*V1+ drB*tmp1*(tmpt2-tmp2)*tmp3*V2 + drC*tmp1*tmp2*(tmpt3-tmp3)*V3);   //  correct FF : square of sum of phase factors
-    //retVal *= (tmp3*tmp3);
-    retVal /= Vot;
+  }
+  // This expression is different from NIST/IGOR package (I strongly believe the IGOR is wrong!!!). 10/15/2010.
+  retVal =( dr0*tmp1*tmp2*tmp3*Vin + drA*(tmpt1-tmp1)*tmp2*tmp3*V1+ drB*tmp1*(tmpt2-tmp2)*tmp3*V2 + drC*tmp1*tmp2*(tmpt3-tmp3)*V3)*
+      ( dr0*tmp1*tmp2*tmp3*Vin + drA*(tmpt1-tmp1)*tmp2*tmp3*V1+ drB*tmp1*(tmpt2-tmp2)*tmp3*V2 + drC*tmp1*tmp2*(tmpt3-tmp3)*V3);   //  correct FF : square of sum of phase factors
+  //retVal *= (tmp3*tmp3);
+  retVal /= Vot;
 
-    return (retVal);
+  return (retVal);
 
 }//Function cspkernel()
 
@@ -175,40 +174,40 @@ static double csparallelepiped_analytical_2D_scaled(CSParallelepipedParameters *
   edgeC = pars->longC;
 
 
-    // parallelepiped c axis orientation
-    cparallel_x = sin(theta) * cos(phi);
-    cparallel_y = sin(theta) * sin(phi);
-    cparallel_z = cos(theta);
+  // parallelepiped c axis orientation
+  cparallel_x = sin(theta) * cos(phi);
+  cparallel_y = sin(theta) * sin(phi);
+  cparallel_z = cos(theta);
 
-    // q vector
-    q_z = 0.0;
+  // q vector
+  q_z = 0.0;
 
-    // Compute the angle btw vector q and the
-    // axis of the parallelepiped
-    cos_val_c = cparallel_x*q_x + cparallel_y*q_y + cparallel_z*q_z;
-    alpha = acos(cos_val_c);
+  // Compute the angle btw vector q and the
+  // axis of the parallelepiped
+  cos_val_c = cparallel_x*q_x + cparallel_y*q_y + cparallel_z*q_z;
+  alpha = acos(cos_val_c);
 
-    // parallelepiped a axis orientation
-    parallel_x = sin(psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)*sin(pars->parallel_psi);
-    parallel_y = cos(psi);//cos(pars->parallel_theta) * cos(pars->parallel_phi)*cos(pars->parallel_psi);
+  // parallelepiped a axis orientation
+  parallel_x = sin(psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)*sin(pars->parallel_psi);
+  parallel_y = cos(psi);//cos(pars->parallel_theta) * cos(pars->parallel_phi)*cos(pars->parallel_psi);
 
-    cos_val_a = parallel_x*q_x + parallel_y*q_y;
-
-
-
-    // parallelepiped b axis orientation
-    bparallel_x = sqrt(1.0-sin(theta)*cos(phi))*cos(psi);//cos(pars->parallel_theta) * cos(pars->parallel_phi)* cos(pars->parallel_psi);
-    bparallel_y = sqrt(1.0-sin(theta)*cos(phi))*sin(psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)* sin(pars->parallel_psi);
-    // axis of the parallelepiped
-    cos_val_b = sin(acos(cos_val_a)) ;
+  cos_val_a = parallel_x*q_x + parallel_y*q_y;
 
 
 
-    // The following test should always pass
-    if (fabs(cos_val_c)>1.0) {
-      printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
-      return 0;
-    }
+  // parallelepiped b axis orientation
+  bparallel_x = sqrt(1.0-sin(theta)*cos(phi))*cos(psi);//cos(pars->parallel_theta) * cos(pars->parallel_phi)* cos(pars->parallel_psi);
+  bparallel_y = sqrt(1.0-sin(theta)*cos(phi))*sin(psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)* sin(pars->parallel_psi);
+  // axis of the parallelepiped
+  cos_val_b = sin(acos(cos_val_a)) ;
+
+
+
+  // The following test should always pass
+  if (fabs(cos_val_c)>1.0) {
+    printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
+    return 0;
+  }
 
   // Call the IGOR library function to get the kernel
   answer = cspkernel( dp,q, sin(alpha)*cos_val_a,sin(alpha)*cos_val_b,cos_val_c);
@@ -234,32 +233,32 @@ static double csparallelepiped_analytical_2D_scaled(CSParallelepipedParameters *
 static double csparallelepiped_analytical_2DXY(CSParallelepipedParameters *pars, double qx, double qy) {
   double q;
   q = sqrt(qx*qx+qy*qy);
-    return csparallelepiped_analytical_2D_scaled(pars, q, qx/q, qy/q);
+  return csparallelepiped_analytical_2D_scaled(pars, q, qx/q, qy/q);
 }
 
 
 
 
 CSParallelepipedModel :: CSParallelepipedModel() {
-	scale      = Parameter(1.0);
-	shortA     = Parameter(35.0, true);
-	shortA.set_min(1.0);
-	midB     = Parameter(75.0, true);
-	midB.set_min(1.0);
-	longC    = Parameter(400.0, true);
-	longC.set_min(1.0);
-	rimA     = Parameter(10.0, true);
-	rimB     = Parameter(10.0, true);
-	rimC     = Parameter(10.0, true);
-	sld_rimA     = Parameter(2.0e-6, true);
-	sld_rimB     = Parameter(4.0e-6, true);
-	sld_rimC    = Parameter(2.0e-6, true);
-	sld_pcore   = Parameter(1.0e-6);
-	sld_solv   = Parameter(6.0e-6);
-	background = Parameter(0.06);
-	parallel_theta  = Parameter(0.0, true);
-	parallel_phi    = Parameter(0.0, true);
-	parallel_psi    = Parameter(0.0, true);
+  scale      = Parameter(1.0);
+  shortA     = Parameter(35.0, true);
+  shortA.set_min(1.0);
+  midB     = Parameter(75.0, true);
+  midB.set_min(1.0);
+  longC    = Parameter(400.0, true);
+  longC.set_min(1.0);
+  rimA     = Parameter(10.0, true);
+  rimB     = Parameter(10.0, true);
+  rimC     = Parameter(10.0, true);
+  sld_rimA     = Parameter(2.0e-6, true);
+  sld_rimB     = Parameter(4.0e-6, true);
+  sld_rimC    = Parameter(2.0e-6, true);
+  sld_pcore   = Parameter(1.0e-6);
+  sld_solv   = Parameter(6.0e-6);
+  background = Parameter(0.06);
+  parallel_theta  = Parameter(0.0, true);
+  parallel_phi    = Parameter(0.0, true);
+  parallel_psi    = Parameter(0.0, true);
 }
 
 /**
@@ -269,75 +268,75 @@ CSParallelepipedModel :: CSParallelepipedModel() {
  * @return: function value
  */
 double CSParallelepipedModel :: operator()(double q) {
-	double dp[13];
+  double dp[13];
 
-	// Fill parameter array for IGOR library
-	// Add the background after averaging
-	dp[0] = scale();
-	dp[1] = shortA();
-	dp[2] = midB();
-	dp[3] = longC();
-	dp[4] = rimA();
-	dp[5] = rimB();
-	dp[6] = rimC();
-	dp[7] = sld_rimA();
-	dp[8] = sld_rimB();
-	dp[9] = sld_rimC();
-	dp[10] = sld_pcore();
-	dp[11] = sld_solv();
-	dp[12] = 0.0;
+  // Fill parameter array for IGOR library
+  // Add the background after averaging
+  dp[0] = scale();
+  dp[1] = shortA();
+  dp[2] = midB();
+  dp[3] = longC();
+  dp[4] = rimA();
+  dp[5] = rimB();
+  dp[6] = rimC();
+  dp[7] = sld_rimA();
+  dp[8] = sld_rimB();
+  dp[9] = sld_rimC();
+  dp[10] = sld_pcore();
+  dp[11] = sld_solv();
+  dp[12] = 0.0;
 
-	// Get the dispersion points for the short_edgeA
-	vector<WeightPoint> weights_shortA;
-	shortA.get_weights(weights_shortA);
+  // Get the dispersion points for the short_edgeA
+  vector<WeightPoint> weights_shortA;
+  shortA.get_weights(weights_shortA);
 
-	// Get the dispersion points for the longer_edgeB
-	vector<WeightPoint> weights_midB;
-	midB.get_weights(weights_midB);
+  // Get the dispersion points for the longer_edgeB
+  vector<WeightPoint> weights_midB;
+  midB.get_weights(weights_midB);
 
-	// Get the dispersion points for the longuest_edgeC
-	vector<WeightPoint> weights_longC;
-	longC.get_weights(weights_longC);
+  // Get the dispersion points for the longuest_edgeC
+  vector<WeightPoint> weights_longC;
+  longC.get_weights(weights_longC);
 
 
 
-	// Perform the computation, with all weight points
-	double sum = 0.0;
-	double norm = 0.0;
-	double vol = 0.0;
+  // Perform the computation, with all weight points
+  double sum = 0.0;
+  double norm = 0.0;
+  double vol = 0.0;
 
-	// Loop over short_edgeA weight points
-	for(int i=0; i< (int)weights_shortA.size(); i++) {
-		dp[1] = weights_shortA[i].value;
+  // Loop over short_edgeA weight points
+  for(int i=0; i< (int)weights_shortA.size(); i++) {
+    dp[1] = weights_shortA[i].value;
 
-		// Loop over longer_edgeB weight points
-		for(int j=0; j< (int)weights_midB.size(); j++) {
-			dp[2] = weights_midB[j].value;
+    // Loop over longer_edgeB weight points
+    for(int j=0; j< (int)weights_midB.size(); j++) {
+      dp[2] = weights_midB[j].value;
 
-			// Loop over longuest_edgeC weight points
-			for(int k=0; k< (int)weights_longC.size(); k++) {
-				dp[3] = weights_longC[k].value;
-				//Un-normalize  by volume
-				sum += weights_shortA[i].weight * weights_midB[j].weight
-					* weights_longC[k].weight * CSParallelepiped(dp, q)
-					* weights_shortA[i].value*weights_midB[j].value
-					* weights_longC[k].value;
-				//Find average volume
-				vol += weights_shortA[i].weight * weights_midB[j].weight
-					* weights_longC[k].weight
-					* weights_shortA[i].value * weights_midB[j].value
-					* weights_longC[k].value;
+      // Loop over longuest_edgeC weight points
+      for(int k=0; k< (int)weights_longC.size(); k++) {
+        dp[3] = weights_longC[k].value;
+        //Un-normalize  by volume
+        sum += weights_shortA[i].weight * weights_midB[j].weight
+            * weights_longC[k].weight * CSParallelepiped(dp, q)
+        * weights_shortA[i].value*weights_midB[j].value
+        * weights_longC[k].value;
+        //Find average volume
+        vol += weights_shortA[i].weight * weights_midB[j].weight
+            * weights_longC[k].weight
+            * weights_shortA[i].value * weights_midB[j].value
+            * weights_longC[k].value;
 
-				norm += weights_shortA[i].weight
-					 * weights_midB[j].weight * weights_longC[k].weight;
-			}
-		}
-	}
-	if (vol != 0.0 && norm != 0.0) {
-		//Re-normalize by avg volume
-		sum = sum/(vol/norm);}
+        norm += weights_shortA[i].weight
+            * weights_midB[j].weight * weights_longC[k].weight;
+      }
+    }
+  }
+  if (vol != 0.0 && norm != 0.0) {
+    //Re-normalize by avg volume
+    sum = sum/(vol/norm);}
 
-	return sum/norm + background();
+  return sum/norm + background();
 }
 /**
  * Function to evaluate 2D scattering function
@@ -346,131 +345,131 @@ double CSParallelepipedModel :: operator()(double q) {
  * @return: function value
  */
 double CSParallelepipedModel :: operator()(double qx, double qy) {
-	CSParallelepipedParameters dp;
-	// Fill parameter array
-	dp.scale      = scale();
-	dp.shortA   = shortA();
-	dp.midB   = midB();
-	dp.longC  = longC();
-	dp.rimA   = rimA();
-	dp.rimB   = rimB();
-	dp.rimC  = rimC();
-	dp.sld_rimA   = sld_rimA();
-	dp.sld_rimB   = sld_rimB();
-	dp.sld_rimC  = sld_rimC();
-	dp.sld_pcore   = sld_pcore();
-	dp.sld_solv   = sld_solv();
-	dp.background = 0.0;
-	//dp.background = background();
-	dp.parallel_theta  = parallel_theta();
-	dp.parallel_phi    = parallel_phi();
-	dp.parallel_psi    = parallel_psi();
+  CSParallelepipedParameters dp;
+  // Fill parameter array
+  dp.scale      = scale();
+  dp.shortA   = shortA();
+  dp.midB   = midB();
+  dp.longC  = longC();
+  dp.rimA   = rimA();
+  dp.rimB   = rimB();
+  dp.rimC  = rimC();
+  dp.sld_rimA   = sld_rimA();
+  dp.sld_rimB   = sld_rimB();
+  dp.sld_rimC  = sld_rimC();
+  dp.sld_pcore   = sld_pcore();
+  dp.sld_solv   = sld_solv();
+  dp.background = 0.0;
+  //dp.background = background();
+  dp.parallel_theta  = parallel_theta();
+  dp.parallel_phi    = parallel_phi();
+  dp.parallel_psi    = parallel_psi();
 
 
 
-	// Get the dispersion points for the short_edgeA
-	vector<WeightPoint> weights_shortA;
-	shortA.get_weights(weights_shortA);
+  // Get the dispersion points for the short_edgeA
+  vector<WeightPoint> weights_shortA;
+  shortA.get_weights(weights_shortA);
 
-	// Get the dispersion points for the longer_edgeB
-	vector<WeightPoint> weights_midB;
-	midB.get_weights(weights_midB);
+  // Get the dispersion points for the longer_edgeB
+  vector<WeightPoint> weights_midB;
+  midB.get_weights(weights_midB);
 
-	// Get the dispersion points for the longuest_edgeC
-	vector<WeightPoint> weights_longC;
-	longC.get_weights(weights_longC);
+  // Get the dispersion points for the longuest_edgeC
+  vector<WeightPoint> weights_longC;
+  longC.get_weights(weights_longC);
 
-	// Get angular averaging for theta
-	vector<WeightPoint> weights_parallel_theta;
-	parallel_theta.get_weights(weights_parallel_theta);
+  // Get angular averaging for theta
+  vector<WeightPoint> weights_parallel_theta;
+  parallel_theta.get_weights(weights_parallel_theta);
 
-	// Get angular averaging for phi
-	vector<WeightPoint> weights_parallel_phi;
-	parallel_phi.get_weights(weights_parallel_phi);
+  // Get angular averaging for phi
+  vector<WeightPoint> weights_parallel_phi;
+  parallel_phi.get_weights(weights_parallel_phi);
 
-	// Get angular averaging for psi
-	vector<WeightPoint> weights_parallel_psi;
-	parallel_psi.get_weights(weights_parallel_psi);
+  // Get angular averaging for psi
+  vector<WeightPoint> weights_parallel_psi;
+  parallel_psi.get_weights(weights_parallel_psi);
 
-	// Perform the computation, with all weight points
-	double sum = 0.0;
-	double norm = 0.0;
-	double norm_vol = 0.0;
-	double vol = 0.0;
-	double pi = 4.0*atan(1.0);
+  // Perform the computation, with all weight points
+  double sum = 0.0;
+  double norm = 0.0;
+  double norm_vol = 0.0;
+  double vol = 0.0;
+  double pi = 4.0*atan(1.0);
 
-	// Loop over radius weight points
-	for(int i=0; i< (int)weights_shortA.size(); i++) {
-		dp.shortA = weights_shortA[i].value;
+  // Loop over radius weight points
+  for(int i=0; i< (int)weights_shortA.size(); i++) {
+    dp.shortA = weights_shortA[i].value;
 
-		// Loop over longer_edgeB weight points
-		for(int j=0; j< (int)weights_midB.size(); j++) {
-			dp.midB = weights_midB[j].value;
+    // Loop over longer_edgeB weight points
+    for(int j=0; j< (int)weights_midB.size(); j++) {
+      dp.midB = weights_midB[j].value;
 
-			// Average over longuest_edgeC distribution
-			for(int k=0; k< (int)weights_longC.size(); k++) {
-				dp.longC = weights_longC[k].value;
+      // Average over longuest_edgeC distribution
+      for(int k=0; k< (int)weights_longC.size(); k++) {
+        dp.longC = weights_longC[k].value;
 
-				// Average over theta distribution
-				for(int l=0; l< (int)weights_parallel_theta.size(); l++) {
-				dp.parallel_theta = weights_parallel_theta[l].value;
+        // Average over theta distribution
+        for(int l=0; l< (int)weights_parallel_theta.size(); l++) {
+          dp.parallel_theta = weights_parallel_theta[l].value;
 
-					// Average over phi distribution
-					for(int m=0; m< (int)weights_parallel_phi.size(); m++) {
-						dp.parallel_phi = weights_parallel_phi[m].value;
+          // Average over phi distribution
+          for(int m=0; m< (int)weights_parallel_phi.size(); m++) {
+            dp.parallel_phi = weights_parallel_phi[m].value;
 
-						// Average over phi distribution
-						for(int n=0; n< (int)weights_parallel_psi.size(); n++) {
-							dp.parallel_psi = weights_parallel_psi[n].value;
-							//Un-normalize by volume
-							double _ptvalue = weights_shortA[i].weight
-								* weights_midB[j].weight
-								* weights_longC[k].weight
-								* weights_parallel_theta[l].weight
-								* weights_parallel_phi[m].weight
-								* weights_parallel_psi[n].weight
-								* csparallelepiped_analytical_2DXY(&dp, qx, qy)
-								* weights_shortA[i].value*weights_midB[j].value
-								* weights_longC[k].value;
+            // Average over phi distribution
+            for(int n=0; n< (int)weights_parallel_psi.size(); n++) {
+              dp.parallel_psi = weights_parallel_psi[n].value;
+              //Un-normalize by volume
+              double _ptvalue = weights_shortA[i].weight
+                  * weights_midB[j].weight
+                  * weights_longC[k].weight
+                  * weights_parallel_theta[l].weight
+                  * weights_parallel_phi[m].weight
+                  * weights_parallel_psi[n].weight
+                  * csparallelepiped_analytical_2DXY(&dp, qx, qy)
+              * weights_shortA[i].value*weights_midB[j].value
+              * weights_longC[k].value;
 
-							if (weights_parallel_theta.size()>1) {
-								_ptvalue *= fabs(sin(weights_parallel_theta[l].value*pi/180.0));
-							}
-							sum += _ptvalue;
-							//Find average volume
-							vol += weights_shortA[i].weight
-								* weights_midB[j].weight
-								* weights_longC[k].weight
-								* weights_shortA[i].value*weights_midB[j].value
-								* weights_longC[k].value;
-							//Find norm for volume
-							norm_vol += weights_shortA[i].weight
-								* weights_midB[j].weight
-								* weights_longC[k].weight;
+              if (weights_parallel_theta.size()>1) {
+                _ptvalue *= fabs(sin(weights_parallel_theta[l].value*pi/180.0));
+              }
+              sum += _ptvalue;
+              //Find average volume
+              vol += weights_shortA[i].weight
+                  * weights_midB[j].weight
+                  * weights_longC[k].weight
+                  * weights_shortA[i].value*weights_midB[j].value
+                  * weights_longC[k].value;
+              //Find norm for volume
+              norm_vol += weights_shortA[i].weight
+                  * weights_midB[j].weight
+                  * weights_longC[k].weight;
 
-							norm += weights_shortA[i].weight
-								* weights_midB[j].weight
-								* weights_longC[k].weight
-								* weights_parallel_theta[l].weight
-								* weights_parallel_phi[m].weight
-								* weights_parallel_psi[n].weight;
-						}
-					}
+              norm += weights_shortA[i].weight
+                  * weights_midB[j].weight
+                  * weights_longC[k].weight
+                  * weights_parallel_theta[l].weight
+                  * weights_parallel_phi[m].weight
+                  * weights_parallel_psi[n].weight;
+            }
+          }
 
-				}
-			}
-		}
-	}
-	// Averaging in theta needs an extra normalization
-	// factor to account for the sin(theta) term in the
-	// integration (see documentation).
-	if (weights_parallel_theta.size()>1) norm = norm / asin(1.0);
+        }
+      }
+    }
+  }
+  // Averaging in theta needs an extra normalization
+  // factor to account for the sin(theta) term in the
+  // integration (see documentation).
+  if (weights_parallel_theta.size()>1) norm = norm / asin(1.0);
 
-	if (vol != 0.0 && norm_vol != 0.0) {
-		//Re-normalize by avg volume
-		sum = sum/(vol/norm_vol);}
+  if (vol != 0.0 && norm_vol != 0.0) {
+    //Re-normalize by avg volume
+    sum = sum/(vol/norm_vol);}
 
-	return sum/norm + background();
+  return sum/norm + background();
 }
 
 
@@ -482,73 +481,73 @@ double CSParallelepipedModel :: operator()(double qx, double qy) {
  * @return: function value
  */
 double CSParallelepipedModel :: evaluate_rphi(double q, double phi) {
-	double qx = q*cos(phi);
-	double qy = q*sin(phi);
-	return (*this).operator()(qx, qy);
+  double qx = q*cos(phi);
+  double qy = q*sin(phi);
+  return (*this).operator()(qx, qy);
 }
 /**
  * Function to calculate effective radius
  * @return: effective radius value
  */
 double CSParallelepipedModel :: calculate_ER() {
-	CSParallelepipedParameters dp;
-	dp.shortA   = shortA();
-	dp.midB   = midB();
-	dp.longC  = longC();
-	dp.rimA   = rimA();
-	dp.rimB   = rimB();
-	dp.rimC  = rimC();
+  CSParallelepipedParameters dp;
+  dp.shortA   = shortA();
+  dp.midB   = midB();
+  dp.longC  = longC();
+  dp.rimA   = rimA();
+  dp.rimB   = rimB();
+  dp.rimC  = rimC();
 
-	double rad_out = 0.0;
-	double pi = 4.0*atan(1.0);
-	double suf_rad = sqrt((dp.shortA*dp.midB+2.0*dp.rimA*dp.midB+2.0*dp.rimA*dp.shortA)/pi);
-	double height =(dp.longC + 2.0*dp.rimC);
-	// Perform the computation, with all weight points
-	double sum = 0.0;
-	double norm = 0.0;
+  double rad_out = 0.0;
+  double pi = 4.0*atan(1.0);
+  double suf_rad = sqrt((dp.shortA*dp.midB+2.0*dp.rimA*dp.midB+2.0*dp.rimA*dp.shortA)/pi);
+  double height =(dp.longC + 2.0*dp.rimC);
+  // Perform the computation, with all weight points
+  double sum = 0.0;
+  double norm = 0.0;
 
-	// Get the dispersion points for the short_edgeA
-	vector<WeightPoint> weights_shortA;
-	shortA.get_weights(weights_shortA);
+  // Get the dispersion points for the short_edgeA
+  vector<WeightPoint> weights_shortA;
+  shortA.get_weights(weights_shortA);
 
-	// Get the dispersion points for the longer_edgeB
-	vector<WeightPoint> weights_midB;
-	midB.get_weights(weights_midB);
+  // Get the dispersion points for the longer_edgeB
+  vector<WeightPoint> weights_midB;
+  midB.get_weights(weights_midB);
 
-	// Get angular averaging for the longuest_edgeC
-	vector<WeightPoint> weights_longC;
-	longC.get_weights(weights_longC);
+  // Get angular averaging for the longuest_edgeC
+  vector<WeightPoint> weights_longC;
+  longC.get_weights(weights_longC);
 
-	// Loop over radius weight points
-	for(int i=0; i< (int)weights_shortA.size(); i++) {
-		dp.shortA = weights_shortA[i].value;
+  // Loop over radius weight points
+  for(int i=0; i< (int)weights_shortA.size(); i++) {
+    dp.shortA = weights_shortA[i].value;
 
-		// Loop over longer_edgeB weight points
-		for(int j=0; j< (int)weights_midB.size(); j++) {
-			dp.midB = weights_midB[j].value;
+    // Loop over longer_edgeB weight points
+    for(int j=0; j< (int)weights_midB.size(); j++) {
+      dp.midB = weights_midB[j].value;
 
-			// Average over longuest_edgeC distribution
-			for(int k=0; k< (int)weights_longC.size(); k++) {
-				dp.longC = weights_longC[k].value;
-				//Calculate surface averaged radius
-				//This is rough approximation.
-				suf_rad = sqrt((dp.shortA*dp.midB+2.0*dp.rimA*dp.midB+2.0*dp.rimA*dp.shortA)/pi);
-				height =(dp.longC + 2.0*dp.rimC);
-				//Note: output of "DiamCyl(dp.length,dp.radius)" is a DIAMETER.
-				sum +=weights_shortA[i].weight* weights_midB[j].weight
-					* weights_longC[k].weight*DiamCyl(height, suf_rad)/2.0;
-				norm += weights_shortA[i].weight* weights_midB[j].weight*weights_longC[k].weight;
-			}
-		}
-	}
+      // Average over longuest_edgeC distribution
+      for(int k=0; k< (int)weights_longC.size(); k++) {
+        dp.longC = weights_longC[k].value;
+        //Calculate surface averaged radius
+        //This is rough approximation.
+        suf_rad = sqrt((dp.shortA*dp.midB+2.0*dp.rimA*dp.midB+2.0*dp.rimA*dp.shortA)/pi);
+        height =(dp.longC + 2.0*dp.rimC);
+        //Note: output of "DiamCyl(dp.length,dp.radius)" is a DIAMETER.
+        sum +=weights_shortA[i].weight* weights_midB[j].weight
+            * weights_longC[k].weight*DiamCyl(height, suf_rad)/2.0;
+        norm += weights_shortA[i].weight* weights_midB[j].weight*weights_longC[k].weight;
+      }
+    }
+  }
 
-	if (norm != 0){
-		//return the averaged value
-		rad_out =  sum/norm;}
-	else{
-		//return normal value
-		//Note: output of "DiamCyl(length,radius)" is DIAMETER.
-		rad_out = DiamCyl(dp.longC, suf_rad)/2.0;}
-	return rad_out;
+  if (norm != 0){
+    //return the averaged value
+    rad_out =  sum/norm;}
+  else{
+    //return normal value
+    //Note: output of "DiamCyl(length,radius)" is DIAMETER.
+    rad_out = DiamCyl(dp.longC, suf_rad)/2.0;}
+  return rad_out;
 
 }
