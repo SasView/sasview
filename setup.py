@@ -215,11 +215,14 @@ srcdir  = os.path.join("sansmodels", "src", "c_extensions")
 igordir = os.path.join("sansmodels", "src", "libigor")
 c_model_dir = os.path.join("sansmodels", "src", "c_models")
 smear_dir  = os.path.join("sansmodels", "src", "c_smearer")
-wrapper_dir  = os.path.join("sansmodels", "src", "python_wrapper")
+wrapper_dir  = os.path.join("sansmodels", "src", "python_wrapper", "generated")
+os.makedirs(wrapper_dir)
 
-sys.path.append(wrapper_dir)
+sys.path.append(os.path.join("sansmodels", "src", "python_wrapper"))
 from wrapping import generate_wrappers
-generate_wrappers(header_dir=srcdir, output_dir=wrapper_dir)
+generate_wrappers(header_dir=srcdir, 
+                  output_dir=os.path.join("sansmodels", "src", "sans", "models"), 
+                  c_wrapper_dir=wrapper_dir)
 
 IGNORED_FILES = ["a.exe",
                  "__init__.py"
