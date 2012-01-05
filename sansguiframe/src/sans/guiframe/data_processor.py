@@ -643,23 +643,47 @@ class Notebook(nb, PanelBase):
     def set_data(self, data_inputs, data_outputs, details="", file_name=None):
         if data_outputs is None or data_outputs == {}:
             return
-        
+        inputs, outputs = self.get_odered_results(data_inputs, data_outputs)
         for pos in range(self.GetPageCount()):
             grid = self.GetPage(pos)
             if grid.data is None:
                 #Found empty page
-                grid.set_data(data_inputs=data_inputs, 
-                              data_outputs=data_outputs,
+                grid.set_data(data_inputs=inputs, 
+                              data_outputs=outputs,
                               details=details,
                               file_name=file_name) 
                 self.SetSelection(pos) 
                 return
                 
         grid, pos = self.add_empty_page()
-        grid.set_data(data_inputs=data_inputs, 
-                      data_outputs=data_outputs,
+        grid.set_data(data_inputs=inputs, 
+                      data_outputs=outputs,
                       file_name=file_name,
                       details=details)
+        
+    def get_odered_results(self, inputs, outputs=None):
+        """
+        Get ordered the results
+        """
+        # Let's re-order the data from the keys in 'Data' name.
+        if outputs == None:
+            return
+        to_be_sort = [str(item.label) for item in outputs['Data']]
+        inds = numpy.lexsort((to_be_sort, to_be_sort))
+        for key in outputs.keys():
+            key_list = outputs[key]
+            temp_key = [item for item in key_list]
+            for ind in inds:
+                temp_key[ind] = key_list[inds[ind]]
+            outputs[key] = temp_key
+        for key in inputs.keys():
+            key_list = inputs[key]
+            if len(key_list) > 0:
+                temp_key = [item for item in key_list]
+                for ind in inds:
+                    temp_key[ind] = key_list[inds[ind]]
+                inputs[key] = temp_key
+        return inputs, outputs
     
     def add_column(self):
         """
@@ -669,10 +693,6 @@ class Notebook(nb, PanelBase):
         grid = self.GetPage(pos)
         grid.AppendCols(1, True)
         
-   
-
-
-
 class GridPanel(SPanel):
     def __init__(self, parent, data_inputs=None,
                  data_outputs=None, *args, **kwds):
@@ -705,7 +725,7 @@ class GridPanel(SPanel):
         self.layout_grid()
         self.layout_plotting_area()
         self.SetSizer(self.vbox)
-  
+
     def set_xaxis(self, label="", x=None):
         """
         """
@@ -1087,7 +1107,6 @@ class GridFrame(wx.Frame):
         self.Bind(wx.EVT_MENU_OPEN, self.on_menu_open)
         menubar.Append(self.edit, "&Edit")
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        
     def GetLabelText(self, id):
         """
         """

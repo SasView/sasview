@@ -581,7 +581,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                         for process in process_list:
                             i_t_c = self.tree_ctrl.AppendItem(d_p_c,
                                                               process.__str__())
-                self.append_theory(state_id, theory_list)
+                wx.CallAfter(self.append_theory, state_id, theory_list)
         self.enable_remove()
         self.enable_import()
         self.enable_plot()

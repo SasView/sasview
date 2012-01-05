@@ -1379,9 +1379,9 @@ class Plugin(PluginBase):
                 for key in batch_outputs.keys():
                     if key not in param_list and key not in ["Chi2", "Data"]:
                         batch_outputs[key].append(EMPTY)
-                for key in batch_inputs.keys():
-                    if key not in param_list and key not in ["Chi2", "Data"]:
-                        batch_inputs[key].append(EMPTY)
+                #for key in batch_inputs.keys():
+                    #if key not in param_list and key not in ["Chi2", "Data"]:
+                        #batch_inputs[key].append(EMPTY)
                                 
                 self.page_finder[pid].set_batch_result(batch_inputs=batch_inputs,
                                                      batch_outputs=batch_outputs) 
@@ -1469,8 +1469,8 @@ class Plugin(PluginBase):
         for key, value in data.meta_data.iteritems():
             if key not in batch_inputs.keys():
                 batch_inputs[key] = []
-            if key.lower().strip() != "loader":
-                batch_inputs[key].append(value)
+            #if key.lower().strip() != "loader":
+            batch_inputs[key].append(value)
         param = "temperature"
         if hasattr(data.sample, param):
             if param not in  batch_inputs.keys():
