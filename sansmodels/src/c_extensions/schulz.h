@@ -1,5 +1,6 @@
 #if !defined(schulz_h)
 #define schulz_h
+#include "parameters.hh"
 
 /** Structure definition for Schulz parameters.
  * The Schulz is normalized to the 'scale' parameter.
@@ -15,23 +16,27 @@
  		            z= math.pow[(1/(sigma/center),2]-1
  					R= x/center</text>
  */
-typedef struct {
-    /// Scale factor 
-    //  [DEFAULT]=scale=1.0
-    double scale;
-    /// Standard deviation
-    //  [DEFAULT]=sigma=1 
-    double sigma;
-    /// Center of the Schulz distribution
-    //  [DEFAULT]=center=0.0 
-    double center;
-} SchulzParameters;
 
-/// 1D scattering function
-double schulz_analytical_1D(SchulzParameters *pars, double x);
+class Schulz{
+public:
+  /// Scale factor
+  //  [DEFAULT]=scale=1.0
+  Parameter scale;
+  /// Standard deviation
+  //  [DEFAULT]=sigma=1
+  Parameter sigma;
+  /// Center of the Schulz distribution
+  //  [DEFAULT]=center=0.0
+  Parameter center;
 
-/// 2D scattering function
-double schulz_analytical_2D(SchulzParameters *pars, double x, double phi);
-double schulz_analytical_2DXY(SchulzParameters *pars, double x, double y);
+  // Constructor
+  Schulz();
+
+  // Operators to get I(Q)
+  double operator()(double q);
+  double operator()(double qx, double qy);
+  double calculate_ER();
+  double evaluate_rphi(double q, double phi);
+};
 
 #endif
