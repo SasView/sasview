@@ -26,60 +26,6 @@ extern "C" {
 
 using namespace std;
 
-
-
-
-
-class RPAModel{
-public:
-	// Model parameters
-	Parameter lcase_n;
-	Parameter ba;
-	Parameter bb;
-	Parameter bc;
-	Parameter bd;
-
-	Parameter Kab;
-	Parameter Kac;
-	Parameter Kad;
-	Parameter Kbc;
-	Parameter Kbd;
-	Parameter Kcd;
-
-	Parameter scale;
-	Parameter background;
-
-	Parameter Na;
-	Parameter Phia;
-	Parameter va;
-	Parameter La;
-
-	Parameter Nb;
-	Parameter Phib;
-	Parameter vb;
-	Parameter Lb;
-
-	Parameter Nc;
-	Parameter Phic;
-	Parameter vc;
-	Parameter Lc;
-
-	Parameter Nd;
-	Parameter Phid;
-	Parameter vd;
-	Parameter Ld;
-
-	// Constructor
-	RPAModel();
-
-	// Operators to get I(Q)
-	double operator()(double q);
-	double operator()(double qx, double qy);
-	double calculate_ER();
-	double evaluate_rphi(double q, double phi);
-};
-
-
 class ReflModel{
 public:
 	// Model parameters
