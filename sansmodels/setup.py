@@ -51,10 +51,10 @@ includedir  = os.path.join("src", "include")
 igordir = os.path.join("src", "libigor")
 c_model_dir = os.path.join("src", "c_models")
 smear_dir  = os.path.join("src", "c_smearer")
-wrapper_dir  = os.path.join("src", "python_wrapper")
+wrapper_dir  = os.path.join("src", "python_wrapper", "generated")
 print "Installing SANS models"
 
-sys.path.append(wrapper_dir)
+sys.path.append(os.path.join("src", "python_wrapper"))
 from wrapping import generate_wrappers
 generate_wrappers(header_dir=includedir, 
                   output_dir=os.path.join("src", "sans", "models"), 
