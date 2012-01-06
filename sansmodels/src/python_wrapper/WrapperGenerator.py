@@ -322,14 +322,15 @@ class WrapperGenerator:
                 param_str += "        PyDict_SetItemString(self->params,\"%s\",Py_BuildValue(\"d\",%10.12f));\n" % \
                     (par, self.params[par])
 
-            param_str += "        // Initialize dispersion / averaging parameter dict\n"
-            param_str += "        DispersionVisitor* visitor = new DispersionVisitor();\n"
-            param_str += "        PyObject * disp_dict;\n"
-            for par in self.disp_params:
-                par = par.strip()
-                param_str += "        disp_dict = PyDict_New();\n"
-                param_str += "        self->model->%s.dispersion->accept_as_source(visitor, self->model->%s.dispersion, disp_dict);\n" % (par, par)
-                param_str += "        PyDict_SetItemString(self->dispersion, \"%s\", disp_dict);\n" % par
+            if len(self.disp_params)>0:
+                param_str += "        // Initialize dispersion / averaging parameter dict\n"
+                param_str += "        DispersionVisitor* visitor = new DispersionVisitor();\n"
+                param_str += "        PyObject * disp_dict;\n"
+                for par in self.disp_params:
+                    par = par.strip()
+                    param_str += "        disp_dict = PyDict_New();\n"
+                    param_str += "        self->model->%s.dispersion->accept_as_source(visitor, self->model->%s.dispersion, disp_dict);\n" % (par, par)
+                    param_str += "        PyDict_SetItemString(self->dispersion, \"%s\", disp_dict);\n" % par
                 
             # Initialize dispersion object dictionnary
             param_str += "\n"
@@ -344,13 +345,14 @@ class WrapperGenerator:
                 param_str += "    self->model->%s = PyFloat_AsDouble( PyDict_GetItemString(self->params, \"%s\") );\n" % \
                     (par, par)
                     
-            param_str += "    // Read in dispersion parameters\n"
-            param_str += "    PyObject* disp_dict;\n"
-            param_str += "    DispersionVisitor* visitor = new DispersionVisitor();\n"
-            for par in self.disp_params:
-                par = par.strip()
-                param_str += "    disp_dict = PyDict_GetItemString(self->dispersion, \"%s\");\n" % par
-                param_str += "    self->model->%s.dispersion->accept_as_destination(visitor, self->model->%s.dispersion, disp_dict);\n" % (par, par)
+            if len(self.disp_params)>0:
+                param_str += "    // Read in dispersion parameters\n"
+                param_str += "    PyObject* disp_dict;\n"
+                param_str += "    DispersionVisitor* visitor = new DispersionVisitor();\n"
+                for par in self.disp_params:
+                    par = par.strip()
+                    param_str += "    disp_dict = PyDict_GetItemString(self->dispersion, \"%s\");\n" % par
+                    param_str += "    self->model->%s.dispersion->accept_as_destination(visitor, self->model->%s.dispersion, disp_dict);\n" % (par, par)
                 
             newline = self.replaceToken(newline, "[READDICTIONARY]", param_str)
                 

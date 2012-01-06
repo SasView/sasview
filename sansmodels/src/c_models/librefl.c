@@ -150,8 +150,7 @@ complex cplx_cos(b)
 // n_sub = total no. of bins(or sublayers)
 // ind = x position: 0 to max
 // nu = max x to integration
-double err_mod_func(n_sub, ind, nu)
-	double n_sub,nu, ind;
+double err_mod_func(double n_sub, double ind, double nu)
 {
   double center, func;
   if (nu == 0.0)
@@ -176,8 +175,7 @@ double err_mod_func(n_sub, ind, nu)
 
 	return func;
 }
-double linearfunc(n_sub, ind, nu)
-	double n_sub,nu, ind;
+double linearfunc(double n_sub, double ind, double nu)
 {
   double bin_size, func;
 	if (n_sub == 0.0)
@@ -191,8 +189,7 @@ double linearfunc(n_sub, ind, nu)
 	return func;
 }
 // use the right hand side from the center of power func
-double power_r(n_sub, ind, nu)
-	double n_sub, nu, ind;
+double power_r(double n_sub, double ind, double nu)
 {
   double bin_size,func;
 	if (nu == 0.0)
@@ -208,8 +205,7 @@ double power_r(n_sub, ind, nu)
 	return func;
 }
 // use the left hand side from the center of power func
-double power_l(n_sub, ind, nu)
-	double n_sub, nu, ind;
+double power_l(double n_sub, double ind, double nu)
 {
   double bin_size, func;
 	if (nu == 0.0)
@@ -225,8 +221,7 @@ double power_l(n_sub, ind, nu)
 	return func;
 }
 // use 1-exp func from x=0 to x=1
-double exp_r(n_sub, ind, nu)
-	double n_sub, nu, ind;
+double exp_r(double n_sub, double ind, double nu)
 {
   double bin_size, func;
 	if (nu == 0.0)
@@ -246,8 +241,7 @@ double exp_r(n_sub, ind, nu)
 }
 
 // use the left hand side mirror image of exp func
-double exp_l(n_sub, ind, nu)
-	double n_sub, nu, ind;
+double exp_l(double n_sub, double ind, double nu)
 {
   double bin_size, func;
 	if (nu == 0.0)
@@ -268,9 +262,7 @@ double exp_l(n_sub, ind, nu)
 
 // To select function called
 // At nu = 0 (singular point), call line function
-double intersldfunc(fun_type, n_sub, i, nu, sld_l, sld_r)
-	double n_sub, nu, sld_l, sld_r,i;
-	int fun_type;
+double intersldfunc(int fun_type, double n_sub, double i, double nu, double sld_l, double sld_r)
 {
 	double sld_i, func;
 	// this condition protects an error from the singular point
@@ -314,9 +306,7 @@ double intersldfunc(fun_type, n_sub, i, nu, sld_l, sld_r)
 
 
 // used by refl.c
-double interfunc(fun_type, n_sub, i, sld_l, sld_r)
-	double n_sub, sld_l, sld_r, i;
-	int fun_type;
+double interfunc(int fun_type, double n_sub, double i, double sld_l, double sld_r)
 {
 	double sld_i, func;
 	switch(fun_type){
