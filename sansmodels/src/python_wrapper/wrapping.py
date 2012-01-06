@@ -20,7 +20,7 @@ def generate_wrappers(header_dir, output_dir='.', c_wrapper_dir='.'):
     print "Total number of model  wrappers created is %s" % nModels
 
 if __name__ == '__main__':
-    header_dir = os.path.join('..', 'c_extensions')
+    header_dir = os.path.join('..', 'include')
     generate_wrappers(header_dir, output_dir="../sans/models/", c_wrapper_dir='.')
 
 

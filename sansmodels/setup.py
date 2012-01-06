@@ -47,7 +47,7 @@ class build_ext_subclass( build_ext ):
         build_ext.build_extensions(self)
 
 # Build the module name
-srcdir  = os.path.join("src", "c_extensions")
+srcdir  = os.path.join("src", "include")
 igordir = os.path.join("src", "libigor")
 c_model_dir = os.path.join("src", "c_models")
 smear_dir  = os.path.join("src", "c_smearer")
@@ -60,18 +60,7 @@ generate_wrappers(header_dir=srcdir,
                   output_dir=os.path.join("src", "sans", "models"), 
                   c_wrapper_dir=wrapper_dir)
 
-IGNORED_FILES = ["a.exe",
-                 "__init__.py"
-                 ".svn",
-                   "lineparser.py",
-                   "run.py",
-                   "CGaussian.cpp",
-                   "CLogNormal.cpp",
-                   "CLorentzian.cpp",
-                   "CSchulz.cpp",
-                   "WrapperGenerator.py",
-                   "wrapping.py"
-                   ]
+IGNORED_FILES = [".svn"]
 if not os.name=='nt':
     IGNORED_FILES.extend(["gamma_win.c","winFuncs.c"])
 

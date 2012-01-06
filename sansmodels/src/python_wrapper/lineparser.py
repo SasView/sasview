@@ -191,7 +191,7 @@ if __name__ == '__main__':
     
     # Read file
     name= "sphere.h"
-    f = open("..\c_extensions\core_shell.h",'r')
+    f = open("..\include\core_shell.h",'r')
     buf = f.read()
   
     lines = buf.split('\n')

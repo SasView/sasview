@@ -486,7 +486,6 @@ class WrapperGenerator:
 if __name__ == '__main__':
     if len(sys.argv)>1:
         print "Will look for file %s" % sys.argv[1]
-    #app = WrapperGenerator('../c_extensions/elliptical_cylinder.h')
         app = WrapperGenerator(sys.argv[1])
     else:
         app = WrapperGenerator("test.h")
