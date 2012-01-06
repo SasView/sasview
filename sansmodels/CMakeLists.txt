@@ -71,54 +71,54 @@ set ( INC_FILES
     src/c_models/gamma_win.h
     src/c_models/parameters.hh
     src/c_models/dispersion_visitor.hh
-    src/include/sphere.h
-    src/include/hollow_cylinder.h
-    src/include/binaryHS.h
-    src/include/multishell.h
-    src/include/sc.h
-    src/include/StickyHS.h
-    src/include/vesicle.h
-    src/include/flexible_cylinder.h
-    src/include/csparallelepiped.h
-    src/include/flexcyl_ellipX.h
-    src/include/gaussian.h
-    src/include/lamellarPC.h
-    src/include/ellipsoid.h
-    src/include/stacked_disks.h
-    src/include/SquareWell.h
-    src/include/lamellarFF_HG.h
-    src/include/lamellarPS_HG.h
-    src/include/lorentzian.h
-    src/include/fractal.h
-    src/include/lamellarPS.h
-    src/include/cylinder.h
-    src/include/elliptical_cylinder.h
-    src/include/schulz.h
-    src/include/Hardsphere.h
-    src/include/refl_adv.h
-    src/include/barbell.h
-    src/include/spheresld.h
-    src/include/parallelepiped.h
-    src/include/pearlnecklace.h
-    src/include/sld_cal.h
-    src/include/logNormal.h
-    src/include/spheroid.h
-    src/include/HayterMSA.h
-    src/include/polygausscoil.h
-    src/include/corefourshell.h
-    src/include/fcc.h
-    src/include/triaxial_ellipsoid.h
-    src/include/capcyl.h
-    src/include/DiamCyl.h
-    src/include/onion.h
-    src/include/bcc.h
-    src/include/core_shell_cylinder.h
-    src/include/lamellar.h
-    src/include/rpa.h
-    src/include/core_shell.h
-    src/include/fuzzysphere.h
-    src/include/refl.h
-    src/include/DiamEllip.h
+    include/sphere.h
+    include/hollow_cylinder.h
+    include/binaryHS.h
+    include/multishell.h
+    include/sc.h
+    include/StickyHS.h
+    include/vesicle.h
+    include/flexible_cylinder.h
+    include/csparallelepiped.h
+    include/flexcyl_ellipX.h
+    include/gaussian.h
+    include/lamellarPC.h
+    include/ellipsoid.h
+    include/stacked_disks.h
+    include/SquareWell.h
+    include/lamellarFF_HG.h
+    include/lamellarPS_HG.h
+    include/lorentzian.h
+    include/fractal.h
+    include/lamellarPS.h
+    include/cylinder.h
+    include/elliptical_cylinder.h
+    include/schulz.h
+    include/Hardsphere.h
+    include/refl_adv.h
+    include/barbell.h
+    include/spheresld.h
+    include/parallelepiped.h
+    include/pearlnecklace.h
+    include/sld_cal.h
+    include/logNormal.h
+    include/spheroid.h
+    include/HayterMSA.h
+    include/polygausscoil.h
+    include/corefourshell.h
+    include/fcc.h
+    include/triaxial_ellipsoid.h
+    include/capcyl.h
+    include/DiamCyl.h
+    include/onion.h
+    include/bcc.h
+    include/core_shell_cylinder.h
+    include/lamellar.h
+    include/rpa.h
+    include/core_shell.h
+    include/fuzzysphere.h
+    include/refl.h
+    include/DiamEllip.h
     src/libigor/GaussWeights.h
     src/libigor/libSANSAnalysis.h
     src/libigor/StandardHeaders.h
@@ -130,7 +130,7 @@ set ( INC_FILES
 
 )
     
-include_directories (src/libigor src/include src/c_models)
+include_directories (src/libigor include src/c_models)
 
 # Add the target for this directory
 add_library ( Models ${SRC_FILES} ${INC_FILES})

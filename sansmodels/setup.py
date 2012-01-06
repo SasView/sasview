@@ -47,7 +47,7 @@ class build_ext_subclass( build_ext ):
         build_ext.build_extensions(self)
 
 # Build the module name
-includedir  = os.path.join("src", "include")
+includedir  = "include"
 igordir = os.path.join("src", "libigor")
 c_model_dir = os.path.join("src", "c_models")
 smear_dir  = os.path.join("src", "c_smearer")

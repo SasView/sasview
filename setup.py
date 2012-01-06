@@ -211,7 +211,7 @@ ext_modules.append( Extension("park._modeling",
                               ) )
 
 # Sans models
-includedir  = os.path.join("sansmodels", "src", "include")
+includedir  = os.path.join("sansmodels", "include")
 igordir = os.path.join("sansmodels", "src", "libigor")
 c_model_dir = os.path.join("sansmodels", "src", "c_models")
 smear_dir  = os.path.join("sansmodels", "src", "c_smearer")

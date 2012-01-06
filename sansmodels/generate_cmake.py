@@ -42,7 +42,7 @@ cmakelist += "    )\n\n"
 cmakelist += "set ( INC_FILES\n"    
 
 include_dirs = ["src/c_models",
-                "src/include",
+                "include",
                 "src/libigor"]
 
 for inc_dir in include_dirs:
@@ -54,7 +54,7 @@ for inc_dir in include_dirs:
 cmakelist += """
 )
     
-include_directories (src/libigor src/include src/c_models)
+include_directories (src/libigor include src/c_models)
 
 # Add the target for this directory
 add_library ( Models ${SRC_FILES} ${INC_FILES})
