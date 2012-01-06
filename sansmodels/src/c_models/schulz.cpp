@@ -18,6 +18,10 @@
 using namespace std;
 #include "schulz.h"
 
+#if defined(_MSC_VER)
+#include "gamma_win.h"
+#endif
+
 Schulz :: Schulz() {
   scale  = Parameter(1.0, true);
   sigma  = Parameter(1.0, true);
