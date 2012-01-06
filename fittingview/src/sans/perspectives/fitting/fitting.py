@@ -227,7 +227,7 @@ class Plugin(PluginBase):
             raise
         
         self.id_edit = wx.NewId()
-        editmodel_help = "Edit cusomized model sample file" 
+        editmodel_help = "Edit customized model sample file" 
         self.menu1.AppendMenu(self.id_edit, "Edit Custom Model", 
                               self.edit_model_menu, editmodel_help)
         #create  menubar items
