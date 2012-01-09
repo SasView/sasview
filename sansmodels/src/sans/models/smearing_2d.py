@@ -25,7 +25,7 @@ class Smearer2D:
     """
      
     def __init__(self, data=None, model=None, index=None, 
-                 limit=LIMIT, accuracy='Low', coords='polar', engine='python'):
+                 limit=LIMIT, accuracy='Low', coords='polar', engine='c'):
         """
         Assumption: equally spaced bins in dq_r, dq_phi space.
         
@@ -146,14 +146,14 @@ class Smearer2D:
 
         if self._engine == 'c' and self.coords == 'polar':
             try:
-                import sans_extension.smearer2d_helper as smearer2dc
+                import sans.models.sans_extension.smearer2d_helper as smearer2dc
                 smearc = smearer2dc.new_Smearer_helper(self.qx_data, self.qy_data,
                                               self.dqx_data, self.dqy_data,
                                               self.limit, nr, nphi, int(len_data))
                 weight_res = numpy.zeros(nr * nphi )
                 qx_res = numpy.zeros(nr * nphi * int(len_data))
                 qy_res = numpy.zeros(nr * nphi * int(len_data))
-                smearer2dc.smearer2d_helper(smearc,weight_res, qx_res, qy_res)
+                smearer2dc.smearer2d_helper(smearc, weight_res, qx_res, qy_res)
             except:
                 raise 
         else:
@@ -230,7 +230,7 @@ if __name__ == '__main__':
     z = numpy.ones(10)
     dz = numpy.sqrt(z)
     
-    from DataLoader import Data2D
+    from sans.dataloader import Data2D
     #for i in range(10): print i, 0.001 + i*0.008/9.0 
     #for i in range(100): print i, int(math.floor( (i/ (100/9.0)) )) 
     out = Data2D()
