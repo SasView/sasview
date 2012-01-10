@@ -264,6 +264,8 @@ class PlotPanel(wx.Panel):
         
         # check if zoomed.
         self.is_zoomed = False
+        # Plottables
+        self.plots = {}
         
         # Default locations
         self._default_save_location = os.getcwd()    
@@ -639,6 +641,9 @@ class PlotPanel(wx.Panel):
         when clicking on linear Fit on context menu , display Fitting Dialog
         """
         list = {}
+        menu = event.GetEventObject()
+        id = event.GetId()
+        self.set_selected_from_menu(menu, id)
         plotlist = self.graph.returnPlottable()
         if self.graph.selected_plottable is not None:
             for item in plotlist:
@@ -660,7 +665,22 @@ class PlotPanel(wx.Panel):
                 dlg.setFitRange(self.xminView, self.xmaxView, 
                                 self.xmin, self.xmax)
             dlg.ShowModal() 
-
+            
+    def set_selected_from_menu(self, menu, id):
+        """
+        Set selected_plottable from context menu selection
+        
+        :param menu: context menu item
+        :param id: menu item id
+        """
+        if len(self.plots) < 1:
+            return
+        name = menu.GetHelpString(id)
+        for plot in self.plots.values():
+            if plot.name == name:
+                self.graph.selected_plottable = plot.id
+                break
+            
     def linear_plottable_fit(self, plot): 
         """
             when clicking on linear Fit on context menu , display Fitting Dialog
@@ -916,6 +936,8 @@ class PlotPanel(wx.Panel):
         """
         # reset postion
         self.position = None
+        if self.graph.selected_plottable != None:
+            self.graph.selected_plottable = None
         
         self.onContextMenu(event)
         

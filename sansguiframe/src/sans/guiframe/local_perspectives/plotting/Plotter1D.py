@@ -317,6 +317,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         Toggle error display to hide or show
         """
+        menu = event.GetEventObject()
+        id = event.GetId()
+        self.set_selected_from_menu(menu, id)
         # Check zoom
         xlo, xhi = self.subplot.get_xlim()
         ylo, yhi = self.subplot.get_ylim()
@@ -344,6 +347,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         :param event: Menu event
         
         """
+        menu = event.GetEventObject()
+        id = event.GetId()
+        self.set_selected_from_menu(menu, id)
         ## Check if there is a selected graph to remove
         if self.graph.selected_plottable in self.plots.keys():
             selected_plot = self.plots[self.graph.selected_plottable]
@@ -359,166 +365,177 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         self._slicerpop = PanelMenu()
         self._slicerpop.set_plots(self.plots)
-        self._slicerpop.set_graph(self.graph)     
-        # Various plot options
-        id = wx.NewId()
-        self._slicerpop.Append(id, '&Save Image', 'Save image as PNG')
-        wx.EVT_MENU(self, id, self.onSaveImage)
-        id = wx.NewId()
-        self._slicerpop.Append(id, '&Print Image', 'Print image ')
-        wx.EVT_MENU(self, id, self.onPrint)
-        id = wx.NewId()
-        self._slicerpop.Append(id, '&Print Preview', 'Print preview')
-        wx.EVT_MENU(self, id, self.onPrinterPreview)
-        
-        id = wx.NewId()
-        self._slicerpop.Append(id, '&Copy to Clipboard', 'Copy to the clipboard')
-        wx.EVT_MENU(self, id, self.OnCopyFigureMenu)
-                
-        self._slicerpop.AppendSeparator()
-
-        #add menu of other plugins
-        item_list = self.parent.get_context_menu(self)
-
-        if (not item_list == None) and (not len(item_list) == 0):
-            for item in item_list:
-                try:
-                    id = wx.NewId()
-                    self._slicerpop.Append(id, item[0], item[1])
-                    wx.EVT_MENU(self, id, item[2])
-                except:
-                    msg = "ModelPanel1D.onContextMenu: "
-                    msg += "bad menu item  %s" % sys.exc_value
-                    wx.PostEvent(self.parent, StatusEvent(status=msg))
-                    pass
-            self._slicerpop.AppendSeparator()
-        #id = wx.NewId()
-        #self._slicerpop.Append(id, '&Print image', 'Print image')
-        if self.graph.selected_plottable in self.plots:
-            plot = self.plots[self.graph.selected_plottable]
+        self._slicerpop.set_graph(self.graph)   
+        if not self.graph.selected_plottable in self.plots:  
+            # Various plot options
+            id = wx.NewId()
+            self._slicerpop.Append(id, '&Save Image', 'Save image as PNG')
+            wx.EVT_MENU(self, id, self.onSaveImage)
+            id = wx.NewId()
+            self._slicerpop.Append(id, '&Print Image', 'Print image ')
+            wx.EVT_MENU(self, id, self.onPrint)
+            id = wx.NewId()
+            self._slicerpop.Append(id, '&Print Preview', 'Print preview')
+            wx.EVT_MENU(self, id, self.onPrinterPreview)
             
             id = wx.NewId()
-            name = plot.name
-            self._slicerpop.Append(id, "&Save Points as a File")
-            wx.EVT_MENU(self, id, self._onSave)
+            self._slicerpop.Append(id, '&Copy to Clipboard', 'Copy to the clipboard')
+            wx.EVT_MENU(self, id, self.OnCopyFigureMenu)
+                    
             self._slicerpop.AppendSeparator()
+
+        for plot in self.plots.values():
+            #title = plot.title
+            name = plot.name
+            plot_menu = wx.Menu()
+            #plot = self.plots[self.graph.selected_plottable]
+            #add menu of other plugins
+            item_list = self.parent.get_context_menu(self)
+    
+            if (not item_list == None) and (not len(item_list) == 0):
+                for item in item_list:
+                    try:
+                        id = wx.NewId()
+                        plot_menu.Append(id, item[0], name)
+                        wx.EVT_MENU(self, id, item[2])
+                    except:
+                        msg = "ModelPanel1D.onContextMenu: "
+                        msg += "bad menu item  %s" % sys.exc_value
+                        wx.PostEvent(self.parent, StatusEvent(status=msg))
+                        pass
+                plot_menu.AppendSeparator()
+    
+            id = wx.NewId()
+            plot_menu.Append(id, "&Save Points as a File", name)
+            wx.EVT_MENU(self, id, self._onSave)
+            plot_menu.AppendSeparator()
             if self.parent.ClassName.count('wxDialog') == 0: 
                 id = wx.NewId()
-                self._slicerpop.Append(id, '&Linear Fit')
+                plot_menu.Append(id, '&Linear Fit', name)
                 wx.EVT_MENU(self, id, self.onFitting)
-                self._slicerpop.AppendSeparator()
+                plot_menu.AppendSeparator()
     
                 id = wx.NewId()
-                self._slicerpop.Append(id, "Remove %s Curve" % name)
+                plot_menu.Append(id, "Remove", name)
                 wx.EVT_MENU(self, id, self._onRemove)
                 if not plot.is_data:
                     id = wx.NewId()
-                    self._slicerpop.Append(id, '&Freeze', 'Freeze')
+                    plot_menu.Append(id, '&Freeze', name)
                     wx.EVT_MENU(self, id, self.onFreeze)
-                self._slicerpop.AppendSeparator()    
+                plot_menu.AppendSeparator()    
                 symbol_menu = wx.Menu()
                 for label in self._symbol_labels:
                     id = wx.NewId()
-                    symbol_menu.Append(id, str(label), str(label))
+                    symbol_menu.Append(id, str(label), name)
                     wx.EVT_MENU(self, id, self.onChangeSymbol)
                 id = wx.NewId()
-                self._slicerpop.AppendMenu(id,'&Modify Symbol',  symbol_menu)
+                plot_menu.AppendMenu(id,'&Modify Symbol', symbol_menu, name)
                 
                 color_menu = wx.Menu()
                 for label in self._color_labels:
                     id = wx.NewId()
-                    color_menu.Append(id, str(label), str(label))
+                    color_menu.Append(id, str(label), name)
                     wx.EVT_MENU(self, id, self.onChangeColor)
                 id = wx.NewId()
-                self._slicerpop.AppendMenu(id, '&Modify Symbol Color', color_menu)
+                plot_menu.AppendMenu(id, '&Modify Symbol Color', 
+                                     color_menu, name)
                 
                 size_menu = wx.Menu()
                 for i in range(10):
                     id = wx.NewId()
-                    size_menu.Append(id, str(i), str(i))
+                    size_menu.Append(id, str(i), name)
                     wx.EVT_MENU(self, id, self.onChangeSize)
                 id = wx.NewId()
-                size_menu.Append(id, '&Custom', 'Custom')
+                size_menu.Append(id, '&Custom', name)
                 wx.EVT_MENU(self, id, self.onChangeSize)
                 id = wx.NewId()
-                self._slicerpop.AppendMenu(id, '&Modify Symbol Size', size_menu)
+                plot_menu.AppendMenu(id, '&Modify Symbol Size', 
+                                     size_menu, name)
                 
-                self.hide_menu = self._slicerpop.Append(id, "Hide Error Bar")
-    
-                if plot.dy is not None and plot.dy != []:
-                    if plot.hide_error :
-                        self.hide_menu.SetText('Show Error Bar')
+                if plot.is_data:
+                    self.hide_menu = plot_menu.Append(id, 
+                                                    "Hide Error Bar", name)
+        
+                    if plot.dy is not None and plot.dy != []:
+                        if plot.hide_error :
+                            self.hide_menu.SetText('Show Error Bar')
+                        else:
+                            self.hide_menu.SetText('Hide Error Bar')
                     else:
-                        self.hide_menu.SetText('Hide Error Bar')
-                else:
-                    self.hide_menu.Enable(False)
-                wx.EVT_MENU(self, id, self._ontoggle_hide_error)
+                        self.hide_menu.Enable(False)
+                    wx.EVT_MENU(self, id, self._ontoggle_hide_error)
                 
-                self._slicerpop.AppendSeparator()
+                plot_menu.AppendSeparator()
                 id = wx.NewId()
-                self._slicerpop.Append(id, '&Edit Legend Label', 'Edit Legend Label')
+                plot_menu.Append(id, '&Edit Legend Label', name)
                 wx.EVT_MENU(self, id, self.onEditLabels)
+            id = wx.NewId()
+            #plot_menu.SetTitle(name)
+            self._slicerpop.AppendMenu(id, '&%s'% name, plot_menu)
                 # Option to hide
                 #TODO: implement functionality to hide a plottable (legend click)
-
-        loc_menu = wx.Menu()
-        for label in self._loc_labels:
-            id = wx.NewId()
-            loc_menu.Append(id, str(label), str(label))
-            wx.EVT_MENU(self, id, self.onChangeLegendLoc)
-        id = wx.NewId()
-        self._slicerpop.AppendMenu(id, '&Modify Legend Location', loc_menu)
-        
-        id = wx.NewId()
-        self._slicerpop.Append(id, '&Toggle Legend On/Off', 'Toggle Legend On/Off')
-        wx.EVT_MENU(self, id, self.onLegend)
-        self._slicerpop.AppendSeparator()
-        
-        id = wx.NewId()
-        self._slicerpop.Append(id, '&Edit Y Axis Label')
-        wx.EVT_MENU(self, id, self._on_yaxis_label)     
-        id = wx.NewId()
-        self._slicerpop.Append(id, '&Edit X Axis Label')
-        wx.EVT_MENU(self, id, self._on_xaxis_label)
-
-        id = wx.NewId()
-        self._slicerpop.Append(id, '&Toggle Grid On/Off', 'Toggle Grid On/Off')
-        wx.EVT_MENU(self, id, self.onGridOnOff)
-        self._slicerpop.AppendSeparator()
-        
-        if self.position != None:
-            id = wx.NewId()
-            self._slicerpop.Append(id, '&Add Text')
-            wx.EVT_MENU(self, id, self._on_addtext)
-            id = wx.NewId()
-            self._slicerpop.Append(id, '&Remove Text')
-            wx.EVT_MENU(self, id, self._on_removetext)
+        if not self.graph.selected_plottable in self.plots:  
             self._slicerpop.AppendSeparator()
-        id = wx.NewId()
-        self._slicerpop.Append(id, '&Change Scale')
-        wx.EVT_MENU(self, id, self._onProperties)
-        self._slicerpop.AppendSeparator()
-        id = wx.NewId()
-        self._slicerpop.Append(id, '&Reset Graph Range')
-        wx.EVT_MENU(self, id, self.onResetGraph)  
+            loc_menu = wx.Menu()
+            for label in self._loc_labels:
+                id = wx.NewId()
+                loc_menu.Append(id, str(label), str(label))
+                wx.EVT_MENU(self, id, self.onChangeLegendLoc)
+            id = wx.NewId()
+            self._slicerpop.AppendMenu(id, '&Modify Legend Location', loc_menu)
+            
+            id = wx.NewId()
+            self._slicerpop.Append(id, '&Toggle Legend On/Off', 'Toggle Legend On/Off')
+            wx.EVT_MENU(self, id, self.onLegend)
+            self._slicerpop.AppendSeparator()
+            
+            id = wx.NewId()
+            self._slicerpop.Append(id, '&Edit Y Axis Label')
+            wx.EVT_MENU(self, id, self._on_yaxis_label)     
+            id = wx.NewId()
+            self._slicerpop.Append(id, '&Edit X Axis Label')
+            wx.EVT_MENU(self, id, self._on_xaxis_label)
+    
+            id = wx.NewId()
+            self._slicerpop.Append(id, '&Toggle Grid On/Off', 'Toggle Grid On/Off')
+            wx.EVT_MENU(self, id, self.onGridOnOff)
+            self._slicerpop.AppendSeparator()
+            
+            if self.position != None:
+                id = wx.NewId()
+                self._slicerpop.Append(id, '&Add Text')
+                wx.EVT_MENU(self, id, self._on_addtext)
+                id = wx.NewId()
+                self._slicerpop.Append(id, '&Remove Text')
+                wx.EVT_MENU(self, id, self._on_removetext)
+                self._slicerpop.AppendSeparator()
+            id = wx.NewId()
+            self._slicerpop.Append(id, '&Change Scale')
+            wx.EVT_MENU(self, id, self._onProperties)
+            self._slicerpop.AppendSeparator()
+            id = wx.NewId()
+            self._slicerpop.Append(id, '&Reset Graph Range')
+            wx.EVT_MENU(self, id, self.onResetGraph)  
+            
+            if self.parent.ClassName.count('wxDialog') == 0:    
+                self._slicerpop.AppendSeparator()
+                id = wx.NewId()
+                self._slicerpop.Append(id, '&Window Title')
+                wx.EVT_MENU(self, id, self.onChangeCaption)
         try:
             pos_evt = event.GetPosition()
             pos = self.ScreenToClient(pos_evt)
         except:
             pos_x, pos_y = self.toolbar.GetPositionTuple()
             pos = (pos_x, pos_y + 5)
-        
-        if self.parent.ClassName.count('wxDialog') == 0:    
-            self._slicerpop.AppendSeparator()
-            id = wx.NewId()
-            self._slicerpop.Append(id, '&Window Title')
-            wx.EVT_MENU(self, id, self.onChangeCaption)
-        
         self.PopupMenu(self._slicerpop, pos)
-        
+            
     def onFreeze(self, event):
         """
         """
+        menu = event.GetEventObject()
+        id = event.GetId()
+        self.set_selected_from_menu(menu, id)
         plot = self.plots[self.graph.selected_plottable]
         self.parent.onfreeze([plot.id])
         
@@ -526,6 +543,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         Edit legend label
         """
+        menu = event.GetEventObject()
+        id = event.GetId()
+        self.set_selected_from_menu(menu, id)
         selected_plot = self.plots[self.graph.selected_plottable]
         label = selected_plot.label
         dial = LabelDialog(None, -1, 'Change Legend Label', label)
@@ -556,6 +576,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         menu = event.GetEventObject()
         id = event.GetId()
+        self.set_selected_from_menu(menu, id)
         label =  menu.GetLabel(id)
         selected_plot = self.plots[self.graph.selected_plottable]
         selected_plot.custom_color = self._color_labels[label]
@@ -567,9 +588,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
         #                                     id=selected_plot.id))
     
     def onChangeSize(self, event):
-        
+        """
+        On Change size menu
+        """
         menu = event.GetEventObject()
         id = event.GetId()
+        self.set_selected_from_menu(menu, id)
         label =  menu.GetLabel(id)
         selected_plot = self.plots[self.graph.selected_plottable]
         
@@ -598,6 +622,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         menu = event.GetEventObject()
         id = event.GetId()
+        self.set_selected_from_menu(menu, id)
         label =  menu.GetLabel(id)
         selected_plot = self.plots[self.graph.selected_plottable]
         selected_plot.symbol = self._symbol_labels[label]
@@ -615,6 +640,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         :param evt: Menu event
         
         """
+        menu = evt.GetEventObject()
+        id = evt.GetId()
+        self.set_selected_from_menu(menu, id)
         data = self.plots[self.graph.selected_plottable]
         default_name = data.label
         if default_name.count('.') > 0:
