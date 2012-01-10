@@ -10,4 +10,4 @@ we ask that you acknowledge the use of the software with the following sentence:
 See the DANSE project web site for license information:
 http://wiki.cacr.caltech.edu/danse/index.php/Main_Page
 
-copyright 2009, University of Tennessee for the DANSE project
+copyright 2009-2011, University of Tennessee
