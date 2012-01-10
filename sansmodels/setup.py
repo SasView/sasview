@@ -12,6 +12,13 @@ numpy_incl_path = os.path.join(get_numpy_include_dirs()[0], "numpy")
 from distutils.core import Extension, setup
 from distutils.command.build_ext import build_ext
 
+# Manage version number ######################################
+sys.path.append(os.path.join("src", "sans"))
+import models
+VERSION = models.__version__
+print "Building models v%s" % VERSION
+##############################################################
+
 # Options to enable OpenMP
 copt =  {'msvc': ['/openmp'],
          'mingw32' : ['-fopenmp'],
@@ -52,7 +59,8 @@ igordir = os.path.join("src", "libigor")
 c_model_dir = os.path.join("src", "c_models")
 smear_dir  = os.path.join("src", "c_smearer")
 wrapper_dir  = os.path.join("src", "python_wrapper", "generated")
-print "Installing SANS models"
+if not os.path.isdir(wrapper_dir):
+    os.makedirs(wrapper_dir)
 
 sys.path.append(os.path.join("src", "python_wrapper"))
 from wrapping import generate_wrappers
@@ -100,11 +108,11 @@ if os.name=='nt':
 
 dist = setup(
     name="sansmodels",
-    version = "1.0.0",
+    version = VERSION,
     description = "Python module for SANS scattering models",
     author = "SANS/DANSE",
     author_email = "sansdanse@gmail.gov",
-    url = "http://danse.us/trac/sans",
+    url = "http://sansviewproject.svn.sourceforge.net",
     
     # Place this module under the sans package
     #ext_package = "sans",
@@ -112,7 +120,7 @@ dist = setup(
     # Use the pure python modules
     package_dir = {"sans":os.path.join("src", "sans"),
                    "sans.models":os.path.join("src", "sans", "models"),
-                   "sans.models.sans_extension":includedir,
+                   "sans.models.sans_extension":os.path.join("src", "sans", "models", "sans_extension"),
                   },
     package_data={'sans.models': [os.path.join('media', "*")]},
     packages = ["sans","sans.models",

@@ -262,7 +262,7 @@ append_file(file_list=smear_sources, dir_path=smear_dir)
 
 package_dir["sans"] = os.path.join("sansmodels", "src", "sans")
 package_dir["sans.models"] = os.path.join("sansmodels", "src", "sans", "models")
-package_dir["sans.models.sans_extension"] = includedir
+package_dir["sans.models.sans_extension"] = os.path.join("sansmodels", "src", "sans", "models", "sans_extension")
             
 package_data['sans.models'] = [os.path.join('media', "*")]
 packages.extend(["sans","sans.models","sans.models.sans_extension"])
