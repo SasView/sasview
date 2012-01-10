@@ -25,7 +25,6 @@ set (SRC_FILES
 source_dirs = ["src/c_models",
                "src/libigor"]
 excluded_src = ["c_models.cpp",
-                "dispersion_visitor.cpp",
                 "disperser.c",
                 "winFuncs.c"]
 
@@ -57,7 +56,11 @@ cmakelist += """
 include_directories (src/libigor include src/c_models)
 
 # Add the target for this directory
-add_library ( Models ${SRC_FILES} ${INC_FILES})
+add_library ( models ${SRC_FILES} ${INC_FILES})
+add_executable( libraryTest test/library_test.cpp  ${INC_FILES})
+ADD_DEFINITIONS(-D__MODELS_STANDALONE__)
+ADD_DEPENDENCIES(libraryTest models)
+TARGET_LINK_LIBRARIES(libraryTest models)
 """
 
 f.write(cmakelist)
