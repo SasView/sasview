@@ -7,3 +7,5 @@ try:
     __build__ = str(rev)
 except:
     __build__ = "1"
+    import sys
+    print "Error getting build version\n  %s" % sys.exc_value
