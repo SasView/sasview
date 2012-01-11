@@ -47,13 +47,9 @@ from sans.dataloader.loader import Loader
 
 def get_app_dir():
     """
-    Get the path of the current app (whatever among SansView/PrView/...) 
-    This is mainly for running app/data file from the command line
     """
-    tem_path = sys.path[0]
-    if os.path.isfile(tem_path):
-        tem_path = os.path.dirname(tem_path)
-    return os.path.abspath(tem_path)
+    from sans import sansview
+    return os.path.dirname(sansview.__file__)
 
 def get_user_directory():
     USERDIR = os.path.join(os.path.expanduser("~"),".sansview")
