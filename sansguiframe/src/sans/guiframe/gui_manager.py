@@ -47,12 +47,13 @@ from sans.dataloader.loader import Loader
 
 def get_app_dir():
     """
-      Return sansview dir until we clean up the gui_manager configuration.
-      There should be a proper config class so that we don't need all
-      the complexity currently used to figure out where things are.
+    Get the path of the current app (whatever among SansView/PrView/...) 
+    This is mainly for running app/data file from the command line
     """
-    from sans import sansview
-    return os.path.dirname(sansview.__file__)
+    tem_path = sys.path[0]
+    if os.path.isfile(tem_path):
+        tem_path = os.path.dirname(tem_path)
+    return os.path.abspath(tem_path)
 
 def get_user_directory():
     USERDIR = os.path.join(os.path.expanduser("~"),".sansview")
