@@ -25,7 +25,6 @@ except:
 # Manage version number ######################################
 import sansview
 VERSION = sansview.__version__
-print "Building SansView version %s %s" % (sansview.__version__, sansview.__build__)
 ##############################################################
 
 package_dir = {}
