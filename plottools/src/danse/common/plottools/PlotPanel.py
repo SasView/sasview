@@ -1264,6 +1264,8 @@ class PlotPanel(wx.Panel):
             label = '$' + label + '$'
         if font:
             self.subplot.set_xlabel(label, fontproperties=font, color=color)
+            for tick in self.subplot.xaxis.get_major_ticks():
+                tick.label.set_fontproperties(font) 
         else:
             self.subplot.set_xlabel(label, color=color)
         pass
@@ -1276,6 +1278,8 @@ class PlotPanel(wx.Panel):
             label = '$' + label + '$'
         if font:
             self.subplot.set_ylabel(label, fontproperties=font, color=color)
+            for tick_label in self.subplot.get_yticklabels():
+                tick_label.set_fontproperties(font)
         else:
             self.subplot.set_ylabel(label, color=color)
         pass
