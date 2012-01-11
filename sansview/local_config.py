@@ -5,6 +5,7 @@ import time
 import os
 from sans.guiframe.gui_style import GUIFRAME
 import sans.sansview
+import logging
 
 # Version of the application
 __appname__ = "SansView"
@@ -41,6 +42,7 @@ _license = "mailto:sansdanse@gmail.com"
 
 
 icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "images"))
+logging.info("icon path: %s" % icon_path)
 media_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "media"))
 test_path =  os.path.abspath(os.path.join(os.path.dirname(__file__), "test"))
 
