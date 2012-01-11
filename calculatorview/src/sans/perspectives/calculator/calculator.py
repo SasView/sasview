@@ -56,9 +56,13 @@ class Plugin(PluginBase):
         resolution_help = "Approximately estimates the "
         resolution_help += "resolution of Q in 2D based on the SANS "
         resolution_help += "instrumental parameter values."
+        mass_volume_help = "Based on the chemical formular, "
+        mass_volume_help += "compute the mass density or the molar volume."
         pyconsole_help = "Python Console."
         #data_editor_help = "Meta Data Editor"
         return [("SLD Calculator", sld_help, self.on_calculate_sld),
+                ("Density/Volume Calculator", mass_volume_help, 
+                                            self.on_calculate_dv),
                 ("Slit Size Calculator", slit_length_help,
                         self.on_calculate_slit_size),
                 ("Kiessig Thickness Calculator", 
@@ -76,7 +80,6 @@ class Plugin(PluginBase):
                                   title="Data Editor")
         self.put_icon(frame)
         frame.Show(True)
-        event.Skip()
 
     def on_calculate_kiessig(self, event):
         """
@@ -95,7 +98,16 @@ class Plugin(PluginBase):
         frame = SldWindow(base=self.parent)
         self.put_icon(frame)
         frame.Show(True) 
-       
+    
+    def on_calculate_dv(self, event):
+        """
+        Compute the mass density or molar voulme
+        """
+        from density_panel import DensityWindow
+        frame = DensityWindow(base=self.parent)
+        self.put_icon(frame)
+        frame.Show(True) 
+              
     def on_calculate_slit_size(self, event):
         """
         Compute the slit size a given data
