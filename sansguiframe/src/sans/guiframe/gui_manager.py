@@ -41,23 +41,35 @@ from sans.guiframe.data_processor import BatchOutputFrame
 from sans.guiframe.events import EVT_NEW_BATCH
 from sans.dataloader.loader import Loader
 
-# gui_manager should not know about sansview
-#from sans import sansview
-#PATH_APP = os.path.dirname(sansview.__file__)
-
 def get_app_dir():
     """
+        The application directory is the one where the default custom_config.py
+        file resides.
     """
-    if os.name=='nt':
-        logging.info(sys.executable)
-        logging.info(str(sys.argv))
-        app_path = sys.path[0]
-        if os.path.isfile(app_path):
-            app_path = os.path.dirname(app_path)
-        return os.path.abspath(app_path)
-    else:
-        from sans import sansview
-        return os.path.dirname(sansview.__file__)
+    # First, try the directory of the executable we are running
+    app_path = sys.path[0]
+    if os.path.isfile(app_path):
+        app_path = os.path.dirname(app_path)
+    if os.path.isfile(os.path.join(app_path, "custom_config.py")):
+        app_path = os.path.abspath(app_path)
+        logging.info("Using application path: %s", app_path)
+        return app_path
+    
+    # Next, try the current working directory
+    if os.path.isfile(os.path.join(os.getcwd(), "custom_config.py")):
+        logging.info("Using application path: %s", os.getcwd())
+        return os.path.abspath(os.getcwd())
+    
+    # Finally, try the directory of the sansview module
+    #TODO: gui_manager will have to know about sansview until we
+    # clean all these module variables and put them into a config class
+    # that can be passed by sansview.py.
+    logging.info(sys.executable)
+    logging.info(str(sys.argv))
+    from sans import sansview
+    app_path = os.path.dirname(sansview.__file__)
+    logging.info("Using application path: %s", app_path)
+    return app_path
 
 def get_user_directory():
     USERDIR = os.path.join(os.path.expanduser("~"),".sansview")
