@@ -98,7 +98,7 @@ class DensityPanel(ScrolledPanel, PanelBase):
         vbox  = wx.BoxSizer(wx.VERTICAL)
         
         # inputs
-        inputbox = wx.StaticBox(self, -1, "Input")
+        inputbox = wx.StaticBox(self, -1, "Inputs")
         boxsizer1 = wx.StaticBoxSizer(inputbox, wx.VERTICAL)
         boxsizer1.SetMinSize((_STATICBOX_WIDTH, -1))
         compound_txt = wx.StaticText(self, -1, 'Molecular Formula ')
@@ -146,7 +146,7 @@ class DensityPanel(ScrolledPanel, PanelBase):
         self.sizer1.Add(boxsizer1, 0, wx.EXPAND | wx.ALL, 10)
         
         # outputs
-        outputbox = wx.StaticBox(self, -1, "Output")
+        outputbox = wx.StaticBox(self, -1, "Outputs")
         boxsizer2 = wx.StaticBoxSizer(outputbox, wx.VERTICAL)
         boxsizer2.SetMinSize((_STATICBOX_WIDTH, -1))
         

@@ -65,6 +65,8 @@ class HelpWindow(wx.Frame):
             <ul>
             <li><a href ="sld_calculator_help.html" 
             target ="showframe">SLD Calculator</a><br></li>
+            <li><a href ="density_calculator_help.html" 
+            target ="showframe">Density Calculator</a><br></li>
             <li><a href ="slit_calculator_help.html" 
             target ="showframe">Slit Size Calculator</a><br></li>
             <li><a href ="kiessig_calculator_help.html" 
