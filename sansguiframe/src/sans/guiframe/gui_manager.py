@@ -48,8 +48,16 @@ from sans.dataloader.loader import Loader
 def get_app_dir():
     """
     """
-    from sans import sansview
-    return os.path.dirname(sansview.__file__)
+    if not os.name=='nt':
+        logging.info(sys.executable)
+        logging.info(str(sys.argv))
+        app_path = sys.path[0]
+        if os.path.isfile(app_path):
+            app_path = os.path.dirname(app_path)
+        return os.path.abspath(app_path)
+    else:
+        from sans import sansview
+        return os.path.dirname(sansview.__file__)
 
 def get_user_directory():
     USERDIR = os.path.join(os.path.expanduser("~"),".sansview")
