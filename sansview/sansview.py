@@ -8,9 +8,13 @@
 #
 #copyright 2009, University of Tennessee
 ################################################################################
+import os
+import logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    filename=os.path.join(os.path.expanduser("~"),'sansview.log'))
 
 import wx
-import os
 import sys
 # The below will make sure that sansview application uses the matplotlib font 
 # bundled with sansview. 
@@ -25,11 +29,6 @@ from sans.guiframe.gui_style import GUIFRAME
 from welcome_panel import WelcomePanel
 # For py2exe, import config here
 import local_config
-import logging
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(levelname)s %(message)s',
-                    filename=os.path.join(gui_manager.get_user_directory(),'sansview.log'),
-                    filemode='w')
 
 def run():
     sys.path.append(os.path.join("..","..",".."))
