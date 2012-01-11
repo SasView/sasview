@@ -48,7 +48,7 @@ from sans.dataloader.loader import Loader
 def get_app_dir():
     """
     """
-    if not os.name=='nt':
+    if os.name=='nt':
         logging.info(sys.executable)
         logging.info(str(sys.argv))
         app_path = sys.path[0]
