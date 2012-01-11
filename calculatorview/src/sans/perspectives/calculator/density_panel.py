@@ -1,31 +1,19 @@
 """
-This module provide GUI for the neutron scattering length density calculator
+This module provide GUI for the mass density calculator
 
 """
-
 import wx
-import math
 import sys
-
 from sans.guiframe.panel_base import PanelBase
 from wx.lib.scrolledpanel import ScrolledPanel
-from sans.guiframe.utils import format_number
 from sans.guiframe.utils import check_float
 from sans.guiframe.events import StatusEvent  
-
-# the calculator default value for wavelength is 6
-#import periodictable
 from periodictable import formula as Formula
-from periodictable.xsf import xray_energy
-from periodictable.xsf import xray_sld_from_atoms
-from periodictable.nsf import neutron_scattering
        
 AVOGADRO =  6.02214129e23
-
-_SCALE = 1e-6
 _INPUTS = ['Mass Density', 'Molar Volume']
 _UNITS = ['g/cm^(3)     ', 'cm^(3)/mol ']
-#SLD panel size 
+#Density panel size 
 if sys.platform.count("win32") > 0:
     _STATICBOX_WIDTH = 410
     _BOX_WIDTH = 200
