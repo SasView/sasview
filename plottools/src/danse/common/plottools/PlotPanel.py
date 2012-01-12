@@ -257,10 +257,12 @@ class PlotPanel(wx.Panel):
         self.xaxis_label = None
         self.xaxis_unit = None
         self.xaxis_color = 'black'
+        self.xaxis_tick = False
         self.yaxis_font = None
         self.yaxis_label = None
         self.yaxis_unit = None
         self.yaxis_color = 'black'
+        self.yaxis_tick = False
         
         # check if zoomed.
         self.is_zoomed = False
@@ -1058,7 +1060,7 @@ class PlotPanel(wx.Panel):
         Allows you to add text to the plot
         """
         xaxis_label, xaxis_unit, xaxis_font, xaxis_color,\
-                     is_ok = self._on_axis_label(axis='x')
+                     is_ok, xaxis_tick = self._on_axis_label(axis='x')
         if not is_ok:
             return
         
@@ -1066,11 +1068,12 @@ class PlotPanel(wx.Panel):
         self.xaxis_unit = xaxis_unit
         self.xaxis_font = xaxis_font
         self.xaxis_color = xaxis_color
+        self.xaxis_tick = xaxis_tick
         
         if self.data != None:
             # 2D
             self.xaxis(self.xaxis_label, self.xaxis_unit,\
-                        self.xaxis_font, self.xaxis_color)
+                        self.xaxis_font, self.xaxis_color, self.xaxis_tick)
             self.subplot.figure.canvas.draw_idle()
         else:
             # 1D
@@ -1096,7 +1099,7 @@ class PlotPanel(wx.Panel):
         Allows you to add text to the plot
         """
         yaxis_label, yaxis_unit, yaxis_font, yaxis_color,\
-                        is_ok = self._on_axis_label(axis='y')
+                        is_ok, yaxis_tick = self._on_axis_label(axis='y')
         if not is_ok:
             return
         
@@ -1104,11 +1107,12 @@ class PlotPanel(wx.Panel):
         self.yaxis_unit = yaxis_unit
         self.yaxis_font = yaxis_font
         self.yaxis_color = yaxis_color
+        self.yaxis_tick = yaxis_tick
 
         if self.data != None:
             # 2D
             self.yaxis(self.yaxis_label, self.yaxis_unit,\
-                        self.yaxis_font, self.yaxis_color)
+                        self.yaxis_font, self.yaxis_color, self.yaxis_tick)
             self.subplot.figure.canvas.draw_idle()
         else:
             # 1D
@@ -1142,6 +1146,7 @@ class PlotPanel(wx.Panel):
                 font.set_weight(textdial.getWeight())
                 unit = textdial.getUnit()
                 colour = textdial.getColor()
+                is_tick = textdial.getTickLabel()
                 label_temp = textdial.getText()
                 if label_temp.count("\%s"% "\\") > 0:
                     if self.parent != None:
@@ -1160,8 +1165,9 @@ class PlotPanel(wx.Panel):
                     pass
         else:
             is_ok = False
+            is_tick = True
         textdial.Destroy()
-        return label, unit, font, colour, is_ok
+        return label, unit, font, colour, is_ok, is_tick
         
     def _on_removetext(self, event):
         """
@@ -1248,7 +1254,7 @@ class PlotPanel(wx.Panel):
                 self.legend = ax.legend(prop=FontProperties(size=10),  numpoints=1,
                                 handletextsep=.05, loc=self.legendLoc)
                  
-    def xaxis(self, label, units, font=None, color='black'):
+    def xaxis(self, label, units, font=None, color='black', t_font=False):
         """xaxis label and units.
         
         Axis labels know about units.
@@ -1264,13 +1270,14 @@ class PlotPanel(wx.Panel):
             label = '$' + label + '$'
         if font:
             self.subplot.set_xlabel(label, fontproperties=font, color=color)
-            for tick in self.subplot.xaxis.get_major_ticks():
-                tick.label.set_fontproperties(font) 
+            if t_font:
+                for tick in self.subplot.xaxis.get_major_ticks():
+                    tick.label.set_fontproperties(font) 
         else:
             self.subplot.set_xlabel(label, color=color)
         pass
     
-    def yaxis(self, label, units, font=None, color='black'):
+    def yaxis(self, label, units, font=None, color='black', t_font=False):
         """yaxis label and units."""
         if units != "": 
             label = label + " (" + units + ")"
@@ -1278,8 +1285,9 @@ class PlotPanel(wx.Panel):
             label = '$' + label + '$'
         if font:
             self.subplot.set_ylabel(label, fontproperties=font, color=color)
-            for tick_label in self.subplot.get_yticklabels():
-                tick_label.set_fontproperties(font)
+            if t_font:
+                for tick_label in self.subplot.get_yticklabels():
+                    tick_label.set_fontproperties(font)
         else:
             self.subplot.set_ylabel(label, color=color)
         pass
@@ -1816,8 +1824,10 @@ class PlotPanel(wx.Panel):
         self.set_xscale(_xscale)
         self.set_yscale(_yscale)
         
-        self.xaxis(xname, xunits, self.xaxis_font, self.xaxis_color)
-        self.yaxis(yname, yunits, self.yaxis_font, self.yaxis_color)
+        self.xaxis(xname, xunits, self.xaxis_font, 
+                   self.xaxis_color, self.xaxis_tick)
+        self.yaxis(yname, yunits, self.yaxis_font, 
+                   self.yaxis_color, self.yaxis_tick)
         self.subplot.texts = self.textList
         self.subplot.figure.canvas.draw_idle()
         

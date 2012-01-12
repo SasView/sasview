@@ -28,6 +28,7 @@ class TextDialog(wx.Dialog):
         self.style = STYLE[0]
         self.weight = WEIGHT[1]
         self.color = COLOR[0]
+        self.tick_label = True
         #Dialog interface
         vbox  = wx.BoxSizer(wx.VERTICAL)
         text_box = wx.BoxSizer(wx.HORIZONTAL)
@@ -48,6 +49,14 @@ class TextDialog(wx.Dialog):
             self.unit_ctrl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
             self.unit_ctrl.SetValue(str(unit))
             unit_box = wx.BoxSizer(wx.HORIZONTAL)
+            tick_label_text = wx.StaticText(self, -1, 'Tick label')
+            tick_label_text.SetToolTipString("Apply to tick label too.")
+            self.tick_label_check = wx.CheckBox(self, -1, 
+                                                '', (10, 10))
+            self.tick_label_check.SetValue(True)
+            self.tick_label_check.SetToolTipString("Apply to tick label too.")
+            wx.EVT_CHECKBOX(self, self.tick_label_check.GetId(), 
+                            self.on_tick_label)
             enter_text = 'Enter text:'
         else:
             styles = wx.TAB_TRAVERSAL|wx.TE_MULTILINE|wx.TE_LINEWRAP|\
@@ -56,6 +65,8 @@ class TextDialog(wx.Dialog):
             unit_text = None
             self.unit_ctrl = None
             unit_box = None
+            tick_label_text = None
+            self.tick_label_check = None
             enter_text = 'Enter text'
             if len(label) > 0:
                 enter_text += " (this text won't be auto-updated if modified.):"
@@ -118,6 +129,10 @@ class TextDialog(wx.Dialog):
         family_box.Add((_BOX_WIDTH/2,-1))
         family_box.Add(wx.StaticText(self, -1, 'Size :'), -1, 0)
         family_box.Add(self.fontSize, -1, 0)
+        if unit_box != None:
+            family_box.Add((_BOX_WIDTH/2,-1))
+            family_box.Add(tick_label_text, -1, 0)
+            family_box.Add(self.tick_label_check, -1, 0)
         style_box.Add(wx.StaticText(self, -1, 'Style :'), -1, 0)
         style_box.Add(self.fontStyle, -1, 0)
         style_box.Add((_BOX_WIDTH/2,-1))
@@ -201,6 +216,13 @@ class TextDialog(wx.Dialog):
         list = COLOR
         for idx in range(len(list)):
             self.fontColor.Append(list[idx],idx) 
+            
+    def on_tick_label(self, event):
+        """
+        Set the font for tick label
+        """
+        event.Skip()
+        self.tick_label = self.tick_label_check.GetValue()
                    
     def on_family(self, event):
         """
@@ -291,3 +313,8 @@ class TextDialog(wx.Dialog):
         """
         return str(self.color)
     
+    def getTickLabel(self):
+        """
+        Bool for use on tick label
+        """
+        return self.tick_label
