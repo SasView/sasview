@@ -23,12 +23,12 @@ class TextDialog(wx.Dialog):
         #Font
         self.SetWindowVariant(variant=FONT_VARIANT)
         # default
-        self.family = FAMILY[0]
+        self.family = FAMILY[1]
         self.size = SIZE[3]
         self.style = STYLE[0]
         self.weight = WEIGHT[1]
         self.color = COLOR[0]
-        self.tick_label = True
+        self.tick_label = False
         #Dialog interface
         vbox  = wx.BoxSizer(wx.VERTICAL)
         text_box = wx.BoxSizer(wx.HORIZONTAL)
@@ -53,7 +53,7 @@ class TextDialog(wx.Dialog):
             tick_label_text.SetToolTipString("Apply to tick label too.")
             self.tick_label_check = wx.CheckBox(self, -1, 
                                                 '', (10, 10))
-            self.tick_label_check.SetValue(True)
+            self.tick_label_check.SetValue(False)
             self.tick_label_check.SetToolTipString("Apply to tick label too.")
             wx.EVT_CHECKBOX(self, self.tick_label_check.GetId(), 
                             self.on_tick_label)
@@ -81,7 +81,7 @@ class TextDialog(wx.Dialog):
         wx.EVT_COMBOBOX(self.fontFamily, -1, self.on_family)
         self.fontFamily.SetMinSize((_BOX_WIDTH, -1))
         self._set_family_list()
-        self.fontFamily.SetSelection(0)
+        self.fontFamily.SetSelection(1)
         self.fontFamily.SetToolTipString("Font family of the text.")
         #font weight
         self.fontWeight =  wx.ComboBox(self, -1, style=wx.CB_READONLY)
