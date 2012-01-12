@@ -281,8 +281,10 @@ class ModelPanel2D(ModelPanel1D):
         else:
             self.xaxis_label = xname
             self.xaxis_unit = xunits
-        self.xaxis(xname, xunits, self.xaxis_font, self.xaxis_color)
-        self.yaxis(yname, yunits, self.yaxis_font, self.yaxis_color)
+        self.xaxis(xname, xunits, self.xaxis_font, 
+                   self.xaxis_color, self.xaxis_tick)
+        self.yaxis(yname, yunits, self.yaxis_font, 
+                   self.yaxis_color, self.yaxis_tick)
         
     def onContextMenu(self, event):
         """
