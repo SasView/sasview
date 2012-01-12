@@ -226,6 +226,10 @@ if os.path.isfile(f):
 f = 'local_config.py'
 if os.path.isfile(f):
     data_files.append(('.', [f]))
+    
+if os.path.isfile("BUILD_NUMBER"):
+    data_files.append(('.',["BUILD_NUMBER"]))
+
 # Copying the images directory to the distribution directory.
 for f in findall(images_dir):
     if os.path.split(f)[0].count('.svn')==0:
