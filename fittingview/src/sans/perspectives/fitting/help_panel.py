@@ -20,6 +20,7 @@ class HelpWindow(wx.Frame):
         """
         contains help info
         """
+        self.Show(False)
         self.SetTitle('Fitting Help') 
         from sans.perspectives.fitting import get_data_path as fit_path
         fitting_path = fit_path(media='media')
@@ -131,7 +132,6 @@ class HelpWindow(wx.Frame):
 
         self.splitter = splitter
         self.Centre()
-        self.Show(True)
         self.Bind(wx.EVT_SIZE, self.on_Size)
         
     def OnButtonClicked(self, event):

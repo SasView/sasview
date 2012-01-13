@@ -41,7 +41,8 @@ from .fitpanel import FitPanel
 from .fit_thread import FitThread
 from .pagestate import Reader
 from .fitpage import Chi2UpdateEvent
-from .fitting_widgets import TextDialog
+from sans.perspectives.calculator.model_editor import TextDialog
+from sans.perspectives.calculator.model_editor import EditorWindow
 
 MAX_NBR_DATA = 4
 SANS_F_TOL = 5e-05
@@ -109,6 +110,7 @@ class Plugin(PluginBase):
         self.scipy_id = wx.NewId()
         self.park_id = wx.NewId()
         self.menu1 = None
+        self.new_model_frame = None
         
         self.temp_state = []
         self.state_index = 0
@@ -242,7 +244,7 @@ class Plugin(PluginBase):
         from sans.perspectives.calculator.pyconsole import PyConsole
         filename = os.path.join(models.find_plugins_dir(), label)
         frame = PyConsole(parent=self.parent, manager=self, panel= self.fit_panel,
-                          title='Custom Model Editor', filename=filename)
+                          title='Advanced Custom Model Editor', filename=filename)
         self.put_icon(frame)
         frame.Show(True) 
     
@@ -255,7 +257,7 @@ class Plugin(PluginBase):
         model_manager = models.ModelManager()
         model_list = model_manager.get_model_name_list()
 
-        textdial = TextDialog(None, -1, 'Easy Custom Sum(p1,p2)', model_list)
+        textdial = TextDialog(None, -1, 'Modify Sum(p1, p2) Model', model_list)
         self.put_icon(textdial)
         if textdial.ShowModal() == wx.ID_OK:
             try:
@@ -276,6 +278,21 @@ class Plugin(PluginBase):
                 else:
                     raise
         textdial.Destroy()
+    
+    def make_new_model(self, event):
+        """
+        Make new model 
+        """
+        if self.new_model_frame != None and self.new_model_frame.IsShown():
+            self.new_model_frame.Show(False)
+        else:
+            id = event.GetId()
+            dir_path = models.find_plugins_dir()
+            title = "New Custom Model Function"
+            self.new_model_frame = EditorWindow(parent=self, base=self, 
+                                                path=dir_path, title=title)
+            self.put_icon(self.new_model_frame)
+        self.new_model_frame.Show(True)
 
     def update_custom_combo(self):
         """
@@ -302,13 +319,19 @@ class Plugin(PluginBase):
         Set list of the edit model menu labels
         """
         id = wx.NewId()
-        self.edit_model_menu.Append(id, 'Easy Custom Sum(p1, p2)', 
-                                    'Sum two models') 
+        #new_model_menu = wx.Menu()
+        self.edit_model_menu.Append(id, 'New Model Function', 
+                                   'Add a new model function')#, 
+                                   #new_model_menu) 
+        wx.EVT_MENU(owner, id,  self.make_new_model)
+        id = wx.NewId()
+        self.edit_model_menu.Append(id, 'Modify Sum(p1, p2)', 
+                                    'Sum of two model functions') 
         wx.EVT_MENU(owner, id,  self.make_sum_model)
         e_id = wx.NewId()
         self.edit_menu =wx.Menu()
         self.edit_model_menu.AppendMenu(e_id, 
-                                    'Edit Sample File', self.edit_menu) 
+                                    'Advanced Edit', self.edit_menu) 
         self.set_edit_menu_helper(owner)
     
     def set_edit_menu_helper(self, owner):

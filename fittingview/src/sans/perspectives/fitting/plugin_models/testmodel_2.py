@@ -15,8 +15,8 @@ Otherwise, it could be removed in the future on re-installation of the SansView.
 """
 
 from sans.models.pluginmodel import Model1DPlugin  ##DO NOT CHANGE THIS LINE!!!
-from math import *                    ##DO NOT CHANGE THIS LINE!!!
-from numpy import *                ##DO NOT CHANGE THIS LINE!!!
+import math                     ##DO NOT CHANGE THIS LINE!!!
+import numpy                    ##DO NOT CHANGE THIS LINE!!!
 
 ##PLEASE READ COMMENTS CAREFULLY !!! COMMENT ARE IN CAPITAL LETTERS AND AFTER ##
 ## THESE COMMENTS ARE THERE TO GUIDE YOU. YOU CAN REMOVE THEM ONLY WHEN YOU ARE

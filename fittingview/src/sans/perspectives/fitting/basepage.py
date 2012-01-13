@@ -2869,13 +2869,21 @@ class BasicPage(ScrolledPanel, PanelBase):
             name = self.formfactorbox.GetValue()
             #name = self.model.__class__.__name__
         frame = HelpWindow(None, -1,  pageToOpen=model_path)    
-        frame.Show(True)
         if frame.rhelp.HasAnchor(name):
+            frame.Show(True)
             frame.rhelp.ScrollToAnchor(name)
         else:
            msg= "Model does not contains an available description "
            msg +="Please try searching in the Help window"
-           wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))      
+           wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))  
+           if self.model != None:
+               frame.Destroy() 
+               msg = 'Model description:\n'
+               msg += self.model.description + '\n'
+               info = "Info"
+               wx.MessageBox(msg, info)
+           else:
+               frame.Show(True)   
     
     def on_pd_help_clicked(self, event):
         """
