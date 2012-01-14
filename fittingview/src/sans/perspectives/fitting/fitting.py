@@ -248,6 +248,28 @@ class Plugin(PluginBase):
         self.put_icon(frame)
         frame.Show(True) 
     
+    def delete_custom_model(self, event):
+        """
+        Delete custom model file
+        """
+        id = event.GetId()
+        label = self.delete_menu.GetLabel(id)
+        toks = os.path.splitext(label)
+        path = os.path.join(models.find_plugins_dir(), toks[0])
+        try:
+            for ext in ['.py', '.pyc']:
+                p_path = path + ext
+                os.remove(p_path)
+            self.update_custom_combo()
+            self.delete_menu.Delete(id)
+            for item in self.edit_menu.GetMenuItems():
+                if item.GetLabel() == label:
+                    self.edit_menu.DeleteItem(item)
+                    break
+        except:
+            msg ='Delete Error: \nCould not delete the file; Check if in use.'
+            wx.MessageBox(msg)
+    
     def make_sum_model(self, event):
         """
         Edit summodel template and make one
@@ -257,13 +279,13 @@ class Plugin(PluginBase):
         model_manager = models.ModelManager()
         model_list = model_manager.get_model_name_list()
 
-        textdial = TextDialog(None, -1, 'Modify Sum(p1, p2) Model', model_list)
+        textdial = TextDialog(None, -1, 'Easy Sum(p1, p2)', model_list)
         self.put_icon(textdial)
         if textdial.ShowModal() == wx.ID_OK:
             try:
                 label = textdial.getText()
                 plug_dir = models.find_plugins_dir()
-                fname = os.path.join(plug_dir, "sum_temp.py")
+                fname = os.path.join(plug_dir, "easy_sum_of_p1_p2.py")
                 name1 = label[0]
                 name2 = label[1]
                 textdial.write_string(fname, name1, name2)
@@ -299,6 +321,9 @@ class Plugin(PluginBase):
         Update custom model list in the fitpage combo box
         """
         try:
+            # Update edit menus
+            self.set_edit_menu_helper(self.parent, self.edit_custom_model)
+            self.set_edit_menu_helper(self.parent, self.delete_custom_model)
             temp = self.fit_panel.reset_pmodel_list()
             if temp:
                 # Set the new custom model list for all fit pages
@@ -308,8 +333,11 @@ class Plugin(PluginBase):
                         current_val = page.formfactorbox.GetValue()
                         pos = page.formfactorbox.GetSelection()
                         page._show_combox_helper()
-                        page.formfactorbox.SetSelection(pos)
-                        page.formfactorbox.SetValue(current_val)
+                        new_val = page.formfactorbox.GetValue()
+                        if current_val != new_val and new_val != '':
+                            page.formfactorbox.SetValue(new_val)
+                        else:
+                            page.formfactorbox.SetValue(current_val)
         except:
             pass
         
@@ -320,21 +348,27 @@ class Plugin(PluginBase):
         """
         id = wx.NewId()
         #new_model_menu = wx.Menu()
-        self.edit_model_menu.Append(id, 'New Model Function', 
+        self.edit_model_menu.Append(id, 'New', 
                                    'Add a new model function')#, 
                                    #new_model_menu) 
         wx.EVT_MENU(owner, id,  self.make_new_model)
         id = wx.NewId()
-        self.edit_model_menu.Append(id, 'Modify Sum(p1, p2)', 
+        self.edit_model_menu.Append(id, 'Sum(p1, p2)', 
                                     'Sum of two model functions') 
         wx.EVT_MENU(owner, id,  self.make_sum_model)
         e_id = wx.NewId()
         self.edit_menu =wx.Menu()
         self.edit_model_menu.AppendMenu(e_id, 
-                                    'Advanced Edit', self.edit_menu) 
-        self.set_edit_menu_helper(owner)
+                                    'Advanced', self.edit_menu) 
+        self.set_edit_menu_helper(owner, self.edit_custom_model)
+
+        d_id = wx.NewId()
+        self.delete_menu =wx.Menu()
+        self.edit_model_menu.AppendMenu(d_id, 
+                                    'Delete', self.delete_menu)
+        self.set_edit_menu_helper(owner, self.delete_custom_model)
     
-    def set_edit_menu_helper(self, owner):
+    def set_edit_menu_helper(self, owner, menu):
         """
         help for setting list of the edit model menu labels
         """
@@ -342,16 +376,22 @@ class Plugin(PluginBase):
         for item in list_fnames:
             name = os.path.basename(item)
             toks = os.path.splitext(name)
-            if toks[1]=='.py' and not toks[0] =='__init__' \
-                                and not toks[0] =='sum_temp':
+            if toks[-1]=='.py' and not toks[0] =='__init__':
+                if menu == self.edit_custom_model:
+                    if toks[0] =='easy_sum_of_p1_p2':
+                        continue
+                    submenu = self.edit_menu
+                else:
+                    submenu = self.delete_menu
+                    #name = toks[0]
                 has_file = False
-                for item in self.edit_menu.GetMenuItems():
-                    if name == self.edit_menu.GetLabel(item.GetId()):
+                for item in submenu.GetMenuItems():
+                    if name == submenu.GetLabel(item.GetId()):
                         has_file = True
                 if not has_file:
                     id = wx.NewId()
-                    self.edit_menu.Append(id, name) 
-                    wx.EVT_MENU(owner, id,  self.edit_custom_model)
+                    submenu.Append(id, name) 
+                    wx.EVT_MENU(owner, id,  menu)
                     has_file = False
 
     def put_icon(self, frame):

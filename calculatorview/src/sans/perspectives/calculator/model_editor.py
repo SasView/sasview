@@ -293,6 +293,7 @@ class EditorPanel(wx.ScrolledWindow):
         id  = wx.NewId() 
         self.param_tcl = EditWindow(self, id, wx.DefaultPosition, 
                             wx.DefaultSize, wx.CLIP_CHILDREN|wx.SUNKEN_BORDER)
+        self.param_tcl.setDisplayLineNumbers(True)
         self.param_tcl.SetToolTipString(param_tip)
         self.param_sizer.AddMany([(param_txt, 0, wx.LEFT, 10),
                         (self.param_tcl, 1, wx.EXPAND|wx.ALL, 10)])
@@ -304,11 +305,16 @@ class EditorPanel(wx.ScrolledWindow):
         """
         function_txt = wx.StaticText(self, -1, 'Function(x) : ') 
         hint_function = "#Example:\n"
-        hint_function += "y = A + B * numpy.sin(x * math.pi)\n"
-        hint_function += "return y"
+        hint_function += "new_x = x * math.pi\n"
+        hint_function += "if new_x <= 0:\n"
+        hint_function += "    y = A + B\n"
+        hint_function += "else:\n"
+        hint_function += "    y = A + B * numpy.cos(new_x)\n"
+        hint_function += "return y\n"
         id  = wx.NewId() 
         self.function_tcl = EditWindow(self, id, wx.DefaultPosition, 
                             wx.DefaultSize, wx.CLIP_CHILDREN|wx.SUNKEN_BORDER)
+        self.function_tcl.setDisplayLineNumbers(True)
         self.function_tcl.SetToolTipString(hint_function)
         self.function_sizer.Add(function_txt, 0, wx.LEFT, 10)
         self.function_sizer.Add( self.function_tcl, 1, wx.EXPAND|wx.ALL, 10)
@@ -566,7 +572,8 @@ class EditorWindow(wx.Frame):
         """
         On close event
         """
-        self.parent.new_model_frame = None
+        if self.parent != None:
+            self.parent.new_model_frame = None
         self.Destroy()  
 
 ## Templates for custom models
