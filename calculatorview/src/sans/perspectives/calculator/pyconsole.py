@@ -178,6 +178,7 @@ class PyConsole(editor.EditorNotebookFrame):
                                    filename='untitled.py',
                                    wildcard='Python Files (*.py)|*.py')
         if result.path:
+            self.buffer.confirmed = True
             self.buffer.saveAs(result.path)
             cancel = False
         else:
