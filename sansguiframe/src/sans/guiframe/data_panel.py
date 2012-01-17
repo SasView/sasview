@@ -386,9 +386,37 @@ class DataPanel(ScrolledPanel, PanelBase):
         from sans.guiframe.local_perspectives.plotting.masking \
             import MaskPanel as MaskDialog
         
-        panel = MaskDialog(base=self, data=data, id=wx.NewId())
+        panel = MaskDialog(parent=self.parent, base=self, 
+                           data=data, id=wx.NewId())
         #self.panel.Bind(wx.EVT_CLOSE, self._draw_masked_model)
         panel.ShowModal()
+    
+    def on_plot_3d(self, event):
+        """
+        Frozen image of 3D
+        """
+        data = self._get_data_selection(event)
+        from sans.guiframe.local_perspectives.plotting.masking \
+        import FloatPanel as Float3dDialog
+        
+        panel = Float3dDialog(base=self, data=data, 
+                              dimension=3, id=wx.NewId())
+        panel.ShowModal()   
+    
+    def on_quick_plot(self, event):
+        """
+        Frozen plot
+        """
+        data = self._get_data_selection(event)
+        from sans.guiframe.local_perspectives.plotting.masking \
+        import FloatPanel as QucikPlotDialog
+        if data.__class__.__name__ == "Data2D":
+            dimension = 2
+        else:
+            dimension = 1
+        panel = QucikPlotDialog(base=self, data=data, 
+                                dimension=dimension, id=wx.NewId())
+        panel.ShowModal()    
         
     def on_save_as(self, event):
         """
@@ -425,12 +453,24 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.data_menu.Append(id, name, msg)
         wx.EVT_MENU(self, id, self.on_save_as)
     
+        self.quickplot_id = wx.NewId()
+        name = "Quick Plot"
+        msg = "Plot the current Data"
+        self.data_menu.Append(self.quickplot_id, name, msg)
+        wx.EVT_MENU(self, self.quickplot_id, self.on_quick_plot)
+    
+        self.plot3d_id = wx.NewId()
+        name = "Quick 3DPlot (Slow)"
+        msg = "Plot3D the current 2D Data"
+        self.data_menu.Append(self.plot3d_id, name, msg)
+        wx.EVT_MENU(self, self.plot3d_id, self.on_plot_3d)
+            
         self.editmask_id = wx.NewId()
         name = "Edit Mask"
         msg = "Edit Mask for the current 2D Data"
         self.data_menu.Append(self.editmask_id, name, msg)
         wx.EVT_MENU(self, self.editmask_id, self.on_edit_data)
-
+        
         tree_ctrl_theory_label = wx.StaticText(self, -1, "Theory")
         tree_ctrl_theory_label.SetForegroundColour('blue')
         self.tree_ctrl_theory = DataTreeCtrl(parent=self, 
@@ -473,8 +513,10 @@ class DataPanel(ScrolledPanel, PanelBase):
         except:
             return
         if self.data_menu is not None:
-            menu_enable = (data_class_name == "Data2D" and is_data)
-            self.data_menu.Enable(self.editmask_id, menu_enable)
+            menu_enable = (data_class_name == "Data2D")
+            maskmenu_enable = (menu_enable and is_data)
+            self.data_menu.Enable(self.editmask_id, maskmenu_enable)
+            self.data_menu.Enable(self.plot3d_id, menu_enable)
             self.PopupMenu(self.data_menu) 
         
     def onContextMenu(self, event): 

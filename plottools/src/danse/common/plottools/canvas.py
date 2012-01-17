@@ -249,7 +249,7 @@ class FigureCanvas(FigureCanvasWxAgg):
         :TODO: Investigate what the root cause of the problem is.
         
         """
-        if sys.platform == 'linux2':
+        if sys.platform == 'linux2' or self.panel.dimension == 3:
             evt.Skip()
         else:
             FigureCanvasWxAgg._onRightButtonDown(self, evt)

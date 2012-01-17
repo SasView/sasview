@@ -256,7 +256,7 @@ class EditorPanel(wx.ScrolledWindow):
         wx.EVT_CHECKBOX(self, overwrite_cb.GetId(), self.on_over_cb)
         self.name_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH*3/5, -1)) 
         self.name_tcl.Bind(wx.EVT_TEXT_ENTER, self.on_change_name)
-        self.name_tcl.SetValue('untitled')
+        self.name_tcl.SetValue('MyFunction')
         self.name_tcl.SetFont(self.font)
         hint_name = "Unique Model Function Name."
         self.name_tcl.SetToolTipString(hint_name)

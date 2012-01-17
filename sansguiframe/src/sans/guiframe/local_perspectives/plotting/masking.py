@@ -24,7 +24,7 @@ import numpy
 from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Graph
 from binder import BindArtist
-from sans.guiframe.dataFitting import Data2D
+from sans.guiframe.dataFitting import Data1D, Data2D
 from boxMask import BoxMask
 from sectorMask import SectorMask
 from sans.guiframe.events import SlicerEvent
@@ -56,7 +56,7 @@ class MaskPanel(wx.Dialog):
     def __init__(self, parent=None, base=None, 
                  data=None, id=-1, *args, **kwds):
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
-        kwds["size"] = wx.Size(_STATICBOX_WIDTH * 2, PANEL_SIZE) 
+        kwds["size"] = wx.Size(_STATICBOX_WIDTH*0.8, PANEL_SIZE) 
         wx.Dialog.__init__(self, parent, id=id,  *args, **kwds)
         
         if data != None:
@@ -507,12 +507,120 @@ class MaskPanel(wx.Dialog):
         except:
             # when called by data panel
             event.Skip()
-            pass
+            pass   
+
+class FloatPanel(wx.Dialog):
+    """
+    Provides the Mask Editor GUI.
+    """
+    ## Internal nickname for the window, used by the AUI manager
+    window_name = "Plot"
+    ## Name to appear on the window title bar
+    window_caption = "Plot"
+    ## Flag to tell the AUI manager to put this panel in the center pane
+    CENTER_PANE = True
+    def __init__(self, parent=None, base=None, 
+                 data=None, dimension=1, id=-1, *args, **kwds):
+        kwds["style"] = wx.DEFAULT_DIALOG_STYLE
+        kwds["size"] = wx.Size(_STATICBOX_WIDTH*1.3, PANEL_SIZE*1.3) 
+        wx.Dialog.__init__(self, parent, id=id,  *args, **kwds)
         
+        if data != None:
+            #Font size 
+            kwds = []
+            self.SetWindowVariant(variant=FONT_VARIANT)
+            self.SetTitle("Plot " + data.name)
+            self.parent = base
+            self.data = data
+            self.str = self.data.__str__()
+            ## when 2 data have the same id override the 1 st plotted
+            self.name = self.data.name
+            self.dimension = dimension
+            # Panel for 2D plot
+            self.plotpanel = Maskplotpanel(self, -1, dimension,
+                                           style=wx.TRANSPARENT_WINDOW)
+            
+            self.cmap = DEFAULT_CMAP
+            ## Create Artist and bind it
+            self.subplot = self.plotpanel.subplot
+            self._setup_layout()
+            if self.dimension == 1:
+                self.newplot = Data1D(x=data.x, y=data.y, 
+                                      dx=data.dx, dy=data.dy)
+                self.newplot.name = data.name
+            else:    
+                self.newplot = Data2D(image=self.data.data)
+                self.newplot.setValues(self.data)
+                
+            self.plotpanel.add_image(self.newplot) 
+            self.Centre()
+            self.Layout()
+
+            
+    def _setup_layout(self):
+        """
+        Set up the layout
+        """
+        #  panel
+        sizer = wx.GridBagSizer(10, 10)
+        if self.dimension == 3:
+            note = "Note: I am very SLOW.     Please be PATIENT...\n"
+            note_txt = wx.StaticText(self, -1, note) 
+            note_txt.SetForegroundColour(wx.RED)
+            sizer.Add(note_txt, (0, 2), flag=wx.RIGHT|wx.BOTTOM, border=5)
+        
+        sizer.Add(self.plotpanel, (1, 1), (9, 9), 
+                  wx.EXPAND|wx.ALL, 15)
+
+        sizer.AddGrowableCol(3)
+        sizer.AddGrowableRow(2)
+        
+        self.SetSizerAndFit(sizer)
+        self.Centre()
+        self.Show(True)
+        
+    def set_plot_unfocus(self):
+        """
+        Not implemented
+        """
+        pass
+    
+
+    def _draw_model(self, event):
+        """
+         on_close, update the model2d plot
+        """
+        pass
+        
+    def freeze_axes(self):
+        """
+        freeze axes
+        """
+        self.plotpanel.axes_frozen = True
+        
+    def thaw_axes(self):
+        """
+        thaw axes
+        """
+        self.plotpanel.axes_frozen = False       
+    
+    def OnClose(self, event):
+        """
+        """
+        try:
+            self.plotpanel.subplot.figure.clf()
+        except:
+            # when called by data panel
+            event.Skip()
+            pass
+
+                
 class Maskplotpanel(PlotPanel):
     """
+    PlotPanel for Quick plot and masking plot
     """
-    def __init__(self, parent, id=-1, color=None, dpi=None, **kwargs):
+    def __init__(self, parent, id=-1, dimension=2, color=None, 
+                                            dpi=None, **kwargs):
         """
         """
         PlotPanel.__init__(self, parent, id=id, color=color, dpi=dpi, **kwargs)
@@ -521,8 +629,16 @@ class Maskplotpanel(PlotPanel):
         self.parent = parent
         # Internal list of plottable names (because graph 
         # doesn't have a dictionary of handles for the plottables)
+        self.dimension = dimension
         self.plots = {}
         self.graph = Graph()
+        #add axis labels
+        if self.dimension == 1:
+            self.graph.xaxis('\\rm{x} ', '')
+            self.graph.yaxis('\\rm{y} ', '')
+        if self.dimension == 2:
+            self.graph.xaxis('\\rm{Q}_{x} ', 'A^{-1}')
+            self.graph.yaxis('\\rm{Q}_{y} ', 'A^{-1}')
         
     def add_toolbar(self):
         """ 
@@ -530,13 +646,15 @@ class Maskplotpanel(PlotPanel):
         """
         # Not implemented
         pass
+    
     def on_set_focus(self, event):
         """
         send to the parenet the current panel on focus
         """
-        #change the panel background
-        #self.SetColor((170, 202, 255))
-        self.draw()   
+        if self.dimension == 3:
+            pass
+        else:
+            self.draw()   
          
     def add_image(self, plot):
         """
@@ -548,32 +666,109 @@ class Maskplotpanel(PlotPanel):
         #add plot
         self.graph.add(plot)
         #add axes
-        self.graph.xaxis('\\rm{Q}_{x} ', 'A^{-1}')
-        self.graph.yaxis('\\rm{Q}_{y} ', 'A^{-1}')
+        if self.dimension == 1:
+            self.xaxis_label = '\\rm{x} '
+            self.xaxis_unit = ''
+            self.yaxis_label = '\\rm{y} '
+            self.yaxis_unit = ''
         #draw
+        # message
+        status_type = 'progress' 
+        msg = 'Plotting...'
+        self._status_info(msg, status_type)
+        status_type = 'stop'           
+        
         self.graph.render(self)
-        self.subplot.figure.canvas.draw_idle()
+        if self.dimension == 3:
+            pass
+        else:
+            self.subplot.figure.canvas.draw_idle()
+        msg = 'Plotting Completed.'
+        self._status_info(msg, status_type)
         
     def onMouseMotion(self, event):
         """
         Disable dragging 2D image
         """
         pass
-   
+    
+    def onWheel(self, event):
+        """
+        """
+        pass 
+     
+    def onLeftDown(self, event):
+        """
+        Disables LeftDown
+        """
+        pass
+    
+    def onPick(self, event):
+        """
+        Disables OnPick
+        """
+        pass
+    
+    def draw(self):
+        """
+        Draw
+        """
+        # message
+        status_type = 'progress' 
+        msg = 'Plotting...'
+        self._status_info(msg, status_type)
+        status_type = 'stop'           
+        
+        if self.dimension == 3:
+            pass
+        else:
+           self.subplot.figure.canvas.draw_idle() 
+        
+        msg = 'Plotting Completed.'
+        self._status_info(msg, status_type)
+       
     def onContextMenu(self, event):
         """
         Default context menu for a plot panel
         """
-        # Slicer plot popup menu
+        # Selective Slicer plot popup menu
         slicerpop = wx.Menu()
         
-        id_cm = wx.NewId()
-        slicerpop.Append(id_cm, '&Toggle Linear/Log scale')
-        wx.EVT_MENU(self, id_cm, self._onToggleScale)
+        id = wx.NewId()
+        slicerpop.Append(id,'&Print Image', 'Print image')
+        wx.EVT_MENU(self, id, self.onPrint)
+
+        id = wx.NewId()
+        slicerpop.Append(id, '&Copy to Clipboard', 'Copy to the clipboard')
+        wx.EVT_MENU(self, id, self.OnCopyFigureMenu)
+        
+        if self.dimension == 1:
+            id = wx.NewId()
+            slicerpop.Append(id, '&Change Scale')
+            wx.EVT_MENU(self, id, self._onProperties)
+        else:
+            slicerpop.AppendSeparator()
+            id_cm = wx.NewId()
+            slicerpop.Append(id_cm, '&Toggle Linear/Log scale')
+            wx.EVT_MENU(self, id_cm, self._onToggleScale)
                
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
+        
+    def _status_info(self, msg = '', type = "update"):
+        """
+        Status msg
+        """
+        if type == "stop":
+            label = "Plotting..."
+            able = True
+        else:   
+            label = "Wait..."
+            able = False
+        if self.parent.parent.parent != None:
+                wx.PostEvent(self.parent.parent.parent, 
+                             StatusEvent(status = msg, type = type ))
 
 class ViewerFrame(wx.Frame):
     """

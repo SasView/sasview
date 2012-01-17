@@ -21,6 +21,10 @@ from plottables import Data1D
 from binder import BindArtist
 from matplotlib.font_manager import FontProperties
 
+from mpl_toolkits.mplot3d import Axes3D
+#from matplotlib import cm
+#from matplotlib.ticker import LinearLocator, FixedLocator, FormatStrFormatter
+
 DEBUG = False
 
 from plottables import Graph
@@ -118,6 +122,7 @@ class PlotPanel(wx.Panel):
         """
         wx.Panel.__init__(self, parent, id=id, **kwargs)
         self.parent = parent
+        self.dimension = 1
         self.gotLegend = 0  #to begin, legend is not picked. 
         self.legend_pos_loc = None
         self.legend = None
@@ -1426,8 +1431,6 @@ class PlotPanel(wx.Panel):
         Render the current data
         
         """
-        #Re-adjust colorbar
-        self.figure.subplots_adjust(left=0.2, right=.8, bottom=.2)        
         self.data = data
         self.qx_data = qx_data
         self.qy_data = qy_data
@@ -1469,20 +1472,50 @@ class PlotPanel(wx.Panel):
         else:
             zmin_temp = self.zmin_2D
         self.cmap = cmap
-        im = self.subplot.imshow(output, interpolation='nearest', 
-                                 origin='lower',
-                                 vmin=zmin_temp, vmax=self.zmax_2D,
-                                 cmap=self.cmap, 
-                                 extent=(self.xmin_2D, self.xmax_2D,
-                                            self.ymin_2D, self.ymax_2D))
-        
-        #Add color bar and its label
-        #TODO: make the size and location interactive to the image plot.
-        cbax = self.subplot.figure.add_axes([0.84,0.2,0.02,0.7])
-        cb = self.subplot.figure.colorbar(im, cax=cbax)
+        if self.dimension != 3:
+            #Re-adjust colorbar
+            self.subplot.figure.subplots_adjust(left=0.2, right=.8, bottom=.2)
+            
+            im = self.subplot.imshow(output, interpolation='nearest', 
+                                     origin='lower',
+                                     vmin=zmin_temp, vmax=self.zmax_2D,
+                                     cmap=self.cmap, 
+                                     extent=(self.xmin_2D, self.xmax_2D,
+                                                self.ymin_2D, self.ymax_2D))
+            cbax = self.subplot.figure.add_axes([0.84,0.2,0.02,0.7])
+        else:
+            # clear the previous 2D from memory
+            self.subplot.figure.clf()
+            self.subplot.figure.subplots_adjust(left=0.1, right=.8, bottom=.1)  
+            try:
+                # mpl >= 1.0.0
+                ax = self.subplot.figure.gca(projection='3d')
+                #ax.disable_mouse_rotation()
+                cbax = self.subplot.figure.add_axes([0.84,0.1,0.02,0.8])
+            except:
+                # mpl < 1.0.0
+                ax =  Axes3D(self.subplot.figure)
+                cbax = None
+
+            X = self.x_bins[0:-1]
+            Y = self.y_bins[0:-1]
+            X, Y = numpy.meshgrid(X, Y)
+    
+            im = ax.plot_surface(X, Y, output, rstride=1, cstride=1, cmap=cmap,
+                                   linewidth=0, antialiased=False)
+            #ax.set_zlim3d(zmin_temp, self.zmax_2D)
+            #ax.set_frame_on(False)
+            self.subplot.set_axis_off()    
+            
+        if cbax == None:
+            cb =self.subplot.figure.colorbar(im, shrink=0.6, aspect=20)
+        else:
+            cb =self.subplot.figure.colorbar(im, cax=cbax)
         cb.update_bruteforce(im)
         cb.set_label(self.scale)
-        self.subplot.figure.canvas.draw_idle()
+        
+        #if self.dimension != 3:
+        self.figure.canvas.draw_idle()
     
     def _build_matrix(self):
         """ 
