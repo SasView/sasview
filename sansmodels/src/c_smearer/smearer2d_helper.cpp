@@ -51,7 +51,7 @@ void Smearer_helper :: smear2d(double *weights, double *qx_out, double *qy_out){
 	double qphi = 0.0;
 	double Pi = 4.0*atan(1.0);
 	// Loop over q-values and multiply apply matrix
-
+#pragma omp parallel for
 	for(int i=0; i<nrbins; i++){
 		rbin = rbin_size * (double(i) + 0.5);
 		for(int j=0; j<nphibins; j++){
