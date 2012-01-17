@@ -489,13 +489,16 @@ class DataPanel(ScrolledPanel, PanelBase):
         On click theory data
         """
         try:
-            id, _, _ = self.tree_ctrl_theory.GetSelection().GetData()
+            id, data_class_name, _ = \
+                            self.tree_ctrl_theory.GetSelection().GetData()
             data_list, _ = \
                             self.parent._data_manager.get_by_id(id_list=[id])
         except:
             return
         if self.data_menu is not None:
+            menu_enable = (data_class_name == "Data2D")
             self.data_menu.Enable(self.editmask_id, False)
+            self.data_menu.Enable(self.plot3d_id, menu_enable)
             self.PopupMenu(self.data_menu) 
                    
     def on_right_click_data(self, event):
