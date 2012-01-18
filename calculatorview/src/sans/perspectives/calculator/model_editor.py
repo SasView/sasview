@@ -617,24 +617,6 @@ class Model(Model1DPlugin):
         #local params here
         #function here
 """
-TEST_TEMPLATE = """
-######################################################################
-## THIS IS FOR TEST. DO NOT MODIFY THE FOLLOWING LINES!!!!!!!!!!!!!!!!       
-if __name__ == "__main__": 
-    m= Model() 
-    out1 = m.runXY(0.0)
-    out2 = m.runXY(0.01)
-    isfine1 = numpy.isfinite(out1)
-    isfine2 = numpy.isfinite(out2)
-    print "Testing the value at Q = 0.0:"
-    print out1, " : finite? ", isfine1
-    print "Testing the value at Q = 0.01:"
-    print out2, " : finite? ", isfine2
-    if isfine1 and isfine2:
-        print "===> Simple Test: Passed!"
-    else:
-        print "===> Simple Test: Failed!"
-"""    
 CUSTOM_2D_TEMP = """
     def run(self, x=0.0):
         if x.__class__.__name__ == 'list':
@@ -645,7 +627,7 @@ CUSTOM_2D_TEMP = """
             msg = "Tuples are not allowed as input to BaseComponent models"
             raise ValueError, msg
         else:
-            return self.function(x, x)
+            return self.function(x, 0.0)
     def runXY(self, x=0.0, y=0.0):
         if x.__class__.__name__ == 'list':
             return self.function(x, y)
@@ -670,6 +652,24 @@ CUSTOM_2D_TEMP = """
             v_model = numpy.vectorize(self.runXY, otypes=[float])
             iq_array = v_model(qdist)
             return iq_array
+"""
+TEST_TEMPLATE = """
+######################################################################
+## THIS IS FOR TEST. DO NOT MODIFY THE FOLLOWING LINES!!!!!!!!!!!!!!!!       
+if __name__ == "__main__": 
+    m= Model() 
+    out1 = m.runXY(0.0)
+    out2 = m.runXY(0.01)
+    isfine1 = numpy.isfinite(out1)
+    isfine2 = numpy.isfinite(out2)
+    print "Testing the value at Q = 0.0:"
+    print out1, " : finite? ", isfine1
+    print "Testing the value at Q = 0.01:"
+    print out2, " : finite? ", isfine2
+    if isfine1 and isfine2:
+        print "===> Simple Test: Passed!"
+    else:
+        print "===> Simple Test: Failed!"
 """
 SUM_TEMPLATE = """
 # A sample of an experimental model function for Sum(Pmodel1,Pmodel2)
@@ -968,5 +968,5 @@ if __name__ == "__main__":
     from sans.perspectives.fitting import models
     dir_path = models.find_plugins_dir()
     app  = wx.App()
-    window = EditorWindow(parent=None, base=None, path=dir_path, title="AAA")
+    window = EditorWindow(parent=None, base=None, path=dir_path, title="Editor")
     app.MainLoop()         
