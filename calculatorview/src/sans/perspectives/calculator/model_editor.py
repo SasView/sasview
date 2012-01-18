@@ -618,10 +618,10 @@ class Model(Model1DPlugin):
         #function here
 """
 CUSTOM_2D_TEMP = """
-    def run(self, x=0.0):
+    def run(self, x=0.0, y=0.0):
         if x.__class__.__name__ == 'list':
-            x_val = x[0]*math.cos(x[1])
-            y_val = x[0]*math.sin(x[1])
+            x_val = x[0]
+            y_val = y[0]*0.0
             return self.function(x_val, y_val)
         elif x.__class__.__name__ == 'tuple':
             msg = "Tuples are not allowed as input to BaseComponent models"
