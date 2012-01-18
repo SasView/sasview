@@ -522,7 +522,7 @@ class FloatPanel(wx.Dialog):
     def __init__(self, parent=None, base=None, 
                  data=None, dimension=1, id=-1, *args, **kwds):
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
-        kwds["size"] = wx.Size(_STATICBOX_WIDTH*1.3, PANEL_SIZE*1.3) 
+        kwds["size"] = wx.Size(_STATICBOX_WIDTH*1.5, PANEL_SIZE*1.5) 
         wx.Dialog.__init__(self, parent, id=id,  *args, **kwds)
         
         if data != None:
