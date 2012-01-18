@@ -18,7 +18,7 @@ try:
     from data_util.nxsunit import Converter
 except:
     has_converter = False
-    
+_ZERO = 1e-16  
 class Reader:
     """
     Class to load IGOR reduced .ABS files
@@ -228,7 +228,8 @@ class Reader:
                 # though we were not able to read the file.
                 if len(x) == 0:
                     raise ValueError, "ascii_reader: could not load file"
-                
+                x[x==0] = _ZERO
+                y[x==0] = _ZERO
                 output.x = x[x!=0]
                 output.y = y[x!=0]
                 output.dy = dy[x!=0]
