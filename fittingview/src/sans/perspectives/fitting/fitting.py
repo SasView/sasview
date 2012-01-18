@@ -565,6 +565,9 @@ class Plugin(PluginBase):
                 group_id = wx.NewId()
                 for data in selected_data_list:
                     if data is not None:
+                        # 2D has no same group_id
+                        if data.__class__.__name__ == 'Data2D':
+                            group_id = wx.NewId()
                         data.group_id = group_id
                         if group_id not in data.list_group_id:
                             data.list_group_id.append(group_id)
