@@ -220,6 +220,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.reader = None
         self.name = 'untitled'
         self.overwrite_name = True
+        self.is_2d = False
         self.fname = None
         self.param_strings = ''
         self.function_strings = ''
@@ -471,8 +472,14 @@ class EditorPanel(wx.ScrolledWindow):
             raise
         lines = CUSTOM_TEMPLATE.split('\n')
         has_scipy = func_str.count("scipy.")
+        self.is_2d = func_str.count("#self.ndim = 2")
+        line_2d = ''
+        if self.is_2d:
+            line_2d = CUSTOM_2D_TEMP.split('\n')
+        line_test = TEST_TEMPLATE.split('\n')
         local_params = ''
         spaces = '        '#8spaces
+        # write function here
         for line in lines:
             # The location where to put the strings is 
             # hard-coded in the template as shown below.
@@ -491,13 +498,22 @@ class EditorPanel(wx.ScrolledWindow):
                 if not desc:
                     desc= self.name
                 out_f.write(line% desc + "\n")
+            elif line.count("def function(self, x=0.0%s):"):
+                if self.is_2d:
+                    y_str = ', y=0.0'
+                    out_f.write(line% y_str + "\n")
+                else:
+                    out_f.write(line% '' + "\n")
             elif line.count("#function here"):
                 for func_line in func_str.split('\n'):
                     f_line = func_line.lstrip().rstrip()
                     if f_line:
                         out_f.write(spaces + f_line + "\n")
                 if not func_str:
-                    out_f.write(spaces + 'return y' + "\n")
+                    dep_var = 'y'
+                    if self.is_2d:
+                        dep_var = 'z'
+                    out_f.write(spaces + 'return %s'% dep_var + "\n")
             elif line.count("#import scipy?"):
                 if has_scipy:
                     out_f.write("import scipy" + "\n")
@@ -505,6 +521,14 @@ class EditorPanel(wx.ScrolledWindow):
                 out_f.write(line % self.name + "\n")
             elif line:
                 out_f.write(line + "\n")
+        # run string for 2d
+        if line_2d:
+            for line in line_2d:
+                out_f.write(line + "\n")
+        # Test strins
+        for line in line_test:
+            out_f.write(line + "\n")
+   
         out_f.close() 
     
     def set_param_helper(self, line):   
@@ -589,9 +613,11 @@ class Model(Model1DPlugin):
         #self.params here
         self.description = "%s"
         self.set_details()
-    def function(self, x = 0.0):
+    def function(self, x=0.0%s):
         #local params here
-        #function here  
+        #function here
+"""
+TEST_TEMPLATE = """
 ######################################################################
 ## THIS IS FOR TEST. DO NOT MODIFY THE FOLLOWING LINES!!!!!!!!!!!!!!!!       
 if __name__ == "__main__": 
@@ -608,8 +634,43 @@ if __name__ == "__main__":
         print "===> Simple Test: Passed!"
     else:
         print "===> Simple Test: Failed!"
-"""        
-        
+"""    
+CUSTOM_2D_TEMP = """
+    def run(self, x=0.0):
+        if x.__class__.__name__ == 'list':
+            x_val = x[0]*math.cos(x[1])
+            y_val = x[0]*math.sin(x[1])
+            return self.function(x_val, y_val)
+        elif x.__class__.__name__ == 'tuple':
+            msg = "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, msg
+        else:
+            return self.function(x, x)
+    def runXY(self, x=0.0, y=0.0):
+        if x.__class__.__name__ == 'list':
+            return self.function(x, y)
+        elif x.__class__.__name__ == 'tuple':
+            msg = "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, msg
+        else:
+            return self.function(x, y)
+    def evalDistribution(self, qdist):
+        if qdist.__class__.__name__ == 'list':
+            msg = "evalDistribution expects a list of 2 ndarrays"
+            if len(qdist)!=2:
+                raise RuntimeError, msg
+            if qdist[0].__class__.__name__ != 'ndarray':
+                raise RuntimeError, msg
+            if qdist[1].__class__.__name__ != 'ndarray':
+                raise RuntimeError, msg
+            v_model = numpy.vectorize(self.runXY, otypes=[float])
+            iq_array = v_model(qdist[0], qdist[1])
+            return iq_array
+        elif qdist.__class__.__name__ == 'ndarray':
+            v_model = numpy.vectorize(self.runXY, otypes=[float])
+            iq_array = v_model(qdist)
+            return iq_array
+"""
 SUM_TEMPLATE = """
 # A sample of an experimental model function for Sum(Pmodel1,Pmodel2)
 import copy

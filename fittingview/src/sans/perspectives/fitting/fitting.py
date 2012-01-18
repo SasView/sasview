@@ -368,10 +368,12 @@ class Plugin(PluginBase):
                                     'Delete', self.delete_menu)
         self.set_edit_menu_helper(owner, self.delete_custom_model)
     
-    def set_edit_menu_helper(self, owner, menu):
+    def set_edit_menu_helper(self, owner=None, menu=None):
         """
         help for setting list of the edit model menu labels
         """
+        if menu == None:
+            menu = self.edit_custom_model
         list_fnames = os.listdir(models.find_plugins_dir())
         for item in list_fnames:
             name = os.path.basename(item)
