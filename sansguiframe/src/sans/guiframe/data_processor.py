@@ -668,7 +668,12 @@ class Notebook(nb, PanelBase):
         # Let's re-order the data from the keys in 'Data' name.
         if outputs == None:
             return
-        to_be_sort = [str(item.label) for item in outputs['Data']]
+        try:
+            # For outputs from batch
+            to_be_sort = [str(item.label) for item in outputs['Data']]
+        except:
+            # When inputs are from an external file
+            return inputs, outputs
         inds = numpy.lexsort((to_be_sort, to_be_sort))
         for key in outputs.keys():
             key_list = outputs[key]
