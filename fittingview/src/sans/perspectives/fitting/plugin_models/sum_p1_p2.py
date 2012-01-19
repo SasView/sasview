@@ -129,9 +129,15 @@ class Model(Model1DPlugin):
         """
         Get combined name from two model names
         """
-        name = self._get_upper_name(name1)
+        p1_name = self._get_upper_name(name1)
+        if not p1_name:
+            p1_name = name1
+        name = p1_name
         name += "+"
-        name += self._get_upper_name(name2)
+        p2_name = self._get_upper_name(name2)
+        if not p2_name:
+            p2_name = name2
+        name += p2_name
         return name
     
     def _get_upper_name(self, name=None):
