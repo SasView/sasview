@@ -1442,6 +1442,9 @@ class FitPage(BasicPage):
         #Clear msg if previously shown.
         msg= ""
         wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        # For theory mode
+        if not self.data.is_data:
+            self.create_default_data()
         # Flag to register when a parameter has changed.
         is_modified = False
         if tcrtl.GetValue().lstrip().rstrip()!="":
@@ -2579,13 +2582,35 @@ class FitPage(BasicPage):
             wx.PostEvent(self._manager.parent, StatusEvent(status=\
                             "Smear: %s"%msg))
             return
-        
         # Need update param values
         self._update_paramv_on_fit()
+        temp_smearer = self.on_smear_helper()            
         
-        temp_smearer = None
+        self.sizer_set_smearer.Layout()
+        self.Layout()
+        self._set_weight()
+        
+        ## set smearing value whether or not the data contain the smearing info
+        wx.CallAfter(self._manager.set_smearer, uid=self.uid, smearer=temp_smearer,
+                                  fid=self.data.id,
+                        qmin=float(self.qmin_x),
+                        qmax=float(self.qmax_x),
+                        enable_smearer=not self.disable_smearer.GetValue(),
+                         draw=True) 
+        
+        self.state.enable_smearer=  self.enable_smearer.GetValue()
+        self.state.disable_smearer=self.disable_smearer.GetValue()
+        self.state.pinhole_smearer = self.pinhole_smearer.GetValue()
+        self.state.slit_smearer = self.slit_smearer.GetValue()
+        
+    def on_smear_helper(self, update=False):
+        """
+        Help for onSmear
+        
+        :param update: force or not to update
+        """
         self._get_smear_info()
-        
+        temp_smearer = None
         #renew smear sizer
         if self.smear_type != None:
             self.smear_description_smear_type.SetValue(str(self.smear_type))
@@ -2593,15 +2618,14 @@ class FitPage(BasicPage):
             self.smear_data_right.SetValue(str(self.dq_r)) 
 
         self._hide_all_smear_info()
-        
         data = copy.deepcopy(self.data)
+        
         # make sure once more if it is smearer
         temp_smearer = smear_selection(data, self.model)
-        if self.current_smearer != temp_smearer:
+        if self.current_smearer != temp_smearer or update:
             self.current_smearer = temp_smearer
         if self.enable_smearer.GetValue():
             if hasattr(self.data,"dxl"):
-                
                 msg= ": Resolution smearing parameters"
             if hasattr(self.data,"dxw"):
                 msg= ": Slit smearing parameters"
@@ -2622,26 +2646,10 @@ class FitPage(BasicPage):
             self.onPinholeSmear(None)
         elif self.slit_smearer.GetValue():
             self.onSlitSmear(None)
-            
         self._show_smear_sizer()
         
-        self.sizer_set_smearer.Layout()
-        self.Layout()
-        self._set_weight()
-        
-        ## set smearing value whether or not the data contain the smearing info
-        wx.CallAfter(self._manager.set_smearer, uid=self.uid, smearer=temp_smearer,
-                                  fid=self.data.id,
-                        qmin=float(self.qmin_x),
-                        qmax=float(self.qmax_x),
-                        enable_smearer=not self.disable_smearer.GetValue(),
-                         draw=True) 
-        
-        self.state.enable_smearer=  self.enable_smearer.GetValue()
-        self.state.disable_smearer=self.disable_smearer.GetValue()
-        self.state.pinhole_smearer = self.pinhole_smearer.GetValue()
-        self.state.slit_smearer = self.slit_smearer.GetValue()
-      
+        return temp_smearer
+    
     def on_complete_chisqr(self, event):  
         """
         Display result chisqr on the panel

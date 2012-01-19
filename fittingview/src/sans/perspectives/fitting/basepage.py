@@ -201,6 +201,14 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self._create_default_2d_data()
             else:
                 self._create_default_1d_data()
+            if self.model != None:
+                if not self.data.is_data:
+                    self._manager.page_finder[self.uid].set_fit_data(data=[self.data])
+            self.on_smear_helper(update=True)
+            self.state.enable_smearer=  self.enable_smearer.GetValue()
+            self.state.disable_smearer=self.disable_smearer.GetValue()
+            self.state.pinhole_smearer = self.pinhole_smearer.GetValue()
+            self.state.slit_smearer = self.slit_smearer.GetValue()
         
     def _create_default_1d_data(self):
         """
@@ -1455,7 +1463,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if is_2Ddata: self.btEditMask.Disable()
             else:
                 #self.btFit.Enable(True)
-                if is_2Ddata  and not self.batch_on: 
+                if is_2Ddata  and self.data.is_data and not self.batch_on: 
                     self.btEditMask.Enable(True)
             if is_modified and self.fitrange:
                 #if self.data == None:
@@ -1481,7 +1489,11 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         ##So make sure that update param values on_Fit.
         #self._undo.Enable(True)
-        if self.model !=None:           
+        if self.model !=None:   
+            if self.Npts_total.GetValue() != self.Npts_fit.GetValue():
+                if not self.data.is_data:
+                    self._manager.page_finder[self.uid].set_fit_data(data=\
+                                                                    [self.data])      
             ##Check the values
             self._check_value_enter( self.fittable_param ,is_modified)
             self._check_value_enter( self.fixed_param ,is_modified)
@@ -1553,7 +1565,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.btEditMask.Disable()
         else:
             #self.btFit.Enable(True)
-            if self._is_2D() and  self.data != None and not self.batch_on:
+            if self._is_2D() and  self.data.is_data and not self.batch_on:
                 self.btEditMask.Enable(True)
 
         if not flag:
@@ -1561,7 +1573,10 @@ class BasicPage(ScrolledPanel, PanelBase):
             msg += " model or Fitting range is not valid!!!  "
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
         
-        self.save_current_state()
+        try:
+            self.save_current_state()
+        except:
+            pass
    
         return flag                           
                
