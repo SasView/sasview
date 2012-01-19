@@ -14,7 +14,6 @@
 #include "smearer2d_helper.hh"
 #include <stdio.h>
 #include <math.h>
-//#include <omp.h>
 using namespace std;
 
 /**
@@ -58,7 +57,6 @@ void Smearer_helper :: smear2d(double *weights, double *qx_out, double *qy_out){
 		for(int j=0; j<nphibins; j++){
 			phibin_size =  2.0 * Pi / double(nphibins);
 			phibin = phibin_size * (double(j));
-			#pragma omp for
 			for(int q_i=0; q_i<npoints; q_i++){
 				qr = sqrt(qx_values[q_i]*qx_values[q_i] + qy_values[q_i]*qy_values[q_i]);
 				qphi = atan(qy_values[q_i]/qx_values[q_i]);
