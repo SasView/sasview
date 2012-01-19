@@ -116,7 +116,7 @@ class PlotPanel(wx.Panel):
     
     """
     def __init__(self, parent, id=-1, xtransform=None,
-                  ytransform=None, scale='log', 
+                  ytransform=None, scale='log_{10}', 
                   color=None, dpi=None, **kwargs):
         """
         """
@@ -225,7 +225,7 @@ class PlotPanel(wx.Panel):
         
         # for 2D scale
         if scale != 'linear':
-            scale = 'log'
+            scale = 'log_{10}'
         self.scale = scale
         self.data = None
         self.qx_data = None
@@ -1401,22 +1401,22 @@ class PlotPanel(wx.Panel):
         """
         zmin_2D_temp = self.zmin_2D
         zmax_2D_temp = self.zmax_2D
-        if self.scale == 'log':
+        if self.scale == 'log_{10}':
             self.scale = 'linear'
             if not self.zmin_2D is None:
-                zmin_2D_temp = math.exp(self.zmin_2D)
+                zmin_2D_temp = math.pow(10, self.zmin_2D)
             if not self.zmax_2D is None:
-                zmax_2D_temp = math.exp(self.zmax_2D)
+                zmax_2D_temp = math.pow(10, self.zmax_2D)
         else:
-            self.scale = 'log'
+            self.scale = 'log_{10}'
             if not self.zmin_2D is None:
                 # min log value: no log(negative)
                 if self.zmin_2D <= 0:
                     zmin_2D_temp = -32
                 else:
-                    zmin_2D_temp = math.log(self.zmin_2D)
+                    zmin_2D_temp = math.log10(self.zmin_2D)
             if not self.zmax_2D is None:
-                zmax_2D_temp = math.log(self.zmax_2D)
+                zmax_2D_temp = math.log10(self.zmax_2D)
                  
         self.image(data=self.data, qx_data=self.qx_data, 
                    qy_data=self.qy_data, xmin=self.xmin_2D, 
@@ -1449,11 +1449,11 @@ class PlotPanel(wx.Panel):
         else:
             output = copy.deepcopy(self.data)
         # check scale
-        if self.scale == 'log':
+        if self.scale == 'log_{10}':
             try:
                 if  self.zmin_2D  <= 0  and  len(output[output > 0]) > 0:
                     zmin_temp = self.zmin_2D 
-                    output[output>0] = numpy.log(output[output>0])
+                    output[output>0] = numpy.log10(output[output>0])
                     #In log scale Negative values are not correct in general
                     #output[output<=0] = math.log(numpy.min(output[output>0]))
                 elif self.zmin_2D  <= 0:
@@ -1462,7 +1462,7 @@ class PlotPanel(wx.Panel):
                     output[output<=0] = -32       
                 else: 
                     zmin_temp = self.zmin_2D
-                    output[output>0] = numpy.log(output[output>0])
+                    output[output>0] = numpy.log10(output[output>0])
                     #In log scale Negative values are not correct in general
                     #output[output<=0] = math.log(numpy.min(output[output>0]))
             except:
@@ -1478,10 +1478,10 @@ class PlotPanel(wx.Panel):
             
             im = self.subplot.imshow(output, interpolation='nearest', 
                                      origin='lower',
-                                     vmin=zmin_temp, vmax=self.zmax_2D,
-                                     cmap=self.cmap, 
-                                     extent=(self.xmin_2D, self.xmax_2D,
-                                                self.ymin_2D, self.ymax_2D))
+                                     #vmin=zmin_temp, vmax=self.zmax_2D,
+                                     cmap=self.cmap)#, 
+                                     #extent=(self.xmin_2D, self.xmax_2D,
+                                     #           self.ymin_2D, self.ymax_2D))
             cbax = self.subplot.figure.add_axes([0.84,0.2,0.02,0.7])
         else:
             # clear the previous 2D from memory
@@ -1512,7 +1512,7 @@ class PlotPanel(wx.Panel):
         else:
             cb =self.subplot.figure.colorbar(im, cax=cbax)
         cb.update_bruteforce(im)
-        cb.set_label(self.scale)
+        cb.set_label('$' + self.scale + '$')
         
         #if self.dimension != 3:
         self.figure.canvas.draw_idle()
