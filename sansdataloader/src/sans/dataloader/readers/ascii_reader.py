@@ -332,8 +332,6 @@ class Reader:
                 if has_error_dy:
                     dy[dy==0] = _ZERO
                 #Data    
-                x[x==0] = _ZERO
-                y[x==0] = _ZERO
                 output.x = x[x!=0]
                 output.y = y[x!=0]
                 output.dy = dy[x!=0] if has_error_dy == True else numpy.zeros(len(output.y))

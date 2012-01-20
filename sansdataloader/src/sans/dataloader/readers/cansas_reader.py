@@ -558,8 +558,7 @@ class Reader:
             dx[dx==0] = _ZERO
         if not numpy.all(dy==0):
             dy[dy==0] = _ZERO
-        x[x==0] = _ZERO
-        y[x==0] = _ZERO
+       
         data_info.x = x[x!=0]
         data_info.y = y[x!=0]
         data_info.dx = dx[x!=0]
