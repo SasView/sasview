@@ -258,6 +258,8 @@ class Plugin(PluginBase):
             #remove menu item
             self.delete_menu_item(panel.window_caption, panel.uid)
             del self.plot_panels[group_id]
+            if uid in self.parent.plot_panels.keys():
+                del self.parent.plot_panels[uid]
             return True
 
         return False
