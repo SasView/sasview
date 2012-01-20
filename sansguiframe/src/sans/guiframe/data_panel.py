@@ -662,7 +662,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             root = data_c
             tree = self.tree_ctrl
         if root is not None:
-             self.append_theory_helper(tree=tree, root=root, 
+             wx.CallAfter(self.append_theory_helper, tree=tree, root=root, 
                                        state_id=state_id, 
                                        theory_list=theory_list)
       

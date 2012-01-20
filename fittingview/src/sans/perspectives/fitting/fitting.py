@@ -1440,6 +1440,8 @@ class Plugin(PluginBase):
                                 len(res.stderr) == len(res.param_list):
                                 item = res.stderr[index]
                                 batch_inputs["error on %s" % param].append(item)
+                            else:
+                                batch_inputs["error on %s" % param].append('-')
                             model.setParam(param, res.pvec[index])
                 #fill the batch result with emtpy value if not in the current 
                 #model
