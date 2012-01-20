@@ -17,6 +17,7 @@
 ##Todo: cleaning up, improving the maskplotpanel initialization, and testing.
 import wx
 import sys
+import time
 import pylab
 import math
 import copy
@@ -42,7 +43,43 @@ if sys.platform.count("win32") > 0:
 else:
     FONT_VARIANT = 1
     
+from data_util.calcthread import CalcThread
 
+class CalcPlot(CalcThread):
+    """
+    Compute Resolution
+    """
+    def __init__(self,
+                 id = -1,
+                 panel = None,
+                 image = None,
+                 completefn = None,
+                 updatefn   = None,
+                 elapsed = 0,
+                 yieldtime  = 0.01,
+                 worktime   = 0.01
+                 ):
+        """
+        """
+        CalcThread.__init__(self,completefn,
+                 updatefn,
+                 yieldtime,
+                 worktime)
+        self.starttime = 0
+        self.id = id 
+        self.panel = panel
+        self.image = image
+        
+        
+    def compute(self):
+        """
+        excuting computation
+        """
+        elapsed = time.time() - self.starttime
+       
+        self.complete(panel=self.panel, image=self.image, elapsed=elapsed)
+        
+        
 class MaskPanel(wx.Dialog):
     """
     Provides the Mask Editor GUI.
@@ -518,9 +555,10 @@ class FloatPanel(wx.Dialog):
     ## Name to appear on the window title bar
     window_caption = "Plot"
     ## Flag to tell the AUI manager to put this panel in the center pane
-    CENTER_PANE = True
+    CENTER_PANE = False
+    ID = wx.NewId()
     def __init__(self, parent=None, base=None, 
-                 data=None, dimension=1, id=-1, *args, **kwds):
+                 data=None, dimension=1, id=ID, *args, **kwds):
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
         kwds["size"] = wx.Size(_STATICBOX_WIDTH*1.5, PANEL_SIZE*1.5) 
         wx.Dialog.__init__(self, parent, id=id,  *args, **kwds)
@@ -551,12 +589,29 @@ class FloatPanel(wx.Dialog):
             else:    
                 self.newplot = Data2D(image=self.data.data)
                 self.newplot.setValues(self.data)
-                
-            self.plotpanel.add_image(self.newplot) 
+                    # Compute and get the image plot
+            self.get_plot()
+            #self.plotpanel.add_image(self.newplot) 
             self.Centre()
             self.Layout()
-
-            
+    
+    def get_plot(self):
+        """
+        Get Plot panel
+        """
+        cal_plot = CalcPlot(panel=self.plotpanel, 
+                                   image=self.newplot, 
+                                   completefn=self.complete)
+        cal_plot.queue()
+    
+    def complete(self, panel, image, elapsed=None):
+        """
+        Plot image
+        
+        :param image: newplot [plotpanel]
+        """
+        wx.CallAfter(panel.add_image, image) 
+        
     def _setup_layout(self):
         """
         Set up the layout
@@ -565,6 +620,8 @@ class FloatPanel(wx.Dialog):
         sizer = wx.GridBagSizer(10, 10)
         if self.dimension == 3:
             note = "Note: I am very SLOW.     Please be PATIENT...\n"
+            if len(self.data.data) > 3600:
+                note += "Rotation disabled for pixels > 60x60."
             note_txt = wx.StaticText(self, -1, note) 
             note_txt.SetForegroundColour(wx.RED)
             sizer.Add(note_txt, (0, 2), flag=wx.RIGHT|wx.BOTTOM, border=5)
@@ -609,6 +666,7 @@ class FloatPanel(wx.Dialog):
         """
         try:
             self.plotpanel.subplot.figure.clf()
+            self.plotpanel.close()
         except:
             # when called by data panel
             event.Skip()
@@ -677,11 +735,9 @@ class Maskplotpanel(PlotPanel):
         msg = 'Plotting...'
         self._status_info(msg, status_type)
         status_type = 'stop'           
-        
         self.graph.render(self)
-        if self.dimension == 3:
-            pass
-        else:
+        if self.dimension < 3:
+            self.graph.render(self)
             self.subplot.figure.canvas.draw_idle()
         msg = 'Plotting Completed.'
         self._status_info(msg, status_type)

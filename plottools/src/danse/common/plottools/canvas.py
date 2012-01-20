@@ -129,6 +129,7 @@ class FigureCanvas(FigureCanvasWxAgg):
         self.resizing = False
         self.xaxis = None
         self.yaxis = None
+        self.ndraw = 0
         # Support for mouse wheel
         self.Bind(wx.EVT_MOUSEWHEEL, self._onMouseWheel)
        
@@ -165,6 +166,9 @@ class FigureCanvas(FigureCanvasWxAgg):
         """
         """
         # Check resize whether or not True
+        if self.panel.dimension == 3:
+            return
+
         # This is for fast response when plot is being resized
         if not self.resizing:
             self.xaxis.set_visible(True)
@@ -190,10 +194,10 @@ class FigureCanvas(FigureCanvasWxAgg):
         """
         # Only draw if window is shown, otherwise graph will bleed through
         # on the notebook style AUI widgets.
+        #    raise
         fig = FigureCanvasWxAgg
-        if self.IsShownOnScreen():
+        if self.IsShownOnScreen() and self.ndraw != 1:
             self._isRendered = True
-            #self.panel.parent.refresh_floating(self.panel)
             self._get_axes_switch()
             #import time
             #st = time.time()
@@ -206,7 +210,9 @@ class FigureCanvas(FigureCanvasWxAgg):
             #print "time", time.time() - st
         else:
             self._isRendered = False
-   
+        if self.ndraw <= 1:
+            self.ndraw += 1
+        
     def _onMouseWheel(self, evt):
         """Translate mouse wheel events into matplotlib events"""
         # Determine mouse location

@@ -323,13 +323,13 @@ class PlotPanel(wx.Panel):
         """
         Set the resizing (True/False)
         """
-        pass # Not impleeted
+        pass # Not implemented
     
     def schedule_full_draw(self, func='append'):    
         """
         Put self in schedule to full redraw list
         """
-        pass # Not implemeted
+        pass # Not implemented
     
     def add_toolbar(self):
         """
@@ -1424,6 +1424,7 @@ class PlotPanel(wx.Panel):
                    ymin=self.ymin_2D, ymax=self.ymax_2D, 
                    cmap=self.cmap, zmin=zmin_2D_temp,
                    zmax=zmax_2D_temp)
+        self.figure.canvas.draw_idle()
       
     def image(self, data, qx_data, qy_data, xmin, xmax, ymin, ymax, 
               zmin, zmax, color=0, symbol=0, markersize=0, label='data2D', cmap=DEFAULT_CMAP):
@@ -1478,14 +1479,17 @@ class PlotPanel(wx.Panel):
             
             im = self.subplot.imshow(output, interpolation='nearest', 
                                      origin='lower',
-                                     #vmin=zmin_temp, vmax=self.zmax_2D,
-                                     cmap=self.cmap)#, 
-                                     #extent=(self.xmin_2D, self.xmax_2D,
-                                     #           self.ymin_2D, self.ymax_2D))
+                                     vmin=zmin_temp, vmax=self.zmax_2D,
+                                     cmap=self.cmap, 
+                                     extent=(self.xmin_2D, self.xmax_2D,
+                                                self.ymin_2D, self.ymax_2D))
+            
             cbax = self.subplot.figure.add_axes([0.84,0.2,0.02,0.7])
         else:
             # clear the previous 2D from memory
-            self.subplot.figure.clf()
+            # mpl is not clf, so we do
+            self.subplot.figure.clear()
+
             self.subplot.figure.subplots_adjust(left=0.1, right=.8, bottom=.1)  
             try:
                 # mpl >= 1.0.0
@@ -1500,12 +1504,13 @@ class PlotPanel(wx.Panel):
             X = self.x_bins[0:-1]
             Y = self.y_bins[0:-1]
             X, Y = numpy.meshgrid(X, Y)
-    
+            if len(X) > 60:
+                ax.disable_mouse_rotation()
             im = ax.plot_surface(X, Y, output, rstride=1, cstride=1, cmap=cmap,
                                    linewidth=0, antialiased=False)
             #ax.set_zlim3d(zmin_temp, self.zmax_2D)
             #ax.set_frame_on(False)
-            self.subplot.set_axis_off()    
+            self.subplot.set_axis_off()  
             
         if cbax == None:
             cb =self.subplot.figure.colorbar(im, shrink=0.6, aspect=20)
@@ -1513,9 +1518,6 @@ class PlotPanel(wx.Panel):
             cb =self.subplot.figure.colorbar(im, cax=cbax)
         cb.update_bruteforce(im)
         cb.set_label('$' + self.scale + '$')
-        
-        #if self.dimension != 3:
-        self.figure.canvas.draw_idle()
     
     def _build_matrix(self):
         """ 
