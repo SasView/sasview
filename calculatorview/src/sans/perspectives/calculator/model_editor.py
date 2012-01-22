@@ -286,7 +286,7 @@ class EditorPanel(wx.ScrolledWindow):
         """
         Do the layout for parameter related widgets
         """
-        param_txt = wx.StaticText(self, -1, 'Parameters : ') 
+        param_txt = wx.StaticText(self, -1, 'Fit Parameters (if any): ') 
         param_tip = "#Set the parameters and initial values.\n"
         param_tip += "#Example:\n"
         param_tip += "A = 1\nB = 1"
@@ -306,11 +306,10 @@ class EditorPanel(wx.ScrolledWindow):
         """
         function_txt = wx.StaticText(self, -1, 'Function(x) : ') 
         hint_function = "#Example:\n"
-        hint_function += "new_x = x * math.pi\n"
-        hint_function += "if new_x <= 0:\n"
+        hint_function += "if x <= 0:\n"
         hint_function += "    y = A + B\n"
         hint_function += "else:\n"
-        hint_function += "    y = A + B * numpy.cos(new_x)\n"
+        hint_function += "    y = A + B * cos(2 * pi * x)\n"
         hint_function += "return y\n"
         id  = wx.NewId() 
         self.function_tcl = EditWindow(self, id, wx.DefaultPosition, 
@@ -422,6 +421,7 @@ class EditorPanel(wx.ScrolledWindow):
         info = 'Info'
         # Sort out the errors if occur
         if self.check_name():
+            name = self.name_tcl.GetValue().lstrip().rstrip()
             description = self.desc_tcl.GetValue()
             param_str = self.param_tcl.GetText()
             func_str = self.function_tcl.GetText()
@@ -470,7 +470,14 @@ class EditorPanel(wx.ScrolledWindow):
             out_f =  open(fname,'w')
         except :
             raise
+        # Prepare the content of the function
         lines = CUSTOM_TEMPLATE.split('\n')
+        im_np = 'import numpy'
+        im_sp = 'import scipy'
+        if func_str.count(im_np):
+            func_str = func_str.replace(im_np, '')
+        if func_str.count(im_sp):
+            func_str = func_str.replace(im_sp, '')
         has_scipy = func_str.count("scipy.")
         self.is_2d = func_str.count("#self.ndim = 2")
         line_2d = ''
@@ -494,10 +501,9 @@ class EditorPanel(wx.ScrolledWindow):
                 if local_params:
                     out_f.write(local_params)
             elif line.count("self.description = "):
+                des0 = self.name + "\\n"
                 desc = str(desc_str.lstrip().rstrip().replace('\"', ''))
-                if not desc:
-                    desc= self.name
-                out_f.write(line% desc + "\n")
+                out_f.write(line% (des0 + desc) + "\n")
             elif line.count("def function(self, x=0.0%s):"):
                 if self.is_2d:
                     y_str = ', y=0.0'
@@ -543,11 +549,11 @@ class EditorPanel(wx.ScrolledWindow):
         items = line.split(";")
         for item in items:
             name = item.split("=")[0].lstrip().rstrip()
-            value = item.split("=")[1].lstrip().rstrip()
             try:
+                value = item.split("=")[1].lstrip().rstrip()
                 float(value)
             except:
-               raise
+                value = 1.0 # default
             params_str += spaces + "self.params['%s'] = %s\n"% (name, value)
             
         return params_str
@@ -603,7 +609,7 @@ class EditorWindow(wx.Frame):
 ## Templates for custom models
 CUSTOM_TEMPLATE = """
 from sans.models.pluginmodel import Model1DPlugin
-import math
+from math import *
 import numpy
 #import scipy?
 class Model(Model1DPlugin):
