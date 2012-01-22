@@ -1436,7 +1436,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                                                       is_modified) 
             except:
                 pass
-            #if is_modified:
 
             # Here we should check whether the boundaries have been modified.
             # If qmin and qmax have been modified, update qmin and qmax and 
@@ -1457,6 +1456,10 @@ class BasicPage(ScrolledPanel, PanelBase):
                     
             else:
                 self.fitrange = False    
+                
+            if not self.data.is_data:
+                is_modified = True
+
             ## if any value is modify draw model with new value
             if not self.fitrange:
                 #self.btFit.Disable()
