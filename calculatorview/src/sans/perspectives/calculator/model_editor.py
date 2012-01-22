@@ -472,12 +472,7 @@ class EditorPanel(wx.ScrolledWindow):
             raise
         # Prepare the content of the function
         lines = CUSTOM_TEMPLATE.split('\n')
-        im_np = 'import numpy'
-        im_sp = 'import scipy'
-        if func_str.count(im_np):
-            func_str = func_str.replace(im_np, '')
-        if func_str.count(im_sp):
-            func_str = func_str.replace(im_sp, '')
+
         has_scipy = func_str.count("scipy.")
         self.is_2d = func_str.count("#self.ndim = 2")
         line_2d = ''

@@ -1065,10 +1065,12 @@ class FitPage(BasicPage):
             wx.MessageBox(msg, 'Info')
 
             return
+        """
         if not self.data.is_data:
             self.npts_x = self.Npts_total.GetValue()
             self.Npts_fit.SetValue(self.npts_x)
             self.create_default_data() 
+        """
         flag = self._update_paramv_on_fit()  
     
         wx.CallAfter(self._onparamEnter_helper)
