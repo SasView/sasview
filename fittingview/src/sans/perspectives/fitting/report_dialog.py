@@ -184,12 +184,14 @@ class ReportDialog(wx.Dialog):
             #put image name strings into the html file
             #Note:The str for pic_fname shouldn't be removed.
             if self.nimages == 1:
-                html = report_frame % str(pic_fname[0])
+                html = report_frame % str(os.path.basename(pic_fname[0]))
             elif self.nimages == 2:
-                html = report_frame % (str(pic_fname[0]), str(pic_fname[1]))
+                html = report_frame % (str(os.path.basename(pic_fname[0])), 
+                                       str(os.path.basename(pic_fname[1])))
             elif self.nimages == 3:
-                html = report_frame % (str(pic_fname[0]), str(pic_fname[1]),
-                                          str(pic_fname[2]))
+                html = report_frame % (str(os.path.basename(pic_fname[0])), 
+                                       str(os.path.basename(pic_fname[1])),
+                                       str(os.path.basename(pic_fname[2])))
 
             # make/open file in case of absence
             f = open(fName, 'w')
@@ -232,12 +234,14 @@ class ReportDialog(wx.Dialog):
         #put the image path in html string
         if ext_num == (1 - ind_cor):
             if self.nimages == 1:
-                report = report_frame % pic_fname[0]
+                report = report_frame % os.path.basename(pic_fname[0])
             elif self.nimages == 2:
-                report = report_frame % (pic_fname[0], pic_fname[1])
+                report = report_frame % (os.path.basename(pic_fname[0]), 
+                                         os.path.basename(pic_fname[1]))
             elif self.nimages == 3:
-                report = report_frame % (pic_fname[0], pic_fname[1],
-                                          pic_fname[2])
+                report = report_frame % (os.path.basename(pic_fname[0]), 
+                                         os.path.basename(pic_fname[1]),
+                                         os.path.basename(pic_fname[2]))
         f = open(fName, 'w')
         f.write(report)
         f.close()
