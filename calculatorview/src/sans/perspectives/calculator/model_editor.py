@@ -507,7 +507,7 @@ class EditorPanel(wx.ScrolledWindow):
                     out_f.write(line% '' + "\n")
             elif line.count("#function here"):
                 for func_line in func_str.split('\n'):
-                    f_line = func_line.lstrip().rstrip()
+                    f_line = func_line.rstrip()
                     if f_line:
                         out_f.write(spaces + f_line + "\n")
                 if not func_str:
