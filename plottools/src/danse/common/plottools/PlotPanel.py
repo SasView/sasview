@@ -21,10 +21,7 @@ from plottables import Data1D
 from binder import BindArtist
 from matplotlib.font_manager import FontProperties
 
-try:
-    from mpl_toolkits.mplot3d import Axes3D
-except:
-    logging.error("PlotPanel could not import Axes3D")
+from mpl_toolkits.mplot3d import Axes3D
 #from matplotlib import cm
 #from matplotlib.ticker import LinearLocator, FixedLocator, FormatStrFormatter
 
@@ -137,7 +134,7 @@ class PlotPanel(wx.Panel):
         self.SetColor(color)
         #self.SetBackgroundColour(parent.GetBackgroundColour())
         self._resizeflag = True
-        self._SetInitialSize() 
+        self._SetSize() 
         self.subplot = self.figure.add_subplot(111)
         self.figure.subplots_adjust(left=0.2, bottom=.2)
         self.yscale = 'linear'
@@ -1427,7 +1424,6 @@ class PlotPanel(wx.Panel):
                    ymin=self.ymin_2D, ymax=self.ymax_2D, 
                    cmap=self.cmap, zmin=zmin_2D_temp,
                    zmax=zmax_2D_temp)
-        self.figure.canvas.draw_idle()
       
     def image(self, data, qx_data, qy_data, xmin, xmax, ymin, ymax, 
               zmin, zmax, color=0, symbol=0, markersize=0, label='data2D', cmap=DEFAULT_CMAP):
@@ -1525,6 +1521,7 @@ class PlotPanel(wx.Panel):
             cb =self.subplot.figure.colorbar(im, cax=cbax)
         cb.update_bruteforce(im)
         cb.set_label('$' + self.scale + '$')
+        self.figure.canvas.draw_idle()
     
     def _build_matrix(self):
         """ 

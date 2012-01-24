@@ -36,11 +36,13 @@ DEFAULT_CMAP = pylab.cm.jet
 _BOX_WIDTH = 76
 _SCALE = 1e-6
 _STATICBOX_WIDTH = 380
-PANEL_SIZE = 420
+
 #SLD panel size 
 if sys.platform.count("win32") > 0:
+    PANEL_SIZE = 350
     FONT_VARIANT = 0
 else:
+    PANEL_SIZE = 300
     FONT_VARIANT = 1
     
 from data_util.calcthread import CalcThread
@@ -468,9 +470,9 @@ class MaskPanel(wx.Dialog):
        
         ##use this method
         #set zmax and zmin to plot: Fix it w/ data.
-        if self.plotpanel.scale == 'log':
-            zmax = math.log(max(self.data.data[self.data.data>0]))
-            zmin = math.log(min(self.data.data[self.data.data>0]))
+        if self.plotpanel.scale == 'log_{10}':
+            zmax = math.log10(max(self.data.data[self.data.data>0]))
+            zmin = math.log10(min(self.data.data[self.data.data>0]))
         else:
             zmax = max(self.data.data[self.data.data>0])
             zmin = min(self.data.data[self.data.data>0])
@@ -560,7 +562,7 @@ class FloatPanel(wx.Dialog):
     def __init__(self, parent=None, base=None, 
                  data=None, dimension=1, id=ID, *args, **kwds):
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
-        kwds["size"] = wx.Size(_STATICBOX_WIDTH*1.5, PANEL_SIZE*1.5) 
+        kwds["size"] = wx.Size(PANEL_SIZE*1.5, PANEL_SIZE*1.5) 
         wx.Dialog.__init__(self, parent, id=id,  *args, **kwds)
         
         if data != None:
@@ -577,6 +579,7 @@ class FloatPanel(wx.Dialog):
             # Panel for 2D plot
             self.plotpanel = Maskplotpanel(self, -1, dimension,
                                            style=wx.TRANSPARENT_WINDOW)
+            self.plotpanel._SetInitialSize()
             
             self.cmap = DEFAULT_CMAP
             ## Create Artist and bind it
@@ -624,9 +627,9 @@ class FloatPanel(wx.Dialog):
                 note += "Rotation disabled for pixels > 60x60."
             note_txt = wx.StaticText(self, -1, note) 
             note_txt.SetForegroundColour(wx.RED)
-            sizer.Add(note_txt, (0, 2), flag=wx.RIGHT|wx.BOTTOM, border=5)
+            sizer.Add(note_txt, (0, 2), flag=wx.RIGHT|wx.TOP, border=5)
         
-        sizer.Add(self.plotpanel, (1, 1), (9, 9), 
+        sizer.Add(self.plotpanel, (1, 0), (9, 9), 
                   wx.EXPAND|wx.ALL, 15)
 
         sizer.AddGrowableCol(3)
@@ -736,9 +739,12 @@ class Maskplotpanel(PlotPanel):
         self._status_info(msg, status_type)
         status_type = 'stop'           
         self.graph.render(self)
+        self.subplot.figure.canvas.resizing = False
         if self.dimension < 3:
             self.graph.render(self)
-            self.subplot.figure.canvas.draw_idle()
+            self.subplot.figure.canvas.draw()
+        elif FONT_VARIANT:
+            self.subplot.figure.canvas.draw()
         msg = 'Plotting Completed.'
         self._status_info(msg, status_type)
         
