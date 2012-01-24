@@ -94,6 +94,22 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
                     del kwds['style']
                     CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
         self.root = self.AddRoot("Available Data")
+                   
+    def OnCompareItems(self, item1, item2):
+        """ 
+        Overrides OnCompareItems in wx.TreeCtrl. 
+        Used by the SortChildren method. 
+        """
+        # Get the item data
+        data1 = self.GetItemText(item1)
+        data2 = self.GetItemText(item2)
+        # Compare the item data
+        if data1 < data2:
+            return -1
+        elif data1 > data2:
+            return 1
+        else:
+            return 0
         
 class DataPanel(ScrolledPanel, PanelBase):
     """
@@ -627,6 +643,9 @@ class DataPanel(ScrolledPanel, PanelBase):
                             i_t_c = self.tree_ctrl.AppendItem(d_p_c,
                                                               process.__str__())
                 wx.CallAfter(self.append_theory, state_id, theory_list)
+            # Sort by data name
+            if self.tree_ctrl.root:
+                self.tree_ctrl.SortChildren(self.tree_ctrl.root)    
         self.enable_remove()
         self.enable_import()
         self.enable_plot()
