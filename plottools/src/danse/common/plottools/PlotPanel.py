@@ -1494,21 +1494,25 @@ class PlotPanel(wx.Panel):
             self.subplot.figure.clear()
 
             self.subplot.figure.subplots_adjust(left=0.1, right=.8, bottom=.1)  
+
+            X = self.x_bins[0:-1]
+            Y = self.y_bins[0:-1]
+            X, Y = numpy.meshgrid(X, Y)
+            
             try:
                 # mpl >= 1.0.0
                 ax = self.subplot.figure.gca(projection='3d')
                 #ax.disable_mouse_rotation()
                 cbax = self.subplot.figure.add_axes([0.84,0.1,0.02,0.8])
+                if len(X) > 60:
+                    ax.disable_mouse_rotation()
             except:
                 # mpl < 1.0.0
                 ax =  Axes3D(self.subplot.figure)
+                if len(X) > 60:
+                    ax.cla()
                 cbax = None
-
-            X = self.x_bins[0:-1]
-            Y = self.y_bins[0:-1]
-            X, Y = numpy.meshgrid(X, Y)
-            if len(X) > 60:
-                ax.disable_mouse_rotation()
+            
             im = ax.plot_surface(X, Y, output, rstride=1, cstride=1, cmap=cmap,
                                    linewidth=0, antialiased=False)
             #ax.set_zlim3d(zmin_temp, self.zmax_2D)
