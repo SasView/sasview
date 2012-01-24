@@ -375,8 +375,9 @@ class Plugin(PluginBase):
         if menu == None:
             menu = self.edit_custom_model
         list_fnames = os.listdir(models.find_plugins_dir())
-        for item in list_fnames:
-            name = os.path.basename(item)
+        list_fnames.sort()
+        for f_item in list_fnames:
+            name = os.path.basename(f_item)
             toks = os.path.splitext(name)
             if toks[-1]=='.py' and not toks[0] =='__init__':
                 if menu == self.edit_custom_model:
