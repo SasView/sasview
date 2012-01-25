@@ -139,6 +139,7 @@ class DataManager(object):
             else:
                 data_state = DataState(data)
                 data_state.id = id
+                data_state.path = data.path
                 self.stored_data[id] = data_state
     
     def update_data(self, prev_data, new_data):
