@@ -740,6 +740,11 @@ class PlotPanel(wx.Panel):
                         self.yLabel = "ln(y)"
                         self.viewModel = "--"
                         dial.setValues(self.xLabel, self.yLabel, self.viewModel)
+                    if self.viewModel == "Porod y*x^(4) vs x^(4)":
+                        self.xLabel = "x^(4)"
+                        self.yLabel = "y*x^(4)"
+                        self.viewModel = "--"
+                        dial.setValues(self.xLabel, self.yLabel, self.viewModel)
                     self._onEVT_FUNC_PROPERTY()
                 dial.Destroy()
            
@@ -1853,6 +1858,13 @@ class PlotPanel(wx.Panel):
                 self.graph._xaxis_transformed("%s^{2}" % xname,  "%s" % xunits)
                 item.transformY(transform.toLogX,transform.errToLogX )
                 self.graph._yaxis_transformed("\ln\ \ %s" % yname,  "%s" % yunits)
+            if(self.viewModel == "Porod y*x^(4) vs x^(4)"):
+                item.transformX(transform.toX4, transform.errToX4)
+                xunits = convertUnit(4, self.xaxis_unit) 
+                self.graph._xaxis_transformed("%s^{4}" % xname, "%s" % xunits)
+                item.transformY(transform.toYX4, transform.errToYX4)
+                self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname,xname), 
+                                               "%s%s" % (yunits,xunits))
             item.transformView()
   
         # set new label and units

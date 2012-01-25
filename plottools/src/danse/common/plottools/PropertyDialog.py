@@ -80,6 +80,7 @@ class Properties(wx.Dialog):
         self.view.SetValue("--")
         self.view.Insert("--", 0)
         self.view.Insert("Guinier lny vs x^(2)", 1)
+        self.view.Insert("Porod y*x^(4) vs x^(4)", 2)
         self.SetSizer(vbox)
         self.Fit()        
         self.Centre()
