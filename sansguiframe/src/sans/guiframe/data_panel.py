@@ -384,13 +384,14 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         Get data selection from the right click
         """
+        data = None
         selection = event.GetSelection()
         id, _, _ = self.FindFocus().GetSelection().GetData()
         data_list, theory_list = \
                             self.parent._data_manager.get_by_id(id_list=[id])
         if data_list:
             data = data_list.values()[0]
-        else:
+        if data == None:
             data = theory_list.values()[0][0]
         return data
     
