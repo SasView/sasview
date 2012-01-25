@@ -34,6 +34,12 @@ TwoLorentzianModel, TwoPowerLawModel, VesicleModel
 from sans.models.CylinderModel import CylinderModel as P1          #<========
 from sans.models.PolymerExclVolume import PolymerExclVolume as P2  #<========
 
+# If you want to add your custom model, change the filename to your custom model
+# FILE NAME without the extension(.py). And un-comment the line(ie., remove '#')
+
+# from filename import Model as P2      #<========
+
+
 #####DO NOT CHANGE ANYTHING BELOW THIS LINE 
 #####---------------------------------------------------------------------------
 class Model(Model1DPlugin):
