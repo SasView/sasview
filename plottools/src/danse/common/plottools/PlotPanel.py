@@ -21,7 +21,10 @@ from plottables import Data1D
 from binder import BindArtist
 from matplotlib.font_manager import FontProperties
 
-from mpl_toolkits.mplot3d import Axes3D
+try:
+    from mpl_toolkits.mplot3d import Axes3D
+except:
+    logging.error("PlotPanel could not import Axes3D")
 #from matplotlib import cm
 #from matplotlib.ticker import LinearLocator, FixedLocator, FormatStrFormatter
 
