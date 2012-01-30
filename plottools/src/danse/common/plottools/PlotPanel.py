@@ -21,10 +21,6 @@ from plottables import Data1D
 from binder import BindArtist
 from matplotlib.font_manager import FontProperties
 
-try:
-    from mpl_toolkits.mplot3d import Axes3D
-except:
-    logging.error("PlotPanel could not import Axes3D")
 #from matplotlib import cm
 #from matplotlib.ticker import LinearLocator, FixedLocator, FormatStrFormatter
 
@@ -1512,6 +1508,10 @@ class PlotPanel(wx.Panel):
                     ax.disable_mouse_rotation()
             except:
                 # mpl < 1.0.0
+                try:
+                    from mpl_toolkits.mplot3d import Axes3D
+                except:
+                    logging.error("PlotPanel could not import Axes3D")
                 ax =  Axes3D(self.subplot.figure)
                 if len(X) > 60:
                     ax.cla()
