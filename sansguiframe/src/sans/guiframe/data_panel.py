@@ -184,7 +184,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer1.SetMinSize(wx.Size(w/13, h*2/5))
       
         self.sizer2 = wx.BoxSizer(wx.VERTICAL)
-        self.sizer3 = wx.FlexGridSizer(7, 2, 4, 1)
+        self.sizer3 = wx.FlexGridSizer(9, 2, 4, 1)
         self.sizer4 = wx.BoxSizer(wx.VERTICAL)
         self.sizer5 = wx.BoxSizer(wx.VERTICAL)
        
