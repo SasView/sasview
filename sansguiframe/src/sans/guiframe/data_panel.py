@@ -579,7 +579,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             curr_pers = self.parent.get_current_perspective()
             if curr_pers:
                 self.perspective_cbox.SetStringSelection(curr_pers.sub_menu)
-        self.enable_import()
+                self.enable_import()
                         
     def load_data_list(self, list):
         """
