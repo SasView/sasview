@@ -468,6 +468,7 @@ ul
      href="#VesicleModel">VesicleModel</a>, <a href="#MultiShellModel">MultiShellModel</a>,
       <a href="#OnionExpShellModel">OnionExpShellModel</a>, <a
      href="#SphericalSLDModel">SphericalSLDModel</a>, <a
+     href="#LinearPearlsModel">LinearPearlsModel</a>, <a
      href="#PearlNecklaceModel">PearlNecklaceModel</a>
      , <a href="#CylinderModel">CylinderModel</a>,
      <a href="#CoreShellCylinderModel">CoreShellCylinderModel</a>, <a
@@ -3248,7 +3249,203 @@ Small-Angle X-Ray and Neutron Scattering’, Plenum Press, New York, 1987</p>
 
 <p class=MsoNormal>&nbsp;</p>
 <p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
-style='font-size:14.0pt'>2.10.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+style='font-size:14.0pt'>2.10A.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></b><b><a name=LinearPearlsModel><span style='font-size:14.0pt'>LinearPearlsModel</span></b></p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>This model provides the form factor for pearls linearly joined by short strings: N pearls (homogeneous spheres),
+the radius R and the string segment length (or edge separation) l (= A- 2R)).
+The A is the center to center pearl separation distance. The thickness of each string is assumed to be negligable.</p>
+<p/>
+<center><img src="linearpearls.jpg"></center>
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal style='margin-left:.85in;text-indent:-.35in'><b>1.1.</b><b><span
+style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp; </span>Definition</b></p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The output of the scattering intensity function for the
+linearpearls model is given by (Dobrynin, 1996):</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal align=center style='text-align:center'><span
+style='position:relative;top:15.0pt'><img 
+src="linearpearl_eq1.gif"></span>&nbsp; </p>
+<p class=MsoNormal>&nbsp;</p>
+<p class=MsoNormal>where the mass m<sub>p </sub> is (sld(of a pearl) – sld(of
+solvent)) * (volume of the N pearls), V is the total volume.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The 2D scattering intensity is the same as P(q) above,
+regardless of the orientation of the q vector.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>The returned value is scaled to units of [cm<sup>-1</sup>]
+and the parameters are the following:</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<div align=center>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0
+ style='border-collapse:collapse'>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Parameter name</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Units</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Default value</p>
+  </td>
+ </tr>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>scale</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>None</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>1.0</p>
+  </td>
+ </tr>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>radius</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Å</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>80.0</p>
+  </td>
+ </tr>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>edge_separation</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Å</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>350.0</p>
+  </td>
+ </tr>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>num_pearls</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>(integer)</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>3</p>
+  </td>
+ </tr>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>sld_pearl</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Å<sup> -2</sup></p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>1e-6</p>
+  </td>
+ </tr>
+ <tr style='height:19.25pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>sld_solv</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>Å<sup> -2</sup></p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:19.25pt'>
+  <p class=MsoBodyText>6.3e-6</p>
+  </td>
+ </tr>
+ <tr style='height:20.0pt'>
+  <td width=143 valign=top style='width:107.0pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:20.0pt'>
+  <p class=MsoBodyText>background</p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:20.0pt'>
+  <p class=MsoBodyText>cm<sup>-1</sup></p>
+  </td>
+  <td width=143 valign=top style='width:107.0pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:20.0pt'>
+  <p class=MsoBodyText>0.0</p>
+  </td>
+ </tr>
+</table>
+
+</div>
+
+<p class=MsoNormal align=center style='text-align:center'>&nbsp;</p>
+
+<p class=MsoNormal align=center style='text-align:center'><img 
+src="linearpearl_plot.jpg"></p>
+
+<p class=MsoNormal align=center style='text-align:center'>&nbsp;</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>REFERENCE</p>
+
+<p class=MsoNormal>A. V. Dobrynin, M. Rubinstein and S. P. Obukhov,
+ Macromol. 29, 2974-2979, 1996.</p>
+
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>&nbsp;</p>
+<p class=MsoNormal style='margin-left:.55in;text-indent:-.3in'><b><span
+style='font-size:14.0pt'>2.10B.</span></b><b><span style='font-size:7.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><b><a name=PearlNecklaceModel><span style='font-size:14.0pt'>PearlNecklaceModel</span></b></p>
 
 <p class=MsoNormal>&nbsp;</p>
@@ -3320,7 +3517,7 @@ regardless of the orientation of the q vector.</p>
 <p class=MsoNormal>&nbsp;</p>
 
 <p class=MsoNormal>The returned value is scaled to units of [cm<sup>-1</sup>]
-and the parameters of the sphere model are the following:</p>
+and the parameters are the following:</p>
 
 <p class=MsoNormal>&nbsp;</p>
 
