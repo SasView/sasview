@@ -19,6 +19,7 @@ void addCCSParallelepipedModel(PyObject *module);
 void addCSphereModel(PyObject *module);
 void addCSphereSLDModel(PyObject *module);
 void addCOnionModel(PyObject *module);
+void addCLinearPearlsModel(PyObject *module);
 void addCPearlNecklaceModel(PyObject *module);
 void addCReflModel(PyObject *module);
 void addCReflAdvModel(PyObject *module);
@@ -276,6 +277,7 @@ initc_models(void)
   addCDiamEllipFunc(m);
   addCDiamCylFunc(m);
   addCSLDCalFunc(m);
+  addCLinearPearlsModel(m);
   addCPearlNecklaceModel(m);
   addCLamellarModel(m);
   addCLamellarFFHGModel(m);

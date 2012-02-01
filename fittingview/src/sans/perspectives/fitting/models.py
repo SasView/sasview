@@ -317,6 +317,10 @@ class ModelManagerBase:
         self.multiplication_factor.append(SphericalSLDModel)
         self.multi_func_list.append(SphericalSLDModel)
         
+        from sans.models.LinearPearlsModel import LinearPearlsModel
+        self.shape_list.append(LinearPearlsModel)
+        self.model_name_list.append(LinearPearlsModel.__name__)
+          
         from sans.models.PearlNecklaceModel import PearlNecklaceModel
         self.shape_list.append(PearlNecklaceModel)
         self.model_name_list.append(PearlNecklaceModel.__name__)

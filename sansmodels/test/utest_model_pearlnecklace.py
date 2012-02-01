@@ -10,6 +10,8 @@ class TestPerlNecklace(unittest.TestCase):
     def setUp(self):
         from sans.models.PearlNecklaceModel import PearlNecklaceModel
         self.pnl = PearlNecklaceModel()
+        from sans.models.LinearPearlsModel import LinearPearlsModel
+        self.lpm = LinearPearlsModel()
         from sans.models.SphereModel import SphereModel
         self.sphere = SphereModel()
         from sans.models.BarBellModel import BarBellModel
@@ -43,7 +45,12 @@ class TestPerlNecklace(unittest.TestCase):
         self.pnl.setParam("edge_separation", 400)
         self.bar.setParam("rad_bar", 0.1)
         self.bar.setParam("rad_bell", 20)
-        
+        self.lpm.setParam("radius", 20)
+        self.lpm.setParam("num_pearls", 2)
+        self.lpm.setParam("sld_pearl", 1e-06)
+        self.lpm.setParam("sld_solv", 6.3e-06)
+        self.lpm.setParam("edge_separation", 400)
+                
         self.assertAlmostEqual(self.pnl.run(0.001), self.bar.run(0.001), 1)
         self.assertAlmostEqual(self.pnl.run(0.005), self.bar.run(0.005), 1)
         self.assertAlmostEqual(self.pnl.run(0.01), self.bar.run(0.01), 1)
@@ -51,6 +58,12 @@ class TestPerlNecklace(unittest.TestCase):
         self.assertAlmostEqual(self.pnl.run(0.1), self.bar.run(0.1), 1)
         self.assertAlmostEqual(self.pnl.run(0.5), self.bar.run(0.5), 1)
         
+        self.assertAlmostEqual(self.pnl.run(0.001), self.lpm.run(0.001), 1)
+        self.assertAlmostEqual(self.pnl.run(0.005), self.lpm.run(0.005), 1)
+        self.assertAlmostEqual(self.pnl.run(0.01), self.lpm.run(0.01), 1)
+        self.assertAlmostEqual(self.pnl.run(0.05), self.lpm.run(0.05), 1)
+        self.assertAlmostEqual(self.pnl.run(0.1), self.lpm.run(0.1), 1)
+        self.assertAlmostEqual(self.pnl.run(0.5), self.lpm.run(0.5), 1)
         
 
 if __name__ == '__main__':
