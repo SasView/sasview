@@ -32,6 +32,7 @@ void addCBCCrystalModel(PyObject *module);
 void addCSquareWellStructure(PyObject *module);
 void addCHayterMSAStructure(PyObject *module);
 void addCCoreShellModel(PyObject *module);
+void addCCoreSecondMomentModel(PyObject *module);
 void addCCoreFourShellModel(PyObject *module);
 void addCCoreShellCylinderModel(PyObject *module);
 void addCEllipsoidModel(PyObject *module);
@@ -251,6 +252,7 @@ initc_models(void)
   addCCoreShellCylinderModel(m);
   addCCoreShellModel(m);
   addCCoreFourShellModel(m);
+  addCCoreSecondMomentModel(m);
   addCEllipsoidModel(m);
   addCSphereModel(m);
   addCSphereSLDModel(m);
