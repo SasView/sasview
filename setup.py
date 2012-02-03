@@ -216,9 +216,12 @@ igordir = os.path.join("sansmodels", "src", "libigor")
 c_model_dir = os.path.join("sansmodels", "src", "c_models")
 smear_dir  = os.path.join("sansmodels", "src", "c_smearer")
 wrapper_dir  = os.path.join("sansmodels", "src", "python_wrapper", "generated")
-if not os.path.isdir(wrapper_dir):
+if os.path.isdir(wrapper_dir):
+    for file in os.listdir(wrapper_dir): 
+        file_path =  os.path.join(wrapper_dir, file)
+        os.remove(file_path)
+else:
     os.makedirs(wrapper_dir)
-
 sys.path.append(os.path.join("sansmodels", "src", "python_wrapper"))
 from wrapping import generate_wrappers
 generate_wrappers(header_dir=includedir, 
@@ -307,7 +310,7 @@ required = ['lxml','periodictable>=1.3.0']
 if os.name=='nt':
     #required.extend(['comtypes', 'pisa', 'html5lib', 'reportlab'])
     #required.extend(['pisa', 'html5lib'])
-    if sys.version_info < (2, 7):
+    if sys.version_info < (2, 5):
         required.append('comtypes')
 else:
     required.extend(['pil'])
