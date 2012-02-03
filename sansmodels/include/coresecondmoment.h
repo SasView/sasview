@@ -5,7 +5,7 @@
 /**
  * Structure definition for sphere parameters
  */
- //[PYTHONCLASS] = CoreSecondMomentModel
+ //[PYTHONCLASS] = Core2ndMomentModel
  //[DISP_PARAMS] = radius_core
  //[DESCRIPTION] =<text>Calculate CoreSecondMoment Model
  //
@@ -22,7 +22,7 @@
  //[FIXED]=  radius_core.width
  //[ORIENTATION_PARAMS]= <text> </text>
 
-class CoreSecondMomentModel{
+class Core2ndMomentModel{
 public:
   // Model parameters
   /// Scale factor
@@ -63,7 +63,7 @@ public:
  Parameter background;
 
   // Constructor
- CoreSecondMomentModel();
+ Core2ndMomentModel();
 
   // Operators to get I(Q)
   double operator()(double q);
