@@ -388,12 +388,15 @@ class ModelPanel1D(PlotPanel, PanelBase):
             #title = plot.title
             name = plot.name
             plot_menu = wx.Menu()
-            #plot = self.plots[self.graph.selected_plottable]
+            if self.graph.selected_plottable:
+                if plot != self.plots[self.graph.selected_plottable]:
+                    continue
             #add menu of other plugins
             item_list = self.parent.get_context_menu(self)
-    
+              
             if (not item_list == None) and (not len(item_list) == 0):
                 for item in item_list:
+
                     try:
                         id = wx.NewId()
                         plot_menu.Append(id, item[0], name)
