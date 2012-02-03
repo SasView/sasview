@@ -286,11 +286,15 @@ class ModelManagerBase:
         self.shape_list.append(FuzzySphereModel)
         self.multiplication_factor.append(FuzzySphereModel)
         self.model_name_list.append(FuzzySphereModel.__name__)
-           
+        
         from sans.models.CoreShellModel import CoreShellModel
         self.shape_list.append(CoreShellModel)
         self.multiplication_factor.append(CoreShellModel)
         self.model_name_list.append(CoreShellModel.__name__)
+        
+        from sans.models.Core2ndMomentModel import Core2ndMomentModel
+        self.shape_list.append(Core2ndMomentModel)
+        self.model_name_list.append(Core2ndMomentModel.__name__)
         
         from sans.models.CoreMultiShellModel import CoreMultiShellModel
         self.shape_list.append(CoreMultiShellModel)

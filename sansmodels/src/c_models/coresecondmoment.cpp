@@ -48,7 +48,7 @@ static double core_secondmoment_kernel(double dp[], double q) {
   return (form_factor);
 }
 
-CoreSecondMomentModel :: CoreSecondMomentModel() {
+Core2ndMomentModel :: Core2ndMomentModel() {
 	scale = Parameter(1.0);
 	density_poly = Parameter(0.7);
 	sld_poly = Parameter(1.5e-6);
@@ -66,7 +66,7 @@ CoreSecondMomentModel :: CoreSecondMomentModel() {
  * @param q: q-value
  * @return: function value
  */
-double CoreSecondMomentModel :: operator()(double q) {
+double Core2ndMomentModel :: operator()(double q) {
 	double dp[9];
 
 	// Add the background after averaging
@@ -105,7 +105,7 @@ double CoreSecondMomentModel :: operator()(double q) {
  * @param q_y: value of Q along y
  * @return: function value
  */
-double CoreSecondMomentModel :: operator()(double qx, double qy) {
+double Core2ndMomentModel :: operator()(double qx, double qy) {
 	double q = sqrt(qx*qx + qy*qy);
 	return (*this).operator()(q);
 }
@@ -117,7 +117,7 @@ double CoreSecondMomentModel :: operator()(double qx, double qy) {
  * @param phi: angle phi
  * @return: function value
  */
-double CoreSecondMomentModel :: evaluate_rphi(double q, double phi) {
+double Core2ndMomentModel :: evaluate_rphi(double q, double phi) {
 	return (*this).operator()(q);
 }
 
@@ -125,6 +125,6 @@ double CoreSecondMomentModel :: evaluate_rphi(double q, double phi) {
  * Function to calculate effective radius
  * @return: effective radius value
  */
-double CoreSecondMomentModel :: calculate_ER() {
+double Core2ndMomentModel :: calculate_ER() {
 	return 0.0;
 }
