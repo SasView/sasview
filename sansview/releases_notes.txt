@@ -1,15 +1,16 @@
 Release Notes
 =============
 
-SansView 2.0.1
+SansView 2.1.0
 	
-	- version 2.0.1:
+	- Multiprocessor support
+	- Simple custom model editor
+	- Advanced model editor
+	- Sum model editing panel 
+	- 3D graphic (for 2d data/results) and legend moves with mouse
+	- New Tool: density to vol fraction calculator and Python file editor
 	
-	- fixed a bug in saving model values as a file
-	- fixed a problem in a report file (html)
-	- Simultaneous fit: fixed a problem, displaying incorrect results in PD/Angles
-	- 
-1	- version 2.0.0: 
+1	- version 2.0: 
 
 	- Release date: 10/21/2011
 	- Batch Fit included.
@@ -20,10 +21,8 @@ SansView 2.0.1
 	- Updated the resolution computation for the gravitational effect and added TOF estimation  capability.
 	- Fixed the problem of displaying the fit results in the wrong parameter (with ParkMC FitEngine).
 	
-	-version 1.9
-	
-	- Release date: 06/22/2011
-	- MAC: Fixed some causes of crashing during fitting 
+	- Previous Versions
+
 	- Pr Inversion: Fixed a missing Rg output
 	- Startup Setting: fixed a problem with DataExplorer ON/OFF
 	- Fixed a bug w/ 2D color map dialog
@@ -44,11 +43,6 @@ SansView 2.0.1
 	- Report
 	- 2D masked circular averaging
 	- 2D smearing calculation now uses dQ_parrellel and dQ_perpendicular
-	- More Help
-	- etc
-
-	- Previous Versions
-	
 	- Improved the speed of loading 2D data.
 	- Improved the speed of P*S calculations.
 	- Added 2D smearing calculation for dQx and dQy given along the x-y axes.
@@ -92,32 +86,17 @@ SansView 2.0.1
 	
 	2.1- System Requirements:
 		- Python version >= 2.5 and < 3.0 should be running on the system
-		- We uses Python2.5.4 for WIN, and Python2.6.3 for MAC
+		- We uses Python2.5 - 2.7 for WIN, and Python2.6 - 2.7 for MAC
 
-	2.2- Installing:
-		- Get the code from svn://danse.us/sans/releases/sansview-2.0.0
-			(after all dependent packages/modules are installed/compiled, run 'python sansview.py' under the 'sansview-2.0.0' folder)
-		- This application is also dependent on the following DANSE code:
-			svn://danse.us/sans/releases/fittingview-1.0.1 (run 'python setup.py install' under the 'fittingview-1.0.0' folder)
-			svn://danse.us/sans/releases/sanscalculator-1.0.0 (run 'python setup.py install' under the 'sanscalculator-1.0.0' folder)
-			svn://danse.us/sans/releases/sanscalculator-1.0.0 (run 'python setup.py install' under the 'sanscalculator-1.0.0' folder)
-			svn://danse.us/sans/releases/sansinvariant-1.0.0 (run 'python setup.py install' under the 'sansinvariant-1.0.0' folder)
-			svn://danse.us/sans/releases/invariantview-1.0.0 (run 'python setup.py install' under the 'invariantview-1.0.0' folder)
-			svn://danse.us/sans/releases/sansguiframe-1.0.1 (run 'python setup.py install' under the 'sansguiframe-1.0.0' folder)
-			svn://danse.us/sans/releases/sansdataloader-1.0.0 (run 'python setup.py install' under the 'sansdataloader-1.0.0' folder)
-			svn://danse.us/sans/releases/park_integration-1.0.1 (run 'python setup.py install' under the 'park_integration-1.0.0' folder)
-			svn://danse.us/sans/releases/sansmodels-1.0.0 (run 'python setup.py install' under the 'sansmodels-1.0.0' folder)
-			svn://danse.us/park/releases/park-1.2.1 (run 'python setup.py install' under the 'park-1.2.1' folder)
-	        svn://danse.us/common/releases/plottools-1.0.0 (run 'python setup.py install'under the 'plottools-1.0.0' folder)
-	        svn://danse.us/common/releases/util-1.0.0 (run 'python setup.py install'under the 'util-1.0.0' folder)
-	        svn://danse.us/sans/releases/pr_inversion-1.0.0(run 'python setup.py install'under the 'pr_inversion-1.0.0' folder)
-	        svn://danse.us/sans/releases/inversionview-1.0.0 (run 'python setup.py install'under the 'inversionview-1.0.0' folder)
-	        svn://danse.us/sans/releases/sansview-2.0.1 (run 'python sansview.py' under the 'sansview-2.0.1' folder after finished all other installations)
+	2.2- Installing from source:
+		- Get the code from https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/sansview-x.x.x
+			- run 'python setup.py install' under the 'sansview-x.x.x' folder
+			- run 'python sansview.py' under the 'sansview' folder.
 		- The following modules are required:
-			* matplotlib = 0.99.0(WIN), 0.99.1.1(MAC)
-			* numpy = 1.4.1
+			* matplotlib >= 0.99.0(WIN), 0.99.1.1(MAC)
+			* numpy >= 1.4.1
 			* scipy >= 0.7.2
-			* wxpython 2.8.11 unicode(WIN), 2.8.12.0(MAC)
+			* wxpython 2.8.11 unicode(WIN), 2.8.12.0(MAC) < 2.9.xx
 			* lxml >= 2.2.2
 			* multiprocessing-2.6.2(X)
 			* comtypes (for PDF window)(WIN)
