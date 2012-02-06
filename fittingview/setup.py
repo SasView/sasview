@@ -1,13 +1,11 @@
 """
      Installation script for DANSE P(r) inversion perspective for SansView
 """
-import sys
-
 import os
 
 from distutils.core import setup
 setup(
-    version = "1.0.0",
+    version = "1.1.0",
     name="fittingview",
     description = "Fitting module  for SansView",
     package_dir = {"sans":os.path.join("src", "sans"),

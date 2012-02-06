@@ -26,7 +26,7 @@ for dir in os.listdir(path):
 
 setup(
     name="sansguiframe",
-    version = "1.0.0",
+    version = "1.1.0",
     description = "Python module for SANS gui framework",
     author = "University of Tennessee",
     url = "http://danse.chem.utk.edu",

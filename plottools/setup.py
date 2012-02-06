@@ -8,7 +8,7 @@ from distutils.core import setup
 
 setup(
     name="plottools",
-    version = "1.0",
+    version = "1.1.0",
     description = "Python plotting tools for wx",
 
     # We are living in the danse.common namespace, but there may be
