@@ -45,6 +45,7 @@ except:
     has_converter = False
 
 CANSAS_NS = "cansas1d/1.0"
+allow_all = True
 
 def write_node(doc, parent, name, value, attr={}):
     """
@@ -145,27 +146,28 @@ class Reader:
         if os.path.isfile(path):
             basename  = os.path.basename(path)
             root, extension = os.path.splitext(basename)
-            if extension.lower() in self.ext:
-                
-                tree = etree.parse(path, parser=etree.ETCompatXMLParser())
-                # Check the format version number
-                # Specifying the namespace will take care of the file
-                # format version 
-                root = tree.getroot()
-                
-                entry_list = root.xpath('/ns:SASroot/ns:SASentry',
-                                         namespaces={'ns': CANSAS_NS})
-                
-                for entry in entry_list:
-                    self.errors = []
-                    sas_entry = self._parse_entry(entry)
-                    sas_entry.filename = basename
+            if allow_all or extension.lower() in self.ext:
+                try:
+                    tree = etree.parse(path, parser=etree.ETCompatXMLParser())
+                    # Check the format version number
+                    # Specifying the namespace will take care of the file
+                    # format version 
+                    root = tree.getroot()
                     
-                    # Store loading process information
-                    sas_entry.errors = self.errors
-                    sas_entry.meta_data['loader'] = self.type_name
-                    output.append(sas_entry)
-                
+                    entry_list = root.xpath('/ns:SASroot/ns:SASentry',
+                                             namespaces={'ns': CANSAS_NS})
+                    
+                    for entry in entry_list:
+                        self.errors = []
+                        sas_entry = self._parse_entry(entry)
+                        sas_entry.filename = basename
+                        
+                        # Store loading process information
+                        sas_entry.errors = self.errors
+                        sas_entry.meta_data['loader'] = self.type_name
+                        output.append(sas_entry)
+                except:
+                    raise RuntimeError, "%s cannot be read \n" % path
         else:
             raise RuntimeError, "%s is not a file" % path
         # Return output consistent with the loader's api
