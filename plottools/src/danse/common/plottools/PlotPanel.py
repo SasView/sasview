@@ -20,7 +20,11 @@ from plottables import Data1D
 #TODO: make the plottables interactive
 from binder import BindArtist
 from matplotlib.font_manager import FontProperties
-
+try:
+    from mpl_toolkits.mplot3d import Axes3D
+    PLOT_3D_ON = True
+except:
+    PLOT_3D_ON = False
 #from matplotlib import cm
 #from matplotlib.ticker import LinearLocator, FixedLocator, FormatStrFormatter
 
@@ -1501,21 +1505,21 @@ class PlotPanel(wx.Panel):
             
             try:
                 # mpl >= 1.0.0
-                ax = self.subplot.figure.gca(projection='3d')
+                fig = self.subplot.figure
+                cbax = fig.add_axes([0.84,0.1,0.02,0.8])
+                ax = fig.gca(projection='3d')
                 #ax.disable_mouse_rotation()
-                cbax = self.subplot.figure.add_axes([0.84,0.1,0.02,0.8])
                 if len(X) > 60:
                     ax.disable_mouse_rotation()
             except:
                 # mpl < 1.0.0
-                try:
-                    from mpl_toolkits.mplot3d import Axes3D
-                except:
-                    logging.error("PlotPanel could not import Axes3D")
-                ax =  Axes3D(self.subplot.figure)
-                if len(X) > 60:
-                    ax.cla()
-                cbax = None
+                if PLOT_3D_ON:
+                    ax =  Axes3D(self.subplot.figure)
+                    if len(X) > 60:
+                        ax.cla()
+                    cbax = None
+                else:
+                    raise
             
             im = ax.plot_surface(X, Y, output, rstride=1, cstride=1, cmap=cmap,
                                    linewidth=0, antialiased=False)
