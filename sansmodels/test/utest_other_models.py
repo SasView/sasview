@@ -1726,6 +1726,39 @@ class TestLineModel(unittest.TestCase):
     def testCriticalPoint(self):
         """ Test line at the critical point"""
         self.assert_(numpy.isfinite(self.comp.run(0.0)))
- 
+
+class TestMassFractalModel(unittest.TestCase):
+    """ Unit tests for MassFractalModel: Need to verify the test value"""
+    
+    def setUp(self):
+        from sans.models.MassFractalModel import MassFractalModel
+        self.comp = MassFractalModel()
+        
+    def testEval_1D(self):
+        """ Test 1D model for a MassFractalModel"""
+        self.assertAlmostEquals(self.comp.run(0.05), 279.59322, 4)
+
+class TestSurfaceFractalModel(unittest.TestCase):
+    """ Unit tests for SurfaceFractalModel: Need to verify the test value"""
+    
+    def setUp(self):
+        from sans.models.SurfaceFractalModel import SurfaceFractalModel
+        self.comp = SurfaceFractalModel()
+        
+    def testEval_1D(self):
+        """ Test 1D model for a SurfaceFractal"""
+        self.assertAlmostEquals(self.comp.run(0.05), 301428.65916, 4)
+
+class TestMassSurfaceFractal(unittest.TestCase):
+    """ Unit tests for MassSurfaceFractal: Need to verify the test value"""
+    
+    def setUp(self):
+        from sans.models.MassSurfaceFractal import MassSurfaceFractal
+        self.comp = MassSurfaceFractal()
+        
+    def testEval_1D(self):
+        """ Test 1D model for a MassSurfaceFractal"""
+        self.assertAlmostEquals(self.comp.run(0.05), 1.77537e-05, 4)
+        
 if __name__ == '__main__':
     unittest.main()
