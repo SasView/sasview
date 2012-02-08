@@ -479,6 +479,18 @@ class ModelManagerBase:
         from sans.models.FractalModel import FractalModel
         self.shape_indep_list.append(FractalModel )
         self.model_name_list.append(FractalModel.__name__)
+
+        from sans.models.MassFractalModel import MassFractalModel
+        self.shape_indep_list.append(MassFractalModel)
+        self.model_name_list.append(MassFractalModel.__name__)
+
+        from sans.models.SurfaceFractalModel import SurfaceFractalModel
+        self.shape_indep_list.append(SurfaceFractalModel)
+        self.model_name_list.append(SurfaceFractalModel.__name__)
+        
+        from sans.models.MassSurfaceFractal import MassSurfaceFractal
+        self.shape_indep_list.append(MassSurfaceFractal)
+        self.model_name_list.append(MassSurfaceFractal.__name__)
         
         from sans.models.FractalCoreShellModel import FractalCoreShellModel
         self.shape_indep_list.append(FractalCoreShellModel )

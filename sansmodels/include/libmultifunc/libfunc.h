@@ -7,4 +7,6 @@ double Si(double x);
 
 double sinc(double x);
 
+double gamln(double x);
+
 #endif

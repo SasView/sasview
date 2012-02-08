@@ -57,6 +57,9 @@ void addCVesicleModel(PyObject *module);
 void addCBinaryHSModel(PyObject *module);
 void addCRPAModel(PyObject *module);
 void addCFractalModel(PyObject *module);
+void addCMassSurfaceFractal(PyObject *module);
+void addCSurfaceFractalModel(PyObject *module);
+void addCMassFractalModel(PyObject *module);
 void addCPoly_GaussCoil(PyObject *module);
 
 
@@ -295,4 +298,7 @@ initc_models(void)
   addCPoly_GaussCoil(m);
   addCRPAModel(m);
   addCFractalModel(m);
+  addCMassSurfaceFractal(m);
+  addCMassFractalModel(m);
+  addCSurfaceFractalModel(m);
 }
