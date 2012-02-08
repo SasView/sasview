@@ -427,15 +427,19 @@ class EditorPanel(wx.ScrolledWindow):
             func_str = self.function_tcl.GetText()
             # No input for the model function
             if func_str.lstrip().rstrip():
-                self.write_file(self.fname, description, param_str, func_str)
-                tr_msg = _compileFile(self.fname)
-                msg = tr_msg.__str__()
-                # Compile error
-                if msg:
-                    _deleteFile(self.fname)
-                    msg +=  "\nCompile Failed"
+                if func_str.count('return') > 0:
+                    self.write_file(self.fname, description, param_str, func_str)
+                    tr_msg = _compileFile(self.fname)
+                    msg = tr_msg.__str__()
+                    # Compile error
+                    if msg:
+                        _deleteFile(self.fname)
+                        msg +=  "\nCompile Failed"
+                    else:
+                        msg = ''
                 else:
-                    msg = ''
+                    msg = "Error: The func(x) must 'return' a value at least.\n"
+                    msg += "For example: \n\nreturn 2*x"
             else:
                 msg = 'Error: Function is not defined.'
         else:
