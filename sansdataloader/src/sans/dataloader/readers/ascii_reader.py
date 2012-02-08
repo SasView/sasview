@@ -58,7 +58,9 @@ class Reader:
             _, extension = os.path.splitext(basename)
             if self.allow_all or extension.lower() in self.ext:
                 try:
-                    input_f =  open(path,'r')
+                    # Read in binary mode since GRASP frequently has no-ascii
+                    # characters that brakes the open operation
+                    input_f =  open(path,'rb')
                 except :
                     raise  RuntimeError, "ascii_reader: cannot open %s" % path
                 buff = input_f.read()
