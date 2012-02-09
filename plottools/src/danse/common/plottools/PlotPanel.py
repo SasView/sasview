@@ -20,11 +20,7 @@ from plottables import Data1D
 #TODO: make the plottables interactive
 from binder import BindArtist
 from matplotlib.font_manager import FontProperties
-try:
-    from mpl_toolkits.mplot3d import Axes3D
-    PLOT_3D_ON = True
-except:
-    PLOT_3D_ON = False
+
 #from matplotlib import cm
 #from matplotlib.ticker import LinearLocator, FixedLocator, FormatStrFormatter
 
@@ -40,6 +36,13 @@ import math, pylab, re
 DEFAULT_CMAP = pylab.cm.jet
 import copy
 import numpy
+
+PLOT_3D_ON = False
+try:
+    from mpl_toolkits.mplot3d import Axes3D
+    PLOT_3D_ON = True
+except:
+    pass
 
 def show_tree(obj,d=0):
     """Handy function for displaying a tree of graph objects"""

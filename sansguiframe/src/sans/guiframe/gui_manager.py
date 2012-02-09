@@ -2080,14 +2080,13 @@ class ViewerFrame(wx.Frame):
         """
         Pop up message to make sure the user wants to quit the application
         """
-        return True
-        #message = "\nDo you really want to exit this application?        \n\n"
-        #dial = wx.MessageDialog(self, message, 'Confirm Exit',
-        #                   wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
-        #if dial.ShowModal() == wx.ID_YES:
-        #    return True
-        #else:
-        #    return False    
+        message = "\nDo you really want to exit this application?        \n\n"
+        dial = wx.MessageDialog(self, message, 'Confirm Exit',
+                           wx.YES_NO|wx.YES_DEFAULT|wx.ICON_QUESTION)
+        if dial.ShowModal() == wx.ID_YES:
+            return True
+        else:
+            return False    
         
     def Close(self, event=None):
         """
