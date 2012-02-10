@@ -694,12 +694,8 @@ class Maskplotpanel(PlotPanel):
         self.plots = {}
         self.graph = Graph()
         #add axis labels
-        if self.dimension == 1:
-            self.graph.xaxis('\\rm{x} ', '')
-            self.graph.yaxis('\\rm{y} ', '')
-        if self.dimension == 2:
-            self.graph.xaxis('\\rm{Q}_{x} ', 'A^{-1}')
-            self.graph.yaxis('\\rm{Q}_{y} ', 'A^{-1}')
+        self.graph.xaxis('\\rm{x} ', '')
+        self.graph.yaxis('\\rm{y} ', '')
         
     def add_toolbar(self):
         """ 
