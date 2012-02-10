@@ -389,6 +389,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
             name = plot.name
             plot_menu = wx.Menu()
             if self.graph.selected_plottable:
+                if not self.graph.selected_plottable in self.plots.keys():
+                    continue
                 if plot != self.plots[self.graph.selected_plottable]:
                     continue
             #add menu of other plugins
