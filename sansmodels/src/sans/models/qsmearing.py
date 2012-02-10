@@ -499,9 +499,10 @@ def get_qextrapolate(width, data_x):
     """
     # Length of the width
     length = len(width)
-    width_low = math.fabs(width[0])
+    width_low = math.fabs(width[0])   
     width_high = math.fabs(width[length -1])
-    
+    nbins_low = 0.0 
+    nbins_high = 0.0
     # Compare width(dQ) to the data bin size and take smaller one as the bin 
     # size of the extrapolation; this will correct some weird behavior 
     # at the edge: This method was out (commented) 
@@ -521,9 +522,11 @@ def get_qextrapolate(width, data_x):
         
     # Number of q points required below the 1st data point in order to extend
     # them 3 times of the width (std)
-    nbins_low = math.ceil(3.0 * width_low / bin_size_low)
+    if width_low > 0.0:
+        nbins_low = math.ceil(3.0 * width_low / bin_size_low)
     # Number of q points required above the last data point
-    nbins_high = math.ceil(3.0 * width_high / (bin_size_high))
+    if width_high > 0.0:
+        nbins_high = math.ceil(3.0 * width_high / bin_size_high)
     # Make null q points        
     extra_low = numpy.zeros(nbins_low)
     extra_high = numpy.zeros(nbins_high)
