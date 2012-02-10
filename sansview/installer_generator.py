@@ -29,7 +29,7 @@ DisableProgramGroupPage = 'yes'
 Compression = 'lzma'
 SolidCompression = 'yes'
 PrivilegesRequired = 'none'
-INSTALLER_FILE = 'installer_new'
+INSTALLER_FILE = 'installer'
 
 icon_path =  local_config.icon_path
 media_path = local_config.media_path
