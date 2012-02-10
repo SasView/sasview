@@ -309,7 +309,7 @@ class ViewerFrame(wx.Frame):
         # Check for update
         #self._check_update(None)
         # Register the close event so it calls our own method
-        wx.EVT_CLOSE(self, self.Close)
+        wx.EVT_CLOSE(self, self.WindowClose)
         # Register to status events
         self.Bind(EVT_STATUS, self._on_status_event)
         #Register add extra data on the same panel event on load
@@ -2088,15 +2088,21 @@ class ViewerFrame(wx.Frame):
         else:
             return False    
         
+    def WindowClose(self, event=None):
+        """
+        Quit the application from x icon
+        """
+        flag = self.quit_guiframe()
+        if flag:
+            self.Close()
+            
     def Close(self, event=None):
         """
         Quit the application
         """
-        flag = self.quit_guiframe()
-        if flag:
-            wx.Exit()
-            sys.exit()
-
+        wx.Exit()
+        sys.exit()
+            
     def _check_update(self, event=None): 
         """
         Check with the deployment server whether a new version
