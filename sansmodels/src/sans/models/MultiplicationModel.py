@@ -163,6 +163,8 @@ class MultiplicationModel(BaseComponent):
         """
             Set effective radius to S(Q) model
         """
+        if not 'effect_radius' in self.s_model.params.keys():
+            return
         effective_radius = self.p_model.calculate_ER()
         #Reset the effective_radius of s_model just before the run
         if effective_radius != None and effective_radius != NotImplemented:
