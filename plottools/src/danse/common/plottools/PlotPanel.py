@@ -39,7 +39,7 @@ import numpy
 
 PLOT_3D_ON = False
 try:
-    from mpl_toolkits.mplot3d import Axes3D
+    from mpl_toolkits.mplot3d.axes3d  import Axes3D
     PLOT_3D_ON = True
 except:
     pass
@@ -1511,12 +1511,13 @@ class PlotPanel(wx.Panel):
                 fig = self.subplot.figure
                 cbax = fig.add_axes([0.84,0.1,0.02,0.8])
                 ax = fig.gca(projection='3d')
-                #ax.disable_mouse_rotation()
                 if len(X) > 60:
                     ax.disable_mouse_rotation()
             except:
                 # mpl < 1.0.0
                 if PLOT_3D_ON:
+                    #Todo: Find out why another clear need here
+                    self.subplot.figure.clear()
                     ax =  Axes3D(self.subplot.figure)
                     if len(X) > 60:
                         ax.cla()
@@ -1531,7 +1532,8 @@ class PlotPanel(wx.Panel):
             self.subplot.set_axis_off()  
             
         if cbax == None:
-            cb =self.subplot.figure.colorbar(im, shrink=0.6, aspect=20)
+            ax.set_frame_on(False)
+            cb =self.subplot.figure.colorbar(im, shrink=0.8, aspect=20)
         else:
             cb =self.subplot.figure.colorbar(im, cax=cbax)
         cb.update_bruteforce(im)
