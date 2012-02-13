@@ -37,13 +37,6 @@ DEFAULT_CMAP = pylab.cm.jet
 import copy
 import numpy
 
-PLOT_3D_ON = False
-try:
-    from mpl_toolkits.mplot3d.axes3d  import Axes3D
-    PLOT_3D_ON = True
-except:
-    pass
-
 def show_tree(obj,d=0):
     """Handy function for displaying a tree of graph objects"""
     print "%s%s" % ("-"*d, obj.__class__.__name__)
@@ -1514,15 +1507,16 @@ class PlotPanel(wx.Panel):
                 if len(X) > 60:
                     ax.disable_mouse_rotation()
             except:
-                # mpl < 1.0.0
-                if PLOT_3D_ON:
+                try:
+                    # mpl < 1.0.0
+                    from mpl_toolkits.mplot3d  import Axes3D
                     #Todo: Find out why another clear need here
                     self.subplot.figure.clear()
                     ax =  Axes3D(self.subplot.figure)
                     if len(X) > 60:
                         ax.cla()
                     cbax = None
-                else:
+                except:
                     raise
             
             im = ax.plot_surface(X, Y, output, rstride=1, cstride=1, cmap=cmap,
