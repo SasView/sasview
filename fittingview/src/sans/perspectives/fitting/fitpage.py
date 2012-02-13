@@ -1085,9 +1085,10 @@ class FitPage(BasicPage):
         Allow to fit
         """
         if event != None:
-            event.Skip()
+            event.Skip() 
         if len(self.parent._manager.fit_thread_list)>0 and\
                     self.parent._manager._fit_engine != "park" and\
+                    self._manager.sim_page != None and \
                     self._manager.sim_page.uid == self.uid: 
             msg = "The FitEnging will be set to 'ParkMC'\n"
             msg += " to fit with more than one data set..."
@@ -2099,6 +2100,8 @@ class FitPage(BasicPage):
         :param cov: Covariance matrix
    
         """
+        # make sure stop button to fit button all the time
+        self._on_fit_complete()
         if out == None or not numpy.isfinite(chisqr):
             raise ValueError,"Fit error occured..." 
         
