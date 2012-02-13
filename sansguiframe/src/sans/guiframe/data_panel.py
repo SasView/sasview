@@ -475,13 +475,15 @@ class DataPanel(ScrolledPanel, PanelBase):
         msg = "Plot the current Data"
         self.data_menu.Append(self.quickplot_id, name, msg)
         wx.EVT_MENU(self, self.quickplot_id, self.on_quick_plot)
-    
+        
         self.plot3d_id = wx.NewId()
         name = "Quick 3DPlot (Slow)"
         msg = "Plot3D the current 2D Data"
         self.data_menu.Append(self.plot3d_id, name, msg)
         wx.EVT_MENU(self, self.plot3d_id, self.on_plot_3d)
-            
+        if IS_MAC:
+            if sys.maxsize > 2**32:
+                self.data_menu.Enable(self.self.plot3d_id, False)
         self.editmask_id = wx.NewId()
         name = "Edit Mask"
         msg = "Edit Mask for the current 2D Data"
