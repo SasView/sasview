@@ -1501,24 +1501,23 @@ class PlotPanel(wx.Panel):
             
             try:
                 # mpl >= 1.0.0
-                fig = self.subplot.figure
-                cbax = fig.add_axes([0.84,0.1,0.02,0.8])
-                ax = fig.gca(projection='3d')
+                ax = self.subplot.figure.gca(projection='3d')
+                #ax.disable_mouse_rotation()
+                cbax = self.subplot.figure.add_axes([0.84,0.1,0.02,0.8])
                 if len(X) > 60:
                     ax.disable_mouse_rotation()
             except:
+                # mpl < 1.0.0
                 try:
-                    # mpl < 1.0.0
-                    from mpl_toolkits.mplot3d  import Axes3D
-                    #Todo: Find out why another clear need here
-                    self.subplot.figure.clear()
-                    ax =  Axes3D(self.subplot.figure)
-                    if len(X) > 60:
-                        ax.cla()
-                    cbax = None
+                    from mpl_toolkits.mplot3d import Axes3D
                 except:
-                    raise
-            
+                    logging.error("PlotPanel could not import Axes3D")
+                self.subplot.figure.clear()
+                ax =  Axes3D(self.subplot.figure)
+                if len(X) > 60:
+                    ax.cla()
+                cbax = None
+
             im = ax.plot_surface(X, Y, output, rstride=1, cstride=1, cmap=cmap,
                                    linewidth=0, antialiased=False)
             #ax.set_zlim3d(zmin_temp, self.zmax_2D)
