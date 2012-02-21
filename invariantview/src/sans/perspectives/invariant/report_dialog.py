@@ -159,7 +159,7 @@ class ReportDialog(wx.Dialog):
             self.report_list[2].savefig(pic_fname)
 
             # put the image file path in the html data
-            html = self.report_list[0] % str(os.path.basename(pic_fname))
+            html = self.report_list[0] % str(pic_fname)
             
             # make/open file in case of absence
             f = open(fName, 'w')

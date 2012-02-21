@@ -184,14 +184,12 @@ class ReportDialog(wx.Dialog):
             #put image name strings into the html file
             #Note:The str for pic_fname shouldn't be removed.
             if self.nimages == 1:
-                html = report_frame % str(os.path.basename(pic_fname[0]))
+                html = report_frame % str(pic_fname[0])
             elif self.nimages == 2:
-                html = report_frame % (str(os.path.basename(pic_fname[0])), 
-                                       str(os.path.basename(pic_fname[1])))
+                html = report_frame % (str(pic_fname[0]), str(pic_fname[1]))
             elif self.nimages == 3:
-                html = report_frame % (str(os.path.basename(pic_fname[0])), 
-                                       str(os.path.basename(pic_fname[1])),
-                                       str(os.path.basename(pic_fname[2])))
+                html = report_frame % (str(pic_fname[0]), str(pic_fname[1]),
+                                          str(pic_fname[2]))
 
             # make/open file in case of absence
             f = open(fName, 'w')
