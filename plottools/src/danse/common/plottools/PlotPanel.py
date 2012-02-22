@@ -1517,7 +1517,7 @@ class PlotPanel(wx.Panel):
                 if len(X) > 60:
                     ax.cla()
                 cbax = None
-
+            self.subplot.figure.canvas.resizing = False
             im = ax.plot_surface(X, Y, output, rstride=1, cstride=1, cmap=cmap,
                                    linewidth=0, antialiased=False)
             #ax.set_zlim3d(zmin_temp, self.zmax_2D)
@@ -1531,7 +1531,10 @@ class PlotPanel(wx.Panel):
             cb =self.subplot.figure.colorbar(im, cax=cbax)
         cb.update_bruteforce(im)
         cb.set_label('$' + self.scale + '$')
-        self.figure.canvas.draw_idle()
+        if self.dimension != 3:
+            self.figure.canvas.draw_idle()
+        else:
+            self.figure.canvas.draw()
     
     def _build_matrix(self):
         """ 
