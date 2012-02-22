@@ -3244,8 +3244,8 @@ class FitPage(BasicPage):
         self._set_weight(is_2D= self.enable2D)
         self._set_smear_buttons()
         self.Show(True)
+        self.SetupScrolling()
         self._draw_model()
-        
         
         self.state.enable2D =  copy.deepcopy(self.enable2D)
     
