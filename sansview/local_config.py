@@ -35,7 +35,7 @@ project funded by the US National Science Foundation.
 
 '''
 _homepage = "http://danse.chem.utk.edu"
-_download = "http://danse.chem.utk.edu/sansview.html"
+_download = "https://sourceforge.net/projects/sansviewproject/"
 _authors = []
 _paper = "http://danse.us/trac/sans/newticket"
 _license = "mailto:sansdanse@gmail.com"
@@ -54,7 +54,7 @@ _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = "(c) 2009 - 2011, University of Tennessee"
+_copyright = "(c) 2009 - 2012, University of Tennessee"
 
 
 #edit the list of file state your plugin can read

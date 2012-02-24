@@ -9,31 +9,31 @@ def check_deps():
         import matplotlib
         print "matplotlib ", matplotlib.__version__
     except:
-        print "No matplotlib"
+        print "No matplotlib: recommending 1.1.0"
         
     try:
         import wx
         print "wx ", wx.__version__
     except:
-        print "No wx"
+        print "No wx: recommending 2.8.12.1"
         
     try:
         import scipy
         print "scipy ", scipy.__version__
     except:
-        print "No scipy"
+        print "No scipy: recommending 0.10.0"
         
     try:
         import numpy
         print "numpy ", numpy.__version__
     except:
-        print "No numpy"
+        print "No numpy: recommending 1.1.0"
         
     try:
         import lxml.etree
         print "lxml ", lxml.etree.__version__
     except:
-        print "No lxml"
+        print "No lxml: recommend 2.3.0"
         
     try:
         import reportlab
@@ -71,6 +71,12 @@ def check_deps():
         print "macholib ", macholib.__version__
     except:
         print "No macholib: recommending version >= 1.4.3"
+        
+    try:
+        import pisa
+    except:
+        print "No pisa"
+    
     
 def check_system():
     """
