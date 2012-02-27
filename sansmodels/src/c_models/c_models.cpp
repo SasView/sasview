@@ -35,6 +35,7 @@ void addCCoreShellModel(PyObject *module);
 void addCCore2ndMomentModel(PyObject *module);
 void addCCoreFourShellModel(PyObject *module);
 void addCCoreShellCylinderModel(PyObject *module);
+void addCCoreShellBicelleModel(PyObject *module);
 void addCEllipsoidModel(PyObject *module);
 void addCEllipticalCylinderModel(PyObject *module);
 void addCTriaxialEllipsoidModel(PyObject *module);
@@ -253,6 +254,7 @@ initc_models(void)
   addCParallelepipedModel(m);
   addCCSParallelepipedModel(m);
   addCCoreShellCylinderModel(m);
+  addCCoreShellBicelleModel(m);
   addCCoreShellModel(m);
   addCCoreFourShellModel(m);
   addCCore2ndMomentModel(m);

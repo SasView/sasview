@@ -271,7 +271,27 @@ class TestCoreShellCylinderModel(unittest.TestCase):
     #    """ Test CoreShellCylinder at the critical point"""
     #    self.assert_(numpy.isfinite(self.comp.run(0.0)))
  
- 
+     
+class TestCoreShellBicelleModel(unittest.TestCase):
+    """ Unit tests for CoreShellBicelle Model"""
+    
+    def setUp(self):
+        from sans.models.CoreShellCylinderModel import CoreShellCylinderModel
+        from sans.models.CoreShellBicelleModel import CoreShellBicelleModel
+        self.comp1 = CoreShellCylinderModel()
+        self.comp2 = CoreShellBicelleModel()
+        # Using the default values of CSBiselle is same as CSCylinder
+        
+    def testcompare1D(self):
+        """ Test 1D model for a CoreShellBicelle Model"""
+        self.assertAlmostEqual(self.comp1.run(0.01), self.comp2.run(0.01), 8)
+        
+    def testcompareEval_2D(self):
+        """ Test 2D model for a CoreShellBicelle with evalDistribution"""
+        self.assertAlmostEquals(self.comp1.runXY([0.4, 0.5]),self.comp2.runXY([0.4, 0.5]),8)
+        self.assertAlmostEquals(self.comp1.runXY([1.3,1.57]),self.comp2.runXY([1.3,1.57]),8)
+        
+                      
 class TestHollowCylinderModel(unittest.TestCase):
     """ Unit tests for HollowCylinder Model"""
     
@@ -317,7 +337,7 @@ class TestHollowCylinderModel(unittest.TestCase):
     def testEval_2D(self):
         """ Test 2D model for a HollowCylinder with evalDistribution"""
         self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
+        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1],8)
 
     # No more singular point    
     #def testCriticalPoint(self):

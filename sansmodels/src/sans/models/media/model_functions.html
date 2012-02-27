@@ -455,7 +455,7 @@ ul
 <li class="MsoNormal" style="line-height: 115%;"><a href="#Introduction"><b>Introduction</b></a>
 </li>
 <li class="MsoNormal" style="line-height: 115%;"><a href="#Shapes"><b>Shapes</b></a>: <a href="#SphereModel">SphereModel</a>, <a href="#BinaryHSModel">BinaryHSModel</a>, <a href="#FuzzySphereModel">FuzzySphereModel</a>, <a href="#CoreShellModel">CoreShellModel</a>,&nbsp;<a href="#Core2ndMomentModel">Core2ndMomentModel</a>, <a href="#CoreMultiShellModel">CoreMultiShellModel</a>, <a href="#VesicleModel">VesicleModel</a>, <a href="#MultiShellModel">MultiShellModel</a>, &nbsp;<a href="#OnionExpShellModel">OnionExpShellModel</a>, <a href="#SphericalSLDModel">SphericalSLDModel</a>, <a href="#LinearPearlsModel">LinearPearlsModel</a>, <a href="#PearlNecklaceModel">PearlNecklaceModel</a> , <a href="#CylinderModel">CylinderModel</a>, <a href="#CoreShellCylinderModel">CoreShellCylinderModel</a>,
-<a href="#HollowCylinderModel">HollowCylinderModel</a>,
+<a href="#CoreShellBicelleModel">CoreShellBicelleModel</a>,<a href="#HollowCylinderModel">HollowCylinderModel</a>,
 <a href="#FlexibleCylinderModel">FlexibleCylinderModel</a>,
 <a href="#FlexibleCylinderModel">FlexCylEllipXModel</a>,
 <a href="#StackedDisksModel">StackedDisksModel</a>,
@@ -3339,9 +3339,184 @@ Solvent_sld=1e-6 Å<sup> -2</sup>,
 and Background=0.0 cm<sup> -1</sup>.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.15.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></b><a name="CoreShellBicelleModel"><b><span style="font-size: 14pt;">Core-Shell (Cylinder) Bicelle Model</span></b></a></p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">This model provides the form factor
+for a circular cylinder
+with a core-shell scattering length density profile. The form factor is
+normalized by the particle volume. This model is a more general case of
+<a href="#CoreShellCylinderModel">
+core-shell cylinder model </a> (see&nbsp;above and reference below) in
+that the parameters of the shell are separated into a face-shell and
+a rim-shell so that users can set different values of the thicknesses
+and slds.&nbsp;</p>
+<p class="MsoNormal"></p>
+<p class="MsoNormal">The returned value is scaled to units
+of [cm<sup>-1</sup>]
+and the parameters of the core-shell cylinder model are the following:</p>
+<p class="MsoNormal">&nbsp;</p>
+<div align="center">
+<table class="MsoNormalTable" style="border-collapse: collapse;" border="2" cellpadding="0" cellspacing="0">
+<tbody>
+<tr style="height: 19.25pt;">
+<td style="border: 1pt solid windowtext; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Parameter name</p>
+</td>
+<td style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Units</p>
+</td>
+<td style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Default value</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">scale</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">None</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">1.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">radius</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Å</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">20.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">rim_thick</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Å</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">10.0</p>
+</td>
+</tr>
+<tr>
+<td>face_thick</td>
+<td>Å</td>
+<td>10.0</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">length</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Å</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">400.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; vertical-align: top; width: 107pt; height: 19.25pt;">
+<p class="MsoBodyText">core_sld</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Å<sup> -2</sup></p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">1e-6</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">rim_sld</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Å<sup> -2</sup></p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">4e-6</p>
+</td>
+</tr>
+<tr>
+<td>face_sld</td>
+<td>Å<sup> -2</sup></td>
+<td>4e-6</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">solvent_sld</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Å<sup> -2</sup></p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">1e-6</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">background</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">cm<sup>-1</sup></p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">0.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">axis_theta</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">degree</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">90</p>
+</td>
+</tr>
+<tr style="height: 20pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 20pt;" valign="top" width="143">
+<p class="MsoBodyText">axis_phi</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 20pt;" valign="top" width="143">
+<p class="MsoBodyText">degree</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 20pt;" valign="top" width="143">
+<p class="MsoBodyText">0.0</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">The output of the 1D scattering
+intensity function for
+randomly oriented cylinders is then given by the equation above.</p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">The <i>axis_theta</i>
+and axis<i>_phi</i> parameters are not
+used for the 1D output. Our implementation of the scattering kernel and
+the 1D
+scattering intensity use the c-library from NIST.</p>
+<p class="MsoNormal"></p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal" style="text-align: center;" align="center"><img style="width: 512px; height: 377px;" id="cscylbicelle" src="cscylbicelle_pic.jpg"></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><b>Figure.
+1D plot using the default values (w/200 data point).</b></p>
+<p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
+<p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
+<p class="MsoNormal">&nbsp;REFERENCE<br>
+Feigin, L. A, and D. I. Svergun, "Structure Analysis by Small-Angle
+X-Ray and Neutron Scattering", Plenum Press, New York, (1987).</p>
+<p class="MsoNormal"><b>&nbsp;</b></p>
+<p class="MsoNormal"><b>&nbsp;</b></p>
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.16.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="HollowCylinderModel"><b><span style="font-size: 14pt;">HollowCylinderModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the form factor,
@@ -3508,7 +3683,7 @@ by Small-Angle X-Ray and Neutron Scattering", Plenum Press, New York,
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.16.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.17.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="FlexibleCylinderModel"></a><b><span style="font-size: 14pt;">FlexibleCylinderModel</span></b></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the form factor,
@@ -3671,7 +3846,7 @@ Cationic Wormlike Micelles" Langmuir, August 2006.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.17.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.18.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><b><span style="font-size: 14pt;">FlexCylEllipXMo<a name="FlexCylEllipXModel"></a>del</span></b></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>Flexible Cylinder with
@@ -3898,7 +4073,7 @@ qmax = 0.7
 1D plot using the default values (w/200 data points).</b></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.18.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.19.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="StackedDisksModel"><b><span style="font-size: 14pt;">StackedDisksModel
 </span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -4142,7 +4317,7 @@ Scattering", Clarendon, Oxford, 1994.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.19.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.20.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="ParallelepipedModel"><b><span style="font-size: 14pt;">ParallelepipedModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the form factor,
@@ -4337,7 +4512,7 @@ Austriaca 14 (1961)
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.20.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.21.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><b><span style="font-size: 14pt;"><a name="CSParallelepipedModel">CSParallelepipedModel</a></span></b></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">Calculates the form factor for a
@@ -4646,7 +4821,7 @@ German)&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.21.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.22.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="EllipticalCylinderModel"><b><span style="font-size: 14pt;">Elliptical
 Cylinder Model</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -4880,7 +5055,7 @@ Plenum, New
 York, (1987).</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.22.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.23.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="BarBellModel"><b><span style="font-size: 14pt;">BarBell(/DumBell)Model</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">Calculates the scattering from a
@@ -5088,7 +5263,7 @@ default values for other parameters,</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.23.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.24.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="CappedCylinderModel"><b><span style="font-size: 14pt;">CappedCylinder(/ConvexLens)Model</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">Calculates the scattering from a
@@ -5291,7 +5466,7 @@ values for other parameters,</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.24.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.25.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="EllipsoidModel"><b><span style="font-size: 14pt;">Ellipsoid
 Model</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -5547,7 +5722,7 @@ Background=0.0 cm<sup> -1</sup>.</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.25.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.26.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="CoreShellEllipsoidModel"><b><span style="font-size: 14pt;">CoreShellEllipsoidModel
 </span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -5744,7 +5919,7 @@ Phys., 1983, 79, 2461.</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.26.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.27.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="TriaxialEllipsoidModel"><b><span style="font-size: 14pt;">TriaxialEllipsoidModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the form factor,
@@ -5941,7 +6116,7 @@ Small-Angle X-Ray and Neutron Scattering”, Plenum, New York, 1987.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.27.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.28.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="LamellarModel"><b><span style="font-size: 14pt;">LamellarModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the scattering
@@ -6065,7 +6240,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.28.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.29.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="LamellarFFHGModel"><b><span style="font-size: 14pt;">LamellarFFHGModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the scattering
@@ -6218,7 +6393,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.29.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.30.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="LamellarPSModel"><b><span style="font-size: 14pt;">LamellarPSModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the scattering
@@ -6384,7 +6559,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.30.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.31.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="LamellarPSHGModel"><b><span style="font-size: 14pt;">LamellarPSHGModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the scattering
@@ -6588,7 +6763,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.31.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.32.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="LamellarPCrystalModel"><b><span style="font-size: 14pt;">LamellarPCrystalModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">Lamella ParaCrystal Model: Calculates
@@ -6760,7 +6935,7 @@ Egelhaaf, J. Phys. Chem. B, 103 (1999) 9888-9897.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.32.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.33.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="SCCrystalModel"><b><span style="font-size: 14pt;">SC(Simple
 Cubic Para-)CrystalModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -6978,7 +7153,7 @@ incorrectness of the 2D model computation. </p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.33.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.34.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="FCCrystalModel"><b><span style="font-size: 14pt;">FC(Face
 Centered Cubic Para-)CrystalModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -7202,7 +7377,7 @@ incorrectness of the 2D model computation. </p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.34.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.35.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="BCCrystalModel"><b><span style="font-size: 14pt;">BC(Body
 Centered Cubic Para-)CrystalModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -8345,7 +8520,8 @@ scattering length density of particles.</p>
 <p class="MsoBodyText">background</p>
 </td>
 <td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p class="MsoBodyText"><br><sup></sup></p>
+<p class="MsoBodyText"><br>
+</p>
 </td>
 <td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
 <p class="MsoBodyText">0.0</p>
@@ -8393,7 +8569,8 @@ is the
 scattering length density of particles. </p>
 <p class="MsoNormal" style="margin-left: 0.25in;">&nbsp;Note:
 &nbsp;The surface fractal dimension is valid for
-1&lt;surface_dim&lt;3. &nbsp;Also it is valid in a limited q range (see the reference for details).</p>
+1&lt;surface_dim&lt;3. &nbsp;Also it is valid in a limited
+q range (see the reference for details).</p>
 <p class="MsoNormal" style="text-align: center;" align="center"><span style="font-size: 14pt;">&nbsp;</span></p>
 <div align="center">
 <table class="MsoNormalTable" style="border-collapse: collapse;" border="2" cellpadding="0" cellspacing="0">
@@ -8458,7 +8635,8 @@ scattering length density of particles. </p>
 <p class="MsoBodyText">background</p>
 </td>
 <td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p class="MsoBodyText"><br><sup></sup></p>
+<p class="MsoBodyText"><br>
+</p>
 </td>
 <td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
 <p class="MsoBodyText">0.0</p>
@@ -8572,7 +8750,8 @@ scattering length density of particles. </p>
 <p class="MsoBodyText">background</p>
 </td>
 <td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p class="MsoBodyText"><br><sup></sup></p>
+<p class="MsoBodyText"><br>
+</p>
 </td>
 <td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
 <p class="MsoBodyText">0.0</p>

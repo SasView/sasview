@@ -340,6 +340,11 @@ class ModelManagerBase:
         self.multiplication_factor.append(CoreShellCylinderModel)
         self.model_name_list.append(CoreShellCylinderModel.__name__)
         
+        from sans.models.CoreShellBicelleModel import CoreShellBicelleModel
+        self.shape_list.append(CoreShellBicelleModel)
+        self.multiplication_factor.append(CoreShellBicelleModel)
+        self.model_name_list.append(CoreShellBicelleModel.__name__)
+                
         from sans.models.HollowCylinderModel import HollowCylinderModel
         self.shape_list.append(HollowCylinderModel)
         self.multiplication_factor.append(HollowCylinderModel)
