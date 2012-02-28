@@ -341,6 +341,7 @@ if __name__ == "__main__":
     TEMPLATE += "Compression=%s\n" % str(Compression)
     TEMPLATE += "SolidCompression=%s\n" % str(SolidCompression)
     TEMPLATE += "PrivilegesRequired=%s\n" % str(PrivilegesRequired)
+    TEMPLATE += "UsePreviousAppDir=no\n"
    
     TEMPLATE += write_registry(data_extension=DATA_EXTENSION,
                                 app_extension=APP_EXTENSION)
