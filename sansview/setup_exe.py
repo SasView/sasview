@@ -172,9 +172,9 @@ class Target:
     def __init__(self, **kw):
         self.__dict__.update(kw)
         # for the versioninfo resources
-        self.version = "2.0.1"
+        self.version = "2.1.0"
         self.company_name = "U Tennessee"
-        self.copyright = "copyright 2009 - 2011"
+        self.copyright = "copyright 2009 - 2012"
         self.name = "SansView"
         
 #
