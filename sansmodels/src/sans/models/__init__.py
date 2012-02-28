@@ -6,7 +6,7 @@
 import os
 from distutils.filelist import findall
 
-__version__ = "1.1.0"
+__version__ = "2.1.0"
 
 def get_data_path(media):
     """
