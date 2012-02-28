@@ -3,7 +3,7 @@ Release Notes
 
 SansView 2.1.0
 	
-	- Multiprocessor support
+	- Multiprocessor support(Windows)
 	- Simple custom model editor
 	- Advanced model editor
 	- Sum model editing panel 
