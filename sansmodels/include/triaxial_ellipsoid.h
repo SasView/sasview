@@ -54,6 +54,7 @@ public:
   double operator()(double q);
   double operator()(double qx, double qy);
   double calculate_ER();
+  double calculate_VR();
   double evaluate_rphi(double q, double phi);
 };
 #endif

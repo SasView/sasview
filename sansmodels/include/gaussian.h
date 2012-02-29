@@ -4,9 +4,9 @@
 
 /** Structure definition for Gaussian parameters.
  * The Gaussian is normalized to the 'scale' parameter.
- *  
+ *
  * f(x)=scale * 1/(sigma^2*2pi)e^(-(x-mu)^2/2sigma^2)
- * 
+ *
  * [PYTHONCLASS] = Gaussian
  * [DESCRIPTION] = <text>f(x)=scale * 1/(sigma^2*2pi)e^(-(x-mu)^2/2sigma^2)</text>
  */
@@ -30,6 +30,7 @@ public:
   double operator()(double q);
   double operator()(double qx, double qy);
   double calculate_ER();
+  double calculate_VR();
   double evaluate_rphi(double q, double phi);
 };
 

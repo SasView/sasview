@@ -4,9 +4,9 @@
 
 /** Structure definition for Lorentzian parameters.
  * The Lorentzian is normalized to the 'scale' parameter.
- *  
+ *
  * f(x)=scale * 1/pi 0.5gamma / [ (x-x_0)^2 + (0.5gamma)^2 ]
- * 
+ *
  * [PYTHONCLASS] = Lorentzian
  * [DESCRIPTION] = <text>f(x)=scale * 1/pi 0.5gamma / [ (x-x_0)^2 + (0.5gamma)^2 ]</text>
  * [ORIENTATION_PARAMS]= <text> </text>
@@ -31,6 +31,7 @@ public:
   double operator()(double q);
   double operator()(double qx, double qy);
   double calculate_ER();
+  double calculate_VR();
   double evaluate_rphi(double q, double phi);
 };
 

@@ -4,12 +4,12 @@
 
 /** Structure definition for Schulz parameters.
  * The Schulz is normalized to the 'scale' parameter.
- *  
+ *
  * f(x)=scale * math.pow(z+1, z+1)*math.pow((R), z)*
  *					math.exp(-R*(z+1))/(center*gamma(z+1)
  *		z= math.pow[(1/(sigma/center),2]-1
  *		R= x/center
- * 
+ *
  * [PYTHONCLASS] = Schulz
  * [DESCRIPTION] = <text> f(x)=scale * math.pow(z+1, z+1)*math.pow((R), z)*
  					math.exp(-R*(z+1))/(center*gamma(z+1)
@@ -36,6 +36,7 @@ public:
   double operator()(double q);
   double operator()(double qx, double qy);
   double calculate_ER();
+  double calculate_VR();
   double evaluate_rphi(double q, double phi);
 };
 
