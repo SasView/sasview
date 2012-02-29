@@ -176,3 +176,6 @@ double CoreShellModel :: calculate_ER() {
 
   return rad_out;
 }
+double CoreShellModel :: calculate_VR() {
+  return 1.0;
+}

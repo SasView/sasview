@@ -109,3 +109,6 @@ double DiamCylFunc :: calculate_ER() {
 //NOT implemented yet!!!
   return 0.0;
 }
+double DiamCylFunc :: calculate_VR() {
+  return 1.0;
+}

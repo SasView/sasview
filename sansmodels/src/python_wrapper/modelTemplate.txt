@@ -128,6 +128,15 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         """       
         return [CPYTHONCLASS].calculate_ER(self)
         
+    def calculate_VR(self):
+        """ 
+        Calculate the volf ratio for P(q)*S(q)
+        
+        :return: the value of the volf ratio
+        
+        """       
+        return [CPYTHONCLASS].calculate_VR(self)
+              
     def set_dispersion(self, parameter, dispersion):
         """
         Set the dispersion object for a model parameter

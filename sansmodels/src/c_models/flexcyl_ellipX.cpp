@@ -211,3 +211,6 @@ double FlexCylEllipXModel :: calculate_ER() {
 
   return rad_out;
 }
+double FlexCylEllipXModel :: calculate_VR() {
+  return 1.0;
+}

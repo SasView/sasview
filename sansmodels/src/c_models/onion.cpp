@@ -663,3 +663,6 @@ double OnionModel :: calculate_ER() {
         +dp.thick_shell5+dp.thick_shell6+dp.thick_shell7+dp.thick_shell8+dp.thick_shell9+dp.thick_shell10;}
   return rad_out;
 }
+double OnionModel :: calculate_VR() {
+  return 1.0;
+}

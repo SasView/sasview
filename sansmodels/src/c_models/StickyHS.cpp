@@ -107,3 +107,6 @@ double StickyHSStructure :: calculate_ER() {
 //NOT implemented yet!!!
   return 0.0;
 }
+double StickyHSStructure :: calculate_VR() {
+  return 1.0;
+}

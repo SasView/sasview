@@ -389,3 +389,6 @@ double StackedDisksModel :: calculate_ER() {
 
   return rad_out;
 }
+double StackedDisksModel :: calculate_VR() {
+  return 1.0;
+}

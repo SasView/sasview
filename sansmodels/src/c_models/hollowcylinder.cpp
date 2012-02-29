@@ -371,3 +371,53 @@ double HollowCylinderModel :: calculate_ER() {
 
   return rad_out;
 }
+/**
+ * Function to calculate volf_ratio for shell
+ * @return: volf_ratio value
+ */
+double HollowCylinderModel :: calculate_VR() {
+  HollowCylinderParameters dp;
+  dp.core_radius = core_radius();
+  dp.radius  = radius();
+  dp.length  = length();
+
+  double rad_out = 0.0;
+
+  // Perform the computation, with all weight points
+  double sum_tot = 0.0;
+  double sum_shell = 0.0;
+
+  // Get the dispersion points for the major shell
+  vector<WeightPoint> weights_length;
+  length.get_weights(weights_length);
+
+  // Get the dispersion points for the minor shell
+  vector<WeightPoint> weights_radius ;
+  radius.get_weights(weights_radius);
+
+  // Get the dispersion points for the core radius
+  vector<WeightPoint> weights_core_radius;
+  core_radius.get_weights(weights_core_radius);
+
+  // Loop over major shell weight points
+  for(int i=0; i< (int)weights_length.size(); i++) {
+    dp.length = weights_length[i].value;
+    for(int k=0; k< (int)weights_radius.size(); k++) {
+      dp.radius = weights_radius[k].value;
+      for(int j=0; j<(int)weights_core_radius.size(); j++) {
+    	  dp.core_radius = weights_core_radius[j].value;
+		  sum_tot +=weights_length[i].weight* weights_core_radius[j].weight
+			  * weights_radius[k].weight*pow(dp.radius, 2);
+		  sum_shell += weights_length[i].weight* weights_core_radius[j].weight
+			  * weights_radius[k].weight*(pow(dp.radius, 2)-pow(dp.core_radius, 2));
+      }
+    }
+  }
+    if (sum_tot == 0.0){
+      //return the default value
+      rad_out =  1.0;}
+    else{
+      //return ratio value
+      return sum_shell/sum_tot;
+    }
+}

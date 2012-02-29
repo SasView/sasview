@@ -298,3 +298,6 @@ double ReflModel :: calculate_ER() {
   //NOT implemented yet!!!
   return 0.0;
 }
+double ReflModel :: calculate_VR() {
+  return 1.0;
+}

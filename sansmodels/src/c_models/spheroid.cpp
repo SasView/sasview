@@ -412,3 +412,6 @@ double CoreShellEllipsoidModel :: calculate_ER() {
 
   return rad_out;
 }
+double CoreShellEllipsoidModel :: calculate_VR() {
+  return 1.0;
+}

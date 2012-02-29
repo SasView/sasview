@@ -329,3 +329,6 @@ double BCCrystalModel :: calculate_ER() {
 	//NOT implemented yet!!!
 	return 0.0;
 }
+double BCCrystalModel :: calculate_VR() {
+  return 1.0;
+}

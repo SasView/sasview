@@ -440,3 +440,6 @@ double TriaxialEllipsoidModel :: calculate_ER() {
 
   return rad_out;
 }
+double TriaxialEllipsoidModel :: calculate_VR() {
+  return 1.0;
+}

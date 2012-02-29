@@ -281,3 +281,6 @@ double PearlNecklaceModel :: calculate_ER() {
   return rad_out;
 
 }
+double PearlNecklaceModel :: calculate_VR() {
+  return 1.0;
+}

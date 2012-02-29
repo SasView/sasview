@@ -214,3 +214,6 @@ double LinearPearlsModel :: calculate_ER() {
   return rad_out;
 
 }
+double LinearPearlsModel :: calculate_VR() {
+  return 1.0;
+}

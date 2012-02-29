@@ -156,7 +156,9 @@ class MultiplicationModel(BaseComponent):
         """
         value = self.params['volfraction']
         if value != None: 
-            self.p_model.setParam( 'scale', value)
+            factor = self.p_model.calculate_VR()
+            val = factor * value
+            self.p_model.setParam( 'scale', val)
             
             
     def _set_effect_radius(self):

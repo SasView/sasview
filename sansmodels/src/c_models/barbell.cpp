@@ -345,3 +345,10 @@ double BarBellModel :: calculate_ER() {
 	//NOT implemented yet!!!
 	return 0.0;
 }
+/**
+ * Function to calculate volf_ratio for shell/tot
+ * @return: volf_ratio value
+ */
+double BarBellModel :: calculate_VR() {
+  return 1.0;
+}

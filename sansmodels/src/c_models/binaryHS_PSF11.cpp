@@ -47,6 +47,7 @@ public:
   double operator()(double q);
   double operator()(double qx , double qy);
   double calculate_ER();
+  double calculate_VR();
   double evaluate_rphi(double q, double phi);
 };
 
@@ -141,4 +142,7 @@ double BinaryHSPSF11Model :: evaluate_rphi(double q, double phi) {
 double BinaryHSPSF11Model :: calculate_ER() {
 //NOT implemented yet!!!
 	return 0.0;
+}
+double BinaryHSPSF11Model :: calculate_VR() {
+  return 1.0;
 }

@@ -537,3 +537,6 @@ double RPAModel :: calculate_ER() {
   //NOT implemented!!!
   return 0.0;
 }
+double RPAModel :: calculate_VR() {
+  return 1.0;
+}

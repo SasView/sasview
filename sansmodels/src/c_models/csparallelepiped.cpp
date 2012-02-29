@@ -551,3 +551,6 @@ double CSParallelepipedModel :: calculate_ER() {
   return rad_out;
 
 }
+double CSParallelepipedModel :: calculate_VR() {
+  return 1.0;
+}

@@ -338,3 +338,6 @@ double CylinderModel :: calculate_ER() {
 
 	return rad_out;
 }
+double CylinderModel :: calculate_VR() {
+  return 1.0;
+}

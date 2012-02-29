@@ -252,3 +252,6 @@ double CoreFourShellModel :: calculate_ER() {
 
 	return rad_out;
 }
+double CoreFourShellModel :: calculate_VR() {
+  return 1.0;
+}

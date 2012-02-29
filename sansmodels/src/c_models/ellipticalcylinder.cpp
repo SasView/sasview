@@ -458,3 +458,6 @@ double EllipticalCylinderModel :: calculate_ER() {
 
   return rad_out;
 }
+double EllipticalCylinderModel :: calculate_VR() {
+  return 1.0;
+}

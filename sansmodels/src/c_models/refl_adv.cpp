@@ -376,3 +376,6 @@ double ReflAdvModel :: calculate_ER() {
   //NOT implemented yet!!!
   return 0.0;
 }
+double ReflAdvModel :: calculate_VR() {
+  return 1.0;
+}

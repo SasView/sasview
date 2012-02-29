@@ -339,3 +339,6 @@ double EllipsoidModel :: calculate_ER() {
 
   return rad_out;
 }
+double EllipsoidModel :: calculate_VR() {
+  return 1.0;
+}

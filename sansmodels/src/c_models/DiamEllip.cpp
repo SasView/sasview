@@ -107,3 +107,6 @@ double DiamEllipFunc :: calculate_ER() {
 //NOT implemented yet!!!
   return 0.0;
 }
+double DiamEllipFunc :: calculate_VR() {
+  return 1.0;
+}

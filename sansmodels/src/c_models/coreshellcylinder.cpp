@@ -386,3 +386,6 @@ double CoreShellCylinderModel :: calculate_ER() {
 
   return rad_out;
 }
+double CoreShellCylinderModel :: calculate_VR() {
+  return 1.0;
+}

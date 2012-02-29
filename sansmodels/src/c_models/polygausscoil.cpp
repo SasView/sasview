@@ -139,3 +139,6 @@ double Poly_GaussCoil :: calculate_ER() {
 
 	return rad_out;
 }
+double Poly_GaussCoil :: calculate_VR() {
+  return 1.0;
+}

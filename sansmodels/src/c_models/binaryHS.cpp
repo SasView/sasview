@@ -122,4 +122,6 @@ double BinaryHSModel :: calculate_ER() {
   //NOT implemented yet!!!
   return 0.0;
 }
-
+double BinaryHSModel :: calculate_VR() {
+  return 1.0;
+}

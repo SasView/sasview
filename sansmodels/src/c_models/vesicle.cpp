@@ -166,3 +166,48 @@ double VesicleModel :: calculate_ER() {
 
   return rad_out;
 }
+/**
+ * Function to calculate volf_ratio for shell
+ * @return: volf_ratio value
+ */
+double VesicleModel :: calculate_VR() {
+  VesicleParameters dp;
+
+  dp.radius     = radius();
+  dp.thickness  = thickness();
+
+  double rad_out = 0.0;
+
+  // Perform the computation, with all weight points
+  double sum_tot = 0.0;
+  double sum_shell = 0.0;
+
+
+  // Get the dispersion points for the major shell
+  vector<WeightPoint> weights_thickness;
+  thickness.get_weights(weights_thickness);
+
+  // Get the dispersion points for the minor shell
+  vector<WeightPoint> weights_radius ;
+  radius.get_weights(weights_radius);
+
+  // Loop over major shell weight points
+  for(int j=0; j< (int)weights_thickness.size(); j++) {
+    dp.thickness = weights_thickness[j].value;
+    for(int k=0; k< (int)weights_radius.size(); k++) {
+      dp.radius = weights_radius[k].value;
+      sum_tot += weights_thickness[j].weight
+          * weights_radius[k].weight*pow((dp.radius+dp.thickness), 3);
+      sum_shell += weights_thickness[j].weight
+		  * weights_radius[k].weight*(pow((dp.radius+dp.thickness), 3)
+				  - pow((dp.radius), 3));
+    }
+  }
+  if (sum_tot == 0.0){
+    //return the default value
+    rad_out =  1.0;}
+  else{
+    //return ratio value
+    return sum_shell/sum_tot;
+  }
+}

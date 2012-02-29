@@ -110,3 +110,6 @@ double HayterMSAStructure :: calculate_ER() {
   //NOT implemented yet!!!
   return 0.0;
 }
+double HayterMSAStructure :: calculate_VR() {
+  return 1.0;
+}

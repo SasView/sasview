@@ -104,3 +104,6 @@ double SLDCalFunc :: calculate_ER() {
 //NOT implemented yet!!!
 	return 0.0;
 }
+double SLDCalFunc :: calculate_VR() {
+  return 1.0;
+}

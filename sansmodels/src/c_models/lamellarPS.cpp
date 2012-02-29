@@ -181,4 +181,6 @@ double LamellarPSModel :: calculate_ER() {
   //NOT implemented yet!!!
   return 0.0;
 }
-
+double LamellarPSModel :: calculate_VR() {
+  return 1.0;
+}

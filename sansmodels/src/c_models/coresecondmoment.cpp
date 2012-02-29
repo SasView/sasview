@@ -128,3 +128,6 @@ double Core2ndMomentModel :: evaluate_rphi(double q, double phi) {
 double Core2ndMomentModel :: calculate_ER() {
 	return 0.0;
 }
+double Core2ndMomentModel :: calculate_VR() {
+  return 1.0;
+}

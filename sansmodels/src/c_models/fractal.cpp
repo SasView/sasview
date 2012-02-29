@@ -118,3 +118,6 @@ double FractalModel :: calculate_ER() {
   //NOT implemented yet!!! 'cause None shape Model
   return 0.0;
 }
+double FractalModel :: calculate_VR() {
+  return 1.0;
+}

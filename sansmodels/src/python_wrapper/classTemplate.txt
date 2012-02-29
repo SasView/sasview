@@ -330,6 +330,19 @@ static PyObject * calculate_ER([PYTHONCLASS] *self) {
 
 }
 /**
+ * Function to call to cal the ratio shell volume/ total volume
+ * @return: the ratio shell volume/ total volume 
+ */
+static PyObject * calculate_VR([PYTHONCLASS] *self) {
+
+	// Get parameters
+	
+	[READDICTIONARY]
+		
+	return Py_BuildValue("d",(*(self->model)).calculate_VR());
+
+}
+/**
  * Function to call to evaluate model in cartesian coordinates
  * @param args: input q or [qx, qy]]
  * @return: function value
@@ -415,7 +428,8 @@ static PyMethodDef [PYTHONCLASS]_methods[] = {
       "Evaluate the model at a given Q or Qx, Qy"},
     {"calculate_ER",      (PyCFunction)calculate_ER     , METH_VARARGS,
       "Evaluate the model at a given Q or Q, phi"},
-      
+    {"calculate_VR",      (PyCFunction)calculate_VR     , METH_VARARGS,
+      "Evaluate VR"},    
     {"evalDistribution",  (PyCFunction)evalDistribution , METH_VARARGS,
       "Evaluate the model at a given Q or Qx, Qy vector "},
     {"reset",    (PyCFunction)reset   , METH_VARARGS,

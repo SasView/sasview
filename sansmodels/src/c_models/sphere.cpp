@@ -135,3 +135,6 @@ double SphereModel :: calculate_ER() {
 
 	return rad_out;
 }
+double SphereModel :: calculate_VR() {
+  return 1.0;
+}

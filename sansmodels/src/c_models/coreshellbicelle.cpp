@@ -427,3 +427,6 @@ double CoreShellBicelleModel :: calculate_ER() {
 
   return rad_out;
 }
+double CoreShellBicelleModel :: calculate_VR() {
+  return 1.0;
+}

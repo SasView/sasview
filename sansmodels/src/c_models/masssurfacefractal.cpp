@@ -64,7 +64,7 @@ static double mass_surface_fractal_kernel(double dp[], double q) {
   if (tot_dim < 0.0){
 	  return 0.0;
   }
-  
+
   //computation
   mass_dim /= 2.0;
   tot_dim /= 2.0;
@@ -154,4 +154,7 @@ double MassSurfaceFractal :: evaluate_rphi(double q, double phi) {
 double MassSurfaceFractal :: calculate_ER() {
   //NOT implemented yet!!! 'cause None shape Model
   return 0.0;
+}
+double MassSurfaceFractal :: calculate_VR() {
+  return 1.0;
 }

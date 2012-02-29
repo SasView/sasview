@@ -629,3 +629,6 @@ double SphereSLDModel :: calculate_ER() {
   return out;
 
 }
+double SphereSLDModel :: calculate_VR() {
+  return 1.0;
+}

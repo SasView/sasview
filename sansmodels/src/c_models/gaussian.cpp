@@ -77,3 +77,6 @@ double Gaussian :: calculate_ER() {
   //NOT implemented yet!!!
   return 0.0;
 }
+double Gaussian :: calculate_VR() {
+  return 1.0;
+}

@@ -459,3 +459,6 @@ double ParallelepipedModel :: calculate_ER() {
 	return rad_out;
 
 }
+double ParallelepipedModel :: calculate_VR() {
+  return 1.0;
+}

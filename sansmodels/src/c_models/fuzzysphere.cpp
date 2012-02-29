@@ -179,3 +179,6 @@ double FuzzySphereModel :: calculate_ER() {
 
 	return rad_out;
 }
+double FuzzySphereModel :: calculate_VR() {
+  return 1.0;
+}
