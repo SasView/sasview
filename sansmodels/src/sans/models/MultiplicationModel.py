@@ -157,7 +157,7 @@ class MultiplicationModel(BaseComponent):
         value = self.params['volfraction']
         if value != None: 
             factor = self.p_model.calculate_VR()
-            if factor == 0.0:
+            if factor == 0.0 or factor == None or factor == NotImplemented:
                 val= value
             else:
                 val = value / factor
@@ -243,8 +243,6 @@ class MultiplicationModel(BaseComponent):
         # set effective radius and scaling factor before run
         self._set_effect_radius()
         self._set_scale_factor()
-        print "scal=", self.p_model.params['scale']
-        print "volf=", self.s_model.params['volfraction']
         return self.params['scale_factor']*self.p_model.run(x)*self.s_model.run(x)
 
     def runXY(self, x = 0.0):
@@ -255,8 +253,6 @@ class MultiplicationModel(BaseComponent):
         # set effective radius and scaling factor before run
         self._set_effect_radius()
         self._set_scale_factor()
-        print "scal=", self.p_model.params['scale']
-        print "volf=", self.s_model.params['volfraction']
         return self.params['scale_factor']*self.p_model.runXY(x)* self.s_model.runXY(x)
     
     ## Now (May27,10) directly uses the model eval function 
@@ -269,8 +265,6 @@ class MultiplicationModel(BaseComponent):
         # set effective radius and scaling factor before run
         self._set_effect_radius()
         self._set_scale_factor()
-        print "scal=", self.p_model.params['scale']
-        print "volf=", self.s_model.params['volfraction']
         return self.params['scale_factor']*self.p_model.evalDistribution(x)* self.s_model.evalDistribution(x)
 
     def set_dispersion(self, parameter, dispersion):
