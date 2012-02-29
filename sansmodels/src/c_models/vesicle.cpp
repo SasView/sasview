@@ -33,7 +33,7 @@ typedef struct {
   double scale;
   double radius;
   double thickness;
-  double core_sld;
+  double solv_sld;
   double shell_sld;
   double background;
 } VesicleParameters;
@@ -44,7 +44,7 @@ VesicleModel :: VesicleModel() {
   radius.set_min(0.0);
   thickness  = Parameter(30.0, true);
   thickness.set_min(0.0);
-  core_sld   = Parameter(6.36e-6);
+  solv_sld   = Parameter(6.36e-6);
   shell_sld   = Parameter(5.0e-7);
   background = Parameter(0.0);
 }
@@ -63,7 +63,7 @@ double VesicleModel :: operator()(double q) {
   dp[0] = scale();
   dp[1] = radius();
   dp[2] = thickness();
-  dp[3] = core_sld();
+  dp[3] = solv_sld();
   dp[4] = shell_sld();
   dp[5] = 0.0;
 

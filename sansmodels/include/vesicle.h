@@ -32,9 +32,9 @@ public:
   //  [DEFAULT]=thickness= 30.0 [A]
   Parameter thickness;
 
-  /// core scattering length density [1/A^(2)]
-  //  [DEFAULT]=core_sld= 6.36e-6 [1/A^(2)]
-  Parameter core_sld;
+  /// core_solv scattering length density [1/A^(2)]
+  //  [DEFAULT]=solv_sld= 6.36e-6 [1/A^(2)]
+  Parameter solv_sld;
 
   /// shell scattering length density [1/A^(2)]
   //  [DEFAULT]=shell_sld= 5.0e-7 [1/A^(2)]

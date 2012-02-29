@@ -157,9 +157,12 @@ class MultiplicationModel(BaseComponent):
         value = self.params['volfraction']
         if value != None: 
             factor = self.p_model.calculate_VR()
-            val = factor * value
-            self.p_model.setParam( 'scale', val)
-            
+            if factor == 0.0:
+                val= value
+            else:
+                val = value / factor
+            self.p_model.setParam( 'scale', value)
+            self.s_model.setParam( 'volfraction', val)
             
     def _set_effect_radius(self):
         """
@@ -193,7 +196,8 @@ class MultiplicationModel(BaseComponent):
         # This is a little bit abundant: Todo: find better way         
         self._set_effect_radius()
         if name in self.s_model.getParamList():
-            self.s_model.setParam( name, value)
+            if name != 'volfraction':
+                self.s_model.setParam( name, value)
             
 
         #self._setParamHelper( name, value)
@@ -239,6 +243,8 @@ class MultiplicationModel(BaseComponent):
         # set effective radius and scaling factor before run
         self._set_effect_radius()
         self._set_scale_factor()
+        print "scal=", self.p_model.params['scale']
+        print "volf=", self.s_model.params['volfraction']
         return self.params['scale_factor']*self.p_model.run(x)*self.s_model.run(x)
 
     def runXY(self, x = 0.0):
@@ -249,6 +255,8 @@ class MultiplicationModel(BaseComponent):
         # set effective radius and scaling factor before run
         self._set_effect_radius()
         self._set_scale_factor()
+        print "scal=", self.p_model.params['scale']
+        print "volf=", self.s_model.params['volfraction']
         return self.params['scale_factor']*self.p_model.runXY(x)* self.s_model.runXY(x)
     
     ## Now (May27,10) directly uses the model eval function 
@@ -261,6 +269,8 @@ class MultiplicationModel(BaseComponent):
         # set effective radius and scaling factor before run
         self._set_effect_radius()
         self._set_scale_factor()
+        print "scal=", self.p_model.params['scale']
+        print "volf=", self.s_model.params['volfraction']
         return self.params['scale_factor']*self.p_model.evalDistribution(x)* self.s_model.evalDistribution(x)
 
     def set_dispersion(self, parameter, dispersion):
