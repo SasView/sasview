@@ -255,7 +255,7 @@ if py26MSdll_x86 != None:
 
 # packages
 #
-packages = ['matplotlib', 'scipy', 'pytz', 'encodings']
+packages = ['matplotlib', 'scipy', 'pytz', 'encodings', 'comtypes']
 includes = ['site']
 
 # Exclude packages that are not needed but are often found on build systems
