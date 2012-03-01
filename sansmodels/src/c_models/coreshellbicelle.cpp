@@ -223,6 +223,7 @@ double CoreShellBicelleModel :: operator()(double q) {
     sum = sum/(vol/norm);}
   //convert to [cm-1]
   sum *= 1.0e8;
+  sum *= dp[0];
   return sum/norm + background();
 }
 
