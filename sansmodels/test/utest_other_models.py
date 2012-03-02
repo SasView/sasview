@@ -132,7 +132,7 @@ class TestVesicleModel(unittest.TestCase):
         #Give initial value to model
         self.comp.setParam("scale", 1.0)
         self.comp.setParam("radius", 100.0)
-        self.comp.setParam("core_sld", 6.36e-6)
+        self.comp.setParam("solv_sld", 6.36e-6)
         self.comp.setParam("shell_sld",5e-7)
         self.comp.setParam("thickness",30.0 )
         self.comp.setParam("Background", 0.001)
