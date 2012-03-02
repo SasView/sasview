@@ -310,8 +310,8 @@ required = ['lxml','periodictable>=1.3.0']
 if os.name=='nt':
     #required.extend(['comtypes', 'pisa', 'html5lib', 'reportlab'])
     #required.extend(['pisa', 'html5lib'])
-    if sys.version_info < (2, 5):
-        required.append('comtypes')
+    #if sys.version_info < (2, 5):
+    required.append('comtypes==0.6.2')
 else:
     required.extend(['pil'])
    
