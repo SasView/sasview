@@ -2193,8 +2193,7 @@ class ViewerFrame(wx.Frame):
                     wx.MessageBox(msg, 'Error')
             else:
                 try:
-                    command = "open "
-                    command += path
+                    command = "open '%s'" % path
                     os.system(command)
                 except:
                     msg = "This feature requires 'Preview' Application\n"
