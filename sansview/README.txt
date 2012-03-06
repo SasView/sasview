@@ -1,35 +1,136 @@
-* INSTALLATION
-	For Mac and Windows, run the appropriate installer found at https://sourceforge.net/projects/sansviewproject/files/
+Release Notes
+=============
+
+SansView 2.1.0
+	
+	- Multiprocessor support(Windows)
+	- Simple custom model editor
+	- Advanced model editor
+	- Sum model editing panel 
+	- 3D graphic (for 2d data/results) and legend moves with mouse
+	- New Tool: density to vol fraction calculator and Python file editor
+	
+ 	- version 2.0: 
+
+	- Release date: 10/21/2011
+	- Batch Fit included.
+	- More Graph modifications.
+	- More options for the fit weighting.
+	- Added a Python (PyCrust) shell in the 'Tool' menu.
+	- The 'Startup Setting' in the View menu can remember the last data file folder.
+	- Updated the resolution computation for the gravitational effect and added TOF estimation  capability.
+	- Fixed the problem of displaying the fit results in the wrong parameter (with ParkMC FitEngine).
+	
+	- Previous Versions
+
+	- Pr Inversion: Fixed a missing Rg output
+	- Startup Setting: fixed a problem with DataExplorer ON/OFF
+	- Fixed a bug w/ 2D color map dialog
+	- Minor feature added: Enable to load a data folder from the command line	
+	- Much easier graphical user interface
+	- Optimized for the speed and accuracy of the computations
+	- Added Many shape, polymer, and other models including SphericalSLD, OnionExponetialShell, and even ReflectivityModels
+	- Added Data Explorer to manage, plot, delete, or setup for computation
+	- Added Instrumental resolution estimator (as a Tool)
+	- Customizable Startup appearance
+	- More functionalities on plot panels
+	- Combined Modeling and Fitting
+	- Save/open a SansView project or SansView analysis (subproject)
+	- Start the SansView application from a data file by double-clicking or from command line
+	- Easy manipulation of data and plot
+	- Provides Normalized residual plot
+	- Added useful key-combinations to copy (fitpage), paste (fitpage), change fit-tolerance, etc.
+	- Report
+	- 2D masked circular averaging
+	- 2D smearing calculation now uses dQ_parrellel and dQ_perpendicular
+	- Improved the speed of loading 2D data.
+	- Improved the speed of P*S calculations.
+	- Added 2D smearing calculation for dQx and dQy given along the x-y axes.
+	- MAC release
+  	- Implemented the invariant, volume fraction, and specific surface area computation.
+	- Implemented the scattering length density calculator.
+  	- Re-structured 2D calculation to 2D reduced(Q) data rather than raw pixel data
+	- Capable of Mask enhanced 2D calculation and fitting.
+	- Added a 2D mask data editor.
+	- Added inputs for the slit and pinhole resolution.
+	- Added a slit size calculator.
+	- Support more format options to save a graph.
+	- Enable to display multiple data sets in one graph by loading a data into the graph.
+	- Added a tool bar in a plot panel.
+  	- Implemented P(r) inversion (Indirect Fourier transformations).
+	- Improved fitting and model calculation speed by a factor of ten.
+  	- Supporting many more model functions.
+	- Supporting P(Q)*S(Q) for most of the shape based form factors.
+	- Added more distribution functions for the polydispersion calculations.
+	- Added a bookmark feature so that the results of the calculation can be recalled later.
+	- Q range reset button is added.
+	- Added a color bar in 2D data plots.
+	- Added a model function detail button for an easy access to the model help from the fitting panel.
+	- Simultaneous fit of a number of different sets of data with/without the constraints. 
+	- Loading and displaying 1D and 2D data of various formats.
+	- 1D and 2D data fitting using Scipy or Park (a MC fitting optimizer) fit engine. 
+	- 2D data manipulation and modeling. 
+	- Supporting a number of standard model and model-independent functions including form factor and structure factor functions and their multiplications.  
+	- Plug-in mechanism for data readers. 
+	- Easy pop-up menu by mouse clicking on a given plot. 
+	- Users arrange the various windows. 
+	- Supporting varius 2D averaging methods : Circular, sectorslicer, annulus, boxsum, boxQx and boxQy.  
+	- User defined Qrange (Qmin and Qmax) for both 1D and 2D data for fitting and modeling.  
+	- The user can toggle between a number of different scales on all plots.
+	- Support saving data in the formats of ASCII and xml.
 
 
-* LINUX INSTALLATION
+2- Downloading and Installing
+	
+	*** Note: If you have EXE or ZIP SansView installer, you don't need any of the following.
+	
+	2.1- System Requirements:
+		- Python version >= 2.5 and < 3.0 should be running on the system
+		- We uses Python2.5 - 2.7 for WIN, and Python2.6 - 2.7 for MAC
 
-	Create a directory where you want to install SansView. For example:
-		mkdir ~/my_username/sansview_dir
+	2.2- Installing from source:
+		- Get the code from https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/sansview-x.x.x
+			- run 'python setup.py install' under the 'sansview-x.x.x' folder
+			- run 'python sansview.py' under the 'sansview' folder.
+		- The following modules are required:
+			* matplotlib >= 0.99.0(WIN), 0.99.1.1(MAC)
+			* numpy >= 1.4.1
+			* scipy >= 0.7.2
+			* wxpython 2.8.11 unicode(WIN), 2.8.12.0(MAC) < 2.9.xx
+			* lxml >= 2.2.2
+			* multiprocessing-2.6.2(X)
+			* comtypes (for PDF window)(WIN)
+			* pywin32 (to read ms office)(WIN)
+			* PIL (Python Image Library)
+			* Pyparsing (apply for periodictable and bundling)
+			* periodictable = 1.3.0 (using 'easy_install periodictable')
+			* pisa (html to pdf : MAC)
+			* MinGW/Cygwin (for Windows) or other GNU compiler (gcc)
+			* Optional: setuptools, svn, Innosetup, py2exe(WIN),and/or py2app(MAC) to build App from the source.
+
+
+3- Known Issues
+
+	3.1- All systems:
+		- very old computers may not be able to run 
+
+	3.2- Windows:
+		- None
 		
-	Make sure that this directory is on the python path:
-		export PYTHONPATH=~/my_username/sansview_dir
-	
-	Download the .egg file and run the following:
-	
-	easy_install -d=~/my_username/sansview_dir sansview[...].egg
-	
-	SansView can then be started by calling:
-	
-	~/my_username/sansview_dir/sansview
+	3.3- MAC:
+		- None
+		
+	3.4- Linux:
+		- None
 
+4- Troubleshooting
 
-* DEPENDENCIES
-	
-	- wxPython >= 2.8.11
-	- numpy >= 1.4.1
-	- matplotlib >= 0.99.1.1
-	- scipy
-	
-	The egg installation will attempt to install the following packages. You may want to 
-	install them yourself before installing SansView:
-	
-	- lxml
-	- pil 
-	- periodictable
+	- None
 
+5- Frequently Asked Questions
+
+	- None
+
+6- Installer download website
+
+	- See: http://danse.chem.utk.edu/sansview.html
