@@ -94,9 +94,9 @@ void DispersionModel :: set_weights(int npoints, double* values, double* weights
  */
 
 GaussianDispersion :: GaussianDispersion() {
-	npts  = 100;
+	npts  = 35;
 	width = 0.0;
-	nsigmas = 10;
+	nsigmas = 3;
 };
 
 void GaussianDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
@@ -126,7 +126,7 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
 	if (width<=0) {
 		width = 0.0;
 		npts  = 1;
-		nsigmas = 10;
+		nsigmas = 3;
 	}
 
 	Parameter* par = (Parameter*)param;
@@ -161,7 +161,7 @@ void GaussianDispersion :: operator() (void *param, vector<WeightPoint> &weights
  */
 
 RectangleDispersion :: RectangleDispersion() {
-	npts  = 100;
+	npts  = 35;
 	width = 0.0;
 	nsigmas = 1.73205;
 };
@@ -230,9 +230,9 @@ void RectangleDispersion :: operator() (void *param, vector<WeightPoint> &weight
  */
 
 LogNormalDispersion :: LogNormalDispersion() {
-	npts  = 100;
+	npts  = 80;
 	width = 0.0;
-	nsigmas = 10.0;
+	nsigmas = 8.0;
 };
 
 void LogNormalDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
@@ -261,7 +261,7 @@ void LogNormalDispersion :: operator() (void *param, vector<WeightPoint> &weight
 	if (width<=0) {
 		width = 0.0;
 		npts  = 1;
-		nsigmas = 10.0;
+		nsigmas = 8.0;
 	}
 
 	Parameter* par = (Parameter*)param;
@@ -304,9 +304,9 @@ void LogNormalDispersion :: operator() (void *param, vector<WeightPoint> &weight
  */
 
 SchulzDispersion :: SchulzDispersion() {
-	npts  = 100;
+	npts  = 80;
 	width = 0.0;
-	nsigmas = 10.0;
+	nsigmas = 8.0;
 };
 
 void SchulzDispersion :: accept_as_source(DispersionVisitor* visitor, void* from, void* to) {
@@ -337,7 +337,7 @@ void SchulzDispersion :: operator() (void *param, vector<WeightPoint> &weights){
 	if (width<=0) {
 		width = 0.0;
 		npts  = 1;
-		nsigmas = 10.0;
+		nsigmas = 8.0;
 	}
 
 	Parameter* par = (Parameter*)param;
