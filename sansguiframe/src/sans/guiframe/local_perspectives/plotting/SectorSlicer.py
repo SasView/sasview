@@ -235,8 +235,8 @@ class SectorInteractor(_BaseInteractor):
             msg = "Phi left and phi right are different"
             msg += " %f, %f" % (self.left_line.phi, self.right_line.phi)
             raise ValueError, msg
-        params["Phi"] = self.main_line.theta
-        params["Delta_Phi"] = math.fabs(self.left_line.phi)
+        params["Phi [deg]"] = self.main_line.theta * 180/math.pi
+        params["Delta_Phi [deg]"] = math.fabs(self.left_line.phi * 180/math.pi)
         params["nbins"] = self.nbins
         return params
     
@@ -248,8 +248,8 @@ class SectorInteractor(_BaseInteractor):
         :param params: a dictionary containing name of slicer parameters and 
             values the user assigned to the slicer.
         """
-        main = params["Phi"] 
-        phi = math.fabs(params["Delta_Phi"])
+        main = params["Phi [deg]"]  * math.pi/180
+        phi = math.fabs(params["Delta_Phi [deg]"] * math.pi/180)
         self.nbins = int(params["nbins"])
         self.main_line.theta = main
         ## Reset the slicer parameters
