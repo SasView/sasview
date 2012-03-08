@@ -108,7 +108,7 @@ class GridPage(sheet.CSheet):
         self.details = ""
         self.file_name = None
         self._cols = 50
-        self._rows = 51
+        self._rows = 501
         self.last_selected_row = -1
         self.last_selected_col = -1
         self.col_width = 30
@@ -123,8 +123,8 @@ class GridPage(sheet.CSheet):
         self.plottable_flag = False
         self.SetColMinimalAcceptableWidth(self.col_width)
         self.SetRowMinimalAcceptableHeight(self.row_height)
-        self.SetNumberRows(self._cols)
-        self.SetNumberCols(self._rows)
+        self.SetNumberRows(self._rows)
+        self.SetNumberCols(self._cols)
         self.AutoSize()
         self.list_plot_panels = {}
         self.default_col_width = 75
