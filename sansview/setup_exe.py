@@ -55,10 +55,12 @@ try:
                     "win32com.axscript", "win32com.bits", "win32com.ifilter",
                     "win32com.internet", "win32com.mapi", "win32com.propsys",
                     "win32com.taskscheduler"]:
-        __import__(extra)
-        m = sys.modules[extra]
-        for p in m.__path__[1:]:
-            modulefinder.AddPackagePath(extra, p)
+        
+            __import__(extra)
+            m = sys.modules[extra]
+            for p in m.__path__[1:]:
+                modulefinder.AddPackagePath(extra, p)
+
 except ImportError:
     # no build path setup, no worries.
     pass
@@ -283,7 +285,7 @@ if py26MSdll_x86 != None:
 
 # packages
 #
-packages = ['matplotlib', 'scipy', 'pytz', 'encodings', 'comtypes', 'win32com']
+packages = ['matplotlib', 'scipy', 'pytz', 'encodings', 'comtypes', 'win32com', 'encodings']
 includes = ['site']
 
 # Exclude packages that are not needed but are often found on build systems

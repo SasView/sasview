@@ -23,7 +23,7 @@ if hasattr(sys, 'frozen'):
     if not os.path.exists(mplconfigdir):
         os.mkdir(mplconfigdir)
     os.environ['MPLCONFIGDIR'] = mplconfigdir
-
+    sys.setdefaultencoding("iso-8859-1")
 from sans.guiframe import gui_manager
 from sans.guiframe.gui_style import GUIFRAME
 from welcome_panel import WelcomePanel

@@ -104,7 +104,7 @@ DATA_FILES += ['images','test','media']
 EXCLUDES = ['PyQt4', 'sip', 'QtGui']
 
 OPTIONS = {'argv_emulation': True,
-           'packages': ['lxml','numpy', 'scipy', 'pytz', 
+           'packages': ['lxml','numpy', 'scipy', 'pytz', 'encodings',
                         'encodings','matplotlib', 'periodictable'],
            'iconfile': ICON,
            'frameworks':[libxml_path],
