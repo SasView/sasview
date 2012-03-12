@@ -38,6 +38,9 @@ import matplotlib
 
 # Solution taken from here: http://www.py2exe.org/index.cgi/win32com.shell
 # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
+win32_folder = "win32com"
+if sys.version_info >= (2, 7) or sys.version_info < (2, 6):
+    win32_folder = "win32comext"
 try:
     # py2exe 0.6.4 introduced a replacement modulefinder.
     # This means we have to add package paths there, not to the built-in
@@ -50,7 +53,7 @@ try:
         import modulefinder
     import win32com, sys
     for p in win32com.__path__[1:]:
-        modulefinder.AddPackagePath("win32com", p)
+        modulefinder.AddPackagePath(win32_folder, p)
     for extra in ["win32com.shell", "win32com.adsi", "win32com.axcontrol",
                     "win32com.axscript", "win32com.bits", "win32com.ifilter",
                     "win32com.internet", "win32com.mapi", "win32com.propsys",
@@ -285,7 +288,7 @@ if py26MSdll_x86 != None:
 
 # packages
 #
-packages = ['matplotlib', 'scipy', 'pytz', 'encodings', 'comtypes', 'win32com', 'encodings']
+packages = ['matplotlib', 'scipy', 'pytz', 'encodings', 'comtypes', 'win32com']
 includes = ['site']
 
 # Exclude packages that are not needed but are often found on build systems
@@ -317,7 +320,6 @@ if is_64bits:
 setup(
     windows=[target_wx_client],
     console=[],
-    
     options={
         'py2exe': {
             'dll_excludes': dll_excludes,
