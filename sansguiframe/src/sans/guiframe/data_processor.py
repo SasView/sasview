@@ -420,45 +420,52 @@ class GridPage(sheet.CSheet):
             nbr_user_cols = len(self.col_names)
             #Add more columns to the grid if necessary
             if nbr_user_cols > self._cols:
-                new_col_nbr = nbr_user_cols -  self._cols 
+                new_col_nbr = nbr_user_cols -  self._cols + 1
                 self.AppendCols(new_col_nbr, True)
             #Add more rows to the grid if necessary  
-            nbr_user_row = len(self.data_outputs.values())
+            nbr_user_row = len(self.data_outputs.values()[0])
             if nbr_user_row > self._rows + 1:
-                new_row_nbr =  nbr_user_row - self._rows 
+                new_row_nbr =  nbr_user_row - self._rows + 1
                 self.AppendRows(new_row_nbr, True)
             # add data to the grid    
-            row = 0
-            col = 0
-            cell_col = 0
-            for col_name in  self.col_names:
-                # use the first row of the grid to add user defined labels
-                self.SetCellValue(row, col, str(col_name))
-                col += 1
-                cell_row =  1
-                value_list = self.data_outputs[col_name]
-                
-                for value in value_list:
-                    label = value
-                    if issubclass(value.__class__, BatchCell):
-                        label = value.label
-                    try:
-                        float(label)
-                        label = str(label)#format_number(label, high=True)
-                    except:
-                        label = str(label)
-                    self.SetCellValue(cell_row, cell_col, label)
-                    self.AutoSizeColumn(cell_col, True)
-                    width = self.GetColSize(cell_col)
-                    if width < self.default_col_width:
-                       self.SetColSize(cell_col, self.default_col_width)
-                    
-                    cell_row += 1
-                cell_col += 1
-                if cell_row > self.max_row_touse:
-                    self.max_row_touse = cell_row
+            wx.CallAfter(self.set_grid_values)
         self.ForceRefresh()
-        
+    
+    def set_grid_values(self):
+        """
+        Set the values in grids
+        """
+        # add data to the grid    
+        row = 0
+        col = 0
+        cell_col = 0
+        for col_name in  self.col_names:
+            # use the first row of the grid to add user defined labels
+            self.SetCellValue(row, col, str(col_name))
+            col += 1
+            cell_row =  1
+            value_list = self.data_outputs[col_name]
+            
+            for value in value_list:
+                label = value
+                if issubclass(value.__class__, BatchCell):
+                    label = value.label
+                try:
+                    float(label)
+                    label = str(label)#format_number(label, high=True)
+                except:
+                    label = str(label)
+                self.SetCellValue(cell_row, cell_col, label)
+                self.AutoSizeColumn(cell_col, True)
+                width = self.GetColSize(cell_col)
+                if width < self.default_col_width:
+                   self.SetColSize(cell_col, self.default_col_width)
+                
+                cell_row += 1
+            cell_col += 1
+            if cell_row > self.max_row_touse:
+                self.max_row_touse = cell_row
+                         
     def get_grid_view(self):
         """
         Return value contained in the grid
