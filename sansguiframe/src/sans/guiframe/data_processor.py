@@ -218,6 +218,8 @@ class GridPage(sheet.CSheet):
             for cell_row, cell_col in self.selected_cells:
                 self.axis_value.append(self.GetCellValue(cell_row, cell_col))
             self.axis_label = self.GetCellValue(0, col)
+            if not self.axis_label:
+                self.axis_label = " "
         
     def on_right_click(self, event):
         """
@@ -576,7 +578,8 @@ class Notebook(nb, PanelBase):
         labels = {}
         row = 0
         for col in range(grid.GetNumberCols()):
-            label = grid.GetCellValue(row, col)
+            label = grid.GetColLabelValue(int(col))
+            #label = grid.GetCellValue(row, col)
             if label.strip() != "" :
                 labels[label.strip()] = col
         return labels
@@ -609,16 +612,18 @@ class Notebook(nb, PanelBase):
         if len(cell_list) > 0:
             if len(cell_list) == 1:
                  row_min, col  = cell_list[0]    
-                 col_name = grid.GetCellValue(0, col)
+                 col_name =  grid.GetColLabelValue(int(col))#grid.GetCellValue(0, col)
+                 col_title = grid.GetCellValue(0, col)
                  label = create_label(col_name, row_min+1 , row_min+1)
-                 return  label,  col_name
+                 return  label,  col_title
             else:
                 temp_list = copy.deepcopy(cell_list)
                 temp_list.sort()
                 length = len(temp_list)
                 row_min, col  = temp_list[0]    
                 row_max, _  = temp_list[length-1]
-                col_name = grid.GetCellValue(0, col)
+                col_name =  grid.GetColLabelValue(int(col))#grid.GetCellValue(0, col)
+                col_title = grid.GetCellValue(0, col)
                 index = 0
                 for row in xrange(row_min, row_max +1):
                     if index > 0 and index < len(temp_list):
@@ -637,7 +642,7 @@ class Notebook(nb, PanelBase):
                     elif index == len(temp_list)-1:
                         label += create_label(col_name, None, row_max+1)
                     index += 1
-                return label, col_name
+                return label, col_title
     
     def on_close_page(self, event):
         """
