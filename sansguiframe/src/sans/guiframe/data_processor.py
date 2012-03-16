@@ -150,10 +150,11 @@ class GridPage(sheet.CSheet):
         Handler catching cell selection
         """
         flag = event.CmdDown() or event.ControlDown()
+        flag_shift =  event.ShiftDown()
         row, col = event.GetRow(), event.GetCol()
         cell = (row, col)
         event.Skip()
-        if not flag:
+        if not flag and not flag_shift:
             self.selected_cols = []
             self.selected_rows = []
             self.selected_cells = []
@@ -168,28 +169,60 @@ class GridPage(sheet.CSheet):
             label_row = 0
             self.axis_label = self.GetCellValue(label_row, col)
             self.selected_cols.append(col)
-        if cell not in self.selected_cells:
-            if row > 0:
-                self.selected_cells.append(cell)
-                self.selected_rows.append(row)
+        if flag_shift:
+            if not self.selected_rows:
+                min_r = 1
+            else:
+                min_r = min(self.selected_rows)
+            for row_s in range(min_r, row+1):
+                cel = (row_s, col)
+                if cel not in self.selected_cells:
+                    if row > 0:
+                        self.selected_cells.append(cel)
+                        self.selected_rows.append(row) 
+            for row_s in self.selected_rows: 
+                cel = (row_s, col)
+                if row_s > row:
+                    try:
+                        self.selected_cells.remove(cel)
+                    except:
+                        pass
+                    try:
+                        self.selected_rows.remove(row_s)
+                    except:
+                        pass
+        elif flag:
+            if cell not in self.selected_cells:
+                if row > 0 :
+                    self.selected_cells.append(cell)
+                    self.selected_rows.append(row)
+            else:
+                try:
+                    self.selected_cells.remove(cell)
+                except:
+                    pass
+                try:
+                    self.selected_rows.remove(row)
+                except:
+                    pass
         else:
-            if flag:
-                self.selected_cells.remove(cell)
+            self.selected_cells.append(cell)
+            self.selected_rows.append(row)
         self.axis_value = []
         for cell_row, cell_col in self.selected_cells:
             if cell_row > 0 and cell_row < self.max_row_touse:
                 self.axis_value.append(self.GetCellValue(cell_row, cell_col))
-
-                
+     
     def on_left_click(self, event):
         """
         Catch the left click on label mouse event
         """
         event.Skip()
         flag = event.CmdDown() or event.ControlDown()
+        
         col = event.GetCol()
         row = event.GetRow()
-        if not flag:
+        if not (flag):
             self.selected_cols = []
             self.selected_rows = []
             self.selected_cells = []
@@ -216,7 +249,9 @@ class GridPage(sheet.CSheet):
             self.selected_cols.append(col)
             self.axis_value = []
             for cell_row, cell_col in self.selected_cells:
-                self.axis_value.append(self.GetCellValue(cell_row, cell_col))
+                val = self.GetCellValue(cell_row, cell_col)
+                if not val:
+                    self.axis_value.append(self.GetCellValue(cell_row, cell_col))
             self.axis_label = self.GetCellValue(0, col)
             if not self.axis_label:
                 self.axis_label = " "
@@ -548,6 +583,7 @@ class Notebook(nb, PanelBase):
         """
         pos = self.GetSelection()
         grid = self.GetPage(pos)
+        #grid.selected_cols = [grid.GetSelectedRows()]#
         if len(grid.selected_cols) >= 1:
             col = grid.selected_cols[0]
             for c in grid.selected_cols:
@@ -598,7 +634,7 @@ class Notebook(nb, PanelBase):
         def create_label(col_name,  row_min=None, row_max=None):
             """
             """
-            result = ""
+            result = " "
             if row_min is not  None or row_max is not None:
                 if row_min is None:
                     result = str(row_max) + "]"
@@ -632,17 +668,30 @@ class Notebook(nb, PanelBase):
                             temp_list.insert(index, (None, None))
                             if index -1 >= 0:
                                 new_row, _ = temp_list[index-1]
-                                label += create_label(col_name, None, new_row +1)
+                                if not new_row==None and new_row!=' ' :
+                                    label += create_label(col_name, None, int(new_row) +1)
+                                else:
+                                    label += "]"
                                 label += ","
                             if index + 1 < len(temp_list):
                                 new_row, _ = temp_list[index + 1]
-                                label += create_label(col_name, new_row+1, None)
-                    if index == 0:
-                        label += create_label(col_name,  row_min+1, None)
-                    elif index == len(temp_list)-1:
-                        label += create_label(col_name, None, row_max+1)
+                                if not new_row==None:
+                                    label += create_label(col_name, int(new_row)+1, None)
+                    if row_min != None and row_max != None:
+                        if index == 0:
+                            label += create_label(col_name,  int(row_min)+1, None)
+                        elif index == len(temp_list)-1:
+                            label += create_label(col_name, None, int(row_max)+1)
                     index += 1
-                return label, col_title
+                # clean up the list
+                label_out = ''
+                for item in label.split(','):
+                    if item.split(":")[1]=="]":
+                        continue
+                    else:
+                        label_out += item + ","
+
+                return label_out, col_title
     
     def on_close_page(self, event):
         """
@@ -857,7 +906,7 @@ class GridPanel(SPanel):
                             if label.lower() in ["data", "chi2"]:
                                 if len(grid.selected_cells) != 1:
                                     msg = "2D View: Please select one data set"
-                                    msg += " at a time for View Results."
+                                    msg += " at a time for View Fit Results."
                                     wx.PostEvent(self.parent.parent, 
                                                  StatusEvent(status=msg,
                                                               info="error"))
@@ -873,7 +922,7 @@ class GridPanel(SPanel):
                                      NewPlotEvent(plot=new_plot, 
                                                 group_id=str(new_plot.group_id),
                                                 title=title))  
-                        msg = "Plotting the View Results  completed!"
+                        msg = "Plotting the View Fit Results  completed!"
                         wx.PostEvent( self.parent.parent, 
                                       StatusEvent(status=msg))  
                 else:
@@ -992,7 +1041,7 @@ class GridPanel(SPanel):
                             id=self.y_axis_add.GetId())
         self.x_axis_unit = wx.TextCtrl(self, -1)
         self.y_axis_unit = wx.TextCtrl(self, -1)
-        self.view_button = wx.Button(self, -1, "View Results")
+        self.view_button = wx.Button(self, -1, "View Fits")
         view_tip = "Highlight the data set or the Chi2 column first."
         self.view_button.SetToolTipString(view_tip)
         wx.EVT_BUTTON(self, self.view_button.GetId(), self.on_view)
