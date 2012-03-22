@@ -1974,13 +1974,19 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param list: contains item to fill the combox
             item must model class
         """
+        mlist = []
         for models in list:
             model= models()
             name = model.__class__.__name__
             if models.__name__!="NoStructure":
                 if hasattr(model, "name"):
                     name = model.name
-                combobox.Append(name,models)
+                mlist.append( (name, models) )
+                
+        # Sort the models
+        mlist_sorted = sorted(mlist)
+        for item in mlist_sorted:
+            combobox.Append(item[0],item[1])
         return 0
     
     def _onQrangeEnter(self, event):
