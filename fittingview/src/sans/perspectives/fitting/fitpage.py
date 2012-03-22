@@ -154,7 +154,6 @@ class FitPage(BasicPage):
         When fit is complete ,reset the fit button label.
         """
         self.btFit.SetLabel("Fit")
-        self.bind_fit_button()
         
     def _is_2D(self):
         """
@@ -1084,6 +1083,9 @@ class FitPage(BasicPage):
         """
         Allow to fit
         """
+        if self.fit_started:
+            self._StopFit()
+            
         if event != None:
             event.Skip() 
         if len(self.parent._manager.fit_thread_list)>0 and\
@@ -1144,8 +1146,8 @@ class FitPage(BasicPage):
 
         #single fit 
         self._manager.onFit(uid=self.uid)
+        self.fit_started = True
         self.btFit.SetLabel("Stop")
-        self.bind_fit_button()
            
     def get_weight_flag(self):
         """
