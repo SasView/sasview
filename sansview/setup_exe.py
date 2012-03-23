@@ -55,7 +55,7 @@ try:
     for p in win32com.__path__[1:]:
         modulefinder.AddPackagePath(win32_folder, p)
     for extra in ["win32com.shell", "win32com.adsi", "win32com.axcontrol",
-                    "win32com.axscript", "win32com.bits", "win32com.ifilter",
+                    "win32com.bits", "win32com.ifilter",
                     "win32com.internet", "win32com.mapi", "win32com.propsys",
                     "win32com.taskscheduler"]:
         
