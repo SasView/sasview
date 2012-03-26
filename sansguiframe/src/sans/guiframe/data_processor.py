@@ -857,6 +857,14 @@ class GridPanel(SPanel):
             wx.PostEvent(self.parent.parent, 
                              StatusEvent(status=msg, info="error")) 
             return
+        elif len(grid.selected_cells) > 20:
+            msg = "Too many data (> 20) to plot..."
+            msg += "\n Please select no more than 20 data."
+            dial = wx.MessageDialog(self, msg, 'Plotting', wx.OK)
+            wx.PostEvent(self.parent.parent, 
+                             StatusEvent(status=msg, info="error")) 
+            return
+
         for cell in grid.selected_cells:
             row, col = cell
             label_row = 0
