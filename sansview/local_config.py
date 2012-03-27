@@ -11,8 +11,8 @@ import logging
 __appname__ = "SansView"
 __version__ = sans.sansview.__version__
 __build__ = sans.sansview.__build__
-__download_page__ = 'http://danse.chem.utk.edu'
-__update_URL__ = 'http://danse.chem.utk.edu/sansview_version.php'
+__download_page__ = 'https://sourceforge.net/projects/sansviewproject/files/'
+__update_URL__ = 'http://sansviewproject.svn.sourceforge.net/viewvc/sansviewproject/trunk/sansview.latestversion'
 
 
 # Debug message flag
