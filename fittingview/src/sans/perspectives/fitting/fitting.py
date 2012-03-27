@@ -278,27 +278,12 @@ class Plugin(PluginBase):
         model_list = []
         model_manager = models.ModelManager()
         model_list = model_manager.get_model_name_list()
-
-        textdial = TextDialog(None, -1, 'Easy Sum(p1, p2)', model_list)
+        plug_dir = models.find_plugins_dir()
+        textdial = TextDialog(None, self, -1, 'Easy Sum(p1, p2)', 
+                              model_list, plug_dir)
         self.put_icon(textdial)
-        if textdial.ShowModal() == wx.ID_OK:
-            try:
-                label = textdial.getText()
-                plug_dir = models.find_plugins_dir()
-                fname = os.path.join(plug_dir, "easy_sum_of_p1_p2.py")
-                name1 = label[0]
-                name2 = label[1]
-                textdial.write_string(fname, name1, name2)
-                textdial.compile_file(fname)
-                self.update_custom_combo()
-            except:
-                raise
-                if self.parent != None:
-                    from sans.guiframe.events import StatusEvent 
-                    msg= "Easy Custom Sum: Error occurred..."
-                    wx.PostEvent(self.parent, StatusEvent(status = msg ))
-                else:
-                    raise
+        dial = textdial.ShowModal()
+
         textdial.Destroy()
     
     def make_new_model(self, event):

@@ -18,12 +18,12 @@ from wx.py.editwindow import EditWindow
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
     PNL_WIDTH = 460
-    PNL_HITE = 210
+    PNL_HITE = 300
 else:
     FONT_VARIANT = 1
     PNL_WIDTH = 500
-    PNL_HITE = 250
-
+    PNL_HITE = 370
+M_NAME = 'SumModel'
 EDITOR_WIDTH = 800
 EDITOR_HEIGTH = 700
 PANEL_WIDTH = 500
@@ -56,23 +56,64 @@ class TextDialog(wx.Dialog):
     """
     Dialog for easy custom sum models  
     """
-    def __init__(self, parent=None, id=None, title='', model_list=[]):
+    def __init__(self, parent=None, base=None, id=None, title='', model_list=[], plugin_dir=None):
         """
         Dialog window popup when selecting 'Easy Custom Sum' on the menu
         """
         wx.Dialog.__init__(self, parent=parent, id=id, 
                            title=title, size=(PNL_WIDTH, PNL_HITE))
-        self.parent = parent
+        self.parent = base
         #Font
         self.SetWindowVariant(variant=FONT_VARIANT)
         # default
+        self.font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
+        self.font.SetPointSize(10)
+        self.overwrite_name = False
+        self.plugin_dir = plugin_dir
         self.model_list = model_list
         self.model1_string = "SphereModel"
         self.model2_string = "CylinderModel"
         self._build_sizer()
         self.model1_name = str(self.model1.GetValue())
         self.model2_name = str(self.model2.GetValue())
+        self.good_name = True
         
+    def _layout_name(self):
+        """
+        Do the layout for file/function name related widgets
+        """
+        self.name_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.name_hsizer = wx.BoxSizer(wx.HORIZONTAL)
+        #title name [string]
+        name_txt = wx.StaticText(self, -1, 'SumFunction Name : ')  
+        self.name_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH*3/5, -1)) 
+        self.name_tcl.Bind(wx.EVT_TEXT_ENTER, self.on_change_name)
+        self.name_tcl.SetValue('')
+        self.name_tcl.SetFont(self.font)
+        hint_name = "Unique Sum Model Function Name."
+        self.name_tcl.SetToolTipString(hint_name)
+        self.name_hsizer.AddMany([(name_txt, 0, wx.LEFT|wx.TOP, 10),
+                            (self.name_tcl, 0, wx.RIGHT|wx.TOP|wx.BOTTOM, 10)])
+        self.name_sizer.AddMany([(self.name_hsizer, 0, 
+                                        wx.LEFT|wx.TOP, 10)])
+        
+        
+    def _layout_description(self):
+        """
+        Do the layout for description related widgets
+        """
+        self.desc_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        #title name [string]
+        desc_txt = wx.StaticText(self, -1, 'Description (optional) : ')  
+        self.desc_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH*3/5, -1)) 
+        self.desc_tcl.SetValue('')
+        #self.name_tcl.SetFont(self.font)
+        hint_desc = "Write a short description of the sum model function."
+        self.desc_tcl.SetToolTipString(hint_desc)
+        self.desc_sizer.AddMany([(desc_txt, 0, wx.LEFT|wx.TOP, 10),
+                                       (self.desc_tcl, 0, 
+                                        wx.RIGHT|wx.TOP|wx.BOTTOM, 10)])     
+  
     def _build_sizer(self):
         """
         Build gui
@@ -80,6 +121,10 @@ class TextDialog(wx.Dialog):
         _BOX_WIDTH = 195 # combobox width
         vbox  = wx.BoxSizer(wx.VERTICAL)
         sizer = wx.GridBagSizer(1, 3)
+        self._layout_name()
+        self._layout_description()
+        
+        
         sum_description= wx.StaticBox(self, -1, 'Select', 
                                        size=(PNL_WIDTH-30, 70))
         sum_box = wx.StaticBoxSizer(sum_description, wx.VERTICAL)
@@ -98,13 +143,16 @@ class TextDialog(wx.Dialog):
         
          # Buttons on the bottom
         self.static_line_1 = wx.StaticLine(self, -1)
-        self.okButton = wx.Button(self,wx.ID_OK, 'OK', size=(_BOX_WIDTH/2, 25))
-        self.closeButton = wx.Button(self,wx.ID_CANCEL, 'Cancel', 
+        self.okButton = wx.Button(self,wx.ID_OK, 'Apply', size=(_BOX_WIDTH/2, 25))
+        self.okButton.Bind(wx.EVT_BUTTON, self.check_name)
+        self.closeButton = wx.Button(self,wx.ID_CANCEL, 'Close', 
                                      size=(_BOX_WIDTH/2, 25))
         # Intro
         explanation  = "  custom model = scale_factor * (model1 + model2)\n"
-        explanation  += "  Note: This will overwrite the previous sum model.\n"
+        #explanation  += "  Note: This will overwrite the previous sum model.\n"
         model_string = " Model%s (p%s):"
+        vbox.Add(self.name_hsizer)
+        vbox.Add(self.desc_sizer)
         vbox.Add(sizer)
         ix = 0
         iy = 1
@@ -134,7 +182,65 @@ class TextDialog(wx.Dialog):
         vbox.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
         self.SetSizer(vbox)
         self.Centre()
-                 
+        
+    def on_change_name(self, event=None):
+        """
+        Change name
+        """
+        if event is not None:
+            event.Skip()
+        self.name_tcl.SetBackgroundColour('white')
+        self.Refresh()
+    
+    def check_name(self, event=None):
+        """
+        Check name if exist already
+        """
+        self.on_change_name(None)
+        list_fnames = os.listdir(self.plugin_dir)
+
+        # function/file name
+        title = self.name_tcl.GetValue().lstrip().rstrip()
+        if title == '':
+            title = M_NAME
+        self.name = title
+        t_fname = title + '.py'
+        if not self.overwrite_name:
+            if t_fname in list_fnames and title != M_NAME:
+                self.name_tcl.SetBackgroundColour('pink')
+                self.good_name = False
+                info = 'Error'
+                msg = "Name exists already."
+                wx.MessageBox(msg, info)  
+                return self.good_name
+        self.fname = os.path.join(self.plugin_dir, t_fname)
+        self._notes = "SumModel function name set "
+        self._notes += "to %s. \n" % str(title)
+        self.good_name = True
+        self.on_apply(self.fname)
+        return self.good_name
+    
+    def on_apply(self, path):
+        """
+        On Apply
+        """
+        try:
+            label = self.getText()
+            fname = path
+            name1 = label[0]
+            name2 = label[1]
+            self.write_string(fname, name1, name2)
+            self.compile_file(fname)
+            self.parent.update_custom_combo()
+        except:
+            raise
+            if self.parent.parent != None:
+                from sans.guiframe.events import StatusEvent 
+                msg= "Easy Custom Sum: Error occurred..."
+                wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+            else:
+                raise
+                  
     def _set_model_list(self):
         """
         Set the list of models
@@ -175,8 +281,16 @@ class TextDialog(wx.Dialog):
         """
         Write and Save file
         """
+        self.fname = fname  
+        description = self.desc_tcl.GetValue().lstrip().rstrip()
+        if description == '':
+            description = name1 + "+" + name2
+        name = self.name_tcl.GetValue().lstrip().rstrip()
+        if name == '':
+            name = M_NAME
+        path = self.fname
         try:
-            out_f =  open(fname,'w')
+            out_f =  open(path,'w')
         except :
             raise
         lines = SUM_TEMPLATE.split('\n')
@@ -185,14 +299,21 @@ class TextDialog(wx.Dialog):
                 out_f.write(line % (name1, name1) + "\n")
             elif line.count("import %s as P2"):
                 out_f.write(line % (name2, name2) + "\n")
+            elif line.count("self.description = '%s'"):
+                out_f.write(line % description + "\n")
+            elif line.count("self.name = '%s'"):
+                out_f.write(line % name + "\n")
             else:
                 out_f.write(line + "\n")
-        out_f.close() 
+        out_f.close()
+        #else:
+        #    msg = "Name exists already."
         
     def compile_file(self, path):
         """
         Compile the file in the path
         """
+        path = self.fname
         _compileFile(path)
         
     def delete_file(self, path):
@@ -219,7 +340,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.font.SetPointSize(10)
         self.reader = None
         self.name = 'untitled'
-        self.overwrite_name = True
+        self.overwrite_name = False
         self.is_2d = False
         self.fname = None
         self.param_strings = ''
@@ -252,9 +373,10 @@ class EditorPanel(wx.ScrolledWindow):
         #title name [string]
         name_txt = wx.StaticText(self, -1, 'Function Name : ')  
         overwrite_cb = wx.CheckBox(self, -1, "Overwrite?", (10, 10))
-        overwrite_cb.SetValue(True)
+        overwrite_cb.SetValue(False)
         overwrite_cb.SetToolTipString("Overwrite it if already exists?")
         wx.EVT_CHECKBOX(self, overwrite_cb.GetId(), self.on_over_cb)
+        #overwrite_cb.Show(False)
         self.name_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH*3/5, -1)) 
         self.name_tcl.Bind(wx.EVT_TEXT_ENTER, self.on_change_name)
         self.name_tcl.SetValue('MyFunction')
@@ -694,11 +816,14 @@ class Model(Model1DPlugin):
         p_model1 = P1()
         p_model2 = P2()
         ## Setting  model name model description
-        self.description=""
-        self.name = self._get_name(p_model1.name, p_model2.name)
-        self.description = p_model1.name
-        self.description += p_model2.name
-        self.fill_description(p_model1, p_model2)
+        self.description = '%s'
+        self.name = '%s'
+        if self.name.rstrip().lstrip() == '':
+            self.name = self._get_name(p_model1.name, p_model2.name)
+        if self.description.rstrip().lstrip() == '':
+            self.description = p_model1.name
+            self.description += p_model2.name
+            self.fill_description(p_model1, p_model2)
 
         ## Define parameters
         self.params = {}
