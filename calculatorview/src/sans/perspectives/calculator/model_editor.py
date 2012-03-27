@@ -212,10 +212,10 @@ class TextDialog(wx.Dialog):
                 info = 'Error'
                 msg = "Name exists already."
                 wx.MessageBox(msg, info)  
+                self._notes = msg
                 return self.good_name
         self.fname = os.path.join(self.plugin_dir, t_fname)
-        self._notes = "SumModel function name set "
-        self._notes += "to %s. \n" % str(title)
+        self._notes = "SumModel function (%s) has been set. \n" % str(title)
         self.good_name = True
         self.on_apply(self.fname)
         return self.good_name
@@ -232,14 +232,17 @@ class TextDialog(wx.Dialog):
             self.write_string(fname, name1, name2)
             self.compile_file(fname)
             self.parent.update_custom_combo()
+            msg = self._notes
+            info = 'Infor'
         except:
+            msg= "Easy Custom Sum: Error occurred..."
+            info = 'Error'
+        if self.parent.parent != None:
+            from sans.guiframe.events import StatusEvent 
+            wx.PostEvent(self.parent.parent, StatusEvent(status = msg, 
+                                                      info=info))
+        else:
             raise
-            if self.parent.parent != None:
-                from sans.guiframe.events import StatusEvent 
-                msg= "Easy Custom Sum: Error occurred..."
-                wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-            else:
-                raise
                   
     def _set_model_list(self):
         """
