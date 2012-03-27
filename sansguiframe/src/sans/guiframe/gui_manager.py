@@ -17,12 +17,12 @@ import sys
 import xml
 import time
 import py_compile
-# Try to find a local config
 import imp
 import warnings
+import re
 warnings.simplefilter("ignore")
 import logging
-
+import urllib2
 
 from sans.guiframe.events import EVT_STATUS
 from sans.guiframe.events import EVT_APPEND_BOOKMARK
@@ -306,8 +306,6 @@ class ViewerFrame(wx.Frame):
         self.batch_frame.Hide()
         self.on_batch_selection(event=None)
         self.add_icon()
-        # Check for update
-        #self._check_update(None)
         # Register the close event so it calls our own method
         wx.EVT_CLOSE(self, self.WindowClose)
         # Register to status events
@@ -675,8 +673,7 @@ class ViewerFrame(wx.Frame):
         self.set_custom_default_perspective()
         # Set up extra custom tool menu
         self._setup_extra_custom()
-        #self.Show(True)
-        #self._check_update(None)
+        self._check_update(None)
     
     def _setup_extra_custom(self):  
         """
@@ -1245,14 +1242,11 @@ class ViewerFrame(wx.Frame):
             self._help_menu.Append(id,'&About', 'Software information')
             wx.EVT_MENU(self, id, self._onAbout)
         
-        # Checking for updates needs major refactoring to work with py2exe
-        # We need to make sure it doesn't hang the application if the server
-        # is not up. We also need to make sure there's a proper executable to
-        # run if we spawn a new background process.
-        #id = wx.NewId()
-        #self._help_menu.Append(id,'&Check for update', 
-        # 'Check for the latest version of %s' % config.__appname__)
-        #wx.EVT_MENU(self, id, self._check_update)
+        # Checking for updates
+        id = wx.NewId()
+        self._help_menu.Append(id,'&Check for update', 
+         'Check for the latest version of %s' % config.__appname__)
+        wx.EVT_MENU(self, id, self._check_update)
         self._menubar.Append(self._help_menu, '&Help')
             
     def _add_menu_view(self):
@@ -2110,13 +2104,17 @@ class ViewerFrame(wx.Frame):
         A thread is started for the connecting with the server. The thread calls
         a call-back method when the current version number has been obtained.
         """
-        
-        if hasattr(config, "__update_URL__"):
-            import version
-            checker = version.VersionThread2(config.__update_URL__,
-                                            self._process_version,
-                                            baggage=event==None)
-            checker.start()  
+        try:
+            f=urllib2.urlopen(config.__update_URL__, 
+                              timeout=1.0)
+            content=f.read()
+        except:
+            content = "0.0.0"
+       
+        version = content.strip()
+        if len(re.findall('\d+\.\d+\.\d+$', version)) < 0:
+            content = "0.0.0"
+        self._process_version(content, standalone=event==None)
     
     def _process_version(self, version, standalone=True):
         """
@@ -2131,13 +2129,18 @@ class ViewerFrame(wx.Frame):
            
         """
         try:
-            if cmp(version, config.__version__) > 0:
-                msg = "Version %s is available! See the Help " % str(version)
-                msg += "menu to download it." 
+            if version == "0.0.0":
+                msg = "Could not connect to the application server."
+                msg += " Please try again later."
                 self.SetStatusText(msg)
+            elif cmp(version, config.__version__) > 0:
+                msg = "Version %s is available! " % str(version)
                 if not standalone:
                     import webbrowser
                     webbrowser.open(config.__download_page__)
+                else:
+                    msg +=  "See the help menu to download it." 
+                self.SetStatusText(msg)
             else:
                 if not standalone:
                     msg = "You have the latest version"
