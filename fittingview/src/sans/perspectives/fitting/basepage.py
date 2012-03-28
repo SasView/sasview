@@ -3004,6 +3004,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         content = ''
         # go through the str params
         for item in param: 
+            # copy only the params shown
+            if not item[2].IsShown():
+                continue
             disfunc = ''
             try:
                 if item[7].__class__.__name__ == 'ComboBox':

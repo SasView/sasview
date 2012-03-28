@@ -1474,7 +1474,15 @@ class Plugin(PluginBase):
         
         wx.PostEvent(self.parent, StatusEvent(status=msg, error="error",
                                                               type="stop"))
-        wx.CallAfter(self.parent.on_set_batch_result,batch_outputs, 
+        # Remove parameters that are not shown
+        cpage = self.fit_panel.get_page_by_id(uid)
+        tbatch_outputs = {}
+        shownkeystr = cpage.get_copy_params()
+        for key in batch_outputs.keys():
+            if key in ["Chi2", "Data"] or shownkeystr.count(key)>0:
+                tbatch_outputs[key] = batch_outputs[key]
+                
+        wx.CallAfter(self.parent.on_set_batch_result,tbatch_outputs, 
                                             batch_inputs,
                                            self.sub_menu)
         
