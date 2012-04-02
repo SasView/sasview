@@ -2941,13 +2941,15 @@ class BasicPage(ScrolledPanel, PanelBase):
             frame.Show(True)
             frame.rhelp.ScrollToAnchor(name)
         else:
-           msg= "Model does not contains an available description "
-           msg +="Please try searching in the Help window"
-           wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))  
+           #msg= "Sorry, no information is available for this model"
+           #wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))  
            if self.model != None:
                frame.Destroy() 
                msg = 'Model description:\n'
-               msg += self.model.description + '\n'
+               if str(self.model.description).rstrip().lstrip() == '':
+                   msg += "Sorry, no information is available for this model.\n"
+               else:
+                   msg += self.model.description + '\n'
                info = "Info"
                wx.MessageBox(msg, info)
            else:
