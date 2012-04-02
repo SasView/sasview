@@ -894,8 +894,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.struct_rbutton = self.struct_rbutton.GetValue()
         self.state.plugin_rbutton = self.plugin_rbutton.GetValue()
         #model combobox
-        self.state.structurebox = self.structurebox.GetSelection()
-        self.state.formfactorbox = self.formfactorbox.GetSelection()
+        self.state.structurebox = self.structurebox.GetValue()#.GetSelection()
+        self.state.formfactorbox = self.formfactorbox.GetValue()#.GetSelection()
         
         self.state.enable2D = copy.deepcopy(self.enable2D)
         self.state.values= copy.deepcopy(self.values)
@@ -1059,8 +1059,30 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## fill model combobox
         self._show_combox_helper()
         #select the current model
-        self.formfactorbox.Select(int(state.formfactorcombobox))
-        self.structurebox.SetSelection(state.structurecombobox )
+        try:
+            # to support older version
+            formfactor_pos = int(state.formfactorcombobox)
+        except:
+            formfactor_pos = 0
+            for ind_form in range(self.formfactorbox.GetCount()):
+                if self.formfactorbox.GetString(ind_form).count(state.formfactorcombobox)>0:
+                    formfactor_pos = int(ind_form)
+                    break
+            
+        self.formfactorbox.Select(formfactor_pos)
+        
+        try:
+            # to support older version
+            structfactor_pos = int(state.structurecombobox)
+        except:
+            structfactor_pos = 0
+            for ind_struct in range(self.structurebox.GetCount()):
+                if self.structurebox.GetString(ind_struct).count(state.structurecombobox)>0:
+                    structfactor_pos = int(ind_struct)
+                    break
+                
+        self.structurebox.SetSelection(structfactor_pos)
+        
         if state.multi_factor != None:
             self.multifactorbox.SetSelection(state.multi_factor)
             
@@ -1205,8 +1227,30 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## fill model combobox
         self._show_combox_helper()
         #select the current model
-        self.formfactorbox.Select(int(state.formfactorcombobox))
-        self.structurebox.SetSelection(state.structurecombobox )
+        try:
+            # to support older version
+            formfactor_pos = int(state.formfactorcombobox)
+        except:
+            formfactor_pos = 0
+            for ind_form in range(self.formfactorbox.GetCount()):
+                if self.formfactorbox.GetString(ind_form).count(state.formfactorcombobox)>0:
+                    formfactor_pos = int(ind_form)
+                    break
+            
+        self.formfactorbox.Select(formfactor_pos)
+        
+        try:
+            # to support older version
+            structfactor_pos = int(state.structurecombobox)
+        except:
+            structfactor_pos = 0
+            for ind_struct in range(self.structurebox.GetCount()):
+                if self.structurebox.GetString(ind_struct).count(state.structurecombobox)>0:
+                    structfactor_pos = int(ind_struct)
+                    break
+            
+        self.structurebox.SetSelection(structfactor_pos)
+
         if state.multi_factor != None:
             self.multifactorbox.SetSelection(state.multi_factor)
 
@@ -1397,8 +1441,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.shape_indep_rbutton = self.shape_indep_rbutton.GetValue()
         self.state.struct_rbutton = self.struct_rbutton.GetValue()
         self.state.plugin_rbutton = self.plugin_rbutton.GetValue()
-        self.state.structurebox= self.structurebox.GetCurrentSelection()
-        self.state.formfactorbox = self.formfactorbox.GetCurrentSelection()
+        self.state.structurebox= self.structurebox.GetValue()#.GetCurrentSelection()
+        self.state.formfactorbox = self.formfactorbox.GetValue()#.GetCurrentSelection()
        
         #self._undo.Enable(True)
         ## post state to fit panel

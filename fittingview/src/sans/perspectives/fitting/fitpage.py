@@ -1250,8 +1250,8 @@ class FitPage(BasicPage):
         self.state.pinhole_smearer = self.pinhole_smearer.GetValue()
         self.state.slit_smearer = self.slit_smearer.GetValue()
     
-        self.state.structurecombobox = self.structurebox.GetCurrentSelection()
-        self.state.formfactorcombobox = self.formfactorbox.GetCurrentSelection()
+        self.state.structurecombobox = self.structurebox.GetValue()#.GetCurrentSelection()
+        self.state.formfactorcombobox = self.formfactorbox.GetValue()#.GetCurrentSelection()
         self.enable_fit_button()
         if self.model != None:
             self.rename_model()
@@ -1262,7 +1262,7 @@ class FitPage(BasicPage):
                 if is_data:
                     self._set_bookmark_flag(True)
                     self._keep.Enable(True)
-            #self._set_save_flag(True)
+                    self._set_save_flag(True)
             # Reset smearer, model and data
             if not copy_flag:
                 self.disable_smearer.SetValue(True)
