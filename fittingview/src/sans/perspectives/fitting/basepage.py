@@ -643,11 +643,14 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.Show(False)
         name = menu.GetLabel(event.GetId())
         self._on_select_model_helper()
+        if self.model != None:
+            self.m_name = self.model.name
         if name in self.saved_states.keys():
             previous_state = self.saved_states[name]
             ## reset state of checkbox,textcrtl  and  regular parameters value
             
             self.reset_page(previous_state)   
+        self.state.m_name = self.m_name
         self.Show(True)
                
     def on_preview(self, event):
@@ -1258,6 +1261,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.engine_type = state.engine_type
         #draw the pnael according to the new model parameter 
         self._on_select_model(event=None)
+            
         # take care of 2D button
         if data == None and self.model_view.IsEnabled():
             if self.enable2D:
@@ -1327,6 +1331,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         
         ## set the value of the current state to the state given as parameter
         self.state = state.clone() 
+        self.state.m_name = self.m_name
     
     def _reset_page_disp_helper(self, state):
         """

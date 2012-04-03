@@ -171,6 +171,7 @@ class PageState(object):
         self.enable2D = False
         # model on which the fit would be performed
         self.model = model
+        self.m_name = None
         #list of process done to model
         self.process = []
         #fit page manager 
@@ -369,7 +370,10 @@ class PageState(object):
         rep += "data's name : %s\n"%self.data_name
         rep += "data's id : %s\n"%self.data_id
         if self.model != None:
-            rep += "model name : %s\n"% self.model.__class__.__name__
+            m_name = self.model.__class__.__name__
+            if m_name == 'Model':
+                m_name = self.m_name
+            rep += "model name : %s\n"% m_name
         else:
             rep += "model name : None\n"
         rep += "model type (form factor) selected: %s\n"%self.shape_rbutton 

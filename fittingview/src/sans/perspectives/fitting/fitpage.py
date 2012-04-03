@@ -46,6 +46,7 @@ class FitPage(BasicPage):
         self.is_2D = None
         self.fit_started = False
         self.weightbt_string = None
+        self.m_name = None
         # get smear info from data
         self._get_smear_info()
         self._fill_model_sizer( self.sizer1)
@@ -1254,6 +1255,8 @@ class FitPage(BasicPage):
         self.state.formfactorcombobox = self.formfactorbox.GetValue()#.GetCurrentSelection()
         self.enable_fit_button()
         if self.model != None:
+            self.m_name = self.model.name
+            self.state.m_name = self.m_name
             self.rename_model()
             self._set_copy_flag(True)
             self._set_paste_flag(True)
