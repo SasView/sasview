@@ -32,7 +32,7 @@ if sys.platform == "win32":
     ISMAC = False
 elif sys.platform == "darwin":
     ISMAC = True
-    
+ISPDF = True   
 
         
 class ReportDialog(wx.Dialog):
@@ -57,7 +57,7 @@ class ReportDialog(wx.Dialog):
         # font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         # check if tit is MAC
-        self.is_mac = ISMAC
+        self.is_pdf = ISPDF
         # report string
         self.report_list = list
         # number of images of plot
@@ -138,7 +138,7 @@ class ReportDialog(wx.Dialog):
         Save
         """
         # pdf supporting only on MAC, not on exe
-        if self.is_mac:
+        if self.is_pdf:
             wild_card = ' PDF files (*.pdf)|*.pdf|'
             ind_cor = 0 
         else:

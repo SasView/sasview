@@ -286,7 +286,19 @@ if py26MSdll_x86 != None:
 
 # packages
 #
-packages = ['matplotlib', 'scipy', 'pytz', 'encodings', 'comtypes', 'win32com']
+packages = ['matplotlib', 'scipy', 'pytz', 'encodings', 'comtypes', 'win32com', 'ho.pisa']
+packages.extend([
+'reportlab',
+'reportlab.graphics.charts',
+'reportlab.graphics.samples',
+'reportlab.graphics.widgets',
+'reportlab.graphics.barcode',
+'reportlab.graphics',
+'reportlab.lib',
+'reportlab.pdfbase',
+'reportlab.pdfgen',
+'reportlab.platypus',
+])
 includes = ['site']
 
 # Exclude packages that are not needed but are often found on build systems
