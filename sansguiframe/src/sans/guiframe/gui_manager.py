@@ -2191,17 +2191,27 @@ class ViewerFrame(wx.Frame):
                     #self.SetTopWindow(dialog)
                     dialog.Show(True) 
                 except:
-                    msg = "This feature requires 'Adobe pdf Reader'\n"
-                    msg += "Please install it first (Free)..."
-                    wx.MessageBox(msg, 'Error')
+                    try:
+                        #in case when the pdf default set other than acrobat
+                        import ho.pisa as pisa
+                        pisa.startViewer(path)
+                    except:
+                        msg = "This feature requires 'PDF Viewer'\n"
+                        msg += "Please install it first (Free)..."
+                        wx.MessageBox(msg, 'Error')
             else:
                 try:
                     command = "open '%s'" % path
                     os.system(command)
                 except:
-                    msg = "This feature requires 'Preview' Application\n"
-                    msg += "Please install it first..."
-                    wx.MessageBox(msg, 'Error')
+                    try:
+                        #in case when the pdf default set other than preview
+                        import ho.pisa as pisa
+                        pisa.startViewer(path)
+                    except:
+                        msg = "This feature requires 'Preview' Application\n"
+                        msg += "Please install it first..."
+                        wx.MessageBox(msg, 'Error')
 
                       
     def set_manager(self, manager):

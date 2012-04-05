@@ -30,6 +30,7 @@ else:
     PANEL_HEIGHT = 700
     FONT_VARIANT = 1
     ISMAC = True
+ISPDF = True
   
 class ReportDialog(wx.Dialog):
     """
@@ -54,7 +55,7 @@ class ReportDialog(wx.Dialog):
         self.SetWindowVariant(variant=FONT_VARIANT)
 
         # check if tit is MAC
-        self.is_mac = ISMAC
+        self.is_pdf = ISPDF
         
         # report string
         self.report_list = list
@@ -64,7 +65,7 @@ class ReportDialog(wx.Dialog):
         self._setup_layout()
         # wild card
         # pdf supporting only on MAC
-        if self.is_mac:
+        if self.is_pdf:
         	self.wild_card = ' PDF files (*.pdf)|*.pdf|'
         else:
         	self.wild_card = ''
@@ -141,7 +142,7 @@ class ReportDialog(wx.Dialog):
         fName = dlg.GetPath()
         ext_num = dlg.GetFilterIndex()  
         # index correction 
-        if not self.is_mac:
+        if not self.is_pdf:
         	ind_cor = 1 
         else:
         	ind_cor = 0 
