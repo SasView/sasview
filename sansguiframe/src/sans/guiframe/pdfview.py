@@ -6,6 +6,52 @@ import os
 if wx.Platform == '__WXMSW__':
     from wx.lib.pdfwin import PDFWindow
 
+from wx.lib.scrolledpanel import ScrolledPanel
+STYLE = wx.TE_MULTILINE|wx.TE_READONLY|wx.SUNKEN_BORDER|wx.HSCROLL
+
+class TextPanel(ScrolledPanel):
+    """
+    Panel that contains the text
+    """
+    def __init__(self, parent, text=None):
+        """
+        """
+        ScrolledPanel.__init__(self, parent, id=-1)
+        self.SetupScrolling()
+        self.parent = parent
+        self.text = text
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        self.textctl = wx.TextCtrl(self, -1, size=(-1, -1), style=STYLE)
+        self.textctl.SetValue(self.text)
+        sizer.Add(self.textctl, proportion=1, flag=wx.EXPAND)
+        self.SetSizer(sizer)
+        self.SetAutoLayout(True)
+        wx.EVT_CLOSE(self.parent, self.OnClose)
+                
+    def OnClose(self, event):
+        """
+        Close panel
+        """
+        self.parent.Destroy()
+        
+class TextFrame(wx.Frame):
+    """
+    Frame for PDF panel
+    """
+    def __init__(self, parent, id, title, text):
+        """
+        Init
+        
+        :param parent: parent panel/container
+        :param path: full path of the pdf file 
+        """
+        # Initialize the Frame object
+        wx.Frame.__init__(self, parent, id, title,
+                          wx.DefaultPosition, wx.Size(600, 830))
+        # make an instance of the class
+        TextPanel(self, text) 
+        self.SetFocus()
+        
 class PDFPanel(wx.Panel):
     """
     Panel that contains the pdf reader

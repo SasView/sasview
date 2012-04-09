@@ -325,13 +325,19 @@ class ViewerFrame(wx.Frame):
         
         list_children = self.GetChildren() 
         for frame in list_children:
-            if hasattr(frame, "IsIconized"):
-                if not frame.IsIconized():
-                    try:
-                        icon = self.GetIcon()
-                        frame.SetIcon(icon)
-                    except:
-                        pass
+            self.put_icon(frame)
+        
+    def put_icon(self, frame): 
+        """
+        Put icon on the tap of a panel
+        """
+        if hasattr(frame, "IsIconized"):
+            if not frame.IsIconized():
+                try:
+                    icon = self.GetIcon()
+                    frame.SetIcon(icon)
+                except:
+                    pass  
         
     def on_set_batch_result(self, data_outputs, data_inputs=None,
                              plugin_name=""):
@@ -2181,13 +2187,8 @@ class ViewerFrame(wx.Frame):
                     from sans.guiframe.pdfview import PDFFrame
                     
                     dialog = PDFFrame(None, -1, "Tutorial", path)
-                    if hasattr(dialog, "IsIconized"):
-                        if not dialog.IsIconized():
-                            try:
-                                icon = self.GetIcon()
-                                dialog.SetIcon(icon)
-                            except:
-                                pass   
+                    # put icon
+                    self.put_icon(frame)  
                     #self.SetTopWindow(dialog)
                     dialog.Show(True) 
                 except:
@@ -2564,7 +2565,48 @@ class ViewerFrame(wx.Frame):
                 else:
                     out.write("%g  %g\n" % (data.x[i], 
                                             data.y[i]))
-            out.close()                   
+            out.close()  
+                             
+    def show_data1d(self, data, name):
+        """
+        Show data dialog
+        """   
+        text = data.__str__() 
+        text += 'Data Min Max:\n'
+        text += 'X_min = %s:  X_max = %s\n'% (min(data.x), max(data.x))
+        text += 'Y_min = %s:  Y_max = %s\n'% (min(data.y), max(data.y))
+        if data.dy != None:
+            text += 'dY_min = %s:  dY_max = %s\n'% (min(data.dy), max(data.dy))
+        text += '\nData Points:\n'
+        x_st = "X"
+        for index in range(len(data.x)):
+            if data.dy != None:
+                dy_val = data.dy[index]
+            else:
+                dy_val = 0.0
+            if data.dx != None:
+                dx_val = data.dx[index]
+            else:
+                dx_val = 0.0
+            if data.dxl != None:
+                if index == 0: x_st = "Xl"
+                dx_val = data.dxl[index]
+            elif data.dxw != None:
+                if index == 0: x_st = "Xw"
+                dx_val = data.dxw[index]
+            
+            if index == 0:
+                text += "<index> \t<X> \t<Y> \t<dY> \t<d%s>\n"% x_st
+            text += "%s \t%s \t%s \t%s \t%s\n" % (index,
+                                            data.x[index], 
+                                            data.y[index],
+                                            dy_val,
+                                            dx_val)
+        from pdfview import TextFrame
+        frame = TextFrame(None, -1, "Data Info: %s"% data.name, text) 
+        # put icon
+        self.put_icon(frame) 
+        frame.Show(True) 
             
     def save_data2d(self, data, fname):    
         """
@@ -2608,7 +2650,56 @@ class ViewerFrame(wx.Frame):
             except:
                 pass    
         dlg.Destroy() 
-                     
+                             
+    def show_data2d(self, data, name):
+        """
+        Show data dialog
+        """   
+
+        wx.PostEvent(self, StatusEvent(status = "Gathering Data2D Info.", 
+                                       type = 'start' ))
+        text = data.__str__() 
+        text += 'Data Min Max:\n'
+        text += 'I_min = %s\n'% min(data.data)
+        text += 'I_max = %s\n\n'% max(data.data)
+        text += 'Data (First 2501) Points:\n'
+        text += 'Data columns include err(I).\n'
+        text += 'ASCII data starts here.\n'
+        text += "<index> \t<Qx> \t<Qy> \t<I> \t<dI> \t<dQparal> \t<dQperp>\n"
+        di_val = 0.0
+        dx_val = 0.0
+        dy_val = 0.0
+        #mask_val = True
+        len_data = len(data.qx_data)
+        for index in xrange(0, len_data):
+            x_val = data.qx_data[index]
+            y_val = data.qy_data[index]
+            i_val = data.data[index]
+            if data.err_data != None: di_val = data.err_data[index]
+            if data.dqx_data != None: dx_val = data.dqx_data[index]
+            if data.dqy_data != None: dy_val = data.dqy_data[index]
+            #if data.mask != None: mask_val = data.mask[index] 
+  
+            text += "%s \t%s \t%s \t%s \t%s \t%s \t%s\n" % (index,
+                                            x_val, 
+                                            y_val,
+                                            i_val,
+                                            di_val,
+                                            dx_val,
+                                            dy_val)
+            # Takes too long time for typical data2d: Break here
+            if index >= 2500:
+                text += ".............\n"
+                break
+
+        from pdfview import TextFrame
+        frame = TextFrame(None, -1, "Data Info: %s"% data.name, text) 
+        # put icon
+        self.put_icon(frame)
+        frame.Show(True) 
+        wx.PostEvent(self, StatusEvent(status = "Data2D Info Displayed", 
+                                       type = 'stop' ))
+                                  
     def set_current_perspective(self, perspective):
         """
         set the current active perspective 

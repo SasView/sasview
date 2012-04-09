@@ -317,6 +317,11 @@ class ModelPanel2D(ModelPanel1D):
         plot = self.data2D
         id = wx.NewId()
         name = plot.name
+        slicerpop.Append(id, "&Data Info" )
+        wx.EVT_MENU(self, id, self._onDataShow)
+
+        id = wx.NewId()
+        name = plot.name
         slicerpop.Append(id, "&Save as a File (DAT)" )
         self.action_ids[str(id)] = plot
         wx.EVT_MENU(self, id, self._onSave)
@@ -760,4 +765,22 @@ class ModelPanel2D(ModelPanel1D):
         if id in self.action_ids:         
             path = None
             self.parent.save_data2d(self.data2D, default_name)
+            
+    def _onDataShow(self, evt):
+        """
+        Show the data set in text
+        
+        :param evt: Menu event
+        
+        """
+        menu = evt.GetEventObject()
+        id = evt.GetId()
+        self.set_selected_from_menu(menu, id)
+        data = self.plots[self.graph.selected_plottable]
+        default_name = data.label
+        if default_name.count('.') > 0:
+            default_name = default_name.split('.')[0]
+        #default_name += "_out"
+        if self.parent != None:
+            self.parent.show_data2d(data, default_name)
         

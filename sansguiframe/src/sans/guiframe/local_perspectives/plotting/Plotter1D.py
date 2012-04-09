@@ -409,7 +409,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
                         wx.PostEvent(self.parent, StatusEvent(status=msg))
                         pass
                 plot_menu.AppendSeparator()
-    
+                
+            id = wx.NewId()
+            plot_menu.Append(id, "&DataInfo", name)
+            wx.EVT_MENU(self, id, self. _onDataShow)
             id = wx.NewId()
             plot_menu.Append(id, "&Save Points as a File", name)
             wx.EVT_MENU(self, id, self._onSave)
@@ -656,6 +659,25 @@ class ModelPanel1D(PlotPanel, PanelBase):
         if self.parent != None:
             self.parent.save_data1d(data, default_name)
 
+                       
+    def _onDataShow(self, evt):
+        """
+        Show the data set in text
+        
+        :param evt: Menu event
+        
+        """
+        menu = evt.GetEventObject()
+        id = evt.GetId()
+        self.set_selected_from_menu(menu, id)
+        data = self.plots[self.graph.selected_plottable]
+        default_name = data.label
+        if default_name.count('.') > 0:
+            default_name = default_name.split('.')[0]
+        #default_name += "_out"
+        if self.parent != None:
+            self.parent.show_data1d(data, default_name)
+            
     def _add_more_tool(self):
         """
         Add refresh, add/delete button in the tool bar

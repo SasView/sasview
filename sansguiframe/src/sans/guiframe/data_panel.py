@@ -434,6 +434,16 @@ class DataPanel(ScrolledPanel, PanelBase):
         panel = QucikPlotDialog(base=self, data=data, 
                                 dimension=dimension, id=wx.NewId())
         panel.ShowModal()    
+    
+    def on_data_info(self, event):
+        """
+        Data Info panel
+        """
+        data = self._get_data_selection(event)
+        if data.__class__.__name__ == "Data2D":
+            self.parent.show_data2d(data, data.name)
+        else:
+            self.parent.show_data1d(data, data.name)
         
     def on_save_as(self, event):
         """
@@ -464,6 +474,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.tree_ctrl.Bind(CT.EVT_TREE_ITEM_MENU, self.on_right_click_data)
         ## Create context menu for page
         self.data_menu = wx.Menu()
+        id = wx.NewId()
+        name = "Data Info"
+        msg = "Show Data Info"
+        self.data_menu.Append(id, name, msg)
+        wx.EVT_MENU(self, id, self.on_data_info)
+        
         id = wx.NewId()
         name = "Save As"
         msg = "Save Theory/Data as a file"
