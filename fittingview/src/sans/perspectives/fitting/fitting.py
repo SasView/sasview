@@ -1596,10 +1596,17 @@ class Plugin(PluginBase):
                     cpage = self.fit_panel.get_page_by_id(uid)
                     # Make sure we got all results 
                     #(CallAfter is important to MAC)
-                    wx.CallAfter(cpage.onsetValues, res.fitness, res.param_list, 
-                             pvec, stderr)
-                    index += 1
-                    cpage._on_fit_complete()
+                    try:
+                        #if res != None:
+                        wx.CallAfter(cpage.onsetValues, res.fitness, res.param_list, 
+                                     pvec, stderr)
+                        index += 1
+                        wx.CallAfter(cpage._on_fit_complete)
+                    except:
+                        msg = "Singular point: Fitting Error occured."
+                        wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
+                                                  type="stop"))
+                    
         except:
             msg = "Fit completed but Following"
             msg += " error occurred:%s" % sys.exc_value
