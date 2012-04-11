@@ -67,7 +67,7 @@ package ='sans.perspectives.pr'
 package_name ='Reference'
 
 if __name__ == "__main__":
-    genfiles(package, package_name, modules, dir='api/perspectives/pr')
+    genfiles(package, package_name, modules, dir='../../../sphinx-docs/api/sans/perspectives/pr')
 
     print "Sphinx: generate .rst files complete..."
     

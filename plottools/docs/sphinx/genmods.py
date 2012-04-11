@@ -71,5 +71,5 @@ package = 'danse.common.plottools'
 package_name = 'Reference'
 
 if __name__ == "__main__":
-    genfiles(package, package_name, modules, dir='api')
+    genfiles(package, package_name, modules, dir='../../../sphinx-docs/api/danse/common/plottools')
     print "Sphinx: generate .rst files complete..."

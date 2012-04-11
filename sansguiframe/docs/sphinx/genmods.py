@@ -83,7 +83,7 @@ if __name__ == "__main__":
     modules = create_module_tuple(path)
     package = 'sans.guiframe'
     package_name = 'Reference'
-    genfiles(package, package_name, modules, dir='api')
+    genfiles(package, package_name, modules, dir='../../../sphinx-docs/api/sans/guiframe')
     # build local plugin
     for f in os.listdir(path):
         if os.path.isdir(os.path.join(path, f)) and not f.startswith('.') \
@@ -99,7 +99,7 @@ if __name__ == "__main__":
                             p = os.path.join(path, f, tf)
                             package_name = 'Local Perspective: %s' % str(tf)
                             modules = create_module_tuple(p)
-                            dir = os.path.join("api", "local_perspectives", tf)
+                            dir = os.path.join("../../../sphinx-docs/api/sans/guiframe", "local_perspectives", tf)
                             genfiles(package, package_name, modules, dir=dir)
           
     print "Sphinx: generate .rst files complete..."

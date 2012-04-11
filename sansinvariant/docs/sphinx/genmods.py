@@ -66,5 +66,5 @@ package_name='Reference'
 #genfiles(package, package_name, modules)
 
 if __name__ == "__main__":
-    genfiles(package, package_name, modules, dir='api')
+    genfiles(package, package_name, modules, dir='../../../sphinx-docs/api/sans/invariant')
     print "Sphinx: generate .rst files complete..."

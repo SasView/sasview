@@ -65,7 +65,7 @@ package='sans.dataloader'
 package_name='Reference'
 
 if __name__ == "__main__":
-    genfiles(package, package_name, modules, dir='api')
+    genfiles(package, package_name, modules, dir='../../../sphinx-docs/api/sans/dataloader')
     modules = []
     path = os.path.abspath(os.path.dirname('../../src/sans/dataloader/readers/'))
     list = os.listdir(path)
@@ -76,5 +76,5 @@ if __name__ == "__main__":
          modules.append(module)
     package='sans.dataloader.readers'
     package_name='Readers'
-    genfiles(package, package_name, modules, dir='api/readers')
+    genfiles(package, package_name, modules, dir='../../../sphinx-docs/api/sans/dataloader/readers')
     print "Sphinx: generate .rst files complete..."

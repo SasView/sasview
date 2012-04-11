@@ -1,17 +1,11 @@
-.. sansmodels documentation master file, created by
-   sphinx-quickstart on Fri Jun 04 15:06:28 2010.
+.. DataLoader documentation master file, created by
+   sphinx-quickstart on Tue Jun 01 12:50:32 2010.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to sansmodels's documentation!
+SansView documentation
 ======================================
 
-Contents:
-
-.. toctree::
-   :maxdepth: 2
-
-   api/index.rst
 
 Indices and tables
 ==================
