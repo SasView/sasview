@@ -24,7 +24,8 @@
 # [5] S. Hansen and J. Skov Pedersen, J.Appl. Cryst (1991) 24, 541-548.
 #
 ## \subsection class Class Diagram:
-# The following shows a partial class diagram with the main attributes and methods of the invertor.
+# The following shows a partial class diagram with the main attributes
+# and methods of the invertor.
 #
 # \image html architecture.png
 #

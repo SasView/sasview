@@ -1,10 +1,10 @@
-
+"""
+    Invariant panel
+"""
 import wx
 import sys
 
-import numpy
 from sans.guiframe.utils import format_number
-from sans.guiframe.utils import check_float
 from invariant_widgets import OutputTextCtrl
 # Dimensions related to chart
 RECTANGLE_WIDTH  = 400.0  
@@ -414,9 +414,8 @@ class InvariantDetailsPanel(wx.Dialog):
             scale = float(percentage)
         except:
             scale = RECTANGLE_SCALE
-            self.warning_msg += "Receive an invalid scale for %s\n"
-            self.warning_msg += "check this value : %s\n"%(str(scale_name),
-                                                           str(percentage))
+            self.warning_msg += "Recieve an invalid scale for %s\n"
+            self.warning_msg += "check this value : %s\n" % str(percentage)
         return  scale
     
     def set_color_bar(self):
@@ -534,17 +533,3 @@ class InvariantDetailsPanel(wx.Dialog):
         gc.Scale(self.high_scale, 1.0)  
         gc.DrawPath(path)
         gc.PopState()
-
-
-if __name__ =="__main__":
-    app  = wx.App()
-    container = InvariantContainer()
-    container.qstar_total = 100.0
-    container.qstar = 50
-    container.qstar_low = None
-    container.qstar_high = "alina"
-    container.compute_percentage()
-   
-    dlg = InvariantDetailsPanel(qstar_container=container)
-    dlg.ShowModal()
-    app.MainLoop()
