@@ -38,14 +38,14 @@ from sans.dataloader.data_info import Aperture
 from lxml import etree
 import xml.dom.minidom
 _ZERO = 1e-16
-has_converter = True
+HAS_CONVERTER = True
 try:
     from data_util.nxsunit import Converter
 except:
-    has_converter = False
+    HAS_CONVERTER = False
 
 CANSAS_NS = "cansas1d/1.0"
-allow_all = True
+ALLOW_ALL = True
 
 def write_node(doc, parent, name, value, attr={}):
     """
@@ -123,7 +123,7 @@ class Reader:
                          "CanSAS 1D AVE files (*.ABSx)|*.ABSx"]
 
     ## List of allowed extensions
-    ext = ['.xml', '.XML','.avex', '.AVEx', '.absx', 'ABSx']  
+    ext = ['.xml', '.XML', '.avex', '.AVEx', '.absx', 'ABSx']  
     
     def __init__(self):
         ## List of errors
@@ -146,7 +146,7 @@ class Reader:
         if os.path.isfile(path):
             basename  = os.path.basename(path)
             root, extension = os.path.splitext(basename)
-            if allow_all or extension.lower() in self.ext:
+            if ALLOW_ALL or extension.lower() in self.ext:
                 try:
                     tree = etree.parse(path, parser=etree.ETCompatXMLParser())
                     # Check the format version number
@@ -435,75 +435,81 @@ class Reader:
                 
             if attr.has_key('unit') and \
                 attr['unit'].lower() != data_info.x_unit.lower():
-                if has_converter==True:
+                if HAS_CONVERTER == True:
                     try:
                         data_conv_q = Converter(attr['unit'])
                         _x = data_conv_q(_x, units=data_info.x_unit)
                     except:
                         msg =  "CanSAS reader: could not convert "
-                        msg += "Q unit [%s]; " 
-                        msg += "expecting [%s]\n  %s" % (attr['unit'], 
-                                  data_info.x_unit, sys.exc_value)
+                        msg += "Q unit [%s]; " % attr['unit'],
+                        msg += "expecting [%s]\n  %s" % (data_info.x_unit, 
+                                                         sys.exc_value)
                         raise ValueError, msg
                         
                 else:
-                    msg = "CanSAS reader: unrecognized Q unit [%s]; "
-                    msg += "expecting [%s]" % (attr['unit'], data_info.x_unit)
+                    msg = "CanSAS reader: unrecognized Q unit [%s]; "\
+                    % attr['unit']
+                    msg += "expecting [%s]" % data_info.x_unit
                     raise ValueError, msg
                         
             # Error in Q
             if attr_d.has_key('unit') and \
                 attr_d['unit'].lower() != data_info.x_unit.lower():
-                if has_converter==True:
+                if HAS_CONVERTER == True:
                     try:
                         data_conv_q = Converter(attr_d['unit'])
                         _dx = data_conv_q(_dx, units=data_info.x_unit)
                     except:
-                        msg = "CanSAS reader: could not convert dQ unit [%s];"
+                        msg = "CanSAS reader: could not convert dQ unit [%s]; "\
+                        % attr['unit']
                         msg += " expecting " 
-                        msg += "[%s]\n  %s" % (attr['unit'],
-                                                data_info.x_unit, sys.exc_value)
+                        msg += "[%s]\n  %s" % (data_info.x_unit, sys.exc_value)
                         raise ValueError, msg
                         
                 else:
-                    msg = "CanSAS reader: unrecognized dQ unit [%s]; "
-                    msg += "expecting [%s]" % (attr['unit'], data_info.x_unit)
+                    msg = "CanSAS reader: unrecognized dQ unit [%s]; "\
+                    % attr['unit']
+                    msg += "expecting [%s]" % data_info.x_unit
                     raise ValueError,  msg
                         
             # Slit length
             if attr_l.has_key('unit') and \
                 attr_l['unit'].lower() != data_info.x_unit.lower():
-                if has_converter == True:
+                if HAS_CONVERTER == True:
                     try:
                         data_conv_q = Converter(attr_l['unit'])
                         _dxl = data_conv_q(_dxl, units=data_info.x_unit)
                     except:
-                        msg = "CanSAS reader: could not convert dQl unit [%s];"
-                        msg += " expecting [%s]\n  %s" % (attr['unit'],
-                                             data_info.x_unit, sys.exc_value)
+                        msg = "CanSAS reader: could not convert dQl unit [%s];"\
+                        % attr['unit']
+                        msg += " expecting [%s]\n  %s" % (data_info.x_unit, 
+                                                          sys.exc_value)
                         raise ValueError, msg
                         
                 else:
-                    msg = "CanSAS reader: unrecognized dQl unit [%s];"
-                    msg += " expecting [%s]" % (attr['unit'], data_info.x_unit)
+                    msg = "CanSAS reader: unrecognized dQl unit [%s];"\
+                    % attr['unit']
+                    msg += " expecting [%s]" % data_info.x_unit
                     raise ValueError, msg
                         
             # Slit width
             if attr_w.has_key('unit') and \
             attr_w['unit'].lower() != data_info.x_unit.lower():
-                if has_converter == True:
+                if HAS_CONVERTER == True:
                     try:
                         data_conv_q = Converter(attr_w['unit'])
                         _dxw = data_conv_q(_dxw, units=data_info.x_unit)
                     except:
-                        msg = "CanSAS reader: could not convert dQw unit [%s];"
-                        msg += " expecting [%s]\n  %s" % (attr['unit'], 
-                                                data_info.x_unit, sys.exc_value)
+                        msg = "CanSAS reader: could not convert dQw unit [%s];"\
+                        % attr['unit']
+                        msg += " expecting [%s]\n  %s" % (data_info.x_unit, 
+                                                          sys.exc_value)
                         raise ValueError, msg
                         
                 else:
-                    msg = "CanSAS reader: unrecognized dQw unit [%s];"
-                    msg += " expecting [%s]" % (attr['unit'], data_info.x_unit)
+                    msg = "CanSAS reader: unrecognized dQw unit [%s];"\
+                    % attr['unit']
+                    msg += " expecting [%s]" % data_info.x_unit
                     raise ValueError, msg   
             _y, attr = get_float('ns:I', item)
             _dy, attr_d = get_float('ns:Idev', item)
@@ -511,7 +517,7 @@ class Reader:
                 _dy = 0.0
             if attr.has_key('unit') and \
             attr['unit'].lower() != data_info.y_unit.lower():
-                if has_converter==True:
+                if HAS_CONVERTER == True:
                     try:
                         data_conv_i = Converter(attr['unit'])
                         _y = data_conv_i(_y, units=data_info.y_unit)
@@ -525,13 +531,14 @@ class Reader:
                             msg += "  %s" % str(sys.exc_value)
                             raise ValueError, msg
                 else:
-                    msg = "CanSAS reader: unrecognized I(q) unit [%s];"
-                    msg += " expecting [%s]" % (attr['unit'], data_info.y_unit)
+                    msg = "CanSAS reader: unrecognized I(q) unit [%s];"\
+                    % attr['unit']
+                    msg += " expecting [%s]" % data_info.y_unit
                     raise ValueError, msg 
                         
             if attr_d.has_key('unit') and \
             attr_d['unit'].lower() != data_info.y_unit.lower():
-                if has_converter==True:
+                if HAS_CONVERTER == True:
                     try:
                         data_conv_i = Converter(attr_d['unit'])
                         _dy = data_conv_i(_dy, units=data_info.y_unit)
@@ -544,8 +551,9 @@ class Reader:
                                                  data_info.y_unit, sys.exc_value)
                             raise ValueError, msg
                 else:
-                    msg = "CanSAS reader: unrecognized dI(q) unit [%s]; "
-                    msg += "expecting [%s]" % (attr_d['unit'], data_info.y_unit)
+                    msg = "CanSAS reader: unrecognized dI(q) unit [%s]; "\
+                    % attr_d['unit']
+                    msg += "expecting [%s]" % data_info.y_unit
                     raise ValueError, msg
                 
             if _x is not None and _y is not None:
@@ -572,12 +580,12 @@ class Reader:
         data_conv_q = None
         data_conv_i = None
         
-        if has_converter == True and data_info.x_unit != '1/A':
+        if HAS_CONVERTER == True and data_info.x_unit != '1/A':
             data_conv_q = Converter('1/A')
             # Test it
             data_conv_q(1.0, output.Q_unit)
             
-        if has_converter == True and data_info.y_unit != '1/cm':
+        if HAS_CONVERTER == True and data_info.y_unit != '1/cm':
             data_conv_i = Converter('1/cm')
             # Test it
             data_conv_i(1.0, output.I_unit)                    
@@ -887,7 +895,7 @@ class Reader:
                 toks = variable.split('.')
                 exec "local_unit = storage.%s_unit" % toks[0]
                 if units.lower()!=local_unit.lower():
-                    if has_converter==True:
+                    if HAS_CONVERTER == True:
                         try:
                             conv = Converter(units)
                             exec "storage.%s = %g" % (variable,
@@ -902,9 +910,9 @@ class Reader:
                             else:
                                 raise ValueError, err_mess 
                     else:
-                        err_mess = "CanSAS reader: unrecognized %s unit [%s];"
-                        err_mess += " expecting [%s]" % (variable, 
-                                                         units, local_unit)
+                        err_mess = "CanSAS reader: unrecognized %s unit [%s];"\
+                        % (variable, units)
+                        err_mess += " expecting [%s]" % local_unit
                         self.errors.append(err_mess)
                         if optional:
                             logging.info(err_mess)
