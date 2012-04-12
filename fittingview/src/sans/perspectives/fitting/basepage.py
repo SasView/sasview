@@ -3039,9 +3039,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             return False
         if wx.TheClipboard.Open():
             wx.TheClipboard.SetData(wx.TextDataObject(str(content)))
-            data = wx.TextDataObject()
-            success = wx.TheClipboard.GetData(data)
-            text = data.GetText()
             wx.TheClipboard.Close()
             return True
         return None
@@ -3068,7 +3065,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 pass
             
             # 2D
-            if self.data.__class__.__name__== "Data2D":
+            if self.data.__class__.__name__ == "Data2D":
                 try:
                     check = item[0].GetValue()
                 except:
@@ -3113,15 +3110,14 @@ class BasicPage(ScrolledPanel, PanelBase):
         text = ""  
         # Get text from the clip board        
         if wx.TheClipboard.Open():
-           if wx.TheClipboard.IsSupported(wx.DataFormat(wx.DF_TEXT)):
-               data = wx.TextDataObject()
-               # get wx dataobject
-               success = wx.TheClipboard.GetData(data)
-               # get text
-               text = data.GetText()
-           # close clipboard
-           wx.TheClipboard.Close()
-           
+            if wx.TheClipboard.IsSupported(wx.DataFormat(wx.DF_TEXT)):
+                data = wx.TextDataObject()
+                # get wx dataobject
+                success = wx.TheClipboard.GetData(data)
+                # get text
+                text = data.GetText()
+            # close clipboard
+            wx.TheClipboard.Close()
         return text
     
     def get_paste(self):
@@ -3145,7 +3141,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             return False
         for line in lines[1:-1]:
             if len(line) != 0:
-                item =line.split(',')
+                item = line.split(',')
                 check = item[1]
                 name = item[0]
                 value = item[2]
@@ -3203,7 +3199,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         # go through the str params
         for item in param: 
             # 2D
-            if self.data.__class__.__name__== "Data2D":
+            if self.data.__class__.__name__ == "Data2D":
                 name = item[1]
                 if name in content.keys():
                     check = content[name][0]
@@ -3222,7 +3218,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     if item[2].__class__.__name__ == "ComboBox":
                         if self.model.fun_list.has_key(content[name][1]):
                             fun_val = self.model.fun_list[content[name][1]]
-                            self.model.setParam(name,fun_val)
+                            self.model.setParam(name, fun_val)
                     
                     value = content[name][1:]
                     self._paste_poly_help(item, value)
@@ -3258,7 +3254,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                         if item[2].__class__.__name__ == "ComboBox":
                             if self.model.fun_list.has_key(value[0]):
                                 fun_val = self.model.fun_list[value[0]]
-                                self.model.setParam(name,fun_val)
+                                self.model.setParam(name, fun_val)
                                 # save state
                                 #self._copy_parameters_state(self.str_parameters, 
                                 #    self.state.str_parameters)
@@ -3287,8 +3283,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 selection = item[7].GetCurrentSelection()
                 name = item[7].Name
                 param_name = name.split('.')[0]
-                disp_name = item[7].GetValue()
-                dispersity= item[7].GetClientData(selection)
+                dispersity = item[7].GetClientData(selection)
                 disp_model = dispersity()
                 # Only for array disp
                 try:
@@ -3314,10 +3309,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                     self.state.values = self.values
                     self.state.weights = self.weights    
                     self.model._persistency_dict[param_name] = \
-                                            [state.values, state.weights]
+                                            [self.state.values, 
+                                             self.state.weights]
                          
             except:
-                pass 
+                print "Error in BasePage._paste_poly_help: %s" % sys.exc_value 
     
     def _set_disp_array_cb(self, item):
         """
@@ -3332,5 +3328,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         item[5].Enable(False)
         item[6].SetValue('')
         item[6].Enable(False)
+        
+    def update_pinhole_smear(self):
+        """
+            Method to be called by sub-classes
+            TODO: this method doesn't belong here
+        """
+        print "BasicPage.update_pinhole_smear was called: skipping"
+        return
 
         
