@@ -1227,7 +1227,7 @@ class FitPage(BasicPage):
         is_poly_enabled = None 
         if event != None:
             if (event.GetEventObject() == self.formfactorbox\
-                        and self.structurebox.GetValue() != 'None')\
+                        and self.structurebox.GetLabel() != 'None')\
                         or event.GetEventObject() == self.structurebox\
                         or event.GetEventObject() == self.multifactorbox:
                 copy_flag = self.get_copy_params()
@@ -1251,8 +1251,8 @@ class FitPage(BasicPage):
         self.state.pinhole_smearer = self.pinhole_smearer.GetValue()
         self.state.slit_smearer = self.slit_smearer.GetValue()
     
-        self.state.structurecombobox = self.structurebox.GetValue()#.GetCurrentSelection()
-        self.state.formfactorcombobox = self.formfactorbox.GetValue()#.GetCurrentSelection()
+        self.state.structurecombobox = self.structurebox.GetLabel()#.GetCurrentSelection()
+        self.state.formfactorcombobox = self.formfactorbox.GetLabel()#.GetCurrentSelection()
         self.enable_fit_button()
         if self.model != None:
             self.m_name = self.model.name
@@ -1316,7 +1316,7 @@ class FitPage(BasicPage):
                 temp = self.parent.update_model_list()
                 if temp:
                     self.model_list_box = temp
-                    current_val = self.formfactorbox.GetValue()
+                    current_val = self.formfactorbox.GetLabel()
                     pos = self.formfactorbox.GetSelection()
                     self._show_combox_helper()
                     self.formfactorbox.SetSelection(pos)
