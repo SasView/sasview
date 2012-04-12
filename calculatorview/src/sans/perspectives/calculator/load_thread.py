@@ -1,6 +1,5 @@
 
 import time
-import sys
 
 
 from data_util.calcthread import CalcThread
@@ -42,7 +41,6 @@ class DataReader(CalcThread):
         self.starttime = time.time()
         try:
             data =  self.loader.load(self.path)
-            elapsed = time.time() - self.starttime
             self.complete(data=data)
         except KeyboardInterrupt:
             # Thread was interrupted, just proceed and re-raise.

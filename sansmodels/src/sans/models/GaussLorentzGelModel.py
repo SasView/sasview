@@ -5,7 +5,7 @@ GaussLorentzGel function as a BaseComponent model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from math import exp
+import math
 
 class GaussLorentzGelModel(BaseComponent):
     """ 
@@ -29,7 +29,7 @@ class GaussLorentzGelModel(BaseComponent):
         
         ## Name of the model
         self.name = "GaussLorentzGel"
-        self.description="""I(q)=scale_g*exp(-q^2*Z^2/2)+scale_l/(1+q^2*z^2)
+        self.description = """I(q)=scale_g*exp(-q^2*Z^2/2)+scale_l/(1+q^2*z^2)
             + background
             List of default parameters:
              scale_g = Gauss scale factor
@@ -54,12 +54,12 @@ class GaussLorentzGelModel(BaseComponent):
         self.details['background']   =  ['[1/cm]', None, None]
 
         #list of parameter that cannot be fitted
-        self.fixed= []  
+        self.fixed = []  
     def _gausslorentzgel(self, x):
         """
         Model definition
         """
-        inten = self.params['scale_g']*exp(-1.0*x*x*self.params['stat_colength']* \
+        inten = self.params['scale_g']*math.exp(-1.0*x*x*self.params['stat_colength']* \
                 self.params['stat_colength']/2.0) + self.params['scale_l']/ \
                 (1.0 + (x*self.params['dyn_colength'])* \
                  (x*self.params['dyn_colength'])) + self.params['background']
