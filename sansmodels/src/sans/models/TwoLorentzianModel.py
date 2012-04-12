@@ -5,6 +5,7 @@ TwoLorentzianModel function as a BaseComponent model
 
 from sans.models.BaseComponent import BaseComponent
 from numpy import power
+import math
 
 class TwoLorentzianModel(BaseComponent):
     """ 
@@ -21,7 +22,7 @@ class TwoLorentzianModel(BaseComponent):
         
         ## Name of the model
         self.name = "TwoLorentzian"
-        self.description="""I(q) = scale_1/(1.0 + pow((q*length_1),exponent_1))
+        self.description = """I(q) = scale_1/(1.0 + pow((q*length_1),exponent_1))
              + scale_2/(1.0 + pow((q*length_2),exponent_2) )+ background
              List of default parameters:
              scale_1 = Lorentzian term scaling #1
@@ -52,7 +53,7 @@ class TwoLorentzianModel(BaseComponent):
         self.details['background']   =  ['[1/cm]', None, None]
 
         #list of parameter that cannot be fitted
-        self.fixed= []  
+        self.fixed = []  
     def _twolorentzian(self, x):
         """
         Model definition

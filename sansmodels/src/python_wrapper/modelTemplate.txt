@@ -26,9 +26,11 @@ Provide functionality for a C extension model
 
 from sans.models.BaseComponent import BaseComponent
 from sans.models.sans_extension.c_models import [CPYTHONCLASS]
-import copy    
 
 def create_[PYTHONCLASS]():
+    """
+       Create a model instance
+    """
     obj = [PYTHONCLASS]()
     #[CPYTHONCLASS].__init__(obj) is called by [PYTHONCLASS] constructor
     return obj
@@ -53,11 +55,11 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         ## Name of the model
         self.name = "[PYTHONCLASS]"
         ## Model description
-        self.description ="""[DESCRIPTION]"""
+        self.description = """[DESCRIPTION]"""
        
         [PAR_DETAILS]
         ## fittable parameters
-        self.fixed=[FIXED]
+        self.fixed = [FIXED]
         
         ## non-fittable parameters
         self.non_fittable = [NON_FITTABLE_PARAMS]
@@ -77,7 +79,7 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         c model.
         """
         state = (self.__dict__, self.params, self.dispersion)
-        return (create_[PYTHONCLASS],tuple(), state, None, None)
+        return (create_[PYTHONCLASS], tuple(), state, None, None)
         
     def clone(self):
         """ Return a identical copy of self """

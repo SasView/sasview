@@ -4,7 +4,7 @@ BroadPeakModel function as a BaseComponent model
 """
 
 from sans.models.BaseComponent import BaseComponent
-from math import fabs
+import math
 from numpy import power
 
 class BroadPeakModel(BaseComponent):
@@ -22,7 +22,7 @@ class BroadPeakModel(BaseComponent):
         self.counter = 0
         ## Name of the model
         self.name = "BroadPeak"
-        self.description="""I(q) = scale_p/pow(q,exponent)+scale_l/
+        self.description = """I(q) = scale_p/pow(q,exponent)+scale_l/
         (1.0 + pow((fabs(q-q_peak)*length_l),exponent_l) )+ background
              List of default parameters:
              scale_p = Porod term scaling
@@ -53,14 +53,14 @@ class BroadPeakModel(BaseComponent):
         self.details['background']   =  ['[1/cm]', None, None]
 
         #list of parameter that cannot be fitted
-        self.fixed= []  
+        self.fixed = []  
     def _broadpeak(self, x):
         """
         Model definition
         """
         inten = self.params['scale_p']/pow(x,self.params['exponent_p'])
         inten += self.params['scale_l']/(1.0 + \
-                power((fabs(x-self.params['q_peak'])*self.params['length_l']),\
+                power((math.fabs(x-self.params['q_peak'])*self.params['length_l']),\
                     self.params['exponent_l']))
 
         inten += self.params['background']

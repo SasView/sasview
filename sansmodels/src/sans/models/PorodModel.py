@@ -35,7 +35,7 @@ class PorodModel(BaseComponent):
         self.details['scale']      = ['[1/(cm A^4)]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         #list of parameter that cannot be fitted
-        self.fixed= []
+        self.fixed = []
                
     def _porod(self, x):
         return self.params['scale']/x**4.0 + self.params['background']

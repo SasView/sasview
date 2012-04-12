@@ -30,7 +30,7 @@ class PeakLorentzModel(BaseComponent):
         
         ## Name of the model
         self.name = "Peak Lorentz Model"
-        self.description=""" F(q) = scale/(1+[(q-q0)/B]^2 ) + background
+        self.description = """ F(q) = scale/(1+[(q-q0)/B]^2 ) + background
         
         The model has three parameters: 
         scale     =  scale
@@ -51,7 +51,7 @@ class PeakLorentzModel(BaseComponent):
         self.details['B']            = ['[1/A]', None, None]
         self.details['background']        = ['[1/cm]', None, None]
         #list of parameter that cannot be fitted
-        self.fixed= []  
+        self.fixed = []  
             
     def _PeakLorentz(self, x):
         """

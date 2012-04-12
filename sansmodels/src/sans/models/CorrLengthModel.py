@@ -5,6 +5,7 @@ CorrLengthModel function as a BaseComponent model
 
 from sans.models.BaseComponent import BaseComponent
 from numpy import power
+import math
 
 class CorrLengthModel(BaseComponent):
     """ 
@@ -21,7 +22,7 @@ class CorrLengthModel(BaseComponent):
         
         ## Name of the model
         self.name = "CorrLength"
-        self.description="""I(q) = scale_p/pow(q,exponent)+scale_l/
+        self.description = """I(q) = scale_p/pow(q,exponent)+scale_l/
             (1.0 + pow((q*length_l),exponent_l) )+ background
              List of default parameters:
              scale_p = Porod term scaling
@@ -49,7 +50,7 @@ class CorrLengthModel(BaseComponent):
         self.details['background']   =  ['[1/cm]', None, None]
 
         #list of parameter that cannot be fitted
-        self.fixed= []  
+        self.fixed = []  
     def _corrlength(self, x):
         """
         Model definition
