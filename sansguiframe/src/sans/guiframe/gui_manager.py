@@ -1236,7 +1236,7 @@ class ViewerFrame(wx.Frame):
                 id = wx.NewId()
                 self._help_menu.Append(id,'&%s Help' % item.sub_menu, '')
                 wx.EVT_MENU(self, id, item.help)
-        if config._do_tutorial:
+        if config._do_tutorial and (IS_WIN or sys.platform =='darwin'):
             self._help_menu.AppendSeparator()
             id = wx.NewId()
             self._help_menu.Append(id,'&Tutorial', 'Software tutorial')
