@@ -1,4 +1,6 @@
-
+"""
+    Gui manager: manages the widgets making up an application
+"""
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
@@ -14,9 +16,7 @@ import wx
 import wx.aui
 import os
 import sys
-import xml
 import time
-import py_compile
 import imp
 import warnings
 import re
@@ -37,7 +37,6 @@ from sans.guiframe.data_panel import DataPanel
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.gui_toolbar import GUIToolBar
 from sans.guiframe.data_processor import GridFrame
-from sans.guiframe.data_processor import BatchOutputFrame
 from sans.guiframe.events import EVT_NEW_BATCH
 from sans.dataloader.loader import Loader
 
@@ -72,10 +71,13 @@ def get_app_dir():
     return app_path
 
 def get_user_directory():
-    USERDIR = os.path.join(os.path.expanduser("~"),".sansview")
-    if not os.path.isdir(USERDIR):
-        os.makedirs(USERDIR)
-    return USERDIR
+    """
+        Returns the user's home directory
+    """
+    userdir = os.path.join(os.path.expanduser("~"),".sansview")
+    if not os.path.isdir(userdir):
+        os.makedirs(userdir)
+    return userdir
     
 def _find_local_config(file, path):
     """
@@ -135,7 +137,7 @@ SPLASH_SCREEN_WIDTH = config.SPLASH_SCREEN_WIDTH
 SPLASH_SCREEN_HEIGHT = config.SPLASH_SCREEN_HEIGHT
 SS_MAX_DISPLAY_TIME = config.SS_MAX_DISPLAY_TIME
 if not WELCOME_PANEL_ON:
-        WELCOME_PANEL_SHOW = False
+    WELCOME_PANEL_SHOW = False
 else:
     WELCOME_PANEL_SHOW = True
 try:
@@ -592,8 +594,6 @@ class ViewerFrame(wx.Frame):
         """
         if event != None:
             self.panel_on_focus = event.panel
-        panel_name = 'No panel on focus'
-        application_name = 'No Selected Analysis'
         if self.panel_on_focus is not None:
             #Disable save application if the current panel is in batch mode
             flag = self.panel_on_focus.get_save_flag()
@@ -616,7 +616,6 @@ class ViewerFrame(wx.Frame):
         """
         Helper for panel on focus with data_panel
         """
-        panel_name = self.panel_on_focus.window_caption
         ID = self.panel_on_focus.uid
         self._data_panel.set_panel_on_focus(ID)
         #update combo
@@ -730,9 +729,11 @@ class ViewerFrame(wx.Frame):
         
     def PushStatusText(self, *args, **kwds):
         """
+            FIXME: No message is passed. What is this supposed to do? 
         """
         field = self.sb.get_msg_position()
-        wx.Frame.PushStatusText(self, field=field, string=string)
+        wx.Frame.PushStatusText(self, field=field, 
+                                string="FIXME: PushStatusText called without text")
 
     def add_perspective(self, plugin):
         """
@@ -2192,6 +2193,7 @@ class ViewerFrame(wx.Frame):
                     #self.SetTopWindow(dialog)
                     dialog.Show(True) 
                 except:
+                    print "Error in _onTutorial: %s" % sys.exc_value
                     try:
                         #in case when the pdf default set other than acrobat
                         import ho.pisa as pisa
@@ -2840,9 +2842,12 @@ class ViewerFrame(wx.Frame):
         #disable_add_data if the data is being recovered from  a saved state file.
         is_state_data = False
         if has_meta_data:
-            if 'invstate' in new_plot.meta_data: is_state_data = True
-            if  'prstate' in new_plot.meta_data: is_state_data = True
-            if  'fitstate' in new_plot.meta_data: is_state_data = True
+            if 'invstate' in new_plot.meta_data: 
+                is_state_data = True
+            if  'prstate' in new_plot.meta_data: 
+                is_state_data = True
+            if  'fitstate' in new_plot.meta_data: 
+                is_state_data = True
     
         return is_data1d and not is_data2d and not is_theory and not is_state_data
     
@@ -3310,8 +3315,6 @@ class ViewApp(wx.App):
             msg += "input file from command line.\n"
             logging.error(msg)
         # Display a splash screen on top of the frame.
-        if len(sys.argv) > 1 and '--time' in sys.argv[1:]:
-            log_time("Starting to display the splash screen")
         try:
             if os.path.isfile(SPLASH_SCREEN_PATH):
                 self.s_screen = self.display_splash_screen(parent=self.frame, 
