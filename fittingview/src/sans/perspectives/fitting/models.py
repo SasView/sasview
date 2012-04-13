@@ -1,4 +1,6 @@
-
+"""
+    Utilities to manage models
+"""
 import wx
 import wx.lib.newevent
 import imp
@@ -21,8 +23,9 @@ PLUGIN_DIR = 'plugin_models'
 
 def log(message):
     """
+        Log a message in a file located in the user's home directory
     """
-    dir = os.path.join(os.path.expanduser("~"),'.sansview', PLUGIN_DIR)
+    dir = os.path.join(os.path.expanduser("~"), '.sansview', PLUGIN_DIR)
     out = open(os.path.join(dir, "plugins.log"), 'a')
     out.write("%10g:  %s\n" % (time.clock(), message))
     out.close()
@@ -40,18 +43,18 @@ def _check_plugin(model, name):
     """
     #Check is the plugin is of type Model1DPlugin
     if not issubclass(model, Model1DPlugin):
-        msg = "Plugin %s must be of type Model1DPlugin \n"%str(name)
+        msg = "Plugin %s must be of type Model1DPlugin \n" % str(name)
         log(msg)
         return None
     if model.__name__!="Model":
-        msg= "Plugin %s class name must be Model \n"%str(name)
+        msg= "Plugin %s class name must be Model \n" % str(name)
         log(msg)
         return None
     try:
         new_instance= model()
     except:
-        msg="Plugin %s error in __init__ \n\t: %s %s\n"%(str(name),
-                                    str(sys.exc_type),sys.exc_value)
+        msg="Plugin %s error in __init__ \n\t: %s %s\n" % (str(name),
+                                    str(sys.exc_type), sys.exc_value)
         log(msg)
         return None
    
@@ -60,12 +63,12 @@ def _check_plugin(model, name):
         try:
            value=new_instance.function()
         except:
-           msg="Plugin %s: error writing function \n\t :%s %s\n "%(str(name),
-                                    str(sys.exc_type),sys.exc_value)
+           msg="Plugin %s: error writing function \n\t :%s %s\n " % (str(name),
+                                    str(sys.exc_type), sys.exc_value)
            log(msg)
            return None
     else:
-       msg="Plugin  %s needs a method called function \n"%str(name)
+       msg="Plugin  %s needs a method called function \n" % str(name)
        log(msg)
        return None
     return model
@@ -75,7 +78,7 @@ def find_plugins_dir():
         Find path of the plugins directory.
         The plugin directory is located in the user's home directory.
     """
-    dir = os.path.join(os.path.expanduser("~"),'.sansview', PLUGIN_DIR)
+    dir = os.path.join(os.path.expanduser("~"), '.sansview', PLUGIN_DIR)
     
     # If the plugin directory doesn't exist, create it
     if not os.path.isdir(dir):
@@ -143,7 +146,6 @@ def _findModels(dir):
     plugins = {}
     # Go through files in plug-in directory
     #always recompile the folder plugin
-    import compileall
     dir = find_plugins_dir()
     if not os.path.isdir(dir):
         msg = "SansView couldn't locate Model plugin folder."
@@ -224,6 +226,7 @@ class ModelList(object):
         
 class ModelManagerBase:
     """
+        Base class for the model manager
     """
     ## external dict for models
     model_combobox = ModelList()
@@ -767,8 +770,11 @@ class ModelManagerBase:
             model = MultiplicationModel(model1, model2)    
         else:
             model= self.struct_factor_dict[str(evt.GetId())]()
-        evt = ModelEvent(model=model)
-        wx.PostEvent(self.event_owner, evt)
+        
+        #TODO: investigate why the following two lines were left in the code
+        #      even though the ModelEvent class doesn't exist
+        #evt = ModelEvent(model=model)
+        #wx.PostEvent(self.event_owner, evt)
         
     def _get_multifunc_models(self):
         """
