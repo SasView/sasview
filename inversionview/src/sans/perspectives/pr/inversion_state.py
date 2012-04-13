@@ -1,4 +1,6 @@
-
+"""
+    Handling of P(r) inversion states
+"""
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
@@ -14,7 +16,6 @@ import time
 import os
 import sys
 import logging
-from xml.dom.minidom import parse
 from lxml import etree
 from sans.guiframe.dataFitting import Data1D
 from sans.dataloader.readers.cansas_reader import Reader as CansasReader
