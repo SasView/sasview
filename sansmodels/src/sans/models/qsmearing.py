@@ -1,4 +1,6 @@
-
+"""
+    Handle Q smearing
+"""
 #####################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
@@ -83,7 +85,9 @@ def smear_selection(data1D, model = None):
             
 
 class _BaseSmearer(object):
-    
+    """
+        Base class for smearers
+    """
     def __init__(self):
         self.nbins = 0
         self.nbins_low = 0
@@ -93,8 +97,11 @@ class _BaseSmearer(object):
         self._init_complete = False
         self._smearer = None
         self.model = None
+        self.min = None
+        self.max = None
+        self.qvalues = []
         
-    def __deepcopy__(self, memo={}):
+    def __deepcopy__(self, memo=None):
         """
         Return a valid copy of self.
         Avoid copying the _smearer C object and force a matrix recompute
@@ -106,9 +113,16 @@ class _BaseSmearer(object):
 
     def _compute_matrix(self):
         """
+            Place holder for matrix computation 
         """
         return NotImplemented
 
+    def get_unsmeared_range(self, q_min=None, q_max=None):
+        """
+            Place holder for method returning unsmeared range
+        """
+        return NotImplemented
+    
     def get_bin_range(self, q_min=None, q_max=None):
         """
         
@@ -217,6 +231,7 @@ class _BaseSmearer(object):
     
     def _initialize_smearer(self):
         """
+            Place holder for initializing data smearer
         """
         return NotImplemented
             
@@ -262,7 +277,7 @@ class _BaseSmearer(object):
             last_bin = self.nbins - 1
         else:
             # In the case that doesn't need higher q extrapolation data 
-             last_bin += self.nbins_low
+            last_bin += self.nbins_low
 
         return first_bin, last_bin
         
@@ -566,30 +581,6 @@ def get_qextrapolate(width, data_x):
     new_width = numpy.append(new_width, extra_high)
     
     # nbins corrections due to the negative q value
-    nbins_low = nbins_low - len(data_x_ext[data_x_ext<=0])
-    return  nbins_low, nbins_high, \
-             new_width[data_x_ext>0], data_x_ext[data_x_ext>0]
-    
-if __name__ == '__main__':
-    x = 0.001 * numpy.arange(1, 11)
-    y = 12.0 - numpy.arange(1, 11)
-    print x
-    #for i in range(10): print i, 0.001 + i*0.008/9.0 
-    #for i in range(100): print i, int(math.floor( (i/ (100/9.0)) )) 
-    s = _SlitSmearer(nbins=10, width=0.0, height=0.005, min=0.001, max=0.010)
-    #s = _QSmearer(nbins=10, width=0.001, min=0.001, max=0.010)
-    s._compute_matrix()
-
-    sy = s(y)
-    print sy
-    
-    if True:
-        for i in range(10):
-            print x[i], y[i], sy[i]
-            #print q, ' : ', s.weight(q), s._compute_iq(q) 
-            #print q, ' : ', s(q), s._compute_iq(q) 
-            #s._compute_iq(q) 
-
-
-
-
+    nbins_low = nbins_low - len(data_x_ext[data_x_ext <= 0])
+    return nbins_low, nbins_high, \
+             new_width[data_x_ext > 0], data_x_ext[data_x_ext > 0]
