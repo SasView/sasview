@@ -1,4 +1,6 @@
-
+"""
+    Mask editor
+"""
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
@@ -27,7 +29,6 @@ from danse.common.plottools.plottables import Graph
 from binder import BindArtist
 from sans.guiframe.dataFitting import Data1D, Data2D
 from boxMask import BoxMask
-from sectorMask import SectorMask
 from sans.guiframe.events import SlicerEvent
 from sans.guiframe.events import StatusEvent
 (InternalEvent, EVT_INTERNAL) = wx.lib.newevent.NewEvent()
@@ -63,7 +64,7 @@ class CalcPlot(CalcThread):
                  ):
         """
         """
-        CalcThread.__init__(self,completefn,
+        CalcThread.__init__(self, completefn,
                  updatefn,
                  yieldtime,
                  worktime)
@@ -277,7 +278,7 @@ class MaskPanel(wx.Dialog):
         self.update()
         self.slicer_mask = self.slicer.update() 
 
-    def onOuterSectorMask(self,event=None):
+    def onOuterSectorMask(self, event=None):
         """
         Call Draw Sector Slicer and get mask outside of the sector
         """
@@ -318,7 +319,7 @@ class MaskPanel(wx.Dialog):
         if event != None:
             self.onClearSlicer(event)
         self.slicer_z += 1
-        self.slicer = CircularMask(self,self.subplot,
+        self.slicer = CircularMask(self, self.subplot,
                                    zorder=self.slicer_z, side=False)   
         self.subplot.set_ylim(self.data.ymin, self.data.ymax)
         self.subplot.set_xlim(self.data.xmin, self.data.xmax)
@@ -349,10 +350,10 @@ class MaskPanel(wx.Dialog):
         """
         Erase new mask from old mask
         """
-        if not self.slicer==None:
+        if not self.slicer == None:
             self.slicer_mask = self.slicer.update()
             mask = self.data.mask
-            mask[self.slicer_mask==False] = True
+            mask[self.slicer_mask == False] = True
             self._check_display_mask(mask, event)
             
     def onResetMask(self, event):
@@ -393,33 +394,6 @@ class MaskPanel(wx.Dialog):
             self.subplot.figure.canvas.draw()
             self.slicer = None
 
-    def _setSlicer(self):
-        """
-        Clear the previous slicer and create a new one.Post an internal
-        event.
-        
-        :param slicer: slicer class to create
-        """
-        ## Clear current slicer
-        if not self.slicer == None:  
-            self.slicer.clear()            
-        ## Create a new slicer    
-        self.slicer_z += 1
-        self.slicer = slicer(self, self.subplot, zorder=self.slicer_z)
-        self.subplot.set_ylim(self.data2D.ymin, self.data2D.ymax)
-        self.subplot.set_xlim(self.data2D.xmin, self.data2D.xmax)
-        ## Draw slicer
-        self.update()
-        self.slicer.update()
-        msg = "Plotter2D._setSlicer  %s"%self.slicer.__class__.__name__
-        wx.PostEvent(self.parent, StatusEvent(status=msg))
-        # Post slicer event
-        event = self._getEmptySlicerEvent()
-        event.type = self.slicer.__class__.__name__
-        event.obj_class = self.slicer.__class__
-        event.params = self.slicer.get_params()
-        wx.PostEvent(self, event)
-   
     def update(self, draw=True):
         """
         Respond to changes in the model by recalculating the 
@@ -439,7 +413,7 @@ class MaskPanel(wx.Dialog):
         """
         pass
     
-    def _update_mask(self,mask):
+    def _update_mask(self, mask):
         """
         Respond to changes in masking
         """ 
@@ -459,7 +433,9 @@ class MaskPanel(wx.Dialog):
         temp_mask[mask] = temp_data.data[mask]
         # set temp_data value for self.mask==True, else still None 
         #temp_mask[mask] = temp_data[mask]
-        temp_data.data[mask==False] = temp_mask[mask==False]
+        
+        #TODO: refactor this horrible logic 
+        temp_data.data[mask == False] = temp_mask[mask == False]
         self.plotpanel.clear()
         if self.slicer != None:
             self.slicer.clear()
@@ -540,6 +516,7 @@ class MaskPanel(wx.Dialog):
     
     def OnClose(self, event):
         """
+            Processing close event
         """
         try:
             self.parent._draw_masked_model(event)
@@ -719,7 +696,7 @@ class Maskplotpanel(PlotPanel):
         """
         self.plots[plot.name] = plot
         #init graph
-        self.gaph = Graph()
+        self.graph = Graph()
         #add plot
         self.graph.add(plot)
         #add axes
@@ -780,7 +757,7 @@ class Maskplotpanel(PlotPanel):
         if self.dimension == 3:
             pass
         else:
-           self.subplot.figure.canvas.draw_idle() 
+            self.subplot.figure.canvas.draw_idle() 
         
         msg = 'Plotting Completed.'
         self._status_info(msg, status_type)
@@ -793,7 +770,7 @@ class Maskplotpanel(PlotPanel):
         slicerpop = wx.Menu()
         
         id = wx.NewId()
-        slicerpop.Append(id,'&Print Image', 'Print image')
+        slicerpop.Append(id, '&Print Image', 'Print image')
         wx.EVT_MENU(self, id, self.onPrint)
 
         id = wx.NewId()
