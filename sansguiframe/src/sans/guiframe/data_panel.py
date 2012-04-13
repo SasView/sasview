@@ -10,11 +10,10 @@
 """
 This module provides Graphic interface for the data_manager module.
 """
-import os
 import wx
 from wx.build import build_options
 # Check version
-toks = wx.__version__.split('.')
+toks = str(wx.__version__).split('.')
 if int(toks[1]) < 9:
     if int(toks[2]) < 12:
         wx_version = 811
@@ -23,8 +22,6 @@ if int(toks[1]) < 9:
 else:
     wx_version = 900
 import sys
-import warnings
-import logging
 from wx.lib.scrolledpanel import ScrolledPanel
 import  wx.lib.agw.customtreectrl as CT
 from sans.guiframe.dataFitting import Data1D
@@ -63,7 +60,7 @@ else:
     FONT_VARIANT = 1
     IS_MAC = True
 
-STYLE_FLAG =wx.RAISED_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|\
+STYLE_FLAG = wx.RAISED_BORDER|CT.TR_HAS_BUTTONS| CT.TR_HIDE_ROOT|\
                     wx.WANTS_CHARS|CT.TR_HAS_VARIABLE_ROW_HEIGHT
                     
                     
@@ -156,6 +153,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.perspective_cbox = None
         ## Create context menu for page
         self.data_menu = None
+        self.popUpMenu = None
        
         self.owner = None
         self.do_layout()
@@ -1233,24 +1231,7 @@ class DataDialog(wx.Dialog):
             if cb.GetValue():
                 temp.append(data)
         return temp
-    
-    def _count_selected_data(self, event):
-        """
-        count selected data
-        """
-        if event.GetEventObject().GetValue():
-            self._nb_selected_data += 1
-        else:
-            self._nb_selected_data -= 1
-        select_data_text = " %s Data selected.\n" % str(self._nb_selected_data)
-        self._data_text_ctrl.SetLabel(select_data_text)
-        if self._nb_selected_data <= self._max_data:
-            self._data_text_ctrl.SetForegroundColour('blue')
-        else:
-            self._data_text_ctrl.SetForegroundColour('red')
-        
-                  
-        
+            
 class DataFrame(wx.Frame):
     ## Internal name for the AUI manager
     window_name = "Data Panel"
@@ -1292,7 +1273,8 @@ class State():
         self.msg = "model mane : model1\n"
         self.msg += "params : \n"
         self.msg += "name  value\n"
-        return msg
+        return self.msg
+    
 def set_data_state(data=None, path=None, theory=None, state=None):
     dstate = DataState(data=data)
     dstate.set_path(path=path)
