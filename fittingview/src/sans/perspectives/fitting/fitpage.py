@@ -1,5 +1,7 @@
-
-
+"""
+    FitPanel class contains fields allowing to display results when
+    fitting  a model and one data
+"""
 import sys
 import wx
 import wx.lib.newevent
@@ -7,8 +9,6 @@ import numpy
 import copy
 import math
 import time
-from sans.models.dispersion_models import ArrayDispersion, GaussianDispersion
-#from sans.dataloader.data_info import Data1D
 from sans.guiframe.events import StatusEvent 
 from sans.guiframe.events import NewPlotEvent  
 from sans.guiframe.dataFitting import check_data_validity
@@ -21,7 +21,6 @@ _DATA_BOX_WIDTH = 300
 SMEAR_SIZE_L = 0.00
 SMEAR_SIZE_H = 0.00
 
-import basepage
 from basepage import BasicPage
 from basepage import PageInfoEvent
 from sans.models.qsmearing import smear_selection
@@ -35,7 +34,7 @@ class FitPage(BasicPage):
         on fit Panel window.
     """
     
-    def __init__(self,parent, color='rand'):
+    def __init__(self, parent, color='rand'):
         """ 
         Initialization of the Panel
         """
@@ -92,9 +91,9 @@ class FitPage(BasicPage):
         self.dataSource.SetMinSize((_DATA_BOX_WIDTH, -1))
         sizer_data.Add(wx.StaticText(self, -1, 'Name : '))
         sizer_data.Add(self.dataSource)
-        sizer_data.Add( (0,5) )
-        boxsizer1.Add(sizer_data,0, wx.ALL, 10)
-        self.sizer0.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
+        sizer_data.Add( (0, 5) )
+        boxsizer1.Add(sizer_data, 0, wx.ALL, 10)
+        self.sizer0.Add(boxsizer1, 0, wx.EXPAND | wx.ALL, 10)
         self.sizer0.Layout()
         
     def enable_datasource(self):
@@ -217,7 +216,7 @@ class FitPage(BasicPage):
         self._get_smear_info()
         
         #Sizers
-        box_description_range = wx.StaticBox(self, -1,str(title))
+        box_description_range = wx.StaticBox(self, -1, str(title))
         box_description_range.SetForegroundColour(wx.BLUE)
         boxsizer_range = wx.StaticBoxSizer(box_description_range, wx.VERTICAL)      
         self.sizer_set_smearer = wx.BoxSizer(wx.VERTICAL)
@@ -250,14 +249,14 @@ class FitPage(BasicPage):
                   id=self.dI_idata.GetId())
         self.dI_didata.SetValue(True)
         # add 4 types of weighting to the sizer
-        sizer_weighting.Add( self.dI_noweight,0, wx.LEFT, 10)
-        sizer_weighting.Add((14,10))
+        sizer_weighting.Add( self.dI_noweight, 0, wx.LEFT, 10)
+        sizer_weighting.Add((14, 10))
         sizer_weighting.Add( self.dI_didata)
-        sizer_weighting.Add((14,10))
+        sizer_weighting.Add((14, 10))
         sizer_weighting.Add( self.dI_sqrdata) 
-        sizer_weighting.Add((14,10))
+        sizer_weighting.Add((14, 10))
         sizer_weighting.Add( self.dI_idata) 
-        sizer_weighting.Add((10,10))  
+        sizer_weighting.Add((10, 10))  
         self.dI_noweight.Enable(False)
         self.dI_didata.Enable(False)
         self.dI_sqrdata.Enable(False)
@@ -267,7 +266,7 @@ class FitPage(BasicPage):
         sizer_fit = wx.GridSizer(2, 4, 2, 6)
         
         # combobox for smear2d accuracy selection
-        self.smear_accuracy = wx.ComboBox(self, -1,size=(50,-1),
+        self.smear_accuracy = wx.ComboBox(self, -1, size=(50, -1),
                                           style=wx.CB_READONLY)
         self._set_accuracy_list()
         self.smear_accuracy.SetValue(self.smear2d_accuracy)
@@ -278,9 +277,9 @@ class FitPage(BasicPage):
         wx.EVT_COMBOBOX(self.smear_accuracy,-1, self._on_select_accuracy)
 
         #Fit button
-        self.btFit = wx.Button(self,wx.NewId(),'Fit', size=(88,25))
+        self.btFit = wx.Button(self, wx.NewId(),'Fit', size=(88, 25))
         self.default_bt_colour =  self.btFit.GetDefaultAttributes()
-        self.btFit.Bind(wx.EVT_BUTTON, self._onFit,id= self.btFit.GetId())
+        self.btFit.Bind(wx.EVT_BUTTON, self._onFit, id= self.btFit.GetId())
         self.btFit.SetToolTipString("Start fitting.")
         
         #textcntrl for custom resolution
@@ -299,10 +298,10 @@ class FitPage(BasicPage):
 
         ## smear
         self.smear_data_left= BGTextCtrl(self, -1, 
-                                        size=(_BOX_WIDTH-25,20), style=0)
+                                        size=(_BOX_WIDTH-25, 20), style=0)
         self.smear_data_left.SetValue(str(self.dq_l))
         self.smear_data_right = BGTextCtrl(self, -1, 
-                                        size=(_BOX_WIDTH-25,20), style=0)
+                                        size=(_BOX_WIDTH-25, 20), style=0)
         self.smear_data_right.SetValue(str(self.dq_r))
 
         #set default values for smear
@@ -336,19 +335,19 @@ class FitPage(BasicPage):
         self.disable_smearer.SetValue(True)
         
         # add 4 types of smearing to the sizer
-        sizer_smearer.Add( self.disable_smearer,0, wx.LEFT, 10)
-        sizer_smearer.Add((10,10))
+        sizer_smearer.Add( self.disable_smearer, 0, wx.LEFT, 10)
+        sizer_smearer.Add((10, 10))
         sizer_smearer.Add( self.enable_smearer)
-        sizer_smearer.Add((10,10))
+        sizer_smearer.Add((10, 10))
         sizer_smearer.Add( self.pinhole_smearer ) 
-        sizer_smearer.Add((10,10))
+        sizer_smearer.Add((10, 10))
         sizer_smearer.Add( self.slit_smearer ) 
-        sizer_smearer.Add((10,10))       
+        sizer_smearer.Add((10, 10))       
         
         # StaticText for chi2, N(for fitting), Npts
-        self.tcChi    =  BGTextCtrl(self, -1, "-", size=(75,20), style=0)
+        self.tcChi    =  BGTextCtrl(self, -1, "-", size=(75, 20), style=0)
         self.tcChi.SetToolTipString("Chi2/Npts(Fit)")
-        self.Npts_fit    =  BGTextCtrl(self, -1, "-", size=(75,20), style=0)
+        self.Npts_fit    =  BGTextCtrl(self, -1, "-", size=(75, 20), style=0)
         self.Npts_fit.SetToolTipString(\
                             " Npts : number of points selected for fitting")
         self.Npts_total  =  self.ModelTextCtrl(self, -1, 
@@ -360,27 +359,27 @@ class FitPage(BasicPage):
                                 " Total Npts : total number of data points")
         
         # Update and Draw button
-        self.draw_button = wx.Button(self,wx.NewId(),'Compute', size=(88,24))
+        self.draw_button = wx.Button(self,wx.NewId(), 'Compute', size=(88,24))
         self.draw_button.Bind(wx.EVT_BUTTON, \
-                              self._onDraw,id= self.draw_button.GetId())
+                              self._onDraw,id = self.draw_button.GetId())
         self.draw_button.SetToolTipString("Compute and Draw.")
         
-        box_description_1= wx.StaticText(self, -1,'   Chi2/Npts')
-        box_description_2= wx.StaticText(self, -1,'Npts(Fit)')
-        box_description_3= wx.StaticText(self, -1,'Total Npts')
+        box_description_1= wx.StaticText(self, -1, '   Chi2/Npts')
+        box_description_2= wx.StaticText(self, -1, 'Npts(Fit)')
+        box_description_3= wx.StaticText(self, -1, 'Total Npts')
         box_description_3.SetToolTipString( \
                                 " Total Npts : total number of data points")
         #box_description_4= wx.StaticText(self, -1,' ')
         
         
-        sizer_fit.Add(box_description_1,0,0)
-        sizer_fit.Add(box_description_2,0,0)
-        sizer_fit.Add(box_description_3,0,0)       
-        sizer_fit.Add(self.draw_button,0,0)
-        sizer_fit.Add(self.tcChi,0,0)
-        sizer_fit.Add(self.Npts_fit ,0,0)
-        sizer_fit.Add(self.Npts_total,0,0)
-        sizer_fit.Add(self.btFit,0,0) 
+        sizer_fit.Add(box_description_1, 0, 0)
+        sizer_fit.Add(box_description_2, 0, 0)
+        sizer_fit.Add(box_description_3, 0, 0)       
+        sizer_fit.Add(self.draw_button, 0, 0)
+        sizer_fit.Add(self.tcChi, 0, 0)
+        sizer_fit.Add(self.Npts_fit, 0, 0)
+        sizer_fit.Add(self.Npts_total, 0, 0)
+        sizer_fit.Add(self.btFit, 0, 0) 
 
         # StaticText for smear
         #self.tcChi    =  wx.StaticText(self, -1, "-", style=wx.ALIGN_LEFT)
@@ -1191,7 +1190,7 @@ class FitPage(BasicPage):
                             id=self.btFit.GetId())
         else:
             msg = "FitPage: fit button has unknown label"
-            raise ValuerError, msg
+            raise RuntimeError, msg
         self._manager._reset_schedule_problem(value=0)
           
     def is_fitting(self):
