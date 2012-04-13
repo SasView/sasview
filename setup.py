@@ -308,7 +308,7 @@ packages.append("sans.sansview")
 required = ['lxml','periodictable>=1.3.0']
 
 if os.name=='nt':
-    required.extend(['pisa', 'html5lib', 'reportlab'])
+    required.extend(['html5lib', 'reportlab'])
 else:
     required.extend(['pil'])
    
