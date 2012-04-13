@@ -73,7 +73,8 @@ def check_deps():
         print "No macholib: recommending version >= 1.4.3"
         
     try:
-        import pisa
+        import ho.pisa
+        print "ho.pisa ", ho.pisa.__version__
     except:
         print "No pisa"
     
