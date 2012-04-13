@@ -1,4 +1,6 @@
-
+"""
+    Fitting perspective
+"""
 
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
@@ -17,11 +19,9 @@ import os
 import wx
 import logging
 import numpy
-import string
 import time
 from copy import deepcopy
 import models
-import fitpage
 
 from sans.dataloader.loader import Loader
 from sans.guiframe.dataFitting import Data2D
@@ -616,7 +616,12 @@ class Plugin(PluginBase):
         if len(self.temp_state) == 0:
             if self.state_index==0 and len(self.mypanels) <= 0 \
             and self.sfile_ext =='.svs':
-                self.fit_panel.add_default_pages()
+                #TODO: Why was the following line left in the code
+                # if add_default_pages doesn't exist?
+                try:
+                    self.fit_panel.add_default_pages()
+                except:
+                    print sys.exc_value
                 self.temp_state = []
                 self.state_index = 0
             return
@@ -761,7 +766,7 @@ class Plugin(PluginBase):
             Will return model_name = M1 , parameter name = A
             
         """
-        if string.find(item, ".") != -1:
+        if item.find(".") >= 0:
             param_names = re.split("\.", item)
             model_name = param_names[0]           
             ##Assume max len is 3; eg., M0.radius.width
@@ -1112,7 +1117,7 @@ class Plugin(PluginBase):
             model = fitproblem.get_model()
             plot_id = None
             if model is not None:
-                plot_id = data.id + name
+                plot_id = data.id + model.name
             if theory:
                 plot_id = data.id 
             group_id = data.group_id

@@ -178,7 +178,7 @@ class FitPanel(nb, PanelBase):
             selected_page = self.GetPage(pos)
             return selected_page.get_data()
     
-    def set_model_state(state):
+    def set_model_state(self, state):
         """
         receive a state to reset the model in the current page
         """
