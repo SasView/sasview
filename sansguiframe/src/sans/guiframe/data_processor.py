@@ -835,16 +835,6 @@ class GridPanel(SPanel):
                 axis.append(None) 
         return axis
     
-    def on_save_column(self, parent):
-        """
-        """
-        pos = self.notebook.GetSelection()
-        grid = self.notebook.GetPage(pos)
-        if parent is not None and  self.data is not None:
-            parent.write_batch_tofile(data=grid.data, 
-                                               file_name=path,
-                                               details=self.details)
-        
     def on_view(self, event):
         """
         Get object represented buy the given cell and plot them.
@@ -1209,7 +1199,7 @@ class GridFrame(wx.Frame):
                 self.remove_menu.Enable(True)
             else:
                 self.remove_menu.Enable(False)
-            if len(col_list)== 0 or len(col_list) > 1:
+            if len(col_list) == 0 or len(col_list) > 1:
                 self.insert_sub_menu.Enable(False)
                 
                 label = "Insert Column Before"
@@ -1285,8 +1275,8 @@ class GridFrame(wx.Frame):
            
                 return
             self.parent.open_with_externalapp(data=data,
-                                               file_name=grid.file_name, 
-                                               details=grid.details)
+                                              file_name=grid.file_name, 
+                                              details=grid.details)
             
     def on_close(self, event):
         """
@@ -1392,9 +1382,9 @@ class BatchOutputFrame(wx.Frame):
                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         button_sizer.Add(button_apply, 0,
                                 wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
-        vbox.Add(hint_sizer,  0, wx.EXPAND|wx.ALL, 10)
+        vbox.Add(hint_sizer, 0, wx.EXPAND|wx.ALL, 10)
         vbox.Add(wx.StaticLine(self.panel, -1),  0, wx.EXPAND, 0)
-        vbox.Add(button_sizer, 0 , wx.TOP|wx.BOTTOM, 10)
+        vbox.Add(button_sizer, 0, wx.TOP|wx.BOTTOM, 10)
         self.SetSizer(vbox)
         
     def on_apply(self, event):
@@ -1403,11 +1393,11 @@ class BatchOutputFrame(wx.Frame):
         """
         if self.flag == 1:
             self.parent.open_with_localapp(data_inputs=self.data_inputs,
-                                            data_outputs=self.data_outputs)
+                                           data_outputs=self.data_outputs)
         elif self.flag == 2:
             self.parent.open_with_externalapp(data=self.data, 
-                                           file_name=self.file_name,
-                                           details=self.details)
+                                              file_name=self.file_name,
+                                              details=self.details)
     def on_close(self, event):
         """
         close the Window
@@ -1435,8 +1425,8 @@ class BatchOutputFrame(wx.Frame):
                 if path != None:
                     if self.parent is not None and  self.data is not None:
                         self.parent.write_batch_tofile(data=self.data, 
-                                               file_name=path,
-                                               details=self.details)
+                                                       file_name=path,
+                                                       details=self.details)
         if self.local_app_selected.GetValue():
             self.flag = 1
         else:
@@ -1456,7 +1446,7 @@ if __name__ == "__main__":
             data["index"+str(i)] = [i/j, i*j, i, i+j]
         
         data_input =  copy.deepcopy(data)   
-        data_input["index5"] = [10,20,40, 50]
+        data_input["index5"] = [10, 20, 40, 50]
         frame = GridFrame(data_outputs=data, data_inputs=data_input)
         frame.Show(True)
     except:
