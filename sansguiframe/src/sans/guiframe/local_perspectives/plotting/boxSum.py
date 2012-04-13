@@ -1,9 +1,9 @@
-
-
-
+"""
+    Boxsum Class: determine 2 rectangular area to compute 
+    the sum of pixel of a Data. 
+"""
 import math
 import wx
-from copy import deepcopy
 from BaseInteractor import _BaseInteractor
 from sans.guiframe.events import SlicerParamUpdateEvent
 from sans.guiframe.events import EVT_SLICER_PARS
@@ -56,7 +56,7 @@ class BoxSum(_BaseInteractor):
         ## set to False == no motion , set to True== motion
         self.has_move = False
         ## Create Boxsum edges 
-        self.horizontal_lines= HorizontalDoubleLine(self,
+        self.horizontal_lines = HorizontalDoubleLine(self,
                                                     self.base.subplot,
                                                     color='blue',
                                                       zorder=zorder,
@@ -66,7 +66,7 @@ class BoxSum(_BaseInteractor):
                                                       center_y=self.center_y)
         self.horizontal_lines.qmax = self.qmax
         
-        self.vertical_lines= VerticalDoubleLine(self,
+        self.vertical_lines = VerticalDoubleLine(self,
                                                 self.base.subplot,
                                                 color='black',
                                                 zorder=zorder,
@@ -76,7 +76,7 @@ class BoxSum(_BaseInteractor):
                                                 center_y=self.center_y)
         self.vertical_lines.qmax = self.qmax
         
-        self.center= PointInteractor(self,
+        self.center = PointInteractor(self,
                                      self.base.subplot,color='grey',
                                     zorder=zorder,
                                     center_x= self.center_x,
@@ -399,22 +399,6 @@ class PointInteractor(_BaseInteractor):
         """
         self.move(x, y, None)
         self.update()
-    
-    def get_params(self):
-        """
-        """
-        params = {}
-        params["x"] = self.x
-        params["y"] = self.y
-        return params
-    
-    def set_params(self, params):
-        """
-        """
-        center_x = params["x"] 
-        center_y = params["y"] 
-        self.update(center_x=center_x, center_y=center_y)
-       
         
 class VerticalDoubleLine(_BaseInteractor):
     """
@@ -605,28 +589,6 @@ class VerticalDoubleLine(_BaseInteractor):
         self.move(x, y, None)
         self.update()
         
-    def get_params(self):
-        """
-            Store a copy of values of parameters of the slicer into a dictionary.
-            @return params: the dictionary created
-        """
-        params = {}
-        params["x"] = self.x1
-        params["y"] = self.y1
-        return params
-    
-    def set_params(self, params):
-        """
-            Receive a dictionary and reset the slicer with values contained 
-            in the values of the dictionary.
-            @param params: a dictionary containing name of slicer parameters and 
-            values the user assigned to the slicer.
-        """
-        x = params["x"] 
-        y = params["y"] 
-        self.update(x=x, y=y, center_x=None, center_y=None)
-
-
 class HorizontalDoubleLine(_BaseInteractor):
     """
          Select an annulus through a 2D plot
@@ -807,27 +769,4 @@ class HorizontalDoubleLine(_BaseInteractor):
         """
         self.move(x, y, None)
         self.update()
-        
-    def get_params(self):
-        """
-        Store a copy of values of parameters of the slicer into a dictionary.
-        :return params: the dictionary created
-        """
-        params = {}
-        params["x"] = self.x
-        params["y"] = self.y
-        return params
-    
-    def set_params(self, params):
-        """
-        Receive a dictionary and reset the slicer with values contained 
-        in the values of the dictionary.
-        :param params: a dictionary containing name of slicer parameters and 
-            values the user assigned to the slicer.
-        """
-        x = params["x"] 
-        y = params["y"] 
-        self.update(x=x, y=y, center_x=None,center_y=None)
-         
-         
          
