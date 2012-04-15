@@ -1566,21 +1566,23 @@ HEADER += "<meta name=Generator >\n"
 HEADER += "</head>\n"
 HEADER += "<body lang=EN-US>\n"
 HEADER += "<div class=WordSection1>\n"
-HEADER += "<p class=MsoNormal><b><span ><center>"
-HEADER += "%s</center></span></center></b></p>"
+HEADER += "<p class=MsoNormal><b><span ><center><font size='4' >"
+HEADER += "%s</font></center></span></center></b></p>"
 HEADER += "<p class=MsoNormal>&nbsp;</p>"
-PARA = "<p class=MsoNormal> %s \n"
-PARA += "</p>"
-CENTRE = "<p class=MsoNormal><center> %s \n"
-CENTRE += "</center></p>"
+PARA = "<p class=MsoNormal><font size='4' > %s \n"
+PARA += "</font></p>"
+CENTRE = "<p class=MsoNormal><center><font size='4' > %s \n"
+CENTRE += "</font></center></p>"
 FEET_1 = \
 """
 <p class=MsoNormal>&nbsp;</p>
-<p class=MsoNormal><b><span ><center> Graph</span></center></b></p> 
+<br>
+<p class=MsoNormal><b><span ><center> <font size='4' > Graph
+</font></span></center></b></p> 
 <p class=MsoNormal>&nbsp;</p> 
 <center> 
-<br>Model Computation<br> 
-<br>Data: "%s"<br> 
+<br><font size='4' >Model Computation</font>
+<br><font size='4' >Data: "%s"</font><br> 
 """
 FEET_2 = \
 """
