@@ -3299,12 +3299,18 @@ class ViewApp(wx.App):
     def OnInit(self):
         """
         """
-        pos, size = self.window_placement((GUIFRAME_WIDTH, GUIFRAME_HEIGHT))
+        global GUIFRAME_WIDTH, GUIFRAME_HEIGHT  
+        
+        if (GUIFRAME_WIDTH > ((wx.DisplaySize()[0]/100)*90) | GUIFRAME_HEIGHT > ((wx.DisplaySize()[1]/100)*90) ):
+            GUIFRAME_WIDTH = (wx.DisplaySize()[0]/100)*90
+            GUIFRAME_HEIGHT = (wx.DisplaySize()[1]/100)*90
+
+        pos, size = self.window_placement((GUIFRAME_WIDTH, GUIFRAME_HEIGHT))     
         self.frame = ViewerFrame(parent=None, 
-                                 title=APPLICATION_NAME, 
-                                 pos=pos, 
-                                 gui_style = DEFAULT_STYLE,
-                                 size=size) 
+                             title=APPLICATION_NAME, 
+                             pos=pos, 
+                             gui_style = DEFAULT_STYLE,
+                             size=size)
         self.frame.Hide()
         self.s_screen = None
 
