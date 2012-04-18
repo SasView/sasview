@@ -1,7 +1,6 @@
 """
     Welcome panel for SansView
-"""
-"""
+
 This software was developed by the University of Tennessee as part of the
 Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
 project funded by the US National Science Foundation. 
@@ -17,7 +16,6 @@ import wx.lib.hyperlink
 import os.path
 import os, sys
 import local_config as config
-import logging
 from wx.lib.scrolledpanel import ScrolledPanel
 from sans.guiframe.panel_base import PanelBase
 #Font size width 
@@ -39,7 +37,7 @@ class WelcomePanel(wx.aui.AuiNotebook, PanelBase):
     CENTER_PANE = True
    
     
-    def __init__(self,parent, *args, **kwds):
+    def __init__(self, parent, *args, **kwds):
         
         kwds["style"] = wx.aui.AUI_NB_DEFAULT_STYLE
         
@@ -51,7 +49,6 @@ class WelcomePanel(wx.aui.AuiNotebook, PanelBase):
         welcome_page = WelcomePage(self)
         self.AddPage(page=welcome_page, caption="Welcome")
         
-        pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_page)
         self.Center()
     
@@ -69,7 +66,7 @@ class WelcomePanel(wx.aui.AuiNotebook, PanelBase):
             self.parent.on_close_welcome_panel()
         event.Veto() 
         
-    def set_data(self, list=[]):
+    def set_data(self, list=None):
         """
         """
         pass
@@ -94,10 +91,6 @@ class WelcomePage(ScrolledPanel):
        
         ScrolledPanel.__init__(self, parent, **kwds)
         self.SetupScrolling()
-        path = os.getcwd()
-        import local_config
-        #icon_path = os.path.join(path, "images")
-        #print "PPP", icon_path,path
         image = os.path.join(local_config._welcome_image)
         self.SetWindowVariant(variant = FONT_VARIANT)
         self.bitmap_logo = wx.StaticBitmap(self, -1, wx.Bitmap(image))
@@ -106,14 +99,13 @@ class WelcomePage(ScrolledPanel):
         self.static_line_1 = wx.StaticLine(self, -1)
         self.label_acknowledgement = wx.StaticText(self, -1, config._acknowledgement)
         
-        self.hyperlink_license = wx.StaticText(self, -1, "Comments? Bugs? Requests?")
+        self.hyperlink_license = wx.StaticText(self, -1, 
+                                               "Comments? Bugs? Requests?")
         self.hyperlink_paper = wx.lib.hyperlink.HyperLinkCtrl(self, -1,
-                                         "Send us a ticket at:  sansdanse@gmail.com",URL=config._license)
+            "Send us a ticket at:  sansdanse@gmail.com", URL=config._license)
         
-        verwords = config.__version__.split('.')
-        version = '.'.join(verwords[:-1])
-        revision = verwords[-1]
-        self.label_title = wx.StaticText(self, -1, config.__appname__+ " "+str(config.__version__))#(version))
+        self.label_title = wx.StaticText(self, -1, 
+            config.__appname__+ " "+str(config.__version__))
         try:
             build_num = str(config.__build__)
         except:
@@ -126,35 +118,47 @@ class WelcomePage(ScrolledPanel):
        
         sizer_header.Add(self.bitmap_logo, 0, wx.EXPAND|wx.LEFT, 5)
         
-        sizer_build.Add(self.label_acknowledgement,0,wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
+        sizer_build.Add(self.label_acknowledgement, 0,
+                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
         sizer_build.Add((5,5))
-        sizer_build.Add(self.label_title ,0,wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
-        sizer_build.Add(self.label_build,0,wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
-        sizer_build.Add( self.label_copyright,0,wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15) 
-        sizer_build.Add((5,5))
-        sizer_build.Add( self.hyperlink_license,0,wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15) 
-        sizer_build.Add( self.hyperlink_paper,0,wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15) 
+        sizer_build.Add(self.label_title, 0,
+                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
+        sizer_build.Add(self.label_build, 0, 
+                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
+        sizer_build.Add(self.label_copyright, 0,
+                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15) 
+        sizer_build.Add((5, 5))
+        sizer_build.Add(self.hyperlink_license, 0,
+                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15) 
+        sizer_build.Add(self.hyperlink_paper, 0,
+                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15) 
         
         sizer_main.Add(sizer_header, 0, wx.TOP|wx.EXPAND, 3)
         sizer_main.Add(self.static_line_1, 0, wx.EXPAND, 0)
-        sizer_main.Add(sizer_build,0, wx.BOTTOM|wx.EXPAND, 3)
+        sizer_main.Add(sizer_build,0 , wx.BOTTOM|wx.EXPAND, 3)
         
         self.SetAutoLayout(True)
         self.SetSizer(sizer_main)
         self.Fit()
         
-    def set_data(self, list=[]):
+    def set_data(self, list=None):
         """
         """
         pass
 
 class ViewApp(wx.App):
+    """
+        Test application
+    """
     def OnInit(self):
         self.frame = WelcomeFrame(None, -1, "Test App")    
         self.frame.Show(True)
         return True
 
 class WelcomeFrame(wx.Frame):
+    """
+        Test frame
+    """
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, parent, id, title, size=(570, 400))
         WelcomePanel(self)
