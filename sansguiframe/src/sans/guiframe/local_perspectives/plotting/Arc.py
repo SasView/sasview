@@ -1,14 +1,10 @@
-
+"""
+    Arc slicer for 2D data
+"""
 import math
-import wx 
-from copy import deepcopy
 
 from BaseInteractor import _BaseInteractor
-from sans.guiframe.events import NewPlotEvent
-from sans.guiframe.events import StatusEvent
 from sans.guiframe.events import SlicerParameterEvent
-from sans.guiframe.events import EVT_SLICER_PARS
-  
  
 class ArcInteractor(_BaseInteractor):
     """
@@ -41,12 +37,15 @@ class ArcInteractor(_BaseInteractor):
 
     def set_layer(self, n):
         """
+            Allow adding plot to the same panel
+            :param n: the number of layer
         """
         self.layernum = n
         self.update()
         
     def clear(self):
         """
+            Clear this slicer and its markers
         """
         self.clear_markers()
         try:
@@ -59,6 +58,7 @@ class ArcInteractor(_BaseInteractor):
         
     def get_radius(self):
         """
+            Return arc radius
         """
         radius = math.sqrt(math.pow(self._mouse_x, 2) + \
                            math.pow(self._mouse_y, 2))
@@ -66,6 +66,11 @@ class ArcInteractor(_BaseInteractor):
         
     def update(self, theta1=None, theta2=None, nbins=None, r=None):
         """
+            Update the plotted arc
+            :param theta1: starting angle of the arc
+            :param theta2: ending angle of the arc
+            :param nbins: number of points along the arc
+            :param r: radius of the arc
         """
         # Plot inner circle
         x = []
@@ -74,8 +79,6 @@ class ArcInteractor(_BaseInteractor):
             self.theta1 = theta1
         if theta2 != None:
             self.theta2 = theta2
-        #print "ring update theta1 theta2", math.degrees(self.theta1), 
-        #math.degrees(self.theta2)
         while self.theta2 < self.theta1:
             self.theta2 += (2 * math.pi)
         while self.theta2 >= (self.theta1 + 2 * math.pi):
@@ -110,14 +113,14 @@ class ArcInteractor(_BaseInteractor):
 
     def moveend(self, ev):
         """
+            After a dragging motion reset the flag self.has_move to False
+            :param ev: event
         """
         self.has_move = False
         
         event = SlicerParameterEvent()
         event.type = self.__class__.__name__
         event.params = self.get_params()
-        #print "in arc moveend params",self.get_params()
-        #wx.PostEvent(self.base.base.parent, event)
         self.base.moveend(ev)
             
     def restore(self):
