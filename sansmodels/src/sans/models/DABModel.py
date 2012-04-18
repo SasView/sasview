@@ -28,7 +28,8 @@ class DABModel(BaseComponent):
         
         ## Name of the model
         self.name = "DAB_Model"
-        self.description="""F(x) = scale*(L^3)/( 1 + (x*L)^2 )^(2) + background
+        self.description = """
+        F(x) = scale*(L^3)/( 1 + (x*L)^2 )^(2) + background
         
         The model has three parameters: 
         L             =  Correlation Length
@@ -46,16 +47,17 @@ class DABModel(BaseComponent):
         self.details['scale']             = ['', None, None]
         self.details['background']        = ['[1/cm]', None, None]
         #list of parameter that cannot be fitted
-        self.fixed= []      
+        self.fixed = []   
+           
     def _DAB(self, x):
         """
             Evaluate  F(x) = (scale*L^3)/( 1 + (x*L)^2 )^(2) + background
-           
         """
-        # According to SRK (Igor/NIST code: 6 JUL 2009  changed definition of 'scale' to be uncorrelated with 'length')
-        return self.params['scale']*math.pow(self.params['length'],3)/math.pow(( 1 + math.pow(x * self.params['length'],2)),2) \
-         + self.params['background']
-       
+        # According to SRK (Igor/NIST code: 6 JUL 2009 changed definition 
+        # of 'scale' to be uncorrelated with 'length')
+        return self.params['scale']*math.pow(self.params['length'], 3)/\
+            math.pow(( 1 + math.pow(x * self.params['length'], 2)), 2) \
+            + self.params['background']
    
     def run(self, x = 0.0):
         """ Evaluate the model
@@ -65,7 +67,7 @@ class DABModel(BaseComponent):
         if x.__class__.__name__ == 'list':
             return self._DAB(x[0])
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._DAB(x)
    
@@ -78,6 +80,6 @@ class DABModel(BaseComponent):
             q = math.sqrt(x[0]**2 + x[1]**2)
             return self._DAB(q)
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._DAB(x)
