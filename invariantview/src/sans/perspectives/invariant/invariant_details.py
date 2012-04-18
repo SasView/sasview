@@ -100,7 +100,7 @@ class InvariantContainer(wx.Object):
                                                 /float(self.qstar_total)
             except:
                 self.qstar_high_percent = 'error'
-        self.check_values()
+        wx.CallAfter(self.check_values)
    
     def check_values(self):
         """
@@ -118,16 +118,22 @@ class InvariantContainer(wx.Object):
         #warning to the user when the extrapolated invariant is greater than %5
         msg = ''
         if self.qstar_percent == 'error':
-            self.existing_warning = True
-            msg = 'Error occurred when computing invariant from data.\n '
+            try:
+                float(self.qstar)
+            except:
+                self.existing_warning = True
+                msg += 'Error occurred when computing invariant from data.\n '
         if self.qstar_percent > 1:
             self.existing_warning = True
             msg += "Invariant Q  contribution is greater "
             msg += "than 100% .\n"
         if self.qstar_low_percent == 'error':
-            self.existing_warning = True
-            msg = "Error occurred when computing extrapolated invariant"
-            msg += " at low-Q region.\n"
+            try:
+                float(self.qstar_low)
+            except:
+                self.existing_warning = True
+                msg += "Error occurred when computing extrapolated invariant"
+                msg += " at low-Q region.\n"
         elif self.qstar_low_percent is not None :
             if self.qstar_low_percent >= 0.05:
                 self.existing_warning = True
@@ -141,9 +147,12 @@ class InvariantContainer(wx.Object):
                 msg += "Extrapolated contribution at Low Q is greater "
                 msg += "than 100% .\n"
         if self.qstar_high_percent == 'error':
-            self.existing_warning = True
-            msg += 'Error occurred when computing extrapolated'
-            msg += ' invariant at high-Q region.\n'
+            try:
+                float(self.qstar_high)
+            except:
+                self.existing_warning = True
+                msg += 'Error occurred when computing extrapolated'
+                msg += ' invariant at high-Q region.\n'
         elif self.qstar_high_percent is not None:
             if self.qstar_high_percent >= 0.05:
                 self.existing_warning = True

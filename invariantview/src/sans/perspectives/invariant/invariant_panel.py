@@ -598,7 +598,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                                   info="warning",
                                                   type="stop"))
             return
-       
+        self.Show(False)
         #Compute qstar extrapolated to low q range 
         self.get_low_qstar(inv=inv, npts_low=npts_low, low_q=low_q)
         #Compute qstar extrapolated to high q range 
@@ -653,6 +653,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self._set_save_flag(True)
             wx.PostEvent(self.parent,
                 StatusEvent(status='\nFinished invariant computation...'))
+        self.Show(True)
+        self.Refresh()
             
     def on_undo(self,event=None):
         """
