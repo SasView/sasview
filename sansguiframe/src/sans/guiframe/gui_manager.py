@@ -449,11 +449,10 @@ class ViewerFrame(wx.Frame):
         Helper to write result from batch into cvs file
         """
         self._default_save_location = os.path.dirname(file_name)
-        file_name = os.path.basename(file_name)
+        name = os.path.basename(file_name)
         if data is None or file_name is None or file_name.strip() == "":
             return
-        _, ext = os.path.splitext(file_name)
-        
+        _, ext = os.path.splitext(name)
         fd = open(file_name, 'w')
         separator = "\t"
         if ext.lower() == ".csv":
