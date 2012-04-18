@@ -112,17 +112,17 @@ class StatusBar(wxStatusB):
         self.msg_position = MSG_POSITION 
         #save the position of the gauge
         width, height = self.GetSize()
-        self.gauge = wx.Gauge(self, size=(width/10, height-3),
+        self.gauge = wx.Gauge(self, size=(width/10, height-8),
                                style=wx.GA_HORIZONTAL)
         self.gauge.Hide()
         #status bar icon
         self.bitmap_bt_warning = wx.BitmapButton(self, -1,
-                                                 size=(BUTTON_SIZE,-1),
+                                                 size=(BUTTON_SIZE-4,-1),
                                                   style=wx.NO_BORDER)
         console_bmp = wx.ArtProvider.GetBitmap(wx.ART_TIP, wx.ART_TOOLBAR,
                                                 size = (16,16))
         self.bitmap_bt_console = wx.BitmapButton(self, -1, 
-                                 size=(BUTTON_SIZE-5, height-4))
+                                 size=(BUTTON_SIZE-4, height-4))
         self.bitmap_bt_console.SetBitmapLabel(console_bmp)
         console_hint = "History of status bar messages"
         self.bitmap_bt_console.SetToolTipString(console_hint)
@@ -168,7 +168,7 @@ class StatusBar(wxStatusB):
         rect = self.GetFieldRect(ICON_POSITION)
         self.bitmap_bt_warning.SetPosition((rect.x + 5, rect.y - 2))
         rect = self.GetFieldRect(CONSOLE_POSITION)
-        self.bitmap_bt_console.SetPosition((rect.x - 5, rect.y - 2))
+        self.bitmap_bt_console.SetPosition((rect.x - 5, rect.y - 5))
         self.sizeChanged = False
         
     def OnIdle(self, event):
