@@ -68,7 +68,7 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
     """
     Check list control to be used for Data Panel
     """
-    def __init__(self, parent,*args, **kwds):
+    def __init__(self, parent, *args, **kwds):
         #agwstyle is introduced in wx.2.8.11 but is not working for mac
         if IS_MAC and wx_version < 812:
             try:
@@ -78,7 +78,8 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
                 del kwds['style']
                 CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
         else:
-            #agwstyle is introduced in wx.2.8.11 .argument working only for windows
+            # agwstyle is introduced in wx.2.8.11
+            # argument working only for windows
             try:
                 kwds['agwStyle'] = STYLE_FLAG
                 CT.CustomTreeCtrl.__init__(self, parent, *args, **kwds)
@@ -126,7 +127,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                  list=None,
                  size=(PANEL_WIDTH, PANEL_HEIGHT),
                  list_of_perspective=None, manager=None, *args, **kwds):
-        kwds['size']= size
+        kwds['size'] = size
         kwds['style'] = STYLE_FLAG
         ScrolledPanel.__init__(self, parent=parent, *args, **kwds)
         PanelBase.__init__(self)
@@ -145,7 +146,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         if list_of_perspective is None:
             list_of_perspective = []
         self.list_of_perspective = list_of_perspective
-        self.list_rb_perspectives= []
+        self.list_rb_perspectives = []
         self.list_cb_data = {}
         self.list_cb_theory = {}
         self.tree_ctrl = None
@@ -164,13 +165,13 @@ class DataPanel(ScrolledPanel, PanelBase):
      
     def do_layout(self):
         """
+            Create the panel layout
         """
         self.define_panel_structure()
         self.layout_selection()
         self.layout_data_list()
         self.layout_batch()
         self.layout_button()
-        
    
     def define_panel_structure(self):
         """
@@ -186,16 +187,17 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.sizer4 = wx.BoxSizer(wx.VERTICAL)
         self.sizer5 = wx.BoxSizer(wx.VERTICAL)
        
-        self.vbox.Add(self.sizer5, 0, wx.EXPAND|wx.ALL,1)
-        self.vbox.Add(self.sizer1, 1, wx.EXPAND|wx.ALL,0)
-        self.vbox.Add(self.sizer2, 0, wx.EXPAND|wx.ALL,1)
-        self.vbox.Add(self.sizer3, 0, wx.EXPAND|wx.ALL,10)
+        self.vbox.Add(self.sizer5, 0, wx.EXPAND|wx.ALL, 1)
+        self.vbox.Add(self.sizer1, 1, wx.EXPAND|wx.ALL, 0)
+        self.vbox.Add(self.sizer2, 0, wx.EXPAND|wx.ALL, 1)
+        self.vbox.Add(self.sizer3, 0, wx.EXPAND|wx.ALL, 10)
         #self.vbox.Add(self.sizer4, 0, wx.EXPAND|wx.ALL,5)
         
         self.SetSizer(self.vbox)
         
     def layout_selection(self):
         """
+            Create selection option combo box
         """
         select_txt = wx.StaticText(self, -1, 'Selection Options')
         select_txt.SetForegroundColour('blue')
@@ -217,15 +219,9 @@ class DataPanel(ScrolledPanel, PanelBase):
     
     def _on_selection_type(self, event):
         """
-        Select data according to patterns
+            Select data according to patterns
+            :param event: UI event
         """
-        
-        list_of_options = ['Select all Data',
-                            'Unselect all Data',
-                           'Select all Data 1D',
-                           'Unselect all Data 1D',
-                           'Select all Data 2D',
-                           'Unselect all Data 2D' ]
         option = self.selection_cbox.GetValue()
         
         pos = self.selection_cbox.GetSelection()
@@ -233,7 +229,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             return 
         option = self.selection_cbox.GetString(pos)
         for item in self.list_cb_data.values():
-            data_ctrl, _, _, _,_, _,_,_= item
+            data_ctrl, _, _, _, _, _, _, _= item
             data_id, data_class, _ = self.tree_ctrl.GetItemPyData(data_ctrl) 
             if option == 'Select all Data':
                 self.tree_ctrl.CheckItem(data_ctrl, True) 
@@ -282,7 +278,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                                 style=wx.CB_READONLY)
         if not IS_MAC:
             self.perspective_cbox.SetMinSize((BUTTON_WIDTH*1.6, -1))
-        wx.EVT_COMBOBOX(self.perspective_cbox,-1, 
+        wx.EVT_COMBOBOX(self.perspective_cbox, -1, 
                         self._on_perspective_selection)
     
         self.bt_append_plot = wx.Button(self, wx.NewId(), "Append Plot To",
@@ -302,11 +298,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         freeze_tip += "     so that it can act like a real data set."
         self.bt_freeze.SetToolTipString(freeze_tip)
         wx.EVT_BUTTON(self, self.bt_freeze.GetId(), self.on_freeze)
-        #hide plot
-        #self.bt_close_plot = wx.Button(self, wx.NewId(), "Delete Plot", 
-        #                           size=(BUTTON_WIDTH, -1))
-        #self.bt_close_plot.SetToolTipString("Delete the plot panel on focus")
-        #wx.EVT_BUTTON(self, self.bt_close_plot.GetId(), self.on_close_plot)
        
         if sys.platform == 'darwin' and build_options.WXPORT == 'osx_cocoa':
             self.cb_plotpanel = wx.ComboBox(self, -1, 
@@ -314,7 +305,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         else:
             self.cb_plotpanel = wx.ComboBox(self, -1, 
                                             style=wx.CB_READONLY|wx.CB_SORT)
-        #self.cb_plotpanel.SetMinSize((BUTTON_WIDTH*2, -1))
         wx.EVT_COMBOBOX(self.cb_plotpanel,-1, self._on_plot_selection)
         self.cb_plotpanel.Disable()
 
@@ -348,6 +338,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         
     def layout_batch(self):
         """
+            Set up batch mode options
         """
         self.rb_single_mode = wx.RadioButton(self, -1, 'Single Mode',
                                              style=wx.RB_GROUP)
@@ -359,12 +350,13 @@ class DataPanel(ScrolledPanel, PanelBase):
         
         self.rb_single_mode.SetValue(not self.parent.batch_on)
         self.rb_batch_mode.SetValue(self.parent.batch_on)
-        self.sizer4.AddMany([(self.rb_single_mode,0, wx.ALL, 4),
-                             (self.rb_batch_mode,0, wx.ALL, 4)])
+        self.sizer4.AddMany([(self.rb_single_mode, 0, wx.ALL, 4),
+                             (self.rb_batch_mode, 0, wx.ALL, 4)])
         
     def on_single_mode(self, event):
         """
-        change guiframe to its single mode
+            Change to single mode
+            :param event: UI event
         """
         if self.parent is not None:
                 wx.PostEvent(self.parent, 
@@ -372,15 +364,17 @@ class DataPanel(ScrolledPanel, PanelBase):
        
     def on_batch_mode(self, event):
         """
-        change guiframe to its batch mode
+            Change to batch mode
+            :param event: UI event
         """
         if self.parent is not None:
-                wx.PostEvent(self.parent, 
-                             NewBatchEvent(enable=True))
+            wx.PostEvent(self.parent, 
+                         NewBatchEvent(enable=True))
     
     def _get_data_selection(self, event):  
         """
-        Get data selection from the right click
+            Get data selection from the right click
+            :param event: UI event
         """
         data = None
         selection = event.GetSelection()
@@ -403,7 +397,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         
         panel = MaskDialog(parent=self.parent, base=self, 
                            data=data, id=wx.NewId())
-        #self.panel.Bind(wx.EVT_CLOSE, self._draw_masked_model)
         panel.ShowModal()
     
     def on_plot_3d(self, event):
