@@ -133,21 +133,23 @@ class WrapperGenerator:
         ## Catch fixed parameters
         key = "[FIXED]"
         try:
-            self.fixed= lineparser.readhelper(lines,key, key2,key3, file= self.file)
+            self.fixed= lineparser.readhelper(lines, key, 
+                                              key2, key3, file=self.file)
         except:
            raise   
         ## Catch non-fittable parameters parameters
         key = "[NON_FITTABLE_PARAMS]"
         try:
-            self.non_fittable= lineparser.readhelper(lines,key, key2,key3, file= self.file)
+            self.non_fittable= lineparser.readhelper(lines, key, key2,
+                                                     key3, file=self.file)
         except:
            raise   
 
         ## Catch parameters with orientation
         key = "[ORIENTATION_PARAMS]"    
         try:
-            self.orientation_params = lineparser.readhelper( lines,key, 
-                                                    key2,key3, file= self.file)
+            self.orientation_params = lineparser.readhelper(lines, key, 
+                                                    key2, key3, file=self.file)
         except:
            raise 
         ## Catch Description
@@ -451,15 +453,20 @@ class WrapperGenerator:
                                         "[PAR_DETAILS]", self.details)
            
             # fixed list  details
+            fixed_str = str(self.fixed)
+            fixed_str.replace(', ', '\n                      ')
+            newline = self.replaceToken(newline, "[FIXED]",fixed_str)
+            
+            # non-fittable list details
             newline = self.replaceToken(newline, 
-                                        "[FIXED]",str(self.fixed))
-            # non-fittable list  details
-            newline = self.replaceToken(newline, 
-                                        "[NON_FITTABLE_PARAMS]",str(self.non_fittable))
+                                        "[NON_FITTABLE_PARAMS]",
+                                        str(self.non_fittable))
+            
             ## parameters with orientation
-       
+            oriented_str = str(self.orientation_params)
+            oriented_str.replace(', ', '\n                                  ')
             newline = self.replaceToken(newline, 
-                               "[ORIENTATION_PARAMS]",str(self.orientation_params))
+                               "[ORIENTATION_PARAMS]", oriented_str)
            
             # Write new line to the wrapper .c file
             file.write(newline+'\n')

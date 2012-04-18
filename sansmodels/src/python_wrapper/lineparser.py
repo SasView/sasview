@@ -56,7 +56,7 @@ def look_for_tag( string1,begin, end=None ):
 
 
   
-def readhelper(lines,key, key2,key3 , file):
+def readhelper(lines, key, key2, key3 , file):
   
     temp=""
     # flag to found key
@@ -67,16 +67,13 @@ def readhelper(lines,key, key2,key3 , file):
     for line in lines:
         if line.count(key.lstrip().rstrip())>0 :#[FIXED]= .....
             try:
-                #print "found key", key
                 find_fixed= True
                 index = line.index(key)
                 toks  = line[index:].split("=",1 )
                 temp  = toks[1].lstrip().rstrip()
-                find_key2, find_key3=look_for_tag( string1=temp,begin=key2, end=key3 )
-                #print "looking for endpoints",find_key2, find_key3
-                ##[key]=<text>param </text>
+                find_key2, find_key3=look_for_tag( string1=temp,
+                                                   begin=key2, end=key3 )
                 if find_key2 and find_key3:
-                    
                     temp1=[]
                     temp2=[]
                     temp3=[]
@@ -86,7 +83,6 @@ def readhelper(lines,key, key2,key3 , file):
                     temp3=split_list(separator=';', mylist=temp2)
                     temp4=split_list(separator=',', mylist=temp3)
                     listtofill= temp3 + temp4
-                    #print "endpoints found",listtofill
                     return listtofill
                     
                     
@@ -105,7 +101,7 @@ def readhelper(lines,key, key2,key3 , file):
                     temp3=split_list(separator=';', mylist=temp1)
                     temp4=split_list(separator=',', mylist=temp3)
             
-                    if len(temp3+ temp4)==0:
+                    if len(temp3 + temp4)==0:
                         # [FIXED]=  only one param
                         listtofill+= temp1
                     listtofill += temp3+temp4 
@@ -135,9 +131,7 @@ def readhelper(lines,key, key2,key3 , file):
         elif find_fixed :
             if not find_key2:
                 raise ValueError, "Could not parse file %s" % file
-            #print "find_key3",find_key3,line,key3
             if find_key3:
-                #print "At the ned of the file----->"
                 temp1=[]
                 temp2=[]
                 temp3=[]
@@ -158,30 +152,30 @@ def readhelper(lines,key, key2,key3 , file):
                     temp3=split_list(separator=';',mylist=temp1)
                     temp4=split_list(separator=',', mylist=temp1)
                 
-                if len(temp3+ temp4)==0:# [FIXED]=  only one param
-                    listtofill+= temp1
+                if len(temp3 + temp4)==0:# [FIXED]=  only one param
+                    listtofill += temp1
                 listtofill+=temp3+temp4 #   
                 break
             
             else:
-                temp2=split_text(separator='//',string1=line)
-                temp5=split_text(separator="\*",string1=line)
+                temp2=split_text(separator='//', string1=line)
+                temp5=split_text(separator="\*", string1=line)
                 if len(temp5)>0:
-                    temp3=split_list(separator=';',mylist=temp5)
+                    temp3=split_list(separator=';', mylist=temp5)
                     temp4=split_list(separator=',', mylist=temp5)
                 elif len(temp2)>0:
-                    temp3=split_list(separator=';',mylist=temp2)
+                    temp3=split_list(separator=';', mylist=temp2)
                     temp4=split_list(separator=',', mylist=temp2)
                 else:
                     if look_for_tag( string1=line,begin=";")[0]:# split ";" first
-                        temp3=split_text(separator=';',string1=line)
+                        temp3=split_text(separator=';', string1=line)
                         temp4=split_list(separator=',', mylist=temp3)
                     else:
-                        temp3=split_text(separator=',',string1=line)# slip "," first
+                        temp3=split_text(separator=',', string1=line)# slip "," first
                         temp4=split_list(separator=';', mylist=temp3)
                 if len(temp3+ temp4)==0:# [FIXED]=  only one param
                     if line.lstrip().rstrip()!="":
-                        listtofill= [line.lstrip().rstrip()]
+                        listtofill=[line.lstrip().rstrip()]
                 listtofill+=temp3+temp4 #
                 break
     return listtofill
