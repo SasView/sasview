@@ -454,7 +454,7 @@ class WrapperGenerator:
            
             # fixed list  details
             fixed_str = str(self.fixed)
-            fixed_str.replace(', ', '\n                      ')
+            fixed_str = fixed_str.replace(', ', '\n                      ')
             newline = self.replaceToken(newline, "[FIXED]",fixed_str)
             
             # non-fittable list details
@@ -464,7 +464,8 @@ class WrapperGenerator:
             
             ## parameters with orientation
             oriented_str = str(self.orientation_params)
-            oriented_str.replace(', ', '\n                                  ')
+            formatted_endl = '\n                                  '
+            oriented_str = oriented_str.replace(', ', formatted_endl)
             newline = self.replaceToken(newline, 
                                "[ORIENTATION_PARAMS]", oriented_str)
            
