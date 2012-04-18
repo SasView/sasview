@@ -54,7 +54,9 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         ## Name of the model
         self.name = "[PYTHONCLASS]"
         ## Model description
-        self.description = """[DESCRIPTION]"""
+        self.description = """
+        [DESCRIPTION]
+        """
        
         [PAR_DETAILS]
         ## fittable parameters
