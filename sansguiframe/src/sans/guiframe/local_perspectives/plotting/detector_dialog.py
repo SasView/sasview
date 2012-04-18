@@ -1,18 +1,11 @@
-#!/usr/bin/env python
-
-# version
-__id__ = "$Id: aboutdialog.py 1193 2007-05-03 17:29:59Z dmitriy $"
-__revision__ = "$Revision: 1193 $"
-
+"""
+    Widget to display a 2D map of the detector
+"""
 import wx
 import sys
 from sans.guiframe.utils import format_number
 from sans.guiframe.events import StatusEvent 
-from sans.guiframe.events import NewPlotEvent
-
-import matplotlib 
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as Canvas
-from matplotlib import pyplot
 from matplotlib import mpl
 from matplotlib import pylab
 #FONT size 
@@ -262,7 +255,7 @@ class DetectorDialog(wx.Dialog):
             self.cmap_selector.Append(str(m), pylab.get_cmap(m))
         
         wx.EVT_COMBOBOX(self.cmap_selector, -1, self._on_select_cmap)
-        sizer_selection.Add(wx.StaticText(self, -1,"Select Cmap: "), 0,
+        sizer_selection.Add(wx.StaticText(self, -1, "Select Cmap: "), 0,
                              wx.LEFT|wx.ADJUST_MINSIZE, 5) 
         sizer_selection.Add(self.cmap_selector, 0, wx.EXPAND|wx.ALL, 10)
         sizer_main.Add(sizer_params, 0, wx.EXPAND|wx.ALL, 5)
@@ -294,30 +287,3 @@ class DetectorDialog(wx.Dialog):
         self.cb1 = mpl.colorbar.ColorbarBase(self.ax1, cmap=self.cmap,
                                      norm=self.norm, orientation='horizontal')
         self.canvas.draw()
-
-
-# end of class DialogAbout
-
-##### testing code ############################################################
-class MyApp(wx.App):
-    def OnInit(self):
-        wx.InitAllImageHandlers()
-        dialog = DetectorDialog(None, -1, "")
-        self.SetTopWindow(dialog)
-        dialog.setContent(xnpts=128, ynpts=128, qmax=20,
-                           beam=20, zmin=2, zmax=60, sym=False)
-        print dialog.ShowModal()
-        evt = dialog.getContent()
-        if hasattr(evt, "npts"):
-            print "number of point: ", evt.npts
-        if hasattr(evt,"qmax"): 
-            print "qmax: ", evt.qmax
-        dialog.Destroy()
-        return 1
-
-# end of class MyApp
-
-if __name__ == "__main__":
-    app = MyApp(0)
-    app.MainLoop()
-        
