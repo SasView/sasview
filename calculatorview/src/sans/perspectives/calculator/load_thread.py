@@ -1,14 +1,13 @@
-
+"""
+    Thread handler used to load data
+"""
 import time
-
-
 from data_util.calcthread import CalcThread
 from sans.dataloader.loader import Loader
         
-
 class DataReader(CalcThread):
     """
-            Load a data given a filename
+        Load a data given a filename
     """
     def __init__(self, path, completefn=None,
                  updatefn   = None,

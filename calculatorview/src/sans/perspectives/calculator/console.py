@@ -19,8 +19,10 @@ else:
     PANEL_HEIGHT = 560
     FONT_VARIANT = 1
     
-
 class ConsoleDialog(wx.Dialog):
+    """
+        Data summary dialog
+    """
     def __init__(self, parent=None, manager=None, data=None,
                     title="Data Summary", size=(PANEL_WIDTH, PANEL_HEIGHT)):
         wx.Dialog.__init__(self, parent=parent, title=title, size=size)

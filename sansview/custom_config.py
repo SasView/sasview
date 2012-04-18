@@ -1,4 +1,6 @@
-#Application appearance custom configuration
+"""
+    Application appearance custom configuration
+"""
 DATAPANEL_WIDTH = 260
 CLEANUP_PLOT = False
 FIXED_PANEL = True
