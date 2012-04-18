@@ -189,6 +189,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         if pos_x != 0 and pos_y != 0:
             self.size, _ = self.GetClientSizeTuple()
         self.SetSizer(self.sizer)
+        wx.CallAfter(self.parent.disable_app_menu,self)
         
     def set_resizing(self, resizing=False):
         """

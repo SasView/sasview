@@ -612,6 +612,29 @@ class ViewerFrame(wx.Frame):
                 #update edit menu
                 self.enable_edit_menu()
     
+    def disable_app_menu(self,p_panel=None):  
+        """
+        Disables all menus in the menubar
+        """
+        if p_panel == None:
+            return
+        p_name = p_panel.window_name
+        enable = not self._mgr.GetPane(p_name).IsMaximized()
+        if self._data_panel is not None:
+            self._data_panel.disable_app_combo(enable)
+        if self._menubar is not None:
+            for menu,_ in self._menubar.GetMenus():
+                for items in menu.GetMenuItems():
+                    items.Enable(enable)
+        c_panel = self.cpanel_on_focus
+
+        if not enable:
+            p_panel.on_set_focus(None)
+            if self._toolbar is not None:
+                self._toolbar.update_toolbar(None)
+        else:
+            self._toolbar.update_toolbar(c_panel)
+        
     def set_panel_on_focus_helper(self):
         """
         Helper for panel on focus with data_panel
@@ -894,8 +917,6 @@ class ViewerFrame(wx.Frame):
         self._mgr.AddPane(self.defaultPanel, wx.aui.AuiPaneInfo().
                               Name("default").
                               CenterPane().
-                              #CloseButton(False).
-                              #MinimizeButton(False).
                               # This is where we set the size of
                               # the application window
                               BestSize(wx.Size(self._window_width, 
@@ -909,7 +930,6 @@ class ViewerFrame(wx.Frame):
                               Name(self._data_panel.window_name).
                               Caption(self._data_panel.window_caption).
                               Left().
-                              MinimizeButton().
                               CloseButton(CLOSE_SHOW).
                               TopDockable(False).
                               BottomDockable(False).
@@ -1065,7 +1085,7 @@ class ViewerFrame(wx.Frame):
                               Floatable().
                               Right().
                               Dock().
-                              MinimizeButton().
+                              MinimizeButton(True).MaximizeButton(True).
                               Resizable(True).
                               # Use a large best size to make sure the AUI 
                               # manager takes all the available space
@@ -1077,13 +1097,13 @@ class ViewerFrame(wx.Frame):
         elif style2 == GUIFRAME.FLOATING_PANEL:
             self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                               Name(p.window_name).Caption(p.window_caption).
-                              MinimizeButton().
+                              MinimizeButton(True).MaximizeButton(True).
                               Resizable(True).
                               # Use a large best size to make sure the AUI
                               #  manager takes all the available space
                               BestSize(wx.Size(PLOPANEL_WIDTH, 
                                                PLOPANEL_HEIGTH)))
-
+            
             self._popup_floating_panel(p)
   
         # Register for showing/hiding the panel

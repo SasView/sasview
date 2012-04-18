@@ -172,7 +172,12 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.layout_data_list()
         self.layout_batch()
         self.layout_button()
-   
+        
+    def disable_app_combo(self, enable):
+        """
+        """
+        self.perspective_cbox.Enable(enable)
+        
     def define_panel_structure(self):
         """
         Define the skeleton of the panel
