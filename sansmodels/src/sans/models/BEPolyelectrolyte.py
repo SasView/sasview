@@ -1,16 +1,13 @@
-#!/usr/bin/env python
-""" 
-    
-    Provide F(x) = K*1/(4*pi*Lb*(alpha)^(2))*(q^(2)+k2)/(1+(r02)^(2))*(q^(2)+k2)\
+"""    
+ Provide F(x) = K*1/(4*pi*Lb*(alpha)^(2))*(q^(2)+k2)/(1+(r02)^(2))*(q^(2)+k2)\
                        *(q^(2)-(12*h*C/b^(2)))
-    BEPolyelectrolyte as a BaseComponent model
+ BEPolyelectrolyte as a BaseComponent model
 """
 
 from sans.models.BaseComponent import BaseComponent
 import math
 
 class BEPolyelectrolyte(BaseComponent):
-   
     """
         Class that evaluates a BEPolyelectrolyte.
         
@@ -36,7 +33,7 @@ class BEPolyelectrolyte(BaseComponent):
         
         ## Name of the model
         self.name = "BEPolyelectrolyte"
-        self.description="""
+        self.description = """
         F(x) = K*1/(4*pi*Lb*(alpha)^(2))*(q^(2)+k^(2))/(1+(r02)^(2))
             *(q^(2)+k^(2))*(q^(2)-(12*h*C/b^(2)))+bkd
                 
@@ -52,28 +49,27 @@ class BEPolyelectrolyte(BaseComponent):
         """
         ## Define parameters
         self.params = {}
-        self.params['k']    = 10
-        self.params['lb']   = 7.1
-        self.params['h']    = 12
-        self.params['b']    = 10
-        self.params['cs']   = 0.0
-        self.params['alpha']= 0.05
-        self.params['c']    = 0.7
+        self.params['k']     = 10
+        self.params['lb']    = 7.1
+        self.params['h']     = 12
+        self.params['b']     = 10
+        self.params['cs']    = 0.0
+        self.params['alpha'] = 0.05
+        self.params['c']     = 0.7
         self.params['background']  = 0.0
-        
 
         ## Parameter details [units, min, max]
         self.details = {}
-        self.details['k']    = ['[barns]', None, None]
-        self.details['lb'] = ['[A]', None, None]
-        self.details['h']   = ['[1/A^(2)]', None, None]
-        self.details['b']    = ['[A]', None, None]
-        self.details['cs'] = ['[mol/L]', None, None]
-        self.details['alpha']   = ['', None, None]
-        self.details['c']    = ['[mol/L]', None, None]
+        self.details['k']     = ['[barns]', None, None]
+        self.details['lb']    = ['[A]', None, None]
+        self.details['h']     = ['[1/A^(2)]', None, None]
+        self.details['b']     = ['[A]', None, None]
+        self.details['cs']    = ['[mol/L]', None, None]
+        self.details['alpha'] = ['', None, None]
+        self.details['c']     = ['[mol/L]', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         #list of parameter that cannot be fitted
-        self.fixed= []
+        self.fixed = []
                
     def _BEPoly(self, x):
         """
@@ -88,7 +84,8 @@ class BEPolyelectrolyte(BaseComponent):
         """
         Ca = self.params['c'] * 6.022136e-4
         #remove singulars
-        if self.params['alpha']<=0 or self.params['c']<=0 or self.params['b']==0 or self.params['lb']<=0:
+        if self.params['alpha']<=0 or self.params['c']<=0\
+            or self.params['b']==0 or self.params['lb']<=0:
             return 0
         else:
             
@@ -96,14 +93,15 @@ class BEPolyelectrolyte(BaseComponent):
                      self.params['alpha'] * Ca)
             
             r02 = 1.0/self.params['alpha']/math.sqrt(Ca) * \
-                    (self.params['b']/math.sqrt((48.0*math.pi *self.params['lb'])))
+                    (self.params['b']/\
+                     math.sqrt((48.0*math.pi*self.params['lb'])))
             
-            return self.params['k']/( 4.0 * math.pi * self.params['lb'] * self.params['alpha']**2 ) \
+            return self.params['k']/( 4.0 * math.pi * self.params['lb'] \
+                                      * self.params['alpha']**2 ) \
                    * ( x**2 + K2 ) / ( 1.0 + r02**2 * ( x**2 + K2 ) \
                         * (x**2 - ( 12.0 * self.params['h'] \
                         * Ca/(self.params['b']**2) ))) \
                         + self.params['background']
-            
    
     def run(self, x = 0.0):
         """ Evaluate the model

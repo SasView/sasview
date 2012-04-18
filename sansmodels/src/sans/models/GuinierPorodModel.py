@@ -1,10 +1,8 @@
-#!/usr/bin/env python
 """ 
-I(q) = scale/q^s* exp ( - R_g^2 q^2 / (3-s) ) for q<= ql
-    = scale/q^m*exp((-ql^2*Rg^2)/(3-s))*ql^(m-s) for q>=ql
-Guinier function as a BaseComponent model
+    I(q) = scale/q^s* exp ( - R_g^2 q^2 / (3-s) ) for q<= ql
+        = scale/q^m*exp((-ql^2*Rg^2)/(3-s))*ql^(m-s) for q>=ql
+    Guinier function as a BaseComponent model
 """
-
 from sans.models.BaseComponent import BaseComponent
 from math import sqrt,exp
 
@@ -23,7 +21,8 @@ class GuinierPorodModel(BaseComponent):
         
         ## Name of the model
         self.name = "GuinierPorod"
-        self.description=""" I(q) = scale/q^s* exp ( - R_g^2 q^2 / (3-s) ) for q<= ql
+        self.description = """
+         I(q) = scale/q^s* exp ( - R_g^2 q^2 / (3-s) ) for q<= ql
          = scale/q^m*exp((-ql^2*Rg^2)/(3-s))*ql^(m-s) for q>=ql
                         where ql = sqrt((m-s)(3-s)/2)/Rg.
                         List of parameters:
@@ -48,7 +47,7 @@ class GuinierPorodModel(BaseComponent):
         self.details['background']     = ['[1/cm]', None, None]
 
         #list of parameter that cannot be fitted
-        self.fixed= []  
+        self.fixed = []  
         
     def _guinier_porod(self, x):
         """
@@ -64,11 +63,11 @@ class GuinierPorodModel(BaseComponent):
         qval = x
         
         #do the calculation and return the function value
-        q1=sqrt((n-3.0+m)*n/2.0)/Rg
+        q1 = sqrt((n-3.0+m)*n/2.0)/Rg
         if qval < q1:
             F = (G/pow(qval,(3.0-n)))*exp((-qval*qval*Rg*Rg)/n) 
         else:
-            F = (G/pow(qval,m))*exp(-(n-3.0+m)/2.0)*pow(((n-3.0+m)*n/2.0),
+            F = (G/pow(qval, m))*exp(-(n-3.0+m)/2.0)*pow(((n-3.0+m)*n/2.0),
                                         ((n-3.0+m)/2.0))/pow(Rg,(n-3.0+m))
         inten = F + bgd
     
@@ -82,7 +81,7 @@ class GuinierPorodModel(BaseComponent):
         if x.__class__.__name__ == 'list':
             return self._guinier_porod(x[0])
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._guinier_porod(x)
    
@@ -95,6 +94,6 @@ class GuinierPorodModel(BaseComponent):
             q = sqrt(x[0]**2 + x[1]**2)
             return self._guinier_porod(q)
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._guinier_porod(x)

@@ -483,7 +483,6 @@ class ModelManagerBase:
         self.shape_indep_list.append(DebyeModel )
         self.model_name_list.append(DebyeModel.__name__)
         
-        #FractalModel (a c-model)is now being used instead of FractalAbsModel.
         from sans.models.FractalModel import FractalModel
         self.shape_indep_list.append(FractalModel )
         self.model_name_list.append(FractalModel.__name__)

@@ -55,9 +55,9 @@ class CorrLengthModel(BaseComponent):
         """
         Model definition
         """
-        inten = self.params['scale_p']/pow(x,self.params['exponent_p'])
+        inten = self.params['scale_p']/pow(x, self.params['exponent_p'])
         inten += self.params['scale_l']/(1.0 + \
-                power((x*self.params['length_l']),self.params['exponent_l']))
+                power((x*self.params['length_l']), self.params['exponent_l']))
         inten += self.params['background']
 
         return inten  
@@ -72,7 +72,7 @@ class CorrLengthModel(BaseComponent):
         if x.__class__.__name__ == 'list':
             return self._corrlength(x[0])
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._corrlength(x)
    
@@ -87,6 +87,6 @@ class CorrLengthModel(BaseComponent):
             q = math.sqrt(x[0]**2 + x[1]**2)
             return self._corrlength(q)
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._corrlength(x)

@@ -1,16 +1,13 @@
-#!/usr/bin/env python
 """ 
     Provide F(x) = 2( exp(-x) + x - 1 )/x**2
     with x = (q*R_g)**2
     
     Debye function as a BaseComponent model
 """
-
 from sans.models.BaseComponent import BaseComponent
 import math
 
 class DebyeModel(BaseComponent):
-   
     """
         Class that evaluates a Debye model.
         
@@ -31,7 +28,7 @@ class DebyeModel(BaseComponent):
         
         ## Name of the model
         self.name = "Debye"
-        self.description=""" 
+        self.description = """ 
         F(x) = 2( exp(-x) + x - 1 )/x**2
         with x = (q*R_g)**2
         
@@ -52,7 +49,8 @@ class DebyeModel(BaseComponent):
         self.details['scale']      = ['', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         #list of parameter that cannot be fitted
-        self.fixed= []      
+        self.fixed = [] 
+             
     def _debye(self, x):
         """
             Evaluate F(x)= scale * D + bkd
@@ -64,10 +62,10 @@ class DebyeModel(BaseComponent):
         # an exception
         y = (x * self.params['rg'])**2.0
         if x == 0:
-            D=1
+            D = 1
         else:
-           D = 2.0*( math.exp(-y) + y -1.0 )/y**2.0
-        return self.params['scale']* D + self.params['background']
+            D = 2.0*( math.exp(-y) + y -1.0 )/y**2.0
+        return self.params['scale'] * D + self.params['background']
    
     def run(self, x = 0.0):
         """ Evaluate the model
@@ -77,7 +75,7 @@ class DebyeModel(BaseComponent):
         if x.__class__.__name__ == 'list':
             return self._debye(x[0])
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._debye(x)
    
@@ -90,6 +88,6 @@ class DebyeModel(BaseComponent):
             q = math.sqrt(x[0]**2 + x[1]**2)
             return self._debye(q)
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._debye(x)

@@ -1446,54 +1446,7 @@ class TestPeakLorentzModel(unittest.TestCase):
         """ Test PeakLorentz at the critical point"""
         self.comp.setParam('B', 0.0)
         self.assertRaises(ZeroDivisionError, self.comp.run, 10)
-        #self.assert_(numpy.isfinite(self.comp.run(0.0)))  
-        
-       
-class TestFractalAbsModel(unittest.TestCase):
-    """ Unit tests for FractalAbsModel"""
-    
-    def setUp(self):
-        from sans.models.FractalAbsModel import FractalAbsModel
-        self.comp = FractalAbsModel()
-        self.comp.setParam('scale', 0.05)
-        self.comp.setParam('radius', 5.0)
-        self.comp.setParam('fractal_dim', 2.0)
-        self.comp.setParam('cor_length',100.0)
-        self.comp.setParam('sldBlock', 2.0e-6)
-        self.comp.setParam('sldSolv', 6.35e-6)
-        self.comp.setParam('background',0.0)
-        
-        self.x = numpy.array([0.4, 1.3])
-        self.y = numpy.array([0.5, 1.57])
-        
-        self.x_array = self.comp.evalDistribution(self.x)
-        self.y_array = self.comp.evalDistribution(self.y)
-        qx_prime = numpy.reshape(self.x, [1,len(self.x)])
-        qy_prime = numpy.reshape(self.y, [len(self.y),1])
-        self.xy_matrix = self.comp.evalDistribution([self.x, self.y])
-        
-    def test1D(self):
-        """ Test 1D model for a Fractal Abs Model"""
-        self.assertAlmostEqual(self.comp.run(0.001), 39.2881, 3)
-        
-    def test1D_2(self):
-        """ Test 2D model for a Fractal Abs Model"""
-        self.assertAlmostEqual(self.comp.run([0.001, 1.3]), 39.2881, 3)
-        
-    def testEval_1D(self):
-        """ Test 1D model for a Fractal Abs Model with evalDistribution"""
-        self.assertEquals(self.comp.run(0.4),self.x_array[0])
-        self.assertEquals(self.comp.run(1.3),self.x_array[1])
-        
-    def testEval_2D(self):
-        """ Test 2D model for a Fractal Abs Model with evalDistribution"""
-        self.assertAlmostEquals(self.comp.runXY([0.4, 0.5]),self.xy_matrix[0],8)
-        self.assertAlmostEquals(self.comp.runXY([1.3,1.57]),self.xy_matrix[1], 8)
-
-    # No more singular point
-    #def testCriticalPoint(self):
-    #    """ Test Fractal Abs at the critical point"""
-    #    self.assert_(numpy.isfinite(self.comp.run(0.0)))    
+        #self.assert_(numpy.isfinite(self.comp.run(0.0)))       
    
 class TestFractalModel(unittest.TestCase):
     """ Unit tests for FractalModel"""

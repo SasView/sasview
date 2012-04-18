@@ -1,4 +1,6 @@
-   
+"""
+    Core-Multi-Shell model
+"""
 from sans.models.BaseComponent import BaseComponent
 from sans.models.CoreFourShellModel import CoreFourShellModel
 import copy
@@ -10,16 +12,12 @@ class CoreMultiShellModel(BaseComponent):
     """
     def __init__(self, multfactor=1):
         BaseComponent.__init__(self)
-        """
-        :param n_shells: number of shells in the model, assumes 1<= n_shells <=4.
-        """
 
         ## Setting  model name model description
-        self.description=""
         model = CoreFourShellModel()
         self.model = model
         self.name = "CoreMultiShellModel"
-        self.description=""
+        self.description = ""
         self.n_shells = multfactor
         ## Define parameters
         self.params = {}
@@ -44,26 +42,24 @@ class CoreMultiShellModel(BaseComponent):
         ## functional multiplicity info of the model
         # [int(maximum no. of functionality),"str(Titl),
         # [str(name of function0),...], [str(x-asix name of sld),...]]
-        self.multiplicity_info = [max_nshells,"No. of Shells:",[],['Radius']]
+        self.multiplicity_info = [max_nshells, "No. of Shells:", [], ['Radius']]
 
-        ## parameters with orientation: can be removed since there is no orientational params
+        ## parameters with orientation:
         for item in self.model.orientation_params:
             self.orientation_params.append(item)
-                
         
     def _clone(self, obj):
         """
         Internal utility function to copy the internal
         data members to a fresh copy.
         """
-        obj.params     = copy.deepcopy(self.params)
-        obj.description     = copy.deepcopy(self.description)
-        obj.details    = copy.deepcopy(self.details)
+        obj.params = copy.deepcopy(self.params)
+        obj.description = copy.deepcopy(self.description)
+        obj.details = copy.deepcopy(self.details)
         obj.dispersion = copy.deepcopy(self.dispersion)
-        obj.model  = self.model.clone()
+        obj.model = self.model.clone()
 
         return obj
-    
     
     def _set_dispersion(self):
         """
@@ -74,14 +70,14 @@ class CoreMultiShellModel(BaseComponent):
         for name , value in self.model.dispersion.iteritems():      
             nshell = 0
             if name.split('_')[0] == 'thick':
-                while nshell<self.n_shells:
+                while nshell < self.n_shells:
                     nshell += 1
                     if name.split('_')[1] == 'shell%s' % str(nshell):
-                        self.dispersion[name]= value
+                        self.dispersion[name] = value
                     else: 
                         continue
             else:
-                self.dispersion[name]= value
+                self.dispersion[name] = value
                               
 
     def _set_params(self):
@@ -93,16 +89,17 @@ class CoreMultiShellModel(BaseComponent):
         for name , value in self.model.params.iteritems():
             nshell = 0
             if name.split('_')[0] == 'thick' or name.split('_')[0] == 'sld':
-                if name.split('_')[1] == 'solv' or name.split('_')[1] == 'core0':
-                    self.params[name]= value
+                if name.split('_')[1] == 'solv' \
+                    or name.split('_')[1] == 'core0':
+                    self.params[name] = value
                     continue
-                while nshell<self.n_shells:
+                while nshell < self.n_shells:
                     nshell += 1
                     if name.split('_')[1] == 'shell%s' % str(nshell):
-                        self.params[name]= value
+                        self.params[name] = value
                         continue
             else:
-                self.params[name]= value
+                self.params[name] = value
             
             
         # set constrained values for the original model params
@@ -115,7 +112,7 @@ class CoreMultiShellModel(BaseComponent):
         """
         for name ,detail in self.model.details.iteritems():
             if name in self.params.iterkeys():
-                self.details[name]= detail
+                self.details[name] = detail
             
     
     def _set_xtra_model_param(self):
@@ -130,11 +127,14 @@ class CoreMultiShellModel(BaseComponent):
                     continue
 
                 for nshell in range(self.n_shells,max_nshells):
-                    if key.split('_')[0] == 'sld' and key.split('_')[1] == 'shell%s' % str(nshell+1):
+                    if key.split('_')[0] == 'sld' and \
+                        key.split('_')[1] == 'shell%s' % str(nshell+1):
                         try:
                             value = self.model.params['sld_solv']
                             self.model.setParam(key, value)
-                        except: pass
+                        except:
+                            message = "CoreMultiShellModel evaluation problem"
+                            raise RuntimeError, message
 
     def getProfile(self):
         """
@@ -154,7 +154,7 @@ class CoreMultiShellModel(BaseComponent):
         beta.append(self.params['sld_core0'])
         
         # for shells
-        for n in range(1,self.n_shells+1):
+        for n in range(1, self.n_shells+1):
             # Left side of each shells
             r0 = r[len(r)-1]            
             r.append(r0)
@@ -185,11 +185,12 @@ class CoreMultiShellModel(BaseComponent):
         # set param to new model
         self._setParamHelper( name, value)
         ## setParam to model 
-        if name=='sld_solv':
-            # the sld_*** model.params not in params must set to value of sld_solv
+        if name == 'sld_solv':
+            # the sld_*** model.params not in params 
+            # must set to value of sld_solv
             for key in self.model.params.iterkeys():
                 if key not in self.params.keys()and key.split('_')[0] == 'sld':
-                        self.model.setParam(key, value)
+                    self.model.setParam(key, value)
         self.model.setParam( name, value)
 
     def _setParamHelper(self, name, value):
@@ -198,7 +199,7 @@ class CoreMultiShellModel(BaseComponent):
         """
         #look for dispersion parameters
         toks = name.split('.')
-        if len(toks)==2:
+        if len(toks) == 2:
             for item in self.dispersion.keys():
                 if item.lower()==toks[0].lower():
                     for par in self.dispersion[item]:
@@ -223,7 +224,6 @@ class CoreMultiShellModel(BaseComponent):
                 self.fixed.append(item)
 
         self.fixed.sort()
-        pass         
                 
     def run(self, x = 0.0):
         """ 
@@ -249,7 +249,7 @@ class CoreMultiShellModel(BaseComponent):
     
     ## Now (May27,10) directly uses the model eval function 
     ## instead of the for-loop in Base Component.
-    def evalDistribution(self, x = []):
+    def evalDistribution(self, x):
         """ 
         Evaluate the model in cartesian coordinates
         
@@ -266,10 +266,10 @@ class CoreMultiShellModel(BaseComponent):
         : param parameter: name of the parameter [string]
         :dispersion: dispersion object of type DispersionModel
         """
-        value= None
+        value = None
         try:
             if parameter in self.model.dispersion.keys():
-                value= self.model.set_dispersion(parameter, dispersion)
+                value = self.model.set_dispersion(parameter, dispersion)
             self._set_dispersion()
             return value
         except:

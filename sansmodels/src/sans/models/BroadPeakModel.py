@@ -1,6 +1,5 @@
-#!/usr/bin/env python
 """ 
-BroadPeakModel function as a BaseComponent model
+    BroadPeakModel function as a BaseComponent model
 """
 
 from sans.models.BaseComponent import BaseComponent
@@ -60,7 +59,8 @@ class BroadPeakModel(BaseComponent):
         """
         inten = self.params['scale_p']/pow(x,self.params['exponent_p'])
         inten += self.params['scale_l']/(1.0 + \
-                power((math.fabs(x-self.params['q_peak'])*self.params['length_l']),\
+                power((math.fabs(x-self.params['q_peak'])\
+                       *self.params['length_l']),\
                     self.params['exponent_l']))
 
         inten += self.params['background']
@@ -77,7 +77,7 @@ class BroadPeakModel(BaseComponent):
         if x.__class__.__name__ == 'list':
             return self._broadpeak(x[0])
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._broadpeak(x)
    
@@ -92,7 +92,7 @@ class BroadPeakModel(BaseComponent):
             q = math.sqrt(x[0]**2 + x[1]**2)
             return self._broadpeak(q)
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._broadpeak(x)
         

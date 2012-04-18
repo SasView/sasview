@@ -130,7 +130,7 @@ class FractalCoreShellModel(BaseComponent):
             self.model.params[name] = value
             if name  == 'scale':
                 name = 'volfraction'
-            self.params[name]= value
+            self.params[name] = value
         self.params['frac_dim'] = 2.0
         self.params['cor_length'] = 100.0  
   
@@ -205,7 +205,7 @@ class FractalCoreShellModel(BaseComponent):
             return self.params['background']\
                 +self._fractalcore(x[0])*self.model.run(x)
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self.params['background']\
                 +self._fractalcore(x)*self.model.run(x)
@@ -221,12 +221,13 @@ class FractalCoreShellModel(BaseComponent):
         """  
         if x.__class__.__name__ == 'list':
             q = math.sqrt(x[0]**2 + x[1]**2)
-            return self.params['background']+self._fractalcore(q)*self.model.runXY(x)
+            return self.params['background']\
+                +self._fractalcore(q)*self.model.runXY(x)
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
-            return self.params['background']+self._fractalcore(x)*self.model.runXY(x)
-
+            return self.params['background']\
+                +self._fractalcore(x)*self.model.runXY(x)
 
     def set_dispersion(self, parameter, dispersion):
         """

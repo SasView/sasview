@@ -1,9 +1,7 @@
-#!/usr/bin/env python
 """ 
     Provide I(q) = I_0 exp ( - R_g^2 q^2 / 3.0)
     Guinier function as a BaseComponent model
 """
-
 from sans.models.BaseComponent import BaseComponent
 import math
 
@@ -27,7 +25,7 @@ class GuinierModel(BaseComponent):
         
         ## Name of the model
         self.name = "Guinier"
-        self.description=""" I(q) = I_0 exp ( - R_g^2 q^2 / 3.0 )
+        self.description = """ I(q) = I_0 exp ( - R_g^2 q^2 / 3.0 )
         
                         List of default parameters:
                         I_0 = Scale
@@ -42,19 +40,25 @@ class GuinierModel(BaseComponent):
         self.details['scale'] = ['[1/cm]', None, None]
         self.details['rg']    = ['[A]', None, None]
         #list of parameter that cannot be fitted
-        self.fixed= []  
+        self.fixed = []  
+        
     def _guinier(self, x):
-        return self.params['scale'] * math.exp( -(self.params['rg']*x)**2 / 3.0 )  
+        """
+            Evaluate guinier function
+            :param x: q-value
+        """
+        return self.params['scale']*math.exp( -(self.params['rg']*x)**2/3.0 )  
    
     def run(self, x = 0.0):
-        """ Evaluate the model
+        """ 
+            Evaluate the model
             @param x: input q-value (float or [float, float] as [r, theta])
             @return: (guinier value)
         """
         if x.__class__.__name__ == 'list':
             return self._guinier(x[0])
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._guinier(x)
    
@@ -67,6 +71,6 @@ class GuinierModel(BaseComponent):
             q = math.sqrt(x[0]**2 + x[1]**2)
             return self._guinier(q)
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._guinier(x)

@@ -1,12 +1,13 @@
-#!/usr/bin/env python
-""" Provide cos(x) function as a BaseComponent model
+""" 
+    Provide cos(x) function as a BaseComponent model
 """
 
 from sans.models.BaseComponent import BaseComponent
 import math
  
 class Cos(BaseComponent):
-    """ Class that evaluates a cos(x) model. 
+    """ 
+        Class that evaluates a cos(x) model. 
     """
         
     def __init__(self):
@@ -17,7 +18,7 @@ class Cos(BaseComponent):
         
         ## Name of the model
         self.name = "Cos"
-        self.description='F(x)=cos(x)'
+        self.description = 'F(x)=cos(x)'
         ## Parameter details [units, min, max]
         self.details = {}
    
@@ -33,7 +34,7 @@ class Cos(BaseComponent):
         if x.__class__.__name__ == 'list':
             return math.cos(x[0]*math.cos(x[1]))*math.cos(x[0]*math.sin(x[1]))
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return math.cos(x)
    
@@ -45,8 +46,7 @@ class Cos(BaseComponent):
         if x.__class__.__name__ == 'list':
             return math.cos(x[0])*math.cos(x[1])
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return math.cos(x)
-   
-# End of file
+

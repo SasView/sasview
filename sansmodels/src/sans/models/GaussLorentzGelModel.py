@@ -1,9 +1,7 @@
-#!/usr/bin/env python
 """ 
-Provide I(q) = I_0 exp ( - R_g^2 q^2 / 3.0)
-GaussLorentzGel function as a BaseComponent model
+    Provide I(q) = I_0 exp ( - R_g^2 q^2 / 3.0)
+    GaussLorentzGel function as a BaseComponent model
 """
-
 from sans.models.BaseComponent import BaseComponent
 import math
 
@@ -55,11 +53,13 @@ class GaussLorentzGelModel(BaseComponent):
 
         #list of parameter that cannot be fitted
         self.fixed = []  
+        
     def _gausslorentzgel(self, x):
         """
         Model definition
         """
-        inten = self.params['scale_g']*math.exp(-1.0*x*x*self.params['stat_colength']* \
+        inten = self.params['scale_g'] \
+                *math.exp(-1.0*x*x*self.params['stat_colength']* \
                 self.params['stat_colength']/2.0) + self.params['scale_l']/ \
                 (1.0 + (x*self.params['dyn_colength'])* \
                  (x*self.params['dyn_colength'])) + self.params['background']
@@ -73,7 +73,7 @@ class GaussLorentzGelModel(BaseComponent):
         if x.__class__.__name__ == 'list':
             return self._gausslorentzgel(x[0])
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._gausslorentzgel(x)
    
@@ -86,6 +86,6 @@ class GaussLorentzGelModel(BaseComponent):
             q = math.sqrt(x[0]**2 + x[1]**2)
             return self._gausslorentzgel(q)
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._gausslorentzgel(x)

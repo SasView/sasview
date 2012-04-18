@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-""" Provide constant function as a BaseComponent model
+""" 
+    Provide constant function as a BaseComponent model
 """
 
 from sans.models.BaseComponent import BaseComponent
@@ -19,13 +19,13 @@ class Constant(BaseComponent):
         
         ## Name of the model
         self.name = "Constant"
-        self.description='F(c)= c where c is a constant'
+        self.description = 'F(c)= c where c is a constant'
         ## Parameter details [units, min, max]
         self.details = {}
         self.details['value'] = ['', None, None]
         self.params['value'] = 1.0
         #list of parameter that cannot be fitted
-        self.fixed= []
+        self.fixed = []
     def clone(self):
         """ Return a identical copy of self """
         obj = Constant()
