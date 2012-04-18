@@ -7,7 +7,8 @@
  */
 //[PYTHONCLASS] = CoreShellCylinderModel
 //[DISP_PARAMS] = radius, thickness, length, axis_theta, axis_phi
-//[DESCRIPTION] = <text>P(q,alpha)= scale/Vs*f(q)^(2) + bkg,  where: f(q)= 2(core_sld
+//[DESCRIPTION] = <text>P(q,alpha)= scale/Vs*f(q)^(2) + bkg,
+//      where: f(q)= 2(core_sld
 //			- solvant_sld)* Vc*sin[qLcos(alpha/2)]
 //			/[qLcos(alpha/2)]*J1(qRsin(alpha))
 //			/[qRsin(alpha)]+2(shell_sld-solvent_sld)
