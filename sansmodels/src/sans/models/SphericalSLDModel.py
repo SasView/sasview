@@ -4,7 +4,6 @@
 from sans.models.BaseComponent import BaseComponent
 from sans.models.SphereSLDModel import SphereSLDModel
 from copy import deepcopy
-from math import floor
 func_list = {'Erf(|nu|*z)':0, 'RPower(z^|nu|)':1, 'LPower(z^|nu|)':2, \
                      'RExp(-|nu|*z)':3, 'LExp(-|nu|*z)':4}
 max_nshells = 10
@@ -158,7 +157,7 @@ class SphericalSLDModel(BaseComponent):
                     self.model.setParam(key, 0)
                     continue
 
-                for nshell in range(self.n_shells,max_nshells):
+                for nshell in range(self.n_shells, max_nshells):
                     if key.split('_')[1] == 'flat%s' % str(nshell+1):
                         try:
                             if key.split('_')[0] == 'sld':
@@ -192,9 +191,8 @@ class SphericalSLDModel(BaseComponent):
         beta.append(self.params['sld_core0']) 
         z0 += self.params['rad_core0']
         # for layers from the core
-        for n in range(1, self.n_shells+2):
-            i = n
-            dz = self.params['thick_inter%s'% str(i-1)]/n_sub
+        for i in range(1, self.n_shells+2):
+            dz = self.params['thick_inter%s' % str(i-1)]/n_sub
             # j=0 for interface, j=1 for flat layer 
             for j in range(0, 2):
                 # interation for sub-layers
