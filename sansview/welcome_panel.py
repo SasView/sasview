@@ -86,7 +86,7 @@ class WelcomePage(ScrolledPanel):
    
     
     def __init__(self, parent, *args, **kwds):
-
+        import local_config
         kwds["style"] = wx.DEFAULT_DIALOG_STYLE
        
         ScrolledPanel.__init__(self, parent, **kwds)
