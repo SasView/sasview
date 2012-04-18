@@ -1,8 +1,10 @@
-   
+"""
+    Fractal Core-Shell model
+"""
 from sans.models.BaseComponent import BaseComponent
 from sans.models.CoreShellModel import CoreShellModel
 from scipy.special import gammaln
-from math import exp, sin, atan
+import math
 from numpy import power
 from copy import deepcopy
 
@@ -25,11 +27,11 @@ class FractalCoreShellModel(BaseComponent):
 
         ## Setting  model name model description
         model = CoreShellModel()
-        self.description=model
+        self.description = model
         
         self.model = model
         self.name = "FractalCoreShell"
-        self.description="""Scattering  from a fractal structure 
+        self.description = """Scattering  from a fractal structure 
         with a primary building block of a spherical particle 
         with particle with a core-shell structure.
         Note: Setting the (core) radius polydispersion with a Schulz 
@@ -63,11 +65,11 @@ class FractalCoreShellModel(BaseComponent):
         ## Parameter details [units, min, max]
         self._set_details()
 
-        ## parameters with orientation: can be removed since there is no orientational params
+        ## parameters with orientation:
         for item in self.model.orientation_params:
             self.orientation_params.append(item)
                 
-    def _fractalcore(self,x):
+    def _fractalcore(self, x):
         """
         Define model function
         
@@ -78,8 +80,8 @@ class FractalCoreShellModel(BaseComponent):
         corr = self.params['cor_length']
         r0 = self.params['radius']
         #calculate S(q)
-        sq = Df*exp(gammaln(Df-1.0))*sin((Df-1.0)*atan(x*corr))
-        sq /= power((x*r0),Df) * power((1.0 + 1.0/(x*corr*x*corr)),((Df-1)/2))
+        sq = Df*math.exp(gammaln(Df-1.0))*math.sin((Df-1.0)*math.atan(x*corr))
+        sq /= power((x*r0), Df) * power((1.0 + 1.0/(x*corr*x*corr)), ((Df-1)/2))
         sq += 1.0
         return sq
 
@@ -102,7 +104,7 @@ class FractalCoreShellModel(BaseComponent):
         """ 
         ##set dispersion from model 
         for name , value in self.model.dispersion.iteritems():      
-            self.dispersion[name]= value
+            self.dispersion[name] = value
                               
     def _set_params(self):
         """
@@ -125,7 +127,7 @@ class FractalCoreShellModel(BaseComponent):
                 value = 6.35e-06
             elif name == 'background':
                 value = 0.0
-            self.model.params[name]= value
+            self.model.params[name] = value
             if name  == 'scale':
                 name = 'volfraction'
             self.params[name]= value
@@ -137,11 +139,11 @@ class FractalCoreShellModel(BaseComponent):
         Concatenate details of the original model to create
         this model details 
         """
-        for name ,detail in self.model.details.iteritems():
+        for name, detail in self.model.details.iteritems():
             if name in self.params.iterkeys():
                 if name == 'scale':
                     name = 'volfraction'
-                self.details[name]= detail
+                self.details[name] = detail
         self.details['frac_dim']   = ['', None, None]
         self.details['cor_length'] = ['[A]', None, None]  
 
@@ -200,12 +202,13 @@ class FractalCoreShellModel(BaseComponent):
             # be defined in 1D for a given length of Q
             #qx = math.fabs(x[0]*math.cos(x[1]))
             #qy = math.fabs(x[0]*math.sin(x[1]))
-            return self.params['background']+self._fractalcore(x[0])*self.model.run(x)
+            return self.params['background']\
+                +self._fractalcore(x[0])*self.model.run(x)
         elif x.__class__.__name__ == 'tuple':
             raise ValueError, "Tuples are not allowed as input to BaseComponent models"
         else:
-            return self.params['background']+self._fractalcore(x)*self.model.run(x)
-
+            return self.params['background']\
+                +self._fractalcore(x)*self.model.run(x)
 
         return self.params['background']+self._fractalcore(x)*self.model.run(x)
 
@@ -232,10 +235,10 @@ class FractalCoreShellModel(BaseComponent):
         : param parameter: name of the parameter [string]
         :dispersion: dispersion object of type DispersionModel
         """
-        value= None
+        value = None
         try:
             if parameter in self.model.dispersion.keys():
-                value= self.model.set_dispersion(parameter, dispersion)
+                value = self.model.set_dispersion(parameter, dispersion)
             self._set_dispersion()
             return value
         except:
