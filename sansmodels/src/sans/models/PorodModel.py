@@ -1,17 +1,14 @@
-#!/usr/bin/env python
 """ 
     Provide I(q) = C/q^4,
     Porod function as a BaseComponent model
 """
-
 from sans.models.BaseComponent import BaseComponent
 import math
 
 class PorodModel(BaseComponent):
-    """ Class that evaluates a Porod model.
-    
-       I(q) = scale/q^4 +background
-        
+    """ 
+        Class that evaluates a Porod model.
+        I(q) = scale/q^4 +background
     """
         
     def __init__(self):
@@ -27,7 +24,7 @@ class PorodModel(BaseComponent):
         self.params = {}
         self.params['scale'] = 1.0
         self.params['background'] = 0.0
-        self.description= """The Porod model.
+        self.description = """The Porod model.
         I(q) = scale/q^4 +background"""
 
         ## Parameter details [units, min, max]
@@ -38,6 +35,10 @@ class PorodModel(BaseComponent):
         self.fixed = []
                
     def _porod(self, x):
+        """
+            Evaluate Porod function
+            :param x: q-value
+        """
         return self.params['scale']/x**4.0 + self.params['background']
    
     def run(self, x = 0.0):
@@ -48,7 +49,7 @@ class PorodModel(BaseComponent):
         if x.__class__.__name__ == 'list':
             return self._porod(x[0])
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._porod(x)
    
@@ -61,6 +62,6 @@ class PorodModel(BaseComponent):
             q = math.sqrt(x[0]**2 + x[1]**2)
             return self._porod(q)
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, "Tuples are not allowed as input to models"
         else:
             return self._porod(x)
