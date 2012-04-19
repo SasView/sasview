@@ -111,6 +111,11 @@ class StatusBar(wxStatusB):
         self.SetStatusWidths([hint_w+4, -2, -1, hint_w+15])
         self.SetMinHeight(hint_h)
         
+        rect = self.GetFieldRect(ICON_POSITION)
+        if rect.height > hint_h:
+            hint_h = rect.height
+            hint_w = rect.width
+        
         #display default message
         self.msg_position = MSG_POSITION 
         
