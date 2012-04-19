@@ -97,32 +97,40 @@ class Console(wx.Frame):
         
 class StatusBar(wxStatusB):
     """
+        Application status bar
     """
-    def __init__(self, parent, *args, **kargs):
-        wxStatusB.__init__(self, parent, *args, **kargs)
-        """
-        Implement statusbar functionalities 
-        """
+    def __init__(self, parent, id):
+        wxStatusB.__init__(self, parent, id)
         self.parent = parent
         self.parent.SetStatusBarPane(MSG_POSITION)
+
         #Layout of status bar
+        hint_w, hint_h = wx.ArtProvider.GetSizeHint(wx.ART_TOOLBAR)        
         self.SetFieldsCount(NB_FIELDS) 
-        self.SetStatusWidths([BUTTON_SIZE, -2, -1, BUTTON_SIZE])
+        # Leave some space for the resize handle in the last field
+        self.SetStatusWidths([hint_w+4, -2, -1, hint_w+15])
+        self.SetMinHeight(hint_h+4)
+        
         #display default message
         self.msg_position = MSG_POSITION 
-        #save the position of the gauge
-        width, height = self.GetSize()
-        self.gauge = wx.Gauge(self, size=(width/10, height-3),
+        
+        # Create progress bar
+        self.gauge = wx.Gauge(self, size=(hint_w, hint_h),
                                style=wx.GA_HORIZONTAL)
         self.gauge.Hide()
-        #status bar icon
+        
+        # Create status bar icon reflecting the type of status
+        # for the last message
         self.bitmap_bt_warning = wx.BitmapButton(self, -1,
-                                                 size=(BUTTON_SIZE,-1),
-                                                  style=wx.NO_BORDER)
-        console_bmp = wx.ArtProvider.GetBitmap(wx.ART_TIP, wx.ART_TOOLBAR,
-                                                size = (16,16))
+                                                 size=(hint_w, hint_h),
+                                                 style=wx.NO_BORDER)
+                
+        # Create the button used to show the console dialog
+        console_bmp = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_TOOLBAR,
+                                                size = (hint_w, hint_h))
         self.bitmap_bt_console = wx.BitmapButton(self, -1, 
-                                 size=(BUTTON_SIZE-5, height-4))
+                                 size=(hint_w, hint_h),
+                                 style=wx.NO_BORDER)
         self.bitmap_bt_console.SetBitmapLabel(console_bmp)
         console_hint = "History of status bar messages"
         self.bitmap_bt_console.SetToolTipString(console_hint)
@@ -164,11 +172,11 @@ class StatusBar(wxStatusB):
         """
         """
         rect = self.GetFieldRect(GAUGE_POSITION)
-        self.gauge.SetPosition((rect.x + 5, rect.y))
+        self.gauge.SetPosition((rect.x, rect.y))
         rect = self.GetFieldRect(ICON_POSITION)
-        self.bitmap_bt_warning.SetPosition((rect.x + 5, rect.y))
+        self.bitmap_bt_warning.SetPosition((rect.x, rect.y))
         rect = self.GetFieldRect(CONSOLE_POSITION)
-        self.bitmap_bt_console.SetPosition((rect.x - 5, rect.y))
+        self.bitmap_bt_console.SetPosition((rect.x, rect.y))
         self.sizeChanged = False
         
     def OnIdle(self, event):
@@ -268,16 +276,24 @@ class StatusBar(wxStatusB):
             return
         if not hasattr(event, "info"):
             return 
+        
+        rect = self.GetFieldRect(ICON_POSITION)
+        width = rect.GetWidth()
+        height = rect.GetHeight()  
+        
         msg = event.info.lower()
         if msg == "warning":
-            icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_WARNING, wx.ART_TOOLBAR)
+            icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_WARNING, wx.ART_TOOLBAR,
+                                                 size = (height,height))
             self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
-        if msg == "error":
-            icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_ERROR, wx.ART_TOOLBAR)
+        elif msg == "error":
+            icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_ERROR, wx.ART_TOOLBAR,
+                                                 size = (height,height))
             self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
-        if msg == "info":
+        else:
             icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_INFORMATION,
-                                                 wx.ART_TOOLBAR)
+                                                 wx.ART_TOOLBAR,
+                                                 size = (height,height))
             self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
     
     def set_message(self, event):

@@ -727,11 +727,6 @@ class ViewerFrame(wx.Frame):
         default_flag = wx.aui.AUI_MGR_DEFAULT#| wx.aui.AUI_MGR_ALLOW_ACTIVE_PANE
         self._mgr = wx.aui.AuiManager(self, flags=default_flag)
         self._mgr.SetDockSizeConstraint(0.5, 0.5)
-        # border color
-        #self.b_color = wx.aui.AUI_DOCKART_BORDER_COLOUR  
-        #self._mgr.GetArtProvider().SetColor(self.b_color, self.color)
-        #self._mgr.SetArtProvider(wx.aui.AuiDockArt(wx.AuiDefaultDockArt))
-        #print "set", self._dockart.GetColour(13)
         # Load panels
         self._load_panels()
         self.set_default_perspective()
