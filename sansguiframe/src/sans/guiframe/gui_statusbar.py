@@ -109,7 +109,7 @@ class StatusBar(wxStatusB):
         self.SetFieldsCount(NB_FIELDS) 
         # Leave some space for the resize handle in the last field
         self.SetStatusWidths([hint_w+4, -2, -1, hint_w+15])
-        self.SetMinHeight(hint_h+4)
+        self.SetMinHeight(hint_h)
         
         #display default message
         self.msg_position = MSG_POSITION 
@@ -121,16 +121,18 @@ class StatusBar(wxStatusB):
         
         # Create status bar icon reflecting the type of status
         # for the last message
-        self.bitmap_bt_warning = wx.BitmapButton(self, -1,
-                                                 size=(hint_w, hint_h),
-                                                 style=wx.NO_BORDER)
+        self.bitmap_bt_warning = \
+            wx.BitmapButton(self, -1,
+                            size=(hint_w, hint_h),
+                            style=wx.NO_BORDER|wx.BU_AUTODRAW)
                 
         # Create the button used to show the console dialog
-        console_bmp = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_TOOLBAR,
-                                                size = (hint_w, hint_h))
+        console_bmp = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, 
+                                               wx.ART_TOOLBAR,
+                                               size = (hint_w, hint_h))
         self.bitmap_bt_console = wx.BitmapButton(self, -1, 
                                  size=(hint_w, hint_h),
-                                 style=wx.NO_BORDER)
+                                 style=wx.NO_BORDER|wx.BU_AUTODRAW)
         self.bitmap_bt_console.SetBitmapLabel(console_bmp)
         console_hint = "History of status bar messages"
         self.bitmap_bt_console.SetToolTipString(console_hint)
