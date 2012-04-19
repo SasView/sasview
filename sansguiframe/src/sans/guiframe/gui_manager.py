@@ -3289,7 +3289,7 @@ class ViewerFrame(wx.Frame):
         Restart Idle
         """
         # restart idle   
-        self.idletimer.Restart(55*TIME_FACTOR, *args, **kwargs)
+        self.idletimer.Restart(100*TIME_FACTOR, *args, **kwargs)
 
         
 class DefaultPanel(wx.Panel, PanelBase):
