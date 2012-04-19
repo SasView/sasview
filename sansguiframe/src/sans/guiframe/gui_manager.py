@@ -611,7 +611,7 @@ class ViewerFrame(wx.Frame):
                 #update edit menu
                 self.enable_edit_menu()
     
-    def disable_app_menu(self,p_panel=None):  
+    def disable_app_menu(self, p_panel=None):  
         """
         Disables all menus in the menubar
         """
@@ -628,9 +628,9 @@ class ViewerFrame(wx.Frame):
         c_panel = self.cpanel_on_focus
 
         if not enable:
-            p_panel.on_set_focus(None)
             if self._toolbar is not None:
                 self._toolbar.update_toolbar(None)
+            p_panel.on_set_focus(None)
         else:
             self._toolbar.update_toolbar(c_panel)
         
@@ -1157,22 +1157,25 @@ class ViewerFrame(wx.Frame):
     
     def _update_toolbar_helper(self):
         """
+        Helping to update the toolbar
         """
         application_name = 'No Selected Analysis'
         panel_name = 'No Panel on Focus'
+        c_panel = self.cpanel_on_focus
         if self._toolbar is  None:
             return
-        if self.cpanel_on_focus is not None:
+        if c_panel is not None:
             self.reset_bookmark_menu(self.cpanel_on_focus)
-        self._toolbar.update_toolbar(self.cpanel_on_focus)
         if self._current_perspective is not None:
             application_name = self._current_perspective.sub_menu
-        if self.cpanel_on_focus is not None:
-            panel_name = self.cpanel_on_focus.window_caption
-            
+        c_panel_state = c_panel
+        if c_panel is not None:
+            panel_name = c_panel.window_caption
+            if not c_panel.IsShownOnScreen():
+                c_panel_state = None
+        self._toolbar.update_toolbar(c_panel_state)
         self._toolbar.update_button(application_name=application_name, 
                                         panel_name=panel_name)
-        
         self._toolbar.Realize()
         
     def _add_menu_tool(self):
