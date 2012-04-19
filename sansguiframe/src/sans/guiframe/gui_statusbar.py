@@ -105,22 +105,22 @@ class StatusBar(wxStatusB):
         self.parent.SetStatusBarPane(MSG_POSITION)
 
         #Layout of status bar
-        hint_w, hint_h = wx.ArtProvider.GetSizeHint(wx.ART_TOOLBAR)        
+        width, height = wx.ArtProvider.GetSizeHint(wx.ART_TOOLBAR)        
         self.SetFieldsCount(NB_FIELDS) 
         # Leave some space for the resize handle in the last field
-        self.SetStatusWidths([hint_w+4, -2, -1, hint_w+15])
-        self.SetMinHeight(hint_h)
+        self.SetStatusWidths([width+4, -2, -1, width+15])
+        self.SetMinHeight(height)
         
         rect = self.GetFieldRect(ICON_POSITION)
-        if rect.height > hint_h:
-            hint_h = rect.height
-            hint_w = rect.width
+        if rect.height > height:
+            height = rect.GetHeight()  
+            width = rect.GetWidth()
         
         #display default message
         self.msg_position = MSG_POSITION 
         
         # Create progress bar
-        self.gauge = wx.Gauge(self, size=(hint_w, hint_h),
+        self.gauge = wx.Gauge(self, size=(width, height),
                                style=wx.GA_HORIZONTAL)
         self.gauge.Hide()
         
@@ -128,15 +128,15 @@ class StatusBar(wxStatusB):
         # for the last message
         self.bitmap_bt_warning = \
             wx.BitmapButton(self, -1,
-                            size=(hint_w, hint_h),
+                            size=(width, height),
                             style=wx.NO_BORDER)
                 
         # Create the button used to show the console dialog
         console_bmp = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, 
                                                wx.ART_TOOLBAR,
-                                               size = (hint_w, hint_h))
+                                               size = (width, height))
         self.bitmap_bt_console = wx.BitmapButton(self, -1, 
-                                 size=(hint_w, hint_h),
+                                 size=(width, height),
                                  style=wx.NO_BORDER)
         self.bitmap_bt_console.SetBitmapLabel(console_bmp)
         console_hint = "History of status bar messages"
@@ -177,6 +177,7 @@ class StatusBar(wxStatusB):
         
     def reposition(self):
         """
+            Place the various fields in their proper position
         """
         rect = self.GetFieldRect(GAUGE_POSITION)
         self.gauge.SetPosition((rect.x, rect.y))
@@ -284,9 +285,15 @@ class StatusBar(wxStatusB):
         if not hasattr(event, "info"):
             return 
         
+        # Get the size of the button images
+        width, height = wx.ArtProvider.GetSizeHint(wx.ART_TOOLBAR)        
+
+        # Get the size of the field and choose the size of the 
+        # image accordingly
         rect = self.GetFieldRect(ICON_POSITION)
-        width = rect.GetWidth()
-        height = rect.GetHeight()  
+        if rect.height > height:
+            height = rect.GetHeight()
+            width = rect.GetWidth()
         
         msg = event.info.lower()
         if msg == "warning":
