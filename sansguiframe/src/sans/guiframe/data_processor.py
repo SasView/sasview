@@ -778,8 +778,10 @@ class GridPanel(SPanel):
         self._data_outputs = data_outputs
         self.x = []
         self.y  = []
+        self.dy  = []
         self.x_axis_label = None
         self.y_axis_label = None
+        self.dy_axis_label = None
         self.x_axis_title = None
         self.y_axis_title = None
         self.x_axis_unit = None
@@ -810,6 +812,14 @@ class GridPanel(SPanel):
         self.y_axis_label.SetValue("%s[:]" % str(label))
         self.y_axis_title.SetValue(str(label))
         
+    def set_dyaxis(self, label="", dy=None):
+        """
+        """
+        if dy is None:
+            dy = []
+        self.dy = dy
+        self.dy_axis_label.SetValue("%s[:]" % str(label))
+                
     def get_plot_axis(self, col, list):
         """
        
@@ -958,29 +968,42 @@ class GridPanel(SPanel):
              return
 
         dict = parse_string(sentence, column_names.keys())
-        for tok, (col_name, list) in dict.iteritems():
-            col = column_names[col_name]
-            xaxis = self.get_plot_axis(col, list)
-            sentence = sentence.replace(tok, 
-                                        "numpy.array(%s)" % str(xaxis))
-        for key, value in FUNC_DICT.iteritems():
-            sentence = sentence.replace(key.lower(), value)
-        x = eval(sentence)
+        sentence = self.get_sentence(dict, sentence, column_names)
+        try:
+            x = eval(sentence)
+        except:
+            msg = "Need a proper x-range."
+            wx.PostEvent(self.parent.parent, 
+                             StatusEvent(status=msg, info="error")) 
+            return
         #evaluate y
         sentence = self.y_axis_label.GetValue()
         if sentence.strip() == "":
             msg = "select value for y axis"
             raise ValueError, msg
         dict = parse_string(sentence, column_names.keys())
-        for tok, (col_name, list) in dict.iteritems():
-            col = column_names[col_name]
-            yaxis = self.get_plot_axis(col, list)
-            sentence = sentence.replace(tok, 
-                                        "numpy.array(%s)" % str(yaxis))
-        for key, value in FUNC_DICT.iteritems():
-            sentence = sentence.replace(key, value)
-        y = eval(sentence)
-        if len(x) != len(y) and (len(x) == 0 or len(y) == 0):
+        sentence = self.get_sentence(dict, sentence, column_names)
+        try:
+            y = eval(sentence)
+        except:
+            msg = "Need a proper y-range."
+            wx.PostEvent(self.parent.parent, 
+                             StatusEvent(status=msg, info="error")) 
+            return
+        #evaluate y
+        sentence = self.dy_axis_label.GetValue()
+        dy = None
+        if sentence.strip() != "":
+            dict = parse_string(sentence, column_names.keys())
+            sentence = self.get_sentence(dict, sentence, column_names)
+            try:
+                dy = eval(sentence)
+            except:
+                msg = "Need a proper dy-range."
+                wx.PostEvent(self.parent.parent, 
+                                 StatusEvent(status=msg, info="error")) 
+                return
+        if len(x) != len(y) or (len(x) == 0 or len(y) == 0):
             msg = "Need same length for X and Y axis and both greater than 0"
             msg += " to plot.\n"
             msg += "Got X length = %s, Y length = %s" % (str(len(x)),
@@ -988,9 +1011,16 @@ class GridPanel(SPanel):
             wx.PostEvent(self.parent.parent, 
                              StatusEvent(status=msg, info="error")) 
             return
-            
+        if dy != None and (len(y) != len(dy)):  
+            msg = "Need same length for Y and dY axis and both greater than 0"
+            msg += " to plot.\n"
+            msg += "Got Y length = %s, dY length = %s" % (str(len(y)),
+                                                          str(len(dy)))
+            wx.PostEvent(self.parent.parent, 
+                             StatusEvent(status=msg, info="error")) 
+            return
         #plotting
-        new_plot = Data1D(x=x, y=y)
+        new_plot = Data1D(x=x, y=y, dy=dy)
         new_plot.id =  wx.NewId()
         new_plot.group_id = wx.NewId()
         title = "%s vs %s" % (self.y_axis_title.GetValue(), 
@@ -1013,7 +1043,20 @@ class GridPanel(SPanel):
         except:
              wx.PostEvent(self.parent.parent, 
                              StatusEvent(status=msg, info="error")) 
-
+    
+    def get_sentence(self, dict, sentence, column_names):
+        """
+        Get sentence from dict
+        """
+        for tok, (col_name, list) in dict.iteritems():
+            col = column_names[col_name]
+            axis = self.get_plot_axis(col, list)
+            sentence = sentence.replace(tok, 
+                                        "numpy.array(%s)" % str(axis))
+        for key, value in FUNC_DICT.iteritems():
+            sentence = sentence.replace(key.lower(), value)
+        return sentence
+            
     def layout_grid(self):
         """
         Draw the area related to the grid
@@ -1031,12 +1074,16 @@ class GridPanel(SPanel):
         self.y_axis_title = wx.TextCtrl(self, -1)
         self.x_axis_label = wx.TextCtrl(self, -1, size=(200, -1))
         self.y_axis_label = wx.TextCtrl(self, -1, size=(200, -1))
+        self.dy_axis_label = wx.TextCtrl(self, -1, size=(200, -1))
         self.x_axis_add = wx.Button(self, -1, "Add")
         self.x_axis_add.Bind(event=wx.EVT_BUTTON, handler=self.on_edit_axis, 
                             id=self.x_axis_add.GetId())
         self.y_axis_add = wx.Button(self, -1, "Add")
         self.y_axis_add.Bind(event=wx.EVT_BUTTON, handler=self.on_edit_axis, 
                             id=self.y_axis_add.GetId())
+        self.dy_axis_add = wx.Button(self, -1, "Add")
+        self.dy_axis_add.Bind(event=wx.EVT_BUTTON, handler=self.on_edit_axis, 
+                            id=self.dy_axis_add.GetId())
         self.x_axis_unit = wx.TextCtrl(self, -1)
         self.y_axis_unit = wx.TextCtrl(self, -1)
         self.view_button = wx.Button(self, -1, "View Fits")
@@ -1074,6 +1121,11 @@ class GridPanel(SPanel):
                     (self.y_axis_title,  wx.BOTTOM, 10),
                     (wx.StaticText(self, -1 , "Y-axis Unit"), 1, wx.BOTTOM, 10),
                     (self.y_axis_unit, 1, wx.BOTTOM, 10),
+                    (wx.StaticText(self, -1, 
+                                   "dY Label (Optional)\nSelection Range"), 1, 
+                     wx.BOTTOM|wx.LEFT, 10),
+                    (self.dy_axis_label, wx.BOTTOM, 10),
+                    (self.dy_axis_add, 1, wx.BOTTOM|wx.RIGHT, 10),
                       (-1, -1),
                       (-1, -1),
                       (-1, -1),
@@ -1101,6 +1153,9 @@ class GridPanel(SPanel):
         elif tcrtl == self.y_axis_add:
             self.edit_axis_helper(self.y_axis_label, self.y_axis_title,
                                    label, title)
+        elif tcrtl == self.dy_axis_add:
+            self.edit_axis_helper(self.dy_axis_label, None,
+                                   label, None)
             
     def create_axis_label(self, cell_list):
         """
@@ -1116,8 +1171,10 @@ class GridPanel(SPanel):
         """
         get controls to modify
         """
-        tcrtl_label.SetValue(str(label))
-        tcrtl_title.SetValue(str(title))
+        if label != None:
+            tcrtl_label.SetValue(str(label))
+        if title != None:
+            tcrtl_title.SetValue(str(title))
         
     def add_column(self):
         """
