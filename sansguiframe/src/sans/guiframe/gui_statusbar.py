@@ -129,7 +129,7 @@ class StatusBar(wxStatusB):
         self.bitmap_bt_warning = \
             wx.BitmapButton(self, -1,
                             size=(hint_w, hint_h),
-                            style=wx.NO_BORDER|wx.BU_AUTODRAW)
+                            style=wx.NO_BORDER)
                 
         # Create the button used to show the console dialog
         console_bmp = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, 
@@ -137,7 +137,7 @@ class StatusBar(wxStatusB):
                                                size = (hint_w, hint_h))
         self.bitmap_bt_console = wx.BitmapButton(self, -1, 
                                  size=(hint_w, hint_h),
-                                 style=wx.NO_BORDER|wx.BU_AUTODRAW)
+                                 style=wx.NO_BORDER)
         self.bitmap_bt_console.SetBitmapLabel(console_bmp)
         console_hint = "History of status bar messages"
         self.bitmap_bt_console.SetToolTipString(console_hint)
