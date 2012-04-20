@@ -166,7 +166,10 @@ class GridPage(sheet.CSheet):
         self.last_selected_col = col
         self.last_selected_row = row
         if col >= 0:
-            label_row = 0
+            if flag:
+                label_row = row
+            else:
+                label_row = 0
             self.axis_label = self.GetCellValue(label_row, col)
             self.selected_cols.append(col)
         if flag_shift:
@@ -1126,8 +1129,8 @@ class GridPanel(SPanel):
                     (wx.StaticText(self, -1 , "Y-axis Unit"), 1, wx.BOTTOM, 10),
                     (self.y_axis_unit, 1, wx.BOTTOM, 10),
                     (wx.StaticText(self, -1, 
-                                   "dY Label (Optional)\nSelection Range"), 1, 
-                     wx.BOTTOM|wx.LEFT, 10),
+                                   "dY-Bar (Optional)\nSelection Range"),  
+                                   1, wx.BOTTOM|wx.LEFT, 10),
                     (self.dy_axis_label, wx.BOTTOM, 10),
                     (self.dy_axis_add, 1, wx.BOTTOM|wx.RIGHT, 10),
                       (-1, -1),
