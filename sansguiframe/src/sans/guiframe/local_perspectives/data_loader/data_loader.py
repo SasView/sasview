@@ -177,6 +177,7 @@ class Plugin(PluginBase):
         log_msg = ''
         output = {}
         error_message = ""
+        info = "info"
         for p_file in path:
             basename  = os.path.basename(p_file)
             root, extension = os.path.splitext(basename)
@@ -199,7 +200,7 @@ class Plugin(PluginBase):
                     data = self.parent.create_gui_data(temp, p_file)
                     output[data.id] = data
                 message = "Loading Data..." + str(p_file) + "\n"
-                self.load_update(output=output, message=message)
+                self.load_update(output=output, message=message, info=info)
             except:
                  error = "Error while loading Data: %s\n" % str(p_file)
                  error += str(sys.exc_value) + "\n"
@@ -208,27 +209,31 @@ class Plugin(PluginBase):
                  error_message += " is properly formatted.\n\n"
                  error_message += "When contacting the DANSE team, mention the"
                  error_message += " following:\n%s" % str(error)
-                 self.load_update(output=output, message=error_message)
+                 info = "error"
+                 self.load_update(output=output, message=error_message, 
+                                  info=info)
                 
         message = "Loading Data Complete! "
         message += log_msg
+        if error_message!= "":
+            info = 'error'
         self.load_complete(output=output, error_message=error_message,
-                       message=message, path=path)
+                       message=message, path=path, info=info)
             
-    def load_update(self, output=None, message=""):
+    def load_update(self, output=None, message="", info="warning"):
         """
         print update on the status bar
         """
         if message != "":
-            wx.PostEvent(self.parent, StatusEvent(status=message,
-                                                  type="progress",
-                                                   info="warning"))
-    def load_complete(self, output, message="", error_message="", path=None):
+            wx.PostEvent(self.parent, StatusEvent(status=message, info=info, 
+                                                  type="progress"))
+    def load_complete(self, output, message="", error_message="", path=None, 
+                      info="warning"):
         """
          post message to  status bar and return list of data
         """
-        wx.PostEvent(self.parent, StatusEvent(status=message,
-                                              info="warning",
+        wx.PostEvent(self.parent, StatusEvent(status=message, 
+                                              info=info,
                                               type="stop"))
         if error_message != "":
             self.load_error(error_message)

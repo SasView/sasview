@@ -262,8 +262,9 @@ class GridPage(sheet.CSheet):
         """
         
         col = event.GetCol()
+        row = event.GetRow()
         # Ignore the index column
-        if col < 0:
+        if col < 0 or row != -1:
             return
         self.selected_cols = []
         self.selected_cols.append(col)
