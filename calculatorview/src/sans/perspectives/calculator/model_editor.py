@@ -18,14 +18,14 @@ from wx.py.editwindow import EditWindow
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
     PNL_WIDTH = 460
-    PNL_HITE = 300
+    PNL_HITE = 320
 else:
     FONT_VARIANT = 1
     PNL_WIDTH = 500
-    PNL_HITE = 370
+    PNL_HITE = 400
 M_NAME = 'SumModel'
 EDITOR_WIDTH = 800
-EDITOR_HEIGTH = 700
+EDITOR_HEIGTH = 720
 PANEL_WIDTH = 500
 _BOX_WIDTH = 51
 
@@ -73,6 +73,9 @@ class TextDialog(wx.Dialog):
         self.model_list = model_list
         self.model1_string = "SphereModel"
         self.model2_string = "CylinderModel"
+        self._notes = ''
+        self._msg_box = None
+        self.msg_sizer = None
         self._build_sizer()
         self.model1_name = str(self.model1.GetValue())
         self.model2_name = str(self.model2.GetValue())
@@ -151,6 +154,10 @@ class TextDialog(wx.Dialog):
         explanation  = "  custom model = scale_factor * (model1 + model2)\n"
         #explanation  += "  Note: This will overwrite the previous sum model.\n"
         model_string = " Model%s (p%s):"
+        # msg
+        self._msg_box = wx.StaticText(self, -1, self._notes)
+        self.msg_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.msg_sizer.Add(self._msg_box, 0, wx.LEFT, 0)
         vbox.Add(self.name_hsizer)
         vbox.Add(self.desc_sizer)
         vbox.Add(sizer)
@@ -173,6 +180,8 @@ class TextDialog(wx.Dialog):
                   (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         vbox.Add((10,10))
         vbox.Add(self.static_line_1, 0, wx.EXPAND, 10)
+        vbox.Add(self.msg_sizer, 0, 
+                 wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE|wx.BOTTOM, 10)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         sizer_button.Add(self.okButton, 0, 
@@ -213,9 +222,15 @@ class TextDialog(wx.Dialog):
                 msg = "Name exists already."
                 wx.MessageBox(msg, info)  
                 self._notes = msg
+                color = 'red'
+                self._msg_box.SetLabel(msg)
+                self._msg_box.SetForegroundColour(color)
                 return self.good_name
         self.fname = os.path.join(self.plugin_dir, t_fname)
-        self._notes = "SumModel function (%s) has been set. \n" % str(title)
+        s_title = title
+        if len(title) > 20:
+            s_title = title[0:19] + '...'
+        self._notes = "SumModel function (%s) has been set! \n" % str(s_title)
         self.good_name = True
         self.on_apply(self.fname)
         return self.good_name
@@ -234,9 +249,13 @@ class TextDialog(wx.Dialog):
             self.parent.update_custom_combo()
             msg = self._notes
             info = 'Infor'
+            color = 'blue'
         except:
             msg= "Easy Custom Sum: Error occurred..."
             info = 'Error'
+            color = 'red'
+        self._msg_box.SetLabel(msg)
+        self._msg_box.SetForegroundColour(color)
         if self.parent.parent != None:
             from sans.guiframe.events import StatusEvent 
             wx.PostEvent(self.parent.parent, StatusEvent(status = msg, 
@@ -349,6 +368,8 @@ class EditorPanel(wx.ScrolledWindow):
         self.param_strings = ''
         self.function_strings = ''
         self._notes = ""
+        self._msg_box = None
+        self.msg_sizer = None
         self.warning = ""
         self._description = "New Custom Model"
         #self._default_save_location = os.getcwd()
@@ -368,6 +389,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.param_sizer = wx.BoxSizer(wx.VERTICAL)
         self.function_sizer = wx.BoxSizer(wx.VERTICAL)
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.msg_sizer = wx.BoxSizer(wx.HORIZONTAL)
         
     def _layout_name(self):
         """
@@ -443,7 +465,13 @@ class EditorPanel(wx.ScrolledWindow):
         self.function_tcl.SetToolTipString(hint_function)
         self.function_sizer.Add(function_txt, 0, wx.LEFT, 10)
         self.function_sizer.Add( self.function_tcl, 1, wx.EXPAND|wx.ALL, 10)
-
+        
+    def _layout_msg(self):
+        """
+        Layout msg
+        """
+        self._msg_box = wx.StaticText(self, -1, self._notes)
+        self.msg_sizer.Add(self._msg_box, 0, wx.LEFT, 10)  
                     
     def _layout_button(self):  
         """
@@ -461,7 +489,7 @@ class EditorPanel(wx.ScrolledWindow):
                                     wx.LEFT, EDITOR_WIDTH * 0.8),
                                    (self.bt_close, 0, 
                                     wx.LEFT|wx.BOTTOM, 15)])
-        
+          
     def _do_layout(self):
         """
         Draw the current panel
@@ -471,6 +499,7 @@ class EditorPanel(wx.ScrolledWindow):
         self._layout_description()
         self._layout_param()
         self._layout_function()
+        self._layout_msg()
         self._layout_button()
         self.main_sizer.AddMany([(self.name_sizer, 0,  
                                         wx.EXPAND|wx.ALL, 5),
@@ -488,6 +517,8 @@ class EditorPanel(wx.ScrolledWindow):
                                          wx.EXPAND|wx.ALL, 5),
                                  (wx.StaticLine(self), 0, 
                                        wx.ALL|wx.EXPAND, 5),
+                                 (self.msg_sizer, 0, 
+                                        wx.EXPAND|wx.ALL, 5),
                                 (self.button_sizer, 0,
                                          wx.EXPAND|wx.ALL, 5)])
         self.SetSizer(self.main_sizer)
@@ -512,6 +543,7 @@ class EditorPanel(wx.ScrolledWindow):
         """
         Check name if exist already
         """
+        self._notes = ''
         self.on_change_name(None)
         plugin_dir = self.path
         list_fnames = os.listdir(plugin_dir)
@@ -524,8 +556,11 @@ class EditorPanel(wx.ScrolledWindow):
                 self.name_tcl.SetBackgroundColour('pink')
                 return False
         self.fname = os.path.join(plugin_dir, t_fname)
+        s_title = title
+        if len(title) > 20:
+            s_title = title[0:19] + '...'
         self._notes += "Model function name set "
-        self._notes += "to %s. \n" % str(title)
+        self._notes += "to %s. \n" % str(s_title)
         return True
     
     def on_over_cb(self, event):
@@ -574,10 +609,17 @@ class EditorPanel(wx.ScrolledWindow):
             if self.base != None:
                 self.base.update_custom_combo()
             msg = "Successful!!!"
+            msg += "  " + self._notes
+            msg += " Please look for it in the 'Customized Models' box."
             info = 'Info'
+            color = 'blue'
         else:
             info = 'Error'
+            color = 'red'
             wx.MessageBox(msg, info)  
+        
+        self._msg_box.SetLabel(msg)
+        self._msg_box.SetForegroundColour(color)
         # Send msg to the top window  
         if self.base != None:
                 from sans.guiframe.events import StatusEvent 
