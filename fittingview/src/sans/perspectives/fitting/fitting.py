@@ -1787,7 +1787,7 @@ class Plugin(PluginBase):
             new_plot.group_id = data.group_id#self.page_finder[page_id].get_graph_id()
             if new_plot.group_id == None:
                 new_plot.group_id = data.group_id
-            new_plot.id =  str(page_id) + "model"
+            new_plot.id =  str(page_id) + "model-" + data.name
             #if new_plot.id in self.color_dict:
             #    new_plot.custom_color = self.color_dict[new_plot.id] 
             #find if this theory was already plotted and replace that plot given
@@ -1866,7 +1866,7 @@ class Plugin(PluginBase):
         new_plot= Data2D(image=image, err_image=data.err_data)
         new_plot.name = model.name
         new_plot.title = "Analytical model 2D "
-        new_plot.id = str(page_id) + "model"
+        new_plot.id = str(page_id) + "model-" + data.name
         new_plot.group_id = str(page_id) + " Model2D"
         new_plot.detector = data.detector
         new_plot.source = data.source
