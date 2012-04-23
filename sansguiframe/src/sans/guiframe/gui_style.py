@@ -53,6 +53,7 @@ class GUIFRAME_ICON:
     RESET_ID_PATH = os.path.join(PATH, 'reset.png')
     PREVIEW_ID_PATH = os.path.join(PATH, 'report.png')
     PRINT_ID_PATH = os.path.join(PATH, 'printer.png')
+    HIDE_ID_PATH = os.path.join(PATH, 'hide.png')
     
   
     SAVE_ICON = wx.Image(os.path.join(PATH, 'save.png'))
@@ -69,6 +70,7 @@ class GUIFRAME_ICON:
     REPORT_ICON = wx.Image(os.path.join(PATH, 'report.png'))
     PREVIEW_ICON = wx.Image(os.path.join(PATH, 'preview.png'))
     PRINT_ICON = wx.Image(os.path.join(PATH, 'printer.png'))
+    HIDE_ICON = wx.Image(os.path.join(PATH, 'hide.png'))
 
 if __name__ == "__main__":
   
@@ -82,6 +84,3 @@ if __name__ == "__main__":
     style1 &= (~GUIFRAME.MANAGER_ON)
     print style1 == GUIFRAME.DEFAULT_STYLE
     print style1
-    
- 
-  

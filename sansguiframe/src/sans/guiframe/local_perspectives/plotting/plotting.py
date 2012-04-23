@@ -143,7 +143,7 @@ class Plugin(PluginBase):
     def create_panel_helper(self, new_panel, data, group_id, title=None):
         """
         """
-         ## Set group ID if available
+        ## Set group ID if available
         ## Assign data properties to the new create panel
         new_panel.set_manager(self)
         new_panel.group_id = group_id
@@ -173,8 +173,6 @@ class Plugin(PluginBase):
                                   helpString)
         self.menu.Check(event_id, IS_WIN)
         wx.EVT_MENU(self.parent, event_id, self._on_check_menu)
-
-        wx.EVT_SHOW(new_panel, self._on_close_panel)
 
         
     def create_1d_panel(self, data, group_id):
@@ -308,7 +306,7 @@ class Plugin(PluginBase):
             else:
                 new_panel = self.create_2d_panel(data, group_id)
             self.create_panel_helper(new_panel, data, group_id, title)
-      
+            
         return
 
     def _on_check_menu(self, event):
@@ -339,28 +337,3 @@ class Plugin(PluginBase):
                 except:
                     pass  
         frame.Show(True)
-              
-    def _on_close_panel(self, event):
-        """
-        Update check mark on panel's show and hide event
-        """
-        event.Skip()
-        panel = event.GetEventObject()
-        id = panel.uid
-        if event.GetShow() and self.parent._mgr.GetPane(panel).IsShown():
-            try:
-                if self.menu.FindItemById(id) != None:
-                    if not self.menu.IsChecked(id):
-                        self.menu.Check(id, True)
-                        #self.menu.Enable(id, False)
-            except:
-                # when no such item; may happens after delete
-                pass
-        else:
-            try:
-                if self.menu.FindItemById(id) != None:
-                    if self.menu.IsChecked(id):
-                        self.menu.Check(id, False)
-                        #self.menu.Enable(id, True)
-            except:
-                pass 

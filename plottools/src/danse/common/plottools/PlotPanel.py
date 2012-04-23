@@ -594,7 +594,7 @@ class PlotPanel(wx.Panel):
                 self._scale_yhi = hi
                 ax.set_ylim((lo,hi))
         else:
-             # Check if zoom happens in the axes
+            # Check if zoom happens in the axes
             xdata, ydata = None, None
             x, y = event.x, event.y
            

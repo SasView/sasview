@@ -33,6 +33,7 @@ from sans.guiframe.events import EVT_NEW_LOADED_DATA
 from sans.guiframe.utils import PanelMenu
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.panel_base import PanelBase
+from sans.guiframe.gui_style import GUIFRAME_ICON
 from binder import BindArtist
 
 DEFAULT_QMAX = 0.05
@@ -92,7 +93,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.canvas.set_resizing(self.resizing)
         self.Bind(wx.EVT_SIZE, self._OnReSize)
         self._add_more_tool()
-        self.parent.SetFocus() 
+        self.parent.SetFocus()
+        
         
     def get_symbol_label(self):
         """
@@ -681,18 +683,16 @@ class ModelPanel1D(PlotPanel, PanelBase):
             
     def _add_more_tool(self):
         """
-        Add refresh, add/delete button in the tool bar
+        Add refresh, add/hide button in the tool bar
         """
         if self.parent.__class__.__name__ != 'ViewerFrame':
             return
         self.toolbar.AddSeparator()
         id_delete = wx.NewId()
-        delete =  wx.ArtProvider.GetBitmap(wx.ART_DELETE, wx.ART_TOOLBAR)
-        self.toolbar.AddSimpleTool(id_delete, delete,
-                           'Delete', 'permanently Delete')
-
+        delete = wx.Bitmap(GUIFRAME_ICON.HIDE_ID_PATH, wx.BITMAP_TYPE_PNG)
+        self.toolbar.AddSimpleTool(id_delete, delete, 'Hide', 'Hide')
         self.toolbar.Realize()
-        wx.EVT_TOOL(self, id_delete,  self._on_delete)
+        wx.EVT_TOOL(self, id_delete,  self._on_hide)
         
         """
         self.toolbar.AddSeparator()
@@ -704,14 +704,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.toolbar.Realize()
         wx.EVT_TOOL(self, id_text,  self._on_removetext)
         """
-    def _on_delete(self, event): 
-        """
-        Refreshes the plotpanel on refresh tollbar button
-        """
         
+    def _on_hide(self, event):
+        """
+        Hides the plot when button is pressed
+        """     
         if self.parent is not None:
-            wx.PostEvent(self.parent, 
-                         NewPlotEvent(group_id=self.group_id,
-                                      action="delete"))
+            self.parent.hide_panel(self.uid)
             
             

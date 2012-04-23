@@ -426,7 +426,6 @@ class ViewerFrame(wx.Frame):
                 details += line
             if count >= 2:
                 column_names_line = line
-                first_data_index = index
                 break 
            
         if column_names_line.strip() == "" or index is None:
@@ -459,8 +458,8 @@ class ViewerFrame(wx.Frame):
             separator = ","
         fd.write(str(details))
         for col_name  in data.keys():
-             fd.write(str(col_name))
-             fd.write(separator)
+            fd.write(str(col_name))
+            fd.write(separator)
         fd.write('\n')
         max_list = [len(value) for value in data.values()]
         if len(max_list) == 0:
@@ -903,7 +902,7 @@ class ViewerFrame(wx.Frame):
        
         # Show a default panel with some help information
         # It also sets the size of the application windows
-        #TODO: Use this for slpash screen
+        #TODO: Use this for splash screen
         if self.defaultPanel is None:
             self.defaultPanel = DefaultPanel(self, -1, style=wx.RAISED_BORDER)
         # add a blank default panel always present 
@@ -1027,6 +1026,20 @@ class ViewerFrame(wx.Frame):
             menu_list.extend(item.get_context_menu(plotpanel=plotpanel))
         return menu_list
         
+        
+    def on_panel_close(self, event):
+        """
+        Gets called when the close event for a panel runs.
+        This will check which panel has been closed and
+        delete it.
+        """
+        panel = event.GetPane()
+        for ID in self.plot_panels.keys():
+            if self.plot_panels[ID].window_name == panel.name:
+                self.delete_panel(ID)
+                break
+    
+    
     def popup_panel(self, p):
         """
         Add a panel object to the AUI manager
@@ -1044,16 +1057,7 @@ class ViewerFrame(wx.Frame):
         else:
             windowcaption = 'Graph'#p.window_caption
         windowname = p.window_name
-        """
-        count = 0
-        for item in self.panels:
-            if self.panels[item].window_name.startswith(p.window_name)\
-               or self._mgr.GetPane(p.window_name).IsOk(): 
-                count += 1
-        
-        if count > 0:
-            windowname += str(count+1)
-        """
+
         # Append nummber
         captions = self._get_plotpanel_captions()
         while (1):
@@ -1066,7 +1070,6 @@ class ViewerFrame(wx.Frame):
                 break
         if p.window_caption.split()[0] not in NOT_SO_GRAPH_LIST:
             p.window_caption = caption 
-        #p.window_caption = windowcaption+ str(self.graph_num)
         p.window_name = windowname + str(self.graph_num)
         
         style1 = self.__gui_style & GUIFRAME.FIXED_PANEL
@@ -1099,7 +1102,9 @@ class ViewerFrame(wx.Frame):
                                                PLOPANEL_HEIGTH)))
             
             self._popup_floating_panel(p)
-  
+        
+        # Register for closing of panels
+        self.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.on_panel_close)
         # Register for showing/hiding the panel
         wx.EVT_MENU(self, ID, self.on_view)
         if p not in self.plot_panels.values() and p.group_id != None:
@@ -1474,7 +1479,7 @@ class ViewerFrame(wx.Frame):
         add menu file
         """
         
-         # File menu
+        # File menu
         self._file_menu = wx.Menu()
         #append item from plugin under menu file if necessary
         self._populate_file_menu()
@@ -1741,6 +1746,8 @@ class ViewerFrame(wx.Frame):
         if ID in self.panels.keys():
             if self._mgr.GetPane(self.panels[ID].window_name).IsShown():
                 self._mgr.GetPane(self.panels[ID].window_name).Hide()
+                item = self._plotting_plugin.menu.FindItemById(uid)
+                item.Check(False)
                 if self._data_panel is not None and \
                             ID in self.plot_panels.keys():
                     self._data_panel.cb_plotpanel.Append(str(caption), p)
@@ -1768,7 +1775,7 @@ class ViewerFrame(wx.Frame):
             panel.clear()
             panel.Close()
             if panel in self.schedule_full_draw_list:
-               self.schedule_full_draw_list.remove(panel) 
+                self.schedule_full_draw_list.remove(panel) 
             
             #delete uid number not str(uid)
             if ID in self.plot_panels.keys():
@@ -1838,7 +1845,7 @@ class ViewerFrame(wx.Frame):
         else:
             path = os.path.abspath(path)
             if not os.path.isfile(path) and not os.path.isdir(path):
-               return
+                return
             
             if os.path.isdir(path):
                 self.load_folder(path)
@@ -2053,10 +2060,10 @@ class ViewerFrame(wx.Frame):
                 msg = "%s cannot read %s\n" % (str(APPLICATION_NAME), str(path))
                 logging.error(msg)
         except:
-           msg = "Error occurred while saving: "
-           msg += "To save, at leat one application panel "
-           msg += "should have a data set.."
-           wx.PostEvent(self, StatusEvent(status=msg))    
+            msg = "Error occurred while saving: "
+            msg += "To save, at leat one application panel "
+            msg += "should have a data set.."
+            wx.PostEvent(self, StatusEvent(status=msg))    
                     
     def on_save_helper(self, doc, reader, panel, path):
         """
@@ -3496,5 +3503,3 @@ class ViewApp(wx.App):
 if __name__ == "__main__": 
     app = ViewApp(0)
     app.MainLoop()
-
-             
