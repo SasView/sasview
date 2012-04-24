@@ -198,13 +198,11 @@ class ModelPanel2D(ModelPanel1D):
             self.plots[data.id] = data
             self.graph.add(self.plots[data.id]) 
             # update qmax with the new xmax of data plotted
-            self.qmax = data.xmax
-            
+            self.qmax = data.xmax  
         self.slicer = None
         # Check axis labels
         #TODO: Should re-factor this
-        ## render the graph with its new content
-                
+        ## render the graph with its new content   
         #data2D: put 'Pixel (Number)' for axis title and unit in case of having no detector info and none in _units
         if len(data.detector) < 1: 
             if len(data._xunit) < 1 and len(data._yunit) < 1:
@@ -212,16 +210,13 @@ class ModelPanel2D(ModelPanel1D):
                 data._yaxis = '\\rm{y}'
                 data._xunit = 'pixel'
                 data._yunit = 'pixel'
-        
         # graph properties
         self.graph.xaxis(data._xaxis, data._xunit)
         self.graph.yaxis(data._yaxis, data._yunit)
         if self._is_changed_legend_label:   
                 data.label = self.title_label
-        
         if data.label == None:
-            data.label = data.name
-            
+            data.label = data.name   
         if not self.title_font:
             self.graph.title(data.label)
             self.graph.render(self)
@@ -234,9 +229,12 @@ class ModelPanel2D(ModelPanel1D):
             self.subplot.set_title(label=data.label,
                                    fontproperties=self.title_font,
                                    color=self.title_color)
-            self.subplot.figure.canvas.draw_idle() 
-        
-        
+            self.subplot.figure.canvas.draw_idle()    
+        # Update Graph menu and help string        
+        pos = self.parent._window_menu.FindItem(self.window_caption)
+        helpString = 'Show/Hide Graph: '
+        helpString += (' ' + str(data.label) +';')
+        self.parent._window_menu.SetHelpString(pos, helpString)
         ## store default value of zmin and zmax 
         self.default_zmin_ctl = self.zmin_2D
         self.default_zmax_ctl = self.zmax_2D
@@ -244,7 +242,6 @@ class ModelPanel2D(ModelPanel1D):
         toolbar_zoomed = self.toolbar.GetToolEnabled(self.toolbar._NTB2_BACK)
         if not self.is_zoomed and not toolbar_zoomed:
             return
-        
         # Recover the x,y limits
         if (xlo and xhi and ylo and yhi) != None:
             if (xlo > data.xmin and xhi < data.xmax and\
@@ -254,12 +251,6 @@ class ModelPanel2D(ModelPanel1D):
             else: 
                 self.toolbar.update()
                 self._is_zoomed = False
-                
-        # Update Graph menu and help string        
-        pos = self.parent._window_menu.FindItem(self.window_caption)
-        helpString = 'Show/Hide Graph: '
-        helpString += (' ' + str(data.label) +';')
-        self.parent._window_menu.SetHelpString(pos, helpString)
 
     def _set_axis_labels(self):
         """
