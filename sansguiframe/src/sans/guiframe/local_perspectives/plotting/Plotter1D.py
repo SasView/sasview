@@ -266,12 +266,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 # Recover the x,y limits
                 self.subplot.set_xlim((xlo, xhi))     
                 self.subplot.set_ylim((ylo, yhi))  
-            # Update Graph menu and help string        
-            pos = self.parent._window_menu.FindItem(self.window_caption)
-            helpString = 'Show/Hide Graph: '
-            for plot in  self.plots.itervalues():
-                helpString += (' ' + str(plot.label) +';')
-            self.parent._window_menu.SetHelpString(pos, helpString)
         else:
             self.plots[data.id] = data
             self.graph.add(self.plots[data.id]) 
@@ -285,7 +279,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self.toolbar.update()
             if self.is_zoomed:
                 self.is_zoomed = False
-      
+            # Update Graph menu and help string        
+            pos = self.parent._window_menu.FindItem(self.window_caption)
+            helpString = 'Show/Hide Graph: '
+            for plot in  self.plots.itervalues():
+                helpString += (' ' + str(plot.label) +';')
+            self.parent._window_menu.SetHelpString(pos, helpString)      
           
     def draw_plot(self):
         """
@@ -688,22 +687,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
         if self.parent.__class__.__name__ != 'ViewerFrame':
             return
         self.toolbar.AddSeparator()
-        id_delete = wx.NewId()
-        delete = wx.Bitmap(GUIFRAME_ICON.HIDE_ID_PATH, wx.BITMAP_TYPE_PNG)
-        self.toolbar.AddSimpleTool(id_delete, delete, 'Hide', 'Hide')
+        id_hide = wx.NewId()
+        hide = wx.Bitmap(GUIFRAME_ICON.HIDE_ID_PATH, wx.BITMAP_TYPE_PNG)
+        self.toolbar.AddSimpleTool(id_hide, hide, 'Hide', 'Hide')
         self.toolbar.Realize()
-        wx.EVT_TOOL(self, id_delete,  self._on_hide)
-        
-        """
-        self.toolbar.AddSeparator()
-        id_text = wx.NewId()
-        text =  wx.ArtProvider.GetBitmap(wx.ART_CUT, wx.ART_TOOLBAR)
-        self.toolbar.AddSimpleTool(id_text, text,
-                           'Remove Text from Plot', 'Removes text from plot')
-
-        self.toolbar.Realize()
-        wx.EVT_TOOL(self, id_text,  self._on_removetext)
-        """
+        wx.EVT_TOOL(self, id_hide,  self._on_hide)
         
     def _on_hide(self, event):
         """
