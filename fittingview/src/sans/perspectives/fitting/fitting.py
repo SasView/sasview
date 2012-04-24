@@ -1452,8 +1452,8 @@ class Plugin(PluginBase):
                 self.page_finder[pid][data.id].set_result(res)
                 fitproblem = self.page_finder[pid][data.id]
                 qmin, qmax = fitproblem.get_range()
-               
-                if correct_result:
+                plot_result = False
+                if correct_result and plot_result:
                     if not is_data2d:
                         self._complete1D(x=data.x, y=res.theory, page_id=pid, 
                                      elapsed=None, 
