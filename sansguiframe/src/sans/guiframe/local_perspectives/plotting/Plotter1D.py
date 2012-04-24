@@ -222,14 +222,20 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 data = data_list[id]
             if id in theory_list.keys():
                 data = theory_list[id]
-            
+            # Update Graph menu and help string        
+            h_id = self.parent._window_menu.FindItem(self.window_caption)
+            helpString = self.parent._window_menu.GetHelpString(h_id) 
+            d_string = (' ' + str(data.label) +';')
+            new_tip = helpString.replace(d_string, '')
+            self.parent._window_menu.SetHelpString(h_id, new_tip)  
+
             del self.plots[id]
             self.graph.render(self)
             self.subplot.figure.canvas.draw_idle()    
             if len(self.graph.plottables) == 0:
                 #onRemove: graph is empty must be the panel must be destroyed
                 self.parent.delete_panel(self.uid)
-
+            
         
     def plot_data(self, data):
         """
