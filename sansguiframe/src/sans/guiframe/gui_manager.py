@@ -2710,9 +2710,12 @@ class ViewerFrame(wx.Frame):
             x_val = data.qx_data[index]
             y_val = data.qy_data[index]
             i_val = data.data[index]
-            if data.err_data != None: di_val = data.err_data[index]
-            if data.dqx_data != None: dx_val = data.dqx_data[index]
-            if data.dqy_data != None: dy_val = data.dqy_data[index]
+            if data.err_data != None: 
+                di_val = data.err_data[index]
+            if data.dqx_data != None: 
+                dx_val = data.dqx_data[index]
+            if data.dqy_data != None: 
+                dy_val = data.dqy_data[index]
             #if data.mask != None: mask_val = data.mask[index] 
   
             text += "%s \t%s \t%s \t%s \t%s \t%s \t%s\n" % (index,
@@ -2779,7 +2782,7 @@ class ViewerFrame(wx.Frame):
                         if menu.GetLabel() == name:
                             menu.Check(True)
                         else:
-                             menu.Check(False) 
+                            menu.Check(False) 
            
     def set_plotpanel_floating(self, event=None):
         """
@@ -3325,27 +3328,16 @@ class DefaultPanel(wx.Panel, PanelBase):
     
 
 
-# Toy application to test this Frame
 class ViewApp(wx.App):
     """
+    Toy application to test this Frame
     """
     def OnInit(self):
         """
+        When initialised
         """
-#        global GUIFRAME_WIDTH, GUIFRAME_HEIGHT  
-#        
-#        displays = (wx.Display(i) for i in range(wx.Display.GetCount()))
-#        sizes = [display.GetGeometry().GetSize() for display in displays]
-#        for x in displays:
-#            print x
-#        for y in sizes:
-#            print y
-#        
-#        if (GUIFRAME_WIDTH > ((wx.DisplaySize()[0]/100)*90) | GUIFRAME_HEIGHT > ((wx.DisplaySize()[1]/100)*90) ):
-#            GUIFRAME_WIDTH = (wx.DisplaySize()[0]/100)*90
-#            GUIFRAME_HEIGHT = (wx.DisplaySize()[1]/100)*90
-
-        pos, size = self.window_placement((GUIFRAME_WIDTH, GUIFRAME_HEIGHT))     
+        pos, size = self.window_placement((GUIFRAME_WIDTH, 
+                                           GUIFRAME_HEIGHT))     
         self.frame = ViewerFrame(parent=None, 
                              title=APPLICATION_NAME, 
                              pos=pos, 
@@ -3459,7 +3451,8 @@ class ViewApp(wx.App):
         posX, posY, displayWidth, displayHeight = displayRect        
         customWidth, customHeight = size
         
-        # If the custom screen is bigger than the window screen than make maximum size
+        # If the custom screen is bigger than the 
+        # window screen than make maximum size
         if customWidth > displayWidth:
             customWidth = displayWidth
         if customHeight > displayHeight:
@@ -3492,7 +3485,6 @@ class ViewApp(wx.App):
         """Displays the splash screen.  It will exactly cover the main frame."""
        
         # Prepare the picture.  On a 2GHz intel cpu, this takes about a second.
-        x, y = parent.GetSizeTuple()
         image = wx.Image(path, wx.BITMAP_TYPE_PNG)
         image.Rescale(SPLASH_SCREEN_WIDTH, 
                       SPLASH_SCREEN_HEIGHT, wx.IMAGE_QUALITY_HIGH)
@@ -3517,7 +3509,7 @@ class ViewApp(wx.App):
                         milliseconds=SS_MAX_DISPLAY_TIME,
                         parent=parent,
                         id=wx.ID_ANY)
-        from gui_statusbar import SPageStatusbar
+        from sans.guiframe.gui_statusbar import SPageStatusbar
         statusBar = SPageStatusbar(s_screen)
         s_screen.SetStatusBar(statusBar)
         s_screen.Bind(wx.EVT_CLOSE, self.on_close_splash_screen)
@@ -3527,6 +3519,7 @@ class ViewApp(wx.App):
         
     def on_close_splash_screen(self, event):
         """
+        When the splash screen is closed.
         """
         self.frame.Show(True)
         event.Skip()
