@@ -2217,11 +2217,9 @@ class ViewerFrame(wx.Frame):
             if IS_WIN:
                 try:
                     from sans.guiframe.pdfview import PDFFrame
-                    
                     dialog = PDFFrame(None, -1, "Tutorial", path)
                     # put icon
-                    self.put_icon(frame)  
-                    #self.SetTopWindow(dialog)
+                    self.put_icon(dialog)  
                     dialog.Show(True) 
                 except:
                     print "Error in _onTutorial: %s" % sys.exc_value
