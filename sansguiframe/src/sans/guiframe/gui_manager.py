@@ -493,9 +493,9 @@ class ViewerFrame(wx.Frame):
             wb = excel_app.Workbooks.Open(file_name) 
             excel_app.Visible = 1
         except:
-            msg = "Error occured when calling Excel\n" +
-                        "Check that Excel in installed in this machine or \n" +
-                        "Check that %s really exists.\n" % str(file_name)
+            msg = "Error occured when calling Excel\n"
+            msg += "Check that Excel in installed in this machine or \n"
+            msg += "Check that %s really exists.\n" % str(file_name)
             wx.PostEvent(self, StatusEvent(status=msg,
                                              info="error"))
             
@@ -3332,6 +3332,19 @@ class ViewApp(wx.App):
     def OnInit(self):
         """
         """
+#        global GUIFRAME_WIDTH, GUIFRAME_HEIGHT  
+#        
+#        displays = (wx.Display(i) for i in range(wx.Display.GetCount()))
+#        sizes = [display.GetGeometry().GetSize() for display in displays]
+#        for x in displays:
+#            print x
+#        for y in sizes:
+#            print y
+#        
+#        if (GUIFRAME_WIDTH > ((wx.DisplaySize()[0]/100)*90) | GUIFRAME_HEIGHT > ((wx.DisplaySize()[1]/100)*90) ):
+#            GUIFRAME_WIDTH = (wx.DisplaySize()[0]/100)*90
+#            GUIFRAME_HEIGHT = (wx.DisplaySize()[1]/100)*90
+
         pos, size = self.window_placement((GUIFRAME_WIDTH, GUIFRAME_HEIGHT))     
         self.frame = ViewerFrame(parent=None, 
                              title=APPLICATION_NAME, 
