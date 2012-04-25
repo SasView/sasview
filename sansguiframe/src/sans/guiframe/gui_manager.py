@@ -3323,12 +3323,6 @@ class ViewApp(wx.App):
     def OnInit(self):
         """
         """
-        global GUIFRAME_WIDTH, GUIFRAME_HEIGHT  
-        
-        if (GUIFRAME_WIDTH > ((wx.DisplaySize()[0]/100)*90) | GUIFRAME_HEIGHT > ((wx.DisplaySize()[1]/100)*90) ):
-            GUIFRAME_WIDTH = (wx.DisplaySize()[0]/100)*90
-            GUIFRAME_HEIGHT = (wx.DisplaySize()[1]/100)*90
-
         pos, size = self.window_placement((GUIFRAME_WIDTH, GUIFRAME_HEIGHT))     
         self.frame = ViewerFrame(parent=None, 
                              title=APPLICATION_NAME, 
@@ -3432,29 +3426,44 @@ class ViewApp(wx.App):
         will be centered on the screen; for very large monitors it will be
         placed on the left side of the screen.
         """
-        window_width, window_height = size
-        screen_size = wx.GetDisplaySize()
-        window_height = window_height if screen_size[1]>window_height else screen_size[1]-10
-        window_width  = window_width if screen_size[0]> window_width else screen_size[0]-10
-        xpos = ypos = 0
-
+        
+        # Get size of screen without 
+        for screenCount in range(wx.Display().GetCount()):
+            screen = wx.Display(screenCount)
+            if screen.IsPrimary():
+                displayRect = screen.GetClientArea()
+                break
+        
+        posX, posY, displayWidth, displayHeight = displayRect        
+        customWidth, customHeight = size
+        
+        # If the custom screen is bigger than the window screen than make maximum size
+        if customWidth > displayWidth:
+            customWidth = displayWidth
+        if customHeight > displayHeight:
+            customHeight = displayHeight
+            
         # Note that when running Linux and using an Xming (X11) server on a PC
         # with a dual  monitor configuration, the reported display size may be
         # that of both monitors combined with an incorrect display count of 1.
         # To avoid displaying this app across both monitors, we check for
         # screen 'too big'.  If so, we assume a smaller width which means the
         # application will be placed towards the left hand side of the screen.
+        
+        # If dual screen registered as 1 screen. Make width half.
+        if displayWidth > (displayHeight*2):
+            customWidth = displayWidth/2
+            posX = 0
+            posY = 0
+            
+        # Make the position the middle of the screen. (Not 0,0)
+        else:
+            posX = (displayWidth - customWidth)/2
+            posY = (displayHeight - customHeight)/2
+        
+        # Return the suggested position and size for the application frame.    
+        return (posX, posY), (min(displayWidth, customWidth), min(displayHeight, customHeight))
 
-        _, _, x, y = wx.Display().GetClientArea() # size excludes task bar
-        if len(sys.argv) > 1 and '--platform' in sys.argv[1:]:
-            w, h = wx.DisplaySize()  # size includes task bar area
-        # display on left side, not centered on screen
-        if x > 1920 and x > (2*y): x = x / 2  
-        if x > window_width:  xpos = (x - window_width)/2
-        if y > window_height: ypos = (y - window_height)/2
-
-        # Return the suggested position and size for the application frame.
-        return (xpos, ypos), (min(x, window_width), min(y, window_height))
     
     def display_splash_screen(self, parent, 
                               path=SPLASH_SCREEN_PATH):
