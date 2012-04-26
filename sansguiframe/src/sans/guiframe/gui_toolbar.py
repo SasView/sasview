@@ -5,7 +5,7 @@ from wx import ToolBar as Tbar
 from wx.lib.platebtn import PlateButton
 from sans.guiframe.gui_style import GUIFRAME_ID
 from sans.guiframe.gui_style import GUIFRAME_ICON
-from wx.lib.platebtn import PB_STYLE_SQUARE, PB_STYLE_DROPARROW
+from wx.lib.platebtn import PB_STYLE_DEFAULT, PB_STYLE_DROPARROW,PB_STYLE_NOBG
 #Control panel width 
 import sys
 if sys.platform.count("darwin")==0:
@@ -75,18 +75,9 @@ class GUIToolBar(Tbar):
         self.AddLabelTool(GUIFRAME_ID.PREVIEW_ID, 'Report', report_bmp,
                    disable_report_bmp, button_type,'Report')
         self.AddSeparator()
-        #print_im = GUIFRAME_ICON.PRINT_ICON
-        #print_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
-        #print_bmp = print_im.ConvertToBitmap()
-        
-        #disable_print_bmp = wx.NullBitmap
-        #self.AddLabelTool(GUIFRAME_ID.PRINT_ID, 'Print', print_bmp,
-        #                  disable_print_bmp, button_type, 'Print')
-        #self.AddSeparator()
         undo_im = GUIFRAME_ICON.UNDO_ICON
         undo_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
         undo_bmp = undo_im.ConvertToBitmap()
-        #disable_undo_bmp = clear_image(undo_im).ConvertToBitmap()
         disable_undo_bmp = wx.NullBitmap
         self.AddLabelTool(GUIFRAME_ID.UNDO_ID, 'Undo', undo_bmp,
                           disable_undo_bmp, button_type,'Undo')
@@ -94,7 +85,6 @@ class GUIToolBar(Tbar):
         redo_im = GUIFRAME_ICON.REDO_ICON
         redo_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
         redo_bmp = redo_im.ConvertToBitmap()
-        #disable_redo_bmp = clear_image(redo_im).ConvertToBitmap()
         disable_redo_bmp = wx.NullBitmap
         self.AddLabelTool(GUIFRAME_ID.REDO_ID, 'Redo', redo_bmp,
                           disable_redo_bmp, button_type,'Redo')
@@ -102,7 +92,6 @@ class GUIToolBar(Tbar):
         copy_im = GUIFRAME_ICON.COPY_ICON
         copy_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
         copy_bmp = copy_im.ConvertToBitmap()
-        #disable_undo_bmp = clear_image(undo_im).ConvertToBitmap()
         disable_copy_bmp = wx.NullBitmap
         self.AddLabelTool(GUIFRAME_ID.COPY_ID, 'Copy', copy_bmp,
                           disable_copy_bmp, button_type,'Copy parameter values')
@@ -110,32 +99,19 @@ class GUIToolBar(Tbar):
         paste_im = GUIFRAME_ICON.PASTE_ICON
         paste_im.Rescale(tbar_size[0], tbar_size[1], wx.IMAGE_QUALITY_HIGH)
         paste_bmp = paste_im.ConvertToBitmap()
-        #disable_redo_bmp = clear_image(redo_im).ConvertToBitmap()
         disable_paste_bmp = wx.NullBitmap
         self.AddLabelTool(GUIFRAME_ID.PASTE_ID, 'Paste', paste_bmp,
                           disable_paste_bmp, button_type,'Paste parameter values')
-
         self.AddSeparator()
-        #add button for the current application
-        #self.button_application = wx.StaticText(self, -1, 'Welcome')
-        #self.button_application.SetForegroundColour('black')
-        #self.button_application.SetBackgroundColour('#1874CD')
-        #hint = 'Active Application'
-        #self.button_application.SetToolTipString(hint)
-        #self.AddControl(self.button_application)
-        #self.AddSeparator()
-        
-        self._bookmark_bt = PlateButton(self, -1, 'bookmark', 
-                         GUIFRAME_ICON.BOOKMARK_ICON.ConvertToBitmap(), 
-                         style=PB_STYLE_SQUARE|PB_STYLE_DROPARROW)
+        self._bookmark_bt = PlateButton(self, -1, 'Bookmarks',
+                        GUIFRAME_ICON.BOOKMARK_ICON.ConvertToBitmap(), 
+                        style=PB_STYLE_DEFAULT|PB_STYLE_DROPARROW|PB_STYLE_NOBG)
+        self._bookmark_bt.SetWindowVariant(FONT_VARIANT)
         self._bookmark_bt.Disable()
         self._bookmark_menu = wx.Menu()
         self.add_bookmark_default()
-        
-        
         self._bookmark_bt.SetMenu(self._bookmark_menu)
         self.AddControl(self._bookmark_bt)
-
         self.SetToolBitmapSize(tbar_size)
         self.AddSeparator()
         #add button for the panel on focus
@@ -143,12 +119,9 @@ class GUIToolBar(Tbar):
                                           pos=wx.DefaultPosition, 
                                           size=NAME_BOX,
                                           style=wx.SUNKEN_BORDER|wx.ALIGN_LEFT)
-        #self.button_panel.SetForegroundColour('black')
-        #self.button_panel.SetBackgroundColour('white')
         button_panel_font = self.button_panel.GetFont()
         button_panel_font.SetWeight(wx.BOLD)
         self.button_panel.SetFont(button_panel_font)
-        #self.button_panel.SetClientSize((80,20))
         hint = 'Control Panel on Focus'
         self.button_panel.SetToolTipString(hint)
         self.AddControl(self.button_panel)
@@ -160,12 +133,13 @@ class GUIToolBar(Tbar):
         Add default items in bookmark menu
         """
         id = wx.NewId()
-        self._bookmark_menu.Append(id, 'Add bookmark')
+        self._bookmark_menu.Append(id, 'Bookmark This Page State')
         self._bookmark_menu.AppendSeparator()
         wx.EVT_MENU(self, id, self.on_bookmark)
    
     def on_bind_button(self):
         """
+        Bind the buttons
         """
         if self.parent is not None:
             
