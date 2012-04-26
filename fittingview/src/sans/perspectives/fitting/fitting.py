@@ -1905,7 +1905,7 @@ class Plugin(PluginBase):
         if not source == 'fit':
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                                title=title))
-        self.page_finder[page_id].set_theory_data(data=new_plot, fid=data.id)
+        #self.page_finder[page_id].set_theory_data(data=new_plot, fid=data.id)
         if toggle_mode_on:
             wx.PostEvent(self.parent, 
                              NewPlotEvent(group_id=str(page_id) + " Model1D",

@@ -153,6 +153,7 @@ class FitPage(BasicPage):
         """
         When fit is complete ,reset the fit button label.
         """
+        self.fit_started = False
         self.set_fitbutton()
         
     def _is_2D(self):
