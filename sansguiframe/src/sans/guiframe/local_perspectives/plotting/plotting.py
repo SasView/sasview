@@ -230,6 +230,10 @@ class Plugin(PluginBase):
             if panel.group_id not in data.list_group_id:
                 data.list_group_id.append(panel.group_id)
             wx.CallAfter(panel.plot_data, data)
+            #Do not show residual plot when it is hidden
+            #ToDo: find better way
+            if str(panel.group_id)[0:3] == 'res' and not panel.IsShown():
+                return
             self.parent.show_panel(panel.uid)   
     
     def delete_menu_item(self, name, uid):
