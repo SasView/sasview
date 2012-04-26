@@ -2093,7 +2093,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         wx.PostEvent(self.parent, event)
         self.state_change = False
         #Draw the model for a different range
-        self.create_default_data()
+        if not self.data.is_data:
+            self.create_default_data()
         self._draw_model()
                    
     def _theory_qrange_enter(self, event):
