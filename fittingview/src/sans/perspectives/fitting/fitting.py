@@ -1608,7 +1608,7 @@ class Plugin(PluginBase):
                         index += 1
                         wx.CallAfter(cpage._on_fit_complete)
                     except:
-                        msg = "Singular point: Fitting Error occured."
+                        msg = "Singular point: Fitting Error occurred."
                         wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                   type="stop"))
                     

@@ -109,24 +109,14 @@ class ScipyFit(FitEngine):
                                             model.get_params(self.param_list),
                                                     ftol=ftol,
                                                     full_output=1)
-
-        except KeyboardInterrupt:
-            msg = "Fitting: Terminated!!!"
-            handler.error(msg)
-            raise KeyboardInterrupt, msg #<= more stable
-            #less stable below
-            """
+        except:
             if hasattr(sys, 'last_type') and sys.last_type == KeyboardInterrupt:
                 if handler is not None:
                     msg = "Fitting: Terminated!!!"
                     handler.error(msg)
-                    result = handler.get_result()
-                    return result
+                    raise KeyboardInterrupt, msg
             else:
-                raise 
-            """
-        except:
-            raise
+                raise
         chisqr = functor.chisq()
 
         if cov_x is not None and numpy.isfinite(cov_x).all():

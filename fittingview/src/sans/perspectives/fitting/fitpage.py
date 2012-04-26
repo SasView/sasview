@@ -153,7 +153,7 @@ class FitPage(BasicPage):
         """
         When fit is complete ,reset the fit button label.
         """
-        self.btFit.SetLabel("Fit")
+        self.set_fitbutton()
         
     def _is_2D(self):
         """
@@ -1083,11 +1083,14 @@ class FitPage(BasicPage):
         """
         Allow to fit
         """
-        if self.fit_started:
-            self._StopFit()
-            
         if event != None:
             event.Skip() 
+        if self.fit_started:
+            self._StopFit()
+            self.fit_started = False
+            wx.CallAfter(self.set_fitbutton)
+            return   
+
         if len(self.parent._manager.fit_thread_list)>0 and\
                     self.parent._manager._fit_engine != "park" and\
                     self._manager.sim_page != None and \
@@ -1145,10 +1148,25 @@ class FitPage(BasicPage):
                                    qmax=self.qmax_x)
 
         #single fit 
-        self._manager.onFit(uid=self.uid)
-        self.fit_started = True
-        self.btFit.SetLabel("Stop")
-           
+        #self._manager.onFit(uid=self.uid)
+        self.fit_started = self._manager.onFit(uid=self.uid)
+        wx.CallAfter(self.set_fitbutton)
+    
+    def set_fitbutton(self):  
+        """
+        Set fit button label depending on the fit_started[bool]
+        """
+        if self.fit_started:
+            label = "Stop"
+            color = "red"
+        else:
+            label = "Fit"
+            color = "black"
+        self.btFit.Enable(False)
+        self.btFit.SetLabel(label)
+        self.btFit.SetForegroundColour(color)
+        self.btFit.Enable(True)
+                     
     def get_weight_flag(self):
         """
         Get flag corresponding to a given weighting dI data.
@@ -1171,40 +1189,13 @@ class FitPage(BasicPage):
                 break
         return flag
                 
-    def bind_fit_button(self):
-        """
-        bind the fit button to either fit handler or stop fit handler
-        """
-        self.btFit.Unbind(event=wx.EVT_BUTTON, id= self.btFit.GetId())
-        if self.btFit.GetLabel().lower() == "stop":
-            self.fit_started = True
-            self.btFit.SetForegroundColour('red')
-            self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._StopFit,
-                             id=self.btFit.GetId())
-        elif self.btFit.GetLabel().lower() == "fit":
-            self.fit_started = False
-            self.btFit.SetDefault()
-            self.btFit.SetForegroundColour('black')
-            #self.btFit.SetBackgroundColour(self.default_bt_colour)
-            self.btFit.Bind(event=wx.EVT_BUTTON, handler=self._onFit, 
-                            id=self.btFit.GetId())
-        else:
-            msg = "FitPage: fit button has unknown label"
-            raise RuntimeError, msg
-        self._manager._reset_schedule_problem(value=0)
-          
-    def is_fitting(self):
-        if self.fit_started:
-            self._StopFit(event=None)
             
     def _StopFit(self, event=None):
         """
         Stop fit 
         """
-        #time.sleep(0.1)
         if event != None:
             event.Skip()
-        #if self.engine_type=="scipy":
         self._manager.stop_fit(self.uid)
         self._manager._reset_schedule_problem(value=0)
         self._on_fit_complete()
