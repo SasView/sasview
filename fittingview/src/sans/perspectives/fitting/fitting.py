@@ -1119,7 +1119,7 @@ class Plugin(PluginBase):
             if model is not None:
                 plot_id = data.id + model.name
             if theory:
-                plot_id = data.id 
+                plot_id = data.id + model.name
             group_id = data.group_id
             wx.PostEvent(self.parent, NewPlotEvent(id=plot_id,
                                                        group_id=group_id,
@@ -1452,7 +1452,7 @@ class Plugin(PluginBase):
                 self.page_finder[pid][data.id].set_result(res)
                 fitproblem = self.page_finder[pid][data.id]
                 qmin, qmax = fitproblem.get_range()
-                plot_result = False
+                plot_result = True
                 if correct_result and plot_result:
                     if not is_data2d:
                         self._complete1D(x=data.x, y=res.theory, page_id=pid, 
