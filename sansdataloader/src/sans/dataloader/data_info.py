@@ -1,22 +1,19 @@
 """
-    Module that contains classes to hold information read from 
+    Module that contains classes to hold information read from
     reduced data files.
     
-    A good description of the data members can be found in 
+    A good description of the data members can be found in
     the CanSAS 1D XML data format:
     
     http://www.smallangles.net/wgwiki/index.php/cansas1d_documentation
 """
-
-
+#####################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
-#If you use DANSE applications to do scientific research that leads to 
-#publication, we ask that you acknowledge the use of the software with the 
-#following sentence:
-#This work benefited from DANSE software developed under NSF award DMR-0520547.
+#project funded by the US National Science Foundation.
+#See the license text in license.txt
 #copyright 2008, University of Tennessee
+######################################################################
 
 
 #TODO: Keep track of data manipulation in the 'process' data structure.
@@ -27,6 +24,7 @@
 from data_util.uncertainty import Uncertainty
 import numpy
 import math
+
 
 class plottable_1D:
     """
@@ -53,10 +51,10 @@ class plottable_1D:
         self.x = numpy.asarray(x)
         self.y = numpy.asarray(y)
         if dx is not None:
-             self.dx = numpy.asarray(dx)
-        if dy is not None: 
+            self.dx = numpy.asarray(dx)
+        if dy is not None:
             self.dy = numpy.asarray(dy)
-        if dxl is not None: 
+        if dxl is not None:
             self.dxl = numpy.asarray(dxl)
         if dxw is not None: 
             self.dxw = numpy.asarray(dxw)
@@ -75,6 +73,7 @@ class plottable_1D:
         self._yaxis = label
         self._yunit = unit
 
+
 class plottable_2D:
     """
     Data2D is a place holder for 2D plottables.
@@ -84,13 +83,13 @@ class plottable_2D:
     ymin = None
     ymax = None
     data = None
-    qx_data     = None
-    qy_data     = None
-    q_data      = None
-    err_data    = None
-    dqx_data    = None
-    dqy_data    = None
-    mask        = None
+    qx_data = None
+    qy_data = None
+    q_data = None
+    err_data = None
+    dqx_data = None
+    dqy_data = None
+    mask = None
     
     # Units
     _xaxis = ''
@@ -101,16 +100,18 @@ class plottable_2D:
     _zunit = ''
     
     def __init__(self, data=None, err_data=None, qx_data=None,
-                  qy_data=None, q_data=None, mask=None,
-                   dqx_data=None, dqy_data=None):
+                 qy_data=None, q_data=None, mask=None,
+                 dqx_data=None, dqy_data=None):
         self.data = numpy.asarray(data)
         self.qx_data = numpy.asarray(qx_data)
         self.qy_data = numpy.asarray(qy_data)
         self.q_data = numpy.asarray(q_data)
         self.mask = numpy.asarray(mask)
         self.err_data = numpy.asarray(err_data)
-        if dqx_data is not None: self.dqx_data = numpy.asarray(dqx_data) 
-        if dqy_data is not None: self.dqy_data = numpy.asarray(dqy_data) 
+        if dqx_data is not None:
+            self.dqx_data = numpy.asarray(dqx_data) 
+        if dqy_data is not None:
+            self.dqy_data = numpy.asarray(dqy_data) 
                
     def xaxis(self, label, unit):
         """
@@ -173,15 +174,15 @@ class Detector:
     ## Sample to detector distance [float] [mm]
     distance = None
     distance_unit = 'mm'
-    ## Offset of this detector position in X, Y, 
-    #(and Z if necessary) [Vector] [mm] 
+    ## Offset of this detector position in X, Y,
+    #(and Z if necessary) [Vector] [mm]
     offset = None
     offset_unit = 'm'
     ## Orientation (rotation) of this detector in roll,
     # pitch, and yaw [Vector] [degrees]
     orientation = None
     orientation_unit = 'degree'
-    ## Center of the beam on the detector in X and Y 
+    ## Center of the beam on the detector in X and Y
     #(and Z if necessary) [Vector] [mm]
     beam_center = None
     beam_center_unit = 'mm'
@@ -203,7 +204,6 @@ class Detector:
         self.beam_center = Vector()
         self.pixel_size  = Vector()
         
-    
     def __str__(self):
         _str  = "Detector:\n"
         _str += "   Name:         %s\n" % self.name
@@ -221,6 +221,7 @@ class Detector:
             (str(self.slit_length), str(self.slit_length_unit))
         return _str
 
+
 class Aperture:
     ## Name
     name = None
@@ -237,6 +238,7 @@ class Aperture:
     
     def __init__(self):
         self.size = Vector()
+    
     
 class Collimation:
     """
@@ -264,10 +266,11 @@ class Collimation:
                 (str(item.distance), str(item.distance_unit))
         return _str
 
+
 class Source:
     """
     Class to hold source information
-    """  
+    """
     ## Name
     name = None
     ## Radiation type [string]
@@ -295,7 +298,6 @@ class Source:
     def __init__(self):
         self.beam_size = Vector()
         
-    
     def __str__(self):
         _str  = "Source:\n"
         _str += "   Radiation:    %s\n" % str(self.radiation)
@@ -313,13 +315,14 @@ class Source:
         return _str
     
     
-""" 
+"""
 Definitions of radiation types
 """
 NEUTRON  = 'neutron'
 XRAY     = 'x-ray'
 MUON     = 'muon'
 ELECTRON = 'electron'
+    
     
 class Sample:
     """
@@ -370,6 +373,7 @@ class Sample:
             
         return _str
   
+  
 class Process:
     """
     Class that holds information about the processes
@@ -404,7 +408,7 @@ class DataInfo:
     instrument description, the sample description,
     the data itself and any other meta data.
     """
-    ## Title 
+    ## Title
     title      = ''
     ## Run number
     run        = None
@@ -459,7 +463,7 @@ class DataInfo:
         ## Additional meta-data
         self.meta_data  = {}
         ## Loading errors
-        self.errors = []        
+        self.errors = []
         
     def append_empty_process(self):
         """
@@ -496,7 +500,7 @@ class DataInfo:
     # Private method to perform operation. Not implemented for DataInfo,
     # but should be implemented for each data class inherited from DataInfo
     # that holds actual data (ex.: Data1D)
-    def _perform_operation(self, other, operation): 
+    def _perform_operation(self, other, operation):
         """
         Private method to perform operation. Not implemented for DataInfo,
         but should be implemented for each data class inherited from DataInfo
@@ -618,7 +622,8 @@ class DataInfo:
         """
         def operation(a, b):
             return b/a
-        return self._perform_operation(other, operation)            
+        return self._perform_operation(other, operation)
+            
             
 class Data1D(plottable_1D, DataInfo):
     """
@@ -630,7 +635,6 @@ class Data1D(plottable_1D, DataInfo):
     def __init__(self, x, y, dx=None, dy=None):
         DataInfo.__init__(self)
         plottable_1D.__init__(self, x, y, dx, dy)
-        
         
     def __str__(self):
         """
@@ -653,7 +657,7 @@ class Data1D(plottable_1D, DataInfo):
         :return: True is slit smearing info is present, False otherwise
         
         """
-        def _check(v):            
+        def _check(v):
             if (v.__class__ == list or v.__class__ == numpy.ndarray) \
                 and len(v) > 0 and min(v) > 0:
                 return True
@@ -674,24 +678,24 @@ class Data1D(plottable_1D, DataInfo):
         from copy import deepcopy
         
         if clone is None or not issubclass(clone.__class__, Data1D):
-            x  = numpy.zeros(length) 
-            dx = numpy.zeros(length) 
-            y  = numpy.zeros(length) 
-            dy = numpy.zeros(length) 
+            x  = numpy.zeros(length)
+            dx = numpy.zeros(length)
+            y  = numpy.zeros(length)
+            dy = numpy.zeros(length)
             clone = Data1D(x, y, dx=dx, dy=dy)
         
         clone.title       = self.title
         clone.run         = self.run
         clone.filename    = self.filename
-        clone.instrument   = self.instrument
-        clone.notes       = deepcopy(self.notes) 
-        clone.process     = deepcopy(self.process) 
-        clone.detector    = deepcopy(self.detector) 
-        clone.sample      = deepcopy(self.sample) 
-        clone.source      = deepcopy(self.source) 
-        clone.collimation = deepcopy(self.collimation) 
-        clone.meta_data   = deepcopy(self.meta_data) 
-        clone.errors      = deepcopy(self.errors) 
+        clone.instrument  = self.instrument
+        clone.notes       = deepcopy(self.notes)
+        clone.process     = deepcopy(self.process)
+        clone.detector    = deepcopy(self.detector)
+        clone.sample      = deepcopy(self.sample)
+        clone.source      = deepcopy(self.source)
+        clone.collimation = deepcopy(self.collimation)
+        clone.meta_data   = deepcopy(self.meta_data)
+        clone.errors      = deepcopy(self.errors)
         
         return clone
 
@@ -715,7 +719,7 @@ class Data1D(plottable_1D, DataInfo):
             # Check that data lengths are the same
             if len(self.x) != len(other.x) or \
                 len(self.y) != len(other.y):
-                msg =  "Unable to perform operation: data length are not equal"
+                msg = "Unable to perform operation: data length are not equal"
                 raise ValueError, msg
             
             # Here we could also extrapolate between data points
@@ -733,7 +737,7 @@ class Data1D(plottable_1D, DataInfo):
         # Check that we have errors, otherwise create zero vector
         dy = self.dy
         if self.dy == None or (len(self.dy) != len(self.y)):
-            dy = numpy.zeros(len(self.y))            
+            dy = numpy.zeros(len(self.y))
             
         return dy, dy_other
 
@@ -760,6 +764,7 @@ class Data1D(plottable_1D, DataInfo):
             result.dy[i] = math.sqrt(math.fabs(output.variance))
         return result
         
+        
 class Data2D(plottable_2D, DataInfo):
     """
     2D data class
@@ -776,20 +781,19 @@ class Data2D(plottable_2D, DataInfo):
     ## Vector of Q-values at the center of each bin in y
     y_bins = None
     
-    
     def __init__(self, data=None, err_data=None, qx_data=None,
-                  qy_data=None, q_data=None, mask=None, 
-                  dqx_data=None, dqy_data=None):
+                 qy_data=None, q_data=None, mask=None,
+                 dqx_data=None, dqy_data=None):
         self.y_bins = []
         self.x_bins = []
         DataInfo.__init__(self)
         plottable_2D.__init__(self, data, err_data, qx_data,
-                              qy_data, q_data,mask, dqx_data, dqy_data)
+                              qy_data, q_data, mask, dqx_data, dqy_data)
         if len(self.detector) > 0:
             raise RuntimeError, "Data2D: Detector bank already filled at init"
 
     def __str__(self):
-        _str =  "%s\n" % DataInfo.__str__(self)
+        _str = "%s\n" % DataInfo.__str__(self)
         
         _str += "Data:\n"
         _str += "   Type:         %s\n" % self.__class__.__name__
@@ -813,9 +817,9 @@ class Data2D(plottable_2D, DataInfo):
         """
         from copy import deepcopy
         
-        if clone is None or not issubclass(clone.__class__, Data2D):  
-            data     = numpy.zeros(length) 
-            err_data = numpy.zeros(length) 
+        if clone is None or not issubclass(clone.__class__, Data2D):
+            data = numpy.zeros(length)
+            err_data = numpy.zeros(length)
             qx_data = numpy.zeros(length)
             qy_data = numpy.zeros(length)
             q_data = numpy.zeros(length)
@@ -823,23 +827,22 @@ class Data2D(plottable_2D, DataInfo):
             dqx_data = None
             dqy_data = None
             clone = Data2D(data, err_data, qx_data, qy_data,
-                            q_data,mask, dqx_data=dqx_data, dqy_data=dqy_data)
+                            q_data, mask, dqx_data=dqx_data, dqy_data=dqy_data)
 
         clone.title       = self.title
         clone.run         = self.run
         clone.filename    = self.filename
         clone.instrument  = self.instrument
-        clone.notes       = deepcopy(self.notes) 
-        clone.process     = deepcopy(self.process) 
-        clone.detector    = deepcopy(self.detector) 
-        clone.sample      = deepcopy(self.sample) 
-        clone.source      = deepcopy(self.source) 
-        clone.collimation = deepcopy(self.collimation) 
-        clone.meta_data   = deepcopy(self.meta_data) 
-        clone.errors      = deepcopy(self.errors) 
+        clone.notes       = deepcopy(self.notes)
+        clone.process     = deepcopy(self.process)
+        clone.detector    = deepcopy(self.detector)
+        clone.sample      = deepcopy(self.sample)
+        clone.source      = deepcopy(self.source)
+        clone.collimation = deepcopy(self.collimation)
+        clone.meta_data   = deepcopy(self.meta_data)
+        clone.errors      = deepcopy(self.errors)
         
         return clone
-  
   
     def _validity_check(self, other):
         """
@@ -864,7 +867,7 @@ class Data2D(plottable_2D, DataInfo):
                 raise ValueError, msg
                
             # Check that the scales match
-            #TODO: matching scales?     
+            #TODO: matching scales?
             
             # Check that the other data set has errors, otherwise
             # create zero vector
@@ -884,7 +887,6 @@ class Data2D(plottable_2D, DataInfo):
             
         return err, err_other
   
-  
     def _perform_operation(self, other, operation):
         """
         Perform 2D operations between data sets
@@ -896,7 +898,7 @@ class Data2D(plottable_2D, DataInfo):
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
     
-        result = self.clone_without_data([numpy.size(self.data, 0), 
+        result = self.clone_without_data([numpy.size(self.data, 0),
                                           numpy.size(self.data, 1)])
         
         for i in range(numpy.size(self.data, 0)):
@@ -916,6 +918,3 @@ class Data2D(plottable_2D, DataInfo):
                 result.data[i][j] = output.x
                 result.err_data[i][j] = math.sqrt(math.fabs(output.variance))
         return result
-    
-  
- 

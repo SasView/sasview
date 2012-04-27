@@ -1,12 +1,3 @@
-
-#####################################################################
-#This software was developed by the University of Tennessee as part of the
-#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
-#See the license text in license.txt
-#copyright 2008, University of Tennessee
-######################################################################
-
 """
     File handler to support different file extensions.
     Uses reflectometry's registry utility.
@@ -15,14 +6,21 @@
     and registered by default at initialization time.
     
     To add a new default reader, one must register it in
-    the register_readers method found in readers/__init__.py. 
+    the register_readers method found in readers/__init__.py.
     
-    A utility method (find_plugins) is available to inspect 
+    A utility method (find_plugins) is available to inspect
     a directory (for instance, a user plug-in directory) and
     look for new readers/writers.
 """
+#####################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation.
+#See the license text in license.txt
+#copyright 2008, University of Tennessee
+######################################################################
 
-import os 
+import os
 import sys
 import logging
 import time
@@ -54,25 +52,24 @@ class Registry(ExtensionRegistry):
         # Register default readers
         readers.read_associations(self)
         
-        #TODO: remove the following line when ready to switch to 
+        #TODO: remove the following line when ready to switch to
         #the new default readers
         #readers.register_readers(self._identify_plugin)
         
         # Look for plug-in readers
         #self.find_plugins('plugins')
 
-        
     def load(self, path, format=None):
         """
         Call the loader for the file type of path.
 
         :param path: file path
-        :param format: explicit extension, to force the use 
+        :param format: explicit extension, to force the use
             of a particular reader
 
         Defaults to the ascii (multi-column) reader
         if no reader was registered for the file's
-        extension.   
+        extension.
         """
         try:
             return super(Registry, self).load(path, format=format)
@@ -106,7 +103,7 @@ class Registry(ExtensionRegistry):
         
         dir = temp_path
         # Check whether the directory exists
-        if not os.path.isdir(dir): 
+        if not os.path.isdir(dir):
             msg = "DataLoader couldn't locate DataLoader plugin folder."
             msg += """ "%s" does not exist""" % dir
             logging.warning(msg)
@@ -156,11 +153,11 @@ class Registry(ExtensionRegistry):
                         msg += " %s\n  %s" % (item, sys.exc_value)
                         logging.error(msg)
                      
-        return readers_found 
+        return readers_found
     
     def associate_file_type(self, ext, module):
         """
-        Look into a module to find whether it contains a 
+        Look into a module to find whether it contains a
         Reader class. If so, APPEND it to readers and (potentially)
         to the list of writers for the given extension
         
@@ -225,7 +222,7 @@ class Registry(ExtensionRegistry):
             if hasattr(loader, 'type_name'):
                 type_name = loader.type_name
                 
-                wcard = "%s files (*%s)|*%s" % (type_name, ext.lower(), 
+                wcard = "%s files (*%s)|*%s" % (type_name, ext.lower(),
                                                 ext.lower())
                 if wcard not in self.wildcards:
                     self.wildcards.append(wcard)
@@ -236,7 +233,6 @@ class Registry(ExtensionRegistry):
             logging.error(msg)
         return reader_found
 
-    
     def _identify_plugin(self, module):
         """
         Look into a module to find whether it contains a 
@@ -267,14 +263,14 @@ class Registry(ExtensionRegistry):
                     wcard = "%s files (*%s)|*%s" % (type_name, ext.lower(),
                                                      ext.lower())
                     if wcard not in self.wildcards:
-                    	self.wildcards.append(wcard)
+                        self.wildcards.append(wcard)
                             
                 # Check whether writing is supported
                 if hasattr(loader, 'write'):
                     for ext in loader.ext:
                         if ext not in self.writers:
                             self.writers[ext] = []
-                        self.writers[ext].insert(0,loader.write)
+                        self.writers[ext].insert(0, loader.write)
                         
             except:
                 msg = "Loader: Error accessing Reader"
@@ -287,7 +283,7 @@ class Registry(ExtensionRegistry):
         :return: the loader associated with the file type of path.
         
         :Raises ValueError: if file type is not known.
-        """        
+        """
         # Find matching extensions
         extlist = [ext for ext in self.extensions() if path.endswith(ext)]
         # Sort matching extensions by decreasing order of length
@@ -300,7 +296,8 @@ class Registry(ExtensionRegistry):
         if len(writers) != len(set(writers)):
             result = []
             for L in writers:
-                if L not in result: result.append(L)
+                if L not in result:
+                    result.append(L)
             writers = L
         # Raise an error if there are no matching extensions
         if len(writers) == 0:
@@ -315,7 +312,7 @@ class Registry(ExtensionRegistry):
         Raises ValueError if no writer is available.
         Raises KeyError if format is not available.
         
-        May raise a writer-defined exception if writer fails.        
+        May raise a writer-defined exception if writer fails.
         """
         if format is None:
             writers = self.lookup_writers(path)
@@ -325,9 +322,9 @@ class Registry(ExtensionRegistry):
             try:
                 return fn(path, data)
             except:
-                pass # give other loaders a chance to succeed
+                pass  # give other loaders a chance to succeed
         # If we get here it is because all loaders failed
-        raise # reraises last exception
+        raise  # reraises last exception
 
         
 class Loader(object):
@@ -339,7 +336,7 @@ class Loader(object):
     
     def associate_file_type(self, ext, module):
         """
-        Look into a module to find whether it contains a 
+        Look into a module to find whether it contains a
         Reader class. If so, append it to readers and (potentially)
         to the list of writers for the given extension
         
@@ -393,17 +390,3 @@ class Loader(object):
     
     def get_wildcards(self):
         return self.__registry.wildcards
-        
-if __name__ == "__main__": 
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(levelname)s %(message)s',
-                        filename='loader.log',
-                        filemode='w')
-    l = Loader()
-    test_data = l.load('test/cansas1d.xml')
-    l.save('test_file.xml', test_data, '.xml')
-    
-    print l.get_wildcards()
-        
-        
-    
