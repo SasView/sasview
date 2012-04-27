@@ -7,14 +7,14 @@
 
 ChangesAssociations=yes
 AppName=SansView
-AppVerName=SansView-2.1.0
-AppPublisher=(c) 2009 - 2011, University of Tennessee
+AppVerName=SansView-2.1.1
+AppPublisher=(c) 2009 - 2012, University of Tennessee
 AppPublisherURL=http://danse.chem.utk.edu
 AppSupportURL=http://danse.chem.utk.edu
 AppUpdatesURL=http://danse.chem.utk.edu 
 ChangesEnvironment=true 
 DefaultDirName={pf}\SansView
-DefaultGroupName=DANSE\SansView-2.1.0
+DefaultGroupName=DANSE\SansView-2.1.1
 DisableProgramGroupPage=yes
 LicenseFile=license.txt
 OutputBaseFilename=setupSansView
@@ -22,6 +22,7 @@ SetupIconFile=images\ball.ico
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=none
+UsePreviousAppDir=no
 
 
 [Registry]
@@ -74,8 +75,8 @@ Source: "dist\config\custom_config.py";	DestDir: "{userappdata}\..\.sansview\con
 [Icons]
 Name: "{group}\SansView";	Filename: "{app}\SansView.exe";	WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico" 
 Name: "{group}\{cm:UninstallProgram, SansView}";	 Filename: "{uninstallexe}" 
-Name: "{commondesktop}\SansView-2.1.0";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" ; IconFilename: "{app}\images\ball.ico" 
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\SansView-2.1.0";	Filename: "{app}\SansView.exe";	Tasks: quicklaunchicon; WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico" 
+Name: "{commondesktop}\SansView-2.1.1";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" ; IconFilename: "{app}\images\ball.ico" 
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\SansView-2.1.1";	Filename: "{app}\SansView.exe";	Tasks: quicklaunchicon; WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico" 
 
 
 [Run]
