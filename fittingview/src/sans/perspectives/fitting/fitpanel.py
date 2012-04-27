@@ -418,8 +418,6 @@ class FitPanel(nb, PanelBase):
             for page in self.opened_pages.values():
                 pos = self.GetPageIndex(page)
                 temp_data = page.get_data()
-                #stop the fitting before deleting the page
-                page.is_fitting()
                 if temp_data is not None and temp_data.id in data:
                     self.SetSelection(pos)
                     self.on_close_page(event=None)
