@@ -2035,7 +2035,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 mlist.append( (name, models) )
                 
         # Sort the models
-        mlist_sorted = sorted(mlist)
+        mlist_sorted = mlist
         for item in mlist_sorted:
             combobox.Append(item[0],item[1])
         return 0
