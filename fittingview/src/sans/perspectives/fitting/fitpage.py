@@ -3180,7 +3180,7 @@ class FitPage(BasicPage):
                                             text2,ctl2, ctl3, ctl4,units])
               
         iy+=1
-        
+        box_description.SetForegroundColour(wx.BLUE)
         #Display units text on panel
         for item in keys:   
             if self.model.details.has_key(item):
