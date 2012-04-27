@@ -1,20 +1,24 @@
+"""
+Inferface containing information to store data, model, range of data, etc...
+and retreive this information. This is an inferface
+for a fitProblem i.e relationship between data and model.
+"""
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #
 #See the license text in license.txt
 #
 #copyright 2009, University of Tennessee
 ################################################################################
-import copy 
+import copy
 from sans.models.qsmearing import smear_selection
-
 
 class FitProblemComponent(object):
     """
     Inferface containing information to store data, model, range of data, etc...
-    and retreive this information. This is an inferface 
+    and retreive this information. This is an inferface
     for a fitProblem i.e relationship between data and model.
     """
     def enable_smearing(self, flag=False):
@@ -22,126 +26,151 @@ class FitProblemComponent(object):
         :param flag: bool.When flag is 1 get the computer smear value. When
         flag is 0 ingore smear value.
         """
+        
     def get_smearer(self):
         """
         return smear object
         """
     def save_model_name(self, name):
         """
-        """  
+        """
+        
     def get_name(self):
         """
         """
+        
     def set_model(self, model):
-        """ 
+        """
         associates each model with its new created name
         :param model: model selected
         :param name: name created for model
         """
+        
     def get_model(self):
         """
         :return: saved model
         """
+        
     def set_residuals(self, residuals):
-        """ 
+        """
         save a copy of residual
         :param data: data selected
         """
+        
     def get_residuals(self):
         """
         :return: residuals
         """
         
     def set_theory_data(self, data):
-        """ 
+        """
         save a copy of the data select to fit
         :param data: data selected
         """
+        
     def get_theory_data(self):
         """
         :return: list of data dList
         """
+        
     def set_fit_data(self, data):
-        """ 
+        """
          Store of list of data and create  by create new fitproblem of each data
          id , if there was existing information about model, this information
          get copy to the new fitproblem
         :param data: list of data selected
-        """   
+        """
+        
     def get_fit_data(self):
         """
         """
+        
     def set_model_param(self, name, value=None):
-        """ 
+        """
         Store the name and value of a parameter of this fitproblem's model
         :param name: name of the given parameter
         :param value: value of that parameter
         """
+        
     def set_param2fit(self, list):
         """
         Store param names to fit (checked)
         :param list: list of the param names
         """
+        
     def get_param2fit(self):
         """
         return the list param names to fit
         """
+        
     def get_model_param(self):
-        """ 
+        """
         return list of couple of parameter name and value
         """
+        
     def schedule_tofit(self, schedule=0):
         """
         set schedule to true to decide if this fit  must be performed
         """
+        
     def get_scheduled(self):
         """
         return true or false if a problem as being schedule for fitting
         """
+        
     def set_range(self, qmin=None, qmax=None):
         """
-        set fitting range 
+        set fitting range
         """
+        
     def get_range(self):
         """
         :return: fitting range
         """
+        
     def set_weight(self, flag=None):
         """
-        set fitting range 
+        set fitting range
         """
+        
     def get_weight(self):
         """
         get fitting weight
         """
+        
     def clear_model_param(self):
         """
         clear constraint info
         """
+        
     def set_fit_tab_caption(self, caption):
         """
         store the caption of the page associated with object
         """
+        
     def get_fit_tab_caption(self):
         """
         Return the caption of the page associated with object
         """
+        
     def set_graph_id(self, id):
         """
         Set graph id (from data_group_id at the time the graph produced) 
         """
-    def get_graph_id(self): 
+        
+    def get_graph_id(self):
         """
         Get graph_id
-        """  
+        """
+
     def set_result(self, result):
         """
         """
 
     def get_result(self):
         """
-        get result 
-        """   
+        get result
+        """
 
    
 class FitProblemDictionary(FitProblemComponent, dict):
@@ -153,7 +182,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
         dict.__init__(self)
         ## the current model
         self.model = None
-        ## if 1 this fit problem will be selected to fit , if 0 
+        ## if 1 this fit problem will be selected to fit , if 0
         ## it will not be selected for fit
         self.schedule = 0
         ##list containing parameter name and value
@@ -168,7 +197,6 @@ class FitProblemDictionary(FitProblemComponent, dict):
         self.nbr_residuals_computed = 0
         self.batch_inputs = {}
         self.batch_outputs = {}
-       
  
     def enable_smearing(self, flag=False, fid=None):
         """
@@ -202,10 +230,9 @@ class FitProblemDictionary(FitProblemComponent, dict):
         if fid in self.iterkeys():
             return self[fid].get_smearer()
      
-    
     def save_model_name(self, name, fid=None):
         """
-        """  
+        """
         if fid is None:
             for value in self.itervalues():
                 value.save_model_name(name)
@@ -226,7 +253,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
         return result
     
     def set_model(self, model, fid=None):
-        """ 
+        """
         associates each model with its new created name
         :param model: model selected
         :param name: name created for model
@@ -259,7 +286,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
         return self.fit_tab_caption
     
     def set_residuals(self, residuals, fid):
-        """ 
+        """
         save a copy of residual
         :param data: data selected
         """
@@ -274,7 +301,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
             return self[fid].get_residuals()
         
     def set_theory_data(self, fid, data=None):
-        """ 
+        """
         save a copy of the data select to fit
         :param data: data selected
         """
@@ -299,7 +326,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
         self[data.id].set_fit_data(data)
         
     def set_fit_data(self, data):
-        """ 
+        """
         save a copy of the data select to fit
         :param data: data selected
         
@@ -314,10 +341,9 @@ class FitProblemDictionary(FitProblemComponent, dict):
                 self[d.id].set_fit_data(d)
                 self[d.id].set_model(self.model)
                 self[d.id].set_range(self.qmin, self.qmax)
-                #self[d.id].set_smearer(self[d.id].get_smearer())
+                
     def get_fit_data(self, fid):
         """
-       
         return data for the given fitproblem id
         :param fid: is key representing a fitproblem. usually extract from data
                     id
@@ -326,7 +352,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
             return self[fid].get_fit_data()
    
     def set_model_param(self, name, value=None, fid=None):
-        """ 
+        """
         Store the name and value of a parameter of this fitproblem's model
         :param name: name of the given parameter
         :param value: value of that parameter
@@ -339,7 +365,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
                 self[fid].set_model_param(name, value)
                 
     def get_model_param(self, fid):
-        """ 
+        """
         return list of couple of parameter name and value
         """
         if fid in self.iterkeys():
@@ -355,7 +381,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
     def get_param2fit(self):
         """
         return the list param names to fit
-        """  
+        """
         return self.list_param2fit
           
     def schedule_tofit(self, schedule=0):
@@ -374,7 +400,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
     
     def set_range(self, qmin=None, qmax=None, fid=None):
         """
-        set fitting range 
+        set fitting range
         """
         self.qmin = qmin
         self.qmax = qmax
@@ -392,7 +418,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
         if fid in self.iterkeys():
             return self[fid].get_range()
         
-    def set_weight(self,  is2d, flag=None, fid=None):
+    def set_weight(self, is2d, flag=None, fid=None):
         """
         fit weight
         """
@@ -442,14 +468,14 @@ class FitProblemDictionary(FitProblemComponent, dict):
              
     def get_result(self, fid):
         """
-        get result 
-        """   
+        get result
+        """
         if fid in self.iterkeys():
             return self[fid].get_result()
             
     def get_batch_result(self):
         """
-        get result 
+        get result
         """
         return self.batch_inputs, self.batch_outputs
     
@@ -459,15 +485,15 @@ class FitProblemDictionary(FitProblemComponent, dict):
         """
         self.graph_id = id
         
-    def get_graph_id(self): 
+    def get_graph_id(self):
         """
         Get graph_id
-        """  
+        """
         return self.graph_id
     
     
 class FitProblem(FitProblemComponent):
-    """  
+    """
     FitProblem class allows to link a model with the new name created in _on_model,
     a name theory created with that model  and the data fitted with the model.
     FitProblem is mostly used  as value of the dictionary by fitting module.
@@ -485,7 +511,7 @@ class FitProblem(FitProblemComponent):
         self.original_data = None
         ## the current model
         self.model = None
-        ## if 1 this fit problem will be selected to fit , if 0 
+        ## if 1 this fit problem will be selected to fit , if 0
         ## it will not be selected for fit
         self.schedule = 0
         ##list containing parameter name and value
@@ -500,7 +526,6 @@ class FitProblem(FitProblemComponent):
         # fit weight
         self.weight = None
         self.result = None
-        
         
     def enable_smearing(self, flag=False):
         """
@@ -533,8 +558,8 @@ class FitProblem(FitProblemComponent):
     
     def save_model_name(self, name):
         """
-        """  
-        self.name_per_page= name
+        """
+        self.name_per_page = name
         
     def get_name(self):
         """
@@ -542,7 +567,7 @@ class FitProblem(FitProblemComponent):
         return self.name_per_page
     
     def set_model(self, model):
-        """ 
+        """
         associates each model with its new created name
         :param model: model selected
         :param name: name created for model
@@ -559,7 +584,7 @@ class FitProblem(FitProblemComponent):
         return self.model
    
     def set_residuals(self, residuals):
-        """ 
+        """
         save a copy of residual
         :param data: data selected
         """
@@ -572,7 +597,7 @@ class FitProblem(FitProblemComponent):
         return self.residuals
         
     def set_theory_data(self, data):
-        """ 
+        """
         save a copy of the data select to fit
         
         :param data: data selected
@@ -587,7 +612,7 @@ class FitProblem(FitProblemComponent):
         return self.theory_data
 
     def set_fit_data(self, data):
-        """ 
+        """
         Store data associated with this class
         :param data: list of data selected
         """
@@ -643,19 +668,19 @@ class FitProblem(FitProblemComponent):
     def get_param2fit(self):
         """
         return the list param names to fit
-        """  
+        """
         return self.list_param2fit
     
-    def set_model_param(self,name,value=None):
-        """ 
+    def set_model_param(self, name, value=None):
+        """
         Store the name and value of a parameter of this fitproblem's model
         :param name: name of the given parameter
         :param value: value of that parameter
         """
-        self.list_param.append([name,value])
+        self.list_param.append([name, value])
         
     def get_model_param(self):
-        """ 
+        """
         return list of couple of parameter name and value
         """
         return self.list_param
@@ -706,14 +731,14 @@ class FitProblem(FitProblemComponent):
     
     def set_graph_id(self, id):
         """
-        Set graph id (from data_group_id at the time the graph produced) 
+        Set graph id (from data_group_id at the time the graph produced)
         """
         self.graph_id = id
         
-    def get_graph_id(self): 
+    def get_graph_id(self):
         """
         Get graph_id
-        """  
+        """
         return self.graph_id
     
     def set_result(self, result):
@@ -723,6 +748,6 @@ class FitProblem(FitProblemComponent):
         
     def get_result(self):
         """
-        get result 
-        """   
+        get result
+        """
         return self.result

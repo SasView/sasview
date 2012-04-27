@@ -1,8 +1,12 @@
+"""
+Dialog to set ftol for Scipy
 
+    ftol(float): Relative error desired in the sum of squares.
+"""
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #
 #See the license text in license.txt
 #
@@ -10,13 +14,13 @@
 ################################################################################
 import wx
 import sys
-from sans.guiframe.events import StatusEvent  
+from sans.guiframe.events import StatusEvent
 # default ftol
-F_TOL = 1.49012e-08 
+F_TOL = 1.49012e-08
 SANS_F_TOL = 5e-05
 
 if sys.platform.count("win32") > 0:
-    PANEL_WIDTH = 270 
+    PANEL_WIDTH = 270
     PANEL_HEIGHT = 265
     FONT_VARIANT = 0
 else:
@@ -24,35 +28,31 @@ else:
     PANEL_HEIGHT = 265
     FONT_VARIANT = 1
     
-"""
-Dialog to set ftol for Scipy
-
-    ftol(float): Relative error desired in the sum of squares.
-"""
+    
 class ChangeFtol(wx.Dialog):
     """
     Dialog to select ftol
     """
     def __init__(self, parent, base, id=-1, title="FTolerance"):
-        wx.Dialog.__init__(self, parent, id, title, 
+        wx.Dialog.__init__(self, parent, id, title,
                            size=(PANEL_WIDTH, PANEL_HEIGHT))
         # parent
         self.parent = base
         # default ftol
         self.ftol = SANS_F_TOL
-                # font size 
+        # font size
         self.SetWindowVariant(variant=FONT_VARIANT)
         # build layout
         panel = wx.Panel(self, -1)
         vbox = wx.BoxSizer(wx.VERTICAL)
         wx.StaticBox(panel, -1, 'FTol selection (Leastsq)', (5, 6),
-                      (PANEL_WIDTH*0.9, PANEL_HEIGHT*0.7))
-        default_bt = wx.RadioButton(panel, -1, 'SansView Default (5e-05)', 
-                                    (15, 30), 
+                      (PANEL_WIDTH * 0.9, PANEL_HEIGHT * 0.7))
+        default_bt = wx.RadioButton(panel, -1, 'SansView Default (5e-05)',
+                                    (15, 30),
                                     style=wx.RB_GROUP)
         default_bt.SetValue(True)
         default_bt.Bind(wx.EVT_RADIOBUTTON, self.OnFtolSelection)
-        sci_default_bt = wx.RadioButton(panel, -1, 
+        sci_default_bt = wx.RadioButton(panel, -1,
                                     'Scipy Default (1.49012e-08)', (15, 55))
         sci_default_bt.SetValue(False)
         sci_default_bt.Bind(wx.EVT_RADIOBUTTON, self.OnFtolSelection)
@@ -87,22 +87,21 @@ class ChangeFtol(wx.Dialog):
         # event object and selection
         button = event.GetEventObject()
         selection = button.GetLabel()
-        # get float value 
+        # get float value
         if selection.count('SansView') > 0:
-            ftol = SANS_F_TOL   
-            self.custombox.Disable() 
+            ftol = SANS_F_TOL
+            self.custombox.Disable()
         elif selection.count('Scipy') > 0:
-            ftol = F_TOL   
-            self.custombox.Disable()     
+            ftol = F_TOL
+            self.custombox.Disable()
         elif selection == 'Custom':
-            ftol = F_TOL 
+            ftol = F_TOL
             self.custombox.Enable(True)
         else:
-            ftol =  float(selection)
+            ftol = float(selection)
             self.custombox.Disable()
-        self.ftol = ftol    
+        self.ftol = ftol
         
-
     def OnClose(self, event):
         """
         Close event
@@ -119,13 +118,12 @@ class ChangeFtol(wx.Dialog):
                 flag = False
         if flag:
             # set ftol in fitting
-            self.parent.set_ftol(self.ftol) 
+            self.parent.set_ftol(self.ftol)
             msg = "The ftol (LeastSq) is set to %s." % self.ftol
         else:
-           msg = "Error in the selection... No changes in ftol."
+            msg = "Error in the selection... No changes in ftol."
         # post event for info
-        wx.PostEvent( self.parent.parent, 
-                      StatusEvent(status= msg, info='warning')) 
+        wx.PostEvent(self.parent.parent,
+                    StatusEvent(status=msg, info='warning'))
     
         self.Destroy()
-

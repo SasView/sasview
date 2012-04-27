@@ -1,18 +1,17 @@
-
+"""
+Dialog report panel to show and summarize the results of 
+the invariant calculation.
+"""
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #
 #See the license text in license.txt
 #
 #copyright 2009, University of Tennessee
 ################################################################################
 
-"""
-Dialog report panel to show and summarize the results of 
-the invariant calculation.
-"""
 import wx
 import sys
 import os
@@ -26,21 +25,21 @@ ISMAC = False
 
 if sys.platform == "win32":
     _STATICBOX_WIDTH = 450
-    PANEL_WIDTH = 500 
+    PANEL_WIDTH = 500
     PANEL_HEIGHT = 700
     FONT_VARIANT = 0
     ISMAC = False
 elif sys.platform == "darwin":
     ISMAC = True
-ISPDF = True   
+ISPDF = True
 
         
 class ReportDialog(wx.Dialog):
     """
-    The report dialog box. 
+    The report dialog box.
     """
     
-    def __init__(self,  list, *args, **kwds):
+    def __init__(self, list, *args, **kwds):
         """
         Initialization. The parameters added to Dialog are:
         
@@ -54,7 +53,7 @@ class ReportDialog(wx.Dialog):
         self.SetTitle("Report: Fitting")
         # size
         self.SetSize((720, 650))
-        # font size 
+        # font size
         self.SetWindowVariant(variant=FONT_VARIANT)
         # check if tit is MAC
         self.is_pdf = ISPDF
@@ -70,12 +69,12 @@ class ReportDialog(wx.Dialog):
                                     "memory:img_fit0.png"
             elif len(list[2]) == 2:
                 self.report_html = self.report_list[0] % \
-                                    ("memory:img_fit0.png", 
+                                    ("memory:img_fit0.png",
                                      "memory:img_fit1.png")
             # allows up to three images
             else:
                 self.report_html = self.report_list[0] % \
-                                    ("memory:img_fit0.png", 
+                                    ("memory:img_fit0.png",
                                      "memory:img_fit1.png",
                                      "memory:img_fit2.png")
         else:
@@ -92,7 +91,7 @@ class ReportDialog(wx.Dialog):
         # buttons
         id = wx.ID_OK
         button_close = wx.Button(self, id, "Close")
-        button_close.SetToolTipString("Close this report window.") 
+        button_close.SetToolTipString("Close this report window.")
         #hbox.Add((5,10), 1 , wx.EXPAND|wx.ADJUST_MINSIZE,0)
         hbox.Add(button_close)
         button_close.SetFocus()
@@ -108,20 +107,20 @@ class ReportDialog(wx.Dialog):
         button_print = wx.Button(self, id, "Print")
         button_print.SetToolTipString("Print this report.")
         button_print.Bind(wx.EVT_BUTTON, self.onPrint,
-                          id=button_print.GetId()) 
+                          id=button_print.GetId())
         hbox.Add(button_print)
         
         id = wx.NewId()
-        button_save = wx.Button(self, id, "Save" )
+        button_save = wx.Button(self, id, "Save")
         button_save.SetToolTipString("Save this report.")
-        button_save.Bind(wx.EVT_BUTTON, self.onSave, id = button_save.GetId()) 
-        hbox.Add(button_save)     
+        button_save.Bind(wx.EVT_BUTTON, self.onSave, id=button_save.GetId())
+        hbox.Add(button_save)
         
         # panel for report page
         #panel = wx.Panel(self, -1)
         vbox = wx.BoxSizer(wx.VERTICAL)
         # html window
-        self.hwindow = html.HtmlWindow(self,style=wx.BORDER)
+        self.hwindow = html.HtmlWindow(self, style=wx.BORDER)
         # set the html page with the report string
         self.hwindow.SetPage(self.report_html)
         
@@ -140,10 +139,10 @@ class ReportDialog(wx.Dialog):
         # pdf supporting only on MAC, not on exe
         if self.is_pdf:
             wild_card = ' PDF files (*.pdf)|*.pdf|'
-            ind_cor = 0 
+            ind_cor = 0
         else:
             wild_card = ''
-            ind_cor = 1 
+            ind_cor = 1
         wild_card += 'HTML files (*.html)|*.html|'
         wild_card += 'Text files (*.txt)|*.txt'
 
@@ -151,19 +150,19 @@ class ReportDialog(wx.Dialog):
         dlg = wx.FileDialog(self, "Choose a file",
                             wildcard=wild_card,
                             style=wx.SAVE|wx.OVERWRITE_PROMPT|wx.CHANGE_DIR)
-        dlg.SetFilterIndex(0) #Set .html files to be default
+        dlg.SetFilterIndex(0)  # Set .html files to be default
 
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
         
         fName = dlg.GetPath()
-        ext_num = dlg.GetFilterIndex()     
+        ext_num = dlg.GetFilterIndex()
 
-        #set file extensions 
+        #set file extensions
         img_ext = []
         pic_fname = []
-        #PDF 
+        #PDF
         if ext_num == (0 + 2 * ind_cor):
             # TODO: Sort this case out
             ext = '.pdf'
@@ -212,7 +211,7 @@ class ReportDialog(wx.Dialog):
             report_frame = self.report_list[0]
         #TEXT + pdf(graph)
         elif ext_num == (2 - ind_cor):
-            ext = '.txt'   
+            ext = '.txt'
             # changing the image extension actually changes the image
             # format on saving
             for num in range(self.nimages):
@@ -221,7 +220,7 @@ class ReportDialog(wx.Dialog):
         else:
             return
         
-        #file name     
+        #file name
         fName = os.path.splitext(fName)[0] + ext
         dlg.Destroy()
         
@@ -234,10 +233,10 @@ class ReportDialog(wx.Dialog):
             if self.nimages == 1:
                 report = report_frame % os.path.basename(pic_fname[0])
             elif self.nimages == 2:
-                report = report_frame % (os.path.basename(pic_fname[0]), 
+                report = report_frame % (os.path.basename(pic_fname[0]),
                                          os.path.basename(pic_fname[1]))
             elif self.nimages == 3:
-                report = report_frame % (os.path.basename(pic_fname[0]), 
+                report = report_frame % (os.path.basename(pic_fname[0]),
                                          os.path.basename(pic_fname[1]),
                                          os.path.basename(pic_fname[2]))
         f = open(fName, 'w')
@@ -248,7 +247,6 @@ class ReportDialog(wx.Dialog):
         for num in range(self.nimages):
             self.report_list[2][num].savefig(pic_fname[num])
         
-            
     def onPreview(self, event=None):
         """
         Preview
@@ -273,7 +271,7 @@ class ReportDialog(wx.Dialog):
             event.Skip()
         self.Update()
         
-    def OnClose(self,event=None):
+    def OnClose(self, event=None):
         """
         Close the Dialog
         
@@ -287,7 +285,7 @@ class ReportDialog(wx.Dialog):
     
     def HTML2PDF(self, data, filename):
         """
-        Create a PDF file from html source string. 
+        Create a PDF file from html source string.
         
         : data: html string
         : filename: name of file to be saved
@@ -302,6 +300,3 @@ class ReportDialog(wx.Dialog):
         f.close()
         self.Update()
         return not pdf.err
-
-        
-        

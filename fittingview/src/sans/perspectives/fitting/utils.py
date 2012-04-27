@@ -3,6 +3,7 @@ Module contains functions frequently used in this package
 """
 import numpy
 
+
 def get_weight(data, is2d, flag=None):
     """
     Received flag and compute error on data.
@@ -11,7 +12,7 @@ def get_weight(data, is2d, flag=None):
     """
     weight = None
     if is2d:
-        dy_data = data.err_data 
+        dy_data = data.err_data
         data = data.data
     else:
         dy_data = data.dy

@@ -1,10 +1,10 @@
-
+"""
+    Calculation thread for modeling
+"""
 
 import time
-import sys
 import numpy
 import math
-from sans.models.smearing_2d import Smearer2D
 from data_util.calcthread import CalcThread
 
 class Calc2D(CalcThread):
@@ -14,7 +14,7 @@ class Calc2D(CalcThread):
     where points are computed for one half of the detector
     and I(qx, qy) = I(-qx, -qy) is assumed.
     """
-    def __init__(self, data, model, smearer, qmin, qmax,  page_id,
+    def __init__(self, data, model, smearer, qmin, qmax, page_id,
                  state=None,
                  weight=None,
                  fid=None,
@@ -26,10 +26,7 @@ class Calc2D(CalcThread):
                  yieldtime=0.04,
                  worktime=0.04
                  ):
-        CalcThread.__init__(self,completefn,
-                 updatefn,
-                 yieldtime,
-                 worktime)
+        CalcThread.__init__(self, completefn, updatefn, yieldtime, worktime)
         self.qmin = qmin
         self.qmax = qmax
         self.weight = weight
@@ -42,7 +39,7 @@ class Calc2D(CalcThread):
         # the model on to calculate
         self.model = model
         self.smearer = smearer
-        self.starttime = 0  
+        self.starttime = 0
         self.update_chisqr = update_chisqr
         self.source = source
         
@@ -63,13 +60,12 @@ class Calc2D(CalcThread):
                 self.qmax = math.sqrt(newx + newy)
         
         if self.data is None:
-            msg = "Compute Calc2D receive data = %s.\n" % str(self.data)    
+            msg = "Compute Calc2D receive data = %s.\n" % str(self.data)
             raise ValueError, msg
             
-        # Define matrix where data will be plotted 
-        radius= numpy.sqrt((self.data.qx_data * self.data.qx_data) + \
+        # Define matrix where data will be plotted
+        radius = numpy.sqrt((self.data.qx_data * self.data.qx_data) + \
                     (self.data.qy_data * self.data.qy_data))
-        index_data = (self.qmin <= radius) & self.data.mask
 
         # For theory, qmax is based on 1d qmax 
         # so that must be mulitified by sqrt(2) to get actual max for 2d
@@ -84,23 +80,24 @@ class Calc2D(CalcThread):
             fn.set_index(index_model)
             # Get necessary data from self.data and set the data for smearing
             fn.get_data()
-            # Calculate smeared Intensity 
+            # Calculate smeared Intensity
             #(by Gaussian averaging): DataLoader/smearing2d/Smearer2D()
             value = fn.get_value()
-        else:    
+        else:
             # calculation w/o smearing
-            value =  self.model.evalDistribution([self.data.qx_data[index_model],
-                                                self.data.qy_data[index_model]])
+            value = self.model.evalDistribution(\
+                [self.data.qx_data[index_model],
+                 self.data.qy_data[index_model]])
         output = numpy.zeros(len(self.data.qx_data))
         # output default is None
-        # This method is to distinguish between masked 
+        # This method is to distinguish between masked
         #point(nan) and data point = 0.
-        output = output/output
+        output = output / output
         # set value for self.mask==True, else still None to Plottools
-        output[index_model] = value 
-        elapsed = time.time()-self.starttime
+        output[index_model] = value
+        elapsed = time.time() - self.starttime
         self.complete(image=output,
-                       data=self.data, 
+                       data=self.data,
                        page_id=self.page_id,
                        model=self.model,
                        state=self.state,
@@ -112,7 +109,7 @@ class Calc2D(CalcThread):
                        qmax=self.qmax,
                        weight=self.weight,
                        #qstep=self.qstep,
-                       update_chisqr = self.update_chisqr,
+                       update_chisqr=self.update_chisqr,
                        source=self.source)
         
 
@@ -130,7 +127,7 @@ class Calc1D(CalcThread):
                  smearer=None,
                  toggle_mode_on=False,
                  state=None,
-                 completefn = None,
+                 completefn=None,
                  update_chisqr=True,
                  source='model',
                  updatefn=None,
@@ -139,7 +136,7 @@ class Calc1D(CalcThread):
                  ):
         """
         """
-        CalcThread.__init__(self,completefn,
+        CalcThread.__init__(self, completefn,
                  updatefn,
                  yieldtime,
                  worktime)
@@ -159,33 +156,33 @@ class Calc1D(CalcThread):
         
     def compute(self):
         """
-        Compute model 1d value given qmin , qmax , x value 
+        Compute model 1d value given qmin , qmax , x value
         """
         self.starttime = time.time()
         output = numpy.zeros((len(self.data.x)))
-        index= (self.qmin <= self.data.x)& (self.data.x <= self.qmax)
+        index = (self.qmin <= self.data.x) & (self.data.x <= self.qmax)
      
-        ##smearer the ouput of the plot    
+        ##smearer the ouput of the plot
         if self.smearer is not None:
-            first_bin, last_bin = self.smearer.get_bin_range(self.qmin, 
+            first_bin, last_bin = self.smearer.get_bin_range(self.qmin,
                                                              self.qmax)
             mask = self.data.x[first_bin:last_bin]
             output[first_bin:last_bin] = self.model.evalDistribution(mask)
-            output = self.smearer(output, first_bin, last_bin) 
+            output = self.smearer(output, first_bin, last_bin)
         else:
             output[index] = self.model.evalDistribution(self.data.x[index])
          
         elapsed = time.time() - self.starttime
        
-        self.complete(x=self.data.x[index], y=output[index], 
+        self.complete(x=self.data.x[index], y=output[index],
                       page_id=self.page_id,
                       state=self.state,
                       weight=self.weight,
                       fid=self.fid,
                       toggle_mode_on=self.toggle_mode_on,
-                      elapsed=elapsed,index=index, model=self.model,
-                      data=self.data, 
-                      update_chisqr = self.update_chisqr,
+                      elapsed=elapsed, index=index, model=self.model,
+                      data=self.data,
+                      update_chisqr=self.update_chisqr,
                       source=self.source)
         
     def results(self):
@@ -236,4 +233,4 @@ Example: ::
     
     if __name__ == "__main__":
         CalcCommandline()
-"""   
+"""

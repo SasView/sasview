@@ -2,27 +2,25 @@
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #
 #See the license text in license.txt
 #
 #copyright 2009, University of Tennessee
 ################################################################################
-
-
 import wx
-import sys
-import os
 from wx.lib.scrolledpanel import ScrolledPanel
 
 MAX_NBR_DATA = 4
 WIDTH = 430
 HEIGHT = 350
 
+
 class DialogPanel(ScrolledPanel):
     def __init__(self, *args, **kwds):
         ScrolledPanel.__init__(self, *args, **kwds)
         self.SetupScrolling()
+        
         
 class BatchDataDialog(wx.Dialog):
     """
@@ -30,7 +28,7 @@ class BatchDataDialog(wx.Dialog):
     set. This allows the user to make a quick selection of the type of data
     to use in fit tab.
     """
-    def __init__(self, parent=None,  *args, **kwds):
+    def __init__(self, parent=None, *args, **kwds):
         wx.Dialog.__init__(self, parent, *args, **kwds)
         self.SetSize((WIDTH, HEIGHT))
         self.data_1d_selected = None
@@ -42,13 +40,13 @@ class BatchDataDialog(wx.Dialog):
         Draw the content of the current dialog window
         """
         vbox = wx.BoxSizer(wx.VERTICAL)
-        box_description= wx.StaticBox(self, -1,str("Hint"))
+        box_description = wx.StaticBox(self, -1, str("Hint"))
         hint_sizer = wx.StaticBoxSizer(box_description, wx.VERTICAL)
         selection_sizer = wx.GridBagSizer(5,5)
         button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.data_1d_selected = wx.RadioButton(self, -1, 'Data1D',
                                                 style=wx.RB_GROUP)
-        self.data_2d_selected  = wx.RadioButton(self, -1, 'Data2D')
+        self.data_2d_selected = wx.RadioButton(self, -1, 'Data2D')
         self.data_1d_selected.SetValue(True)
         self.data_2d_selected.SetValue(False)
         button_cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
@@ -68,13 +66,13 @@ class BatchDataDialog(wx.Dialog):
         #contruction the sizer contaning button
         button_sizer.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         button_sizer.Add(button_cancel, 0,
-                          wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+                         wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         button_sizer.Add(button_OK, 0,
                                 wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
-        vbox.Add(hint_sizer,  0, wx.EXPAND|wx.ALL, 10)
+        vbox.Add(hint_sizer, 0, wx.EXPAND|wx.ALL, 10)
         vbox.Add(selection_sizer, 0, wx.TOP|wx.BOTTOM, 10)
         vbox.Add(wx.StaticLine(self, -1),  0, wx.EXPAND, 0)
-        vbox.Add(button_sizer, 0 , wx.TOP|wx.BOTTOM, 10)
+        vbox.Add(button_sizer, 0, wx.TOP|wx.BOTTOM, 10)
         self.SetSizer(vbox)
         self.Layout()
         
@@ -86,7 +84,6 @@ class BatchDataDialog(wx.Dialog):
             return 1
         else:
             return 2
-
 
 
 class DataDialog(wx.Dialog):
@@ -103,7 +100,7 @@ class DataDialog(wx.Dialog):
         self.SetSize((WIDTH, HEIGHT))
         self.list_of_ctrl = []
         if not data_list:
-            return 
+            return
         select_data_text = " %s Data selected.\n" % str(self._nb_selected_data)
         self._data_text_ctrl = wx.StaticText(self, -1, str(select_data_text))
                                
@@ -121,13 +118,13 @@ class DataDialog(wx.Dialog):
         layout the dialog
         """
         if not data_list or len(data_list) <= 1:
-            return 
+            return
         #add text
         if text.strip() == "":
             text = "Fitting: We recommend that you selected"
             text += " no more than '%s' data\n" % str(self._max_data)
-            text += "for adequate plot display size. \n" 
-            text += "unchecked data won't be send to fitting . \n" 
+            text += "for adequate plot display size. \n"
+            text += "unchecked data won't be send to fitting . \n"
         text_ctrl = wx.StaticText(self, -1, str(text))
         self._sizer_txt.Add(text_ctrl)
         iy = 0

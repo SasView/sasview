@@ -1,17 +1,18 @@
-#!/usr/bin/python
-
+"""
+    Help dialog
+"""
 import wx
 import wx.html as html
 from wx.lib.splitter import MultiSplitterWindow
 import os
-
 from wx.lib.scrolledpanel import ScrolledPanel
 
 class HelpPanel(ScrolledPanel):
     def __init__(self, parent, **kwargs):
         ScrolledPanel.__init__(self, parent, **kwargs)
         self.SetupScrolling()
-        
+
+
 class HelpWindow(wx.Frame):
     """
     """
@@ -21,15 +22,15 @@ class HelpWindow(wx.Frame):
         contains help info
         """
         self.Show(False)
-        self.SetTitle('Fitting Help') 
+        self.SetTitle('Fitting Help')
         from sans.perspectives.fitting import get_data_path as fit_path
         fitting_path = fit_path(media='media')
-        ico_file = os.path.join(fitting_path,'ball.ico')
+        ico_file = os.path.join(fitting_path, 'ball.ico')
         if os.path.isfile(ico_file):
             self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         splitter = MultiSplitterWindow(self, style=wx.SP_LIVE_UPDATE)
         rpanel = wx.Panel(splitter, -1)
-        lpanel = wx.Panel(splitter, -1,style=wx.BORDER_SUNKEN)
+        lpanel = wx.Panel(splitter, -1, style=wx.BORDER_SUNKEN)
         
         vbox = wx.BoxSizer(wx.VERTICAL)
         header = wx.Panel(rpanel, -1)
@@ -58,7 +59,8 @@ class HelpWindow(wx.Frame):
         headerl.SetSizer(hboxl)
         vboxl.Add(headerl, 0, wx.EXPAND)
         self.lhelp = html.HtmlWindow(lpanel, -1, style=wx.NO_BORDER)
-        self.rhelp = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER, size=(500,-1))
+        self.rhelp = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER,
+                                     size=(500, -1))
 
         # get the media path
         if pageToOpen != None:
@@ -68,11 +70,10 @@ class HelpWindow(wx.Frame):
             # Get models help model_function path
             path = model_path(media='media')
 
-        self.path = os.path.join(path,"model_functions.html")
-        self.path_pd = os.path.join(path,"pd_help.html")
-        self.path_sm = os.path.join(path,"smear_computation.html")
+        self.path = os.path.join(path, "model_functions.html")
+        self.path_pd = os.path.join(path, "pd_help.html")
+        self.path_sm = os.path.join(path, "smear_computation.html")
        
-        
         _html_file = [("load_data_help.html", "Load a File"),
                       ("single_fit_help.html", "Single Fit"),
                       ("simultaneous_fit_help.html", "Simultaneous Fit"),
@@ -85,17 +86,18 @@ class HelpWindow(wx.Frame):
                       ("key_help.html", "Key Combination"),
                       ("status_bar_help.html", "Status Bar Help"),
                       ]
-
-                    
-        page1="""<html>
+ 
+        page1 = """<html>
             <body>
              <p>Select topic on Menu</p>
             </body>
             </html>"""
-        page="""<html>
+            
+        page = """<html>
             <body>
             <ul>
             """
+            
         for (p, title) in _html_file:
             pp = os.path.join(fitting_path, p)
             page += """<li><a href ="%s" target="showframe">%s</a><br></li>""" % (pp, title)
@@ -103,30 +105,23 @@ class HelpWindow(wx.Frame):
                     </body>
                     </html>
                 """
-        #page += """
-        #    <li><a href ="%s" target="showframe">Model Functions</a><br></li>
-        #   <li><a href ="%s" target="showframe">Polydispersion Distributions</a><br></li>
-        #    <li><a href ="%s" target="showframe">Smear Computation</a><br></li>
-        #    </ul>
-        #    </body>
-        #    </html>""" % (self.path, self.path_pd, self.path_sm)
-        
+                
         self.rhelp.SetPage(page1)
         self.lhelp.SetPage(page)
-        self.lhelp.Bind(wx.html.EVT_HTML_LINK_CLICKED,self.OnLinkClicked )
+        self.lhelp.Bind(wx.html.EVT_HTML_LINK_CLICKED, self.OnLinkClicked )
         
         #open the help frame a the current page
-        if  pageToOpen!= None:
-            self.rhelp.LoadPage(str( pageToOpen))
+        if  pageToOpen != None:
+            self.rhelp.LoadPage(str(pageToOpen))
             
-        vbox.Add(self.rhelp,1, wx.EXPAND)
+        vbox.Add(self.rhelp, 1, wx.EXPAND)
         vboxl.Add(self.lhelp, 1, wx.EXPAND)
         rpanel.SetSizer(vbox)
         lpanel.SetSizer(vboxl)
         lpanel.SetFocus()
         
         vbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        vbox1.Add(splitter,1,wx.EXPAND)
+        vbox1.Add(splitter, 1, wx.EXPAND)
         splitter.AppendWindow(lpanel, 200)
         splitter.AppendWindow(rpanel)
         self.SetSizer(vbox1)
@@ -139,14 +134,13 @@ class HelpWindow(wx.Frame):
         """
         Function to diplay Model html page related to the hyperlinktext selected
         """
-        
         self.rhelp.LoadPage(self.path)
         
     def OnLinkClicked(self, event):
         """
         Function to diplay html page related to the hyperlinktext selected
         """
-        link= event.GetLinkInfo().GetHref()
+        link = event.GetLinkInfo().GetHref()
         
         self.rhelp.LoadPage(os.path.abspath(link))
         
@@ -160,24 +154,3 @@ class HelpWindow(wx.Frame):
         self.rhelp.Show(False)
         self.rhelp.ScrollLines(pos)
         self.rhelp.Show(True)
-        #self.rhelp.SetScrollPos(wx.VERTICAL, pos1, True)
-
-    
-        
-"""
-Example: ::
-
-    class ViewApp(wx.App):
-        def OnInit(self):
-            frame = HelpWindow(None, -1, 'HelpWindow')    
-            frame.Show(True)
-            self.SetTopWindow(frame)
-            
-            return True
-            
-    
-    if __name__ == "__main__": 
-    app = ViewApp(0)
-    app.MainLoop()  
-
-"""   

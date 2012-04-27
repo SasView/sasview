@@ -2,7 +2,6 @@
     Utilities to manage models
 """
 import wx
-import wx.lib.newevent
 import imp
 import os
 import sys
@@ -13,13 +12,14 @@ import time
 import logging
 import py_compile
 import shutil
-from sans.guiframe.events import StatusEvent  
+from sans.guiframe.events import StatusEvent
 # Explicitly import from the pluginmodel module so that py2exe
 # places it in the distribution. The Model1DPlugin class is used
 # as the base class of plug-in models.
 from sans.models.pluginmodel import Model1DPlugin
    
-PLUGIN_DIR = 'plugin_models' 
+PLUGIN_DIR = 'plugin_models'
+
 
 def log(message):
     """
@@ -46,32 +46,32 @@ def _check_plugin(model, name):
         msg = "Plugin %s must be of type Model1DPlugin \n" % str(name)
         log(msg)
         return None
-    if model.__name__!="Model":
-        msg= "Plugin %s class name must be Model \n" % str(name)
+    if model.__name__ != "Model":
+        msg = "Plugin %s class name must be Model \n" % str(name)
         log(msg)
         return None
     try:
-        new_instance= model()
+        new_instance = model()
     except:
-        msg="Plugin %s error in __init__ \n\t: %s %s\n" % (str(name),
+        msg = "Plugin %s error in __init__ \n\t: %s %s\n" % (str(name),
                                     str(sys.exc_type), sys.exc_value)
         log(msg)
         return None
    
-    new_instance= model() 
-    if hasattr(new_instance,"function"):
+    if hasattr(new_instance, "function"):
         try:
-           value=new_instance.function()
+            value = new_instance.function()
         except:
-           msg="Plugin %s: error writing function \n\t :%s %s\n " % (str(name),
+            msg = "Plugin %s: error writing function \n\t :%s %s\n " % (str(name),
                                     str(sys.exc_type), sys.exc_value)
-           log(msg)
-           return None
+            log(msg)
+            return None
     else:
-       msg="Plugin  %s needs a method called function \n" % str(name)
-       log(msg)
-       return None
+        msg = "Plugin  %s needs a method called function \n" % str(name)
+        log(msg)
+        return None
     return model
+  
   
 def find_plugins_dir():
     """
@@ -88,7 +88,7 @@ def find_plugins_dir():
     try:
         # For source
         if os.path.isdir(os.path.dirname(__file__)):
-            p_dir =  os.path.join(os.path.dirname(__file__), PLUGIN_DIR)
+            p_dir = os.path.join(os.path.dirname(__file__), PLUGIN_DIR)
         else:
             raise
     except:
@@ -108,7 +108,7 @@ def find_plugins_dir():
             raise
 
     # Place example user models as needed
-    for file in os.listdir(p_dir): 
+    for file in os.listdir(p_dir):
         file_path = os.path.join(p_dir, file)
         if os.path.isfile(file_path):
             if file.split(".")[-1] == 'py' and\
@@ -116,6 +116,7 @@ def find_plugins_dir():
                 if not os.path.isfile(os.path.join(dir, file)):
                     shutil.copy(file_path, dir)
     return dir
+
 
 class ReportProblem:
     def __nonzero__(self):
@@ -127,17 +128,20 @@ class ReportProblem:
     
 report_problem = ReportProblem()
 
+
 def compile_file(dir):
     """
     Compile a py file
     """
     try:
         import compileall
-        compileall.compile_dir(dir=dir, ddir=dir, force=1, quiet=report_problem)
+        compileall.compile_dir(dir=dir, ddir=dir, force=1,
+                               quiet=report_problem)
     except:
         type, value, traceback = sys.exc_info()
         return value
     return None
+
 
 def _findModels(dir):
     """
@@ -160,31 +164,31 @@ def _findModels(dir):
         list = os.listdir(dir)
         for item in list:
             toks = os.path.splitext(os.path.basename(item))
-            if toks[1]=='.py' and not toks[0]=='__init__':
+            if toks[1] == '.py' and not toks[0] == '__init__':
                 name = toks[0]
             
                 path = [os.path.abspath(dir)]
                 file = None
                 try:
                     (file, path, info) = imp.find_module(name, path)
-                    module = imp.load_module( name, file, item, info )
+                    module = imp.load_module(name, file, item, info)
                     if hasattr(module, "Model"):
                         try:
-                            if _check_plugin(module.Model, name)!=None:
+                            if _check_plugin(module.Model, name) != None:
                                 plugins[name] = module.Model
                         except:
-                            msg="Error accessing Model"
-                            msg+="in %s\n  %s %s\n" % (name,
+                            msg = "Error accessing Model"
+                            msg += "in %s\n  %s %s\n" % (name,
                                     str(sys.exc_type), sys.exc_value)
                             log(msg)
                 except:
-                    msg="Error accessing Model"
-                    msg +=" in %s\n  %s %s \n" %(name,
+                    msg = "Error accessing Model"
+                    msg += " in %s\n  %s %s \n" % (name,
                                     str(sys.exc_type), sys.exc_value)
                     log(msg)
                 finally:
               
-                    if not file==None:
+                    if not file == None:
                         file.close()
     except:
         # Don't deal with bad plug-in imports. Just skip.
@@ -192,6 +196,7 @@ def _findModels(dir):
         log(msg)
         pass
     return plugins
+
 
 class ModelList(object):
     """
@@ -216,13 +221,14 @@ class ModelList(object):
         :param name: the type of the list
         :param mylist: the list to add
         """
-        self.mydict[name] = mylist         
+        self.mydict[name] = mylist
             
     def get_list(self):
         """
         return all the list stored in a dictionary object
         """
         return self.mydict
+        
         
 class ModelManagerBase:
     """
@@ -238,7 +244,7 @@ class ModelManagerBase:
     shape_list = []
     ## independent shape model list
     shape_indep_list = []
-    ##list of structure factors 
+    ##list of structure factors
     struct_list = []
     ##list of model allowing multiplication
     multiplication_factor = []
@@ -249,6 +255,7 @@ class ModelManagerBase:
     ## Event owner (guiframe)
     event_owner = None
     last_time_dir_modified = 0
+    
     def __init__(self):
         """
         """
@@ -440,7 +447,7 @@ class ModelManagerBase:
         self.shape_list.append(BCCrystalModel)
         self.model_name_list.append(BCCrystalModel.__name__)
       
-        ## Structure factor 
+        ## Structure factor
         from sans.models.SquareWellStructure import SquareWellStructure
         self.struct_list.append(SquareWellStructure)
         self.model_name_list.append(SquareWellStructure.__name__)
@@ -459,11 +466,11 @@ class ModelManagerBase:
         
         ##shape-independent models
         from sans.models.PowerLawAbsModel import PowerLawAbsModel
-        self.shape_indep_list.append( PowerLawAbsModel )
+        self.shape_indep_list.append(PowerLawAbsModel)
         self.model_name_list.append(PowerLawAbsModel.__name__)
         
         from sans.models.BEPolyelectrolyte import BEPolyelectrolyte
-        self.shape_indep_list.append(BEPolyelectrolyte )
+        self.shape_indep_list.append(BEPolyelectrolyte)
         self.model_name_list.append(BEPolyelectrolyte.__name__)
         self.form_factor_dict[str(wx.NewId())] =  [SphereModel]
         
@@ -476,35 +483,35 @@ class ModelManagerBase:
         self.model_name_list.append(CorrLengthModel.__name__)
         
         from sans.models.DABModel import DABModel
-        self.shape_indep_list.append(DABModel )
+        self.shape_indep_list.append(DABModel)
         self.model_name_list.append(DABModel.__name__)
         
         from sans.models.DebyeModel import DebyeModel
-        self.shape_indep_list.append(DebyeModel )
+        self.shape_indep_list.append(DebyeModel)
         self.model_name_list.append(DebyeModel.__name__)
         
         from sans.models.FractalModel import FractalModel
-        self.shape_indep_list.append(FractalModel )
+        self.shape_indep_list.append(FractalModel)
         self.model_name_list.append(FractalModel.__name__)
         
         from sans.models.FractalCoreShellModel import FractalCoreShellModel
-        self.shape_indep_list.append(FractalCoreShellModel )
+        self.shape_indep_list.append(FractalCoreShellModel)
         self.model_name_list.append(FractalCoreShellModel.__name__)
         
         from sans.models.GaussLorentzGelModel import GaussLorentzGelModel
-        self.shape_indep_list.append(GaussLorentzGelModel) 
+        self.shape_indep_list.append(GaussLorentzGelModel)
         self.model_name_list.append(GaussLorentzGelModel.__name__)
                 
         from sans.models.GuinierModel import GuinierModel
-        self.shape_indep_list.append(GuinierModel )
+        self.shape_indep_list.append(GuinierModel)
         self.model_name_list.append(GuinierModel.__name__)
         
         from sans.models.GuinierPorodModel import GuinierPorodModel
-        self.shape_indep_list.append(GuinierPorodModel )
+        self.shape_indep_list.append(GuinierPorodModel)
         self.model_name_list.append(GuinierPorodModel.__name__)
 
         from sans.models.LorentzModel import LorentzModel
-        self.shape_indep_list.append( LorentzModel) 
+        self.shape_indep_list.append(LorentzModel)
         self.model_name_list.append(LorentzModel.__name__)
 
         from sans.models.MassFractalModel import MassFractalModel
@@ -521,7 +528,7 @@ class ModelManagerBase:
         
         from sans.models.PeakLorentzModel import PeakLorentzModel
         self.shape_indep_list.append(PeakLorentzModel)
-        self.model_name_list.append( PeakLorentzModel.__name__)
+        self.model_name_list.append(PeakLorentzModel.__name__)
         
         from sans.models.Poly_GaussCoil import Poly_GaussCoil
         self.shape_indep_list.append(Poly_GaussCoil)
@@ -532,8 +539,8 @@ class ModelManagerBase:
         self.model_name_list.append(PolymerExclVolume.__name__)
         
         from sans.models.PorodModel import PorodModel
-        self.shape_indep_list.append(PorodModel )  
-        self.model_name_list.append(PorodModel.__name__)    
+        self.shape_indep_list.append(PorodModel)
+        self.model_name_list.append(PorodModel.__name__)
         
         from sans.models.RPA10Model import RPA10Model
         self.shape_indep_list.append(RPA10Model)
@@ -544,19 +551,19 @@ class ModelManagerBase:
         self.model_name_list.append(SurfaceFractalModel.__name__)
         
         from sans.models.TeubnerStreyModel import TeubnerStreyModel
-        self.shape_indep_list.append(TeubnerStreyModel )
+        self.shape_indep_list.append(TeubnerStreyModel)
         self.model_name_list.append(TeubnerStreyModel.__name__)
         
         from sans.models.TwoLorentzianModel import TwoLorentzianModel
-        self.shape_indep_list.append(TwoLorentzianModel )
+        self.shape_indep_list.append(TwoLorentzianModel)
         self.model_name_list.append(TwoLorentzianModel.__name__)
         
         from sans.models.TwoPowerLawModel import TwoPowerLawModel
-        self.shape_indep_list.append(TwoPowerLawModel )
+        self.shape_indep_list.append(TwoPowerLawModel)
         self.model_name_list.append(TwoPowerLawModel.__name__)
         
         from sans.models.UnifiedPowerRgModel import UnifiedPowerRgModel
-        self.shape_indep_list.append(UnifiedPowerRgModel )
+        self.shape_indep_list.append(UnifiedPowerRgModel)
         self.multi_func_list.append(UnifiedPowerRgModel)
         
         from sans.models.LineModel import LineModel
@@ -586,7 +593,7 @@ class ModelManagerBase:
         is_modified = False
         plugin_dir = find_plugins_dir()
         if os.path.isdir(plugin_dir):
-            temp =  os.path.getmtime(plugin_dir)
+            temp = os.path.getmtime(plugin_dir)
             if  self.last_time_dir_modified != temp:
                 is_modified = True
                 self.last_time_dir_modified = temp
@@ -595,7 +602,7 @@ class ModelManagerBase:
     
     def update(self):
         """
-        return a dictionary of model if 
+        return a dictionary of model if
         new models were added else return empty dictionary
         """
         new_plugins = self.findModels()
@@ -653,36 +660,40 @@ class ModelManagerBase:
         added_models = wx.Menu()
         multip_models = wx.Menu()
         ## create menu with shape
-        self._fill_simple_menu(menuinfo=["Shapes",shape_submenu," simple shape"],
+        self._fill_simple_menu(menuinfo=["Shapes",
+                                         shape_submenu,
+                                         " simple shape"],
                          list1=self.shape_list)
         
-        self._fill_simple_menu(menuinfo=["Shape-Independent",shape_indep_submenu,
-                                    "List of shape-independent models"],
-                         list1=self.shape_indep_list )
+        self._fill_simple_menu(menuinfo=["Shape-Independent",
+                                         shape_indep_submenu,
+                                         "List of shape-independent models"],
+                         list1=self.shape_indep_list)
         
-        self._fill_simple_menu(menuinfo=["Structure Factors",structure_factor,
-                                          "List of Structure factors models" ],
+        self._fill_simple_menu(menuinfo=["Structure Factors",
+                                         structure_factor,
+                                         "List of Structure factors models"],
                                 list1=self.struct_list)
         
         self._fill_plugin_menu(menuinfo=["Customized Models", added_models,
                                             "List of additional models"],
                                  list1=self.plugins)
         
-        self._fill_menu(menuinfo=["P(Q)*S(Q)",multip_models,
+        self._fill_menu(menuinfo=["P(Q)*S(Q)", multip_models,
                                   "mulplication of 2 models"],
-                                   list1=self.multiplication_factor ,
-                                   list2= self.struct_list)
+                                   list1=self.multiplication_factor,
+                                   list2=self.struct_list)
         return 0
     
     def _fill_plugin_menu(self, menuinfo, list1):
         """
         fill the plugin menu with costumized models
         """
-        if len(list1)==0:
-            id = wx.NewId() 
-            msg= "No model available check plugins.log for errors to fix problem"
-            menuinfo[1].Append(int(id),"Empty",msg)
-        self._fill_simple_menu( menuinfo,list1)
+        if len(list1) == 0:
+            id = wx.NewId()
+            msg = "No model available check plugins.log for errors to fix problem"
+            menuinfo[1].Append(int(id), "Empty", msg)
+        self._fill_simple_menu(menuinfo, list1)
         
     def _fill_simple_menu(self, menuinfo, list1):
         """
@@ -695,27 +706,27 @@ class ModelManagerBase:
         :param list1: contains item (form factor )to fill modelmenu second column
         
         """
-        if len(list1)>0:
-            self.model_combobox.set_list(menuinfo[0],list1)
+        if len(list1) > 0:
+            self.model_combobox.set_list(menuinfo[0], list1)
             
             for item in list1:
                 try:
-                    id = wx.NewId() 
-                    struct_factor=item()
+                    id = wx.NewId()
+                    struct_factor = item()
                     struct_name = struct_factor.__class__.__name__
                     if hasattr(struct_factor, "name"):
                         struct_name = struct_factor.name
                         
-                    menuinfo[1].Append(int(id),struct_name,struct_name)
+                    menuinfo[1].Append(int(id), struct_name, struct_name)
                     if not  item in self.struct_factor_dict.itervalues():
-                        self.struct_factor_dict[str(id)]= item
+                        self.struct_factor_dict[str(id)] = item
                     wx.EVT_MENU(self.event_owner, int(id), self._on_model)
                 except:
-                    msg= "Error Occured: %s"%sys.exc_value
+                    msg = "Error Occured: %s" % sys.exc_value
                     wx.PostEvent(self.event_owner, StatusEvent(status=msg))
                 
-        id = wx.NewId()         
-        self.modelmenu.AppendMenu(id, menuinfo[0],menuinfo[1],menuinfo[2])
+        id = wx.NewId()
+        self.modelmenu.AppendMenu(id, menuinfo[0], menuinfo[1], menuinfo[2])
         
     def _fill_menu(self, menuinfo, list1, list2):
         """
@@ -725,36 +736,38 @@ class ModelManagerBase:
                          with info.Should be a list :
                          [name(string) , menu(wx.menu), help(string)]
         :param list1: contains item (form factor )to fill modelmenu second column
-        :param list2: contains item (Structure factor )to fill modelmenu 
+        :param list2: contains item (Structure factor )to fill modelmenu
                 third column
                 
         """
-        if len(list1)>0:
-            self.model_combobox.set_list(menuinfo[0],list1)
+        if len(list1) > 0:
+            self.model_combobox.set_list(menuinfo[0], list1)
             
-            for item in list1:   
-                form_factor= item()
+            for item in list1:
+                form_factor = item()
                 form_name = form_factor.__class__.__name__
                 if hasattr(form_factor, "name"):
                     form_name = form_factor.name
-                ### store form factor to return to other users   
-                newmenu= wx.Menu()
-                if len(list2)>0:
+                ### store form factor to return to other users
+                newmenu = wx.Menu()
+                if len(list2) > 0:
                     for model  in list2:
                         id = wx.NewId()
                         struct_factor = model()
                         name = struct_factor.__class__.__name__
                         if hasattr(struct_factor, "name"):
                             name = struct_factor.name
-                        newmenu.Append(id,name, name)
+                        newmenu.Append(id, name, name)
                         wx.EVT_MENU(self.event_owner, int(id), self._on_model)
                         ## save form_fact and struct_fact
-                        self.form_factor_dict[int(id)] = [form_factor,struct_factor]
+                        self.form_factor_dict[int(id)] = [form_factor,
+                                                          struct_factor]
                         
-                form_id= wx.NewId()    
-                menuinfo[1].AppendMenu(int(form_id), form_name,newmenu,menuinfo[2])
-        id=wx.NewId()
-        self.modelmenu.AppendMenu(id,menuinfo[0],menuinfo[1], menuinfo[2])
+                form_id = wx.NewId()
+                menuinfo[1].AppendMenu(int(form_id), form_name,
+                                       newmenu, menuinfo[2])
+        id = wx.NewId()
+        self.modelmenu.AppendMenu(id, menuinfo[0], menuinfo[1], menuinfo[2])
         
     def _on_model(self, evt):
         """
@@ -766,9 +779,9 @@ class ModelManagerBase:
         if int(evt.GetId()) in self.form_factor_dict.keys():
             from sans.models.MultiplicationModel import MultiplicationModel
             model1, model2 = self.form_factor_dict[int(evt.GetId())]
-            model = MultiplicationModel(model1, model2)    
+            model = MultiplicationModel(model1, model2)
         else:
-            model= self.struct_factor_dict[str(evt.GetId())]()
+            model = self.struct_factor_dict[str(evt.GetId())]()
         
         #TODO: investigate why the following two lines were left in the code
         #      even though the ModelEvent class doesn't exist
@@ -788,17 +801,19 @@ class ModelManagerBase:
                 # pass to other items
                 pass
                     
-    def get_model_list(self):    
+    def get_model_list(self):
         """
-        return dictionary of models for fitpanel use 
+        return dictionary of models for fitpanel use
         
         """
         self.model_combobox.set_list("Shapes", self.shape_list)
-        self.model_combobox.set_list("Shape-Independent", self.shape_indep_list)
+        self.model_combobox.set_list("Shape-Independent",
+                                     self.shape_indep_list)
         self.model_combobox.set_list("Structure Factors", self.struct_list)
         self.model_combobox.set_list("Customized Models", self.plugins)
         self.model_combobox.set_list("P(Q)*S(Q)", self.multiplication_factor)
-        self.model_combobox.set_list("multiplication", self.multiplication_factor)
+        self.model_combobox.set_list("multiplication",
+                                     self.multiplication_factor)
         self.model_combobox.set_list("Multi-Functions", self.multi_func_list)
         return self.model_combobox.get_list()
     
@@ -811,7 +826,7 @@ class ModelManagerBase:
         
 class ModelManager(object):
     """
-    implement model 
+    implement model
     """
     __modelmanager = ModelManagerBase()
     
@@ -839,11 +854,8 @@ class ModelManager(object):
     def _get_multifunc_models(self):
         return self.__modelmanager._get_multifunc_models()
     
-    def get_model_list(self): 
+    def get_model_list(self):
         return self.__modelmanager.get_model_list()
     
     def get_model_name_list(self):
         return self.__modelmanager.get_model_name_list()
-    
-    
-  

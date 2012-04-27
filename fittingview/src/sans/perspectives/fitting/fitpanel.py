@@ -1,9 +1,11 @@
+"""
+FitPanel class contains fields allowing to fit  models and  data
 
-import numpy
-import string 
+:note: For Fit to be performed the user should check at least one parameter
+    on fit Panel window.
+   
+"""
 import wx
-import sys
-#from wx.lib.flatnotebook import FlatNotebook as nb
 from wx.aui import AuiNotebook as nb
 
 from sans.guiframe.panel_base import PanelBase
@@ -16,8 +18,7 @@ import models
 _BOX_WIDTH = 80
 
 
-class FitPanel(nb, PanelBase):    
-
+class FitPanel(nb, PanelBase):
     """
     FitPanel class contains fields allowing to fit  models and  data
     
@@ -35,7 +36,7 @@ class FitPanel(nb, PanelBase):
         """
         """
         nb.__init__(self, parent, -1,
-                    style= wx.aui.AUI_NB_WINDOWLIST_BUTTON|
+                    style=wx.aui.AUI_NB_WINDOWLIST_BUTTON|
                     wx.aui.AUI_NB_DEFAULT_STYLE|
                     wx.CLIP_CHILDREN)
         PanelBase.__init__(self, parent)
@@ -46,19 +47,19 @@ class FitPanel(nb, PanelBase):
         #dictionary of miodel {model class name, model class}
         self.menu_mng = models.ModelManager()
         self.model_list_box = self.menu_mng.get_model_list()
-        #pageClosedEvent = nb.EVT_FLATNOTEBOOK_PAGE_CLOSING 
+        #pageClosedEvent = nb.EVT_FLATNOTEBOOK_PAGE_CLOSING
         self.pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
         
         self.Bind(self.pageClosedEvent, self.on_close_page)
-         ## save the title of the last page tab added
+        ## save the title of the last page tab added
         self.fit_page_name = {}
         ## list of existing fit page
         self.opened_pages = {}
-        #index of fit page 
+        #index of fit page
         self.fit_page_index = 0
         #index of batch page
         self.batch_page_index = 0
-        #page of simultaneous fit 
+        #page of simultaneous fit
         self.sim_page = None
         self.batch_page = None
         self.fit_engine_type = "scipy"
@@ -92,19 +93,20 @@ class FitPanel(nb, PanelBase):
                 # state must be cloned
                 state = page.get_state().clone()
                 if data is not None:
-                    new_doc = self._manager.state_reader.write_toXML(data, state)
+                    new_doc = self._manager.state_reader.write_toXML(data,
+                                                                     state)
                     if doc != None and hasattr(doc, "firstChild"):
                         child = new_doc.firstChild.firstChild
-                        doc.firstChild.appendChild(child)  
+                        doc.firstChild.appendChild(child)
                     else:
-                        doc = new_doc 
+                        doc = new_doc
         if msg.strip() != "":
             temp = "Save Project is not supported for Batch page.\n"
             temp += "The following pages will not be save:\n"
             message = temp + msg
             wx.PostEvent(self._manager.parent, StatusEvent(status=message,
                                                             info="warning"))
-        return doc    
+        return doc
     
     def _on_engine_change(self, name='scipy'):
         """
@@ -135,7 +137,7 @@ class FitPanel(nb, PanelBase):
             self.model_list_box = temp
         return temp
     
-    def get_page_by_id(self, uid):  
+    def get_page_by_id(self, uid):
         """
         """
         if uid not in self.opened_pages:
@@ -150,7 +152,6 @@ class FitPanel(nb, PanelBase):
         to call panel on focus on a panel that is currently deleted
         """
         wx.CallAfter(self.helper_on_page_change)
-        
         
     def helper_on_page_change(self):
         """
@@ -196,8 +197,6 @@ class FitPanel(nb, PanelBase):
             selected_page = self.GetPage(pos)
             return selected_page.get_state()
     
-  
-  
     def close_all(self):
         """
         remove all pages, used when a svs file is opened
@@ -206,7 +205,7 @@ class FitPanel(nb, PanelBase):
         #get number of pages
         nop = self.GetPageCount()
         #use while-loop, for-loop will not do the job well.
-        while (nop>0):
+        while (nop > 0):
             #delete the first page until no page exists
             page = self.GetPage(0)
             if self._manager.parent.panel_on_focus == page:
@@ -218,9 +217,8 @@ class FitPanel(nb, PanelBase):
         ## save the title of the last page tab added
         self.fit_page_name = {}
         ## list of existing fit page
-        self.opened_pages = {}  
+        self.opened_pages = {}
          
-        
     def set_state(self, state):
         """
         Restore state of the panel
@@ -232,7 +230,7 @@ class FitPanel(nb, PanelBase):
                 if uid == panel.uid and panel.data == state.data:
                     # the page is still opened
                     panel.reset_page(state=state)
-                    panel.save_current_state() 
+                    panel.save_current_state()
                     page_is_opened = True
             if not page_is_opened:
                 if state.data.__class__.__name__ != 'list':
@@ -243,8 +241,8 @@ class FitPanel(nb, PanelBase):
                     list_data = state.data
                 panel = self._manager.add_fit_page(data=list_data)
                 # add data associated to the page created
-                if panel is not None:  
-                    self._manager.store_data(uid=panel.uid, 
+                if panel is not None:
+                    self._manager.store_data(uid=panel.uid,
                                              data_list=list_data,
                                              caption=panel.window_caption)
                     panel.reset_page(state=state)
@@ -259,7 +257,6 @@ class FitPanel(nb, PanelBase):
         self.close_all()
         self._manager.mypanels = []
         
-                       
     def on_close_page(self, event=None):
         """
         close page and remove all references to the closed page
@@ -270,7 +267,7 @@ class FitPanel(nb, PanelBase):
             if selected_page.get_data() == None:
                 if event is not None:
                     event.Veto()
-                return 
+                return
         self._close_helper(selected_page=selected_page)
         
     def close_page_with_data(self, deleted_data):
@@ -280,12 +277,12 @@ class FitPanel(nb, PanelBase):
         if deleted_data is None:
             return
         for index in range(self.GetPageCount()):
-            selected_page = self.GetPage(index) 
-            if hasattr(selected_page,"get_data"):
+            selected_page = self.GetPage(index)
+            if hasattr(selected_page, "get_data"):
                 data = selected_page.get_data()
                 
                 if data is None:
-                    #the fitpanel exists and only the initial fit page is open 
+                    #the fitpanel exists and only the initial fit page is open
                     #with no selected data
                     return
                 if data.id == deleted_data.id:
@@ -307,13 +304,13 @@ class FitPanel(nb, PanelBase):
                 page.set_manager(self._manager)
 
     def set_model_list(self, dict):
-         """ 
-         copy a dictionary of model into its own dictionary
-         
-         :param dict: dictionnary made of model name as key and model class
-             as value
-         """
-         self.model_list_box = dict
+        """
+        copy a dictionary of model into its own dictionary
+        
+        :param dict: dictionnary made of model name as key and model class
+        as value
+        """
+        self.model_list_box = dict
         
     def get_current_page(self):
         """
@@ -329,7 +326,7 @@ class FitPanel(nb, PanelBase):
         from simfitpage import SimultaneousFitPage
         page_finder = self._manager.get_page_finder()
         if caption == "Simultaneous Fit":
-            self.sim_page = SimultaneousFitPage(self,page_finder=page_finder,
+            self.sim_page = SimultaneousFitPage(self, page_finder=page_finder,
                                                  id=-1, batch_on=False)
             self.sim_page.window_caption = caption
             self.sim_page.window_name = caption
@@ -348,7 +345,6 @@ class FitPanel(nb, PanelBase):
             self.batch_page.set_manager(self._manager)
             self.enable_close_button()
             return self.batch_page
-        
  
     def add_empty_page(self):
         """
@@ -387,15 +383,15 @@ class FitPanel(nb, PanelBase):
         self._manager.page_finder[panel.uid].add_data(panel.get_data())
         self.enable_close_button()
         panel.on_set_focus(None)
-        return panel 
+        return panel
     
     def enable_close_button(self):
         """
-        display the close button on tab for more than 1 tabs else remove the 
+        display the close button on tab for more than 1 tabs else remove the
         close button
         """
         if self.GetPageCount() <= 1:
-            style = self.GetWindowStyleFlag() 
+            style = self.GetWindowStyleFlag()
             flag = wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB
             if style & wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB == flag:
                 style = style & ~wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB
@@ -423,7 +419,7 @@ class FitPanel(nb, PanelBase):
                     self.on_close_page(event=None)
                     temp = self.GetSelection()
                     self.DeletePage(temp)
-            if self.GetPageCount()== 0:
+            if self.GetPageCount() == 0:
                 self._manager.on_add_new_page(event=None)
         
     def set_data_on_batch_mode(self, data_list):
@@ -431,7 +427,7 @@ class FitPanel(nb, PanelBase):
         Add all data to a single tab when the application is on Batch mode.
         However all data in the set of data must be either 1D or 2D type. 
         This method presents option to select the data type before creating a 
-        tab. 
+        tab.
         """
         data_1d_list = []
         data_2d_list = []
@@ -446,7 +442,7 @@ class FitPanel(nb, PanelBase):
                 data_2d_list.append(data)
         page = None
         for p in self.opened_pages.values():
-            #check if there is an empty page to fill up 
+            #check if there is an empty page to fill up
             if not check_data_validity(p.get_data()) and p.batch_on:
                 
                 #make sure data get placed in 1D empty tab if data is 1D
@@ -472,13 +468,13 @@ class FitPanel(nb, PanelBase):
                     page.fill_data_combobox(data_2d_list)
             else:
                 #the batch analysis is canceled
-                 dlg.Destroy()
-                 return None
+                dlg.Destroy()
+                return None
         else:
             if page is None:
                 page = self.add_empty_page()
             if data_1d_list and not data_2d_list:
-                #only on type of data 
+                #only on type of data
                 page.fill_data_combobox(data_1d_list)
             elif not data_1d_list and data_2d_list:
                 page.fill_data_combobox(data_2d_list)
@@ -491,19 +487,19 @@ class FitPanel(nb, PanelBase):
         return page
     
     def set_data(self, data_list):
-        """ 
+        """
         Add a fitting page on the notebook contained by fitpanel
         
         :param data: data to fit
         
-        :return panel : page just added for further used. 
+        :return panel : page just added for further used.
         is used by fitting module
         
         """
         if not data_list:
             return None
         if self.batch_on:
-           return self.set_data_on_batch_mode(data_list)
+            return self.set_data_on_batch_mode(data_list)
         else:
             data = None
             try:
@@ -545,35 +541,35 @@ class FitPanel(nb, PanelBase):
         """
         page = event.page
         if page.uid in self.fit_page_name:
-           self.fit_page_name[page.uid].appendItem(page.createMemento()) 
+            self.fit_page_name[page.uid].appendItem(page.createMemento())
             
     def _onUndo(self, event):
         """
         return the previous state of a given page is available
         """
-        page = event.page 
+        page = event.page
         if page.uid in self.fit_page_name:
-            if self.fit_page_name[page.uid].getCurrentPosition()==0:
+            if self.fit_page_name[page.uid].getCurrentPosition() == 0:
                 state = None
             else:
                 state = self.fit_page_name[page.uid].getPreviousItem()
                 page._redo.Enable(True)
             page.reset_page(state)
         
-    def _onRedo(self, event): 
+    def _onRedo(self, event):
         """
         return the next state available
-        """       
-        page = event.page 
+        """
+        page = event.page
         if page.uid in self.fit_page_name:
-            length= len(self.fit_page_name[page.uid])
-            if self.fit_page_name[page.uid].getCurrentPosition()== length -1:
+            length = len(self.fit_page_name[page.uid])
+            if self.fit_page_name[page.uid].getCurrentPosition() == length - 1:
                 state = None
                 page._redo.Enable(False)
                 page._redo.Enable(True)
             else:
-                state =self.fit_page_name[page.uid].getNextItem()
-            page.reset_page(state)  
+                state = self.fit_page_name[page.uid].getNextItem()
+            page.reset_page(state)
                  
     def _close_helper(self, selected_page):
         """
@@ -583,11 +579,11 @@ class FitPanel(nb, PanelBase):
         #if selected_page == self.hint_page:
         #    return
         ## removing sim_page
-        if selected_page == self.sim_page :
-            self._manager.sim_page=None 
+        if selected_page == self.sim_page:
+            self._manager.sim_page = None
             return
-        if selected_page == self.batch_page :
-            self._manager.batch_page=None 
+        if selected_page == self.batch_page:
+            self._manager.batch_page = None
             return
         """
         # The below is not working when delete #5 and still have #6.
@@ -598,9 +594,7 @@ class FitPanel(nb, PanelBase):
         """
         ## closing other pages
         state = selected_page.createMemento()
-        page_name = selected_page.window_name
-        page_finder = self._manager.get_page_finder() 
-        fitproblem = None
+        page_finder = self._manager.get_page_finder()
         ## removing fit page
         data = selected_page.get_data()
         #Don' t remove plot for 2D
@@ -614,27 +608,25 @@ class FitPanel(nb, PanelBase):
                 
                 if flag and selected_page.uid == uid:
                     self._manager.remove_plot(uid, theory=False)
-                    break 
+                    break
             del page_finder[selected_page]
-
-                
+  
         #Delete the name of the page into the list of open page
         for uid, list in self.opened_pages.iteritems():
             #Don't return any panel is the exact same page is created
             if selected_page.uid == uid:
                 del self.opened_pages[selected_page.uid]
-                break 
+                break
         ##remove the check box link to the model name of this page (selected_page)
         try:
             self.sim_page.draw_page()
         except:
             ## that page is already deleted no need to remove check box on
             ##non existing page
-            pass     
+            pass
         try:
             self.batch_page.draw_page()
         except:
             ## that page is already deleted no need to remove check box on
             ##non existing page
-            pass     
-        
+            pass
