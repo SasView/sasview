@@ -1041,6 +1041,8 @@ class ViewerFrame(wx.Frame):
         delete it.
         """
         panel = event.GetPane()
+        if panel.IsMaximized():
+            self._mgr.RestoreMaximizedPane()
         for ID in self.plot_panels.keys():
             if self.plot_panels[ID].window_name == panel.name:
                 self.delete_panel(ID)
