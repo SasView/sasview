@@ -102,7 +102,7 @@ def div_inplace(X, varX, Y, varY):
     varX += T  # varX now has varX + varY*Z**2
     del T   # may want to use T[:] = Y for vectors
     T = Y   # reuse T for Y
-    T ** = 2     # T now has Y**2
+    T **= 2     # T now has Y**2
     varX /= T  # varX now has varZ
     return X, varX
 
