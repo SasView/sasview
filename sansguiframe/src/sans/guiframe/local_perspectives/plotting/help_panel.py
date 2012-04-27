@@ -64,7 +64,7 @@ class HelpWindow(wx.Frame):
             <body>
             <ul>
             <li><a href ="Graph_help.html" 
-            target ="showframe">Graph Context Menu</a><br></li>
+            target ="showframe">Graph Menu</a><br></li>
             <li><a href ="averaging_help.html" 
             target ="showframe">2D Data Averaging</a><br></li>
             <li><a href ="key_help.html" 
