@@ -1452,8 +1452,8 @@ class Plugin(PluginBase):
                 self.page_finder[pid][data.id].set_result(res)
                 fitproblem = self.page_finder[pid][data.id]
                 qmin, qmax = fitproblem.get_range()
-                plot_result = True
-                if correct_result and plot_result:
+                plot_result = False
+                if correct_result:
                     if not is_data2d:
                         self._complete1D(x=data.x, y=res.theory, page_id=pid, 
                                      elapsed=None, 
@@ -1461,7 +1461,7 @@ class Plugin(PluginBase):
                                      weight=None, fid=data.id,
                                      toggle_mode_on=False, state=None, 
                                      data=data, update_chisqr=False, 
-                                     source='fit')
+                                     source='fit', plot_result = plot_result)
                     else:
                         self._complete2D(image=new_theory, data=data,
                                       model=model,
@@ -1471,7 +1471,7 @@ class Plugin(PluginBase):
                                      qmax=qmax, fid=data.id, weight=None,
                                       toggle_mode_on=False, state=None, 
                                      update_chisqr=False, 
-                                     source='fit')
+                                     source='fit', plot_result = plot_result)
                 self.on_set_batch_result(page_id=pid, 
                                          fid=data.id, 
                                          batch_outputs=batch_outputs, 
@@ -1769,7 +1769,8 @@ class Plugin(PluginBase):
     def _complete1D(self, x, y, page_id, elapsed, index, model,
                     weight=None, fid=None,
                     toggle_mode_on=False, state=None, 
-                    data=None, update_chisqr=True, source='model'):
+                    data=None, update_chisqr=True, 
+                    source='model', plot_result=True):
         """
         Complete plotting 1D data
         """ 
@@ -1812,7 +1813,7 @@ class Plugin(PluginBase):
             if not batch_on:
                 wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                             title=str(title)))
-            else:
+            elif plot_result:
                 top_data_id = self.fit_panel.get_page_by_id(page_id).data.id
                 if data.id == top_data_id:
                     wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
@@ -1857,7 +1858,7 @@ class Plugin(PluginBase):
   
     def _complete2D(self, image, data, model, page_id,  elapsed, index, qmin,
                 qmax, fid=None, weight=None, toggle_mode_on=False, state=None, 
-                     update_chisqr=True, source='model'):
+                     update_chisqr=True, source='model', plot_result=True):
         """
         Complete get the result of modelthread and create model 2D
         that can be plot.
@@ -1902,7 +1903,7 @@ class Plugin(PluginBase):
         current_pg = self.fit_panel.get_page_by_id(page_id)
         title = new_plot.title
         batch_on = self.fit_panel.get_page_by_id(page_id).batch_on
-        if not source == 'fit':
+        if not source == 'fit' and plot_result:
             wx.PostEvent(self.parent, NewPlotEvent(plot=new_plot,
                                                title=title))
         #self.page_finder[page_id].set_theory_data(data=new_plot, fid=data.id)
