@@ -1,13 +1,10 @@
-
-#import unittest
 import math
 import numpy
-#import sys
-#import string
 import copy
 from sans.pr.invertor import Invertor
 
-class Num_terms():    
+
+class Num_terms():
     """
     """
     def __init__(self, invertor):
@@ -61,7 +58,7 @@ class Num_terms():
 
     def get0_out(self):
         """
-        """ 
+        """
         inver = self.invertor
         self.osc_list = []
         self.err_list = []
@@ -69,7 +66,7 @@ class Num_terms():
         for k in range(self.nterm_min, self.nterm_max, 1):
             if self.isquit_func != None:
                 self.isquit_func()
-            best_alpha, message, elapsed = inver.estimate_alpha(k)
+            best_alpha, message, _ = inver.estimate_alpha(k)
             inver.alpha = best_alpha
             inver.out, inver.cov = inver.lstsq(k)
             osc = inver.oscillations(inver.out)
@@ -81,10 +78,6 @@ class Num_terms():
             self.alpha_list.append(inver.alpha)
             self.mess_list.append(message)
          
-        #print "osc", self.osc_list
-        #print "err", self.err_list
-        #print "alpha", self.alpha_list
-        #new_ls = []
         new_osc1 = []
         new_osc2 = []
         new_osc3 = []
@@ -100,7 +93,7 @@ class Num_terms():
                 flag8 = True
             if self.err_list[i] < 0.8 and self.err_list[i] >= 0.7:
                 new_osc3.append(self.osc_list[i])
-                falg7 = True
+                flag7 = True
                  
         if flag9 == True:
             self.dataset = new_osc1
@@ -109,7 +102,6 @@ class Num_terms():
         else:
             self.dataset = new_osc3
          
-        #print "dataset", self.dataset
         return self.dataset
         
     def ls_osc(self):
@@ -147,10 +139,7 @@ class Num_terms():
         """
         try:
             self.isquit_func = isquit_func
-            #self.nterm_max = len(self.invertor.x)
-            #self.nterm_max = 32
             nts = self.compare_err()
-            #print "nts", nts
             div = len(nts)
             tem = float(div)/2.0
             odd = self.is_odd(div)
@@ -162,9 +151,9 @@ class Num_terms():
         except:
             return self.nterm_min, self.alpha_list[10], self.mess_list[10]
 
+
 #For testing
 def load(path):
-    #import numpy, math, sys
     # Read the data from the data file
     data_x   = numpy.zeros(0)
     data_y   = numpy.zeros(0)
@@ -186,7 +175,7 @@ def load(path):
                     if scale == None:
                         scale = 0.05 * math.sqrt(test_y)
                         #scale = 0.05/math.sqrt(y)
-                        min_err = 0.01*y
+                        min_err = 0.01 * y
                     err = scale * math.sqrt(test_y) + min_err
                     #err = 0
                     
@@ -203,19 +192,13 @@ if __name__ == "__main__":
     i = Invertor()
     x, y, erro = load("test/Cyl_A_D102.txt")
     i.d_max = 102.0
-    i.nfunc = 10    
+    i.nfunc = 10
     #i.q_max = 0.4
     #i.q_min = 0.07
-    i.x   = x
-    i.y   = y
-    i.err = erro   
+    i.x = x
+    i.y = y
+    i.err = erro
     #i.out, i.cov = i.lstsq(10)
     # Testing estimator
     est = Num_terms(i)
     print est.num_terms()
-    
-        
-        
-        
-        
-        

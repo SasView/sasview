@@ -15,10 +15,8 @@ of D_max value. User picks a number of points and a range of
 distances, then get a series of outputs as a function of D_max
 over that range.
 """
-
-import numpy
-import math
 import sys
+
 
 class Results:
     """
@@ -39,8 +37,9 @@ class Results:
         self.iq0 = []
         self.bck = []
         self.d_max = []
-        ## List of errors found during the last exploration        
+        ## List of errors found during the last exploration
         self.errors = []
+        
         
 class DistExplorer(object):
     """
@@ -54,10 +53,9 @@ class DistExplorer(object):
         :param pr_state: sans.pr.invertor.Invertor object
         
         """
-        self.pr_state  = pr_state
+        self.pr_state = pr_state
         self._default_min = 0.8 * self.pr_state.d_max
         self._default_max = 1.2 * self.pr_state.d_max
-
         
     def __call__(self, dmin=None, dmax=None, npts=10):
         """
@@ -79,11 +77,11 @@ class DistExplorer(object):
         results = Results()
         
         # Loop over d_max values
-        for i in range(npts):    
-            d = dmin + i * (dmax - dmin)/(npts-1.0)
+        for i in range(npts):
+            d = dmin + i * (dmax - dmin) / (npts - 1.0)
             self.pr_state.d_max = d
             try:
-                out, cov = self.pr_state.invert(self.pr_state.nfunc)    
+                out, cov = self.pr_state.invert(self.pr_state.nfunc)
             
                 # Store results
                 iq0 = self.pr_state.iq0(out)
@@ -99,7 +97,7 @@ class DistExplorer(object):
                 results.rg.append(rg)
                 results.pos.append(pos)
                 results.pos_err.append(pos_err)
-                results.osc.append(osc)           
+                results.osc.append(osc)
             except:
                 # This inversion failed, skip this D_max value
                 msg = "ExploreDialog: inversion failed for "
@@ -107,4 +105,3 @@ class DistExplorer(object):
                 results.errors.append(msg)
             
         return results
-        
