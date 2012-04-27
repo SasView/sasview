@@ -5,10 +5,10 @@ Format values and uncertainties nicely for printing.
 
 :func:`format_uncertainty_pm`(v,err) produces the expanded format v +/- err.
 
-:func:`format_uncertainty_compact`(v,err) produces the compact format v(##), 
+:func:`format_uncertainty_compact`(v,err) produces the compact format v(##),
 where the number in parenthesis is the uncertainty in the last two digits of v.
 
-:func:`format_uncertainty`(v,err) uses the compact format by default, but this 
+:func:`format_uncertainty`(v,err) uses the compact format by default, but this
 can be changed to use the expanded +/- format by setting 
 format_uncertainty.compact to False.
     
@@ -33,7 +33,7 @@ Example::
     >>> print format_uncertainty(v,dv)
     757.236 +/- 0.010
 
-UncertaintyFormatter() returns a private formatter with its own 
+UncertaintyFormatter() returns a private formatter with its own
 formatter.compact flag.
 """
 from __future__ import division
@@ -61,35 +61,40 @@ __all__ = ['format_uncertainty', 'format_uncertainty_pm',
 # composite units such as 2.3e-3 m**2 -> 2300 mm**2, and with volumes
 # such as 1 g/cm**3 -> 1 kg/L.
 
+
 def format_uncertainty_pm(value, uncertainty):
     """
     Given *value* v and *uncertainty* dv, return a string v +/- dv.
     """
     return _format_uncertainty(value, uncertainty, compact=False)
 
+
 def format_uncertainty_compact(value, uncertainty):
     """
     Given *value* v and *uncertainty* dv, return the compact
-    representation v(##), where ## are the first two digits of 
+    representation v(##), where ## are the first two digits of
     the uncertainty.
     """
     return _format_uncertainty(value, uncertainty, compact=True)
+
 
 class UncertaintyFormatter:
     """
     Value and uncertainty formatter.
 
-    The *formatter* instance will use either the expanded v +/- dv form 
-    or the compact v(##) form depending on whether *formatter.compact* is 
+    The *formatter* instance will use either the expanded v +/- dv form
+    or the compact v(##) form depending on whether *formatter.compact* is
     True or False.  The default is True.
     """
     compact = True
+    
     def __call__(self, value, uncertainty):
         """
         Given *value* and *uncertainty*, return a string representation.
         """
         return _format_uncertainty(value, uncertainty, self.compact)
 format_uncertainty = UncertaintyFormatter()
+
 
 def _format_uncertainty(value, uncertainty, compact):
     """
@@ -102,13 +107,13 @@ def _format_uncertainty(value, uncertainty, compact):
         return "NaN"
 
     # Handle indefinite uncertainty
-    if uncertainty is None or uncertainty<=0 or numpy.isnan(uncertainty):
-        return "%g"%value
+    if uncertainty is None or uncertainty <= 0 or numpy.isnan(uncertainty):
+        return "%g" % value
     if numpy.isinf(uncertainty):
         if compact:
-            return "%.2g(inf)"%value
+            return "%.2g(inf)" % value
         else:
-            return "%.2g +/- inf"%value
+            return "%.2g +/- inf" % value
 
     # Handle zero and negative values
     sign = "-" if value < 0 else ""
@@ -124,11 +129,11 @@ def _format_uncertainty(value, uncertainty, compact):
     if err_place > val_place:
         # Degenerate case: error bigger than value
         # The mantissa is 0.#(##)e#, 0.0#(##)e# or 0.00#(##)e#
-        val_place = err_place+2
+        val_place = err_place + 2
     elif err_place == val_place:
         # Degenerate case: error and value the same order of magnitude
         # The value is ##(##)e#, #.#(##)e# or 0.##(##)e#
-        val_place = err_place+1
+        val_place = err_place + 1
     elif err_place <= 1 and val_place >= -3:
         # Normal case: nice numbers and errors
         # The value is ###.###(##)
@@ -139,19 +144,18 @@ def _format_uncertainty(value, uncertainty, compact):
         pass
     
     # Force engineering notation, with exponent a multiple of 3
-    val_place = int(math.floor(val_place/3.))*3
+    val_place = int(math.floor(val_place / 3.)) * 3
 
     # Format the result
     digits_after_decimal = abs(val_place - err_place + 1)
-    val_str = "%.*f"%(digits_after_decimal,value/10.**val_place)
-    exp_str = "e%d"%val_place if val_place != 0 else ""
+    val_str = "%.*f" % (digits_after_decimal, value / 10.**val_place)
+    exp_str = "e%d" % val_place if val_place != 0 else ""
     if compact:
-        err_str = "(%2d)"%int(uncertainty/10.**(err_place-1)+0.5)
-        result = "".join((sign,val_str,err_str,exp_str))
+        err_str = "(%2d)" % int(uncertainty / 10.**(err_place - 1) + 0.5)
+        result = "".join((sign, val_str, err_str, exp_str))
     else:
-        err_str = "%.*f"%(digits_after_decimal,uncertainty/10.**val_place)
-        result = "".join((sign,val_str,exp_str+" +/- ",err_str,exp_str))
-    #print sign,value, uncertainty, "=>", result
+        err_str = "%.*f" % (digits_after_decimal, uncertainty / 10.**val_place)
+        result = "".join((sign, val_str, exp_str + " +/- ", err_str, exp_str))
     return result
 
 

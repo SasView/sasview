@@ -4,20 +4,23 @@
 #  \brief Abstract class for defining calculation threads.
 #
 
-import thread, traceback
-
+import thread
+import traceback
 import sys
 
-if sys.platform.count("darwin")>0:
+if sys.platform.count("darwin") > 0:
     import time
     stime = time.time()
+    
     def clock():
-        return time.time()-stime
+        return time.time() - stime
+    
     def sleep(t):
-        return time.sleep(t)    
+        return time.sleep(t)
 else:
     from time import clock
     from time import sleep
+
 
 class CalcThread:
     """Threaded calculation class.  Inherit from here and specialize
@@ -112,12 +115,8 @@ class CalcThread:
             ...
     """
 
-    def __init__(self,
-                 completefn = None,
-                 updatefn   = None,
-                 yieldtime  = 0.01,
-                 worktime   = 0.01
-                 ):
+    def __init__(self, completefn=None, updatefn=None,
+                 yieldtime=0.01, worktime=0.01):
         """Prepare the calculator"""
         self.yieldtime     = yieldtime
         self.worktime      = worktime
@@ -133,26 +132,26 @@ class CalcThread:
         """Add a work unit to the end of the queue.  See the compute()
         method for details of the arguments to the work unit."""
         self._lock.acquire()
-        self._queue.append((args,kwargs))
+        self._queue.append((args, kwargs))
         # Cannot do start_new_thread call within the lock
         self._lock.release()
         if not self._running:
-            self._time_for_update = clock()+1e6
-            thread.start_new_thread(self._run,())
+            self._time_for_update = clock() + 1e6
+            thread.start_new_thread(self._run, ())
 
-    def requeue(self,*args,**kwargs):
+    def requeue(self, *args, **kwargs):
         """Replace the work unit on the end of the queue.  See the compute()
         method for details of the arguments to the work unit."""
         self._lock.acquire()
         self._queue = self._queue[:-1]
         self._lock.release()
-        self.queue(*args,**kwargs)
+        self.queue(*args, **kwargs)
 
-    def reset(self,*args,**kwargs):
+    def reset(self, *args, **kwargs):
         """Clear the queue and start a new work unit.  See the compute()
         method for details of the arguments to the work unit."""
         self.stop()
-        self.queue(*args,**kwargs)
+        self.queue(*args, **kwargs)
 
     def stop(self):
         """Clear the queue and stop the thread.  New items may be
@@ -170,7 +169,8 @@ class CalcThread:
         self._interrupting = True
         self._lock.release()
 
-    def isrunning(self): return self._running
+    def isrunning(self):
+        return self._running
 
     def ready(self, delay=0.):
         """Ready for another update after delay=t seconds.  Call
@@ -188,13 +188,14 @@ class CalcThread:
         threads, which is required for good performance on OS X."""
 
         # Only called from within the running thread so no need to lock
-        if self._running and self.yieldtime>0 and clock()>self._time_for_nap:
-            # print "sharing"
+        if self._running and self.yieldtime > 0 \
+            and clock() > self._time_for_nap:
             sleep(self.yieldtime)
             self._time_for_nap = clock() + self.worktime
-        if self._interrupting: raise KeyboardInterrupt
+        if self._interrupting:
+            raise KeyboardInterrupt
 
-    def update(self,**kwargs):
+    def update(self, **kwargs):
 
         """Update GUI with the lastest results from the current work unit."""
         if self.updatefn != None and clock() > self._time_for_update:
@@ -205,19 +206,20 @@ class CalcThread:
             
             self.updatefn(**kwargs)
             sleep(self.yieldtime)
-            if self._interrupting: raise KeyboardInterrupt
+            if self._interrupting:
+                raise KeyboardInterrupt
         else:
             self.isquit()
         return
 
-    def complete(self,**kwargs):
+    def complete(self, **kwargs):
         """Update the GUI with the completed results from a work unit."""
         if self.completefn != None:
             self.completefn(**kwargs)
             sleep(self.yieldtime)
         return
 
-    def compute(self,*args,**kwargs):
+    def compute(self, *args, **kwargs):
         """Perform a work unit.  The subclass will provide details of
         the arguments."""
         raise NotImplemented, "Calculation thread needs compute method"
@@ -232,17 +234,16 @@ class CalcThread:
         # there is more work to be done.
         while 1:
             self._lock.acquire()
-            # print "lock aquired"
-            self._time_for_nap = clock()+self.worktime
+            self._time_for_nap = clock() + self.worktime
             self._running = True
-            if self._queue == []: break
+            if self._queue == []:
+                break
             self._interrupting = False
-            args,kwargs = self._queue[0]
+            args, kwargs = self._queue[0]
             self._queue = self._queue[1:]
             self._lock.release()
-            # print "lock released"
             try:
-                self.compute(*args,**kwargs)
+                self.compute(*args, **kwargs)
             except KeyboardInterrupt:
                 pass
             except:
@@ -250,11 +251,12 @@ class CalcThread:
                 #print 'CalcThread exception',
         self._running = False
 
+
 # ======================================================================
 # Demonstration of calcthread in action
 class CalcDemo(CalcThread):
     """Example of a calculation thread."""
-    def compute(self,n):
+    def compute(self, n):
         total = 0.
         for i in range(n):
             self.update(i=i)
@@ -263,7 +265,11 @@ class CalcDemo(CalcThread):
                 total += j
         self.complete(total=total)
 
+
 class CalcCommandline:
+    """
+        Test method
+    """
     def __init__(self, n=20000):
         print thread.get_ident()
         self.starttime = clock()
@@ -282,20 +288,16 @@ class CalcCommandline:
         self.work.ready(.5)
         while not self.done:
             sleep(1)
-            print "Main thread %d at %.2f"%(thread.get_ident(),clock()-self.starttime)
+            print "Main thread %d at %.2f" % (thread.get_ident(),
+                                              clock() - self.starttime)
 
-    def update(self,i=0):
-        print "Update i=%d from thread %d at %.2f"%(i,thread.get_ident(),clock()-self.starttime)
+    def update(self, i=0):
+        print "Update i=%d from thread %d at %.2f" % (i, thread.get_ident(),
+                                                      clock() - self.starttime)
         self.work.ready(2.5)
 
-    def complete(self,total=0.0):
-        print "Complete total=%g from thread %d at %.2f"%(total,thread.get_ident(),clock()-self.starttime)
+    def complete(self, total=0.0):
+        print "Complete total=%g from thread %d at %.2f" % (total,
+                                                    thread.get_ident(),
+                                                    clock() - self.starttime)
         self.done = True
-
-if __name__ == "__main__":
-    CalcCommandline()
-
-# version
-__id__ = "$Id: calcthread.py 249 2007-06-15 17:03:01Z ziwen $"
-
-# End of file
