@@ -779,7 +779,7 @@ class GridPanel(SPanel):
         self.vbox.AddMany([(self.grid_sizer, 1, wx.EXPAND, 0),
                            (wx.StaticLine(self, -1), 0, wx.EXPAND, 0),
                            (self.plotting_sizer),
-                           (self.button_sizer)])
+                           (self.button_sizer, 0, wx.BOTTOM, 10)])
         self.parent = parent
         self._data_inputs = data_inputs
         self._data_outputs = data_outputs
@@ -1076,7 +1076,11 @@ class GridPanel(SPanel):
         """
         Draw area containing options to plot
         """
-       
+        view_description = wx.StaticBox(self, -1, 'Plot Fits/Residuals')
+        note = "To plot the fits (or residuals), click the 'View Fits' button"
+        note += "\n after highlighting the Data names (or Chi2 values)."
+        note_text = wx.StaticText(self, -1, note)
+        boxsizer1 = wx.StaticBoxSizer(view_description, wx.HORIZONTAL)
         self.x_axis_title = wx.TextCtrl(self, -1)
         self.y_axis_title = wx.TextCtrl(self, -1)
         self.x_axis_label = wx.TextCtrl(self, -1, size=(200, -1))
@@ -1100,10 +1104,14 @@ class GridPanel(SPanel):
         self.plot_button = wx.Button(self, -1, "Plot")
         plot_tip = "Highlight a column for each axis and \n"
         plot_tip += "click the Add buttons first."
+        
         self.plot_button.SetToolTipString(plot_tip)
-        self.button_sizer.AddMany( [ (500, 30),
-                                (self.view_button, 0, wx.RIGHT|wx.BOTTOM, 10),
-                                (self.plot_button, 0, wx.RIGHT|wx.BOTTOM, 10)])
+        boxsizer1.AddMany([(note_text, 0, wx.LEFT, 10),
+                           (self.view_button, 0, wx.LEFT|wx.RIGHT, 10)])
+        self.button_sizer.AddMany([(boxsizer1, 0, 
+                                    wx.LEFT|wx.RIGHT|wx.BOTTOM, 10), 
+                                   (self.plot_button, 0, 
+                                    wx.LEFT|wx.TOP|wx.BOTTOM|wx.EXPAND, 12)])
         
         wx.EVT_BUTTON(self, self.plot_button.GetId(), self.on_plot)
         self.plotting_sizer.AddMany([
