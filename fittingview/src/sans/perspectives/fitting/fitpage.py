@@ -845,53 +845,52 @@ class FitPage(BasicPage):
                            
         ix = 0
         iy += 1
-        self.sizer4_4.Add((20,20),(iy,ix),(1,1), 
-                          wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)  
-        first_orient  = True
+        self.sizer4_4.Add((20, 20), (iy, ix), (1, 1),
+                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+        first_orient = True
         for item in self.model.dispersion.keys():
             if  item in self.model.orientation_params:
-                if not self.disp_cb_dict.has_key(item):
-                    self.disp_cb_dict[item]= None
-                name0="Distribution of " + item
-                name1=item+".width"
-                name2=item+".npts"
-                name3=item+".nsigmas"
+                if not item in self.disp_cb_dict:
+                    self.disp_cb_dict[item] = None
+                name0 = "Distribution of " + item
+                name1 = item + ".width"
+                name2 = item + ".npts"
+                name3 = item + ".nsigmas"
                 
-                if not self.model.details.has_key(name1):
-                    self.model.details [name1] = ["",None,None]                  
+                if not name1 in self.model.details:
+                    self.model.details[name1] = ["", None, None]
  
-
                 iy += 1
-                for p in self.model.dispersion[item].keys(): 
+                for p in self.model.dispersion[item].keys():
         
-                    if p=="width":
+                    if p == "width":
                         ix = 0
                         cb = wx.CheckBox(self, -1, name0, (10, 10))
                         cb.SetValue(CHECK_STATE)
                         cb.SetToolTipString("Check mark to fit")
                         wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
-                        self.sizer4_4.Add( cb,( iy, ix),(1,1),  
-                                           wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 
-                                           5)
-                        if self.data.__class__.__name__ ==  "Data2D" or \
+                        self.sizer4_4.Add(cb, (iy, ix), (1, 1),
+                                wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
+                        if self.data.__class__.__name__ == "Data2D" or \
                                     self.enable2D:
                             cb.Show(True)
                         elif cb.IsShown():
                             cb.Hide()
                         ix = 1
-                        value= self.model.getParam(name1)
-                        ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/1.3,
-                                        20),style=wx.TE_PROCESS_ENTER)
+                        value = self.model.getParam(name1)
+                        ctl1 = self.ModelTextCtrl(self, -1,
+                                                  size=(_BOX_WIDTH / 1.3, 20),
+                                                  style=wx.TE_PROCESS_ENTER)
                         poly_tip = "Absolute Sigma for %s." % item
                         ctl1.SetToolTipString(poly_tip)
-                        ctl1.SetValue(str (format_number(value, True)))
+                        ctl1.SetValue(str(format_number(value, True)))
                         if self.data.__class__.__name__ == "Data2D" or \
                                     self.enable2D:
                             if first_orient:
                                 values.SetLabel('PD[ratio], Sig[deg]')
                                 poly_text = "PD(polydispersity for lengths):\n"
-                                poly_text +=  "It should be a value between"
-                                poly_text +=  "0 and 1\n"
+                                poly_text += "It should be a value between"
+                                poly_text += "0 and 1\n"
                                 poly_text += "Sigma for angles: \n"
                                 poly_text += "It is the STD (ratio*mean)"
                                 poly_text += " of the distribution.\n "
@@ -902,109 +901,109 @@ class FitPage(BasicPage):
                         elif ctl1.IsShown():
                             ctl1.Hide()
                         
-                        self.sizer4_4.Add(ctl1, (iy,ix),(1,1),wx.EXPAND)
+                        self.sizer4_4.Add(ctl1, (iy, ix), (1, 1), wx.EXPAND)
                         ## text to show error sign
                         ix = 2
-                        text2=wx.StaticText(self, -1, '+/-')
-                        self.sizer4_4.Add(text2,(iy, ix),(1,1),
-                                          wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                        text2 = wx.StaticText(self, -1, '+/-')
+                        self.sizer4_4.Add(text2, (iy, ix), (1, 1),
+                                          wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
-                        text2.Hide() 
+                        text2.Hide()
 
                         ix = 3
-                        ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/1.3,20), 
+                        ctl2 = wx.TextCtrl(self, -1,
+                                           size=(_BOX_WIDTH / 1.3, 20),
                                            style=0)
                     
-                        self.sizer4_4.Add(ctl2, (iy,ix),(1,1), 
-                                          wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                        self.sizer4_4.Add(ctl2, (iy, ix), (1, 1),
+                                          wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
                         ctl2.Hide()
-                        if self.data.__class__.__name__ ==  "Data2D" or \
+                        if self.data.__class__.__name__ == "Data2D" or \
                                 self.enable2D:
-                            if self.is_mac:  
+                            if self.is_mac:
                                 text2.Show(True)
-                                ctl2.Show(True)  
+                                ctl2.Show(True)
                             
                         ix = 4
-                        ctl3 = self.ModelTextCtrl(self, -1, 
-                                                  size=(_BOX_WIDTH/2,20), 
+                        ctl3 = self.ModelTextCtrl(self, -1,
+                                                  size=(_BOX_WIDTH / 2, 20),
                                                   style=wx.TE_PROCESS_ENTER,
-                                text_enter_callback = self._onparamRangeEnter)
+                                text_enter_callback=self._onparamRangeEnter)
 
-                        self.sizer4_4.Add(ctl3, (iy,ix),(1,1), 
-                                          wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                        self.sizer4_4.Add(ctl3, (iy, ix), (1, 1),
+                                          wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
                         ctl3.Hide()
                 
                         ix = 5
-                        ctl4 = self.ModelTextCtrl(self, -1, 
-                            size=(_BOX_WIDTH/2,20), style=wx.TE_PROCESS_ENTER,
-                                text_enter_callback = self._onparamRangeEnter)
-                        self.sizer4_4.Add(ctl4, (iy,ix),(1,1), 
-                                          wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                        ctl4 = self.ModelTextCtrl(self, -1,
+                            size=(_BOX_WIDTH / 2, 20),
+                            style=wx.TE_PROCESS_ENTER,
+                            text_enter_callback=self._onparamRangeEnter)
+                        self.sizer4_4.Add(ctl4, (iy, ix), (1, 1),
+                                          wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                         ctl4.Hide()
                         
-                        if self.data.__class__.__name__ ==  "Data2D" or \
+                        if self.data.__class__.__name__ == "Data2D" or \
                                 self.enable2D:
                             ctl3.Show(True)
-                            ctl4.Show(True) 
+                            ctl4.Show(True)
                              
-                    elif p=="npts":
-                            ix = 6
-                            value= self.model.getParam(name2)
-                            Tctl = self.ModelTextCtrl(self, -1, 
-                                                     size=(_BOX_WIDTH/2.2, 20),
-                                                style=wx.TE_PROCESS_ENTER)
-                            
-                            Tctl.SetValue(str (format_number(value)))
-                            if self.data.__class__.__name__ ==  "Data2D" or \
-                                    self.enable2D:
-                                Tctl.Show(True)
-                            else:
-                                Tctl.Hide()
-                            self.sizer4_4.Add(Tctl, (iy,ix),(1,1),
-                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-                            self.fixed_param.append([None,name2, Tctl,None,None,
-                                                      None, None,None])
-                            self.orientation_params_disp.append([None,name2, 
-                                                    Tctl,None,None,
-                                                      None, None,None])
-                    elif p=="nsigmas":
-                            ix = 7
-                            value= self.model.getParam(name3)
-                            Tct2 = self.ModelTextCtrl(self, -1, 
-                                                      size=(_BOX_WIDTH/2.2,20),
-                                                style=wx.TE_PROCESS_ENTER)
-                            
-                            Tct2.SetValue(str (format_number(value)))
-                            if self.data.__class__.__name__ ==  "Data2D" or \
-                                    self.enable2D:
-                                Tct2.Show(True)
-                            else:
-                                Tct2.Hide()
-                            self.sizer4_4.Add(Tct2, (iy,ix),(1,1),
-                                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    elif p == "npts":
+                        ix = 6
+                        value = self.model.getParam(name2)
+                        Tctl = self.ModelTextCtrl(self, -1,
+                                                 size=(_BOX_WIDTH / 2.2, 20),
+                                                 style=wx.TE_PROCESS_ENTER)
+                        
+                        Tctl.SetValue(str(format_number(value)))
+                        if self.data.__class__.__name__ == "Data2D" or \
+                                self.enable2D:
+                            Tctl.Show(True)
+                        else:
+                            Tctl.Hide()
+                        self.sizer4_4.Add(Tctl, (iy, ix), (1, 1),
+                                          wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+                        self.fixed_param.append([None, name2, Tctl, None, None,
+                                                 None, None, None])
+                        self.orientation_params_disp.append([None, name2,
+                                                             Tctl, None, None,
+                                                             None, None, None])
+                    elif p == "nsigmas":
+                        ix = 7
+                        value = self.model.getParam(name3)
+                        Tct2 = self.ModelTextCtrl(self, -1,
+                                                  size=(_BOX_WIDTH / 2.2, 20),
+                                                  style=wx.TE_PROCESS_ENTER)
+                        
+                        Tct2.SetValue(str(format_number(value)))
+                        if self.data.__class__.__name__ == "Data2D" or \
+                                self.enable2D:
+                            Tct2.Show(True)
+                        else:
+                            Tct2.Hide()
+                        self.sizer4_4.Add(Tct2, (iy, ix), (1, 1),
+                                          wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
+                        self.fixed_param.append([None, name3, Tct2,
+                                                 None, None, None, None, None])
+                                                   
+                        self.orientation_params_disp.append([None, name3,
+                                        Tct2, None, None, None, None, None])
 
-                            self.fixed_param.append([None,name3, Tct2
-                                                 ,None,None, None, None,None])    
-                                                       
-                            self.orientation_params_disp.append([None,name3, 
-                                            Tct2 ,None,None, None, None,None])
-        
-
-                ix = 8      
-                disp_box = wx.ComboBox(self, -1,size=(65,-1),
-                                style=wx.CB_READONLY, name = '%s'% name1)
+                ix = 8
+                disp_box = wx.ComboBox(self, -1, size=(65, -1),
+                                style=wx.CB_READONLY, name='%s' % name1)
                 for key, value in self.polydisp.iteritems():
                     name_disp = str(key)
-                    disp_box.Append(name_disp,value)
-                    disp_box.SetStringSelection("gaussian") 
-                wx.EVT_COMBOBOX(disp_box,-1, self._on_disp_func)      
-                self.sizer4_4.Add(disp_box,(iy,ix),(1,1), wx.EXPAND)
-                self.fittable_param.append([cb,name1,ctl1,text2,
+                    disp_box.Append(name_disp, value)
+                    disp_box.SetStringSelection("gaussian")
+                wx.EVT_COMBOBOX(disp_box, -1, self._on_disp_func)
+                self.sizer4_4.Add(disp_box, (iy, ix), (1, 1), wx.EXPAND)
+                self.fittable_param.append([cb, name1, ctl1, text2,
                                             ctl2, ctl3, ctl4, disp_box])
-                self.orientation_params_disp.append([cb,name1,ctl1,
+                self.orientation_params_disp.append([cb, name1, ctl1,
                                             text2, ctl2, ctl3, ctl4, disp_box])
                        
                 if self.data.__class__.__name__ == "Data2D" or \
@@ -1013,126 +1012,116 @@ class FitPage(BasicPage):
                 else:
                     disp_box.Hide()
         
-
-        self.state.disp_cb_dict = copy.deepcopy(self.disp_cb_dict)  
+        self.state.disp_cb_dict = copy.deepcopy(self.disp_cb_dict)
           
-        self.state.model = self.model.clone()  
-         ## save state into
+        self.state.model = self.model.clone()
+        ## save state into
         self.state.cb1 = self.cb1.GetValue()
         self._copy_parameters_state(self.parameters, self.state.parameters)
         self._copy_parameters_state(self.orientation_params_disp,
                                      self.state.orientation_params_disp)
-        self._copy_parameters_state(self.fittable_param, 
+        self._copy_parameters_state(self.fittable_param,
                                     self.state.fittable_param)
         self._copy_parameters_state(self.fixed_param, self.state.fixed_param)
 
-
-        wx.PostEvent(self.parent, StatusEvent(status=\
-                        " Selected Distribution: Gaussian"))   
+        wx.PostEvent(self.parent,
+                     StatusEvent(status=" Selected Distribution: Gaussian"))
         #Fill the list of fittable parameters
         #self.select_all_param(event=None)
         self.get_all_checked_params()
         self.Layout()
 
-    
     def _onDraw(self, event):
         """
         Update and Draw the model
-        """ 
-        if self.model ==None:
-            msg="Please select a Model first..."
+        """
+        if self.model == None:
+            msg = "Please select a Model first..."
             wx.MessageBox(msg, 'Info')
-
             return
         """
         if not self.data.is_data:
             self.npts_x = self.Npts_total.GetValue()
             self.Npts_fit.SetValue(self.npts_x)
-            self.create_default_data() 
+            self.create_default_data()
         """
-        flag = self._update_paramv_on_fit()  
+        flag = self._update_paramv_on_fit()
     
         wx.CallAfter(self._onparamEnter_helper)
         if not flag:
-            msg= "The parameters are invalid"
-            wx.PostEvent(self.parent.parent, StatusEvent(status= msg ))
-            return 
+            msg = "The parameters are invalid"
+            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+            return
         
-
-    def _onFit(self, event):     
+    def _onFit(self, event):
         """
         Allow to fit
         """
         if event != None:
-            event.Skip() 
+            event.Skip()
         if self.fit_started:
             self._StopFit()
             self.fit_started = False
             wx.CallAfter(self.set_fitbutton)
-            return   
+            return
 
-        if len(self.parent._manager.fit_thread_list)>0 and\
+        if len(self.parent._manager.fit_thread_list) > 0 and\
                     self.parent._manager._fit_engine != "park" and\
                     self._manager.sim_page != None and \
-                    self._manager.sim_page.uid == self.uid: 
+                    self._manager.sim_page.uid == self.uid:
             msg = "The FitEnging will be set to 'ParkMC'\n"
             msg += " to fit with more than one data set..."
             wx.MessageBox(msg, 'Info')
-            #wx.PostEvent(self._manager.parent, StatusEvent(status=\
-            #                "Fitting: %s"%msg))
             
         if self.data is None:
             msg = "Please get Data first..."
             wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self._manager.parent, StatusEvent(status=\
-                            "Fit: %s" % msg))
+            wx.PostEvent(self._manager.parent,
+                         StatusEvent(status="Fit: %s" % msg))
             return
         if self.model is None:
             msg = "Please select a Model first..."
             wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self._manager.parent, StatusEvent(status=\
-                            "Fit: %s"%msg, type="stop"))
+            wx.PostEvent(self._manager.parent,
+                         StatusEvent(status="Fit: %s" % msg, type="stop"))
             return
         
         if len(self.param_toFit) <= 0:
-            msg= "Select at least one parameter to fit"
+            msg = "Select at least one parameter to fit"
             wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self._manager.parent, StatusEvent(status= msg, 
-                                                         type="stop" ))
-            return 
+            wx.PostEvent(self._manager.parent,
+                         StatusEvent(status=msg, type="stop"))
+            return
         
-        flag = self._update_paramv_on_fit() 
+        flag = self._update_paramv_on_fit()
         
         if self.batch_on and not self._is_2D():
             if not self._validate_Npts_1D():
                 return
                 
         if not flag:
-            msg= "Fitting range or parameters are invalid"
-            wx.PostEvent(self.parent.parent, StatusEvent(status= msg, 
-                                                         type="stop"))
-            return 
+            msg = "Fitting range or parameters are invalid"
+            wx.PostEvent(self.parent.parent,
+                         StatusEvent(status=msg, type="stop"))
+            return
               
-        self.select_param(event =None)
-        
-        #Clear errors if exist from previous fitting
-        #self._clear_Err_on_Fit() 
+        self.select_param(event=None)
 
-        # Remove or do not allow fitting on the Q=0 point, especially 
-        # when y(q=0)=None at x[0].         
+        # Remove or do not allow fitting on the Q=0 point, especially
+        # when y(q=0)=None at x[0].
         self.qmin_x = float(self.qmin.GetValue())
         self.qmax_x = float(self.qmax.GetValue())
         self._manager._reset_schedule_problem(value=0, uid=self.uid)
-        self._manager.schedule_for_fit(uid=self.uid,value=1) 
-        self._manager.set_fit_range(uid=self.uid,qmin=self.qmin_x, 
-                                   qmax=self.qmax_x)
+        self._manager.schedule_for_fit(uid=self.uid, value=1)
+        self._manager.set_fit_range(uid=self.uid, qmin=self.qmin_x,
+                                    qmax=self.qmax_x)
 
-        #single fit 
+        #single fit
         #self._manager.onFit(uid=self.uid)
         self.fit_started = self._manager.onFit(uid=self.uid)
         wx.CallAfter(self.set_fitbutton)
     
-    def set_fitbutton(self):  
+    def set_fitbutton(self):
         """
         Set fit button label depending on the fit_started[bool]
         """
@@ -1159,20 +1148,19 @@ class FitPage(BasicPage):
         for item in button_list:
             if item.GetValue():
                 if button_list.index(item) == 0:
-                    flag = 0 #dy = numpy.ones_like(dy_data)
+                    flag = 0  # dy = numpy.ones_like(dy_data)
                 elif button_list.index(item) == 1:
-                    flag = 1 #dy = dy_data
+                    flag = 1  # dy = dy_data
                 elif button_list.index(item) == 2:
-                    flag = 2 #dy = numpy.sqrt(numpy.abs(data))
+                    flag = 2  # dy = numpy.sqrt(numpy.abs(data))
                 elif button_list.index(item) == 3:
-                    flag = 3 # dy = numpy.abs(data)
+                    flag = 3  # dy = numpy.abs(data)
                 break
         return flag
                 
-            
     def _StopFit(self, event=None):
         """
-        Stop fit 
+        Stop fit
         """
         if event != None:
             event.Skip()
@@ -1187,24 +1175,23 @@ class FitPage(BasicPage):
         if self.model is not None:
             self.model.name = "M" + str(self.index_model)
     
-
-    def _on_select_model(self, event=None): 
+    def _on_select_model(self, event=None):
         """
         call back for model selection
-        """  
-        self.Show(False) 
-        copy_flag = False 
-        is_poly_enabled = None 
+        """
+        self.Show(False)
+        copy_flag = False
+        is_poly_enabled = None
         if event != None:
             if (event.GetEventObject() == self.formfactorbox\
                         and self.structurebox.GetLabel() != 'None')\
                         or event.GetEventObject() == self.structurebox\
                         or event.GetEventObject() == self.multifactorbox:
                 copy_flag = self.get_copy_params()
-                is_poly_enabled = self.enable_disp.GetValue() 
+                is_poly_enabled = self.enable_disp.GetValue()
 
-        self._on_select_model_helper() 
-        self.set_model_param_sizer(self.model)                   
+        self._on_select_model_helper()
+        self.set_model_param_sizer(self.model)
         if self.model is None:
             self._set_bookmark_flag(False)
             self._keep.Enable(False)
@@ -1215,14 +1202,13 @@ class FitPage(BasicPage):
             self.set_dispers_sizer()
         except:
             pass
-        #self.btFit.SetFocus() 
         self.state.enable_disp = self.enable_disp.GetValue()
         self.state.disable_disp = self.disable_disp.GetValue()
         self.state.pinhole_smearer = self.pinhole_smearer.GetValue()
         self.state.slit_smearer = self.slit_smearer.GetValue()
     
-        self.state.structurecombobox = self.structurebox.GetLabel()#.GetCurrentSelection()
-        self.state.formfactorcombobox = self.formfactorbox.GetLabel()#.GetCurrentSelection()
+        self.state.structurecombobox = self.structurebox.GetLabel()
+        self.state.formfactorcombobox = self.formfactorbox.GetLabel()
         self.enable_fit_button()
         if self.model != None:
             self.m_name = self.model.name
@@ -1231,7 +1217,7 @@ class FitPage(BasicPage):
             self._set_copy_flag(True)
             self._set_paste_flag(True)
             if self.data is not None:
-                is_data = check_data_validity(self.data) 
+                is_data = check_data_validity(self.data)
                 if is_data:
                     self._set_bookmark_flag(True)
                     self._keep.Enable(True)
@@ -1260,15 +1246,15 @@ class FitPage(BasicPage):
             ## event to post model to fit to fitting plugins
             (ModelEventbox, EVT_MODEL_BOX) = wx.lib.newevent.NewEvent()
          
-            ## set smearing value whether or not 
+            ## set smearing value whether or not
             #    the data contain the smearing info
-            evt = ModelEventbox(model=self.model, 
-                                        smearer=temp_smear, 
-                             enable_smearer=not self.disable_smearer.GetValue(),
-                                        qmin=float(self.qmin_x),
-                                        uid=self.uid,
-                                        caption=self.window_caption,
-                                     qmax=float(self.qmax_x)) 
+            evt = ModelEventbox(model=self.model,
+                            smearer=temp_smear,
+                            enable_smearer=not self.disable_smearer.GetValue(),
+                            qmin=float(self.qmin_x),
+                            uid=self.uid,
+                            caption=self.window_caption,
+                            qmax=float(self.qmax_x))
    
             self._manager._on_model_panel(evt=evt)
             self.mbox_description.SetLabel("Model [ %s ]" % str(self.model.name))
@@ -1276,11 +1262,10 @@ class FitPage(BasicPage):
             self.state.model = self.model.clone()
             self.state.model.name = self.model.name
 
-            
         if event != None:
             ## post state to fit panel
-            new_event = PageInfoEvent(page = self)
-            wx.PostEvent(self.parent, new_event) 
+            new_event = PageInfoEvent(page=self)
+            wx.PostEvent(self.parent, new_event)
             #update list of plugins if new plugin is available
             if self.plugin_rbutton.GetValue():
                 temp = self.parent.update_model_list()
@@ -1310,21 +1295,19 @@ class FitPage(BasicPage):
         if self.batch_on:
             self.slit_smearer.Enable(False)
             self.pinhole_smearer.Enable(False)
-            self.btEditMask.Disable()  
+            self.btEditMask.Disable()
             self.EditMask_title.Disable()
             
-        self.Show(True)      
+        self.Show(True)
         self.SetupScrolling()
          
-    def _onparamEnter(self,event):
-        """ 
+    def _onparamEnter(self, event):
+        """
         when enter value on panel redraw model according to changed
         """
-        if self.model ==None:
-            msg="Please select a Model first..."
+        if self.model == None:
+            msg = "Please select a Model first..."
             wx.MessageBox(msg, 'Info')
-            #wx.PostEvent(self._manager.parent, StatusEvent(status=\
-            #                "Parameters: %s"%msg))
             return
 
         #default flag
@@ -1332,21 +1315,18 @@ class FitPage(BasicPage):
         self.fitrange = True
         #get event object
         tcrtl = event.GetEventObject()
-        
-        #wx.PostEvent(self._manager.parent, StatusEvent(status=" \
-        #                        updating ... ",type="update"))
         #Clear msg if previously shown.
-        msg= ""
-        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        msg = ""
+        wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
 
         if check_float(tcrtl):
-            flag = self._onparamEnter_helper() 
-            self.set_npts2fit() 
-            if self.fitrange:             
+            flag = self._onparamEnter_helper()
+            self.set_npts2fit()
+            if self.fitrange:
                 temp_smearer = None
                 if not self.disable_smearer.GetValue():
-                    temp_smearer= self.current_smearer
-                    ## set smearing value whether or not 
+                    temp_smearer = self.current_smearer
+                    ## set smearing value whether or not
                     #        the data contain the smearing info
                     if self.slit_smearer.GetValue():
                         flag1 = self.update_slit_smear()
@@ -1354,91 +1334,84 @@ class FitPage(BasicPage):
                     elif self.pinhole_smearer.GetValue():
                         flag1 = self.update_pinhole_smear()
                         flag = flag or flag1
-                elif self.data.__class__.__name__ !=  "Data2D" and \
+                elif self.data.__class__.__name__ != "Data2D" and \
                         not self.enable2D:
-                    self._manager.set_smearer(smearer=temp_smearer, 
+                    self._manager.set_smearer(smearer=temp_smearer,
                                               fid=self.data.id,
                                               uid=self.uid,
-                                             qmin= float(self.qmin_x),
-                                            qmax= float(self.qmax_x),
+                                              qmin=float(self.qmin_x),
+                                              qmax=float(self.qmax_x),
                             enable_smearer=not self.disable_smearer.GetValue(),
-                                            draw=True) 
-                if flag:   
+                                            draw=True)
+                if flag:
                     #self.compute_chisqr(smearer= temp_smearer)
         
                     ## new state posted
                     if self.state_change:
                         #self._undo.Enable(True)
-                        event = PageInfoEvent(page = self)
+                        event = PageInfoEvent(page=self)
                         wx.PostEvent(self.parent, event)
-                    self.state_change= False 
-            else: 
-                # invalid fit range: do nothing here: 
-                # msg already displayed in validate 
-                return      
+                    self.state_change = False
+            else:
+                # invalid fit range: do nothing here:
+                # msg already displayed in validate
+                return
         else:
             self.save_current_state()
-            msg= "Cannot Plot :Must enter a number!!!  "
-            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+            msg = "Cannot Plot :Must enter a number!!!  "
+            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
              
-        self.save_current_state() 
-        return 
+        self.save_current_state()
+        return
    
     def _onparamRangeEnter(self, event):
         """
         Check validity of value enter in the parameters range field
         """
-        #if self.check_invalid_panel():
-        #    return
-        tcrtl= event.GetEventObject()
+        tcrtl = event.GetEventObject()
         #Clear msg if previously shown.
-        msg= ""
-        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        msg = ""
+        wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
         # Flag to register when a parameter has changed.
         is_modified = False
-        if tcrtl.GetValue().lstrip().rstrip()!="":
+        if tcrtl.GetValue().lstrip().rstrip() != "":
             try:
-                value = float(tcrtl.GetValue())
                 tcrtl.SetBackgroundColour(wx.WHITE)
-                self._check_value_enter(self.fittable_param ,is_modified)
-                self._check_value_enter(self.parameters ,is_modified) 
+                self._check_value_enter(self.fittable_param, is_modified)
+                self._check_value_enter(self.parameters, is_modified)
             except:
                 tcrtl.SetBackgroundColour("pink")
-                msg= "Model Error:wrong value entered : %s"% sys.exc_value
-                wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-                return 
+                msg = "Model Error:wrong value entered : %s" % sys.exc_value
+                wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+                return
         else:
-           tcrtl.SetBackgroundColour(wx.WHITE)
+            tcrtl.SetBackgroundColour(wx.WHITE)
            
         #self._undo.Enable(True)
         self.save_current_state()
-        event = PageInfoEvent(page = self)
+        event = PageInfoEvent(page=self)
         wx.PostEvent(self.parent, event)
-        self.state_change= False
-
-                    
+        self.state_change = False
+         
     def _onQrangeEnter(self, event):
         """
         Check validity of value enter in the Q range field
         """
         tcrtl = event.GetEventObject()
         #Clear msg if previously shown.
-        msg= ""
-        wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+        msg = ""
+        wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
         # For theory mode
         if not self.data.is_data:
             self.npts_x = self.Npts_total.GetValue()
             self.Npts_fit.SetValue(self.npts_x)
             self.create_default_data()
         # Flag to register when a parameter has changed.
-        is_modified = False
-        if tcrtl.GetValue().lstrip().rstrip()!="":
+        if tcrtl.GetValue().lstrip().rstrip() != "":
             try:
-                value = float(tcrtl.GetValue())
                 tcrtl.SetBackgroundColour(wx.WHITE)
-
                 # If qmin and qmax have been modified, update qmin and qmax
-                if self._validate_qrange( self.qmin, self.qmax):
+                if self._validate_qrange(self.qmin, self.qmax):
                     tempmin = float(self.qmin.GetValue())
                     if tempmin != self.qmin_x:
                         self.qmin_x = tempmin
@@ -1447,38 +1420,37 @@ class FitPage(BasicPage):
                         self.qmax_x = tempmax
                 else:
                     tcrtl.SetBackgroundColour("pink")
-                    msg= "Model Error:wrong value entered : %s"% sys.exc_value
-                    wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-                    return 
-                
+                    msg = "Model Error:wrong value entered : %s" % sys.exc_value
+                    wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+                    return
             except:
                 tcrtl.SetBackgroundColour("pink")
-                msg= "Model Error:wrong value entered : %s"% sys.exc_value
-                wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
-                return 
+                msg = "Model Error:wrong value entered : %s" % sys.exc_value
+                wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+                return
             #Check if # of points for theory model are valid(>0).
             # check for 2d
             if self.data.__class__.__name__ == "Data2D" or \
                     self.enable2D:
-                # set mask   
-                radius= numpy.sqrt(self.data.qx_data*self.data.qx_data + 
-                                    self.data.qy_data*self.data.qy_data )
-                index_data = ((self.qmin_x <= radius)& \
-                                (radius<= self.qmax_x))
-                index_data = (index_data)&(self.data.mask)
-                index_data = (index_data)&(numpy.isfinite(self.data.data))
+                # set mask
+                radius = numpy.sqrt(self.data.qx_data * self.data.qx_data +
+                                    self.data.qy_data * self.data.qy_data)
+                index_data = ((self.qmin_x <= radius) & \
+                                (radius <= self.qmax_x))
+                index_data = (index_data) & (self.data.mask)
+                index_data = (index_data) & (numpy.isfinite(self.data.data))
                 if len(index_data[index_data]) < 10:
                     msg = "Cannot Plot :No or too little npts in"
                     msg += " that data range!!!  "
-                    wx.PostEvent(self.parent.parent, 
+                    wx.PostEvent(self.parent.parent,
                                  StatusEvent(status=msg))
                     return
                 else:
                     #self.data.mask = index_data
                     #self.Npts_fit.SetValue(str(len(self.data.mask)))
-                    self.set_npts2fit() 
+                    self.set_npts2fit()
             else:
-                index_data = ((self.qmin_x <= self.data.x)& \
+                index_data = ((self.qmin_x <= self.data.x) & \
                               (self.data.x <= self.qmax_x))
                 self.Npts_fit.SetValue(str(len(self.data.x[index_data])))
             
@@ -1486,85 +1458,87 @@ class FitPage(BasicPage):
             self.create_default_data()
             self._save_plotting_range()
         else:
-           tcrtl.SetBackgroundColour("pink")
-           msg= "Model Error:wrong value entered!!!"
-           wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+            tcrtl.SetBackgroundColour("pink")
+            msg = "Model Error:wrong value entered!!!"
+            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
         
         self._draw_model()
         self.save_current_state()
-        event = PageInfoEvent(page = self)
+        event = PageInfoEvent(page=self)
         wx.PostEvent(self.parent, event)
-        self.state_change= False
+        self.state_change = False
         return
     
     def _clear_Err_on_Fit(self):
         """
-        hide the error text control shown 
+        hide the error text control shown
         after fitting
         """
         if self.is_mac:
             return
-        if hasattr(self,"text2_3"):
+        if hasattr(self, "text2_3"):
             self.text2_3.Hide()
 
-        if len(self.parameters)>0:
+        if len(self.parameters) > 0:
             for item in self.parameters:
                 #Skip t ifhe angle parameters if 1D data
-                if self.data.__class__.__name__ !=  "Data2D" and \
+                if self.data.__class__.__name__ != "Data2D" and \
                         not self.enable2D:
                     if item in self.orientation_params:
                         continue
                 if item in self.param_toFit:
                     continue
-                ## hide statictext +/-    
-                if len(item) < 4 :
+                ## hide statictext +/-
+                if len(item) < 4:
                     continue
-                if item[3]!=None and item[3].IsShown():
+                if item[3] != None and item[3].IsShown():
                     item[3].Hide()
                 ## hide textcrtl  for error after fit
-                if item[4]!=None and item[4].IsShown():                   
+                if item[4] != None and item[4].IsShown():
                     item[4].Hide()
   
-        if len(self.fittable_param)>0:
+        if len(self.fittable_param) > 0:
             for item in self.fittable_param:
                 #Skip t ifhe angle parameters if 1D data
-                if self.data.__class__.__name__ !=  "Data2D" and \
+                if self.data.__class__.__name__ != "Data2D" and \
                         not self.enable2D:
                     if item in self.orientation_params:
                         continue
                 if item in self.param_toFit:
                     continue
-                if len(item) < 4 :
+                if len(item) < 4:
                     continue
-                ## hide statictext +/-    
-                if item[3]!=None and item[3].IsShown():
+                ## hide statictext +/-
+                if item[3] != None and item[3].IsShown():
                     item[3].Hide()
                 ## hide textcrtl  for error after fit
-                if item[4]!=None and item[4].IsShown():
+                if item[4] != None and item[4].IsShown():
                     item[4].Hide()
-        return        
+        return
                 
     def _get_defult_custom_smear(self):
         """
         Get the defult values for custum smearing.
         """
         # get the default values
-        if self.dxl == None: self.dxl = 0.0
-        if self.dxw == None: self.dxw = ""
-        if self.dx_min == None: self.dx_min = SMEAR_SIZE_L
-        if self.dx_max == None: self.dx_max = SMEAR_SIZE_H
+        if self.dxl == None:
+            self.dxl = 0.0
+        if self.dxw == None:
+            self.dxw = ""
+        if self.dx_min == None:
+            self.dx_min = SMEAR_SIZE_L
+        if self.dx_max == None:
+            self.dx_max = SMEAR_SIZE_H
         
     def _get_smear_info(self):
         """
         Get the smear info from data.
        
-        :return: self.smear_type, self.dq_l and self.dq_r, 
-            respectively the type of the smear, dq_min and 
-            dq_max for pinhole smear data 
+        :return: self.smear_type, self.dq_l and self.dq_r,
+            respectively the type of the smear, dq_min and
+            dq_max for pinhole smear data
             while dxl and dxw for slit smear
-            
         """
-
         # default
         self.smear_type = None
         self.dq_l = None
@@ -1572,34 +1546,35 @@ class FitPage(BasicPage):
         data = self.data
         if self.data is None:
             return
-        elif self.data.__class__.__name__ ==  "Data2D" or \
-                        self.enable2D:  
-            if data.dqx_data == None or  data.dqy_data ==None: 
+        elif self.data.__class__.__name__ == "Data2D" or \
+            self.enable2D:
+            if data.dqx_data == None or  data.dqy_data == None:
                 return
-            elif self.current_smearer != None and (data.dqx_data.any()!=0) and \
-                            (data.dqx_data.any()!=0): 
+            elif self.current_smearer != None \
+                and data.dqx_data.any() != 0 \
+                and data.dqx_data.any() != 0:
                 self.smear_type = "Pinhole2d"
-                self.dq_l = format_number(numpy.average(data.dqx_data)) 
-                self.dq_r = format_number(numpy.average(data.dqy_data))  
-                return 
-            else: 
+                self.dq_l = format_number(numpy.average(data.dqx_data))
+                self.dq_r = format_number(numpy.average(data.dqy_data))
+                return
+            else:
                 return
         # check if it is pinhole smear and get min max if it is.
-        if data.dx != None and all(data.dx !=0): 
-            self.smear_type = "Pinhole" 
+        if data.dx != None and all(data.dx != 0):
+            self.smear_type = "Pinhole"
             self.dq_l = data.dx[0]
             self.dq_r = data.dx[-1]
             
         # check if it is slit smear and get min max if it is.
-        elif data.dxl != None or data.dxw != None: 
-            self.smear_type = "Slit" 
-            if data.dxl != None and all(data.dxl !=0):
+        elif data.dxl != None or data.dxw != None:
+            self.smear_type = "Slit"
+            if data.dxl != None and all(data.dxl != 0):
                 self.dq_l = data.dxl[0]
-            if data.dxw != None and all(data.dxw !=0): 
-                self.dq_r = data.dxw[0]    
-        #return self.smear_type,self.dq_l,self.dq_r       
+            if data.dxw != None and all(data.dxw != 0):
+                self.dq_r = data.dxw[0]
+        #return self.smear_type,self.dq_l,self.dq_r
     
-    def _show_smear_sizer(self):    
+    def _show_smear_sizer(self):
         """
         Show only the sizers depending on smear selection
         """
@@ -1625,7 +1600,7 @@ class FitPage(BasicPage):
                 self.smear_description_smear_type.Show(True)
                 if self.smear_type == 'Slit':
                     self.smear_description_slit_height.Show(True)
-                    self.smear_description_slit_width.Show(True)                
+                    self.smear_description_slit_width.Show(True)
                 elif self.smear_type == 'Pinhole':
                     self.smear_description_pin_min.Show(True)
                     self.smear_description_pin_max.Show(True)
@@ -1679,14 +1654,15 @@ class FitPage(BasicPage):
     
     def _set_accuracy_list(self):
         """
-        Set the list of an accuracy in 2D custum smear: Xhigh, High, Med, or Low
+        Set the list of an accuracy in 2D custum smear:
+                Xhigh, High, Med, or Low
         """
         # list of accuracy choices
-        list = ['Low','Med','High','Xhigh']
+        list = ['Low', 'Med', 'High', 'Xhigh']
         for idx in range(len(list)):
-            self.smear_accuracy.Append(list[idx],idx)
+            self.smear_accuracy.Append(list[idx], idx)
             
-    def _set_fun_box_list(self,fun_box):
+    def _set_fun_box_list(self, fun_box):
         """
         Set the list of func for multifunctional models
         """
@@ -1703,11 +1679,11 @@ class FitPage(BasicPage):
         while(ind < len(list)):
             for key, val in list.iteritems():
                 if (val == ind):
-                    fun_box.Append(key,val)
+                    fun_box.Append(key, val)
                     break
             ind += 1
         
-    def _on_select_accuracy(self,event):
+    def _on_select_accuracy(self, event):
         """
         Select an accuracy in 2D custom smear: Xhigh, High, Med, or Low
         """
@@ -1717,14 +1693,13 @@ class FitPage(BasicPage):
         self.smear2d_accuracy = self.smear_accuracy.GetValue()
         if self.pinhole_smearer.GetValue():
             self.onPinholeSmear(event=None)
-        else:    
+        else:
             self.onSmear(event=None)
             if self.current_smearer != None:
-                self.current_smearer.set_accuracy(accuracy = 
-                                                  self.smear2d_accuracy) 
+                self.current_smearer.set_accuracy(accuracy=self.smear2d_accuracy) 
         event.Skip()
 
-    def _on_fun_box(self,event):
+    def _on_fun_box(self, event):
         """
         Select an func: Erf,Rparabola,LParabola
         """
@@ -1732,70 +1707,61 @@ class FitPage(BasicPage):
         fun_box = event.GetEventObject()
         name = fun_box.Name
         value = fun_box.GetValue()
-        if self.model.fun_list.has_key(value):
+        if value in self.model.fun_list:
             fun_val = self.model.fun_list[value]
 
-        self.model.setParam(name,fun_val)
+        self.model.setParam(name, fun_val)
         # save state
-        self._copy_parameters_state(self.str_parameters, 
+        self._copy_parameters_state(self.str_parameters,
                                     self.state.str_parameters)
         # update params
-        self._update_paramv_on_fit() 
+        self._update_paramv_on_fit()
         # draw
         self._draw_model()
         self.Refresh()
         # get ready for new event
         event.Skip()
         
-    def _onMask(self, event):     
+    def _onMask(self, event):
         """
         Build a panel to allow to edit Mask
         """
-        
         from sans.guiframe.local_perspectives.plotting.masking \
         import MaskPanel as MaskDialog
         
         self.panel = MaskDialog(base=self, data=self.data, id=wx.NewId())
-        #self.panel.Bind(wx.EVT_CLOSE, self._draw_masked_model)
         self.panel.ShowModal()
-        #wx.PostEvent(self.parent, event)
         
     def _draw_masked_model(self, event):
         """
         Draw model image w/mask
         """
-        #event.Skip()
         is_valid_qrange = self._update_paramv_on_fit()
 
         if is_valid_qrange and self.model != None:
-            #self.panel.Show(0)
-            #self.panel.Destroy() # frame
             self.panel.MakeModal(False)
-            event.Skip() 
+            event.Skip()
             # try re draw the model plot if it exists
             self._draw_model()
             self.set_npts2fit()
         elif self.model == None:
-            #self.panel.Show(0)
-            #self.panel.Destroy() # frame
             self.panel.MakeModal(False)
             event.Skip()
             self.set_npts2fit()
-            msg= "No model is found on updating MASK in the model plot... "
-            wx.PostEvent(self.parent.parent, StatusEvent(status = msg ))
+            msg = "No model is found on updating MASK in the model plot... "
+            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
         else:
             event.Skip()
             msg = ' Please consider your Q range, too.'
             self.panel.ShowMessage(msg)
 
-        
     def _set_smear(self, data):
         """
         """
         if data is None:
             return
         self.current_smearer = smear_selection(data, self.model)
-        flag =  self.disable_smearer.GetValue()
+        flag = self.disable_smearer.GetValue()
         self.disable_smearer.SetValue(flag)
         if self.current_smearer == None:
             self.enable_smearer.Disable()
@@ -1838,31 +1804,29 @@ class FitPage(BasicPage):
         """
         qmin, qmax, npts = None, None, None
         if data is not None:
-            if not hasattr(data,"data"):
+            if not hasattr(data, "data"):
                 qmin = min(data.x)
-                # Maximum value of data  
+                # Maximum value of data
                 qmax = max(data.x)
                 npts = len(data.x)
             else:
                 qmin = 0
-                x = max(math.fabs(data.xmin), math.fabs(data.xmax)) 
+                x = max(math.fabs(data.xmin), math.fabs(data.xmax))
                 y = max(math.fabs(data.ymin), math.fabs(data.ymax))
-                ## Maximum value of data  
-                qmax = math.sqrt(x*x + y*y)
+                ## Maximum value of data
+                qmax = math.sqrt(x * x + y * y)
                 npts = len(data.data)
         return qmin, qmax, npts
             
-    
     def set_data(self, data):
         """
-        reset the current data 
+        reset the current data
         """
-        from sans.guiframe.dataFitting import check_data_validity
         id = None
         flag = False
         is_data = False
         if self.data is not None:
-            is_data = check_data_validity(self.data)  
+            is_data = check_data_validity(self.data)
         if not is_data and data is not None:
                 flag = True
         if data is not None:
@@ -1890,10 +1854,10 @@ class FitPage(BasicPage):
 
             self._set_smear(data)
             # more disables for 2D
-            if self.data.__class__.__name__ ==  "Data2D" or \
+            if self.data.__class__.__name__ == "Data2D" or \
                         self.enable2D:
                 self.slit_smearer.Disable()
-                self.pinhole_smearer.Enable(True) 
+                self.pinhole_smearer.Enable(True)
                 self.default_mask = copy.deepcopy(self.data.mask)
                 if self.data.err_data == None or\
                         (self.data.err_data == 1).all() or\
@@ -1906,8 +1870,8 @@ class FitPage(BasicPage):
                     self.dI_didata.SetValue(True)
                     self.weightbt_string = self.dI_didata.GetLabelText()
             else:
-                self.slit_smearer.Enable(True) 
-                self.pinhole_smearer.Enable(True) 
+                self.slit_smearer.Enable(True)
+                self.pinhole_smearer.Enable(True)
                 if self.data.dy == None or\
                      (self.data.dy == 1).all() or\
                      (self.data.dy == 0).all():
@@ -1918,22 +1882,22 @@ class FitPage(BasicPage):
                     self.dI_didata.Enable(True)
                     self.dI_didata.SetValue(True)
                     self.weightbt_string = self.dI_didata.GetLabelText()
-            # Enable weighting radio uttons     
-            self.dI_noweight.Enable(True)   
+            # Enable weighting radio uttons
+            self.dI_noweight.Enable(True)
             self.dI_sqrdata.Enable(True)
             self.dI_idata.Enable(True)
               
             self.formfactorbox.Enable()
             self.structurebox.Enable()
             data_name = self.data.name
-            _, _, npts =  self.compute_data_range(self.data)
+            _, _, npts = self.compute_data_range(self.data)
             #set maximum range for x in linear scale
-            if not hasattr(self.data, "data"): #Display only for 1D data fit
-                self.btEditMask.Disable()  
+            if not hasattr(self.data, "data"):  # Display only for 1D data fit
+                self.btEditMask.Disable()
                 self.EditMask_title.Disable()
             else:
-                self.btEditMask.Enable()  
-                self.EditMask_title.Enable() 
+                self.btEditMask.Enable()
+                self.EditMask_title.Enable()
     
         self.Npts_total.SetValue(str(npts))
         #default:number of data points selected to fit
@@ -1946,7 +1910,7 @@ class FitPage(BasicPage):
         self.dataSource.SetValue(data_name)
         self.state.data = data
         self.enable_fit_button()
-        # send graph_id to page_finder 
+        # send graph_id to page_finder
         self._manager.set_graph_id(uid=self.uid, graph_id=self.graph_id)
         #focus the page
         if check_data_validity(data):
@@ -1955,10 +1919,9 @@ class FitPage(BasicPage):
         if self.batch_on:
             self.slit_smearer.Enable(False)
             self.pinhole_smearer.Enable(False)
-            self.btEditMask.Disable()  
+            self.btEditMask.Disable()
             self.EditMask_title.Disable()
 
-        
         self.on_set_focus(None)
         self.Refresh()
         #update model plot with new data information
@@ -1967,7 +1930,6 @@ class FitPage(BasicPage):
             if not self.enable_smearer.GetValue():
                     self.disable_smearer.SetValue(True)
             self.onSmear(None)
-            #self._set_smear(self.data)
 
             if self.data.__class__.__name__ == "Data2D":
                 self.enable2D = True
@@ -1978,29 +1940,29 @@ class FitPage(BasicPage):
             self.model_view.Disable()
             #replace data plot on combo box selection
             #by removing the previous selected data
-            wx.PostEvent(self._manager.parent, NewPlotEvent(action="remove",
-                                                    group_id=self.graph_id, id=id))
+            wx.PostEvent(self._manager.parent,
+                         NewPlotEvent(action="remove",
+                                      group_id=self.graph_id, id=id))
             #plot the current selected data
-            wx.PostEvent(self._manager.parent, NewPlotEvent(plot=self.data, 
-                                                title=str(self.data.title)))
-            #self._manager.store_data(uid=self.uid, data_list=self.data_list,
-            #                          caption=self.window_name)
+            wx.PostEvent(self._manager.parent,
+                         NewPlotEvent(plot=self.data,
+                                      title=str(self.data.title)))
             self._draw_model()
     
     def _npts_click(self, event):
         """
         Prevent further handling of the mouse event on Npts_total
         by not calling Skip().
-        """ 
+        """
         pass
     
-    def reset_page(self, state,first=False):
+    def reset_page(self, state, first=False):
         """
         reset the state
         """
         self.reset_page_helper(state)
 
-        self.select_param(event = None) 
+        self.select_param(event=None)
         #Save state_fit
         self.save_current_state_fit()
         self._lay_out()
@@ -2010,7 +1972,7 @@ class FitPage(BasicPage):
         """
         return the fitting range
         """
-        return float(self.qmin_x) , float(self.qmax_x)
+        return float(self.qmin_x), float(self.qmax_x)
     
     def get_npts2fit(self):
         """
@@ -2022,24 +1984,24 @@ class FitPage(BasicPage):
         if self.data is None:
             return
         npts2fit = 0
-        qmin,qmax = self.get_range()
+        qmin, qmax = self.get_range()
         if self.data.__class__.__name__ == "Data2D" or \
                         self.enable2D:
-            radius= numpy.sqrt( self.data.qx_data*self.data.qx_data + 
-                                self.data.qy_data*self.data.qy_data )
-            index_data = (self.qmin_x <= radius)&(radius<= self.qmax_x)
-            index_data= (index_data)&(self.data.mask)
-            index_data = (index_data)&(numpy.isfinite(self.data.data))
+            radius = numpy.sqrt(self.data.qx_data * self.data.qx_data +
+                                self.data.qy_data * self.data.qy_data)
+            index_data = (self.qmin_x <= radius) & (radius <= self.qmax_x)
+            index_data = (index_data) & (self.data.mask)
+            index_data = (index_data) & (numpy.isfinite(self.data.data))
             npts2fit = len(self.data.data[index_data])
         else:
             for qx in self.data.x:
-                   if qx >= qmin and qx <= qmax:
-                       npts2fit += 1
+                if qx >= qmin and qx <= qmax:
+                    npts2fit += 1
         return npts2fit
 
     def set_npts2fit(self):
         """
-        setValue Npts for fitting 
+        setValue Npts for fitting
         """
         self.Npts_fit.SetValue(str(self.get_npts2fit()))
         
@@ -2054,16 +2016,15 @@ class FitPage(BasicPage):
         :return self.param_toFit: list containing  references to TextCtrl
             checked.Theses TextCtrl will allow reference to parameters to fit.
         
-        :raise: if return an empty list of parameter fit will nnote work 
+        :raise: if return an empty list of parameter fit will nnote work
             properly so raise ValueError,"missing parameter to fit"
         """
-        if self.param_toFit !=[]:
+        if self.param_toFit != []:
             return self.param_toFit
         else:
-            msg = "missing parameters to fit"  
+            msg = "missing parameters to fit"
             wx.MessageBox(msg, 'warning')
             return False
-            #raise ValueError,"missing parameters to fit"    
       
     def onsetValues(self, chisqr, p_name, out, cov):
         """
@@ -2078,26 +2039,23 @@ class FitPage(BasicPage):
         # make sure stop button to fit button all the time
         self._on_fit_complete()
         if out == None or not numpy.isfinite(chisqr):
-            raise ValueError,"Fit error occured..." 
+            raise ValueError,"Fit error occured..."
         
         is_modified = False
-        has_error = False 
-        dispersity = ''   
+        has_error = False
+        dispersity = ''
         
         #Hide textctrl boxes of errors.
-        self._clear_Err_on_Fit()    
+        self._clear_Err_on_Fit()
         
         #Check if chi2 is finite
         if chisqr != None and numpy.isfinite(chisqr):
-        #format chi2  
-            if self.engine_type == "park":  
-                npt_fit = float(self.get_npts2fit()) 
-                # Taking care this in parkemgine
-                #if npt_fit > 0:
-                #    chisqr =chisqr/npt_fit    
-            chi2 = format_number(chisqr, True)    
-            self.tcChi.SetValue(chi2)    
-            self.tcChi.Refresh()    
+            #format chi2
+            if self.engine_type == "park":
+                npt_fit = float(self.get_npts2fit())
+            chi2 = format_number(chisqr, True)
+            self.tcChi.SetValue(chi2)
+            self.tcChi.Refresh()
         else:
             self.tcChi.SetValue("-")
         
@@ -2107,42 +2065,41 @@ class FitPage(BasicPage):
       
         try:
             if self.enable_disp.GetValue():
-                if hasattr(self,"text_disp_1" ):
+                if hasattr(self, "text_disp_1"):
                     if self.text_disp_1 != None and not self.is_mac:
                         self.text_disp_1.Hide()
         except:
             dispersity = None
             pass
       
-            
         i = 0
         #Set the panel when fit result are list
-        for item in self.param_toFit:     
-            if len(item)>5 and item != None:     
+        for item in self.param_toFit:
+            if len(item) > 5 and item != None:
                 ## reset error value to initial state
                 if not self.is_mac:
                     item[3].Hide()
                     item[4].Hide()
                 for ind in range(len(out)):
                     if item[1] == p_name[ind]:
-                        break       
-                if len(out)<=len(self.param_toFit) and out[ind] !=None:   
-                    val_out = format_number(out[ind], True)                  
+                        break
+                if len(out) <= len(self.param_toFit) and out[ind] != None:
+                    val_out = format_number(out[ind], True)
                     item[2].SetValue(val_out)
 
-                if(cov !=None and len(cov) == len(out)):
+                if(cov != None and len(cov) == len(out)):
                     try:
-                        if dispersity !=None:
+                        if dispersity != None:
                             if self.enable_disp.GetValue():
-                                if hasattr(self,"text_disp_1" ):
-                                    if self.text_disp_1!=None:
+                                if hasattr(self, "text_disp_1"):
+                                    if self.text_disp_1 != None:
                                         if not self.text_disp_1.IsShown()\
                                             and not self.is_mac:
                                             self.text_disp_1.Show(True)
                     except:
-                        pass    
+                        pass
                     
-                    if cov[ind]!=None :
+                    if cov[ind] != None:
                         if numpy.isfinite(float(cov[ind])):
                             val_err = format_number(cov[ind], True)
                             if not self.is_mac:
@@ -2150,24 +2107,20 @@ class FitPage(BasicPage):
                                 item[4].Show(True)
                             item[4].SetValue(val_err)
                             has_error = True
-                i += 1         
+                i += 1
         #Show error title when any errors displayed
-        if has_error: 
+        if has_error:
             if not self.text2_3.IsShown():
-                self.text2_3.Show(True)   
-        ## save current state  
-        self.save_current_state()          
+                self.text2_3.Show(True)
+        ## save current state
+        self.save_current_state()
         
-        #self._lay_out() 
         if not self.is_mac:
-            self.Layout() 
-            self.Refresh() 
-        self._mac_sleep(0.1)  
+            self.Layout()
+            self.Refresh()
+        self._mac_sleep(0.1)
         #plot model ( when drawing, do not update chisqr value again)
-        self._draw_model(update_chisqr=False, source = 'fit')    
-        #PostStatusEvent     
-        #msg = "Fit completed!dddd "
-        #wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
+        self._draw_model(update_chisqr=False, source='fit')
     
     def onWeighting(self, event):
         """
@@ -2185,12 +2138,12 @@ class FitPage(BasicPage):
         flag_weight = self.get_weight_flag()
         if is_2D == None:
             is_2D = self._is_2D()
-        weight = get_weight(data=self.data, 
-                            is2d=is_2D, 
+        weight = get_weight(data=self.data,
+                            is2d=is_2D,
                             flag=flag_weight)
-        self._manager.set_fit_weight(uid=self.uid, 
-                                     flag=flag_weight, 
-                                     is2d=is_2D, 
+        self._manager.set_fit_weight(uid=self.uid,
+                                     flag=flag_weight,
+                                     is2d=is_2D,
                                      fid=None)
     
     def onPinholeSmear(self, event):
@@ -2206,52 +2159,48 @@ class FitPage(BasicPage):
             self.disable_smearer.SetValue(True)
             if event == None:
                 return
-            msg="Please select a Model first..."
+            msg = "Please select a Model first..."
             wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self._manager.parent, StatusEvent(status=\
-                            "Smear: %s"%msg))
+            wx.PostEvent(self._manager.parent,
+                         StatusEvent(status="Smear: %s" % msg))
             return
 
         # Need update param values
-        self._update_paramv_on_fit()     
+        self._update_paramv_on_fit()
 
         # msg default
         msg = None
         if event != None:
-            tcrtl= event.GetEventObject()
+            tcrtl = event.GetEventObject()
             # event case of radio button
-            if tcrtl.GetValue()== True:
+            if tcrtl.GetValue() == True:
                 self.dx_min = 0.0
                 self.dx_max = 0.0
                 is_new_pinhole = True
             else:
                 is_new_pinhole = self._is_changed_pinhole()
         else:
-            is_new_pinhole = True 
+            is_new_pinhole = True
         # if any value is changed
         if is_new_pinhole:
             msg = self._set_pinhole_smear()
-        # hide all silt sizer    
+        # hide all silt sizer
         self._hide_all_smear_info()
         
-        ##Calculate chi2
-        temp_smearer = self.current_smearer
-        #self.compute_chisqr(smearer= temp_smearer)
-            
-        # show relevant slit sizers 
+        # show relevant slit sizers
         self._show_smear_sizer()
 
         self.sizer_set_smearer.Layout()
-        self.Layout()   
+        self.Layout()
         
-        if event != None: 
-            event.Skip()                  
+        if event != None:
+            event.Skip()
         #self._undo.Enable(True)
         self.save_current_state()
-        event = PageInfoEvent(page = self)
+        event = PageInfoEvent(page=self)
         wx.PostEvent(self.parent, event)
         
-    def _is_changed_pinhole(self):  
+    def _is_changed_pinhole(self):
         """
         check if any of pinhole smear is changed
         
@@ -2262,7 +2211,7 @@ class FitPage(BasicPage):
         pin_min = self.smear_pinhole_min.GetValue()
         pin_max = self.smear_pinhole_max.GetValue()
                     
-        # Check changes in slit width    
+        # Check changes in slit width
         try:
             dx_min = float(pin_min)
         except:
@@ -2302,48 +2251,53 @@ class FitPage(BasicPage):
         msg = None
    
         get_pin_min = self.smear_pinhole_min
-        get_pin_max = self.smear_pinhole_max        
+        get_pin_max = self.smear_pinhole_max
 
         if not check_float(get_pin_min):
             get_pin_min.SetBackgroundColour("pink")
-            msg= "Model Error:wrong value entered!!!"
-        elif not check_float(get_pin_max ):
+            msg = "Model Error:wrong value entered!!!"
+        elif not check_float(get_pin_max):
             get_pin_max.SetBackgroundColour("pink")
-            msg= "Model Error:wrong value entered!!!"
+            msg = "Model Error:wrong value entered!!!"
         else:
-            if len_data < 2: len_data = 2     
+            if len_data < 2:
+                len_data = 2
             self.dx_min = float(get_pin_min.GetValue())
             self.dx_max = float(get_pin_max.GetValue())
             if self.dx_min < 0:
                 get_pin_min.SetBackgroundColour("pink")
-                msg= "Model Error:This value can not be negative!!!"
-            elif self.dx_max <0:
+                msg = "Model Error:This value can not be negative!!!"
+            elif self.dx_max < 0:
                 get_pin_max.SetBackgroundColour("pink")
-                msg= "Model Error:This value can not be negative!!!"
-            elif self.dx_min != None and self.dx_max != None:   
+                msg = "Model Error:This value can not be negative!!!"
+            elif self.dx_min != None and self.dx_max != None:
                 if self._is_2D():
-                    data.dqx_data[data.dqx_data==0] = self.dx_min
-                    data.dqy_data[data.dqy_data==0] = self.dx_max          
+                    data.dqx_data[data.dqx_data == 0] = self.dx_min
+                    data.dqy_data[data.dqy_data == 0] = self.dx_max
                 elif self.dx_min == self.dx_max:
-                    data.dx[data.dx==0] = self.dx_min
+                    data.dx[data.dx == 0] = self.dx_min
                 else:
-                    step = (self.dx_max - self.dx_min)/(len_data-1)    
-                    data.dx = numpy.arange(self.dx_min,self.dx_max+step/1.1,
-                                           step)            
-            elif self.dx_min != None: 
-                if self._is_2D(): data.dqx_data[data.dqx_data==0] = self.dx_min
-                else: data.dx[data.dx==0] = self.dx_min 
+                    step = (self.dx_max - self.dx_min) / (len_data - 1)
+                    data.dx = numpy.arange(self.dx_min,
+                                           self.dx_max + step / 1.1,
+                                           step)
+            elif self.dx_min != None:
+                if self._is_2D():
+                    data.dqx_data[data.dqx_data == 0] = self.dx_min
+                else:
+                    data.dx[data.dx == 0] = self.dx_min
             elif self.dx_max != None:
-                if self._is_2D(): data.dqy_data[data.dqy_data==0] = self.dx_max
-                else: data.dx[data.dx==0] = self.dx_max          
+                if self._is_2D():
+                    data.dqy_data[data.dqy_data == 0] = self.dx_max
+                else:
+                    data.dx[data.dx == 0] = self.dx_max
             self.current_smearer = smear_selection(data, self.model)
             # 2D need to set accuracy
-            if self._is_2D(): 
-                self.current_smearer.set_accuracy(accuracy = \
-                                                  self.smear2d_accuracy)
+            if self._is_2D():
+                self.current_smearer.set_accuracy(accuracy=self.smear2d_accuracy)
 
         if msg != None:
-            wx.PostEvent(self._manager.parent, StatusEvent(status = msg ))
+            wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         else:
             get_pin_min.SetBackgroundColour("white")
             get_pin_max.SetBackgroundColour("white")
@@ -2352,7 +2306,7 @@ class FitPage(BasicPage):
         self._manager.set_smearer(smearer=self.current_smearer,
                                 fid=self.data.id,
                                  qmin=float(self.qmin_x),
-                                 qmax= float(self.qmax_x),
+                                 qmax=float(self.qmax_x),
                                  enable_smearer=not self.disable_smearer.GetValue(),
                                  uid=self.uid)
         return msg
@@ -2360,7 +2314,7 @@ class FitPage(BasicPage):
     def update_pinhole_smear(self):
         """
         called by kill_focus on pinhole TextCntrl
-        to update the changes 
+        to update the changes
         
         :return: False when wrong value was entered
         
@@ -2369,12 +2323,11 @@ class FitPage(BasicPage):
         msg = None
         # check if any value is changed
         if self._is_changed_pinhole():
-            msg = self._set_pinhole_smear()           
-        #self._undo.Enable(True)
+            msg = self._set_pinhole_smear()
         wx.CallAfter(self.save_current_state)
 
         if msg != None:
-            return False   
+            return False
         else:
             return True
                      
@@ -2387,10 +2340,10 @@ class FitPage(BasicPage):
             self.disable_smearer.SetValue(True)
             if event == None:
                 return
-            msg="Please select a Model first..."
+            msg = "Please select a Model first..."
             wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self._manager.parent, StatusEvent(status=\
-                            "Smear: %s"%msg))
+            wx.PostEvent(self._manager.parent,
+                         StatusEvent(status="Smear: %s" % msg))
             return
 
         # Need update param values
@@ -2400,7 +2353,7 @@ class FitPage(BasicPage):
         msg = None
         # for event given
         if event != None:
-            tcrtl= event.GetEventObject()
+            tcrtl = event.GetEventObject()
             # event case of radio button
             if tcrtl.GetValue():
                 self.dxl = 0.0
@@ -2409,31 +2362,28 @@ class FitPage(BasicPage):
             else:
                 is_new_slit = self._is_changed_slit()
         else:
-            is_new_slit = True 
+            is_new_slit = True
         
         # if any value is changed
         if is_new_slit:
             msg = self._set_slit_smear()
             
         # hide all silt sizer
-        self._hide_all_smear_info()        
-        ##Calculate chi2
-        #self.compute_chisqr(smearer= self.current_smearer)  
-        # show relevant slit sizers       
+        self._hide_all_smear_info()
+        # show relevant slit sizers
         self._show_smear_sizer()
         self.sizer_set_smearer.Layout()
         self.Layout()
 
         if event != None:
-            event.Skip()     
-        #self._undo.Enable(True)
+            event.Skip()
         self.save_current_state()
-        event = PageInfoEvent(page = self)
+        event = PageInfoEvent(page=self)
         wx.PostEvent(self.parent, event)
         if msg != None:
-            wx.PostEvent(self._manager.parent, StatusEvent(status = msg))
+            wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
 
-    def _is_changed_slit(self):  
+    def _is_changed_slit(self):
         """
         check if any of slit lengths is changed
         
@@ -2444,16 +2394,16 @@ class FitPage(BasicPage):
         width = self.smear_slit_width.GetValue()
         height = self.smear_slit_height.GetValue()
         
-        # check and change the box bg color if it was pink 
+        # check and change the box bg color if it was pink
         #    but it should be white now
         # because this is the case that _set_slit_smear() will not handle
-        if height.lstrip().rstrip()=="":
+        if height.lstrip().rstrip() == "":
             self.smear_slit_height.SetBackgroundColour(wx.WHITE)
-        if width.lstrip().rstrip()=="":
+        if width.lstrip().rstrip() == "":
             self.smear_slit_width.SetBackgroundColour(wx.WHITE)
             
-        # Check changes in slit width    
-        if width == "": 
+        # Check changes in slit width
+        if width == "":
             dxw = 0.0
         else:
             try:
@@ -2464,7 +2414,7 @@ class FitPage(BasicPage):
             return True
         
         # Check changes in slit heigth
-        if height == "": 
+        if height == "":
             dxl = 0.0
         else:
             try:
@@ -2483,10 +2433,9 @@ class FitPage(BasicPage):
         :return: message to inform the user about the validity
             of the values entered for slit smear
         """
-        if self.data.__class__.__name__ ==  "Data2D" or \
+        if self.data.__class__.__name__ == "Data2D" or \
                         self.enable2D:
             return
-        temp_smearer = None
         # make sure once more if it is smearer
         data = copy.deepcopy(self.data)
         data_len = len(data.x)
@@ -2497,56 +2446,55 @@ class FitPage(BasicPage):
    
         try:
             self.dxl = float(self.smear_slit_height.GetValue())
-            data.dxl = self.dxl* numpy.ones(data_len)
+            data.dxl = self.dxl * numpy.ones(data_len)
             self.smear_slit_height.SetBackgroundColour(wx.WHITE)
-        except: 
+        except:
             data.dxl = numpy.zeros(data_len)
-            if self.smear_slit_height.GetValue().lstrip().rstrip()!="":
+            if self.smear_slit_height.GetValue().lstrip().rstrip() != "":
                 self.smear_slit_height.SetBackgroundColour("pink")
-                msg = "Wrong value entered... "  
+                msg = "Wrong value entered... "
             else:
                 self.smear_slit_height.SetBackgroundColour(wx.WHITE)
         try:
             self.dxw = float(self.smear_slit_width.GetValue())
             self.smear_slit_width.SetBackgroundColour(wx.WHITE)
-            data.dxw = self.dxw* numpy.ones(data_len)
-        except: 
+            data.dxw = self.dxw * numpy.ones(data_len)
+        except:
             data.dxw = numpy.zeros(data_len)
-            if self.smear_slit_width.GetValue().lstrip().rstrip()!="":
+            if self.smear_slit_width.GetValue().lstrip().rstrip() != "":
                 self.smear_slit_width.SetBackgroundColour("pink")
                 msg = "Wrong Fit value entered... "
             else:
                 self.smear_slit_width.SetBackgroundColour(wx.WHITE)
               
         self.current_smearer = smear_selection(data, self.model)
-        #temp_smearer = self.current_smearer
         ## set smearing value whether or not the data contain the smearing info
-        self._manager.set_smearer(smearer=self.current_smearer, 
+        self._manager.set_smearer(smearer=self.current_smearer,
                                  fid=self.data.id,
-                                 qmin=float(self.qmin_x), 
-                                 qmax= float(self.qmax_x),
+                                 qmin=float(self.qmin_x),
+                                 qmax=float(self.qmax_x),
                         enable_smearer=not self.disable_smearer.GetValue(),
-                                 uid=self.uid) 
+                                 uid=self.uid)
         return msg
     
     def update_slit_smear(self):
         """
         called by kill_focus on pinhole TextCntrl
-        to update the changes 
+        to update the changes
         
         :return: False when wrong value was entered
         
-        """             
+        """
         # msg default
         msg = None
         # check if any value is changed
         if self._is_changed_slit():
-            msg = self._set_slit_smear()           
+            msg = self._set_slit_smear()
         #self._undo.Enable(True)
         self.save_current_state()
 
         if msg != None:
-            return False   
+            return False
         else:
             return True
                             
@@ -2555,8 +2503,8 @@ class FitPage(BasicPage):
         Create a smear object that will change the way residuals
         are compute when fitting
         """
-        if event != None: 
-            event.Skip()    
+        if event != None:
+            event.Skip()
         if self.data is None:
             return
 
@@ -2564,29 +2512,30 @@ class FitPage(BasicPage):
             self.disable_smearer.SetValue(True)
             if event == None:
                 return
-            msg="Please select a Model first..."
+            msg = "Please select a Model first..."
             wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self._manager.parent, StatusEvent(status=\
-                            "Smear: %s"%msg))
+            wx.PostEvent(self._manager.parent,
+                         StatusEvent(status="Smear: %s" % msg))
             return
         # Need update param values
         self._update_paramv_on_fit()
-        temp_smearer = self.on_smear_helper()            
+        temp_smearer = self.on_smear_helper()
         
         self.sizer_set_smearer.Layout()
         self.Layout()
         self._set_weight()
         
         ## set smearing value whether or not the data contain the smearing info
-        wx.CallAfter(self._manager.set_smearer, uid=self.uid, smearer=temp_smearer,
-                                  fid=self.data.id,
-                        qmin=float(self.qmin_x),
-                        qmax=float(self.qmax_x),
-                        enable_smearer=not self.disable_smearer.GetValue(),
-                         draw=True) 
+        wx.CallAfter(self._manager.set_smearer, uid=self.uid,
+                     smearer=temp_smearer,
+                     fid=self.data.id,
+                     qmin=float(self.qmin_x),
+                     qmax=float(self.qmax_x),
+                     enable_smearer=not self.disable_smearer.GetValue(),
+                     draw=True)
         
-        self.state.enable_smearer=  self.enable_smearer.GetValue()
-        self.state.disable_smearer=self.disable_smearer.GetValue()
+        self.state.enable_smearer = self.enable_smearer.GetValue()
+        self.state.disable_smearer = self.disable_smearer.GetValue()
         self.state.pinhole_smearer = self.pinhole_smearer.GetValue()
         self.state.slit_smearer = self.slit_smearer.GetValue()
         
@@ -2597,12 +2546,11 @@ class FitPage(BasicPage):
         :param update: force or not to update
         """
         self._get_smear_info()
-        temp_smearer = None
         #renew smear sizer
         if self.smear_type != None:
             self.smear_description_smear_type.SetValue(str(self.smear_type))
-            self.smear_data_left.SetValue(str(self.dq_l))   
-            self.smear_data_right.SetValue(str(self.dq_r)) 
+            self.smear_data_left.SetValue(str(self.dq_l))
+            self.smear_data_right.SetValue(str(self.dq_r))
 
         self._hide_all_smear_info()
         data = copy.deepcopy(self.data)
@@ -2612,21 +2560,16 @@ class FitPage(BasicPage):
         if self.current_smearer != temp_smearer or update:
             self.current_smearer = temp_smearer
         if self.enable_smearer.GetValue():
-            if hasattr(self.data,"dxl"):
-                msg= ": Resolution smearing parameters"
-            if hasattr(self.data,"dxw"):
-                msg= ": Slit smearing parameters"
-            if self.current_smearer ==None:
-                wx.PostEvent(self._manager.parent, StatusEvent(status=\
-                            "Data contains no smearing information"))
+            if self.current_smearer == None:
+                wx.PostEvent(self._manager.parent,
+                             StatusEvent(status="Data contains no smearing information"))
             else:
-                wx.PostEvent(self._manager.parent, StatusEvent(status=\
-                            "Data contains smearing information"))
+                wx.PostEvent(self._manager.parent,
+                             StatusEvent(status="Data contains smearing information"))
 
-            #self.smear_description_dqdata.Show(True)
             self.smear_data_left.Show(True)
             self.smear_data_right.Show(True)
-            temp_smearer= self.current_smearer
+            temp_smearer = self.current_smearer
         elif self.disable_smearer.GetValue():
             self.smear_description_none.Show(True)
         elif self.pinhole_smearer.GetValue():
@@ -2637,27 +2580,26 @@ class FitPage(BasicPage):
         
         return temp_smearer
     
-    def on_complete_chisqr(self, event):  
+    def on_complete_chisqr(self, event):
         """
         Display result chisqr on the panel
         :event: activated by fitting/ complete after draw
         """
         try:
             if event == None:
-                output= "-"
+                output = "-"
             elif not numpy.isfinite(event.output):
-                output= "-"
+                output = "-"
             else:
                 output = event.output
             self.tcChi.SetValue(str(format_number(output, True)))
             self.state.tcChi = self.tcChi.GetValue()
         except:
-            pass  
+            pass
             
-    
     def get_all_checked_params(self):
         """
-        Found all parameters current check and add them to list of parameters to 
+        Found all parameters current check and add them to list of parameters to
         fit
         """
         self.param_toFit = []
@@ -2667,27 +2609,27 @@ class FitPage(BasicPage):
         for item in self.fittable_param:
             if item[0].GetValue() and item not in self.param_toFit:
                 self.param_toFit.append(item)
-        self.save_current_state_fit()  
+        self.save_current_state_fit()
        
       
-        event = PageInfoEvent(page = self)
-        wx.PostEvent(self.parent, event) 
+        event = PageInfoEvent(page=self)
+        wx.PostEvent(self.parent, event)
         param2fit = []
         for item in self.param_toFit:
             if item[0]:
-                param2fit.append(item[1])     
+                param2fit.append(item[1])
         self.parent._manager.set_param2fit(self.uid, param2fit)
                 
-    def select_all_param(self, event): 
+    def select_all_param(self, event):
         """
         set to true or false all checkBox given the main checkbox value cb1
-        """            
+        """
         self.param_toFit = []
         if  self.parameters !=[]:
             if  self.cb1.GetValue():
                 for item in self.parameters:
                     ## for data2D select all to fit
-                    if self.data.__class__.__name__==  "Data2D" or \
+                    if self.data.__class__.__name__ ==  "Data2D" or \
                             self.enable2D:
                         item[0].SetValue(True)
                         self.param_toFit.append(item)
@@ -2695,10 +2637,10 @@ class FitPage(BasicPage):
                         ## for 1D all parameters except orientation
                         if not item in self.orientation_params:
                             item[0].SetValue(True)
-                            self.param_toFit.append(item )
+                            self.param_toFit.append(item)
                 #if len(self.fittable_param)>0:
                 for item in self.fittable_param:
-                    if self.data.__class__.__name__== "Data2D" or \
+                    if self.data.__class__.__name__ == "Data2D" or \
                             self.enable2D:
                         item[0].SetValue(True)
                         self.param_toFit.append(item)
@@ -2712,7 +2654,7 @@ class FitPage(BasicPage):
                         ## for 1D all parameters except orientation
                         if not item in self.orientation_params_disp:
                             item[0].SetValue(True)
-                            self.param_toFit.append(item )
+                            self.param_toFit.append(item)
                             try:
                                 if len(self.values[item[1]]) > 0:
                                     item[0].SetValue(False)
@@ -2724,22 +2666,21 @@ class FitPage(BasicPage):
                     item[0].SetValue(False)
                 for item in self.fittable_param:
                     item[0].SetValue(False)
-                self.param_toFit=[]
+                self.param_toFit = []
            
-        self.save_current_state_fit()  
+        self.save_current_state_fit()
        
-        if event !=None:
+        if event != None:
             #self._undo.Enable(True)
             ## post state to fit panel
-            event = PageInfoEvent(page = self)
-            wx.PostEvent(self.parent, event) 
+            event = PageInfoEvent(page=self)
+            wx.PostEvent(self.parent, event)
         param2fit = []
         for item in self.param_toFit:
             if item[0]:
-                param2fit.append(item[1])     
+                param2fit.append(item[1])
         self.parent._manager.set_param2fit(self.uid, param2fit)
 
-        
     def select_param(self,event):
         """ 
         Select TextCtrl  checked for fitting purpose and stores them
@@ -2755,57 +2696,54 @@ class FitPage(BasicPage):
             #Select parameters to fit for list of primary parameters
             if item[0].GetValue():
                 if not (item in self.param_toFit):
-                    self.param_toFit.append(item )  
+                    self.param_toFit.append(item)
             else:
                 #remove parameters from the fitting list
                 if item in self.param_toFit:
                     self.param_toFit.remove(item)
 
-        #Select parameters to fit for list of fittable parameters 
-        #        with dispersion          
+        #Select parameters to fit for list of fittable parameters
+        #        with dispersion
         for item in self.fittable_param:
             #Skip t ifhe angle parameters if 1D data
-            if self.data.__class__.__name__ !=  "Data2D" and\
+            if self.data.__class__.__name__ != "Data2D" and\
                         not self.enable2D:
                 if item in self.orientation_params:
                     continue
             if item[0].GetValue():
                 if not (item in self.param_toFit):
-                    self.param_toFit.append(item)  
+                    self.param_toFit.append(item)
             else:
                 #remove parameters from the fitting list
                 if item in self.param_toFit:
                     self.param_toFit.remove(item)
 
-        #Calculate num. of angle parameters 
-        if self.data.__class__.__name__ ==  "Data2D" or \
+        #Calculate num. of angle parameters
+        if self.data.__class__.__name__ == "Data2D" or \
                        self.enable2D:
             len_orient_para = 0
         else:
-            len_orient_para = len(self.orientation_params)  #assume even len 
+            len_orient_para = len(self.orientation_params)  # assume even len
         #Total num. of angle parameters
         if len(self.fittable_param) > 0:
             len_orient_para *= 2
-        #Set the value of checkbox that selected every checkbox or not        
-        if len(self.parameters)+len(self.fittable_param)-len_orient_para ==\
+        #Set the value of checkbox that selected every checkbox or not
+        if len(self.parameters) + len(self.fittable_param) - len_orient_para ==\
                 len(self.param_toFit):
             self.cb1.SetValue(True)
         else:
             self.cb1.SetValue(False)
        
-       
-       
         self.save_current_state_fit()
-        if event !=None:
-            #self._undo.Enable(True)
+        if event != None:
             ## post state to fit panel
-            event = PageInfoEvent(page = self)
-            wx.PostEvent(self.parent, event) 
+            event = PageInfoEvent(page=self)
+            wx.PostEvent(self.parent, event)
         
         param2fit = []
         for item in self.param_toFit:
             if item[0]:
-                param2fit.append(item[1])     
+                param2fit.append(item[1])
         self.parent._manager.set_param2fit(self.uid, param2fit)
         
     def set_model_param_sizer(self, model):
@@ -2818,18 +2756,18 @@ class FitPage(BasicPage):
         self.sizer3.Clear(True)
         self.parameters = []
         self.str_parameters = []
-        self.param_toFit=[]
-        self.fittable_param=[]
-        self.fixed_param=[]
-        self.orientation_params=[]
-        self.orientation_params_disp=[]
+        self.param_toFit = []
+        self.fittable_param = []
+        self.fixed_param = []
+        self.orientation_params = []
+        self.orientation_params_disp = []
         
-        if model ==None:
+        if model == None:
             self.sizer3.Layout()
             self.SetupScrolling()
             return
         ## the panel is drawn using the current value of the fit engine
-        if self.engine_type==None and self._manager !=None:
+        if self.engine_type==None and self._manager != None:
             self.engine_type= self._manager._return_engine_type()
 
         box_description= wx.StaticBox(self, -1,str("Model Parameters"))
