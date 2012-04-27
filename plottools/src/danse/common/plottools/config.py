@@ -51,4 +51,3 @@ if 'matplotlib.backends' not in sys.modules:
 elif matplotlib.get_backend() != plot_backend:
     # if a backend has already been selected, make sure it is the correct one.
     raise ImportError("Matplotlib not using backend " + plot_backend)
-

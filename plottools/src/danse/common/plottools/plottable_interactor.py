@@ -16,8 +16,8 @@ class PointInteractor(_BaseInteractor):
         self.id = id
         self.color = color
         self.colorlist = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
-        self.symbollist = ['o', 'x', '^', 'v', '<', '>', 
-                           '+', 's', 'd', 'D', 'h', 'H', 'p','-']
+        self.symbollist = ['o', 'x', '^', 'v', '<', '>',
+                           '+', 's', 'd', 'D', 'h', 'H', 'p', '-']
         self.markersize = None
         self.marker = None
         self.marker2 = None
@@ -34,8 +34,8 @@ class PointInteractor(_BaseInteractor):
         """Return a particular symbol"""
         return self.symbollist[s % len(self.symbollist)]
 
-    def points(self, x, y, dx=None, dy=None, color=0, symbol=0, markersize=5, label=None, 
-               hide_error=False):
+    def points(self, x, y, dx=None, dy=None, color=0, symbol=0, markersize=5,
+               label=None, hide_error=False):
         """
         """
         #Draw curve
@@ -65,26 +65,25 @@ class PointInteractor(_BaseInteractor):
             if hide_error:
                 zorder = 1
                 self.marker = self.axes.plot(x, y, color=self.color,
-                                         marker=self._symbol(symbol),
-                                         markersize=markersize,
-                                         linestyle='', label=label,
-                                         zorder=zorder)[0]
+                                             marker=self._symbol(symbol),
+                                             markersize=markersize,
+                                             linestyle='', label=label,
+                                             zorder=zorder)[0]
             else:
                 zorder = 2
                 self.marker = self.axes.errorbar(x, y, yerr=dy,
-                                                  xerr=None,
-                                             ecolor=self.color, 
-                                             color=self.color,
-                                             capsize=2, 
-                                             linestyle='',
-                                            barsabove=False,
-                                            #mec=self.color, mfc=self.color,
-                                            marker=self._symbol(symbol),
-                                            markersize=markersize,
-                                            lolims=False, uplims=False,
-                                            xlolims=False, xuplims=False,
-                                            label=label,
-                                            zorder=zorder)[0]
+                                                 xerr=None,
+                                                 ecolor=self.color,
+                                                 color=self.color,
+                                                 capsize=2,
+                                                 linestyle='',
+                                                 barsabove=False,
+                                                 marker=self._symbol(symbol),
+                                                 markersize=markersize,
+                                                 lolims=False, uplims=False,
+                                                 xlolims=False, xuplims=False,
+                                                 label=label,
+                                                 zorder=zorder)[0]
             
         self.connect_markers([self.marker])
         self.update()
@@ -95,7 +94,7 @@ class PointInteractor(_BaseInteractor):
         if not self.marker == None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
-        self.marker = self.axes.plot(x, y, color=self.color, lw = 1.5,
+        self.marker = self.axes.plot(x, y, color=self.color, lw=1.5,
                                      marker='', linestyle='-', label=label)[0]
             
         self.connect_markers([self.marker])
@@ -111,7 +110,6 @@ class PointInteractor(_BaseInteractor):
             connect('leave', h, self._on_leave)
             connect('click', h, self._on_click)
             connect('release', h, self._on_release)
-            #connect('drag', h, self._on_drag)
             connect('key', h, self.onKey)
 
     def clear(self):
@@ -127,12 +125,12 @@ class PointInteractor(_BaseInteractor):
             evt.artist = self.marker
             self._on_leave(evt)
 
-    def _on_release(self, evt): 
+    def _on_release(self, evt):
         """
         Called when a mouse button is released
         within the boundaries of an artist
         """
-        # Check to see whether we are about to pop 
+        # Check to see whether we are about to pop
         # the context menu up
         if evt.button == 3:
             self._context_menu = True
@@ -147,7 +145,7 @@ class PointInteractor(_BaseInteractor):
             
             if evt.artist.get_color() == 'y':
                 try:
-                     evt.artist.set_color('b')
+                    evt.artist.set_color('b')
                 except:
                     evt.artist.set_color_cycle('b')
                 if hasattr(evt.artist, "set_facecolor"):
@@ -156,7 +154,7 @@ class PointInteractor(_BaseInteractor):
                     evt.artist.set_edgecolor('b')
             else:
                 try:
-                     evt.artist.set_color('y')
+                    evt.artist.set_color('y')
                 except:
                     evt.artist.set_color_cycle('y')
                 if hasattr(evt.artist, "set_facecolor"):
@@ -180,7 +178,7 @@ class PointInteractor(_BaseInteractor):
                     evt.artist.set_color_cycle(self.color)
                 if hasattr(evt.artist, "set_facecolor"):
                     evt.artist.set_facecolor(self.color)
-                if hasattr(evt.artist, "set_edgecolor"):            
+                if hasattr(evt.artist, "set_edgecolor"):
                     evt.artist.set_edgecolor(self.color)
                 self.axes.figure.canvas.draw_idle()
     
@@ -189,4 +187,3 @@ class PointInteractor(_BaseInteractor):
         Update
         """
         pass
-

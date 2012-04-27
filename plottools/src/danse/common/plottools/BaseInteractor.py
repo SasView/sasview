@@ -21,7 +21,7 @@ class _BaseInteractor:
         moveend(ev) - end the drag event
         update() - draw the interactors
         
-    The following are provided by the base class: 
+    The following are provided by the base class:
     
         connect_markers(markers) - register callbacks for all markers
         clear_markers() - remove all items in self.markers
@@ -52,8 +52,10 @@ class _BaseInteractor:
         '''
         Clear old markers and interfaces.
         '''
-        for h in self.markers: h.remove()
-        if self.markers: self.base.connect.clear(*self.markers)
+        for h in self.markers:
+            h.remove()
+        if self.markers:
+            self.base.connect.clear(*self.markers)
         self.markers = []
 
     def save(self, ev):
@@ -126,7 +128,7 @@ class _BaseInteractor:
         Move the artist.  Calls move() to update the state, or restore() if
         the mouse leaves the window.
         """
-        inside, prop = self.axes.contains(ev)
+        inside, _ = self.axes.contains(ev)
         if inside:
             self.clickx, self.clicky = ev.xdata, ev.ydata
             self.move(ev.xdata, ev.ydata, ev)
@@ -146,10 +148,14 @@ class _BaseInteractor:
             self.restore()
         elif ev.key in ['up', 'down', 'right', 'left']:
             dx, dy = self.dpixel(self.clickx, self.clicky, nudge=ev.control)
-            if ev.key == 'up': self.clicky += dy
-            elif ev.key == 'down': self.clicky -= dy
-            elif ev.key == 'right': self.clickx += dx
-            else: self.clickx -= dx
+            if ev.key == 'up':
+                self.clicky += dy
+            elif ev.key == 'down':
+                self.clicky -= dy
+            elif ev.key == 'right':
+                self.clickx += dx
+            else:
+                self.clickx -= dx
             self.move(self.clickx, self.clicky, ev)
         else:
             return False
@@ -171,4 +177,3 @@ class _BaseInteractor:
             nx, ny = ax.transData.xy_tup((px+1., py+1.))
         dx, dy = nx-x, ny-y
         return dx, dy
-

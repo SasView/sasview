@@ -1,11 +1,8 @@
-#!/usr/bin/python
-
-# fitDialog.py
-
 import wx
-#from PlotPanel import PlotPanel
 from plottables import Theory1D
-import math, numpy, fittings
+import math
+import numpy
+import fittings
 import transform
 import sys
 
@@ -17,11 +14,12 @@ else:
     FONT_VARIANT = 1
     PNL_WIDTH = 450
     
+    
 def format_number(value, high=False):
     """
-    Return a float in a standardized, human-readable formatted string 
+    Return a float in a standardized, human-readable formatted string
     """
-    try: 
+    try:
         value = float(value)
     except:
         output = "NaN"
@@ -35,9 +33,8 @@ def format_number(value, high=False):
     return output.lstrip().rstrip()
 
 
-
 class LinearFit(wx.Dialog):
-    def __init__(self, parent, plottable, push_data,transform, title):
+    def __init__(self, parent, plottable, push_data, transform, title):
         """
         Dialog window pops- up when select Linear fit on Context menu
         Displays fitting parameters
@@ -106,7 +103,7 @@ class LinearFit(wx.Dialog):
         self.btClose.Bind(wx.EVT_BUTTON, self._on_close)
         
         # Intro
-        explanation  = "Perform fit for y(x) = Ax + B"
+        explanation = "Perform fit for y(x) = Ax + B"
         vbox.Add(sizer)
         ix = 0
         iy = 1
@@ -121,7 +118,7 @@ class LinearFit(wx.Dialog):
         sizer.Add(wx.StaticText(self, -1, '+/-'),
                   (iy, ix), (1, 1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 1
-        sizer.Add(self.tcErrA, (iy, ix), (1, 1), 
+        sizer.Add(self.tcErrA, (iy, ix), (1, 1),
                   wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 0
@@ -166,7 +163,7 @@ class LinearFit(wx.Dialog):
                   (iy, ix), (1, 1),
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
-        sizer.Add(self.xminFit, (iy, ix),(1,1),
+        sizer.Add(self.xminFit, (iy, ix), (1, 1),
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 2
         sizer.Add(self.xmaxFit, (iy, ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -178,7 +175,7 @@ class LinearFit(wx.Dialog):
         sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         sizer_button.Add(self.btFit, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         sizer_button.Add(self.btClose, 0,
-                          wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)        
+                          wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         vbox.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
         
         sizer.Add(self.btFit, (iy, ix), (1,1), wx.LEFT|wx.ADJUST_MINSIZE, 0)
@@ -189,15 +186,15 @@ class LinearFit(wx.Dialog):
         from LineModel import LineModel
         self.model = LineModel()
         #Display the fittings values
-        self.default_A = self.model.getParam('A') 
-        self.default_B = self.model.getParam('B') 
+        self.default_A = self.model.getParam('A')
+        self.default_B = self.model.getParam('B')
         self.cstA = fittings.Parameter(self.model, 'A', self.default_A)
         self.cstB = fittings.Parameter(self.model, 'B', self.default_B)
         
         # Set default value of parameter in fit dialog
         if self.Avalue == None:
             self.tcA.SetValue(format_number(self.default_A))
-        else :
+        else:
             self.tcA.SetLabel(format_number(self.Avalue))
         if self.Bvalue == None:
             self.tcB.SetValue(format_number(self.default_B))
@@ -230,8 +227,6 @@ class LinearFit(wx.Dialog):
 
             self.initXmin.SetValue(format_number(min(self.plottable.x)))
             self.initXmax.SetValue(format_number(max(self.plottable.x)))
-            #self.xminFit.SetLabel(format_number(self.mini))
-            #self.xmaxFit.SetLabel(format_number(self.maxi))
             self.mini = min(self.x)
             self.maxi = max(self.x)
             self.xminFit.SetValue(format_number(self.mini))
@@ -250,7 +245,7 @@ class LinearFit(wx.Dialog):
         
     def _on_close(self, event):
         """
-        Close event. 
+        Close event.
         Notify registered owner if available.
         """
         event.Skip()
@@ -262,7 +257,7 @@ class LinearFit(wx.Dialog):
         Performs the fit. Receive an event when clicking on
         the button Fit.Computes chisqr ,
         A and B parameters of the best linear fit y=Ax +B
-        Push a plottable to 
+        Push a plottable to
         """
         tempx = []
         tempy = []
@@ -270,14 +265,14 @@ class LinearFit(wx.Dialog):
        
         # Check if View contains a x array .we online fit when x exits
         # makes transformation for y as a line to fit
-        if self.x != []: 
+        if self.x != []:
             if(self.checkFitValues(self.xminFit) == True):
                 #Check if the field of Fit Dialog contain values
                 # and use the x max and min of the user
                 #xminView,xmaxView = self._checkVal(self.xminFit.GetValue(),
                 #self.xmaxFit.GetValue())
                 if not self._checkVal(self.xminFit, self.xmaxFit):
-                    return 
+                    return
                 xminView = float(self.xminFit.GetValue())
                 xmaxView = float(self.xmaxFit.GetValue())
                 #xmin = self.floatInvTransform(xminView)
@@ -290,12 +285,12 @@ class LinearFit(wx.Dialog):
                     if (self.xLabel.lower() == "log10(x)"):
                         for i in range(len(self.x)):
                             if self.x[i] >= math.log10(xmin):
-                                tempy.append(math.log10(self.y[i])) 
+                                tempy.append(math.log10(self.y[i]))
                                 tempdy.append(transform.errToLogX(self.y[i],
                                                         0, self.dy[i], 0))
                     else:
                         for i in range(len(self.y)):
-                            tempy.append(math.log10(self.y[i])) 
+                            tempy.append(math.log10(self.y[i]))
                             tempdy.append(transform.errToLogX(self.y[i],
                                                             0, self.dy[i], 0))
                 else:
@@ -305,13 +300,13 @@ class LinearFit(wx.Dialog):
                 if (self.xLabel.lower() == "log10(x)"):
                     for x_i in self.x:
                         if x_i >= math.log10(xmin):
-                            tempx.append(math.log10(x_i)) 
+                            tempx.append(math.log10(x_i))
                 else:
                     tempx = self.x
               
                 #Find the fitting parameters
-                # Always use the same defaults, so that fit history 
-                #doesn't play a role! 
+                # Always use the same defaults, so that fit history
+                #doesn't play a role!
                 self.cstA = fittings.Parameter(self.model, 'A', self.default_A)
                 self.cstB = fittings.Parameter(self.model, 'B', self.default_B)
                 
@@ -327,7 +322,7 @@ class LinearFit(wx.Dialog):
                 else:
                     tempdy = numpy.asarray(tempdy)
                     tempdy[tempdy == 0] = 1
-                    chisqr, out, cov = fittings.sansfit(self.model, 
+                    chisqr, out, cov = fittings.sansfit(self.model,
                                                         [self.cstA, self.cstB],
                                                         tempx, tempy, tempdy,
                                                         xminView, xmaxView)
@@ -348,7 +343,7 @@ class LinearFit(wx.Dialog):
                 else:
                     cstA = out[0]
                     cstB = out[1]
-                # Reset model with the right values of A and B 
+                # Reset model with the right values of A and B
                 self.model.setParam('A', float(cstA))
                 self.model.setParam('B', float(cstB))
                 
@@ -379,7 +374,7 @@ class LinearFit(wx.Dialog):
                     
                 if self.yLabel == "log10(y)":
                     tempy.append(math.pow(10, y_model))
-                else: 
+                else:
                     tempy.append(y_model)
                 #Set the fit parameter display when  FitDialog is opened again
                 self.Avalue = cstB
@@ -395,8 +390,7 @@ class LinearFit(wx.Dialog):
                
     def _onsetValues(self, cstA, cstB, errA, errB, Chi):
         """
-        Display  the value on fit Dialog 
-        
+        Display  the value on fit Dialog
         """
         self.tcA.SetValue(format_number(cstA))
         self.tcB.SetValue(format_number(cstB))
@@ -406,20 +400,20 @@ class LinearFit(wx.Dialog):
         
     def _ongetValues(self):
         """
-        Display  the value on fit Dialog 
+        Display  the value on fit Dialog
         """
         return self.Avalue, self.Bvalue, self.ErrAvalue, \
                             self.ErrBvalue, self.Chivalue
     
     def _checkVal(self, usermin, usermax):
         """
-        Ensure that fields parameter contains a min and a max value 
+        Ensure that fields parameter contains a min and a max value
         within x min and x max range
         """
         self.mini = float(self.xminFit.GetValue())
         self.maxi = float(self.xmaxFit.GetValue())
         flag = True
-        try: 
+        try:
             mini = float(usermin.GetValue())
             maxi = float(usermax.GetValue())
             if mini < maxi:
@@ -445,7 +439,7 @@ class LinearFit(wx.Dialog):
         # This code stinks.
         if(self.xLabel == "x"):
             return transform.toX(x)
-        if(self.xLabel == "x^(2)"): 
+        if(self.xLabel == "x^(2)"):
             return transform.toX2(x)
         if(self.xLabel == "ln(x)"):
             return transform.toLogX(x)
@@ -462,7 +456,7 @@ class LinearFit(wx.Dialog):
         # This code stinks.
         if(self.xLabel == "x"):
             return transform.toX(x)
-        if(self.xLabel == "x^(2)"): 
+        if(self.xLabel == "x^(2)"):
             return transform.toX2(x)
         if(self.xLabel == "ln(x)"):
             return transform.toLogX(x)
@@ -470,24 +464,24 @@ class LinearFit(wx.Dialog):
             if x > 0:
                 return x
             else:
-                raise ValueError,"cannot compute log of a negative number"
+                raise ValueError, "cannot compute log of a negative number"
             
     def floatInvTransform(self, x):
         """
-        transform a float.It is use to determine the x.View min and x.View 
+        transform a float.It is use to determine the x.View min and x.View
         max for values not in x
         
         """
         #TODO: refactor this. This is just a hack to make the
         # functionality work without rewritting the whole code
         # with good design (which really should be done...).
-        if(self.xLabel == "x^(2)"): 
+        if(self.xLabel == "x^(2)"):
             return math.sqrt(x)
         
         elif(self.xLabel == "log10(x)"):
             return math.pow(10, x)
         
-        elif(self.xLabel == "ln(x)"): 
+        elif(self.xLabel == "ln(x)"):
             return math.exp(x)
         return x
             
@@ -498,7 +492,7 @@ class LinearFit(wx.Dialog):
         flag = True
         value = item.GetValue()
         # Check for possible values entered
-        if (self.xLabel == "log10(x)") :#or self.xLabel=="ln(x)"):
+        if (self.xLabel == "log10(x)"):  #or self.xLabel=="ln(x)"):
             if(float(value) > 0):
                 item.SetBackgroundColour(wx.WHITE)
                 item.Refresh()
@@ -519,7 +513,7 @@ class LinearFit(wx.Dialog):
         """
         Set the fit region
         :param xmin: minimum x-value to be included in fit
-        :param xmax: maximum x-value to be included in fit 
+        :param xmax: maximum x-value to be included in fit
         """
         # Check values
         try:
@@ -531,6 +525,7 @@ class LinearFit(wx.Dialog):
         self.xminFit.SetValue(format_number(xmin))
         self.xmaxFit.SetValue(format_number(xmax))
   
+  
 class MyApp(wx.App):
     """
     """
@@ -539,9 +534,9 @@ class MyApp(wx.App):
         """
         wx.InitAllImageHandlers()
         plot = Theory1D([], [])
-        dialog = LinearFit(parent=None, plottable=plot, 
+        dialog = LinearFit(parent=None, plottable=plot,
                            push_data=self.onFitDisplay,
-                           transform=self.returnTrans, 
+                           transform=self.returnTrans,
                             title='Linear Fit')
         if dialog.ShowModal() == wx.ID_OK:
             pass
@@ -557,9 +552,3 @@ class MyApp(wx.App):
         """
         """
         return '', '', 0, 0, 0, 0, 0
-
-# end of class MyApp
-
-if __name__ == "__main__":
-    app = MyApp(0)
-    app.MainLoop()

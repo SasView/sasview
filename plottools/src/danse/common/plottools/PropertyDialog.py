@@ -1,6 +1,3 @@
-#!/usr/bin/python
-
-# myDialog.py
 """
 """
 import wx
@@ -14,7 +11,7 @@ class Properties(wx.Dialog):
         for the properties window
         """
         self.parent = parent
-        vbox  = wx.BoxSizer(wx.VERTICAL)
+        vbox = wx.BoxSizer(wx.VERTICAL)
         sizer = wx.GridBagSizer(5,5)
 
         x_size = 70
@@ -41,7 +38,7 @@ class Properties(wx.Dialog):
         self.view = wx.ComboBox(self, -1)
         x_size += self.view.GetSize()[0]
         self.view.SetMinSize((160, 30))
-        sizer.Add(self.view, (iy,ix), (1,1), 
+        sizer.Add(self.view, (iy,ix), (1,1),
                   wx.EXPAND|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
         self.SetMinSize((x_size, 50))
         vbox.Add(sizer, 0, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -51,8 +48,8 @@ class Properties(wx.Dialog):
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         sizer_button.Add(btOk, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
-        sizer_button.Add(btCancel, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)        
-        vbox.Add(sizer_button, 0, 
+        sizer_button.Add(btCancel, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+        vbox.Add(sizer_button, 0,
                  wx.EXPAND|wx.TOP|wx.BOTTOM|wx.ADJUST_MINSIZE, 10)
         # scale value for x
         self.xvalue.SetValue("ln(x)")
@@ -76,13 +73,13 @@ class Properties(wx.Dialog):
         self.yvalue.Insert("ln(y*x^(2))", 8)
         self.yvalue.Insert("ln(y*x^(4))", 9)
         self.yvalue.Insert("log10(y*x^(4))", 10)
-        # type of view or model used 
+        # type of view or model used
         self.view.SetValue("--")
         self.view.Insert("--", 0)
         self.view.Insert("Guinier lny vs x^(2)", 1)
         self.view.Insert("Porod y*x^(4) vs x^(4)", 2)
         self.SetSizer(vbox)
-        self.Fit()        
+        self.Fit()
         self.Centre()
            
     def setValues(self, x, y, view):
@@ -96,12 +93,3 @@ class Properties(wx.Dialog):
         """
         return self.xvalue.GetValue(), self.yvalue.GetValue(),\
                             self.view.GetValue()
-        
-
-if __name__ == "__main__": 
-    app = wx.App()
-    dialog = Properties(None, -1, 'Properties')
-    dialog.ShowModal()
-    app.MainLoop()
-
-

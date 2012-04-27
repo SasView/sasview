@@ -1,6 +1,8 @@
 """
 Extension to MPL to support the binding of artists to key/mouse events.
 """
+import sys
+
 
 class Selection:
     """
@@ -11,6 +13,7 @@ class Selection:
         
     artist = None
     prop = {}
+    
     def __init__(self, artist=None, prop={}):
         self.artist, self.prop = artist, self.prop
         
@@ -22,6 +25,7 @@ class Selection:
     
     def __nonzero__(self):
         return self.artist is not None
+
 
 class BindArtist:
     """
@@ -65,13 +69,6 @@ class BindArtist:
                 canvas.mpl_connect('key_release_event', self._onKeyRelease),
             ]
             
-
-        # Turn off picker if it hasn't already been done
-        #try:
-        #    canvas.mpl_disconnect(canvas.button_pick_id)
-        #    canvas.mpl_disconnect(canvas.scroll_pick_id)
-        #except: 
-        #    pass
         self._current = None
         self._actions = {}
         self.canvas = canvas
@@ -120,9 +117,10 @@ class BindArtist:
         """
         In case we need to disconnect from the canvas...
         """
-        try: 
+        try:
             for cid in self._connections: self.canvas.mpl_disconnect(cid)
-        except: 
+        except:
+            print "Error disconnection canvas: %s" % sys.exc_value
             pass
         self._connections = []
 
@@ -164,7 +162,7 @@ class BindArtist:
             key is the key being pressed/released
             shift,control,alt,meta are flags which are true if the
                 corresponding key is pressed at the time of the event.
-            details is a dictionary of artist specific details, such as the 
+            details is a dictionary of artist specific details, such as the
                 id(s) of the point that were clicked.
                 
         When receiving an event, first check the modifier state to be
@@ -181,7 +179,7 @@ class BindArtist:
         TODO:   without changing callback code
         TODO: Attach multiple callbacks to the same event?
         TODO: Clean up interaction with toolbar modes
-        TODO: push/pushclear/pop context so that binding changes for 
+        TODO: push/pushclear/pop context so that binding changes for
              the duration
         TODO:   e.g., to support ? context sensitive help
         """
@@ -192,11 +190,9 @@ class BindArtist:
 
         # Register the trigger callback
         self._actions[trigger][artist] = action
-        #print "==> added",artist,[artist],"to",trigger,":",
-        #self._actions[trigger].keys()
 
         # Maintain a list of all artists
-        if artist not in self._artists: 
+        if artist not in self._artists:
             self._artists.append(artist)
 
     def trigger(self, actor, action, ev):
@@ -238,12 +234,10 @@ class BindArtist:
         """
         # TODO: sort by zorder of axes then by zorder within axes
         self._artists.sort(cmp=lambda x, y: cmp(y.zorder, x.zorder))
-        # print "search"," ".join([str(h) for h in self._artists])
         found = Selection()
-        #print "searching in",self._artists
         for artist in self._artists:
             # TODO: should contains() return false if invisible?
-            if not artist.get_visible(): 
+            if not artist.get_visible():
                 continue
             # TODO: optimization - exclude artists not inaxes
             try:
@@ -254,7 +248,6 @@ class BindArtist:
             if inside:
                 found.artist, found.prop = artist, prop
                 break
-        #print "found",found.artist
         
         # TODO: how to check if prop is equal?
         if found != self._current:
@@ -295,12 +288,10 @@ class BindArtist:
                 ## crashes also here
                 x, y = transform.inverse_xy_tup((x, y))
 
-               
             event.xdata, event.ydata = x, y
             self.trigger(self._hasclick, 'drag', event)
         else:
             found = self._find_current(event)
-            #print "found",found.artist
             self.trigger(found, 'motion', event)
 
     def _onClick(self, event):
@@ -311,9 +302,6 @@ class BindArtist:
         
         # Check for double-click
         event_time = time.time()
-        #print event_time,self._last_time,self.dclick_threshhold
-        #print (event_time > self._last_time + self.dclick_threshhold)
-        #print event.button,self._last_button
         if (event.button != self._last_button) or \
                 (event_time > self._last_time + self.dclick_threshhold):
             action = 'click'
@@ -375,7 +363,7 @@ class BindArtist:
         # TODO: Do we need an explicit focus command for keyboard?
         # TODO: Can we tab between items?
         # TODO: How do unhandled events get propogated to axes, figure and
-        # TODO: finally to application?  Do we need to implement a full tags 
+        # TODO: finally to application?  Do we need to implement a full tags
         # TODO: architecture a la Tk?
         # TODO: Do modifiers cause a grab?  Does the artist see the modifiers?
         if event.key in ('alt', 'meta', 'control', 'shift'):
@@ -407,4 +395,3 @@ class BindArtist:
         """
         found = self._find_current(event)
         self.trigger(found, 'scroll', event)
-

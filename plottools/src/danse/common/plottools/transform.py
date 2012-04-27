@@ -1,4 +1,5 @@
-import math  
+import math
+         
          
 def toX(x, y=None):
     """
@@ -10,6 +11,7 @@ def toX(x, y=None):
     
     """
     return x
+
 
 def toX_pos(x, y=None):
     """
@@ -25,6 +27,7 @@ def toX_pos(x, y=None):
     else:
         return x
 
+
 def toX2(x, y=None):
     """
     This function is used to load value on Plottable.View
@@ -36,6 +39,7 @@ def toX2(x, y=None):
     """
     return x * x
 
+
 def fromX2(x, y=None):
     """
     This function is used to load value on Plottable.View
@@ -44,10 +48,11 @@ def fromX2(x, y=None):
     :param x: float value
      
     """
-    if not x >= 0 :
+    if not x >= 0:
         raise ValueError, "square root of a negative value "
     else:
         return math.sqrt(x)
+
 
 def toX4(x, y=None):
     """
@@ -60,6 +65,7 @@ def toX4(x, y=None):
     """
     return x * x * x * x
 
+
 def fromX4(x, y=None):
     """
     This function is used to load value on Plottable.View
@@ -68,11 +74,12 @@ def fromX4(x, y=None):
     :param x: float value
      
     """
-    if not x >= 0 :
+    if not x >= 0:
         raise ValueError, "double square root of a negative value "
     else:
         return math.sqrt(math.sqrt(x))
          
+
 def toLogX(x, y=None):
     """
     This function is used to load value on Plottable.View
@@ -92,7 +99,8 @@ def toOneOverX(x, y=None):
     if x != 0:
         return 1/x
     else:
-        raise ValueError,"cannot divide by zero"
+        raise ValueError, "cannot divide by zero"
+    
     
 def toOneOverSqrtX(y, x=None):
     """
@@ -100,15 +108,17 @@ def toOneOverSqrtX(y, x=None):
     if y > 0:
         return 1/math.sqrt(y)
     else:
-        raise ValueError,"transform.toOneOverSqrtX: cannot be computed"
+        raise ValueError, "transform.toOneOverSqrtX: cannot be computed"
+    
     
 def toLogYX2(y, x):
     """
     """
-    if (y *(x**2)) > 0:
+    if (y * (x**2)) > 0:
         return math.log(y * (x**2))
     else:
-         raise ValueError,"transform.toLogYX2: cannot be computed"
+        raise ValueError, "transform.toLogYX2: cannot be computed"
+     
      
 def toLogYX4(y, x):
     """
@@ -116,12 +126,14 @@ def toLogYX4(y, x):
     if (math.pow(x, 4) * y) > 0:
         return math.log(math.pow(x,4) * y)
     else:
-         raise ValueError,"transform.toLogYX4: input error"
+        raise ValueError,"transform.toLogYX4: input error"
+     
      
 def toYX4(y, x):
     """
     """
     return math.pow(x, 4) * y
+
 
 def toLogXY(y, x):
     """
@@ -136,6 +148,7 @@ def toLogXY(y, x):
     else:
         return math.log(x * y)
 
+
 def errToX(x, y=None, dx=None, dy=None):
     """
     calculate error of x**2
@@ -148,6 +161,7 @@ def errToX(x, y=None, dx=None, dy=None):
         dx = 0
     return dx
 
+
 def errToX_pos(x, y=None, dx=None, dy=None):
     """
     calculate error of x**2
@@ -157,8 +171,9 @@ def errToX_pos(x, y=None, dx=None, dy=None):
     
     """
     if dx == None:
-        dx = 0   
+        dx = 0
     return dx
+
 
 def errToX2(x, y=None, dx=None, dy=None):
     """
@@ -174,6 +189,7 @@ def errToX2(x, y=None, dx=None, dy=None):
     else:
         return 0.0
     
+    
 def errFromX2(x, y=None, dx=None, dy=None):
     """
     calculate error of sqrt(x)
@@ -184,13 +200,14 @@ def errFromX2(x, y=None, dx=None, dy=None):
     """
     if (x > 0):
         if(dx != None):
-            err = dx/(2 * math.sqrt(x))
+            err = dx / (2 * math.sqrt(x))
         else:
             err = 0
         return math.fabs(err)
     else:
         msg = "transform.errFromX2: can't compute error of negative x"
         raise ValueError, msg
+
 
 def errToX4(x, y=None, dx=None, dy=None):
     """
@@ -206,6 +223,7 @@ def errToX4(x, y=None, dx=None, dy=None):
     else:
         return 0.0
     
+    
 def errFromX4(x, y=None, dx=None, dy=None):
     """
     calculate error of x^1/4
@@ -216,13 +234,14 @@ def errFromX4(x, y=None, dx=None, dy=None):
     """
     if (x > 0):
         if(dx != None):
-            err = dx/(4 * math.pow(x, 3/4))
+            err = dx / (4 * math.pow(x, 3/4))
         else:
             err = 0
         return math.fabs(err)
     else:
         msg = "transform.errFromX4: can't compute error of negative x"
         raise ValueError, msg
+ 
  
 def errToLog10X(x, y=None, dx=None, dy=None):
     """
@@ -242,10 +261,11 @@ def errToLog10X(x, y=None, dx=None, dy=None):
         msg += " point that are consistent with zero."
         raise ValueError, msg
     if x != 0:
-        dx = dx /(x * math.log(10))
+        dx = dx / (x * math.log(10))
     else:
         raise ValueError, "errToLogX: divide by zero"
     return dx
+    
     
 def errToLogX(x, y=None, dx=None, dy=None):
     """
@@ -265,6 +285,7 @@ def errToLogX(x, y=None, dx=None, dy=None):
         raise ValueError, "errToLogX: divide by zero"
     return dx
 
+
 def errToYX2(x, y, dx=None, dy=None):
     """
     """
@@ -273,7 +294,8 @@ def errToYX2(x, y, dx=None, dy=None):
     if dy == None:
         dy = 0
     err = math.sqrt((2 * x * y * dx)**2 + ((x**2) * dy)**2)
-    return err 
+    return err
+    
     
 def errToLogXY(x, y, dx=None, dy=None):
     """
@@ -297,6 +319,7 @@ def errToLogXY(x, y, dx=None, dy=None):
    
     return math.sqrt(math.fabs(err))
     
+    
 def errToLogYX2(x, y, dx=None, dy=None):
     """
     calculate error of Log(yx**2)
@@ -316,7 +339,8 @@ def errToLogYX2(x, y, dx=None, dy=None):
         err = (2.0*dx/x)**2 + (dy/y)**2
     else:
         raise ValueError, "cannot compute this error"
-    return math.sqrt(math.fabs(err)) 
+    return math.sqrt(math.fabs(err))
+        
         
 def errOneOverX(x, y=None, dx=None, dy=None):
     """
@@ -328,8 +352,9 @@ def errOneOverX(x, y=None, dx=None, dy=None):
             dx = 0
         err = dx/x**2
     else:
-        raise ValueError,"Cannot compute this error"
+        raise ValueError, "Cannot compute this error"
     return math.fabs(err)
+
 
 def errOneOverSqrtX(x, y=None, dx=None, dy=None):
     """
@@ -343,6 +368,7 @@ def errOneOverSqrtX(x, y=None, dx=None, dy=None):
     else:
         raise ValueError, "Cannot compute this error"
     return math.fabs(err)
+
 
 def errToLogYX4(x, y=None, dx=None, dy=None):
     """
@@ -362,7 +388,8 @@ def errToLogYX4(x, y=None, dx=None, dy=None):
     if dy == None:
         dy = 0
     err = math.sqrt((4.0 * dx/x)**2  + (dy/y)**2)
-    return err 
+    return err
+
 
 def errToYX4(x, y=None, dx=None, dy=None):
     """
@@ -379,5 +406,4 @@ def errToYX4(x, y=None, dx=None, dy=None):
     if dy == None:
         dy = 0
     err = math.sqrt((dy * pow(x, 4))**2  + (4 * y * dx * math.pow(x, 3))**2)
-    return err 
-           
+    return err

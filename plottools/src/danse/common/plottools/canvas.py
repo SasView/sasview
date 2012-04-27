@@ -1,5 +1,5 @@
 """
-This module implements a faster canvas for plotting. 
+This module implements a faster canvas for plotting.
 it ovewrites some matplolib methods to allow printing on sys.platform=='win32'
 """
 import wx
@@ -26,24 +26,26 @@ def draw_image(self, x, y, im, bbox, clippath=None, clippath_trans=None):
 
     """
     pass
-#print "overriding select"
-def select(self): 
+
+
+def select(self):
     """
     """
-    #print "in new select"
     pass
+
 
 def unselect(self):
     """
     """
     pass
 
+
 def OnPrintPage(self, page):
     """
-    override printPage of matplotlib 
+    override printPage of matplotlib
     """
     self.canvas.draw()
-    dc        = self.GetDC()
+    dc = self.GetDC()
     try:
         (ppw, pph) = self.GetPPIPrinter()      # printer's pixels per in
     except:
@@ -60,29 +62,30 @@ def OnPrintPage(self, page):
     fig_dpi = self.canvas.figure.dpi
 
     # draw the bitmap, scaled appropriately
-    vscale    = float(ppw) / fig_dpi 
+    vscale = float(ppw) / fig_dpi
 
     # set figure resolution,bg color for printer
     self.canvas.figure.dpi = ppw
     self.canvas.figure.set_facecolor('#FFFFFF')
 
-    renderer  = RendererWx(self.canvas.bitmap, self.canvas.figure.dpi)
+    renderer = RendererWx(self.canvas.bitmap, self.canvas.figure.dpi)
     self.canvas.figure.draw(renderer)
-    self.canvas.bitmap.SetWidth(  int(self.canvas.bitmap.GetWidth() * vscale))
-    self.canvas.bitmap.SetHeight( int(self.canvas.bitmap.GetHeight()* vscale))
+    self.canvas.bitmap.SetWidth(int(self.canvas.bitmap.GetWidth() * vscale))
+    self.canvas.bitmap.SetHeight(int(self.canvas.bitmap.GetHeight() * vscale))
     self.canvas.draw()
 
     # page may need additional scaling on preview
     page_scale = 1.0
-    if self.IsPreview():   page_scale = float(dcw)/pgw
+    if self.IsPreview():
+        page_scale = float(dcw)/pgw
 
     # get margin in pixels = (margin in in) * (pixels/in)
-    top_margin  = int(self.margin * pph * page_scale)
+    top_margin = int(self.margin * pph * page_scale)
     left_margin = int(self.margin * ppw * page_scale)
 
     # set scale so that width of output is self.width inches
     # (assuming grw is size of graph in inches....)
-    user_scale = (self.width * fig_dpi * page_scale)/float(grw)
+    user_scale = (self.width * fig_dpi * page_scale) / float(grw)
     dc.SetDeviceOrigin(left_margin, top_margin)
     dc.SetUserScale(user_scale, user_scale)
 
@@ -107,11 +110,11 @@ GraphicsContextWx.unselect = unselect
 PrintoutWx.OnPrintPage = OnPrintPage
 RendererBase.draw_image = draw_image
 
+
 class FigureCanvas(FigureCanvasWxAgg):
     """
     Add features to the wx agg canvas for better support of AUI and
     faster plotting.
-    
     """
 
     def __init__(self, *args, **kw):
@@ -135,7 +138,7 @@ class FigureCanvas(FigureCanvasWxAgg):
        
     def set_panel(self, panel):
         """
-        Set axes 
+        Set axes
         """
         # set panel
         self.panel = panel
@@ -157,12 +160,12 @@ class FigureCanvas(FigureCanvasWxAgg):
         """
         if False and wx.GetApp().Pending():
             self.idletimer.Restart(5, *args, **kwargs)
-        else:           
+        else:
             # Draw plot, changes resizing too
             self.draw(*args, **kwargs)
-            self.resizing = False  
+            self.resizing = False
             
-    def _get_axes_switch(self):    
+    def _get_axes_switch(self):
         """
         """
         # Check resize whether or not True
@@ -181,10 +184,10 @@ class FigureCanvas(FigureCanvasWxAgg):
         # set the resizing back to default= False
         self.set_resizing(False)
         
-    def set_resizing(self, resizing=False):  
+    def set_resizing(self, resizing=False):
         """
-        Setting the resizing 
-        """  
+        Setting the resizing
+        """
         self.resizing = resizing
         self.panel.set_resizing(False)
              
@@ -221,7 +224,7 @@ class FigureCanvas(FigureCanvasWxAgg):
         y = h - evt.GetY()
 
         # Convert delta/rotation/rate into a floating point step size
-        delta = evt.GetWheelDelta() 
+        delta = evt.GetWheelDelta()
         rotation = evt.GetWheelRotation()
         rate = evt.GetLinesPerAction()
         #print "delta,rotation,rate",delta,rotation,rate
@@ -236,7 +239,6 @@ class FigureCanvas(FigureCanvasWxAgg):
         Backend derived classes should call this function on any
         scroll wheel event.  x,y are the canvas coords: 0,0 is lower,
         left.  button and key are as defined in MouseEvent
-        
         """
         button = 'up' if step >= 0 else 'down'
         self._button = button
@@ -261,7 +263,7 @@ class FigureCanvas(FigureCanvasWxAgg):
             FigureCanvasWxAgg._onRightButtonDown(self, evt)
             # This solves the focusing on rightclick.
             # Todo: better design
-            self.panel.parent.set_plot_unfocus() 
+            self.panel.parent.set_plot_unfocus()
             self.panel.on_set_focus(None)
         
         return

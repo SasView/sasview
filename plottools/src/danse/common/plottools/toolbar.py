@@ -1,11 +1,8 @@
-
 """
-this module overwrite matplotlib toolbar
-
+    This module overwrites matplotlib toolbar
 """
 import wx
 from matplotlib.backends.backend_wxagg import NavigationToolbar2WxAgg
-from matplotlib.backends.backend_wx import _load_bitmap
 
 class NavigationToolBar(NavigationToolbar2WxAgg):
     """
@@ -27,9 +24,9 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
         remove default toolbar item
         """
         #delte reset button
-        self.DeleteToolByPos(0) 
+        self.DeleteToolByPos(0)
         #delete unwanted button that configures subplot parameters
-        self.DeleteToolByPos(5) 
+        self.DeleteToolByPos(5)
         
     def add_option(self):
         """
@@ -40,20 +37,20 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
         context_tip = 'Graph Menu: \n'
         context_tip += '    For more menu options, \n'
         context_tip += '    right-click the data symbols.'
-        context =  wx.ArtProvider.GetBitmap(wx.ART_LIST_VIEW, wx.ART_TOOLBAR)
-        self.InsertSimpleTool(0, id_context, context, 
+        context = wx.ArtProvider.GetBitmap(wx.ART_LIST_VIEW, wx.ART_TOOLBAR)
+        self.InsertSimpleTool(0, id_context, context,
                                    context_tip, context_tip)
-        wx.EVT_TOOL(self, id_context,  self.on_menu)
+        wx.EVT_TOOL(self, id_context, self.on_menu)
         self.InsertSeparator(1)
         
         id_print = wx.NewId()
-        print_bmp =  wx.ArtProvider.GetBitmap(wx.ART_PRINT, wx.ART_TOOLBAR)
+        print_bmp = wx.ArtProvider.GetBitmap(wx.ART_PRINT, wx.ART_TOOLBAR)
         self.AddSimpleTool(id_print, print_bmp,
                            'Print', 'Activate printing')
         wx.EVT_TOOL(self, id_print, self.on_print)
         #add reset button
         id_reset = wx.NewId()
-        reset_bmp =  wx.ArtProvider.GetBitmap(wx.ART_GO_HOME, wx.ART_TOOLBAR)
+        reset_bmp = wx.ArtProvider.GetBitmap(wx.ART_GO_HOME, wx.ART_TOOLBAR)
         self.AddSimpleTool(id_reset, reset_bmp,
                            'Reset Graph Range', 'Reset graph range')
         wx.EVT_TOOL(self, id_reset, self.on_reset)
@@ -84,3 +81,4 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
             self.canvas.Printer_Print(event=event)
         except:
             pass
+        

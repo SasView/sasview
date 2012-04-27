@@ -1,7 +1,7 @@
 """
 """
 from scipy import optimize
-#from numpy import *
+
 
 class Parameter:
     """
@@ -20,10 +20,11 @@ class Parameter:
         self.model.setParam(self.name, value)
 
     def __call__(self):
-        """ 
+        """
             Return the current value of the parameter
         """
         return self.model.getParam(self.name)
+    
     
 def sansfit(model, pars, x, y, err_y , qmin=None, qmax=None):
     """
@@ -33,12 +34,11 @@ def sansfit(model, pars, x, y, err_y , qmin=None, qmax=None):
     :param pars: list of parameters
     :param x: vector of x data
     :param y: vector of y data
-    :param err_y: vector of y errors 
-    
+    :param err_y: vector of y errors
     """
     def f(params):
         """
-        Calculates the vector of residuals for each point 
+        Calculates the vector of residuals for each point
         in y for a given set of input parameters.
         
         :param params: list of parameter values
@@ -78,21 +78,18 @@ def sansfit(model, pars, x, y, err_y , qmin=None, qmax=None):
     elif len(pars) == 1:
         chisqr = chi2([out])
         
-    return chisqr, out, cov_x    
+    return chisqr, out, cov_x
+
 
 def calcCommandline(event):
     #Testing implementation
     # Fit a Line model
     from LineModel import LineModel
-    line    = LineModel()
+    line = LineModel()
     cstA = Parameter(line, 'A', event.cstA)
-    cstB  = Parameter(line, 'B', event.cstB)        
+    cstB = Parameter(line, 'B', event.cstB)
     y = line.run()
-    chisqr, out, cov = sansfit(line, [cstA, cstB],  event.x, y, 0) 
+    chisqr, out, cov = sansfit(line, [cstA, cstB], event.x, y, 0)
     # print "Output parameters:", out
     print "The right answer is [70.0, 1.0]"
     print chisqr, out, cov
-
-if __name__ == "__main__": 
-    calcCommandline()
-

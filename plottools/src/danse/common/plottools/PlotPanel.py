@@ -12,18 +12,11 @@ matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 from matplotlib.figure import Figure
 import os
-import fittings
 import transform
-from matplotlib.widgets import RectangleSelector
-from pylab import  gca, gcf
 from plottables import Data1D
 #TODO: make the plottables interactive
 from binder import BindArtist
 from matplotlib.font_manager import FontProperties
-
-#from matplotlib import cm
-#from matplotlib.ticker import LinearLocator, FixedLocator, FormatStrFormatter
-
 DEBUG = False
 
 from plottables import Graph
@@ -32,18 +25,21 @@ from TextDialog import TextDialog
 from LabelDialog import LabelDialog
 import operator
 
-import math, pylab, re
+import math
+import pylab
 DEFAULT_CMAP = pylab.cm.jet
 import copy
 import numpy
 
-def show_tree(obj,d=0):
+
+def show_tree(obj, d=0):
     """Handy function for displaying a tree of graph objects"""
     print "%s%s" % ("-"*d, obj.__class__.__name__)
     if 'get_children' in dir(obj):
         for a in obj.get_children(): show_tree(a, d+1)
      
-from unitConverter import UnitConvertion as convertUnit   
+from unitConverter import UnitConvertion as convertUnit
+
 
 def _rescale(lo, hi, step, pt=None, bal=None, scale='linear'):
         """
@@ -59,14 +55,14 @@ def _rescale(lo, hi, step, pt=None, bal=None, scale='linear'):
         # TODO: use proper scale transformers
         loprev = lo
         hiprev = hi
-        ptprev = pt
         if scale == 'log':
             assert lo > 0
-            if lo > 0 :
+            if lo > 0:
                 lo = math.log10(lo)
-            if hi > 0 :
+            if hi > 0:
                 hi = math.log10(hi)
-            if pt is not None: pt = math.log10(pt)
+            if pt is not None:
+                pt = math.log10(pt)
         
         # Compute delta from axis range * %, or 1-% if persent is negative
         if step > 0:
@@ -93,18 +89,17 @@ def _rescale(lo, hi, step, pt=None, bal=None, scale='linear'):
 
 
 def CopyImage(canvas):
-     """
-     0: matplotlib plot
-     1: wx.lib.plot
-     2: other
-     
-     """
-     bmp = wx.BitmapDataObject()
-     bmp.SetBitmap(canvas.bitmap)
-
-     wx.TheClipboard.Open()
-     wx.TheClipboard.SetData(bmp)
-     wx.TheClipboard.Close()
+    """
+    0: matplotlib plot
+    1: wx.lib.plot
+    2: other
+    """
+    bmp = wx.BitmapDataObject()
+    bmp.SetBitmap(canvas.bitmap)
+    
+    wx.TheClipboard.Open()
+    wx.TheClipboard.SetData(bmp)
+    wx.TheClipboard.Close()
 
 
 class PlotPanel(wx.Panel):
@@ -115,25 +110,25 @@ class PlotPanel(wx.Panel):
     
     """
     def __init__(self, parent, id=-1, xtransform=None,
-                  ytransform=None, scale='log_{10}', 
+                  ytransform=None, scale='log_{10}',
                   color=None, dpi=None, **kwargs):
         """
         """
         wx.Panel.__init__(self, parent, id=id, **kwargs)
         self.parent = parent
         self.dimension = 1
-        self.gotLegend = 0  #to begin, legend is not picked. 
+        self.gotLegend = 0  # to begin, legend is not picked.
         self.legend_pos_loc = None
         self.legend = None
-        self.line_collections_list = [] 
+        self.line_collections_list = []
         self.figure = Figure(None, dpi, linewidth=2.0)
-        self.color = '#b3b3b3'  
+        self.color = '#b3b3b3'
         from canvas import FigureCanvas
-        self.canvas = FigureCanvas(self, -1, self.figure) 
+        self.canvas = FigureCanvas(self, -1, self.figure)
         self.SetColor(color)
         #self.SetBackgroundColour(parent.GetBackgroundColour())
         self._resizeflag = True
-        self._SetSize() 
+        self._SetSize()
         self.subplot = self.figure.add_subplot(111)
         self.figure.subplots_adjust(left=0.2, bottom=.2)
         self.yscale = 'linear'
@@ -170,7 +165,7 @@ class PlotPanel(wx.Panel):
         #User scale
         if xtransform != None:
             self.xLabel = xtransform
-        else:   
+        else:
             self.xLabel = "log10(x)"
         if ytransform != None:
             self.yLabel = ytransform
@@ -202,7 +197,7 @@ class PlotPanel(wx.Panel):
         self.connect = BindArtist(self.subplot.figure)
         #self.selected_plottable = None
         
-        # new data for the fit 
+        # new data for the fit
         self.fit_result = Data1D(x=[], y=[], dy=None)
         self.fit_result.symbol = 13
         #self.fit_result = Data1D(x=[], y=[],dx=None, dy=None)
@@ -238,7 +233,7 @@ class PlotPanel(wx.Panel):
         self.zmin_2D = None
         self.zmax_2D = None
         
-        #index array 
+        #index array
         self.index_x = None
         self.index_y = None
         
@@ -274,11 +269,11 @@ class PlotPanel(wx.Panel):
         self.plots = {}
         
         # Default locations
-        self._default_save_location = os.getcwd()    
+        self._default_save_location = os.getcwd()
         # let canvas know about axes
         self.canvas.set_panel(self)
         
-        #Bind focus to change the border color      
+        #Bind focus to change the border color
         self.canvas.Bind(wx.EVT_SET_FOCUS, self.on_set_focus)
         self.canvas.Bind(wx.EVT_KILL_FOCUS, self.on_kill_focus)
 
@@ -287,19 +282,14 @@ class PlotPanel(wx.Panel):
         """
         pixels = self.parent.GetClientSize()
         self.canvas.SetSize(pixels)
-        self.figure.set_size_inches( (pixels[0])/self.figure.get_dpi(),
-         (pixels[1])/self.figure.get_dpi(), forward=True )   
+        self.figure.set_size_inches(pixels[0] / self.figure.get_dpi(),
+         pixels[1] / self.figure.get_dpi(), forward=True)
           
     def On_Paint(self, event):
         """
         """
         self.canvas.SetBackgroundColour(self.color)
-        #dc = wx.PaintDC(self.canvas)
-        #dc.SetPen(wx.Pen(self.color))
-        #x, y = self.GetSize()
-        #dc.DrawRectangle(0, 0, x, y)
-        #dc.DrawRectangle(1, 1, x-1, y-1)
-        #self.draw()
+
     def on_set_focus(self, event):
         """
         Send to the parenet the current panel on focus
@@ -322,13 +312,13 @@ class PlotPanel(wx.Panel):
         """
         Set the resizing (True/False)
         """
-        pass # Not implemented
+        pass  # Not implemented
     
-    def schedule_full_draw(self, func='append'):    
+    def schedule_full_draw(self, func='append'):
         """
         Put self in schedule to full redraw list
         """
-        pass # Not implemented
+        pass  # Not implemented
     
     def add_toolbar(self):
         """
@@ -358,7 +348,7 @@ class PlotPanel(wx.Panel):
         # update the axes menu on the toolbar
         self.toolbar.update()
         
-    def onLeftDown(self, event): 
+    def onLeftDown(self, event):
         """
         left button down and ready to drag
         
@@ -370,29 +360,26 @@ class PlotPanel(wx.Panel):
             if ax != None:
                 self.xInit, self.yInit = event.xdata, event.ydata
                 try:
-                    pos_x = float(event.xdata)# / size_x
-                    pos_y = float(event.ydata)# / size_y
-                    pos_x = "%8.3g"% pos_x
-                    pos_y = "%8.3g"% pos_y
+                    pos_x = float(event.xdata)  # / size_x
+                    pos_y = float(event.ydata)  # / size_y
+                    pos_x = "%8.3g" % pos_x
+                    pos_y = "%8.3g" % pos_y
                     self.position = str(pos_x), str(pos_y)
                     wx.PostEvent(self.parent, StatusEvent(status=self.position))
                 except:
-                    self.position = None  
-        #size_x, size_y =  self.GetClientSizeTuple()
+                    self.position = None
 
-     
-    def onLeftUp(self, event): 
+    def onLeftUp(self, event):
         """
         Dragging is done
-        
         """
         # Check that the LEFT button was released
         if event.button == 1:
             self.leftdown = False
-            self.mousemotion = False 
+            self.mousemotion = False
             self.leftup = True
             
-        #release the legend    
+        #release the legend
         if self.gotLegend == 1:
             self.gotLegend = 0
             self.set_legend_alpha(1)
@@ -404,26 +391,25 @@ class PlotPanel(wx.Panel):
         if self.legend != None:
             self.legend.legendPatch.set_alpha(alpha)
         
-    def onPick(self, event):    
+    def onPick(self, event):
         """
         On pick legend
         """
         legend = self.legend
         if event.artist == legend:
             #gets the box of the legend.
-            bbox = self.legend.get_window_extent()  
+            bbox = self.legend.get_window_extent()
             #get mouse coordinates at time of pick.
-            self.mouse_x = event.mouseevent.x  
+            self.mouse_x = event.mouseevent.x
             self.mouse_y = event.mouseevent.y
             #get legend coordinates at time of pick.
-            self.legend_x = bbox.xmin          
+            self.legend_x = bbox.xmin
             self.legend_y = bbox.ymin
             #indicates we picked up the legend.
-            self.gotLegend = 1   
+            self.gotLegend = 1
             self.set_legend_alpha(0.5)
-  
-            
-    def _on_legend_motion(self, event): 
+    
+    def _on_legend_motion(self, event):
         """
         On legend in motion
         """
@@ -434,7 +420,7 @@ class PlotPanel(wx.Panel):
         lo_x, hi_x = ax.get_xlim()
         lo_y, hi_y = ax.get_ylim()
         # How much the mouse moved.
-        x = mouse_diff_x = self.mouse_x - event.x  
+        x = mouse_diff_x = self.mouse_x - event.x
         y = mouse_diff_y = self.mouse_y - event.y
         # Put back inside
         if x < lo_x:
@@ -443,7 +429,7 @@ class PlotPanel(wx.Panel):
             x = hi_x
         if y < lo_y:
             y = lo_y
-        if y> hi_y:
+        if y > hi_y:
             y = hi_y
         # Move the legend from its previous location by that same amount
         loc_in_canvas = self.legend_x - mouse_diff_x, \
@@ -455,12 +441,12 @@ class PlotPanel(wx.Panel):
         self.legend._loc = self.legend_pos_loc
         self.resizing = True
         self.canvas.set_resizing(self.resizing)
-        self.canvas.draw() 
+        self.canvas.draw()
            
-    def onMouseMotion(self, event): 
+    def onMouseMotion(self, event):
         """
         check if the left button is press and the mouse in moving.
-        computer delta for x and y coordinates and then calls draghelper 
+        computer delta for x and y coordinates and then calls draghelper
         to perform the drag
         
         """
@@ -470,10 +456,10 @@ class PlotPanel(wx.Panel):
         if self.enable_toolbar:
             #Disable dragging without the toolbar to allow zooming with toolbar
             return
-        self.mousemotion = True 
+        self.mousemotion = True
         if self.leftdown == True and self.mousemotion == True:
             ax = event.inaxes
-            if ax != None:#the dragging is perform inside the figure
+            if ax != None:  # the dragging is perform inside the figure
                 self.xFinal, self.yFinal = event.xdata, event.ydata
                 # Check whether this is the first point
                 if self.xInit == None:
@@ -488,14 +474,12 @@ class PlotPanel(wx.Panel):
                 if self.yscale == 'log':
                     ydelta = math.log10(self.yFinal) - math.log10(self.yInit)
                 self._dragHelper(xdelta, ydelta)
-            else:# no dragging is perform elsewhere
-                self._dragHelper(0,0)
+            else:  # no dragging is perform elsewhere
+                self._dragHelper(0, 0)
 
-                
     def _offset_graph(self):
         """
-        Zoom and offset the graph to the last known settings 
-        
+        Zoom and offset the graph to the last known settings
         """
         for ax in self.axes:
             if self._scale_xhi is not None and self._scale_xlo is not None:
@@ -579,7 +563,7 @@ class PlotPanel(wx.Panel):
         if ax != None:
             # Event occurred inside a plotting area
             lo, hi = ax.get_xlim()
-            lo, hi = _rescale(lo, hi, step, 
+            lo, hi = _rescale(lo, hi, step,
                              pt=event.xdata, scale=ax.get_xscale())
             if not self.xscale == 'log' or lo > 0:
                 self._scale_xlo = lo
@@ -592,7 +576,7 @@ class PlotPanel(wx.Panel):
             if not self.yscale == 'log' or lo > 0:
                 self._scale_ylo = lo
                 self._scale_yhi = hi
-                ax.set_ylim((lo,hi))
+                ax.set_ylim((lo, hi))
         else:
             # Check if zoom happens in the axes
             xdata, ydata = None, None
@@ -601,15 +585,13 @@ class PlotPanel(wx.Panel):
             for ax in self.axes:
                 insidex, _ = ax.xaxis.contains(event)
                 if insidex:
-                    xdata, _ = ax.transAxes.inverted().transform_point((x, y)) 
-                    #xdata,_ = ax.transAxes.inverse_xy_tup((x,y))
+                    xdata, _ = ax.transAxes.inverted().transform_point((x, y))
                 insidey, _ = ax.yaxis.contains(event)
                 if insidey:
-                    _, ydata = ax.transAxes.inverted().transform_point((x, y)) 
-                    #_,ydata = ax.transAxes.inverse_xy_tup((x,y))
+                    _, ydata = ax.transAxes.inverted().transform_point((x, y))
             if xdata is not None:
                 lo, hi = ax.get_xlim()
-                lo, hi = _rescale(lo, hi, step, 
+                lo, hi = _rescale(lo, hi, step,
                                   bal=xdata, scale=ax.get_xscale())
                 if not self.xscale == 'log' or lo > 0:
                     self._scale_xlo = lo
@@ -617,9 +599,9 @@ class PlotPanel(wx.Panel):
                     ax.set_xlim((lo, hi))
             if ydata is not None:
                 lo, hi = ax.get_ylim()
-                lo, hi = _rescale(lo, hi, step, bal=ydata, 
+                lo, hi = _rescale(lo, hi, step, bal=ydata,
                                   scale=ax.get_yscale())
-                if not self.yscale=='log' or lo>0:
+                if not self.yscale == 'log' or lo > 0:
                     self._scale_ylo = lo
                     self._scale_yhi = hi
                     ax.set_ylim((lo, hi))
@@ -629,10 +611,10 @@ class PlotPanel(wx.Panel):
         """
         Return values and labels used by Fit Dialog
         """
-        return self.xLabel,self.yLabel, self.Avalue, self.Bvalue,\
+        return self.xLabel, self.yLabel, self.Avalue, self.Bvalue,\
                 self.ErrAvalue, self.ErrBvalue, self.Chivalue
     
-    def setTrans(self, xtrans, ytrans): 
+    def setTrans(self, xtrans, ytrans):
         """
         
         :param xtrans: set x transformation on Property dialog
@@ -642,7 +624,7 @@ class PlotPanel(wx.Panel):
         self.prevXtrans = xtrans
         self.prevYtrans = ytrans
    
-    def onFitting(self, event): 
+    def onFitting(self, event):
         """
         when clicking on linear Fit on context menu , display Fitting Dialog
         """
@@ -659,18 +641,18 @@ class PlotPanel(wx.Panel):
             list = plotlist
         from fitDialog import LinearFit
         
-        if len(list.keys())>0:
+        if len(list.keys()) > 0:
             first_item = list.keys()[0]
-            dlg = LinearFit(parent=None, plottable=first_item, 
+            dlg = LinearFit(parent=None, plottable=first_item,
                             push_data=self.onFitDisplay,
-                            transform=self.returnTrans, 
+                            transform=self.returnTrans,
                             title='Linear Fit')
            
             if (self.xmin != 0.0)and (self.xmax != 0.0)\
                 and(self.xminView != 0.0)and (self.xmaxView != 0.0):
-                dlg.setFitRange(self.xminView, self.xmaxView, 
+                dlg.setFitRange(self.xminView, self.xmaxView,
                                 self.xmin, self.xmax)
-            dlg.ShowModal() 
+            dlg.ShowModal()
             
     def set_selected_from_menu(self, menu, id):
         """
@@ -687,9 +669,9 @@ class PlotPanel(wx.Panel):
                 self.graph.selected_plottable = plot.id
                 break
             
-    def linear_plottable_fit(self, plot): 
+    def linear_plottable_fit(self, plot):
         """
-            when clicking on linear Fit on context menu , display Fitting Dialog
+            when clicking on linear Fit on context menu, display Fitting Dialog
             
             :param plot: PlotPanel owning the graph
             
@@ -705,7 +687,7 @@ class PlotPanel(wx.Panel):
         # Register the close event
         self._fit_dialog.register_close(self._linear_fit_close)
         # Show a non-model dialog
-        self._fit_dialog.Show() 
+        self._fit_dialog.Show()
 
     def _linear_fit_close(self):
         """
@@ -713,12 +695,11 @@ class PlotPanel(wx.Panel):
         """
         self._fit_dialog = None
         
-
     def _onProperties(self, event):
         """
         when clicking on Properties on context menu ,
         The Property dialog is displayed
-        The user selects a transformation for x or y value and 
+        The user selects a transformation for x or y value and
         a new plot is displayed
         """
         if self._fit_dialog is not None:
@@ -733,7 +714,7 @@ class PlotPanel(wx.Panel):
                 dial = Properties(self, -1, 'Properties')
                 dial.setValues(self.prevXtrans, self.prevYtrans, self.viewModel)
                 if dial.ShowModal() == wx.ID_OK:
-                    self.xLabel, self.yLabel,self.viewModel = dial.getValues()
+                    self.xLabel, self.yLabel, self.viewModel = dial.getValues()
                     if self.viewModel == "Guinier lny vs x^(2)":
                         self.xLabel = "x^(2)"
                         self.yLabel = "ln(y)"
@@ -808,7 +789,7 @@ class PlotPanel(wx.Panel):
             self._SetSize()
             self.draw()
 
-    def _SetSize(self, pixels = None):
+    def _SetSize(self, pixels=None):
         """
         This method can be called to force the Plot to be a desired size,
          which defaults to the ClientSize of the panel
@@ -817,8 +798,8 @@ class PlotPanel(wx.Panel):
         if not pixels:
             pixels = tuple(self.GetClientSize())
         self.canvas.SetSize(pixels)
-        self.figure.set_size_inches( float( pixels[0] )/self.figure.get_dpi(),
-                                     float( pixels[1] )/self.figure.get_dpi() ) 
+        self.figure.set_size_inches(float(pixels[0]) / self.figure.get_dpi(),
+                                    float(pixels[1]) / self.figure.get_dpi())
 
     def draw(self):
         """
@@ -827,10 +808,11 @@ class PlotPanel(wx.Panel):
         """
         self.figure.canvas.draw_idle()
         
-       
-    #pick up the legend patch
     def legend_picker(self, legend, event):
-        return self.legend.legendPatch.contains(event)      
+        """
+            Pick up the legend patch
+        """
+        return self.legend.legendPatch.contains(event)
         
     def get_loc_label(self):
         """
@@ -879,11 +861,11 @@ class PlotPanel(wx.Panel):
         wx.EVT_MENU(self, id, self.onSaveImage)
         
         id = wx.NewId()
-        slicerpop.Append(id,'&Printer setup', 'Set image size')
+        slicerpop.Append(id, '&Printer setup', 'Set image size')
         wx.EVT_MENU(self, id, self.onPrinterSetup)
         
         id = wx.NewId()
-        slicerpop.Append(id,'&Printer Preview', 'Set image size')
+        slicerpop.Append(id, '&Printer Preview', 'Set image size')
         wx.EVT_MENU(self, id, self.onPrinterPreview)
     
         id = wx.NewId()
@@ -967,14 +949,14 @@ class PlotPanel(wx.Panel):
                         key=operator.itemgetter(1))
             handles2, labels2 = zip(*hl)
             self.line_collections_list = handles2
-            self.legend = self.subplot.legend(handles2, labels2, 
+            self.legend = self.subplot.legend(handles2, labels2,
                                 prop=FontProperties(size=10), numpoints=1,
                                 handletextsep=.05, loc=self.legendLoc)
             if self.legend != None:
-                self.legend.set_picker(self.legend_picker) 
-                self.legend.set_axes(self.subplot) 
+                self.legend.set_picker(self.legend_picker)
+                self.legend.set_axes(self.subplot)
         
-        self.subplot.figure.canvas.draw_idle()       
+        self.subplot.figure.canvas.draw_idle()
         self.legend_on = not self.legend_on
     
     def onChangeLegendLoc(self, event):
@@ -983,7 +965,7 @@ class PlotPanel(wx.Panel):
         """
         menu = event.GetEventObject()
         id = event.GetId()
-        label =  menu.GetLabel(id)
+        label = menu.GetLabel(id)
         
         self.legendLoc = label
         self.legend_pos_loc = None
@@ -993,26 +975,24 @@ class PlotPanel(wx.Panel):
                     key=operator.itemgetter(1))
         handles2, labels2 = zip(*hl)
         self.line_collections_list = handles2
-        self.legend = self.subplot.legend(handles2, labels2, 
-                            prop=FontProperties(size=10),  numpoints=1,
+        self.legend = self.subplot.legend(handles2, labels2,
+                            prop=FontProperties(size=10), numpoints=1,
                             handletextsep=.05, loc=self.legendLoc)
         if self.legend != None:
-                self.legend.set_picker(self.legend_picker) 
-                self.legend.set_axes(self.subplot) 
-        self.subplot.figure.canvas.draw_idle()  
-        #self._onEVT_FUNC_PROPERTY()
+                self.legend.set_picker(self.legend_picker)
+                self.legend.set_axes(self.subplot)
+        self.subplot.figure.canvas.draw_idle()
         
     def remove_legend(self, ax=None):
         """
         Remove legend for ax or the current axes.
         """
-        from pylab import gca, draw
+        from pylab import gca
         if ax is None:
             ax = gca()
         ax.legend_ = None
-        #draw()
         
-    def _on_addtext(self, event): 
+    def _on_addtext(self, event):
         """
         Allows you to add text to the plot
         """
@@ -1037,15 +1017,15 @@ class PlotPanel(wx.Panel):
                 font.set_weight(textdial.getWeight())
                 colour = textdial.getColor()
                 if len(label) > 0 and xpos > 0 and ypos > 0:
-                    new_text = self.subplot.text(str(xpos), str(ypos), label, 
+                    new_text = self.subplot.text(str(xpos), str(ypos), label,
                                                    fontproperties=font,
                                                    color=colour)
                     self.textList.append(new_text)
-                    self.subplot.figure.canvas.draw_idle()  
+                    self.subplot.figure.canvas.draw_idle()
             except:
                 if self.parent != None:
                     from sans.guiframe.events import StatusEvent 
-                    msg= "Add Text: Error. Check your property values..."
+                    msg = "Add Text: Error. Check your property values..."
                     wx.PostEvent(self.parent, StatusEvent(status = msg ))
                 else:
                     raise
@@ -1054,7 +1034,7 @@ class PlotPanel(wx.Panel):
         #text that they want to add...then create text Plottable
         #based on this and plot it at user designated coordinates
 
-    def onGridOnOff(self, event): 
+    def onGridOnOff(self, event):
         """
         Allows ON/OFF Grid
         """
@@ -1064,7 +1044,7 @@ class PlotPanel(wx.Panel):
             self.grid_on = True
         self.subplot.figure.canvas.draw_idle()
         
-    def _on_xaxis_label(self, event): 
+    def _on_xaxis_label(self, event):
         """
         Allows you to add text to the plot
         """
@@ -1089,7 +1069,7 @@ class PlotPanel(wx.Panel):
             # 1D
             self._check_zoom_plot()
     
-    def _check_zoom_plot(self): 
+    def _check_zoom_plot(self):
         """
         Check the zoom range and plot (1D only)
         """
@@ -1101,10 +1081,10 @@ class PlotPanel(wx.Panel):
         toolbar_zoomed = self.toolbar.GetToolEnabled(self.toolbar._NTB2_BACK)
         if self.is_zoomed or toolbar_zoomed:
             # Recover the x,y limits
-            self.subplot.set_xlim((xlo, xhi))     
-            self.subplot.set_ylim((ylo, yhi)) 
+            self.subplot.set_xlim((xlo, xhi))
+            self.subplot.set_ylim((ylo, yhi))
                    
-    def _on_yaxis_label(self, event): 
+    def _on_yaxis_label(self, event):
         """
         Allows you to add text to the plot
         """
@@ -1129,7 +1109,6 @@ class PlotPanel(wx.Panel):
             # 1D
             self._check_zoom_plot()
             
-        
     def _on_axis_label(self, axis='x'):
         """
         Modify axes labels
@@ -1137,7 +1116,7 @@ class PlotPanel(wx.Panel):
         :param axis: x or y axis [string]
         """
         is_ok = True
-        title = 'Modify %s axis label'% axis
+        title = 'Modify %s axis label' % axis
         font = 'serif'
         colour = 'black'
         if axis == 'x':
@@ -1146,7 +1125,7 @@ class PlotPanel(wx.Panel):
         else:
             label = self.yaxis_label
             unit = self.yaxis_unit
-        textdial = TextDialog(None, -1, title, label, unit) 
+        textdial = TextDialog(None, -1, title, label, unit)
         if textdial.ShowModal() == wx.ID_OK:
             try:
                 FONT = FontProperties()
@@ -1159,19 +1138,19 @@ class PlotPanel(wx.Panel):
                 colour = textdial.getColor()
                 is_tick = textdial.getTickLabel()
                 label_temp = textdial.getText()
-                if label_temp.count("\%s"% "\\") > 0:
+                if label_temp.count("\%s" % "\\") > 0:
                     if self.parent != None:
                         from sans.guiframe.events import StatusEvent 
-                        msg= "Add Label: Error. Can not use double '\\' "
+                        msg = "Add Label: Error. Can not use double '\\' "
                         msg += "characters..."
-                        wx.PostEvent(self.parent, StatusEvent(status = msg ))
+                        wx.PostEvent(self.parent, StatusEvent(status=msg))
                 else:
                     label = label_temp
             except:
                 if self.parent != None:
-                    from sans.guiframe.events import StatusEvent 
-                    msg= "Add Label: Error. Check your property values..."
-                    wx.PostEvent(self.parent, StatusEvent(status = msg ))
+                    from sans.guiframe.events import StatusEvent
+                    msg = "Add Label: Error. Check your property values..."
+                    wx.PostEvent(self.parent, StatusEvent(status=msg))
                 else:
                     pass
         else:
@@ -1188,9 +1167,9 @@ class PlotPanel(wx.Panel):
         num_text = len(self.textList)
         if num_text < 1:
             if self.parent != None:
-                from sans.guiframe.events import StatusEvent 
+                from sans.guiframe.events import StatusEvent
                 msg= "Remove Text: Nothing to remove.  "
-                wx.PostEvent(self.parent, StatusEvent(status = msg ))
+                wx.PostEvent(self.parent, StatusEvent(status=msg))
             else:
                 raise
             return
@@ -1199,19 +1178,19 @@ class PlotPanel(wx.Panel):
             text_remove = txt.get_text()
             txt.remove()
             if self.parent != None:
-                from sans.guiframe.events import StatusEvent 
+                from sans.guiframe.events import StatusEvent
                 msg= "Removed Text: '%s'. " % text_remove
-                wx.PostEvent(self.parent, StatusEvent(status = msg ))
+                wx.PostEvent(self.parent, StatusEvent(status=msg))
         except:
             if self.parent != None:
-                from sans.guiframe.events import StatusEvent 
+                from sans.guiframe.events import StatusEvent
                 msg= "Remove Text: Error occurred. "
-                wx.PostEvent(self.parent, StatusEvent(status = msg ))
+                wx.PostEvent(self.parent, StatusEvent(status=msg))
             else:
                 raise
         self.textList.remove(txt)
             
-        self.subplot.figure.canvas.draw_idle() 
+        self.subplot.figure.canvas.draw_idle()
 
     def properties(self, prop):
         """
@@ -1219,7 +1198,7 @@ class PlotPanel(wx.Panel):
         The set of properties is not yet determined.
         
         """
-        # The particulars of how they are stored and manipulated (e.g., do 
+        # The particulars of how they are stored and manipulated (e.g., do
         # we want an inventory internally) is not settled.  I've used a
         # property dictionary for now.
         #
@@ -1231,9 +1210,6 @@ class PlotPanel(wx.Panel):
         self.subplot.set_ylabel(r"$%s$" % prop["ylabel"])
         self.subplot.set_title(prop["title"])
 
-        # Properties defined by user
-        #self.axes.grid(True)
-
     def clear(self):
         """Reset the plot"""
         # TODO: Redraw is brutal.  Render to a backing store and swap in
@@ -1244,7 +1220,7 @@ class PlotPanel(wx.Panel):
     def render(self):
         """Commit the plot after all objects are drawn"""
         # TODO: this is when the backing store should be swapped in.
-        if self.legend_on:          
+        if self.legend_on:
             ax = self.subplot
             ax.texts = self.textList
             try:
@@ -1254,16 +1230,17 @@ class PlotPanel(wx.Panel):
                             key=operator.itemgetter(1))
                 handles2, labels2 = zip(*hl)
                 self.line_collections_list = handles2
-                self.legend = ax.legend(handles2, labels2,  numpoints=1,
-                                prop=FontProperties(size=10), 
+                self.legend = ax.legend(handles2, labels2, numpoints=1,
+                                prop=FontProperties(size=10),
                                 handletextsep=.05, loc=self.legendLoc)
                 if self.legend != None:
                     self.legend.set_picker(self.legend_picker)
-                    self.legend.set_axes(self.subplot) 
+                    self.legend.set_axes(self.subplot)
                 
             except:
-                self.legend = ax.legend(prop=FontProperties(size=10),  numpoints=1,
-                                handletextsep=.05, loc=self.legendLoc)
+                self.legend = ax.legend(prop=FontProperties(size=10),
+                                        numpoints=1, handletextsep=.05,
+                                        loc=self.legendLoc)
                  
     def xaxis(self, label, units, font=None, color='black', t_font=None):
         """xaxis label and units.
@@ -1275,7 +1252,7 @@ class PlotPanel(wx.Panel):
         purposes.
         
         """
-        if units != "": 
+        if units != "":
             label = label + " (" + units + ")"
         if label.count("{") > 0 and label.count("$") < 2:
             label = '$' + label + '$'
@@ -1283,18 +1260,17 @@ class PlotPanel(wx.Panel):
             self.subplot.set_xlabel(label, fontproperties=font, color=color)
             if t_font != None:
                 for tick in self.subplot.xaxis.get_major_ticks():
-                    tick.label.set_fontproperties(t_font) 
+                    tick.label.set_fontproperties(t_font)
                 for line in self.subplot.xaxis.get_ticklines():
                     size = t_font.get_size()
                     line.set_markersize(size / 3)
-                    #line.set_markeredgewidth(int(size / 24 + 1))
         else:
             self.subplot.set_xlabel(label, color=color)
         pass
     
     def yaxis(self, label, units, font=None, color='black', t_font=None):
         """yaxis label and units."""
-        if units != "": 
+        if units != "":
             label = label + " (" + units + ")"
         if label.count("{") > 0 and label.count("$") < 2:
             label = '$' + label + '$'
@@ -1310,19 +1286,16 @@ class PlotPanel(wx.Panel):
             self.subplot.set_ylabel(label, color=color)
         pass
 
-    def _connect_to_xlim(self,callback):
+    def _connect_to_xlim(self, callback):
         """Bind the xlim change notification to the callback"""
         def process_xlim(axes):
             lo, hi = subplot.get_xlim()
             callback(lo, hi)
         self.subplot.callbacks.connect('xlim_changed', process_xlim)
-    
-    #def connect(self,trigger,callback):
-    #    print "PlotPanel.connect???"
-    #    if trigger == 'xlim': self._connect_to_xlim(callback)
 
     def interactive_points(self, x, y, dx=None, dy=None, name='', color=0,
-                           symbol=0, markersize=5, id=None, label=None, hide_error=False):
+                           symbol=0, markersize=5, id=None, label=None,
+                           hide_error=False):
         """Draw markers with error bars"""
         self.subplot.set_yscale('linear')
         self.subplot.set_xscale('linear')
@@ -1335,11 +1308,11 @@ class PlotPanel(wx.Panel):
         p.points(x, y, dx=dx, dy=dy, color=color, symbol=symbol, markersize=markersize, label=label,
                  hide_error=hide_error)
         
-        self.subplot.set_yscale(self.yscale,nonposy='clip')
+        self.subplot.set_yscale(self.yscale, nonposy='clip')
         self.subplot.set_xscale(self.xscale)
        
-    
-    def interactive_curve(self,x,y,dy=None,name='',color=0,symbol=0,id=None,label=None):
+    def interactive_curve(self, x, y, dy=None, name='', color=0,
+                          symbol=0, id=None, label=None):
         """Draw markers with error bars"""
         self.subplot.set_yscale('linear')
         self.subplot.set_xscale('linear')
@@ -1349,10 +1322,9 @@ class PlotPanel(wx.Panel):
         p = PointInteractor(self, self.subplot, zorder=4, id=id)
         p.curve(x, y, dy=dy, color=color, symbol=symbol, label=label)
         
-        self.subplot.set_yscale(self.yscale,nonposy='clip')
+        self.subplot.set_yscale(self.yscale, nonposy='clip')
         self.subplot.set_xscale(self.xscale)
         
-
     def plottable_selected(self, id):
         """
         Called to register a plottable as selected
@@ -1361,10 +1333,9 @@ class PlotPanel(wx.Panel):
         self.graph.selected_plottable = id
 
     def points(self, x, y, dx=None, dy=None,
-               color=0, symbol=0, marker_size=5, label=None,id=None,  hide_error=False):
+               color=0, symbol=0, marker_size=5, label=None,
+               id=None, hide_error=False):
         """Draw markers with error bars"""
-        #self.subplot.set_yscale('linear')
-        #self.subplot.set_xscale('linear')
         
         # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
         if dx != None and type(dx) == type(()):
@@ -1376,18 +1347,17 @@ class PlotPanel(wx.Panel):
                                    marker=self._symbol(symbol), markersize=marker_size,
                                    linestyle='',
                                    label=label)
-            
         else:
             col = self._color(color)
             if hide_error:
                 h = self.subplot.plot(x, y, color=col,
-                                   marker=self._symbol(symbol), markersize=marker_size,
+                                   marker=self._symbol(symbol),
+                                   markersize=marker_size,
                                    linestyle='',
                                    label=label)
-                
             else:
-                h= self.subplot.errorbar(x, y, yerr=dy, xerr=None,
-                                  ecolor=col, capsize=2, linestyle='', 
+                h = self.subplot.errorbar(x, y, yerr=dy, xerr=None,
+                                  ecolor=col, capsize=2, linestyle='',
                                   barsabove=False,
                                   mec=col, mfc=col,
                                   marker=self._symbol(symbol),
@@ -1422,15 +1392,16 @@ class PlotPanel(wx.Panel):
             if not self.zmax_2D is None:
                 zmax_2D_temp = math.log10(self.zmax_2D)
                  
-        self.image(data=self.data, qx_data=self.qx_data, 
-                   qy_data=self.qy_data, xmin=self.xmin_2D, 
+        self.image(data=self.data, qx_data=self.qx_data,
+                   qy_data=self.qy_data, xmin=self.xmin_2D,
                    xmax=self.xmax_2D,
-                   ymin=self.ymin_2D, ymax=self.ymax_2D, 
+                   ymin=self.ymin_2D, ymax=self.ymax_2D,
                    cmap=self.cmap, zmin=zmin_2D_temp,
                    zmax=zmax_2D_temp)
       
-    def image(self, data, qx_data, qy_data, xmin, xmax, ymin, ymax, 
-              zmin, zmax, color=0, symbol=0, markersize=0, label='data2D', cmap=DEFAULT_CMAP):
+    def image(self, data, qx_data, qy_data, xmin, xmax, ymin, ymax,
+              zmin, zmax, color=0, symbol=0, markersize=0,
+              label='data2D', cmap=DEFAULT_CMAP):
         """
         Render the current data
         
@@ -1442,28 +1413,28 @@ class PlotPanel(wx.Panel):
         self.xmax_2D = xmax
         self.ymin_2D = ymin
         self.ymax_2D = ymax
-        self.zmin_2D = zmin 
+        self.zmin_2D = zmin
         self.zmax_2D = zmax
         c = self._color(color)
         # If we don't have any data, skip.
         if self.data == None:
             return
-        if self.data.ndim == 1:    
+        if self.data.ndim == 1:
             output = self._build_matrix()
         else:
             output = copy.deepcopy(self.data)
         # check scale
         if self.scale == 'log_{10}':
             try:
-                if  self.zmin_2D  <= 0  and  len(output[output > 0]) > 0:
-                    zmin_temp = self.zmin_2D 
+                if  self.zmin_2D <= 0  and len(output[output > 0]) > 0:
+                    zmin_temp = self.zmin_2D
                     output[output>0] = numpy.log10(output[output>0])
                     #In log scale Negative values are not correct in general
                     #output[output<=0] = math.log(numpy.min(output[output>0]))
-                elif self.zmin_2D  <= 0:
+                elif self.zmin_2D <= 0:
                     zmin_temp = self.zmin_2D
-                    output[output>0] = numpy.zeros(len(output))  
-                    output[output<=0] = -32       
+                    output[output>0] = numpy.zeros(len(output))
+                    output[output<=0] = -32
                 else: 
                     zmin_temp = self.zmin_2D
                     output[output>0] = numpy.log10(output[output>0])
@@ -1480,10 +1451,10 @@ class PlotPanel(wx.Panel):
             #Re-adjust colorbar
             self.subplot.figure.subplots_adjust(left=0.2, right=.8, bottom=.2)
             
-            im = self.subplot.imshow(output, interpolation='nearest', 
+            im = self.subplot.imshow(output, interpolation='nearest',
                                      origin='lower',
                                      vmin=zmin_temp, vmax=self.zmax_2D,
-                                     cmap=self.cmap, 
+                                     cmap=self.cmap,
                                      extent=(self.xmin_2D, self.xmax_2D,
                                                 self.ymin_2D, self.ymax_2D))
             
@@ -1493,7 +1464,7 @@ class PlotPanel(wx.Panel):
             # mpl is not clf, so we do
             self.subplot.figure.clear()
 
-            self.subplot.figure.subplots_adjust(left=0.1, right=.8, bottom=.1)  
+            self.subplot.figure.subplots_adjust(left=0.1, right=.8, bottom=.1)
 
             X = self.x_bins[0:-1]
             Y = self.y_bins[0:-1]
@@ -1513,22 +1484,20 @@ class PlotPanel(wx.Panel):
                 except:
                     logging.error("PlotPanel could not import Axes3D")
                 self.subplot.figure.clear()
-                ax =  Axes3D(self.subplot.figure)
+                ax = Axes3D(self.subplot.figure)
                 if len(X) > 60:
                     ax.cla()
                 cbax = None
             self.subplot.figure.canvas.resizing = False
             im = ax.plot_surface(X, Y, output, rstride=1, cstride=1, cmap=cmap,
                                    linewidth=0, antialiased=False)
-            #ax.set_zlim3d(zmin_temp, self.zmax_2D)
-            #ax.set_frame_on(False)
-            self.subplot.set_axis_off()  
+            self.subplot.set_axis_off()
             
         if cbax == None:
             ax.set_frame_on(False)
-            cb =self.subplot.figure.colorbar(im, shrink=0.8, aspect=20)
+            cb = self.subplot.figure.colorbar(im, shrink=0.8, aspect=20)
         else:
-            cb =self.subplot.figure.colorbar(im, cax=cbax)
+            cb = self.subplot.figure.colorbar(im, cax=cbax)
         cb.update_bruteforce(im)
         cb.set_label('$' + self.scale + '$')
         if self.dimension != 3:
@@ -1537,10 +1506,10 @@ class PlotPanel(wx.Panel):
             self.figure.canvas.draw()
     
     def _build_matrix(self):
-        """ 
+        """
         Build a matrix for 2d plot from a vector
         Returns a matrix (image) with ~ square binning
-        Requirement: need 1d array formats of 
+        Requirement: need 1d array formats of
         self.data, self.qx_data, and self.qy_data
         where each one corresponds to z, x, or y axis values
         
@@ -1560,51 +1529,50 @@ class PlotPanel(wx.Panel):
         
         #Note: Can not use scipy.interpolate.Rbf:
         # 'cause too many data points (>10000)<=JHC.
-        # 1d array to use for weighting the data point averaging 
-        #when they fall into a same bin.          
-        weights_data  = numpy.ones([self.data.size])
-        # get histogram of ones w/len(data); this will provide 
+        # 1d array to use for weighting the data point averaging
+        #when they fall into a same bin.
+        weights_data = numpy.ones([self.data.size])
+        # get histogram of ones w/len(data); this will provide
         #the weights of data on each bins
-        weights, xedges, yedges = numpy.histogram2d(x=self.qy_data, 
+        weights, xedges, yedges = numpy.histogram2d(x=self.qy_data,
                                                     y=self.qx_data,
-                                                bins=[self.y_bins, self.x_bins],
-                                                    weights=weights_data)
+                                            bins=[self.y_bins, self.x_bins],
+                                            weights=weights_data)
         # get histogram of data, all points into a bin in a way of summing
-        image, xedges, yedges = numpy.histogram2d(x=self.qy_data, 
+        image, xedges, yedges = numpy.histogram2d(x=self.qy_data,
                                                   y=self.qx_data,
-                                                bins=[self.y_bins, self.x_bins],
-                                                weights=self.data)
+                                            bins=[self.y_bins, self.x_bins],
+                                            weights=self.data)
         # Now, normalize the image by weights only for weights>1: 
         # If weight == 1, there is only one data point in the bin so
         # that no normalization is required.
-        image[weights>1] = image[weights>1]/weights[weights>1]
+        image[weights > 1] = image[weights>1]/weights[weights>1]
         # Set image bins w/o a data point (weight==0) as None (was set to zero
         # by histogram2d.)
-        image[weights==0] = None
+        image[weights == 0] = None
 
         # Fill empty bins with 8 nearest neighbors only when at least
         #one None point exists
         loop = 0
         
-        # do while loop until all vacant bins are filled up up 
+        # do while loop until all vacant bins are filled up up
         #to loop = max_loop
         while(not(numpy.isfinite(image[weights == 0])).all()):
-            if loop >= max_loop: # this protects never-ending loop
+            if loop >= max_loop:  # this protects never-ending loop
                 break
             image = self._fillup_pixels(image=image, weights=weights)
             loop += 1
                
         return image
     
-    def _get_bins(self): 
+    def _get_bins(self):
         """
         get bins
-        set x_bins and y_bins into self, 1d arrays of the index with 
+        set x_bins and y_bins into self, 1d arrays of the index with
         ~ square binning
-        Requirement: need 1d array formats of 
+        Requirement: need 1d array formats of
         self.qx_data, and self.qy_data
         where each one corresponds to  x, or y axis values
-        
         """
         # No qx or qy given in a vector format
         if self.qx_data == None or self.qy_data == None \
@@ -1623,11 +1591,11 @@ class PlotPanel(wx.Panel):
         x_size = xmax - xmin
         y_size = ymax - ymin
         
-        # estimate the # of pixels on each axes  
+        # estimate the # of pixels on each axes
         npix_y = int(math.floor(math.sqrt(len(self.qy_data))))
         npix_x = int(math.floor(len(self.qy_data) / npix_y))
 
-        # bin size: x- & y-directions     
+        # bin size: x- & y-directions
         xstep = x_size / (npix_x - 1)
         ystep = y_size / (npix_y - 1)
 
@@ -1639,15 +1607,15 @@ class PlotPanel(wx.Panel):
         
         # store x and y bin centers in q space
         x_bins = numpy.arange(xmin, xmax + xstep / 10, xstep)
-        y_bins = numpy.arange(ymin, ymax + ystep / 10, ystep) 
+        y_bins = numpy.arange(ymin, ymax + ystep / 10, ystep)
       
         #set x_bins and y_bins
-        self.x_bins = x_bins 
-        self.y_bins = y_bins 
+        self.x_bins = x_bins
+        self.y_bins = y_bins
 
-    def _fillup_pixels(self, image=None, weights=None): 
+    def _fillup_pixels(self, image=None, weights=None):
         """
-        Fill z values of the empty cells of 2d image matrix 
+        Fill z values of the empty cells of 2d image matrix
         with the average over up-to next nearest neighbor points
         
         :param image: (2d matrix with some zi = None)
@@ -1690,7 +1658,6 @@ class PlotPanel(wx.Panel):
                         weit[n_y][n_x] += 1
                     # go 4 next nearest neighbors when no non-zero
                     # neighbor exists
-                    #if weight[n_y][n_x] == 0:
                     if n_y != 0 and n_x != 0 and\
                          numpy.isfinite(image[n_y-1][n_x-1]):
                         temp_image[n_y][n_x] += image[n_y-1][n_x-1]
@@ -1720,18 +1687,18 @@ class PlotPanel(wx.Panel):
         self.subplot.set_yscale('linear')
         self.subplot.set_xscale('linear')
         
-        hlist = self.subplot.plot(x, y, color=c, marker='', 
-                                  linestyle='-', label=label)
+        self.subplot.plot(x, y, color=c, marker='',
+                          linestyle='-', label=label)
         self.subplot.set_yscale(self.yscale)
         self.subplot.set_xscale(self.xscale)
 
     def _color(self, c):
         """Return a particular colour"""
-        return self.colorlist[c%len(self.colorlist)]
+        return self.colorlist[c % len(self.colorlist)]
 
     def _symbol(self, s):
         """Return a particular symbol"""
-        return self.symbollist[s%len(self.symbollist)]
+        return self.symbollist[s % len(self.symbollist)]
    
     def _replot(self, remove_fit=False):
         """
@@ -1752,8 +1719,8 @@ class PlotPanel(wx.Panel):
         """
         Receive the x and y transformation from myDialog,
         Transforms x and y in View
-        and set the scale    
-        """ 
+        and set the scale
+        """
         # The logic should be in the right order
         # Delete first, and then get the whole list...
         if remove_fit:
@@ -1762,9 +1729,9 @@ class PlotPanel(wx.Panel):
         list = []
         list = self.graph.returnPlottable()
         # Changing the scale might be incompatible with
-        # currently displayed data (for instance, going 
+        # currently displayed data (for instance, going
         # from ln to log when all plotted values have
-        # negative natural logs). 
+        # negative natural logs).
         # Go linear and only change the scale at the end.
         self.set_xscale("linear")
         self.set_yscale("linear")
@@ -1788,28 +1755,28 @@ class PlotPanel(wx.Panel):
             else:
                 self.xaxis_label = xname
                 self.xaxis_unit = xunits
-            # Goes through all possible scales    
+            # Goes through all possible scales
             if(self.xLabel == "x"):
                 item.transformX(transform.toX, transform.errToX)
                 self.graph._xaxis_transformed("%s" % xname, "%s" % xunits)
             if(self.xLabel == "x^(2)"):
                 item.transformX(transform.toX2, transform.errToX2)
-                xunits = convertUnit(2,xunits) 
+                xunits = convertUnit(2, xunits)
                 self.graph._xaxis_transformed("%s^{2}" % xname, "%s" % xunits)
             if(self.xLabel == "x^(4)"):
                 item.transformX(transform.toX4, transform.errToX4)
-                xunits = convertUnit(4,xunits) 
+                xunits = convertUnit(4, xunits)
                 self.graph._xaxis_transformed("%s^{4}" % xname, "%s" % xunits)
             if(self.xLabel == "ln(x)"):
-                item.transformX(transform.toLogX,transform.errToLogX)
-                self.graph._xaxis_transformed("\ln\\ %s" % xname, "%s" % xunits) 
+                item.transformX(transform.toLogX, transform.errToLogX)
+                self.graph._xaxis_transformed("\ln\\ %s" % xname, "%s" % xunits)
             if(self.xLabel == "log10(x)"):
                 item.transformX(transform.toX_pos, transform.errToX_pos)
                 _xscale = 'log'
                 self.graph._xaxis_transformed("%s" % xname, "%s" % xunits)
             if(self.xLabel == "log10(x^(4))"):
                 item.transformX(transform.toX4, transform.errToX4)
-                xunits = convertUnit(4,xunits) 
+                xunits = convertUnit(4, xunits)
                 self.graph._xaxis_transformed("%s^{4}" % xname, "%s" % xunits)
                 _xscale = 'log'
             if(self.yLabel == "ln(y)"):
@@ -1818,13 +1785,13 @@ class PlotPanel(wx.Panel):
             if(self.yLabel == "y"):
                 item.transformY(transform.toX, transform.errToX)
                 self.graph._yaxis_transformed("%s" % yname, "%s" % yunits)
-            if(self.yLabel == "log10(y)"): 
+            if(self.yLabel == "log10(y)"):
                 item.transformY(transform.toX_pos, transform.errToX_pos)
-                _yscale = 'log'  
+                _yscale = 'log'
                 self.graph._yaxis_transformed("%s" % yname, "%s" % yunits)
             if(self.yLabel == "y^(2)"):
-                item.transformY(transform.toX2, transform.errToX2)    
-                yunits = convertUnit(2, yunits) 
+                item.transformY(transform.toX2, transform.errToX2)
+                yunits = convertUnit(2, yunits)
                 self.graph._yaxis_transformed("%s^{2}" % yname, "%s" % yunits)
             if(self.yLabel == "1/y"):
                 item.transformY(transform.toOneOverX, transform.errOneOverX)
@@ -1832,47 +1799,48 @@ class PlotPanel(wx.Panel):
                 self.graph._yaxis_transformed("1/%s" % yname, "%s" % yunits)
             if(self.yLabel == "y*x^(4)"):
                 item.transformY(transform.toYX4, transform.errToYX4)
-                xunits = convertUnit(4, self.xaxis_unit) 
-                self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname,xname), 
-                                               "%s%s" % (yunits,xunits))
+                xunits = convertUnit(4, self.xaxis_unit)
+                self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname, xname),
+                                               "%s%s" % (yunits, xunits))
             if(self.yLabel == "1/sqrt(y)"):
                 item.transformY(transform.toOneOverSqrtX,
-                                transform.errOneOverSqrtX )
+                                transform.errOneOverSqrtX)
                 yunits = convertUnit(-0.5, yunits)
-                self.graph._yaxis_transformed("1/\sqrt{%s}" %yname, "%s" % yunits)
+                self.graph._yaxis_transformed("1/\sqrt{%s}" % yname,
+                                              "%s" % yunits)
             if(self.yLabel == "ln(y*x)"):
                 item.transformY(transform.toLogXY, transform.errToLogXY)
-                self.graph._yaxis_transformed("\ln (%s \ \ %s)" % (yname,xname),
-                                                "%s%s" % (yunits, self.xaxis_unit))
+                self.graph._yaxis_transformed("\ln (%s \ \ %s)" % (yname, xname),
+                                            "%s%s" % (yunits, self.xaxis_unit))
             if(self.yLabel == "ln(y*x^(2))"):
                 item.transformY( transform.toLogYX2, transform.errToLogYX2) 
-                xunits = convertUnit(2, self.xaxis_unit) 
-                self.graph._yaxis_transformed("\ln (%s \ \ %s^{2})" % (yname,xname), 
-                                               "%s%s" % (yunits,xunits))
+                xunits = convertUnit(2, self.xaxis_unit)
+                self.graph._yaxis_transformed("\ln (%s \ \ %s^{2})" % (yname, xname),
+                                               "%s%s" % (yunits, xunits))
             if(self.yLabel == "ln(y*x^(4))"):
                 item.transformY(transform.toLogYX4, transform.errToLogYX4)
-                xunits = convertUnit(4, self.xaxis_unit) 
-                self.graph._yaxis_transformed("\ln (%s \ \ %s^{4})" % (yname,xname), 
-                                               "%s%s" % (yunits,xunits))
+                xunits = convertUnit(4, self.xaxis_unit)
+                self.graph._yaxis_transformed("\ln (%s \ \ %s^{4})" % (yname, xname),
+                                               "%s%s" % (yunits, xunits))
             if(self.yLabel == "log10(y*x^(4))"):
                 item.transformY(transform.toYX4, transform.errToYX4)
-                xunits = convertUnit(4, self.xaxis_unit) 
-                _yscale = 'log' 
-                self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname,xname), 
-                                               "%s%s" % (yunits,xunits))
+                xunits = convertUnit(4, self.xaxis_unit)
+                _yscale = 'log'
+                self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname, xname),
+                                               "%s%s" % (yunits, xunits))
             if(self.viewModel == "Guinier lny vs x^(2)"):
                 item.transformX(transform.toX2, transform.errToX2)
-                xunits = convertUnit(2, xunits) 
-                self.graph._xaxis_transformed("%s^{2}" % xname,  "%s" % xunits)
-                item.transformY(transform.toLogX,transform.errToLogX )
-                self.graph._yaxis_transformed("\ln\ \ %s" % yname,  "%s" % yunits)
+                xunits = convertUnit(2, xunits)
+                self.graph._xaxis_transformed("%s^{2}" % xname, "%s" % xunits)
+                item.transformY(transform.toLogX,transform.errToLogX)
+                self.graph._yaxis_transformed("\ln\ \ %s" % yname, "%s" % yunits)
             if(self.viewModel == "Porod y*x^(4) vs x^(4)"):
                 item.transformX(transform.toX4, transform.errToX4)
-                xunits = convertUnit(4, self.xaxis_unit) 
+                xunits = convertUnit(4, self.xaxis_unit)
                 self.graph._xaxis_transformed("%s^{4}" % xname, "%s" % xunits)
                 item.transformY(transform.toYX4, transform.errToYX4)
-                self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname,xname), 
-                                               "%s%s" % (yunits,xunits))
+                self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname, xname),
+                                               "%s%s" % (yunits, xunits))
             item.transformView()
   
         # set new label and units
@@ -1880,26 +1848,22 @@ class PlotPanel(wx.Panel):
         yunits = ''
         xname = self.graph.prop["xlabel"]
         xunits = ''
-        #self.yaxis_label = yname
-        #self.yaxis_unit = yunits
-        #self.xaxis_label = xname
-        #self.xaxis_unit = xunits
                 
-        self.resetFitView()   
-        self.prevXtrans = self.xLabel 
-        self.prevYtrans = self.yLabel  
+        self.resetFitView()
+        self.prevXtrans = self.xLabel
+        self.prevYtrans = self.yLabel
         self.graph.render(self)
         self.set_xscale(_xscale)
         self.set_yscale(_yscale)
         
-        self.xaxis(xname, xunits, self.xaxis_font, 
+        self.xaxis(xname, xunits, self.xaxis_font,
                    self.xaxis_color, self.xaxis_tick)
-        self.yaxis(yname, yunits, self.yaxis_font, 
+        self.yaxis(yname, yunits, self.yaxis_font,
                    self.yaxis_color, self.yaxis_tick)
         self.subplot.texts = self.textList
         self.subplot.figure.canvas.draw_idle()
         
-    def onFitDisplay(self, tempx, tempy, xminView, 
+    def onFitDisplay(self, tempx, tempy, xminView,
                      xmaxView, xmin, xmax, func):
         """
         Add a new plottable into the graph .In this case this plottable
@@ -1927,16 +1891,16 @@ class PlotPanel(wx.Panel):
             #item.onFitRange(xminView,xmaxView)
             item.onFitRange(None, None)
         # Create new data plottable with result
-        self.fit_result.x = [] 
+        self.fit_result.x = []
         self.fit_result.y = []
-        self.fit_result.x = tempx  
-        self.fit_result.y = tempy     
+        self.fit_result.x = tempx
+        self.fit_result.y = tempy
         self.fit_result.dx = None
         self.fit_result.dy = None
         #Load the view with the new values
         self.fit_result.reset_view()
-        # Add the new plottable to the graph 
-        self.graph.add(self.fit_result) 
+        # Add the new plottable to the graph
+        self.graph.add(self.fit_result)
         self.graph.render(self)
         self._offset_graph()
         self.subplot.figure.canvas.draw_idle()
@@ -1951,11 +1915,11 @@ class PlotPanel(wx.Panel):
         # Get new caption dialog
         dial = LabelDialog(None, -1, 'Modify Window Title', old_caption)
         if dial.ShowModal() == wx.ID_OK:
-            new_caption = dial.getText() 
+            new_caption = dial.getText()
           
             # send to guiframe to change the panel caption
-            caption = self.parent.on_change_caption(self.window_name, 
-                                                    old_caption, new_caption) 
+            caption = self.parent.on_change_caption(self.window_name,
+                                                    old_caption, new_caption)
             
             # also set new caption in plot_panels list
             self.parent.plot_panels[self.uid].window_caption = caption
@@ -1966,7 +1930,7 @@ class PlotPanel(wx.Panel):
          
     def onResetGraph(self, event):
         """
-        Reset the graph by plotting the full range of data 
+        Reset the graph by plotting the full range of data
         """
         list = []
         list = self.graph.returnPlottable()
@@ -2011,9 +1975,8 @@ class PlotPanel(wx.Panel):
         except:
             print "Error in copy Image"
 
-
-            
-#---------------------------------------------------------------        
+ 
+#---------------------------------------------------------------
 class NoRepaintCanvas(FigureCanvasWxAgg):
     """
     We subclass FigureCanvasWxAgg, overriding the _onPaint method, so that
@@ -2035,8 +1998,6 @@ class NoRepaintCanvas(FigureCanvasWxAgg):
         if not self._isRealized:
             self.realize()
         if self._drawn < 2:
-            self.draw(repaint = False)
+            self.draw(repaint=False)
             self._drawn += 1
         self.gui_repaint(drawDC=wx.PaintDC(self))
-           
-
