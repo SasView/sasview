@@ -1,10 +1,12 @@
 """
 This module is a small tool to allow user to quickly
-determine the size value in real space  from the 
+determine the size value in real space  from the
 fringe width in q space.
 """
 from math import pi, fabs
 _DQ_DEFAULT = 0.05
+
+
 class KiessigThicknessCalculator(object):
     """
     compute thickness from the fringe width of data
@@ -12,7 +14,7 @@ class KiessigThicknessCalculator(object):
     def __init__(self):
         
         # dq value
-        self.deltaq = _DQ_DEFAULT 
+        self.deltaq = _DQ_DEFAULT
         # thickenss value
         self.thickness = None
         # unit of the thickness
@@ -25,14 +27,14 @@ class KiessigThicknessCalculator(object):
         :param dq: q fringe width in 1/A unit
         """
         # set dq
-        self.deltaq  = dq
+        self.deltaq = dq
         
     def get_deltaq(self):
         """
         return deltaQ value in 1/A unit
         """
         # return dq
-        return self.deltaq 
+        return self.deltaq
 
     def compute_thickness(self):
         """
@@ -50,15 +52,13 @@ class KiessigThicknessCalculator(object):
             return None
         else:
             # calculate thickness
-            thickness = 2*pi/fabs(dq) 
-            # return thickness value      
+            thickness = 2*pi/fabs(dq)
+            # return thickness value
             return thickness
   
-    def get_thickness_unit(self): 
+    def get_thickness_unit(self):
         """
         :return: the thickness unit.
         """
         # unit of thickness
         return self.thickness_unit
-
-

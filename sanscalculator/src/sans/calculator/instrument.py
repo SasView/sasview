@@ -1,27 +1,28 @@
 """
-This module is a small tool to allow user to 
-control instrumental parameters 
+This module is a small tool to allow user to
+control instrumental parameters
 """
 import numpy
 
 # defaults in cgs unit
 _SAMPLE_A_SIZE = [1.27]
-_SOURCE_A_SIZE = [3.81] 
-_SAMPLE_DISTANCE = [1627, 0] 
-_SAMPLE_OFFSET = [0, 0] 
-_SAMPLE_SIZE = [2.54] 
-_SAMPLE_THICKNESS = 0.2  
-_D_DISTANCE = [1000, 0] 
+_SOURCE_A_SIZE = [3.81]
+_SAMPLE_DISTANCE = [1627, 0]
+_SAMPLE_OFFSET = [0, 0]
+_SAMPLE_SIZE = [2.54]
+_SAMPLE_THICKNESS = 0.2
+_D_DISTANCE = [1000, 0]
 _D_SIZE = [128, 128]
-_D_PIX_SIZE = [0.5, 0.5]  
+_D_PIX_SIZE = [0.5, 0.5]
 
 _MIN = 0.0
 _MAX = 50.0
 _INTENSITY = 368428
 _WAVE_LENGTH = 6.0
 _WAVE_SPREAD = 0.125
-_MASS = 1.67492729E-24 #[gr]
-_LAMBDA_ARRAY = [[0, 1e+16],[_INTENSITY, _INTENSITY]]
+_MASS = 1.67492729E-24  # [gr]
+_LAMBDA_ARRAY = [[0, 1e+16], [_INTENSITY, _INTENSITY]]
+
 
 class Aperture(object):
     """
@@ -35,31 +36,32 @@ class Aperture(object):
         self.source_size = _SOURCE_A_SIZE
         self.sample_distance = _SAMPLE_DISTANCE
         
-    def set_source_size(self, size =[]):
+    def set_source_size(self, size=[]):
         """
         Set the source aperture size
         """
         if len(size) == 0:
-            self.source_size = 0.0 
+            self.source_size = 0.0
         else:
             self.source_size = size
             validate(size[0])
-    def set_sample_size(self, size =[]):
+            
+    def set_sample_size(self, size=[]):
         """
         Set the sample aperture size
         """
         if len(size) == 0:
-            self.sample_size = 0.0 
+            self.sample_size = 0.0
         else:
             self.sample_size = size
             validate(size[0])
             
-    def set_sample_distance(self, distance = []):
+    def set_sample_distance(self, distance=[]):
         """
         Set the sample aperture distance
         """
         if len(distance) == 0:
-            self.sample_distance = 0.0 
+            self.sample_distance = 0.0
         else:
             self.sample_distance = distance
             validate(distance[0])
@@ -77,30 +79,29 @@ class Sample(object):
         self.size = _SAMPLE_SIZE
         self.thickness = _SAMPLE_THICKNESS
 
-    
-    def set_size(self, size =[]):
+    def set_size(self, size=[]):
         """
         Set the sample size
         """
         if len(size) == 0:
-            self.sample_size = 0.0 
+            self.sample_size = 0.0
         else:
             self.sample_size = size
             validate(size[0])
             
-    def set_thickness(self, thickness = 0.0):
+    def set_thickness(self, thickness=0.0):
         """
         Set the sample thickness
         """
         self.thickness = thickness
         validate(thickness)
     
-    def set_distance(self, distance = []):
+    def set_distance(self, distance=[]):
         """
         Set the sample distance
         """
         if len(distance) == 0:
-            self.distance = 0.0 
+            self.distance = 0.0
         else:
             self.distance = distance
             if distance[0] != 0.0:
@@ -121,7 +122,7 @@ class Detector(object):
 
     
         
-    def set_size(self, size =[]):
+    def set_size(self, size=[]):
         """
         Set the detector  size
         """
@@ -131,17 +132,17 @@ class Detector(object):
             self.size = size
             validate(size[0])
             
-    def set_pix_size(self, size = []):
+    def set_pix_size(self, size=[]):
         """
         Set the detector pix_size
         """
         if len(size) == 0:
-            self.pix_size = 0 
+            self.pix_size = 0
         else:
             self.pix_size = size
             validate(size[0])
     
-    def set_distance(self, distance = []):
+    def set_distance(self, distance=[]):
         """
         Set the detector distance
         """
@@ -165,10 +166,10 @@ class Neutron(object):
         self.wavelength = _WAVE_LENGTH
         # wavelength spread (FWHM)
         self.wavelength_spread = _WAVE_SPREAD
-        # wavelength spectrum 
-        self.spectrum = self.get_default_spectrum()        
+        # wavelength spectrum
+        self.spectrum = self.get_default_spectrum()
         # intensity in counts/sec
-        self.intensity = numpy.interp(self.wavelength, 
+        self.intensity = numpy.interp(self.wavelength,
                                       self.spectrum[0],
                                       self.spectrum[1],
                                       0.0,
@@ -187,22 +188,23 @@ class Neutron(object):
         set band to default value
         """
         self.band = self.spectrum
-    def set_spectrum(self, spectrum):  
+        
+    def set_spectrum(self, spectrum):
         """
         Set spectrum
         
         :param spectrum: numpy array
         """
-        self.spectrum = spectrum 
+        self.spectrum = spectrum
         self.setup_spectrum()
          
     def setup_spectrum(self):
         """
-        To set the wavelength spectrum, and intensity, assumes 
+        To set the wavelength spectrum, and intensity, assumes
         wavelength is already within the spectrum
         """
         spectrum = self.spectrum
-        intensity = numpy.interp(self.wavelength, 
+        intensity = numpy.interp(self.wavelength,
                                       spectrum[0],
                                       spectrum[1],
                                       0.0,
@@ -212,7 +214,7 @@ class Neutron(object):
         self.min = min(self.spectrum[0])
         self.max = max(self.spectrum[0])
         # set default band
-        self.set_band([self.min,self.max])
+        self.set_band([self.min, self.max])
         
     def set_band(self, band=[]):
         """
@@ -223,42 +225,40 @@ class Neutron(object):
         # check if the wavelength is in range
         if min(band) < self.min or\
                 max(band) > self.max:
-            raise 
+            raise
         self.band = band
-
          
-    def set_intensity(self, intensity = 368428):
+    def set_intensity(self, intensity=368428):
         """
         Sets the intensity in counts/sec
         """
-        self.intensity = intensity  
-        validate(intensity) 
+        self.intensity = intensity
+        validate(intensity)
             
-    def set_wavelength(self, wavelength = _WAVE_LENGTH):
+    def set_wavelength(self, wavelength=_WAVE_LENGTH):
         """
         Sets the wavelength
         """
         # check if the wavelength is in range
         if wavelength < min(self.band) or\
                 wavelength > max(self.band):
-            raise 
+            raise
         self.wavelength = wavelength
         validate(wavelength)
-        self.intensity = numpy.interp(self.wavelength, 
+        self.intensity = numpy.interp(self.wavelength,
                                   self.spectrum[0],
                                   self.spectrum[1],
                                   0.0,
                                   0.0)
 
-
-    def set_mass(self, mass = _MASS):
+    def set_mass(self, mass=_MASS):
         """
         Sets the wavelength
         """
         self.mass = mass
         validate(mass)
         
-    def set_wavelength_spread(self, spread = _WAVE_SPREAD):
+    def set_wavelength_spread(self, spread=_WAVE_SPREAD):
         """
         Sets the wavelength spread
         """
@@ -301,16 +301,18 @@ class Neutron(object):
         To get the wavelength spectrum
         """
         return self.spectrum
+    
     def get_default_spectrum(self):
         """
         get default spectrum
         """
         return numpy.array(_LAMBDA_ARRAY)
+    
     def get_band(self):
         """
         To get the wavelength band
         """
-        return self.band 
+        return self.band
     
     def plot_spectrum(self):
         """
@@ -319,8 +321,8 @@ class Neutron(object):
         """
         try:
             import matplotlib.pyplot as plt
-            plt.plot(self.spectrum[0], self.spectrum[1], linewidth = 2, color = 'r')
-            plt.legend(['Spectrum'], loc = 'best')
+            plt.plot(self.spectrum[0], self.spectrum[1], linewidth=2, color='r')
+            plt.legend(['Spectrum'], loc='best')
             plt.show()
         except:
             raise RuntimeError, "Can't import matplotlib required to plot..."
@@ -344,7 +346,7 @@ class TOF(Neutron):
         """
         get list of the intensity wrt wavelength_list
         """
-        out = numpy.interp(self.wavelength_list, 
+        out = numpy.interp(self.wavelength_list,
                                       self.spectrum[0],
                                       self.spectrum[1],
                                       0.0,
@@ -374,7 +376,7 @@ class TOF(Neutron):
         self.wavelengthspread_list = wavelength_spread
         
         
-def validate(value = None):
+def validate(value=None):
     """
     Check if the value is folat > 0.0
     
@@ -388,5 +390,3 @@ def validate(value = None):
             val = False
     except:
         val = False
-    #if not val:
-    #    raise ValueError, "Got improper value..."
