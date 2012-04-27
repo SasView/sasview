@@ -3,7 +3,7 @@
 #####################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
@@ -19,16 +19,17 @@ try:
 except:
     has_converter = False
     
+    
 class Reader:
     """
     Class to load IGOR reduced .ABS files
     """
     ## File type
-    type_name = "IGOR 1D"   
+    type_name = "IGOR 1D"
     ## Wildcards
     type = ["IGOR 1D files (*.abs)|*.abs"]
     ## List of allowed extensions
-    ext = ['.abs', '.ABS']  
+    ext = ['.abs', '.ABS']
     
     def read(self, path):
         """ 
@@ -42,12 +43,12 @@ class Reader:
         :raise ValueError: when the length of the data vectors are inconsistent
         """
         if os.path.isfile(path):
-            basename  = os.path.basename(path)
+            basename = os.path.basename(path)
             root, extension = os.path.splitext(basename)
             if extension.lower() in self.ext:
                 try:
-                    input_f =  open(path,'r')
-                except :
+                    input_f = open(path,'r')
+                except:
                     raise  RuntimeError, "abs_reader: cannot open %s" % path
                 buff = input_f.read()
                 lines = buff.split('\n')
@@ -90,7 +91,7 @@ class Reader:
                             if has_converter == True and \
                                 output.source.wavelength_unit != 'A':
                                 conv = Converter('A')
-                                output.source.wavelength = conv(value, 
+                                output.source.wavelength = conv(value,
                                         units=output.source.wavelength_unit)
                             else:
                                 output.source.wavelength = value
@@ -98,8 +99,6 @@ class Reader:
                             #goes to ASC reader
                             msg = "abs_reader: cannot open %s" % path
                             raise  RuntimeError, msg
-                            #raise ValueError,"IgorReader: can't read this file,
-                            # missing wavelength"
                         
                         # Distance in meters
                         try:
@@ -107,7 +106,7 @@ class Reader:
                             if has_converter == True and \
                                 detector.distance_unit != 'm':
                                 conv = Converter('m')
-                                detector.distance = conv(value, 
+                                detector.distance = conv(value,
                                                 units=detector.distance_unit)
                             else:
                                 detector.distance = value
@@ -115,7 +114,7 @@ class Reader:
                             #goes to ASC reader
                             msg = "abs_reader: cannot open %s" % path
                             raise  RuntimeError, msg
-                        # Transmission 
+                        # Transmission
                         try:
                             output.sample.transmission = float(line_toks[4])
                         except:
@@ -128,7 +127,7 @@ class Reader:
                             if has_converter == True and \
                                 output.sample.thickness_unit != 'cm':
                                 conv = Converter('cm')
-                                output.sample.thickness = conv(value, 
+                                output.sample.thickness = conv(value,
                                             units=output.sample.thickness_unit)
                             else:
                                 output.sample.thickness = value
@@ -143,7 +142,7 @@ class Reader:
                         
                     # Find center info line
                     if is_center == True:
-                        is_center = False                
+                        is_center = False
                         line_toks = line.split()
                         # Center in bin number
                         center_x = float(line_toks[0])
@@ -153,7 +152,7 @@ class Reader:
                         if has_converter == True and \
                             detector.pixel_size_unit != 'mm':
                             conv = Converter('mm')
-                            detector.pixel_size.x = conv(5.0, 
+                            detector.pixel_size.x = conv(5.0,
                                                 units=detector.pixel_size_unit)
                             detector.pixel_size.y = conv(5.0,
                                                 units=detector.pixel_size_unit)
@@ -163,12 +162,12 @@ class Reader:
                         
                         # Store beam center in distance units
                         # Det 640 x 640 mm
-                        if has_converter==True and \
+                        if has_converter == True and \
                             detector.beam_center_unit != 'mm':
                             conv = Converter('mm')
                             detector.beam_center.x = conv(center_x * 5.0,
                                              units=detector.beam_center_unit)
-                            detector.beam_center.y = conv(center_y * 5.0, 
+                            detector.beam_center.y = conv(center_y * 5.0,
                                             units=detector.beam_center_unit)
                         else:
                             detector.beam_center.x = center_x * 5.0
@@ -181,8 +180,8 @@ class Reader:
                             # Detector name is not a mandatory entry
                             pass
                     
-                    #BCENT(X,Y)   A1(mm)   A2(mm)   A1A2DIST(m)   DL/L 
-                    #  BSTOP(mm)   DET_TYP 
+                    #BCENT(X,Y)   A1(mm)   A2(mm)   A1A2DIST(m)   DL/L
+                    #  BSTOP(mm)   DET_TYP
                     if line.count("BCENT") > 0:
                         is_center = True
                         
@@ -190,9 +189,9 @@ class Reader:
                     if is_data_started == True:
                         toks = line.split()
 
-                        try:  
+                        try:
                             _x  = float(toks[0])
-                            _y  = float(toks[1]) 
+                            _y  = float(toks[1])
                             _dy = float(toks[2])
                             _dx = float(toks[3])
                             
@@ -204,10 +203,10 @@ class Reader:
                                 _y = data_conv_i(_y, units=output.y_unit)
                                 _dy = data_conv_i(_dy, units=output.y_unit)
                            
-                            x  = numpy.append(x,   _x) 
-                            y  = numpy.append(y,   _y)
+                            x = numpy.append(x, _x)
+                            y = numpy.append(y, _y)
                             dy = numpy.append(dy, _dy)
-                            dx  = numpy.append(dx, _dx)
+                            dx = numpy.append(dx, _dx)
                             
                         except:
                             # Could not read this data line. If we are here
@@ -217,7 +216,7 @@ class Reader:
                             
                     #The 6 columns are | Q (1/A) | I(Q) (1/cm) | std. dev.
                     # I(Q) (1/cm) | sigmaQ | meanQ | ShadowFactor|
-                    if line.count("The 6 columns")>0:
+                    if line.count("The 6 columns") > 0:
                         is_data_started = True
             
                 # Sanity check
@@ -229,10 +228,10 @@ class Reader:
                 if len(x) == 0:
                     raise ValueError, "ascii_reader: could not load file"
                 
-                output.x = x[x!=0]
-                output.y = y[x!=0]
-                output.dy = dy[x!=0]
-                output.dx = dx[x!=0]
+                output.x = x[x != 0]
+                output.y = y[x != 0]
+                output.dy = dy[x != 0]
+                output.dx = dx[x != 0]
                 if data_conv_q is not None:
                     output.xaxis("\\rm{Q}", output.x_unit)
                 else:
@@ -240,18 +239,11 @@ class Reader:
                 if data_conv_i is not None:
                     output.yaxis("\\rm{Intensity}", output.y_unit)
                 else:
-                    output.yaxis("\\rm{Intensity}","cm^{-1}")
+                    output.yaxis("\\rm{Intensity}", "cm^{-1}")
                     
                 # Store loading process information
-                output.meta_data['loader'] = self.type_name                       
+                output.meta_data['loader'] = self.type_name
                 return output
         else:
             raise RuntimeError, "%s is not a file" % path
         return None
-    
-if __name__ == "__main__": 
-    reader = Reader()
-    print reader.read("../test/jan08002.ABS")
-    
-    
-            

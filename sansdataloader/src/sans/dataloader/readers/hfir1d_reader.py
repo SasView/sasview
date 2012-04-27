@@ -1,12 +1,13 @@
-
+"""
+    HFIR 1D 4-column data reader
+"""
 #####################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
-
 import numpy
 import os
 from sans.dataloader.data_info import Data1D
@@ -23,11 +24,11 @@ class Reader(object):
     Class to load HFIR 1D 4-column files
     """
     ## File type
-    type_name = "HFIR 1D"   
+    type_name = "HFIR 1D"
     ## Wildcards
     type = ["HFIR 1D files (*.d1d)|*.d1d"]
     ## List of allowed extensions
-    ext = ['.d1d']  
+    ext = ['.d1d']
     
     def read(self, path):
         """ 
@@ -41,17 +42,17 @@ class Reader(object):
         :raise ValueError: when the length of the data vectors are inconsistent
         """
         if os.path.isfile(path):
-            basename  = os.path.basename(path)
+            basename = os.path.basename(path)
             root, extension = os.path.splitext(basename)
             if extension.lower() in self.ext:
                 try:
-                    input_f =  open(path,'r')
-                except :
+                    input_f = open(path,'r')
+                except:
                     raise  RuntimeError, "hfir1d_reader: cannot open %s" % path
                 buff = input_f.read()
                 lines = buff.split('\n')
-                x  = numpy.zeros(0)
-                y  = numpy.zeros(0)
+                x = numpy.zeros(0)
+                y = numpy.zeros(0)
                 dx = numpy.zeros(0)
                 dy = numpy.zeros(0)
                 output = Data1D(x, y, dx=dx, dy=dy)
@@ -83,18 +84,17 @@ class Reader(object):
                             _dx = data_conv_q(_dx, units=output.x_unit)
                             
                         if data_conv_i is not None:
-                            _y = data_conv_i(_y, units=output.y_unit)                        
-                            _dy = data_conv_i(_dy, units=output.y_unit)                        
+                            _y = data_conv_i(_y, units=output.y_unit)
+                            _dy = data_conv_i(_dy, units=output.y_unit)
                                                     
-                        x   = numpy.append(x, _x) 
-                        y   = numpy.append(y, _y)
-                        dx  = numpy.append(dx, _dx)
-                        dy  = numpy.append(dy, _dy)                        
+                        x = numpy.append(x, _x)
+                        y = numpy.append(y, _y)
+                        dx = numpy.append(dx, _dx)
+                        dy = numpy.append(dy, _dy)
                     except:
                         # Couldn't parse this line, skip it 
                         pass
                          
-                     
                 # Sanity check
                 if not len(y) == len(dy):
                     msg = "hfir1d_reader: y and dy have different length"
@@ -119,18 +119,11 @@ class Reader(object):
                 if data_conv_i is not None:
                     output.yaxis("\\rm{Intensity}", output.y_unit)
                 else:
-                    output.yaxis("\\rm{Intensity}","cm^{-1}")
+                    output.yaxis("\\rm{Intensity}", "cm^{-1}")
                 
                 # Store loading process information
-                output.meta_data['loader'] = self.type_name   
+                output.meta_data['loader'] = self.type_name
                 return output
         else:
             raise RuntimeError, "%s is not a file" % path
         return None
-    
-if __name__ == "__main__": 
-    reader = Reader()
-    print reader.read("../test/S2-30dq.d1d")
-    
-    
-                        

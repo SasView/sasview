@@ -1,32 +1,28 @@
-
-
-############################################################################
-#This software was developed by the University of Tennessee as part of the
-#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
-#If you use DANSE applications to do scientific research that leads to 
-#publication, we ask that you acknowledge the use of the software with the 
-#following sentence:
-#This work benefited from DANSE software developed under NSF award DMR-0520547. 
-#copyright 2009, University of Tennessee
-#############################################################################
-
-
 """
 Module to associate default readers to file extensions.
 The module reads an xml file to get the readers for each file extension.
 The readers are tried in order they appear when reading a file.
 """
-
+############################################################################
+#This software was developed by the University of Tennessee as part of the
+#Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+#project funded by the US National Science Foundation.
+#If you use DANSE applications to do scientific research that leads to
+#publication, we ask that you acknowledge the use of the software with the
+#following sentence:
+#This work benefited from DANSE software developed under NSF award DMR-0520547.
+#copyright 2009, University of Tennessee
+#############################################################################
 import os
 import sys
 import logging
-from lxml import etree 
+from lxml import etree
 # Py2exe compatibility: import _elementpath to ensure that py2exe finds it
-from lxml import _elementpath  
+from lxml import _elementpath
 
 ## Format version for the XML settings file
 VERSION = 'sansloader/1.0'
+
 
 def read_associations(loader, settings='defaults.xml'):
     """
@@ -53,7 +49,7 @@ def read_associations(loader, settings='defaults.xml'):
         tree = etree.parse(path, parser=etree.ETCompatXMLParser())
         
         # Check the format version number
-        # Specifying the namespace will take care of the file format version 
+        # Specifying the namespace will take care of the file format version
         root = tree.getroot()
         
         # Read in the file extension associations
@@ -63,11 +59,11 @@ def read_associations(loader, settings='defaults.xml'):
         # For each FileType entry, get the associated reader and extension
         for entry in entry_list:
             reader = entry.get('reader')
-            ext    = entry.get('extension')
+            ext = entry.get('extension')
             
             if reader is not None and ext is not None:
                 # Associate the extension with a particular reader
-                # TODO: Modify the Register code to be case-insensitive 
+                # TODO: Modify the Register code to be case-insensitive
                 # and remove the extra line below.
                 try:
                     exec "import %s" % reader
@@ -113,19 +109,4 @@ def register_readers(registry_function):
     registry_function(red2d_reader)
     registry_function(tiff_reader)
     
-    return True            
-
-
-if __name__ == "__main__": 
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(levelname)s %(message)s',
-                        filename='logger.log',
-                        filemode='w')
-    from sans.dataloader.loader import Loader
-    l = Loader()
-    read_associations(l)
-    
-    
-    print l.get_wildcards()
-    
-    
+    return True

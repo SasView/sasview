@@ -1,4 +1,6 @@
-
+"""
+    TXT/IGOR 2D Q Map file reader
+"""
 #####################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
@@ -6,17 +8,9 @@
 #See the license text in license.txt
 #copyright 2008, University of Tennessee
 ######################################################################
-
-"""
-    TXT/IGOR 2D Q Map file reader
-"""
-
-
 import os
-#import sys
 import numpy
 import math
-#import logging
 from sans.dataloader.data_info import Data2D, Detector
 
 # Look for unit converter
@@ -25,6 +19,7 @@ try:
     from data_util.nxsunit import Converter
 except:
     has_converter = False
+    
     
 def check_point(x_point):
     """
@@ -35,25 +30,25 @@ def check_point(x_point):
         return float(x_point)
     except:
         return 0
+      
         
 class Reader:
     """ Simple data reader for Igor data files """
     ## File type
-    type_name = "IGOR/DAT 2D Q_map"   
+    type_name = "IGOR/DAT 2D Q_map"
     ## Wildcards
     type = ["IGOR/DAT 2D file in Q_map (*.dat)|*.DAT"]
     ## Extension
-    ext=['.DAT', '.dat']
+    ext = ['.DAT', '.dat']
     
     def write(self, filename, data):
         """
         Write to .dat
         
         :param filename: file name to write
-        :param data: data2D 
+        :param data: data2D
         """
         import time
-        st = time.time()
         # Write the file
         fd = open(filename, 'w')
         t = time.localtime()
@@ -65,52 +60,46 @@ class Reader:
         fd.write(header_str)
         # write qx qy I values
         for i in range(len(data.data)):
-            fd.write("%g  %g  %g\n" % (data.qx_data[i], 
+            fd.write("%g  %g  %g\n" % (data.qx_data[i],
                                         data.qy_data[i],
                                        data.data[i]))
         # close
-        fd.close()                 
+        fd.close()
 
-    def read(self,filename=None):
+    def read(self, filename=None):
         """ Read file """
         if not os.path.isfile(filename):
             raise ValueError, \
             "Specified file %s is not a regular file" % filename
 
         # Read file
-        f = open(filename,'r')
+        f = open(filename, 'r')
         buf = f.read()
-        f.close()     
+        f.close()
         # Instantiate data object
         output = Data2D()
         output.filename = os.path.basename(filename)
         detector = Detector()
-        if len(output.detector)>0: print str(output.detector[0])
+        if len(output.detector) > 0:
+            print str(output.detector[0])
         output.detector.append(detector)
                 
         # Get content
         dataStarted = False
         
-        ## Defaults      
+        ## Defaults
         lines = buf.split('\n')
-        itot = 0
         x = []
         y = []
         
-        ncounts = 0
-        
-        wavelength   = None
-        distance     = None
+        wavelength = None
+        distance = None
         transmission = None
         
         pixel_x = None
         pixel_y = None
         
-        i_x    = 0
-        i_y    = -1
-        pixels = 0
-        
-        isInfo   = False
+        isInfo = False
         isCenter = False
 
         data_conv_q = None
@@ -125,21 +114,21 @@ class Reader:
         if has_converter == True and output.I_unit != '1/cm':
             data_conv_i = Converter('1/cm')
             # Test it
-            data_conv_i(1.0, output.I_unit)            
+            data_conv_i(1.0, output.I_unit)
         
               
         # Remove the last lines before the for loop if the lines are empty
         # to calculate the exact number of data points
         count = 0
-        while (len(lines[len(lines)-(count+1)].lstrip().rstrip()) < 1):
-            del lines[len(lines)-(count+1)]
+        while (len(lines[len(lines) - (count + 1)].lstrip().rstrip()) < 1):
+            del lines[len(lines) - (count + 1)]
             count = count + 1
 
         #Read Header and find the dimensions of 2D data
         line_num = 0
         # Old version NIST files: 0
         ver = 0
-        for line in lines:      
+        for line in lines:
             line_num += 1
             ## Reading the header applies only to IGOR/NIST 2D q_map data files
             # Find setup info line
@@ -181,7 +170,7 @@ class Reader:
                 
             # Find center info line
             if isCenter:
-                isCenter = False                
+                isCenter = False
                 line_toks = line.split()
                 # Center in bin number
                 center_x = float(line_toks[0])
@@ -198,9 +187,9 @@ class Reader:
                 dataStarted = True
                 continue
 
-            ## Read and get data.   
+            ## Read and get data.
             if dataStarted == True:
-                line_toks = line.split()              
+                line_toks = line.split()
                 if len(line_toks) == 0:
                     #empty line
                     continue
@@ -222,9 +211,9 @@ class Reader:
         # split all data to one big list w/" "separator
         data_list = data_list.split()
  
-        # Check if the size is consistent with data, otherwise 
+        # Check if the size is consistent with data, otherwise
         #try the tab(\t) separator
-        # (this may be removed once get the confidence 
+        # (this may be removed once get the confidence
         #the former working all cases).
         if len(data_list) != (len(data_lines)) * col_num:
             data_list = "\t".join(data_lines.tolist())
@@ -232,11 +221,11 @@ class Reader:
 
         # Change it(string) into float
         #data_list = map(float,data_list)
-        data_list1 = map(check_point,data_list)
+        data_list1 = map(check_point, data_list)
 
         # numpy array form
         data_array = numpy.array(data_list1)
-        # Redimesion based on the row_num and col_num, 
+        # Redimesion based on the row_num and col_num,
         #otherwise raise an error.
         try:
             data_point = data_array.reshape(row_num, col_num).transpose()
@@ -249,28 +238,33 @@ class Reader:
         dqy_data = numpy.zeros(0)
         err_data = numpy.ones(row_num)
         qz_data = numpy.zeros(row_num)
-        mask = numpy.ones(row_num,dtype=bool)
+        mask = numpy.ones(row_num, dtype=bool)
         # Get from the array
         qx_data = data_point[0]
         qy_data = data_point[1]
         data = data_point[2]
         if ver == 1:
-            if col_num > (2 + ver): err_data = data_point[(2 + ver)]
-        if col_num > (3 + ver): qz_data = data_point[(3 + ver)]
-        if col_num > (4 + ver): dqx_data = data_point[(4 + ver)]
-        if col_num > (5 + ver): dqy_data = data_point[(5 + ver)]
+            if col_num > (2 + ver):
+                err_data = data_point[(2 + ver)]
+        if col_num > (3 + ver):
+            qz_data = data_point[(3 + ver)]
+        if col_num > (4 + ver):
+            dqx_data = data_point[(4 + ver)]
+        if col_num > (5 + ver):
+            dqy_data = data_point[(5 + ver)]
         #if col_num > (6 + ver): mask[data_point[(6 + ver)] < 1] = False
         q_data = numpy.sqrt(qx_data*qx_data+qy_data*qy_data+qz_data*qz_data)
            
         # Extra protection(it is needed for some data files): 
         # If all mask elements are False, put all True
-        if not mask.any(): mask[mask==False] = True   
+        if not mask.any():
+            mask[mask == False] = True
   
         # Store limits of the image in q space
-        xmin    = numpy.min(qx_data)
-        xmax    = numpy.max(qx_data)
-        ymin    = numpy.min(qy_data)
-        ymax    = numpy.max(qy_data)
+        xmin = numpy.min(qx_data)
+        xmax = numpy.max(qx_data)
+        ymin = numpy.min(qy_data)
+        ymax = numpy.max(qy_data)
 
         # units
         if has_converter == True and output.Q_unit != '1/A':
@@ -285,35 +279,35 @@ class Reader:
         
         # calculate the number of pixels in the each axes
         npix_y = math.floor(math.sqrt(len(data)))
-        npix_x = math.floor(len(data)/npix_y)
+        npix_x = math.floor(len(data) / npix_y)
         
-        # calculate the size of bins      
-        xstep = x_size/(npix_x-1)
-        ystep = y_size/(npix_y-1)
+        # calculate the size of bins
+        xstep = x_size / (npix_x - 1)
+        ystep = y_size / (npix_y - 1)
         
         # store x and y axis bin centers in q space
-        x_bins  = numpy.arange(xmin,xmax+xstep,xstep)
-        y_bins  = numpy.arange(ymin,ymax+ystep,ystep)
+        x_bins = numpy.arange(xmin, xmax + xstep, xstep)
+        y_bins = numpy.arange(ymin, ymax + ystep, ystep)
        
         # get the limits of q values
-        xmin = xmin - xstep/2
-        xmax = xmax + xstep/2
-        ymin = ymin - ystep/2
-        ymax = ymax + ystep/2
+        xmin = xmin - xstep / 2
+        xmax = xmax + xstep / 2
+        ymin = ymin - ystep / 2
+        ymax = ymax + ystep / 2
         
-        #Store data in outputs  
-        #TODO: Check the lengths 
-        output.data     = data
+        #Store data in outputs
+        #TODO: Check the lengths
+        output.data = data
         if (err_data == 1).all():
             output.err_data = numpy.sqrt(numpy.abs(data))
             output.err_data[output.err_data == 0.0] = 1.0
         else:
             output.err_data = err_data
             
-        output.qx_data  = qx_data
-        output.qy_data  = qy_data             
-        output.q_data   = q_data
-        output.mask     = mask 
+        output.qx_data = qx_data
+        output.qy_data = qy_data
+        output.q_data = q_data
+        output.mask = mask
         
         output.x_bins = x_bins
         output.y_bins = y_bins
@@ -333,10 +327,10 @@ class Reader:
         detector.distance = distance
         
         # optional data: if all of dq data == 0, do not pass to output
-        if len(dqx_data) == len(qx_data) and dqx_data.any()!=0: 
+        if len(dqx_data) == len(qx_data) and dqx_data.any() != 0:
             # if no dqx_data, do not pass dqy_data.
             #(1 axis dq is not supported yet).
-            if len(dqy_data) == len(qy_data) and dqy_data.any()!=0:
+            if len(dqy_data) == len(qy_data) and dqy_data.any() != 0:
                 # Currently we do not support dq parr, perp.
                 # tranfer the comp. to cartesian coord. for newer version.
                 if ver != 1:
@@ -345,12 +339,12 @@ class Reader:
                     sin_th = qy_data / diag
                     output.dqx_data = numpy.sqrt((dqx_data * cos_th) * \
                                                  (dqx_data * cos_th) \
-                                                 + ( dqy_data * sin_th) * \
-                                                  ( dqy_data * sin_th))
+                                                 + (dqy_data * sin_th) * \
+                                                  (dqy_data * sin_th))
                     output.dqy_data = numpy.sqrt((dqx_data * sin_th) * \
                                                  (dqx_data * sin_th) \
-                                                 + ( dqy_data * cos_th) * \
-                                                  ( dqy_data * cos_th))
+                                                 + (dqy_data * cos_th) * \
+                                                  (dqy_data * cos_th))
                 else:
                     output.dqx_data = dqx_data
                     output.dqy_data = dqy_data
@@ -361,19 +355,13 @@ class Reader:
             output.yaxis("\\rm{Q_{y}}", output.Q_unit)
         else:
             output.xaxis("\\rm{Q_{x}}", 'A^{-1}')
-            output.yaxis("\\rm{Q_{y}}", 'A^{-1}')            
+            output.yaxis("\\rm{Q_{y}}", 'A^{-1}')
         if data_conv_i is not None:
             output.zaxis("\\rm{Intensity}", output.I_unit)
         else:
-            output.zaxis("\\rm{Intensity}","cm^{-1}")
+            output.zaxis("\\rm{Intensity}", "cm^{-1}")
     
         # Store loading process information
         output.meta_data['loader'] = self.type_name
 
         return output
-    
-if __name__ == "__main__": 
-    reader = Reader()
-    print reader.read("../test/exp18_14_igor_2dqxqy.dat") 
-        
-

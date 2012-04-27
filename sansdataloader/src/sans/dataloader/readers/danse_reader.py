@@ -1,20 +1,16 @@
-
-
+"""
+    DANSE/SANS file reader
+"""
 ############################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
 #project funded by the US National Science Foundation. 
-#If you use DANSE applications to do scientific research that leads to 
-#publication, we ask that you acknowledge the use of the software with the 
+#If you use DANSE applications to do scientific research that leads to
+#publication, we ask that you acknowledge the use of the software with the
 #following sentence:
-#This work benefited from DANSE software developed under NSF award DMR-0520547. 
+#This work benefited from DANSE software developed under NSF award DMR-0520547.
 #copyright 2008, University of Tennessee
 #############################################################################
-
-"""
-    DANSE/SANS file reader
-"""
-
 import math
 import os
 #import copy
@@ -30,16 +26,17 @@ try:
 except:
     has_converter = False
 
+
 class Reader:
     """
     Example data manipulation
     """
     ## File type
-    type_name = "DANSE"   
+    type_name = "DANSE"
     ## Wildcards
     type = ["DANSE files (*.sans)|*.sans"]
     ## Extension
-    ext  = ['.sans', '.SANS']    
+    ext  = ['.sans', '.SANS']
         
     def read(self, filename=None):
         """
@@ -55,7 +52,7 @@ class Reader:
         if read_it:
             try:
                 datafile = open(filename, 'r')
-            except :
+            except:
                 raise  RuntimeError,"danse_reader cannot open %s" % (filename)
         
             # defaults
@@ -95,7 +92,7 @@ class Reader:
             if has_converter == True and output.I_unit != '1/cm':
                 data_conv_i = Converter('1/cm')
                 # Test it
-                data_conv_i(1.0, output.I_unit)            
+                data_conv_i(1.0, output.I_unit)
         
             read_on = True
             while read_on:
@@ -106,8 +103,8 @@ class Reader:
                 toks = line.split(':')
                 if toks[0] == "FORMATVERSION":
                     fversion = float(toks[1])
-                if toks[0] == "WAVELENGTH":    
-                    wavelength = float(toks[1])                
+                if toks[0] == "WAVELENGTH":
+                    wavelength = float(toks[1])
                 elif toks[0] == "DISTANCE":
                     distance = float(toks[1])
                 elif toks[0] == "CENTER_X":
@@ -144,12 +141,12 @@ class Reader:
                             data.append(val)
                             error.append(err)
                         except:
-                            logging.info("Skipping line:%s,%s" %( data_str,
+                            logging.info("Skipping line:%s,%s" %(data_str,
                                                                 sys.exc_value))
             
-            # Initialize 
+            # Initialize
             x_vals = []
-            y_vals = [] 
+            y_vals = []
             ymin = None
             ymax = None
             xmin = None
@@ -157,10 +154,10 @@ class Reader:
             
             # Qx and Qy vectors
             theta = pixel / distance / 100.0
-            stepq = 4.0 * math.pi/wavelength * math.sin(theta/2.0) 
+            stepq = 4.0 * math.pi / wavelength * math.sin(theta / 2.0)
             for i_x in range(size_x):
                 theta = (i_x - center_x + 1) * pixel / distance / 100.0
-                qx = 4.0 * math.pi / wavelength * math.sin(theta/2.0)
+                qx = 4.0 * math.pi / wavelength * math.sin(theta / 2.0)
                 
                 if has_converter == True and output.Q_unit != '1/A':
                     qx = data_conv_q(qx, units=output.Q_unit)
@@ -175,7 +172,7 @@ class Reader:
             ymax = None
             for i_y in range(size_y):
                 theta = (i_y - center_y + 1) * pixel / distance / 100.0
-                qy = 4.0 * math.pi/wavelength * math.sin(theta/2.0)
+                qy = 4.0 * math.pi / wavelength * math.sin(theta/2.0)
                 
                 if has_converter == True and output.Q_unit != '1/A':
                     qy = data_conv_q(qy, units=output.Q_unit)
@@ -187,9 +184,8 @@ class Reader:
                     ymax = qy
             
             # Store the data in the 2D array
-            itot = 0
-            i_x  = 0
-            i_y  = -1
+            i_x = 0
+            i_y = -1
             
             for i_pt in range(len(data)):
                 try:
@@ -197,7 +193,7 @@ class Reader:
                 except:
                     # For version 1.0, the data were still
                     # stored as strings at this point.
-                    msg = "Skipping entry (v1.0):%s,%s" %(str(data[i_pt]),
+                    msg = "Skipping entry (v1.0):%s,%s" % (str(data[i_pt]),
                                                            sys.exc_value)
                     logging.info(msg)
                 
@@ -208,14 +204,11 @@ class Reader:
                 else:
                     i_x += 1
                     
-                output.data[i_y][i_x] = value       
-                #output.data[size_y-1-i_y][i_x] = value
+                output.data[i_y][i_x] = value
                 if fversion>1.0:
                     output.err_data[i_y][i_x] = error[i_pt]
-                    #output.err_data[size_y-1-i_y][i_x] = error[i_pt]
                 
-
-            # Store all data 
+            # Store all data
             # Store wavelength
             if has_converter == True and output.source.wavelength_unit != 'A':
                 conv = Converter('A')
@@ -237,13 +230,13 @@ class Reader:
             detector.pixel_size.y = pixel
 
             # Store beam center in distance units
-            detector.beam_center.x = center_x*pixel
-            detector.beam_center.y = center_y*pixel
+            detector.beam_center.x = center_x * pixel
+            detector.beam_center.y = center_y * pixel
             
             # Store limits of the image (2D array)
             xmin = xmin - stepq / 2.0
             xmax = xmax + stepq / 2.0
-            ymin = ymin - stepq  /2.0
+            ymin = ymin - stepq /2.0
             ymax = ymax + stepq / 2.0
             
             if has_converter == True and output.Q_unit != '1/A':
@@ -257,8 +250,8 @@ class Reader:
             output.ymax = ymax
             
             # Store x and y axis bin centers
-            output.x_bins     = x_vals
-            output.y_bins     = y_vals
+            output.x_bins = x_vals
+            output.y_bins = y_vals
            
             # Units
             if data_conv_q is not None:
@@ -271,7 +264,7 @@ class Reader:
             if data_conv_i is not None:
                 output.zaxis("\\rm{Intensity}", output.I_unit)
             else:
-                output.zaxis("\\rm{Intensity}","cm^{-1}")
+                output.zaxis("\\rm{Intensity}", "cm^{-1}")
            
             if not fversion >= 1.0:
                 msg = "Danse_reader can't read this file %s" % filename
@@ -280,13 +273,8 @@ class Reader:
                 logging.info("Danse_reader Reading %s \n" % filename)
             
             # Store loading process information
-            output.meta_data['loader'] = self.type_name    
+            output.meta_data['loader'] = self.type_name
             output = reader2D_converter(output)
             return output
         
         return None
-
-if __name__ == "__main__": 
-    reader = Reader()
-    print reader.read("../test/MP_New.sans")
-    

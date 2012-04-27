@@ -1,4 +1,6 @@
-
+"""
+    IGOR 2D reduced file reader
+"""
 ############################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
@@ -9,13 +11,7 @@
 #This work benefited from DANSE software developed under NSF award DMR-0520547. 
 #copyright 2008, University of Tennessee
 #############################################################################
-
-"""
-    IGOR 2D reduced file reader
-"""
-
 import os
-#import sys
 import numpy
 import math
 #import logging
@@ -30,35 +26,36 @@ try:
 except:
     has_converter = False
 
+
 class Reader:
     """ Simple data reader for Igor data files """
     ## File type
-    type_name = "IGOR 2D"   
+    type_name = "IGOR 2D"
     ## Wildcards
     type = ["IGOR 2D files (*.ASC)|*.ASC"]
     ## Extension
     ext=['.ASC', '.asc']
 
-    def read(self,filename=None):
+    def read(self, filename=None):
         """ Read file """
         if not os.path.isfile(filename):
             raise ValueError, \
             "Specified file %s is not a regular file" % filename
         
         # Read file
-        f = open(filename,'r')
+        f = open(filename, 'r')
         buf = f.read()
         
         # Instantiate data object
         output = Data2D()
         output.filename = os.path.basename(filename)
         detector = Detector()
-        if len(output.detector)>0: print str(output.detector[0])
+        if len(output.detector) > 0:
+            print str(output.detector[0])
         output.detector.append(detector)
                 
         # Get content
         dataStarted = False
-        
         
         lines = buf.split('\n')
         itot = 0
@@ -90,7 +87,7 @@ class Reader:
         if has_converter == True and output.I_unit != '1/cm':
             data_conv_i = Converter('1/cm')
             # Test it
-            data_conv_i(1.0, output.I_unit)            
+            data_conv_i(1.0, output.I_unit)
          
         for line in lines:
             
@@ -116,12 +113,12 @@ class Reader:
                 # Get total bin number
                 
             i_tot_row += 1
-        i_tot_row=math.ceil(math.sqrt(i_tot_row))-1 
+        i_tot_row = math.ceil(math.sqrt(i_tot_row)) - 1
         #print "i_tot", i_tot_row
-        size_x = i_tot_row#192#128
-        size_y = i_tot_row#192#128
-        output.data = numpy.zeros([size_x,size_y])
-        output.err_data = numpy.zeros([size_x,size_y])
+        size_x = i_tot_row  # 192#128
+        size_y = i_tot_row  # 192#128
+        output.data = numpy.zeros([size_x, size_y])
+        output.err_data = numpy.zeros([size_x, size_y])
      
         #Read Header and 2D data
         for line in lines:
@@ -150,23 +147,22 @@ class Reader:
                     msg += "missing transmission"
                     raise ValueError, msg
                                             
-            if line.count("LAMBDA")>0:
+            if line.count("LAMBDA") > 0:
                 isInfo = True
                 
             # Find center info line
             if isCenter:
-                isCenter = False                
+                isCenter = False
                 line_toks = line.split()
                 
-                # Center in bin number: Must substrate 1 because 
+                # Center in bin number: Must substrate 1 because
                 #the index starts from 1
-                center_x = float(line_toks[0])-1
-                center_y = float(line_toks[1])-1
+                center_x = float(line_toks[0]) - 1
+                center_y = float(line_toks[1]) - 1
 
-            if line.count("BCENT")>0:
+            if line.count("BCENT") > 0:
                 isCenter = True
                 
-        
             # Find data start
             if line.count("***")>0:
                 dataStarted = True
@@ -187,44 +183,44 @@ class Reader:
                     continue
                 
                 # Get bin number
-                if math.fmod(itot, i_tot_row)==0:
+                if math.fmod(itot, i_tot_row) == 0:
                     i_x = 0
                     i_y += 1
                 else:
                     i_x += 1
                     
                 output.data[i_y][i_x] = value
-                ncounts += 1 
+                ncounts += 1
                 
                 # Det 640 x 640 mm
                 # Q = 4pi/lambda sin(theta/2)
                 # Bin size is 0.5 cm 
-                #REmoved +1 from theta = (i_x-center_x+1)*0.5 / distance 
+                #REmoved +1 from theta = (i_x-center_x+1)*0.5 / distance
                 # / 100.0 and 
                 #REmoved +1 from theta = (i_y-center_y+1)*0.5 /
                 # distance / 100.0
                 #ToDo: Need  complete check if the following
                 # covert process is consistent with fitting.py.
-                theta = (i_x-center_x)*0.5 / distance / 100.0
-                qx = 4.0*math.pi/wavelength * math.sin(theta/2.0)
+                theta = (i_x - center_x) * 0.5 / distance / 100.0
+                qx = 4.0 * math.pi / wavelength * math.sin(theta/2.0)
 
                 if has_converter == True and output.Q_unit != '1/A':
                     qx = data_conv_q(qx, units=output.Q_unit)
 
-                if xmin==None or qx<xmin:
+                if xmin == None or qx < xmin:
                     xmin = qx
-                if xmax==None or qx>xmax:
+                if xmax == None or qx > xmax:
                     xmax = qx
                 
-                theta = (i_y-center_y)*0.5 / distance / 100.0
-                qy = 4.0*math.pi/wavelength * math.sin(theta/2.0)
+                theta = (i_y - center_y) * 0.5 / distance / 100.0
+                qy = 4.0 * math.pi / wavelength * math.sin(theta / 2.0)
 
                 if has_converter == True and output.Q_unit != '1/A':
                     qy = data_conv_q(qy, units=output.Q_unit)
                 
-                if ymin==None or qy<ymin:
+                if ymin == None or qy < ymin:
                     ymin = qy
-                if ymax==None or qy>ymax:
+                if ymax == None or qy > ymax:
                     ymax = qy
                 
                 if not qx in x:
@@ -236,20 +232,20 @@ class Reader:
                   
                   
         theta = 0.25 / distance / 100.0
-        xstep = 4.0*math.pi/wavelength * math.sin(theta/2.0)
+        xstep = 4.0 * math.pi / wavelength * math.sin(theta / 2.0)
         
         theta = 0.25 / distance / 100.0
-        ystep = 4.0*math.pi/wavelength * math.sin(theta/2.0)
+        ystep = 4.0 * math.pi/ wavelength * math.sin(theta / 2.0)
         
         # Store all data ######################################
         # Store wavelength
-        if has_converter==True and output.source.wavelength_unit != 'A':
+        if has_converter == True and output.source.wavelength_unit != 'A':
             conv = Converter('A')
             wavelength = conv(wavelength, units=output.source.wavelength_unit)
         output.source.wavelength = wavelength
 
         # Store distance
-        if has_converter==True and detector.distance_unit != 'm':
+        if has_converter == True and detector.distance_unit != 'm':
             conv = Converter('m')
             distance = conv(distance, units=detector.distance_unit)
         detector.distance = distance
@@ -259,22 +255,21 @@ class Reader:
         
         # Store pixel size
         pixel = 5.0
-        if has_converter==True and detector.pixel_size_unit != 'mm':
+        if has_converter == True and detector.pixel_size_unit != 'mm':
             conv = Converter('mm')
             pixel = conv(pixel, units=detector.pixel_size_unit)
         detector.pixel_size.x = pixel
         detector.pixel_size.y = pixel
   
         # Store beam center in distance units
-        detector.beam_center.x = center_x*pixel
-        detector.beam_center.y = center_y*pixel
-  
+        detector.beam_center.x = center_x * pixel
+        detector.beam_center.y = center_y * pixel
         
         # Store limits of the image (2D array)
-        xmin    =xmin-xstep/2.0
-        xmax    =xmax+xstep/2.0
-        ymin    =ymin-ystep/2.0
-        ymax    =ymax+ystep/2.0
+        xmin = xmin - xstep / 2.0
+        xmax = xmax + xstep / 2.0
+        ymin = ymin - ystep / 2.0
+        ymax = ymax + ystep / 2.0
         if has_converter == True and output.Q_unit != '1/A':
             xmin = data_conv_q(xmin, units=output.Q_unit)
             xmax = data_conv_q(xmax, units=output.Q_unit)
@@ -286,8 +281,8 @@ class Reader:
         output.ymax = ymax
         
         # Store x and y axis bin centers
-        output.x_bins     = x
-        output.y_bins     = y
+        output.x_bins = x
+        output.y_bins = y
         
         # Units
         if data_conv_q is not None:
@@ -300,15 +295,10 @@ class Reader:
         if data_conv_i is not None:
             output.zaxis("\\rm{Intensity}", output.I_unit)
         else:
-            output.zaxis("\\rm{Intensity}","cm^{-1}")
+            output.zaxis("\\rm{Intensity}", "cm^{-1}")
     
         # Store loading process information
         output.meta_data['loader'] = self.type_name
         output = reader2D_converter(output)
 
         return output
-    
-if __name__ == "__main__": 
-    reader = Reader()
-    print reader.read("../test/MAR07232_rest.ASC") 
-    
