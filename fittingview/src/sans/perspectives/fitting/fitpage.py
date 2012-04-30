@@ -2039,7 +2039,7 @@ class FitPage(BasicPage):
         # make sure stop button to fit button all the time
         self._on_fit_complete()
         if out == None or not numpy.isfinite(chisqr):
-            raise ValueError,"Fit error occured..."
+            raise ValueError, "Fit error occured..."
         
         is_modified = False
         has_error = False
@@ -2599,8 +2599,8 @@ class FitPage(BasicPage):
             
     def get_all_checked_params(self):
         """
-        Found all parameters current check and add them to list of parameters to
-        fit
+        Found all parameters current check and add them to list of parameters
+        to fit
         """
         self.param_toFit = []
         for item in self.parameters:
@@ -2611,7 +2611,6 @@ class FitPage(BasicPage):
                 self.param_toFit.append(item)
         self.save_current_state_fit()
        
-      
         event = PageInfoEvent(page=self)
         wx.PostEvent(self.parent, event)
         param2fit = []
@@ -2625,11 +2624,11 @@ class FitPage(BasicPage):
         set to true or false all checkBox given the main checkbox value cb1
         """
         self.param_toFit = []
-        if  self.parameters !=[]:
+        if  self.parameters != []:
             if  self.cb1.GetValue():
                 for item in self.parameters:
                     ## for data2D select all to fit
-                    if self.data.__class__.__name__ ==  "Data2D" or \
+                    if self.data.__class__.__name__ == "Data2D" or \
                             self.enable2D:
                         item[0].SetValue(True)
                         self.param_toFit.append(item)
@@ -2681,8 +2680,8 @@ class FitPage(BasicPage):
                 param2fit.append(item[1])
         self.parent._manager.set_param2fit(self.uid, param2fit)
 
-    def select_param(self,event):
-        """ 
+    def select_param(self, event):
+        """
         Select TextCtrl  checked for fitting purpose and stores them
         in  self.param_toFit=[] list
         """
@@ -2728,8 +2727,8 @@ class FitPage(BasicPage):
         if len(self.fittable_param) > 0:
             len_orient_para *= 2
         #Set the value of checkbox that selected every checkbox or not
-        if len(self.parameters) + len(self.fittable_param) - len_orient_para ==\
-                len(self.param_toFit):
+        if len(self.parameters) + len(self.fittable_param) - len_orient_para \
+            == len(self.param_toFit):
             self.cb1.SetValue(True)
         else:
             self.cb1.SetValue(False)
@@ -2767,26 +2766,26 @@ class FitPage(BasicPage):
             self.SetupScrolling()
             return
         ## the panel is drawn using the current value of the fit engine
-        if self.engine_type==None and self._manager != None:
-            self.engine_type= self._manager._return_engine_type()
+        if self.engine_type == None and self._manager != None:
+            self.engine_type = self._manager._return_engine_type()
 
-        box_description= wx.StaticBox(self, -1,str("Model Parameters"))
+        box_description = wx.StaticBox(self, -1, str("Model Parameters"))
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)
-        sizer = wx.GridBagSizer(5,5)
+        sizer = wx.GridBagSizer(5, 5)
         ## save the current model
         self.model = model
            
         keys = self.model.getParamList()
         #list of dispersion paramaters
-        self.disp_list=self.model.getDispParamList()
+        self.disp_list = self.model.getDispParamList()
 
-        def custom_compare(a,b):
+        def custom_compare(a, b):
             """
             Custom compare to order, first by alphabets then second by number.
-            """ 
+            """
             # number at the last digit
-            a_last = a[len(a)-1]
-            b_last = b[len(b)-1]
+            a_last = a[len(a) - 1]
+            b_last = b[len(b) - 1]
             # default
             num_a = None
             num_b = None
@@ -2797,70 +2796,76 @@ class FitPage(BasicPage):
             len_a2 = len(a2)
             len_b2 = len(b2)
             # check if it contains a int number(<10)
-            try: 
+            try:
                 num_a = int(a_last)
-            except: pass
+            except:
+                pass
             try:
                 num_b = int(b_last)
-            except: pass
-            # Put 'scale' near the top; happens 
+            except:
+                pass
+            # Put 'scale' near the top; happens
             # when numbered param name exists
             if a == 'scale':
                 return -1
-            # both have a number    
+            # both have a number
             if num_a != None and num_b != None:
-                if num_a > num_b: return -1
+                if num_a > num_b:
+                    return -1
                 # same number
-                elif num_a == num_b: 
+                elif num_a == num_b:
                     # different last names
-                    if a2[len_a2-1] != b2[len_b2-1] and num_a != 0:
-                        return -cmp(a2[len_a2-1], b2[len_b2-1])
-                    else: 
-                        return cmp(a, b) 
-                else: return 1
+                    if a2[len_a2 - 1] != b2[len_b2 - 1] and num_a != 0:
+                        return -cmp(a2[len_a2 - 1], b2[len_b2 - 1])
+                    else:
+                        return cmp(a, b)
+                else:
+                    return 1
             # one of them has a number
-            elif num_a != None: return 1
-            elif num_b != None: return -1
+            elif num_a != None:
+                return 1
+            elif num_b != None:
+                return -1
             # no numbers
-            else: return cmp(a.lower(), b.lower())
+            else:
+                return cmp(a.lower(), b.lower())
 
-                        
         keys.sort(custom_compare)
     
         iy = 0
         ix = 0
         select_text = "Select All"
-        self.cb1 = wx.CheckBox(self, -1,str(select_text), (10, 10))
+        self.cb1 = wx.CheckBox(self, -1, str(select_text), (10, 10))
         wx.EVT_CHECKBOX(self, self.cb1.GetId(), self.select_all_param)
         self.cb1.SetToolTipString("To check/uncheck all the boxes below.")
         self.cb1.SetValue(True)
         
-        sizer.Add(self.cb1,(iy, ix),(1,1),\
-                             wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
-        ix +=1
+        sizer.Add(self.cb1, (iy, ix), (1, 1),\
+                             wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
+        ix += 1
         self.text2_2 = wx.StaticText(self, -1, 'Value')
-        sizer.Add(self.text2_2,(iy, ix),(1,1),\
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        ix +=2 
+        sizer.Add(self.text2_2, (iy, ix), (1, 1), \
+                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        ix += 2
         self.text2_3 = wx.StaticText(self, -1, 'Error')
-        sizer.Add(self.text2_3,(iy, ix),(1,1),\
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+        sizer.Add(self.text2_3, (iy, ix), (1, 1), \
+                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         if not self.is_mac:
             self.text2_3.Hide()
-        ix +=1 
+        ix += 1
         self.text2_min = wx.StaticText(self, -1, 'Min')
-        sizer.Add(self.text2_min,(iy, ix),(1,1),\
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+        sizer.Add(self.text2_min, (iy, ix), (1, 1), \
+                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         #self.text2_min.Hide()
-        ix +=1 
+        ix += 1
         self.text2_max = wx.StaticText(self, -1, 'Max')
-        sizer.Add(self.text2_max,(iy, ix),(1,1),\
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+        sizer.Add(self.text2_max, (iy, ix), (1, 1), \
+                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         #self.text2_max.Hide()
         ix += 1
         self.text2_4 = wx.StaticText(self, -1, '[Units]')
-        sizer.Add(self.text2_4,(iy, ix),(1,1),\
-                            wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+        sizer.Add(self.text2_4, (iy, ix), (1, 1), \
+                            wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         self.text2_4.Hide()
         
         CHECK_STATE = self.cb1.GetValue()
@@ -2869,8 +2874,8 @@ class FitPage(BasicPage):
                     self.model.orientation_params:
                 
                 ##prepare a spot to store errors
-                if not self.model.details.has_key(item):
-                    self.model.details [item] = ["",None,None] 
+                if not item in self.model.details:
+                    self.model.details[item] = ["", None, None]
          
                 iy += 1
                 ix = 0
@@ -2878,104 +2883,105 @@ class FitPage(BasicPage):
                     self.model_list_box["Multi-Functions"] or \
                     self.temp_multi_functional)\
                     and (item in self.model.non_fittable):
-                    non_fittable_name = wx.StaticText(self, -1, item )
-                    sizer.Add(non_fittable_name,(iy, ix),(1,1),\
-                            wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 21)
+                    non_fittable_name = wx.StaticText(self, -1, item)
+                    sizer.Add(non_fittable_name, (iy, ix), (1, 1), \
+                            wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 21)
                     ## add parameter value
                     ix += 1
-                    value= self.model.getParam(item)
+                    value = self.model.getParam(item)
                     if len(self.model.fun_list) > 0:
-                        num = item.split('_')[1][5:7]
-                        fun_box = wx.ComboBox(self, -1,size=(100,-1),
-                                    style=wx.CB_READONLY, name = '%s'% item)
+                        #num = item.split('_')[1][5:7]
+                        fun_box = wx.ComboBox(self, -1, size=(100, -1),
+                                    style=wx.CB_READONLY, name='%s' % item)
                         self._set_fun_box_list(fun_box)
                         fun_box.SetSelection(0)
-                        #self.fun_box.SetToolTipString("A function 
+                        #self.fun_box.SetToolTipString("A function
                         #    describing the interface")
-                        wx.EVT_COMBOBOX(fun_box,-1, self._on_fun_box)
+                        wx.EVT_COMBOBOX(fun_box, -1, self._on_fun_box)
                     else:
-                        fun_box = self.ModelTextCtrl(self, -1, 
-                                                     size=(_BOX_WIDTH,20),
-                                style=wx.TE_PROCESS_ENTER, name ='%s'% item)
+                        fun_box = self.ModelTextCtrl(self, -1,
+                                                     size=(_BOX_WIDTH, 20),
+                                style=wx.TE_PROCESS_ENTER, name='%s' % item)
                         fun_box.SetToolTipString(\
                                 "Hit 'Enter' after typing to update the plot.")
                         fun_box.SetValue(format_number(value, True))
-                    sizer.Add(fun_box, (iy,ix),(1,1), wx.EXPAND)
-                    self.str_parameters.append([None,item, fun_box,
-                                                None, None, None, 
+                    sizer.Add(fun_box, (iy, ix), (1, 1), wx.EXPAND)
+                    self.str_parameters.append([None, item, fun_box,
+                                                None, None, None,
                                                 None, None])
-
-                    
                 else:
                     ## add parameters name with checkbox for selecting to fit
-                    cb = wx.CheckBox(self, -1, item)  
-                    cb.SetValue(CHECK_STATE)            
+                    cb = wx.CheckBox(self, -1, item)
+                    cb.SetValue(CHECK_STATE)
                     cb.SetToolTipString(" Check mark to fit.")
                     #cb.SetValue(True)
                     wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
                     
-                    sizer.Add( cb,( iy, ix),(1,1),
-                                 wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
+                    sizer.Add(cb, (iy, ix), (1, 1),
+                              wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
 
                     ## add parameter value
                     ix += 1
-                    value= self.model.getParam(item)
-                    ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                    value = self.model.getParam(item)
+                    ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                         style=wx.TE_PROCESS_ENTER)
                     ctl1.SetToolTipString(\
                                 "Hit 'Enter' after typing to update the plot.")
                     ctl1.SetValue(format_number(value, True))
-                    sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
+                    sizer.Add(ctl1, (iy, ix), (1, 1), wx.EXPAND)
                     ## text to show error sign
                     ix += 1
-                    text2=wx.StaticText(self, -1, '+/-')
-                    sizer.Add(text2,(iy, ix),(1,1),\
-                                    wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+                    text2 = wx.StaticText(self, -1, '+/-')
+                    sizer.Add(text2, (iy, ix), (1, 1), \
+                              wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                     if not self.is_mac:
-                        text2.Hide() 
+                        text2.Hide()
                     ix += 1
-                    ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/1.2,20), style=0)
-                    sizer.Add(ctl2, (iy,ix),(1,1), 
-                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    ctl2 = wx.TextCtrl(self, -1,
+                                       size=(_BOX_WIDTH / 1.2, 20), style=0)
+                    sizer.Add(ctl2, (iy, ix), (1, 1),
+                              wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                     if not self.is_mac:
                         ctl2.Hide()
                     
                     ix += 1
-                    ctl3 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/1.9,20),
-                                               style=wx.TE_PROCESS_ENTER,
-                                text_enter_callback = self._onparamRangeEnter)
+                    ctl3 = self.ModelTextCtrl(self, -1,
+                                              size=(_BOX_WIDTH / 1.9, 20),
+                                              style=wx.TE_PROCESS_ENTER,
+                                text_enter_callback=self._onparamRangeEnter)
          
-                    sizer.Add(ctl3, (iy,ix),(1,1), 
-                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    sizer.Add(ctl3, (iy, ix), (1, 1),
+                              wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             
                     ix += 1
-                    ctl4 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/1.9,20),
-                                               style=wx.TE_PROCESS_ENTER,
-                                text_enter_callback = self._onparamRangeEnter)
-                    sizer.Add(ctl4, (iy,ix),(1,1), 
-                              wx.EXPAND|wx.FIXED_MINSIZE, 0)
+                    ctl4 = self.ModelTextCtrl(self, -1,
+                                              size=(_BOX_WIDTH / 1.9, 20),
+                                              style=wx.TE_PROCESS_ENTER,
+                                text_enter_callback=self._onparamRangeEnter)
+                    sizer.Add(ctl4, (iy, ix), (1, 1),
+                              wx.EXPAND | wx.FIXED_MINSIZE, 0)
     
-                    ix +=1
+                    ix += 1
                     # Units
-                    if self.model.details.has_key(item):
-                        units = wx.StaticText(self, -1, 
+                    if item in self.model.details:
+                        units = wx.StaticText(self, -1,
                             self.model.details[item][0], style=wx.ALIGN_LEFT)
                     else:
-                        units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
-                    sizer.Add(units, (iy,ix),(1,1), 
-                               wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                        units = wx.StaticText(self, -1, "",
+                                              style=wx.ALIGN_LEFT)
+                    sizer.Add(units, (iy, ix), (1, 1),
+                              wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                         
-                    ##[cb state, name, value, "+/-", error of fit, min, max , units]
-                    self.parameters.append([cb,item, ctl1,
-                                            text2,ctl2, ctl3, ctl4,units])
+                    self.parameters.append([cb, item, ctl1,
+                                            text2, ctl2, ctl3, ctl4, units])
                                   
-        iy+=1
-        sizer.Add((10,10),(iy,ix),(1,1), 
-                  wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        iy += 1
+        sizer.Add((10, 10), (iy, ix), (1, 1),
+                  wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         
         # type can be either Guassian or Array
-        if len(self.model.dispersion.values())>0:
-            type= self.model.dispersion.values()[0]["type"]
+        if len(self.model.dispersion.values()) > 0:
+            type = self.model.dispersion.values()[0]["type"]
         else:
             type = "Gaussian"
             
@@ -2983,10 +2989,10 @@ class FitPage(BasicPage):
         ix = 0
         #Add tile for orientational angle
         for item in keys:
-            if item in self.model.orientation_params:       
+            if item in self.model.orientation_params:
                 orient_angle = wx.StaticText(self, -1, '[For 2D only]:')
-                sizer.Add(orient_angle,(iy, ix),(1,1), 
-                          wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15) 
+                sizer.Add(orient_angle, (iy, ix), (1, 1),
+                          wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
                 if not self.data.__class__.__name__ == "Data2D" and \
                         not self.enable2D:
                     orient_angle.Hide()
@@ -2999,13 +3005,13 @@ class FitPage(BasicPage):
             for item in self.model.orientation_params:
                 if not item in self.disp_list:
                     ##prepare a spot to store min max
-                    if not self.model.details.has_key(item):
-                        self.model.details [item] = ["",None,None] 
+                    if not item in self.model.details:
+                        self.model.details[item] = ["", None, None]
                           
                     iy += 1
                     ix = 0
                     ## add parameters name with checkbox for selecting to fit
-                    cb = wx.CheckBox(self, -1, item )
+                    cb = wx.CheckBox(self, -1, item)
                     cb.SetValue(CHECK_STATE)
                     cb.SetToolTipString("Check mark to fit")
                     wx.EVT_CHECKBOX(self, cb.GetId(), self.select_param)
@@ -3014,13 +3020,13 @@ class FitPage(BasicPage):
                         cb.Show(True)
                     else:
                         cb.Hide()
-                    sizer.Add( cb,( iy, ix),(1,1),
-                                 wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
+                    sizer.Add(cb, (iy, ix), (1, 1),
+                              wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
     
                     ## add parameter value
                     ix += 1
-                    value= self.model.getParam(item)
-                    ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH,20),
+                    value = self.model.getParam(item)
+                    ctl1 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                         style=wx.TE_PROCESS_ENTER)
                     ctl1.SetToolTipString(\
                                 "Hit 'Enter' after typing to update the plot.")
@@ -3030,86 +3036,86 @@ class FitPage(BasicPage):
                         ctl1.Show(True)
                     else:
                         ctl1.Hide()
-                    sizer.Add(ctl1, (iy,ix),(1,1), wx.EXPAND)
+                    sizer.Add(ctl1, (iy, ix), (1, 1), wx.EXPAND)
                     ## text to show error sign
                     ix += 1
-                    text2=wx.StaticText(self, -1, '+/-')
-                    sizer.Add(text2,(iy, ix),(1,1),\
-                                    wx.EXPAND|wx.ADJUST_MINSIZE, 0) 
+                    text2 = wx.StaticText(self, -1, '+/-')
+                    sizer.Add(text2, (iy, ix), (1, 1), \
+                              wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
-                    text2.Hide() 
+                    text2.Hide()
                     ix += 1
-                    ctl2 = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/1.2,20), style=0)
-                    sizer.Add(ctl2, (iy,ix),(1,1), 
-                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    ctl2 = wx.TextCtrl(self, -1,
+                                       size=(_BOX_WIDTH / 1.2, 20), style=0)
+                    sizer.Add(ctl2, (iy, ix), (1, 1),
+                              wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
                     ctl2.Hide()
                     
-                    
                     ix += 1
-                    ctl3 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/1.8,20), 
+                    ctl3 = self.ModelTextCtrl(self, -1,
+                                              size=(_BOX_WIDTH / 1.8, 20),
                                               style=wx.TE_PROCESS_ENTER,
-                                text_enter_callback = self._onparamRangeEnter)
+                                text_enter_callback=self._onparamRangeEnter)
                     
-                    sizer.Add(ctl3, (iy,ix),(1,1), 
-                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    sizer.Add(ctl3, (iy, ix), (1, 1),
+                              wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                     ctl3.Hide()
                  
                     ix += 1
-                    ctl4 = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH/1.8,20),
-                                               style=wx.TE_PROCESS_ENTER,
-                            text_enter_callback = self._onparamRangeEnter)
-                    sizer.Add(ctl4, (iy,ix),(1,1), 
-                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    ctl4 = self.ModelTextCtrl(self, -1,
+                                              size=(_BOX_WIDTH / 1.8, 20),
+                                              style=wx.TE_PROCESS_ENTER,
+                            text_enter_callback=self._onparamRangeEnter)
+                    sizer.Add(ctl4, (iy, ix), (1, 1),
+                              wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                    
                     ctl4.Hide()
                     
                     if self.data.__class__.__name__ == "Data2D" or \
-                            self.enable2D:  
-                        if self.is_mac:  
+                            self.enable2D:
+                        if self.is_mac:
                             text2.Show(True)
-                            ctl2.Show(True)                 
+                            ctl2.Show(True)
                         ctl3.Show(True)
                         ctl4.Show(True)
                     
-                    ix +=1
+                    ix += 1
                     # Units
-                    if self.model.details.has_key(item):
-                        units = wx.StaticText(self, -1, 
-                                              self.model.details[item][0], 
+                    if item in self.model.details:
+                        units = wx.StaticText(self, -1,
+                                              self.model.details[item][0],
                                               style=wx.ALIGN_LEFT)
                     else:
-                        units = wx.StaticText(self, -1, "", style=wx.ALIGN_LEFT)
+                        units = wx.StaticText(self, -1, "",
+                                              style=wx.ALIGN_LEFT)
                     if self.data.__class__.__name__ == "Data2D" or \
                             self.enable2D:
                         units.Show(True)
-                    
                     else:
                         units.Hide()
                     
-                    sizer.Add(units, (iy,ix),(1,1),  
-                              wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    sizer.Add(units, (iy, ix), (1, 1),
+                              wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                                           
-                    ##[cb state, name, value, "+/-", error of fit,min,max,units]
-                    self.parameters.append([cb,item, ctl1,
-                                            text2,ctl2, ctl3, ctl4,units])
-                    self.orientation_params.append([cb,item, ctl1,
-                                            text2,ctl2, ctl3, ctl4,units])
+                    self.parameters.append([cb, item, ctl1,
+                                            text2, ctl2, ctl3, ctl4, units])
+                    self.orientation_params.append([cb, item, ctl1,
+                                            text2, ctl2, ctl3, ctl4, units])
               
-        iy+=1
+        iy += 1
         box_description.SetForegroundColour(wx.BLUE)
         #Display units text on panel
-        for item in keys:   
-            if self.model.details.has_key(item):
+        for item in keys:
+            if item in self.model.details:
                 self.text2_4.Show()
         #Fill the list of fittable parameters
         self.get_all_checked_params()
         self.save_current_state_fit()
         boxsizer1.Add(sizer)
-        self.sizer3.Add(boxsizer1,0, wx.EXPAND | wx.ALL, 10)
+        self.sizer3.Add(boxsizer1, 0, wx.EXPAND | wx.ALL, 10)
         self.sizer3.Layout()
         self.Layout()
-        #self.Refresh()
 
     def on_right_down(self, event):
         """
@@ -3133,9 +3139,8 @@ class FitPage(BasicPage):
             msg += " Check if the Scipy fit engine is selected in the menubar."
             infor = 'warning'
             # inform msg to wx
-            wx.PostEvent( self.parent.parent, 
-                          StatusEvent(status= msg, info=infor))
-
+            wx.PostEvent(self.parent.parent,
+                        StatusEvent(status=msg, info=infor))
         
     def _onModel2D(self, event):
         """
@@ -3153,34 +3158,34 @@ class FitPage(BasicPage):
         self._manager.store_data(self.uid, data_list=[self.data])
 
         self.set_model_param_sizer(self.model)
-        self._set_sizer_dispersion()  
-        self._set_weight(is_2D= self.enable2D)
+        self._set_sizer_dispersion()
+        self._set_weight(is_2D=self.enable2D)
         self._set_smear_buttons()
         self.Show(True)
         self.SetupScrolling()
         self._draw_model()
         
-        self.state.enable2D =  copy.deepcopy(self.enable2D)
+        self.state.enable2D = copy.deepcopy(self.enable2D)
     
     def _set_smear_buttons(self):
         """
-        Set semarer radio buttons 
+        Set semarer radio buttons
         """
         # more disables for 2D
-        if self.data.__class__.__name__ ==  "Data2D" or \
+        if self.data.__class__.__name__ == "Data2D" or \
                     self.enable2D:
             self.slit_smearer.Disable()
-            self.pinhole_smearer.Enable(True) 
+            self.pinhole_smearer.Enable(True)
             self.default_mask = copy.deepcopy(self.data.mask)
         else:
-            self.slit_smearer.Enable(True) 
-            self.pinhole_smearer.Enable(True)  
+            self.slit_smearer.Enable(True)
+            self.pinhole_smearer.Enable(True)
             
             
 class BGTextCtrl(wx.TextCtrl):
     """
     Text control used to display outputs.
-    No editing allowed. The background is 
+    No editing allowed. The background is
     grayed out. User can't select text.
     """
     def __init__(self, *args, **kwds):
@@ -3197,6 +3202,5 @@ class BGTextCtrl(wx.TextCtrl):
         """
         Prevent further handling of the mouse event
         by not calling Skip().
-        """ 
+        """
         pass
- 
