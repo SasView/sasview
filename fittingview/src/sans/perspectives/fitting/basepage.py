@@ -1218,7 +1218,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         except:
             formfactor_pos = 0
             for ind_form in range(self.formfactorbox.GetCount()):
-                if self.formfactorbox.GetString(ind_form).count(state.formfactorcombobox) > 0:
+                if self.formfactorbox.GetString(ind_form) == (state.formfactorcombobox):
                     formfactor_pos = int(ind_form)
                     break
             
@@ -1230,7 +1230,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         except:
             structfactor_pos = 0
             for ind_struct in range(self.structurebox.GetCount()):
-                if self.structurebox.GetString(ind_struct).count(state.structurecombobox) > 0:
+                if self.structurebox.GetString(ind_struct) == (state.structurecombobox) > 0:
                     structfactor_pos = int(ind_struct)
                     break
             
@@ -2008,7 +2008,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 mlist.append((name, models))
                 
         # Sort the models
-        mlist_sorted = mlist
+        mlist_sorted = sorted(mlist)
         for item in mlist_sorted:
             combobox.Append(item[0], item[1])
         return 0
