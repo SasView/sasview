@@ -261,14 +261,28 @@ class Plugin(PluginBase):
                 p_path = path + ext
                 os.remove(p_path)
             self.update_custom_combo()
-            self.delete_menu.Delete(id)
-            for item in self.edit_menu.GetMenuItems():
-                if item.GetLabel() == label:
-                    self.edit_menu.DeleteItem(item)
-                    break
+            if os.path.isfile(p_path):
+                msg = "Sorry! Could not be able to delete the default "
+                msg += "custom model... \n"
+                msg += "Please manually remove the files (.py, .pyc) "
+                msg += "in the 'plugin_models' folder \n"
+                msg += "inside of the SansView application, "
+                msg += "and try it again."
+                wx.MessageBox(msg, 'Info')
+                #wx.PostEvent(self.parent, StatusEvent(status=msg, type='stop',
+                #                                      info='warning'))
+            else:
+                self.delete_menu.Delete(id)
+                for item in self.edit_menu.GetMenuItems():
+                    if item.GetLabel() == label:
+                        self.edit_menu.DeleteItem(item)
+                        msg = "The custom model, %s, has been deleted."% label
+                        wx.PostEvent(self.parent, StatusEvent(status=msg, 
+                                                type='stop', info='info'))
+                        break
         except:
             msg ='Delete Error: \nCould not delete the file; Check if in use.'
-            wx.MessageBox(msg)
+            wx.MessageBox(msg, 'Error')
     
     def make_sum_model(self, event):
         """
@@ -313,14 +327,14 @@ class Plugin(PluginBase):
                 for uid, page in self.fit_panel.opened_pages.iteritems():
                     if hasattr(page, "formfactorbox"):
                         page.model_list_box = temp
-                        current_val = page.formfactorbox.GetValue()
-                        pos = page.formfactorbox.GetSelection()
+                        current_val = page.formfactorbox.GetLabel()
+                        #pos = page.formfactorbox.GetSelection()
                         page._show_combox_helper()
-                        new_val = page.formfactorbox.GetValue()
+                        new_val = page.formfactorbox.GetLabel()
                         if current_val != new_val and new_val != '':
-                            page.formfactorbox.SetValue(new_val)
+                            page.formfactorbox.SetLabel(new_val)
                         else:
-                            page.formfactorbox.SetValue(current_val)
+                            page.formfactorbox.SetLabel(current_val)
         except:
             pass
         

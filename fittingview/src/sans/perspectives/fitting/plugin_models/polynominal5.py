@@ -31,7 +31,7 @@ class Model(Model1DPlugin): ##DO NOT CHANGE THIS LINE!!!
     """
     ## YOU CAN MODIFY THE LINE BELLOW. CHANGE ONLY WORDS BETWEEN " " 
     ## TO RENAME YOUR MODEL: THIS NAME IS WHAT YOU SEE ON GUI.
-    name = "polynomial5"        ## <----- NAME OF THE MODEL   
+    name = "polynomial5"        ## <----- FILE NAME (NAME OF THE MODEL)   
                                 
     def __init__(self):      ##DO NOT CHANGE THIS LINE!!!
         """
@@ -47,7 +47,11 @@ class Model(Model1DPlugin): ##DO NOT CHANGE THIS LINE!!!
         self.params['D'] = 0.0       ## <-----                    
         self.params['E'] = 0.0       ## <-----                  
         self.params['F'] = 0.0       ## <-----   
-        
+        ## YOU CAN MODIFY THE LINE BELLOW.MODIFY WORDS BETWEEN """   """  ONLY!!!!
+        self.description = """
+            a + b * x + c * math.pow(x,2) + d * math.pow(x,3) \n
+             + e * math.pow(x,4) + f * math.pow(x,5)  
+        """                        ## <-----   
         ## DEFINE DEFAULT DETAILS
         self.set_details()      ##DO NOT DELETE OR CHANGE THIS LINE!!!
         

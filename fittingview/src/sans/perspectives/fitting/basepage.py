@@ -2892,7 +2892,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         else:
             name = self.formfactorbox.GetValue()
         frame = HelpWindow(None, -1, pageToOpen=model_path)
-        if frame.rhelp.HasAnchor(name):
+        # If model name exists and model is not a custom model
+        if frame.rhelp.HasAnchor(name) and not self.plugin_rbutton.GetValue():
             frame.Show(True)
             frame.rhelp.ScrollToAnchor(name)
         else:

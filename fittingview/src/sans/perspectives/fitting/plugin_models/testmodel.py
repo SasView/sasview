@@ -35,7 +35,7 @@ class Model(Model1DPlugin):##DO NOT CHANGE THIS LINE!!!
     
     ## YOU CAN MODIFY THE LINE BELLOW. CHANGE ONLY WORDS BETWEEN " " 
     ## TO RENAME YOUR MODEL
-    name = "A+Bcos(2x)+Csin(2x)"      ## <----- NAME OF THE MODEL   
+    name = "testmodel"      ## <----- FILE NAME (NAME OF THE MODEL)   
     
     def __init__(self):
         """

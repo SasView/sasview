@@ -34,7 +34,7 @@ class Model(Model1DPlugin): ##DO NOT CHANGE THIS LINE!!!
     """
     ## YOU CAN MODIFY THE LINE BELLOW. CHANGE ONLY WORDS BETWEEN " " 
     ## TO RENAME YOUR MODEL
-    name = "sin(poly)/(poly)" ## <----- NAME OF THE MODEL   
+    name = "testmodel_2" ## <----- FILE NAME (NAME OF THE MODEL)  
                                 
     def __init__(self):      ##DO NOT CHANGE THIS LINE!!!
         """

@@ -3395,7 +3395,25 @@ class ViewApp(wx.App):
         if self.frame is not None:
             self.frame.set_input_file(input_file=input_file)
          
-            
+    def clean_plugin_models(self, path): 
+        """
+        Delete plugin models  in app folder
+        
+        :param path: path of the plugin_models folder in app
+        """
+        # do it only the first time app loaded
+        # delete unused model folder    
+        model_folder = os.path.join(PATH_APP, path)
+        if os.path.exists(model_folder) and os.path.isdir(model_folder):
+            if len(os.listdir(model_folder)) > 0:
+                try:
+                    for file in os.listdir(model_folder):
+                        file_path = os.path.join(model_folder, file)
+                        if os.path.isfile(file_path):
+                            os.remove(file_path)
+                except:
+                    pass
+              
     def set_manager(self, manager):
         """
         Sets a reference to the application manager

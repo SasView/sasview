@@ -106,15 +106,16 @@ def find_plugins_dir():
                 break
         if not p_dir:
             raise
-
     # Place example user models as needed
-    for file in os.listdir(p_dir):
-        file_path = os.path.join(p_dir, file)
-        if os.path.isfile(file_path):
-            if file.split(".")[-1] == 'py' and\
-                file.split(".")[0] != '__init__':
-                if not os.path.isfile(os.path.join(dir, file)):
-                    shutil.copy(file_path, dir)
+    if os.path.isdir(p_dir):
+        for file in os.listdir(p_dir):
+            file_path = os.path.join(p_dir, file)
+            if os.path.isfile(file_path):
+                if file.split(".")[-1] == 'py' and\
+                    file.split(".")[0] != '__init__':
+                    if not os.path.isfile(os.path.join(dir, file)):
+                        shutil.copy(file_path, dir)
+
     return dir
 
 
@@ -571,16 +572,17 @@ class ModelManagerBase:
         self.model_name_list.append(LineModel.__name__)
         
         from sans.models.ReflectivityModel import ReflectivityModel
+        self.shape_indep_list.append(ReflectivityModel)
         self.multi_func_list.append(ReflectivityModel)
         
         from sans.models.ReflectivityIIModel import ReflectivityIIModel
+        self.shape_indep_list.append(ReflectivityIIModel)
         self.multi_func_list.append(ReflectivityIIModel)
     
         #Looking for plugins
         self.stored_plugins = self.findModels()
         self.plugins = self.stored_plugins.values()
-        self.plugins.append(ReflectivityModel)
-        self.plugins.append(ReflectivityIIModel)
+
         self._get_multifunc_models()
        
         return 0
@@ -629,10 +631,7 @@ class ModelManagerBase:
                     break
             self.stored_plugins[name] = plug
             self.plugins.append(plug)
-        from sans.models.ReflectivityModel import ReflectivityModel
-        from sans.models.ReflectivityIIModel import ReflectivityIIModel
-        self.plugins.append(ReflectivityModel)
-        self.plugins.append(ReflectivityIIModel)
+
         self.model_combobox.reset_list("Customized Models", self.plugins)
         return self.model_combobox.get_list()
        

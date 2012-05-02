@@ -31,6 +31,7 @@ from sans.guiframe.gui_style import GUIFRAME
 from welcome_panel import WelcomePanel
 # For py2exe, import config here
 import local_config
+PLUGIN_MODEL_DIR = 'plugin_models'
 
 def run():
     sys.path.append(os.path.join("..","..",".."))
@@ -103,7 +104,8 @@ class SansView():
       
         # Build the GUI
         self.gui.build_gui()
-        
+        # delete unused model folder    
+        self.gui.clean_plugin_models(PLUGIN_MODEL_DIR)
         # Start the main loop
         self.gui.MainLoop()  
        

@@ -42,9 +42,9 @@ class Model(Model1DPlugin):
     Use for A*p1(Q)+(1-A)*p2(Q); 
     Note: P(Q) refers to 'form factor' model.
     """
-    name = ""
+    name = "sum_Ap1_1_Ap2" ## <----- FILE NAME (NAME OF THE MODEL) 
     def __init__(self):
-        Model1DPlugin.__init__(self, name='')
+        Model1DPlugin.__init__(self, name=self.name)
         """
         :param p_model1: a form factor, P(Q)
         :param p_model2: another form factor, P(Q)
@@ -52,10 +52,7 @@ class Model(Model1DPlugin):
         p_model1 = P1()
         p_model2 = P2()
         ## Setting  model name model description
-        self.description=""
-        self.name = self._get_name(p_model1.name, p_model2.name)
-        self.description = p_model1.name+"\n"
-        self.description += p_model2.name+"\n"
+        self.description = ""
         self.fill_description(p_model1, p_model2)
 
         ## Define parameters
@@ -390,7 +387,7 @@ class Model(Model1DPlugin):
         Fill the description for P(Q)+P(Q)
         """
         description = ""
-        description +="This model gives the summation of  %s and %s.\n"% \
+        description +="This model gives the summation of (A*%s) and ((1-A)*%s).\n"% \
                                         ( p_model1.name, p_model2.name )
         self.description += description
 

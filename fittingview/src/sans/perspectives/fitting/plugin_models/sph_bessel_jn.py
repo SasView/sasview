@@ -35,7 +35,7 @@ class Model(Model1DPlugin): ##DO NOT CHANGE THIS LINE!!!
     """
     ## YOU CAN MODIFY THE LINE BELLOW. CHANGE ONLY WORDS BETWEEN " " 
     ## TO RENAME YOUR MODEL
-    name = "C*sph_jn(Ax+B)+D" ## <----- NAME OF THE MODEL   
+    name = "sph_bessel_jn" ## <----- FILE NAME (NAME OF THE MODEL)   
                                 
     def __init__(self):      ##DO NOT CHANGE THIS LINE!!!
         """
