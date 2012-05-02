@@ -3412,7 +3412,8 @@ class ViewApp(wx.App):
                         if os.path.isfile(file_path):
                             os.remove(file_path)
                 except:
-                    pass
+                    logging.error("gui_manager.clean_plugin_models:\n  %s" \
+                                  % sys.exc_value)
               
     def set_manager(self, manager):
         """
