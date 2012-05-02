@@ -470,11 +470,11 @@ ul
 <a href="#Absolute%20Power_Law">AbsolutePower_Law</a>,
 <a href="#BEPolyelectrolyte">BEPolyelectrolyte</a>,
 <a href="#BroadPeak">BroadPeak,<span style="text-decoration: none;"> </span><span style="color: windowtext; text-decoration: none;"><u><span style="color: blue;">CorrLength</span></u></span><span style="color: windowtext; text-decoration: none;">,</span></a>
-<a href="#DAB_Model">DAB_Model</a>, <a href="#Debye">Debye</a>, <a href="#Number_Density_Fractal">FractalModel</a>, <a href="#FractalCoreShell">FractalCoreShell</a>, <a href="#GaussLorentzGel">GaussLorentzGel</a>, <a href="#Guinier">Guinier</a>, <a href="#GuinierPorod">GuinierPorod</a>, <a href="#Lorentz">Lorentz</a>, <a href="#Mass_Fractal">MassFractalModel</a>, <a href="#MassSurface_Fractal">MassSurfaceFractal</a>, <a href="#Peak%20Gauss%20Model">PeakGaussModel</a>, <a href="#Peak%20Lorentz%20Model">PeakLorentzModel</a>, <a href="#Poly_GaussCoil">Poly_GaussCoil</a>, <a href="#PolymerExclVolume">PolyExclVolume</a>, <a href="#PorodModel">PorodModel</a>, <a href="#RPA10Model">RPA10Model</a>, <a href="#Surface_Fractal">SurfaceFractalModel</a>,
-<a href="#Teubner%20Strey">Teubner Strey</a>, <a href="#TwoLorentzian">TwoLorentzian</a>, <a href="#TwoPowerLaw">TwoPowerLaw</a>, <a href="#UnifiedPowerRg">UnifiedPowerRg</a>, <a href="#LineModel">LineModel</a>.</li>
+<a href="#DAB_Model">DAB_Model</a>, <a href="#Debye">Debye</a>, <a href="#Number_Density_Fractal">FractalModel</a>, <a href="#FractalCoreShell">FractalCoreShell</a>, <a href="#GaussLorentzGel">GaussLorentzGel</a>, <a href="#Guinier">Guinier</a>, <a href="#GuinierPorod">GuinierPorod</a>, <a href="#Lorentz">Lorentz</a>, <a href="#Mass_Fractal">MassFractalModel</a>, <a href="#MassSurface_Fractal">MassSurfaceFractal</a>, <a href="#Peak%20Gauss%20Model">PeakGaussModel</a>, <a href="#Peak%20Lorentz%20Model">PeakLorentzModel</a>, <a href="#Poly_GaussCoil">Poly_GaussCoil</a>, <a href="#PolymerExclVolume">PolyExclVolume</a>, <a href="#PorodModel">PorodModel</a>, <a href="#RPA10Model">RPA10Model</a><a href="model_functions.html#ReflectivityIIModel">, </a><a href="#Surface_Fractal">SurfaceFractalModel</a>,
+<a href="#Teubner%20Strey">Teubner Strey</a>, <a href="#TwoLorentzian">TwoLorentzian</a>, <a href="#TwoPowerLaw">TwoPowerLaw</a>, <a href="#UnifiedPowerRg">UnifiedPowerRg</a>, <a href="#LineModel">LineModel</a>, <a href="#ReflectivityModel">ReflectivityModel</a>,
+<a href="#ReflectivityIIModel">ReflectivityIIModel</a>.</li>
 <li class="MsoNormal" style="line-height: 115%;"><a href="#Model"><b>Customized Models</b></a>:
-<a href="#A+Bcos%282x%29+Csin%282x%29">A+Bcos(2x)+Csin(2x)</a>,
-<a href="#sinpoly_poly">sin(poly)/(poly)</a>, <a href="#CM+PEV">CM+PEV</a>, <a href="#A*CM+%281-A%29*PEV">A*CM+(1-A)*PEV</a>, <a href="#polynomial5">polynomial5</a>, <a href="#C*sph_jn%28Ax+B%29+D">C*sph_jn(Ax+B)+D</a>, <a href="#ReflectivityModel">ReflectivityModel</a>, <a href="#ReflectivityIIModel">ReflectivityIIModel</a>.</li>
+<a href="#testmodel">testmodel</a>, <a href="#testmodel_2">testmodel_2</a>, <a href="#sum_p1_p2">sum_p1_p2</a>, <a href="#sum_Ap1_1_Ap2">sum_Ap1_1_Ap2</a>, <a href="#polynomial5">polynomial5</a>, <a href="#sph_bessel_jn">sph_bessel_jn</a>.</li>
 <li class="MsoNormal" style="line-height: 115%;"><a href="#Structure_Factors"><b>Structure Factors</b></a>:
 <a href="#HardsphereStructure">HardSphereStructure</a>,
 <a href="#SquareWellStructure">SquareWellStructure</a>,
@@ -3346,8 +3346,8 @@ and Background=0.0 cm<sup> -1</sup>.</p>
 for a circular cylinder
 with a core-shell scattering length density profile. The form factor is
 normalized by the particle volume. This model is a more general case of
-<a href="#CoreShellCylinderModel">
-core-shell cylinder model </a> (see&nbsp;above and reference below) in
+<a href="#CoreShellCylinderModel">core-shell cylinder
+model </a> (see&nbsp;above and reference below) in
 that the parameters of the shell are separated into a face-shell and
 a rim-shell so that users can set different values of the thicknesses
 and slds.&nbsp;</p>
@@ -10724,8 +10724,77 @@ shape independent models.</p>
 </tbody>
 </table>
 </div>
-<p class="MsoNormal" style="margin-left: 0.25in;"><b><span style="font-size: 14pt;">&nbsp;</span></b></p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;"></span></b></p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">3.27.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></b><a name="ReflectivityModel"><b><span style="font-size: 14pt;">ReflectivityModel</span></b></a></p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">&nbsp;</span></b></p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;">This
+model calculates the reflectivity and uses the Parrett algorithm. Up to
+nine
+film layers are supported between Bottom(substrate) and
+Medium(Superstrate
+where the neutron enters the first top film). Each layers are composed
+of [ ½
+of the interface(from the previous layer or substrate) + flat portion +
+½ of
+the interface(to the next layer or medium)]. Only two simple
+interfacial
+functions are selectable, error function and linear function. The each
+interfacial thickness is equivalent to (- 2.5 sigma to +2.5 sigma for
+the error
+function, sigma=roughness).</p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;">Note:
+This model was contributed by an interested user. </p>
+<p>&nbsp;</p>
+<p align="center"> <img src="image231.bmp"></p>
+<p class="MsoNormal" style="">&nbsp;</p>
+<p class="MsoNormal" style="text-align: center;" align="center"><b>Figure.
+Comparison (using the SLD profile below) with NISTweb calculation
+(circles): http://www.ncnr.nist.gov/resources/reflcalc.html.</b></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p align="center"> <img src="image232.gif"></p>
+<p class="MsoNormal" style="">&nbsp;</p>
+<p class="MsoNormal" style="text-align: center;" align="center"><b>Figure.
+SLD profile used for the calculation(above).</b></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"></p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;">&nbsp;</p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">3.28.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></b><a name="ReflectivityIIModel"><b><span style="font-size: 14pt;">ReflectivityIIModel</span></b></a></p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">&nbsp;</span></b></p>
+<p class="MsoNormal">&nbsp;&nbsp;&nbsp; Same
+as the ReflectivityModel except
+that the it is more
+customizable. More interfacial functions are supplied. The number of
+points
+(npts_inter) for each interface can be choosen.
+&nbsp;&nbsp;&nbsp; The constant (A below
+but 'nu' as
+a parameter name of the model) for exp, erf, or power-law is an input.
+The SLD at
+the interface between layers, <i><span style="font-family: Symbol;">r</span><sub>inter_i</sub></i>,
+is calculated with a function chosen by a user, where the functions are:</p>
+<p class="MsoListParagraph" style="margin-left: 0.55in;">1)
+Erf; </p>
+<p> <img src="image051.gif"></p>
+<p class="MsoListParagraph" style="margin-left: 0.55in;">2)
+Power-Law; </p>
+<p> <span><img src="image050.gif"></span></p>
+<p> </p>
+<p> </p>
+<p class="MsoListParagraph" style="margin-left: 0.55in;">3)
+Exp; </p>
+<p> <span><img src="image049.gif"></span></p>
+<p> </p>
+<p class="MsoNormal">&nbsp;&nbsp;&nbsp; Note:
+This
+model was implemented by an interested user. </p>
 <p class="MsoNormal"><b><span style="font-size: 14pt;">&nbsp;</span></b></p>
+<p class="MsoNormal"><b><span style="font-size: 14pt;"></span></b></p>
+<p class="MsoNormal"><b><span style="font-size: 14pt;"></span></b></p>
 <p class="MsoNormal"><b><span style="font-size: 14pt;">&nbsp;</span></b></p>
 <p class="MsoNormal" style="margin-left: 0.25in; text-indent: -0.25in;"><b><span style="font-size: 16pt;">4.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;
 </span></b><a name="Model"><b><span style="font-size: 16pt;">Customized
@@ -10735,16 +10804,14 @@ Models </span></b></a></p>
 model functions can be
 redefined or added by users (See SansView tutorial for details). </p>
 <p class="MsoBodyText" style="margin-left: 0.25in;">&nbsp;</p>
-<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">4.1.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></b><a name="A+Bcos(2x)+Csin(2x)"><b><span style="font-size: 14pt;">A+Bcos(2x)+Csin(2x)</span></b></a></p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">4.1.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></b><a name="testmodel"><b><span style="font-size: 14pt;">testmodel</span></b></a></p>
 <p class="MsoListParagraph" style="margin-left: 0.55in;"><b><span style="font-size: 14pt;">&nbsp;</span></b></p>
 <p class="MsoNormal">This function, as an example of a
 user defined function, calculates
 the intensity = A + Bcos(2q) + Csin(2q).</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">4.2.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></b><a name="sin(poly)/(poly)"><b><span style="font-size: 14pt;">sin(poly)/poly
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">4.2.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></b><a name="testmodel_2"><b><span style="font-size: 14pt;">testmodel_2
 </span></b></a></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal">This function, as an example of a
@@ -10755,7 +10822,7 @@ calculates the intensity =&nbsp; scale * sin(f)/f, where f = A + Bq
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">4.3.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></b><a name="CM+PEV"><b><span style="font-size: 14pt;">CM+PEV
+</span></b><a name="sum_p1_p2"><b><span style="font-size: 14pt;">sum_p1_p2
 </span></b></a></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal">This function, as an example of a
@@ -10769,8 +10836,7 @@ functional models.
 </p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">4.4.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></b><a name="A*CM+(1-A)*PEV"><b><span style="font-size: 14pt;">A*CM+(1-A)*PEV
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">4.4.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></b><a name="sum_Ap1_1_Ap2"><b><span style="font-size: 14pt;">sum_Ap1_1_Ap2
 </span></b></a></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal">This function, as an example of a
@@ -10796,8 +10862,7 @@ This model can be modified and compiled from 'Edit Custom Model' in the
 </p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">4.6.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></b><a name="C*sph_jn(Ax+B)+D"><b><span style="font-size: 14pt;">C*sph_jn(Ax+B)+D
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">4.6.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></b><a name="sph_bessel_jn"><b><span style="font-size: 14pt;">sph_bessel_jn
 </span></b></a></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal">This function, as an example of a
@@ -10808,79 +10873,6 @@ This model can be modified and compiled from 'Edit Custom Model' in the
 'Fitting' menu.
 </p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal">&nbsp;</p>
-<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">4.7.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></b><a name="ReflectivityModel"><b><span style="font-size: 14pt;">ReflectivityModel</span></b></a></p>
-<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">&nbsp;</span></b></p>
-<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;">This
-model calculates the reflectivity and uses the Parrett algorithm. Up to
-nine
-film layers are supported between Bottom(substrate) and
-Medium(Superstrate
-where the neutron enters the first top film). Each layers are composed
-of [ ½
-of the interface(from the previous layer or substrate) + flat portion +
-½ of
-the interface(to the next layer or medium)]. Only two simple
-interfacial
-functions are selectable, error function and linear function. The each
-interfacial thickness is equivalent to (- 2.5 sigma to +2.5 sigma for
-the error
-function, sigma=roughness).</p>
-<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;">Note:
-This model was contributed by an interested user. </p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
-<p align="center"> <img src="image231.bmp"></p>
-<p class="MsoNormal" style="">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><b>Figure.
-Comparison (using the SLD profile below) with NISTweb calculation
-(circles): http://www.ncnr.nist.gov/resources/reflcalc.html.</b></p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
-<p align="center"> <img src="image232.gif"></p>
-<p class="MsoNormal" style="">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><b>Figure.
-SLD profile used for the calculation(above).</b></p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
-<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;">&nbsp;</p>
-<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;">&nbsp;</p>
-<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;">&nbsp;</p>
-<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">4.8.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-</span></b><a name="ReflectivityIIModel"><b><span style="font-size: 14pt;">ReflectivityIIModel</span></b></a></p>
-<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">&nbsp;</span></b></p>
-<p class="MsoNormal">Same as the ReflectivityModel except
-that the it is more
-customizable. More interfacial functions are supplied. The number of
-points
-(npts_inter) for each interface can be choosen. The constant (A below
-but 'nu' as
-a parameter name of the model) for exp, erf, or power-law is an input.
-The SLD at
-the interface between layers, <i><span style="font-family: Symbol;">r</span><sub>inter_i</sub></i>,
-is calculated with a function chosen by a user, where the functions are:</p>
-<p class="MsoListParagraph" style="margin-left: 0.55in;">1)
-Erf; </p>
-<p> <img src="image051.gif"></p>
-<p class="MsoListParagraph" style="margin-left: 0.55in;">2)
-Power-Law; </p>
-<p> <span><img src="image050.gif"></span></p>
-<p> </p>
-<p> </p>
-<p class="MsoListParagraph" style="margin-left: 0.55in;">3)
-Exp; </p>
-<p> <span><img src="image049.gif"></span></p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p class="MsoNormal">Note: This
-model was implemented by an interested user. </p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
 <p class="MsoListParagraph" style="margin-left: 0.25in; text-indent: -0.25in;"><b><span style="font-size: 16pt;">5.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;
 </span></b><a name="Structure_Factors"><b><span style="font-size: 16pt;">Structure
 Factors</span></b></a></p>
