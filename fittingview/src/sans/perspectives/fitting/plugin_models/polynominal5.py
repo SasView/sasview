@@ -19,7 +19,8 @@ from sans.models.pluginmodel import Model1DPlugin  ##DO NOT CHANGE THIS LINE!!!
 ## AND http://www.scipy.org/Numpy_Functions_by_Category
 import math                    ##DO NOT CHANGE THIS LINE!!!
 import numpy                   ##DO NOT CHANGE THIS LINE!!!
-
+import os
+import sys
 ## <-----  SIGN DEFINES WHERE YOU CAN MODIFY THE CODE
 
 class Model(Model1DPlugin): ##DO NOT CHANGE THIS LINE!!!
@@ -29,9 +30,7 @@ class Model(Model1DPlugin): ##DO NOT CHANGE THIS LINE!!!
     
     ##EXAMPLE: Class that evaluates a polynomial model. 
     """
-    ## YOU CAN MODIFY THE LINE BELLOW. CHANGE ONLY WORDS BETWEEN " " 
-    ## TO RENAME YOUR MODEL: THIS NAME IS WHAT YOU SEE ON GUI.
-    name = "polynomial5"        ## <----- FILE NAME (NAME OF THE MODEL)   
+    name = ""  
                                 
     def __init__(self):      ##DO NOT CHANGE THIS LINE!!!
         """
@@ -47,6 +46,8 @@ class Model(Model1DPlugin): ##DO NOT CHANGE THIS LINE!!!
         self.params['D'] = 0.0       ## <-----                    
         self.params['E'] = 0.0       ## <-----                  
         self.params['F'] = 0.0       ## <-----   
+        # Set the name same as the file name
+        self.name = self.get_fname()     ##DO NOT CHANGE THIS LINE!!!
         ## YOU CAN MODIFY THE LINE BELLOW.MODIFY WORDS BETWEEN """   """  ONLY!!!!
         self.description = """
             a + b * x + c * math.pow(x,2) + d * math.pow(x,3) \n
@@ -87,7 +88,17 @@ class Model(Model1DPlugin): ##DO NOT CHANGE THIS LINE!!!
             result = poly                   ## <-----    
 
         return result       ## MODIFY ONLY RESULT. DON'T DELETE RETURN!!!!
-
+    
+    ## DO NOT MODIFY THE FOLLOWING LINES!!!!!!!!!!!!!!!!       
+    def get_fname(self):
+        """
+        Get the model name same as the file name
+        """
+        path = sys._getframe().f_code.co_filename
+        basename  = os.path.basename(path)
+        name, _ = os.path.splitext(basename)
+        return name
+            
 ###############################################################################
 ## THIS IS FOR TEST. DO NOT MODIFY THE FOLLOWING LINES!!!!!!!!!!!!!!!!       
 if __name__ == "__main__": 

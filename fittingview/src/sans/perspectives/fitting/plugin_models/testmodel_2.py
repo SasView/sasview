@@ -17,7 +17,8 @@ Otherwise, it could be removed in the future on re-installation of the SansView.
 from sans.models.pluginmodel import Model1DPlugin  ##DO NOT CHANGE THIS LINE!!!
 import math                     ##DO NOT CHANGE THIS LINE!!!
 import numpy                    ##DO NOT CHANGE THIS LINE!!!
-
+import os
+import sys
 ##PLEASE READ COMMENTS CAREFULLY !!! COMMENT ARE IN CAPITAL LETTERS AND AFTER ##
 ## THESE COMMENTS ARE THERE TO GUIDE YOU. YOU CAN REMOVE THEM ONLY WHEN YOU ARE
 ## CONFORTABLE ENOUGH WITH OUR MODEL PLUGIN OPTION
@@ -32,9 +33,7 @@ class Model(Model1DPlugin): ##DO NOT CHANGE THIS LINE!!!
     
     ##EXAMPLE: Class that evaluates a polynomial model. 
     """
-    ## YOU CAN MODIFY THE LINE BELLOW. CHANGE ONLY WORDS BETWEEN " " 
-    ## TO RENAME YOUR MODEL
-    name = "testmodel_2" ## <----- FILE NAME (NAME OF THE MODEL)  
+    name = "" 
                                 
     def __init__(self):      ##DO NOT CHANGE THIS LINE!!!
         """
@@ -45,7 +44,8 @@ class Model(Model1DPlugin): ##DO NOT CHANGE THIS LINE!!!
         ## EDIT PARAMETERS' NAMES AND VALUE
         ## DELETE MODIFIABLE LINE HERE WILL REDUCE THE NUMBER OF PARAMETERS
         self.params = {}                ##DO NOT CHANGE THIS LINE!!!
-        
+        # Set the name same as the file name
+        self.name = self.get_fname()     ##DO NOT CHANGE THIS LINE!!!
         ## YOU CAN MODIFY THE LINE BELLOW.CHANGE WORD BETWEEN ' ' AND NUMBER 
         ## YOU CAN ALSO DELETE THIS LINE
         self.params['scale'] = 1.0   ## <-----   
@@ -147,7 +147,17 @@ class Model(Model1DPlugin): ##DO NOT CHANGE THIS LINE!!!
         result *=scl                       ## <-----   
 
         return result ## MODIFY ONLY RESULT. DON'T DELETE RETURN!!!!
-    
+
+    ## DO NOT MODIFY THE FOLLOWING LINES!!!!!!!!!!!!!!!!   
+    def get_fname(self):
+        """
+        Get the model name same as the file name
+        """
+        path = sys._getframe().f_code.co_filename
+        basename  = os.path.basename(path)
+        name, _ = os.path.splitext(basename)
+        return name
+                
 ## DO NOT MODIFY THE FOLLOWING LINES!!!!!!!!!!!!!!!!       
 if __name__ == "__main__": 
     m= Model() 

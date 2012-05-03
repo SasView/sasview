@@ -323,8 +323,8 @@ class TextDialog(wx.Dialog):
                 out_f.write(line % (name2, name2) + "\n")
             elif line.count("self.description = '%s'"):
                 out_f.write(line % description + "\n")
-            elif line.count("self.name = '%s'"):
-                out_f.write(line % name + "\n")
+            #elif line.count("self.name = '%s'"):
+            #    out_f.write(line % name + "\n")
             else:
                 out_f.write(line + "\n")
         out_f.close()
@@ -689,8 +689,8 @@ class EditorPanel(wx.ScrolledWindow):
             elif line.count("#import scipy?"):
                 if has_scipy:
                     out_f.write("import scipy" + "\n")
-            elif line.count("name = "):
-                out_f.write(line % self.name + "\n")
+            #elif line.count("name = "):
+            #    out_f.write(line % self.name + "\n")
             elif line:
                 out_f.write(line + "\n")
         # run string for 2d
@@ -776,12 +776,16 @@ class EditorWindow(wx.Frame):
 CUSTOM_TEMPLATE = """
 from sans.models.pluginmodel import Model1DPlugin
 from math import *
+import os
+import sys
 import numpy
 #import scipy?
 class Model(Model1DPlugin):
-    name = "%s"                             
+    name = ""                             
     def __init__(self):
-        Model1DPlugin.__init__(self, name=self.name)                                                     
+        Model1DPlugin.__init__(self, name=self.name)  
+        #set name same as file name 
+        self.name = self.get_fname()                                                   
         #self.params here
         self.description = "%s"
         self.set_details()
@@ -826,6 +830,11 @@ CUSTOM_2D_TEMP = """
             return iq_array
 """
 TEST_TEMPLATE = """
+    def get_fname(self):
+        path = sys._getframe().f_code.co_filename
+        basename  = os.path.basename(path)
+        name, _ = os.path.splitext(basename)
+        return name
 ######################################################################
 ## THIS IS FOR TEST. DO NOT MODIFY THE FOLLOWING LINES!!!!!!!!!!!!!!!!       
 if __name__ == "__main__": 
@@ -853,6 +862,8 @@ from sans.models.%s import %s as P1
 
 #P2_model: 
 from sans.models.%s import %s as P2
+import os
+import sys
 
 class Model(Model1DPlugin):
     name = ""
@@ -862,7 +873,7 @@ class Model(Model1DPlugin):
         p_model2 = P2()
         ## Setting  model name model description
         self.description = '%s'
-        self.name = '%s'
+        self.name = self.get_fname()
         if self.name.rstrip().lstrip() == '':
             self.name = self._get_name(p_model1.name, p_model2.name)
         if self.description.rstrip().lstrip() == '':
@@ -1117,7 +1128,13 @@ new_parameter in self.p_model2.dispersion.keys():
         description +="This model gives the summation of  %s and %s. "% \
 ( p_model1.name, p_model2.name )
         self.description += description
-        
+          
+    def get_fname(self):
+        path = sys._getframe().f_code.co_filename
+        basename  = os.path.basename(path)
+        name, _ = os.path.splitext(basename)
+        return name     
+           
 if __name__ == "__main__": 
     m1= Model() 
     #m1.setParam("p1_scale", 25)  

@@ -1,7 +1,8 @@
 # A sample of an experimental model function for Sum(APmodel1,(1-A)Pmodel2)
 import copy
 from sans.models.pluginmodel import Model1DPlugin
-
+import os
+import sys
 """
 ## *****************************************************************************
 Please select the 'Compile' from the menubar after the modification and saving.
@@ -42,7 +43,7 @@ class Model(Model1DPlugin):
     Use for A*p1(Q)+(1-A)*p2(Q); 
     Note: P(Q) refers to 'form factor' model.
     """
-    name = "sum_Ap1_1_Ap2" ## <----- FILE NAME (NAME OF THE MODEL) 
+    name = ""  
     def __init__(self):
         Model1DPlugin.__init__(self, name=self.name)
         """
@@ -54,7 +55,8 @@ class Model(Model1DPlugin):
         ## Setting  model name model description
         self.description = ""
         self.fill_description(p_model1, p_model2)
-
+        # Set the name same as the file name
+        self.name = self.get_fname()     ##DO NOT CHANGE THIS LINE!!!
         ## Define parameters
         self.params = {}
 
@@ -390,7 +392,17 @@ class Model(Model1DPlugin):
         description +="This model gives the summation of (A*%s) and ((1-A)*%s).\n"% \
                                         ( p_model1.name, p_model2.name )
         self.description += description
-
+    
+    ## DO NOT MODIFY THE FOLLOWING LINES!!!!!!!!!!!!!!!!       
+    def get_fname(self):
+        """
+        Get the model name same as the file name
+        """
+        path = sys._getframe().f_code.co_filename
+        basename  = os.path.basename(path)
+        name, _ = os.path.splitext(basename)
+        return name
+            
 ### FOR TEST                
 if __name__ == "__main__": 
     m1= Model() 
