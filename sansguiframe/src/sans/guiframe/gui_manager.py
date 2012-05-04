@@ -173,9 +173,6 @@ except:
 
 DEFAULT_STYLE = config.DEFAULT_STYLE
 
-
-PLOPANEL_HEIGTH = config.PLOPANEL_HEIGTH
-DATAPANEL_HEIGHT = config.DATAPANEL_HEIGHT
 PLUGIN_STATE_EXTENSIONS =  config.PLUGIN_STATE_EXTENSIONS
 OPEN_SAVE_MENU = config.OPEN_SAVE_PROJECT_MENU
 VIEW_MENU = config.VIEW_MENU
@@ -877,20 +874,21 @@ class ViewerFrame(wx.Frame):
         find the proper size of the current panel
         get the proper panel width and height
         """
-        panel_height_min = self._window_height
-        panel_width_min = self._window_width 
+        ## Check and set the size
+        if DATAPANEL_WIDTH < 0:
+            panel_width = int(self._window_width * 0.22)
+        else:
+            panel_width = DATAPANEL_WIDTH
+        panel_height = int(self._window_height * 0.9)
         style = self.__gui_style & (GUIFRAME.MANAGER_ON)
         if self._data_panel is not None  and (p == self._data_panel):
-            panel_width_min = DATAPANEL_WIDTH
-            panel_height_min = self._window_height * 0.8
-            return panel_width_min, panel_height_min
+            return panel_width, panel_height
         if hasattr(p, "CENTER_PANE") and p.CENTER_PANE:
             style = self.__gui_style & (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON)
             if style == (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON):
-                panel_width_min = self._window_width -\
-                            (DATAPANEL_WIDTH +config.PLOPANEL_WIDTH)
-            return panel_width_min, panel_height_min
-        return panel_width_min, panel_height_min
+                panel_width = self._window_width - panel_width
+            return panel_width, panel_height
+        return panel_width, panel_height
     
     def _load_panels(self):
         """
@@ -946,7 +944,6 @@ class ViewerFrame(wx.Frame):
         for panel_class in panels:
             p = panel_class
             id = wx.NewId()
-            #w, h = self._get_panels_size(p)
             # Check whether we need to put this panel
             # in the center pane
             if hasattr(p, "CENTER_PANE") and p.CENTER_PANE:
@@ -1085,6 +1082,14 @@ class ViewerFrame(wx.Frame):
         
         style1 = self.__gui_style & GUIFRAME.FIXED_PANEL
         style2 = self.__gui_style & GUIFRAME.FLOATING_PANEL
+        
+        ## Check and set the size
+        if PLOPANEL_WIDTH < 0:
+            p_panel_width = int(self._window_width * 0.36)
+        else:
+            p_panel_width = PLOPANEL_WIDTH
+        p_panel_height = int(p_panel_width * 0.75)
+        
         if style1 == GUIFRAME.FIXED_PANEL:
             self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                               Name(p.window_name).
@@ -1097,9 +1102,8 @@ class ViewerFrame(wx.Frame):
                               Resizable(True).
                               # Use a large best size to make sure the AUI 
                               # manager takes all the available space
-                              BestSize(wx.Size(PLOPANEL_WIDTH, 
-                                               PLOPANEL_HEIGTH)))
-        
+                              BestSize(wx.Size(p_panel_width, 
+                                               p_panel_height)))
             self._popup_fixed_panel(p)
     
         elif style2 == GUIFRAME.FLOATING_PANEL:
@@ -1109,11 +1113,10 @@ class ViewerFrame(wx.Frame):
                               Resizable(True).
                               # Use a large best size to make sure the AUI
                               #  manager takes all the available space
-                              BestSize(wx.Size(PLOPANEL_WIDTH, 
-                                               PLOPANEL_HEIGTH)))
+                              BestSize(wx.Size(p_panel_width, 
+                                               p_panel_height)))
             
             self._popup_floating_panel(p)
-        
         # Register for closing of panels
         self.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.on_panel_close)
         # Register for showing/hiding the panel
@@ -2847,13 +2850,14 @@ class ViewerFrame(wx.Frame):
         """
         style = self.__gui_style & GUIFRAME.FIXED_PANEL
         if style == GUIFRAME.FIXED_PANEL:
-            self._mgr.GetPane(p.window_name).Dock()
-            self._mgr.GetPane(p.window_name).Floatable()
-            self._mgr.GetPane(p.window_name).Right()
-            self._mgr.GetPane(p.window_name).TopDockable(False)
-            self._mgr.GetPane(p.window_name).BottomDockable(False)
-            self._mgr.GetPane(p.window_name).LeftDockable(False)
-            self._mgr.GetPane(p.window_name).RightDockable(True)
+            pane = self._mgr.GetPane(p.window_name)
+            pane.Dock()
+            pane.Floatable()
+            pane.Right()
+            pane.TopDockable(False)
+            pane.BottomDockable(False)
+            pane.LeftDockable(False)
+            pane.RightDockable(True)
             self._mgr.Update()
             
     def _popup_floating_panel(self, p):
@@ -2861,9 +2865,10 @@ class ViewerFrame(wx.Frame):
         """
         style = self.__gui_style &  GUIFRAME.FLOATING_PANEL
         if style == GUIFRAME.FLOATING_PANEL: 
-            self._mgr.GetPane(p.window_name).Floatable(True)
-            self._mgr.GetPane(p.window_name).Float()
-            self._mgr.GetPane(p.window_name).Dockable(False)
+            pane = self._mgr.GetPane(p.window_name)
+            pane.Floatable(True)
+            pane.Float()
+            pane.Dockable(False)
             self._mgr.Update()
             
     def enable_add_data(self, new_plot):
@@ -3477,12 +3482,17 @@ class ViewApp(wx.App):
         posX, posY, displayWidth, displayHeight = displayRect        
         customWidth, customHeight = size
         
-        # If the custom screen is bigger than the 
-        # window screen than make maximum size
-        if customWidth > displayWidth:
-            customWidth = displayWidth
-        if customHeight > displayHeight:
-            customHeight = displayHeight
+        # If the custom size is default, set 90% of the screen size
+        if customWidth < 0 and customHeight < 0:
+            customWidth = displayWidth * 0.9
+            customHeight = displayHeight * 0.9
+        else:
+            # If the custom screen is bigger than the 
+            # window screen than make maximum size
+            if customWidth > displayWidth:
+                customWidth = displayWidth
+            if customHeight > displayHeight:
+                customHeight = displayHeight
             
         # Note that when running Linux and using an Xming (X11) server on a PC
         # with a dual  monitor configuration, the reported display size may be
@@ -3493,7 +3503,9 @@ class ViewApp(wx.App):
         
         # If dual screen registered as 1 screen. Make width half.
         if displayWidth > (displayHeight*2):
-            customWidth = displayWidth/2
+            if (customWidth == displayWidth):
+                customWidth = displayWidth/2
+            # and set the position to be the corner of the screen.
             posX = 0
             posY = 0
             
@@ -3503,7 +3515,7 @@ class ViewApp(wx.App):
             posY = (displayHeight - customHeight)/2
         
         # Return the suggested position and size for the application frame.    
-        return (posX, posY), (min(displayWidth, customWidth), min(displayHeight, customHeight))
+        return (posX, posY), (customWidth, customHeight)
 
     
     def display_splash_screen(self, parent, 
