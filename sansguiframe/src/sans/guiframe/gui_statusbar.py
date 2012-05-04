@@ -355,7 +355,7 @@ class StatusBar(wxStatusB):
             if self.enable_clear_gauge():
                 self.timer.Stop()
                 self.progress = 0
-                self.gauge.SetValue(90) 
+                self.gauge.SetValue(100) 
                 self.timer_stop.Start(5) 
                     
     def set_status(self, event):

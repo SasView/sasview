@@ -223,7 +223,8 @@ class DialogAbout(wx.Dialog):
         sizer_main.Add(sizer_logos, 0, wx.EXPAND, 0)
         sizer_main.Add(self.static_line_3, 0, wx.EXPAND, 0)
         sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        sizer_button.Add(self.button_OK, 0, wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+        sizer_button.Add(self.button_OK, 0, 
+                         wx.RIGHT|wx.ADJUST_MINSIZE|wx.BOTTOM, 10)
         sizer_main.Add(sizer_button, 0, wx.EXPAND, 0)
         self.SetAutoLayout(True)
         self.SetSizer(sizer_main)
