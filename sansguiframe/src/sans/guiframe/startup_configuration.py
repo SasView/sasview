@@ -18,10 +18,10 @@ from sans.guiframe.gui_style import GUIFRAME
 from sans.guiframe import gui_manager as CURRENT
 from sans.guiframe.customdir  import SetupCustom
 # default configuration
-DEFAULT_STRINGS = {'GUIFRAME_WIDTH':1150,
-                   'GUIFRAME_HEIGHT':840,
-                   'PLOPANEL_WIDTH':415,
-                   'DATAPANEL_WIDTH':235,
+DEFAULT_STRINGS = {'GUIFRAME_WIDTH':-1,
+                   'GUIFRAME_HEIGHT':-1,
+                   'PLOPANEL_WIDTH':-1,
+                   'DATAPANEL_WIDTH':-1,
                    'DATALOADER_SHOW':True,
                    'TOOLBAR_SHOW':True,
                    'FIXED_PANEL':True,
