@@ -1,4 +1,5 @@
 import wx
+import sys
 from wx import StatusBar as wxStatusB
 from wx.lib import newevent
 import wx.richtext
@@ -14,7 +15,11 @@ CONSOLE_POSITION  = 3
 BUTTON_SIZE = 40
 
 CONSOLE_WIDTH = 500
-CONSOLE_HEIGHT = 300
+CONSOLE_HEIGHT = 50
+if sys.platform.count("win32") > 0:
+    FONT_VARIANT = 0
+else:
+    FONT_VARIANT = 1
 
 class ConsolePanel(wx.Panel):
     """
@@ -73,6 +78,7 @@ class Console(wx.Frame):
         kwds["size"] = (CONSOLE_WIDTH, CONSOLE_HEIGHT)
         kwds["title"] = "Console"
         wx.Frame.__init__(self, parent=parent, *args, **kwds)
+        self.SetWindowVariant(FONT_VARIANT)
         self.panel = ConsolePanel(self)
         self.panel.set_message(status=status)
         wx.EVT_CLOSE(self, self.Close)
@@ -120,7 +126,8 @@ class StatusBar(wxStatusB):
         self.msg_position = MSG_POSITION 
         
         # Create progress bar
-        self.gauge = wx.Gauge(self, size=(width, height),
+        gauge_width = 5 * width
+        self.gauge = wx.Gauge(self, size=(gauge_width, height),
                                style=wx.GA_HORIZONTAL)
         self.gauge.Hide()
         
@@ -329,9 +336,9 @@ class StatusBar(wxStatusB):
         if type.lower() == "start":
             self.nb_start += 1
             #self.timer.Stop()
-            self.progress += 10
+            self.progress += 5
             self.gauge.SetValue(int(self.progress)) 
-            self.progress += 10
+            self.progress += 5
             if self.progress < self.gauge.GetRange() - 20:
                 self.gauge.SetValue(int(self.progress)) 
         if type.lower() == "progress":
@@ -339,7 +346,7 @@ class StatusBar(wxStatusB):
             self.timer.Start(1)
             self.gauge.Pulse()
         if type.lower() == "update":
-            self.progress += 10
+            self.progress += 5
             if self.progress < self.gauge.GetRange()- 20:
                 self.gauge.SetValue(int(self.progress))   
         if type.lower() == "stop":
@@ -349,7 +356,7 @@ class StatusBar(wxStatusB):
                 self.timer.Stop()
                 self.progress = 0
                 self.gauge.SetValue(90) 
-                self.timer_stop.Start(3) 
+                self.timer_stop.Start(5) 
                     
     def set_status(self, event):
         """
