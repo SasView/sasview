@@ -2213,8 +2213,8 @@ class ViewerFrame(wx.Frame):
         
         """
         if config._do_aboutbox:
-            import sans.guiframe.aboutbox 
-            dialog = aboutbox.DialogAbout(None, -1, "")
+            import sans.guiframe.aboutbox as AboutBox 
+            dialog = AboutBox.DialogAbout(None, -1, "")
             dialog.ShowModal()   
                      
     def _onTutorial(self, evt):
