@@ -2128,9 +2128,6 @@ class Plugin(PluginBase):
             residuals.yaxis('\\rm{Residuals} ', 'normalized')
         new_plot = residuals
         new_plot.name = "Residuals for " + str(theory_data.name.split()[0]) + "[" +  str(data.name) +"]"
-        t1 = time.time()
-        str_time = time.strftime(" %H:%M:%S", time.localtime(t1))
-        new_plot.name += str_time 
         ## allow to highlight data when plotted
         new_plot.interactive = True
         ## when 2 data have the same id override the 1 st plotted
