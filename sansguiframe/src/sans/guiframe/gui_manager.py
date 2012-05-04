@@ -1045,8 +1045,10 @@ class ViewerFrame(wx.Frame):
             self._mgr.RestoreMaximizedPane()
         for ID in self.plot_panels.keys():
             if self.plot_panels[ID].window_name == panel.name:
+                self.disable_app_menu(self.plot_panels[ID])
                 self.delete_panel(ID)
                 break
+        self.cpanel_on_focus.SetFocus()
     
     
     def popup_panel(self, p):
@@ -1752,8 +1754,12 @@ class ViewerFrame(wx.Frame):
         caption = self.panels[ID].window_caption
         config.printEVT("hide_panel: %s" % ID)
         if ID in self.panels.keys():
-            if self._mgr.GetPane(self.panels[ID].window_name).IsShown():
-                self._mgr.GetPane(self.panels[ID].window_name).Hide()
+            pane = self._mgr.GetPane(self.panels[ID].window_name)
+            if pane.IsMaximized():
+                self._mgr.RestoreMaximizedPane()
+                self.disable_app_menu(self.panels[ID])
+            if pane.IsShown():
+                pane.Hide()
                 item = self._plotting_plugin.menu.FindItemById(uid)
                 item.Check(False)
                 if self._data_panel is not None and \
@@ -1761,7 +1767,8 @@ class ViewerFrame(wx.Frame):
                     self._data_panel.cb_plotpanel.Append(str(caption), p)
                 # Do not Hide default panel here...
                 #self._mgr.GetPane(self.panels["default"].window_name).Hide()
-            self._mgr.Update()
+            wx.CallAfter(self._mgr.Update)
+            self.cpanel_on_focus.SetFocus()
                 
     def delete_panel(self, uid):
         """
