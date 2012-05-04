@@ -224,8 +224,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 data = theory_list[id]
             # Update Graph menu and help string        
             h_id = self.parent._window_menu.FindItem(self.window_caption)
+            if data != None:
+                label = data.label
+            else:
+                label = '???'
             helpString = self.parent._window_menu.GetHelpString(h_id) 
-            d_string = (' ' + str(data.label) +';')
+            d_string = (' ' + str(label) +';')
             new_tip = helpString.replace(d_string, '')
             self.parent._window_menu.SetHelpString(h_id, new_tip)  
 
