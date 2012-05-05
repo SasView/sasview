@@ -328,13 +328,14 @@ class Plugin(PluginBase):
                     if hasattr(page, "formfactorbox"):
                         page.model_list_box = temp
                         current_val = page.formfactorbox.GetLabel()
-                        #pos = page.formfactorbox.GetSelection()
-                        page._show_combox_helper()
-                        new_val = page.formfactorbox.GetLabel()
-                        if current_val != new_val and new_val != '':
-                            page.formfactorbox.SetLabel(new_val)
-                        else:
-                            page.formfactorbox.SetLabel(current_val)
+                        if page.plugin_rbutton.GetValue():
+                            #pos = page.formfactorbox.GetSelection()
+                            page._show_combox_helper()
+                            new_val = page.formfactorbox.GetLabel()
+                            if current_val != new_val and new_val != '':
+                                page.formfactorbox.SetLabel(new_val)
+                            else:
+                                page.formfactorbox.SetLabel(current_val)
         except:
             pass
         
