@@ -225,7 +225,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
             # Update Graph menu and help string        
             h_id = self.parent._window_menu.FindItem(self.window_caption)
             if data != None:
-                label = data.label
+                if data.__class__.__name__ == 'list':
+                    label = data[0].label
+                else:
+                    label = data.label
             else:
                 label = '???'
             helpString = self.parent._window_menu.GetHelpString(h_id) 
