@@ -40,7 +40,8 @@ class PointInteractor(_BaseInteractor):
         """
         #Draw curve
         if self._symbol(symbol) == '-':
-            return self.curve(x=x, y=y, color=color, label=label)
+            l_width = markersize * 0.4
+            return self.curve(x=x, y=y, color=color, label=label, width=l_width)
             #return
         if not self.marker == None:
             self.base.connect.clear([self.marker])
@@ -88,13 +89,13 @@ class PointInteractor(_BaseInteractor):
         self.connect_markers([self.marker])
         self.update()
         
-    def curve(self, x, y, dy=None, color=0, symbol=0, label=None):
+    def curve(self, x, y, dy=None, color=0, symbol=0, label=None, width=2.0):
         """
         """
         if not self.marker == None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
-        self.marker = self.axes.plot(x, y, color=self.color, lw=1.5,
+        self.marker = self.axes.plot(x, y, color=self.color, lw=width,
                                      marker='', linestyle='-', label=label)[0]
             
         self.connect_markers([self.marker])
