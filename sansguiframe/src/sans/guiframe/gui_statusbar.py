@@ -15,7 +15,7 @@ CONSOLE_POSITION  = 3
 BUTTON_SIZE = 40
 
 CONSOLE_WIDTH = 500
-CONSOLE_HEIGHT = 50
+CONSOLE_HEIGHT = 300
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
 else:
