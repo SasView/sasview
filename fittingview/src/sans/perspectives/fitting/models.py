@@ -297,7 +297,11 @@ class ModelManagerBase:
         self.shape_list.append(FuzzySphereModel)
         self.multiplication_factor.append(FuzzySphereModel)
         self.model_name_list.append(FuzzySphereModel.__name__)
-        
+                        
+        from sans.models.RaspBerryModel import RaspBerryModel
+        self.shape_list.append(RaspBerryModel)
+        self.model_name_list.append(RaspBerryModel.__name__)
+                
         from sans.models.CoreShellModel import CoreShellModel
         self.shape_list.append(CoreShellModel)
         self.multiplication_factor.append(CoreShellModel)

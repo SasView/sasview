@@ -24,6 +24,7 @@ void addCPearlNecklaceModel(PyObject *module);
 void addCReflModel(PyObject *module);
 void addCReflAdvModel(PyObject *module);
 void addCFuzzySphereModel(PyObject *module);
+void addCRaspBerryModel(PyObject *module);
 void addCHardsphereStructure(PyObject *module);
 void addCStickyHSStructure(PyObject *module);
 void addCSCCrystalModel(PyObject *module);
@@ -265,6 +266,7 @@ initc_models(void)
   addCReflModel(m);
   addCReflAdvModel(m);
   addCFuzzySphereModel(m);
+  addCRaspBerryModel(m);
   addCHardsphereStructure(m);
   addCStickyHSStructure(m);
   addCSCCrystalModel(m);
