@@ -3348,7 +3348,7 @@ class ViewApp(wx.App):
         """
         When initialised
         """
-        pos, size = self.window_placement((GUIFRAME_WIDTH, 
+        pos, size, self.is_max = self.window_placement((GUIFRAME_WIDTH, 
                                            GUIFRAME_HEIGHT))     
         self.frame = ViewerFrame(parent=None, 
                              title=APPLICATION_NAME, 
@@ -3384,6 +3384,15 @@ class ViewApp(wx.App):
         self.SetTopWindow(self.frame)
   
         return True
+    
+    def maximize_win(self):
+        """
+        Maximize the window after the frame shown
+        """
+        if self.is_max:
+            if self.frame.IsShown():
+                # Max window size
+                self.frame.Maximize(self.is_max)
 
     def open_file(self):
         """
@@ -3471,7 +3480,7 @@ class ViewApp(wx.App):
         will be centered on the screen; for very large monitors it will be
         placed on the left side of the screen.
         """
-        
+        is_maximized = False
         # Get size of screen without 
         for screenCount in range(wx.Display().GetCount()):
             screen = wx.Display(screenCount)
@@ -3483,7 +3492,9 @@ class ViewApp(wx.App):
         customWidth, customHeight = size
         
         # If the custom size is default, set 90% of the screen size
-        if customWidth < 0 and customHeight < 0:
+        if customWidth <= 0 and customHeight <= 0:
+            if customWidth == 0 and customHeight == 0:
+                is_maximized = True
             customWidth = displayWidth * 0.9
             customHeight = displayHeight * 0.9
         else:
@@ -3515,7 +3526,7 @@ class ViewApp(wx.App):
             posY = (displayHeight - customHeight)/2
         
         # Return the suggested position and size for the application frame.    
-        return (posX, posY), (customWidth, customHeight)
+        return (posX, posY), (customWidth, customHeight), is_maximized
 
     
     def display_splash_screen(self, parent, 
@@ -3561,6 +3572,7 @@ class ViewApp(wx.App):
         """
         self.frame.Show(True)
         event.Skip()
+        self.maximize_win()
 
 if __name__ == "__main__": 
     app = ViewApp(0)

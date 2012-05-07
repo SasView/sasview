@@ -116,8 +116,10 @@ class StartupConfiguration(wx.Dialog):
         Set to curent setup
         """
         event.Skip()
-        
-        gui_pw, gui_ph = self.parent.GetSizeTuple()
+        if self.parent.IsMaximized():
+            gui_pw, gui_ph = (0, 0)
+        else:
+            gui_pw, gui_ph = self.parent.GetSizeTuple()
         self.current_string['GUIFRAME_WIDTH'] = gui_pw
         self.current_string['GUIFRAME_HEIGHT'] = gui_ph
         try:
