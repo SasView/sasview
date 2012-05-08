@@ -3298,7 +3298,20 @@ class ViewerFrame(wx.Frame):
         """
         for plot in self.plot_panels.values():
             plot.on_kill_focus(None)
-
+    
+    def get_window_size(self):
+        """
+        Get window size 
+        
+        :return size: tuple
+        """
+        width, height = self.GetSizeTuple()
+        if not IS_WIN:
+            # Subtract toolbar height to get real window side
+            if self._toolbar.IsShown():
+                height -= 45
+        return (width, height)
+            
     def _onDrawIdle(self, *args, **kwargs):
         """
         ReDraw with axes
@@ -3513,17 +3526,19 @@ class ViewApp(wx.App):
         # application will be placed towards the left hand side of the screen.
         
         # If dual screen registered as 1 screen. Make width half.
-        if displayWidth > (displayHeight*2):
-            if (customWidth == displayWidth):
-                customWidth = displayWidth/2
-            # and set the position to be the corner of the screen.
-            posX = 0
-            posY = 0
-            
-        # Make the position the middle of the screen. (Not 0,0)
-        else:
-            posX = (displayWidth - customWidth)/2
-            posY = (displayHeight - customHeight)/2
+        # MAC just follows the default behavior of pos
+        if IS_WIN:
+            if displayWidth > (displayHeight*2):
+                if (customWidth == displayWidth):
+                    customWidth = displayWidth/2
+                # and set the position to be the corner of the screen.
+                posX = 0
+                posY = 0
+                
+            # Make the position the middle of the screen. (Not 0,0)
+            else:
+                posX = (displayWidth - customWidth)/2
+                posY = (displayHeight - customHeight)/2
         
         # Return the suggested position and size for the application frame.    
         return (posX, posY), (customWidth, customHeight), is_maximized
