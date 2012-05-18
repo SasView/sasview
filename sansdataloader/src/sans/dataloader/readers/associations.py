@@ -98,6 +98,7 @@ def register_readers(registry_function):
     import IgorReader
     import red2d_reader
     import tiff_reader
+    import nexus_reader
 
     registry_function(abs_reader)
     registry_function(cansas_reader)
