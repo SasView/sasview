@@ -12,6 +12,7 @@
 	<FileType extension='.abs' reader='abs_reader'/>
 	<FileType extension='.d1d' reader='hfir1d_reader'/>
 	<FileType extension='.sans' reader='danse_reader'/>
+	<FileType extension='.nxs' reader='nexus_reader'/>
     
 </SansLoader>
 
