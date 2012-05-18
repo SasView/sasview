@@ -109,5 +109,6 @@ def register_readers(registry_function):
     registry_function(IgorReader)
     registry_function(red2d_reader)
     registry_function(tiff_reader)
+    registry_function(nexus_reader)
     
     return True
