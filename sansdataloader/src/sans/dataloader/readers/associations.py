@@ -73,7 +73,7 @@ def read_associations(loader, settings='defaults.xml'):
                                                                     reader)
                 except:
                     msg = "read_associations: skipping association"
-                    msg += " for %s\n  %s" % (attr['extension'], sys.exc_value)
+                    msg += " for %s\n  %s" % (ext.lower(), sys.exc_value)
                     logging.error(msg)
     else:
         print "Could not find reader association settings\n  %s [%s]" % (__file__, os.getcwd())
