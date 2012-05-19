@@ -434,7 +434,8 @@ class ParkFit(FitEngine):
             small_result.residuals = m.residuals
             if result is not None:
                 for p in result.parameters:
-                    if p.data.name == small_result.data.name:
+                    if p.data.name == small_result.data.name and \
+                            p.model.name == small_result.model.name:
                         small_result.index = m.data.idx
                         small_result.fitness = result.fitness
                         small_result.pvec.append(p.value)

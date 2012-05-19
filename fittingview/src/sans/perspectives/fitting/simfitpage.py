@@ -214,6 +214,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 self._hide_constraint()
             
         self._update_easy_setup_cb()
+        self.Layout()
         self.Refresh()
         
     def check_model_name(self, event):
@@ -663,6 +664,9 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 return
         ## some model or parameters can be constrained
         self._show_constraint()
+        self.sizer3.Layout()
+        self.Layout()
+        self.Refresh()
         
     def _fill_sizer_fit(self):
         """

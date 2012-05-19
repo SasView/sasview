@@ -93,20 +93,32 @@ SansView 2.1.0
 			- run 'python setup.py install' under the 'sansview-x.x.x' folder
 			- run 'python sansview.py' under the 'sansview' folder.
 		- The following modules are required:
-			* matplotlib >= 0.99.0(WIN), 0.99.1.1(MAC)
-			* numpy >= 1.4.1
-			* scipy >= 0.7.2
-			* wxpython 2.8.11 unicode(WIN), 2.8.12.0(MAC) < 2.9.xx
-			* lxml >= 2.2.2
-			* multiprocessing-2.6.2(X)
-			* comtypes (for PDF window)(WIN)
-			* pywin32 (to read ms office)(WIN)
-			* PIL (Python Image Library)
-			* Pyparsing (apply for periodictable and bundling)
-			* periodictable = 1.3.0 (using 'easy_install periodictable')
-			* pisa (html to pdf : MAC)
-			* MinGW/Cygwin (for Windows) or other GNU compiler (gcc)
-			* Optional: setuptools, svn, Innosetup, py2exe(WIN),and/or py2app(MAC) to build App from the source.
+			- wxPython 2.8.12.1
+			- matplotlib 1.1.0 
+			- SciPy 0.10.1
+			- py2app (MAC)
+
+			(The following three are easily installed using easy_install)
+			- lxml 2.3.0
+			- numpy 1.6.1
+			- periodictable 1.3.0
+
+			(The following are additional dependencies for Windows)
+			- comtypes 0.6.2
+			- pywin32 build 217
+			- pisa 3.0.27 (NOT 3.0.33)
+			- html5lib 0.95
+			- reportlab 2.5
+			- pyparsing 1.5.5
+			- PIL 1.1.7
+			- setuptools 0.6c11
+			- py2exe 0.6.9 (WIN)
+			- svn
+			- MinGW w/ gcc version 4.6.1 (WIN)
+			- Innosetup (WIN).
+
+			(On Windows, the following site has all the dependencies nicely packaged)
+			http://www.lfd.uci.edu/~gohlke/pythonlibs/
 
 
 3- Known Issues

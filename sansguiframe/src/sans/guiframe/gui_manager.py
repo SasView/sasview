@@ -451,7 +451,13 @@ class ViewerFrame(wx.Frame):
         if data is None or file_name is None or file_name.strip() == "":
             return
         _, ext = os.path.splitext(name)
-        fd = open(file_name, 'w')
+        try:
+            fd = open(file_name, 'w')
+        except:
+            # On Permission denied: IOError
+            temp_dir = get_user_directory()
+            temp_file_name = os.path.join(temp_dir, name)
+            fd = open(temp_file_name, 'w')
         separator = "\t"
         if ext.lower() == ".csv":
             separator = ","
@@ -490,9 +496,9 @@ class ViewerFrame(wx.Frame):
             wb = excel_app.Workbooks.Open(file_name) 
             excel_app.Visible = 1
         except:
-            msg = "Error occured when calling Excel\n"
-            msg += "Check that Excel in installed in this machine or \n"
-            msg += "Check that %s really exists.\n" % str(file_name)
+            msg = "Error occured when calling Excel.\n"
+            msg += "Check that Excel installed in this machine or \n"
+            msg += "check that %s really exists.\n" % str(file_name)
             wx.PostEvent(self, StatusEvent(status=msg,
                                              info="error"))
             
@@ -1030,7 +1036,20 @@ class ViewerFrame(wx.Frame):
             menu_list.extend(item.get_context_menu(plotpanel=plotpanel))
         return menu_list
         
-        
+    def get_current_context_menu(self, plotpanel=None):
+        """
+        Get the context menu items made available 
+        by the current plug-in. 
+        This function is used by the plotting module
+        """
+        if plotpanel is None:
+            return
+        menu_list = []
+        item = self._current_perspective
+        if item != None:
+            menu_list.extend(item.get_context_menu(plotpanel=plotpanel))
+        return menu_list
+            
     def on_panel_close(self, event):
         """
         Gets called when the close event for a panel runs.
@@ -2597,10 +2616,15 @@ class ViewerFrame(wx.Frame):
             for i in range(len(data.x)):
                 if has_errors:
                     if data.dx != [] and data.dx[i] != None:
-                        out.write("%g  %g  %g  %g\n" % (data.x[i], 
-                                                    data.y[i],
-                                                    data.dy[i],
-                                                    data.dx[i]))
+                        if  data.dx[i] != None:
+                            out.write("%g  %g  %g  %g\n" % (data.x[i], 
+                                                        data.y[i],
+                                                        data.dy[i],
+                                                        data.dx[i]))
+                        else:
+                            out.write("%g  %g  %g\n" % (data.x[i], 
+                                                        data.y[i],
+                                                        data.dy[i]))
                     else:
                         out.write("%g  %g  %g\n" % (data.x[i], 
                                                     data.y[i],

@@ -86,7 +86,6 @@ class SlicerParameterPanel(wx.Dialog):
                     ix = 1
                     ctl.SetValue(format_number(str(params[item])))
                     self.Bind(wx.EVT_TEXT_ENTER, self.onTextEnter)
-                    ctl.Bind(wx.EVT_KILL_FOCUS, self.onTextEnter)
                     self.parameters.append([item, ctl])
                     self.bck.Add(ctl, (iy, ix), (1, 1), 
                                  wx.EXPAND|wx.ADJUST_MINSIZE, 0)

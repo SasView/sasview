@@ -182,8 +182,8 @@ class SectorInteractor(_BaseInteractor):
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
-        new_plot.group_id = "SectorQ" + self.base.data2D.name
-        new_plot.id = None
+        new_plot.group_id = "2daverage" + self.base.data2D.name
+        new_plot.id = "SectorQ" + self.base.data2D.name
         new_plot.is_data = True
         self.base.parent.update_theory(data_id=data, \
                                        theory=new_plot)

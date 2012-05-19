@@ -25,8 +25,8 @@ class FitThread(CalcThread):
                   pars=None,
                  completefn = None,
                  updatefn   = None,
-                 yieldtime  = 0.01,
-                 worktime   = 0.01,
+                 yieldtime  = 0.03,
+                 worktime   = 0.03,
                  ftol       = None,
                  reset_flag = False):
         CalcThread.__init__(self,completefn,

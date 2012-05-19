@@ -7,8 +7,6 @@ The fitting function is a simple polynomial. It works but is of no practical use
 #include "StandardHeaders.h"			// Include ANSI headers, Mac headers, IgorXOP.h, XOP.h and XOPSupport.h
 #include "libStructureFactor.h"
 
-static double gMSAWave[17]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17};
-
 //Hard Sphere Structure Factor
 //
 double
@@ -176,6 +174,7 @@ SquareWellStruct(double dp[], double q)
 double
 HayterPenfoldMSA(double dp[], double q)
 {
+  double gMSAWave[17]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17};
 	double Elcharge=1.602189e-19;		// electron charge in Coulombs (C)
 	double kB=1.380662e-23;				// Boltzman constant in J/K
 	double FrSpPerm=8.85418782E-12;	//Permittivity of free space in C^2/(N m^2)
@@ -230,9 +229,9 @@ HayterPenfoldMSA(double dp[], double q)
 	//        AND IF SO CALCULATE S(Q*SIG)
 	
 	ierr=0;
-	ierr=sqcoef(ierr);
+	ierr=sqcoef(ierr, gMSAWave);
 	if (ierr>=0) {
-		SofQ=sqhcal(Qdiam);
+		SofQ=sqhcal(Qdiam, gMSAWave);
 	}else{
        	//SofQ=NaN;
 		SofQ=-1.0;
@@ -268,11 +267,11 @@ HayterPenfoldMSA(double dp[], double q)
 //         < 0:    FAILED TO CONVERGE
 //
 int
-sqcoef(int ir)
+sqcoef(int ir, double gMSAWave[])
 {	
 	int itm=40,ix,ig,ii;
 	double acc=5.0E-6,del,e1,e2,f1,f2;
-	
+
 	//      WAVE gMSAWave = $"root:HayPenMSA:gMSAWave"
 	f1=0;		//these were never properly initialized...
 	f2=0;
@@ -283,7 +282,7 @@ sqcoef(int ir)
 		gMSAWave[15]=gMSAWave[14];
 		gMSAWave[16]=gMSAWave[4];
 		ix=1;
-		ir = sqfun(ix,ir);
+		ir = sqfun(ix,ir,gMSAWave);
 		gMSAWave[14]=gMSAWave[15];
 		gMSAWave[4]=gMSAWave[16];
 		if((ir<0.0) || (gMSAWave[14]>=0.0)) {
@@ -309,14 +308,14 @@ sqcoef(int ir)
 			gMSAWave[15]=f1;
 			gMSAWave[16]=e1;
 			ix=2;
-			ir = sqfun(ix,ir);
+			ir = sqfun(ix,ir,gMSAWave);
 			f1=gMSAWave[15];
 			e1=gMSAWave[16];
 			e2=gMSAWave[10]*1.01;
 			gMSAWave[15]=f2;
 			gMSAWave[16]=e2;
 			ix=2;
-			ir = sqfun(ix,ir);
+			ir = sqfun(ix,ir,gMSAWave);
 			f2=gMSAWave[15];
 			e2=gMSAWave[16];
 			e2=e1-(e2-e1)*f1/(f2-f1);
@@ -326,7 +325,7 @@ sqcoef(int ir)
 		gMSAWave[15]=gMSAWave[14];
 		gMSAWave[16]=e2;
 		ix=4;
-		ir = sqfun(ix,ir);
+		ir = sqfun(ix,ir,gMSAWave);
 		gMSAWave[14]=gMSAWave[15];
 		e2=gMSAWave[16];
 		ir=ii;
@@ -337,7 +336,7 @@ sqcoef(int ir)
 	gMSAWave[15]=gMSAWave[14];
 	gMSAWave[16]=gMSAWave[4];
 	ix=3;
-	ir = sqfun(ix,ir);
+	ir = sqfun(ix,ir,gMSAWave);
 	gMSAWave[14]=gMSAWave[15];
 	gMSAWave[4]=gMSAWave[16];
 	if ((ir>=0) && (gMSAWave[14]<0.0)) {
@@ -348,7 +347,7 @@ sqcoef(int ir)
 
 
 int
-sqfun(int ix, int ir)
+sqfun(int ix, int ir, double gMSAWave[])
 {	
 	double acc=1.0e-6;
 	double reta,eta2,eta21,eta22,eta3,eta32,eta2d,eta2d2,eta3d,eta6d,e12,e24,rgek;
@@ -711,11 +710,11 @@ DiamEllip(double aa, double bb)
 }
 
 double
-sqhcal(double qq)
+sqhcal(double qq, double gMSAWave[])
 {      	
     double SofQ,etaz,akz,gekz,e24,x1,x2,ck,sk,ak2,qk,q2k,qk2,qk3,qqk,sink,cosk,asink,qcosk,aqk,inter; 		
 	//	WAVE gMSAWave = $"root:HayPenMSA:gMSAWave"
-	
+
 	etaz = gMSAWave[10];
 	akz =  gMSAWave[12];
 	gekz =  gMSAWave[11];

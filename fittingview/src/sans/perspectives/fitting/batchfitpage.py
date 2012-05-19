@@ -37,6 +37,7 @@ class BatchFitPage(FitPage):
         self.window_name = "BatchFit"
         self.window_caption  = "BatchFit"
         self._set_save_flag(False)
+        self._set_bookmark_flag(False)
         
     def _fill_range_sizer(self):
         """
@@ -364,8 +365,8 @@ class BatchFitPage(FitPage):
             self._set_copy_flag(True)
             self._set_paste_flag(True)
             if self.data != None:
-                self._set_bookmark_flag(True)
-                self._keep.Enable(True)
+                self._set_bookmark_flag(False)
+                self._keep.Enable(False)
                 
             temp_smear = None
             """
@@ -551,9 +552,9 @@ class BatchFitPage(FitPage):
             self._set_save_flag(False)
         else:
             if self.model != None:
-                self._set_bookmark_flag(True)
-                self._keep.Enable(True)
-            self._set_save_flag(True)
+                self._set_bookmark_flag(False)
+                self._keep.Enable(False)
+            self._set_save_flag(False)
             self._set_preview_flag(True)
             """
             self._set_smear(data)

@@ -40,7 +40,7 @@ DEFAULT_QMAX = 0.05
 DEFAULT_QSTEP = 0.001
 DEFAULT_BEAM = 0.005
 BIN_WIDTH = 1
-
+IS_MAC = (sys.platform == 'darwin')
 
 class ModelPanel1D(PlotPanel, PanelBase):
     """
@@ -173,6 +173,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         # It was found that wx >= 2.9.3 sends an event even if no size changed.
         # So manually recode the size (=x_size) and compare here.
+        # Massy code to work around:<
+        if self.parent._mgr != None:
+            max_panel = self.parent._mgr.GetPane(self)
+            if max_panel.IsMaximized():
+                self.parent._mgr.RestorePane(max_panel)
+                max_panel.Maximize()
         if self.x_size != None:
             if self.x_size == self.GetSize():
                 self.resizing = False
@@ -285,6 +291,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
             ## Set the view scale for all plots
             try:
                 self._onEVT_FUNC_PROPERTY()
+                if IS_MAC:
+                    # MAC: forcing to plot 2D avg
+                    self.canvas._onDrawIdle()
             except:
                 msg=" Encountered singular points..."
                 wx.PostEvent(self.parent, StatusEvent(status=\
@@ -408,8 +417,17 @@ class ModelPanel1D(PlotPanel, PanelBase):
                     continue
                 if plot != self.plots[self.graph.selected_plottable]:
                     continue
+                
+            id = wx.NewId()
+            plot_menu.Append(id, "&DataInfo", name)
+            wx.EVT_MENU(self, id, self. _onDataShow)
+            id = wx.NewId()
+            plot_menu.Append(id, "&Save Points as a File", name)
+            wx.EVT_MENU(self, id, self._onSave)
+            plot_menu.AppendSeparator()
+            
             #add menu of other plugins
-            item_list = self.parent.get_context_menu(self)
+            item_list = self.parent.get_current_context_menu(self)
               
             if (not item_list == None) and (not len(item_list) == 0):
                 for item in item_list:
@@ -424,14 +442,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                         wx.PostEvent(self.parent, StatusEvent(status=msg))
                         pass
                 plot_menu.AppendSeparator()
-                
-            id = wx.NewId()
-            plot_menu.Append(id, "&DataInfo", name)
-            wx.EVT_MENU(self, id, self. _onDataShow)
-            id = wx.NewId()
-            plot_menu.Append(id, "&Save Points as a File", name)
-            wx.EVT_MENU(self, id, self._onSave)
-            plot_menu.AppendSeparator()
+            
             if self.parent.ClassName.count('wxDialog') == 0: 
                 id = wx.NewId()
                 plot_menu.Append(id, '&Linear Fit', name)

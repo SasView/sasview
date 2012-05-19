@@ -112,7 +112,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## smearer object
         self.enable2D = False
         self.is_mac = ON_MAC
-        
+        self.formfactorbox = None
+        self.structurebox = None
         ##list of model parameters. each item must have same length
         ## each item related to a given parameters
         ##[cb state, name, value, "+/-", error of fit, min, max , units]
@@ -881,14 +882,26 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.disp_list = self.model.getDispParamList()
             self.state.disp_list = copy.deepcopy(self.disp_list)
             self.state.model = self.model.clone()
+            
+            #model combobox: complex code because of mac's silent error
+            if self.structurebox != None:
+                if self.structurebox.IsShown():
+                    self.state.structurecombobox = 'None'
+                    s_select = self.structurebox.GetSelection()
+                    if s_select > 0:
+                        self.state.structurecombobox = self.structurebox.\
+                        GetString(s_select)
+            if self.formfactorbox != None:
+                f_select = self.formfactorbox.GetSelection()
+                if f_select > 0:
+                        self.state.formfactorcombobox = self.formfactorbox.\
+                        GetString(f_select)
+                        
         #save radiobutton state for model selection
         self.state.shape_rbutton = self.shape_rbutton.GetValue()
         self.state.shape_indep_rbutton = self.shape_indep_rbutton.GetValue()
         self.state.struct_rbutton = self.struct_rbutton.GetValue()
         self.state.plugin_rbutton = self.plugin_rbutton.GetValue()
-        #model combobox
-        self.state.structurebox = self.structurebox.GetLabel()
-        self.state.formfactorbox = self.formfactorbox.GetLabel()
         
         self.state.enable2D = copy.deepcopy(self.enable2D)
         self.state.values = copy.deepcopy(self.values)
@@ -1230,7 +1243,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         except:
             structfactor_pos = 0
             for ind_struct in range(self.structurebox.GetCount()):
-                if self.structurebox.GetString(ind_struct) == (state.structurecombobox) > 0:
+                if self.structurebox.GetString(ind_struct) == (state.structurecombobox):
                     structfactor_pos = int(ind_struct)
                     break
             
@@ -1427,8 +1440,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.shape_indep_rbutton = self.shape_indep_rbutton.GetValue()
         self.state.struct_rbutton = self.struct_rbutton.GetValue()
         self.state.plugin_rbutton = self.plugin_rbutton.GetValue()
-        self.state.structurebox = self.structurebox.GetLabel()
-        self.state.formfactorbox = self.formfactorbox.GetLabel()
+        self.state.structurecombobox = self.structurebox.GetLabel()
+        self.state.formfactorcombobox = self.formfactorbox.GetLabel()
        
         ## post state to fit panel
         event = PageInfoEvent(page=self)

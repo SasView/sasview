@@ -1219,8 +1219,8 @@ class FitPage(BasicPage):
             if self.data is not None:
                 is_data = check_data_validity(self.data)
                 if is_data:
-                    self._set_bookmark_flag(True)
-                    self._keep.Enable(True)
+                    self._set_bookmark_flag(not self.batch_on)
+                    self._keep.Enable(not self.batch_on)
                     self._set_save_flag(True)
             # Reset smearer, model and data
             if not copy_flag:
@@ -1481,39 +1481,41 @@ class FitPage(BasicPage):
 
         if len(self.parameters) > 0:
             for item in self.parameters:
-                #Skip t ifhe angle parameters if 1D data
-                if self.data.__class__.__name__ != "Data2D" and \
-                        not self.enable2D:
-                    if item in self.orientation_params:
+                if item[0].IsShown():
+                    #Skip t ifhe angle parameters if 1D data
+                    if self.data.__class__.__name__ != "Data2D" and \
+                            not self.enable2D:
+                        if item in self.orientation_params:
+                            continue
+                    if item in self.param_toFit:
                         continue
-                if item in self.param_toFit:
-                    continue
-                ## hide statictext +/-
-                if len(item) < 4:
-                    continue
-                if item[3] != None and item[3].IsShown():
-                    item[3].Hide()
-                ## hide textcrtl  for error after fit
-                if item[4] != None and item[4].IsShown():
-                    item[4].Hide()
+                    ## hide statictext +/-
+                    if len(item) < 4:
+                        continue
+                    if item[3] != None and item[3].IsShown():
+                        item[3].Hide()
+                    ## hide textcrtl  for error after fit
+                    if item[4] != None and item[4].IsShown():
+                        item[4].Hide()
   
         if len(self.fittable_param) > 0:
             for item in self.fittable_param:
-                #Skip t ifhe angle parameters if 1D data
-                if self.data.__class__.__name__ != "Data2D" and \
-                        not self.enable2D:
-                    if item in self.orientation_params:
+                if item[0].IsShown():
+                    #Skip t ifhe angle parameters if 1D data
+                    if self.data.__class__.__name__ != "Data2D" and \
+                            not self.enable2D:
+                        if item in self.orientation_params:
+                            continue
+                    if item in self.param_toFit:
                         continue
-                if item in self.param_toFit:
-                    continue
-                if len(item) < 4:
-                    continue
-                ## hide statictext +/-
-                if item[3] != None and item[3].IsShown():
-                    item[3].Hide()
-                ## hide textcrtl  for error after fit
-                if item[4] != None and item[4].IsShown():
-                    item[4].Hide()
+                    if len(item) < 4:
+                        continue
+                    ## hide statictext +/-
+                    if item[3] != None and item[3].IsShown():
+                        item[3].Hide()
+                    ## hide textcrtl  for error after fit
+                    if item[4] != None and item[4].IsShown():
+                        item[4].Hide()
         return
                 
     def _get_defult_custom_smear(self):
@@ -1846,8 +1848,8 @@ class FitPage(BasicPage):
             self._set_save_flag(False)
         else:
             if self.model != None:
-                self._set_bookmark_flag(True)
-                self._keep.Enable(True)
+                self._set_bookmark_flag(not self.batch_on)
+                self._keep.Enable(not self.batch_on)
                 
             self._set_save_flag(True)
             self._set_preview_flag(True)
@@ -1940,12 +1942,12 @@ class FitPage(BasicPage):
             self.model_view.Disable()
             #replace data plot on combo box selection
             #by removing the previous selected data
-            wx.PostEvent(self._manager.parent,
-                         NewPlotEvent(action="remove",
-                                      group_id=self.graph_id, id=id))
+            #wx.PostEvent(self._manager.parent,
+            #             NewPlotEvent(action="remove",
+            #                          group_id=self.graph_id, id=id))
             #plot the current selected data
             wx.PostEvent(self._manager.parent,
-                         NewPlotEvent(plot=self.data,
+                         NewPlotEvent(action="check", plot=self.data,
                                       title=str(self.data.title)))
             self._draw_model()
     
@@ -2076,38 +2078,41 @@ class FitPage(BasicPage):
         #Set the panel when fit result are list
         for item in self.param_toFit:
             if len(item) > 5 and item != None:
-                ## reset error value to initial state
-                if not self.is_mac:
-                    item[3].Hide()
-                    item[4].Hide()
-                for ind in range(len(out)):
-                    if item[1] == p_name[ind]:
-                        break
-                if len(out) <= len(self.param_toFit) and out[ind] != None:
-                    val_out = format_number(out[ind], True)
-                    item[2].SetValue(val_out)
-
-                if(cov != None and len(cov) == len(out)):
-                    try:
-                        if dispersity != None:
-                            if self.enable_disp.GetValue():
-                                if hasattr(self, "text_disp_1"):
-                                    if self.text_disp_1 != None:
-                                        if not self.text_disp_1.IsShown()\
-                                            and not self.is_mac:
-                                            self.text_disp_1.Show(True)
-                    except:
-                        pass
-                    
-                    if cov[ind] != None:
-                        if numpy.isfinite(float(cov[ind])):
-                            val_err = format_number(cov[ind], True)
-                            if not self.is_mac:
-                                item[3].Show(True)
-                                item[4].Show(True)
-                            item[4].SetValue(val_err)
-                            has_error = True
+                if item[0].IsShown():
+                    ## reset error value to initial state
+                    if not self.is_mac:
+                        item[3].Hide()
+                        item[4].Hide()
+                    for ind in range(len(out)):
+                        if item[1] == p_name[ind]:
+                            break
+                    if len(out) > 0 and out[ind] != None:
+                        val_out = format_number(out[ind], True)
+                        item[2].SetValue(val_out)
+    
+                    if(cov != None and len(cov) == len(out)):
+                        try:
+                            if dispersity != None:
+                                if self.enable_disp.GetValue():
+                                    if hasattr(self, "text_disp_1"):
+                                        if self.text_disp_1 != None:
+                                            if not self.text_disp_1.IsShown()\
+                                                and not self.is_mac:
+                                                self.text_disp_1.Show(True)
+                        except:
+                            pass
+                        
+                        if cov[ind] != None:
+                            if numpy.isfinite(float(cov[ind])):
+                                val_err = format_number(cov[ind], True)
+                                if not self.is_mac:
+                                    item[3].Show(True)
+                                    item[4].Show(True)
+                                item[4].SetValue(val_err)
+                                has_error = True
                 i += 1
+            else:
+                raise ValueError, "onsetValues: Invalid parameters..."
         #Show error title when any errors displayed
         if has_error:
             if not self.text2_3.IsShown():
@@ -2605,17 +2610,19 @@ class FitPage(BasicPage):
         self.param_toFit = []
         for item in self.parameters:
             if item[0].GetValue() and item not in self.param_toFit:
-                self.param_toFit.append(item)
+                if item[0].IsShown():
+                    self.param_toFit.append(item)
         for item in self.fittable_param:
             if item[0].GetValue() and item not in self.param_toFit:
-                self.param_toFit.append(item)
+                if item[0].IsShown():
+                    self.param_toFit.append(item)
         self.save_current_state_fit()
        
         event = PageInfoEvent(page=self)
         wx.PostEvent(self.parent, event)
         param2fit = []
         for item in self.param_toFit:
-            if item[0]:
+            if item[0] and item[0].IsShown():
                 param2fit.append(item[1])
         self.parent._manager.set_param2fit(self.uid, param2fit)
                 
@@ -2627,31 +2634,24 @@ class FitPage(BasicPage):
         if  self.parameters != []:
             if  self.cb1.GetValue():
                 for item in self.parameters:
-                    ## for data2D select all to fit
-                    if self.data.__class__.__name__ == "Data2D" or \
-                            self.enable2D:
-                        item[0].SetValue(True)
-                        self.param_toFit.append(item)
-                    else:
-                        ## for 1D all parameters except orientation
-                        if not item in self.orientation_params:
+                    if item[0].IsShown():
+                        ## for data2D select all to fit
+                        if self.data.__class__.__name__ == "Data2D" or \
+                                self.enable2D:
                             item[0].SetValue(True)
                             self.param_toFit.append(item)
+                        else:
+                            ## for 1D all parameters except orientation
+                            if not item in self.orientation_params:
+                                item[0].SetValue(True)
+                                self.param_toFit.append(item)
+                    else:
+                        item[0].SetValue(False)
                 #if len(self.fittable_param)>0:
                 for item in self.fittable_param:
-                    if self.data.__class__.__name__ == "Data2D" or \
-                            self.enable2D:
-                        item[0].SetValue(True)
-                        self.param_toFit.append(item)
-                        try:
-                            if len(self.values[item[1]]) > 0:
-                                item[0].SetValue(False)
-                        except:
-                            pass
-
-                    else:
-                        ## for 1D all parameters except orientation
-                        if not item in self.orientation_params_disp:
+                    if item[0].IsShown():
+                        if self.data.__class__.__name__ == "Data2D" or \
+                                self.enable2D:
                             item[0].SetValue(True)
                             self.param_toFit.append(item)
                             try:
@@ -2659,6 +2659,19 @@ class FitPage(BasicPage):
                                     item[0].SetValue(False)
                             except:
                                 pass
+    
+                        else:
+                            ## for 1D all parameters except orientation
+                            if not item in self.orientation_params_disp:
+                                item[0].SetValue(True)
+                                self.param_toFit.append(item)
+                                try:
+                                    if len(self.values[item[1]]) > 0:
+                                        item[0].SetValue(False)
+                                except:
+                                    pass
+                    else:
+                        item[0].SetValue(False)
 
             else:
                 for item in self.parameters:
@@ -2676,7 +2689,7 @@ class FitPage(BasicPage):
             wx.PostEvent(self.parent, event)
         param2fit = []
         for item in self.param_toFit:
-            if item[0]:
+            if item[0] and item[0].IsShown():
                 param2fit.append(item[1])
         self.parent._manager.set_param2fit(self.uid, param2fit)
 
@@ -2693,7 +2706,7 @@ class FitPage(BasicPage):
                 if item in self.orientation_params:
                     continue
             #Select parameters to fit for list of primary parameters
-            if item[0].GetValue():
+            if item[0].GetValue() and item[0].IsShown():
                 if not (item in self.param_toFit):
                     self.param_toFit.append(item)
             else:
@@ -2709,7 +2722,7 @@ class FitPage(BasicPage):
                         not self.enable2D:
                 if item in self.orientation_params:
                     continue
-            if item[0].GetValue():
+            if item[0].GetValue() and item[0].IsShown():
                 if not (item in self.param_toFit):
                     self.param_toFit.append(item)
             else:
@@ -2741,7 +2754,7 @@ class FitPage(BasicPage):
         
         param2fit = []
         for item in self.param_toFit:
-            if item[0]:
+            if item[0] and item[0].IsShown():
                 param2fit.append(item[1])
         self.parent._manager.set_param2fit(self.uid, param2fit)
         

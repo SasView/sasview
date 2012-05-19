@@ -52,6 +52,7 @@ class SLDPanel(wx.Dialog):
 
             self.SetTitle("Scattering Length Density Profile")
             self.parent = parent
+            self._mgr = None
             self.data = data
             self.str = self.data.__str__()
             ## when 2 data have the same id override the 1 st plotted
@@ -74,12 +75,16 @@ class SLDPanel(wx.Dialog):
             self.newplot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
             self.newplot.dy = None
             self.newplot.name = 'SLD'
+            self.newplot.id = self.newplot.name
             self.plotpanel.add_image(self.newplot) 
             self.plotpanel.subplot.set_ylim(min(data_plot.y) - _Y_OFF , 
                                                 max(data_plot.y) + _Y_OFF)
             self.plotpanel.subplot.set_xlim(min(data_plot.x) - _X_OFF, 
                                                 max(data_plot.x) + _X_OFF)
             #self.Centre()
+            self.plotpanel.resizing = False
+            self.plotpanel.canvas.set_resizing(self.plotpanel.resizing)
+            self.plotpanel.subplot.figure.canvas.draw_idle()
             self.Layout()
 
     def _set_dy_data(self): 
@@ -174,6 +179,12 @@ class SLDPanel(wx.Dialog):
         """
         self.parent.parent.parent.on_change_caption(name, old_caption, new_caption)
     
+    def disable_app_menu(self, panel):
+        """
+        Disable menu bar
+        """
+        # Not implemented!
+        return
     
 class SLDplotpanel(PlotPanel):
     """
@@ -202,15 +213,14 @@ class SLDplotpanel(PlotPanel):
         self.xaxis_unit = ''
         self.yaxis_label = ''
         self.yaxis_unit = ''
+        self.resizing = True
         
     def add_image(self, plot):
         """
         Add image(Theory1D)
         """
-        self.plots[plot.name] = plot
-        self.plots[plot.name].is_data = False
-        #init graph
-        #self.gaph = Graph()
+        self.plots[plot.id] = plot
+        self.plots[plot.id].is_data = True
         #add plot
         self.graph.add(plot)
         #add axes
@@ -221,13 +231,12 @@ class SLDplotpanel(PlotPanel):
         self.yaxis_label = '\\rm{SLD} '
         self.yaxis_unit = '10^{-6}A^{-2}'
         self.graph.yaxis(self.yaxis_label, self.yaxis_unit)
+        #self.subplot.figure.canvas.draw_idle()
+        # For latter scale changes 
+        self.plots[plot.id].xaxis('\\rm{%s} '% x1_label, 'A')
+        self.plots[plot.id].yaxis('\\rm{SLD} ', '10^{-6}A^{-2}')
         #draw
         self.graph.render(self)
-        self.subplot.figure.canvas.draw_idle()
-                
-        # For latter scale changes 
-        self.plots[plot.name].xaxis('\\rm{%s} '% x1_label, 'A')
-        self.plots[plot.name].yaxis('\\rm{SLD} ', '10^{-6}A^{-2}')
         
     def on_set_focus(self, event):
         """
@@ -256,7 +265,7 @@ class SLDplotpanel(PlotPanel):
         Not implemented
         """
         pass
-    
+                           
     def _onSave(self, evt):
         """
         Save a data set to a text file
@@ -264,57 +273,19 @@ class SLDplotpanel(PlotPanel):
         :param evt: Menu event
         
         """
-       
-        path = None
-        wildcard = "Text files (*.txt)|*.txt|"\
-                    "CanSAS 1D files(*.xml)|*.xml" 
-        default_name = "sld_profile"
+        menu = evt.GetEventObject()
+        id = evt.GetId()
+        self.set_selected_from_menu(menu, id)
+        data = self.plots[self.graph.selected_plottable]
+        default_name = data.label
+        if default_name.count('.') > 0:
+            default_name = default_name.split('.')[0]
+        default_name += "_out"
         if self.parent != None:
-            self._default_save_location = self.parent.parent._default_save_location
-        dlg = wx.FileDialog(self, "Choose a file",
-                            self._default_save_location,
-                            default_name, wildcard , wx.SAVE)
-       
-        if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.GetPath()
-            # ext_num = 0 for .txt, ext_num = 1 for .xml
-            # This is MAC Fix
-            ext_num = dlg.GetFilterIndex()
-            if ext_num == 0:
-                format = '.txt'
-            else:
-                format = '.xml'
-            path = os.path.splitext(path)[0] + format
-            mypath = os.path.basename(path)
-            
-            #TODO: This is bad design. The DataLoader is designed 
-            #to recognize extensions.
-            # It should be a simple matter of calling the .
-            #save(file, data, '.xml') method
-            # of the sans.dataloader.loader.Loader class.
-            from sans.dataloader.loader import  Loader
-            #Instantiate a loader 
-            loader = Loader() 
-            data = self.parent.data
-            format = ".txt"
-            if os.path.splitext(mypath)[1].lower() == format:
-                # Make sure the ext included in the file name
-                # especially on MAC
-                fName = os.path.splitext(path)[0] + format
-                self._onsaveTXT(fName)
-            format = ".xml"
-            if os.path.splitext(mypath)[1].lower() == format:
-                # Make sure the ext included in the file name
-                # especially on MAC
-                fName = os.path.splitext(path)[0] + format
-                loader.save(fName, data, format)
-            try:
-                self._default_save_location = os.path.dirname(path)
-                self.parent.parent._default_save_location = self._default_save_location
-            except:
-                pass    
-        dlg.Destroy()
-         
+            # What an ancestor!
+            fit_panel = self.parent.parent.parent
+            fit_panel.parent.save_data1d(data, default_name)
+             
 class ViewerFrame(wx.Frame):
     """
     Add comment

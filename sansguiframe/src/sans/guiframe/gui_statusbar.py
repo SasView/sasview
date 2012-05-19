@@ -237,10 +237,11 @@ class StatusBar(wxStatusB):
         """
         clear the progress bar
         """
-        flag = False
-        if (self.nb_start <= self.nb_stop) or \
-            (self.nb_progress <= self.nb_stop):
-            flag = True
+        flag = True
+        # Why we do this?
+        #if (self.nb_start <= self.nb_stop) or \
+        #    (self.nb_progress <= self.nb_stop):
+        #    flag = True
         return flag
     
     def _on_time_stop(self, evt): 

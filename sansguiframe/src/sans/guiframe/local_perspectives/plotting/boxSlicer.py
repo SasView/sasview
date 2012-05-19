@@ -197,9 +197,9 @@ class BoxInteractor(_BaseInteractor):
             new_plot.ytransform = 'y'
             new_plot.yaxis("\\rm{Residuals} ", "/")
             
-        new_plot.group_id = str(self.averager.__name__) + self.base.data2D.name
-        #new_plot.id = str(self.averager.__name__)
-        #new_plot.is_data= True
+        new_plot.group_id = "2daverage" + self.base.data2D.name
+        new_plot.id = (self.averager.__name__) + self.base.data2D.name
+        new_plot.is_data= True
         self.base.parent.update_theory(data_id=self.base.data2D.id, \
                                        theory=new_plot)
         wx.PostEvent(self.base.parent, NewPlotEvent(plot=new_plot,

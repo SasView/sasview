@@ -166,8 +166,8 @@ class AnnulusInteractor(_BaseInteractor):
             new_plot.yaxis("\\rm{Residuals} ", "/")
 
         new_plot.group_id = "AnnulusPhi" + self.base.data2D.name
-        new_plot.id = None
-        #new_plot.is_data= True
+        new_plot.id = "AnnulusPhi" + self.base.data2D.name
+        new_plot.is_data= True
         new_plot.xtransform = "x"
         new_plot.ytransform = "y"
         self.base.parent.update_theory(data_id=data.id, theory=new_plot)

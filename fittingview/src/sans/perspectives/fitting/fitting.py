@@ -47,7 +47,7 @@ SANS_F_TOL = 5e-05
 (PageInfoEvent, EVT_PAGE_INFO) = wx.lib.newevent.NewEvent()
 
 
-if sys.platform.count("darwin") == 0:
+if sys.platform == "win32":
     ON_MAC = False
 else:
     ON_MAC = True
@@ -72,6 +72,7 @@ class Plugin(PluginBase):
         self.residuals = None
         self.weight = None
         self.fit_panel = None
+        self.plot_panel = None
         # Start with a good default
         self.elapsed = 0.022
         # the type of optimizer selected, park or scipy
@@ -459,6 +460,7 @@ class Plugin(PluginBase):
                 the fitting option is not allowed
                 
         """
+        self.plot_panel = plotpanel
         graph = plotpanel.graph
         fit_option = "Select data for fitting"
         fit_hint =  "Dialog with fitting parameters "
@@ -482,6 +484,7 @@ class Plugin(PluginBase):
                     return [[fit_option, fit_hint, self._onSelect]]
                 else:
                     return []
+            return [[fit_option, fit_hint, self._onSelect]]
         return []
 
     def get_panels(self, parent):
@@ -1280,18 +1283,19 @@ class Plugin(PluginBase):
         when Select data to fit a new page is created .Its reference is
         added to self.page_finder
         """
-        self.panel = event.GetEventObject()
+        panel = self.plot_panel
+        if panel == None:
+            raise ValueError, "Fitting:_onSelect: NonType panel"
         Plugin.on_perspective(self, event=event)
-        self.select_data(self.panel)
+        self.select_data(panel)
         
     def select_data(self, panel):
         """
         """
-        self.panel = panel
-        for plottable in self.panel.graph.plottables:
+        for plottable in panel.graph.plottables:
             if plottable.__class__.__name__ in ["Data1D", "Theory1D"]:
-                data_id = self.panel.graph.selected_plottable
-                if plottable == self.panel.plots[data_id]:
+                data_id = panel.graph.selected_plottable
+                if plottable == panel.plots[data_id]:
                     data = plottable
                     self.add_fit_page(data=[data])
                     return
@@ -1879,11 +1883,10 @@ class Plugin(PluginBase):
             data_name = str(model.__class__.__name__)
 
         if len(title) > 1:
-            new_plot.title = "Model2D for " + data_name
+            new_plot.title = "Model2D for %s "% model.name + data_name
         new_plot.name = model.name + " [" + \
-                                    data_name + "-2D]"
+                                    data_name + "]"
         theory_data = deepcopy(new_plot)
-        theory_data.name = "Unknown"
         
         self.page_finder[page_id].set_theory_data(data=theory_data,
                                                   fid=data.id)
@@ -2127,12 +2130,14 @@ class Plugin(PluginBase):
             # For latter scale changes 
             residuals.xaxis('\\rm{Q} ', 'A^{-1}')
             residuals.yaxis('\\rm{Residuals} ', 'normalized')
+        theory_name = str(theory_data.name.split()[0])
         new_plot = residuals
-        new_plot.name = "Residuals for " + str(theory_data.name.split()[0]) + "[" +  str(data.name) +"]"
+        new_plot.name = "Residuals for " + str(theory_name) + "[" +\
+                        str(data.name) +"]"
         ## allow to highlight data when plotted
         new_plot.interactive = True
         ## when 2 data have the same id override the 1 st plotted
-        new_plot.id = "res" + str(data_copy.id)
+        new_plot.id = "res" + str(data_copy.id) + str(theory_name)
         ##group_id specify on which panel to plot this data
         group_id = self.page_finder[page_id].get_graph_id()
         if group_id == None:

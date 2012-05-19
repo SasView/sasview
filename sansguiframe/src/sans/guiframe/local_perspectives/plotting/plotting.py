@@ -275,31 +275,39 @@ class Plugin(PluginBase):
         :param event: EVT_NEW_PLOT event
         
         """
+        action_check = False
         if hasattr(event, 'action'):
-            group_id = event.group_id
-            if group_id in self.plot_panels.keys():
-                #remove data from panel
-                if event.action.lower().strip() == 'remove':
-                    id = event.id
-                    return self.remove_plot(group_id, id)
-                if event.action.lower().strip() == 'hide':
-                    return self.hide_panel(group_id)
-                if event.action.lower().strip() == 'delete':
-                    panel = self.plot_panels[group_id]
-                    uid = panel.uid
-                    return self.parent.delete_panel(uid)
-                if event.action.lower().strip() == "clear":
-                    return self.clear_panel_by_id(group_id)
+            action_string = event.action.lower().strip()
+            if action_string == 'check':
+                action_check = True
+            else:
+                group_id = event.group_id
+                if group_id in self.plot_panels.keys():
+                    #remove data from panel
+                    if action_string == 'remove':
+                        id = event.id
+                        return self.remove_plot(group_id, id)
+                    if action_string == 'hide':
+                        return self.hide_panel(group_id)
+                    if action_string == 'delete':
+                        panel = self.plot_panels[group_id]
+                        uid = panel.uid
+                        return self.parent.delete_panel(uid)
+                    if action_string == "clear":
+                        return self.clear_panel_by_id(group_id)
+                    
         if not hasattr(event, 'plot'):    
             return
         title = None
         if hasattr(event, 'title'):
-            title = 'Graph'#event.title
-                
+            title = 'Graph'#event.title      
         data = event.plot
-        group_id = data.group_id
-            
+        group_id = data.group_id    
         if group_id in self.plot_panels.keys():
+            if action_check:
+                # Check if the plot already exist. if it does, do nothing.
+                if data.id in self.plot_panels[group_id].plots.keys():
+                    return 
             #update a panel graph 
             panel = self.plot_panels[group_id]
             self.update_panel(data, panel)
@@ -308,9 +316,24 @@ class Plugin(PluginBase):
             if issubclass(data.__class__, Data1D):
                 new_panel = self.create_1d_panel(data, group_id)
             else:
+                # Need to make the group_id consistent with 1D thus no if below
+                if len(self.plot_panels.values()) > 0:
+                    for p_group_id in self.plot_panels.keys():
+                        p_plot = self.plot_panels[p_group_id]
+                        if data.id in p_plot.plots.keys():
+                            p_plot.plots[data.id] = data
+                            self.plot_panels[group_id] = p_plot
+                            if group_id != p_group_id:
+                                del self.plot_panels[p_group_id]
+                                if p_group_id in data.list_group_id:
+                                    data.list_group_id.remove(p_group_id)
+                                if group_id not in data.list_group_id:
+                                    data.list_group_id.append(group_id)
+                            p_plot.group_id = group_id
+                            return
+                
                 new_panel = self.create_2d_panel(data, group_id)
-            self.create_panel_helper(new_panel, data, group_id, title)
-            
+            self.create_panel_helper(new_panel, data, group_id, title) 
         return
 
     def _on_check_menu(self, event):

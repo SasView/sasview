@@ -320,7 +320,7 @@ class ModelPanel2D(ModelPanel1D):
         slicerpop.AppendSeparator()
         if len(self.data2D.detector) == 1:        
             
-            item_list = self.parent.get_context_menu(self)
+            item_list = self.parent.get_current_context_menu(self)
             if (not item_list == None) and (not len(item_list) == 0) and\
                 self.data2D.name.split(" ")[0] != 'Residuals':  
                 # The line above; Not for trunk
@@ -630,7 +630,7 @@ class ModelPanel2D(ModelPanel1D):
         else:
             new_plot.yaxis("\\rm{Intensity} ", "cm^{-1}")
 
-        new_plot.group_id = "Circ avg " + self.data2D.name
+        new_plot.group_id = "2daverage"  + self.data2D.name
         new_plot.id = "Circ avg " + self.data2D.name
         new_plot.is_data = True
         self.parent.update_theory(data_id=self.data2D, \
