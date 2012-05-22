@@ -142,7 +142,7 @@ class SLDPanel(wx.Dialog):
         """
         pass
 
-    def get_context_menu(self, graph=None):
+    def get_current_context_menu(self, graph=None):
         """
         When the context menu of a plot is rendered, the 
         get_context_menu method will be called to give you a 
