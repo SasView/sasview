@@ -186,6 +186,12 @@ class SLDPanel(wx.Dialog):
         # Not implemented!
         return
     
+    def show_data1d(self, data, name):
+        """
+        Show data dialog
+        """   
+        self.parent.parent.parent.show_data1d(data, name)
+        
 class SLDplotpanel(PlotPanel):
     """
     Panel
