@@ -82,10 +82,10 @@ class SLDPanel(wx.Dialog):
             self.plotpanel.subplot.set_xlim(min(data_plot.x) - _X_OFF, 
                                                 max(data_plot.x) + _X_OFF)
             #self.Centre()
+            self.plotpanel.render()
             self.plotpanel.resizing = False
             self.plotpanel.canvas.set_resizing(self.plotpanel.resizing)
             self.plotpanel.subplot.figure.canvas.draw_idle()
-            self.Layout()
 
     def _set_dy_data(self): 
         """
