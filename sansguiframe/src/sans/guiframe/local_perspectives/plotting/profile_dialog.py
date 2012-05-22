@@ -81,11 +81,9 @@ class SLDPanel(wx.Dialog):
                                                 max(data_plot.y) + _Y_OFF)
             self.plotpanel.subplot.set_xlim(min(data_plot.x) - _X_OFF, 
                                                 max(data_plot.x) + _X_OFF)
-            #self.Centre()
-            self.plotpanel.render()
             self.plotpanel.resizing = False
             self.plotpanel.canvas.set_resizing(self.plotpanel.resizing)
-            self.plotpanel.subplot.figure.canvas.draw_idle()
+            self.plotpanel.graph.render(self.plotpanel)
 
     def _set_dy_data(self): 
         """
@@ -242,7 +240,7 @@ class SLDplotpanel(PlotPanel):
         self.plots[plot.id].xaxis('\\rm{%s} '% x1_label, 'A')
         self.plots[plot.id].yaxis('\\rm{SLD} ', '10^{-6}A^{-2}')
         #draw
-        self.graph.render(self)
+        #self.graph.render(self)
         
     def on_set_focus(self, event):
         """
