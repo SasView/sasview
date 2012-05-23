@@ -727,6 +727,18 @@ class Data1D(plottable_1D, DataInfo):
                 if self.x[i] != other.x[i]:
                     msg = "Incompatible data sets: x-values do not match"
                     raise ValueError, msg
+                if self.dxl != None and other.dxl == None:
+                    msg = "Incompatible data sets: dxl-values do not match"
+                    raise ValueError, msg
+                if self.dxl == None and other.dxl != None:
+                    msg = "Incompatible data sets: dxl-values do not match"
+                    raise ValueError, msg
+                if self.dxw != None and other.dxw == None:
+                    msg = "Incompatible data sets: dxw-values do not match"
+                    raise ValueError, msg
+                if self.dxw == None and other.dxw != None:
+                    msg = "Incompatible data sets: dxw-values do not match"
+                    raise ValueError, msg
             
             # Check that the other data set has errors, otherwise
             # create zero vector
@@ -747,15 +759,42 @@ class Data1D(plottable_1D, DataInfo):
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
         result = self.clone_without_data(len(self.x))
-        
+        if self.dxw == None:
+            result.dxw = None
+        else:
+            result.dxw = numpy.zeros(len(self.x))
+        if self.dxl == None:
+            result.dxl = None
+        else:
+            result.dxl = numpy.zeros(len(self.x))
+
         for i in range(len(self.x)):
             result.x[i] = self.x[i]
             if self.dx is not None and len(self.x) == len(self.dx):
                 result.dx[i] = self.dx[i]
+            if self.dxw is not None and len(self.x) == len(self.dxw):
+                result.dxw[i] = self.dxw[i]
+            if self.dxl is not None and len(self.x) == len(self.dxl):
+                result.dxl[i] = self.dxl[i]
             
             a = Uncertainty(self.y[i], dy[i]**2)
             if isinstance(other, Data1D):
                 b = Uncertainty(other.y[i], dy_other[i]**2)
+                if other.dx is not None:
+                    result.dx[i] *= self.dx[i]
+                    result.dx[i] += (other.dx[i]**2)
+                    result.dx[i] /= 2
+                    result.dx[i] = math.sqrt(result.dx[i])
+                if result.dxl is not None and other.dxl is not None:
+                    result.dxl[i] *= self.dxl[i]
+                    other.dxl[i] += (other.dxl[i]**2)
+                    result.dxl[i] /= 2
+                    result.dxl[i] = math.sqrt(result.dxl[i])
+                if result.dxw is not None and self.dxw is not None:
+                    result.dxw[i] *= self.dxw[i]
+                    other.dxw[i] += (other.dxw[i]**2)
+                    result.dxw[i] /= 2
+                    result.dxw[i] = math.sqrt(result.dxw[i])
             else:
                 b = other
             
@@ -865,25 +904,32 @@ class Data2D(plottable_2D, DataInfo):
             if numpy.size(self.data) != numpy.size(other.data):
                 msg = "Unable to perform operation: data length are not equal"
                 raise ValueError, msg
-               
+            if numpy.size(self.qx_data) != numpy.size(other.qx_data):
+                msg = "Unable to perform operation: data length are not equal"
+                raise ValueError, msg
+            if numpy.size(self.qy_data) != numpy.size(other.qy_data):
+                msg = "Unable to perform operation: data length are not equal"
+                raise ValueError, msg
+            # Here we could also extrapolate between data points
+            for i in range(len(self.data)):
+                if self.qx_data[i] != other.qx_data[i]:
+                    msg = "Incompatible data sets: qx-values do not match"
+                    raise ValueError, msg
+                if self.qy_data[i] != other.qy_data[i]:
+                    msg = "Incompatible data sets: qy-values do not match"
+                    raise ValueError, msg
+                   
             # Check that the scales match
-            #TODO: matching scales?
-            
-            # Check that the other data set has errors, otherwise
-            # create zero vector
-            #TODO: test this
             err_other = other.err_data
             if other.err_data == None or \
                 (numpy.size(other.err_data) != numpy.size(other.data)):
-                err_other = numpy.zeros([numpy.size(other.data, 0),
-                                          numpy.size(other.data, 1)])
+                err_other = numpy.zeros(numpy.size(other.data))
             
         # Check that we have errors, otherwise create zero vector
         err = self.err_data
         if self.err_data == None or \
             (numpy.size(self.err_data) != numpy.size(self.data)):
-            err = numpy.zeros([numpy.size(self.data, 0),
-                                numpy.size(self.data, 1)])
+            err = numpy.zeros(numpy.size(other.data))
             
         return err, err_other
   
@@ -897,24 +943,50 @@ class Data2D(plottable_2D, DataInfo):
         """
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
-    
-        result = self.clone_without_data([numpy.size(self.data, 0),
-                                          numpy.size(self.data, 1)])
-        
-        for i in range(numpy.size(self.data, 0)):
-            for j in range(numpy.size(self.data, 1)):
-                result.data[i][j] = self.data[i][j]
-                if self.err_data is not None and \
-                    numpy.size(self.data) == numpy.size(self.err_data):
-                    result.err_data[i][j] = self.err_data[i][j]
-                
-                a = Uncertainty(self.data[i][j], dy[i][j]**2)
-                if isinstance(other, Data2D):
-                    b = Uncertainty(other.data[i][j], dy_other[i][j]**2)
-                else:
-                    b = other
-                
-                output = operation(a, b)
-                result.data[i][j] = output.x
-                result.err_data[i][j] = math.sqrt(math.fabs(output.variance))
+        result = self.clone_without_data(numpy.size(self.data))
+        result.xmin = self.xmin
+        result.xmax = self.xmax
+        result.ymin = self.ymin
+        result.ymax = self.ymax
+        if self.dqx_data == None or self.dqy_data == None:
+            result.dqx_data = None
+            result.dqy_data = None
+        else:
+            result.dqx_data = numpy.zeros(len(self.data))
+            result.dqy_data = numpy.zeros(len(self.data))
+        for i in range(numpy.size(self.data)):
+            result.data[i] = self.data[i]
+            if self.err_data is not None and \
+                numpy.size(self.data) == numpy.size(self.err_data):
+                result.err_data[i] = self.err_data[i]    
+            if self.dqx_data is not None:
+                result.dqx_data[i] = self.dqx_data[i]
+            if self.dqy_data is not None:
+                result.dqy_data[i] = self.dqy_data[i]
+            result.qx_data[i] = self.qx_data[i]
+            result.qy_data[i] = self.qy_data[i]
+            result.q_data[i] = self.q_data[i]
+            result.mask[i] = self.mask[i]
+            
+            a = Uncertainty(self.data[i], dy[i]**2)
+            if isinstance(other, Data2D):
+                b = Uncertainty(other.data[i], dy_other[i]**2)
+                if other.dqx_data is not None and \
+                        result.dqx_data is not None:
+                    result.dqx_data[i] *= self.dqx_data[i]
+                    result.dqx_data[i] += (other.dqx_data[i]**2)
+                    result.dqx_data[i] /= 2
+                    result.dqx_data[i] = math.sqrt(result.dqx_data[i])     
+                if other.dqy_data is not None and \
+                        result.dqy_data is not None:
+                    result.dqy_data[i] *= self.dqy_data[i]
+                    result.dqy_data[i] += (other.dqy_data[i]**2)
+                    result.dqy_data[i] /= 2
+                    result.dqy_data[i] = math.sqrt(result.dqy_data[i])
+            else:
+                b = other
+            
+            output = operation(a, b)
+            result.data[i] = output.x
+            result.err_data[i] = math.sqrt(math.fabs(output.variance))
         return result
