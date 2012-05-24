@@ -1,4 +1,6 @@
-
+"""
+Base Page for fitting
+"""
 import sys
 import os
 import wx
@@ -18,8 +20,7 @@ from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import check_data_validity
 from sans.dataloader.data_info import Detector
 from sans.dataloader.data_info import Source
-import pagestate
-from pagestate import PageState
+from sans.perspectives.fitting.pagestate import PageState
 
 (PageInfoEvent, EVT_PAGE_INFO) = wx.lib.newevent.NewEvent()
 (PreviousStateEvent, EVT_PREVIOUS_STATE) = wx.lib.newevent.NewEvent()
@@ -101,7 +102,7 @@ class BasicPage(ScrolledPanel, PanelBase):
        
         self.disp_cb_dict = {}
    
-        self.state = PageState(parent=parent)
+        #self.state = PageState(parent=parent)
         ## dictionary containing list of models
         self.model_list_box = {}
        
@@ -779,54 +780,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._manager.on_perspective(event)
         self.onResetModel(event)
         self._draw_model()
-        
-    def old_on_bookmark(self, event):
-        """
-        save history of the data and model
-        """
-        if self.model == None:
-            msg = "Can not bookmark; Please select Data and Model first..."
-            wx.MessageBox(msg, 'Info')
-            return
-        if hasattr(self, "enable_disp"):
-            self.state.enable_disp = copy.deepcopy(self.enable_disp.GetValue())
-        if hasattr(self, "disp_box"):
-            self.state.disp_box = copy.deepcopy(self.disp_box.GetSelection())
-
-        self.state.model.name = self.model.name
-        
-        #Remember fit engine_type for fit panel
-        if self.engine_type == None:
-            self.engine_type = "scipy"
-        if self._manager != None:
-            self._manager._on_change_engine(engine=self.engine_type)
-        
-            self.state.engine_type = self.engine_type
-
-        new_state = self.state.clone()
-        new_state.model.name = self.state.model.name
-        
-        new_state.enable2D = copy.deepcopy(self.enable2D)
-        ##Add model state on context menu
-        self.number_saved_state += 1
-        name = self.model.__class__.__name__ + "[%g]" % self.number_saved_state
-        self.saved_states[name] = new_state
-        
-        ## Add item in the context menu
-        
-        year, month, day, hour, minute, second, tda, ty, tm_isdst \
-            = time.localtime()
-        my_time = str(hour) + " : " + str(minute) + " : " + str(second) + " "
-        date = str(month) + "|" + str(day) + "|" + str(year)
-        msg = "Model saved at %s on %s" % (my_time, date)
-        ## post help message for the selected model
-        msg += " Saved! right click on this page to retrieve this model"
-        wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
-        
-        id = wx.NewId()
-        self.popUpMenu.Append(id, name, str(msg))
-        wx.EVT_MENU(self, id, self.onResetModel)
-        
+                
     def onSetFocus(self, evt):
         """
         highlight the current textcrtl and hide the error text control shown
@@ -1910,7 +1864,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                                     update_chisqr=update_chisqr,
                                     source='model',
                                     weight=weight)
-        
+       
     def _on_show_sld(self, event=None):
         """
         Plot SLD profile
@@ -3293,3 +3247,103 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         print "BasicPage.update_pinhole_smear was called: skipping"
         return
+
+    def _fill_model_sizer(self, sizer):
+        """
+        fill sizer containing model info
+        """
+        ##Add model function Details button in fitpanel.
+        ##The following 3 lines are for Mac. Let JHC know before modifying...
+        title = "Model"
+        self.formfactorbox = None
+        self.multifactorbox = None
+        self.mbox_description = wx.StaticBox(self, -1, str(title))
+        boxsizer1 = wx.StaticBoxSizer(self.mbox_description, wx.VERTICAL)
+        self.mbox_description.SetForegroundColour(wx.RED)
+        id = wx.NewId()
+        self.model_help = wx.Button(self, id, 'Details', size=(80, 23))
+        self.model_help.Bind(wx.EVT_BUTTON, self.on_model_help_clicked, id=id)
+        self.model_help.SetToolTipString("Model Function Help")
+        id = wx.NewId()
+        self.model_view = wx.Button(self, id, "Show 2D", size=(80, 23))
+        self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D, id=id)
+        hint = "toggle view of model from 1D to 2D  or 2D to 1D"
+        self.model_view.SetToolTipString(hint)
+      
+        self.shape_rbutton = wx.RadioButton(self, -1, 'Shapes',
+                                             style=wx.RB_GROUP)
+        self.shape_indep_rbutton = wx.RadioButton(self, -1,
+                                                  "Shape-Independent")
+        self.struct_rbutton = wx.RadioButton(self, -1, "Structure Factor ")
+        self.plugin_rbutton = wx.RadioButton(self, -1, "Customized Models")
+                
+        self.Bind(wx.EVT_RADIOBUTTON, self._show_combox,
+                            id=self.shape_rbutton.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self._show_combox,
+                            id=self.shape_indep_rbutton.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self._show_combox,
+                            id=self.struct_rbutton.GetId())
+        self.Bind(wx.EVT_RADIOBUTTON, self._show_combox,
+                            id=self.plugin_rbutton.GetId())
+        #MAC needs SetValue
+        self.shape_rbutton.SetValue(True)
+      
+        sizer_radiobutton = wx.GridSizer(2, 3, 5, 5)
+        sizer_radiobutton.Add(self.shape_rbutton)
+        sizer_radiobutton.Add(self.shape_indep_rbutton)
+        sizer_radiobutton.Add(self.model_view, 1, wx.LEFT, 20)
+        sizer_radiobutton.Add(self.plugin_rbutton)
+        sizer_radiobutton.Add(self.struct_rbutton)
+        sizer_radiobutton.Add(self.model_help, 1, wx.LEFT, 20)
+        
+        sizer_selection = wx.BoxSizer(wx.HORIZONTAL)
+        mutifactor_selection = wx.BoxSizer(wx.HORIZONTAL)
+        
+        self.text1 = wx.StaticText(self, -1, "")
+        self.text2 = wx.StaticText(self, -1, "P(Q)*S(Q)")
+        self.mutifactor_text = wx.StaticText(self, -1, "No. of Shells: ")
+        self.mutifactor_text1 = wx.StaticText(self, -1, "")
+        self.show_sld_button = wx.Button(self, -1, "Show SLD Profile")
+        self.show_sld_button.Bind(wx.EVT_BUTTON, self._on_show_sld)
+
+        self.formfactorbox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        if self.model != None:
+            self.formfactorbox.SetValue(self.model.name)
+        self.structurebox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        self.multifactorbox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        self.initialize_combox()
+        wx.EVT_COMBOBOX(self.formfactorbox, -1, self._on_select_model)
+
+        wx.EVT_COMBOBOX(self.structurebox, -1, self._on_select_model)
+        wx.EVT_COMBOBOX(self.multifactorbox, -1, self._on_select_model)
+        ## check model type to show sizer
+        if self.model != None:
+            self._set_model_sizer_selection(self.model)
+        
+        sizer_selection.Add(self.text1)
+        sizer_selection.Add((5, 5))
+        sizer_selection.Add(self.formfactorbox)
+        sizer_selection.Add((5, 5))
+        sizer_selection.Add(self.text2)
+        sizer_selection.Add((5, 5))
+        sizer_selection.Add(self.structurebox)
+       
+        mutifactor_selection.Add((10, 5))
+        mutifactor_selection.Add(self.mutifactor_text)
+        mutifactor_selection.Add(self.multifactorbox)
+        mutifactor_selection.Add((5, 5))
+        mutifactor_selection.Add(self.mutifactor_text1)
+        mutifactor_selection.Add((10, 5))
+        mutifactor_selection.Add(self.show_sld_button)
+
+        boxsizer1.Add(sizer_radiobutton)
+        boxsizer1.Add((10, 10))
+        boxsizer1.Add(sizer_selection)
+        boxsizer1.Add((10, 10))
+        boxsizer1.Add(mutifactor_selection)
+        
+        self._set_multfactor_combobox()
+        self.multifactorbox.SetSelection(1)
+        self.show_sld_button.Hide()
+        sizer.Add(boxsizer1, 0, wx.EXPAND | wx.ALL, 10)
+        sizer.Layout()
