@@ -24,8 +24,11 @@ from lxml import etree
 import sans.dataloader
 from sans.dataloader.readers.cansas_reader import Reader as CansasReader
 from sans.dataloader.readers.cansas_reader import get_content, write_node
-from sans.dataloader.data_info import Data2D, Detector
-
+from sans.dataloader.data_info import Data2D
+from sans.dataloader.data_info import Collimation
+from sans.dataloader.data_info import Detector
+from sans.dataloader.data_info import Process
+from sans.dataloader.data_info import Aperture
 #Information to read/write state as xml
 FITTING_NODE_NAME = 'fitting_plug_in'
 CANSAS_NS = "cansas1d/1.0"
