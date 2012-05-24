@@ -114,10 +114,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.dq_r = None
         self.tcChi = None
         self.disp_box = None
+        self.model_disp = None
         self.Npts_fit = None
         self.Npts_total = None
         self.theory_qmin = None 
         self.theory_qmax = None
+        self.theory_qmin_x = None
+        self.theory_qmax_x = None
         self.cb1 = None
         self.btEditMask = None
         self.btFit = None
@@ -3369,3 +3372,72 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.show_sld_button.Hide()
         sizer.Add(boxsizer1, 0, wx.EXPAND | wx.ALL, 10)
         sizer.Layout()
+        
+    def on_smear_helper(self, update=False):
+        """
+        Help for onSmear if implemented
+        
+        :param update: force or not to update
+        """
+    def reset_page(self, state, first=False):
+        """
+        reset the state  if implemented
+        """
+    def onSmear(self, event):
+        """
+        Create a smear object if implemented 
+        """
+    def onPinholeSmear(self, event):
+        """
+        Create a custom pinhole smear object if implemented
+        """
+    def onSlitSmear(self, event):
+        """
+        Create a custom slit smear object if implemented
+        """
+    def update_slit_smear(self):
+        """
+        called by kill_focus on pinhole TextCntrl
+        to update the changes if implemented
+        """
+    def select_param(self, event):
+        """
+        Select TextCtrl  checked if implemented
+        """
+    def set_data(self, data=None):
+        """
+        Sets data if implemented
+        """
+    def _is_2D(self):
+        """
+        Check if data_name is Data2D if implemented
+        """
+    def _on_select_model(self, event=None):
+        """
+        call back for model selection if implemented
+        """
+    def select_all_param(self, event):
+        """
+        set to true or false all checkBox if implemented
+        """
+    def get_weight_flag(self):
+        """
+        Get flag corresponding to a given weighting dI data if implemented
+        """
+    def _set_sizer_dispersion(self):
+        """
+        draw sizer for dispersity if implemented
+        """
+    def get_all_checked_params(self):
+        """
+        Found all parameters current check and add them to list of parameters
+        to fit if implemented
+        """
+    def set_npts2fit(self):
+        """
+        setValue Npts for fitting if implemented
+        """
+    def _onModel2D(self, event):
+        """
+        toggle view of model from 1D to 2D  or 2D from 1D if implemented
+        """
