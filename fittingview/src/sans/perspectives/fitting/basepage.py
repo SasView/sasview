@@ -99,6 +99,16 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## pinhole smear
         self.dx_min = None
         self.dx_max = None
+        ##semar attrs
+        self.enable_smearer = None
+        self.disable_smearer = None
+        self.pinhole_smearer = None
+        self.slit_smearer = None
+        ##weigth attrs
+        self.dI_noweight = None
+        self.dI_didata = None
+        self.dI_sqrdata = None
+        self.dI_idata = None
        
         self.disp_cb_dict = {}
    
