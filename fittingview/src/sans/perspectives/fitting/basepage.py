@@ -99,16 +99,24 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## pinhole smear
         self.dx_min = None
         self.dx_max = None
-        ##semar attrs
+        ##semar attrbs
         self.enable_smearer = None
         self.disable_smearer = None
         self.pinhole_smearer = None
         self.slit_smearer = None
-        ##weigth attrs
+        ##weigth attrbs
         self.dI_noweight = None
         self.dI_didata = None
         self.dI_sqrdata = None
         self.dI_idata = None
+        ##other attrbs
+        self.dq_l = None
+        self.dq_r = None
+        self.tcChi = None
+        self.disp_box = None
+        self.Npts_fit = None
+        self.theory_qmin = None 
+        self.theory_qmax = None
        
         self.disp_cb_dict = {}
    
@@ -962,7 +970,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.state.dI_didata = copy.deepcopy(self.dI_didata.GetValue())
         self.state.dI_sqrdata = copy.deepcopy(self.dI_sqrdata.GetValue())
         self.state.dI_idata = copy.deepcopy(self.dI_idata.GetValue())
-        if hasattr(self, "disp_box"):
+        if hasattr(self, "disp_box") and self.disp_box != None:
             self.state.disp_box = self.disp_box.GetCurrentSelection()
 
             if len(self.disp_cb_dict) > 0:
@@ -1064,7 +1072,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.enable_disp.SetValue(state.enable_disp)
         self.disable_disp.SetValue(state.disable_disp)
         
-        if hasattr(self, "disp_box"):
+        if hasattr(self, "disp_box") and self.disp_box != None:
             self.disp_box.SetSelection(state.disp_box)
             n = self.disp_box.GetCurrentSelection()
             dispersity = self.disp_box.GetClientData(n)
