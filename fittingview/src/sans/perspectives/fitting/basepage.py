@@ -115,8 +115,12 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.tcChi = None
         self.disp_box = None
         self.Npts_fit = None
+        self.Npts_total = None
         self.theory_qmin = None 
         self.theory_qmax = None
+        self.cb1 = None
+        self.btEditMask = None
+        self.btFit = None
        
         self.disp_cb_dict = {}
    
