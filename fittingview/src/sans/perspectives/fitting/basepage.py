@@ -1328,13 +1328,12 @@ class BasicPage(ScrolledPanel, PanelBase):
             # From saved file, disp_model can not be sent in model obj.
             # it will be sent as a string here, then converted to model object.
             if disp.__class__.__name__ == 'str':
+                disp_model = None
                 com_str = "from sans.models.dispersion_models "
-                com_str += "import %s as disp_func"
+                com_str += "import %s as disp_func \ndisp_model = disp_func()"
                 exec com_str % disp
-                disp_model = disp_func()
             else:
                 disp_model = disp
-
             self._disp_obj_dict[key] = disp_model
             param_name = key.split('.')[0]
             # Try to set dispersion only when available
