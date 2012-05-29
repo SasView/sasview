@@ -1205,19 +1205,6 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         # no message for now
         return True
-        count_bf = self.data_cbbox.GetCount()
-        if count_bf > 1:
-            msg += "Loading a new data set will reset all the work"
-            msg += " done in this panel. \n\r"
-            mssg += "Please make sure to save it first... \n\r"
-            answer = wx.MessageBox(mssg, msg,
-                                   wx.CANCEL|wx.OK|wx.ICON_EXCLAMATION)
-    
-            if answer == wx.OK:
-                return True
-            else:
-                return False
-        else: True
         
     def _reset_output(self):
         """
