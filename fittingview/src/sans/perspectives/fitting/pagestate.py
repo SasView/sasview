@@ -695,6 +695,7 @@ class PageState(object):
             
         # For self.values ={ disp_param_name: [vals,...],...}
         # and for self.weights ={ disp_param_name: [weights,...],...}
+        list = {}
         for item in list_of_model_attributes:
             element = newdoc.createElement(item[0])
             exec "list = self.%s" % item[1]
@@ -855,10 +856,9 @@ class PageState(object):
                         try:
                             # Try to recover disp_model object from strings
                             com = "from sans.models.dispersion_models "
-                            com += "import %s as disp"
+                            com += "import %s as disp /ndisp_model = disp()"
                             com_name = disp_name.split(".")[3]
                             exec com % com_name
-                            disp_model = disp()
                             exec "self.%s['%s'] = com_name" % (item[1], name)
                         except:
                             pass
@@ -1008,7 +1008,7 @@ class Reader(CansasReader):
         for item in list_of_data2d_values:
             root_node = doc.createElement(item[0])
             new_node.appendChild(root_node)
-            
+            temp_list = None
             exec "temp_list = datainfo.%s" % item[1]
 
             if temp_list is None or len(temp_list)== 0:

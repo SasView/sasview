@@ -1212,8 +1212,8 @@ class DataDialog(wx.Dialog):
         
         self._sizer_txt.Add(self._panel, 1, wx.EXPAND|wx.LEFT|wx.RIGHT, 5)
         self._sizer_main.Add(self._sizer_txt, 1, wx.EXPAND|wx.ALL, 10)
-        self._sizer_main.Add(self._data_text_ctrl, 0, 
-                             wx.EXPAND|wx.LEFT|wx.RIGHT, 10)
+        #self._sizer_main.Add(self._data_text_ctrl, 0, 
+        #                     wx.EXPAND|wx.LEFT|wx.RIGHT, 10)
         self._sizer_main.Add(static_line, 0, wx.EXPAND, 0)
         self._sizer_main.Add(self._sizer_button, 0, wx.EXPAND|wx.ALL, 10)
         self.SetSizer(self._sizer_main)
