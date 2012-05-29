@@ -267,6 +267,7 @@ OnionModel :: OnionModel() {
   n_shells = Parameter(1.0);
   scale = Parameter(1.0);
   rad_core0 = Parameter(200.0);
+  rad_core0.set_min(0.0);
   sld_core0 = Parameter(1e-06);
   sld_solv = Parameter(6.4e-06);
   background = Parameter(0.0);
@@ -305,15 +306,25 @@ OnionModel :: OnionModel() {
   A_shell10 = Parameter(1.0);
 
   thick_shell1 = Parameter(50.0);
+  thick_shell1.set_min(0.0);
   thick_shell2 = Parameter(50.0);
+  thick_shell2.set_min(0.0);
   thick_shell3 = Parameter(50.0);
+  thick_shell3.set_min(0.0);
   thick_shell4 = Parameter(50.0);
+  thick_shell4.set_min(0.0);
   thick_shell5 = Parameter(50.0);
+  thick_shell5.set_min(0.0);
   thick_shell6 = Parameter(50.0);
+  thick_shell6.set_min(0.0);
   thick_shell7 = Parameter(50.0);
+  thick_shell7.set_min(0.0);
   thick_shell8 = Parameter(50.0);
+  thick_shell8.set_min(0.0);
   thick_shell9 = Parameter(50.0);
+  thick_shell9.set_min(0.0);
   thick_shell10 = Parameter(50.0);
+  thick_shell10.set_min(0.0);
 
   func_shell1 = Parameter(2);
   func_shell2 = Parameter(2);
