@@ -132,21 +132,21 @@ class manip_2D(unittest.TestCase):
     
     def setUp(self):
         # Create two data sets to play with
-        x_0 = 2.0*numpy.ones(100)
-        dx_0 = 0.5*numpy.ones(100)
-        qx_0 = numpy.arange(100)
-        qy_0 = numpy.arange(100)
-        mask_0 = numpy.zeros(100)
-        dqx_0 = numpy.arange(100)/100
-        dqy_0 = numpy.arange(100)/100
+        x_0 = 2.0*numpy.ones(25)
+        dx_0 = 0.5*numpy.ones(25)
+        qx_0 = numpy.arange(25)
+        qy_0 = numpy.arange(25)
+        mask_0 = numpy.zeros(25)
+        dqx_0 = numpy.arange(25)/100
+        dqy_0 = numpy.arange(25)/100
         q_0 = numpy.sqrt(qx_0 * qx_0 + qy_0 * qy_0)
         self.data = Data2D(x_0, dx_0, qx_0, qy_0, q_0, mask_0, dqx_0, dqy_0)
         
-        y = numpy.ones(100)
-        dy = numpy.ones(100)
-        qx = numpy.arange(100)
-        qy = numpy.arange(100)
-        mask = numpy.zeros(100)
+        y = numpy.ones(25)
+        dy = numpy.ones(25)
+        qx = numpy.arange(25)
+        qy = numpy.arange(25)
+        mask = numpy.zeros(25)
         q = numpy.sqrt(qx * qx + qy * qy)
         self.data2 = Data2D(y, dy, qx, qy, q, mask)
         
@@ -156,9 +156,9 @@ class manip_2D(unittest.TestCase):
             Test whether the test file was loaded properly
         """
         # There should be 5 entries in the file
-        self.assertEqual(numpy.size(self.data.data), 100)
+        self.assertEqual(numpy.size(self.data.data), 25)
         
-        for i in range(100):
+        for i in range(25):
             # All y-error values should be 0.5
             self.assertEqual(self.data.err_data[i], 0.5)    
             
@@ -167,69 +167,69 @@ class manip_2D(unittest.TestCase):
         
     def test_add(self):
         result = self.data2+self.data
-        for i in range(100):
+        for i in range(25):
             self.assertEqual(result.data[i], 3.0)
             self.assertEqual(result.err_data[i], math.sqrt(0.5**2+1.0))
         
     def test_sub(self):
         result = self.data2-self.data
-        for i in range(100):
+        for i in range(25):
                 self.assertEqual(result.data[i], -1.0)
                 self.assertEqual(result.err_data[i], math.sqrt(0.5**2+1.0))
         
     def test_mul(self):
         result = self.data2*self.data
-        for i in range(100):
+        for i in range(25):
             self.assertEqual(result.data[i], 2.0)
             self.assertEqual(result.err_data[i], math.sqrt((0.5*1.0)**2+(1.0*2.0)**2))
         
     def test_div(self):
         result = self.data2/self.data
-        for i in range(100):
+        for i in range(25):
             self.assertEqual(result.data[i], 0.5)
             self.assertEqual(result.err_data[i], math.sqrt((1.0/2.0)**2+(0.5*1.0/4.0)**2))
         
     def test_radd(self):
         result = self.data+3.0
-        for i in range(100):
+        for i in range(25):
             self.assertEqual(result.data[i], 5.0)
             self.assertEqual(result.err_data[i], 0.5)
             
         result = 3.0+self.data
-        for i in range(100):
+        for i in range(25):
             self.assertEqual(result.data[i], 5.0)
             self.assertEqual(result.err_data[i], 0.5)
             
     def test_rsub(self):
         result = self.data-3.0
-        for i in range(100):
+        for i in range(25):
             self.assertEqual(result.data[i], -1.0)
             self.assertEqual(result.err_data[i], 0.5)
             
         result = 3.0-self.data
-        for i in range(100):
+        for i in range(25):
             self.assertEqual(result.data[i], 1.0)
             self.assertEqual(result.err_data[i], 0.5)
             
     def test_rmul(self):
         result = self.data*3.0
-        for i in range(100):
+        for i in range(25):
             self.assertEqual(result.data[i], 6.0)
             self.assertEqual(result.err_data[i], 1.5)
             
         result = 3.0*self.data
-        for i in range(100):
+        for i in range(25):
             self.assertEqual(result.data[i], 6.0)
             self.assertEqual(result.err_data[i], 1.5)
             
     def test_rdiv(self):
         result = self.data/4.0
-        for i in range(100):
+        for i in range(25):
             self.assertEqual(result.data[i], 0.5)
             self.assertEqual(result.err_data[i], 0.125)
             
         result = 6.0/self.data
-        for i in range(100):
+        for i in range(25):
             self.assertEqual(result.data[i], 3.0)
             self.assertEqual(result.err_data[i], 6.0*0.5/4.0)
             
