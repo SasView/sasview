@@ -1,5 +1,6 @@
 """
-Welcome panel for SansView
+    Welcome page
+    
 """
 import wx
 import wx.aui
