@@ -76,6 +76,6 @@ class ModelAdaptor(object):
     
 
 if __name__ == "__main__":
-    b = BaseModel() 
-    print b.operateOn
+    b = ModelAdaptor() 
+    #print b.operateOn
     
