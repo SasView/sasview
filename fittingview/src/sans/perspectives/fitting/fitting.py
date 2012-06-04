@@ -626,12 +626,6 @@ class Plugin(PluginBase):
         if len(self.temp_state) == 0:
             if self.state_index == 0 and len(self.mypanels) <= 0 \
             and self.sfile_ext == '.svs':
-                #TODO: Why was the following line left in the code
-                # if add_default_pages doesn't exist?
-                try:
-                    self.fit_panel.add_default_pages()
-                except:
-                    print sys.exc_value
                 self.temp_state = []
                 self.state_index = 0
             return
@@ -2017,7 +2011,7 @@ class Plugin(PluginBase):
         # Get data: data I, theory I, and data dI in order
         if data_copy.__class__.__name__ == "Data2D":
             if index == None:
-                index = numpy.ones(len(data_copy.data), ntype=bool)
+                index = numpy.ones(len(data_copy.data), dtype=bool)
             if weight != None:
                 data_copy.err_data = weight
             # get rid of zero error points
@@ -2032,7 +2026,7 @@ class Plugin(PluginBase):
         else:
             # 1 d theory from model_thread is only in the range of index
             if index == None: 
-                index = numpy.ones(len(data_copy.y), ntype=bool)
+                index = numpy.ones(len(data_copy.y), dtype=bool)
             if weight != None:
                 data_copy.dy = weight
             if data_copy.dy == None or data_copy.dy == []:

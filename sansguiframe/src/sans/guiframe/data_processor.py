@@ -766,6 +766,15 @@ class Notebook(nb, PanelBase):
         grid = self.GetPage(pos)
         grid.AppendCols(1, True)
         
+    def on_remove_column(self):
+        """
+        Remove the selected column from the grid
+        """
+        pos = self.GetSelection()
+        grid = self.GetPage(pos)
+        grid.on_remove_column(event=None)
+        
+        
 class GridPanel(SPanel):
     def __init__(self, parent, data_inputs=None,
                  data_outputs=None, *args, **kwds):
