@@ -153,6 +153,8 @@ class Calc1D(CalcThread):
         self.starttime = 0
         self.update_chisqr = update_chisqr
         self.source = source
+        self.out = None
+        self.index = None
         
     def compute(self):
         """

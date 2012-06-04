@@ -106,13 +106,13 @@ class PluginBase:
         """
         Load  data
         """
-        raise NotImplemented
+        raise NotImplementedError
  
     def load_folder(self, event):
         """
         Load entire folder
         """
-        raise NotImplemented 
+        raise NotImplementedError
     
     def set_is_active(self, active=False):
         """
