@@ -156,12 +156,12 @@ class BaseComponent:
         obj._persistency_dict = copy.deepcopy( self._persistency_dict)
         return obj
     
-    def _set_dispersion(self):
+    def set_dispersion(self, parameter, dispersion):
         """
         model dispersions
         """ 
-        ##set dispersion from model 
-        self.dispersion = {}
+        ##Not Implemented
+        return None
         
     def getProfile(self):
         """

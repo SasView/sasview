@@ -104,16 +104,9 @@ class Model(Model1DPlugin):
             new_item = "p2_" + item
             if not new_item in self.orientation_params:
                 self.orientation_params.append(new_item)
-        # get multiplicity if model provide it, else 1.
-        try:
-            multiplicity1 = p_model1.multiplicity
-            try:
-                multiplicity2 = p_model2.multiplicity
-            except:
-                multiplicity2 = 1
-        except:
-            multiplicity1 = 1
-            multiplicity2 = 1
+        # set multiplicity 1: muti_func Not supported.
+        multiplicity1 = 1
+        multiplicity2 = 1
         ## functional multiplicity of the model
         self.multiplicity1 = multiplicity1  
         self.multiplicity2 = multiplicity2    
