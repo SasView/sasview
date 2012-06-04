@@ -705,7 +705,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         
         self.sizer2.Clear(True)
         if self.batch_on:
-            self.sizer2.Hide()
+            if self.sizer2.IsShown():
+                self.sizer2.Hide()
             return
         box_description= wx.StaticBox(self, -1, "Fit Constraints")
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)

@@ -184,9 +184,9 @@ class DataEditorPanel(wx.ScrolledWindow):
         self.bt_edit_source = wx.Button(self, -1, "Edit")
         self.bt_edit_source.SetToolTipString("Edit data's sample.")
         self.bt_edit_source.Bind(wx.EVT_BUTTON, self.edit_source)
-        self.source_sizer.AddMany([(source_txt, 0, wx.ALL, 10),
-                                (self.bt_edit_source, 0,
-                                  wx.RIGHT|wx.BOTTOM|wx.TOP, 10)])
+        #self.source_sizer.AddMany([(source_txt, 0, wx.ALL, 10),
+        #                        (self.bt_edit_source, 0,
+        #                          wx.RIGHT|wx.BOTTOM|wx.TOP, 10)])
 
     def _layout_summary(self):
         """
@@ -197,7 +197,7 @@ class DataEditorPanel(wx.ScrolledWindow):
                                         size=(-1, 200))
         summary = 'No data info available...'
         self.data_summary.SetValue(summary)
-        self.summary_sizer.Add(self.data_summary, 1, wx.EXPAND|wx.ALL, 10)  
+        #self.summary_sizer.Add(self.data_summary, 1, wx.EXPAND|wx.ALL, 10)  
                     
     def _layout_button(self):  
         """

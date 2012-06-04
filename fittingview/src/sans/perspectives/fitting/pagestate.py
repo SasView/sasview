@@ -1614,7 +1614,7 @@ class Reader(CansasReader):
                 doc, sasentry = self._data2d_to_xml_doc(data)
             
         if state is not None:
-            state.toXML(doc=doc, file=data.name, entry_node=sasentry)
+            state.toXML(doc=doc, file=data.filename, entry_node=sasentry)
             
         return doc
     
