@@ -866,8 +866,8 @@ class Plugin(PluginBase):
         
         self.current_plottable = new_plot
         # Get Q range
-        self.control_panel.q_min = self.pr.x.min()
-        self.control_panel.q_max = self.pr.x.max()
+        self.control_panel.q_min = min(self.pr.x)
+        self.control_panel.q_max = max(self.pr.x)
             
     def save_data(self, filepath, prstate=None):
         """
