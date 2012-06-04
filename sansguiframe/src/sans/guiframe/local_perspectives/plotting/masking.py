@@ -20,7 +20,7 @@
 import wx
 import sys
 import time
-import pylab
+import matplotlib.cm as cm
 import math
 import copy
 import numpy
@@ -33,7 +33,7 @@ from sans.guiframe.events import SlicerEvent
 from sans.guiframe.events import StatusEvent
 (InternalEvent, EVT_INTERNAL) = wx.lib.newevent.NewEvent()
 
-DEFAULT_CMAP = pylab.cm.jet
+DEFAULT_CMAP = cm.jet
 _BOX_WIDTH = 76
 _SCALE = 1e-6
 _STATICBOX_WIDTH = 380
@@ -646,7 +646,7 @@ class FloatPanel(wx.Dialog):
         """
         try:
             self.plotpanel.subplot.figure.clf()
-            self.plotpanel.close()
+            self.plotpanel.Close()
         except:
             # when called by data panel
             event.Skip()

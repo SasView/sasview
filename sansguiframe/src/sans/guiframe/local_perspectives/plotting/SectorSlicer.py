@@ -494,7 +494,7 @@ class SideInteractor(_BaseInteractor):
         """
         """
         x = params["radius"] 
-        self.set_cursor(x, self._inner_mouse_y)
+        self.set_cursor(x, None)
         
 
 class LineInteractor(_BaseInteractor):
@@ -623,5 +623,5 @@ class LineInteractor(_BaseInteractor):
         """
         """
         x = params["radius"] 
-        self.set_cursor(x, self._inner_mouse_y)
+        self.set_cursor(x, None)
         

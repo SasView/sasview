@@ -59,6 +59,8 @@ class SldPanel(wx.Panel, PanelBase):
         #layout attribute
         self.compound_ctl = None
         self.density_ctl = None
+        self.compound = ""
+        self.density = ""
         self.wavelength_ctl = None
         self.neutron_sld_real_ctl = None
         self.neutron_sld_im_ctl = None
@@ -304,7 +306,7 @@ class SldPanel(wx.Panel, PanelBase):
         element = myformula.atoms.keys()[0] 
         energy = xray_energy(element.K_alpha)
         
-        self.sld_formula = formula(str(user_formula), density=self.density)
+        self.sld_formula = formula(str(self.compound), density=self.density)
         atom = self.sld_formula.atoms
         return xray_sld_from_atoms(atom, density=self.density, energy= energy)
     
@@ -319,7 +321,7 @@ class SldPanel(wx.Panel, PanelBase):
             msg += "Error for Density value :expect float"
     
         self.wavelength = self.wavelength_ctl.GetValue()
-        if self.wavelength.lstrip().rstrip() == "":
+        if str(self.wavelength).lstrip().rstrip() == "":
             self.wavelength = WAVELENGTH
             self.wavelength_ctl.SetValue(str(WAVELENGTH))
             self.wavelength_ctl.SetBackgroundColour(wx.WHITE)

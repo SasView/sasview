@@ -274,8 +274,7 @@ class DataManager(object):
         for selected_name in name_list:
             for id, data_state in self.stored_data.iteritems():
                 if data_state.data.name == selected_name:
-                    del self._selected_data[id]
-                    del self.stored_data[data.id]
+                    del self.stored_data[id]
 
     def get_data_state(self, data_id):
         """

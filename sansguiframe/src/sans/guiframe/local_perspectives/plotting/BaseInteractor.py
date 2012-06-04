@@ -134,7 +134,7 @@ class _BaseInteractor:
             self.clickx, self.clicky = ev.xdata, ev.ydata
             self.move(ev.xdata, ev.ydata, ev)
         else:
-            self.restore()
+            self.restore(ev)
         self.base.update()
         return True
     
@@ -146,7 +146,7 @@ class _BaseInteractor:
         Calls move() to update the state.  Calls restore() on escape.
         """
         if ev.key == 'escape':
-            self.restore()
+            self.restore(ev)
         elif ev.key in ['up', 'down', 'right', 'left']:
             dx, dy = self.dpixel(self.clickx, self.clicky, nudge=ev.control)
             if ev.key == 'up':
