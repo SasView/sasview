@@ -49,7 +49,8 @@ class ArcInteractor(_BaseInteractor):
         """
         self.clear_markers()
         try:
-            self.marker.remove()
+            for item in self.markers:
+                item.remove()
             self.arc.remove()
         except:
             # Old version of matplotlib
@@ -160,6 +161,8 @@ class ArcInteractor(_BaseInteractor):
         """
         """
         x = params["radius"] 
-        self.set_cursor(x, self._mouse_y)
+        phi_max = self.theta2
+        nbins = self.npts
+        self.set_cursor(x, self._mouse_y, phi_max, nbins)
         
     

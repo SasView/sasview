@@ -657,9 +657,13 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 return 
             ctl2 = item[3]
             if ctl2.GetValue().lstrip().rstrip() == "":
-                model = param_cbox.GetClientData(param_cbox.GetCurrentSelection())
-                msg = " Enter a constraint for %s.%s! "%(model.name, 
+                model = param_cbox.GetClientData(\
+                                            param_cbox.GetCurrentSelection())
+                if model != None:
+                    msg = " Enter a constraint for %s.%s! "%(model.name, 
                                                         param_cbox.GetString(0))
+                else:
+                     msg = " Enter a constraint"
                 wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
                 return
         ## some model or parameters can be constrained
@@ -706,7 +710,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         self.sizer2.Clear(True)
         if self.batch_on:
             if self.sizer2.IsShown():
-                self.sizer2.Hide()
+                self.sizer2.Show(False)
             return
         box_description= wx.StaticBox(self, -1, "Fit Constraints")
         boxsizer1 = wx.StaticBoxSizer(box_description, wx.VERTICAL)

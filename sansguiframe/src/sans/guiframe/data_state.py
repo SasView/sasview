@@ -34,14 +34,6 @@ class DataState(object):
         if self.data is not None:
             _str += "Data name : %s \n" % str(self.data.name)
             _str += "Data ID : %s \n" % str(self.data.id)
-        else:
-            _str += "Theory Data: %s \n" % str(self.theory_data)
-        if self.theory_data is not None:
-            _str += "Data name : %s \n" % str(self.theory_data.name)
-            _str += "Theory Data ID : %s \n" % str(self.theory_data.id)
-        else:
-            _str += "Theory Data: %s \n" % str(self.theory_data)
-            
         _str += "Theories available: %s \n" % len(self.theory_list)
         if self.theory_list:
             for id, item in self.theory_list.iteritems():
