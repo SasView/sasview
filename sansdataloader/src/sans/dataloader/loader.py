@@ -229,7 +229,7 @@ class Registry(ExtensionRegistry):
                  
         except:
             msg = "Loader: Error accessing Reader "
-            msg += "in %s\n  %s" % (module.__name__, sys.exc_value)
+            msg += "in %s\n  %s" % (loader.__name__, sys.exc_value)
             logging.error(msg)
         return reader_found
 

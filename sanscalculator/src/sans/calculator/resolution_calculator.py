@@ -765,7 +765,8 @@ class ResolutionCalculator(object):
         """
         Set wavelength and its spread list
         """
-        self.wave.set_wave_list(wavelength_list, wavelengthspread_list)
+        self.wave.set_wave_list(wavelength_list)
+        self.wave.set_wave_spread_list(wavelengthspread_list)
     
     def get_wave_list(self):
         """

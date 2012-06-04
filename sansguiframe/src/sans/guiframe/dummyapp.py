@@ -98,7 +98,7 @@ class TestPlugin(PluginBase):
         """
         return [["Menu text", 
                  "Tool-tip help text", 
-                 self._on_context_do_something]]   
+                 "self._on_context_do_something"]]   
 
 class SansView():
     

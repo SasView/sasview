@@ -7,6 +7,7 @@ TwoPowerLaw function as a BaseComponent model
 
 from sans.models.BaseComponent import BaseComponent
 from numpy import power
+import math
 
 class TwoPowerLawModel(BaseComponent):
     """ 

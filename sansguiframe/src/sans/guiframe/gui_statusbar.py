@@ -230,8 +230,10 @@ class StatusBar(wxStatusB):
       
     def PushStatusText(self, *args, **kwds):
         """
+        PushStatusText
         """
-        wxStatusB.PushStatusText(self, field=MSG_POSITION, string=string)
+        text = "PushStatusText: What is this string?"
+        wxStatusB.PushStatusText(self, field=MSG_POSITION, string=text)
         
     def enable_clear_gauge(self):
         """

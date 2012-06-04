@@ -98,7 +98,7 @@ class PolymerExclVolume(BaseComponent):
             @return: (guinier value)
         """
         if x.__class__.__name__ == 'list':
-            return self._guinier(x[0])
+            return self._polymerexclvol(x[0])
         elif x.__class__.__name__ == 'tuple':
             raise ValueError, "Tuples are not allowed as input to BaseComponent models"
         else:

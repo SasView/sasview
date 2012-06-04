@@ -34,6 +34,7 @@ class BoxMask(_BaseInteractor):
         ## list of Boxmask markers
         self.markers = []
         self.axes = axes
+        self.mask = None
         self.is_inside = side
         ## connect the artist for the motion
         self.connect = self.base.connect
@@ -163,6 +164,7 @@ class BoxMask(_BaseInteractor):
         else:
             out = (mask(data))
         #self.base.data.mask=out
+        self.mask = mask
         return out  
               
     def moveend(self, ev):

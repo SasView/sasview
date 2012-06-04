@@ -126,7 +126,7 @@ class LineModel(BaseComponent):
    
 
 if __name__ == "__main__": 
-    l = Line()
+    l = LineModel()
     print "hello"
        
 # End of file

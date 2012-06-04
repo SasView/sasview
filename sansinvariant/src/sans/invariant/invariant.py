@@ -532,7 +532,7 @@ class InvariantCalculator(object):
         else:
             #Create error for data without dy error
             if data.dy is None:
-                dy = math.sqrt(y) 
+                dy = math.sqrt(data.y) 
             else:
                 dy = data.dy
             # Take care of smeared data
