@@ -229,7 +229,7 @@ class UnifiedPowerRgModel(BaseComponent):
         : return: DAB value
         """  
         if x.__class__.__name__ == 'list':
-            q = math.sqrt(x[0]**2 + x[1]**2)
+            q = sqrt(x[0]**2 + x[1]**2)
             return self._unifiedpowerrg(x)
         elif x.__class__.__name__ == 'tuple':
             raise ValueError, "Tuples are not allowed as input to BaseComponent models"

@@ -79,17 +79,6 @@ class SectorInteractor(_BaseInteractor):
             self.set_params(event.params)
             self.base.update()
 
-    def save_data(self, path, image, x, y):
-        """
-        """
-        output = open(path, 'w')
-        data_x, data_y = self.get_data(image, x, y)
-        
-        output.write("<phi>  <average>\n")
-        for i in range(len(data_x)):
-            output.write("%g  %g\n" % (data_x[i], data_y[i]))
-        output.close()
-
     def set_layer(self, n):
         """
         """
