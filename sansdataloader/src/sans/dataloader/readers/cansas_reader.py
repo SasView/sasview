@@ -584,12 +584,12 @@ class Reader:
         if HAS_CONVERTER == True and data_info.x_unit != '1/A':
             data_conv_q = Converter('1/A')
             # Test it
-            data_conv_q(1.0, output.Q_unit)
+            data_conv_q(1.0, data_info.x_unit)
             
         if HAS_CONVERTER == True and data_info.y_unit != '1/cm':
             data_conv_i = Converter('1/cm')
             # Test it
-            data_conv_i(1.0, output.I_unit)
+            data_conv_i(1.0, data_info.y_unit)
                 
         if data_conv_q is not None:
             data_info.xaxis("\\rm{Q}", data_info.x_unit)
@@ -892,8 +892,9 @@ class Reader:
             units = entry.get('unit')
             if units is not None:
                 toks = variable.split('.')
+                local_unit = None
                 exec "local_unit = storage.%s_unit" % toks[0]
-                if units.lower() != local_unit.lower():
+                if local_unit != None and units.lower() != local_unit.lower():
                     if HAS_CONVERTER == True:
                         try:
                             conv = Converter(units)
