@@ -13,7 +13,7 @@
 #############################################################################
 import math
 import os
-#import copy
+import sys
 import numpy
 import logging
 from sans.dataloader.data_info import Data2D, Detector
@@ -136,8 +136,8 @@ class Reader:
                             val = float(toks[0])
                             err = float(toks[1])
                             if data_conv_i is not None:
-                                val = data_conv_i(val, units=output.y_unit)
-                                err = data_conv_i(err, units=output.y_unit)
+                                val = data_conv_i(val, units=output._yunit)
+                                err = data_conv_i(err, units=output._yunit)
                             data.append(val)
                             error.append(err)
                         except:
