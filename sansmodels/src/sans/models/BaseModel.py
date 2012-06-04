@@ -132,5 +132,5 @@ class BaseModel(ModelAdaptor):
     
 if __name__ == "__main__":
     b = BaseModel() 
-    print b.operateOn
+    #print b.operateOn
     

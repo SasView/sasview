@@ -14,7 +14,7 @@ if sys.platform.count("win32") > 0:
 else:
     FONT_VARIANT = 1
     
-DEFAULT_CMAP = pylab.cm.jet
+DEFAULT_CMAP = pylab.cm.get_cmap('jet')
 
 class DetectorDialog(wx.Dialog):
     """
