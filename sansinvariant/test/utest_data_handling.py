@@ -92,6 +92,7 @@ class TestInvariantCalculator(unittest.TestCase):
     """
     def setUp(self):
         self.data = Loader().load("latex_smeared_slit.xml")
+        self.data.dxl = None
         
     def test_initial_data_processing(self):
         """ 
