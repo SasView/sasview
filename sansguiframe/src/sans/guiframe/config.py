@@ -7,6 +7,7 @@ from sans.guiframe.gui_style import GUIFRAME
 # Version of the application
 __appname__ = "DummyView"
 __version__ = '0.0.0'
+__build__ = '1'
 __download_page__ = 'https://sourceforge.net/projects/sansviewproject/files/'
 __update_URL__ = 'http://sansviewproject.svn.sourceforge.net/viewvc/sansviewproject/trunk/sansview.latestversion'
 

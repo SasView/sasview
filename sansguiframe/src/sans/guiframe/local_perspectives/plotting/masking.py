@@ -33,7 +33,7 @@ from sans.guiframe.events import SlicerEvent
 from sans.guiframe.events import StatusEvent
 (InternalEvent, EVT_INTERNAL) = wx.lib.newevent.NewEvent()
 
-DEFAULT_CMAP = cm.jet
+DEFAULT_CMAP = cm.get_cmap('jet')
 _BOX_WIDTH = 76
 _SCALE = 1e-6
 _STATICBOX_WIDTH = 380
