@@ -155,7 +155,24 @@ class BaseComponent:
         obj.dispersion = copy.deepcopy(self.dispersion)
         obj._persistency_dict = copy.deepcopy( self._persistency_dict)
         return obj
-
+    
+    def _set_dispersion(self):
+        """
+        model dispersions
+        """ 
+        ##set dispersion from model 
+        self.dispersion = {}
+        
+    def getProfile(self):
+        """
+        Get SLD profile 
+        
+        : return: (z, beta) where z is a list of depth of the transition points
+                beta is a list of the corresponding SLD values 
+        """
+        #Not Implemented
+        return None, None
+            
     def setParam(self, name, value):
         """ 
         Set the value of a model parameter
