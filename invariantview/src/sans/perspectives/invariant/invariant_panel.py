@@ -98,8 +98,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self._default_save_location = os.getcwd()        
         if self.parent is not None:
             msg = ""
-            wx.PostEvent(self.parent,StatusEvent(status=msg, info="info"))
-            self._default_save_location =\
+            wx.PostEvent(self.parent, StatusEvent(status=msg, info="info"))
+            self._default_save_location = \
                         self.parent._default_save_location
         
         self._set_bookmark_flag(False)
@@ -198,14 +198,15 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                     doc = new_doc
         return doc   
 
-    def set_state(self,state=None,data=None):
+    def set_state(self, state=None, data=None):
         """
         set state when loading it from a .inv/.svs file
         """
         
         if state == None and data == None:
             self.state = IState()
-        elif state == None or data == None: return
+        elif state == None or data == None: 
+            return
         else:
             new_state = copy.deepcopy(state)
             self.new_state = True
@@ -225,16 +226,16 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self.bookmark_num = len(self.state.bookmark_list)
             total_bookmark_num = self.bookmark_num + 1
 
-            for ind in range(1,total_bookmark_num):
+            for ind in range(1, total_bookmark_num):
                 #bookmark_num = ind
                 value = self.state.bookmark_list[ind]
-                name = "%d] bookmarked at %s on %s"% (ind,value[0], value[1])
+                name = "%d] bookmarked at %s on %s"% (ind, value[0], value[1])
                 # append it to menu
                 id = wx.NewId()
-                self.popUpMenu.Append(id,name,str(''))
+                self.popUpMenu.Append(id, name, str(''))
                 wx.EVT_MENU(self, id, self._back_to_bookmark) 
                 wx.PostEvent(self.parent, AppendBookmarkEvent(title=name, 
-                                          hint='',
+                                          hint='', 
                                           handler=self._back_to_bookmark))
 
             self.get_state_by_num(state_num=str(num))
@@ -314,6 +315,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
     
     def get_extrapolation_type(self, low_q, high_q):
         """
+        get extrapolation type
         """
         extrapolation = None
         if low_q  and not high_q:
@@ -336,6 +338,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
     
     def get_volume(self, inv, contrast, extrapolation):
         """
+        get volume fraction
         """
         if contrast is not None:
             try:
@@ -354,6 +357,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                
     def get_surface(self, inv, contrast, porod_const, extrapolation):
         """
+        get surface value
         """
         if contrast is not None and porod_const is not None:
             try:
@@ -372,6 +376,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 
     def get_total_qstar(self, inv, extrapolation):
         """
+        get total qstar
         """
         try:
             qstar_total, qstar_total_err = inv.get_qstar_with_error(extrapolation)
@@ -390,6 +395,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             
     def get_low_qstar(self, inv, npts_low, low_q=False):
         """
+        get low qstar
         """
         if low_q:
             try: 
@@ -414,10 +420,12 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         else:
             try:
                 self._manager.plot_theory(name="Low-Q extrapolation")
-            except: pass
+            except: 
+                pass
             
     def get_high_qstar(self, inv, high_q=False):
         """
+        get high qstar
         """
         if high_q:
             try: 
@@ -444,10 +452,12 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         else:
             try:
                 self._manager.plot_theory(name="High-Q extrapolation")
-            except: pass
+            except: 
+                pass
 
     def get_qstar(self, inv):
         """
+        get qstar
         """
         qstar, qstar_err = inv.get_qstar_with_error()
         self.inv_container.qstar = qstar
@@ -508,7 +518,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             if check_float(self.power_high_tcl):
                 power_high = float(power_high)
             else:
-                if high_q :
+                if high_q:
                     #Raise error only when qstar at high q is requested
                     msg = "Expect float for power at high q,"
                     msg += " got %s" % (power_high)
@@ -579,7 +589,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         except:
             msg = "Error occurred computing invariant: %s" % sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg,
-                                                 info="warning",type="stop"))
+                                                 info="warning", type="stop"))
             return
         #check the type of extrapolation
         extrapolation = self.get_extrapolation_type(low_q=low_q, high_q=high_q)
@@ -656,7 +666,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.Show(True)
         self.Refresh()
             
-    def on_undo(self,event=None):
+    def on_undo(self, event=None):
         """
         Go back to the previous state
         
@@ -679,7 +689,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self._info_state_num()
 
         
-    def on_redo(self,event=None):
+    def on_redo(self, event=None):
         """
         Go forward to the previous state
         
@@ -712,11 +722,11 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         report_html_str = self.state.report_str
         report_text_str = self.state.__str__()
         report_img = self.state.image
-        report_list = [report_html_str,report_text_str,report_img]
+        report_list = [report_html_str, report_text_str, report_img]
         dialog = ReportDialog(report_list, None, -1, "")
         dialog.ShowModal()
         
-    def get_state_by_num(self,state_num=None):
+    def get_state_by_num(self, state_num=None):
         """
         Get the state given by number
         
@@ -783,7 +793,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
 
         # get the previous state
         try:
-            time,date,current_state,comp_state = self.state.bookmark_list[int(num)] 
+            time,date,current_state,comp_state = \
+                self.state.bookmark_list[int(num)] 
         except :
             raise ValueError,  "No such bookmark exists"
 
@@ -858,9 +869,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         obj = event.GetEventObject()
         name = str(obj.GetName())
         value = str(obj.GetValue())
-        rb_list = [['power_law_low','guinier'],
-                   ['fit_enable_low','fix_enable_low'],
-                   ['fit_enable_high','fix_enable_high']]
+        rb_list = [['power_law_low', 'guinier'],
+                   ['fit_enable_low', 'fix_enable_low'],
+                   ['fit_enable_high', 'fix_enable_high']]
 
         try:
             if value == None or value.lstrip().rstrip() =='':
@@ -885,7 +896,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             
             self.state.saved_state['state_num'] += 1
             self.state.state_num = self.state.saved_state['state_num']
-            self.state.state_list[str(self.state.state_num)] = self.state.clone_state()#copy.deepcopy(self.state.saved_state)
+            self.state.state_list[str(self.state.state_num)] = \
+                    self.state.clone_state()
         except:           
             pass
         
@@ -893,7 +905,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self._set_redo_flag(False)
         #event.Skip()
                    
-    def _set_compute_state(self,state=None):
+    def _set_compute_state(self, state=None):
         """
         Notify the compute_invariant state to self.state
         
@@ -908,7 +920,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         else:
             self.is_power_out = True
         # Instead of changing the future, create a new future.
-        max_state_num = len(self.state.state_list)-1   
+        max_state_num = len(self.state.state_list) - 1   
         self.state.saved_state['state_num'] = max_state_num        
         # A new computation is also A state
         #copy.deepcopy(self.state.saved_state)
@@ -922,11 +934,12 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             temp_saved_states['compute_num'] = self.state.state_num
         self.state.saved_state= copy.deepcopy(temp_saved_states)
         #copy.deepcopy(self.state.saved_state)
-        self.state.state_list[str(self.state.state_num)] = self.state.clone_state()
+        self.state.state_list[str(self.state.state_num)] = \
+                                        self.state.clone_state()
         
         # A computation is a new state, so delete the states with any higher
         # state numbers
-        for i in range(self.state.state_num+1,len(self.state.state_list)):
+        for i in range(self.state.state_num+1, len(self.state.state_list)):
             try:
                 del (self.state.state_list[str(i)])
             except: 
@@ -990,7 +1003,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
 
         # text event is a new state, so delete the states with higher state_num
         # i.e., change the future
-        for i in range(int(state_num)+1,len(self.state.state_list)):
+        for i in range(int(state_num)+1, len(self.state.state_list)):
             try:
                 del (self.state.state_list[str(i)])
             except: 
@@ -1011,7 +1024,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                     self.state.saved_state['state_num'] += 1
             self.state.state_num = self.state.saved_state['state_num']
             #copy.deepcopy(self.state.saved_state)
-            self.state.state_list[str(self.state.state_num)] = self.state.clone_state()
+            self.state.state_list[str(self.state.state_num)] = \
+                                        self.state.clone_state()
         except:
             pass
 
@@ -1034,7 +1048,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         value = str(obj.GetValue())
         try:
             exec "self.state.saved_state['%s'] = '%s'" %  (name, value)
-            self.state.state_list[str(self.state.state_num)] = self.state.clone_state()
+            self.state.state_list[str(self.state.state_num)] = \
+                                self.state.clone_state()
         except:
             pass
         #if event != None: event.Skip()
@@ -1067,7 +1082,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.popUpMenu.AppendSeparator()
         self.Bind(wx.EVT_CONTEXT_MENU, self._on_context_menu)
         
-    def on_bookmark(self,event):
+    def on_bookmark(self, event):
         """
         Save the panel state in memory and add the list on
         the popup menu on bookmark context menu event
@@ -1091,7 +1106,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         
         # append it to menu
         id = wx.NewId()
-        self.popUpMenu.Append(id,name,str(msg))
+        self.popUpMenu.Append(id, name, str(msg))
         wx.EVT_MENU(self, id, self._back_to_bookmark)
         state = self.state.clone_state()
         comp_state = copy.deepcopy(self.state.state_list[str(compute_num)])
@@ -1099,13 +1114,13 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                                        state,comp_state]
         self.state.toXML(self, doc=None, entry_node=None)
         
-        wx.PostEvent(self.parent,StatusEvent(status=msg,info="info"))
+        wx.PostEvent(self.parent, StatusEvent(status=msg, info="info"))
         wx.PostEvent(self.parent, 
                      AppendBookmarkEvent(title=name, 
                                          hint=str(msg),
                                           handler=self._back_to_bookmark))
 
-    def _back_to_bookmark(self,event):
+    def _back_to_bookmark(self, event):
         """
         Bring the panel back to the state of bookmarked requested by
         context menu event
@@ -1123,7 +1138,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         num,time = name.split(']')
         current_state_num = self.state.state_num  
         self.get_bookmark_by_num(num)
-        state_num = int(current_state_num)+1
+        state_num = int(current_state_num) + 1
         
         self.state.saved_state['state_num'] = state_num
         #copy.deepcopy(self.state.saved_state)
@@ -1133,7 +1148,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self._set_undo_flag(True)
         self._info_bookmark_num(event)
         
-    def _info_bookmark_num(self,event=None):
+    def _info_bookmark_num(self, event=None):
         """
         print the bookmark number in info
         
@@ -1163,9 +1178,10 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         return time and date stings
         """
         # date and time 
-        year, month, day,hour,minute,second,tda,ty,tm_isdst= time.localtime()
-        my_time= str(hour)+":"+str(minute)+":"+str(second)
-        date= str( month)+"/"+str(day)+"/"+str(year)
+        year, month, day, hour, minute, second, tda, ty, tm_isdst = \
+                                    time.localtime()
+        my_time = str(hour) + ":" + str(minute) + ":" + str(second)
+        date = str( month) + "/" + str(day) + "/" + str(year)
         return my_time, date
    
             
@@ -1176,7 +1192,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         # Ask the user the location of the file to write to.
         path = None
         if self.parent != None:
-            self._default_save_location =\
+            self._default_save_location = \
              self.parent._default_save_location
         if self._default_save_location == None:
             self._default_save_location = os.getcwd()
@@ -1187,7 +1203,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
             if self.parent != None:
-                self.parent._default_save_location =\
+                self.parent._default_save_location = \
                     self._default_save_location
         else:
             return None
@@ -1199,7 +1215,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         fName = os.path.splitext(path)[0] + extens
         self._manager.save_file(filepath=fName, state=self.state)
         
-    def _show_message(self, mssg='',msg='Warning'):
+    def _show_message(self, mssg='', msg='Warning'):
         """
         Show warning message when resetting data
         """
@@ -1220,7 +1236,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.inv_container = InvariantContainer()
 
     
-    def _on_context_menu(self,event):
+    def _on_context_menu(self, event):
         
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
@@ -1268,14 +1284,14 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         high_q_box = wx.StaticBox(self, -1, "High Q")
         self.high_extrapolation_sizer = wx.StaticBoxSizer(high_q_box,
                                                           wx.VERTICAL)
-        self.high_q_sizer = wx.GridBagSizer(5,5)
+        self.high_q_sizer = wx.GridBagSizer(5, 5)
         #sizer to define outputs
-        self.volume_surface_sizer = wx.GridBagSizer(5,5)
+        self.volume_surface_sizer = wx.GridBagSizer(5, 5)
         #Sizer related to invariant output
         self.invariant_sizer = wx.GridBagSizer(5, 5)
         #Sizer related to button
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.button_sizer.SetMinSize((_STATICBOX_WIDTH,-1))
+        self.button_sizer.SetMinSize((_STATICBOX_WIDTH, -1))
         #Sizer related to save button
         self.save_button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         
@@ -1687,12 +1703,12 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         unit_invariant = '[1/(cm * A)]'
         invariant_total_txt = wx.StaticText(self, -1, 'Invariant Total [Q*]')
         self.invariant_total_tcl = OutputTextCtrl(self, -1,
-                                                  size=(_BOX_WIDTH,-1),
+                                                  size=(_BOX_WIDTH, -1),
                                                   name='invariant_total_tcl')
         msg_hint = "Total invariant [Q*], including extrapolated regions."
         self.invariant_total_tcl.SetToolTipString(msg_hint)
         self.invariant_total_err_tcl = OutputTextCtrl(self, -1,
-                                                      size=(_BOX_WIDTH,-1),
+                                                      size=(_BOX_WIDTH, -1),
                                                 name='invariant_total_err_tcl')
         hint_msg = "Uncertainty on invariant."
         self.invariant_total_err_tcl.SetToolTipString(hint_msg)
@@ -1722,7 +1738,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         contrast_txt = wx.StaticText(self, -1, 'Contrast :')  
         self.contrast_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
-                                        style=0,name='contrast_tcl')
+                                        style=0, name='contrast_tcl')
         wx.EVT_TEXT(self, self.contrast_tcl.GetId(), self._on_text)
         contrast_hint_txt = "Contrast"
         self.contrast_tcl.SetToolTipString(contrast_hint_txt)
@@ -1749,15 +1765,15 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         scale_hint_txt = "Scale"
         self.scale_tcl.SetToolTipString(scale_hint_txt)
         self.sizer_input.AddMany([(background_txt, 0, wx.LEFT|wx.BOTTOM, 5),
-                                  (self.background_tcl, 0, wx.LEFT|wx.BOTTOM, 5),
-                                (background_unit_txt, 0, wx.LEFT|wx.BOTTOM, 5),
-                                (scale_txt, 0, wx.LEFT|wx.BOTTOM, 20),
-                                (self.scale_tcl, 0, wx.LEFT|wx.BOTTOM|wx.RIGHT, 5),
-                                (contrast_txt, 0, wx.LEFT|wx.BOTTOM, 5),
-                                (self.contrast_tcl, 0, wx.LEFT|wx.BOTTOM, 5),
-                                (contrast_unit_txt, 0, wx.LEFT|wx.BOTTOM, 5),
-                                (porod_const_txt, 0, wx.LEFT, 20),
-                        (self.porod_constant_tcl, 0, wx.LEFT|wx.BOTTOM|wx.RIGHT, 5)])
+                            (self.background_tcl, 0, wx.LEFT|wx.BOTTOM, 5),
+                            (background_unit_txt, 0, wx.LEFT|wx.BOTTOM, 5),
+                            (scale_txt, 0, wx.LEFT|wx.BOTTOM, 20),
+                            (self.scale_tcl, 0, wx.LEFT|wx.BOTTOM|wx.RIGHT, 5),
+                            (contrast_txt, 0, wx.LEFT|wx.BOTTOM, 5),
+                            (self.contrast_tcl, 0, wx.LEFT|wx.BOTTOM, 5),
+                            (contrast_unit_txt, 0, wx.LEFT|wx.BOTTOM, 5),
+                            (porod_const_txt, 0, wx.LEFT, 20),
+                (self.porod_constant_tcl, 0, wx.LEFT|wx.BOTTOM|wx.RIGHT, 5)])
         self.inputs_sizer.Add(self.sizer_input)
        
     def _layout_outputs_sizer(self):
@@ -1819,8 +1835,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
 class InvariantDialog(wx.Dialog):
     """
     """
-    def __init__(self, parent=None, id=1,graph=None,
-                 data=None, title="Invariant",base=None):
+    def __init__(self, parent=None, id=1, graph=None,
+                 data=None, title="Invariant", base=None):
         wx.Dialog.__init__(self, parent, id, title, size=(PANEL_WIDTH,
                                                              PANEL_HEIGHT))
         self.panel = InvariantPanel(self)
