@@ -21,8 +21,8 @@ _DATA_BOX_WIDTH = 300
 SMEAR_SIZE_L = 0.00
 SMEAR_SIZE_H = 0.00
 
-from basepage import BasicPage
-from basepage import PageInfoEvent
+from sans.perspectives.fitting.basepage import BasicPage as BasicPage
+from sans.perspectives.fitting.basepage import PageInfoEvent as PageInfoEvent
 from sans.models.qsmearing import smear_selection
 
 
@@ -139,6 +139,7 @@ class FitPage(BasicPage):
                 
     def on_select_data(self, event=None):
         """
+        On_select_data
         """
         if event is None and self.dataSource.GetCount() > 0:
             data = self.dataSource.GetClientData(0)
@@ -226,7 +227,7 @@ class FitPage(BasicPage):
         sizer_smearer_box = wx.StaticBoxSizer(smear_set_box, wx.HORIZONTAL)
         sizer_smearer_box.SetMinSize((_DATA_BOX_WIDTH, 60))
         
-        weighting_set_box = wx.StaticBox(self, -1,\
+        weighting_set_box = wx.StaticBox(self, -1, \
                                 'Set Weighting by Selecting dI Source')
         weighting_box = wx.StaticBoxSizer(weighting_set_box, wx.HORIZONTAL)
         sizer_weighting = wx.BoxSizer(wx.HORIZONTAL)
@@ -456,14 +457,14 @@ class FitPage(BasicPage):
         self.sizer_new_smear.Add(self.smear_description_slit_width,
                                   0, wx.CENTER, 10 )
 
-        self.sizer_new_smear.Add(self.smear_pinhole_max,0, wx.CENTER, 10)
-        self.sizer_new_smear.Add(self.smear_slit_width,0, wx.CENTER, 10)
-        self.sizer_new_smear.Add(self.smear_data_right,0, wx.CENTER, 10)
+        self.sizer_new_smear.Add(self.smear_pinhole_max, 0, wx.CENTER, 10)
+        self.sizer_new_smear.Add(self.smear_slit_width, 0, wx.CENTER, 10)
+        self.sizer_new_smear.Add(self.smear_data_right, 0, wx.CENTER, 10)
            
-        self.sizer_set_smearer.Add(self.smear_message_new_s,0, wx.CENTER, 10)
-        self.sizer_set_smearer.Add(self.smear_message_new_p,0, wx.CENTER, 10)
+        self.sizer_set_smearer.Add(self.smear_message_new_s, 0, wx.CENTER, 10)
+        self.sizer_set_smearer.Add(self.smear_message_new_p, 0, wx.CENTER, 10)
         self.sizer_set_smearer.Add((5, 2))
-        self.sizer_set_smearer.Add(self.sizer_new_smear,0, wx.CENTER, 10)
+        self.sizer_set_smearer.Add(self.sizer_new_smear, 0, wx.CENTER, 10)
         
         # add all to chi2 sizer
         sizer_smearer_box.Add(self.sizer_set_smearer)
@@ -517,7 +518,7 @@ class FitPage(BasicPage):
         self.reset_qrange = wx.Button(self, id, 'Reset', size=(77, 20))
       
         self.reset_qrange.Bind(wx.EVT_BUTTON, self.on_reset_clicked, id=id)
-        self.reset_qrange.SetToolTipString("Reset Q range to the default values")
+        self.reset_qrange.SetToolTipString("Reset Q range to the default")
      
         sizer = wx.GridSizer(2, 4, 2, 6)
 
@@ -597,12 +598,12 @@ class FitPage(BasicPage):
         else:
             err_text = ''
         self.text_disp_1 = wx.StaticText(self, -1, err_text)
-        self.sizer4_4.Add(self.text_disp_1, (iy, ix), (1, 1),\
+        self.sizer4_4.Add(self.text_disp_1, (iy, ix), (1, 1), \
                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         
         ix += 1
         self.text_disp_min = wx.StaticText(self, -1, 'Min')
-        self.sizer4_4.Add(self.text_disp_min, (iy, ix), (1, 1),\
+        self.sizer4_4.Add(self.text_disp_min, (iy, ix), (1, 1), \
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
         ix += 1
@@ -1158,7 +1159,7 @@ class FitPage(BasicPage):
                             qmax=float(self.qmax_x))
    
             self._manager._on_model_panel(evt=evt)
-            self.mbox_description.SetLabel("Model [ %s ]" % str(self.model.name))
+            self.mbox_description.SetLabel("Model [ %s ]"% str(self.model.name))
             self.mbox_description.SetForegroundColour(wx.BLUE)
             self.state.model = self.model.clone()
             self.state.model.name = self.model.name
@@ -1599,7 +1600,8 @@ class FitPage(BasicPage):
         else:
             self.onSmear(event=None)
             if self.current_smearer != None:
-                self.current_smearer.set_accuracy(accuracy=self.smear2d_accuracy) 
+                self.current_smearer.set_accuracy(accuracy=\
+                                                  self.smear2d_accuracy) 
         event.Skip()
 
     def _on_fun_box(self, event):
@@ -1660,6 +1662,7 @@ class FitPage(BasicPage):
 
     def _set_smear(self, data):
         """
+        Set_smear
         """
         if data is None:
             return
@@ -2200,7 +2203,8 @@ class FitPage(BasicPage):
             self.current_smearer = smear_selection(data, self.model)
             # 2D need to set accuracy
             if self._is_2D():
-                self.current_smearer.set_accuracy(accuracy=self.smear2d_accuracy)
+                self.current_smearer.set_accuracy(accuracy=\
+                                                  self.smear2d_accuracy)
 
         if msg != None:
             wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
@@ -2210,11 +2214,11 @@ class FitPage(BasicPage):
         ## set smearing value whether or not the data contain the smearing info
         
         self._manager.set_smearer(smearer=self.current_smearer,
-                                fid=self.data.id,
-                                 qmin=float(self.qmin_x),
-                                 qmax=float(self.qmax_x),
-                                 enable_smearer=not self.disable_smearer.GetValue(),
-                                 uid=self.uid)
+                            fid=self.data.id,
+                            qmin=float(self.qmin_x),
+                            qmax=float(self.qmax_x),
+                            enable_smearer=not self.disable_smearer.GetValue(),
+                            uid=self.uid)
         return msg
         
     def update_pinhole_smear(self):
@@ -2468,10 +2472,10 @@ class FitPage(BasicPage):
         if self.enable_smearer.GetValue():
             if self.current_smearer == None:
                 wx.PostEvent(self._manager.parent,
-                             StatusEvent(status="Data contains no smearing information"))
+                    StatusEvent(status="Data contains no smearing information"))
             else:
                 wx.PostEvent(self._manager.parent,
-                             StatusEvent(status="Data contains smearing information"))
+                    StatusEvent(status="Data contains smearing information"))
 
             self.smear_data_left.Show(True)
             self.smear_data_right.Show(True)
@@ -2754,7 +2758,7 @@ class FitPage(BasicPage):
         self.cb1.SetToolTipString("To check/uncheck all the boxes below.")
         self.cb1.SetValue(True)
         
-        sizer.Add(self.cb1, (iy, ix), (1, 1),\
+        sizer.Add(self.cb1, (iy, ix), (1, 1), \
                              wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
         ix += 1
         self.text2_2 = wx.StaticText(self, -1, 'Value')
