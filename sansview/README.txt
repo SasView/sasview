@@ -1,8 +1,19 @@
 Release Notes
 =============
 
-SansView 2.1.0
+SansView 2.1.1 (bug fixed)
 	
+	- Added DataInfo for data in the DataExplorer and plots
+	- Added Maximize/Restore button in the title bar of the graphs
+	- The 'x' button now works as deleting the graph
+	- Added a hide button in the toolbar of the graph panel
+	- Fixed some bugs and improved some behaviors in the batch/grid panel.
+	- Edit SUM Model from the menubar can now generate more than one sum model.
+	- Report can now be saved as a pdf format on WIN and MAC.
+	- Fixed many minor bugs.
+	
+	-version 2.1
+		
 	- Multiprocessor support(Windows)
 	- Simple custom model editor
 	- Advanced model editor
@@ -86,7 +97,7 @@ SansView 2.1.0
 	
 	2.1- System Requirements:
 		- Python version >= 2.5 and < 3.0 should be running on the system
-		- We uses Python2.5 - 2.7 for WIN, and Python2.6 - 2.7 for MAC
+		- We currently use Python 2.6
 
 	2.2- Installing from source:
 		- Get the code from https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/sansview-x.x.x
@@ -94,24 +105,25 @@ SansView 2.1.0
 			- run 'python sansview.py' under the 'sansview' folder.
 		- The following modules are required:
 			- wxPython 2.8.12.1
-			- matplotlib 1.1.0 
+			- matplotlib 1.1.0  (CHECK MAC VERSION)
 			- SciPy 0.10.1
+			- pisa 3.0.27 (NOT 3.0.33) (CHECK MAC VERSION)
+			- setuptools 0.6c11
 			- py2app (MAC)
 
 			(The following three are easily installed using easy_install)
 			- lxml 2.3.0
-			- numpy 1.6.1
+			- numpy 1.6.1 (CHECK MAC VERSION)
 			- periodictable 1.3.0
 
 			(The following are additional dependencies for Windows)
-			- comtypes 0.6.2
-			- pywin32 build 217
-			- pisa 3.0.27 (NOT 3.0.33)
+			- comtypes 0.6.2 (for PDF support on windows systems)
+			- pywin32 build 217 (to read ms office)
+			- pyPdf 1.13
 			- html5lib 0.95
 			- reportlab 2.5
-			- pyparsing 1.5.5
-			- PIL 1.1.7
-			- setuptools 0.6c11
+			- pyparsing 1.5.5 (required for periodictable and bundling)
+			- PIL 1.1.7 (Python Image Library)
 			- py2exe 0.6.9 (WIN)
 			- svn
 			- MinGW w/ gcc version 4.6.1 (WIN)
