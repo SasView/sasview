@@ -103,18 +103,20 @@ SansView 2.1.1 (bug fixed)
 		- Get the code from https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/sansview-x.x.x
 			- run 'python setup.py install' under the 'sansview-x.x.x' folder
 			- run 'python sansview.py' under the 'sansview' folder.
-		- The following modules are required:
-			- wxPython 2.8.12.1
-			- matplotlib 1.1.0  (CHECK MAC VERSION)
+		- The following modules are required (version numbers are what are used in the release build):
+			- wxPython 2.8.12.1 (NOTE: do NOT use version 2.9)
+			- matplotlib 1.1.0  (NOTE: Mac build is using version 1.0.1)
 			- SciPy 0.10.1
-			- pisa 3.0.27 (NOT 3.0.33) (CHECK MAC VERSION)
+			- pisa 3.0.27 (NOTE Mac Version uses 3.0.33 BUT -- DO NOT USE ver 3.0.33 on windows: it will not work!)
 			- setuptools 0.6c11
-			- py2app (MAC)
 
 			(The following three are easily installed using easy_install)
 			- lxml 2.3.0
-			- numpy 1.6.1 (CHECK MAC VERSION)
+			- numpy 1.6.1 (NOTE: Mac build is using version 1.5.1)
 			- periodictable 1.3.0
+
+			(The following are additional dependencies for Mac)
+			- py2app
 
 			(The following are additional dependencies for Windows)
 			- comtypes 0.6.2 (for PDF support on windows systems)
