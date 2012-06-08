@@ -2617,7 +2617,7 @@ class ViewerFrame(wx.Frame):
                 
             for i in range(len(data.x)):
                 if has_errors:
-                    if data.dx != [] and data.dx[i] != None:
+                    if data.dx != [] and data.dx != None:
                         if  data.dx[i] != None:
                             out.write("%g  %g  %g  %g\n" % (data.x[i], 
                                                         data.y[i],
