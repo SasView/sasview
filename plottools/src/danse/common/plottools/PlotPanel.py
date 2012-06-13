@@ -176,12 +176,15 @@ class PlotPanel(wx.Panel):
         # and y in Property dialog
         self.prevXtrans = "log10(x)"
         self.prevYtrans = "log10(y)"
-        self.canvas.mpl_connect('scroll_event', self.onWheel)
+        self.scroll_id = self.canvas.mpl_connect('scroll_event', self.onWheel)
         #taking care of dragging
-        self.canvas.mpl_connect('motion_notify_event', self.onMouseMotion)
-        self.canvas.mpl_connect('button_press_event', self.onLeftDown)
-        self.canvas.mpl_connect('pick_event', self.onPick)
-        self.canvas.mpl_connect('button_release_event', self.onLeftUp)
+        self.motion_id = self.canvas.mpl_connect('motion_notify_event', 
+                                                 self.onMouseMotion)
+        self.press_id = self.canvas.mpl_connect('button_press_event', 
+                                                self.onLeftDown)
+        self.pick_id = self.canvas.mpl_connect('pick_event', self.onPick)
+        self.release_id = self.canvas.mpl_connect('button_release_event', 
+                                                  self.onLeftUp)
         
         wx.EVT_RIGHT_DOWN(self, self.onLeftDown)
         # to turn axis off whenn resizing the panel

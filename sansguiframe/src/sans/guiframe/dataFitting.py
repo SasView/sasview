@@ -68,23 +68,90 @@ class Data1D(PlotData1D, LoadData1D):
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
         result = Data1D(x=[], y=[], dx=None, dy=None)
-        result.clone_without_data(clone=self)
+        result.clone_without_data(length=len(self.x), clone=self)
         result.copy_from_datainfo(data1d=self)
+        if self.dxw == None:
+            result.dxw = None
+        else:
+            result.dxw = numpy.zeros(len(self.x))
+        if self.dxl == None:
+            result.dxl = None
+        else:
+            result.dxl = numpy.zeros(len(self.x))
+
         for i in range(len(self.x)):
             result.x[i] = self.x[i]
             if self.dx is not None and len(self.x) == len(self.dx):
                 result.dx[i] = self.dx[i]
+            if self.dxw is not None and len(self.x) == len(self.dxw):
+                result.dxw[i] = self.dxw[i]
+            if self.dxl is not None and len(self.x) == len(self.dxl):
+                result.dxl[i] = self.dxl[i]
             
             a = Uncertainty(self.y[i], dy[i]**2)
             if isinstance(other, Data1D):
                 b = Uncertainty(other.y[i], dy_other[i]**2)
+                if other.dx is not None:
+                    result.dx[i] *= self.dx[i]
+                    result.dx[i] += (other.dx[i]**2)
+                    result.dx[i] /= 2
+                    result.dx[i] = math.sqrt(result.dx[i])
+                if result.dxl is not None and other.dxl is not None:
+                    result.dxl[i] *= self.dxl[i]
+                    result.dxl[i] += (other.dxl[i]**2)
+                    result.dxl[i] /= 2
+                    result.dxl[i] = math.sqrt(result.dxl[i])
             else:
                 b = other
             
             output = operation(a, b)
             result.y[i] = output.x
-            if result.dy is None: result.dy = numpy.zeros(len(self.x))
             result.dy[i] = math.sqrt(math.fabs(output.variance))
+        return result
+    
+    def _perform_union(self, other):
+        """
+        """
+        # First, check the data compatibility
+        self._validity_check_union(other)
+        result = Data1D(x=[], y=[], dx=None, dy=None)
+        tot_length = len(self.x) + len(other.x)
+        result = self.clone_without_data(length=tot_length, clone=result)
+        if self.dy == None or other.dy is None:
+            result.dy = None
+        else:
+            result.dy = numpy.zeros(tot_length)
+        if self.dx == None or other.dx is None:
+            result.dx = None
+        else:
+            result.dx = numpy.zeros(tot_length)
+        if self.dxw == None or other.dxw is None:
+            result.dxw = None
+        else:
+            result.dxw = numpy.zeros(tot_length)
+        if self.dxl == None or other.dxl is None:
+            result.dxl = None
+        else:
+            result.dxl = numpy.zeros(tot_length)
+
+        result.x = numpy.append(self.x, other.x)
+        #argsorting
+        ind = numpy.argsort(result.x)
+        result.x = result.x[ind]
+        result.y = numpy.append(self.y, other.y)
+        result.y = result.y[ind]
+        if result.dy != None:
+            result.dy = numpy.append(self.dy, other.dy)
+            result.dy = result.dy[ind]
+        if result.dx is not None:
+            result.dx = numpy.append(self.dx, other.dx)
+            result.dx = result.dx[ind]
+        if result.dxw is not None:
+            result.dxw = numpy.append(self.dxw, other.dxw)
+            result.dxw = result.dxw[ind]
+        if result.dxl is not None:
+            result.dxl = numpy.append(self.dxl, other.dxl)
+            result.dxl = result.dxl[ind]
         return result
     
   
@@ -141,24 +208,96 @@ class Theory1D(PlotTheory1D, LoadData1D):
         """
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
-        result = Theory1D(x=[], y=[], dy=None)
-        result.clone_without_data(clone=self)
+        result = self.clone_without_data(len(self.x))
         result.copy_from_datainfo(data1d=self)
-        for i in range(len(self.x)):
+        if self.dxw == None:
+            result.dxw = None
+        else:
+            result.dxw = numpy.zeros(len(self.x))
+        if self.dxl == None:
+            result.dxl = None
+        else:
+            result.dxl = numpy.zeros(len(self.x))
+
+        for i in range(numpy.size(self.x)):
             result.x[i] = self.x[i]
-           
+            if self.dx is not None and len(self.x) == len(self.dx):
+                result.dx[i] = self.dx[i]
+            if self.dxw is not None and len(self.x) == len(self.dxw):
+                result.dxw[i] = self.dxw[i]
+            if self.dxl is not None and len(self.x) == len(self.dxl):
+                result.dxl[i] = self.dxl[i]
+            
             a = Uncertainty(self.y[i], dy[i]**2)
             if isinstance(other, Data1D):
                 b = Uncertainty(other.y[i], dy_other[i]**2)
+                if other.dx is not None:
+                    result.dx[i] *= self.dx[i]
+                    result.dx[i] += (other.dx[i]**2)
+                    result.dx[i] /= 2
+                    result.dx[i] = math.sqrt(result.dx[i])
+                if result.dxl is not None and other.dxl is not None:
+                    result.dxl[i] *= self.dxl[i]
+                    other.dxl[i] += (other.dxl[i]**2)
+                    result.dxl[i] /= 2
+                    result.dxl[i] = math.sqrt(result.dxl[i])
+                if result.dxw is not None and self.dxw is not None:
+                    result.dxw[i] *= self.dxw[i]
+                    other.dxw[i] += (other.dxw[i]**2)
+                    result.dxw[i] /= 2
+                    result.dxw[i] = math.sqrt(result.dxw[i])
             else:
                 b = other
+            
             output = operation(a, b)
             result.y[i] = output.x
-            if result.dy is None:
-                result.dy = numpy.zeros(len(self.x))
             result.dy[i] = math.sqrt(math.fabs(output.variance))
         return result
     
+    def _perform_union(self, other):
+        """
+        """
+        # First, check the data compatibility
+        self._validity_check_union(other)
+        result = Data1D(x=[], y=[], dx=None, dy=None)
+        tot_length = len(self.x)+len(other.x)
+        result.clone_without_data(length=tot_length, clone=self)
+        if self.dy == None or other.dy is None:
+            result.dy = None
+        else:
+            result.dy = numpy.zeros(tot_length)
+        if self.dx == None or other.dx is None:
+            result.dx = None
+        else:
+            result.dx = numpy.zeros(tot_length)
+        if self.dxw == None or other.dxw is None:
+            result.dxw = None
+        else:
+            result.dxw = numpy.zeros(tot_length)
+        if self.dxl == None or other.dxl is None:
+            result.dxl = None
+        else:
+            result.dxl = numpy.zeros(tot_length)
+        result.x = numpy.append(self.x, other.x)
+        #argsorting
+        ind = numpy.argsort(result.x)
+        result.x = result.x[ind]
+        result.y = numpy.append(self.y, other.y)
+        result.y = result.y[ind]
+        if result.dy != None:
+            result.dy = numpy.append(self.dy, other.dy)
+            result.dy = result.dy[ind]
+        if result.dx is not None:
+            result.dx = numpy.append(self.dx, other.dx)
+            result.dx = result.dx[ind]
+        if result.dxw is not None:
+            result.dxw = numpy.append(self.dxw, other.dxw)
+            result.dxw = result.dxw[ind]
+        if result.dxl is not None:
+            result.dxl = numpy.append(self.dxl, other.dxl)
+            result.dxl = result.dxl[ind]
+        return result
+ 
       
 class Data2D(PlotData2D, LoadData2D):
     """
@@ -233,29 +372,100 @@ class Data2D(PlotData2D, LoadData2D):
         """
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
-    
         result = Data2D(image=None, qx_data=None, qy_data=None,
-                         err_image=None, xmin=None, xmax=None,
+                         q_data=None, err_image=None, xmin=None, xmax=None,
                          ymin=None, ymax=None, zmin=None, zmax=None)
-        
-        result.clone_without_data(clone=self)
+        result.clone_without_data(len(self.data), self)
         result.copy_from_datainfo(data2d=self)
+        result.xmin = self.xmin
+        result.xmax = self.xmax
+        result.ymin = self.ymin
+        result.ymax = self.ymax
+        if self.dqx_data == None or self.dqy_data == None:
+            result.dqx_data = None
+            result.dqy_data = None
+        else:
+            result.dqx_data = numpy.zeros(len(self.data))
+            result.dqy_data = numpy.zeros(len(self.data))
+        for i in range(numpy.size(self.data)):
+            result.data[i] = self.data[i]
+            if self.err_data is not None and \
+                numpy.size(self.data) == numpy.size(self.err_data):
+                result.err_data[i] = self.err_data[i]    
+            if self.dqx_data is not None:
+                result.dqx_data[i] = self.dqx_data[i]
+            if self.dqy_data is not None:
+                result.dqy_data[i] = self.dqy_data[i]
+            result.qx_data[i] = self.qx_data[i]
+            result.qy_data[i] = self.qy_data[i]
+            result.q_data[i] = self.q_data[i]
+            result.mask[i] = self.mask[i]
+            
+            a = Uncertainty(self.data[i], dy[i]**2)
+            if isinstance(other, Data2D):
+                b = Uncertainty(other.data[i], dy_other[i]**2)
+                if other.dqx_data is not None and \
+                        result.dqx_data is not None:
+                    result.dqx_data[i] *= self.dqx_data[i]
+                    result.dqx_data[i] += (other.dqx_data[i]**2)
+                    result.dqx_data[i] /= 2
+                    result.dqx_data[i] = math.sqrt(result.dqx_data[i])     
+                if other.dqy_data is not None and \
+                        result.dqy_data is not None:
+                    result.dqy_data[i] *= self.dqy_data[i]
+                    result.dqy_data[i] += (other.dqy_data[i]**2)
+                    result.dqy_data[i] /= 2
+                    result.dqy_data[i] = math.sqrt(result.dqy_data[i])
+            else:
+                b = other
+            
+            output = operation(a, b)
+            result.data[i] = output.x
+            result.err_data[i] = math.sqrt(math.fabs(output.variance))
+        return result
+    
+    def _perform_union(self, other):
+        """
+        Perform 2D operations between data sets
         
-        for i in range(numpy.size(self.data, 0)):
-            for j in range(numpy.size(self.data, 1)):
-                result.data[i][j] = self.data[i][j]
-                if self.err_data is not None and \
-                        numpy.size(self.data) == numpy.size(self.err_data):
-                    result.err_data[i][j] = self.err_data[i][j]
-                
-                a = Uncertainty(self.data[i][j], dy[i][j]**2)
-                if isinstance(other, Data2D):
-                    b = Uncertainty(other.data[i][j], dy_other[i][j]**2)
-                else:
-                    b = other
-                output = operation(a, b)
-                result.data[i][j] = output.x
-                result.err_data[i][j] = math.sqrt(math.fabs(output.variance))
+        :param other: other data set
+        :param operation: function defining the operation
+        
+        """
+        # First, check the data compatibility
+        self._validity_check_union(other)
+        result = Data2D(image=None, qx_data=None, qy_data=None,
+                         q_data=None, err_image=None, xmin=None, xmax=None,
+                         ymin=None, ymax=None, zmin=None, zmax=None)
+        length = len(self.data)
+        tot_length = length + len(other.data)
+        result.clone_without_data(tot_length, self)
+        result.xmin = self.xmin
+        result.xmax = self.xmax
+        result.ymin = self.ymin
+        result.ymax = self.ymax
+        if self.dqx_data == None or self.dqy_data == None or \
+                other.dqx_data == None or other.dqy_data == None :
+            result.dqx_data = None
+            result.dqy_data = None
+        else:
+            result.dqx_data = numpy.zeros(len(self.data) + \
+                                         numpy.size(other.data))
+            result.dqy_data = numpy.zeros(len(self.data) + \
+                                         numpy.size(other.data))
+        
+        result.data = numpy.append(self.data, other.data)
+        result.qx_data = numpy.append(self.qx_data, other.qx_data)
+        result.qy_data = numpy.append(self.qy_data, other.qy_data)
+        result.q_data = numpy.append(self.q_data, other.q_data)
+        result.mask = numpy.append(self.mask, other.mask)
+        if result.err_data is not None:
+            result.err_data = numpy.append(self.err_data, other.err_data) 
+        if self.dqx_data is not None:
+            result.dqx_data = numpy.append(self.dqx_data, other.dqx_data)
+        if self.dqy_data is not None:
+            result.dqy_data = numpy.append(self.dqy_data, other.dqy_data)
+
         return result
         
 def check_data_validity(data):

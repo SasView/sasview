@@ -624,7 +624,33 @@ class DataInfo:
             return b/a
         return self._perform_operation(other, operation)
             
-            
+        
+    def __or__(self, other):
+        """
+        Union a data set with another
+        
+        :param other: data set to be unified
+        
+        :return: new data set
+        
+        :raise ValueError: raised when two data sets are incompatible
+        
+        """
+        return self._perform_union(other)
+        
+    def __ror__(self, other):
+        """
+        Union a data set with another
+        
+        :param other: data set to be unified
+        
+        :return: new data set
+        
+        :raise ValueError: raised when two data sets are incompatible
+        
+        """
+        return self._perform_union(other)
+                
 class Data1D(plottable_1D, DataInfo):
     """
     1D data class
@@ -727,6 +753,7 @@ class Data1D(plottable_1D, DataInfo):
                 if self.x[i] != other.x[i]:
                     msg = "Incompatible data sets: x-values do not match"
                     raise ValueError, msg
+                """
                 if self.dxl != None and other.dxl == None:
                     msg = "Incompatible data sets: dxl-values do not match"
                     raise ValueError, msg
@@ -739,7 +766,7 @@ class Data1D(plottable_1D, DataInfo):
                 if self.dxw == None and other.dxw != None:
                     msg = "Incompatible data sets: dxw-values do not match"
                     raise ValueError, msg
-            
+                """
             # Check that the other data set has errors, otherwise
             # create zero vector
             dy_other = other.dy
@@ -787,20 +814,78 @@ class Data1D(plottable_1D, DataInfo):
                     result.dx[i] = math.sqrt(result.dx[i])
                 if result.dxl is not None and other.dxl is not None:
                     result.dxl[i] *= self.dxl[i]
-                    other.dxl[i] += (other.dxl[i]**2)
+                    result.dxl[i] += (other.dxl[i]**2)
                     result.dxl[i] /= 2
                     result.dxl[i] = math.sqrt(result.dxl[i])
-                if result.dxw is not None and self.dxw is not None:
-                    result.dxw[i] *= self.dxw[i]
-                    other.dxw[i] += (other.dxw[i]**2)
-                    result.dxw[i] /= 2
-                    result.dxw[i] = math.sqrt(result.dxw[i])
             else:
                 b = other
             
             output = operation(a, b)
             result.y[i] = output.x
             result.dy[i] = math.sqrt(math.fabs(output.variance))
+        return result
+    
+    def _validity_check_union(self, other):
+        """
+        Checks that the data lengths are compatible.
+        Checks that the x vectors are compatible.
+        Returns errors vectors equal to original
+        errors vectors if they were present or vectors
+        of zeros when none was found.
+        
+        :param other: other data set for operation
+        
+        :return: bool
+        
+        :raise ValueError: when data types are not compatible
+        
+        """
+        if not isinstance(other, Data1D):
+            msg = "Unable to perform operation: different types of data set"
+            raise ValueError, msg   
+        return True
+
+    def _perform_union(self, other):
+        """
+        """
+        # First, check the data compatibility
+        self._validity_check_union(other)
+        result = self.clone_without_data(len(self.x) + len(other.x))
+        if self.dy == None or other.dy is None:
+            result.dy = None
+        else:
+            result.dy = numpy.zeros(len(self.x) + len(other.x))
+        if self.dx == None or other.dx is None:
+            result.dx = None
+        else:
+            result.dx = numpy.zeros(len(self.x) + len(other.x))
+        if self.dxw == None or other.dxw is None:
+            result.dxw = None
+        else:
+            result.dxw = numpy.zeros(len(self.x) + len(other.x))
+        if self.dxl == None or other.dxl is None:
+            result.dxl = None
+        else:
+            result.dxl = numpy.zeros(len(self.x) + len(other.x))
+
+        result.x = numpy.append(self.x, other.x)
+        #argsorting
+        ind = numpy.argsort(result.x)
+        result.x = result.x[ind]
+        result.y = numpy.append(self.y, other.y)
+        result.y = result.y[ind]
+        if result.dy != None:
+            result.dy = numpy.append(self.dy, other.dy)
+            result.dy = result.dy[ind]
+        if result.dx is not None:
+            result.dx = numpy.append(self.dx, other.dx)
+            result.dx = result.dx[ind]
+        if result.dxw is not None:
+            result.dxw = numpy.append(self.dxw, other.dxw)
+            result.dxw = result.dxw[ind]
+        if result.dxl is not None:
+            result.dxl = numpy.append(self.dxl, other.dxl)
+            result.dxl = result.dxl[ind]
         return result
         
         
@@ -914,12 +999,13 @@ class Data2D(plottable_2D, DataInfo):
             if numpy.size(self.data) < 2:
                 msg = "Incompatible data sets: I-values do not match"
                 raise ValueError, msg 
-            if self.qx_data.all() != other.qx_data.all():
-                msg = "Incompatible data sets: qx-values do not match"
-                raise ValueError, msg
-            if self.qy_data.all() != other.qy_data.all():
-                msg = "Incompatible data sets: qy-values do not match"
-                raise ValueError, msg
+            for ind in range(len(self.data)):
+                if self.qx_data[ind] != other.qx_data[ind]:
+                    msg = "Incompatible data sets: qx-values do not match"
+                    raise ValueError, msg
+                if self.qy_data[ind] != other.qy_data[ind]:
+                    msg = "Incompatible data sets: qy-values do not match"
+                    raise ValueError, msg
                    
             # Check that the scales match
             err_other = other.err_data
@@ -991,4 +1077,64 @@ class Data2D(plottable_2D, DataInfo):
             output = operation(a, b)
             result.data[i] = output.x
             result.err_data[i] = math.sqrt(math.fabs(output.variance))
+        return result
+    
+    def _validity_check_union(self, other):
+        """
+        Checks that the data lengths are compatible.
+        Checks that the x vectors are compatible.
+        Returns errors vectors equal to original
+        errors vectors if they were present or vectors
+        of zeros when none was found.
+        
+        :param other: other data set for operation
+        
+        :return: bool
+        
+        :raise ValueError: when data types are not compatible
+        
+        """
+        if not isinstance(other, Data2D):
+            msg = "Unable to perform operation: different types of data set"
+            raise ValueError, msg   
+        return True
+    
+    def _perform_union(self, other):
+        """
+        Perform 2D operations between data sets
+        
+        :param other: other data set
+        :param operation: function defining the operation
+        
+        """
+        # First, check the data compatibility
+        self._validity_check_union(other)
+        result = self.clone_without_data(numpy.size(self.data) + \
+                                         numpy.size(other.data))
+        result.xmin = self.xmin
+        result.xmax = self.xmax
+        result.ymin = self.ymin
+        result.ymax = self.ymax
+        if self.dqx_data == None or self.dqy_data == None or \
+                other.dqx_data == None or other.dqy_data == None :
+            result.dqx_data = None
+            result.dqy_data = None
+        else:
+            result.dqx_data = numpy.zeros(len(self.data) + \
+                                         numpy.size(other.data))
+            result.dqy_data = numpy.zeros(len(self.data) + \
+                                         numpy.size(other.data))
+        
+        result.data = numpy.append(self.data, other.data)
+        result.qx_data = numpy.append(self.qx_data, other.qx_data)
+        result.qy_data = numpy.append(self.qy_data, other.qy_data)
+        result.q_data = numpy.append(self.q_data, other.q_data)
+        result.mask = numpy.append(self.mask, other.mask)
+        if result.err_data is not None:
+            result.err_data = numpy.append(self.err_data, other.err_data) 
+        if self.dqx_data is not None:
+            result.dqx_data = numpy.append(self.dqx_data, other.dqx_data)
+        if self.dqy_data is not None:
+            result.dqy_data = numpy.append(self.dqy_data, other.dqy_data)
+
         return result

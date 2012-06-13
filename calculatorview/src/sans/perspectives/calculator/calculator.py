@@ -13,6 +13,7 @@ Calculator Module
 
 
 from sans.guiframe.plugin_base import PluginBase
+from sans.perspectives.calculator.data_operator import DataOperatorWindow
 import logging
 
 class Plugin(PluginBase):
@@ -25,7 +26,9 @@ class Plugin(PluginBase):
         # Log startup
         logging.info("Calculator plug-in started")   
         self.sub_menu = "Tool" 
-  
+        # data operator use one frame all the time
+        self.data_operator_frame = None
+        
     def help(self, evt):
         """
         Show a general help dialog. 
@@ -60,7 +63,9 @@ class Plugin(PluginBase):
         mass_volume_help += "compute the mass density or the molar volume."
         pyconsole_help = "Python Console."
         #data_editor_help = "Meta Data Editor"
-        return [("SLD Calculator", sld_help, self.on_calculate_sld),
+        return [("Data Operation", 
+                        'Data operation', self.on_data_operation),
+                ("SLD Calculator", sld_help, self.on_calculate_sld),
                 ("Density/Volume Calculator", mass_volume_help, 
                                             self.on_calculate_dv),
                 ("Slit Size Calculator", slit_length_help,
@@ -75,17 +80,30 @@ class Plugin(PluginBase):
         """
         Edit meta data 
         """
-        from data_editor import DataEditorWindow
+        from sans.perspectives.calculator.data_editor import DataEditorWindow
         frame = DataEditorWindow(parent=self.parent, data=[],
                                   title="Data Editor")
         self.put_icon(frame)
         frame.Show(True)
-
+              
+    def on_data_operation(self, event):
+        """
+        Data operation
+        """
+        if self.data_operator_frame == None:
+            # Use one frame all the time
+            self.data_operator_frame = DataOperatorWindow(parent=self.parent, 
+                                                title="Data Operation")
+            self.put_icon(self.data_operator_frame)
+        self.data_operator_frame.Show(False)
+        self.data_operator_frame.Show(True)
+        
     def on_calculate_kiessig(self, event):
         """
         Compute the Kiessig thickness
         """
-        from kiessig_calculator_panel import KiessigWindow
+        from sans.perspectives.calculator.kiessig_calculator_panel \
+        import KiessigWindow
         frame = KiessigWindow()
         self.put_icon(frame)
         frame.Show(True) 
@@ -94,7 +112,7 @@ class Plugin(PluginBase):
         """
         Compute the scattering length density of molecula
         """
-        from sld_panel import SldWindow
+        from sans.perspectives.calculator.sld_panel import SldWindow
         frame = SldWindow(base=self.parent)
         self.put_icon(frame)
         frame.Show(True) 
@@ -103,7 +121,7 @@ class Plugin(PluginBase):
         """
         Compute the mass density or molar voulme
         """
-        from density_panel import DensityWindow
+        from sans.perspectives.calculator.density_panel import DensityWindow
         frame = DensityWindow(base=self.parent)
         self.put_icon(frame)
         frame.Show(True) 
@@ -112,7 +130,8 @@ class Plugin(PluginBase):
         """
         Compute the slit size a given data
         """
-        from slit_length_calculator_panel import SlitLengthCalculatorWindow
+        from sans.perspectives.calculator.slit_length_calculator_panel \
+        import SlitLengthCalculatorWindow
         frame = SlitLengthCalculatorWindow(parent=self.parent)  
         self.put_icon(frame)  
         frame.Show(True)
@@ -121,7 +140,8 @@ class Plugin(PluginBase):
         """
         Estimate the instrumental resolution
         """
-        from resolution_calculator_panel import ResolutionWindow
+        from sans.perspectives.calculator.resolution_calculator_panel \
+        import ResolutionWindow
         frame = ResolutionWindow(parent=self.parent)
         self.put_icon(frame)
         frame.Show(True) 
@@ -152,7 +172,7 @@ class Plugin(PluginBase):
         
         :param filename: file name to open in editor
         """
-        from pyconsole import PyConsole
+        from sans.perspectives.calculator.pyconsole import PyConsole
         frame = PyConsole(parent=self.parent, filename=filename)
         self.put_icon(frame)
         frame.Show(True) 
