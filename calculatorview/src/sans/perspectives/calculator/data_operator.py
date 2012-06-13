@@ -430,7 +430,13 @@ class DataOperPanel(wx.ScrolledWindow):
             self.data2_cbox.SetSelection(pos2)
             self.data2_cbox.SetClientData(pos2, None)
             pos3 = self.data2_cbox.Append("Number")
-            self.data2_cbox.SetClientData(pos3, None)
+            val = None
+            if self.numberctr.IsShown():
+                try:
+                    val = float(self.numberctr.GetLabel())
+                except:
+                    val = None
+            self.data2_cbox.SetClientData(pos3, vale)
             return
         pos1 = self.data1_cbox.Append('Select Data')
         self.data1_cbox.SetSelection(pos1)
@@ -439,7 +445,13 @@ class DataOperPanel(wx.ScrolledWindow):
         self.data2_cbox.SetSelection(pos2)
         self.data2_cbox.SetClientData(pos2, None)
         pos3 = self.data2_cbox.Append("Number")
-        self.data2_cbox.SetClientData(pos3, None)
+        val = None
+        if self.numberctr.IsShown():
+            try:
+                val = float(self.numberctr.GetLabel())
+            except:
+                val = None
+        self.data2_cbox.SetClientData(pos3, val)
         dnames = [dstate.data.name for dstate in self._data.values()]
         ind = numpy.argsort(dnames)
         for datastate in numpy.array(self._data.values())[ind]:
