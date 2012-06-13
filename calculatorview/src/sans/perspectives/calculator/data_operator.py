@@ -601,7 +601,7 @@ class SmallPanel(PlotPanel):
 
         self.erase_legend()
         self.figure.tight_layout()
-        self.figure.subplots_adjust(left=0.1, bottom=0.1)
+        #self.figure.subplots_adjust(left=0.1, bottom=0.1)
 
         self.subplot.figure.canvas.draw()
 
@@ -636,8 +636,8 @@ class SmallPanel(PlotPanel):
                 float(label)
         except:
             self.subplot.set_frame_on(False)
-        self.figure.tight_layout()#subplots_adjust(left=0.1, bottom=0.1)
-        self.figure.subplots_adjust(left=0.1, bottom=0.1)
+        self.figure.tight_layout()
+        #self.figure.subplots_adjust(left=0.1, bottom=0.1)
         if len(label) > 0 and xpos > 0 and ypos > 0:
             new_text = self.subplot.text(str(xpos), str(ypos), str(label),
                                            fontproperties=font)
@@ -706,6 +706,6 @@ class DataOperatorWindow(wx.Frame):
 if __name__ == "__main__":
    
     app  = wx.App()
-    window = DataEditorWindow(parent=None, data=[], title="Data Editor")
+    window = DataOperatorWindow(parent=None, data=[], title="Data Editor")
     app.MainLoop()
  

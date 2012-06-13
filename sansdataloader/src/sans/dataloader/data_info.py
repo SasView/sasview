@@ -507,6 +507,14 @@ class DataInfo:
         that holds actual data (ex.: Data1D)
         """
         return NotImplemented
+    
+    def _perform_union(self, other):
+        """
+        Private method to perform union operation. Not implemented for DataInfo,
+        but should be implemented for each data class inherited from DataInfo
+        that holds actual data (ex.: Data1D)
+        """
+        return NotImplemented
 
     def __add__(self, other):
         """
