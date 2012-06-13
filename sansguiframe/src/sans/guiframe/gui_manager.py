@@ -193,8 +193,8 @@ NOT_SO_GRAPH_LIST = ["BoxSum"]
 if sys.platform.count("win32")==0:
     IS_WIN = False
     TIME_FACTOR = 2
-    if int(wx.__version__.split('.')[0]) == 2:
-        if int(wx.__version__.split('.')[1]) < 9:
+    if int(str(wx.__version__).split('.')[0]) == 2:
+        if int(str(wx.__version__).split('.')[1]) < 9:
             CLOSE_SHOW = False
     
 class ViewerFrame(wx.Frame):
@@ -830,7 +830,7 @@ class ViewerFrame(wx.Frame):
                     if name is None or name.strip() == '':
                         continue
                     path = [os.path.abspath(dir)]
-                    file = ''
+                    file = None
                     try:
                         if toks[1] == '':
                             mod_path = '.'.join([dir, name])
@@ -1786,7 +1786,8 @@ class ViewerFrame(wx.Frame):
                 item.Check(False)
                 if self._data_panel is not None and \
                             ID in self.plot_panels.keys():
-                    self._data_panel.cb_plotpanel.Append(str(caption), p)
+                    self._data_panel.cb_plotpanel.Append(str(caption), 
+                                                         self.panels[ID])
                 # Do not Hide default panel here...
                 #self._mgr.GetPane(self.panels["default"].window_name).Hide()
             wx.CallAfter(self._mgr.Update)
@@ -1852,8 +1853,9 @@ class ViewerFrame(wx.Frame):
             log_msg += "load: %s\n" % str(basename)
             log_msg += "Try Data opening...."
             logging.info(log_msg)
-            self.load_complete(output=output, error_message=error_message,
-                   message=log_msg, path=path)    
+            print log_msg
+            #self.load_complete(output=output, error_message=error_message,
+            #       message=log_msg, path=path)    
             return
         
         #reading a state file
@@ -3207,8 +3209,8 @@ class ViewerFrame(wx.Frame):
         """
         drag 
         """
-        if self.cpanel_on_focus is not None:
-            self._toolbar.enable_drag(self.panel_on_focus)
+        #if self.cpanel_on_focus is not None:
+        #    self._toolbar.enable_drag(self.panel_on_focus)
             
     def enable_reset(self):
         """
@@ -3416,8 +3418,8 @@ class ViewApp(wx.App):
             logging.error(msg)
             self.frame.Show()
  
-        if hasattr(self.frame, 'special'):
-            self.frame.special.SetCurrent()
+        #if hasattr(self.frame, 'special'):
+        #    self.frame.special.SetCurrent()
         self.SetTopWindow(self.frame)
   
         return True
