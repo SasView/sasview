@@ -1007,13 +1007,14 @@ class Data2D(plottable_2D, DataInfo):
             if numpy.size(self.data) < 2:
                 msg = "Incompatible data sets: I-values do not match"
                 raise ValueError, msg 
-            for ind in range(len(self.data)):
-                if self.qx_data[ind] != other.qx_data[ind]:
-                    msg = "Incompatible data sets: qx-values do not match"
-                    raise ValueError, msg
-                if self.qy_data[ind] != other.qy_data[ind]:
-                    msg = "Incompatible data sets: qy-values do not match"
-                    raise ValueError, msg
+            else:
+                for ind in range(len(self.data)):
+                    if self.qx_data[ind] != other.qx_data[ind]:
+                        msg = "Incompatible data sets: qx-values do not match"
+                        raise ValueError, msg
+                    if self.qy_data[ind] != other.qy_data[ind]:
+                        msg = "Incompatible data sets: qy-values do not match"
+                        raise ValueError, msg
                    
             # Check that the scales match
             err_other = other.err_data
