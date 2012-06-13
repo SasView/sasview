@@ -299,6 +299,13 @@ class DataOperPanel(wx.ScrolledWindow):
             self.numberctr.SetBackgroundColour('white')
             try:
                 float(data2)
+                if self.operator_cbox.GetLabel().strip() == '|':
+                    msg = "DataOperation: This operation can not accept "
+                    msg += "a float number."
+                    self.send_warnings(msg, 'error')
+                    self.numberctr.SetBackgroundColour('pink')
+                    self.output = None
+                    return flag
             except:
                 msg = "DataOperation: Number requires a float number."
                 self.send_warnings(msg, 'error')
@@ -518,7 +525,7 @@ class DataOperPanel(wx.ScrolledWindow):
         Unfocus on right click
         """
     
-    def send_warnings(self, msg='', info=''):
+    def send_warnings(self, msg='', info='info'):
         """
         Send warning to status bar
         """
