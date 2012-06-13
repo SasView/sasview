@@ -1004,6 +1004,12 @@ class Data2D(plottable_2D, DataInfo):
                 msg = "Unable to perform operation: data length are not equal"
                 raise ValueError, msg
             # Here we could also extrapolate between data points
+            if self.qx_data.all() != other.qx_data.all():
+                msg = "Incompatible data sets: qx-values do not match"
+                raise ValueError, msg
+            if self.qy_data.all() != other.qy_data.all():
+                msg = "Incompatible data sets: qy-values do not match"
+                raise ValueError, msg
             if numpy.size(self.data) < 2:
                 msg = "Incompatible data sets: I-values do not match"
                 raise ValueError, msg 
