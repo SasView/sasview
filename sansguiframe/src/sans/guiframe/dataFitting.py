@@ -391,6 +391,11 @@ class Data2D(PlotData2D, LoadData2D):
         else:
             result.dqx_data = numpy.zeros(len(self.data))
             result.dqy_data = numpy.zeros(len(self.data))
+        
+        result.qx_data = self.qx_data
+        result.qy_data = self.qy_data
+        result.q_data = self.q_data
+        result.mask = self.mask
         for i in range(numpy.size(self.data)):
             result.data[i] = self.data[i]
             if self.err_data is not None and \
@@ -400,10 +405,6 @@ class Data2D(PlotData2D, LoadData2D):
                 result.dqx_data[i] = self.dqx_data[i]
             if self.dqy_data is not None:
                 result.dqy_data[i] = self.dqy_data[i]
-            result.qx_data[i] = self.qx_data[i]
-            result.qy_data[i] = self.qy_data[i]
-            result.q_data[i] = self.q_data[i]
-            result.mask[i] = self.mask[i]
             
             a = Uncertainty(self.data[i], dy[i]**2)
             if isinstance(other, Data2D):
