@@ -436,7 +436,7 @@ class DataOperPanel(wx.ScrolledWindow):
                     val = float(self.numberctr.GetLabel())
                 except:
                     val = None
-            self.data2_cbox.SetClientData(pos3, vale)
+            self.data2_cbox.SetClientData(pos3, val)
             return
         pos1 = self.data1_cbox.Append('Select Data')
         self.data1_cbox.SetSelection(pos1)
