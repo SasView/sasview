@@ -958,8 +958,7 @@ class Data2D(plottable_2D, DataInfo):
             mask = numpy.zeros(length)
             dqx_data = None
             dqy_data = None
-            clone = Data2D(data, err_data, qx_data, qy_data,
-                            q_data, mask, dqx_data=dqx_data, dqy_data=dqy_data)
+            clone = Data2D(data, err_data, qx_data, qy_data, q_data, mask)
 
         clone.title       = self.title
         clone.run         = self.run
@@ -994,45 +993,33 @@ class Data2D(plottable_2D, DataInfo):
         err_other = None
         if isinstance(other, Data2D):
             # Check that data lengths are the same
-            if numpy.size(self.data) != numpy.size(other.data):
+            if len(self.data) != len(other.data) or \
+                len(self.qx_data) != len(other.qx_data) or \
+                len(self.qy_data) != len(other.qy_data):
                 msg = "Unable to perform operation: data length are not equal"
                 raise ValueError, msg
-            if numpy.size(self.qx_data) != numpy.size(other.qx_data):
-                msg = "Unable to perform operation: data length are not equal"
-                raise ValueError, msg
-            if numpy.size(self.qy_data) != numpy.size(other.qy_data):
-                msg = "Unable to perform operation: data length are not equal"
-                raise ValueError, msg
-            # Here we could also extrapolate between data points
-            if self.qx_data.all() != other.qx_data.all():
-                msg = "Incompatible data sets: qx-values do not match"
-                raise ValueError, msg
-            if self.qy_data.all() != other.qy_data.all():
-                msg = "Incompatible data sets: qy-values do not match"
-                raise ValueError, msg
-            if numpy.size(self.data) < 2:
-                msg = "Incompatible data sets: I-values do not match"
-                raise ValueError, msg 
-            elif other.__class__.__name__ == 'ndarray':
-                for ind in range(len(self.data)):
-                    if self.qx_data[ind] != other.qx_data[ind]:
-                        msg = "Incompatible data sets: qx-values do not match"
-                        raise ValueError, msg
-                    if self.qy_data[ind] != other.qy_data[ind]:
-                        msg = "Incompatible data sets: qy-values do not match"
-                        raise ValueError, msg
+            #if len(self.data) < 1:
+            #    msg = "Incompatible data sets: I-values do not match"
+            #    raise ValueError, msg 
+            for ind in range(len(self.data)):
+                if self.qx_data[ind] != other.qx_data[ind]:
+                    msg = "Incompatible data sets: qx-values do not match"
+                    raise ValueError, msg
+                if self.qy_data[ind] != other.qy_data[ind]:
+                    msg = "Incompatible data sets: qy-values do not match"
+                    raise ValueError, msg
                    
             # Check that the scales match
             err_other = other.err_data
             if other.err_data == None or \
-                (numpy.size(other.err_data) != numpy.size(other.data)):
-                err_other = numpy.zeros(numpy.size(other.data))
+                (len(other.err_data) != len(other.data)):
+                err_other = numpy.zeros(len(other.data))
             
         # Check that we have errors, otherwise create zero vector
         err = self.err_data
         if self.err_data == None or \
-            (numpy.size(self.err_data) != numpy.size(self.data)):
-            err = numpy.zeros(numpy.size(other.data))
+            (len(self.err_data) != len(self.data)):
+            err = numpy.zeros(len(other.data))
             
         return err, err_other
   
@@ -1044,33 +1031,34 @@ class Data2D(plottable_2D, DataInfo):
         :param operation: function defining the operation
         
         """
+        print "numpy.size(self.data)=", numpy.size(self.data)
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
         result = self.clone_without_data(numpy.size(self.data))
+        result.data = self.data
+        result.qx_data = self.qx_data
+        result.qy_data = self.qy_data
+        result.q_data = self.q_data
+        result.mask = self.mask
         result.xmin = self.xmin
         result.xmax = self.xmax
         result.ymin = self.ymin
         result.ymax = self.ymax
+        
+        if self.err_data is not None:
+            result.err_data = self.err_data    
+        if self.dqx_data is not None:
+            result.dqx_data = self.dqx_data
+        if self.dqy_data is not None:
+            result.dqy_data = self.dqy_data
         if self.dqx_data == None or self.dqy_data == None:
             result.dqx_data = None
             result.dqy_data = None
         else:
-            result.dqx_data = numpy.zeros(len(self.data))
-            result.dqy_data = numpy.zeros(len(self.data))
+            result.dqx_data = numpy.zeros(numpy.size(self.data))
+            result.dqy_data = numpy.zeros(numpy.size(self.data))
+        
         for i in range(numpy.size(self.data)):
-            result.data[i] = self.data[i]
-            if self.err_data is not None and \
-                numpy.size(self.data) == numpy.size(self.err_data):
-                result.err_data[i] = self.err_data[i]    
-            if self.dqx_data is not None:
-                result.dqx_data[i] = self.dqx_data[i]
-            if self.dqy_data is not None:
-                result.dqy_data[i] = self.dqy_data[i]
-            result.qx_data[i] = self.qx_data[i]
-            result.qy_data[i] = self.qy_data[i]
-            result.q_data[i] = self.q_data[i]
-            result.mask[i] = self.mask[i]
-            
             a = Uncertainty(self.data[i], dy[i]**2)
             if isinstance(other, Data2D):
                 b = Uncertainty(other.data[i], dy_other[i]**2)

@@ -375,32 +375,32 @@ class Data2D(PlotData2D, LoadData2D):
         result = Data2D(image=None, qx_data=None, qy_data=None,
                          q_data=None, err_image=None, xmin=None, xmax=None,
                          ymin=None, ymax=None, zmin=None, zmax=None)
-        result.clone_without_data(length=numpy.size(self.data))
+        result.clone_without_data(len(self.data), self)
         result.copy_from_datainfo(data2d=self)
-        result.data = self.data
-        result.qx_data = self.qx_data
-        result.qy_data = self.qy_data
-        result.q_data = self.q_data
-        result.mask = self.mask
         result.xmin = self.xmin
         result.xmax = self.xmax
         result.ymin = self.ymin
         result.ymax = self.ymax
-        
-        if self.err_data is not None:
-            result.err_data = self.err_data    
-        if self.dqx_data is not None:
-            result.dqx_data = self.dqx_data
-        if self.dqy_data is not None:
-            result.dqy_data = self.dqy_data
         if self.dqx_data == None or self.dqy_data == None:
             result.dqx_data = None
             result.dqy_data = None
         else:
-            result.dqx_data = numpy.zeros(numpy.size(self.data))
-            result.dqy_data = numpy.zeros(numpy.size(self.data))
-        
+            result.dqx_data = numpy.zeros(len(self.data))
+            result.dqy_data = numpy.zeros(len(self.data))
         for i in range(numpy.size(self.data)):
+            result.data[i] = self.data[i]
+            if self.err_data is not None and \
+                numpy.size(self.data) == numpy.size(self.err_data):
+                result.err_data[i] = self.err_data[i]    
+            if self.dqx_data is not None:
+                result.dqx_data[i] = self.dqx_data[i]
+            if self.dqy_data is not None:
+                result.dqy_data[i] = self.dqy_data[i]
+            result.qx_data[i] = self.qx_data[i]
+            result.qy_data[i] = self.qy_data[i]
+            result.q_data[i] = self.q_data[i]
+            result.mask[i] = self.mask[i]
+            
             a = Uncertainty(self.data[i], dy[i]**2)
             if isinstance(other, Data2D):
                 b = Uncertainty(other.data[i], dy_other[i]**2)
@@ -422,7 +422,6 @@ class Data2D(PlotData2D, LoadData2D):
             output = operation(a, b)
             result.data[i] = output.x
             result.err_data[i] = math.sqrt(math.fabs(output.variance))
-            
         return result
     
     def _perform_union(self, other):
