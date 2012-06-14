@@ -370,12 +370,16 @@ class Data2D(PlotData2D, LoadData2D):
         :param operation: function defining the operation
         
         """
+        length = numpy.size(self.data)
+        if length < 1:
+            length = numpy.size(other.data)
+        print "numpy.size(self.data)=", numpy.size(self.data)
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
         result = Data2D(image=None, qx_data=None, qy_data=None,
                          q_data=None, err_image=None, xmin=None, xmax=None,
                          ymin=None, ymax=None, zmin=None, zmax=None)
-        result.clone_without_data(len(self.data), self)
+        result.clone_without_data(length, self)
         result.copy_from_datainfo(data2d=self)
         result.xmin = self.xmin
         result.xmax = self.xmax
