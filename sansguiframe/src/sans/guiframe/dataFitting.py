@@ -303,9 +303,10 @@ class Data2D(PlotData2D, LoadData2D):
     """
     """
     def __init__(self, image=None, err_image=None,
+                 qx_data=None, qy_data=None, q_data=None, 
+                 mask=None, dqx_data=None, dqy_data=None, 
                  xmin=None, xmax=None, ymin=None, ymax=None,
-                 zmin=None, zmax=None, qx_data=None, qy_data=None,
-                 q_data=None, mask=None, dqx_data=None, dqy_data=None):
+                 zmin=None, zmax=None):
         """
         """
         PlotData2D.__init__(self, image=image, err_image=err_image,

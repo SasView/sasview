@@ -958,7 +958,9 @@ class Data2D(plottable_2D, DataInfo):
             mask = numpy.zeros(length)
             dqx_data = None
             dqy_data = None
-            clone = Data2D(data, err_data, qx_data, qy_data, q_data, mask)
+            clone = Data2D(data=data, err_data=err_data, 
+                           qx_data=qx_data, qy_data=qy_data, 
+                           q_data=q_data, mask=mask)
 
         clone.title       = self.title
         clone.run         = self.run

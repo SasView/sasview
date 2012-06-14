@@ -58,7 +58,7 @@ class TextDialog(wx.Dialog):
     """
     def __init__(self, parent=None, base=None, id=None, title='', model_list=[], plugin_dir=None):
         """
-        Dialog window popup when selecting 'Easy Custom Sum' on the menu
+        Dialog window popup when selecting 'Easy Custom Sum/Multiply' on the menu
         """
         wx.Dialog.__init__(self, parent=parent, id=id, 
                            title=title, size=(PNL_WIDTH, PNL_HITE))
@@ -74,6 +74,7 @@ class TextDialog(wx.Dialog):
         self.model1_string = "SphereModel"
         self.model2_string = "CylinderModel"
         self._notes = ''
+        self.operator = '+'
         self._msg_box = None
         self.msg_sizer = None
         self._build_sizer()
@@ -88,12 +89,12 @@ class TextDialog(wx.Dialog):
         self.name_sizer = wx.BoxSizer(wx.VERTICAL)
         self.name_hsizer = wx.BoxSizer(wx.HORIZONTAL)
         #title name [string]
-        name_txt = wx.StaticText(self, -1, 'SumFunction Name : ')  
+        name_txt = wx.StaticText(self, -1, 'Function Name : ')  
         self.name_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH*3/5, -1)) 
         self.name_tcl.Bind(wx.EVT_TEXT_ENTER, self.on_change_name)
         self.name_tcl.SetValue('')
         self.name_tcl.SetFont(self.font)
-        hint_name = "Unique Sum Model Function Name."
+        hint_name = "Unique Sum/Multiply Model Function Name."
         self.name_tcl.SetToolTipString(hint_name)
         self.name_hsizer.AddMany([(name_txt, 0, wx.LEFT|wx.TOP, 10),
                             (self.name_tcl, 0, wx.RIGHT|wx.TOP|wx.BOTTOM, 10)])
@@ -151,7 +152,8 @@ class TextDialog(wx.Dialog):
         self.closeButton = wx.Button(self,wx.ID_CANCEL, 'Close', 
                                      size=(_BOX_WIDTH/2, 25))
         # Intro
-        explanation  = "  custom model = scale_factor * (model1 + model2)\n"
+        explanation  = "  custom model = scale_factor * (model1 %s model2)\n"\
+                            % self.operator
         #explanation  += "  Note: This will overwrite the previous sum model.\n"
         model_string = " Model%s (p%s):"
         # msg
@@ -230,7 +232,7 @@ class TextDialog(wx.Dialog):
         s_title = title
         if len(title) > 20:
             s_title = title[0:19] + '...'
-        self._notes = "SumModel function (%s) has been set! \n" % str(s_title)
+        self._notes = "Model function (%s) has been set! \n" % str(s_title)
         self.good_name = True
         self.on_apply(self.fname)
         return self.good_name
@@ -248,7 +250,7 @@ class TextDialog(wx.Dialog):
             self.compile_file(fname)
             self.parent.update_custom_combo()
             msg = self._notes
-            info = 'Infor'
+            info = 'Info'
             color = 'blue'
         except:
             msg= "Easy Custom Sum: Error occurred..."
@@ -306,7 +308,7 @@ class TextDialog(wx.Dialog):
         self.fname = fname  
         description = self.desc_tcl.GetValue().lstrip().rstrip()
         if description == '':
-            description = name1 + "+" + name2
+            description = name1 + self.operator + name2
         name = self.name_tcl.GetValue().lstrip().rstrip()
         if name == '':
             name = M_NAME
@@ -323,8 +325,10 @@ class TextDialog(wx.Dialog):
                 out_f.write(line % (name2, name2) + "\n")
             elif line.count("self.description = '%s'"):
                 out_f.write(line % description + "\n")
-            #elif line.count("self.name = '%s'"):
-            #    out_f.write(line % name + "\n")
+            elif line.count("run") and line.count("%s"):
+                out_f.write(line % self.operator)
+            elif line.count("evalDistribution") and line.count("%s"):
+                out_f.write(line % self.operator)
             else:
                 out_f.write(line + "\n")
         out_f.close()
@@ -853,7 +857,7 @@ if __name__ == "__main__":
         print "===> Simple Test: Failed!"
 """
 SUM_TEMPLATE = """
-# A sample of an experimental model function for Sum(Pmodel1,Pmodel2)
+# A sample of an experimental model function for Sum/Multiply(Pmodel1,Pmodel2)
 import copy
 from sans.models.pluginmodel import Model1DPlugin
 # User can change the name of the model (only with single functional model)
@@ -950,7 +954,7 @@ class Model(Model1DPlugin):
         if not p1_name:
             p1_name = name1
         name = p1_name
-        name += "+"
+        name += "%s"% (self.operator)
         p2_name = self._get_upper_name(name2)
         if not p2_name:
             p2_name = name2
@@ -1023,7 +1027,7 @@ class Model(Model1DPlugin):
         
                 
     def setParam(self, name, value):
-        # set param to p1+p2 model
+        # set param to this (p1, p2) model
         self._setParamHelper(name, value)
         
         ## setParam to p model 
@@ -1092,19 +1096,19 @@ class Model(Model1DPlugin):
     def run(self, x = 0.0):
         self._set_scale_factor()
         return self.params['scale_factor'] * \
-(self.p_model1.run(x) + self.p_model2.run(x))
+(self.p_model1.run(x) %s self.p_model2.run(x))
     
     def runXY(self, x = 0.0):
         self._set_scale_factor()
         return self.params['scale_factor'] * \
-(self.p_model1.runXY(x) + self.p_model2.runXY(x))
+(self.p_model1.runXY(x) %s self.p_model2.runXY(x))
     
     ## Now (May27,10) directly uses the model eval function 
     ## instead of the for-loop in Base Component.
     def evalDistribution(self, x = []):
         self._set_scale_factor()
         return self.params['scale_factor'] * \
-(self.p_model1.evalDistribution(x) + \
+(self.p_model1.evalDistribution(x) %s \
 self.p_model2.evalDistribution(x))
 
     def set_dispersion(self, parameter, dispersion):
@@ -1125,8 +1129,8 @@ new_parameter in self.p_model2.dispersion.keys():
 
     def fill_description(self, p_model1, p_model2):
         description = ""
-        description +="This model gives the summation of  %s and %s. "% \
-( p_model1.name, p_model2.name )
+        description += "This model gives the summation or multiplication of"
+        description += "%s and %s. "% ( p_model1.name, p_model2.name )
         self.description += description
           
     def get_fname(self):
@@ -1148,7 +1152,7 @@ if __name__ == "__main__":
     #m2.p_model1.setParam("length", 1000) 
     #m2.p_model2.setParam("scale", 100)
     #m2.p_model2.setParam("rg", 100)
-    out2 = m2.p_model1.runXY(0.01) + m2.p_model2.runXY(0.01)
+    out2 = m2.p_model1.runXY(0.01) %s m2.p_model2.runXY(0.01)\n
     print out1, " = ", out2
     if out1 == out2:
         print "===> Simple Test: Passed!"
