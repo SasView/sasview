@@ -6,7 +6,7 @@
 import unittest
 import numpy, math
 from sans.dataloader.loader import  Loader
-from sans.dataloader.data_info import Data1D, Data2D
+from sans.guiframe.dataFitting import Data1D, Data2D
  
 import os.path
 
@@ -140,7 +140,9 @@ class manip_2D(unittest.TestCase):
         dqx_0 = numpy.arange(25)/100
         dqy_0 = numpy.arange(25)/100
         q_0 = numpy.sqrt(qx_0 * qx_0 + qy_0 * qy_0)
-        self.data = Data2D(x_0, dx_0, qx_0, qy_0, q_0, mask_0, dqx_0, dqy_0)
+        self.data = Data2D(image=x_0, err_image=dx_0, qx_data=qx_0, 
+                           qy_data=qy_0, q_data=q_0, mask=mask_0, 
+                           dqx_data=dqx_0, dqy_data=dqy_0)
         
         y = numpy.ones(25)
         dy = numpy.ones(25)
@@ -148,7 +150,8 @@ class manip_2D(unittest.TestCase):
         qy = numpy.arange(25)
         mask = numpy.zeros(25)
         q = numpy.sqrt(qx * qx + qy * qy)
-        self.data2 = Data2D(y, dy, qx, qy, q, mask)
+        self.data2 = Data2D(image=y, err_image=dy, qx_data=qx, qy_data=qy, 
+                            q_data=q, mask=mask)
         
         
     def test_load(self):
@@ -194,44 +197,44 @@ class manip_2D(unittest.TestCase):
         for i in range(25):
             self.assertEqual(result.data[i], 5.0)
             self.assertEqual(result.err_data[i], 0.5)
-        #Currently NOT supported    
-        #result = 3.0+self.data
-        #for i in range(25):
-        #    self.assertEqual(result.data[i], 5.0)
-        #    self.assertEqual(result.err_data[i], 0.5)
+   
+        result = 3.0+self.data
+        for i in range(25):
+            self.assertEqual(result.data[i], 5.0)
+            self.assertEqual(result.err_data[i], 0.5)
             
     def test_rsub(self):
         result = self.data-3.0
         for i in range(25):
             self.assertEqual(result.data[i], -1.0)
             self.assertEqual(result.err_data[i], 0.5)
-        #Currently NOT supported     
-        #result = 3.0-self.data
-        #for i in range(25):
-        #    self.assertEqual(result.data[i], 1.0)
-        #    self.assertEqual(result.err_data[i], 0.5)
+    
+        result = 3.0-self.data
+        for i in range(25):
+            self.assertEqual(result.data[i], 1.0)
+            self.assertEqual(result.err_data[i], 0.5)
             
     def test_rmul(self):
         result = self.data*3.0
         for i in range(25):
             self.assertEqual(result.data[i], 6.0)
             self.assertEqual(result.err_data[i], 1.5)
-        #Currently NOT supported     
-        #result = 3.0*self.data
-        #for i in range(25):
-        #    self.assertEqual(result.data[i], 6.0)
-        #    self.assertEqual(result.err_data[i], 1.5)
+ 
+        result = 3.0*self.data
+        for i in range(25):
+            self.assertEqual(result.data[i], 6.0)
+            self.assertEqual(result.err_data[i], 1.5)
             
     def test_rdiv(self):
         result = self.data/4.0
         for i in range(25):
             self.assertEqual(result.data[i], 0.5)
             self.assertEqual(result.err_data[i], 0.125)
-        #Currently NOT supported 
-        #result = 6.0/self.data
-        #for i in range(25):
-        #    self.assertEqual(result.data[i], 3.0)
-        #    self.assertEqual(result.err_data[i], 6.0*0.5/4.0)
+
+        result = 6.0/self.data
+        for i in range(25):
+            self.assertEqual(result.data[i], 3.0)
+            self.assertEqual(result.err_data[i], 6.0*0.5/4.0)
     
 
 if __name__ == '__main__':
