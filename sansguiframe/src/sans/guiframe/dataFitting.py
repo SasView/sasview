@@ -375,7 +375,7 @@ class Data2D(PlotData2D, LoadData2D):
         result = Data2D(image=None, qx_data=None, qy_data=None,
                          q_data=None, err_image=None, xmin=None, xmax=None,
                          ymin=None, ymax=None, zmin=None, zmax=None)
-        result.clone_without_data(length=numpy.size(self.data), clone=self)
+        result.clone_without_data(length=numpy.size(self.data))
         result.copy_from_datainfo(data2d=self)
         result.data = self.data
         result.qx_data = self.qx_data
