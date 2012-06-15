@@ -1,4 +1,3 @@
-
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
@@ -8,8 +7,6 @@
 #
 #copyright 2009, University of Tennessee
 ################################################################################
-
-
 import wx
 import sys
 import os
@@ -39,7 +36,7 @@ def _compileFile(path):
         py_compile.compile(file=path, doraise=True)
         return ''
     except:
-        type, value, traceback = sys.exc_info()
+        _, value, _ = sys.exc_info()
         return value
     
 def _deleteFile(path):
@@ -56,9 +53,11 @@ class TextDialog(wx.Dialog):
     """
     Dialog for easy custom sum models  
     """
-    def __init__(self, parent=None, base=None, id=None, title='', model_list=[], plugin_dir=None):
+    def __init__(self, parent=None, base=None, id=None, title='', 
+                 model_list=[], plugin_dir=None):
         """
-        Dialog window popup when selecting 'Easy Custom Sum/Multiply' on the menu
+        Dialog window popup when selecting 'Easy Custom Sum/Multiply' 
+        on the menu
         """
         wx.Dialog.__init__(self, parent=parent, id=id, 
                            title=title, size=(PNL_WIDTH, PNL_HITE))
@@ -74,14 +73,28 @@ class TextDialog(wx.Dialog):
         self.model1_string = "SphereModel"
         self.model2_string = "CylinderModel"
         self.name = 'Sum' + M_NAME
+        self.factor = 'scale_factor'
         self._notes = ''
         self.operator = '+'
         self.operator_cbox = None
         self.explanation = ''
         self.explanationctr = None
         self.sizer = None
+        self.name_sizer = None
+        self.name_hsizer = None
+        self.desc_sizer = None
+        self.desc_tcl = None
+        self.model1 = None
+        self.model2 = None
+        self.static_line_1 = None
+        self.okButton = None
+        self.closeButton = None
         self._msg_box = None
         self.msg_sizer = None
+        self.fname = None
+        self.cm_list = None
+        self.is_p1_custom = False
+        self.is_p2_custom = False
         self._build_sizer()
         self.model1_name = str(self.model1.GetValue())
         self.model2_name = str(self.model2.GetValue())
@@ -122,8 +135,8 @@ class TextDialog(wx.Dialog):
         hint_desc = "Write a short description of this model function."
         self.desc_tcl.SetToolTipString(hint_desc)
         self.desc_sizer.AddMany([(desc_txt, 0, wx.LEFT|wx.TOP, 10),
-                                    (self.desc_tcl, -1, 
-                                    wx.EXPAND|wx.RIGHT|wx.TOP|wx.BOTTOM, 10)])     
+                                (self.desc_tcl, -1, 
+                                wx.EXPAND|wx.RIGHT|wx.TOP|wx.BOTTOM, 10)])     
   
     def _build_sizer(self):
         """
@@ -136,7 +149,7 @@ class TextDialog(wx.Dialog):
         self._layout_description()
         
         
-        sum_description= wx.StaticBox(self, -1, 'Select', 
+        sum_description = wx.StaticBox(self, -1, 'Select', 
                                        size=(PNL_WIDTH-30, 70))
         sum_box = wx.StaticBoxSizer(sum_description, wx.VERTICAL)
         model1_box = wx.BoxSizer(wx.HORIZONTAL)
@@ -166,8 +179,8 @@ class TextDialog(wx.Dialog):
         self.closeButton = wx.Button(self,wx.ID_CANCEL, 'Close', 
                                      size=(box_width/2, 25))
         # Intro
-        self.explanation  = "  custom model = scale_factor * (model1 %s model2)\n"\
-                            % self.operator
+        self.explanation  = "  custom model = %s %s "% (self.factor, '*')
+        self.explanation  += "(model1 %s model2)\n"% self.operator
         #explanation  += "  Note: This will overwrite the previous sum model.\n"
         model_string = " Model%s (p%s):"
         # msg
@@ -182,13 +195,13 @@ class TextDialog(wx.Dialog):
         self.explanationctr = wx.StaticText(self, -1, self.explanation)
         self.sizer.Add(self.explanationctr , (iy, ix),
                  (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        model1_box.Add(wx.StaticText(self,-1, model_string% (1, 1)), -1, 0)
-        model1_box.Add((box_width-15,10))
+        model1_box.Add(wx.StaticText(self, -1, model_string% (1, 1)), -1, 0)
+        model1_box.Add((box_width-15, 10))
         model1_box.Add(wx.StaticText(self, -1, model_string% (2, 2)), -1, 0)
         model2_box.Add(self.model1, -1, 0)
-        model2_box.Add((15,10))
+        model2_box.Add((15, 10))
         model2_box.Add(self.operator_cbox, 0, 0)
-        model2_box.Add((15,10))
+        model2_box.Add((15, 10))
         model2_box.Add(self.model2, -1, 0)
         model_vbox.Add(model1_box, -1, 0)
         model_vbox.Add(model2_box, -1, 0)
@@ -197,7 +210,7 @@ class TextDialog(wx.Dialog):
         ix = 0
         self.sizer.Add(sum_box, (iy, ix),
                   (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        vbox.Add((10,10))
+        vbox.Add((10, 10))
         vbox.Add(self.static_line_1, 0, wx.EXPAND, 10)
         vbox.Add(self.msg_sizer, 0, 
                  wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE|wx.BOTTOM, 10)
@@ -225,23 +238,26 @@ class TextDialog(wx.Dialog):
         """
         Check name if exist already
         """
+        mname = M_NAME
         self.on_change_name(None)
         list_fnames = os.listdir(self.plugin_dir)
-
+        # fake existing regular model name list
+        m_list = [model + ".py" for model in self.model_list]
+        list_fnames.append(m_list)
         # function/file name
         title = self.name_tcl.GetValue().lstrip().rstrip()
         if title == '':
             text = self.operator_cbox.GetLabel().strip()
             if text == '+':
-                name = 'Sum'
+                mname = 'Sum'
             else:
-                name = 'Multi'
-            self.name = name + M_NAME
-            title = self.name
+                mname = 'Multi'
+            mname += M_NAME
+            title = mname
         self.name = title
         t_fname = title + '.py'
         if not self.overwrite_name:
-            if t_fname in list_fnames and title != self.name:
+            if t_fname in list_fnames and title != mname:
                 self.name_tcl.SetBackgroundColour('pink')
                 self.good_name = False
                 info = 'Error'
@@ -294,30 +310,65 @@ class TextDialog(wx.Dialog):
         Set the list of models
         """
         # list of model names
+        cm_list = []
+        # models
         list = self.model_list
+        # custom models
+        al_list = os.listdir(self.plugin_dir)
+        for c_name in al_list:
+            if c_name.split('.')[-1] == 'py' and \
+                    c_name.split('.')[0] != '__init__':
+                name = str(c_name.split('.')[0])
+                cm_list.append(name)
+                if name not in list:
+                    list.append(name)
+        self.cm_list = cm_list
         if len(list) > 1:
             list.sort()
         for idx in range(len(list)):
-            self.model1.Append(list[idx],idx) 
-            self.model2.Append(list[idx],idx)
+            self.model1.Append(str(list[idx]), idx) 
+            self.model2.Append(str(list[idx]), idx)
         self.model1.SetStringSelection(self.model1_string)
         self.model2.SetStringSelection(self.model2_string)
-           
+    
+    def update_cm_list(self):
+        """
+        Update custom model list
+        """
+        cm_list = []
+        al_list = os.listdir(self.plugin_dir)
+        for c_name in al_list:
+            if c_name.split('.')[-1] == 'py' and \
+                    c_name.split('.')[0] != '__init__':
+                name = str(c_name.split('.')[0])
+                cm_list.append(name)
+        self.cm_list = cm_list 
+              
     def on_model1(self, event):
         """
         Set model1
         """
         event.Skip()
+        self.update_cm_list()
         self.model1_name = str(self.model1.GetValue())
         self.model1_string = self.model1_name
+        if self.model1_name in self.cm_list:
+            self.is_p1_custom = True
+        else:
+            self.is_p1_custom = False
             
     def on_model2(self, event):
         """
         Set model2
         """
         event.Skip()
+        self.update_cm_list()
         self.model2_name = str(self.model2.GetValue())
         self.model2_string = self.model2_name
+        if self.model2_name in self.cm_list:
+            self.is_p2_custom = True
+        else:
+            self.is_p2_custom = False
         
     def on_select_operator(self, event=None):
         """
@@ -327,10 +378,16 @@ class TextDialog(wx.Dialog):
         text = item.GetLabel().strip()
         if text == '+':
             name = 'Sum'
+            factor = 'scale_factor'
+            f_oper = '*'
         else:
             name = 'Multi'
+            factor = 'BackGround'
+            f_oper = '+'
+        self.factor = str(factor)
         self.operator = str(text)
-        self.explanation = "  custom model = scale_factor * "
+        self.explanation = "  custom model = %s %s "% (self.factor, 
+                                                       f_oper)
         self.explanation += "(model1 %s model2)\n"% self.operator
         self.explanationctr.SetLabel(self.explanation)
         self.name = name + M_NAME 
@@ -361,13 +418,15 @@ class TextDialog(wx.Dialog):
         if description == '':
             description = name1 + self.operator + name2
         name = self.name_tcl.GetValue().lstrip().rstrip()
-        if name == '':
-            text = self.operator_cbox.GetLabel().strip()
-            if text == '+':
-                name = 'Sum'
-            else:
-                name = 'Multi'
-            self.name = name + M_NAME
+        text = self.operator_cbox.GetLabel().strip()
+        if text == '+':
+            factor = 'scale_factor'
+            f_oper = '*'
+            default_val = '1.0'
+        else:
+            factor = 'BackGround'
+            f_oper = '+'
+            default_val = '0.0'
         path = self.fname
         try:
             out_f =  open(path,'w')
@@ -375,18 +434,51 @@ class TextDialog(wx.Dialog):
             raise
         lines = SUM_TEMPLATE.split('\n')
         for line in lines:
-            if line.count("import %s as P1"):
-                out_f.write(line % (name1, name1) + "\n")
-            elif line.count("import %s as P2"):
-                out_f.write(line % (name2, name2) + "\n")
-            elif line.count("self.description = '%s'"):
-                out_f.write(line % description + "\n")
-            elif line.count("run") and line.count("%s"):
-                out_f.write(line % self.operator)
-            elif line.count("evalDistribution") and line.count("%s"):
-                out_f.write(line % self.operator)
-            else:
-                out_f.write(line + "\n")
+            try:
+                if line.count("scale_factor"):
+                    line = line.replace('scale_factor', factor)
+                    #print "scale_factor", line
+                if line.count("= %s"):
+                    out_f.write(line % (default_val) + "\n")
+                elif line.count("import Model as P1"):
+                    if self.is_p1_custom:
+                        line = line.replace('#', '')
+                        out_f.write(line % name1 + "\n")
+                    else:
+                        out_f.write(line + "\n")
+                elif line.count("import %s as P1"):
+                    if not self.is_p1_custom:
+                        line = line.replace('#', '')
+                        out_f.write(line % (name1, name1) + "\n")
+                    else:
+                        out_f.write(line + "\n")
+                elif line.count("import Model as P2"):
+                    if self.is_p2_custom:
+                        line = line.replace('#', '')
+                        out_f.write(line % name2 + "\n")
+                    else:
+                        out_f.write(line + "\n")
+                elif line.count("import %s as P2"):
+                    if not self.is_p2_custom:
+                        line = line.replace('#', '')
+                        out_f.write(line % (name2, name2) + "\n")
+                    else:
+                        out_f.write(line + "\n")
+                elif line.count("self.description = '%s'"):
+                    out_f.write(line % description + "\n")
+                #elif line.count("run") and line.count("%s"):
+                #    out_f.write(line % self.operator + "\n")
+                #elif line.count("evalDistribution") and line.count("%s"):
+                #    out_f.write(line % self.operator + "\n")
+                elif line.count("return") and line.count("%s") == 2:
+                    #print "line return", line
+                    out_f.write(line % (f_oper, self.operator) + "\n")
+                elif line.count("out2")and line.count("%s"):
+                    out_f.write(line % self.operator + "\n")
+                else:
+                    out_f.write(line + "\n")
+            except:
+                raise
         out_f.close()
         #else:
         #    msg = "Name exists already."
@@ -412,7 +504,7 @@ class EditorPanel(wx.ScrolledWindow):
     def __init__(self, parent, base, path, title, *args, **kwds):
         kwds['name'] = title
         kwds["size"] = (EDITOR_WIDTH, EDITOR_HEIGTH)
-        kwds["style"]= wx.FULL_REPAINT_ON_RESIZE
+        kwds["style"] = wx.FULL_REPAINT_ON_RESIZE
         wx.ScrolledWindow.__init__(self, parent, *args, **kwds)
         #self.SetupScrolling()
         self.parent = parent
@@ -813,8 +905,14 @@ class EditorPanel(wx.ScrolledWindow):
         event.Skip()
         
 class EditorWindow(wx.Frame):
+    """
+    Editor Window
+    """
     def __init__(self, parent, base, path, title, 
                  size=(EDITOR_WIDTH, EDITOR_HEIGTH), *args, **kwds):
+        """
+        Init
+        """
         kwds["title"] = title
         kwds["size"] = size
         wx.Frame.__init__(self, parent=None, *args, **kwds)
@@ -918,10 +1016,12 @@ import copy
 from sans.models.pluginmodel import Model1DPlugin
 # User can change the name of the model (only with single functional model)
 #P1_model: 
-from sans.models.%s import %s as P1
+#from sans.models.%s import %s as P1
+#from %s import Model as P1 
 
 #P2_model: 
-from sans.models.%s import %s as P2
+#from sans.models.%s import %s as P2
+#from %s import Model as P2 
 import os
 import sys
 
@@ -960,8 +1060,8 @@ class Model(Model1DPlugin):
         self._set_dispersion()
         ## Define parameters
         self._set_params()
-        ## New parameter:Scaling factor
-        self.params['scale_factor'] = 1
+        ## New parameter:scaling_factor
+        self.params['scale_factor'] = %s
         
         ## Parameter details [units, min, max]
         self._set_details()
@@ -1151,19 +1251,19 @@ class Model(Model1DPlugin):
                     
     def run(self, x = 0.0):
         self._set_scale_factor()
-        return self.params['scale_factor'] * \
+        return self.params['scale_factor'] %s \
 (self.p_model1.run(x) %s self.p_model2.run(x))
     
     def runXY(self, x = 0.0):
         self._set_scale_factor()
-        return self.params['scale_factor'] * \
+        return self.params['scale_factor'] %s \
 (self.p_model1.runXY(x) %s self.p_model2.runXY(x))
     
     ## Now (May27,10) directly uses the model eval function 
     ## instead of the for-loop in Base Component.
     def evalDistribution(self, x = []):
         self._set_scale_factor()
-        return self.params['scale_factor'] * \
+        return self.params['scale_factor'] %s \
 (self.p_model1.evalDistribution(x) %s \
 self.p_model2.evalDistribution(x))
 
