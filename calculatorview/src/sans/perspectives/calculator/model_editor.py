@@ -17,17 +17,17 @@ from wx.py.editwindow import EditWindow
 
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
-    PNL_WIDTH = 460
+    PNL_WIDTH = 450
     PNL_HITE = 320
 else:
     FONT_VARIANT = 1
-    PNL_WIDTH = 500
+    PNL_WIDTH = 590
     PNL_HITE = 400
-M_NAME = 'SumModel'
+M_NAME = 'Model'
 EDITOR_WIDTH = 800
 EDITOR_HEIGTH = 720
 PANEL_WIDTH = 500
-_BOX_WIDTH = 51
+_BOX_WIDTH = 55
 
     
 def _compileFile(path):
@@ -73,14 +73,20 @@ class TextDialog(wx.Dialog):
         self.model_list = model_list
         self.model1_string = "SphereModel"
         self.model2_string = "CylinderModel"
+        self.name = 'Sum' + M_NAME
         self._notes = ''
         self.operator = '+'
+        self.operator_cbox = None
+        self.explanation = ''
+        self.explanationctr = None
+        self.sizer = None
         self._msg_box = None
         self.msg_sizer = None
         self._build_sizer()
         self.model1_name = str(self.model1.GetValue())
         self.model2_name = str(self.model2.GetValue())
         self.good_name = True
+        self.fill_oprator_combox()
         
     def _layout_name(self):
         """
@@ -97,8 +103,9 @@ class TextDialog(wx.Dialog):
         hint_name = "Unique Sum/Multiply Model Function Name."
         self.name_tcl.SetToolTipString(hint_name)
         self.name_hsizer.AddMany([(name_txt, 0, wx.LEFT|wx.TOP, 10),
-                            (self.name_tcl, 0, wx.RIGHT|wx.TOP|wx.BOTTOM, 10)])
-        self.name_sizer.AddMany([(self.name_hsizer, 0, 
+                            (self.name_tcl, -1, 
+                             wx.EXPAND|wx.RIGHT|wx.TOP|wx.BOTTOM, 10)])
+        self.name_sizer.AddMany([(self.name_hsizer, -1, 
                                         wx.LEFT|wx.TOP, 10)])
         
         
@@ -112,19 +119,19 @@ class TextDialog(wx.Dialog):
         self.desc_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH*3/5, -1)) 
         self.desc_tcl.SetValue('')
         #self.name_tcl.SetFont(self.font)
-        hint_desc = "Write a short description of the sum model function."
+        hint_desc = "Write a short description of this model function."
         self.desc_tcl.SetToolTipString(hint_desc)
         self.desc_sizer.AddMany([(desc_txt, 0, wx.LEFT|wx.TOP, 10),
-                                       (self.desc_tcl, 0, 
-                                        wx.RIGHT|wx.TOP|wx.BOTTOM, 10)])     
+                                    (self.desc_tcl, -1, 
+                                    wx.EXPAND|wx.RIGHT|wx.TOP|wx.BOTTOM, 10)])     
   
     def _build_sizer(self):
         """
         Build gui
         """
-        _BOX_WIDTH = 195 # combobox width
+        box_width = 195 # combobox width
         vbox  = wx.BoxSizer(wx.VERTICAL)
-        sizer = wx.GridBagSizer(1, 3)
+        self.sizer = wx.GridBagSizer(1, 3)
         self._layout_name()
         self._layout_description()
         
@@ -137,22 +144,29 @@ class TextDialog(wx.Dialog):
         model_vbox = wx.BoxSizer(wx.VERTICAL)
         self.model1 =  wx.ComboBox(self, -1, style=wx.CB_READONLY)
         wx.EVT_COMBOBOX(self.model1, -1, self.on_model1)
-        self.model1.SetMinSize((_BOX_WIDTH, -1))
+        self.model1.SetMinSize((box_width*5/6, -1))
         self.model1.SetToolTipString("model1")
+        
+        self.operator_cbox = wx.ComboBox(self, -1, size=(50, -1), 
+                                         style=wx.CB_READONLY)
+        wx.EVT_COMBOBOX(self.operator_cbox, -1, self.on_select_operator)
+        operation_tip = "Add: +, Multiply: * "
+        self.operator_cbox.SetToolTipString(operation_tip)
+        
         self.model2 =  wx.ComboBox(self, -1, style=wx.CB_READONLY)
         wx.EVT_COMBOBOX(self.model2, -1, self.on_model2)
-        self.model2.SetMinSize((_BOX_WIDTH, -1))
+        self.model2.SetMinSize((box_width*5/6, -1))
         self.model2.SetToolTipString("model2")
         self._set_model_list()
         
          # Buttons on the bottom
         self.static_line_1 = wx.StaticLine(self, -1)
-        self.okButton = wx.Button(self,wx.ID_OK, 'Apply', size=(_BOX_WIDTH/2, 25))
+        self.okButton = wx.Button(self,wx.ID_OK, 'Apply', size=(box_width/2, 25))
         self.okButton.Bind(wx.EVT_BUTTON, self.check_name)
         self.closeButton = wx.Button(self,wx.ID_CANCEL, 'Close', 
-                                     size=(_BOX_WIDTH/2, 25))
+                                     size=(box_width/2, 25))
         # Intro
-        explanation  = "  custom model = scale_factor * (model1 %s model2)\n"\
+        self.explanation  = "  custom model = scale_factor * (model1 %s model2)\n"\
                             % self.operator
         #explanation  += "  Note: This will overwrite the previous sum model.\n"
         model_string = " Model%s (p%s):"
@@ -162,23 +176,26 @@ class TextDialog(wx.Dialog):
         self.msg_sizer.Add(self._msg_box, 0, wx.LEFT, 0)
         vbox.Add(self.name_hsizer)
         vbox.Add(self.desc_sizer)
-        vbox.Add(sizer)
+        vbox.Add(self.sizer)
         ix = 0
         iy = 1
-        sizer.Add(wx.StaticText(self, -1, explanation), (iy, ix),
+        self.explanationctr = wx.StaticText(self, -1, self.explanation)
+        self.sizer.Add(self.explanationctr , (iy, ix),
                  (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         model1_box.Add(wx.StaticText(self,-1, model_string% (1, 1)), -1, 0)
-        model1_box.Add((_BOX_WIDTH-35,10))
+        model1_box.Add((box_width-15,10))
         model1_box.Add(wx.StaticText(self, -1, model_string% (2, 2)), -1, 0)
         model2_box.Add(self.model1, -1, 0)
-        model2_box.Add((20,10))
+        model2_box.Add((15,10))
+        model2_box.Add(self.operator_cbox, 0, 0)
+        model2_box.Add((15,10))
         model2_box.Add(self.model2, -1, 0)
         model_vbox.Add(model1_box, -1, 0)
         model_vbox.Add(model2_box, -1, 0)
         sum_box.Add(model_vbox, -1, 10)
         iy += 1
         ix = 0
-        sizer.Add(sum_box, (iy, ix),
+        self.sizer.Add(sum_box, (iy, ix),
                   (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         vbox.Add((10,10))
         vbox.Add(self.static_line_1, 0, wx.EXPAND, 10)
@@ -189,8 +206,9 @@ class TextDialog(wx.Dialog):
         sizer_button.Add(self.okButton, 0, 
                          wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 0)
         sizer_button.Add(self.closeButton, 0,
-                          wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 15)        
+                          wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)        
         vbox.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
+         
         self.SetSizer(vbox)
         self.Centre()
         
@@ -213,11 +231,17 @@ class TextDialog(wx.Dialog):
         # function/file name
         title = self.name_tcl.GetValue().lstrip().rstrip()
         if title == '':
-            title = M_NAME
+            text = self.operator_cbox.GetLabel().strip()
+            if text == '+':
+                name = 'Sum'
+            else:
+                name = 'Multi'
+            self.name = name + M_NAME
+            title = self.name
         self.name = title
         t_fname = title + '.py'
         if not self.overwrite_name:
-            if t_fname in list_fnames and title != M_NAME:
+            if t_fname in list_fnames and title != self.name:
                 self.name_tcl.SetBackgroundColour('pink')
                 self.good_name = False
                 info = 'Error'
@@ -253,7 +277,7 @@ class TextDialog(wx.Dialog):
             info = 'Info'
             color = 'blue'
         except:
-            msg= "Easy Custom Sum: Error occurred..."
+            msg= "Easy Custom Sum/Multipy: Error occurred..."
             info = 'Error'
             color = 'red'
         self._msg_box.SetLabel(msg)
@@ -294,7 +318,34 @@ class TextDialog(wx.Dialog):
         event.Skip()
         self.model2_name = str(self.model2.GetValue())
         self.model2_string = self.model2_name
- 
+        
+    def on_select_operator(self, event=None):
+        """
+        On Select an Operator
+        """
+        item = event.GetEventObject()
+        text = item.GetLabel().strip()
+        if text == '+':
+            name = 'Sum'
+        else:
+            name = 'Multi'
+        self.operator = str(text)
+        self.explanation = "  custom model = scale_factor * "
+        self.explanation += "(model1 %s model2)\n"% self.operator
+        self.explanationctr.SetLabel(self.explanation)
+        self.name = name + M_NAME 
+        self.sizer.Layout()
+             
+    def fill_oprator_combox(self):
+        """
+        fill the current combobox with the operator
+        """   
+        operator_list = [' +', ' *']
+        for oper in operator_list:
+            pos = self.operator_cbox.Append(str(oper))
+            self.operator_cbox.SetClientData(pos, str(oper.strip()))
+        self.operator_cbox.SetSelection(0)
+            
     def getText(self):
         """
         Returns model name string as list
@@ -311,7 +362,12 @@ class TextDialog(wx.Dialog):
             description = name1 + self.operator + name2
         name = self.name_tcl.GetValue().lstrip().rstrip()
         if name == '':
-            name = M_NAME
+            text = self.operator_cbox.GetLabel().strip()
+            if text == '+':
+                name = 'Sum'
+            else:
+                name = 'Multi'
+            self.name = name + M_NAME
         path = self.fname
         try:
             out_f =  open(path,'w')
@@ -1153,6 +1209,7 @@ if __name__ == "__main__":
     #m2.p_model2.setParam("scale", 100)
     #m2.p_model2.setParam("rg", 100)
     out2 = m2.p_model1.runXY(0.01) %s m2.p_model2.runXY(0.01)\n
+    print "My name is %s."% m1.name
     print out1, " = ", out2
     if out1 == out2:
         print "===> Simple Test: Passed!"

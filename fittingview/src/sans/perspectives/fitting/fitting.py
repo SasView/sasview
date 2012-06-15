@@ -293,7 +293,7 @@ class Plugin(PluginBase):
         model_manager = models.ModelManager()
         model_list = model_manager.get_model_name_list()
         plug_dir = models.find_plugins_dir()
-        textdial = TextDialog(None, self, -1, 'Easy Sum(p1, p2)', 
+        textdial = TextDialog(None, self, -1, 'Easy Sum/Multi(p1, p2) Editor', 
                               model_list, plug_dir)
         self.put_icon(textdial)
         textdial.ShowModal()
@@ -351,7 +351,7 @@ class Plugin(PluginBase):
                                    'Add a new model function')
         wx.EVT_MENU(owner, id, self.make_new_model)
         id = wx.NewId()
-        self.edit_model_menu.Append(id, 'Sum(p1, p2)',
+        self.edit_model_menu.Append(id, 'Sum|Multi(p1, p2)',
                                     'Sum of two model functions')
         wx.EVT_MENU(owner, id, self.make_sum_model)
         e_id = wx.NewId()
