@@ -75,6 +75,9 @@ def run_tests():
     print "    Test errors:  %d" % n_errors 
     print "----------------------------------------------"
     
+    return failed
 
 if __name__ == '__main__':
-    run_tests()                    
+    if run_tests()>0:
+        sys.exit(1)
+    
