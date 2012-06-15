@@ -152,13 +152,26 @@ class manip_2D(unittest.TestCase):
     
     def setUp(self):
         # Create two data sets to play with
-        x_0 = 2.0*numpy.ones([5,4])
-        dx_0 = 0.5*numpy.ones([5,4])
-        self.data = Data2D(x_0, dx_0)
+        x_0 = 2.0*numpy.ones(25)
+        dx_0 = 0.5*numpy.ones(25)
+        qx_0 = numpy.arange(25)
+        qy_0 = numpy.arange(25)
+        mask_0 = numpy.zeros(25)
+        dqx_0 = numpy.arange(25)/100
+        dqy_0 = numpy.arange(25)/100
+        q_0 = numpy.sqrt(qx_0 * qx_0 + qy_0 * qy_0)
+        self.data = Data2D(image=x_0, err_image=dx_0, qx_data=qx_0, 
+                           qy_data=qy_0, q_data=q_0, mask=mask_0, 
+                           dqx_data=dqx_0, dqy_data=dqy_0)
         
-        y = numpy.ones([5,4])
-        dy = numpy.ones([5,4])
-        self.data2 = Data2D(y, dy)
+        y = numpy.ones(25)
+        dy = numpy.ones(25)
+        qx = numpy.arange(25)
+        qy = numpy.arange(25)
+        mask = numpy.zeros(25)
+        q = numpy.sqrt(qx * qx + qy * qy)
+        self.data2 = Data2D(image=y, err_image=dy, qx_data=qx, qy_data=qy, 
+                            q_data=q, mask=mask)
         
         
     def test_load(self):
@@ -166,97 +179,83 @@ class manip_2D(unittest.TestCase):
             Test whether the test file was loaded properly
         """
         # There should be 5 entries in the file
-        self.assertEqual(numpy.size(self.data.data, 0), 5)
-        self.assertEqual(numpy.size(self.data.data, 1), 4)
+        self.assertEqual(numpy.size(self.data.data), 25)
         
-        for i in range(5):
-            for j in range(4):
-                # All y-error values should be 0.5
-                self.assertEqual(self.data.err_data[i][j], 0.5)    
-                
-                # All y values should be 2.0
-                self.assertEqual(self.data.data[i][j], 2.0)    
+        for i in range(25):
+            # All y-error values should be 0.5
+            self.assertEqual(self.data.err_data[i], 0.5)    
+            
+            # All y values should be 2.0
+            self.assertEqual(self.data.data[i], 2.0)    
         
     def test_add(self):
         result = self.data2+self.data
-        for i in range(5):
-            for j in range(4):
-                self.assertEqual(result.data[i][j], 3.0)
-                self.assertEqual(result.err_data[i][j], math.sqrt(0.5**2+1.0))
+        for i in range(25):
+            self.assertEqual(result.data[i], 3.0)
+            self.assertEqual(result.err_data[i], math.sqrt(0.5**2+1.0))
         
     def test_sub(self):
         result = self.data2-self.data
-        for i in range(5):
-            for j in range(4):
-                self.assertEqual(result.data[i][j], -1.0)
-                self.assertEqual(result.err_data[i][j], math.sqrt(0.5**2+1.0))
+        for i in range(25):
+                self.assertEqual(result.data[i], -1.0)
+                self.assertEqual(result.err_data[i], math.sqrt(0.5**2+1.0))
         
     def test_mul(self):
         result = self.data2*self.data
-        for i in range(5):
-            for j in range(4):
-                self.assertEqual(result.data[i][j], 2.0)
-                self.assertEqual(result.err_data[i][j], math.sqrt((0.5*1.0)**2+(1.0*2.0)**2))
+        for i in range(25):
+            self.assertEqual(result.data[i], 2.0)
+            self.assertEqual(result.err_data[i], math.sqrt((0.5*1.0)**2+(1.0*2.0)**2))
         
     def test_div(self):
         result = self.data2/self.data
-        for i in range(5):
-            for j in range(4):
-                self.assertEqual(result.data[i][j], 0.5)
-                self.assertEqual(result.err_data[i][j], math.sqrt((1.0/2.0)**2+(0.5*1.0/4.0)**2))
+        for i in range(25):
+            self.assertEqual(result.data[i], 0.5)
+            self.assertEqual(result.err_data[i], math.sqrt((1.0/2.0)**2+(0.5*1.0/4.0)**2))
         
     def test_radd(self):
         result = self.data+3.0
-        for i in range(5):
-            for j in range(4):
-                self.assertEqual(result.data[i][j], 5.0)
-                self.assertEqual(result.err_data[i][j], 0.5)
-            
+        for i in range(25):
+            self.assertEqual(result.data[i], 5.0)
+            self.assertEqual(result.err_data[i], 0.5)
+   
         result = 3.0+self.data
-        for i in range(5):
-            for j in range(4):
-                self.assertEqual(result.data[i][j], 5.0)
-                self.assertEqual(result.err_data[i][j], 0.5)
+        for i in range(25):
+            self.assertEqual(result.data[i], 5.0)
+            self.assertEqual(result.err_data[i], 0.5)
             
     def test_rsub(self):
         result = self.data-3.0
-        for i in range(5):
-            for j in range(4):
-                self.assertEqual(result.data[i][j], -1.0)
-                self.assertEqual(result.err_data[i][j], 0.5)
-            
+        for i in range(25):
+            self.assertEqual(result.data[i], -1.0)
+            self.assertEqual(result.err_data[i], 0.5)
+    
         result = 3.0-self.data
-        for i in range(5):
-            for j in range(4):
-                self.assertEqual(result.data[i][j], 1.0)
-                self.assertEqual(result.err_data[i][j], 0.5)
+        for i in range(25):
+            self.assertEqual(result.data[i], 1.0)
+            self.assertEqual(result.err_data[i], 0.5)
             
     def test_rmul(self):
         result = self.data*3.0
-        for i in range(5):
-            for j in range(4):
-                self.assertEqual(result.data[i][j], 6.0)
-                self.assertEqual(result.err_data[i][j], 1.5)
-            
+        for i in range(25):
+            self.assertEqual(result.data[i], 6.0)
+            self.assertEqual(result.err_data[i], 1.5)
+ 
         result = 3.0*self.data
-        for i in range(5):
-            for j in range(4):
-                self.assertEqual(result.data[i][j], 6.0)
-                self.assertEqual(result.err_data[i][j], 1.5)
+        for i in range(25):
+            self.assertEqual(result.data[i], 6.0)
+            self.assertEqual(result.err_data[i], 1.5)
             
     def test_rdiv(self):
         result = self.data/4.0
-        for i in range(5):
-            for j in range(4):
-                self.assertEqual(result.data[i][j], 0.5)
-                self.assertEqual(result.err_data[i][j], 0.125)
-            
+        for i in range(25):
+            self.assertEqual(result.data[i], 0.5)
+            self.assertEqual(result.err_data[i], 0.125)
+
         result = 6.0/self.data
-        for i in range(5):
-            for j in range(4):
-                self.assertEqual(result.data[i][j], 3.0)
-                self.assertEqual(result.err_data[i][j], 6.0*0.5/4.0)
-            
+        for i in range(25):
+            self.assertEqual(result.data[i], 3.0)
+            self.assertEqual(result.err_data[i], 6.0*0.5/4.0)
+    
 
 if __name__ == '__main__':
     unittest.main()
