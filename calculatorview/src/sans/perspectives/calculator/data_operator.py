@@ -452,34 +452,39 @@ class DataOperPanel(wx.ScrolledWindow):
             except:
                 val = None
         self.data2_cbox.SetClientData(pos3, val)
-        dnames = [dstate.data.name for dstate in self._data.values()]
-        ind = numpy.argsort(dnames)
-        for datastate in numpy.array(self._data.values())[ind]:
-            data = datastate.data
-            if data != None:
-                name = data.name
-                pos1 = self.data1_cbox.Append(str(name))
-                self.data1_cbox.SetClientData(pos1, data)
-                pos2 = self.data2_cbox.Append(str(name))
-                self.data2_cbox.SetClientData(pos2, data)
-                if str(current1) == str(name):
-                  pos_pre1 = pos1 
-                if str(current2) == str(name):
-                  pos_pre2 = pos2
-            try:
-                theory_list = datastate.get_theory()
-                for theory, _ in theory_list.values():
-                    th_name = theory.name
-                    posth1 = self.data1_cbox.Append(str(th_name))
-                    self.data1_cbox.SetClientData(posth1, theory)
-                    posth2 = self.data2_cbox.Append(str(th_name))
-                    self.data2_cbox.SetClientData(posth2, theory)
-                    if str(current1) == str(th_name):
-                        pos_pre1 = posth1
-                    if str(current2) == str(th_name):
-                        pos_pre2 = posth2
-            except:
-                continue 
+        dnames = []
+        for dstate in self._data.values():
+            if dstate != None:
+                if dstate.data != None:
+                    dnames.append(dstate.data.name)
+        if len(dnames) > 0:
+            ind = numpy.argsort(dnames)
+            for datastate in numpy.array(self._data.values())[ind]:
+                data = datastate.data
+                if data != None:
+                    name = data.name
+                    pos1 = self.data1_cbox.Append(str(name))
+                    self.data1_cbox.SetClientData(pos1, data)
+                    pos2 = self.data2_cbox.Append(str(name))
+                    self.data2_cbox.SetClientData(pos2, data)
+                    if str(current1) == str(name):
+                      pos_pre1 = pos1 
+                    if str(current2) == str(name):
+                      pos_pre2 = pos2
+                try:
+                    theory_list = datastate.get_theory()
+                    for theory, _ in theory_list.values():
+                        th_name = theory.name
+                        posth1 = self.data1_cbox.Append(str(th_name))
+                        self.data1_cbox.SetClientData(posth1, theory)
+                        posth2 = self.data2_cbox.Append(str(th_name))
+                        self.data2_cbox.SetClientData(posth2, theory)
+                        if str(current1) == str(th_name):
+                            pos_pre1 = posth1
+                        if str(current2) == str(th_name):
+                            pos_pre2 = posth2
+                except:
+                    continue 
         self.data1_cbox.SetSelection(pos_pre1)
         self.data2_cbox.SetSelection(pos_pre2)
     
