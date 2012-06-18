@@ -823,12 +823,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         try:
             if path == None:
                 wx.PostEvent(self.parent.parent,
-        StatusEvent(status=" Selected Distribution was not loaded: %s" % path))
+                            StatusEvent(status= \
+                            " Selected Distribution was not loaded: %s" % path))
                 return None, None
             input_f = open(path, 'r')
             buff = input_f.read()
             lines = buff.split('\n')
-            
+            input_f.close()
             angles = []
             weights = []
             for line in lines:
@@ -836,11 +837,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                 try:
                     angle = float(toks[0])
                     weight = float(toks[1])
+                    angles.append(angle)
+                    weights.append(weight)
                 except:
                     # Skip non-data lines
                     pass
-                angles.append(angle)
-                weights.append(weight)
             return numpy.array(angles), numpy.array(weights)
         except:
             raise

@@ -136,7 +136,7 @@ static double cylinder_analytical_2D_scaled(CylinderParameters *pars, double q, 
     cyl_z = cos(theta);
 
     // q vector
-    q_z = 0;
+    q_z = 0.0;
 
     // Compute the angle btw vector q and the
     // axis of the cylinder
@@ -144,8 +144,9 @@ static double cylinder_analytical_2D_scaled(CylinderParameters *pars, double q, 
 
     // The following test should always pass
     if (fabs(cos_val)>1.0) {
-      printf("cyl_ana_2D: Unexpected error: cos(alpha)>1\n");
-      return 0;
+      printf("cyl_ana_2D: Unexpected error: |cos(alpha)=%g|>1\n", cos_val);
+      printf("cyl_ana_2D: at theta=%g and phi=%g.", theta, phi);
+      return 1.0;
     }
 
     // Note: cos(alpha) = 0 and 1 will get an
