@@ -392,6 +392,7 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         if event != None:
             event.Skip()
+        self._data = self.get_datalist()
         children = self.GetChildren()
         # update the list only when it is on the top
         if self.FindFocus() in children:
