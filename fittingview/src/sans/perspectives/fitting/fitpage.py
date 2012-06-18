@@ -2431,7 +2431,7 @@ class FitPage(BasicPage):
         self._update_paramv_on_fit()
         if self.model != None:
             if self.data.is_data:
-                self._manager.page_finder[self.uid].set_fit_data(data=[self.data])
+                self._manager.page_finder[self.uid].add_data(data=self.data)
         temp_smearer = self.on_smear_helper()
         
         self.sizer_set_smearer.Layout()
