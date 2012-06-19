@@ -152,7 +152,9 @@ static double cylinder_analytical_2D_scaled(CylinderParameters *pars, double q, 
     // Note: cos(alpha) = 0 and 1 will get an
     // undefined value from CylKernel
   alpha = acos( cos_val );
-
+  if (alpha == 0.0){
+  	alpha = 1.0e-26;
+  	}
   // Call the IGOR library function to get the kernel
   answer = CylKernel(q, pars->radius, pars->length/2.0, alpha) / sin(alpha);
 
