@@ -76,8 +76,10 @@ class Properties(wx.Dialog):
         # type of view or model used
         self.view.SetValue("--")
         self.view.Insert("--", 0)
-        self.view.Insert("Guinier lny vs x^(2)", 1)
-        self.view.Insert("Porod y*x^(4) vs x^(4)", 2)
+        self.view.Insert("Linear y vs x", 1)
+        self.view.Insert("Guinier lny vs x^(2)", 2)
+        self.view.Insert("CS Guinier ln(y*x) vs x^(2)", 3)
+        self.view.Insert("Porod y*x^(4) vs x^(4)", 4)
         self.SetSizer(vbox)
         self.Fit()
         self.Centre()

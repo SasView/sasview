@@ -718,9 +718,19 @@ class PlotPanel(wx.Panel):
                 dial.setValues(self.prevXtrans, self.prevYtrans, self.viewModel)
                 if dial.ShowModal() == wx.ID_OK:
                     self.xLabel, self.yLabel, self.viewModel = dial.getValues()
+                    if self.viewModel == "Linear y vs x":
+                        self.xLabel = "x"
+                        self.yLabel = "y"
+                        self.viewModel = "--"
+                        dial.setValues(self.xLabel, self.yLabel, self.viewModel)
                     if self.viewModel == "Guinier lny vs x^(2)":
                         self.xLabel = "x^(2)"
                         self.yLabel = "ln(y)"
+                        self.viewModel = "--"
+                        dial.setValues(self.xLabel, self.yLabel, self.viewModel)
+                    if self.viewModel == "CS Guinier ln(y*x) vs x^(2)":
+                        self.xLabel = "x^(2)"
+                        self.yLabel = "ln(y*x)"
                         self.viewModel = "--"
                         dial.setValues(self.xLabel, self.yLabel, self.viewModel)
                     if self.viewModel == "Porod y*x^(4) vs x^(4)":
