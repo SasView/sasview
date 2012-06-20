@@ -8,7 +8,17 @@ except:
     print "xmlrunner needs to be installed to run these tests"
     print "Try easy_install unittest-xml-reporting"
 
+# Check whether we have matplotlib installed
+HAS_MPL = True
+try:
+    import matplotlib
+except:
+    HAS_MPL = False
+
 SKIPPED_DIRS = ["sansrealspace", "calculatorview"]
+if not HAS_MPL:
+    SKIPPED_DIRS.append("sansguiframe")
+
 SANSVIEW_DIR = os.pardir
 COMMAND_SEP = ';'
 if os.name == 'nt':
