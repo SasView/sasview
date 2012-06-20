@@ -239,7 +239,7 @@ class TestInvariantCalculator(unittest.TestCase):
         self.assertTrue(math.fabs(inv._high_extrapolation_function.power-3)<0.1)
         
         self.assertEqual(qs_extr, _qstar+delta_qs_extr)
-        self.assertEqual(dqs_extr, math.sqrt(dqstar*dqstar + delta_dqs_extr*delta_dqs_extr))
+        self.assertAlmostEqual(dqs_extr, math.sqrt(dqstar*dqstar + delta_dqs_extr*delta_dqs_extr), 10)
         
         # We don't expect the extrapolated invariant to be very far from the
         # result without extrapolation. Let's test for a result within 10%.
