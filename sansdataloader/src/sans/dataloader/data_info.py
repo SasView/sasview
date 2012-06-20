@@ -1033,34 +1033,29 @@ class Data2D(plottable_2D, DataInfo):
         :param operation: function defining the operation
         
         """
-        print "numpy.size(self.data)=", numpy.size(self.data)
         # First, check the data compatibility
         dy, dy_other = self._validity_check(other)
         result = self.clone_without_data(numpy.size(self.data))
-        result.data = self.data
-        result.qx_data = self.qx_data
-        result.qy_data = self.qy_data
-        result.q_data = self.q_data
-        result.mask = self.mask
-        result.xmin = self.xmin
-        result.xmax = self.xmax
-        result.ymin = self.ymin
-        result.ymax = self.ymax
-        
-        if self.err_data is not None:
-            result.err_data = self.err_data    
-        if self.dqx_data is not None:
-            result.dqx_data = self.dqx_data
-        if self.dqy_data is not None:
-            result.dqy_data = self.dqy_data
         if self.dqx_data == None or self.dqy_data == None:
             result.dqx_data = None
             result.dqy_data = None
         else:
-            result.dqx_data = numpy.zeros(numpy.size(self.data))
-            result.dqy_data = numpy.zeros(numpy.size(self.data))
-        
+            result.dqx_data = numpy.zeros(len(self.data))
+            result.dqy_data = numpy.zeros(len(self.data))
         for i in range(numpy.size(self.data)):
+            result.data[i] = self.data[i]
+            if self.err_data is not None and \
+                numpy.size(self.data) == numpy.size(self.err_data):
+                result.err_data[i] = self.err_data[i]    
+            if self.dqx_data is not None:
+                result.dqx_data[i] = self.dqx_data[i]
+            if self.dqy_data is not None:
+                result.dqy_data[i] = self.dqy_data[i]
+            result.qx_data[i] = self.qx_data[i]
+            result.qy_data[i] = self.qy_data[i]
+            result.q_data[i] = self.q_data[i]
+            result.mask[i] = self.mask[i]
+            
             a = Uncertainty(self.data[i], dy[i]**2)
             if isinstance(other, Data2D):
                 b = Uncertainty(other.data[i], dy_other[i]**2)
