@@ -186,7 +186,7 @@ class LinearFit(wx.Dialog):
                 self.I0err_tctr = wx.TextCtrl(self, -1, '')
                 self.I0err_tctr.SetEditable(False)
                 self.I0err_tctr.SetBackgroundColour(_BACKGROUND_COLOR)
-                Rg_stxt = wx.StaticText(self, -1, 'Rg (A)')
+                Rg_stxt = wx.StaticText(self, -1, 'Rg [A]')
                 Rg_stxt.Show(self.yLabel == "ln(y)" )
                 self.Rg_tctr = wx.TextCtrl(self, -1, '')
                 self.Rg_tctr.SetEditable(False)
@@ -196,12 +196,16 @@ class LinearFit(wx.Dialog):
                 self.Rgerr_tctr.SetEditable(False)
                 self.Rgerr_tctr.SetBackgroundColour(_BACKGROUND_COLOR)
                 self.Rgerr_tctr.Show(self.yLabel == "ln(y)" )
-                Diameter_stxt = wx.StaticText(self, -1, 'Rod Diameter (A)')
+                self.Rgerr_pm = wx.StaticText(self, -1, '+/-')
+                self.Rgerr_pm.Show(self.yLabel == "ln(y)" )
+                Diameter_stxt = wx.StaticText(self, -1, 'Rod Diameter [A]')
                 Diameter_stxt.Show(self.yLabel == "ln(y*x)")
                 self.Diameter_tctr = wx.TextCtrl(self, -1, '')
                 self.Diameter_tctr.SetEditable(False)
                 self.Diameter_tctr.SetBackgroundColour(_BACKGROUND_COLOR)
                 self.Diameter_tctr.Show(self.yLabel == "ln(y*x)")
+                self.Diameter_pm = wx.StaticText(self, -1, '+/-')
+                self.Diameter_pm.Show(self.yLabel == "ln(y*x)")
                 self.Diametererr_tctr = wx.TextCtrl(self, -1, '')
                 self.Diametererr_tctr.SetEditable(False)
                 self.Diametererr_tctr.SetBackgroundColour(_BACKGROUND_COLOR)
@@ -215,16 +219,17 @@ class LinearFit(wx.Dialog):
                 self.RgQmax_tctr.SetEditable(False)
                 self.RgQmax_tctr.SetBackgroundColour(_BACKGROUND_COLOR)
 
-                #sizer.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
                 iy += 2
                 ix = 0
-                sizer.Add(I0_stxt, (iy, ix),(1,1),
+                sizer.Add(I0_stxt, (iy, ix), (1,1),
                                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
                 ix += 1
                 sizer.Add(self.I0_tctr, (iy, ix), (1,1),
                                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        
-                ix += 2
+                ix += 1
+                sizer.Add(wx.StaticText(self, -1, '+/-'), (iy, ix),
+                                        (1, 1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                ix += 1
                 sizer.Add(self.I0err_tctr, (iy, ix), (1,1), 
                                         wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 
@@ -236,7 +241,10 @@ class LinearFit(wx.Dialog):
                 sizer.Add(self.Rg_tctr, (iy, ix), (1,1),
                                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
-                ix += 2
+                ix += 1
+                sizer.Add(self.Rgerr_pm, (iy, ix),
+                                        (1, 1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                ix += 1
                 sizer.Add(self.Rgerr_tctr, (iy, ix), (1,1), 
                                         wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 iy += 1
@@ -247,7 +255,10 @@ class LinearFit(wx.Dialog):
                 sizer.Add(self.Diameter_tctr, (iy, ix), (1,1),
                                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         
-                ix += 2
+                ix += 1
+                sizer.Add(self.Diameter_pm, (iy, ix),
+                                        (1, 1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                ix += 1
                 sizer.Add(self.Diametererr_tctr, (iy, ix), (1,1), 
                                         wx.EXPAND|wx.ADJUST_MINSIZE, 0)
                 iy += 1

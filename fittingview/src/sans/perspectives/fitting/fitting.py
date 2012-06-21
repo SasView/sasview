@@ -2114,7 +2114,12 @@ class Plugin(PluginBase):
             en = dy[index]
             # build residuals
             residuals = Data1D()
-            residuals.y = (fn - gn) / en
+            try:
+                residuals.y = (fn - gn) / en
+            except:
+                msg = "ResidualPlot Error: different # of data points in theory"
+                wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
+                residuals.y = (fn - gn[index]) / en
             residuals.x = data_copy.x[index]
             residuals.dy = numpy.ones(len(residuals.y))
             residuals.dx = None
