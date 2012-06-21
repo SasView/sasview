@@ -99,7 +99,7 @@ class DataOperPanel(wx.ScrolledWindow):
         self.numberctr.SetValue(str(1.0))
         self.data1_cbox = wx.ComboBox(self, -1, size=(_BOX_WIDTH, 25), 
                                       style=wx.CB_READONLY)
-        self.operator_cbox = wx.ComboBox(self, -1, size=(50, 25), 
+        self.operator_cbox = wx.ComboBox(self, -1, size=(50, -1), 
                                          style=wx.CB_READONLY)
         operation_tip = "Add: +, Subtract: -, "
         operation_tip += "Multiply: *, Divide: /, "
@@ -151,7 +151,7 @@ class DataOperPanel(wx.ScrolledWindow):
         if not ON_MAC:
             self.numberctr.Show(False)
         else:
-            self.numberctr.Disable()
+            self.numberctr.Enable(False)
         wx.EVT_TEXT_ENTER(self.data_namectr, -1, self.on_name)
         wx.EVT_TEXT_ENTER(self.numberctr, -1, self.on_number) 
         wx.EVT_COMBOBOX(self.data1_cbox, -1, self.on_select_data1) 
@@ -261,13 +261,14 @@ class DataOperPanel(wx.ScrolledWindow):
         item = event.GetEventObject()
         text = item.GetLabel().strip().lower()
         if ON_MAC:
-            self.numberctr.Enable()
+            self.numberctr.Enable(text=='number')
         else:
             self.numberctr.Show(text=='number')
         
         pos = item.GetSelection()
         data = item.GetClientData(pos)
-        if not self.numberctr.IsShown():
+        content = "?"
+        if not self.numberctr.IsShown() or self.numberctr.Disabled():
             if data == None:
                 content = "?"
                 self.put_text_pic(self.data2_pic, content) 

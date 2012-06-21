@@ -380,16 +380,20 @@ class TextDialog(wx.Dialog):
             
         item = event.GetEventObject()
         text = item.GetValue().strip()
-        if text == '+':
-            name = 'Sum'
-            factor = 'scale_factor'
-            f_oper = '*'
-        elif text == '*':
+        if text == '*':
             name = 'Multi'
             factor = 'BackGround'
             f_oper = '+'
+        elif text == '+':
+            name = 'Sum'
+            factor = 'scale_factor'
+            f_oper = '*'
+        
         else:
-            raise
+            text = '+'
+            name = 'Sum'
+            factor = 'scale_factor'
+            f_oper = '*'
         self.factor = str(factor)
         self.operator = text
         self.explanation = "  Custom Model = %s %s (model1 %s model2)\n"% \
