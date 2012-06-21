@@ -19,7 +19,7 @@ if sys.platform.count("win32") > 0:
 else:
     FONT_VARIANT = 1
     PNL_WIDTH = 590
-    PNL_HITE = 400
+    PNL_HITE = 350
 M_NAME = 'Model'
 EDITOR_WIDTH = 800
 EDITOR_HEIGTH = 720
@@ -374,6 +374,10 @@ class TextDialog(wx.Dialog):
         """
         On Select an Operator
         """
+        # For Mac
+        if event != None:
+            event.Skip()
+            
         item = event.GetEventObject()
         text = item.GetLabel().strip()
         if text == '+':

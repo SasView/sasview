@@ -24,7 +24,7 @@ if sys.platform.count("win32") > 0:
 else:
     _BOX_WIDTH = 230
     PANEL_WIDTH = 890
-    PANEL_HEIGTH = 470
+    PANEL_HEIGTH = 430
     FONT_VARIANT = 1
     ON_MAC = True
       
@@ -625,9 +625,11 @@ class SmallPanel(PlotPanel):
         self.subplot.axvline(linewidth = 1, color='r')       
 
         self.erase_legend()
-        self.figure.tight_layout()
-        #self.figure.subplots_adjust(left=0.1, bottom=0.1)
-
+        try:
+            # mpl >= 1.1.0
+            self.figure.tight_layout()
+        except:
+            self.figure.subplots_adjust(left=0.1, bottom=0.1)
         self.subplot.figure.canvas.draw()
 
     def add_text(self):
@@ -661,8 +663,11 @@ class SmallPanel(PlotPanel):
                 float(label)
         except:
             self.subplot.set_frame_on(False)
-        self.figure.tight_layout()
-        #self.figure.subplots_adjust(left=0.1, bottom=0.1)
+        try:
+            # mpl >= 1.1.0
+            self.figure.tight_layout()
+        except:
+            self.figure.subplots_adjust(left=0.1, bottom=0.1)
         if len(label) > 0 and xpos > 0 and ypos > 0:
             new_text = self.subplot.text(str(xpos), str(ypos), str(label),
                                            fontproperties=font)
