@@ -112,11 +112,14 @@ class DataOperPanel(wx.ScrolledWindow):
                              style=wx.NO_BORDER)
         self.equal_pic = SmallPanel(self, -1, True, '=',  size=(50, _BOX_WIDTH), 
                               style=wx.NO_BORDER)
-        self.data1_pic = SmallPanel(self, -1, True, size=(_BOX_WIDTH, _BOX_WIDTH), 
+        self.data1_pic = SmallPanel(self, -1, True, 
+                                    size=(_BOX_WIDTH, _BOX_WIDTH), 
                              style=wx.NO_BORDER)
-        self.operator_pic = SmallPanel(self, -1, True, "+", size=(50, _BOX_WIDTH), 
-                             style=wx.NO_BORDER)
-        self.data2_pic = SmallPanel(self, -1, True, size=(_BOX_WIDTH, _BOX_WIDTH), 
+        self.operator_pic = SmallPanel(self, -1, True, 
+                                       '+', size=(50, _BOX_WIDTH), 
+                                       style=wx.NO_BORDER)
+        self.data2_pic = SmallPanel(self, -1, True, 
+                                    size=(_BOX_WIDTH, _BOX_WIDTH), 
                              style=wx.NO_BORDER)
         for ax in self.equal_pic.axes:
             ax.set_frame_on(False)
@@ -135,7 +138,7 @@ class DataOperPanel(wx.ScrolledWindow):
                                  (self.operator_cbox, 0, wx.LEFT, 3),
                                  (self.operator_pic, 0, wx.LEFT, 3)])
         data2_hori_sizer.AddMany([(self.data2_cbox, 0, wx.LEFT, 0),
-                                       (self.numberctr, 0, wx.LEFT, 0)])
+                                       (self.numberctr, 0, wx.RIGHT, 0)])
         old_data2_sizer.AddMany([(data2_name, 0, wx.LEFT, 3),
                                        (data2_hori_sizer, 0, wx.LEFT, 3),
                                        (self.data2_pic, 0, wx.LEFT, 3)])
@@ -145,7 +148,10 @@ class DataOperPanel(wx.ScrolledWindow):
                                        (operator_sizer, 0, wx.TOP, 5),
                                        (old_data2_sizer, 0, wx.TOP, 5)])
         self.data2_cbox.Show(True)
-        self.numberctr.Hide()
+        if not ON_MAC:
+            self.numberctr.Show(False)
+        else:
+            self.numberctr.Disable()
         wx.EVT_TEXT_ENTER(self.data_namectr, -1, self.on_name)
         wx.EVT_TEXT_ENTER(self.numberctr, -1, self.on_number) 
         wx.EVT_COMBOBOX(self.data1_cbox, -1, self.on_select_data1) 
@@ -156,6 +162,8 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         On data name typing
         """
+        if event != None:
+            event.Skip()
         item = event.GetEventObject()
         item.SetBackgroundColour('white')
         text = item.GetLabel().strip()
@@ -187,6 +195,8 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         On selecting Number for Data2
         """
+        if event != None:
+            event.Skip()
         self.send_warnings('')
         self.numberctr.SetBackgroundColour('white')
         item = event.GetEventObject()
@@ -210,6 +220,8 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         On select data1
         """
+        if event != None:
+            event.Skip()
         self.send_warnings('')
         item = event.GetEventObject()
         pos = item.GetSelection()
@@ -228,6 +240,8 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         On Select an Operator
         """
+        if event != None:
+            event.Skip()
         self.send_warnings('')
         item = event.GetEventObject()
         text = item.GetLabel().strip()
@@ -241,10 +255,16 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         On Selecting Data2
         """
+        if event != None:
+            event.Skip()
         self.send_warnings('')
         item = event.GetEventObject()
         text = item.GetLabel().strip().lower()
-        self.numberctr.Show(text=='number')
+        if ON_MAC:
+            self.numberctr.Enable()
+        else:
+            self.numberctr.Show(text=='number')
+        
         pos = item.GetSelection()
         data = item.GetClientData(pos)
         if not self.numberctr.IsShown():
@@ -295,7 +315,7 @@ class DataOperPanel(wx.ScrolledWindow):
         if data2 == None:
             self.output = None
             return flag
-        if self.numberctr.IsShown():
+        if self.numberctr.IsShown() or (ON_MAC and self.numberctr.Enabled()):
             self.numberctr.SetBackgroundColour('white')
             try:
                 float(data2)
@@ -432,9 +452,10 @@ class DataOperPanel(wx.ScrolledWindow):
             self.data2_cbox.SetClientData(pos2, None)
             pos3 = self.data2_cbox.Append("Number")
             val = None
-            if self.numberctr.IsShown():
+            if self.numberctr.IsShown() or \
+                                (ON_MAC and self.numberctr.Enabled()):
                 try:
-                    val = float(self.numberctr.GetLabel())
+                    val = float(self.numberctr.GetValue())
                 except:
                     val = None
             self.data2_cbox.SetClientData(pos3, val)
@@ -445,11 +466,12 @@ class DataOperPanel(wx.ScrolledWindow):
         pos2 = self.data2_cbox.Append('Select Data')
         self.data2_cbox.SetSelection(pos2)
         self.data2_cbox.SetClientData(pos2, None)
-        pos3 = self.data2_cbox.Append("Number")
+        pos3 = self.data2_cbox.Append('Number')
         val = None
-        if self.numberctr.IsShown():
+        if self.numberctr.IsShown() or \
+                                (ON_MAC and self.numberctr.Enabled()):
             try:
-                val = float(self.numberctr.GetLabel())
+                val = float(self.numberctr.GetValue())
             except:
                 val = None
         self.data2_cbox.SetClientData(pos3, val)
