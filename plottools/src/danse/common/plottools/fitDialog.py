@@ -9,11 +9,13 @@ import sys
 #Linear fit panel size 
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
-    PNL_WIDTH = 400
+    PNL_WIDTH = 450
+    PNL_HEIGHT = 500
 else:
     FONT_VARIANT = 1
-    PNL_WIDTH = 450
-    
+    PNL_WIDTH = 500
+    PNL_HEIGHT = 500
+RG_ON = True    
     
 def format_number(value, high=False):
     """
@@ -39,7 +41,8 @@ class LinearFit(wx.Dialog):
         Dialog window pops- up when select Linear fit on Context menu
         Displays fitting parameters
         """
-        wx.Dialog.__init__(self, parent, title=title, size=(PNL_WIDTH, 350))
+        wx.Dialog.__init__(self, parent, title=title, 
+                           size=(PNL_WIDTH, 350))
         self.parent = parent
         self.transform = transform
         #Font
@@ -51,7 +54,7 @@ class LinearFit(wx.Dialog):
         self.push_data = push_data
         #dialog self plottable
         self.plottable = plottable
-        
+        self.rg_on = False
         # Receive transformations of x and y
         self.xLabel, self.yLabel, self.Avalue, self.Bvalue,\
                self.ErrAvalue, self.ErrBvalue, self.Chivalue = self.transform()
@@ -103,14 +106,14 @@ class LinearFit(wx.Dialog):
         self.btClose.Bind(wx.EVT_BUTTON, self._on_close)
         
         # Intro
-        explanation = "Perform fit for y(x) = Ax + B"
+        explanation = "Perform fit for y(x) = ax + b"
         vbox.Add(sizer)
         ix = 0
         iy = 1
         sizer.Add(wx.StaticText(self, -1, explanation), (iy, ix),
                  (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         iy += 2
-        sizer.Add(wx.StaticText(self, -1, 'Parameter A'), (iy, ix),
+        sizer.Add(wx.StaticText(self, -1, 'Parameter a'), (iy, ix),
                  (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         sizer.Add(self.tcA,(iy, ix),(1, 1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -122,7 +125,7 @@ class LinearFit(wx.Dialog):
                   wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         iy += 1
         ix = 0
-        sizer.Add(wx.StaticText(self, -1, 'Parameter B'), (iy, ix),(1, 1),
+        sizer.Add(wx.StaticText(self, -1, 'Parameter b'), (iy, ix),(1, 1),
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         sizer.Add(self.tcB, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
@@ -138,6 +141,9 @@ class LinearFit(wx.Dialog):
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
         ix += 1
         sizer.Add(self.tcChi, (iy, ix),(1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+
+        
+        #sizer.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
         iy += 2
         ix = 1
         sizer.Add(wx.StaticText(self, -1, 'Min'), (iy, ix), (1, 1),
@@ -145,6 +151,7 @@ class LinearFit(wx.Dialog):
         ix += 2
         sizer.Add(wx.StaticText(self, -1, 'Max'), (iy, ix),
                   (1, 1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+
         iy += 1
         ix = 0
         sizer.Add(wx.StaticText(self, -1, 'Maximum range (linear scale)'),
@@ -167,6 +174,97 @@ class LinearFit(wx.Dialog):
                    wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         ix += 2
         sizer.Add(self.xmaxFit, (iy, ix), (1,1), wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        if RG_ON:
+            if (self.yLabel == "ln(y)" or self.yLabel == "ln(y*x)") and \
+                    (self.xLabel == "x^(2)"):
+                self.rg_on = True
+                self.SetSize((PNL_WIDTH, PNL_HEIGHT))
+                I0_stxt = wx.StaticText(self, -1, 'I(q=0)')
+                self.I0_tctr = wx.TextCtrl(self, -1, '')
+                self.I0_tctr.SetEditable(False)
+                self.I0_tctr.SetBackgroundColour(_BACKGROUND_COLOR)
+                self.I0err_tctr = wx.TextCtrl(self, -1, '')
+                self.I0err_tctr.SetEditable(False)
+                self.I0err_tctr.SetBackgroundColour(_BACKGROUND_COLOR)
+                Rg_stxt = wx.StaticText(self, -1, 'Rg (A)')
+                Rg_stxt.Show(self.yLabel == "ln(y)" )
+                self.Rg_tctr = wx.TextCtrl(self, -1, '')
+                self.Rg_tctr.SetEditable(False)
+                self.Rg_tctr.SetBackgroundColour(_BACKGROUND_COLOR)
+                self.Rg_tctr.Show(self.yLabel == "ln(y)" )
+                self.Rgerr_tctr = wx.TextCtrl(self, -1, '')
+                self.Rgerr_tctr.SetEditable(False)
+                self.Rgerr_tctr.SetBackgroundColour(_BACKGROUND_COLOR)
+                self.Rgerr_tctr.Show(self.yLabel == "ln(y)" )
+                Diameter_stxt = wx.StaticText(self, -1, 'Rod Diameter (A)')
+                Diameter_stxt.Show(self.yLabel == "ln(y*x)")
+                self.Diameter_tctr = wx.TextCtrl(self, -1, '')
+                self.Diameter_tctr.SetEditable(False)
+                self.Diameter_tctr.SetBackgroundColour(_BACKGROUND_COLOR)
+                self.Diameter_tctr.Show(self.yLabel == "ln(y*x)")
+                self.Diametererr_tctr = wx.TextCtrl(self, -1, '')
+                self.Diametererr_tctr.SetEditable(False)
+                self.Diametererr_tctr.SetBackgroundColour(_BACKGROUND_COLOR)
+                self.Diametererr_tctr.Show(self.yLabel == "ln(y*x)")
+                RgQmin_stxt = wx.StaticText(self, -1, 'Rg*Qmin')
+                self.RgQmin_tctr = wx.TextCtrl(self, -1, '')
+                self.RgQmin_tctr.SetEditable(False)
+                self.RgQmin_tctr.SetBackgroundColour(_BACKGROUND_COLOR)
+                RgQmax_stxt = wx.StaticText(self, -1, 'Rg*Qmax')
+                self.RgQmax_tctr = wx.TextCtrl(self, -1, '')
+                self.RgQmax_tctr.SetEditable(False)
+                self.RgQmax_tctr.SetBackgroundColour(_BACKGROUND_COLOR)
+
+                #sizer.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
+                iy += 2
+                ix = 0
+                sizer.Add(I0_stxt, (iy, ix),(1,1),
+                                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                ix += 1
+                sizer.Add(self.I0_tctr, (iy, ix), (1,1),
+                                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
+                ix += 2
+                sizer.Add(self.I0err_tctr, (iy, ix), (1,1), 
+                                        wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                
+                iy += 1
+                ix = 0
+                sizer.Add(Rg_stxt, (iy, ix),(1,1),
+                                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                ix += 1
+                sizer.Add(self.Rg_tctr, (iy, ix), (1,1),
+                                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
+                ix += 2
+                sizer.Add(self.Rgerr_tctr, (iy, ix), (1,1), 
+                                        wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                iy += 1
+                ix = 0
+                sizer.Add(Diameter_stxt, (iy, ix),(1,1),
+                                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                ix += 1
+                sizer.Add(self.Diameter_tctr, (iy, ix), (1,1),
+                                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        
+                ix += 2
+                sizer.Add(self.Diametererr_tctr, (iy, ix), (1,1), 
+                                        wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                iy += 1
+                ix = 0
+                sizer.Add(RgQmin_stxt, (iy, ix),(1,1),
+                                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                ix += 1
+                sizer.Add(self.RgQmin_tctr, (iy, ix), (1,1),
+                                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                iy += 1
+                ix = 0
+                sizer.Add(RgQmax_stxt, (iy, ix),(1,1),
+                                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                ix += 1
+                sizer.Add(self.RgQmax_tctr, (iy, ix), (1,1),
+                                        wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+            
         iy += 1
         ix = 1
         
@@ -392,12 +490,46 @@ class LinearFit(wx.Dialog):
         """
         Display  the value on fit Dialog
         """
+        rg = None
         self.tcA.SetValue(format_number(cstA))
         self.tcB.SetValue(format_number(cstB))
         self.tcErrA.SetValue(format_number(errA))
         self.tcErrB.SetValue(format_number(errB))
         self.tcChi.SetValue(format_number(Chi))
-        
+        if self.rg_on:
+            if self.Rg_tctr.IsShown():
+                rg = numpy.sqrt(-3 * float(cstA))
+                value = format_number(rg)
+                self.Rg_tctr.SetValue(value)
+                if self.I0_tctr.IsShown():
+                    val = numpy.exp(cstB)
+                    self.I0_tctr.SetValue(format_number(val))
+            if self.Rgerr_tctr.IsShown():
+                if rg != None and rg != 0:
+                    value = format_number(3 * float(cstA) / (2 * rg))
+                else:
+                    value =''
+                self.Rgerr_tctr.SetValue(value)
+                if self.I0err_tctr.IsShown():
+                    val = numpy.abs(numpy.exp(cstB) - numpy.exp(cstB + errB))
+                    self.I0err_tctr.SetValue(format_number(val))
+            if self.Diameter_tctr.IsShown():
+                rg = 4 * numpy.sqrt(-float(cstA))
+                value = format_number(rg)
+                self.Diameter_tctr.SetValue(value)
+            if self.Diametererr_tctr.IsShown():
+                if rg != None and rg != 0:
+                    value = format_number(8 * float(cstA) / rg)
+                else:
+                    value =''
+                self.Diametererr_tctr.SetValue(value)
+            if self.RgQmin_tctr.IsShown():
+                value = format_number(rg * self.mini)
+                self.RgQmin_tctr.SetValue(value)
+            if self.RgQmax_tctr.IsShown():
+                value = format_number(rg * self.maxi)
+                self.RgQmax_tctr.SetValue(value)
+                
     def _ongetValues(self):
         """
         Display  the value on fit Dialog

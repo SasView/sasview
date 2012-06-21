@@ -728,7 +728,7 @@ class PlotPanel(wx.Panel):
                         self.yLabel = "ln(y)"
                         self.viewModel = "--"
                         dial.setValues(self.xLabel, self.yLabel, self.viewModel)
-                    if self.viewModel == "CS Guinier ln(y*x) vs x^(2)":
+                    if self.viewModel == "XS Guinier ln(y*x) vs x^(2)":
                         self.xLabel = "x^(2)"
                         self.yLabel = "ln(y*x)"
                         self.viewModel = "--"

@@ -78,7 +78,7 @@ class Properties(wx.Dialog):
         self.view.Insert("--", 0)
         self.view.Insert("Linear y vs x", 1)
         self.view.Insert("Guinier lny vs x^(2)", 2)
-        self.view.Insert("CS Guinier ln(y*x) vs x^(2)", 3)
+        self.view.Insert("XS Guinier ln(y*x) vs x^(2)", 3)
         self.view.Insert("Porod y*x^(4) vs x^(4)", 4)
         self.SetSizer(vbox)
         self.Fit()
