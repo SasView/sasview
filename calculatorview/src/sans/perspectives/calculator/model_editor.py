@@ -247,14 +247,11 @@ class TextDialog(wx.Dialog):
         # function/file name
         title = self.name_tcl.GetValue().lstrip().rstrip()
         if title == '':
-            text = self.operator_cbox.GetLabel().strip()
-            if text == '+':
+            text = self.operator
+            if text.count('+') > 0:
                 mname = 'Sum'
-            elif text == '*':
-                mname = 'Multi'
             else:
-                text = '+'
-                mname = 'Sum'
+                mname = 'Multi'
             mname += M_NAME
             title = mname
         self.name = title
@@ -380,23 +377,19 @@ class TextDialog(wx.Dialog):
         # For Mac
         if event != None:
             event.Skip()
-            
+        name = ''    
         item = event.GetEventObject()
-        text = item.GetValue().strip()
-        if text == '*':
+        text = item.GetValue()
+        if text.count('*') > 0:
             name = 'Multi'
             factor = 'BackGround'
             f_oper = '+'
-        elif text == '+':
-            name = 'Sum'
-            factor = 'scale_factor'
-            f_oper = '*'
         else:
-            text = '+'
             name = 'Sum'
             factor = 'scale_factor'
             f_oper = '*'
-        self.factor = str(factor)
+
+        self.factor = factor
         self.operator = text
         self.explanation = "  Custom Model = %s %s (model1 %s model2)\n"% \
                     (self.factor, f_oper, self.operator)
@@ -429,20 +422,15 @@ class TextDialog(wx.Dialog):
         if description == '':
             description = name1 + self.operator + name2
         name = self.name_tcl.GetValue().lstrip().rstrip()
-        text = self.operator_cbox.GetLabel().strip()
-        if text == '+':
+        text = self.operator_cbox.GetValue()
+        if text.count('+') > 0:
             factor = 'scale_factor'
             f_oper = '*'
             default_val = '1.0'
-        elif text == '*':
+        else:
             factor = 'BackGround'
             f_oper = '+'
             default_val = '0.0'
-        else:
-            text = '+'
-            factor = 'scale_factor'
-            f_oper = '*'
-            default_val = '1.0'
         path = self.fname
         try:
             out_f =  open(path,'w')
