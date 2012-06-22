@@ -148,10 +148,9 @@ class DataOperPanel(wx.ScrolledWindow):
                                        (operator_sizer, 0, wx.TOP, 5),
                                        (old_data2_sizer, 0, wx.TOP, 5)])
         self.data2_cbox.Show(True)
-        if not ON_MAC:
-            self.numberctr.Show(False)
-        else:
-            self.numberctr.Enable(False)
+
+        self.numberctr.Show(False)
+
         wx.EVT_TEXT_ENTER(self.data_namectr, -1, self.on_name)
         wx.EVT_TEXT_ENTER(self.numberctr, -1, self.on_number) 
         wx.EVT_COMBOBOX(self.data1_cbox, -1, self.on_select_data1) 
@@ -260,15 +259,12 @@ class DataOperPanel(wx.ScrolledWindow):
         self.send_warnings('')
         item = event.GetEventObject()
         text = item.GetLabel().strip().lower()
-        if ON_MAC:
-            self.numberctr.Enable(text=='number')
-        else:
-            self.numberctr.Show(text=='number')
+        self.numberctr.Show(text=='number')
         
         pos = item.GetSelection()
         data = item.GetClientData(pos)
         content = "?"
-        if not self.numberctr.IsShown() or self.numberctr.Disabled():
+        if not self.numberctr.IsShown():
             if data == None:
                 content = "?"
                 self.put_text_pic(self.data2_pic, content) 
@@ -316,7 +312,7 @@ class DataOperPanel(wx.ScrolledWindow):
         if data2 == None:
             self.output = None
             return flag
-        if self.numberctr.IsShown() or (ON_MAC and self.numberctr.Enabled()):
+        if self.numberctr.IsShown():
             self.numberctr.SetBackgroundColour('white')
             try:
                 float(data2)
@@ -453,8 +449,7 @@ class DataOperPanel(wx.ScrolledWindow):
             self.data2_cbox.SetClientData(pos2, None)
             pos3 = self.data2_cbox.Append("Number")
             val = None
-            if self.numberctr.IsShown() or \
-                                (ON_MAC and self.numberctr.Enabled()):
+            if self.numberctr.IsShown():
                 try:
                     val = float(self.numberctr.GetValue())
                 except:
@@ -469,8 +464,7 @@ class DataOperPanel(wx.ScrolledWindow):
         self.data2_cbox.SetClientData(pos2, None)
         pos3 = self.data2_cbox.Append('Number')
         val = None
-        if self.numberctr.IsShown() or \
-                                (ON_MAC and self.numberctr.Enabled()):
+        if self.numberctr.IsShown():
             try:
                 val = float(self.numberctr.GetValue())
             except:

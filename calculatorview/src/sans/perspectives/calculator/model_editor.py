@@ -250,8 +250,11 @@ class TextDialog(wx.Dialog):
             text = self.operator_cbox.GetLabel().strip()
             if text == '+':
                 mname = 'Sum'
-            else:
+            elif text == '*':
                 mname = 'Multi'
+            else:
+                text = '+'
+                mname = 'Sum'
             mname += M_NAME
             title = mname
         self.name = title
@@ -388,7 +391,6 @@ class TextDialog(wx.Dialog):
             name = 'Sum'
             factor = 'scale_factor'
             f_oper = '*'
-        
         else:
             text = '+'
             name = 'Sum'
@@ -432,10 +434,15 @@ class TextDialog(wx.Dialog):
             factor = 'scale_factor'
             f_oper = '*'
             default_val = '1.0'
-        else:
+        elif text == '*':
             factor = 'BackGround'
             f_oper = '+'
             default_val = '0.0'
+        else:
+            text = '+'
+            factor = 'scale_factor'
+            f_oper = '*'
+            default_val = '1.0'
         path = self.fname
         try:
             out_f =  open(path,'w')
