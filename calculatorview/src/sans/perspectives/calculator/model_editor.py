@@ -1114,7 +1114,7 @@ class Model(Model1DPlugin):
         if not p1_name:
             p1_name = name1
         name = p1_name
-        name += "%s"% (self.operator)
+        name += "_and_"
         p2_name = self._get_upper_name(name2)
         if not p2_name:
             p2_name = name2
