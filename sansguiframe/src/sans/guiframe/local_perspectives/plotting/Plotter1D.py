@@ -35,6 +35,7 @@ from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.gui_style import GUIFRAME_ICON
 from binder import BindArtist
+from appearanceDialog import appearanceDialog
 
 DEFAULT_QMAX = 0.05
 DEFAULT_QSTEP = 0.001
@@ -458,35 +459,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
                     wx.EVT_MENU(self, id, self.onFreeze)
                 plot_menu.AppendSeparator()    
                 symbol_menu = wx.Menu()
-                for label in self._symbol_labels:
-                    id = wx.NewId()
-                    symbol_menu.Append(id, str(label), name)
-                    wx.EVT_MENU(self, id, self.onChangeSymbol)
-                id = wx.NewId()
-                plot_menu.AppendMenu(id,'&Modify Symbol', symbol_menu, name)
-                
-                color_menu = wx.Menu()
-                for label in self._color_labels:
-                    id = wx.NewId()
-                    color_menu.Append(id, str(label), name)
-                    wx.EVT_MENU(self, id, self.onChangeColor)
-                id = wx.NewId()
-                plot_menu.AppendMenu(id, '&Modify Symbol Color', 
-                                     color_menu, name)
-                
-                size_menu = wx.Menu()
-                for i in range(10):
-                    id = wx.NewId()
-                    size_menu.Append(id, str(i), name)
-                    wx.EVT_MENU(self, id, self.onChangeSize)
-                id = wx.NewId()
-                size_menu.Append(id, '&Custom', name)
-                wx.EVT_MENU(self, id, self.onChangeSize)
-                id = wx.NewId()
-                plot_menu.AppendMenu(id, '&Modify Symbol Size', 
-                                     size_menu, name)
                 
                 if plot.is_data:
+                    id = wx.NewId()
                     self.hide_menu = plot_menu.Append(id, 
                                                     "Hide Error Bar", name)
         
@@ -499,10 +474,14 @@ class ModelPanel1D(PlotPanel, PanelBase):
                         self.hide_menu.Enable(False)
                     wx.EVT_MENU(self, id, self._ontoggle_hide_error)
                 
-                plot_menu.AppendSeparator()
+                    plot_menu.AppendSeparator()
+
                 id = wx.NewId()
-                plot_menu.Append(id, '&Edit Legend Label', name)
-                wx.EVT_MENU(self, id, self.onEditLabels)
+                plot_menu.Append(id, '&Modify graph properties', name)
+                wx.EVT_MENU(self, id, self.createAppDialog)
+
+
+
             id = wx.NewId()
             #plot_menu.SetTitle(name)
             self._slicerpop.AppendMenu(id, '&%s'% name, plot_menu)
@@ -573,99 +552,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
         plot = self.plots[self.graph.selected_plottable]
         self.parent.onfreeze([plot.id])
         
-    def onEditLabels(self, event):
-        """
-        Edit legend label
-        """
-        menu = event.GetEventObject()
-        id = event.GetId()
-        self.set_selected_from_menu(menu, id)
-        selected_plot = self.plots[self.graph.selected_plottable]
-        label = selected_plot.label
-        dial = LabelDialog(None, -1, 'Change Legend Label', label)
-        if dial.ShowModal() == wx.ID_OK:
-            newLabel = dial.getText() 
-            selected_plot.label = newLabel
-            # Updata Graph menu help string
-            pos = self.parent._window_menu.FindItem(self.window_caption)
-            helpString = 'Show/Hide Graph: '
-            for plot in  self.plots.itervalues():
-                helpString += (' ' + str(plot.label) +';')
-            self.parent._window_menu.SetHelpString(pos, helpString)
-            self._is_changed_legend_label = True
-            #break
-        dial.Destroy()
-        
-        ## render the graph
-        try:
-            self._onEVT_FUNC_PROPERTY()
-        except:
-            msg=" Encountered singular points..."
-            wx.PostEvent(self.parent, StatusEvent(status=\
-                    "Plotting Erorr: %s"% msg, info="error")) 
-    
-    def onChangeColor(self, event):
-        """
-        Changes the color of the graph when selected
-        """
-        menu = event.GetEventObject()
-        id = event.GetId()
-        self.set_selected_from_menu(menu, id)
-        label =  menu.GetLabel(id)
-        selected_plot = self.plots[self.graph.selected_plottable]
-        selected_plot.custom_color = self._color_labels[label]
-        ## Set the view scale for all plots
-        self._check_zoom_plot()
-        #self._onEVT_FUNC_PROPERTY()
-        #wx.PostEvent(self.parent,
-        #              NewColorEvent(color=selected_plot.custom_color,
-        #                                     id=selected_plot.id))
-    
-    def onChangeSize(self, event):
-        """
-        On Change size menu
-        """
-        menu = event.GetEventObject()
-        id = event.GetId()
-        self.set_selected_from_menu(menu, id)
-        label =  menu.GetLabel(id)
-        selected_plot = self.plots[self.graph.selected_plottable]
-        
-        if label == "&Custom":
-            sizedial = SizeDialog(None, -1, 'Change Marker Size')
-            if sizedial.ShowModal() == wx.ID_OK:
-                try:
-                    label = sizedial.getText()
-
-                except:
-                    msg = 'Symbol Size: Got an invalid Value.'
-                    wx.PostEvent( self.parent, 
-                          StatusEvent(status= msg, info='error'))
-            sizedial.Destroy()
-        try:
-            selected_plot.markersize = int(label)
-            self._check_zoom_plot()
-        except:
-            msg = 'Symbol Size: Got an invalid Value.'
-            wx.PostEvent( self.parent, 
-                          StatusEvent(status= msg, info='error'))
-
-    
-    def onChangeSymbol(self, event):
-        """
-        """
-        menu = event.GetEventObject()
-        id = event.GetId()
-        self.set_selected_from_menu(menu, id)
-        label =  menu.GetLabel(id)
-        selected_plot = self.plots[self.graph.selected_plottable]
-        selected_plot.symbol = self._symbol_labels[label]
-        ## Set the view scale for all plots
-        self._check_zoom_plot()
-        #self._onEVT_FUNC_PROPERTY()
-        ## render the graph
-        #self.graph.render(self)
-        #self.subplot.figure.canvas.draw_idle()
                        
     def _onSave(self, evt):
         """
@@ -723,5 +609,45 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """     
         if self.parent is not None:
             self.parent.hide_panel(self.uid)
-            
-            
+
+    def createAppDialog(self, event):
+        """
+        Create the custom dialog for fit appearance modification
+        """
+        menu = event.GetEventObject()
+        id = event.GetId()
+        self.set_selected_from_menu(menu,id)
+        self.appearance_selected_plot = self.plots[self.graph.selected_plottable]
+
+        # find current properties
+        curr_color = self.appearance_selected_plot.custom_color
+        curr_symbol = self.appearance_selected_plot.symbol
+        curr_size = self.appearance_selected_plot.markersize
+        curr_label = self.appearance_selected_plot.label
+
+        if curr_color == None:
+            curr_color = self._color_labels['Blue']
+            curr_symbol = 13
+
+        self.appD = appearanceDialog(self,'Modify graph properties')
+        self.appD.setDefaults(float(curr_size),int(curr_color),str(appearanceDialog.find_key(self.get_symbol_label(),int(curr_symbol))),curr_label)
+        self.appD.Bind(wx.EVT_CLOSE, self.on_AppDialog_close)    
+
+    def on_AppDialog_close(self,e):
+        if(self.appD.okay_clicked == True):
+            info = self.appD.getCurrentValues() # returns (size,color,symbol,datalabel)
+            self.appearance_selected_plot.custom_color = self._color_labels[info[1].encode('ascii','ignore')]
+
+            self.appearance_selected_plot.markersize = float(info[0])
+            self.appearance_selected_plot.symbol = self.get_symbol_label()[info[2]] # self._symbol_labels[info[2].encode('ascii','ignore')]
+            self.appearance_selected_plot.label = str(info[3])
+
+            pos = self.parent._window_menu.FindItem(self.window_caption)
+            helpString = 'Show/Hide Graph: '
+            for plot in  self.plots.itervalues():
+                helpString += (' ' + str(plot.label) +';')
+                self.parent._window_menu.SetHelpString(pos, helpString)
+                self._is_changed_legend_label = True
+                
+        self.appD.Destroy()
+        self._check_zoom_plot()
