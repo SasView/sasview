@@ -245,7 +245,7 @@ class DataOperPanel(wx.ScrolledWindow):
             self.send_warnings(msg, 'error')
             return
         self.put_text_pic(self.data2_pic, content=str(val)) 
-        wx.CallAfter(self.check_data_inputs)
+        self.check_data_inputs()
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
@@ -266,7 +266,7 @@ class DataOperPanel(wx.ScrolledWindow):
             self.put_text_pic(self.data1_pic, content) 
         else:
             self.data1_pic.add_image(data)
-        wx.CallAfter(self.check_data_inputs)
+        self.check_data_inputs()
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
@@ -279,7 +279,7 @@ class DataOperPanel(wx.ScrolledWindow):
         item = event.GetEventObject()
         text = item.GetValue().strip()
         self.put_text_pic(self.operator_pic, content=text) 
-        self.check_data_inputs
+        self.check_data_inputs()
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
@@ -314,7 +314,7 @@ class DataOperPanel(wx.ScrolledWindow):
                     data = None
                 item.SetClientData(pos, content)
             self.put_text_pic(self.data2_pic, content)   
-        wx.CallAfter(self.check_data_inputs)
+        self.check_data_inputs()
 
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
