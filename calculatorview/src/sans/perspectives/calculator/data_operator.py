@@ -16,14 +16,14 @@ from sans.guiframe.events import StatusEvent
        
 #Control panel width 
 if sys.platform.count("win32") > 0:
-    PANEL_WIDTH = 780
+    PANEL_WIDTH = 790
     PANEL_HEIGTH = 370
     FONT_VARIANT = 0
     _BOX_WIDTH = 200
     ON_MAC = False
 else:
     _BOX_WIDTH = 230
-    PANEL_WIDTH = 890
+    PANEL_WIDTH = 900
     PANEL_HEIGTH = 430
     FONT_VARIANT = 1
     ON_MAC = True
@@ -99,7 +99,7 @@ class DataOperPanel(wx.ScrolledWindow):
         self.numberctr.SetValue(str(1.0))
         self.data1_cbox = wx.ComboBox(self, -1, size=(_BOX_WIDTH, 25), 
                                       style=wx.CB_READONLY)
-        self.operator_cbox = wx.ComboBox(self, -1, size=(50, -1), 
+        self.operator_cbox = wx.ComboBox(self, -1, size=(70, 25), 
                                          style=wx.CB_READONLY)
         operation_tip = "Add: +, Subtract: -, "
         operation_tip += "Multiply: *, Divide: /, "
@@ -116,7 +116,7 @@ class DataOperPanel(wx.ScrolledWindow):
                                     size=(_BOX_WIDTH, _BOX_WIDTH), 
                              style=wx.NO_BORDER)
         self.operator_pic = SmallPanel(self, -1, True, 
-                                       '+', size=(50, _BOX_WIDTH), 
+                                       '+', size=(70, _BOX_WIDTH), 
                                        style=wx.NO_BORDER)
         self.data2_pic = SmallPanel(self, -1, True, 
                                     size=(_BOX_WIDTH, _BOX_WIDTH), 
@@ -149,14 +149,25 @@ class DataOperPanel(wx.ScrolledWindow):
                                        (old_data2_sizer, 0, wx.TOP, 5)])
         self.data2_cbox.Show(True)
 
-        self.numberctr.Show(False)
-
+        self._show_numctrl(self.numberctr, False)
+        
         wx.EVT_TEXT_ENTER(self.data_namectr, -1, self.on_name)
         wx.EVT_TEXT_ENTER(self.numberctr, -1, self.on_number) 
         wx.EVT_COMBOBOX(self.data1_cbox, -1, self.on_select_data1) 
         wx.EVT_COMBOBOX(self.operator_cbox, -1, self.on_select_operator) 
         wx.EVT_COMBOBOX(self.data2_cbox, -1, self.on_select_data2)
-        
+    
+    def _show_numctrl(self, ctrl, enable=True):  
+        """
+        Show/Hide on Win
+        Enable/Disable on MAC
+        """
+        if ON_MAC:
+            ctrl.Enable(enable)
+            ctrl.GetChildren()[0].SetBackGroundColor(self.GetBackGroundColor())
+        else:
+            ctrl.Show(enable)
+            
     def on_name(self, event=None):
         """
         On data name typing
@@ -164,7 +175,10 @@ class DataOperPanel(wx.ScrolledWindow):
         if event != None:
             event.Skip()
         item = event.GetEventObject()
-        item.SetBackgroundColour('white')
+        if item.IsEnabled():
+            self._set_textctrl_color(item, 'white')
+        else:
+            self._set_textctrl_color(item, self.GetBackgroundColour())
         text = item.GetLabel().strip()
         self._check_newname(text)
     
@@ -180,16 +194,26 @@ class DataOperPanel(wx.ScrolledWindow):
             text = name
         state_list = self.get_datalist().values()
         if text in [str(state.data.name) for state in state_list]:
-            self.data_namectr.SetBackgroundColour('pink')
+            self._set_textctrl_color(self.data_namectr, 'pink')
             msg = "DataOperation: The name already exists."
         if len(text) == 0:
-            self.data_namectr.SetBackgroundColour('pink')
+            self._set_textctrl_color(self.data_namectr, 'pink')
             msg = "DataOperation: Type the data name first."
         if self._notes:
             self.send_warnings(msg, 'error')
-        self.name_sizer.Layout()
+        
         self.Refresh()
-                
+    
+    def _set_textctrl_color(self, ctrl, color): 
+        """
+        Set TextCtrl color 
+        """
+        if ON_MAC:
+            ctrl.GetChildren()[0].SetBackgroundColour(color)  
+        else:
+            ctrl.SetBackgroundColour(color)  
+        self.name_sizer.Layout()
+                     
     def on_number(self, event=None):
         """
         On selecting Number for Data2
@@ -197,7 +221,11 @@ class DataOperPanel(wx.ScrolledWindow):
         if event != None:
             event.Skip()
         self.send_warnings('')
-        self.numberctr.SetBackgroundColour('white')
+        if self.numberctr.IsEnabled():
+            self._set_textctrl_color(self.numberctr, 'white')
+        else:
+            self._set_textctrl_color(self.numberctr, self.GetBackgroundColour())
+
         item = event.GetEventObject()
         text = item.GetLabel().strip()
         try:
@@ -205,7 +233,7 @@ class DataOperPanel(wx.ScrolledWindow):
             pos = self.data2_cbox.GetSelection()
             self.data2_cbox.SetClientData(pos, val)
         except:
-            self.numberctr.SetBackgroundColour('pink')
+            self._set_textctrl_color(self.numberctr, 'pink')
             msg = "DataOperation: Number requires a float number."
             self.send_warnings(msg, 'error')
             return
@@ -243,7 +271,7 @@ class DataOperPanel(wx.ScrolledWindow):
             event.Skip()
         self.send_warnings('')
         item = event.GetEventObject()
-        text = item.GetLabel().strip()
+        text = item.GetValue().strip()
         self.put_text_pic(self.operator_pic, content=text) 
         self.check_data_inputs()
         if self.output != None:
@@ -259,12 +287,12 @@ class DataOperPanel(wx.ScrolledWindow):
         self.send_warnings('')
         item = event.GetEventObject()
         text = item.GetLabel().strip().lower()
-        self.numberctr.Show(text=='number')
+        self._show_numctrl(self.numberctr, text=='number')
         
         pos = item.GetSelection()
         data = item.GetClientData(pos)
         content = "?"
-        if not self.numberctr.IsShown():
+        if not (self.numberctr.IsShown() and self.numberctr.IsEnabled()):
             if data == None:
                 content = "?"
                 self.put_text_pic(self.data2_pic, content) 
@@ -277,6 +305,7 @@ class DataOperPanel(wx.ScrolledWindow):
                     content = float(content)
                     data = content
                 except:
+                    self._set_textctrl_color(self.numberctr, 'pink')
                     content = "?"
                     data = None
                 item.SetClientData(pos, content)
@@ -299,8 +328,8 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         Check data1 and data2 whether or not they are ready for operation
         """
-        self.data1_cbox.SetBackgroundColour('white')
-        self.data2_cbox.SetBackgroundColour('white')
+        self._set_textctrl_color(self.data1_cbox, 'white')
+        self._set_textctrl_color(self.data2_cbox, 'white')
         flag = False
         pos1 = self.data1_cbox.GetCurrentSelection()
         data1 = self.data1_cbox.GetClientData(pos1)
@@ -313,25 +342,29 @@ class DataOperPanel(wx.ScrolledWindow):
             self.output = None
             return flag
         if self.numberctr.IsShown():
-            self.numberctr.SetBackgroundColour('white')
+            if self.numberctr.IsEnabled():
+                self._set_textctrl_color(self.numberctr, 'white')
+            else:
+                self._set_textctrl_color(self.numberctr, 
+                                         self.GetBackgroundColour())
             try:
                 float(data2)
                 if self.operator_cbox.GetLabel().strip() == '|':
                     msg = "DataOperation: This operation can not accept "
                     msg += "a float number."
                     self.send_warnings(msg, 'error')
-                    self.numberctr.SetBackgroundColour('pink')
+                    self._set_textctrl_color(self.numberctr, 'pink')
                     self.output = None
                     return flag
             except:
                 msg = "DataOperation: Number requires a float number."
                 self.send_warnings(msg, 'error')
-                self.numberctr.SetBackgroundColour('pink')
+                self._set_textctrl_color(self.numberctr, 'pink')
                 self.output = None
                 return flag
         elif data1.__class__.__name__ != data2.__class__.__name__:
-            self.data1_cbox.SetBackgroundColour('pink')
-            self.data2_cbox.SetBackgroundColour('pink')
+            self._set_textctrl_color(self.data1_cbox, 'pink')
+            self._set_textctrl_color(self.data1_cbox, 'pink')
             msg = "DataOperation: Data types must be same."
             self.send_warnings(msg, 'error')
             self.output = None
@@ -340,8 +373,8 @@ class DataOperPanel(wx.ScrolledWindow):
             self.output = self.make_data_out(data1, data2)
         except:
             self._check_newname()
-            self.data1_cbox.SetBackgroundColour('pink')
-            self.data2_cbox.SetBackgroundColour('pink')
+            self._set_textctrl_color(self.data1_cbox, 'pink')
+            self._set_textctrl_color(self.data2_cbox, 'pink')
             msg = "DataOperation: Data types must be same."
             self.send_warnings(msg, 'error')
             self.output = None
@@ -449,7 +482,7 @@ class DataOperPanel(wx.ScrolledWindow):
             self.data2_cbox.SetClientData(pos2, None)
             pos3 = self.data2_cbox.Append("Number")
             val = None
-            if self.numberctr.IsShown():
+            if (self.numberctr.IsShown() and self.numberctr.IsEnabled()):
                 try:
                     val = float(self.numberctr.GetValue())
                 except:
@@ -464,7 +497,7 @@ class DataOperPanel(wx.ScrolledWindow):
         self.data2_cbox.SetClientData(pos2, None)
         pos3 = self.data2_cbox.Append('Number')
         val = None
-        if self.numberctr.IsShown():
+        if (self.numberctr.IsShown() and self.numberctr.IsEnabled()):
             try:
                 val = float(self.numberctr.GetValue())
             except:
@@ -522,14 +555,14 @@ class DataOperPanel(wx.ScrolledWindow):
         self.send_warnings('')
         self.data_namectr.SetBackgroundColour('white')
         state_list = self.get_datalist().values()
-        name = self.data_namectr.GetLabel().strip()
+        name = self.data_namectr.GetValue().strip()
         if name in [str(state.data.name) for state in state_list]:
-            self.data_namectr.SetBackgroundColour('pink')
+            self._set_textctrl_color(self.data_namectr, 'pink')
             msg = "The Output Data Name already exists...   "
             wx.MessageBox(msg, 'Error')
             return
         if name == '':
-            self.data_namectr.SetBackgroundColour('pink')
+            sself._set_textctrl_color(self.data_namectr, 'pink')
             msg = "Please type the output data name first...   "
             wx.MessageBox(msg, 'Error')
             return
