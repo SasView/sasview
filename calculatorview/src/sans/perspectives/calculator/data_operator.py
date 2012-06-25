@@ -208,7 +208,7 @@ class DataOperPanel(wx.ScrolledWindow):
             msg = "DataOperation: Type the data name first."
         if self._notes:
             self.send_warnings(msg, 'error')
-        
+        self.name_sizer.Layout()
         self.Refresh()
     
     def _set_textctrl_color(self, ctrl, color): 
@@ -227,8 +227,6 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         On selecting Number for Data2
         """
-        if event != None:
-            event.Skip()
         self.send_warnings('')
         if self.numberctr.IsEnabled():
             self._set_textctrl_color(self.numberctr, 'white')
@@ -247,11 +245,11 @@ class DataOperPanel(wx.ScrolledWindow):
             self.send_warnings(msg, 'error')
             return
         self.put_text_pic(self.data2_pic, content=str(val)) 
-        self.check_data_inputs()
+        wx.CallAfter(self.check_data_inputs)
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
-        self.name_sizer.Layout()
+        self.Refresh()
         
     def on_select_data1(self, event=None):
         """
@@ -268,7 +266,7 @@ class DataOperPanel(wx.ScrolledWindow):
             self.put_text_pic(self.data1_pic, content) 
         else:
             self.data1_pic.add_image(data)
-        self.check_data_inputs()
+        wx.CallAfter(self.check_data_inputs)
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
@@ -277,13 +275,11 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         On Select an Operator
         """
-        if event != None:
-            event.Skip()
         self.send_warnings('')
         item = event.GetEventObject()
         text = item.GetValue().strip()
         self.put_text_pic(self.operator_pic, content=text) 
-        self.check_data_inputs()
+        self.check_data_inputs
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
@@ -292,14 +288,13 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         On Selecting Data2
         """
-        if event != None:
-            event.Skip()
         self.send_warnings('')
         item = event.GetEventObject()
         text = item.GetValue().strip().lower()
-        pos = item.GetCurrentSelection()
-        data = item.GetClientData(pos)
         self._show_numctrl(self.numberctr, text=='number')
+        
+        pos = item.GetSelection()
+        data = item.GetClientData(pos)
         content = "?"
         if not (self.numberctr.IsShown() and self.numberctr.IsEnabled()):
             if data == None:
@@ -318,9 +313,8 @@ class DataOperPanel(wx.ScrolledWindow):
                     content = "?"
                     data = None
                 item.SetClientData(pos, content)
-                
             self.put_text_pic(self.data2_pic, content)   
-        self.check_data_inputs()
+        wx.CallAfter(self.check_data_inputs)
 
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
@@ -333,7 +327,6 @@ class DataOperPanel(wx.ScrolledWindow):
         pic.set_content(content) 
         pic.add_text()
         pic.draw()
-        self.name_sizer.Layout()
                   
     def check_data_inputs(self):
         """
@@ -413,7 +406,8 @@ class DataOperPanel(wx.ScrolledWindow):
             self.put_text_pic(out, content) 
         else:
             out.add_image(output)
-        self.name_sizer.Layout()
+        wx.CallAfter(self.name_sizer.Layout)
+        self.Layout()
         self.Refresh()
                     
     def _layout_button(self):  
