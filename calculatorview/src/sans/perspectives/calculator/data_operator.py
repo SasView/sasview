@@ -166,7 +166,7 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         if ON_MAC:
             ctrl.Enable(enable)
-            chidren = ctrl.GetChildren()
+            children = ctrl.GetChildren()
             if len(children) > 0:
                 ctrl.GetChildren()[0].SetBackGroundColour(\
                                                 self.GetBackGroundColour())
@@ -216,7 +216,7 @@ class DataOperPanel(wx.ScrolledWindow):
         Set TextCtrl color 
         """
         if ON_MAC:
-            chidren = ctrl.GetChildren()
+            children = ctrl.GetChildren()
             if len(children) > 0:
                 ctrl.GetChildren()[0].SetBackgroundColour(color)  
         else:
@@ -251,6 +251,7 @@ class DataOperPanel(wx.ScrolledWindow):
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
+        self.name_sizer.Layout()
         
     def on_select_data1(self, event=None):
         """
@@ -296,10 +297,9 @@ class DataOperPanel(wx.ScrolledWindow):
         self.send_warnings('')
         item = event.GetEventObject()
         text = item.GetValue().strip().lower()
-        self._show_numctrl(self.numberctr, text=='number')
-        
-        pos = item.GetSelection()
+        pos = item.GetCurrentSelection()
         data = item.GetClientData(pos)
+        self._show_numctrl(self.numberctr, text=='number')
         content = "?"
         if not (self.numberctr.IsShown() and self.numberctr.IsEnabled()):
             if data == None:
@@ -318,6 +318,7 @@ class DataOperPanel(wx.ScrolledWindow):
                     content = "?"
                     data = None
                 item.SetClientData(pos, content)
+                
             self.put_text_pic(self.data2_pic, content)   
         self.check_data_inputs()
 
@@ -332,6 +333,7 @@ class DataOperPanel(wx.ScrolledWindow):
         pic.set_content(content) 
         pic.add_text()
         pic.draw()
+        self.name_sizer.Layout()
                   
     def check_data_inputs(self):
         """
@@ -474,8 +476,8 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         pos_pre1 = self.data1_cbox.GetCurrentSelection()
         pos_pre2 = self.data2_cbox.GetCurrentSelection()
-        current1 = self.data1_cbox.GetValue()
-        current2 = self.data2_cbox.GetValue()
+        current1 = self.data1_cbox.GetLabel()
+        current2 = self.data2_cbox.GetLabel()
         if pos_pre1 < 0:
             pos_pre1 = 0
         if pos_pre2 < 0:
