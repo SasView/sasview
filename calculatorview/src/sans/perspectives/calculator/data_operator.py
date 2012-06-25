@@ -87,7 +87,7 @@ class DataOperPanel(wx.ScrolledWindow):
         old_data2_sizer = wx.BoxSizer(wx.VERTICAL)
         data2_hori_sizer = wx.BoxSizer(wx.HORIZONTAL)
         data_name = wx.StaticText(self, -1, 'Output Data Name')  
-        equal_name = wx.StaticText(self, -1, ' =',  size=(50, 23)) 
+        equal_name = wx.StaticText(self, -1, ' =', size=(50, 25)) 
         data1_name = wx.StaticText(self, -1, 'Data1')
         operator_name = wx.StaticText(self, -1, 'Operator')
         data2_name = wx.StaticText(self, -1, 'Data2 (or Number)')
@@ -108,19 +108,21 @@ class DataOperPanel(wx.ScrolledWindow):
         self.data2_cbox = wx.ComboBox(self, -1, size=(_BOX_WIDTH*2/3, 25),
                                        style=wx.CB_READONLY)
 
-        self.out_pic = SmallPanel(self, -1, True, size=(_BOX_WIDTH, _BOX_WIDTH), 
-                             style=wx.NO_BORDER)
-        self.equal_pic = SmallPanel(self, -1, True, '=',  size=(50, _BOX_WIDTH), 
-                              style=wx.NO_BORDER)
+        self.out_pic = SmallPanel(self, -1, True, 
+                                    size=(_BOX_WIDTH, _BOX_WIDTH), 
+                                    style=wx.NO_BORDER)
+        self.equal_pic = SmallPanel(self, -1, True, '=',  
+                                    size=(50, _BOX_WIDTH), 
+                                    style=wx.NO_BORDER)
         self.data1_pic = SmallPanel(self, -1, True, 
                                     size=(_BOX_WIDTH, _BOX_WIDTH), 
-                             style=wx.NO_BORDER)
-        self.operator_pic = SmallPanel(self, -1, True, 
-                                       '+', size=(70, _BOX_WIDTH), 
-                                       style=wx.NO_BORDER)
+                                    style=wx.NO_BORDER)
+        self.operator_pic = SmallPanel(self, -1, True, '+',
+                                    size=(70, _BOX_WIDTH), 
+                                    style=wx.NO_BORDER)
         self.data2_pic = SmallPanel(self, -1, True, 
                                     size=(_BOX_WIDTH, _BOX_WIDTH), 
-                             style=wx.NO_BORDER)
+                                    style=wx.NO_BORDER)
         for ax in self.equal_pic.axes:
             ax.set_frame_on(False)
         for ax in self.operator_pic.axes:
@@ -129,7 +131,7 @@ class DataOperPanel(wx.ScrolledWindow):
         new_data_sizer.AddMany([(data_name, 0, wx.LEFT, 3),
                                        (self.data_namectr, 0, wx.LEFT, 3),
                                        (self.out_pic, 0, wx.LEFT, 3)])
-        equal_sizer.AddMany([(13, 15), (equal_name, 0, wx.LEFT, 3),
+        equal_sizer.AddMany([(13, 13), (equal_name, 0, wx.LEFT, 3),
                                        (self.equal_pic, 0, wx.LEFT, 3)])
         old_data1_sizer.AddMany([(data1_name, 0, wx.LEFT, 3),
                                        (self.data1_cbox, 0, wx.LEFT, 3),
@@ -164,8 +166,13 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         if ON_MAC:
             ctrl.Enable(enable)
-            ctrl.GetChildren()[0].SetBackGroundColor(self.GetBackGroundColor())
+            chidren = ctrl.GetChildren()
+            if len(children) > 0:
+                ctrl.GetChildren()[0].SetBackGroundColour(\
+                                                self.GetBackGroundColour())
         else:
+            if not ctrl.IsEnabled():
+                ctrl.Enable(True)
             ctrl.Show(enable)
             
     def on_name(self, event=None):
@@ -179,7 +186,7 @@ class DataOperPanel(wx.ScrolledWindow):
             self._set_textctrl_color(item, 'white')
         else:
             self._set_textctrl_color(item, self.GetBackgroundColour())
-        text = item.GetLabel().strip()
+        text = item.GetValue().strip()
         self._check_newname(text)
     
     def _check_newname(self, name=None):
@@ -189,7 +196,7 @@ class DataOperPanel(wx.ScrolledWindow):
         self.send_warnings('')
         msg = ''
         if name == None:
-            text = self.data_namectr.GetLabel().strip()
+            text = self.data_namectr.GetValue().strip()
         else:
             text = name
         state_list = self.get_datalist().values()
@@ -209,7 +216,9 @@ class DataOperPanel(wx.ScrolledWindow):
         Set TextCtrl color 
         """
         if ON_MAC:
-            ctrl.GetChildren()[0].SetBackgroundColour(color)  
+            chidren = ctrl.GetChildren()
+            if len(children) > 0:
+                ctrl.GetChildren()[0].SetBackgroundColour(color)  
         else:
             ctrl.SetBackgroundColour(color)  
         self.name_sizer.Layout()
@@ -227,7 +236,7 @@ class DataOperPanel(wx.ScrolledWindow):
             self._set_textctrl_color(self.numberctr, self.GetBackgroundColour())
 
         item = event.GetEventObject()
-        text = item.GetLabel().strip()
+        text = item.GetValue().strip()
         try:
             val = float(text)
             pos = self.data2_cbox.GetSelection()
@@ -286,7 +295,7 @@ class DataOperPanel(wx.ScrolledWindow):
             event.Skip()
         self.send_warnings('')
         item = event.GetEventObject()
-        text = item.GetLabel().strip().lower()
+        text = item.GetValue().strip().lower()
         self._show_numctrl(self.numberctr, text=='number')
         
         pos = item.GetSelection()
@@ -315,7 +324,7 @@ class DataOperPanel(wx.ScrolledWindow):
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
-    
+        
     def put_text_pic(self, pic=None, content=''):  
         """
         Put text to the pic
@@ -349,7 +358,7 @@ class DataOperPanel(wx.ScrolledWindow):
                                          self.GetBackgroundColour())
             try:
                 float(data2)
-                if self.operator_cbox.GetLabel().strip() == '|':
+                if self.operator_cbox.GetValue().strip() == '|':
                     msg = "DataOperation: This operation can not accept "
                     msg += "a float number."
                     self.send_warnings(msg, 'error')
@@ -465,8 +474,8 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         pos_pre1 = self.data1_cbox.GetCurrentSelection()
         pos_pre2 = self.data2_cbox.GetCurrentSelection()
-        current1 = self.data1_cbox.GetLabel()
-        current2 = self.data2_cbox.GetLabel()
+        current1 = self.data1_cbox.GetValue()
+        current2 = self.data2_cbox.GetValue()
         if pos_pre1 < 0:
             pos_pre1 = 0
         if pos_pre2 < 0:
