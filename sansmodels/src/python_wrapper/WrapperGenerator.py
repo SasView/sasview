@@ -92,6 +92,7 @@ class WrapperGenerator:
         ## output directory for wrappers
         self.output_dir = output_dir
         self.c_wrapper_dir = c_wrapper_dir
+
         
         
     def __repr__(self):
@@ -200,7 +201,7 @@ class WrapperGenerator:
                         self.description+='\n\t\t'+line.lstrip().rstrip()
                     
                 
-                
+     
         for line in lines:
             
             # Catch class name
@@ -208,9 +209,9 @@ class WrapperGenerator:
             if line.count(key)>0:
                 try:
                     index = line.index(key)
-                    #toks = string.split( line[index:], "=" )
                     toks = line[index:].split("=" )
                     self.pythonClass = toks[1].lstrip().rstrip()
+
                 except:
                     raise ValueError, "Could not parse file %s" % self.file
                 
@@ -286,9 +287,7 @@ class WrapperGenerator:
                     self.disp_params = list_str.split(',')
                 except:
                     raise ValueError, "Could not parse file %s" % self.file
-               
-        
-                
+
     def write_c_wrapper(self):
         """ Writes the C file to create the python extension class 
             The file is written in C[PYTHONCLASS].c
@@ -494,7 +493,11 @@ class WrapperGenerator:
         
         return newline
         
+    def getModelName(self):
+        return self.pythonClass
         
+
+
 # main
 if __name__ == '__main__':
     if len(sys.argv)>1:
