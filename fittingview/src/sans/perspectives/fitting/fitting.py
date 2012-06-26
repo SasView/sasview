@@ -1852,7 +1852,7 @@ class Plugin(PluginBase):
         """
         numpy.nan_to_num(image)
         new_plot = Data2D(image=image, err_image=data.err_data)
-        new_plot.name = model.name
+        new_plot.name = model.name + '2d'
         new_plot.title = "Analytical model 2D "
         new_plot.id = str(page_id) + "model-" + data.name
         new_plot.group_id = str(page_id) + " Model2D"
@@ -1874,7 +1874,7 @@ class Plugin(PluginBase):
         if data.is_data:
             data_name = str(data.name)
         else:
-            data_name = str(model.__class__.__name__)
+            data_name = str(model.__class__.__name__) + '2d'
 
         if len(title) > 1:
             new_plot.title = "Model2D for %s "% model.name + data_name

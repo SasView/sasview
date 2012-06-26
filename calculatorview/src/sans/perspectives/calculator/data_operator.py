@@ -56,6 +56,8 @@ class DataOperPanel(wx.ScrolledWindow):
         self.data2_pic = None
         self.output = None
         self._notes = None
+        #text grayed color
+        self.color = wx.SystemSettings.GetColour(wx.SYS_COLOUR_BACKGROUND)
         #data
         self._data = self.get_datalist()
         self._do_layout()
@@ -168,8 +170,7 @@ class DataOperPanel(wx.ScrolledWindow):
             ctrl.Enable(enable)
             children = ctrl.GetChildren()
             if len(children) > 0:
-                ctrl.GetChildren()[0].SetBackGroundColour(\
-                                                self.GetBackGroundColour())
+                ctrl.GetChildren()[0].SetBackGroundColour(self.color)
         else:
             if not ctrl.IsEnabled():
                 ctrl.Enable(True)
@@ -200,7 +201,16 @@ class DataOperPanel(wx.ScrolledWindow):
         else:
             text = name
         state_list = self.get_datalist().values()
-        if text in [str(state.data.name) for state in state_list]:
+        name_list = []
+        for state in state_list:
+            if state.data == None:
+                theory_list = state.get_theory()
+                theory, _ = theory_list.values()[0]
+                d_name = str(theory.name)
+            else:
+                d_name = str(state.data.name)
+            name_list.append(d_name)
+        if text in name_list:
             self._set_textctrl_color(self.data_namectr, 'pink')
             msg = "DataOperation: The name already exists."
         if len(text) == 0:
@@ -299,23 +309,26 @@ class DataOperPanel(wx.ScrolledWindow):
         if not (self.numberctr.IsShown() and self.numberctr.IsEnabled()):
             if data == None:
                 content = "?"
-                self.put_text_pic(self.data2_pic, content) 
+                self.put_text_pic(self.data2_pic, content)
+                #item.SetClientData(pos, content) 
             else:
                 self.data2_pic.add_image(data)
+            self.check_data_inputs() 
         else:
-            if data == None:
-                content = str(self.numberctr.GetValue().strip())
-                try:
-                    content = float(content)
-                    data = content
-                except:
-                    self._set_textctrl_color(self.numberctr, 'pink')
-                    content = "?"
-                    data = None
-                item.SetClientData(pos, content)
+            content = str(self.numberctr.GetValue().strip())
+            try:
+                content = float(content)
+                data = content
+            except:
+                self._set_textctrl_color(self.numberctr, 'pink')
+                content = "?"
+                data = None
+            item.SetClientData(pos, data)
+            if data != None:
+                self.check_data_inputs()
+                
             self.put_text_pic(self.data2_pic, content)   
-        self.check_data_inputs()
-
+        
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
@@ -349,8 +362,7 @@ class DataOperPanel(wx.ScrolledWindow):
             if self.numberctr.IsEnabled():
                 self._set_textctrl_color(self.numberctr, 'white')
             else:
-                self._set_textctrl_color(self.numberctr, 
-                                         self.GetBackgroundColour())
+                self._set_textctrl_color(self.numberctr, self.color )
             try:
                 float(data2)
                 if self.operator_cbox.GetValue().strip() == '|':
@@ -368,7 +380,7 @@ class DataOperPanel(wx.ScrolledWindow):
                 return flag
         elif data1.__class__.__name__ != data2.__class__.__name__:
             self._set_textctrl_color(self.data1_cbox, 'pink')
-            self._set_textctrl_color(self.data1_cbox, 'pink')
+            self._set_textctrl_color(self.data2_cbox, 'pink')
             msg = "DataOperation: Data types must be same."
             self.send_warnings(msg, 'error')
             self.output = None
@@ -392,7 +404,10 @@ class DataOperPanel(wx.ScrolledWindow):
         output = None
         pos = self.operator_cbox.GetCurrentSelection()
         operator = self.operator_cbox.GetClientData(pos)
-        exec "output = data1 %s data2"% operator
+        try:
+            exec "output = data1 %s data2"% operator
+        except:
+            raise
         return output
     
     
@@ -478,6 +493,7 @@ class DataOperPanel(wx.ScrolledWindow):
             pos_pre2 = 0
         self.data1_cbox.Clear()
         self.data2_cbox.Clear()
+
         if not self._data:
             pos = self.data1_cbox.Append('No Data Available')
             self.data1_cbox.SetSelection(pos)
@@ -485,14 +501,6 @@ class DataOperPanel(wx.ScrolledWindow):
             pos2 = self.data2_cbox.Append('No Data Available')
             self.data2_cbox.SetSelection(pos2)
             self.data2_cbox.SetClientData(pos2, None)
-            pos3 = self.data2_cbox.Append("Number")
-            val = None
-            if (self.numberctr.IsShown() and self.numberctr.IsEnabled()):
-                try:
-                    val = float(self.numberctr.GetValue())
-                except:
-                    val = None
-            self.data2_cbox.SetClientData(pos3, val)
             return
         pos1 = self.data1_cbox.Append('Select Data')
         self.data1_cbox.SetSelection(pos1)
@@ -509,13 +517,19 @@ class DataOperPanel(wx.ScrolledWindow):
                 val = None
         self.data2_cbox.SetClientData(pos3, val)
         dnames = []
-        for dstate in self._data.values():
-            if dstate != None:
-                if dstate.data != None:
-                    dnames.append(dstate.data.name)
-        if len(dnames) > 0:
-            ind = numpy.argsort(dnames)
-            for datastate in numpy.array(self._data.values())[ind]:
+        ids = self._data.keys()
+        for id in ids:
+            if id != None:
+                if self._data[id].data != None:
+                    dnames.append(self._data[id].data.name)
+                else:
+                    theory_list = self._data[id].get_theory()
+                    theory, _ = theory_list.values()[0]
+                    dnames.append(theory.name)
+        ind = numpy.argsort(dnames)
+        if len(ind) > 0:
+            val_list = numpy.array(self._data.values())[ind]
+            for datastate in val_list:
                 data = datastate.data
                 if data != None:
                     name = data.name
@@ -561,7 +575,16 @@ class DataOperPanel(wx.ScrolledWindow):
         self.data_namectr.SetBackgroundColour('white')
         state_list = self.get_datalist().values()
         name = self.data_namectr.GetValue().strip()
-        if name in [str(state.data.name) for state in state_list]:
+        name_list = []
+        for state in state_list:
+            if state.data == None:
+                theory_list = state.get_theory()
+                theory, _ = theory_list.values()[0]
+                d_name = str(theory.name)
+            else:
+                d_name = str(state.data.name)
+            name_list.append(d_name)
+        if name in name_list:
             self._set_textctrl_color(self.data_namectr, 'pink')
             msg = "The Output Data Name already exists...   "
             wx.MessageBox(msg, 'Error')
@@ -673,8 +696,8 @@ class SmallPanel(PlotPanel):
         except:
             pass
         self.subplot.figure.canvas.resizing = False
-        self.subplot.set_xticks([])
-        self.subplot.set_yticks([])
+        self.subplot.set_xticks([0.0])
+        self.subplot.set_yticks([0.0])
         # Draw zero axis lines
         self.subplot.axhline(linewidth = 1, color='r')  
         self.subplot.axvline(linewidth = 1, color='r')       
