@@ -215,8 +215,13 @@ class DataManager(object):
                         new_theory = copy.deepcopy(theory_data)
                         new_theory.id  = time.time()
                         new_theory.is_data = True
+                        new_theory.name += '_@' + \
+                                    str(new_theory.id)[7:-1].replace('.', '')
+                        new_theory.title = new_theory.name
+                        new_theory.label = new_theory.name
                         selected_theory[new_theory.id] = DataState(new_theory)
-                        self.stored_data[new_theory.id] = selected_theory[new_theory.id]
+                        self.stored_data[new_theory.id] = \
+                                    selected_theory[new_theory.id]
 
         return selected_theory
                     
