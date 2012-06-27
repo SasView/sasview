@@ -96,6 +96,7 @@ class Plugin(PluginBase):
                                                 title="Data Operation")
             self.put_icon(self.data_operator_frame)
         self.data_operator_frame.Show(False)
+        self.data_operator_frame.panel.set_panel_on_focus(None)
         self.data_operator_frame.Show(True)
         
     def on_calculate_kiessig(self, event):

@@ -93,10 +93,10 @@ class DataOperPanel(wx.ScrolledWindow):
         data1_name = wx.StaticText(self, -1, 'Data1')
         operator_name = wx.StaticText(self, -1, 'Operator')
         data2_name = wx.StaticText(self, -1, 'Data2 (or Number)')
-        self.data_namectr = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 25))
+        self.data_namectr = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 25), style=wx.TE_PROCESS_ENTER) 
         self.data_namectr.SetToolTipString("Hit 'Enter' key after typing.")
         self.data_namectr.SetValue(str('MyNewDataName'))
-        self.numberctr = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/3, 25)) 
+        self.numberctr = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/3, 25), style=wx.TE_PROCESS_ENTER) 
         self.numberctr.SetToolTipString("Hit 'Enter' key after typing.")
         self.numberctr.SetValue(str(1.0))
         self.data1_cbox = wx.ComboBox(self, -1, size=(_BOX_WIDTH, 25), 
@@ -171,6 +171,8 @@ class DataOperPanel(wx.ScrolledWindow):
             children = ctrl.GetChildren()
             if len(children) > 0:
                 ctrl.GetChildren()[0].SetBackGroundColour(self.color)
+            if enable:
+                wx.EVT_TEXT_ENTER(self.numberctr, -1, self.on_number) 
         else:
             if not ctrl.IsEnabled():
                 ctrl.Enable(True)
@@ -186,7 +188,7 @@ class DataOperPanel(wx.ScrolledWindow):
         if item.IsEnabled():
             self._set_textctrl_color(item, 'white')
         else:
-            self._set_textctrl_color(item, self.GetBackgroundColour())
+            self._set_textctrl_color(item, self.color)
         text = item.GetValue().strip()
         self._check_newname(text)
     
@@ -238,23 +240,24 @@ class DataOperPanel(wx.ScrolledWindow):
         On selecting Number for Data2
         """
         self.send_warnings('')
-        if self.numberctr.IsEnabled():
-            self._set_textctrl_color(self.numberctr, 'white')
-        else:
-            self._set_textctrl_color(self.numberctr, self.GetBackgroundColour())
-
         item = event.GetEventObject()
         text = item.GetValue().strip()
-        try:
-            val = float(text)
-            pos = self.data2_cbox.GetSelection()
-            self.data2_cbox.SetClientData(pos, val)
-        except:
-            self._set_textctrl_color(self.numberctr, 'pink')
-            msg = "DataOperation: Number requires a float number."
-            self.send_warnings(msg, 'error')
-            return
-        self.put_text_pic(self.data2_pic, content=str(val)) 
+        if self.numberctr.IsShown():
+            if self.numberctr.IsEnabled():
+                self._set_textctrl_color(self.numberctr, 'white')
+                try:
+                    val = float(text)
+                    pos = self.data2_cbox.GetCurrentSelection()
+                    self.data2_cbox.SetClientData(pos, val)
+                except:
+                    self._set_textctrl_color(self.numberctr, 'pink')
+                    msg = "DataOperation: Number requires a float number."
+                    self.send_warnings(msg, 'error')
+                    return
+            else:
+                self._set_textctrl_color(self.numberctr, self.color)
+        
+        self.put_text_pic(self.data2_pic, content=str(val))
         self.check_data_inputs()
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
@@ -265,11 +268,9 @@ class DataOperPanel(wx.ScrolledWindow):
         """
         On select data1
         """
-        if event != None:
-            event.Skip()
         self.send_warnings('')
         item = event.GetEventObject()
-        pos = item.GetSelection()
+        pos = item.GetCurrentSelection()
         data = item.GetClientData(pos)
         if data == None:
             content = "?"
@@ -302,15 +303,13 @@ class DataOperPanel(wx.ScrolledWindow):
         item = event.GetEventObject()
         text = item.GetValue().strip().lower()
         self._show_numctrl(self.numberctr, text=='number')
-        
-        pos = item.GetSelection()
+        pos = item.GetCurrentSelection()
         data = item.GetClientData(pos)
         content = "?"
         if not (self.numberctr.IsShown() and self.numberctr.IsEnabled()):
             if data == None:
                 content = "?"
                 self.put_text_pic(self.data2_pic, content)
-                #item.SetClientData(pos, content) 
             else:
                 self.data2_pic.add_image(data)
             self.check_data_inputs() 
@@ -355,29 +354,30 @@ class DataOperPanel(wx.ScrolledWindow):
             return flag
         pos2 = self.data2_cbox.GetCurrentSelection()
         data2 = self.data2_cbox.GetClientData(pos2)
+        
         if data2 == None:
             self.output = None
             return flag
         if self.numberctr.IsShown():
             if self.numberctr.IsEnabled():
                 self._set_textctrl_color(self.numberctr, 'white')
-            else:
-                self._set_textctrl_color(self.numberctr, self.color )
-            try:
-                float(data2)
-                if self.operator_cbox.GetValue().strip() == '|':
-                    msg = "DataOperation: This operation can not accept "
-                    msg += "a float number."
+                try:
+                    float(data2)
+                    if self.operator_cbox.GetValue().strip() == '|':
+                        msg = "DataOperation: This operation can not accept "
+                        msg += "a float number."
+                        self.send_warnings(msg, 'error')
+                        self._set_textctrl_color(self.numberctr, 'pink')
+                        self.output = None
+                        return flag
+                except:
+                    msg = "DataOperation: Number requires a float number."
                     self.send_warnings(msg, 'error')
                     self._set_textctrl_color(self.numberctr, 'pink')
                     self.output = None
                     return flag
-            except:
-                msg = "DataOperation: Number requires a float number."
-                self.send_warnings(msg, 'error')
-                self._set_textctrl_color(self.numberctr, 'pink')
-                self.output = None
-                return flag
+            else:
+                self._set_textctrl_color(self.numberctr, self.color )
         elif data1.__class__.__name__ != data2.__class__.__name__:
             self._set_textctrl_color(self.data1_cbox, 'pink')
             self._set_textctrl_color(self.data2_cbox, 'pink')
@@ -696,8 +696,7 @@ class SmallPanel(PlotPanel):
         except:
             pass
         self.subplot.figure.canvas.resizing = False
-        self.subplot.set_xticks([0.0])
-        self.subplot.set_yticks([0.0])
+        self.subplot.tick_params(axis='both', labelsize=9)
         # Draw zero axis lines
         self.subplot.axhline(linewidth = 1, color='r')  
         self.subplot.axvline(linewidth = 1, color='r')       
