@@ -590,7 +590,7 @@ class DataOperPanel(wx.ScrolledWindow):
             wx.MessageBox(msg, 'Error')
             return
         if name == '':
-            sself._set_textctrl_color(self.data_namectr, 'pink')
+            self._set_textctrl_color(self.data_namectr, 'pink')
             msg = "Please type the output data name first...   "
             wx.MessageBox(msg, 'Error')
             return
