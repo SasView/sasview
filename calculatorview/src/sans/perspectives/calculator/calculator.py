@@ -51,6 +51,8 @@ class Plugin(PluginBase):
         """
         Returns a set of menu entries for tools
         """
+        data_oper_help = "Perform arithmetic data operation (+...) "
+        data_oper_help += "and combination (|)"
         kiessig_help = "Approximately computes the "
         kiessig_help += "thickness of a shell or the size of "
         kiessig_help += "particles \n from the width of a Kiessig fringe."
@@ -64,7 +66,7 @@ class Plugin(PluginBase):
         pyconsole_help = "Python Console."
         #data_editor_help = "Meta Data Editor"
         return [("Data Operation", 
-                        'Data operation', self.on_data_operation),
+                        data_oper_help, self.on_data_operation),
                 ("SLD Calculator", sld_help, self.on_calculate_sld),
                 ("Density/Volume Calculator", mass_volume_help, 
                                             self.on_calculate_dv),

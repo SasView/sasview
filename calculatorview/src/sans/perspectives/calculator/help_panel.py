@@ -63,6 +63,8 @@ class HelpWindow(wx.Frame):
         page = """<html>
             <body>
             <ul>
+            <li><a href ="data_operator_help.html" 
+            target ="showframe">Data Operator</a><br></li>
             <li><a href ="sld_calculator_help.html" 
             target ="showframe">SLD Calculator</a><br></li>
             <li><a href ="density_calculator_help.html" 
