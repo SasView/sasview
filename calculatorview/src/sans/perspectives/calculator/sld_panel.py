@@ -98,7 +98,7 @@ class SldPanel(wx.Panel, PanelBase):
         boxsizer1.SetMinSize((_STATICBOX_WIDTH, -1))
         
         compound_txt = wx.StaticText(self, -1, 'Compound ')
-        self.compound_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
+        self.compound_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH*2, -1))
         density_txt = wx.StaticText(self, -1, 'Density ')
         self.density_ctl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, -1))
         unit_density_txt = wx.StaticText(self, -1, unit_density)
