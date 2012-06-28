@@ -176,12 +176,14 @@ class Plugin(PluginBase):
         message = ""
         log_msg = ''
         output = {}
+        any_error = False
         error_message = ""
-        info = "info"
         for p_file in path:
+            info = "info"
             basename  = os.path.basename(p_file)
             root, extension = os.path.splitext(basename)
             if extension.lower() in EXTENSIONS:
+                any_error = True
                 log_msg = "Data Loader cannot "
                 log_msg += "load: %s\n" % str(p_file)
                 log_msg += """Please try to open that file from "open project" """
@@ -202,20 +204,24 @@ class Plugin(PluginBase):
                 message = "Loading Data..." + str(p_file) + "\n"
                 self.load_update(output=output, message=message, info=info)
             except:
-                 error = "Error while loading Data: %s\n" % str(p_file)
-                 error += str(sys.exc_value) + "\n"
-                 error_message = "The data file you selected could not be loaded.\n"
-                 error_message += "Make sure the content of your file"
-                 error_message += " is properly formatted.\n\n"
-                 error_message += "When contacting the DANSE team, mention the"
-                 error_message += " following:\n%s" % str(error)
-                 info = "error"
-                 self.load_update(output=output, message=error_message, 
+                any_error = True
+                if error_message == "":
+                     error = "Error: " + str(sys.exc_value) + "\n"
+                     error += "while loading Data: \n%s\n" % str(p_file)
+                     error_message = "The data file you selected could not be loaded.\n"
+                     error_message += "Make sure the content of your file"
+                     error_message += " is properly formatted.\n\n"
+                     error_message += "When contacting the DANSE team, mention the"
+                     error_message += " following:\n%s" % str(error)
+                else:
+                     error_message += "%s\n"% str(p_file)
+                info = "error"
+                self.load_update(output=output, message=error_message, 
                                   info=info)
                 
         message = "Loading Data Complete! "
         message += log_msg
-        if error_message!= "":
+        if error_message != "":
             info = 'error'
         self.load_complete(output=output, error_message=error_message,
                        message=message, path=path, info=info)
@@ -225,7 +231,7 @@ class Plugin(PluginBase):
         print update on the status bar
         """
         if message != "":
-            wx.PostEvent(self.parent, StatusEvent(status=message, info=info, 
+            wx.PostEvent(self.parent, StatusEvent(status=message, info='info', 
                                                   type="progress"))
     def load_complete(self, output, message="", error_message="", path=None, 
                       info="warning"):
@@ -235,8 +241,8 @@ class Plugin(PluginBase):
         wx.PostEvent(self.parent, StatusEvent(status=message, 
                                               info=info,
                                               type="stop"))
-        if error_message != "":
-            self.load_error(error_message)
+        #if error_message != "":
+        #    self.load_error(error_message)
         self.parent.add_data(data_list=output)
    
     

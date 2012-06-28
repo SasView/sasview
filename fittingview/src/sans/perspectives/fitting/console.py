@@ -101,6 +101,18 @@ class ConsoleUpdate(FitHandler):
         message = str(msg) + " \n %s \n" % self.result.__str__()
         wx.PostEvent(self.parent, StatusEvent(status=message,
                                    info="error", type="stop"))
+    def stop(self, msg):
+        """
+        Post event msg and stop
+        """
+        if self.isbetter:
+            #self.result.print_summary()
+            self.update_fit()
+
+        message = str(msg) + " \n %s \n" % self.result.__str__()
+        wx.PostEvent(self.parent, StatusEvent(status=message,
+                                   info="info", type="stop"))
+        
     def finalize(self):
         """
         """

@@ -485,10 +485,10 @@ class SansAssembly:
                 try:
                     self.curr_thread.isquit()
                 except:
-                    msg = "Fitting: Terminated...       Note: Forcing to stop "
-                    msg += "fitting may cause a 'Functor error message' "
-                    msg += "being recorded in the log file....."
-                    self.handler.error(msg)
+                    #msg = "Fitting: Terminated...       Note: Forcing to stop "
+                    #msg += "fitting may cause a 'Functor error message' "
+                    #msg += "being recorded in the log file....."
+                    #self.handler.stop(msg)
                     raise
          
         return self.res

@@ -113,7 +113,7 @@ class ScipyFit(FitEngine):
             if hasattr(sys, 'last_type') and sys.last_type == KeyboardInterrupt:
                 if handler is not None:
                     msg = "Fitting: Terminated!!!"
-                    handler.error(msg)
+                    handler.stop(msg)
                     raise KeyboardInterrupt, msg
             else:
                 raise

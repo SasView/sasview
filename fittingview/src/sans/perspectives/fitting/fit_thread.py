@@ -99,7 +99,7 @@ class FitThread(CalcThread):
             #some mssg and reset progress bar.
             
             if self.handler is not None:
-                self.handler.error(msg=msg)
+                self.handler.stop(msg=msg)
         except:
             if self.handler is not None:
                 self.handler.error(msg=str(sys.exc_value))

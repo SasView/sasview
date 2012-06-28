@@ -227,7 +227,7 @@ class StatusBar(wxStatusB):
         Override status bar 
         """
         wxStatusB.PopStatusText(self, field=MSG_POSITION)
-      
+        
     def PushStatusText(self, *args, **kwds):
         """
         PushStatusText
@@ -314,6 +314,9 @@ class StatusBar(wxStatusB):
             icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_ERROR, wx.ART_TOOLBAR,
                                                  size = (height,height))
             self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
+            e_msg = "Error(s) Occurred:\n"
+            e_msg += event.status
+            wx.MessageBox(e_msg, style=wx.ICON_ERROR)
         else:
             icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_INFORMATION,
                                                  wx.ART_TOOLBAR,

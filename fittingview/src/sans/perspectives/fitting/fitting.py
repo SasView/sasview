@@ -1032,6 +1032,12 @@ class Plugin(PluginBase):
                     list_page_id.append(page_id)
                     current_page_id = page_id
                     value.clear_model_param()
+            except KeyboardInterrupt:
+                flag = True
+                msg = "Fitting terminated"
+                wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
+                                                      type="stop"))
+                return flag
             except:
                 flag = False
                 msg = "%s error: %s" % (engineType, sys.exc_value)
@@ -1473,7 +1479,7 @@ class Plugin(PluginBase):
                                          batch_outputs=batch_outputs,
                                          batch_inputs=batch_inputs)
         
-        wx.PostEvent(self.parent, StatusEvent(status=msg, error="error",
+        wx.PostEvent(self.parent, StatusEvent(status=msg, error="info",
                                               type="stop"))
         # Remove parameters that are not shown
         cpage = self.fit_panel.get_page_by_id(uid)
@@ -1599,6 +1605,11 @@ class Plugin(PluginBase):
                                      pvec, stderr)
                         index += 1
                         wx.CallAfter(cpage._on_fit_complete)
+                    except KeyboardInterrupt:
+                        msg = "Singular point: Fitting Stoped."
+                        wx.PostEvent(self.parent, StatusEvent(status=msg,
+                                                              info="info",
+                                                              type="stop"))
                     except:
                         msg = "Singular point: Fitting Error occurred."
                         wx.PostEvent(self.parent, StatusEvent(status=msg,
@@ -1606,7 +1617,7 @@ class Plugin(PluginBase):
                                                               type="stop"))
                     
         except:
-            msg = "Fit completed but Following"
+            msg = "Fit completed 33but Following"
             msg += " error occurred:%s" % sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                   type="stop"))

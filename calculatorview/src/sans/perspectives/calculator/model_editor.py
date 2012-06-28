@@ -772,7 +772,7 @@ class EditorPanel(wx.ScrolledWindow):
         else:
             info = 'Error'
             color = 'red'
-            wx.MessageBox(msg, info)  
+            #wx.MessageBox(msg, info)  
         
         self._msg_box.SetLabel(msg)
         self._msg_box.SetForegroundColour(color)
