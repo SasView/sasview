@@ -230,7 +230,7 @@ class DataOperPanel(wx.ScrolledWindow):
         if ON_MAC:
             children = ctrl.GetChildren()
             if len(children) > 0:
-                ctrl.GetChildren()[0].SetBackgroundColour(color)  
+                children[0].SetBackgroundColour(color)  
         else:
             ctrl.SetBackgroundColour(color)  
         self.name_sizer.Layout()
