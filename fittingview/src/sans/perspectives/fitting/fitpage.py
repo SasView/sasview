@@ -1711,14 +1711,29 @@ class FitPage(BasicPage):
         qmin, qmax, npts = None, None, None
         if data is not None:
             if not hasattr(data, "data"):
-                qmin = min(data.x)
-                # Maximum value of data
-                qmax = max(data.x)
-                npts = len(data.x)
+                try:
+                    qmin = min(data.x)
+                    # Maximum value of data
+                    qmax = max(data.x)
+                    npts = len(data.x)
+                except:
+                    msg = "Unable to find min/max/length of \n data named %s"% \
+                                data.filename  
+                    wx.PostEvent(self._manager.parent, StatusEvent(status=msg,
+                                               info="error"))
+                    raise ValueError, msg
+                    
             else:
                 qmin = 0
-                x = max(math.fabs(data.xmin), math.fabs(data.xmax))
-                y = max(math.fabs(data.ymin), math.fabs(data.ymax))
+                try:
+                    x = max(math.fabs(data.xmin), math.fabs(data.xmax))
+                    y = max(math.fabs(data.ymin), math.fabs(data.ymax))
+                except:
+                    msg = "Unable to find min/max of \n data named %s"% \
+                                data.filename  
+                    wx.PostEvent(self._manager.parent, StatusEvent(status=msg,
+                                               info="error"))
+                    raise ValueError, msg
                 ## Maximum value of data
                 qmax = math.sqrt(x * x + y * y)
                 npts = len(data.data)

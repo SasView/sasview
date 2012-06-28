@@ -2640,10 +2640,19 @@ class ViewerFrame(wx.Frame):
         """
         Show data dialog
         """   
+        try:
+            xmin = min(data.x)
+            ymin = min(data.y)
+        except:
+            msg = "Unable to find min/max of \n data named %s"% \
+                        data.filename  
+            wx.PostEvent(self, StatusEvent(status=msg,
+                                       info="error"))
+            raise ValueError, msg
         text = data.__str__() 
         text += 'Data Min Max:\n'
-        text += 'X_min = %s:  X_max = %s\n'% (min(data.x), max(data.x))
-        text += 'Y_min = %s:  Y_max = %s\n'% (min(data.y), max(data.y))
+        text += 'X_min = %s:  X_max = %s\n'% (xmin, max(data.x))
+        text += 'Y_min = %s:  Y_max = %s\n'% (ymin, max(data.y))
         if data.dy != None:
             text += 'dY_min = %s:  dY_max = %s\n'% (min(data.dy), max(data.dy))
         text += '\nData Points:\n'

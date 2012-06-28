@@ -352,7 +352,8 @@ class Reader:
                     
                 # Store loading process information
                 output.meta_data['loader'] = self.type_name
-                    
+                if len(output.x) < 1:
+                    raise RuntimeError, "%s is empty" % path
                 return output
             
         else:
