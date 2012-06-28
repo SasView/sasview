@@ -2,7 +2,7 @@
 
 """
 
-Appearance of graph symbols and legend label dialog.
+Dialog for appearance of plot symbols, color, size etc.
 
 
 /**
@@ -26,7 +26,7 @@ import operator
 class appearanceDialog(wx.Frame):
 
     def __init__(self,parent,title):
-        super(appearanceDialog,self).__init__(parent, title=title,size=(570,400))
+        super(appearanceDialog,self).__init__(parent, title=title,size=(570,430))
 
         self.okay_clicked = False
 
@@ -74,7 +74,7 @@ class appearanceDialog(wx.Frame):
         self.sizeComboBox.Bind(wx.EVT_COMBOBOX, self.combo_click)
         self.sizeCustomButton = wx.Button(panel, label='Custom...')
         self.sizeCustomButton.Bind(wx.EVT_BUTTON, self.customSize)
-        self.labelTextBox = wx.TextCtrl(panel,-1, "",size=(180,-1))
+        self.labelTextBox = wx.TextCtrl(panel,-1, "",size=(-1,-1))
 
         # buttons
         OkButton = wx.Button(panel, label='OK')
@@ -83,49 +83,39 @@ class appearanceDialog(wx.Frame):
         cancelButton.Bind(wx.EVT_BUTTON, self.CloseDlg)
 
         # now Add all the widgets to relevant spacer - tricky
-        ivbox1.Add(symbolText, flag =  wx.TOP | wx.LEFT | wx.ALIGN_LEFT ,border=10)
-        ivbox1.Add(self.symbolListBox, flag = wx.TOP | wx.LEFT | wx.ALIGN_LEFT ,border=10)
+        ivbox1.Add(symbolText, flag =  wx.ALL  | wx.ALIGN_LEFT ,border=10)
+        ivbox1.Add(self.symbolListBox, flag = wx.ALL | wx.ALIGN_LEFT ,border=10)
 
-        ihbox1.Add(sizeText, flag = wx.TOP | wx.LEFT | wx.ALIGN_LEFT , border=10)
-        ihbox1.Add((20,-1))
-        ihbox1.Add(self.sizeComboBox, flag =  wx.TOP | wx.LEFT | wx.ALIGN_LEFT , border=10)
-        ihbox1.Add((20,-1))
-        ihbox1.Add(self.sizeCustomButton, flag = wx.ALIGN_LEFT | wx.TOP, border=10)
+        ihbox1.Add(sizeText, flag = wx.ALL| wx.ALIGN_LEFT , border=10)
+        ihbox1.Add(self.sizeComboBox, flag =  wx.ALL | wx.ALIGN_LEFT , border=10)
+        ihbox1.Add(self.sizeCustomButton, flag = wx.ALIGN_LEFT | wx.ALL, border=10)
 
-        ihbox2.Add(colorText,flag = wx.TOP |  wx.LEFT | wx.ALIGN_LEFT, border=10)
-        ihbox2.Add((20,-1))
-        ihbox2.Add(self.colorListBox, flag = wx.TOP | wx.LEFT | wx.ALIGN_LEFT, border=10)
+        ihbox2.Add(colorText,flag = wx.ALL | wx.ALIGN_LEFT, border=10)
+        ihbox2.Add(self.colorListBox, flag = wx.ALL  | wx.ALIGN_LEFT, border=10)
 
 
 
-        ivbox2.Add(ihbox1, flag =  wx.TOP | wx.ALIGN_RIGHT,border=10)
-        ivbox2.Add(ihbox2, flag =  wx.TOP | wx.ALIGN_RIGHT,border=10)
+        ivbox2.Add(ihbox1, flag =  wx.ALL | wx.ALIGN_RIGHT,border=10)
+        ivbox2.Add(ihbox2, flag =  wx.ALL | wx.ALIGN_RIGHT,border=10)
 
         
-        hbox1.Add((5,-1))
         hbox1.Add(ivbox1,flag =  wx.EXPAND | wx.ALIGN_LEFT ,border=10)
-        hbox1.Add((5,-1))
         hbox1.Add(ivbox2,flag =  wx.EXPAND | wx.ALIGN_RIGHT ,border=10)
-        hbox1.Add((5,-1))
 
    
-        hbox2.Add(OkButton, flag = wx.RIGHT |  wx.ALIGN_RIGHT, border=10)
-        hbox2.Add(cancelButton, flag = wx.RIGHT | wx.ALIGN_RIGHT, border=10)
+        hbox2.Add(OkButton, flag = wx.ALL |  wx.ALIGN_RIGHT, border=10)
+        hbox2.Add(cancelButton, flag = wx.ALL | wx.ALIGN_RIGHT, border=10)
 
-        hbox3.Add(labelText, flag= wx.TOP | wx.LEFT | wx.ALIGN_LEFT, border=10)
-        hbox3.Add((20,-1))
-        hbox3.Add(self.labelTextBox, wx.TOP |wx.ALIGN_LEFT | wx.LEFT , border=10)
-        hbox3.Add((20,-1))
+        hbox3.Add(labelText, flag= wx.EXPAND | wx.ALL |  wx.ALIGN_LEFT, border=10)
+        hbox3.Add(self.labelTextBox, wx.EXPAND | wx.ALL |wx.ALIGN_LEFT , border=10)
   
-        vbox.Add((20,-1))
-        symbolStaticBoxSizer.Add(hbox1,flag = wx.TOP | wx.EXPAND,border=10)
-        vbox.Add(symbolStaticBoxSizer, flag = wx.TOP | wx.EXPAND,border=10)
+        symbolStaticBoxSizer.Add(hbox1,flag = wx.ALL | wx.EXPAND,border=10)
+        vbox.Add(symbolStaticBoxSizer, flag = wx.ALL | wx.EXPAND,border=10)
 
-        vbox.Add((-1,20))
-        vbox.Add(hbox3,flag = wx.BOTTOM  | wx.ALIGN_RIGHT, border=20)
+        vbox.Add(hbox3,flag = wx.ALL | wx.EXPAND | wx.ALIGN_RIGHT, border=10)
 
 
-        vbox.Add(hbox2,flag = wx.BOTTOM  | wx.ALIGN_RIGHT, border=20)
+        vbox.Add(hbox2,flag = wx.ALL  | wx.ALIGN_RIGHT, border=10)
 
 
         panel.SetSizer(vbox)
