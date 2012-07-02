@@ -443,7 +443,9 @@ ol
 ul
 {margin-bottom:0in;}
 -->
-</style><title></title></head>
+</style><title></title>
+
+</head>
 <body lang="EN-US" link="blue" vlink="purple">
 <div class="WordSection1">
 <p class="MsoNormal"><b><span style="font-size: 16pt;">Model Functions</span></b></p>
@@ -452,7 +454,7 @@ ul
 <ul style="margin-top: 0in;" type="disc">
 <li class="MsoNormal" style="line-height: 115%;"><a href="#Introduction"><b>Introduction</b></a>
 </li>
-<li class="MsoNormal" style="line-height: 115%;"><a href="#Shapes"><b>Shapes</b></a>: <a href="#SphereModel">SphereModel</a>, <a href="#BinaryHSModel">BinaryHSModel</a>, <a href="#FuzzySphereModel">FuzzySphereModel</a>, <a href="#CoreShellModel">CoreShellModel</a>,&nbsp;<a href="#Core2ndMomentModel">Core2ndMomentModel</a>, <a href="#CoreMultiShellModel">CoreMultiShellModel</a>, <a href="#VesicleModel">VesicleModel</a>, <a href="#MultiShellModel">MultiShellModel</a>, &nbsp;<a href="#OnionExpShellModel">OnionExpShellModel</a>, <a href="#SphericalSLDModel">SphericalSLDModel</a>, <a href="#LinearPearlsModel">LinearPearlsModel</a>, <a href="#PearlNecklaceModel">PearlNecklaceModel</a> , <a href="#CylinderModel">CylinderModel</a>, <a href="#CoreShellCylinderModel">CoreShellCylinderModel</a>,
+<li class="MsoNormal" style="line-height: 115%;"><a href="#Shapes"><b>Shapes</b></a>: <a href="#SphereModel">SphereModel</a>, <a href="#BinaryHSModel">BinaryHSModel</a>, <a href="#FuzzySphereModel">FuzzySphereModel</a>, <a href="#RaspBerryModel">RaspBerryModel</a>, <a href="#CoreShellModel">CoreShellModel</a>,&nbsp;<a href="#Core2ndMomentModel">Core2ndMomentModel</a>, <a href="#CoreMultiShellModel">CoreMultiShellModel</a>, <a href="#VesicleModel">VesicleModel</a>, <a href="#MultiShellModel">MultiShellModel</a>, &nbsp;<a href="#OnionExpShellModel">OnionExpShellModel</a>, <a href="#SphericalSLDModel">SphericalSLDModel</a>, <a href="#LinearPearlsModel">LinearPearlsModel</a>, <a href="#PearlNecklaceModel">PearlNecklaceModel</a> , <a href="#CylinderModel">CylinderModel</a>, <a href="#CoreShellCylinderModel">CoreShellCylinderModel</a>,
 <a href="#CoreShellBicelleModel">CoreShellBicelleModel</a>,<a href="#HollowCylinderModel">HollowCylinderModel</a>,
 <a href="#FlexibleCylinderModel">FlexibleCylinderModel</a>,
 <a href="#FlexibleCylinderModel">FlexCylEllipXModel</a>,
@@ -530,11 +532,11 @@ intensity measured in
 experiments, we normalize the form factors by the volume of the
 particle:</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 12pt;"><img src="image001.PNG" ></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 12pt;"><img src="image001.PNG"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">with</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 8pt;"><img src="image002.PNG" ></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 8pt;"><img src="image002.PNG"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">where <i>P</i><sub>0</sub><i>(<b>q</b>)</i>
 is the
@@ -549,7 +551,7 @@ interference, the form
 factors we provide can be related to the scattering intensity by the
 particle
 volume fraction:<span style="position: relative; top: 5pt;">
-<img src="image003.PNG" ></span>.</p>
+<img src="image003.PNG"></span>.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">Our so-called 1D scattering intensity
 functions provide <i>P(q)
@@ -587,7 +589,7 @@ form factor is normalized by the particle volume as described below.</p>
 calculated in the following
 way (Guinier, 1955):</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="image004.PNG" ></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="image004.PNG"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
@@ -725,7 +727,7 @@ sphere
 interaction between those particles. Using Percus-Yevick closure, the
 calculation is an exact multi-component solution:</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 5pt;"><img src="image006.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 5pt;"><img src="image006.PNG"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">where S<sub>ij</sub> are
@@ -739,13 +741,13 @@ n =
 the number density) is internally calculated based on:</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 24pt;"><img src="image007.PNG" ></span>.</p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 24pt;"><img src="image007.PNG"></span>.</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">The 2D scattering intensity is the
 same as 1D, regardless of
-the orientation of the <i>q</i> vector which is defined as<span style="font-size: 14pt; position: relative; top: 8pt;"><img src="image008.PNG" ></span><span style="font-size: 14pt;">.</span></p>
+the orientation of the <i>q</i> vector which is defined as<span style="font-size: 14pt; position: relative; top: 8pt;"><img src="image008.PNG"></span><span style="font-size: 14pt;">.</span></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">The parameters of the binary hard
@@ -903,7 +905,7 @@ absolute scale.</p>
 <p class="MsoNormal">The scattering intensity I(q) is
 calculated as:</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 12pt;"><img src="image010.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 12pt;"><img src="image010.PNG"></span></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">where the amplitude A(q) is given as
 the typical sphere
@@ -911,7 +913,7 @@ scattering convoluted with a Gaussian to get a gradual drop-off in the
 scattering length density:</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 18pt;"><img src="image011.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 18pt;"><img src="image011.PNG"></span></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">Here A<sup>2</sup>(q) is
@@ -946,7 +948,7 @@ approximately Rbox ~ R - 2(sigma). the profile approaches zero as Rsans
 2(sigma).</p>
 <p class="MsoNormal">For 2D data: The 2D scattering
 intensity is calculated in
-the same way as 1D, where the <i>q</i> vector is defined as<span style="font-size: 14pt; position: relative; top: 8pt;"><img src="image008.PNG" ></span><span style="font-size: 14pt;">.</span></p>
+the same way as 1D, where the <i>q</i> vector is defined as<span style="font-size: 14pt; position: relative; top: 8pt;"><img src="image008.PNG"></span><span style="font-size: 14pt;">.</span></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">REFERENCE</p>
 <p class="MsoNormal">M. Stieger, J. S. Pedersen, P.
@@ -1048,8 +1050,172 @@ qmax = 0.7 A<sup>-1</sup> and the default values:</p>
 1D plot using the default values (w/200 data point).</b></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
+<p class="MsoNormal">
+</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.4.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></b><a name="RaspBerryModel"></a><b><span style="font-size: 14pt;">RaspBerryModel</span></b></p>
+&nbsp;<b> <br>
+</b>Calculates the form factor, P(q), for a "Raspberry-like"
+structure where there are smaller spheres at the surface of a larger
+sphere, such as the structure of a Pickering emulsion.&nbsp;
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal" style="margin-left: 0.85in; text-indent: -0.35in;"><b>1.1.</b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;
+</span>Definition</b></p>
+<p class="MsoNormal">&nbsp;</p>
+The structure is:<br>
+<img src="raspberry_pic.jpg">
+<p class="MsoNormal"><br>
+Ro = the radius of the&nbsp;large sphere<br>
+Rp = the radius of the smaller sphere on the surface<br>
+delta = the fractional penetration depth<br>
+surface coverage = fractional coverage of the large sphere surface (0.9
+max)<br>
+<br>
+<br>
+The large and small spheres have their own SLD, as well as the solvent.
+The surface coverage term is a fractional coverage (maximum of
+approximately 0.9 for hexagonally packed spheres on a surface). Since
+not all of the small spheres are necessarily attached to the surface,
+the excess free (small) spheres scattering is also included in the
+calculation. The function calculated follows equations (8)-(12) of the
+reference below, and the equations are not reproduced here.<br>
+<br>
+The returned value is scaled to units of [cm-1]. No interparticle
+scattering is included in this model.<br>
+<br>
+</p>
+<p class="MsoNormal">For 2D data: The 2D scattering
+intensity is calculated in
+the same way as 1D, where the <i>q</i> vector is defined as<span style="font-size: 14pt; position: relative; top: 8pt;"><img src="image008.PNG"></span><span style="font-size: 14pt;">.</span></p>
+<p class="MsoNormal">&nbsp;</p>
+&nbsp;&nbsp; REFERENCE<br>
+Kjersta Larson-Smith, Andrew Jackson, and Danilo C
+Pozzo, "Small angle scattering model for Pickering emulsions and
+raspberry particles." Journal of Colloid and Interface Science (2010)
+vol. 343 (1) pp. 36-41.<br>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal">TEST DATASET</p>
+<p class="MsoNormal">This example dataset is produced by
+running the RaspBerryModel, using 2000 data points, qmin = 0.0001 Å<sup>-1</sup>,&nbsp;
+qmax = 0.2 A<sup>-1</sup> and the default values, where
+Ssph/Lsph stands for Smaller/Large sphere and&nbsp;surfrac_Ssph for
+the surface fraction of the smaller spheres.</p>
+<p class="MsoNormal">&nbsp;</p>
+<div align="center">
+<table class="MsoNormalTable" style="border-collapse: collapse;" border="2" cellpadding="0" cellspacing="0">
+<tbody>
+<tr style="height: 18.8pt;">
+<td style="border: 1pt solid windowtext; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">Parameter name</p>
+</td>
+<td style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">Units</p>
+</td>
+<td style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">Default value</p>
+</td>
+</tr>
+<tr>
+<td>&nbsp; delta_Ssph</td>
+<td></td>
+<td>&nbsp; 0</td>
+</tr>
+<tr>
+<td>&nbsp; radius_Lsph</td>
+<td>&nbsp; Å</td>
+<td>&nbsp; 5000</td>
+</tr>
+<tr>
+<td>&nbsp; radius_Ssph</td>
+<td>&nbsp; Å</td>
+<td>&nbsp; 100</td>
+</tr>
+<tr>
+<td>&nbsp; sld_Lsph</td>
+<td>&nbsp;&nbsp;Å<sup> -2</sup></td>
+<td>&nbsp; -4e-07</td>
+</tr>
+<tr style="height: 18.8pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">sld_Ssph</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; vertical-align: top; width: 107pt; height: 18.8pt;">
+<p class="MsoBodyText">Å<sup> -2</sup></p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">3.5e-6</p>
+</td>
+</tr>
+<tr style="height: 18.8pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">sld_solv</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">Å<sup> -2</sup></p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">6.3e-6</p>
+</td>
+</tr>
+<tr style="height: 18.8pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">surfrac_Ssph</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText"><br>
+</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">0.4</p>
+</td>
+</tr>
+<tr style="height: 18.8pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">volf_Lsph</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">&nbsp;</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">0.05</p>
+</td>
+</tr>
+<tr style="height: 18.8pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">volf_Lsph</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText"><br>
+</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">0.005</p>
+</td>
+</tr>
+<tr style="height: 18.8pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">background</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">cm<sup>-1</sup></p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p class="MsoBodyText">0</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal" style="text-align: center;" align="center"><img src="raspberry_plot.jpg"></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><b>Figure.
+1D plot using the values of /2000 data points.</b></p>
+<p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
+<p class="MsoNormal" style="text-align: center;" align="center"></p>
+<p class="MsoNormal">&nbsp;</p>
+<p class="MsoNormal"></p>
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.5.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="CoreShellModel"><b><span style="font-size: 14pt;">Core Shell
 (Sphere) Model</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -1066,7 +1232,7 @@ by the particle volume.</p>
 calculated in the following
 way (Guinier, 1955):</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="image013.PNG" ></span>&nbsp;</p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="image013.PNG"></span>&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal" style="text-align: right;" align="right">&nbsp;</p>
@@ -1228,7 +1394,7 @@ parameters were set to: Scale=1.0, Radius=60 Å, Contrast=1e-6 Å<sup>
 and Background=0.001 cm<sup> -1</sup>.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.5.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.6.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="Core2ndMomentModel"><b><span style="font-size: 14pt;">Core2ndMomentModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model describes the scattering
@@ -1398,7 +1564,7 @@ T. Cosgrove, "SANS from Adsorbed Polymer Lyaers", Macromol. Symp. <span style="f
 <p class="MsoBodyText" style="text-align: center; page-break-after: avoid;" align="center"><img style="width: 526px; height: 333px;" src="secongm_fig1.jpg" alt="core_scondmoment_1D_validation"></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.6.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.7.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="CoreMultiShellModel"><b><span style="font-size: 14pt;">CoreMultiShell(Sphere)Model</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the scattering
@@ -1637,7 +1803,7 @@ sld values (w/ 4 shells).</p>
 SLD profile against the radius of the sphere for default SLDs.</b></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.7.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.8.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="VesicleModel"><b><span style="font-size: 14pt;">VesicleModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the form factor,
@@ -1682,7 +1848,7 @@ defined in terms of a core radius (= R1) and a shell thickness, t.
 same as <i>P</i>(<i>q</i>)
 above, regardless of the orientation of the <i>q</i>
 vector&nbsp; which is
-defined as<span style="font-size: 14pt; position: relative; top: 8pt;"><img src="image008.PNG" ></span><span style="font-size: 14pt;">.</span></p>
+defined as<span style="font-size: 14pt; position: relative; top: 8pt;"><img src="image008.PNG"></span><span style="font-size: 14pt;">.</span></p>
 <p class="MsoNormal">For P*S: The outer most radius (=
 radius + thickness) is
 used as the effective radius toward S(Q) when P(Q)*S(Q) is applied. </p>
@@ -1801,7 +1967,7 @@ X-Rays", John Wiley and Sons, New York, (1955).</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.8.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.9.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="MultiShellModel"><b><span style="font-size: 14pt;">MultiShellModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the form factor,
@@ -1818,7 +1984,7 @@ the vesicle model (above).</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">The 2D scattering intensity is the
 same as 1D, regardless of
-the orientation of the <i>q</i> vector which is defined as<span style="font-size: 14pt; position: relative; top: 8pt;"><img src="image008.PNG" ></span><span style="font-size: 14pt;">.</span></p>
+the orientation of the <i>q</i> vector which is defined as<span style="font-size: 14pt; position: relative; top: 8pt;"><img src="image008.PNG"></span><span style="font-size: 14pt;">.</span></p>
 <p class="MsoNormal">For P*S: The outer most radius (=
 core_radius +
 n_pairs&nbsp; * s_thickness&nbsp; + (n_pairs -1) * w_thickness)
@@ -1962,7 +2128,7 @@ Series Vol.
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.9.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.10.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="OnionExpShellModel"><b><span style="font-size: 14pt;">OnionExpShellModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;&nbsp;</p>
 <p class="MsoNormal">This model provides the form factor, <i>P</i>(<i>q</i>),
@@ -2221,7 +2387,7 @@ SLD profile from the default values.</b></p>
 Small-Angle X-Ray and Neutron Scattering’, Plenum Press, New York, 1987</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.10.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.11.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="SphericalSLDModel"><b><span style="font-size: 14pt;">SphericalSLDModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;&nbsp;</p>
 <p class="MsoNormal">Similarly to the OnionExpShellModel,
@@ -2264,15 +2430,15 @@ and D.I.Svergun, ‘Structure Analysis by Small-Angle X-Ray and Neutron
 Scattering’, Plenum Press, New York, 1987],</p>
 <p class="MsoNormal"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image024.gif" height="41" width="200"></span></p>
 <p class="MsoNormal">so that</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image044.gif" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image044.gif"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image045.gif" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image045.gif"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image046.gif" ></span></p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image047.gif" ></span></p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image048.gif" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image046.gif"></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image047.gif"></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image048.gif"></span></p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image027.gif" ></span></p>
+<p class="MsoNormal"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image027.gif"></span></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">Here we assumed that the SLDs of the
@@ -2284,19 +2450,19 @@ function chosen by an user, where the functions are:</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoListParagraph" style="text-indent: -0.25in;">1)<span style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant: normal; font-weight: normal; font-size: 7pt; line-height: normal; font-size-adjust: none; font-stretch: normal;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span>Exp;&nbsp;&nbsp;&nbsp; </p>
-<p class="MsoNormal"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image049.gif" ></span></p>
+<p class="MsoNormal"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image049.gif"></span></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoListParagraph" style="text-indent: -0.25in;">2)<span style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant: normal; font-weight: normal; font-size: 7pt; line-height: normal; font-size-adjust: none; font-stretch: normal;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span>Power-Law;</p>
 <p class="MsoNormal" style="margin-left: 0.25in;">&nbsp;</p>
 <p class="MsoListParagraph">&nbsp;</p>
-<p class="MsoNormal"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image050.gif" ></span></p>
+<p class="MsoNormal"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image050.gif"></span></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoListParagraph" style="text-indent: -0.25in;">3)<span style="font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant: normal; font-weight: normal; font-size: 7pt; line-height: normal; font-size-adjust: none; font-stretch: normal;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span>Erf;</p>
 <p class="MsoNormal" style="margin-left: 0.25in;">&nbsp;</p>
-<p class="MsoListParagraph"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image051.gif" ></span></p>
+<p class="MsoListParagraph"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image051.gif"></span></p>
 <p class="MsoListParagraph">&nbsp;</p>
 <p class="MsoListParagraph">&nbsp;</p>
 <p class="MsoNormal">Then the functions are normalized so
@@ -2320,26 +2486,26 @@ can be approximately
 linear within a sub-layer j. </p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">In the equation, </p>
-<p class="MsoNormal"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image055.gif" ></span></p>
+<p class="MsoNormal"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image055.gif"></span></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">Finally, the form factor can be
 calculated by</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image037.gif" ></span></p>
+<p class="MsoNormal"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image037.gif"></span></p>
 <p class="MsoNormal">where </p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image038.gif" ></span></p>
+<p class="MsoNormal"><span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;;"><img src="image038.gif"></span></p>
 <p class="MsoNormal"><span style="font-family: Symbol;">&nbsp;</span></p>
 <p class="MsoNormal"><span style="font-family: Symbol;">&nbsp;</span></p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="font-family: Symbol;"><img id="Object 20" src="image056.gif" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="font-family: Symbol;"><img id="Object 20" src="image056.gif"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center"><span style="font-family: Symbol;">&nbsp;</span></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">The 2D scattering intensity is the
 same as <i>P</i>(<i>q</i>)
 above, regardless of the orientation of the <i>q</i>
 vector&nbsp; which is
-defined as<span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;; position: relative; top: 4.5pt;"><img src="image040.gif" ></span><span style="font-size: 14pt;">.</span></p>
+defined as<span style="font-size: 12pt; font-family: &quot;Times New Roman&quot;,&quot;serif&quot;; position: relative; top: 4.5pt;"><img src="image040.gif"></span><span style="font-size: 14pt;">.</span></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">For P*S: The outer most radius is
 used as the effective radius
@@ -2534,7 +2700,7 @@ SLD profile from the default values.</b></p>
 Small-Angle X-Ray and Neutron Scattering’, Plenum Press, New York, 1987</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.11.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.12.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><b><a name="LinearPearlsModel"><span style="font-size: 14pt;">LinearPearlsModel</span></a></b></p>
 <p class="MsoNormal"><a name="LinearPearlsModel">&nbsp;</a></p>
 <p class="MsoNormal"><a name="LinearPearlsModel">This
@@ -2675,7 +2841,7 @@ V. Dobrynin, M. Rubinstein and S. P. Obukhov, Macromol. 29, 2974-2979,
 1996.</a></p>
 <p class="MsoNormal"><a name="LinearPearlsModel">&nbsp;</a></p>
 <p class="MsoNormal"><a name="LinearPearlsModel">&nbsp;</a></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><a name="LinearPearlsModel"><b><span style="font-size: 14pt;">2.12.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><a name="LinearPearlsModel"><b><span style="font-size: 14pt;">2.13.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b></a><b><a name="PearlNecklaceModel"><span style="font-size: 14pt;">PearlNecklaceModel</span></a></b></p>
 <p class="MsoNormal"><a name="PearlNecklaceModel">&nbsp;</a></p>
 <p class="MsoNormal"><a name="PearlNecklaceModel">This
@@ -2850,7 +3016,7 @@ Schweins and K. Huber, ‘Particle Scattering Factor of
 Pearl Necklace Chains’, Macromol. Symp., 211, 25-42, 2004.</a></p>
 <p class="MsoNormal"><a name="PearlNecklaceModel">&nbsp;</a></p>
 <p class="MsoNormal"><a name="PearlNecklaceModel">&nbsp;</a></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><a name="PearlNecklaceModel"><b><span style="font-size: 14pt;">2.13.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><a name="PearlNecklaceModel"><b><span style="font-size: 14pt;">2.14.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b></a><a name="CylinderModel"><b><span style="font-size: 14pt;">Cylinder
 Model</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -2868,9 +3034,9 @@ intensity function for
 oriented cylinders is given by (Guinier, 1955):</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 12pt;"><img src="image059.PNG" ></span>&nbsp;
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 12pt;"><img src="image059.PNG"></span>&nbsp;
 </p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 14pt;"><img src="image060.PNG" ></span>&nbsp;&nbsp;
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 14pt;"><img src="image060.PNG"></span>&nbsp;&nbsp;
 </p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
@@ -3012,7 +3178,7 @@ and the parameters of the cylinder model are the following:</p>
 intensity function for
 randomly oriented cylinders is then given by:</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><a name="_Ref173306528"></a><a name="_Ref173306479"></a><span style="position: relative; top: 16pt;"><img src="image063.PNG" ></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="text-align: center;" align="center"><a name="_Ref173306528"></a><a name="_Ref173306479"></a><span style="position: relative; top: 16pt;"><img src="image063.PNG"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">The <i>cyl_theta</i> and
@@ -3040,7 +3206,7 @@ NIST software.</p>
 distribution of orientations is
 done by evaluating the following:</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="image064.PNG" ></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="image064.PNG"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
@@ -3083,7 +3249,7 @@ Background=0.0 cm<sup> -1</sup>.</p>
 <p class="MsoCaption">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.14.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.15.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="CoreShellCylinderModel"><b><span style="font-size: 14pt;">Core-Shell
 Cylinder Model</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -3099,8 +3265,8 @@ normalized by the particle volume.</p>
 intensity function for
 oriented core-shell cylinders is given by (Kline, 2006):</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image067.PNG" ></span>&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 32pt;"><img src="image068.PNG" ></span>&nbsp;</p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image067.PNG"></span>&nbsp;</p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 32pt;"><img src="image068.PNG"></span>&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">where <span style="font-family: &quot;Arial&quot;,&quot;sans-serif&quot;;">&#945;</span>
@@ -3337,7 +3503,7 @@ Solvent_sld=1e-6 Å<sup> -2</sup>,
 and Background=0.0 cm<sup> -1</sup>.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.15.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.16.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="CoreShellBicelleModel"><b><span style="font-size: 14pt;">Core-Shell (Cylinder) Bicelle Model</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the form factor
@@ -3514,7 +3680,7 @@ Feigin, L. A, and D. I. Svergun, "Structure Analysis by Small-Angle
 X-Ray and Neutron Scattering", Plenum Press, New York, (1987).</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.16.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.17.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="HollowCylinderModel"><b><span style="font-size: 14pt;">HollowCylinderModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the form factor,
@@ -3531,9 +3697,10 @@ inside and outside of the hollow cylinder have the same SLD.</p>
 calculated in the following
 way (Guinier, 1955):</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><img src="image072.PNG" ></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><img src="image072.PNG"></p>
 <br>
 <nr>
+</nr>
 <p class="MsoNormal">where <i>scale</i> is a
 scale factor, <i>J<sub>1</sub></i>
 is the 1<sup>st</sup> order Bessel function, <i>J<sub>1</sub></i>
@@ -3681,7 +3848,7 @@ by Small-Angle X-Ray and Neutron Scattering", Plenum Press, New York,
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.17.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.18.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="FlexibleCylinderModel"></a><b><span style="font-size: 14pt;">FlexibleCylinderModel</span></b></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the form factor,
@@ -3844,7 +4011,7 @@ Cationic Wormlike Micelles" Langmuir, August 2006.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.18.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.19.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><b><span style="font-size: 14pt;">FlexCylEllipXMo<a name="FlexCylEllipXModel"></a>del</span></b></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>Flexible Cylinder with
@@ -3938,7 +4105,7 @@ However, no inter-particle interference effects are included in this
 calculation.</p>
 <p class="MsoNormal">For 2D data: The 2D scattering
 intensity is calculated in
-the same way as 1D, where the <i>q</i> vector is defined as<span style="font-size: 14pt; position: relative; top: 8pt;"><img src="image008.PNG" ></span><span style="font-size: 14pt;">.</span></p>
+the same way as 1D, where the <i>q</i> vector is defined as<span style="font-size: 14pt; position: relative; top: 8pt;"><img src="image008.PNG"></span><span style="font-size: 14pt;">.</span></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">REFERENCE</p>
 <p class="MsoNormal">Pedersen, J. S. and P. Schurtenberger
@@ -4071,7 +4238,7 @@ qmax = 0.7
 1D plot using the default values (w/200 data points).</b></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.19.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.20.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="StackedDisksModel"><b><span style="font-size: 14pt;">StackedDisksModel
 </span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -4093,7 +4260,7 @@ the
 repeat distance of the layers.</p>
 <p class="MsoNormal">The 2D scattering intensity is the
 same as 1D, regardless of
-the orientation of the <i>q</i> vector which is defined as<span style="font-size: 14pt; position: relative; top: 8pt;"><img src="image008.PNG" ></span><span style="font-size: 14pt;">.</span></p>
+the orientation of the <i>q</i> vector which is defined as<span style="font-size: 14pt; position: relative; top: 8pt;"><img src="image008.PNG"></span><span style="font-size: 14pt;">.</span></p>
 <p class="MsoNormal"><span style="font-size: 14pt;">&nbsp;</span></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img id="Picture 36" src="image079.gif" height="93" width="214"></p>
@@ -4107,10 +4274,10 @@ sr<sup>-1</sup>],
 on absolute scale. </p>
 <p class="MsoNormal">The scattering intensity I(q) is:</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 9pt;"><img src="image081.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 9pt;"><img src="image081.PNG"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">where the contrast,</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 6pt;"><img src="image082.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 6pt;"><img src="image082.PNG"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">N is the number of discs per unit
@@ -4120,14 +4287,15 @@ disc and q, and Vt and Vc are the total volume and the core volume of a
 single
 disc, respectively.</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><img src="image083.PNG" ></p>
-<br><br>
-<p class="MsoNormal"></p><p class="MsoNormal">where d = thickness of the layer
+<p class="MsoNormal" style="text-align: center;" align="center"><img src="image083.PNG"></p>
+<br>
+<br>
+<p class="MsoNormal"></p>
+<p class="MsoNormal">where d = thickness of the layer
 (layer_thick), 2h= core
 thickness (core_thick),&nbsp; and R = radius of the disc (radius).</p>
-
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 14pt;"><img src="image084.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 14pt;"><img src="image084.PNG"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">where n = the total number of the
@@ -4313,7 +4481,7 @@ Scattering", Clarendon, Oxford, 1994.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.20.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.21.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="ParallelepipedModel"><b><span style="font-size: 14pt;">ParallelepipedModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the form factor,
@@ -4338,11 +4506,11 @@ B=short_b, and C=long_c for the fitting parameters.</p>
 <p class="MsoNormal">a = A/B&lt;1; b=B/B=1;
 c=C/B&gt;1, the form factor,</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 48pt;"><img src="image088.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 48pt;"><img src="image088.PNG"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">The contrast is defined as</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 6pt;"><img src="image089.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 6pt;"><img src="image089.PNG"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">The scattering intensity per unit
@@ -4508,7 +4676,7 @@ Austriaca 14 (1961)
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.21.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.22.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><b><span style="font-size: 14pt;"><a name="CSParallelepipedModel">CSParallelepipedModel</a></span></b></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">Calculates the form factor for a
@@ -4541,7 +4709,7 @@ the AC
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">The volume of the solid is:</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal"><span style="position: relative; top: 5pt;"><img src="image095.PNG" ></span></p>
+<p class="MsoNormal"><span style="position: relative; top: 5pt;"><img src="image095.PNG"></span></p>
 <p class="MsoNormal">meaning that there are "gaps" at the
 corners of
 the solid.</p>
@@ -4817,7 +4985,7 @@ German)&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.22.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.23.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="EllipticalCylinderModel"><b><span style="font-size: 14pt;">Elliptical
 Cylinder Model</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -4846,14 +5014,14 @@ r_major/r_minor).</b></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">The function calculated is:</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="image099.PNG" ></span>&nbsp;</p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="image099.PNG"></span>&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">with the functions:</p>
 <br>
-<p class="MsoNormal" style="text-align: center;" align="center"><img src="image100.PNG" >
-</p><br>
-
+<p class="MsoNormal" style="text-align: center;" align="center"><img src="image100.PNG">
+</p>
+<br>
 <p class="MsoNormal">and the angle psi is defined as the
 orientation of the major
 axis of the ellipse with respect to the vector Q.</p>
@@ -5049,7 +5217,7 @@ Plenum, New
 York, (1987).</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.23.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.24.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="BarBellModel"><b><span style="font-size: 14pt;">BarBell(/DumBell)Model</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">Calculates the scattering from a
@@ -5089,11 +5257,11 @@ as:</p>
 <p class="MsoNormal">The scattering intensity I(q) is
 calculated as:</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 12pt;"><img src="image106.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 12pt;"><img src="image106.PNG"></span></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">where the amplitude A(q) is given as:</p>
 <br>
-<p class="MsoNormal" style="text-align: center;" align="center"><img src="image107.PNG" ></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><img src="image107.PNG"></p>
 <br>
 <p class="MsoNormal">The &lt; &gt; brackets denote
 an average of the structure
@@ -5253,7 +5421,7 @@ default values for other parameters,</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.24.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.25.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="CappedCylinderModel"><b><span style="font-size: 14pt;">CappedCylinder(/ConvexLens)Model</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">Calculates the scattering from a
@@ -5456,7 +5624,7 @@ values for other parameters,</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.25.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.26.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="EllipsoidModel"><b><span style="font-size: 14pt;">Ellipsoid
 Model</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -5474,13 +5642,13 @@ intensity function for
 oriented ellipsoids is given by (Feigin, 1987):</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoCaption" style="text-align: center;" align="center"><span style="position: relative; top: 12pt;"><img src="image059.PNG" ></span>&nbsp;&nbsp;
+<p class="MsoCaption" style="text-align: center;" align="center"><span style="position: relative; top: 12pt;"><img src="image059.PNG"></span>&nbsp;&nbsp;
 </p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoCaption" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image119.PNG" ></span>&nbsp;&nbsp;&nbsp;
+<p class="MsoCaption" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image119.PNG"></span>&nbsp;&nbsp;&nbsp;
 </p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoCaption" style="text-align: center;" align="center"><span style="position: relative; top: 6pt;"><img src="image120.PNG" ></span>&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoCaption" style="text-align: center;" align="center"><span style="position: relative; top: 6pt;"><img src="image120.PNG"></span>&nbsp;&nbsp;&nbsp;&nbsp;
 </p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
@@ -5712,7 +5880,7 @@ Background=0.0 cm<sup> -1</sup>.</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.26.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.27.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="CoreShellEllipsoidModel"><b><span style="font-size: 14pt;">CoreShellEllipsoidModel
 </span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -5736,7 +5904,7 @@ on
 absolute scale. </p>
 <p class="MsoNormal">The form factor calculated is:</p>
 <br>
-<p class="MsoNormal" style="text-align: center;" align="center"><img src="image126.PNG" ></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><img src="image126.PNG"></p>
 <br>
 <p class="MsoNormal">To provide easy access to the
 orientation of the coreshell
@@ -5748,8 +5916,8 @@ are defined on Figure 2 of CylinderModel. </p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">The contrast is defined as SLD(core)
 – SLD(shell) or
-SLD(shell – solvent). In the parameters, equat_core = equatorial core radius, 
-polar_core = polar core radius, equat_shell = r<sub>min</sub>
+SLD(shell – solvent). In the parameters, equat_core = equatorial core
+radius, polar_core = polar core radius, equat_shell = r<sub>min</sub>
 (or equatorial outer radius), and polar_shell = = r<sub>maj</sub>
 (or polar outer radius).</p>
 <p class="MsoNormal">&nbsp;</p>
@@ -5904,7 +6072,7 @@ Phys., 1983, 79, 2461.</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.27.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.28.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="TriaxialEllipsoidModel"><b><span style="font-size: 14pt;">TriaxialEllipsoidModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the form factor,
@@ -5927,7 +6095,7 @@ on
 absolute scale. </p>
 <p class="MsoNormal">The form factor calculated is:</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 33pt;"><img src="image129.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 33pt;"><img src="image129.PNG"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">&nbsp;</p>
@@ -6101,7 +6269,7 @@ Small-Angle X-Ray and Neutron Scattering”, Plenum, New York, 1987.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.28.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.29.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="LamellarModel"><b><span style="font-size: 14pt;">LamellarModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the scattering
@@ -6113,10 +6281,10 @@ thickness can be
 applied from the GUI.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">The scattering intensity I(q) is:</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image133.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image133.PNG"></span></p>
 <p class="MsoNormal">The form factor is,</p>
 <p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image134.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image134.PNG"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">where <span style="font-family: Symbol;">d</span> = bilayer
 thickness.</p>
@@ -6225,7 +6393,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.29.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.30.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="LamellarFFHGModel"><b><span style="font-size: 14pt;">LamellarFFHGModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the scattering
@@ -6237,7 +6405,7 @@ from the SLD
 of the tail region.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">The scattering intensity I(q) is:</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image136.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image136.PNG"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">The form factor is,</p>
@@ -6378,7 +6546,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.30.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.31.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="LamellarPSModel"><b><span style="font-size: 14pt;">LamellarPSModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the scattering
@@ -6388,19 +6556,19 @@ for a lyotropic lamellar phase
 where a random distribution in solution are assumed.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">The scattering intensity I(q) is:</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image139.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image139.PNG"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">The form factor is</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image134.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image134.PNG"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">and the structure is </p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="image140.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="image140.PNG"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">where </p>
 <br>
-<p class="MsoNormal" style="text-align: center;" align="center"><img src="image141.PNG" ></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><img src="image141.PNG"></p>
 <br>
 <p class="MsoNormal">Here d= (repeat) spacing, <span style="font-family: Symbol;">d</span>
 = bilayer thickness, the contrast <span style="font-family: Symbol;">Dr</span>
@@ -6542,7 +6710,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.31.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.32.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="LamellarPSHGModel"><b><span style="font-size: 14pt;">LamellarPSHGModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">This model provides the scattering
@@ -6554,18 +6722,18 @@ of the head
 region is taken to be different from the SLD of the tail region.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">The scattering intensity I(q) is:</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image139.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image139.PNG"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">The form factor is,</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image143.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="image143.PNG"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">The structure factor is</p>
-<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="image140.PNG" ></span></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="image140.PNG"></span></p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal" style="text-align: center;" align="center">&nbsp;</p>
 <p class="MsoNormal">where </p>
 <br>
-<p class="MsoNormal" style="text-align: center;" align="center"><img src="image141.PNG" ></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><img src="image141.PNG"></p>
 <br>
 <p class="MsoNormal">where <span style="font-family: Symbol;">d<sub>T</sub></span>
 = tail length (or t_length), <span style="font-family: Symbol;">d<sub>H</sub></span>
@@ -6745,7 +6913,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.32.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.33.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="LamellarPCrystalModel"><b><span style="font-size: 14pt;">LamellarPCrystalModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal">Lamella ParaCrystal Model: Calculates
@@ -6917,7 +7085,7 @@ Egelhaaf, J. Phys. Chem. B, 103 (1999) 9888-9897.</p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.33.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.34.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="SCCrystalModel"><b><span style="font-size: 14pt;">SC(Simple
 Cubic Para-)CrystalModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -7135,7 +7303,7 @@ incorrectness of the 2D model computation. </p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.34.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.35.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="FCCrystalModel"><b><span style="font-size: 14pt;">FC(Face
 Centered Cubic Para-)CrystalModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
@@ -7359,7 +7527,7 @@ incorrectness of the 2D model computation. </p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
 <p class="MsoNormal">&nbsp;</p>
 <p class="MsoNormal"><b>&nbsp;</b></p>
-<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.35.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<p class="MsoNormal" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.36.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></b><a name="BCCrystalModel"><b><span style="font-size: 14pt;">BC(Body
 Centered Cubic Para-)CrystalModel</span></b></a></p>
 <p class="MsoNormal">&nbsp;</p>
