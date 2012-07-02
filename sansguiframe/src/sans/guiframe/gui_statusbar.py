@@ -314,15 +314,24 @@ class StatusBar(wxStatusB):
             icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_ERROR, wx.ART_TOOLBAR,
                                                  size = (height,height))
             self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
-            e_msg = "Error(s) Occurred:\n"
-            e_msg += event.status
-            wx.MessageBox(e_msg, style=wx.ICON_ERROR)
         else:
             icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_INFORMATION,
                                                  wx.ART_TOOLBAR,
                                                  size = (height,height))
             self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
     
+    def set_dialog(self, event):
+        """
+        Display dialogbox
+        """
+        if not hasattr(event, "info"):
+            return 
+        msg = event.info.lower()
+        if msg == "error":
+            e_msg = "Error(s) Occurred:\n"
+            e_msg += event.status
+            wx.MessageBox(e_msg, style=wx.ICON_ERROR)
+
     def set_message(self, event):
         """
         display received message on the statusbar
@@ -377,7 +386,9 @@ class StatusBar(wxStatusB):
         self.set_message(event=event)
         self.set_icon(event=event)
         self.set_gauge(event=event)
-    
+        # dialog on error
+        self.set_dialog(event=event)
+        
     def _onMonitor(self, event):
         """
         Pop up a frame with messages sent to the status bar
