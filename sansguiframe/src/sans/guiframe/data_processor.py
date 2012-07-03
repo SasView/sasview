@@ -560,7 +560,7 @@ class Notebook(nb, PanelBase):
         grid = GridPage(self, panel=self.parent)
         self.AddPage(grid, "", True)
         pos = self.GetPageIndex(grid)
-        title = "Batch" + str(self.GetPageCount())
+        title = "Grid" + str(self.GetPageCount())
         self.SetPageText(pos, title)
         self.SetSelection(pos)
         return grid , pos
@@ -891,7 +891,7 @@ class GridPanel(SPanel):
                     msg = "Invalid cell was chosen." 
                     wx.PostEvent(self.parent.parent, StatusEvent(status=msg, 
                                                                 info="error"))
-                    time.sleep(0.5)
+                    #time.sleep(0.5)
                     continue
                 else:
                      value = values[row -1]
@@ -914,8 +914,8 @@ class GridPanel(SPanel):
                             #raise ValueError, msg
                             wx.PostEvent(self.parent.parent, 
                                  StatusEvent(status=msg, info="error")) 
-                            time.sleep(0.5)
-                            continue
+                            return
+                            #continue
                         #new_plot.name =  title + ': ' + new_plot.title
                         if issubclass(new_plot.__class__, Data1D):
                             if label in grid.list_plot_panels.keys():
@@ -934,8 +934,9 @@ class GridPanel(SPanel):
                                     wx.PostEvent(self.parent.parent, 
                                                  StatusEvent(status=msg,
                                                               info="error"))
-                                    time.sleep(0.5) 
-                                    continue  
+                                    #time.sleep(0.5) 
+                                    return
+                                    #continue  
                         """
                         wx.PostEvent(self.parent.parent, 
                                      NewPlotEvent(action="clear",
@@ -957,8 +958,9 @@ class GridPanel(SPanel):
                     #raise ValueError, msg
                     wx.PostEvent(self.parent.parent, 
                          StatusEvent(status=msg, info="error")) 
-                    time.sleep(0.5)
-                    continue
+                    #time.sleep(0.5)
+                    return
+                    #continue
     
         
      
@@ -1039,17 +1041,21 @@ class GridPanel(SPanel):
         new_plot = Data1D(x=x, y=y, dy=dy)
         new_plot.id =  wx.NewId()
         new_plot.group_id = wx.NewId()
-        title = "%s vs %s" % (self.y_axis_title.GetValue(), 
-                              self.x_axis_title.GetValue())
-        new_plot.xaxis(self.x_axis_title.GetValue(), 
+        y_title = self.y_axis_title.GetValue()
+        x_title = self.x_axis_title.GetValue()
+        title = "%s_vs_%s" % (y_title, 
+                              x_title)
+        new_plot.xaxis(x_title, 
                        self.x_axis_unit.GetValue())
-        new_plot.yaxis(self.y_axis_title.GetValue(), 
+        new_plot.yaxis(y_title, 
                        self.y_axis_unit.GetValue())
         try:
-            title = self.notebook.GetPageText(pos)
+            title = y_title.strip()
+            title += self.notebook.GetPageText(pos)
             new_plot.name = title
             new_plot.xtransform = "x"
             new_plot.ytransform  = "y"  
+            #new_plot.is_data = False
             wx.PostEvent(self.parent.parent, 
                         NewPlotEvent(plot=new_plot, 
                         group_id=str(new_plot.group_id), title =title)) 
@@ -1215,7 +1221,7 @@ class GridPanel(SPanel):
         
 class GridFrame(wx.Frame):
     def __init__(self, parent=None, data_inputs=None, data_outputs=None, id=-1, 
-                 title="Batch Window", size=(800, 500)):
+                 title="Grid Window", size=(800, 500)):
         wx.Frame.__init__(self, parent=parent, id=id, title=title, size=size)
         self.parent = parent
         self.panel = GridPanel(self, data_inputs, data_outputs)

@@ -371,7 +371,7 @@ class ViewerFrame(wx.Frame):
                                   data_outputs=data_outputs,
                                   details=details,
                                   file_name=file_name)
-        self.batch_frame.Show(True)
+        self.show_batch_frame(None)
         
     def on_read_batch_tofile(self, event):
         """
@@ -402,7 +402,7 @@ class ViewerFrame(wx.Frame):
         data = {}
         fd = open(file_name, 'r')
         _, ext = os.path.splitext(file_name)
-        separator = "\t"
+        separator = None
         if ext.lower() == ".csv":
             separator = ","
         buffer = fd.read()
@@ -413,8 +413,18 @@ class ViewerFrame(wx.Frame):
         details = ""
         for index in range(len(lines)):
             line = lines[index]
+            line.strip()
             count = 0
-            if line.find(separator) != -1:
+            if separator == None:
+                line.replace('\t', ' ')
+                #found the first line containing the label
+                col_name_toks = line.split()
+                for item in col_name_toks:
+                    if item.strip() != "":
+                        count += 1
+                    else:
+                        line = " "
+            elif line.find(separator) != -1:
                 if line.count(separator) >= 2:
                     #found the first line containing the label
                     col_name_toks = line.split(separator)
@@ -429,6 +439,7 @@ class ViewerFrame(wx.Frame):
            
         if column_names_line.strip() == "" or index is None:
             return 
+
         col_name_toks = column_names_line.split(separator)
         c_index = 0
         for col_index in range(len(col_name_toks)):
@@ -438,7 +449,6 @@ class ViewerFrame(wx.Frame):
                                 for row in range(index + 1, len(lines)-1)]
                 c_index += 1
                 
-      
         self.open_with_localapp(data_outputs=data, data_inputs=None,
                                 file_name=file_name, details=details)
         
@@ -1341,7 +1351,7 @@ class ViewerFrame(wx.Frame):
         self._view_menu.AppendSeparator()
         id = wx.NewId()
         hint = "Display batch results into a grid"
-        self._view_menu.Append(id, '&Show Batch Results', hint) 
+        self._view_menu.Append(id, '&Show Grid Window', hint) 
         wx.EVT_MENU(self, id, self.show_batch_frame)
 
         if custom_config != None:
