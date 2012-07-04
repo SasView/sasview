@@ -36,12 +36,20 @@ from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.gui_style import GUIFRAME_ICON
 from binder import BindArtist
 from appearanceDialog import appearanceDialog
+from graphAppearance import graphAppearance
 
 DEFAULT_QMAX = 0.05
 DEFAULT_QSTEP = 0.001
 DEFAULT_BEAM = 0.005
 BIN_WIDTH = 1
 IS_MAC = (sys.platform == 'darwin')
+
+
+def find_key(dic, val):
+    """return the key of dictionary dic given the value"""
+    return [k for k, v in dic.iteritems() if v == val][0]
+
+
 
 class ModelPanel1D(PlotPanel, PanelBase):
     """
@@ -477,7 +485,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                     plot_menu.AppendSeparator()
 
                 id = wx.NewId()
-                plot_menu.Append(id, '&Modify graph properties', name)
+                plot_menu.Append(id, '&Modify plot properties', name)
                 wx.EVT_MENU(self, id, self.createAppDialog)
 
 
@@ -494,25 +502,35 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 id = wx.NewId()
                 loc_menu.Append(id, str(label), str(label))
                 wx.EVT_MENU(self, id, self.onChangeLegendLoc)
-            id = wx.NewId()
-            self._slicerpop.AppendMenu(id, '&Modify Legend Location', loc_menu)
             
-            id = wx.NewId()
-            self._slicerpop.Append(id, '&Toggle Legend On/Off', 'Toggle Legend On/Off')
-            wx.EVT_MENU(self, id, self.onLegend)
-            self._slicerpop.AppendSeparator()
+
+            # ILL mod start here
+
+            # id = wx.NewId()
+            # self._slicerpop.AppendMenu(id, '&Modify Legend Location', loc_menu)
+
+            # id = wx.NewId()
+            # self._slicerpop.Append(id, '&Toggle Legend On/Off', 'Toggle Legend On/Off')
+            # wx.EVT_MENU(self, id, self.onLegend)
+            # self._slicerpop.AppendSeparator()
             
-            id = wx.NewId()
-            self._slicerpop.Append(id, '&Edit Y Axis Label')
-            wx.EVT_MENU(self, id, self._on_yaxis_label)     
-            id = wx.NewId()
-            self._slicerpop.Append(id, '&Edit X Axis Label')
-            wx.EVT_MENU(self, id, self._on_xaxis_label)
+            # id = wx.NewId()
+            # self._slicerpop.Append(id, '&Edit Y Axis Label')
+            # wx.EVT_MENU(self, id, self._on_yaxis_label)     
+            # id = wx.NewId()
+            # self._slicerpop.Append(id, '&Edit X Axis Label')
+            # wx.EVT_MENU(self, id, self._on_xaxis_label)
     
+            # id = wx.NewId()
+            # self._slicerpop.Append(id, '&Toggle Grid On/Off', 'Toggle Grid On/Off')
+            # wx.EVT_MENU(self, id, self.onGridOnOff)
+            # self._slicerpop.AppendSeparator()
+
             id = wx.NewId()
-            self._slicerpop.Append(id, '&Toggle Grid On/Off', 'Toggle Grid On/Off')
-            wx.EVT_MENU(self, id, self.onGridOnOff)
+            self._slicerpop.Append(id, '&Modify graph appearance','Modify graph appearance')
+            wx.EVT_MENU(self, id, self.modifyGraphAppearance)
             self._slicerpop.AppendSeparator()
+
             
             if self.position != None:
                 id = wx.NewId()
@@ -629,7 +647,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             curr_color = self._color_labels['Blue']
             curr_symbol = 13
 
-        self.appD = appearanceDialog(self,'Modify graph properties')
+        self.appD = appearanceDialog(self,'Modify plot properties')
         self.appD.setDefaults(float(curr_size),int(curr_color),str(appearanceDialog.find_key(self.get_symbol_label(),int(curr_symbol))),curr_label)
         self.appD.Bind(wx.EVT_CLOSE, self.on_AppDialog_close)    
 
@@ -651,3 +669,42 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 
         self.appD.Destroy()
         self._check_zoom_plot()
+
+
+    def modifyGraphAppearance(self,e):
+        self.graphApp = graphAppearance(self,'Modify graph appearance')
+
+        
+
+        self.graphApp.setDefaults(self.grid_on,self.legend_on,
+                                  self.xaxis_label,self.yaxis_label,
+                                  self.xaxis_unit,self.yaxis_unit,
+                                  self.xaxis_font,self.yaxis_font,
+                                  find_key(self.get_loc_label(),self.legendLoc),
+                                  self.xcolor,self.ycolor)
+        self.graphApp.Bind(wx.EVT_CLOSE, self.on_graphApp_close)
+    
+
+    def on_graphApp_close(self,e):
+# returns toggleGrid? toggleLegend? xlab, ylab, xunit, yunit, xfont, yfont, xcolor, ycolor, legendloc
+
+        #to do - make this passback mechanism much nicer
+        data = self.graphApp.getAppInfo()
+        self.onGridOnOff(data[0])
+        self.onLegend(data[1])
+        self.ChangeLegendLoc(data[10])
+
+        self.xaxis_label = data[2]
+        self.yaxis_label = data[3]
+        self.xaxis_unit = data[4]
+        self.yaxis_unit = data[5]
+
+        self.xaxis(data[2],data[4],data[6],data[8])
+        self.yaxis(data[3],data[5],data[7],data[9])
+
+        xfont = data[6]
+        yfont = data[7]
+
+        # and a little sanity checking along the way
+
+        self.graphApp.Destroy()

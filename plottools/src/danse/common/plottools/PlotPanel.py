@@ -947,12 +947,13 @@ class PlotPanel(wx.Panel):
         
         self.onContextMenu(event)
         
-    def onLegend(self, event):
+# modified kieranrcampbell ILL june2012
+    def onLegend(self,legOnOff):
         """
         Toggles whether legend is visible/not visible
         """
         
-        if self.legend_on:
+        if not legOnOff:
             for ax in self.axes:
                 self.remove_legend(ax)
         else:
@@ -970,8 +971,11 @@ class PlotPanel(wx.Panel):
                 self.legend.set_axes(self.subplot)
         
         self.subplot.figure.canvas.draw_idle()
-        self.legend_on = not self.legend_on
+        self.legend_on = legOnOff
     
+
+    # to do - remove this function when done
+
     def onChangeLegendLoc(self, event):
         """
         Changes legend loc based on user input
@@ -996,6 +1000,31 @@ class PlotPanel(wx.Panel):
                 self.legend.set_axes(self.subplot)
         self.subplot.figure.canvas.draw_idle()
         
+
+    def ChangeLegendLoc(self, label):
+        """
+        Changes legend loc based on user input
+        """
+        
+        self.legendLoc = label
+        self.legend_pos_loc = None
+        # sort them by labels
+        handles, labels = self.subplot.get_legend_handles_labels()
+        hl = sorted(zip(handles, labels),
+                    key=operator.itemgetter(1))
+        handles2, labels2 = zip(*hl)
+        self.line_collections_list = handles2
+        self.legend = self.subplot.legend(handles2, labels2,
+                            prop=FontProperties(size=10), numpoints=1,
+                            handletextsep=.05, loc=self.legendLoc)
+        if self.legend != None:
+                self.legend.set_picker(self.legend_picker)
+                self.legend.set_axes(self.subplot)
+        self.subplot.figure.canvas.draw_idle()
+        
+
+
+
     def remove_legend(self, ax=None):
         """
         Remove legend for ax or the current axes.
@@ -1047,14 +1076,12 @@ class PlotPanel(wx.Panel):
         #text that they want to add...then create text Plottable
         #based on this and plot it at user designated coordinates
 
-    def onGridOnOff(self, event):
+    def onGridOnOff(self,gridon_off):
         """
         Allows ON/OFF Grid
         """
-        if self.grid_on:
-            self.grid_on = False
-        else:
-            self.grid_on = True
+        self.grid_on = gridon_off
+
         self.subplot.figure.canvas.draw_idle()
         
     def _on_xaxis_label(self, event):
@@ -1265,6 +1292,8 @@ class PlotPanel(wx.Panel):
         purposes.
         
         """
+
+        self.xcolor = color
         if units != "":
             label = label + " (" + units + ")"
         if label.count("{") > 0 and label.count("$") < 2:
@@ -1283,6 +1312,8 @@ class PlotPanel(wx.Panel):
     
     def yaxis(self, label, units, font=None, color='black', t_font=None):
         """yaxis label and units."""
+        self.ycolor = color
+
         if units != "":
             label = label + " (" + units + ")"
         if label.count("{") > 0 and label.count("$") < 2:
