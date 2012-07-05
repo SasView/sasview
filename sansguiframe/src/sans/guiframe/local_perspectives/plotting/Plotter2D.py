@@ -32,12 +32,18 @@ from Plotter1D import ModelPanel1D
 from danse.common.plottools.toolbar import NavigationToolBar 
 from sans.guiframe.dataFitting import Data1D
 from matplotlib.font_manager import FontProperties
+from graphAppearance import graphAppearance
 (InternalEvent, EVT_INTERNAL) = wx.lib.newevent.NewEvent()
 
 DEFAULT_QMAX = 0.05
 DEFAULT_QSTEP = 0.001
 DEFAULT_BEAM = 0.005
 BIN_WIDTH = 1.0
+
+
+def find_key(dic, val):
+    """return the key of dictionary dic given the value"""
+    return [k for k, v in dic.iteritems() if v == val][0]
 
 
 class NavigationToolBar2D(NavigationToolBar):
@@ -374,16 +380,25 @@ class ModelPanel2D(ModelPanel1D):
         wx.EVT_MENU(self, id, self.onEditLabels)
         slicerpop.AppendSeparator()
         
+        # id = wx.NewId()
+        # slicerpop.Append(id, '&Edit Y Axis Label')
+        # wx.EVT_MENU(self, id, self._on_yaxis_label)     
+        # id = wx.NewId()
+        # slicerpop.Append(id, '&Edit X Axis Label')
+        # wx.EVT_MENU(self, id, self._on_xaxis_label)
+        # id = wx.NewId()
+        # slicerpop.Append(id, '&Toggle Grid On/Off', 'Toggle Grid On/Off')
+        # wx.EVT_MENU(self, id, self.onGridOnOff)
+        # slicerpop.AppendSeparator()
+
+        # ILL mod here
+
         id = wx.NewId()
-        slicerpop.Append(id, '&Edit Y Axis Label')
-        wx.EVT_MENU(self, id, self._on_yaxis_label)     
-        id = wx.NewId()
-        slicerpop.Append(id, '&Edit X Axis Label')
-        wx.EVT_MENU(self, id, self._on_xaxis_label)
-        id = wx.NewId()
-        slicerpop.Append(id, '&Toggle Grid On/Off', 'Toggle Grid On/Off')
-        wx.EVT_MENU(self, id, self.onGridOnOff)
+        slicerpop.Append(id, '&Modify graph appearance','Modify graph appearance')
+        wx.EVT_MENU(self, id, self.modifyGraphAppearance)
         slicerpop.AppendSeparator()
+
+
         
         id = wx.NewId()
         slicerpop.Append(id, '&2D Color Map')
@@ -775,3 +790,37 @@ class ModelPanel2D(ModelPanel1D):
         if self.parent != None:
             self.parent.show_data2d(data, default_name)
         
+
+    def modifyGraphAppearance(self,e):
+        self.graphApp = graphAppearance(self,'Modify graph appearance',
+                                        legend=False)
+
+        
+
+        self.graphApp.setDefaults(self.grid_on,self.legend_on,
+                                  self.xaxis_label,self.yaxis_label,
+                                  self.xaxis_unit,self.yaxis_unit,
+                                  self.xaxis_font,self.yaxis_font,
+                                  find_key(self.get_loc_label(),self.legendLoc),
+                                  self.xcolor,self.ycolor)
+        self.graphApp.Bind(wx.EVT_CLOSE, self.on_graphApp_close)
+    
+
+    def on_graphApp_close(self,e):
+        # gets values from graph appearance dialog and sends them off
+        # to modify the plot
+
+        self.onGridOnOff(self.graphApp.get_togglegrid())
+
+        
+        self.xaxis_label = self.graphApp.get_xlab()
+        self.yaxis_label = self.graphApp.get_ylab()
+        self.xaxis_unit = self.graphApp.get_xunit()
+        self.yaxis_unit = self.graphApp.get_yunit()
+
+        self.xaxis(self.xaxis_label,self.xaxis_unit,
+                   self.graphApp.get_xfont(),self.graphApp.get_xcolor())
+        self.yaxis(self.yaxis_label,self.yaxis_unit,
+                   self.graphApp.get_yfont(),self.graphApp.get_ycolor())
+
+        self.graphApp.Destroy()

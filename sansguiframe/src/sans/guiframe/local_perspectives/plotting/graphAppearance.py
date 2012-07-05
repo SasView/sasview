@@ -25,8 +25,10 @@ COLOR = ['black', 'blue', 'green', 'red', 'cyan', 'magenta', 'yellow']
 
 class graphAppearance(wx.Frame):
 
-    def __init__(self,parent,title):
+    def __init__(self,parent,title,legend=True):
         super(graphAppearance,self).__init__(parent, title=title,size=(520,435))
+
+        self.legend = legend
 
         self.InitUI()
         self.Centre()
@@ -50,11 +52,20 @@ class graphAppearance(wx.Frame):
         yhbox2 = wx.BoxSizer(wx.HORIZONTAL)
 
 
-        legendLocText = wx.StaticText(panel, label='Legend location: ')
-        self.legendLocCombo = wx.ComboBox(panel,style = wx.CB_READONLY, size=(180,-1))
-        self.fillLegendLocs()
 
-        self.toggleLegend = wx.CheckBox(panel, label='Toggle legend on/off')
+        if self.legend:
+            legendLocText = wx.StaticText(panel, label='Legend location: ')
+            self.legendLocCombo = wx.ComboBox(panel,style = wx.CB_READONLY, size=(180,-1))
+            self.fillLegendLocs()
+        else:
+            self.legendLocCombo = None
+
+
+        if self.legend:
+            self.toggleLegend = wx.CheckBox(panel, label='Toggle legend on/off')
+        else:
+            self.toggleLegend = None
+
         self.toggleGrid = wx.CheckBox(panel, label='Toggle grid on/off')
 
         
@@ -118,11 +129,13 @@ class graphAppearance(wx.Frame):
         yhbox2.Add(self.yfontColor,flag=wx.ALL | wx.ALIGN_RIGHT, border=5)
         yhbox2.Add(yfontButton,flag=wx.ALL | wx.ALIGN_RIGHT, border=5)
 
+        if self.legend:
+            hbox1.Add(legendLocText, flag =  wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=5)
+            hbox1.Add(self.legendLocCombo, flag =  wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=5)
 
-        hbox1.Add(legendLocText, flag =  wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=5)
-        hbox1.Add(self.legendLocCombo, flag =  wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=5)
-        hbox1.Add((5,-1))
-        hbox1.Add(self.toggleLegend, flag = wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=5)
+        if self.legend:
+            hbox1.Add((5,-1))
+            hbox1.Add(self.toggleLegend, flag = wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=5)
 
         hbox2.Add(self.okButton, flag = wx.ALL | wx.ALIGN_RIGHT, border=5)
         hbox2.Add(self.cancelButton, flag = wx.ALL | wx.ALIGN_RIGHT, border=5)
@@ -222,7 +235,8 @@ class graphAppearance(wx.Frame):
                     xaxis_font,yaxis_font,legend_loc,
                     xcolor,ycolor):
         self.toggleGrid.SetValue(grid)
-        self.toggleLegend.SetValue(legend)
+        if self.legend:
+            self.toggleLegend.SetValue(legend)
         self.xaxisText.SetValue(xlab)
         self.yaxisText.SetValue(ylab)
         self.xaxisUnitText.SetValue(xunit)
@@ -241,27 +255,54 @@ class graphAppearance(wx.Frame):
             self.yfontColor.SetStringSelection(ycolor)
             
 
-        
-        self.legendLocCombo.SetStringSelection(legend_loc)
+        if self.legend:
+            self.legendLocCombo.SetStringSelection(legend_loc)
 
 
-    def getAppInfo(self):
-        grid_on = self.toggleGrid.GetValue()
-        legend_on = self.toggleLegend.GetValue()
-        xlab = self.xaxisText.GetValue()
-        ylab = self.yaxisText.GetValue()
-        xunit = self.xaxisUnitText.GetValue()
-        yunit = self.yaxisUnitText.GetValue()
-        legend_loc = self.get_loc_label()[self.legendLocCombo.GetStringSelection()]
-        xcolor = self.xfontColor.GetValue()
-        ycolor = self.yfontColor.GetValue()
+    # get whether grid is toggled on/off
+    def get_togglegrid(self):
+        return self.toggleGrid.GetValue()
 
+    # get whether legend is toggled on/off
+    def get_togglelegend(self):
+        return self.toggleLegend.GetValue()
 
-        return [grid_on,legend_on,xlab,ylab,xunit,yunit,
-                self.xfont,self.yfont,
-                xcolor,ycolor,legend_loc]
+    # get x label
+    def get_xlab(self):
+        return self.xaxisText.GetValue()
 
+    # get y label
+    def get_ylab(self):
+        return self.yaxisText.GetValue()
 
+    # get x unit
+    def get_xunit(self):
+        return self.xaxisUnitText.GetValue()
+
+    # get y unit
+    def get_yunit(self):
+        return self.yaxisUnitText.GetValue()
+
+    # get legend location
+    def get_legend_loc(self):
+        return self.get_loc_label()[self.legendLocCombo.GetStringSelection()]
+
+    # get x axis label color
+    def get_xcolor(self):
+        return self.xfontColor.GetValue()
+
+    # get y axis label color
+    def get_ycolor(self):
+        return self.yfontColor.GetValue()
+
+    # get x axis font (type is FontProperties)
+    def get_xfont(self):
+        return self.xfont
+
+    # get y axis font
+    def get_yfont(self):
+        return self.yfont
+    
 
 if __name__ == '__main__':
 

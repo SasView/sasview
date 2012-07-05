@@ -686,25 +686,21 @@ class ModelPanel1D(PlotPanel, PanelBase):
     
 
     def on_graphApp_close(self,e):
-# returns toggleGrid? toggleLegend? xlab, ylab, xunit, yunit, xfont, yfont, xcolor, ycolor, legendloc
+        # gets values from graph appearance dialog and sends them off
+        # to modify the plot
 
-        #to do - make this passback mechanism much nicer
-        data = self.graphApp.getAppInfo()
-        self.onGridOnOff(data[0])
-        self.onLegend(data[1])
-        self.ChangeLegendLoc(data[10])
+        self.onGridOnOff(self.graphApp.get_togglegrid())
+        self.onLegend(self.graphApp.get_togglelegend())
+        self.ChangeLegendLoc(self.graphApp.get_legend_loc())
 
-        self.xaxis_label = data[2]
-        self.yaxis_label = data[3]
-        self.xaxis_unit = data[4]
-        self.yaxis_unit = data[5]
+        self.xaxis_label = self.graphApp.get_xlab()
+        self.yaxis_label = self.graphApp.get_ylab()
+        self.xaxis_unit = self.graphApp.get_xunit()
+        self.yaxis_unit = self.graphApp.get_yunit()
 
-        self.xaxis(data[2],data[4],data[6],data[8])
-        self.yaxis(data[3],data[5],data[7],data[9])
-
-        xfont = data[6]
-        yfont = data[7]
-
-        # and a little sanity checking along the way
+        self.xaxis(self.xaxis_label,self.xaxis_unit,
+                   self.graphApp.get_xfont(),self.graphApp.get_xcolor())
+        self.yaxis(self.yaxis_label,self.yaxis_unit,
+                   self.graphApp.get_yfont(),self.graphApp.get_ycolor())
 
         self.graphApp.Destroy()
