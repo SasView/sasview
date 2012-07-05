@@ -503,29 +503,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 loc_menu.Append(id, str(label), str(label))
                 wx.EVT_MENU(self, id, self.onChangeLegendLoc)
             
-
-            # ILL mod start here
-
-            # id = wx.NewId()
-            # self._slicerpop.AppendMenu(id, '&Modify Legend Location', loc_menu)
-
-            # id = wx.NewId()
-            # self._slicerpop.Append(id, '&Toggle Legend On/Off', 'Toggle Legend On/Off')
-            # wx.EVT_MENU(self, id, self.onLegend)
-            # self._slicerpop.AppendSeparator()
-            
-            # id = wx.NewId()
-            # self._slicerpop.Append(id, '&Edit Y Axis Label')
-            # wx.EVT_MENU(self, id, self._on_yaxis_label)     
-            # id = wx.NewId()
-            # self._slicerpop.Append(id, '&Edit X Axis Label')
-            # wx.EVT_MENU(self, id, self._on_xaxis_label)
-    
-            # id = wx.NewId()
-            # self._slicerpop.Append(id, '&Toggle Grid On/Off', 'Toggle Grid On/Off')
-            # wx.EVT_MENU(self, id, self.onGridOnOff)
-            # self._slicerpop.AppendSeparator()
-
             id = wx.NewId()
             self._slicerpop.Append(id, '&Modify graph appearance','Modify graph appearance')
             wx.EVT_MENU(self, id, self.modifyGraphAppearance)

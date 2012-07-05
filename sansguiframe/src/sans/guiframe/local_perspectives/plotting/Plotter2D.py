@@ -380,17 +380,6 @@ class ModelPanel2D(ModelPanel1D):
         wx.EVT_MENU(self, id, self.onEditLabels)
         slicerpop.AppendSeparator()
         
-        # id = wx.NewId()
-        # slicerpop.Append(id, '&Edit Y Axis Label')
-        # wx.EVT_MENU(self, id, self._on_yaxis_label)     
-        # id = wx.NewId()
-        # slicerpop.Append(id, '&Edit X Axis Label')
-        # wx.EVT_MENU(self, id, self._on_xaxis_label)
-        # id = wx.NewId()
-        # slicerpop.Append(id, '&Toggle Grid On/Off', 'Toggle Grid On/Off')
-        # wx.EVT_MENU(self, id, self.onGridOnOff)
-        # slicerpop.AppendSeparator()
-
         # ILL mod here
 
         id = wx.NewId()
