@@ -1061,7 +1061,9 @@ class GridPanel(SPanel):
                         group_id=str(new_plot.group_id), title =title)) 
             msg = "Plotting completed!"
             wx.PostEvent( self.parent.parent, 
-                                      StatusEvent(status=msg))   
+                                      StatusEvent(status=msg))  
+            self.parent.parent.update_theory(data_id=new_plot.id, 
+                                              theory=new_plot) 
         except:
              wx.PostEvent(self.parent.parent, 
                              StatusEvent(status=msg, info="error")) 
