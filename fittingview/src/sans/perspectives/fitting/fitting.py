@@ -1457,7 +1457,7 @@ class Plugin(PluginBase):
                 plot_result = False
                 if correct_result:
                     if not is_data2d:
-                        self._complete1D(x=data.x, y=res.theory, page_id=pid,
+                        self._complete1D(x=data.x[res.index], y=res.theory, page_id=pid,
                                          elapsed=None,
                                          index=res.index, model=model,
                                          weight=None, fid=data.id,
