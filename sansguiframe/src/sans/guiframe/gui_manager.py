@@ -373,7 +373,7 @@ class ViewerFrame(wx.Frame):
                                   file_name=file_name)
         self.show_batch_frame(None)
         
-    def on_read_batch_tofile(self, event):
+    def on_read_batch_tofile(self, base):
         """
         Open a file dialog , extract the file to read and display values
         into a grid
@@ -381,18 +381,24 @@ class ViewerFrame(wx.Frame):
         path = None
         if self._default_save_location == None:
             self._default_save_location = os.getcwd()
-        
-        dlg = wx.FileDialog(self, 
+        wildcard = "(*.csv; *.txt)|*.csv; *.txt"
+        dlg = wx.FileDialog(base, 
                             "Choose a file", 
                             self._default_save_location, "",
-                             "(*.csv)|*.csv| Text Files (*.txt)|*.txt")
+                             wildcard)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             if path is not None:
                 self._default_save_location = os.path.dirname(path)
         dlg.Destroy()
-        self.read_batch_tofile(file_name=path)
-        
+        try:
+            self.read_batch_tofile(file_name=path)
+        except:
+            msg = "Error occurred when reading the file; %s\n"% path
+            msg += "%s\n"% sys.exc_value
+            wx.PostEvent(self, StatusEvent(status=msg,
+                                             info="error"))
+            
     def read_batch_tofile(self, file_name):
         """
         Extract value from file name and Display them into a grid
@@ -445,8 +451,16 @@ class ViewerFrame(wx.Frame):
         for col_index in range(len(col_name_toks)):
             c_name = col_name_toks[col_index]
             if c_name.strip() != "":
-                data[c_name] = [ lines[row].split(separator)[c_index]
-                                for row in range(index + 1, len(lines)-1)]
+                # distinguish between column name and value
+                try:
+                    float(c_name)
+                    col_name = "Column %s"% str(col_index + 1)
+                    index_min = index
+                except:
+                    col_name = c_name
+                    index_min = index + 1
+                data[col_name] = [ lines[row].split(separator)[c_index]
+                                for row in range(index_min, len(lines)-1)]
                 c_index += 1
                 
         self.open_with_localapp(data_outputs=data, data_inputs=None,

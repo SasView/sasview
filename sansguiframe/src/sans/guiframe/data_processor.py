@@ -125,6 +125,9 @@ class GridPage(sheet.CSheet):
         self.SetRowMinimalAcceptableHeight(self.row_height)
         self.SetNumberRows(self._rows)
         self.SetNumberCols(self._cols)
+        color = self.parent.GetBackgroundColour()
+        for col in range(self._cols):
+            self.SetCellBackgroundColour(0, col, color)
         self.AutoSize()
         self.list_plot_panels = {}
         self.default_col_width = 75
@@ -215,7 +218,7 @@ class GridPage(sheet.CSheet):
         for cell_row, cell_col in self.selected_cells:
             if cell_row > 0 and cell_row < self.max_row_touse:
                 self.axis_value.append(self.GetCellValue(cell_row, cell_col))
-     
+
     def on_left_click(self, event):
         """
         Catch the left click on label mouse event
@@ -225,6 +228,7 @@ class GridPage(sheet.CSheet):
         
         col = event.GetCol()
         row = event.GetRow()
+
         if not (flag):
             self.selected_cols = []
             self.selected_rows = []
@@ -421,6 +425,8 @@ class GridPage(sheet.CSheet):
         width = self.GetColSize(col)
         if width < self.default_col_width:
            self.SetColSize(col, self.default_col_width)
+        color = self.parent.GetBackgroundColour()
+        self.SetCellBackgroundColour(0, col, color)
         self.ForceRefresh()
         
     def on_set_x_axis(self, event):
@@ -528,6 +534,12 @@ class GridPage(sheet.CSheet):
                         grid_view[label].append(None) 
         return grid_view
     
+    def get_nofrows(self):
+        """
+        Return number of total rows
+        """
+        return self._rows
+    
 class Notebook(nb, PanelBase):
     """
     ## Internal name for the AUI manager
@@ -545,14 +557,15 @@ class Notebook(nb, PanelBase):
                     wx.aui.AUI_NB_DEFAULT_STYLE|
                     wx.CLIP_CHILDREN)
         PanelBase.__init__(self, parent)
+        self.gpage_num = 1
         self.enable_close_button()
         self.parent = parent
         self.manager = manager
         self.data = data
         #add empty page
         self.add_empty_page()
-        
-        self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_page)
+        self.pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
+        self.Bind(self.pageClosedEvent, self.on_close_page)    
     
     def add_empty_page(self):
         """
@@ -560,9 +573,11 @@ class Notebook(nb, PanelBase):
         grid = GridPage(self, panel=self.parent)
         self.AddPage(grid, "", True)
         pos = self.GetPageIndex(grid)
-        title = "Grid" + str(self.GetPageCount())
+        title = "Grid" + str(self.gpage_num)
         self.SetPageText(pos, title)
         self.SetSelection(pos)
+        self.enable_close_button()
+        self.gpage_num += 1
         return grid , pos
         
     def enable_close_button(self):
@@ -604,14 +619,33 @@ class Notebook(nb, PanelBase):
                     msg += "this operation.\n"
                     msg += "Please select elements of the same col.\n"
                     raise ValueError, msg
+                
+            # Finally check the highlighted cell if any cells missing
+            self.get_highlighted_row()
         else:
             msg = "No item selected.\n"
             msg += "Please select only one column or one cell"
             raise ValueError, msg
-       
         return grid.selected_cells
        
-    
+    def get_highlighted_row(self):
+        """
+        Add highlight rows
+        """
+        pos = self.GetSelection()
+        grid = self.GetPage(pos)
+        col = grid.selected_cols[0]
+        # Finally check the highlighted cell if any cells missing
+        for row in range(grid.get_nofrows()):
+            if grid.IsInSelection(row, col):
+                cel = (row, col)
+                if row < 1:
+                    continue
+                if not grid.GetCellValue(row, col):
+                    continue
+                if cel not in grid.selected_cells:
+                    grid.selected_cells.append(cel)
+                        
     def get_column_labels(self):
         """
         return dictionary of columns labels of the current page
@@ -654,46 +688,52 @@ class Notebook(nb, PanelBase):
             
         if len(cell_list) > 0:
             if len(cell_list) == 1:
-                 row_min, col  = cell_list[0]    
-                 col_name =  grid.GetColLabelValue(int(col))#grid.GetCellValue(0, col)
-                 col_title = grid.GetCellValue(0, col)
-                 label = create_label(col_name, row_min+1 , row_min+1)
-                 return  label,  col_title
+                row_min, col  = cell_list[0]    
+                col_name =  grid.GetColLabelValue(int(col))
+                 
+                col_title = grid.GetCellValue(0, col)
+                label = create_label(col_name, row_min+1 , row_min+1)
+                return  label,  col_title
             else:
                 temp_list = copy.deepcopy(cell_list)
                 temp_list.sort()
                 length = len(temp_list)
                 row_min, col  = temp_list[0]    
                 row_max, _  = temp_list[length-1]
-                col_name =  grid.GetColLabelValue(int(col))#grid.GetCellValue(0, col)
+                col_name = grid.GetColLabelValue(int(col))
                 col_title = grid.GetCellValue(0, col)
+
                 index = 0
-                for row in xrange(row_min, row_max +1):
+                for row in xrange(row_min, row_max + 1):
                     if index > 0 and index < len(temp_list):
                         new_row, _ = temp_list[index]
                         if row != new_row:
                             temp_list.insert(index, (None, None))
                             if index -1 >= 0:
                                 new_row, _ = temp_list[index-1]
-                                if not new_row==None and new_row!=' ' :
-                                    label += create_label(col_name, None, int(new_row) +1)
+                                if not new_row == None and new_row != ' ' :
+                                    label += create_label(col_name, None, 
+                                                          int(new_row) +1)
                                 else:
                                     label += "]"
                                 label += ","
                             if index + 1 < len(temp_list):
                                 new_row, _ = temp_list[index + 1]
                                 if not new_row==None:
-                                    label += create_label(col_name, int(new_row)+1, None)
+                                    label += create_label(col_name, 
+                                                          int(new_row)+1, None)
                     if row_min != None and row_max != None:
                         if index == 0:
-                            label += create_label(col_name,  int(row_min)+1, None)
+                            label += create_label(col_name,  
+                                                  int(row_min)+1, None)
                         elif index == len(temp_list)-1:
-                            label += create_label(col_name, None, int(row_max)+1)
+                            label += create_label(col_name, None, 
+                                                  int(row_max)+1)
                     index += 1
                 # clean up the list
                 label_out = ''
                 for item in label.split(','):
-                    if item.split(":")[1]=="]":
+                    if item.split(":")[1] == "]":
                         continue
                     else:
                         label_out += item + ","
@@ -706,7 +746,7 @@ class Notebook(nb, PanelBase):
         """
         if self.GetPageCount() == 1:
             event.Veto()
-        self.enable_close_button()
+        wx.CallAfter(self.enable_close_button)
         
     def set_data(self, data_inputs, data_outputs, details="", file_name=None):
         if data_outputs is None or data_outputs == {}:
@@ -805,6 +845,7 @@ class GridPanel(SPanel):
         self.view_button = None
         self.plot_button = None
         self.notebook = None
+        self.plot_num = 1
        
         self.layout_grid()
         self.layout_plotting_area()
@@ -868,6 +909,7 @@ class GridPanel(SPanel):
         pos = self.notebook.GetSelection()
         grid = self.notebook.GetPage(pos)
         title = self.notebook.GetPageText(pos)
+        self.notebook.get_highlighted_row()
         if len(grid.selected_cells) == 0:
             msg = "Highlight a Data or Chi2 column first..."
             wx.PostEvent(self.parent.parent, 
@@ -936,13 +978,7 @@ class GridPanel(SPanel):
                                                               info="error"))
                                     #time.sleep(0.5) 
                                     return
-                                    #continue  
-                        """
-                        wx.PostEvent(self.parent.parent, 
-                                     NewPlotEvent(action="clear",
-                                                  group_id=str(group_id),
-                                                  title=title)) 
-                        """ 
+
                         wx.PostEvent(self.parent.parent, 
                                      NewPlotEvent(plot=new_plot, 
                                                 group_id=str(new_plot.group_id),
@@ -962,9 +998,6 @@ class GridPanel(SPanel):
                     return
                     #continue
     
-        
-     
-    
     def on_plot(self, event):
         """
         Evaluate the contains of textcrtl and plot result
@@ -981,13 +1014,14 @@ class GridPanel(SPanel):
                 msg = "Select column values for x axis"
                 raise ValueError, msg
         except:
-             wx.PostEvent(self.parent.parent, 
-                             StatusEvent(status=msg, info="error")) 
-             return
-
+            msg = "X axis value error."
+            wx.PostEvent(self.parent.parent, 
+                            StatusEvent(status=msg, info="error")) 
+            return
         dict = parse_string(sentence, column_names.keys())
-        sentence = self.get_sentence(dict, sentence, column_names)
+        
         try:
+            sentence = self.get_sentence(dict, sentence, column_names)
             x = eval(sentence)
         except:
             msg = "Need a proper x-range."
@@ -996,12 +1030,18 @@ class GridPanel(SPanel):
             return
         #evaluate y
         sentence = self.y_axis_label.GetValue()
-        if sentence.strip() == "":
-            msg = "select value for y axis"
-            raise ValueError, msg
-        dict = parse_string(sentence, column_names.keys())
-        sentence = self.get_sentence(dict, sentence, column_names)
         try:
+            if sentence.strip() == "":
+                msg = "select value for y axis"
+                raise ValueError, msg
+        except:
+            msg = "Y axis value error."
+            wx.PostEvent(self.parent.parent, 
+                            StatusEvent(status=msg, info="error")) 
+            return
+        dict = parse_string(sentence, column_names.keys())
+        try:
+            sentence = self.get_sentence(dict, sentence, column_names)
             y = eval(sentence)
         except:
             msg = "Need a proper y-range."
@@ -1051,7 +1091,10 @@ class GridPanel(SPanel):
                        self.y_axis_unit.GetValue())
         try:
             title = y_title.strip()
-            title += self.notebook.GetPageText(pos)
+            
+            title += "_" + self.notebook.GetPageText(pos)
+            title += "_" + str(self.plot_num)
+            self.plot_num += 1
             new_plot.name = title
             new_plot.xtransform = "x"
             new_plot.ytransform  = "y"  
@@ -1345,7 +1388,7 @@ class GridFrame(wx.Frame):
         Open file containg batch result
         """
         if self.parent is not None:
-            self.parent.on_read_batch_tofile(event)
+            self.parent.on_read_batch_tofile(self)
             
     def open_with_excel(self, event):
         """
