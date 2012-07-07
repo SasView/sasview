@@ -4,7 +4,6 @@
 import plottables
 from BaseInteractor import _BaseInteractor
 
-
 class PointInteractor(_BaseInteractor):
     """
     """
@@ -17,7 +16,8 @@ class PointInteractor(_BaseInteractor):
         self.color = color
         self.colorlist = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
         self.symbollist = ['o', 'x', '^', 'v', '<', '>',
-                           '+', 's', 'd', 'D', 'h', 'H', 'p', '-']
+                           '+', 's', 'd', 'D', 'h', 'H', 'p', '-', '--',
+                           'vline', 'step']
         self.markersize = None
         self.marker = None
         self.marker2 = None
@@ -39,10 +39,19 @@ class PointInteractor(_BaseInteractor):
         """
         """
         #Draw curve
-        if self._symbol(symbol) == '-':
+        if self._symbol(symbol) == '-' or self._symbol(symbol) == '--':
             l_width = markersize * 0.4
-            return self.curve(x=x, y=y, color=color, label=label, width=l_width)
+            return self.curve(x=x, y=y, color=color, symbol=symbol, 
+                              label=label, width=l_width)
             #return
+        if self._symbol(symbol) == 'vline':
+            l_width = markersize * 0.4
+            return self.vline(x=x, y=y, color=color, 
+                                label=label, width=l_width)
+        if self._symbol(symbol) == 'step':
+            l_width = markersize * 0.4
+            return self.step(x=x, y=y, color=color, 
+                                label=label, width=l_width)
         if not self.marker == None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
@@ -53,9 +62,9 @@ class PointInteractor(_BaseInteractor):
             dx = nx.vstack((x-dx[0], dx[1]-x)).transpose()
         if dy != None and type(dy) == type(()):
             dy = nx.vstack((y-dy[0], dy[1]-y)).transpose()
-        
+        zorder = self.zorder
         if dx == None and dy == None:
-            zorder = 1
+            #zorder = 1
             self.marker = self.axes.plot(x, y, color=self.color,
                                          marker=self._symbol(symbol),
                                          markersize=markersize,
@@ -64,14 +73,14 @@ class PointInteractor(_BaseInteractor):
         else:
             
             if hide_error:
-                zorder = 1
+                #zorder = 1
                 self.marker = self.axes.plot(x, y, color=self.color,
                                              marker=self._symbol(symbol),
                                              markersize=markersize,
                                              linestyle='', label=label,
                                              zorder=zorder)[0]
             else:
-                zorder = 2
+                #zorder = 2
                 self.marker = self.axes.errorbar(x, y, yerr=dy,
                                                  xerr=None,
                                                  ecolor=self.color,
@@ -96,11 +105,46 @@ class PointInteractor(_BaseInteractor):
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
         self.marker = self.axes.plot(x, y, color=self.color, lw=width,
-                                     marker='', linestyle='-', label=label)[0]
+                                     marker='', linestyle=self._symbol(symbol),
+                                     label=label, zorder=self.zorder)[0]
             
         self.connect_markers([self.marker])
         self.update()
+
         
+    def vline(self, x, y, dy=None, color=0, symbol=0, label=None, width=2.0):
+        """
+        """
+        if not self.marker == None:
+            self.base.connect.clear([self.marker])
+        self.color = self._color(color)
+        if min(y) < 0:
+            y_min = 0.0
+        else:
+            y_min = min(y)*9/10
+        self.marker = self.axes.vlines(x=x, ymin=y_min, ymax=y, 
+                                      color=self.color, 
+                                      linestyle='-', label=label,
+                                      lw=width, zorder=self.zorder)    
+        self.connect_markers([self.marker])
+        self.update()
+
+    def step(self, x, y, dy=None, color=0, symbol=0, label=None, width=2.0):
+        """
+        """
+        if not self.marker == None:
+            self.base.connect.clear([self.marker])
+        self.color = self._color(color)
+        if self.markersize != None:
+            markersize = self.markersize
+            
+        self.marker = self.axes.step(x, y, color=self.color,
+                                         marker='',
+                                         linestyle='-', label=label,
+                                         lw=width, zorder=self.zorder)[0]
+        self.connect_markers([self.marker])
+        self.update()
+               
     def connect_markers(self, markers):
         """
         Connect markers to callbacks

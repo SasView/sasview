@@ -138,6 +138,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
         _labels['Pentagon'] = i
         i += 1
         _labels['Line'] = i
+        i += 1
+        _labels['Dash'] = i
+        i += 1
+        _labels['Vline'] = i
+        i += 1
+        _labels['Step'] = i
         return _labels
     
     def get_color_label(self):
@@ -267,7 +273,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         if data.__class__.__name__ == 'Data2D':
             return
-        if data.id in self.plots.keys():
+        plot_keys = self.plots.keys()
+        if data.id in plot_keys:
             #Recover panel prop.s
             xlo, xhi = self.subplot.get_xlim()
             ylo, yhi = self.subplot.get_ylim()
@@ -278,6 +285,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 data.custom_color = old_data.custom_color
                 data.symbol = old_data.symbol
                 data.markersize = old_data.markersize
+                data.zorder = len(plot_keys)
             # Replace data
             self.graph.replace(data)
             self.plots[data.id] = data
@@ -297,6 +305,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         else:
             self.plots[data.id] = data
             self.graph.add(self.plots[data.id]) 
+            data.zorder = len(plot_keys)
             ## Set the view scale for all plots
             try:
                 self._onEVT_FUNC_PROPERTY()

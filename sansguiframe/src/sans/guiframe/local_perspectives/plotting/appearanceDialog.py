@@ -216,6 +216,12 @@ class appearanceDialog(wx.Frame):
         _labels['Pentagon'] = i
         i += 1
         _labels['Line'] = i
+        i += 1
+        _labels['Dash'] = i
+        i += 1
+        _labels['Vline'] = i
+        i += 1
+        _labels['Step'] = i
         return _labels
     
     def get_color_label(self):
