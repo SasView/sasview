@@ -1343,6 +1343,13 @@ class ViewerFrame(wx.Frame):
         if not VIEW_MENU:
             return
         self._view_menu = wx.Menu()
+        
+        id = wx.NewId()
+        hint = "Display the Grid Window for batch results etc."
+        self._view_menu.Append(id, '&Show Grid Window', hint) 
+        wx.EVT_MENU(self, id, self.show_batch_frame)
+        
+        self._view_menu.AppendSeparator()
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         id = wx.NewId()
         self._data_panel_menu = self._view_menu.Append(id,
@@ -1361,17 +1368,14 @@ class ViewerFrame(wx.Frame):
         else:
             self._toolbar_menu = self._view_menu.Append(id, '&Show Toolbar', '')
         wx.EVT_MENU(self, id, self._on_toggle_toolbar)
-                    
-        self._view_menu.AppendSeparator()
-        id = wx.NewId()
-        hint = "Display batch results into a grid"
-        self._view_menu.Append(id, '&Show Grid Window', hint) 
-        wx.EVT_MENU(self, id, self.show_batch_frame)
 
         if custom_config != None:
             self._view_menu.AppendSeparator()
             id = wx.NewId()
-            preference_menu = self._view_menu.Append(id, 'Startup Setting', '')
+            hint_ss = "Select the current/default configuration "
+            hint_ss += "as a startup setting"
+            preference_menu = self._view_menu.Append(id, 'Startup Setting', 
+                                                     hint_ss)
             wx.EVT_MENU(self, id, self._on_preference_menu)
             
         self._menubar.Append(self._view_menu, '&View')   
