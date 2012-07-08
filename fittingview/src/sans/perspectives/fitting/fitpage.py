@@ -1027,6 +1027,11 @@ class FitPage(BasicPage):
         """
         Set fit button label depending on the fit_started[bool]
         """
+        # Skip this feature if we are not on Windows
+        #NOTE: the is_mac data member actually means "is no Windows".
+        if self.is_mac:
+            return
+        
         if self.fit_started:
             label = "Stop"
             color = "red"
