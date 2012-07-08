@@ -322,7 +322,7 @@ class GridPage(sheet.CSheet):
         col_name = [self.GetCellValue(row, col) 
                         for col in range(self.GetNumberCols())]
         for c_name in self.data.keys():
-            if c_name not in col_name:
+            if c_name not in col_name and self.data[c_name]:
                 id = wx.NewId()
                 hint = "Insert %s column before the " % str(c_name)
                 hint += " %s column" % str(label)
@@ -343,7 +343,7 @@ class GridPage(sheet.CSheet):
         col_name = [self.GetCellValue(row, col) 
                         for col in range(self.GetNumberCols())]
         for c_name in self.data.keys():
-            if c_name not in col_name:
+            if c_name not in col_name and self.data[c_name]:
                 id = wx.NewId()
                 hint = "Insert %s column after the " % str(c_name)
                 hint += " %s column" % str(label)
