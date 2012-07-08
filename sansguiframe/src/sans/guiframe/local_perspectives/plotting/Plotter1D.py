@@ -34,7 +34,7 @@ from sans.guiframe.utils import PanelMenu
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.gui_style import GUIFRAME_ICON
-from binder import BindArtist
+from danse.common.plottools.binder import BindArtist
 from appearanceDialog import appearanceDialog
 from graphAppearance import graphAppearance
 

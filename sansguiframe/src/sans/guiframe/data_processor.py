@@ -131,14 +131,14 @@ class GridPage(sheet.CSheet):
         self.AutoSize()
         self.list_plot_panels = {}
         self.default_col_width = 75
-        self.EnableEditing(False)
+        self.EnableEditing(True)
         if self.GetNumberCols() > 0:
             self.default_col_width =  self.GetColSize(0)
         self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.on_left_click)
         self.Bind(wx.grid.EVT_GRID_LABEL_RIGHT_CLICK, self.on_right_click)
         self.Bind(wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.on_selected_cell)
         self.Bind(wx.grid.EVT_GRID_CMD_CELL_CHANGE, self.on_edit_cell)
-        
+        self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK, self.onContextMenu)
         
     def on_edit_cell(self, event):
         """
@@ -458,10 +458,10 @@ class GridPage(sheet.CSheet):
         for item in (self.data_outputs, self.data_inputs):
             self.data.update(item)
             
-        if len(self.data) + len(self.data_inputs) +len(self.data_outputs) == 0:
-            self.EnableEditing(False)
-        else:
-            self.EnableEditing(True)
+        #if len(self.data) + len(self.data_inputs) +len(self.data_outputs) == 0:
+        #    self.EnableEditing(False)
+        #else:
+        #    self.EnableEditing(True)
         if  len(self.data_outputs) > 0:
             self._cols = self.GetNumberCols()
             self._rows = self.GetNumberRows()
@@ -540,6 +540,45 @@ class GridPage(sheet.CSheet):
         """
         return self._rows
     
+    def onContextMenu(self, event):
+        """
+        Default context menu 
+        """
+        id = wx.NewId()
+        c_menu = wx.Menu()
+        copy_menu = c_menu.Append(id, '&Copy', 'Copy cell values')
+        wx.EVT_MENU(self, id, self.on_copy)
+        
+        id = wx.NewId()
+        paste_menu = c_menu.Append(id, '&Paste', 'Paste cell values')
+        wx.EVT_MENU(self, id, self.on_paste)
+        # enable from flag
+        has_selection = False
+        selected_cel = self.selected_cells
+        if len(selected_cel) > 0:
+            _row, _col = selected_cel[0]
+            has_selection = self.IsInSelection(_row, _col)
+        copy_menu.Enable(has_selection)
+        try:
+            # mouse event pos
+            pos_evt = event.GetPosition()
+            self.PopupMenu(c_menu, pos_evt)
+        except:
+            return
+    
+    def on_copy(self, event):
+        """
+        On copy event from the contextmenu
+        """
+        self.Copy()
+
+    def on_paste(self, event):
+        """
+        On paste event from the contextmenu
+        """
+        self.data = {}
+        self.Paste()
+    
 class Notebook(nb, PanelBase):
     """
     ## Internal name for the AUI manager
@@ -573,7 +612,7 @@ class Notebook(nb, PanelBase):
         grid = GridPage(self, panel=self.parent)
         self.AddPage(grid, "", True)
         pos = self.GetPageIndex(grid)
-        title = "Grid" + str(self.gpage_num)
+        title = "Table" + str(self.gpage_num)
         self.SetPageText(pos, title)
         self.SetSelection(pos)
         self.enable_close_button()
@@ -814,7 +853,6 @@ class Notebook(nb, PanelBase):
         grid = self.GetPage(pos)
         grid.on_remove_column(event=None)
         
-        
 class GridPanel(SPanel):
     def __init__(self, parent, data_inputs=None,
                  data_outputs=None, *args, **kwds):
@@ -897,7 +935,8 @@ class GridPanel(SPanel):
                         msg = "Invalid data in row %s column %s" % (str(row),
                                                                     str(col))
                         wx.PostEvent(self.parent.parent, 
-                             StatusEvent(status=msg, info="error")) 
+                             StatusEvent(status=msg, info="error"))
+                        return None
             else:
                 axis.append(None) 
         return axis
@@ -933,7 +972,6 @@ class GridPanel(SPanel):
                     msg = "Invalid cell was chosen." 
                     wx.PostEvent(self.parent.parent, StatusEvent(status=msg, 
                                                                 info="error"))
-                    #time.sleep(0.5)
                     continue
                 else:
                      value = values[row -1]
@@ -1118,6 +1156,8 @@ class GridPanel(SPanel):
         for tok, (col_name, list) in dict.iteritems():
             col = column_names[col_name]
             axis = self.get_plot_axis(col, list)
+            if axis == None:
+                return None
             sentence = sentence.replace(tok, 
                                         "numpy.array(%s)" % str(axis))
         for key, value in FUNC_DICT.iteritems():
@@ -1291,11 +1331,19 @@ class GridFrame(wx.Frame):
         wx.EVT_MENU(self, save_menu.GetId(), self.on_save_page)
         
         self.edit = wx.Menu()
+
+        self.copy_menu = self.edit.Append(-1, 'Copy', 'Copy cells')
+        wx.EVT_MENU(self, self.copy_menu.GetId(), self.on_copy)
+        self.paste_menu = self.edit.Append(-1, 'Paste', 'Paste Cells')
+        wx.EVT_MENU(self, self.paste_menu.GetId(), self.on_paste)
         hint = "Insert column before the selected column"
         self.insert_before_menu = wx.Menu()
-        self.insert_sub_menu = self.edit.AppendSubMenu(self.insert_before_menu, 
+        self.insertb_sub_menu = self.edit.AppendSubMenu(self.insert_before_menu, 
                                                       'Insert Before', hint)
- 
+        hint = "Insert column after the selected column"
+        self.insert_after_menu = wx.Menu()
+        self.inserta_sub_menu = self.edit.AppendSubMenu(self.insert_after_menu, 
+                                                      'Insert After', hint)
         hint = "Remove the selected column"
         self.remove_menu = self.edit.Append(-1, 'Remove Column', hint)
         wx.EVT_MENU(self, self.remove_menu.GetId(), self.on_remove_column)
@@ -1303,8 +1351,26 @@ class GridFrame(wx.Frame):
         self.Bind(wx.EVT_MENU_OPEN, self.on_menu_open)
         menubar.Append(self.edit, "&Edit")
         self.Bind(wx.EVT_CLOSE, self.on_close)
+    
+    def on_copy(self, event):
+        """
+        On Copy
+        """
+        pos = self.panel.notebook.GetSelection()
+        grid = self.panel.notebook.GetPage(pos)
+        grid.Copy()
+        
+    def on_paste(self, event):
+        """
+        On Paste
+        """
+        pos = self.panel.notebook.GetSelection()
+        grid = self.panel.notebook.GetPage(pos)
+        grid.on_paste(event)
+     
     def GetLabelText(self, id):
         """
+        Get Label Text
         """
         for item in self.insert_before_menu.GetMenuItems():
             m_id = item.GetId() 
@@ -1313,6 +1379,7 @@ class GridFrame(wx.Frame):
     
     def on_remove_column(self, event):
         """
+        On remove column
         """
         pos = self.panel.notebook.GetSelection()
         grid = self.panel.notebook.GetPage(pos)
@@ -1320,33 +1387,54 @@ class GridFrame(wx.Frame):
         
     def on_menu_open(self, event):
         """
-        
+        On menu open
         """
         if self.edit == event.GetMenu():
             #get the selected column
             pos = self.panel.notebook.GetSelection()
             grid = self.panel.notebook.GetPage(pos)
             col_list = grid.GetSelectedCols()
+            #has_selection = False
+            #selected_cel = grid.selected_cells
+            #if len(selected_cel) > 0:
+            #    has_selection = True
+            #self.copy_menu.Enable(has_selection)
+            
+            has_selection = False
+            selected_cel = grid.selected_cells
+            if len(selected_cel) > 0:
+                _row, _col = selected_cel[0]
+                has_selection = grid.IsInSelection(_row, _col)
+            self.copy_menu.Enable(has_selection)
+        
             if len(col_list) > 0:
                 self.remove_menu.Enable(True)
             else:
                 self.remove_menu.Enable(False)
             if len(col_list) == 0 or len(col_list) > 1:
-                self.insert_sub_menu.Enable(False)
-                
+                self.insertb_sub_menu.Enable(False)
+                self.inserta_sub_menu.Enable(False)
                 label = "Insert Column Before"
-                self.insert_sub_menu.SetText(label)
+                self.insertb_sub_menu.SetText(label)
+                label = "Insert Column After"
+                self.inserta_sub_menu.SetText(label)
             else:
-                self.insert_sub_menu.Enable(True)
+                self.insertb_sub_menu.Enable(True)
+                self.inserta_sub_menu.Enable(True)
                 
                 col = col_list[0]
-                #GetColLabelValue(self, col)
                 col_name = grid.GetCellValue(row=0, col=col)
                 label = "Insert Column Before " + str(col_name)
-                self.insert_sub_menu.SetText(label)
+                self.insertb_sub_menu.SetText(label)
                 for item in self.insert_before_menu.GetMenuItems():
                     self.insert_before_menu.DeleteItem(item)
                 grid.insert_col_menu(menu=self.insert_before_menu, 
+                                     label=col_name, window=self)
+                label = "Insert Column After " + str(col_name)
+                self.inserta_sub_menu.SetText(label)
+                for item in self.insert_after_menu.GetMenuItems():
+                    self.insert_after_menu.DeleteItem(item)
+                grid.insert_after_col_menu(menu=self.insert_after_menu, 
                                      label=col_name, window=self)
         event.Skip()
         

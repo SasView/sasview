@@ -27,7 +27,7 @@ from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.events import PanelOnFocusEvent
 from sans.guiframe.events import SlicerEvent
 from sans.guiframe.utils import PanelMenu
-from binder import BindArtist
+from danse.common.plottools.binder import BindArtist
 from Plotter1D import ModelPanel1D
 from danse.common.plottools.toolbar import NavigationToolBar 
 from sans.guiframe.dataFitting import Data1D
