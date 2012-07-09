@@ -1364,7 +1364,10 @@ class GridFrame(wx.Frame):
         self.paste_menu = self.edit.Append(-1, 'Paste', 
                                            'Paste the selected Cells')
         wx.EVT_MENU(self, self.paste_menu.GetId(), self.on_paste)
-        
+        self.clear_menu = self.edit.Append(-1, 'Clear', 
+                                           'Clear the selected Cells')
+        wx.EVT_MENU(self, self.clear_menu.GetId(), self.on_clear)
+
         self.edit.AppendSeparator()
         hint = "Insert column before the selected column"
         self.insert_before_menu = wx.Menu()
@@ -1401,6 +1404,14 @@ class GridFrame(wx.Frame):
         pos = self.panel.notebook.GetSelection()
         grid = self.panel.notebook.GetPage(pos)
         grid.on_paste(None)
+
+    def on_clear(self, event):
+        """
+        On Clear
+        """
+        pos = self.panel.notebook.GetSelection()
+        grid = self.panel.notebook.GetPage(pos)
+        grid.Clear()
      
     def GetLabelText(self, id):
         """
@@ -1445,6 +1456,7 @@ class GridFrame(wx.Frame):
             if len(grid.selected_rows) > 0:
                 has_selection = True
             self.copy_menu.Enable(has_selection)
+            self.clear_menu.Enable(has_selection)
         
             if len(col_list) > 0:
                 self.remove_menu.Enable(True)
