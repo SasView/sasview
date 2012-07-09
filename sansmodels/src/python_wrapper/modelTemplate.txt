@@ -68,6 +68,8 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         ## parameters with orientation
         self.orientation_params = [ORIENTATION_PARAMS]
 
+        self.category = [CATEGORY]
+
     def __setstate__(self, state):
         """
         restore the state of a model from pickle

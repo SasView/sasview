@@ -89,6 +89,8 @@ class WrapperGenerator:
         self.non_fittable= []
         ## parameters with orientation
         self.orientation_params =[]
+        # Model category
+        self.category = None
         ## output directory for wrappers
         self.output_dir = output_dir
         self.c_wrapper_dir = c_wrapper_dir
@@ -215,6 +217,18 @@ class WrapperGenerator:
                 except:
                     raise ValueError, "Could not parse file %s" % self.file
                 
+            key = "[CATEGORY]"
+            if line.count(key)>0:
+                try:
+                    index = line.index(key)
+                    toks = line[index:].split("=")
+                    self.category = toks[1].lstrip().rstrip()
+
+                except:
+                    raise ValueError, "Could not parse file %s" % self.file
+
+
+
             # Catch struct name
             # C++ class definition
             if line.count("class")>0:
@@ -470,7 +484,16 @@ class WrapperGenerator:
             oriented_str = oriented_str.replace(', ', formatted_endl)
             newline = self.replaceToken(newline, 
                                "[ORIENTATION_PARAMS]", oriented_str)
-           
+            
+            if self.category:
+                newline = self.replaceToken(newline,"[CATEGORY]"
+                                            ,'"' + self.category + '"')
+            else:
+                newline = self.replaceToken(newline,"[CATEGORY]",
+                                            "None")
+            
+
+
             # Write new line to the wrapper .c file
             file.write(newline+'\n')
                

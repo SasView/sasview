@@ -18,6 +18,7 @@
  //		</text>
  //[FIXED]=  radius.width
  //[ORIENTATION_PARAMS]= <text> </text>
+ //[CATEGORY] = Shapes & Spheres
 
 class SphereModel{
 public:
