@@ -558,7 +558,7 @@ class ModelManagerBase:
         from sans.models.TeubnerStreyModel import TeubnerStreyModel
         self.shape_indep_list.append(TeubnerStreyModel)
         self.model_name_list.append(TeubnerStreyModel.__name__)
-        
+
         from sans.models.TwoLorentzianModel import TwoLorentzianModel
         self.shape_indep_list.append(TwoLorentzianModel)
         self.model_name_list.append(TwoLorentzianModel.__name__)
