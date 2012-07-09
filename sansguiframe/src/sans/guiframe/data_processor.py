@@ -108,7 +108,7 @@ class GridPage(sheet.CSheet):
         self.details = ""
         self.file_name = None
         self._cols = 50
-        self._rows = 501
+        self._rows = 3001
         self.last_selected_row = -1
         self.last_selected_col = -1
         self.col_width = 30
