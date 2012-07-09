@@ -37,16 +37,20 @@ double TeubnerStreyModel::operator()(double qx,double qy) {
 }
 
 double TeubnerStreyModel::calculate_ER() {
+  // not implemented yet
   return 0.0;
 }
 
 double TeubnerStreyModel::calculate_VR() {
-  return 0.0;
+  return 1.0;
 }
 
 double TeubnerStreyModel::evaluate_rphi(double q,double phi) {
-  return 1.0;
+  double qx = q*cos(phi);
+  double qy = q*sin(phi);
+  return this->operator()(qx, qy);
 }
+
 
 
 /***
