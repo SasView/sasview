@@ -1136,9 +1136,12 @@ class GridPanel(SPanel):
             wx.PostEvent(self.parent.parent, 
                              StatusEvent(status=msg, info="error")) 
             return
+        if dy == None:
+            dy = numpy.zeros(len(y))
         #plotting
         new_plot = Data1D(x=x, y=y, dy=dy)
         new_plot.id =  wx.NewId()
+        new_plot.is_data = False
         new_plot.group_id = wx.NewId()
         y_title = self.y_axis_title.GetValue()
         x_title = self.x_axis_title.GetValue()

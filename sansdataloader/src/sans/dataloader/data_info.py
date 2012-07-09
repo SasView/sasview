@@ -757,8 +757,9 @@ class Data1D(plottable_1D, DataInfo):
                 raise ValueError, msg
             
             # Here we could also extrapolate between data points
+            ZERO = 1.0e-12
             for i in range(len(self.x)):
-                if self.x[i] != other.x[i]:
+                if math.fabs(self.x[i] - other.x[i]) > ZERO:
                     msg = "Incompatible data sets: x-values do not match"
                     raise ValueError, msg
                 """
