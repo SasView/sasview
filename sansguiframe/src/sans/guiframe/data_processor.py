@@ -146,6 +146,8 @@ class GridPage(sheet.CSheet):
         row, col = event.GetRow(), event.GetCol()
         if row > self.max_row_touse:
             self.max_row_touse = row
+        if self.data == None:
+            self.data = {}
         event.Skip()
         
     def on_selected_cell(self, event):
@@ -546,19 +548,29 @@ class GridPage(sheet.CSheet):
         """
         id = wx.NewId()
         c_menu = wx.Menu()
-        copy_menu = c_menu.Append(id, '&Copy', 'Copy cell values')
+        copy_menu = c_menu.Append(id, '&Copy', 'Copy the selected cells')
         wx.EVT_MENU(self, id, self.on_copy)
         
         id = wx.NewId()
-        paste_menu = c_menu.Append(id, '&Paste', 'Paste cell values')
+        paste_menu = c_menu.Append(id, '&Paste', 'Paste the selected cells')
         wx.EVT_MENU(self, id, self.on_paste)
+        
+        id = wx.NewId()
+        clear_menu = c_menu.Append(id, '&Clear', 'Clear the selected cells')
+        wx.EVT_MENU(self, id, self.on_clear)
+        
         # enable from flag
         has_selection = False
         selected_cel = self.selected_cells
         if len(selected_cel) > 0:
             _row, _col = selected_cel[0]
             has_selection = self.IsInSelection(_row, _col)
+        if len(self.selected_cols) > 0:
+            has_selection = True
+        if len(self.selected_rows) > 0:
+            has_selection = True
         copy_menu.Enable(has_selection)
+        clear_menu.Enable(has_selection)
         try:
             # mouse event pos
             pos_evt = event.GetPosition()
@@ -576,8 +588,17 @@ class GridPage(sheet.CSheet):
         """
         On paste event from the contextmenu
         """
-        self.data = {}
+        if self.data == None:
+            self.data = {}
+        if self.file_name == None:
+            self.file_name = 'copied_data'
         self.Paste()
+    
+    def on_clear(self, event):
+        """
+        Clear the cells selected
+        """
+        self.Clear()
     
 class Notebook(nb, PanelBase):
     """
@@ -1316,26 +1337,35 @@ class GridFrame(wx.Frame):
         self.curr_col = None
         self.curr_grid = None
         self.curr_col_name = ""
-        file = wx.Menu()
-        menubar.Append(file, "&File")
+        self.file = wx.Menu()
+        menubar.Append(self.file, "&File")
         
         hint = "Open file containing batch results"
-        open_menu = file.Append(wx.NewId(), 'Open ', hint)
+        open_menu = self.file.Append(wx.NewId(), 'Open ', hint)
         wx.EVT_MENU(self, open_menu.GetId(), self.on_open)
         
         hint = "Open the the current grid into excel"
-        open_excel_menu = file.Append(wx.NewId(), 'Open with Excel', hint)
-        wx.EVT_MENU(self, open_excel_menu.GetId(), self.open_with_excel)
-        file.AppendSeparator()
-        save_menu = file.Append(wx.NewId(), 'Save As', 'Save into File')
-        wx.EVT_MENU(self, save_menu.GetId(), self.on_save_page)
+        self.open_excel_menu = self.file.Append(wx.NewId(), 'Open with Excel', hint)
+        wx.EVT_MENU(self, self.open_excel_menu.GetId(), self.open_with_excel)
+        self.file.AppendSeparator()
+        self.save_menu = self.file.Append(wx.NewId(), 'Save As', 'Save into File')
+        wx.EVT_MENU(self, self.save_menu.GetId(), self.on_save_page)
         
         self.edit = wx.Menu()
-
-        self.copy_menu = self.edit.Append(-1, 'Copy', 'Copy cells')
+        
+        add_table_menu = self.edit.Append(-1, 'New Table', 
+                                          'Add a New Table')
+        self.edit.AppendSeparator()
+        wx.EVT_MENU(self, add_table_menu.GetId(), self.add_table)
+        
+        self.copy_menu = self.edit.Append(-1, 'Copy', 
+                                          'Copy the selected cells')
         wx.EVT_MENU(self, self.copy_menu.GetId(), self.on_copy)
-        self.paste_menu = self.edit.Append(-1, 'Paste', 'Paste Cells')
+        self.paste_menu = self.edit.Append(-1, 'Paste', 
+                                           'Paste the selected Cells')
         wx.EVT_MENU(self, self.paste_menu.GetId(), self.on_paste)
+        
+        self.edit.AppendSeparator()
         hint = "Insert column before the selected column"
         self.insert_before_menu = wx.Menu()
         self.insertb_sub_menu = self.edit.AppendSubMenu(self.insert_before_menu, 
@@ -1356,6 +1386,8 @@ class GridFrame(wx.Frame):
         """
         On Copy
         """
+        if event != None:
+            event.Skip()
         pos = self.panel.notebook.GetSelection()
         grid = self.panel.notebook.GetPage(pos)
         grid.Copy()
@@ -1364,9 +1396,11 @@ class GridFrame(wx.Frame):
         """
         On Paste
         """
+        if event != None:
+            event.Skip()
         pos = self.panel.notebook.GetSelection()
         grid = self.panel.notebook.GetPage(pos)
-        grid.on_paste(event)
+        grid.on_paste(None)
      
     def GetLabelText(self, id):
         """
@@ -1389,22 +1423,27 @@ class GridFrame(wx.Frame):
         """
         On menu open
         """
+        if self.file == event.GetMenu():
+            pos = self.panel.notebook.GetSelection()
+            grid = self.panel.notebook.GetPage(pos)
+            has_data = (grid.data != None and grid.data != {})
+            self.open_excel_menu.Enable(has_data) 
+            self.save_menu.Enable(has_data) 
+            
         if self.edit == event.GetMenu():
             #get the selected column
             pos = self.panel.notebook.GetSelection()
             grid = self.panel.notebook.GetPage(pos)
             col_list = grid.GetSelectedCols()
-            #has_selection = False
-            #selected_cel = grid.selected_cells
-            #if len(selected_cel) > 0:
-            #    has_selection = True
-            #self.copy_menu.Enable(has_selection)
-            
             has_selection = False
             selected_cel = grid.selected_cells
             if len(selected_cel) > 0:
                 _row, _col = selected_cel[0]
                 has_selection = grid.IsInSelection(_row, _col)
+            if len(grid.selected_cols) > 0:
+                has_selection = True
+            if len(grid.selected_rows) > 0:
+                has_selection = True
             self.copy_menu.Enable(has_selection)
         
             if len(col_list) > 0:
@@ -1503,7 +1542,6 @@ class GridFrame(wx.Frame):
         """
         self.Hide()
         
-   
     def on_append_column(self, event):
         """
         Append a new column to the grid
@@ -1512,13 +1550,19 @@ class GridFrame(wx.Frame):
         
     def set_data(self, data_inputs, data_outputs, details="", file_name=None):
         """
+        Set data
         """
-       
         self.panel.notebook.set_data(data_inputs=data_inputs, 
                             file_name=file_name,
                             details=details,
                             data_outputs=data_outputs)
-      
+
+    def add_table(self, event):
+        """
+        Add a new table
+        """
+        # DO not event.Skip(): it will make 2 pages
+        self.panel.notebook.add_empty_page()      
       
 class BatchOutputFrame(wx.Frame):
     """
