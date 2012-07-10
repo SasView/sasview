@@ -676,6 +676,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         # to modify the plot
 
         self.onGridOnOff(self.graphApp.get_togglegrid())
+
         self.onLegend(self.graphApp.get_togglelegend())
         self.ChangeLegendLoc(self.graphApp.get_legend_loc())
 

@@ -42,15 +42,16 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
     [DEFAULT_LIST]
     """
         
-    def __init__(self):
+    def __init__(self,multfactor=1):
         """ Initialization """
         self.__dict__ = {}
         
         # Initialize BaseComponent first, then sphere
         BaseComponent.__init__(self)
         #apply([CPYTHONCLASS].__init__, (self,)) 
-        [CPYTHONCLASS].__init__(self)
-        
+
+	[CALL_CPYTHON_INIT]
+		        
         ## Name of the model
         self.name = "[PYTHONCLASS]"
         ## Model description
@@ -69,6 +70,8 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         self.orientation_params = [ORIENTATION_PARAMS]
 
         self.category = [CATEGORY]
+        self.multiplicity_info = [MULTIPLICITY_INFO]
+        
 
     def __setstate__(self, state):
         """

@@ -91,6 +91,8 @@ class WrapperGenerator:
         self.orientation_params =[]
         # Model category
         self.category = None
+        # Whether model belongs to multifunc
+        self.is_multifunc = False
         ## output directory for wrappers
         self.output_dir = output_dir
         self.c_wrapper_dir = c_wrapper_dir
@@ -227,7 +229,16 @@ class WrapperGenerator:
                 except:
                     raise ValueError, "Could not parse file %s" % self.file
 
-
+            # is_multifunc
+            key = "[MULTIPLICITY_INFO]"
+            if line.count(key) > 0:
+                self.is_multifunc = True
+                try:
+                    index = line.index(key)
+                    toks = line[index:].split("=")
+                    self.multiplicity_info = toks[1].lstrip().rstrip()
+                except:
+                    raise ValueError, "Could not parse file %s" % self.file
 
             # Catch struct name
             # C++ class definition
@@ -330,6 +341,16 @@ class WrapperGenerator:
             # Catch class name
             newline = self.replaceToken(newline, 
                                         "[MODELSTRUCT]", self.structName)
+
+            # Sort model initialization based on multifunc
+            if(self.is_multifunc):
+                line = "int level = 1;\nPyArg_ParseTuple(args,\"i\",&level);\n"
+                line += "self->model = new " + self.pythonClass + "(level);"
+            else:
+                line = "self->model = new " + self.pythonClass + "();"
+    
+            newline = self.replaceToken(newline,"[INITIALIZE_MODEL]",
+                                            line)
             
             # Dictionary initialization
             param_str = "// Initialize parameter dictionary\n"            
@@ -464,6 +485,17 @@ class WrapperGenerator:
             # Parameter details
             newline = self.replaceToken(newline, 
                                         "[PAR_DETAILS]", self.details)
+            
+            # Call base constructor
+            if self.is_multifunc:
+                newline = self.replaceToken(newline,"[CALL_CPYTHON_INIT]",
+                                            'C' + self.pythonClass + ".__init__(self,multfactor)\n\tself.is_multifunc = True")
+                newline = self.replaceToken(newline,"[MULTIPLICITY_INFO]",self.multiplicity_info)
+            else:
+                newline = self.replaceToken(newline,"[CALL_CPYTHON_INIT]",
+                                            'C' + self.pythonClass + ".__init__(self)\n\tself.is_multifunc = False")
+                newline = self.replaceToken(newline,"[MULTIPLICITY_INFO]","None")
+
            
             # fixed list  details
             fixed_str = str(self.fixed)

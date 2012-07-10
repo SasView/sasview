@@ -9,4 +9,12 @@ double sinc(double x);
 
 double gamln(double x);
 
+void gser(float *gamser, float a, float x, float *gln);
+
+void gcf(float *gammcf, float a, float x, float *gln);
+
+float gammp(float a,float x);
+
+float erff(float x);
+
 #endif

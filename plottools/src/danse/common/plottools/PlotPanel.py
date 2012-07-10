@@ -905,7 +905,7 @@ class PlotPanel(wx.Panel):
         
         id = wx.NewId()
         slicerpop.AppendSeparator()
-        slicerpop.Append(id, '&Toggle Legned On/Off', 'Toggle Legend On/Off')
+        slicerpop.Append(id, '&Toggle Legend On/Off', 'Toggle Legend On/Off')
         wx.EVT_MENU(self, id, self.onLegend)
         
         loc_menu = wx.Menu()
@@ -952,8 +952,8 @@ class PlotPanel(wx.Panel):
         """
         Toggles whether legend is visible/not visible
         """
-        
-        if not legOnOff:
+        self.legend_on = legOnOff
+        if not self.legend_on:
             for ax in self.axes:
                 self.remove_legend(ax)
         else:
@@ -971,7 +971,7 @@ class PlotPanel(wx.Panel):
                 self.legend.set_axes(self.subplot)
         
         self.subplot.figure.canvas.draw_idle()
-        self.legend_on = legOnOff
+
     
 
     # to do - remove this function when done

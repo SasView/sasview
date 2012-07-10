@@ -570,6 +570,10 @@ class ModelManagerBase:
         from sans.models.UnifiedPowerRgModel import UnifiedPowerRgModel
         self.shape_indep_list.append(UnifiedPowerRgModel)
         self.multi_func_list.append(UnifiedPowerRgModel)
+
+        from sans.models.UnifiedPowerRgModel2 import UnifiedPowerRgModel2
+        self.shape_indep_list.append(UnifiedPowerRgModel2)
+        self.multi_func_list.append(UnifiedPowerRgModel2)
         
         from sans.models.LineModel import LineModel
         self.shape_indep_list.append(LineModel)

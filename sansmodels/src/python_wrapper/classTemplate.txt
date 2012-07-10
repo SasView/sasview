@@ -85,8 +85,9 @@ static int
     	// Create parameters
         self->params = PyDict_New();
         self->dispersion = PyDict_New();
-        self->model = new [CMODEL]();
-        
+
+	[INITIALIZE_MODEL]
+
         [INITDICTIONARY]
          
         // Create empty log
