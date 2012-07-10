@@ -671,23 +671,28 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.graphApp.Bind(wx.EVT_CLOSE, self.on_graphApp_close)
     
 
-    def on_graphApp_close(self,e):
-        # gets values from graph appearance dialog and sends them off
-        # to modify the plot
+    def on_graphApp_close(self, event):
+        """
+        Gets values from graph appearance dialog and sends them off
+        to modify the plot
+        """
+        graph_app = self.graphApp
+        toggle_grid = graph_app.get_togglegrid()
+        legend_loc = graph_app.get_legend_loc()
+        toggle_legend = graph_app.get_togglelegend()
+        
+        self.onGridOnOff(toggle_grid )
+        self.ChangeLegendLoc(legend_loc)
+        self.onLegend(toggle_legend)
 
-        self.onGridOnOff(self.graphApp.get_togglegrid())
+        self.xaxis_label = graph_app.get_xlab()
+        self.yaxis_label = graph_app.get_ylab()
+        self.xaxis_unit = graph_app.get_xunit()
+        self.yaxis_unit = graph_app.get_yunit()
 
-        self.onLegend(self.graphApp.get_togglelegend())
-        self.ChangeLegendLoc(self.graphApp.get_legend_loc())
+        self.xaxis(self.xaxis_label, self.xaxis_unit, 
+                   graph_app.get_xfont(), graph_app.get_xcolor())
+        self.yaxis(self.yaxis_label, self.yaxis_unit, 
+                   graph_app.get_yfont(), graph_app.get_ycolor())
 
-        self.xaxis_label = self.graphApp.get_xlab()
-        self.yaxis_label = self.graphApp.get_ylab()
-        self.xaxis_unit = self.graphApp.get_xunit()
-        self.yaxis_unit = self.graphApp.get_yunit()
-
-        self.xaxis(self.xaxis_label,self.xaxis_unit,
-                   self.graphApp.get_xfont(),self.graphApp.get_xcolor())
-        self.yaxis(self.yaxis_label,self.yaxis_unit,
-                   self.graphApp.get_yfont(),self.graphApp.get_ycolor())
-
-        self.graphApp.Destroy()
+        graph_app.Destroy()
