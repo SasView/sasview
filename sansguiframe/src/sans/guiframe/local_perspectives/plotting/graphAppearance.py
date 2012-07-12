@@ -17,7 +17,6 @@ Dialog for general graph appearance
 """
 
 import wx
-from matplotlib.font_manager import FontProperties
 from danse.common.plottools.SimpleFont import SimpleFont
 
 COLOR = ['black', 'blue', 'green', 'red', 'cyan', 'magenta', 'yellow']
@@ -25,8 +24,8 @@ COLOR = ['black', 'blue', 'green', 'red', 'cyan', 'magenta', 'yellow']
 
 class graphAppearance(wx.Frame):
 
-    def __init__(self,parent,title,legend=True):
-        super(graphAppearance,self).__init__(parent, title=title,size=(520,435))
+    def __init__(self, parent, title, legend=True):
+        super(graphAppearance, self).__init__(parent, title=title, size=(520, 435))
 
         self.legend = legend
 
@@ -55,134 +54,134 @@ class graphAppearance(wx.Frame):
 
         if self.legend:
             legendLocText = wx.StaticText(panel, label='Legend location: ')
-            self.legendLocCombo = wx.ComboBox(panel,style = wx.CB_READONLY, size=(180,-1))
+            self.legend_loc_combo = wx.ComboBox(panel,style = wx.CB_READONLY, size=(180,-1))
             self.fillLegendLocs()
         else:
-            self.legendLocCombo = None
+            self.legend_loc_combo = None
 
 
         if self.legend:
-            self.toggleLegend = wx.CheckBox(panel, label='Toggle legend on/off')
+            self.toggle_legend = wx.CheckBox(panel, label='Toggle legend on/off')
         else:
-            self.toggleLegend = None
+            self.toggle_legend = None
 
-        self.toggleGrid = wx.CheckBox(panel, label='Toggle grid on/off')
+        self.toggle_grid = wx.CheckBox(panel, label='Toggle grid on/off')
 
         
-        xStaticBox = wx.StaticBox(panel,-1, 'x-axis label')
-        xStaticBoxSizer = wx.StaticBoxSizer(xStaticBox, wx.VERTICAL)
-        yStaticBox = wx.StaticBox(panel,-1, 'y-axis label')
-        yStaticBoxSizer = wx.StaticBoxSizer(yStaticBox, wx.VERTICAL)
+        xstatic_box = wx.StaticBox(panel, -1, 'x-axis label')
+        xstatic_box_sizer = wx.StaticBoxSizer(xstatic_box, wx.VERTICAL)
+        ystatic_box = wx.StaticBox(panel, -1, 'y-axis label')
+        ystatic_box_sizer = wx.StaticBoxSizer(ystatic_box, wx.VERTICAL)
 
 
-        xaxisLabel = wx.StaticText(panel, label='X-axis: ')
-        yaxisLabel = wx.StaticText(panel, label='Y-axis: ')
-        unitLabel1 = wx.StaticText(panel, label='Units: ')
-        unitLabel2 = wx.StaticText(panel, label='Units: ')
+        xaxis_label = wx.StaticText(panel, label='X-axis: ')
+        yaxis_label = wx.StaticText(panel, label='Y-axis: ')
+        unitlabel_1 = wx.StaticText(panel, label='Units: ')
+        unitlabel_2 = wx.StaticText(panel, label='Units: ')
 
-        self.xaxisText = wx.TextCtrl(panel,-1,"",size=(220,-1))
-        self.yaxisText = wx.TextCtrl(panel,-1,"",size=(220,-1))
+        self.xaxis_text = wx.TextCtrl(panel, -1, "",size=(220, -1))
+        self.yaxis_text = wx.TextCtrl(panel, -1, "",size=(220, -1))
 
-        self.xaxisUnitText = wx.TextCtrl(panel,-1,"",size=(100,-1))
-        self.yaxisUnitText = wx.TextCtrl(panel,-1,"",size=(100,-1))
+        self.xaxis_unit_text = wx.TextCtrl(panel, -1,"",size=(100, -1))
+        self.yaxis_unit_text = wx.TextCtrl(panel, -1,"",size=(100, -1))
 
 
 
         xcolorLabel = wx.StaticText(panel, label='Font color: ')
-        self.xfontColor = wx.ComboBox(panel,size=(100,-1),style=wx.CB_READONLY)
-        self.xfillColors()
-        self.xfontColor.SetSelection(0)
-        xfontButton = wx.Button(panel, label='Font')
-        xfontButton.Bind(wx.EVT_BUTTON,self.onxFont)
+        self.xfont_color = wx.ComboBox(panel, size=(100, -1), style=wx.CB_READONLY)
+        self.xfill_colors()
+        self.xfont_color.SetSelection(0)
+        xfont_button = wx.Button(panel, label='Font')
+        xfont_button.Bind(wx.EVT_BUTTON, self.onxFont)
 
         ycolorLabel = wx.StaticText(panel, label='Font color: ')
-        self.yfontColor = wx.ComboBox(panel,size=(100,-1),style=wx.CB_READONLY)
-        self.yfillColors()
-        self.yfontColor.SetSelection(0)
-        yfontButton = wx.Button(panel, label='Font')
-        yfontButton.Bind(wx.EVT_BUTTON,self.onyFont)
+        self.yfont_color = wx.ComboBox(panel, size=(100, -1),style=wx.CB_READONLY)
+        self.yfill_colors()
+        self.yfont_color.SetSelection(0)
+        yfont_button = wx.Button(panel, label='Font')
+        yfont_button.Bind(wx.EVT_BUTTON, self.onyFont)
 
         
 
-        self.cancelButton = wx.Button(panel, label='Cancel')
-        self.okButton = wx.Button(panel, label='OK')
+        self.cancel_button = wx.Button(panel, label='Cancel')
+        self.ok_button = wx.Button(panel, label='OK')
 
-        self.cancelButton.Bind(wx.EVT_BUTTON,self.onCancel)
-        self.okButton.Bind(wx.EVT_BUTTON,self.onOK)
+        self.cancel_button.Bind(wx.EVT_BUTTON, self.onCancel)
+        self.ok_button.Bind(wx.EVT_BUTTON, self.on_ok)
 
 
-        xhbox1.Add(xaxisLabel,flag= wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT,border=10)
-        xhbox1.Add(self.xaxisText,flag=wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT,border=10)
-        xhbox1.Add(unitLabel1,flag=wx.ALL | wx.EXPAND  | wx.ALIGN_RIGHT,border=10)
-        xhbox1.Add(self.xaxisUnitText, flag=wx.ALL | wx.EXPAND  | wx.ALIGN_RIGHT,border=10)
+        xhbox1.Add(xaxis_label, flag= wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=10)
+        xhbox1.Add(self.xaxis_text, flag=wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=10)
+        xhbox1.Add(unitlabel_1, flag=wx.ALL | wx.EXPAND  | wx.ALIGN_RIGHT, border=10)
+        xhbox1.Add(self.xaxis_unit_text, flag=wx.ALL | wx.EXPAND  | wx.ALIGN_RIGHT, border=10)
 
-        yhbox1.Add(yaxisLabel,flag= wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT,border=10)
-        yhbox1.Add(self.yaxisText,flag=wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT,border=10)
-        yhbox1.Add(unitLabel2,flag=wx.ALL | wx.EXPAND  | wx.ALIGN_RIGHT,border=10)
-        yhbox1.Add(self.yaxisUnitText, flag=wx.ALL | wx.EXPAND  | wx.ALIGN_RIGHT,border=10)
+        yhbox1.Add(yaxis_label, flag= wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=10)
+        yhbox1.Add(self.yaxis_text, flag=wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=10)
+        yhbox1.Add(unitlabel_2, flag=wx.ALL | wx.EXPAND  | wx.ALIGN_RIGHT, border=10)
+        yhbox1.Add(self.yaxis_unit_text, flag=wx.ALL | wx.EXPAND  | wx.ALIGN_RIGHT, border=10)
 
-        xhbox2.Add(xcolorLabel,flag=wx.ALL | wx.ALIGN_RIGHT, border=10)
-        xhbox2.Add(self.xfontColor,flag=wx.ALL | wx.ALIGN_RIGHT, border=5)
-        xhbox2.Add(xfontButton,flag=wx.ALL | wx.ALIGN_RIGHT, border=5)
+        xhbox2.Add(xcolorLabel, flag=wx.ALL | wx.ALIGN_RIGHT, border=10)
+        xhbox2.Add(self.xfont_color, flag=wx.ALL | wx.ALIGN_RIGHT, border=5)
+        xhbox2.Add(xfont_button, flag=wx.ALL | wx.ALIGN_RIGHT, border=5)
 
-        yhbox2.Add(ycolorLabel,flag=wx.ALL | wx.ALIGN_RIGHT, border=10)
-        yhbox2.Add(self.yfontColor,flag=wx.ALL | wx.ALIGN_RIGHT, border=5)
-        yhbox2.Add(yfontButton,flag=wx.ALL | wx.ALIGN_RIGHT, border=5)
+        yhbox2.Add(ycolorLabel, flag=wx.ALL | wx.ALIGN_RIGHT, border=10)
+        yhbox2.Add(self.yfont_color, flag=wx.ALL | wx.ALIGN_RIGHT, border=5)
+        yhbox2.Add(yfont_button, flag=wx.ALL | wx.ALIGN_RIGHT, border=5)
 
         if self.legend:
             hbox1.Add(legendLocText, flag =  wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=5)
-            hbox1.Add(self.legendLocCombo, flag =  wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=5)
+            hbox1.Add(self.legend_loc_combo, flag =  wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=5)
 
         if self.legend:
-            hbox1.Add((5,-1))
-            hbox1.Add(self.toggleLegend, flag = wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=5)
+            hbox1.Add((5, -1))
+            hbox1.Add(self.toggle_legend, flag = wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=5)
 
-        hbox2.Add(self.okButton, flag = wx.ALL | wx.ALIGN_RIGHT, border=5)
-        hbox2.Add(self.cancelButton, flag = wx.ALL | wx.ALIGN_RIGHT, border=5)
-        hbox2.Add((15,-1))
+        hbox2.Add(self.ok_button, flag = wx.ALL | wx.ALIGN_RIGHT, border=5)
+        hbox2.Add(self.cancel_button, flag = wx.ALL | wx.ALIGN_RIGHT, border=5)
+        hbox2.Add((15, -1))
 
-        xStaticBoxSizer.Add(xhbox1,flag= wx.EXPAND ,border=5)
-        xStaticBoxSizer.Add(xhbox2, flag=wx.ALL | wx.ALIGN_RIGHT, border=5)
-        yStaticBoxSizer.Add(yhbox1,flag= wx.EXPAND ,border=5)
-        yStaticBoxSizer.Add(yhbox2, flag=wx.ALL | wx.ALIGN_RIGHT, border=5)
+        xstatic_box_sizer.Add(xhbox1, flag= wx.EXPAND , border=5)
+        xstatic_box_sizer.Add(xhbox2, flag=wx.ALL | wx.ALIGN_RIGHT, border=5)
+        ystatic_box_sizer.Add(yhbox1, flag= wx.EXPAND, border=5)
+        ystatic_box_sizer.Add(yhbox2, flag=wx.ALL | wx.ALIGN_RIGHT, border=5)
 
-        vbox.Add((-1,20))
+        vbox.Add((-1, 20))
         vbox.Add(hbox1, flag = wx.EXPAND | wx.ALL, border=5)
-        vbox.Add(xStaticBoxSizer, flag = wx.ALL | wx.EXPAND, border=10)
-        vbox.Add(yStaticBoxSizer, flag = wx.ALL | wx.EXPAND, border=10)
+        vbox.Add(xstatic_box_sizer, flag = wx.ALL | wx.EXPAND, border=10)
+        vbox.Add(ystatic_box_sizer, flag = wx.ALL | wx.EXPAND, border=10)
 
-        vbox.Add(self.toggleGrid, flag = wx.ALIGN_RIGHT | wx.RIGHT, border=20)
+        vbox.Add(self.toggle_grid, flag = wx.ALIGN_RIGHT | wx.RIGHT, border=20)
         vbox.Add(hbox2, flag = wx.ALIGN_RIGHT | wx.ALL , border=5)
 
 
         panel.SetSizer(vbox)
 
-    def xfillColors(self):
-        list = COLOR
-        for idx in range(len(list)):
-            self.xfontColor.Append(list[idx],idx)
+    def xfill_colors(self):
+        c_list = COLOR
+        for idx in range(len(c_list)):
+            self.xfont_color.Append(c_list[idx], idx)
 
-    def yfillColors(self):
-        list = COLOR
-        for idx in range(len(list)):
-            self.yfontColor.Append(list[idx],idx)
+    def yfill_colors(self):
+        c_list = COLOR
+        for idx in range(len(c_list)):
+            self.yfont_color.Append(c_list[idx], idx)
 
-    def onxFont(self,e):
+    def onxFont(self, e):
         title = 'Modify x axis font'
 
-        fonty = SimpleFont(self,wx.NewId(),title)
+        fonty = SimpleFont(self, wx.NewId(), title)
         fonty.set_default_font(self.xfont)
         if(fonty.ShowModal() == wx.ID_OK):
             self.xfont = fonty.get_font()
 
-    def onyFont(self,e):
+    def onyFont(self, e):
         title = 'Modify y axis font'
-        fonty = SimpleFont(self,wx.NewId(),title)
+        fonty = SimpleFont(self, wx.NewId(), title)
         fonty.set_default_font(self.yfont)
         if(fonty.ShowModal() == wx.ID_OK):
             self.yfont = fonty.get_font()
 
-    def onOK(self,e):
+    def on_ok(self, e):
         self.Close()
 
     def onCancel(self, e):
@@ -226,74 +225,74 @@ class graphAppearance(wx.Frame):
         #     labels.append(str(label))
 
         # for label in reversed(labels):
-        #     self.legendLocCombo.Append(label)
+        #     self.legend_loc_combo.Append(label)
         for label in self.get_loc_label():
-            self.legendLocCombo.Append(label)
+            self.legend_loc_combo.Append(label)
 
 
     def setDefaults(self,grid,legend,xlab,ylab,xunit,yunit,
                     xaxis_font,yaxis_font,legend_loc,
                     xcolor,ycolor):
-        self.toggleGrid.SetValue(grid)
+        self.toggle_grid.SetValue(grid)
         if self.legend:
-            self.toggleLegend.SetValue(legend)
-        self.xaxisText.SetValue(xlab)
-        self.yaxisText.SetValue(ylab)
-        self.xaxisUnitText.SetValue(xunit)
-        self.yaxisUnitText.SetValue(yunit)
+            self.toggle_legend.SetValue(legend)
+        self.xaxis_text.SetValue(xlab)
+        self.yaxis_text.SetValue(ylab)
+        self.xaxis_unit_text.SetValue(xunit)
+        self.yaxis_unit_text.SetValue(yunit)
         self.xfont = xaxis_font
         self.yfont = yaxis_font
 
         if not xcolor:
-            self.xfontColor.SetSelection(0)
+            self.xfont_color.SetSelection(0)
         else:
-            self.xfontColor.SetStringSelection(xcolor)
+            self.xfont_color.SetStringSelection(xcolor)
 
         if not ycolor:
-            self.yfontColor.SetSelection(0)
+            self.yfont_color.SetSelection(0)
         else:
-            self.yfontColor.SetStringSelection(ycolor)
+            self.yfont_color.SetStringSelection(ycolor)
             
 
         if self.legend:
-            self.legendLocCombo.SetStringSelection(legend_loc)
+            self.legend_loc_combo.SetStringSelection(legend_loc)
 
 
     # get whether grid is toggled on/off
     def get_togglegrid(self):
-        return self.toggleGrid.GetValue()
+        return self.toggle_grid.GetValue()
 
     # get whether legend is toggled on/off
     def get_togglelegend(self):
-        return self.toggleLegend.GetValue()
+        return self.toggle_legend.GetValue()
 
     # get x label
     def get_xlab(self):
-        return self.xaxisText.GetValue()
+        return self.xaxis_text.GetValue()
 
     # get y label
     def get_ylab(self):
-        return self.yaxisText.GetValue()
+        return self.yaxis_text.GetValue()
 
     # get x unit
     def get_xunit(self):
-        return self.xaxisUnitText.GetValue()
+        return self.xaxis_unit_text.GetValue()
 
     # get y unit
     def get_yunit(self):
-        return self.yaxisUnitText.GetValue()
+        return self.yaxis_unit_text.GetValue()
 
     # get legend location
     def get_legend_loc(self):
-        return self.get_loc_label()[self.legendLocCombo.GetStringSelection()]
+        return self.get_loc_label()[self.legend_loc_combo.GetStringSelection()]
 
     # get x axis label color
     def get_xcolor(self):
-        return self.xfontColor.GetValue()
+        return self.xfont_color.GetValue()
 
     # get y axis label color
     def get_ycolor(self):
-        return self.yfontColor.GetValue()
+        return self.yfont_color.GetValue()
 
     # get x axis font (type is FontProperties)
     def get_xfont(self):
