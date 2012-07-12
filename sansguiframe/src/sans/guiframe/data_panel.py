@@ -237,7 +237,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             self.selection_cbox.Append(str(option))
         self.selection_cbox.SetValue('Select all Data')
         wx.EVT_COMBOBOX(self.selection_cbox, -1, self._on_selection_type)
-        self.sizer5.AddMany([(select_txt, 0, wx.ALL,5), 
+        self.sizer5.AddMany([(select_txt, 0, wx.ALL, 5), 
                             (self.selection_cbox, 0, wx.ALL,5)])
         self.enable_selection()
         
@@ -558,7 +558,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         try:
             id, data_class_name, _ = self.tree_ctrl.GetSelection().GetData()
             data_list, _ = \
-                            self.parent.get_data_manager().get_by_id(id_list=[id])
+                        self.parent.get_data_manager().get_by_id(id_list=[id])
             if not data_list:
                 is_data = False
         except:
@@ -676,7 +676,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                                                    'Path: %s' % s_path) 
                         self.tree_ctrl.DeleteChildren(d_p_c) 
                         for process in process_list:
-                            i_t_c = self.tree_ctrl.AppendItem(d_p_c,
+                            _ = self.tree_ctrl.AppendItem(d_p_c,
                                                               process.__str__())
                 wx.CallAfter(self.append_theory, state_id, theory_list)
             # Sort by data name
@@ -1325,41 +1325,41 @@ if __name__ == "__main__":
         data1.append_empty_process()
         process1 = data1.process[len(data1.process)-1]
         process1.data = "07/01/2010"
-        theory = Data2D()
-        theory.id = 34
-        theory.name = "theory1"
-        path = "path1"
+        theory1 = Data2D()
+        theory1.id = 34
+        theory1.name = "theory1"
+        path1 = "path1"
         state1 = State()
-        data_list1['1'] = set_data_state(data1, path, theory, state1)
+        data_list1['1'] = set_data_state(data1, path1, theory1, state1)
         #state 2
         data1 = Data2D()
         data1.name = "data2"
         data1.id = 76
-        theory = Data2D()
-        theory.id = 78
-        theory.name = "CoreShell 07/24/25"
-        path = "path2"
+        theory1 = Data2D()
+        theory1.id = 78
+        theory1.name = "CoreShell 07/24/25"
+        path1 = "path2"
         #state3
         state1 = State()
-        data_list1['2'] = set_data_state(data1, path, theory, state1)
+        data_list1['2'] = set_data_state(data1, path1, theory1, state1)
         data1 = Data1D()
         data1.id = 3
         data1.name = "data2"
-        theory = Theory1D()
-        theory.name = "CoreShell"
-        theory.id = 4
-        theory.append_empty_process()
-        process1 = theory.process[len(theory.process)-1]
+        theory1 = Theory1D()
+        theory1.name = "CoreShell"
+        theory1.id = 4
+        theory1.append_empty_process()
+        process1 = theory1.process[len(theory1.process)-1]
         process1.description = "this is my description"
-        path = "path3"
+        path1 = "path3"
         data1.append_empty_process()
         process1 = data1.process[len(data1.process)-1]
         process1.data = "07/22/2010"
-        data_list1['4'] = set_data_state(data1, path, theory, state1)
+        data_list1['4'] = set_data_state(data1, path1, theory1, state1)
         #state 4
         temp_data_list = {}
         data1.name = "data5 erasing data2"
-        temp_data_list['4'] = set_data_state(data1, path, theory, state1)
+        temp_data_list['4'] = set_data_state(data1, path1, theory1, state1)
         #state 5
         data1 = Data2D()
         data1.name = "data3"
@@ -1367,27 +1367,27 @@ if __name__ == "__main__":
         data1.append_empty_process()
         process1 = data1.process[len(data1.process)-1]
         process1.data = "07/01/2010"
-        theory = Theory1D()
-        theory.name = "Cylinder"
-        path = "path2"
+        theory1 = Theory1D()
+        theory1.name = "Cylinder"
+        path1 = "path2"
         state1 = State()
-        dstate1= set_data_state(data1, path, theory, state1)
-        theory = Theory1D()
-        theory.id = 6
-        theory.name = "CoreShell"
-        dstate1.set_theory(theory)
-        theory = Theory1D()
-        theory.id = 6
-        theory.name = "CoreShell replacing coreshell in data3"
-        dstate1.set_theory(theory)
+        dstate1 = set_data_state(data1, path1, theory1, state1)
+        theory1 = Theory1D()
+        theory1.id = 6
+        theory1.name = "CoreShell"
+        dstate1.set_theory(theory1)
+        theory1 = Theory1D()
+        theory1.id = 6
+        theory1.name = "CoreShell replacing coreshell in data3"
+        dstate1.set_theory(theory1)
         data_list1['3'] = dstate1
         #state 6
-        data_list1['6'] = set_data_state(None, path, theory, state1)
-        data_list1['6'] = set_data_state(theory=theory, state=None)
-        theory = Theory1D()
-        theory.id = 7
-        data_list1['6'] = set_data_state(theory=theory, state=None)
-        data_list1['7'] = set_data_state(theory=theory, state=None)
+        data_list1['6'] = set_data_state(None, path1, theory1, state1)
+        data_list1['6'] = set_data_state(theory=theory1, state=None)
+        theory1 = Theory1D()
+        theory1.id = 7
+        data_list1['6'] = set_data_state(theory=theory1, state=None)
+        data_list1['7'] = set_data_state(theory=theory1, state=None)
         window = DataFrame(list=data_list1)
         window.load_data_list(list=data_list1)
         window.Show(True)
