@@ -99,12 +99,12 @@ class DataTreeCtrl(CT.CustomTreeCtrl):
         Used by the SortChildren method. 
         """
         # Get the item data
-        data1 = self.GetItemText(item1)
-        data2 = self.GetItemText(item2)
+        data_1 = self.GetItemText(item1)
+        data_2 = self.GetItemText(item2)
         # Compare the item data
-        if data1 < data2:
+        if data_1 < data_2:
             return -1
-        elif data1 > data2:
+        elif data_1 > data_2:
             return 1
         else:
             return 0
@@ -238,7 +238,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.selection_cbox.SetValue('Select all Data')
         wx.EVT_COMBOBOX(self.selection_cbox, -1, self._on_selection_type)
         self.sizer5.AddMany([(select_txt, 0, wx.ALL,5), 
-                            (self.selection_cbox,0, wx.ALL,5)])
+                            (self.selection_cbox, 0, wx.ALL,5)])
         self.enable_selection()
         
     
@@ -402,7 +402,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             :param event: UI event
         """
         data = None
-        selection = event.GetSelection()
+        #selection = event.GetSelection()
         id, _, _ = self.FindFocus().GetSelection().GetData()
         data_list, theory_list = \
                         self.parent.get_data_manager().get_by_id(id_list=[id])
@@ -466,7 +466,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         Save data as a file
         """
         data = self._get_data_selection(event)
-        path = None
+        #path = None
         default_name = data.name
         if default_name.count('.') > 0:
             default_name = default_name.split('.')[0]
@@ -540,8 +540,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         try:
             id, data_class_name, _ = \
                             self.tree_ctrl_theory.GetSelection().GetData()
-            data_list, _ = \
-                            self.parent.get_data_manager().get_by_id(id_list=[id])
+            _, _ = self.parent.get_data_manager().get_by_id(id_list=[id])
         except:
             return
         if self.data_menu is not None:
@@ -666,7 +665,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                     else:
                         data_ctrl_list =  self.list_cb_data[state_id]
                         #This state is already display replace it contains
-                        data_c, d_i_c, d_t_c, r_n_c,  i_c_c, p_c_c, d_p_c, t_c \
+                        data_c, d_i_c, d_t_c, r_n_c,  i_c_c, p_c_c, d_p_c, _ \
                                 = data_ctrl_list
                         self.tree_ctrl.SetItemText(data_c, data_name) 
                         temp = (data_id, data_class, state_id)
@@ -773,7 +772,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             #data didn't have a theory associated it before
             theory_list_ctrl = {}
             for theory_id, item in theory_list.iteritems():
-                theory_data, theory_state = item
+                theory_data, _ = item
                 if theory_data is not None:
                     name = theory_data.name
                     theory_class = theory_data.__class__.__name__
@@ -896,7 +895,7 @@ class DataPanel(ScrolledPanel, PanelBase):
                 del self.list_cb_theory[key]
         #remove theory  references independently of data
         for key in theory_key:
-            for t_key, theory_dict in self.list_cb_theory.iteritems():
+            for _, theory_dict in self.list_cb_theory.iteritems():
                 if key in theory_dict:
                     for  key, value in theory_dict.iteritems():
                         item, _, _ = value
@@ -1118,6 +1117,7 @@ class DataPanel(ScrolledPanel, PanelBase):
             
     def check_theory_to_freeze(self):
         """
+        Check_theory_to_freeze
         """
     def enable_freeze(self):
         """
@@ -1287,8 +1287,7 @@ class DataFrame(wx.Frame):
         
    
     
-from sans.guiframe.dataFitting import Data1D
-from sans.guiframe.dataFitting import Data2D, Theory1D
+from sans.guiframe.dataFitting import Theory1D
 from sans.guiframe.data_state import DataState
 
 class State():
@@ -1331,7 +1330,7 @@ if __name__ == "__main__":
         theory.name = "theory1"
         path = "path1"
         state1 = State()
-        data_list1['1'] = set_data_state(data1, path,theory, state1)
+        data_list1['1'] = set_data_state(data1, path, theory, state1)
         #state 2
         data1 = Data2D()
         data1.name = "data2"
@@ -1342,7 +1341,7 @@ if __name__ == "__main__":
         path = "path2"
         #state3
         state1 = State()
-        data_list1['2'] = set_data_state(data1, path,theory, state1)
+        data_list1['2'] = set_data_state(data1, path, theory, state1)
         data1 = Data1D()
         data1.id = 3
         data1.name = "data2"
@@ -1356,32 +1355,32 @@ if __name__ == "__main__":
         data1.append_empty_process()
         process1 = data1.process[len(data1.process)-1]
         process1.data = "07/22/2010"
-        data_list1['4'] = set_data_state(data1, path,theory, state1)
+        data_list1['4'] = set_data_state(data1, path, theory, state1)
         #state 4
         temp_data_list = {}
         data1.name = "data5 erasing data2"
-        temp_data_list['4'] = set_data_state(data1, path,theory, state1)
+        temp_data_list['4'] = set_data_state(data1, path, theory, state1)
         #state 5
         data1 = Data2D()
         data1.name = "data3"
         data1.id = 5
         data1.append_empty_process()
-        process1 = data.process[len(data1.process)-1]
+        process1 = data1.process[len(data1.process)-1]
         process1.data = "07/01/2010"
         theory = Theory1D()
         theory.name = "Cylinder"
         path = "path2"
         state1 = State()
-        dstate= set_data_state(data, path,theory, state1)
+        dstate1= set_data_state(data1, path, theory, state1)
         theory = Theory1D()
         theory.id = 6
         theory.name = "CoreShell"
-        dstate.set_theory(theory)
+        dstate1.set_theory(theory)
         theory = Theory1D()
         theory.id = 6
         theory.name = "CoreShell replacing coreshell in data3"
-        dstate.set_theory(theory)
-        data_list1['3'] = dstate
+        dstate1.set_theory(theory)
+        data_list1['3'] = dstate1
         #state 6
         data_list1['6'] = set_data_state(None, path, theory, state1)
         data_list1['6'] = set_data_state(theory=theory, state=None)
