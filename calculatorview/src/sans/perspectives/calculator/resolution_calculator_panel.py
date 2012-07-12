@@ -25,8 +25,8 @@ from matplotlib.figure import Figure
 #from sans.guicomm.events import StatusEvent  
 from sans.calculator.resolution_calculator import ResolutionCalculator 
 from sans.guiframe.events import StatusEvent  
-from calculator_widgets import OutputTextCtrl
-from calculator_widgets import InputTextCtrl
+from sans.perspectives.calculator.calculator_widgets import OutputTextCtrl
+from sans.perspectives.calculator.calculator_widgets import InputTextCtrl
 from wx.lib.scrolledpanel import ScrolledPanel
 from math import fabs
 _BOX_WIDTH = 100
@@ -62,8 +62,8 @@ class ResolutionCalculatorPanel(ScrolledPanel):
     CENTER_PANE = True
     
     def __init__(self, parent,  *args, **kwds):
-        kwds["size"]= (PANEL_WIDTH * 2, PANEL_HEIGHT)
-        kwds["style"]= wx.FULL_REPAINT_ON_RESIZE
+        kwds["size"] = (PANEL_WIDTH * 2, PANEL_HEIGHT)
+        kwds["style"] = wx.FULL_REPAINT_ON_RESIZE
         ScrolledPanel.__init__(self, parent, *args, **kwds)
         self.SetupScrolling()
         self.parent = parent
@@ -82,7 +82,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         # dQ 2d image
         self.image = None
         # results of sigmas
-        self.sigma_strings =' '
+        self.sigma_strings = ' '
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         # Object that receive status event
@@ -148,9 +148,9 @@ class ResolutionCalculatorPanel(ScrolledPanel):
             source_list.append(name_source)
         source_list.sort()
         for idx in range(len(source_list)):
-            self.source_cb.Append(source_list[idx],idx)
+            self.source_cb.Append(source_list[idx], idx)
         self.source_cb.SetStringSelection("Neutron") 
-        wx.EVT_COMBOBOX(self.source_cb,-1, self._on_source_selection) 
+        wx.EVT_COMBOBOX(self.source_cb, -1, self._on_source_selection) 
         
         # combo box for color
         self.wave_color_cb =  wx.ComboBox(self, -1,
@@ -160,7 +160,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.wave_color_cb.Append('Monochromatic')
         self.wave_color_cb.Append('TOF')
         self.wave_color_cb.SetStringSelection("Monochromatic") 
-        wx.EVT_COMBOBOX(self.wave_color_cb,-1, self._on_source_color) 
+        wx.EVT_COMBOBOX(self.wave_color_cb, -1, self._on_source_color) 
         
         source_hint = "Source Selection: Affect on"
         source_hint += " the gravitational contribution.\n"
@@ -272,7 +272,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.source_aperture_sizer.AddMany([(source_aperture_txt, 0, 
                                                wx.LEFT, 15),
                                 (self.source_aperture_tcl, 0, wx.LEFT, 15),
-                                    (source_aperture_unit_txt,0, wx.LEFT, 10)])  
+                                (source_aperture_unit_txt, 0, wx.LEFT, 10)])  
 
         
     def _layout_sample_aperture(self):
@@ -296,7 +296,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.sample_aperture_sizer.AddMany([(sample_aperture_txt, 0, 
                                                wx.LEFT, 15),
                                 (self.sample_aperture_tcl, 0, wx.LEFT, 15),
-                                    (sample_aperture_unit_txt,0, wx.LEFT, 10)])  
+                                (sample_aperture_unit_txt, 0, wx.LEFT, 10)])  
 
 
     def _layout_source2sample_distance(self):
@@ -365,9 +365,9 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.sample2detector_distance_tcl.SetToolTipString(\
                                                 sample2detector_distance_hint)
         self.sample2detector_distance_sizer.AddMany([\
-                            (sample2detector_distance_txt, 0, wx.LEFT, 15),        
-                            (self.sample2detector_distance_tcl, 0, wx.LEFT, 15),
-                            (sample2detector_distance_unit_txt,0, wx.LEFT, 10)])  
+                        (sample2detector_distance_txt, 0, wx.LEFT, 15),        
+                        (self.sample2detector_distance_tcl, 0, wx.LEFT, 15),
+                        (sample2detector_distance_unit_txt,0, wx.LEFT, 10)])  
         
     def _layout_detector_size(self):
         """
@@ -687,7 +687,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         # Build image plot layout                     
         self._layout_image()
         # Add a vertical static line
-        self.main_sizer.Add( wx.StaticLine(self, -1, (2,2), 
+        self.main_sizer.Add( wx.StaticLine(self, -1, (2, 2), 
                             (2,PANEL_HEIGHT * 0.94), style = wx.LI_VERTICAL))
         # Add the plot to main sizer
         self.main_sizer.Add(self.vertical_r_spacer, 0, wx.ALL, 10)
@@ -717,7 +717,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         wx.CallAfter(self.on_compute_call, event)
         
-    def on_compute_call(self, event = None):
+    def on_compute_call(self, event=None):
         """
         Execute the computation of resolution
         """
@@ -775,9 +775,12 @@ class ResolutionCalculatorPanel(ScrolledPanel):
             sample2sample_distance = self.sample2sample_distance_tcl.GetValue()
             sample2sample_distance = self._string2list(sample2sample_distance)
             self.resolution.set_sample2sample_distance(sample2sample_distance)
-            sample2detector_distance = self.sample2detector_distance_tcl.GetValue()
-            sample2detector_distance = self._string2list(sample2detector_distance)
-            self.resolution.set_sample2detector_distance(sample2detector_distance)
+            sample2detector_distance = \
+                                self.sample2detector_distance_tcl.GetValue()
+            sample2detector_distance = \
+                                self._string2list(sample2detector_distance)
+            self.resolution.set_sample2detector_distance(\
+                                                    sample2detector_distance)
             detector_size = self.detector_size_tcl.GetValue()
             detector_size = self._string2list(detector_size)
             self.resolution.set_detector_size(detector_size)
@@ -826,7 +829,8 @@ class ResolutionCalculatorPanel(ScrolledPanel):
 
         # Compute and get the image plot
         try:
-            from sans.perspectives.calculator.resolcal_thread import CalcRes as thread
+            from sans.perspectives.calculator.resolcal_thread \
+                                                import CalcRes as thread
             self.sigma_strings = '\nResolution: Computation is finished. \n'
             cal_res = thread(func = self._map_func,
                          qx = self.qx,
@@ -846,11 +850,6 @@ class ResolutionCalculatorPanel(ScrolledPanel):
             self._status_info(msg, status_type)
         except:
             raise
-            msg = "An error occured during the resolution computation."
-            msg += "Please check your inputs..."
-            status_type = 'stop'
-            self._status_info(msg, status_type)
-            wx.MessageBox(msg, 'Warning')
             
     def complete(self, image, elapsed=None):
         """
@@ -910,7 +909,8 @@ class ResolutionCalculatorPanel(ScrolledPanel):
             detector_qy_min = self.resolution.detector_qy_min
             detector_qy_max = self.resolution.detector_qy_max
         else:
-            qx_min, qx_max, qy_min, qy_max = self.resolution.get_detector_qrange()
+            qx_min, qx_max, qy_min, qy_max = \
+                                self.resolution.get_detector_qrange()
             # detector range
             detector_qx_min = self.resolution.qxmin_limit
             detector_qx_max = self.resolution.qxmax_limit
@@ -987,7 +987,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                                  qx_min, qx_max, qy_min, qy_max, 
                                  self.det_coordinate)
         # record sigmas
-        self.sigma_strings += " At Qx = %s, Qy = %s; \n"% (qx_value,qy_value)
+        self.sigma_strings += " At Qx = %s, Qy = %s; \n"% (qx_value, qy_value)
         self._sigma_strings()
         return image
     def _sigma_strings(self):
@@ -1169,7 +1169,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         
         : return new_string: string like list
         """
-        new_string = []
+        #new_string = []
         msg = "Wrong format of intputs."
         try:
             # is float
@@ -1205,7 +1205,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                     pass
                 #    wx.MessageBox(msg, 'Warning')
 
-    def _on_xy_coordinate(self,event=None):
+    def _on_xy_coordinate(self, event=None):
         """
         Set the detector coordinate for sigmas to x-y coordinate
         """
@@ -1217,7 +1217,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.sigma_phi_txt.SetLabel('Sigma_y:')
         self._onparamEnter()
         
-    def _on_rp_coordinate(self,event=None):
+    def _on_rp_coordinate(self, event=None):
         """
         Set the detector coordinate for sigmas to polar coordinate
         """
@@ -1243,7 +1243,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.compute_button.SetLabel(label)
         self.compute_button.SetToolTipString(label)
         if self.parent.parent != None:
-                wx.PostEvent(self.parent.parent, 
+            wx.PostEvent(self.parent.parent, 
                              StatusEvent(status = msg, type = type ))
 
 
@@ -1315,7 +1315,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         On spectrum ComboBox event
         """
         if event != None:
-            combo = event.GetEventObject()
+            #combo = event.GetEventObject()
             event.Skip()
         else:
             raise
@@ -1338,9 +1338,6 @@ class ResolutionCalculatorPanel(ScrolledPanel):
                 return
             except:
                 raise
-                msg = "Failed to load the spectrum data file."
-                wx.MessageBox(msg, 'Warning')
-                raise ValueError, "Invalid spectrum file..."
         
         self.resolution.set_spectrum(self.spectrum_dic[selection])
                              
@@ -1348,10 +1345,9 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         open a dialog file to select a customized spectrum
         """
-        import os
         dlg = wx.FileDialog(self, 
                 "Choose a wavelength spectrum file: Intensity vs. wavelength",
-                self.parent.parent._default_save_location , "", 
+                self.parent.parent.get_save_location() , "", 
                 "*.*", wx.OPEN)
         path = None
         if dlg.ShowModal() == wx.ID_OK:
@@ -1367,7 +1363,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         
         """
         try:
-            if path==None:
+            if path == None:
                 wx.PostEvent(self.parent.parent, StatusEvent(status=\
                             " Selected Distribution was not loaded: %s"%path))
                 return None, None
@@ -1393,6 +1389,9 @@ class ResolutionCalculatorPanel(ScrolledPanel):
             raise 
         
 class ResolutionWindow(wx.Frame):
+    """
+    Resolution Window
+    """
     def __init__(self, parent = None, title = "SANS Resolution Estimator",
                   size=(PANEL_WIDTH * 2, PANEL_HEIGHT), *args, **kwds):
         kwds['title'] = title
