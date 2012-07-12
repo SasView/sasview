@@ -596,6 +596,12 @@ class ViewerFrame(wx.Frame):
         return the current perspective
         """
         return self._current_perspective
+
+    def get_save_location(self):
+        """
+        return the _default_save_location
+        """
+        return self._default_save_location
     
     def set_input_file(self, input_file):
         """
