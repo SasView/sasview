@@ -67,7 +67,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.event_owner = None
         ## current model
         self.model = None
+        self.m_name = None
         self.index_model = None
+        self.panel = None
         ## data
         self.data = None
         #list of available data
@@ -87,6 +89,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.npts_x = _NPTS_DEFAULT
         ## total number of point: float
         self.npts = None
+        self.num_points = None
         ## default fitengine type
         self.engine_type = 'scipy'
         ## smear default
@@ -124,6 +127,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.cb1 = None
         self.btEditMask = None
         self.btFit = None
+        self.sld_axes = None
+        self.multi_factor = None
        
         self.disp_cb_dict = {}
    
@@ -229,7 +234,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self._create_default_1d_data()
             if self.model != None:
                 if not self.data.is_data:
-                    self._manager.page_finder[self.uid].set_fit_data(data=[self.data])
+                    self._manager.page_finder[self.uid].set_fit_data(data=\
+                                                                [self.data])
             self.on_smear_helper(update=True)
             self.state.enable_smearer = self.enable_smearer.GetValue()
             self.state.disable_smearer = self.disable_smearer.GetValue()
@@ -345,7 +351,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             flag = self.data.is_data\
                             and (self.model != None)
             sim_menu.Enable(not self.batch_on and flag)
-            batch_menu = self._manager.menu1.FindItemById(self._manager.id_batchfit)
+            batch_menu = \
+                    self._manager.menu1.FindItemById(self._manager.id_batchfit)
             batch_menu.Enable(self.batch_on and flag)
     
     class ModelTextCtrl(wx.TextCtrl):
@@ -360,7 +367,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         :param text_enter_callback: callback method for EVT_TEXT_ENTER event
         
         """
-        ## Set to True when the mouse is clicked while the whole string is selected
+        ## Set to True when the mouse is clicked while whole string is selected
         full_selection = False
         ## Call back for EVT_SET_FOCUS events
         _on_set_focus_callback = None
@@ -430,7 +437,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             """
             
             event.Skip()
-            pass
+            #pass
     
     def set_page_info(self, page_info):
         """
@@ -759,8 +766,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         return time and date stings
         """
         # date and time
-        year, month, day, hour, minute, second, tda, ty, tm_isdst \
-            = time.localtime()
+        year, month, day, hour, minute, second, _, _, _ = time.localtime()
         current_time = str(hour) + ":" + str(minute) + ":" + str(second)
         current_date = str(month) + "/" + str(day) + "/" + str(year)
         return current_time, current_date
@@ -1122,9 +1128,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                     if item in self.disp_list and \
                         not item in self.model.details:
                         self.model.details[item] = ["", None, None]
-                for k, v in self.state.disp_cb_dict.iteritems():
-                    self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
-                    self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
+                self.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
+                self.state.disp_cb_dict = copy.deepcopy(state.disp_cb_dict)
         ## smearing info  restore
         if hasattr(self, "enable_smearer"):
             ## set smearing value whether or not the data
@@ -1211,7 +1216,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         except:
             formfactor_pos = 0
             for ind_form in range(self.formfactorbox.GetCount()):
-                if self.formfactorbox.GetString(ind_form) == (state.formfactorcombobox):
+                if self.formfactorbox.GetString(ind_form) == \
+                                                    (state.formfactorcombobox):
                     formfactor_pos = int(ind_form)
                     break
             
@@ -1223,7 +1229,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         except:
             structfactor_pos = 0
             for ind_struct in range(self.structurebox.GetCount()):
-                if self.structurebox.GetString(ind_struct) == (state.structurecombobox):
+                if self.structurebox.GetString(ind_struct) == \
+                                                    (state.structurecombobox):
                     structfactor_pos = int(ind_struct)
                     break
             
@@ -1382,7 +1389,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         if self.parent != None:
             self._default_save_location = \
-                        self.parent.parent._default_save_location
+                        self.parent.parent.get_save_location()
         dlg = wx.FileDialog(self, "Choose a weight file",
                                 self._default_save_location, "",
                                 "*.*", wx.OPEN)
@@ -1396,7 +1403,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         reset the context menu
         """
-        for name, state in self.state.saved_states.iteritems():
+        for name, _ in self.state.saved_states.iteritems():
             self.number_saved_state += 1
             ## Add item in the context menu
             id = wx.NewId()
@@ -1897,11 +1904,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         # get profile data
         x, y = self.model.getProfile()
 
-        from danse.common.plottools import Data1D
+        from danse.common.plottools import Data1D as pf_data1d
         #from sans.perspectives.theory.profile_dialog import SLDPanel
         from sans.guiframe.local_perspectives.plotting.profile_dialog \
         import SLDPanel
-        sld_data = Data1D(x, y)
+        sld_data = pf_data1d(x, y)
         sld_data.name = 'SLD'
         sld_data.axes = self.sld_axes
         self.panel = SLDPanel(self, data=sld_data, axes=self.sld_axes, id=-1)
@@ -2015,10 +2022,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         msg = ""
         wx.PostEvent(self.parent, StatusEvent(status=msg))
         # Flag to register when a parameter has changed.
-        is_modified = False
+        #is_modified = False
         if tcrtl.GetValue().lstrip().rstrip() != "":
             try:
-                value = float(tcrtl.GetValue())
+                float(tcrtl.GetValue())
                 tcrtl.SetBackgroundColour(wx.WHITE)
                 # If qmin and qmax have been modified, update qmin and qmax
                 if self._validate_qrange(self.qmin, self.qmax):
@@ -2044,7 +2051,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     temp_npts = float(self.npts.GetValue())
                     if temp_npts != self.num_points:
                         self.num_points = temp_npts
-                        is_modified = True
+                        #is_modified = True
                 else:
                     msg = "Cannot Plot :No npts in that Qrange!!!  "
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
@@ -2145,7 +2152,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             
         if form_factor != None:
             # set multifactor for Mutifunctional models
-            if form_factor().__class__ in self.model_list_box["Multi-Functions"]:
+            if form_factor().__class__ in \
+                                        self.model_list_box["Multi-Functions"]:
                 m_id = self.multifactorbox.GetCurrentSelection()
                 multiplicity = form_factor().multiplicity_info[0]
                 self.multifactorbox.Clear()
@@ -2166,7 +2174,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.multifactorbox.SetSelection(m_id)
                 # Check len of the text1 and max_multiplicity
                 text = ''
-                if form_factor.multiplicity_info[0] == len(form_factor.multiplicity_info[2]):
+                if form_factor.multiplicity_info[0] == \
+                                        len(form_factor.multiplicity_info[2]):
                     text = form_factor.multiplicity_info[2][self.multi_factor]
                 self.mutifactor_text1.SetLabel(text)
                 # Check if model has  get sld profile.
@@ -2272,7 +2281,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.qmin.Refresh()
                 self.qmax.SetBackgroundColour("pink")
                 self.qmax.Refresh()
-                msg = "Npts of Data Error :No or too little npts of %s." % data.name
+                msg = "Npts of Data Error :"
+                msg += "No or too little npts of %s." % data.name
                 wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
                 self.fitrange = False
                 flag = False
@@ -2306,7 +2316,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.qmin.Refresh()
                 self.qmax.SetBackgroundColour("pink")
                 self.qmax.Refresh()
-                msg = "Npts of Data Error :No or too little npts of %s." % data.name
+                msg = "Npts of Data Error :"
+                msg += "No or too little npts of %s." % data.name
                 wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
                 self.fitrange = False
                 flag = False
@@ -2388,11 +2399,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                                      StatusEvent(status=msg))
                 
                 if name in self.model.details.keys():
-                        self.model.details[name][1:3] = param_min, param_max
-                        is_modified = True
+                    self.model.details[name][1:3] = param_min, param_max
+                    is_modified = True
                 else:
-                        self.model.details[name] = ["", param_min, param_max]
-                        is_modified = True
+                    self.model.details[name] = ["", param_min, param_max]
+                    is_modified = True
             try:
                 # Check if the textctr is enabled
                 if item[2].IsEnabled():
@@ -2706,7 +2717,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         # Store a reference to the weights in the model object
         #so that
         # it's not lost when we use the model within another thread.
-        #TODO: total hack - fix this
         self.state.model = self.model.clone()
         self.model._persistency_dict[name.split('.')[0]] = \
                                         [values, weights]
@@ -2845,7 +2855,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         Get the images of the plots corresponding this panel for report
         
         : return graphs: list of figures
-        : TODO: Move to guiframe
+        : Need Move to guiframe
         """
         # set list of graphs
         graphs = []
@@ -2853,7 +2863,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         # call gui_manager
         gui_manager = self.parent.parent
         # loops through the panels [dic]
-        for item1, item2 in gui_manager.plot_panels.iteritems():
+        for _, item2 in gui_manager.plot_panels.iteritems():
             data_title = self.data.group_id
             # try to get all plots belonging to this control panel
             try:
@@ -2873,7 +2883,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         on 'More details' button
         """
-        from help_panel import  HelpWindow
+        from sans.perspectives.fitting.help_panel import  HelpWindow
         from sans.models import get_data_path
         
         # Get models help model_function path
@@ -2921,9 +2931,9 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         # Figuring out key combo: Cmd for copy, Alt for paste
         if event.CmdDown() and event.ShiftDown():
-            flag = self.get_paste()
+            self.get_paste()
         elif event.CmdDown():
-            flag = self.get_copy()
+            self.get_copy()
         else:
             event.Skip()
             return
@@ -2948,24 +2958,24 @@ class BasicPage(ScrolledPanel, PanelBase):
         if  self.parameters != []:
             
             # go through the parameters
-            string = self._get_copy_helper(self.parameters,
+            strings = self._get_copy_helper(self.parameters,
                                            self.orientation_params)
-            content += string
+            content += strings
             
             # go through the fittables
-            string = self._get_copy_helper(self.fittable_param,
+            strings = self._get_copy_helper(self.fittable_param,
                                            self.orientation_params_disp)
-            content += string
+            content += strings
 
             # go through the fixed params
-            string = self._get_copy_helper(self.fixed_param,
+            strings = self._get_copy_helper(self.fixed_param,
                                            self.orientation_params_disp)
-            content += string
+            content += strings
                 
             # go through the str params
-            string = self._get_copy_helper(self.str_parameters,
+            strings = self._get_copy_helper(self.str_parameters,
                                            self.orientation_params)
-            content += string
+            content += strings
             return content
         else:
             return False
@@ -3026,7 +3036,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             if disfunc != '':
                 
                 disfunc = ',' + disfunc
-            # TODO: to support array func for copy/paste
+            # Need to support array func for copy/paste
             try:
                 if disfunc.count('array') > 0:
                     disfunc += ','
@@ -3051,7 +3061,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             if wx.TheClipboard.IsSupported(wx.DataFormat(wx.DF_TEXT)):
                 data = wx.TextDataObject()
                 # get wx dataobject
-                success = wx.TheClipboard.GetData(data)
+                #success = wx.TheClipboard.GetData(data)
                 # get text
                 text = data.GetText()
             # close clipboard
@@ -3268,7 +3278,7 @@ class BasicPage(ScrolledPanel, PanelBase):
     def update_pinhole_smear(self):
         """
             Method to be called by sub-classes
-            TODO: this method doesn't belong here
+            Moveit; This method doesn't belong here
         """
         print "BasicPage.update_pinhole_smear was called: skipping"
         return
