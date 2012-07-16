@@ -732,8 +732,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Paste Parameter values to the panel if possible
         """
-        if event != None:
-            event.Skip()
+        #if event != None:
+        #    event.Skip()
         # It seems MAC needs wxCallAfter for the setvalues
         # for multiple textctrl items, otherwise it tends to crash once a while
         wx.CallAfter(self.get_paste)
@@ -757,6 +757,9 @@ class BasicPage(ScrolledPanel, PanelBase):
             msg = "Error was occured "
             msg += ": No valid parameter values to paste from the clipboard..."
             infor = "error"
+            wx.PostEvent(self.parent.parent,
+                    StatusEvent(status=msg, info=infor))
+            raise
         # inform msg to wx
         wx.PostEvent(self.parent.parent,
                     StatusEvent(status=msg, info=infor))
@@ -3061,9 +3064,12 @@ class BasicPage(ScrolledPanel, PanelBase):
             if wx.TheClipboard.IsSupported(wx.DataFormat(wx.DF_TEXT)):
                 data = wx.TextDataObject()
                 # get wx dataobject
-                #success = wx.TheClipboard.GetData(data)
+                success = wx.TheClipboard.GetData(data)
                 # get text
-                text = data.GetText()
+                if success:
+                    text = data.GetText()
+                else:
+                    text = ''
             # close clipboard
             wx.TheClipboard.Close()
         return text
