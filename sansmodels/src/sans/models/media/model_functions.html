@@ -472,7 +472,7 @@ ul
 <a href="#BroadPeak">BroadPeak,<span style="text-decoration: none;"> </span><span style="color: windowtext; text-decoration: none;"><u><span style="color: blue;">CorrLength</span></u></span><span style="color: windowtext; text-decoration: none;">,</span></a>
 <a href="#DAB_Model">DAB_Model</a>, <a href="#Debye">Debye</a>, <a href="#Number_Density_Fractal">FractalModel</a>, <a href="#FractalCoreShell">FractalCoreShell</a>, <a href="#GaussLorentzGel">GaussLorentzGel</a>, <a href="#Guinier">Guinier</a>, <a href="#GuinierPorod">GuinierPorod</a>, <a href="#Lorentz">Lorentz</a>, <a href="#Mass_Fractal">MassFractalModel</a>, <a href="#MassSurface_Fractal">MassSurfaceFractal</a>, <a href="#Peak%20Gauss%20Model">PeakGaussModel</a>, <a href="#Peak%20Lorentz%20Model">PeakLorentzModel</a>, <a href="#Poly_GaussCoil">Poly_GaussCoil</a>, <a href="#PolymerExclVolume">PolyExclVolume</a>, <a href="#PorodModel">PorodModel</a>, <a href="#RPA10Model">RPA10Model</a><a href="model_functions.html#ReflectivityIIModel">, </a><a href="#Surface_Fractal">SurfaceFractalModel</a>,
 <a href="#Teubner%20Strey">Teubner Strey</a>, <a href="#TwoLorentzian">TwoLorentzian</a>, <a href="#TwoPowerLaw">TwoPowerLaw</a>, <a href="#UnifiedPowerRg">UnifiedPowerRg</a>, <a href="#LineModel">LineModel</a>, <a href="#ReflectivityModel">ReflectivityModel</a>,
-<a href="#ReflectivityIIModel">ReflectivityIIModel</a>.</li>
+<a href="#ReflectivityIIModel">ReflectivityIIModel</a>, <a href="#GelFitModel">GelFitModel</a>.</li>
 <li class="MsoNormal" style="line-height: 115%;"><a href="#Model"><b>Customized Models</b></a>:
 <a href="#testmodel">testmodel</a>, <a href="#testmodel_2">testmodel_2</a>, <a href="#sum_p1_p2">sum_p1_p2</a>, <a href="#sum_Ap1_1_Ap2">sum_Ap1_1_Ap2</a>, <a href="#polynomial5">polynomial5</a>, <a href="#sph_bessel_jn">sph_bessel_jn</a>.</li>
 <li class="MsoNormal" style="line-height: 115%;"><a href="#Structure_Factors"><b>Structure Factors</b></a>:
@@ -10931,6 +10931,142 @@ Exp; </p>
 <p class="MsoNormal">&nbsp;&nbsp;&nbsp; Note:
 This
 model was implemented by an interested user. </p>
+
+
+
+
+
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"></p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;">&nbsp;</p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">3.28.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></b><a name="GelFitModel"><b><span style="font-size: 14pt;">GelFitModel</span></b></a></p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">&nbsp;</span></b></p>
+<p class="MsoNormal">&nbsp;&nbsp;&nbsp; Unlike a concentrated polymer solution, the fine-scale polymer distribution in a gel involves 
+at least two characteristic length scales, a shorter correlation length (a1) to describe the rapid fluctuations in the position of the 
+polymer chains that ensure thermodynamic equilibrium, and a longer distance (denoted here as a2) needed to account for the static 
+accumulations of polymer pinned down by junction points or clusters of such points. The letter is derived from a simple Guinier function.</p>
+<p>&nbsp;</p>
+<p class="MsoListParagraph" style="margin-left: 0.55in;">
+The scattered intensity I(Q) is then calculated as: </p>
+<p> <img src="image233.gif"></p>
+<p class="MsoListParagraph" style="margin-left: 0.55in;">
+Where: </p>
+<p> <span><img src="image234.gif"></span></p>
+<p> </p>
+<p> </p>
+<p class="MsoNormal">&nbsp;&nbsp;&nbsp; Note the first term reduces to the Ornstein-Zernicke equation when D=2; ie, when the Flory exponent is 0.5 (theta conditions).
+&nbsp;
+In gels with significant hydrogen bonding D has been reported to be ~2.6 to 2.8.
+</p>
+<p>&nbsp;</p>
+<p class="MsoNormal">&nbsp;&nbsp;&nbsp; Note:
+This
+model was implemented by an interested user. </p>
+
+<p class="MsoNormal" style="margin-left: 0.25in;">&nbsp;</p>
+<p class="MsoNormal" style="margin-left: 0.25in; text-align: center;" align="center"><b>Default
+input parameter values</b></p>
+<div align="center">
+<table class="MsoNormalTable" style="border-collapse: collapse;" border="2" cellpadding="0" cellspacing="0">
+<tbody>
+<tr style="height: 19.25pt;">
+<td style="border: 1pt solid windowtext; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Parameter name</p>
+</td>
+<td style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Units</p>
+</td>
+<td style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Default value</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Background</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">cm<sup>-1</sup></p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">0.01</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; vertical-align: top; width: 107pt; height: 19.25pt;">
+<p class="MsoBodyText">Guinier scale</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">cm<sup>-1</sup></p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">1.7</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Lorentzian scale</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">cm<sup>-1</sup></p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">3.5</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Radius of gyration</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Å</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">104</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Fractal exponent</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143"></td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">2</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Correlation length</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Å</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">16</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="MsoNormal" style="margin-left: 0.5in;">&nbsp;</p>
+<p class="MsoNormal" style="margin-left: 0.5in;">&nbsp;</p>
+<p class="MsoNormal" style="margin-left: 0.5in; text-align: center;" align="center"><img id="Picture 11" src="image235.gif" height="336" width="470"></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><b>Figure.
+1D plot using the default values (w/300 data points, qmin=0.001, and qmax=0.3).</b></p>
+<p class="MsoNormal" style="margin-left: 0.5in; text-align: center;" align="center">&nbsp;</p>
+<p class="MsoNormal" style="margin-left: 0.25in;">&nbsp;</p>
+<p class="MsoNormal" style="margin-left: 0.25in;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+REFERENCES</p>
+<p class="MsoNormal" style="margin-left: 0.25in;">
+Mitsuhiro Shibayama, Toyoichi Tanaka, Charles C. Han, J. Chem. Phys. 1992, 97 (9), 6829-6841.</p>
+<p class="MsoNormal" style="margin-left: 0.25in;">
+Simon Mallam, Ferenc Horkay, Anne-Marie Hecht, Adrian R. Rennie, Erik Geissler, Macromolecules 1991, 24, 543-548.</p>
+
+
+
+
 <p class="MsoNormal"><b><span style="font-size: 14pt;">&nbsp;</span></b></p>
 <p class="MsoNormal"><b><span style="font-size: 14pt;"></span></b></p>
 <p class="MsoNormal"><b><span style="font-size: 14pt;"></span></b></p>
