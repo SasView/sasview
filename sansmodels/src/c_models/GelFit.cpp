@@ -26,16 +26,7 @@
 using namespace std;
 #include "GelFit.h"
 
-typedef struct {
-  double lScale;
-  double gScale;
-  double zeta;
-  double radius;
-  double scale;
-  double background;
-}
-
-GelFitModel :: GelFitModel()
+GelFitModel::GelFitModel()
 {
     lScale = Parameter(3.5);
     gScale = Parameter(1.7);
@@ -46,7 +37,7 @@ GelFitModel :: GelFitModel()
     background = Parameter(0.01);
 }
 
-double GelFitModel :: operator()(double q) 
+double GelFitModel::operator()(double q) 
 {
     double dp[3];
     dp[0] = zeta();
@@ -73,8 +64,8 @@ double GelFitModel :: operator()(double q)
     double f(exp(e));
         
         // Scattering Law
-        ///////////////////////////////ycal[j] = ((lScale/c) + (gScale*f) + bkgd);
-    return ((lScale()/c) + (gScale()*f) + background());
+    double result((lScale()/c) + (gScale()*f) + background());
+    return result;
 }
 
 
@@ -84,7 +75,7 @@ double GelFitModel :: operator()(double q)
  * @param q_y: value of Q along y
  * @return: function value
  */
-double GelFitModel :: operator()(double qx, double qy) 
+double GelFitModel::operator()(double qx, double qy) 
 {
   double q = sqrt(qx*qx + qy*qy);
   return (*this).operator()(q);
@@ -97,7 +88,7 @@ double GelFitModel :: operator()(double qx, double qy)
  * @param phi: angle phi
  * @return: function value
  */
-double GelFitModel :: evaluate_rphi(double q, double phi) 
+double GelFitModel::evaluate_rphi(double q, double phi) 
 {
   double qx = q*cos(phi);
   double qy = q*sin(phi);
@@ -107,12 +98,12 @@ double GelFitModel :: evaluate_rphi(double q, double phi)
  * Function to calculate effective radius
  * @return: effective radius value
  */
-double GelFitModel :: calculate_ER() 
+double GelFitModel::calculate_ER() 
 {
   //NOT implemented yet!!!
   return 0.0;
 }
-double GelFitModel :: calculate_VR() 
+double GelFitModel::calculate_VR() 
 {
   return 1.0;
 }
