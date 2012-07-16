@@ -582,6 +582,10 @@ class ModelManagerBase:
         from sans.models.ReflectivityIIModel import ReflectivityIIModel
         self.shape_indep_list.append(ReflectivityIIModel)
         self.multi_func_list.append(ReflectivityIIModel)
+        
+        from sans.models.GelFitModel import GelFitModel
+        self.shape_indep_list.append(GelFitModel)
+        self.model_name_list.append(GelFitModel.__name__)
     
         #Looking for plugins
         self.stored_plugins = self.findModels()
