@@ -472,7 +472,7 @@ ul
 <a href="#BroadPeak">BroadPeak,<span style="text-decoration: none;"> </span><span style="color: windowtext; text-decoration: none;"><u><span style="color: blue;">CorrLength</span></u></span><span style="color: windowtext; text-decoration: none;">,</span></a>
 <a href="#DAB_Model">DAB_Model</a>, <a href="#Debye">Debye</a>, <a href="#Number_Density_Fractal">FractalModel</a>, <a href="#FractalCoreShell">FractalCoreShell</a>, <a href="#GaussLorentzGel">GaussLorentzGel</a>, <a href="#Guinier">Guinier</a>, <a href="#GuinierPorod">GuinierPorod</a>, <a href="#Lorentz">Lorentz</a>, <a href="#Mass_Fractal">MassFractalModel</a>, <a href="#MassSurface_Fractal">MassSurfaceFractal</a>, <a href="#Peak%20Gauss%20Model">PeakGaussModel</a>, <a href="#Peak%20Lorentz%20Model">PeakLorentzModel</a>, <a href="#Poly_GaussCoil">Poly_GaussCoil</a>, <a href="#PolymerExclVolume">PolyExclVolume</a>, <a href="#PorodModel">PorodModel</a>, <a href="#RPA10Model">RPA10Model</a><a href="model_functions.html#ReflectivityIIModel">, </a><a href="#Surface_Fractal">SurfaceFractalModel</a>,
 <a href="#Teubner%20Strey">Teubner Strey</a>, <a href="#TwoLorentzian">TwoLorentzian</a>, <a href="#TwoPowerLaw">TwoPowerLaw</a>, <a href="#UnifiedPowerRg">UnifiedPowerRg</a>, <a href="#LineModel">LineModel</a>, <a href="#ReflectivityModel">ReflectivityModel</a>,
-<a href="#ReflectivityIIModel">ReflectivityIIModel</a>, <a href="#GelFitModel">GelFitModel</a>.</li>
+<a href="#ReflectivityIIModel">ReflectivityIIModel</a>, <a href="#GelFitModel">GelFitModel</a>, <a href="#FractalO_Z">FractalO_Z</a>.</li>
 <li class="MsoNormal" style="line-height: 115%;"><a href="#Model"><b>Customized Models</b></a>:
 <a href="#testmodel">testmodel</a>, <a href="#testmodel_2">testmodel_2</a>, <a href="#sum_p1_p2">sum_p1_p2</a>, <a href="#sum_Ap1_1_Ap2">sum_Ap1_1_Ap2</a>, <a href="#polynomial5">polynomial5</a>, <a href="#sph_bessel_jn">sph_bessel_jn</a>.</li>
 <li class="MsoNormal" style="line-height: 115%;"><a href="#Structure_Factors"><b>Structure Factors</b></a>:
@@ -10932,11 +10932,6 @@ Exp; </p>
 This
 model was implemented by an interested user. </p>
 
-
-
-
-
-
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"></p>
@@ -11064,8 +11059,130 @@ Mitsuhiro Shibayama, Toyoichi Tanaka, Charles C. Han, J. Chem. Phys. 1992, 97 (9
 <p class="MsoNormal" style="margin-left: 0.25in;">
 Simon Mallam, Ferenc Horkay, Anne-Marie Hecht, Adrian R. Rennie, Erik Geissler, Macromolecules 1991, 24, 543-548.</p>
 
-
-
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"></p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;">&nbsp;</p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">3.28.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></b><a name="FractalO_Z"><b><span style="font-size: 14pt;">FractalO_Z</span></b></a></p>
+<p class="MsoListParagraph" style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">&nbsp;</span></b></p>
+<p class="MsoNormal">&nbsp;&nbsp;&nbsp; A number of natural and commercial processes form high-surface area materials as a result of 
+the vapour-phase aggregation of primary particles. Examples of such materials include soots, aerosols, and ‘fume’ or pyrogenic silicas.
+ These are all characterised by cluster mass distributions (sometimes also cluster size distributions) and internal surfaces that are
+ fractal in nature.
+ &nbsp;
+ The scattering from such materials displays two distinct breaks in log-log representation, corresponding to the radius-of-gyration of
+ the primary particles, r<sub>g</sub>, and the radius-of-gyration of the clusters (aggregates), R<sub>g</sub>. Between these boundaries 
+ the scattering follows a power law related to the mass fractal dimension, D<sub>m</sub>, whilst above the high-Q boundary the scattering
+ follows a power law related to the surface fractal dimension of the primary particles, D<sub>s</sub>.
+</p>
+<p>&nbsp;</p>
+<p class="MsoListParagraph" style="margin-left: 0.55in;">
+The scattered intensity I(Q) is then calculated using a modified Ornstein-Zernicke equation: </p>
+<p> <img src="image236.gif"></p>
+<p class="MsoListParagraph" style="margin-left: 0.55in;">
+Where: </p>
+<p> <span><img src="image237.gif"></span></p>
+<p> </p>
+<p>&nbsp;</p>
+<p class="MsoNormal">&nbsp;&nbsp;&nbsp; This example dataset was produced using 300 data points, qmin=0.001 Å-1, qmax=0.3 Å-1 and the default values: </p>
+<p class="MsoNormal" style="margin-left: 0.25in;">&nbsp;</p>
+<p class="MsoNormal" style="margin-left: 0.25in; text-align: center;" align="center"><b>Default
+input parameter values</b></p>
+<div align="center">
+<table class="MsoNormalTable" style="border-collapse: collapse;" border="2" cellpadding="0" cellspacing="0">
+<tbody>
+<tr style="height: 19.25pt;">
+<td style="border: 1pt solid windowtext; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Parameter name</p>
+</td>
+<td style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Units</p>
+</td>
+<td style="border-style: solid solid solid none; border-color: windowtext windowtext windowtext -moz-use-text-color; border-width: 1pt 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Default value</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Background</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">cm<sup>-1</sup></p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">0.01</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; vertical-align: top; width: 107pt; height: 19.25pt;">
+<p class="MsoBodyText">Scale</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">cm<sup>-1</sup></p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">10000.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Cluster Rg</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Å</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">3520.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Mass fractal exponent</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143"></td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">1.8</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Primary particle Rg</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Å</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">82.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-style: none solid solid; border-color: -moz-use-text-color windowtext windowtext; border-width: medium 1pt 1pt; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">Surface fractal exponent</p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">cm<sup>-1</sup></p>
+</td>
+<td style="border-style: none solid solid none; border-color: -moz-use-text-color windowtext windowtext -moz-use-text-color; border-width: medium 1pt 1pt medium; padding: 0in 5.4pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p class="MsoBodyText">2.5</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="MsoNormal" style="margin-left: 0.5in;">&nbsp;</p>
+<p class="MsoNormal" style="margin-left: 0.5in;">&nbsp;</p>
+<p class="MsoNormal" style="margin-left: 0.5in; text-align: center;" align="center"><img id="Picture 11" src="image238.gif" height="336" width="470"></p>
+<p class="MsoNormal" style="text-align: center;" align="center"><b>Figure.
+1D plot using the default values (w/300 data points, qmin=0.001, and qmax=0.3).</b></p>
+<p class="MsoNormal" style="margin-left: 0.5in; text-align: center;" align="center">&nbsp;</p>
+<p class="MsoNormal" style="margin-left: 0.25in;">&nbsp;</p>
+<p class="MsoNormal" style="margin-left: 0.25in;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+REFERENCES</p>
+<p class="MsoNormal" style="margin-left: 0.25in;">
+PW Schmidt, J Appl Cryst, (1991), 24, 414-435.</p>
+<p class="MsoNormal" style="margin-left: 0.25in;">
+AJ Hurd, DW Schaefer, JE Martin, Phys Rev A, (1987), 35, 2361-2364.</p>
 
 <p class="MsoNormal"><b><span style="font-size: 14pt;">&nbsp;</span></b></p>
 <p class="MsoNormal"><b><span style="font-size: 14pt;"></span></b></p>
