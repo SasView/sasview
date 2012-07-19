@@ -477,6 +477,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 msg += "invariant: %s" % sys.exc_value
                 wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                       type="stop"))
+                raise
         else:
             try:
                 self._manager.plot_theory(name="High-Q extrapolation")
@@ -514,7 +515,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                         #Raise error only when qstar at low q is requested
                         msg = "Expect float for power at low q, "
                         msg += " got %s" % (power_low)
-                        raise ValueError, msg
+                        wx.PostEvent(self.parent, StatusEvent(status=msg, 
+                                                  info="error",
+                                                  type="stop"))
        
         #Get the number of points to extrapolated
         npts_low = self.npts_low_tcl.GetValue().lstrip().rstrip()   
@@ -524,7 +527,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             if low_q:
                 msg = "Expect float for number of points at low q,"
                 msg += " got %s" % (npts_low)
-                raise ValueError, msg
+                wx.PostEvent(self.parent, StatusEvent(status=msg, 
+                                                  info="error",
+                                                  type="stop"))
         #Set the invariant calculator
         inv.set_extrapolation(range="low", npts=npts_low,
                                    function=function_low, power=power_low)    
@@ -550,7 +555,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                     #Raise error only when qstar at high q is requested
                     msg = "Expect float for power at high q,"
                     msg += " got %s" % (power_high)
-                    raise ValueError, msg
+                    wx.PostEvent(self.parent, StatusEvent(status=msg, 
+                                                  info="error",
+                                                  type="stop"))
                           
         npts_high = self.npts_high_tcl.GetValue().lstrip().rstrip()   
         if check_float(self.npts_high_tcl):
@@ -559,7 +566,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             if high_q:
                 msg = "Expect float for number of points at high q,"
                 msg += " got %s" % (npts_high)
-                raise ValueError, msg
+                wx.PostEvent(self.parent, StatusEvent(status=msg, 
+                                                  info="error",
+                                                  type="stop"))
         inv.set_extrapolation(range="high", npts=npts_high,
                                    function=function_high, power=power_high)
         return inv, npts_high
@@ -637,16 +646,27 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                                   type="stop"))
             return
         self.Show(False)
-        #Compute qstar extrapolated to low q range 
-        self.get_low_qstar(inv=inv, npts_low=npts_low, low_q=low_q)
-        #Compute qstar extrapolated to high q range 
-        self.get_high_qstar(inv=inv, high_q=high_q)
-        #Compute qstar extrapolated to total q range and set value to txtcrtl
-        self.get_total_qstar(inv=inv, extrapolation=extrapolation)
-        # Parse additional parameters
-        porod_const = self.get_porod_const()        
-        contrast = self.get_contrast()
-        
+        r_msg = ''
+        try:
+            r_msg = 'Low Q: '
+            #Compute qstar extrapolated to low q range 
+            self.get_low_qstar(inv=inv, npts_low=npts_low, low_q=low_q)
+            r_msg = 'High Q: '
+            #Compute qstar extrapolated to high q range 
+            self.get_high_qstar(inv=inv, high_q=high_q)
+            r_msg = ''
+            #Compute qstar extrapolated to total q range 
+            #and set value to txtcrtl
+            self.get_total_qstar(inv=inv, extrapolation=extrapolation)
+            # Parse additional parameters
+            porod_const = self.get_porod_const()        
+            contrast = self.get_contrast()
+        except:
+            msg = r_msg + "Error occurred computing invariant: %s" % \
+                                                            sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg, 
+                                                  info="error",
+                                                  type="stop"))
         try:
             #Compute volume and set value to txtcrtl
             self.get_volume(inv=inv, contrast=contrast,

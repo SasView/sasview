@@ -131,11 +131,16 @@ class Guinier(Transform):
 	    assign new value to the scale and the radius
     	"""
         self.scale = math.exp(constant)
+        if slope > 0:
+            slope = 0.0
         self.radius = math.sqrt(-3 * slope)
-        
         # Errors
         self.dscale = math.exp(constant)*dconstant
-        self.dradius = -3.0/2.0/math.sqrt(-3 * slope)*dslope
+        if slope == 0.0:
+            n_zero = -1.0e-24
+            self.dradius = -3.0/2.0/math.sqrt(-3 * n_zero)*dslope
+        else:
+            self.dradius = -3.0/2.0/math.sqrt(-3 * slope)*dslope
         
         return [self.radius, self.scale], [self.dradius, self.dscale]
         
