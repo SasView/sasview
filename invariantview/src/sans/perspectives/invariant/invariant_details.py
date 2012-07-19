@@ -256,7 +256,7 @@ class InvariantDetailsPanel(wx.Dialog):
         Draw widgets related to invariant
         """
         uncertainty = "+/-" 
-        unit_invariant = '[1/(cm * A)]'
+        unit_invariant = '[1/(cm * A^3)]'
      
         invariant_txt = wx.StaticText(self, -1, 'Q* from Data ')
         invariant_txt.SetToolTipString("Invariant in the data set's Q range.")

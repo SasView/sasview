@@ -1313,7 +1313,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
        
         self.data_range_sizer = wx.BoxSizer(wx.HORIZONTAL)
         #Sizer related to inputs
-        self.sizer_input =  wx.FlexGridSizer(2, 5, 0, 0)
+        self.sizer_input =  wx.FlexGridSizer(2, 6, 0, 0)
         #Sizer related to inputs
         inputs_box = wx.StaticBox(self, -1, "Customized Inputs")
         self.inputs_sizer = wx.StaticBoxSizer(inputs_box, wx.VERTICAL)
@@ -1685,7 +1685,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         Draw widgets related to volume and surface
         """
         unit_volume = ''
-        unit_surface = ''
+        unit_surface = '[1/A]'
         uncertainty = "+/-" 
         volume_txt = wx.StaticText(self, -1, 'Volume Fraction')
         self.volume_tcl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH, -1),
@@ -1751,7 +1751,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         Draw widgets related to invariant
         """
         uncertainty = "+/-" 
-        unit_invariant = '[1/(cm * A)]'
+        unit_invariant = '[1/(cm * A^3)]'
         invariant_total_txt = wx.StaticText(self, -1, 'Invariant Total [Q*]')
         self.invariant_total_tcl = OutputTextCtrl(self, -1,
                                                   size=(_BOX_WIDTH, -1),
@@ -1787,15 +1787,16 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         """
         Draw widgets related to inputs
         """
-        contrast_txt = wx.StaticText(self, -1, 'Contrast :')  
+        contrast_txt = wx.StaticText(self, -1, 'Contrast:')  
         self.contrast_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                         style=0, name='contrast_tcl')
         wx.EVT_TEXT(self, self.contrast_tcl.GetId(), self._on_text)
         contrast_hint_txt = "Contrast"
         self.contrast_tcl.SetToolTipString(contrast_hint_txt)
-        contrast_unit_txt = wx.StaticText(self, -1, '[1/A^(2)]')  
+        contrast_unit_txt = wx.StaticText(self, -1, '[1/A^2]')  
         porod_const_txt = wx.StaticText(self, -1, 
-                                        'Porod Constant:\n(optional)\n')  
+                                        'Porod\nConstant:\n(optional)\n')  
+        porod_unit_txt = wx.StaticText(self, -1, '[1/(cm*A^4)]') 
         self.porod_constant_tcl = InvTextCtrl(self, -1, 
                                               size=(_BOX_WIDTH, 20), style=0,
                                               name='porod_constant_tcl') 
@@ -1803,14 +1804,14 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         porod_const_hint_txt = "Porod Constant"
         self.porod_constant_tcl.SetToolTipString(porod_const_hint_txt)
         
-        background_txt = wx.StaticText(self, -1, 'Background : ')  
+        background_txt = wx.StaticText(self, -1, 'Background:')  
         self.background_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                           style=0, name='background_tcl') 
         wx.EVT_TEXT(self, self.background_tcl.GetId(), self._on_text)
         background_hint_txt = "Background"
         self.background_tcl.SetToolTipString(background_hint_txt)
         background_unit_txt = wx.StaticText(self, -1, '[1/cm]')  
-        scale_txt = wx.StaticText(self, -1, 'Scale : ')  
+        scale_txt = wx.StaticText(self, -1, 'Scale:')  
         self.scale_tcl = InvTextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0,
                                      name='scale_tcl')
         wx.EVT_TEXT(self, self.scale_tcl.GetId(), self._on_text)
@@ -1819,13 +1820,15 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.sizer_input.AddMany([(background_txt, 0, wx.LEFT|wx.BOTTOM, 5),
                             (self.background_tcl, 0, wx.LEFT|wx.BOTTOM, 5),
                             (background_unit_txt, 0, wx.LEFT|wx.BOTTOM, 5),
-                            (scale_txt, 0, wx.LEFT|wx.BOTTOM, 20),
+                            (scale_txt, 0, wx.LEFT|wx.BOTTOM, 10),
                             (self.scale_tcl, 0, wx.LEFT|wx.BOTTOM|wx.RIGHT, 5),
+                            (10, 10),
                             (contrast_txt, 0, wx.LEFT|wx.BOTTOM, 5),
                             (self.contrast_tcl, 0, wx.LEFT|wx.BOTTOM, 5),
                             (contrast_unit_txt, 0, wx.LEFT|wx.BOTTOM, 5),
-                            (porod_const_txt, 0, wx.LEFT, 20),
-                (self.porod_constant_tcl, 0, wx.LEFT|wx.BOTTOM|wx.RIGHT, 5)])
+                            (porod_const_txt, 0, wx.LEFT, 10),
+                (self.porod_constant_tcl, 0, wx.LEFT|wx.BOTTOM|wx.RIGHT, 5),
+                (porod_unit_txt, 0, wx.LEFT|wx.BOTTOM, 5)])
         self.inputs_sizer.Add(self.sizer_input)
        
     def _layout_outputs_sizer(self):
