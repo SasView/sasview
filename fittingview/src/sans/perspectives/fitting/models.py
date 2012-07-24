@@ -335,6 +335,10 @@ class ModelManagerBase:
         self.shape_list.append(SphericalSLDModel)
         self.multiplication_factor.append(SphericalSLDModel)
         self.multi_func_list.append(SphericalSLDModel)
+
+        from sans.models.StarPolymer import StarPolymer
+        self.shape_list.append(StarPolymer)
+        self.model_name_list.append(StarPolymer.__name__)
         
         from sans.models.LinearPearlsModel import LinearPearlsModel
         self.shape_list.append(LinearPearlsModel)
@@ -468,7 +472,8 @@ class ModelManagerBase:
         from sans.models.HayterMSAStructure import HayterMSAStructure
         self.struct_list.append(HayterMSAStructure)
         self.model_name_list.append(HayterMSAStructure.__name__)
-        
+
+
         ##shape-independent models
         from sans.models.PowerLawAbsModel import PowerLawAbsModel
         self.shape_indep_list.append(PowerLawAbsModel)
