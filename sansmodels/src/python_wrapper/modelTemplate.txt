@@ -42,7 +42,7 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
     [DEFAULT_LIST]
     """
         
-    def __init__(self,multfactor=1):
+    def __init__(self, multfactor=1):
         """ Initialization """
         self.__dict__ = {}
         
