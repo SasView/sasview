@@ -43,11 +43,11 @@ class WrapperGenerator:
         The .h file should define two function definitions. For example,
         cylinder.h defines the following:
         
-            /// 1D scattering function
-            double cylinder_analytical_1D(CylinderParameters *pars, double q);
+        /// 1D scattering function
+        double cylinder_analytical_1D(CylinderParameters *pars, double q);
             
-            /// 2D scattering function
-            double cylinder_analytical_2D(CylinderParameters *pars, double q, double phi);
+        /// 2D scattering function
+        double cylinder_analytical_2D(CylinderParameters *pars, double q, double phi);
             
         The .c file implements those functions.
         
@@ -317,10 +317,12 @@ class WrapperGenerator:
         """ Writes the C file to create the python extension class 
             The file is written in C[PYTHONCLASS].c
         """
-        file_path = os.path.join(self.c_wrapper_dir, "C"+self.pythonClass+'.cpp')
+        file_path = os.path.join(self.c_wrapper_dir, 
+                                 "C"+self.pythonClass+'.cpp')
         file = open(file_path, 'w')
         
-        template = open(os.path.join(os.path.dirname(__file__), "classTemplate.txt"), 'r')
+        template = open(os.path.join(os.path.dirname(__file__), 
+                                     "classTemplate.txt"), 'r')
         
         tmp_buf = template.read()
         #tmp_lines = string.split(tmp_buf,'\n')
@@ -404,14 +406,14 @@ class WrapperGenerator:
                                         "[INCLUDE_FILE]", self.file)  
             if self.foundCPP:
                 newline = self.replaceToken(newline, 
-                                            "[C_INCLUDE_FILE]", "")  
+                            "[C_INCLUDE_FILE]", "")  
                 newline = self.replaceToken(newline, 
-                                            "[CPP_INCLUDE_FILE]", "#include \"%s\"" % basename)  
+                            "[CPP_INCLUDE_FILE]", "#include \"%s\"" % basename)  
             else:  
                 newline = self.replaceToken(newline, 
-                                            "[C_INCLUDE_FILE]", "#include \"%s\"" % basename)   
+                            "[C_INCLUDE_FILE]", "#include \"%s\"" % basename)   
                 newline = self.replaceToken(newline, 
-                                            "[CPP_INCLUDE_FILE]", "#include \"models.hh\"")  
+                            "[CPP_INCLUDE_FILE]", "#include \"models.hh\"")  
                 
             # Numerical calcs dealloc
             dealloc_str = "\n"
@@ -457,7 +459,8 @@ class WrapperGenerator:
         """
         file_path = os.path.join(self.output_dir, self.pythonClass+'.py')
         file = open(file_path, 'w')
-        template = open(os.path.join(os.path.dirname(__file__), "modelTemplate.txt"), 'r')
+        template = open(os.path.join(os.path.dirname(__file__), 
+                                     "modelTemplate.txt"), 'r')
         
         tmp_buf = template.read()
         tmp_lines = tmp_buf.split('\n')
@@ -489,12 +492,16 @@ class WrapperGenerator:
             # Call base constructor
             if self.is_multifunc:
                 newline = self.replaceToken(newline,"[CALL_CPYTHON_INIT]",
-                                            'C' + self.pythonClass + ".__init__(self,multfactor)\n\tself.is_multifunc = True")
-                newline = self.replaceToken(newline,"[MULTIPLICITY_INFO]",self.multiplicity_info)
+                    'C' + self.pythonClass + \
+                    ".__init__(self,multfactor)\n\tself.is_multifunc = True")
+                newline = self.replaceToken(newline,"[MULTIPLICITY_INFO]", 
+                                            self.multiplicity_info)
             else:
                 newline = self.replaceToken(newline,"[CALL_CPYTHON_INIT]",
-                                            'C' + self.pythonClass + ".__init__(self)\n\tself.is_multifunc = False")
-                newline = self.replaceToken(newline,"[MULTIPLICITY_INFO]","None")
+                    'C' + self.pythonClass + \
+                    ".__init__(self)\n        self.is_multifunc = False")
+                newline = self.replaceToken(newline, 
+                                            "[MULTIPLICITY_INFO]","None")
 
            
             # fixed list  details

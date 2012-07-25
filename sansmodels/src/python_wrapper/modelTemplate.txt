@@ -50,7 +50,7 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         BaseComponent.__init__(self)
         #apply([CPYTHONCLASS].__init__, (self,)) 
 
-	[CALL_CPYTHON_INIT]
+        [CALL_CPYTHON_INIT]
 		        
         ## Name of the model
         self.name = "[PYTHONCLASS]"
