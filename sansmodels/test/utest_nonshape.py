@@ -247,7 +247,8 @@ class TestDAB(unittest.TestCase):
         
         value = self._func(self.scale, self.length, self.back, x)*self._func(self.scale, self.length, self.back, y)
         self.assertAlmostEquals(self.model.run([x, y]), value,1)
-        
+
+
 class TestPowerLaw(unittest.TestCase):
     """
         Unit tests for PowerLaw function
@@ -520,3 +521,4 @@ class TestFractalModel(unittest.TestCase):
         
 if __name__ == '__main__':
     unittest.main()
+

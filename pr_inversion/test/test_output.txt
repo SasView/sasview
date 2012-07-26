@@ -2,14 +2,14 @@
 #nfunc=10
 #alpha=0.0007
 #chi2=836.797
-#elapsed=0
+#elapsed=0.000865936
 #qmin=None
 #qmax=None
 #slit_height=0
 #slit_width=0
 #background=0
 #has_bck=0
-#alpha_estimate=4.58991e-006
+#alpha_estimate=4.58991e-06
 #C_0=217.876478953+-2522.42314999
 #C_1=0.30164617344+-226.644556603
 #C_2=7.15694574584+-43.4919208221

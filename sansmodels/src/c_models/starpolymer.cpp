@@ -6,7 +6,6 @@
 
 **/
 
-
 #include <math.h>
 #include "parameters.hh"
 #include "starpolymer.h"
@@ -28,12 +27,12 @@ double StarPolymer::operator()(double q) {
   double d_background = background();
 
   double u = d_R2 * pow(q,2);
-  double v = pow(u,2) * d_arms / (3 * d_arms - 2);
+  double v = pow(u,2.0) * d_arms / (3.0 * d_arms - 2.0);
 
-  double term1 = v - 1 + exp(-v);
-  double term2 = ((d_arms - 1)/2)* pow((1 - exp(-v)),2);
+  double term1 = v - 1.0 + exp(-v);
+  double term2 = ((d_arms - 1.0)/2.0)* pow((1.0 - exp(-v)),2.0);
 
-  return 2 * d_scale / (d_arms * pow(v,2)) * (term1 + term2) + d_background;
+  return 2.0 * d_scale / (d_arms * pow(v,2.0)) * (term1 + term2) + d_background;
 
 }
 
