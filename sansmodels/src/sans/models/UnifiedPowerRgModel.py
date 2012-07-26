@@ -1,4 +1,3 @@
-   
 from sans.models.BaseComponent import BaseComponent
 from math import exp, sqrt
 from numpy import power
@@ -12,12 +11,14 @@ class UnifiedPowerRgModel(BaseComponent):
     def __init__(self, multfactor=1):
         BaseComponent.__init__(self)
         """
-        :param multfactor: number of levels in the model, assumes 0<= level# <=5.
+        :param multfactor: number of levels in the model, 
+            assumes 0<= level# <=5.
         """
 
         ## Setting  model name model description
         self.name = "UnifiedPowerRg"
-        self.description="""Multiple Levels of Unified Exponential/Power-law Method.
+        self.description = """
+        Multiple Levels of Unified Exponential/Power-law Method.
         Up to Level 6 is provided.
         Note; the additional Level 0 is an inverse linear function, 
         i.e., y = scale/x + background.
@@ -52,9 +53,9 @@ class UnifiedPowerRgModel(BaseComponent):
         self._set_fixed_params()  
         
         ## functional multiplicity of the model
-        self.multiplicity_info = [max_level_n,"Level No.:",[],[]]
+        self.multiplicity_info = [max_level_n, "Level No.:", [], []]
     
-    def _unifiedpowerrg(self,x):
+    def _unifiedpowerrg(self, x):
         """
         Scattering function
         
@@ -72,25 +73,26 @@ class UnifiedPowerRgModel(BaseComponent):
             answer = scale / x + bkg
             return answer
         # rearrange the parameters for the given label no.
-        for ind in range(1,l_num+1):
+        for ind in range(1, l_num+1):
             # get exp term
-            exp_now = exp(-power(x*self.params['Rg%s'% ind],2)/3.0)
+            exp_now = exp(-power(x*self.params['Rg%s'% ind], 2)/3.0)
             # get erf term
             erf_now = erf(x*self.params['Rg%s'% ind]/sqrt(6.0))
             # get power term
-            pow_now = power((erf_now*erf_now*erf_now/x),self.params['power%s'% ind])
+            pow_now = power((erf_now*erf_now*erf_now/x), 
+                            self.params['power%s'% ind])
             # get next exp term only if it exists
             try:
-                exp_next = exp(-power(x*self.params['Rg%s'% (ind+1)],2)/3.0)
+                exp_next = exp(-power(x*self.params['Rg%s'% (ind+1)], 2)/3.0)
             except:
                 exp_next = 1.0
             # get to the calculation
-            answer += self.params['G%s'% ind]*exp_now + self.params['B%s'% ind]* \
-                            exp_next * pow_now
+            answer += self.params['G%s'% ind]*exp_now + \
+                            self.params['B%s'% ind] * exp_next * pow_now
         # take care of the singular point
         if x == 0.0:
             answer = 0.0
-            for ind in range(1,l_num+1):
+            for ind in range(1, l_num+1):
                 answer += self.params['G%s'% ind]
         # get scaled
         answer *= scale
@@ -116,7 +118,7 @@ class UnifiedPowerRgModel(BaseComponent):
         self.params['scale'] = 1.0
         l_num = self.level_num
         # rearrange the parameters for the given label no.
-        for ind in range(0,l_num+1):
+        for ind in range(0, l_num+1):
             if ind == 0:
                 continue
             # multiple factor for higher labels
@@ -127,11 +129,11 @@ class UnifiedPowerRgModel(BaseComponent):
                 mul_pow = 2.0
             # Set reasonably define default values that consistent 
             # w/NIST for label #1
-            self.params['G%s'% ind] = 0.3*mult*pow(10, \
+            self.params['G%s'% ind] = 0.3 * mult * pow(10, \
                             (l_num+1 - float('%s'% ind)))
-            self.params['Rg%s'% ind] = 21.0/mult*pow(10, \
+            self.params['Rg%s'% ind] = 21.0 / mult * pow(10, \
                               (l_num - float('%s'% ind)))
-            self.params['B%s'% ind] = 6e-03/mult*pow(10, \
+            self.params['B%s'% ind] = 6e-03/mult * pow(10, \
                            -(l_num+1 - float('%s'% ind)))
             self.params['power%s'% ind] = 2.0 * mul_pow
             
@@ -145,7 +147,7 @@ class UnifiedPowerRgModel(BaseComponent):
         self.details['background'] = ['[1/cm]', None, None]
         self.details['scale'] = ['', None, None]
         # rearrange the parameters for the given label no.
-        for ind in range(0,self.level_num+1):
+        for ind in range(0, self.level_num+1):
             if ind == 0:
                 continue
             self.details['G%s'% ind] = ['[1/(cm.sr)]', None, None]
@@ -214,7 +216,8 @@ class UnifiedPowerRgModel(BaseComponent):
             #qy = math.fabs(x[0]*math.sin(x[1]))
             return self._unifiedpowerrg(x)
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            msg = "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, msg
         else:
             return self._unifiedpowerrg(x)
 
@@ -232,7 +235,8 @@ class UnifiedPowerRgModel(BaseComponent):
             q = sqrt(x[0]**2 + x[1]**2)
             return self._unifiedpowerrg(x)
         elif x.__class__.__name__ == 'tuple':
-            raise ValueError, "Tuples are not allowed as input to BaseComponent models"
+            msg = "Tuples are not allowed as input to BaseComponent models"
+            raise ValueError, msg
         else:
             return self._unifiedpowerrg(x)
 

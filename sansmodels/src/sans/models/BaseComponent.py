@@ -31,7 +31,7 @@ class BaseComponent:
         self.dispersion = {}
         # string containing information about the model such as the equation
         #of the given model, exception or possible use
-        self.description=''
+        self.description = ''
         #list of parameter that can be fitted
         self.fixed = []
         #list of non-fittable parameter
@@ -65,10 +65,30 @@ class BaseComponent:
         #For the future
         #return self.params[str(par_name)].is_fittable()
    
-    def run(self, x): return NotImplemented
-    def runXY(self, x): return NotImplemented  
-    def calculate_ER(self): return NotImplemented  
-    def calculate_VR(self): return NotImplemented 
+    def run(self, x): 
+        """
+        run 1d
+        """
+        return NotImplemented
+    
+    def runXY(self, x): 
+        """
+        run 2d
+        """
+        return NotImplemented  
+    
+    def calculate_ER(self): 
+        """
+        Calculate effective radius
+        """
+        return NotImplemented  
+    
+    def calculate_VR(self): 
+        """
+        Calculate volume fraction ratio
+        """
+        return NotImplemented 
+    
     def evalDistribution(self, qdist):
         """
         Evaluate a distribution of q-values.
@@ -111,7 +131,8 @@ class BaseComponent:
             if len(qdist)!=2 or \
                 qdist[0].__class__.__name__ != 'ndarray' or \
                 qdist[1].__class__.__name__ != 'ndarray':
-                    raise RuntimeError, "evalDistribution expects a list of 2 ndarrays"
+                msg = "evalDistribution expects a list of 2 ndarrays"
+                raise RuntimeError, msg
                 
             # Extract qx and qy for code clarity
             qx = qdist[0]
@@ -120,18 +141,17 @@ class BaseComponent:
             # calculate q_r component for 2D isotropic
             q = numpy.sqrt(qx**2+qy**2)
             # vectorize the model function runXY
-            v_model = numpy.vectorize(self.runXY,otypes=[float])
+            v_model = numpy.vectorize(self.runXY, otypes=[float])
             # calculate the scattering
             iq_array = v_model(q)
 
             return iq_array
                 
         elif qdist.__class__.__name__ == 'ndarray':
-                # We have a simple 1D distribution of q-values
-                v_model = numpy.vectorize(self.runXY,otypes=[float])
-                iq_array = v_model(qdist)
-
-                return iq_array
+            # We have a simple 1D distribution of q-values
+            v_model = numpy.vectorize(self.runXY, otypes=[float])
+            iq_array = v_model(qdist)
+            return iq_array
             
         else:
             mesg = "evalDistribution is expecting an ndarray of scalar q-values"
@@ -245,11 +265,40 @@ class BaseComponent:
         return list
     
     # Old-style methods that are no longer used
-    def setParamWithToken(self, name, value, token, member): return NotImplemented
-    def getParamWithToken(self, name, token, member): return NotImplemented
-    def getParamListWithToken(self, token, member): return NotImplemented
-    def __add__(self, other): raise ValueError, "Model operation are no longer supported"
-    def __sub__(self, other): raise ValueError, "Model operation are no longer supported"
-    def __mul__(self, other): raise ValueError, "Model operation are no longer supported"
-    def __div__(self, other): raise ValueError, "Model operation are no longer supported"
+    def setParamWithToken(self, name, value, token, member): 
+        """
+        set Param With Token
+        """
+        return NotImplemented
+    def getParamWithToken(self, name, token, member): 
+        """
+        get Param With Token
+        """
+        return NotImplemented
+    
+    def getParamListWithToken(self, token, member): 
+        """
+        get Param List With Token
+        """
+        return NotImplemented
+    def __add__(self, other): 
+        """
+        add
+        """
+        raise ValueError, "Model operation are no longer supported"
+    def __sub__(self, other): 
+        """
+        sub
+        """
+        raise ValueError, "Model operation are no longer supported"
+    def __mul__(self, other): 
+        """
+        mul
+        """
+        raise ValueError, "Model operation are no longer supported"
+    def __div__(self, other): 
+        """
+        div
+        """
+        raise ValueError, "Model operation are no longer supported"
         

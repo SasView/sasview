@@ -1,8 +1,8 @@
 
 from sans.models.BaseComponent import BaseComponent
-import numpy, math
+#import numpy, math
 import copy
-from sans.models.pluginmodel import Model1DPlugin
+#from sans.models.pluginmodel import Model1DPlugin
 class MultiplicationModel(BaseComponent):
     """
         Use for P(Q)*S(Q); function call must be in the order of P(Q) and then S(Q):
@@ -16,14 +16,14 @@ class MultiplicationModel(BaseComponent):
     def __init__(self, p_model, s_model ):
         BaseComponent.__init__(self)
         """
-            @param p_model: form factor, P(Q)
-            @param s_model: structure factor, S(Q)
+        :param p_model: form factor, P(Q)
+        :param s_model: structure factor, S(Q)
         """
 
         ## Setting  model name model description
-        self.description=""
+        self.description = ""
         self.name = p_model.name +" * "+ s_model.name
-        self.description= self.name+"\n"
+        self.description= self.name + "\n"
         self.fill_description(p_model, s_model)
 
         ## Define parameters
@@ -33,8 +33,8 @@ class MultiplicationModel(BaseComponent):
         self.details = {}
         
         ##models 
-        self.p_model= p_model
-        self.s_model= s_model        
+        self.p_model = p_model
+        self.s_model = s_model        
        
         ## dispersion
         self._set_dispersion()
@@ -99,7 +99,7 @@ class MultiplicationModel(BaseComponent):
         """
         ##set dispersion only from p_model 
         for name , value in self.p_model.dispersion.iteritems():
-            self.dispersion[name]= value 
+            self.dispersion[name] = value 
                                       
     def getProfile(self):
         """
@@ -110,7 +110,7 @@ class MultiplicationModel(BaseComponent):
         : Note: This works only for func_shell# = 2 (exp function).
         """
         try:
-            x,y = self.p_model.getProfile()
+            x, y = self.p_model.getProfile()
         except:
             x = None
             y = None
@@ -125,12 +125,12 @@ class MultiplicationModel(BaseComponent):
 
         for name , value in self.p_model.params.iteritems():
             if not name in self.params.keys() and name != 'scale':
-                self.params[name]= value
+                self.params[name] = value
             
         for name , value in self.s_model.params.iteritems():
             #Remove the effect_radius from the (P*S) model parameters.
             if not name in self.params.keys() and name != 'effect_radius':
-                self.params[name]= value
+                self.params[name] = value
                 
         # Set "scale and effec_radius to P and S model as initializing
         # since run P*S comes from P and S separately.
@@ -142,13 +142,13 @@ class MultiplicationModel(BaseComponent):
             Concatenate details of the two models to create
             this model details 
         """
-        for name ,detail in self.p_model.details.iteritems():
+        for name, detail in self.p_model.details.iteritems():
             if name != 'scale':
-                self.details[name]= detail
+                self.details[name] = detail
             
         for name , detail in self.s_model.details.iteritems():
             if not name in self.details.keys() or name != 'effect_radius':
-                self.details[name]= detail
+                self.details[name] = detail
     
     def _set_scale_factor(self):
         """
@@ -158,7 +158,7 @@ class MultiplicationModel(BaseComponent):
         if value != None: 
             factor = self.p_model.calculate_VR()
             if factor == None or factor == NotImplemented or factor == 0.0:
-                val= value
+                val = value
             else:
                 val = value / factor
             self.p_model.setParam('scale', value)
@@ -173,14 +173,14 @@ class MultiplicationModel(BaseComponent):
         effective_radius = self.p_model.calculate_ER()
         #Reset the effective_radius of s_model just before the run
         if effective_radius != None and effective_radius != NotImplemented:
-            self.s_model.setParam('effect_radius',effective_radius)
+            self.s_model.setParam('effect_radius', effective_radius)
                 
     def setParam(self, name, value):
         """ 
-            Set the value of a model parameter
+        Set the value of a model parameter
         
-            @param name: name of the parameter
-            @param value: value of the parameter
+        :param name: name of the parameter
+        :param value: value of the parameter
         """
         # set param to P*S model
         self._setParamHelper( name, value)
@@ -236,14 +236,16 @@ class MultiplicationModel(BaseComponent):
                 
                 
     def run(self, x = 0.0):
-        """ Evaluate the model
-            @param x: input q-value (float or [float, float] as [r, theta])
-            @return: (scattering function value)
+        """ 
+        Evaluate the model
+        :param x: input q-value (float or [float, float] as [r, theta])
+        :return: (scattering function value)
         """
         # set effective radius and scaling factor before run
         self._set_effect_radius()
         self._set_scale_factor()
-        return self.params['scale_factor']*self.p_model.run(x)*self.s_model.run(x)
+        return self.params['scale_factor'] * self.p_model.run(x) * \
+                            self.s_model.run(x)
 
     def runXY(self, x = 0.0):
         """ Evaluate the model
@@ -253,30 +255,35 @@ class MultiplicationModel(BaseComponent):
         # set effective radius and scaling factor before run
         self._set_effect_radius()
         self._set_scale_factor()
-        return self.params['scale_factor']*self.p_model.runXY(x)* self.s_model.runXY(x)
+        out = self.params['scale_factor'] * self.p_model.runXY(x) * \
+                        self.s_model.runXY(x)
+        return out
     
     ## Now (May27,10) directly uses the model eval function 
     ## instead of the for-loop in Base Component.
     def evalDistribution(self, x = []):
-        """ Evaluate the model in cartesian coordinates
-            @param x: input q[], or [qx[], qy[]]
-            @return: scattering function P(q[])
+        """ 
+        Evaluate the model in cartesian coordinates
+        :param x: input q[], or [qx[], qy[]]
+        :return: scattering function P(q[])
         """
         # set effective radius and scaling factor before run
         self._set_effect_radius()
         self._set_scale_factor()
-        return self.params['scale_factor']*self.p_model.evalDistribution(x)* self.s_model.evalDistribution(x)
+        out = self.params['scale_factor'] * self.p_model.evalDistribution(x) * \
+                        self.s_model.evalDistribution(x)
+        return out
 
     def set_dispersion(self, parameter, dispersion):
         """
-            Set the dispersion object for a model parameter
-            @param parameter: name of the parameter [string]
-            @dispersion: dispersion object of type DispersionModel
+        Set the dispersion object for a model parameter
+        :param parameter: name of the parameter [string]
+        :dispersion: dispersion object of type DispersionModel
         """
-        value= None
+        value = None
         try:
             if parameter in self.p_model.dispersion.keys():
-                value= self.p_model.set_dispersion(parameter, dispersion)
+                value = self.p_model.set_dispersion(parameter, dispersion)
             self._set_dispersion()
             return value
         except:
@@ -287,11 +294,16 @@ class MultiplicationModel(BaseComponent):
             Fill the description for P(Q)*S(Q)
         """
         description = ""
-        description += "Note:1) The effect_radius (effective radius) of %s \n"% (s_model.name)
-        description +="             is automatically calculated from size parameters (radius...).\n"
-        description += "         2) For non-spherical shape, this approximation is valid \n"
-        description += "            only for limited systems. Thus, use it at your own risk.\n"
-        description +="See %s description and %s description \n"%( p_model.name, s_model.name )
+        description += "Note:1) The effect_radius (effective radius) of %s \n"%\
+                                                                (s_model.name)
+        description += "             is automatically calculated "
+        description += "from size parameters (radius...).\n"
+        description += "         2) For non-spherical shape, "
+        description += "this approximation is valid \n"
+        description += "            only for limited systems. "
+        description += "Thus, use it at your own risk.\n"
+        description += "See %s description and %s description \n"% \
+                                                ( p_model.name, s_model.name )
         description += "        for details of individual models."
         self.description += description
     
