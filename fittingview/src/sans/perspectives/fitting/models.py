@@ -336,9 +336,6 @@ class ModelManagerBase:
         self.multiplication_factor.append(SphericalSLDModel)
         self.multi_func_list.append(SphericalSLDModel)
 
-        from sans.models.StarPolymer import StarPolymer
-        self.shape_list.append(StarPolymer)
-        self.model_name_list.append(StarPolymer.__name__)
         
         from sans.models.LinearPearlsModel import LinearPearlsModel
         self.shape_list.append(LinearPearlsModel)
@@ -555,6 +552,10 @@ class ModelManagerBase:
         from sans.models.RPA10Model import RPA10Model
         self.shape_indep_list.append(RPA10Model)
         self.multi_func_list.append(RPA10Model)
+
+        from sans.models.StarPolymer import StarPolymer
+        self.shape_indep_list.append(StarPolymer)
+        self.model_name_list.append(StarPolymer.__name__)
 
         from sans.models.SurfaceFractalModel import SurfaceFractalModel
         self.shape_indep_list.append(SurfaceFractalModel)

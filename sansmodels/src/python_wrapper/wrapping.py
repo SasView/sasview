@@ -25,11 +25,6 @@ def generate_wrappers(header_dir, output_dir='.', c_wrapper_dir='.'):
 def write_c_models(model_list):
     # simultaneously generates 'sansmodels/installed_models.txt'
     # and 'sansmodels/src/c_models/c_models.cpp'
-    model_list_file = open(os.path.join("sansmodels","installed_models.txt"),"w")
-    for model in model_list:
-        model_list_file.write(model + "\n")
-
-    model_list_file.close()
     
 
     template_file = open(os.path.join("sansmodels","src","c_models","c_models.cpp.template"),"r")

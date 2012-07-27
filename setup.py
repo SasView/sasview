@@ -216,6 +216,8 @@ igordir = os.path.join("sansmodels", "src", "libigor")
 c_model_dir = os.path.join("sansmodels", "src", "c_models")
 smear_dir  = os.path.join("sansmodels", "src", "c_smearer")
 wrapper_dir  = os.path.join("sansmodels", "src", "python_wrapper", "generated")
+model_dir = os.path.join("sansmodels", "src", "sans","models")
+
 if os.path.isdir(wrapper_dir):
     for file in os.listdir(wrapper_dir): 
         file_path =  os.path.join(wrapper_dir, file)
@@ -224,9 +226,9 @@ else:
     os.makedirs(wrapper_dir)
 sys.path.append(os.path.join("sansmodels", "src", "python_wrapper"))
 from wrapping import generate_wrappers
-generate_wrappers(header_dir=includedir, 
-                  output_dir=os.path.join("sansmodels", "src", "sans", "models"), 
-                  c_wrapper_dir=wrapper_dir)
+generate_wrappers(header_dir = includedir, 
+                  output_dir = model_dir,
+                  c_wrapper_dir = wrapper_dir)
 
 IGNORED_FILES = [".svn"]
 if not os.name=='nt':
@@ -264,7 +266,8 @@ append_file(file_list=smear_sources, dir_path=smear_dir)
 
 
 package_dir["sans"] = os.path.join("sansmodels", "src", "sans")
-package_dir["sans.models"] = os.path.join("sansmodels", "src", "sans", "models")
+package_dir["sans.models"] = model_dir
+
 package_dir["sans.models.sans_extension"] = os.path.join("sansmodels", "src", "sans", "models", "sans_extension")
             
 package_data['sans.models'] = [os.path.join('media', "*")]
@@ -272,6 +275,26 @@ packages.extend(["sans","sans.models","sans.models.sans_extension"])
     
 smearer_sources = [os.path.join(smear_dir, "smearer.cpp"),
                   os.path.join(smear_dir, "smearer_module.cpp")]
+
+# compile list of installed models
+installed_model_file = open(os.path.join("sansmodels",
+                                         "installed_models.txt"),'w')
+not_models = ['BaseComponent',
+              'sans_extension',
+              'MulComponent',
+              'svn',
+              'media',
+              'SubComponent',
+              '__init__',
+              'dispersion_models',
+              'AddComponent',
+              'qsmearing']
+
+for model in os.listdir(model_dir):
+    if not model.rstrip(".py") in not_models:
+        installed_model_file.write(model.rstrip(".py") + '\n')
+
+installed_model_file.close()
 
 if os.name=='nt':
     smearer_sources.append(os.path.join(igordir, "winFuncs.c"))
@@ -311,6 +334,9 @@ if os.name=='nt':
     required.extend(['html5lib', 'reportlab'])
 else:
     required.extend(['pil'])
+
+
+
    
  # Set up SansView    
 setup(
