@@ -34,8 +34,8 @@ class ParameterDict(dict):
     """
     def __init__(self, parameters):
         """    
-            Initialization
-            @param parameters: new-style 'parameters' dictionary
+        Initialization
+        param parameters: new-style 'parameters' dictionary
         """
         self.parameters = parameters
         
@@ -47,9 +47,8 @@ class ParameterDict(dict):
     
 class ModelAdaptor(object):
     """ 
-        Model adaptor to provide old-style model functionality
+    Model adaptor to provide old-style model functionality
     """
-
     def __init__(self):
         """ Initialization"""
         ## Dictionary of Parameter objects
@@ -58,22 +57,50 @@ class ModelAdaptor(object):
         self.params = ParameterDict(self.parameters)
         ## Additional details, provided for backward compatibility
         self.details = {}
-        self.description=''
+        self.description = ''
         ## Dictionary used to store the dispersity/averaging
         #  parameters of dispersed/averaged parameters.
         ## Provided for backward compatibility
         self.dispersion = {}
                               
     # Old-style methods that are no longer used
-    def setParamWithToken(self, name, value, token, member): return NotImplemented
-    def getParamWithToken(self, name, token, member): return NotImplemented
-    def getParamListWithToken(self, token, member): return NotImplemented
-    def __add__(self, other): raise ValueError, "Model operation are no longer supported"
-    def __sub__(self, other): raise ValueError, "Model operation are no longer supported"
-    def __mul__(self, other): raise ValueError, "Model operation are no longer supported"
-    def __div__(self, other): raise ValueError, "Model operation are no longer supported"
-
+    def setParamWithToken(self, name, value, token, member): 
+        """
+        set Param With Token
+        """
+        return NotImplemented
     
+    def getParamWithToken(self, name, token, member): 
+        """
+        get Param With Token
+        """
+        return NotImplemented
+    
+    def getParamListWithToken(self, token, member): 
+        """
+        get Param List With Token
+        """
+        return NotImplemented
+    def __add__(self, other): 
+        """
+        add
+        """
+        raise ValueError, "Model operation are no longer supported"
+    def __sub__(self, other): 
+        """
+        sub
+        """
+        raise ValueError, "Model operation are no longer supported"
+    def __mul__(self, other): 
+        """
+        mul
+        """
+        raise ValueError, "Model operation are no longer supported"
+    def __div__(self, other): 
+        """
+        div
+        """
+        raise ValueError, "Model operation are no longer supported"
 
 if __name__ == "__main__":
     b = ModelAdaptor() 
