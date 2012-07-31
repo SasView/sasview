@@ -48,21 +48,21 @@ static double mass_surface_fractal_kernel(double dp[], double q) {
   // This model is valid only for 0<dm<=6 and 0<ds<=6
   // Not valid values => reject as 0.0
   if (mass_dim < 1e-16){
-	  return 0.0;
+	  return background;
   }
   if (mass_dim > 6.0){
-	  return 0.0;
+	  return background;
   }
   if (surface_dim < 1e-16){
-	  return 0.0;
+	  return background;
   }
   if (surface_dim > 6.0){
-	  return 0.0;
+	  return background;
   }
   tot_dim = 6.0 - surface_dim - mass_dim;
   //singulars
   if (tot_dim < 0.0){
-	  return 0.0;
+	  return background;
   }
 
   //computation
@@ -81,7 +81,7 @@ static double mass_surface_fractal_kernel(double dp[], double q) {
   inv_form = pow(x_val1, mass_dim) * pow(x_val2, tot_dim);
 
   //another singular
-  if (inv_form == 0.0) return 0.0;
+  if (inv_form == 0.0) return background;
 
   form_factor = 1.0;
   form_factor /= inv_form;
