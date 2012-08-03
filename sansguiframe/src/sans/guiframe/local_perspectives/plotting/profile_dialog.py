@@ -65,6 +65,7 @@ class SLDPanel(wx.Dialog):
             self.subplot = self.plotpanel.subplot
             # layout
             self._setup_layout()
+            
             # plot
             data_plot = deepcopy(self.data)
             data_plot.dy = self._set_dy_data()
@@ -75,15 +76,20 @@ class SLDPanel(wx.Dialog):
             self.newplot.symbol = GUIFRAME_ID.CURVE_SYMBOL_NUM
             self.newplot.dy = None
             self.newplot.name = 'SLD'
+            self.newplot.is_data = False
+            
             self.newplot.id = self.newplot.name
             self.plotpanel.add_image(self.newplot) 
+            
+            self.plotpanel.resizing = False
+            self.plotpanel.canvas.set_resizing(self.plotpanel.resizing)
+            
             self.plotpanel.subplot.set_ylim(min(data_plot.y) - _Y_OFF , 
                                                 max(data_plot.y) + _Y_OFF)
             self.plotpanel.subplot.set_xlim(min(data_plot.x) - _X_OFF, 
                                                 max(data_plot.x) + _X_OFF)
-            self.plotpanel.resizing = False
-            self.plotpanel.canvas.set_resizing(self.plotpanel.resizing)
             self.plotpanel.graph.render(self.plotpanel)
+            self.plotpanel.canvas.draw()
 
     def _set_dy_data(self): 
         """
@@ -218,6 +224,8 @@ class SLDplotpanel(PlotPanel):
         self.yaxis_label = ''
         self.yaxis_unit = ''
         self.resizing = True
+        self.xcolor = 'black'
+        self.ycolor = 'black'
         
     def add_image(self, plot):
         """
