@@ -22,7 +22,7 @@ from danse.common.plottools.SimpleFont import SimpleFont
 COLOR = ['black', 'blue', 'green', 'red', 'cyan', 'magenta', 'yellow']
 
 
-class graphAppearance(wx.Frame):
+class graphAppearance(wx.Dialog):
 
     def __init__(self, parent, title, legend=True):
         super(graphAppearance, self).__init__(parent, title=title, size=(520, 435))
@@ -104,10 +104,9 @@ class graphAppearance(wx.Frame):
         
 
         self.cancel_button = wx.Button(panel, label='Cancel')
-        self.ok_button = wx.Button(panel, label='OK')
+        self.ok_button = wx.Button(panel, wx.ID_OK, label='OK')
 
         self.cancel_button.Bind(wx.EVT_BUTTON, self.onCancel)
-        self.ok_button.Bind(wx.EVT_BUTTON, self.on_ok)
 
 
         xhbox1.Add(xaxis_label, flag= wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=10)
@@ -180,9 +179,6 @@ class graphAppearance(wx.Frame):
         fonty.set_default_font(self.yfont)
         if(fonty.ShowModal() == wx.ID_OK):
             self.yfont = fonty.get_font()
-
-    def on_ok(self, e):
-        self.Close()
 
     def onCancel(self, e):
         self.Destroy()

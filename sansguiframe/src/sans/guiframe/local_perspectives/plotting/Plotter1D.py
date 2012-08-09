@@ -633,25 +633,30 @@ class ModelPanel1D(PlotPanel, PanelBase):
             curr_color = self._color_labels['Blue']
             curr_symbol = 13
 
-        self.appD = appearanceDialog(self,'Modify plot properties')
-        self.appD.setDefaults(float(curr_size),int(curr_color),str(appearanceDialog.find_key(self.get_symbol_label(),int(curr_symbol))),curr_label)
-        self.appD.Bind(wx.EVT_CLOSE, self.on_AppDialog_close)    
+        self.appD = appearanceDialog(self, 'Modify plot properties')
+        self.appD.setDefaults(float(curr_size),
+                              int(curr_color),
+                              str(appearanceDialog.find_key\
+                                      (self.get_symbol_label(),
+                                       int(curr_symbol))),curr_label)
+        if self.appD.ShowModal() == wx.ID_OK:
+            self.on_AppDialog_close()
 
-    def on_AppDialog_close(self,e):
-        if(self.appD.okay_clicked == True):
-            info = self.appD.getCurrentValues() # returns (size,color,symbol,datalabel)
-            self.appearance_selected_plot.custom_color = self._color_labels[info[1].encode('ascii','ignore')]
+    def on_AppDialog_close(self):
 
-            self.appearance_selected_plot.markersize = float(info[0])
-            self.appearance_selected_plot.symbol = self.get_symbol_label()[info[2]] # self._symbol_labels[info[2].encode('ascii','ignore')]
-            self.appearance_selected_plot.label = str(info[3])
-
-            pos = self.parent._window_menu.FindItem(self.window_caption)
-            helpString = 'Show/Hide Graph: '
-            for plot in  self.plots.itervalues():
-                helpString += (' ' + str(plot.label) +';')
-                self.parent._window_menu.SetHelpString(pos, helpString)
-                self._is_changed_legend_label = True
+        info = self.appD.getCurrentValues() # returns (size,color,symbol,datalabel)
+        self.appearance_selected_plot.custom_color = self._color_labels[info[1].encode('ascii','ignore')]
+        
+        self.appearance_selected_plot.markersize = float(info[0])
+        self.appearance_selected_plot.symbol = self.get_symbol_label()[info[2]] # self._symbol_labels[info[2].encode('ascii','ignore')]
+        self.appearance_selected_plot.label = str(info[3])
+        
+        pos = self.parent._window_menu.FindItem(self.window_caption)
+        helpString = 'Show/Hide Graph: '
+        for plot in  self.plots.itervalues():
+            helpString += (' ' + str(plot.label) + ';')
+            self.parent._window_menu.SetHelpString(pos, helpString)
+            self._is_changed_legend_label = True
                 
         self.appD.Destroy()
         self._check_zoom_plot()
@@ -668,10 +673,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
                                   self.xaxis_font,self.yaxis_font,
                                   find_key(self.get_loc_label(),self.legendLoc),
                                   self.xcolor,self.ycolor)
-        self.graphApp.Bind(wx.EVT_CLOSE, self.on_graphApp_close)
+        if self.graphApp.ShowModal() == wx.ID_OK:
+            self.on_graphApp_close()
     
 
-    def on_graphApp_close(self, event):
+    def on_graphApp_close(self):
         """
         Gets values from graph appearance dialog and sends them off
         to modify the plot

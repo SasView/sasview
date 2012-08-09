@@ -23,12 +23,11 @@ import operator
 # main appearance dialog starts here:
 
 
-class appearanceDialog(wx.Frame):
+class appearanceDialog(wx.Dialog):
 
     def __init__(self,parent,title):
-        super(appearanceDialog,self).__init__(parent, title=title,size=(570,430))
-
-        self.okay_clicked = False
+        super(appearanceDialog,self).__init__(parent, title=title,
+                                              size=(570, 430))
 
         self.symbolLabels = self.get_symbol_label()
         self.colorLabels = self.get_color_label()
@@ -77,8 +76,7 @@ class appearanceDialog(wx.Frame):
         self.labelTextBox = wx.TextCtrl(panel,-1, "",size=(-1,-1))
 
         # buttons
-        OkButton = wx.Button(panel, label='OK')
-        OkButton.Bind(wx.EVT_BUTTON,self.onOK)
+        OkButton = wx.Button(panel, wx.ID_OK, label='OK')
         cancelButton = wx.Button(panel, label='Cancel')
         cancelButton.Bind(wx.EVT_BUTTON, self.CloseDlg)
 
@@ -171,7 +169,7 @@ class appearanceDialog(wx.Frame):
         sortedcolorLabels = sorted(self.colorLabels.iteritems(),key=operator.itemgetter(1))
         
         for color in sortedcolorLabels:
-             self.colorListBox.Append(str(color[0]))
+            self.colorListBox.Append(str(color[0]))
  
     def populateSize(self):
 
@@ -259,7 +257,3 @@ class appearanceDialog(wx.Frame):
  
         return(size,color,symbol,name)
 
-    def onOK(self,e):
-        self.okay_clicked = True
-
-        self.Close()
