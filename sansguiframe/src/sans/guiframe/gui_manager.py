@@ -1901,7 +1901,14 @@ class ViewerFrame(wx.Frame):
                     reader.read(path)
                     return
                 elif extension == APPLICATION_STATE_EXTENSION:
-                    reader.read(path)
+                    try:
+                        reader.read(path)
+                    except:
+                        msg = "DataLoader Error: Encounted Non-ASCII character"
+                        msg += "\n(%s)"% sys.exc_value
+                        wx.PostEvent(self, StatusEvent(status=msg, 
+                                                info="error", type="stop"))
+                        return
         
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style == GUIFRAME.MANAGER_ON:
