@@ -270,7 +270,9 @@ package_dir["sans.models"] = model_dir
 
 package_dir["sans.models.sans_extension"] = os.path.join("sansmodels", "src", "sans", "models", "sans_extension")
             
-package_data['sans.models'] = [os.path.join('media', "*")]
+package_data['sans.models'] = [os.path.join('media', "*.*")]
+package_data['sans.models'] += [os.path.join('media','img', "*.*")]
+
 packages.extend(["sans","sans.models","sans.models.sans_extension"])
     
 smearer_sources = [os.path.join(smear_dir, "smearer.cpp"),
