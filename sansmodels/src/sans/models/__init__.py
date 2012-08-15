@@ -44,10 +44,12 @@ def data_files():
     """
     data_files = []
     path = get_data_path(media="media")
-    for f in findall(path):
-        if os.path.isfile(f):
-            data_files.append(('media/models_media', [f]))
     path_img = get_data_path(media=os.path.join("media","img"))
-    for f in findall(path_img):
+    im_list = findall(path_img)
+    for f in findall(path):
+        if os.path.isfile(f) and f not in im_list:
+            data_files.append(('media/models_media', [f]))
+    
+    for f in im_list:
         data_files.append(('media/models_media/img', [f]))
     return data_files
