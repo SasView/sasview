@@ -6,10 +6,10 @@ Dialog for general graph appearance
 
 
 /**
-	This software was developed by Institut Laue-Langevin as part of
-	Distributed Data Analysis of Neutron Scattering Experiments (DANSE).
+    This software was developed by Institut Laue-Langevin as part of
+    Distributed Data Analysis of Neutron Scattering Experiments (DANSE).
 
-	Copyright 2012 Institut Laue-Langevin
+    Copyright 2012 Institut Laue-Langevin
 
 **/
 
@@ -22,7 +22,7 @@ from danse.common.plottools.SimpleFont import SimpleFont
 COLOR = ['black', 'blue', 'green', 'red', 'cyan', 'magenta', 'yellow']
 
 
-class graphAppearance(wx.Dialog):
+class graphAppearance(wx.Frame):
 
     def __init__(self, parent, title, legend=True):
         super(graphAppearance, self).__init__(parent, title=title, size=(520, 435))
@@ -104,9 +104,10 @@ class graphAppearance(wx.Dialog):
         
 
         self.cancel_button = wx.Button(panel, label='Cancel')
-        self.ok_button = wx.Button(panel, wx.ID_OK, label='OK')
+        self.ok_button = wx.Button(panel, label='OK')
 
         self.cancel_button.Bind(wx.EVT_BUTTON, self.onCancel)
+        self.ok_button.Bind(wx.EVT_BUTTON, self.on_ok)
 
 
         xhbox1.Add(xaxis_label, flag= wx.ALL | wx.EXPAND  | wx.ALIGN_LEFT, border=10)
@@ -179,6 +180,9 @@ class graphAppearance(wx.Dialog):
         fonty.set_default_font(self.yfont)
         if(fonty.ShowModal() == wx.ID_OK):
             self.yfont = fonty.get_font()
+
+    def on_ok(self, e):
+        self.Close()
 
     def onCancel(self, e):
         self.Destroy()

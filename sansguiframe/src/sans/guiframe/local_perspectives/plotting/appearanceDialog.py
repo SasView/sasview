@@ -6,10 +6,10 @@ Dialog for appearance of plot symbols, color, size etc.
 
 
 /**
-	This software was developed by Institut Laue-Langevin as part of
-	Distributed Data Analysis of Neutron Scattering Experiments (DANSE).
+    This software was developed by Institut Laue-Langevin as part of
+    Distributed Data Analysis of Neutron Scattering Experiments (DANSE).
 
-	Copyright 2012 Institut Laue-Langevin
+    Copyright 2012 Institut Laue-Langevin
 
 **/
 
@@ -23,14 +23,15 @@ import operator
 # main appearance dialog starts here:
 
 
-class appearanceDialog(wx.Dialog):
+class appearanceDialog(wx.Frame):
 
     def __init__(self,parent,title):
-        super(appearanceDialog,self).__init__(parent, title=title,
-                                              size=(570, 430))
+        super(appearanceDialog,self).__init__(parent, title=title,size=(570,450), style=wx.DEFAULT_FRAME_STYLE|wx.FRAME_FLOAT_ON_PARENT)
 
-        self.symbolLabels = self.get_symbol_label()
-        self.colorLabels = self.get_color_label()
+        self.okay_clicked = False
+        self.parent = parent
+        self.symbolLabels = self.parent.get_symbol_label()
+        self.colorLabels = self.parent.get_color_label()
 
 
         self.InitUI()
@@ -63,7 +64,7 @@ class appearanceDialog(wx.Dialog):
         # texts
         symbolText = wx.StaticText(panel, label='Shape')
         colorText = wx.StaticText(panel, label='Color')
-        sizeText = wx.StaticText(panel, label='Size')
+        sizeText = wx.StaticText(panel, label='Size ')
         labelText = wx.StaticText(panel, label='Legend label')
 
         # selection widgets
@@ -76,7 +77,8 @@ class appearanceDialog(wx.Dialog):
         self.labelTextBox = wx.TextCtrl(panel,-1, "",size=(-1,-1))
 
         # buttons
-        OkButton = wx.Button(panel, wx.ID_OK, label='OK')
+        OkButton = wx.Button(panel, label='OK')
+        OkButton.Bind(wx.EVT_BUTTON,self.onOK)
         cancelButton = wx.Button(panel, label='Cancel')
         cancelButton.Bind(wx.EVT_BUTTON, self.CloseDlg)
 
@@ -85,7 +87,7 @@ class appearanceDialog(wx.Dialog):
         ivbox1.Add(self.symbolListBox, flag = wx.ALL | wx.ALIGN_LEFT ,border=10)
 
         ihbox1.Add(sizeText, flag = wx.ALL| wx.ALIGN_LEFT , border=10)
-        ihbox1.Add(self.sizeComboBox, flag =  wx.ALL | wx.ALIGN_LEFT , border=10)
+        ihbox1.Add(self.sizeComboBox, flag =  wx.ALL|wx.RIGHT | wx.ALIGN_LEFT , border=10)
         ihbox1.Add(self.sizeCustomButton, flag = wx.ALIGN_LEFT | wx.ALL, border=10)
 
         ihbox2.Add(colorText,flag = wx.ALL | wx.ALIGN_LEFT, border=10)
@@ -93,19 +95,19 @@ class appearanceDialog(wx.Dialog):
 
 
 
-        ivbox2.Add(ihbox1, flag =  wx.ALL | wx.ALIGN_RIGHT,border=10)
-        ivbox2.Add(ihbox2, flag =  wx.ALL | wx.ALIGN_RIGHT,border=10)
+        ivbox2.Add(ihbox1, flag =wx.ALIGN_LEFT,border=10)
+        ivbox2.Add(ihbox2, flag =wx.ALIGN_LEFT,border=10)
 
         
-        hbox1.Add(ivbox1,flag =  wx.EXPAND | wx.ALIGN_LEFT ,border=10)
-        hbox1.Add(ivbox2,flag =  wx.EXPAND | wx.ALIGN_RIGHT ,border=10)
+        hbox1.Add(ivbox1,flag =wx.ALIGN_LEFT ,border=10)
+        hbox1.Add(ivbox2,flag =wx.ALIGN_LEFT ,border=10)
 
    
         hbox2.Add(OkButton, flag = wx.ALL |  wx.ALIGN_RIGHT, border=10)
         hbox2.Add(cancelButton, flag = wx.ALL | wx.ALIGN_RIGHT, border=10)
 
-        hbox3.Add(labelText, flag= wx.EXPAND | wx.ALL |  wx.ALIGN_LEFT, border=10)
-        hbox3.Add(self.labelTextBox, wx.EXPAND | wx.ALL |wx.ALIGN_LEFT , border=10)
+        hbox3.Add(labelText, flag= wx.EXPAND | wx.RIGHT |  wx.ALIGN_LEFT, border=10)
+        hbox3.Add(self.labelTextBox, wx.EXPAND | wx.RIGHT |wx.ALIGN_LEFT , border=10)
   
         symbolStaticBoxSizer.Add(hbox1,flag = wx.ALL | wx.EXPAND,border=10)
         vbox.Add(symbolStaticBoxSizer, flag = wx.ALL | wx.EXPAND,border=10)
@@ -153,7 +155,7 @@ class appearanceDialog(wx.Dialog):
         else:
             self.sizeComboBox.SetSelection(4)
         self.symbolListBox.SetSelection(self.sorted_sym_dic[symbol])
-        colorname = appearanceDialog.find_key(self.get_color_label(),color)
+        colorname = appearanceDialog.find_key(self.parent.get_color_label(),color)
         self.colorListBox.SetStringSelection(colorname)
 
     def populateSymbol(self):
@@ -169,7 +171,7 @@ class appearanceDialog(wx.Dialog):
         sortedcolorLabels = sorted(self.colorLabels.iteritems(),key=operator.itemgetter(1))
         
         for color in sortedcolorLabels:
-            self.colorListBox.Append(str(color[0]))
+             self.colorListBox.Append(str(color[0]))
  
     def populateSize(self):
 
@@ -257,3 +259,7 @@ class appearanceDialog(wx.Dialog):
  
         return(size,color,symbol,name)
 
+    def onOK(self,e):
+        self.okay_clicked = True
+
+        self.Close()
