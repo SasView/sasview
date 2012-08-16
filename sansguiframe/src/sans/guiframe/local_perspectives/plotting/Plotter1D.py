@@ -421,7 +421,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
             wx.EVT_MENU(self, id, self.onPrinterPreview)
             
             id = wx.NewId()
-            self._slicerpop.Append(id, '&Copy to Clipboard', 'Copy to the clipboard')
+            self._slicerpop.Append(id, '&Copy to Clipboard', 
+                                   'Copy to the clipboard')
             wx.EVT_MENU(self, id, self.OnCopyFigureMenu)
                     
             self._slicerpop.AppendSeparator()
@@ -494,7 +495,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
                     plot_menu.AppendSeparator()
 
                 id = wx.NewId()
-                plot_menu.Append(id, '&Modify plot properties', name)
+                plot_menu.Append(id, '&Modify Plot Property', name)
                 wx.EVT_MENU(self, id, self.createAppDialog)
 
 
@@ -502,8 +503,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
             id = wx.NewId()
             #plot_menu.SetTitle(name)
             self._slicerpop.AppendMenu(id, '&%s'% name, plot_menu)
-                # Option to hide
-                #TODO: implement functionality to hide a plottable (legend click)
+            # Option to hide
+            #TODO: implement functionality to hide a plottable (legend click)
         if not self.graph.selected_plottable in self.plots:  
             self._slicerpop.AppendSeparator()
             loc_menu = wx.Menu()
@@ -513,7 +514,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 wx.EVT_MENU(self, id, self.onChangeLegendLoc)
             
             id = wx.NewId()
-            self._slicerpop.Append(id, '&Modify graph appearance','Modify graph appearance')
+            self._slicerpop.Append(id, '&Modify Graph Appearance',
+                                   'Modify graph appearance')
             wx.EVT_MENU(self, id, self.modifyGraphAppearance)
             self._slicerpop.AppendSeparator()
 
@@ -549,6 +551,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             
     def onFreeze(self, event):
         """
+        on Freeze data
         """
         menu = event.GetEventObject()
         id = event.GetId()
@@ -620,9 +623,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         menu = event.GetEventObject()
         id = event.GetId()
-        self.set_selected_from_menu(menu,id)
-        self.appearance_selected_plot = self.plots[self.graph.selected_plottable]
-
+        self.set_selected_from_menu(menu, id)
+        self.appearance_selected_plot = \
+                        self.plots[self.graph.selected_plottable]
         # find current properties
         curr_color = self.appearance_selected_plot.custom_color
         curr_symbol = self.appearance_selected_plot.symbol
@@ -636,22 +639,30 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.appD = appearanceDialog(self, 'Modify Plot Property')
         icon = self.parent.GetIcon()
         self.appD.SetIcon(icon)
-        self.appD.setDefaults(float(curr_size),int(curr_color),str(appearanceDialog.find_key(self.get_symbol_label(),int(curr_symbol))),curr_label)
+        self.appD.set_defaults(float(curr_size), int(curr_color), 
+                    str(appearanceDialog.find_key(self.get_symbol_label(), 
+                    int(curr_symbol))), curr_label)
         self.appD.Bind(wx.EVT_CLOSE, self.on_AppDialog_close)    
 
-    def on_AppDialog_close(self,e):
+    def on_AppDialog_close(self, event):
+        """
+        on_Modify Plot Property_close
+        """
         if(self.appD.okay_clicked == True):
-            info = self.appD.getCurrentValues() # returns (size,color,symbol,datalabel)
-            self.appearance_selected_plot.custom_color = self._color_labels[info[1].encode('ascii','ignore')]
+            # returns (size,color,symbol,datalabel)
+            info = self.appD.get_current_values() 
+            self.appearance_selected_plot.custom_color = \
+                        self._color_labels[info[1].encode('ascii', 'ignore')]
 
             self.appearance_selected_plot.markersize = float(info[0])
-            self.appearance_selected_plot.symbol = self.get_symbol_label()[info[2]] # self._symbol_labels[info[2].encode('ascii','ignore')]
+            self.appearance_selected_plot.symbol = \
+                        self.get_symbol_label()[info[2]] 
             self.appearance_selected_plot.label = str(info[3])
 
             pos = self.parent._window_menu.FindItem(self.window_caption)
             helpString = 'Show/Hide Graph: '
             for plot in  self.plots.itervalues():
-                helpString += (' ' + str(plot.label) +';')
+                helpString += (' ' + str(plot.label) + ';')
                 self.parent._window_menu.SetHelpString(pos, helpString)
                 self._is_changed_legend_label = True
                 
@@ -659,17 +670,19 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._check_zoom_plot()
 
 
-    def modifyGraphAppearance(self,e):
-        self.graphApp = graphAppearance(self,'Modify Graph Appearance')
+    def modifyGraphAppearance(self, event):
+        """
+        On Modify Graph Appearance 
+        """
+        self.graphApp = graphAppearance(self, 'Modify Graph Appearance')
         icon = self.parent.GetIcon()
         self.graphApp.SetIcon(icon)
-        
-
-        self.graphApp.setDefaults(self.grid_on,self.legend_on,
-                                  self.xaxis_label,self.yaxis_label,
-                                  self.xaxis_unit,self.yaxis_unit,
-                                  self.xaxis_font,self.yaxis_font,
-                                  find_key(self.get_loc_label(),self.legendLoc),
+        self.graphApp.setDefaults(self.grid_on, self.legend_on, 
+                                  self.xaxis_label, self.yaxis_label, 
+                                  self.xaxis_unit, self.yaxis_unit, 
+                                  self.xaxis_font, self.yaxis_font, 
+                                  find_key(self.get_loc_label(), 
+                                  self.legendLoc), 
                                   self.xcolor,self.ycolor)
         self.graphApp.Bind(wx.EVT_CLOSE, self.on_graphApp_close)
     

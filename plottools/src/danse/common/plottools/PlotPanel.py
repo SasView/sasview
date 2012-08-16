@@ -1294,10 +1294,12 @@ class PlotPanel(wx.Panel):
         """
 
         self.xcolor = color
-        if units != "":
-            label = label + " (" + units + ")"
+        if units.count("{") > 0 and units.count("$") < 2:
+            units = '$' + units + '$'
         if label.count("{") > 0 and label.count("$") < 2:
             label = '$' + label + '$'
+        if units != "":
+            label = label + " (" + units + ")"
         if font:
             self.subplot.set_xlabel(label, fontproperties=font, color=color)
             if t_font != None:
@@ -1313,11 +1315,12 @@ class PlotPanel(wx.Panel):
     def yaxis(self, label, units, font=None, color='black', t_font=None):
         """yaxis label and units."""
         self.ycolor = color
-
-        if units != "":
-            label = label + " (" + units + ")"
+        if units.count("{") > 0 and units.count("$") < 2:
+            units = '$' + units + '$'
         if label.count("{") > 0 and label.count("$") < 2:
             label = '$' + label + '$'
+        if units != "":
+            label = label + " (" + units + ")"
         if font:
             self.subplot.set_ylabel(label, fontproperties=font, color=color)
             if t_font != None:
