@@ -17,20 +17,21 @@ import wx
 import sys
 import os
 import wx.html as html
-
-if sys.platform.count("win32") > 0:
+ISPDF = False
+if sys.platform == "win32":
     _STATICBOX_WIDTH = 450
     PANEL_WIDTH = 500 
     PANEL_HEIGHT = 700
     FONT_VARIANT = 0
     ISMAC = False
-else:
+    ISPDF = True
+elif sys.platform == "darwin":
     _STATICBOX_WIDTH = 480
     PANEL_WIDTH = 530
     PANEL_HEIGHT = 700
     FONT_VARIANT = 1
     ISMAC = True
-ISPDF = True
+    ISPDF = True
   
 class ReportDialog(wx.Dialog):
     """
@@ -170,7 +171,16 @@ class ReportDialog(wx.Dialog):
             
             #open pdf
             if pdf:
-                os.startfile(str(fName))
+                try:
+                    #Windows
+                    os.startfile(str(fName))
+                except:
+                    try:
+                        #Mac
+                        os.system("open %s"% fName)
+                    except:
+                        #DO not open
+                        pass
             #delete image file
             os.remove(pic_fname)
             return

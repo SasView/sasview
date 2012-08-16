@@ -22,16 +22,17 @@ PANEL_WIDTH = 530
 PANEL_HEIGHT = 700
 FONT_VARIANT = 1
 ISMAC = False
-
+ISPDF = False
 if sys.platform == "win32":
     _STATICBOX_WIDTH = 450
     PANEL_WIDTH = 500
     PANEL_HEIGHT = 700
     FONT_VARIANT = 0
     ISMAC = False
+    ISPDF = True
 elif sys.platform == "darwin":
     ISMAC = True
-ISPDF = True
+    ISPDF = True
 
         
 class ReportDialog(wx.Dialog):
@@ -198,7 +199,16 @@ class ReportDialog(wx.Dialog):
             
             #open pdf
             if pdf:
-                os.startfile(str(fName))
+                try:
+                    #Windows
+                    os.startfile(str(fName))
+                except:
+                    try:
+                        #Mac
+                        os.system("open %s"% fName)
+                    except:
+                        #DO not open
+                        pass
             #delete image file
             for num in range(self.nimages):
                 os.remove(pic_fname[num])
