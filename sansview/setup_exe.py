@@ -18,7 +18,7 @@ import platform
 
 if len(sys.argv) == 1:
     sys.argv.append('py2exe')
-# When using the SansView build script, we need to be able to pass
+# When using the SasView build script, we need to be able to pass
 # an extra path to be added to the python path. The extra arguments
 # should be removed from the list so that the setup processing doesn't
 # fail.
@@ -30,7 +30,7 @@ try:
         del sys.argv[path_flag_idx+1]
         sys.argv.remove('--extrapath')
 except:
-    print "Error processing extra python path needed to build SansView\n  %s" % sys.exc_value
+    print "Error processing extra python path needed to build SasView\n  %s" % sys.exc_value
 
 from distutils.core import setup
 from distutils.filelist import findall
@@ -95,7 +95,7 @@ if is_64bits and sys.version_info >= (2, 6):
            name="Controls"
            type="win32"
        />
-       <description>SansView</description>
+       <description>SasView</description>
        <dependency>
            <dependentAssembly>
                <assemblyIdentity
@@ -117,10 +117,10 @@ else:
           <assemblyIdentity
             version="5.0.0.0"
             processorArchitecture="x86"
-            name="SansView"
+            name="SasView"
             type="win32">
           </assemblyIdentity>
-          <description>SansView</description>
+          <description>SasView</description>
           <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
             <security>
               <requestedPrivileges>
@@ -166,7 +166,7 @@ else:
            name="Controls"
            type="win32"
        />
-       <description>SansView</description>
+       <description>SasView</description>
        <dependency>
            <dependentAssembly>
                <assemblyIdentity
@@ -206,7 +206,7 @@ class Target:
         self.version = "2.1.0"
         self.company_name = "U Tennessee"
         self.copyright = "copyright 2009 - 2012"
-        self.name = "SansView"
+        self.name = "SasView"
         
 #
 # Adapted from http://www.py2exe.org/index.cgi/MatPlotLib
@@ -316,11 +316,11 @@ dll_excludes = ['libgdk_pixbuf-2.0-0.dll',
                 'cygwin1.dll']
 
 target_wx_client = Target(
-    description = 'SansView',
+    description = 'SasView',
     script = 'sansview.py',
     icon_resources = [(1, os.path.join(images_dir, "ball.ico"))],
     other_resources = [(24,1,manifest)],
-    dest_base = "SansView"
+    dest_base = "SasView"
     )
 
 bundle_option = 2

@@ -123,7 +123,7 @@ def write_registry(data_extension=None, app_extension=None):
     msg += """Root: HKCR; Subkey: "{app}\%s";\t""" % str(APPLICATION)
     msg += """ValueType: %s; """ % str('string')
     msg += """ValueName: "%s";\t""" % str('') 
-    msg += """ValueData: "{app}\%s";\t""" % str("SansView File") 
+    msg += """ValueData: "{app}\%s";\t""" % str("SasView File") 
     msg += """ Flags: %s \t""" % str("uninsdeletekey  noerror")
     msg += "\n"
         
@@ -144,10 +144,10 @@ def write_registry(data_extension=None, app_extension=None):
     msg += "\n"  
 
     
-    #SANSVIEWPATH
+    #SASVIEWPATH
     msg += """Root: HKLM; Subkey: "%s";\t"""  %  str('SYSTEM\CurrentControlSet\Control\Session Manager\Environment')
     msg += """ValueType: %s; """ % str('expandsz')
-    msg += """ValueName: "%s";\t""" % str('SANSVIEWPATH') 
+    msg += """ValueName: "%s";\t""" % str('SASVIEWPATH') 
     msg += """ValueData: "{app}";\t"""
     msg += """ Flags: %s""" % str('uninsdeletevalue noerror')
     msg += "\n"
@@ -157,7 +157,7 @@ def write_registry(data_extension=None, app_extension=None):
     msg += """;Root: HKCU; Subkey: "%s";\t"""  %  str('Environment')
     msg += """ValueType: %s; """ % str('expandsz')
     msg += """ValueName: "%s";\t""" % str('PATH') 
-    msg += """ValueData: "%s;{olddata}";\t""" % str('%SANSVIEWPATH%')
+    msg += """ValueData: "%s;{olddata}";\t""" % str('%SASVIEWPATH%')
     msg += """ Check: %s""" % str('NeedsAddPath()')
     msg += "\n"
         
@@ -196,9 +196,9 @@ def write_file():
     msg += """DestDir: "{app}";\tFlags: ignoreversion\n"""
     msg += """Source: "dist\*";\tDestDir: "{app}";\t"""
     msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
-    msg += """Source: "dist\plugin_models\*";\tDestDir: "{userappdata}\..\.sansview\plugin_models";\t""" 
+    msg += """Source: "dist\plugin_models\*";\tDestDir: "{userappdata}\..\.sasview\plugin_models";\t""" 
     msg += """Flags: recursesubdirs createallsubdirs\n"""
-    msg += """Source: "dist\config\custom_config.py";\tDestDir: "{userappdata}\..\.sansview\config";\t""" 
+    msg += """Source: "dist\config\custom_config.py";\tDestDir: "{userappdata}\..\.sasview\config";\t""" 
     msg += """Flags: recursesubdirs createallsubdirs\n"""
     msg += """;\tNOTE: Don't use "Flags: ignoreversion" on any shared system files"""
     return msg
@@ -277,7 +277,7 @@ def write_code():
     msg += """  RegQueryStringValue(HKEY_CURRENT_USER,'Environment',"""
     msg += """'PATH', oldpath)\n"""
     msg += """  oldpath := oldpath + ';';\n"""
-    msg += """  newpath := '%SANSVIEWPATH%';\n"""
+    msg += """  newpath := '%SASVIEWPATH%';\n"""
     msg += """  i := 0;\n"""
     msg += """  while (Pos(';', oldpath) > 0) do begin\n"""
     msg += """    SetArrayLength(pathArr, i+1);\n"""

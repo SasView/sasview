@@ -2,4 +2,3 @@ graft docs
 graft images
 include README.txt
 include license.txt
-include release_notes.txt

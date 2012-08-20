@@ -8,7 +8,7 @@ import sans.sansview
 import logging
 
 # Version of the application
-__appname__ = "SansView"
+__appname__ = "SasView"
 __version__ = sans.sansview.__version__
 __build__ = sans.sansview.__build__
 __download_page__ = 'https://sourceforge.net/projects/sansviewproject/files/'
@@ -58,7 +58,7 @@ _copyright = "(c) 2009 - 2012, University of Tennessee"
 
 
 #edit the list of file state your plugin can read
-APPLICATION_WLIST = 'SansView files (*.svs)|*.svs'
+APPLICATION_WLIST = 'SasView files (*.svs)|*.svs'
 APPLICATION_STATE_EXTENSION = '.svs'
 GUIFRAME_WIDTH = 1150
 GUIFRAME_HEIGHT = 840
@@ -89,8 +89,8 @@ EDIT_MENU = True
 
 SetupIconFile_win = os.path.join(icon_path, "ball.ico")
 SetupIconFile_mac = os.path.join(icon_path, "ball.icns")
-DefaultGroupName = "DANSE"
-OutputBaseFilename = "setupSansView"
+DefaultGroupName = "."
+OutputBaseFilename = "setupSasView"
 
 FIXED_PANEL = True
 DATALOADER_SHOW = True

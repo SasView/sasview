@@ -10,7 +10,7 @@ and the Oak Ridge National Laboratory Neutron Sciences Directorate.
 If you use DANSE applications to do scientific research that leads to publication, 
 we ask that you acknowledge the use of the software with the following sentence:
 
-"This work benefited from the use of the SansView application, originally developed under NSF award DMR-0520547." 
+"This work benefited from the use of the SasView application, originally developed under NSF award DMR-0520547." 
 
 See the DANSE project web site for license information:
 http://wiki.cacr.caltech.edu/danse/index.php/Main_Page

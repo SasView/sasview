@@ -12,12 +12,12 @@ import os
 import logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
-                    filename=os.path.join(os.path.expanduser("~"),'sansview.log'))
+                    filename=os.path.join(os.path.expanduser("~"),'sasview.log'))
 
 import wx
 import sys
-# The below will make sure that sansview application uses the matplotlib font 
-# bundled with sansview. 
+# The below will make sure that sasview application uses the matplotlib font 
+# bundled with sasview. 
 if hasattr(sys, 'frozen'):
     mplconfigdir = os.path.join(os.path.expanduser("~"), '.matplotlib')
     if not os.path.exists(mplconfigdir):
@@ -32,26 +32,26 @@ from welcome_panel import WelcomePanel
 # For py2exe, import config here
 import local_config
 PLUGIN_MODEL_DIR = 'plugin_models'
-
+APP_NAME = 'SasView'
 def run():
     sys.path.append(os.path.join("..","..",".."))
     from multiprocessing import freeze_support
     freeze_support()
-    sansview = SansView()
+    sasview = SasView()
         
-class SansViewApp(gui_manager.ViewApp):
+class SasViewApp(gui_manager.ViewApp):
     """
     """
   
 
-class SansView():
+class SasView():
     """
     """
     def __init__(self):
         """
         """
         #from gui_manager import ViewApp
-        self.gui = SansViewApp(0) 
+        self.gui = SasViewApp(0) 
         # Set the application manager for the GUI
         self.gui.set_manager(self)
         # Add perspectives to the basic application
@@ -67,7 +67,7 @@ class SansView():
             fitting_plug = module.Plugin()
             self.gui.add_perspective(fitting_plug)
         except:
-            logging.error("SansView: could not find Fitting plug-in module")
+            logging.error("%s: could not find Fitting plug-in module")% APP_NAME 
             logging.error(sys.exc_value)  
             
         # P(r) perspective
@@ -76,7 +76,7 @@ class SansView():
             pr_plug = module.Plugin(standalone=False)
             self.gui.add_perspective(pr_plug)
         except:
-            logging.error("SansView: could not find P(r) plug-in module") 
+            logging.error("%s: could not find P(r) plug-in module")% APP_NAME
             logging.error(sys.exc_value)  
         
         #Invariant perspective
@@ -86,7 +86,8 @@ class SansView():
             self.gui.add_perspective(invariant_plug)
         except:
             raise
-            logging.error("SansView: could not find Invariant plug-in module") 
+            logging.error("%s: could not find Invariant plug-in module")% \
+                                                        APP_NAME 
             logging.error(sys.exc_value)  
         
         #Calculator perspective   
@@ -95,7 +96,8 @@ class SansView():
             calculator_plug = module.Plugin(standalone=False)
             self.gui.add_perspective(calculator_plug)
         except:
-            logging.error("SansView: could not find Calculator plug-in module")
+            logging.error("%s: could not find Calculator plug-in module")% \
+                                                        APP_NAME
             logging.error(sys.exc_value)  
 
             
@@ -114,7 +116,7 @@ class SansView():
 if __name__ == "__main__": 
     from multiprocessing import freeze_support
     freeze_support()
-    #Process(target=SansView).start()
-    sansview = SansView()
+    #Process(target=SasView).start()
+    sasview = SasView()
 
    

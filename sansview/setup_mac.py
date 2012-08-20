@@ -95,7 +95,7 @@ EXTENSIONS_LIST = find_extension()
  
 plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
                                          CFBundleTypeIconFile=ICON,
-                                   CFBundleTypeName="sansview file",
+                                   CFBundleTypeName="sasview file",
                                    CFBundleTypeRole="Shell" )],)
 
 APP = ['sansview.py']

@@ -6,18 +6,18 @@
 [Setup]
 
 ChangesAssociations=yes
-AppName=SansView
-AppVerName=SansView-2.1.1
+AppName=SasView
+AppVerName=SasView-2.1.1
 AppPublisher=(c) 2009 - 2012, University of Tennessee
 AppPublisherURL=http://danse.chem.utk.edu
 AppSupportURL=http://danse.chem.utk.edu
 AppUpdatesURL=http://danse.chem.utk.edu 
 ChangesEnvironment=true 
-DefaultDirName={pf}\SansView
-DefaultGroupName=DANSE\SansView-2.1.1
+DefaultDirName={pf}\SasView
+DefaultGroupName=.\SasView-2.1.1
 DisableProgramGroupPage=yes
 LicenseFile=license.txt
-OutputBaseFilename=setupSansView
+OutputBaseFilename=setupSasView
 SetupIconFile=images\ball.ico
 Compression=lzma
 SolidCompression=yes
@@ -26,34 +26,36 @@ UsePreviousAppDir=no
 
 
 [Registry]
-Root: HKCR;	Subkey: ".xml\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".txt\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".asc\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".dat\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".tif\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".abs\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".d1d\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".sans\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCR; Subkey: "applications\SansView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SansView.exe""  ""%1"""; 	 Flags: uninsdeletevalue noerror
-Root: HKCU;	Subkey: "Software\Classes\.xml\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.txt\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.asc\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.dat\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.tif\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.abs\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.d1d\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.sans\OpenWithList\SansView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCU; Subkey: "Software\Classes\applications\SansView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SansView.exe""  ""%1"""; 	 Flags: uninsdeletevalue noerror
-Root: HKCR;	Subkey: ".svs";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue  noerror
-Root: HKCR;	Subkey: ".fitv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue  noerror
-Root: HKCR;	Subkey: ".inv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue  noerror
-Root: HKCR;	Subkey: ".prv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SansView.exe";	 Flags: uninsdeletevalue  noerror
-Root: HKCR; Subkey: "{app}\SansView.exe";	ValueType: string; ValueName: "";	ValueData: "{app}\SansView File";	 Flags: uninsdeletekey  noerror 	
-Root: HKCR; Subkey: "{app}\SansView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SansView.exe""  ""%1""";	 Flags: uninsdeletevalue noerror 	
-Root: HKCR; Subkey: "{app}\images\ball.ico";	ValueType: string; ValueName: "";	ValueData: "{app}\SansView.exe,0";	 Flags: uninsdeletevalue noerror 	
-Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment";	ValueType: expandsz; ValueName: "SANSVIEWPATH";	ValueData: "{app}";	 Flags: uninsdeletevalue noerror
+Root: HKCR;	Subkey: ".xml\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCR;	Subkey: ".txt\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCR;	Subkey: ".asc\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCR;	Subkey: ".dat\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCR;	Subkey: ".tif\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCR;	Subkey: ".abs\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCR;	Subkey: ".d1d\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCR;	Subkey: ".sans\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCR;	Subkey: ".nxs\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCR; Subkey: "applications\SasView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SasView.exe""  ""%1"""; 	 Flags: uninsdeletevalue noerror
+Root: HKCU;	Subkey: "Software\Classes\.xml\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCU;	Subkey: "Software\Classes\.txt\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCU;	Subkey: "Software\Classes\.asc\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCU;	Subkey: "Software\Classes\.dat\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCU;	Subkey: "Software\Classes\.tif\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCU;	Subkey: "Software\Classes\.abs\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCU;	Subkey: "Software\Classes\.d1d\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCU;	Subkey: "Software\Classes\.sans\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCU;	Subkey: "Software\Classes\.nxs\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCU; Subkey: "Software\Classes\applications\SasView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SasView.exe""  ""%1"""; 	 Flags: uninsdeletevalue noerror
+Root: HKCR;	Subkey: ".svs";	ValueType: string;	ValueName: "";	ValueData: "{app}\SasView.exe";	 Flags: uninsdeletevalue  noerror
+Root: HKCR;	Subkey: ".fitv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SasView.exe";	 Flags: uninsdeletevalue  noerror
+Root: HKCR;	Subkey: ".inv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SasView.exe";	 Flags: uninsdeletevalue  noerror
+Root: HKCR;	Subkey: ".prv";	ValueType: string;	ValueName: "";	ValueData: "{app}\SasView.exe";	 Flags: uninsdeletevalue  noerror
+Root: HKCR; Subkey: "{app}\SasView.exe";	ValueType: string; ValueName: "";	ValueData: "{app}\SasView File";	 Flags: uninsdeletekey  noerror 	
+Root: HKCR; Subkey: "{app}\SasView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SasView.exe""  ""%1""";	 Flags: uninsdeletevalue noerror 	
+Root: HKCR; Subkey: "{app}\images\ball.ico";	ValueType: string; ValueName: "";	ValueData: "{app}\SasView.exe,0";	 Flags: uninsdeletevalue noerror 	
+Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment";	ValueType: expandsz; ValueName: "SASVIEWPATH";	ValueData: "{app}";	 Flags: uninsdeletevalue noerror
 ; Write to PATH (below) is disabled; need more tests
-;Root: HKCU; Subkey: "Environment";	ValueType: expandsz; ValueName: "PATH";	ValueData: "%SANSVIEWPATH%;{olddata}";	 Check: NeedsAddPath()
+;Root: HKCU; Subkey: "Environment";	ValueType: expandsz; ValueName: "PATH";	ValueData: "%SASVIEWPATH%;{olddata}";	 Check: NeedsAddPath()
 
 
 [Languages]
@@ -66,21 +68,21 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}";	GroupDescrip
 
 
 [Files]
-Source: "dist\SansView.exe";	DestDir: "{app}";	Flags: ignoreversion
+Source: "dist\SasView.exe";	DestDir: "{app}";	Flags: ignoreversion
 Source: "dist\*";	DestDir: "{app}";	Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "dist\plugin_models\*";	DestDir: "{userappdata}\..\.sansview\plugin_models";	Flags: recursesubdirs createallsubdirs
-Source: "dist\config\custom_config.py";	DestDir: "{userappdata}\..\.sansview\config";	Flags: recursesubdirs createallsubdirs
+Source: "dist\plugin_models\*";	DestDir: "{userappdata}\..\.sasview\plugin_models";	Flags: recursesubdirs createallsubdirs
+Source: "dist\config\custom_config.py";	DestDir: "{userappdata}\..\.sasview\config";	Flags: recursesubdirs createallsubdirs
 ;	NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\SansView";	Filename: "{app}\SansView.exe";	WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico" 
-Name: "{group}\{cm:UninstallProgram, SansView}";	 Filename: "{uninstallexe}" 
-Name: "{commondesktop}\SansView-2.1.1";	Filename: "{app}\SansView.exe";	Tasks: desktopicon; WorkingDir: "{app}" ; IconFilename: "{app}\images\ball.ico" 
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\SansView-2.1.1";	Filename: "{app}\SansView.exe";	Tasks: quicklaunchicon; WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico" 
+Name: "{group}\SasView";	Filename: "{app}\SasView.exe";	WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico" 
+Name: "{group}\{cm:UninstallProgram, SasView}";	 Filename: "{uninstallexe}" 
+Name: "{commondesktop}\SasView-2.1.1";	Filename: "{app}\SasView.exe";	Tasks: desktopicon; WorkingDir: "{app}" ; IconFilename: "{app}\images\ball.ico" 
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\SasView-2.1.1";	Filename: "{app}\SasView.exe";	Tasks: quicklaunchicon; WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico" 
 
 
 [Run]
-Filename: "{app}\SansView.exe";	Description: "{cm:LaunchProgram, SansView}";	Flags: nowait postinstall skipifsilent
+Filename: "{app}\SasView.exe";	Description: "{cm:LaunchProgram, SasView}";	Flags: nowait postinstall skipifsilent
 ; Install the Microsoft C++ DLL redistributable package if it is provided and the DLLs are not present on the target system.
 ; Note that the redistributable package is included if the app was built using Python 2.6 or 2.7, but not with 2.5.
 ; Parameter options:
@@ -110,7 +112,7 @@ var
 begin
   RegQueryStringValue(HKEY_CURRENT_USER,'Environment','PATH', oldpath)
   oldpath := oldpath + ';';
-  newpath := '%SANSVIEWPATH%';
+  newpath := '%SASVIEWPATH%';
   i := 0;
   while (Pos(';', oldpath) > 0) do begin
     SetArrayLength(pathArr, i+1);

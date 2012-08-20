@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-SansView 2.1.1 (bug fixed)
+SasView 2.1.1 (bug fixed)
 	
 	- Added DataInfo for data in the DataExplorer and plots
 	- Added Maximize/Restore button in the title bar of the graphs
@@ -46,8 +46,8 @@ SansView 2.1.1 (bug fixed)
 	- Customizable Startup appearance
 	- More functionalities on plot panels
 	- Combined Modeling and Fitting
-	- Save/open a SansView project or SansView analysis (subproject)
-	- Start the SansView application from a data file by double-clicking or from command line
+	- Save/open a SasView project or SasView analysis (subproject)
+	- Start the SasView application from a data file by double-clicking or from command line
 	- Easy manipulation of data and plot
 	- Provides Normalized residual plot
 	- Added useful key-combinations to copy (fitpage), paste (fitpage), change fit-tolerance, etc.
@@ -93,16 +93,16 @@ SansView 2.1.1 (bug fixed)
 
 2- Downloading and Installing
 	
-	*** Note: If you have EXE or ZIP SansView installer, you don't need any of the following.
+	*** Note: If you have EXE or ZIP SasView installer, you don't need any of the following.
 	
 	2.1- System Requirements:
 		- Python version >= 2.5 and < 3.0 should be running on the system
 		- We currently use Python 2.6
 
 	2.2- Installing from source:
-		- Get the code from https://sansviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/sansview-x.x.x
-			- run 'python setup.py install' under the 'sansview-x.x.x' folder
-			- run 'python sansview.py' under the 'sansview' folder.
+		- Get the code from https://sasviewproject.svn.sourceforge.net/svnroot/sansviewproject/releases/sasview-x.x.x
+			- run 'python setup.py install' under the 'sasview-x.x.x' folder
+			- run 'python sasview.py' under the 'sasview' folder.
 		- The following modules are required (version numbers are what are used in the release build):
 			- wxPython 2.8.12.1 (NOTE: do NOT use version 2.9)
 			- matplotlib 1.1.0  (NOTE: Mac build is using version 1.0.1)
@@ -159,4 +159,4 @@ SansView 2.1.1 (bug fixed)
 
 6- Installer download website
 
-	- See: http://danse.chem.utk.edu/sansview.html
+	- See: http://danse.chem.utk.edu/sasview.html

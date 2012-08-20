@@ -1,5 +1,5 @@
 """
-    Setup for SansView
+    Setup for SasView
     #TODO: Add checks to see that all the dependencies are on the system
 """
 import sys
@@ -18,7 +18,7 @@ except:
         NUMPY_INC = os.path.join(os.path.split(numpy.__file__)[0], 
                                  "core","include")
     except:
-        msg = "\nNumpy is needed to build SansView. "
+        msg = "\nNumpy is needed to build SasView. "
         print msg, "Try easy_install numpy.\n  %s" % str(sys.exc_value)
         sys.exit(0)
 
@@ -42,9 +42,9 @@ plugin_model_list = ['polynominal5.py', 'sph_bessel_jn.py',
                      'polynominal5.pyc', 'sph_bessel_jn.pyc', 
                      'sum_Ap1_1_Ap2.pyc', 'sum_p1_p2.pyc', 
                      'testmodel_2.pyc', 'testmodel.pyc', 'plugins.log']
-sans_dir = os.path.join(os.path.expanduser("~"),'.sansview')
+sans_dir = os.path.join(os.path.expanduser("~"),'.sasview')
 if os.path.isdir(sans_dir):
-    f_path = os.path.join(sans_dir, "sansview.log")
+    f_path = os.path.join(sans_dir, "sasview.log")
     if os.path.isfile(f_path):
         os.remove(f_path)
     f_path = os.path.join(sans_dir, 'config', "custom_config.py")
@@ -322,7 +322,7 @@ ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
                               )
                     ] )
         
-# SansView
+# SasView
 package_dir["sans.sansview"] = "sansview"
 package_data['sans.sansview'] = ['images/*', 'media/*', 'test/*']
 packages.append("sans.sansview")
@@ -340,16 +340,16 @@ else:
 
 
    
- # Set up SansView    
+ # Set up SasView    
 setup(
-    name="sansview",
+    name="sasview",
     version = VERSION,
-    description = "SansView application",
+    description = "SasView application",
     author = "University of Tennessee",
     author_email = "sansdanse@gmail.com",
     url = "http://danse.chem.utk.edu",
     license = "PSF",
-    keywords = "small-angle neutron scattering analysis",
+    keywords = "small-angle x-ray and neutron scattering analysis",
     download_url = "https://sourceforge.net/projects/sansviewproject/files/",
     package_dir = package_dir,
     packages = packages,

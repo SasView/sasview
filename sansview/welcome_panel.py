@@ -35,7 +35,7 @@ class WelcomePanel(wx.aui.AuiNotebook, PanelBase):
         
         wx.aui.AuiNotebook.__init__(self, parent, *args, **kwds)
         PanelBase.__init__(self)
-        #For sansview the parent is guiframe
+        #For sasview the parent is guiframe
         self.parent = parent
        
         welcome_page = WelcomePage(self)

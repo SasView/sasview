@@ -59,14 +59,14 @@ def get_app_dir():
         logging.info("Using application path: %s", os.getcwd())
         return os.path.abspath(os.getcwd())
     
-    # Finally, try the directory of the sansview module
-    #TODO: gui_manager will have to know about sansview until we
+    # Finally, try the directory of the sasview module
+    #TODO: gui_manager will have to know about sasview until we
     # clean all these module variables and put them into a config class
-    # that can be passed by sansview.py.
+    # that can be passed by sasview.py.
     logging.info(sys.executable)
     logging.info(str(sys.argv))
-    from sans import sansview
-    app_path = os.path.dirname(sansview.__file__)
+    from sans import sansview as sasview
+    app_path = os.path.dirname(sasview.__file__)
     logging.info("Using application path: %s", app_path)
     return app_path
 
@@ -74,7 +74,7 @@ def get_user_directory():
     """
         Returns the user's home directory
     """
-    userdir = os.path.join(os.path.expanduser("~"),".sansview")
+    userdir = os.path.join(os.path.expanduser("~"),".sasview")
     if not os.path.isdir(userdir):
         os.makedirs(userdir)
     return userdir
@@ -2103,7 +2103,7 @@ class ViewerFrame(wx.Frame):
             
     def _on_save_project(self, event):
         """
-        save the state of the SansView as *.svs
+        save the state of the SasView as *.svs
         """
         if self._current_perspective is  None:
             return
@@ -2111,7 +2111,7 @@ class ViewerFrame(wx.Frame):
         path = None
         extension = '*' + APPLICATION_STATE_EXTENSION
         dlg = wx.FileDialog(self, "Save Project file",
-                            self._default_save_location, "sansview_proj",
+                            self._default_save_location, "sasview_proj",
                              extension, 
                              wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
@@ -2842,13 +2842,13 @@ class ViewerFrame(wx.Frame):
             if self._data_panel is not None:
                 self._data_panel.set_active_perspective(name)
                 self._check_applications_menu()
-            #Set the SansView title
+            #Set the SasView title
             self._set_title_name(name)
           
             
     def _set_title_name(self, name):
         """
-        Set the SansView title w/ the current application name
+        Set the SasView title w/ the current application name
         
         : param name: application name [string]
         """
