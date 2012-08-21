@@ -133,9 +133,7 @@ class TestLorentzian(unittest.TestCase):
     
     def setUp(self):
         from sans.models.Lorentzian import Lorentzian
-        self.lor 
-
-= Lorentzian()
+        self.lor = Lorentzian()
         
     def test1D(self):
         self.lor.setParam('scale', 2.0)
