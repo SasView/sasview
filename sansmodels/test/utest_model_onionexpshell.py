@@ -93,7 +93,7 @@ class TestOnionExpShell1(unittest.TestCase):
         
         #Compare time of the calculation: time_linear takes a bit longer
         # but they are not much different  
-        self.assertNotEqual(time_linear, time_flat)
+        self.assertAlmostEqual(time_linear, time_flat, 1)
   
     # this feature removed!!!
     """
