@@ -113,6 +113,7 @@ OPTIONS = {'argv_emulation': True,
            'excludes' : EXCLUDES,
            }
 setup(
+    name="sasview",
     app=APP,
     data_files=DATA_FILES,
     include_package_data= True,
