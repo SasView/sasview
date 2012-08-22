@@ -762,15 +762,6 @@ class EditorPanel(wx.ScrolledWindow):
             msg = "Name exists already."
         # Prepare for the messagebox
         if not msg:
-            try:
-                exec("from %s import Model; print Model().run(0.01)"% \
-                     (self.name))
-            except:
-                msg = str(sys.exc_value) + "\n\n"
-                msg += "Note: To check the line number if used above\n"
-                msg += "open this model file with 'Advanced' editor."
-        if not msg:
-            
             if self.base != None:
                 self.base.update_custom_combo()
             msg = "Successful!!!"
