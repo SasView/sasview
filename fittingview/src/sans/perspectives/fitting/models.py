@@ -25,7 +25,7 @@ def log(message):
     """
         Log a message in a file located in the user's home directory
     """
-    dir = os.path.join(os.path.expanduser("~"), '.sansview', PLUGIN_DIR)
+    dir = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR)
     out = open(os.path.join(dir, "plugins.log"), 'a')
     out.write("%10g:  %s\n" % (time.clock(), message))
     out.close()
@@ -78,7 +78,7 @@ def find_plugins_dir():
         Find path of the plugins directory.
         The plugin directory is located in the user's home directory.
     """
-    dir = os.path.join(os.path.expanduser("~"), '.sansview', PLUGIN_DIR)
+    dir = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR)
     
     # If the plugin directory doesn't exist, create it
     if not os.path.isdir(dir):

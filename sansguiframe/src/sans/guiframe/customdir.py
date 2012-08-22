@@ -4,7 +4,7 @@ import os.path
 import shutil
 
 CONF_DIR = 'config' 
-APPLICATION_NAME = 'sansview'
+APPLICATION_NAME = 'sasview'
 
 def _find_customconf_dir():
     """
