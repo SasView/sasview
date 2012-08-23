@@ -45,4 +45,4 @@ except:
     print "Could not extract revision number"
 
 
-print "SansView v ", __version__, __revision__
+print "SasView v ", __version__, __revision__

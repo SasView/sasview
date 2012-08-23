@@ -1,15 +1,15 @@
-Name:       sansview          
+Name:       sasview          
 Version:        [VERSION]
 Release:        r[REVISION]%{?dist}
 Summary:        Data analysis for Small Angle Scattering
 
 License:        BSD
 URL:            http://danse.chem.utk.edu
-Source0:        sansview-[VERSION]_[REVISION]-py2.6-linux-x86_64.egg
+Source0:        sasview-[VERSION]_[REVISION]-py2.6-linux-x86_64.egg
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
-SansView data analysis
+SasView data analysis
 
 %prep
 
@@ -17,12 +17,12 @@ SansView data analysis
 
 
 %install
-mkdir -p $RPM_BUILD_ROOT/opt/sansview
+mkdir -p $RPM_BUILD_ROOT/opt/sasview
 mkdir -p $RPM_BUILD_ROOT/usr/local/bin
-export PYTHONPATH=$RPM_BUILD_ROOT/opt/sansview
-easy_install -d $RPM_BUILD_ROOT/opt/sansview ../SOURCES/sansview*.egg
+export PYTHONPATH=$RPM_BUILD_ROOT/opt/sasview
+easy_install -d $RPM_BUILD_ROOT/opt/sasview ../SOURCES/sasview*.egg
 cd $RPM_BUILD_ROOT/usr/local/bin
-ln -sf /opt/sansview/sansview sansview
+ln -sf /opt/sasview/sasview sasview
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -30,8 +30,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-/opt/sansview
-/usr/local/bin/sansview
+/opt/sasview
+/usr/local/bin/sasview
 
 
 %changelog
