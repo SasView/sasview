@@ -8,7 +8,7 @@
 ChangesAssociations=yes
 AppName=SasView
 AppVerName=SasView-2.1.1
-AppPublisher=(c) 2009 - 2012, University of Tennessee
+AppPublisher=(c) 2009 - 2012, UTK, UMD, NIST, ORNL, ISIS, ESS and ILL
 AppPublisherURL=http://danse.chem.utk.edu
 AppSupportURL=http://danse.chem.utk.edu
 AppUpdatesURL=http://danse.chem.utk.edu 
@@ -53,9 +53,9 @@ Root: HKCR;	Subkey: ".prv";	ValueType: string;	ValueName: "";	ValueData: "{app}\
 Root: HKCR; Subkey: "{app}\SasView.exe";	ValueType: string; ValueName: "";	ValueData: "{app}\SasView File";	 Flags: uninsdeletekey  noerror 	
 Root: HKCR; Subkey: "{app}\SasView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SasView.exe""  ""%1""";	 Flags: uninsdeletevalue noerror 	
 Root: HKCR; Subkey: "{app}\images\ball.ico";	ValueType: string; ValueName: "";	ValueData: "{app}\SasView.exe,0";	 Flags: uninsdeletevalue noerror 	
-Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment";	ValueType: expandsz; ValueName: "SASVIEWPATH";	ValueData: "{app}";	 Flags: uninsdeletevalue noerror
+Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment";	ValueType: expandsz; ValueName: "SANSVIEWPATH";	ValueData: "{app}";	 Flags: uninsdeletevalue noerror
 ; Write to PATH (below) is disabled; need more tests
-;Root: HKCU; Subkey: "Environment";	ValueType: expandsz; ValueName: "PATH";	ValueData: "%SASVIEWPATH%;{olddata}";	 Check: NeedsAddPath()
+;Root: HKCU; Subkey: "Environment";	ValueType: expandsz; ValueName: "PATH";	ValueData: "%SANSVIEWPATH%;{olddata}";	 Check: NeedsAddPath()
 
 
 [Languages]
@@ -112,7 +112,7 @@ var
 begin
   RegQueryStringValue(HKEY_CURRENT_USER,'Environment','PATH', oldpath)
   oldpath := oldpath + ';';
-  newpath := '%SASVIEWPATH%';
+  newpath := '%SANSVIEWPATH%';
   i := 0;
   while (Pos(';', oldpath) > 0) do begin
     SetArrayLength(pathArr, i+1);
