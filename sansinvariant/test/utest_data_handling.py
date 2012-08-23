@@ -270,8 +270,8 @@ class TestInvariantCalculator(unittest.TestCase):
         delta_qs_hi,  delta_dqs_hi = inv.get_qstar_high()
         
         self.assertAlmostEqual(qs_extr, _qstar+delta_qs_low+delta_qs_hi, 8)
-        self.assertEqual(dqs_extr, math.sqrt(dqstar*dqstar + delta_dqs_low*delta_dqs_low \
-                                             + delta_dqs_hi*delta_dqs_hi))
+        self.assertAlmostEqual(dqs_extr, math.sqrt(dqstar*dqstar + delta_dqs_low*delta_dqs_low \
+                                             + delta_dqs_hi*delta_dqs_hi), 8)
         
         # We don't expect the extrapolated invariant to be very far from the
         # result without extrapolation. Let's test for a result within 10%.
