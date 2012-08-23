@@ -67,7 +67,7 @@ class SasView():
             fitting_plug = module.Plugin()
             self.gui.add_perspective(fitting_plug)
         except:
-            logging.error("%s: could not find Fitting plug-in module")% APP_NAME 
+            logging.error("%s: could not find Fitting plug-in module"% APP_NAME) 
             logging.error(sys.exc_value)  
             
         # P(r) perspective
@@ -76,7 +76,7 @@ class SasView():
             pr_plug = module.Plugin(standalone=False)
             self.gui.add_perspective(pr_plug)
         except:
-            logging.error("%s: could not find P(r) plug-in module")% APP_NAME
+            logging.error("%s: could not find P(r) plug-in module"% APP_NAME)
             logging.error(sys.exc_value)  
         
         #Invariant perspective
@@ -86,8 +86,8 @@ class SasView():
             self.gui.add_perspective(invariant_plug)
         except:
             raise
-            logging.error("%s: could not find Invariant plug-in module")% \
-                                                        APP_NAME 
+            logging.error("%s: could not find Invariant plug-in module"% \
+                          APP_NAME)
             logging.error(sys.exc_value)  
         
         #Calculator perspective   
@@ -96,8 +96,8 @@ class SasView():
             calculator_plug = module.Plugin(standalone=False)
             self.gui.add_perspective(calculator_plug)
         except:
-            logging.error("%s: could not find Calculator plug-in module")% \
-                                                        APP_NAME
+            logging.error("%s: could not find Calculator plug-in module"% \
+                                                        APP_NAME)
             logging.error(sys.exc_value)  
 
             
