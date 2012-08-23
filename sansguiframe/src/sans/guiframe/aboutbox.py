@@ -103,6 +103,9 @@ class DialogAbout(wx.Dialog):
         self.label_acknowledgement = wx.StaticText(self, -1,
                                                    config._acknowledgement)
         self.static_line_2 = wx.StaticLine(self, -1)
+        self.bitmap_button_nist = wx.BitmapButton(self, -1, wx.NullBitmap)
+        self.bitmap_button_umd = wx.BitmapButton(self, -1, wx.NullBitmap)
+        self.bitmap_button_sns = wx.BitmapButton(self, -1, wx.NullBitmap)
         self.bitmap_button_nsf = wx.BitmapButton(self, -1,
                                                  wx.NullBitmap)
         self.bitmap_button_danse = wx.BitmapButton(self, -1, wx.NullBitmap)
@@ -112,7 +115,10 @@ class DialogAbout(wx.Dialog):
 
         self.__set_properties()
         self.__do_layout()
-
+        
+        self.Bind(wx.EVT_BUTTON, self.onNistLogo, self.bitmap_button_nist)
+        self.Bind(wx.EVT_BUTTON, self.onUmdLogo, self.bitmap_button_umd)
+        self.Bind(wx.EVT_BUTTON, self.onSnsLogo, self.bitmap_button_sns)
         self.Bind(wx.EVT_BUTTON, self.onNsfLogo, self.bitmap_button_nsf)
         self.Bind(wx.EVT_BUTTON, self.onDanseLogo, self.bitmap_button_danse)
         self.Bind(wx.EVT_BUTTON, self.onUTLogo, self.bitmap_button_msu)
@@ -136,6 +142,25 @@ class DialogAbout(wx.Dialog):
         self.label_svnrevision.SetLabel(build_num)
         
         # set bitmaps for logo buttons
+        image = file_dir + "/images/nist_logo.png"
+        if os.path.isfile(config._nist_logo):
+            image = config._nist_logo
+        logo = wx.Bitmap(image)        
+        self.bitmap_button_nist.SetBitmapLabel(logo)
+        
+        image = file_dir + "/images/umd_logo.png"
+        if os.path.isfile(config._umd_logo):
+            image = config._umd_logo
+        logo = wx.Bitmap(image)        
+        self.bitmap_button_umd.SetBitmapLabel(logo)
+
+        
+        image = file_dir + "/images/sns_logo.png"
+        if os.path.isfile(config._sns_logo):
+            image = config._sns_logo
+        logo = wx.Bitmap(image)        
+        self.bitmap_button_sns.SetBitmapLabel(logo)
+        
         image = file_dir + "/images/nsf_logo.png"
         if os.path.isfile(config._nsf_logo):
             image = config._nsf_logo
@@ -172,6 +197,9 @@ class DialogAbout(wx.Dialog):
         self.label_version.SetFont(wx.Font(26, wx.DEFAULT, wx.NORMAL,
                                            wx.NORMAL, 0, ""))
         self.hyperlink_paper.Enable(True)
+        self.bitmap_button_nist.SetSize(self.bitmap_button_nist.GetBestSize())
+        self.bitmap_button_umd.SetSize(self.bitmap_button_umd.GetBestSize())
+        self.bitmap_button_sns.SetSize(self.bitmap_button_sns.GetBestSize())
         self.bitmap_button_nsf.SetSize(self.bitmap_button_nsf.GetBestSize())
         self.bitmap_button_danse.SetSize(self.bitmap_button_danse.GetBestSize())
         self.bitmap_button_msu.SetSize(self.bitmap_button_msu.GetBestSize())
@@ -215,6 +243,9 @@ class DialogAbout(wx.Dialog):
         sizer_main.Add(self.label_acknowledgement, 0,
                        wx.LEFT|wx.TOP|wx.BOTTOM|wx.ADJUST_MINSIZE, 7)
         sizer_main.Add(self.static_line_2, 0, wx.EXPAND, 0)
+        sizer_logos.Add(self.bitmap_button_nist, 0, wx.LEFT|wx.ADJUST_MINSIZE, 2)
+        sizer_logos.Add(self.bitmap_button_umd, 0, wx.LEFT|wx.ADJUST_MINSIZE, 2)
+        sizer_logos.Add(self.bitmap_button_sns, 0, wx.LEFT|wx.ADJUST_MINSIZE, 2)
         sizer_logos.Add(self.bitmap_button_nsf, 0, wx.LEFT|wx.ADJUST_MINSIZE, 2)
         sizer_logos.Add(self.bitmap_button_danse, 0,
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
@@ -232,6 +263,27 @@ class DialogAbout(wx.Dialog):
         self.Centre()
         # end wxGlade
 
+    def onNistLogo(self, event): 
+        """
+        """
+        # wxGlade: DialogAbout.<event_handler>
+        launchBrowser(config._nist_url)
+        event.Skip()
+        
+    def onUmdLogo(self, event): 
+        """
+        """
+        # wxGlade: DialogAbout.<event_handler>
+        launchBrowser(config._umd_url)
+        event.Skip()
+        
+    def onSnsLogo(self, event): 
+        """
+        """
+        # wxGlade: DialogAbout.<event_handler>
+        launchBrowser(config._sns_url)
+        event.Skip()
+                
     def onNsfLogo(self, event): 
         """
         """

@@ -29,16 +29,16 @@ __EVT_DEBUG_FILENAME__ = "debug.log"
 _do_aboutbox = True
 _do_tutorial = True
 _acknowledgement =  \
-'''This software was developed by the University of Tennessee as part of the
-Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
+'''This work originally developed as part of the DANSE project funded by the NSF
+under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS 
+and ILL.
 
 '''
 _homepage = "http://danse.chem.utk.edu"
 _download = "https://sourceforge.net/projects/sansviewproject/"
 _authors = []
-_paper = "http://danse.us/trac/sans/newticket"
-_license = "mailto:sansdanse@gmail.com"
+_paper = "http://sourceforge.net/apps/trac/sansviewproject/report"
+_license = "mailto:sansviewproject-developers@lists.sourceforge.net"
 
 
 icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "images"))
@@ -46,15 +46,22 @@ logging.info("icon path: %s" % icon_path)
 media_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "media"))
 test_path =  os.path.abspath(os.path.join(os.path.dirname(__file__), "test"))
 
+_nist_logo = "images/nist_logo.png"
+_umd_logo = "images/umd_logo.png"
+_sns_logo = "images/sns_logo.png"
 _nsf_logo = os.path.join(icon_path, "nsf_logo.png")
 _danse_logo = os.path.join(icon_path, "danse_logo.png")
 _inst_logo = os.path.join(icon_path, "utlogo.gif")
+_nist_url = "http://www.nist.gov/"
+_umd_url = "http://www.umd.edu/"
+_sns_url = "http://neutrons.ornl.gov/"
 _nsf_url = "http://www.nsf.gov"
 _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = "(c) 2009 - 2012, University of Tennessee"
+_copyright = "(c) 2009 - 2011, University of Tennessee \n"
+_copyright += "(c) 2012, UMD, NIST, ORNL, ISIS, ESS and ILL"
 
 
 #edit the list of file state your plugin can read
