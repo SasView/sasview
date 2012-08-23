@@ -106,7 +106,7 @@ class TestStarPolymer(unittest.TestCase):
         self.star.setParam('arms', 5.0)
         self.star.setParam('R2', 100.0)
         self.star.setParam('background', 1.0)
-        self.assertAlmostEqual(self.star.run(0.01), 3.9998999827681025)
+        self.assertAlmostEqual(self.star.run(0.01), 3.9900214150405686)
 
     def test2D(self):
         x = 0.009539392014169456
@@ -116,7 +116,7 @@ class TestStarPolymer(unittest.TestCase):
         self.star.setParam('arms', 5.0)
         self.star.setParam('R2', 100.0)
         self.star.setParam('background', 1.0)
-        self.assertAlmostEqual(self.star.runXY([x, y]), 3.9998999827681025)
+        self.assertAlmostEqual(self.star.runXY([x, y]), 3.9900214150405686)
 
     def test2Dphi(self):
         self.star.setParam('scale', 3.0)
@@ -124,7 +124,7 @@ class TestStarPolymer(unittest.TestCase):
         self.star.setParam('R2', 100.0)
         self.star.setParam('background', 1.0)
         
-        self.assertAlmostEqual(self.star.run([0.01, math.pi/4.0]), 3.9998999827681025)
+        self.assertAlmostEqual(self.star.run([0.01, math.pi/4.0]), 3.9900214150405686)
 
 
 

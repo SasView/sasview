@@ -1233,58 +1233,6 @@ class TestDABModel(unittest.TestCase):
         """ Test DABModel at the critical point"""
         self.assert_(numpy.isfinite(self.comp.run(0.0)))           
 
-class TestStarPolymer(unittest.TestCase):
-    """ Unit tests for StarPolymer"""
-    
-    def setUp(self):
-        from sans.models.StarPolymer import StarPolymer
-        self.comp = StarPolymer()
-        self.comp.setParam('arms',3.0)
-        self.comp.setParam('scale',5.0)
-        self.comp.setParam('background',1.0)
-        self.comp.setParam('R2',100.0)
-        
-        
-    def test1D(self):
-        """ Test 1D model for a StarPolymer"""
-        # our variables
-        q = 0.001
-        rg = 100.0
-        f = 3.0
-        bkg = 1.0
-        scale = 5.0
-
-        # equation set up
-        u = rg * q * q
-        v = u * u * f / (3*f - 2)
-        p = 2 / (f * v * v)
-        temp = v - 1 + math.exp(-v)
-        temp += (f - 1)/2 * math.pow(1 - math.exp(-v), 2)
-        p *= (temp * scale)
-        p += bkg
-        
-        self.assertAlmostEquals(self.comp.run(q), p, 5)
-        
-    def test1D_2(self):
-        """ Test 2D model for a StarPolymer"""
-        qx = 0.001
-        qy = 1.3
-        q = math.sqrt(qx*qx + qy*qy)
-        rg = 100.0
-        f = 3.0
-        bkg = 1.0
-        scale = 5.0
-
-        # equation set up
-        u = rg * q * q
-        v = u * u * f / (3*f - 2)
-        p = 2 / (f * v * v)
-        temp = v - 1 + math.exp(-v)
-        temp += (f - 1)/2 * math.pow(1 - math.exp(-v), 2)
-        p *= (temp * scale)
-        p += bkg
-
-        self.assertAlmostEqual(self.comp.runXY([0.001, 1.3]), p, 5)
              
     
 class TestGuinierModel(unittest.TestCase):
