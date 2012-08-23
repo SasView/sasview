@@ -144,10 +144,10 @@ def write_registry(data_extension=None, app_extension=None):
     msg += "\n"  
 
     
-    #SASVIEWPATH
+    #SANSVIEWPATH
     msg += """Root: HKLM; Subkey: "%s";\t"""  %  str('SYSTEM\CurrentControlSet\Control\Session Manager\Environment')
     msg += """ValueType: %s; """ % str('expandsz')
-    msg += """ValueName: "%s";\t""" % str('SASVIEWPATH') 
+    msg += """ValueName: "%s";\t""" % str('SANSVIEWPATH') 
     msg += """ValueData: "{app}";\t"""
     msg += """ Flags: %s""" % str('uninsdeletevalue noerror')
     msg += "\n"
@@ -157,7 +157,7 @@ def write_registry(data_extension=None, app_extension=None):
     msg += """;Root: HKCU; Subkey: "%s";\t"""  %  str('Environment')
     msg += """ValueType: %s; """ % str('expandsz')
     msg += """ValueName: "%s";\t""" % str('PATH') 
-    msg += """ValueData: "%s;{olddata}";\t""" % str('%SASVIEWPATH%')
+    msg += """ValueData: "%s;{olddata}";\t""" % str('%SANSVIEWPATH%')
     msg += """ Check: %s""" % str('NeedsAddPath()')
     msg += "\n"
         
@@ -277,7 +277,7 @@ def write_code():
     msg += """  RegQueryStringValue(HKEY_CURRENT_USER,'Environment',"""
     msg += """'PATH', oldpath)\n"""
     msg += """  oldpath := oldpath + ';';\n"""
-    msg += """  newpath := '%SASVIEWPATH%';\n"""
+    msg += """  newpath := '%SANSVIEWPATH%';\n"""
     msg += """  i := 0;\n"""
     msg += """  while (Pos(';', oldpath) > 0) do begin\n"""
     msg += """    SetArrayLength(pathArr, i+1);\n"""
