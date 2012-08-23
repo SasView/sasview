@@ -10,6 +10,7 @@ from sans.dataloader.data_info import Data1D
 from danse.common.plottools.PlotPanel import PlotPanel
 from danse.common.plottools.plottables import Graph
 from danse.common.plottools.canvas import FigureCanvas
+from danse.common.plottools import transform
 from matplotlib.font_manager import FontProperties
 from matplotlib.figure import Figure
 from sans.guiframe.events import StatusEvent 
@@ -786,13 +787,116 @@ class SmallPanel(PlotPanel):
         if self.dimension == 3:
             pass
         else:
+            self.subplot.figure.canvas.resizing = False
+            self.subplot.tick_params(axis='both', labelsize=9)     
+            self.erase_legend()
             self.subplot.figure.canvas.draw_idle() 
+            try:
+                self.figure.delaxes(self.figure.axes[1])
+            except:
+                pass
+            
        
     def onContextMenu(self, event):
         """
         Default context menu for a plot panel
         """
-               
+        id = wx.NewId()
+        slicerpop = wx.Menu()
+        slicerpop.Append(id, '&Change Scale')
+        wx.EVT_MENU(self, id, self._onProperties)
+        try:
+            # mouse event
+            pos_evt = event.GetPosition()
+            pos = self.ScreenToClient(pos_evt)
+        except:
+            # toolbar event
+            pos_x, pos_y = self.toolbar.GetPositionTuple()
+            pos = (pos_x, pos_y + 5)
+            
+        self.PopupMenu(slicerpop, pos)
+        
+    def _onProperties(self, event):
+        """
+        when clicking on Properties on context menu ,
+        The Property dialog is displayed
+        The user selects a transformation for x or y value and
+        a new plot is displayed
+        """
+        list = []
+        list = self.graph.returnPlottable()
+        if len(list.keys()) > 0:
+            first_item = list.keys()[0]
+            if first_item.x != []:
+                from danse.common.plottools.PropertyDialog import Properties
+                dial = Properties(self, -1, 'Change Scale')
+                # type of view or model used
+                dial.xvalue.Clear()
+                dial.yvalue.Clear()
+                dial.view.Clear()
+                dial.xvalue.Insert("x", 0)
+                dial.xvalue.Insert("log10(x)", 1)
+                dial.yvalue.Insert("y", 0)
+                dial.yvalue.Insert("log10(y)", 1)
+                dial.view.Insert("--", 0)
+                dial.view.Insert("Linear y vs x", 1)
+                dial.xvalue.SetValue("x")
+                dial.yvalue.SetValue("y")
+                dial.view.SetValue("--")
+                dial.Update()
+                if dial.ShowModal() == wx.ID_OK:
+                    self.xLabel, self.yLabel, self.viewModel = dial.getValues()
+                    if self.viewModel == "Linear y vs x":
+                        self.xLabel = "x"
+                        self.yLabel = "y"
+                        self.viewModel = "--"
+                        dial.setValues(self.xLabel, self.yLabel, self.viewModel)
+                    self._onEVT_FUNC_PROPERTY()
+                dial.Destroy()
+         
+    def _onEVT_FUNC_PROPERTY(self, remove_fit=True):
+        """
+        Receive the x and y transformation from myDialog,
+        Transforms x and y in View
+        and set the scale
+        """
+        list = []
+        list = self.graph.returnPlottable()
+        # Changing the scale might be incompatible with
+        # currently displayed data (for instance, going
+        # from ln to log when all plotted values have
+        # negative natural logs).
+        # Go linear and only change the scale at the end.
+        self.set_xscale("linear")
+        self.set_yscale("linear")
+        _xscale = 'linear'
+        _yscale = 'linear'
+        for item in list:
+            item.setLabel(self.xLabel, self.yLabel)
+            # control axis labels from the panel itself
+            yname, yunits = item.get_yaxis()
+            xname, xunits = item.get_xaxis()
+            # Goes through all possible scales
+            # Goes through all possible scales
+            if(self.xLabel == "x"):
+                item.transformX(transform.toX, transform.errToX)
+                self.graph._xaxis_transformed("%s" % xname, "%s" % xunits)
+            if(self.xLabel == "log10(x)"):
+                item.transformX(transform.toX_pos, transform.errToX_pos)
+                _xscale = 'log'
+                self.graph._xaxis_transformed("%s" % xname, "%s" % xunits)
+            if(self.yLabel == "y"):
+                item.transformY(transform.toX, transform.errToX)
+                self.graph._yaxis_transformed("%s" % yname, "%s" % yunits)
+            if(self.yLabel == "log10(y)"):
+                item.transformY(transform.toX_pos, transform.errToX_pos)
+                _yscale = 'log'
+                self.graph._yaxis_transformed("%s" % yname, "%s" % yunits)
+            item.transformView()
+        self.set_xscale(_xscale)
+        self.set_yscale(_yscale)
+        self.draw()
+        
 class DataOperatorWindow(wx.Frame):
     def __init__(self, parent, *args, **kwds):
         kwds["size"] = (PANEL_WIDTH, PANEL_HEIGTH)
