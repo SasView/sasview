@@ -1,7 +1,15 @@
 Release Notes
 =============
 
-SasView 2.1.1 (bug fixed)
+SasView 2.2.0
+	
+	- Changed the application name to 'SasView'.
+	- Improved Grid/Batch window functionality.
+	- Added a new tool; Data operation for addition, subtraction, multiplication, division, and combination of two data sets
+	- Extended Sum Model Editor to Summation and Multiplication Editor
+	- Fixed many minor bugs.
+	
+	-version 2.1
 	
 	- Added DataInfo for data in the DataExplorer and plots
 	- Added Maximize/Restore button in the title bar of the graphs
@@ -10,9 +18,6 @@ SasView 2.1.1 (bug fixed)
 	- Fixed some bugs and improved some behaviors in the batch/grid panel.
 	- Edit SUM Model from the menubar can now generate more than one sum model.
 	- Report can now be saved as a pdf format on WIN and MAC.
-	- Fixed many minor bugs.
-	
-	-version 2.1
 		
 	- Multiprocessor support(Windows)
 	- Simple custom model editor
@@ -21,7 +26,7 @@ SasView 2.1.1 (bug fixed)
 	- 3D graphic (for 2d data/results) and legend moves with mouse
 	- New Tool: density to vol fraction calculator and Python file editor
 	
- 	- version 2.0: 
+ 	- Previous Versions: 
 
 	- Release date: 10/21/2011
 	- Batch Fit included.
@@ -31,9 +36,6 @@ SasView 2.1.1 (bug fixed)
 	- The 'Startup Setting' in the View menu can remember the last data file folder.
 	- Updated the resolution computation for the gravitational effect and added TOF estimation  capability.
 	- Fixed the problem of displaying the fit results in the wrong parameter (with ParkMC FitEngine).
-	
-	- Previous Versions
-
 	- Pr Inversion: Fixed a missing Rg output
 	- Startup Setting: fixed a problem with DataExplorer ON/OFF
 	- Fixed a bug w/ 2D color map dialog
