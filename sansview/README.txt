@@ -7,6 +7,7 @@ SasView 2.2.0
 	- Improved Grid/Batch window functionality.
 	- Added a new tool; Data operation for addition, subtraction, multiplication, division, and combination of two data sets
 	- Extended Sum Model Editor to Summation and Multiplication Editor
+	- More models.
 	- Fixed many minor bugs.
 	
 	-version 2.1
@@ -161,4 +162,4 @@ SasView 2.2.0
 
 6- Installer download website
 
-	- See: http://danse.chem.utk.edu/sasview.html
+	- http://sourceforge.net/projects/sansviewproject/files/
