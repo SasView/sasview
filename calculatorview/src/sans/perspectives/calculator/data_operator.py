@@ -638,6 +638,7 @@ class SmallPanel(PlotPanel):
         PlotPanel.__init__(self, parent, id=id, **kwargs)
         self.is_number = is_number
         self.content = content
+        self.point = None
         self.position = (0.4, 0.5)
         self.scale = 'linear'
         self.subplot.set_xticks([])
@@ -672,6 +673,7 @@ class SmallPanel(PlotPanel):
         self.textList = []
         self.plots = {}
         self.clear()
+        self.point = plot
         try:
             self.figure.delaxes(self.figure.axes[0])
             self.subplot = self.figure.add_subplot(111)
@@ -803,8 +805,13 @@ class SmallPanel(PlotPanel):
         """
         id = wx.NewId()
         slicerpop = wx.Menu()
-        slicerpop.Append(id, '&Change Scale')
-        wx.EVT_MENU(self, id, self._onProperties)
+        data = self.point
+        if issubclass(data.__class__, Data1D):
+            slicerpop.Append(id, '&Change Scale')
+            wx.EVT_MENU(self, id, self._onProperties)
+        else:
+            slicerpop.Append(id, '&Toggle Linear/Log Scale')
+            wx.EVT_MENU(self, id, self.ontogglescale)     
         try:
             # mouse event
             pos_evt = event.GetPosition()
@@ -813,8 +820,22 @@ class SmallPanel(PlotPanel):
             # toolbar event
             pos_x, pos_y = self.toolbar.GetPositionTuple()
             pos = (pos_x, pos_y + 5)
-            
         self.PopupMenu(slicerpop, pos)
+        
+    def ontogglescale(self, event): 
+        """
+        On toggle 2d scale
+        """
+        self._onToggleScale(event)  
+        try:
+            # mpl >= 1.1.0
+            self.figure.tight_layout()
+        except:
+            self.figure.subplots_adjust(left=0.1, bottom=0.1) 
+        try:
+            self.figure.delaxes(self.figure.axes[1])
+        except:
+            pass
         
     def _onProperties(self, event):
         """
