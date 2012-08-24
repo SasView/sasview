@@ -592,11 +592,7 @@ class ModelManagerBase:
         from sans.models.GelFitModel import GelFitModel
         self.shape_indep_list.append(GelFitModel)
         self.model_name_list.append(GelFitModel.__name__)
-        
-        from sans.models.FractalO_Z import FractalO_Z
-        self.shape_indep_list.append(FractalO_Z)
-        self.model_name_list.append(FractalO_Z.__name__)
-    
+
         #Looking for plugins
         self.stored_plugins = self.findModels()
         self.plugins = self.stored_plugins.values()
