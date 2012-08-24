@@ -40,12 +40,12 @@ _BOX_WIDTH = 76
 
 
 if sys.platform.count("win32") > 0:
-    _STATICBOX_WIDTH = 420
+    _STATICBOX_WIDTH = 450
     PANEL_WIDTH = 500 
     PANEL_HEIGHT = 700
     FONT_VARIANT = 0
 else:
-    _STATICBOX_WIDTH = 450
+    _STATICBOX_WIDTH = 490
     PANEL_WIDTH = 530
     PANEL_HEIGHT = 700
     FONT_VARIANT = 1
@@ -1751,7 +1751,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         Draw widgets related to invariant
         """
         uncertainty = "+/-" 
-        unit_invariant = '[1/(cm * A^3)]'
+        unit_invariant = '[1/(cm*A^3)]'
         invariant_total_txt = wx.StaticText(self, -1, 'Invariant Total [Q*]')
         self.invariant_total_tcl = OutputTextCtrl(self, -1,
                                                   size=(_BOX_WIDTH, -1),
@@ -1763,7 +1763,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                                 name='invariant_total_err_tcl')
         hint_msg = "Uncertainty on invariant."
         self.invariant_total_err_tcl.SetToolTipString(hint_msg)
-        invariant_total_units_txt = wx.StaticText(self, -1, unit_invariant)
+        invariant_total_units_txt = wx.StaticText(self, -1, unit_invariant, 
+                                                  size=(80,-1))
     
         #Invariant total
         iy = 0
@@ -1793,10 +1794,10 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         wx.EVT_TEXT(self, self.contrast_tcl.GetId(), self._on_text)
         contrast_hint_txt = "Contrast"
         self.contrast_tcl.SetToolTipString(contrast_hint_txt)
-        contrast_unit_txt = wx.StaticText(self, -1, '[1/A^2]')  
+        contrast_unit_txt = wx.StaticText(self, -1, '[1/A^2]', size=(40,-1))  
         porod_const_txt = wx.StaticText(self, -1, 
                                         'Porod\nConstant:\n(optional)\n')  
-        porod_unit_txt = wx.StaticText(self, -1, '[1/(cm*A^4)]') 
+        porod_unit_txt = wx.StaticText(self, -1, '[1/(cm*A^4)]', size=(80,-1)) 
         self.porod_constant_tcl = InvTextCtrl(self, -1, 
                                               size=(_BOX_WIDTH, 20), style=0,
                                               name='porod_constant_tcl') 
