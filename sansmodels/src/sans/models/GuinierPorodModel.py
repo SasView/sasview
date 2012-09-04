@@ -61,7 +61,11 @@ class GuinierPorodModel(BaseComponent):
         bgd = self.params['background']
         n = 3.0 - s
         qval = x
-        
+        # take care of the singular points
+        if Rg <= 0.0:
+            return bgd
+        if (n-3.0+m) <= 0.0:
+            return bgd
         #do the calculation and return the function value
         q1 = sqrt((n-3.0+m)*n/2.0)/Rg
         if qval < q1:
