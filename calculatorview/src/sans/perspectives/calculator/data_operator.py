@@ -464,10 +464,13 @@ class DataOperPanel(wx.ScrolledWindow):
         if event != None:
             event.Skip()
         self._data = self.get_datalist()
-        children = self.GetChildren()
-        # update the list only when it is on the top
-        if self.FindFocus() in children:
+        if ON_MAC:
             self.fill_data_combox()
+        else:
+            children = self.GetChildren()
+            # update the list only when it is on the top
+            if self.FindFocus() in children:
+                self.fill_data_combox()
          
     def fill_oprator_combox(self):
         """
