@@ -11,6 +11,7 @@ import wx
 import sys
 import os
 from wx.py.editwindow import EditWindow
+import subprocess
 
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
@@ -735,6 +736,7 @@ class EditorPanel(wx.ScrolledWindow):
         #must post event here
         event.Skip()
         info = 'Info'
+        msg = ''
         # Sort out the errors if occur
         if self.check_name():
             name = self.name_tcl.GetValue().lstrip().rstrip()
@@ -742,17 +744,28 @@ class EditorPanel(wx.ScrolledWindow):
             param_str = self.param_tcl.GetText()
             func_str = self.function_tcl.GetText()
             # No input for the model function
-            if func_str.lstrip().rstrip():
+            if func_str.lstrip().rstrip():     
                 if func_str.count('return') > 0:
-                    self.write_file(self.fname, description, param_str, func_str)
+                    self.write_file(self.fname, description, param_str, 
+                                                                    func_str)
                     tr_msg = _compileFile(self.fname)
                     msg = tr_msg.__str__()
                     # Compile error
                     if msg:
-                        _deleteFile(self.fname)
-                        msg +=  "\nCompile Failed"
+                        msg +=  "\nCompiling Failed"
                     else:
-                        msg = ''
+                        proc = subprocess.Popen(['python','%s'% self.fname], 
+                                                bufsize=1,
+                                                stdout=subprocess.PIPE, 
+                                                stderr=subprocess.STDOUT,
+                                                universal_newlines=True)
+
+                        while proc.poll() is None:
+                            line = proc.stdout.readline()
+                            if line:
+                                #the real code does filtering here
+                                if line.count("Error"):
+                                    msg = line.rstrip()
                 else:
                     msg = "Error: The func(x) must 'return' a value at least.\n"
                     msg += "For example: \n\nreturn 2*x"
@@ -771,9 +784,13 @@ class EditorPanel(wx.ScrolledWindow):
             color = 'blue'
         else:
             info = 'Error'
-            color = 'red'
-            #wx.MessageBox(msg, info)  
-        
+            color = 'red' 
+            try:
+                # try to remove pyc file if exists
+                #_deleteFile(self.fname)
+                _deleteFile(self.fname + "c")
+            except:
+                pass
         self._msg_box.SetLabel(msg)
         self._msg_box.SetForegroundColour(color)
         # Send msg to the top window  
@@ -905,7 +922,7 @@ class EditorPanel(wx.ScrolledWindow):
         """
         leave data as it is and close
         """
-        self.parent.Close()
+        self.parent.Show(False)#Close()
         event.Skip()
         
 class EditorWindow(wx.Frame):
@@ -930,9 +947,10 @@ class EditorWindow(wx.Frame):
         """
         On close event
         """
-        if self.parent != None:
-            self.parent.new_model_frame = None
-        self.Destroy()  
+        self.Show(False)
+        #if self.parent != None:
+        #    self.parent.new_model_frame = None
+        #self.Destroy()  
 
 ## Templates for custom models
 CUSTOM_TEMPLATE = """

@@ -303,8 +303,9 @@ class Plugin(PluginBase):
         """
         Make new model
         """
-        if self.new_model_frame != None and self.new_model_frame.IsShown():
+        if self.new_model_frame != None:
             self.new_model_frame.Show(False)
+            self.new_model_frame.Show(True)
         else:
             id = event.GetId()
             dir_path = models.find_plugins_dir()
