@@ -754,12 +754,12 @@ class EditorPanel(wx.ScrolledWindow):
                     if msg:
                         msg +=  "\nCompiling Failed"
                     else:
-                        proc = subprocess.Popen(['python','%s'% self.fname], 
+                        proc = subprocess.Popen(['python','%s'% self.fname],
                                                 bufsize=1,
                                                 stdout=subprocess.PIPE, 
                                                 stderr=subprocess.STDOUT,
-                                                universal_newlines=True)
-
+                                                universal_newlines=True,
+                                                shell=False)
                         while proc.poll() is None:
                             line = proc.stdout.readline()
                             if line:
