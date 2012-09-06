@@ -749,23 +749,11 @@ class EditorPanel(wx.ScrolledWindow):
                     self.write_file(self.fname, description, param_str, 
                                                                     func_str)
                     tr_msg = _compileFile(self.fname)
-                    msg = tr_msg.__str__()
+                    msg = str(tr_msg.__str__())
                     # Compile error
                     if msg:
+                        msg.replace("  ", "\n")
                         msg +=  "\nCompiling Failed"
-                    else:
-                        proc = subprocess.Popen(['python','%s'% self.fname],
-                                                bufsize=1,
-                                                stdout=subprocess.PIPE, 
-                                                stderr=subprocess.STDOUT,
-                                                universal_newlines=True,
-                                                shell=False)
-                        while proc.poll() is None:
-                            line = proc.stdout.readline()
-                            if line:
-                                #the real code does filtering here
-                                if line.count("Error"):
-                                    msg = line.rstrip()
                 else:
                     msg = "Error: The func(x) must 'return' a value at least.\n"
                     msg += "For example: \n\nreturn 2*x"
@@ -774,15 +762,17 @@ class EditorPanel(wx.ScrolledWindow):
         else:
             msg = "Name exists already."
         # Prepare for the messagebox
-        if not msg:
-            if self.base != None:
-                self.base.update_custom_combo()
-            msg = "Successful!!!"
-            msg += "  " + self._notes
-            msg += " Please look for it in the 'Customized Models' box."
-            info = 'Info'
-            color = 'blue'
-        else:
+        if self.base != None and not msg:
+            self.base.update_custom_combo()
+            Model  = None
+            exec "from %s import Model"% name 
+            try:
+                Model().run(0.01) 
+            except:
+                msg = "Error "
+                _, value, _ = sys.exc_info()
+                msg += "in %s:\n%s\n" % (name,  value)
+        if msg:
             info = 'Error'
             color = 'red' 
             try:
@@ -791,7 +781,18 @@ class EditorPanel(wx.ScrolledWindow):
                 _deleteFile(self.fname + "c")
             except:
                 pass
-        self._msg_box.SetLabel(msg)
+        else:
+            msg = "Successful!!!"
+            msg += "  " + self._notes
+            msg += " Please look for it in the 'Customized Models' box."
+            info = 'Info'
+            color = 'blue'
+        # Not to display long error msg
+        if info == 'Error':
+            mss = info
+        else:
+            mss = msg
+        self._msg_box.SetLabel(mss)
         self._msg_box.SetForegroundColour(color)
         # Send msg to the top window  
         if self.base != None:
