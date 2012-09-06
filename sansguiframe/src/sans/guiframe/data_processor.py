@@ -681,14 +681,14 @@ class Notebook(nb, PanelBase):
                     raise ValueError, msg
                 
             # Finally check the highlighted cell if any cells missing
-            self.get_highlighted_row()
+            self.get_highlighted_row(True)
         else:
             msg = "No item selected.\n"
             msg += "Please select only one column or one cell"
             raise ValueError, msg
         return grid.selected_cells
        
-    def get_highlighted_row(self):
+    def get_highlighted_row(self, is_number=True):
         """
         Add highlight rows
         """
@@ -699,10 +699,21 @@ class Notebook(nb, PanelBase):
         for row in range(grid.get_nofrows()):
             if grid.IsInSelection(row, col):
                 cel = (row, col)
-                if row < 1:
+                if row < 1 and not is_number:
                     continue
-                if not grid.GetCellValue(row, col):
+                # empty cell
+                if not grid.GetCellValue(row, col).lstrip().rstrip():
+                    if cel in grid.selected_cells:
+                        grid.selected_cells.remove(cel)
                     continue
+                if is_number:
+                    try: 
+                        float(grid.GetCellValue(row, col))
+                    except:
+                        # non numeric cell
+                        if cel in grid.selected_cells:
+                            grid.selected_cells.remove(cel)
+                        continue
                 if cel not in grid.selected_cells:
                     grid.selected_cells.append(cel)
                         
@@ -969,7 +980,7 @@ class GridPanel(SPanel):
         pos = self.notebook.GetSelection()
         grid = self.notebook.GetPage(pos)
         title = self.notebook.GetPageText(pos)
-        self.notebook.get_highlighted_row()
+        self.notebook.get_highlighted_row(False)
         if len(grid.selected_cells) == 0:
             msg = "Highlight a Data or Chi2 column first..."
             wx.PostEvent(self.parent.parent, 
@@ -1279,12 +1290,12 @@ class GridPanel(SPanel):
         """
         try:
             cell_list = self.notebook.on_edit_axis()
+            label, title = self.create_axis_label(cell_list)
         except:
             msg = str(sys.exc_value)
             wx.PostEvent(self.parent.parent, 
                              StatusEvent(status=msg, info="error")) 
             return 
-        label, title = self.create_axis_label(cell_list)
         tcrtl = event.GetEventObject()
         if tcrtl == self.x_axis_add:
             self.edit_axis_helper(self.x_axis_label, self.x_axis_title,

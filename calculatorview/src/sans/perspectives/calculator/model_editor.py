@@ -777,7 +777,7 @@ class EditorPanel(wx.ScrolledWindow):
             color = 'red' 
             try:
                 # try to remove pyc file if exists
-                #_deleteFile(self.fname)
+                _deleteFile(self.fname)
                 _deleteFile(self.fname + "c")
             except:
                 pass
