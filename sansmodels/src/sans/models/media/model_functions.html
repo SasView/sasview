@@ -5513,7 +5513,14 @@
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p style="margin-left: 0.55in; text-indent: -0.3in;"><strong><span style="font-size: 14pt;">3.12.</span></strong><strong><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></strong><strong><span style="font-size: 14pt;">&nbsp; <a name="FractalCoreShell"></a>FractalCoreShell(Model)</span></strong></p>
-<p style="margin-left: 0.25in;">Calculates the scattering from a fractal structure with a primary building block of core-shell spheres. The fractal structure is as documented in the fractal model. This model could find use for aggregates of coated particles, or aggregates of vesicles.&nbsp;The polydispersity computation of radius and thickness is provided.</p>
+<p style="margin-left: 0.25in;">Calculates the scattering from a fractal structure with a primary building block of core-shell spheres.</p>
+<p><img src="img/fractcore_eq1.gif"/></p>
+The formfactor P(q) is <a href="#CoreShellModel">CoreShellModel</a> with bkg = 0, 
+while the fractal structure factor S(q);
+<p><img src="img/fractcore_eq3.gif"/></p>
+where
+<p><img src="img/fractcore_eq4.gif"/></p>
+<p> The fractal structure is as documented in the fractal model. This model could find use for aggregates of coated particles, or aggregates of vesicles.&nbsp;The polydispersity computation of radius and thickness is provided.</p>
 <p style="margin-left: 0.25in;">The returned value is scaled to units of [cm-1sr-1], absolute scale.</p>
 <p style="margin-left: 0.25in;">See each of these individual models for full documentation.&nbsp;</p>
 <p style="margin-left: 0.25in;">For 2D plot, the wave transfer is defined as<span style="font-size: 12pt; font-family: 'Times New Roman','serif'; position: relative; top: 4.5pt;"><img src="img/image040.gif" alt="" /></span><span style="font-size: 14pt;">.</span></p>
