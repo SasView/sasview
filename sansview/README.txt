@@ -5,11 +5,12 @@ SasView 2.2.0
 	
 	- Changed the application name to 'SasView'.
 	- Improved Grid/Batch window functionality.
-	- Added a new tool; Data operation for addition, subtraction, multiplication, division, and combination of two data sets
-	- Extended Sum Model Editor to Summation and Multiplication Editor
+	- Easier Graph/Plot modification.
+	- Added a new tool; Data operation for addition, subtraction, multiplication, division, and combination of two data sets.
+	- Extended Sum Model Editor to Summation and Multiplication Editor.
 	- More options for 1d plot symbols.
 	- Better compiling error captures in the 'New' model editor.
-	- More outputs (e.g., Rg, background, or rod diameter) on LinearFit in certain axis scales
+	- More outputs (e.g., Rg, background, or rod diameter) on LinearFit in certain axis scales.
 	- More models.
 	- Fixed many minor bugs.
 	
