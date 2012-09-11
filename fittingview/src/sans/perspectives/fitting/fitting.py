@@ -2055,9 +2055,14 @@ class Plugin(PluginBase):
                 return chisqr
             gn = theory_data.y
             en = dy[index]
-            
+        
         # residual
-        res = (fn - gn) / en
+        try:
+            res = (fn - gn) / en
+        except ValueError:
+            print "Unmatch lengths %s, %s, %s"% (len(fn), len(gn), len(en))
+            return
+        
         residuals = res[numpy.isfinite(res)]
         # get chisqr only w/finite
         chisqr = numpy.average(residuals * residuals)
