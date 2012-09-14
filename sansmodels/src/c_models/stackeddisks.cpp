@@ -292,7 +292,7 @@ double StackedDisksModel :: operator()(double qx, double qy) {
                 * stacked_disks_analytical_2DXY(&dp, qx, qy)
             *pow(weights_radius[j].value,2)*(weights_core_thick[i].value+2*weights_layer_thick[k].value);
             if (weights_theta.size()>1) {
-              _ptvalue *= fabs(sin(weights_theta[l].value));
+              _ptvalue *= fabs(sin(weights_theta[l].value*pi/180.0));
             }
             sum += _ptvalue;
             //Find average volume
