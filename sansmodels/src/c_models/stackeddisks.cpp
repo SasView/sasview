@@ -263,6 +263,7 @@ double StackedDisksModel :: operator()(double qx, double qy) {
   double norm = 0.0;
   double norm_vol = 0.0;
   double vol = 0.0;
+  double pi = 4.0*atan(1.0);
 
   // Loop over length weight points
   for(int i=0; i< (int)weights_core_thick.size(); i++) {
