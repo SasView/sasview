@@ -62,13 +62,15 @@ static double stacked_disks_analytical_2D_scaled(StackedDisksParameters *pars, d
   double alpha, vol, cos_val;
   double d, dum, halfheight;
   double answer;
+  double theta = pars->axis_theta * pi/180.0;
+  double phi = pars->axis_phi * pi/180.0;
 
 
 
   // parallelepiped orientation
-  cyl_x = sin(pars->axis_theta) * cos(pars->axis_phi);
-  cyl_y = sin(pars->axis_theta) * sin(pars->axis_phi);
-  cyl_z = cos(pars->axis_theta);
+  cyl_x = sin(theta) * cos(phi);
+  cyl_y = sin(theta) * sin(phi);
+  cyl_z = cos(theta);
 
   // q vector
   q_z = 0;
