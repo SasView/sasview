@@ -47,6 +47,7 @@ class FitPanel(nb, PanelBase):
         #dictionary of miodel {model class name, model class}
         self.menu_mng = models.ModelManager()
         self.model_list_box = self.menu_mng.get_model_list()
+        self.model_dictionary = self.menu_mng.get_model_dictionary()
         #pageClosedEvent = nb.EVT_FLATNOTEBOOK_PAGE_CLOSING
         self.pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
         
@@ -303,15 +304,22 @@ class FitPanel(nb, PanelBase):
             if page is not None:
                 page.set_manager(self._manager)
 
-    def set_model_list(self, dict):
+    def set_model_list(self, m_dict):
         """
         copy a dictionary of model into its own dictionary
         
-        :param dict: dictionnary made of model name as key and model class
+        :param m_dict: dictionnary made of model name as key and model class
         as value
         """
-        self.model_list_box = dict
+        self.model_list_box = m_dict
         
+    def set_model_dict(self, m_dict):
+        """
+        copy a dictionary of model name -> model object
+
+        :param m_dict: dictionary linking model name -> model object
+        """
+
     def get_current_page(self):
         """
         :return: the current page selected
@@ -359,8 +367,10 @@ class FitPanel(nb, PanelBase):
             index = self.batch_page_index
         else:
         """
+
         from fitpage import FitPage
-        panel = FitPage(parent=self)
+        panel = FitPage(parent=self, m_dict = self.model_list_box)
+
         if self.batch_on:
             self.batch_page_index += 1
             caption = "BatchPage" + str(self.batch_page_index)
@@ -372,7 +382,7 @@ class FitPanel(nb, PanelBase):
             panel.set_index_model(self.fit_page_index)
         panel.batch_on = self.batch_on
         panel._set_save_flag(not panel.batch_on)
-        panel.populate_box(dict=self.model_list_box)
+        panel.set_model_dictionary(self.model_dictionary)
         panel.set_manager(self._manager)
         panel.window_caption = caption
         panel.window_name = caption

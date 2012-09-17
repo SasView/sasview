@@ -53,6 +53,7 @@ else:
     ON_MAC = True
 
 
+
 class Plugin(PluginBase):
     """
     Fitting plugin is used to perform fit

@@ -3,11 +3,14 @@
     #TODO: Add checks to see that all the dependencies are on the system
 """
 import sys
-
 import os
 import platform
+import shutil
 from setuptools import setup, Extension, find_packages
 from distutils.command.build_ext import build_ext
+
+
+
 
 try:
     from numpy.distutils.misc_util import get_numpy_include_dirs
@@ -112,7 +115,10 @@ guiframe_path = os.path.join("sansguiframe", "src", "sans", "guiframe")
 package_dir["sans.guiframe"] = guiframe_path
 package_dir["sans.guiframe.local_perspectives"] = os.path.join(guiframe_path, 
                                                         "local_perspectives")
-package_data["sans.guiframe"] = ['images/*', 'media/*']
+package_data["sans.guiframe"] = ['images/*', 
+                                 'media/*', 
+                                 'default_categories.p']
+
 packages.extend(["sans.guiframe", "sans.guiframe.local_perspectives"])
 # build local plugin
 for dir in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
@@ -278,25 +284,10 @@ packages.extend(["sans","sans.models","sans.models.sans_extension"])
 smearer_sources = [os.path.join(smear_dir, "smearer.cpp"),
                   os.path.join(smear_dir, "smearer_module.cpp")]
 
-# compile list of installed models
-installed_model_file = open(os.path.join("sansmodels",
-                                         "installed_models.txt"),'w')
-not_models = ['BaseComponent',
-              'sans_extension',
-              'MulComponent',
-              'svn',
-              'media',
-              'SubComponent',
-              '__init__',
-              'dispersion_models',
-              'AddComponent',
-              'qsmearing']
 
-for model in os.listdir(model_dir):
-    if not model.rstrip(".py") in not_models:
-        installed_model_file.write(model.rstrip(".py") + '\n')
 
-installed_model_file.close()
+
+
 
 if os.name=='nt':
     smearer_sources.append(os.path.join(igordir, "winFuncs.c"))
@@ -323,6 +314,7 @@ ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
                     ] )
         
 # SasView
+
 package_dir["sans.sansview"] = "sansview"
 package_data['sans.sansview'] = ['images/*', 'media/*', 'test/*']
 packages.append("sans.sansview")
@@ -337,7 +329,35 @@ if os.name=='nt':
 else:
     required.extend(['pil'])
 
+# sys.path.append(os.path.join('sansguiframe',
+#                              'src',
+#                              'sans',
+#                              'guiframe'))
 
+#install category stuff
+cat_install_path = os.path.join('sansguiframe', 'src',
+                                'sans','guiframe','CategoryInstaller.py')
+shutil.copy(cat_install_path, os.getcwd())
+
+from CategoryInstaller import CategoryInstaller
+CategoryInstaller.check_install(defaultfile = \
+                                    os.path.join('sansguiframe',
+                                                 'src',
+                                                 'sans',
+                                                 'guiframe',
+                                                 'default_categories.p'),
+                                modelsdir = \
+                                    os.path.join('fittingview',
+                                                 'src',
+                                                 'sans',
+                                                 'perspectives',
+                                                 'fitting'), 
+                                installed_models_dir = \
+                                    os.path.join('sansdataloader',
+                                                 'src',
+                                                 'sans',
+                                                 'dataloader',
+                                                 'readers') )
 
    
  # Set up SasView    

@@ -29,3 +29,5 @@ import wx.lib.newevent
 (NewBatchEvent, EVT_NEW_BATCH) = wx.lib.newevent.NewEvent()
 ##color event
 (NewColorEvent, EVT_NEW_COLOR) = wx.lib.newevent.NewEvent()
+##change category event
+(ChangeCategoryEvent, EVT_CATEGORY) = wx.lib.newevent.NewEvent()

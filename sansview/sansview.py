@@ -10,6 +10,7 @@
 ################################################################################
 import os
 import logging
+from shutil import copy
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     filename=os.path.join(os.path.expanduser("~"),'sasview.log'))
@@ -66,7 +67,8 @@ class SasView():
             import sans.perspectives.fitting as module    
             fitting_plug = module.Plugin()
             self.gui.add_perspective(fitting_plug)
-        except:
+        except Exception as inst:
+            logging.error("Fitting problems: " + str(inst))
             logging.error("%s: could not find Fitting plug-in module"% APP_NAME) 
             logging.error(sys.exc_value)  
             
@@ -99,6 +101,19 @@ class SasView():
             logging.error("%s: could not find Calculator plug-in module"% \
                                                         APP_NAME)
             logging.error(sys.exc_value)  
+
+        # initialize category stuff
+        user_file = os.path.join(os.path.expanduser("~"),
+                                 'serialized_categories.p')
+        
+        if not os.path.isfile(user_file): 
+            # either first time starting sansview or the
+            # user has deleted their category file
+            my_dir = os.path.dirname(os.path.abspath(__file__))
+            default_file = os.path.join(my_dir, '..',
+                                        'sansmodels',
+                                        'default_categories.p' )
+            copy(default_file, user_file)
 
             
         # Add welcome page

@@ -24,6 +24,7 @@ warnings.simplefilter("ignore")
 import logging
 import urllib2
 
+from sans.guiframe.events import EVT_CATEGORY
 from sans.guiframe.events import EVT_STATUS
 from sans.guiframe.events import EVT_APPEND_BOOKMARK
 from sans.guiframe.events import EVT_PANEL_ON_FOCUS
@@ -38,6 +39,7 @@ from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.gui_toolbar import GUIToolBar
 from sans.guiframe.data_processor import GridFrame
 from sans.guiframe.events import EVT_NEW_BATCH
+from sans.guiframe.CategoryManager import CategoryManager
 from sans.dataloader.loader import Loader
 
 def get_app_dir():
@@ -210,7 +212,7 @@ class ViewerFrame(wx.Frame):
         """
         Initialize the Frame object
         """
-        
+
         wx.Frame.__init__(self, parent=parent, title=title, pos=pos, size=size)
         # title
         self.title = title
@@ -318,6 +320,7 @@ class ViewerFrame(wx.Frame):
         self.Bind(EVT_NEW_LOAD_DATA, self.on_load_data)
         self.Bind(EVT_NEW_BATCH, self.on_batch_selection)
         self.Bind(EVT_NEW_COLOR, self.on_color_selection)
+        self.Bind(EVT_CATEGORY, self.on_change_categories)
         self.setup_custom_conf()
         
     def add_icon(self):
@@ -341,6 +344,20 @@ class ViewerFrame(wx.Frame):
                 except:
                     pass  
         
+    def on_change_categories(self, evt):
+        # ILL
+        fitpanel = None
+        for item in self.plugins:
+            if hasattr(item, "get_panels"):
+                if hasattr(item, "fit_panel"):
+                    fitpanel = item.fit_panel
+
+        if fitpanel != None:
+            for i in range(0,fitpanel.GetPageCount()):
+                fitpanel.GetPage(i)._populate_listbox()
+
+
+
     def on_set_batch_result(self, data_outputs, data_inputs=None,
                              plugin_name=""):
         """
@@ -1384,6 +1401,11 @@ class ViewerFrame(wx.Frame):
                                                      hint_ss)
             wx.EVT_MENU(self, id, self._on_preference_menu)
             
+        id = wx.NewId()
+        self._view_menu.AppendSeparator()
+        self._view_menu.Append(id, 'Category Manager', 'Edit model categories')
+        wx.EVT_MENU(self, id, self._on_category_manager)
+
         self._menubar.Append(self._view_menu, '&View')   
          
     def show_batch_frame(self, event=None):
@@ -1394,6 +1416,9 @@ class ViewerFrame(wx.Frame):
         self.batch_frame.Show(False)
         self.batch_frame.Show(True)
         
+    def _on_category_manager(self, event):
+        CategoryManager(self, -1, 'Model Category Manager')
+
     def _on_preference_menu(self, event):     
         """
         Build a panel to allow to edit Mask

@@ -92,6 +92,11 @@ def find_extension():
 
 EXTENSIONS_LIST = find_extension()
 
+#initialize category stuff
+from sans.guiframe.CategoryInstaller import CategoryInstaller
+CategoryInstaller.check_install()
+
+
  
 plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
                                          CFBundleTypeIconFile=ICON,

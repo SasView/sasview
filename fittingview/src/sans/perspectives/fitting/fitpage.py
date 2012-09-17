@@ -35,12 +35,13 @@ class FitPage(BasicPage):
         on fit Panel window.
     """
 
-    def __init__(self, parent, color='rand'):
+    def __init__(self, parent, m_dict, color='rand'):
         """
         Initialization of the Panel
         """
         BasicPage.__init__(self, parent, color=color)
-        
+        self.populate_box(m_dict)
+
         ## draw sizer
         self._fill_data_sizer()
         self.is_2D = None
@@ -66,7 +67,7 @@ class FitPage(BasicPage):
         self.fill_data_combobox(data_list=self.data_list)
         #create a default data for an empty panel
         self.create_default_data()
-    
+
     def enable_fit_button(self):
         """
         Enable fit button if data is valid and model is valid
@@ -1086,17 +1087,24 @@ class FitPage(BasicPage):
         """
         call back for model selection
         """
+        # if we're just clearing the box then do nothing
+        if self.model_box.GetCount() == 0 or \
+                self.model_box.GetStringSelection() == '':
+            return
+
+
         self.Show(False)
         copy_flag = False
         is_poly_enabled = None
         if event != None:
-            if (event.GetEventObject() == self.formfactorbox\
-                        and self.structurebox.GetLabel() != 'None')\
-                        or event.GetEventObject() == self.structurebox\
-                        or event.GetEventObject() == self.multifactorbox:
-                copy_flag = self.get_copy_params()
-                is_poly_enabled = self.enable_disp.GetValue()
+            # if (event.GetEventObject() == self.formfactorbox\
+            #             and self.structurebox.GetLabel() != 'None')\
+            #             or event.GetEventObject() == self.structurebox\
+            #             or event.GetEventObject() == self.multifactorbox:
+            copy_flag = self.get_copy_params()
+            is_poly_enabled = self.enable_disp.GetValue()
 
+        self.model_name = self.model_box.GetStringSelection()
         self._on_select_model_helper()
         self.set_model_param_sizer(self.model)
         if self.model is None:
@@ -1115,7 +1123,7 @@ class FitPage(BasicPage):
         self.state.slit_smearer = self.slit_smearer.GetValue()
     
         self.state.structurecombobox = self.structurebox.GetLabel()
-        self.state.formfactorcombobox = self.formfactorbox.GetLabel()
+        self.state.formfactorcombobox = self.model_box.GetStringSelection()
         self.enable_fit_button()
         if self.model != None:
             self.m_name = self.model.name
@@ -1174,15 +1182,15 @@ class FitPage(BasicPage):
             new_event = PageInfoEvent(page=self)
             wx.PostEvent(self.parent, new_event)
             #update list of plugins if new plugin is available
-            if self.plugin_rbutton.GetValue():
-                temp = self.parent.update_model_list()
-                if temp:
-                    self.model_list_box = temp
-                    current_val = self.formfactorbox.GetLabel()
-                    pos = self.formfactorbox.GetSelection()
-                    self._show_combox_helper()
-                    self.formfactorbox.SetSelection(pos)
-                    self.formfactorbox.SetValue(current_val)
+            # if self.plugin_rbutton.GetValue():
+            #     temp = self.parent.update_model_list()
+            #     if temp:
+            #         self.model_list_box = temp
+                    # current_val = self.formfactorbox.GetLabel()
+                    # pos = self.formfactorbox.GetSelection()
+                    # self._show_combox_helper()
+                    # self.formfactorbox.SetSelection(pos)
+                    # self.formfactorbox.SetValue(current_val)
             # when select a model only from guictr/button
             if is_poly_enabled != None:
                 self.enable_disp.SetValue(is_poly_enabled)
@@ -1813,7 +1821,7 @@ class FitPage(BasicPage):
             self.dI_sqrdata.Enable(True)
             self.dI_idata.Enable(True)
               
-            self.formfactorbox.Enable()
+#            self.formfactorbox.Enable()
             self.structurebox.Enable()
             data_name = self.data.name
             _, _, npts = self.compute_data_range(self.data)

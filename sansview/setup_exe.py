@@ -16,6 +16,7 @@
 import os, sys
 import platform
 
+
 if len(sys.argv) == 1:
     sys.argv.append('py2exe')
 # When using the SasView build script, we need to be able to pass
@@ -326,6 +327,12 @@ target_wx_client = Target(
 bundle_option = 2
 if is_64bits:
     bundle_option = 3
+
+#initialize category stuff
+from sans.guiframe.CategoryInstaller import CategoryInstaller
+CategoryInstaller.check_install()
+
+
 
 setup(
     windows=[target_wx_client],

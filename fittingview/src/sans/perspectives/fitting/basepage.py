@@ -1,6 +1,7 @@
 """
 Base Page for fitting
 """
+
 import sys
 import os
 import wx
@@ -9,6 +10,9 @@ import time
 import copy
 import math
 import string
+import cPickle as pickle
+import shutil
+from collections import defaultdict
 from wx.lib.scrolledpanel import ScrolledPanel
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.utils import format_number, check_float
@@ -21,6 +25,9 @@ from sans.guiframe.dataFitting import check_data_validity
 from sans.dataloader.data_info import Detector
 from sans.dataloader.data_info import Source
 from sans.perspectives.fitting.pagestate import PageState
+from sans.guiframe.CategoryInstaller import CategoryInstaller
+
+
 
 (PageInfoEvent, EVT_PAGE_INFO) = wx.lib.newevent.NewEvent()
 (PreviousStateEvent, EVT_PREVIOUS_STATE) = wx.lib.newevent.NewEvent()
@@ -129,6 +136,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.btFit = None
         self.sld_axes = None
         self.multi_factor = None
+        self.model_name = None
+        self.model_dict = {}
        
         self.disp_cb_dict = {}
    
@@ -160,6 +169,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         ##list of dispersion parameters
         self.disp_list = []
         self.disp_name = ""
+
+        ## category stuff
+        self.category_box = None
+        self.model_box = None
         
         ## list of orientation parameters
         self.orientation_params = []
@@ -212,6 +225,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         
         ## layout
         self.set_layout()
+
+
     
     def set_index_model(self, index):
         """
@@ -458,7 +473,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## dictionary containing list of models
         self.model_list_box = page_info.model_list_box
         ## Data member to store the dispersion object created
-        self.populate_box(dict=self.model_list_box)
+
         
     def onContextMenu(self, event):
         """
@@ -561,17 +576,25 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._manager = manager
         self.state.manager = manager
         
-    def populate_box(self, dict):
+    def populate_box(self, m_dict):
         """
         Store list of model
         
         :param dict: dictionary containing list of models
         
         """
-        self.model_list_box = dict
-        self.state.model_list_box = self.model_list_box
-        self.initialize_combox()
+        self.model_list_box = m_dict
+        # self.state.model_list_box = self.model_list_box
+        # self.initialize_combox()
         
+    def set_model_dictionary(self, model_dict):
+        """
+        Store a dictionary linking model name -> model object
+
+        :param model_dict: dictionary containing list of models
+        """
+        self.model_dict = model_dict
+
     def initialize_combox(self):
         """
         put default value in the combobox
@@ -579,9 +602,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## fill combox box
         if self.model_list_box is None:
             return
-        if len(self.model_list_box) > 0:
-            self._populate_box(self.formfactorbox,
-                               self.model_list_box["Shapes"])
        
         if len(self.model_list_box) > 0:
             self._populate_box(self.structurebox,
@@ -880,17 +900,18 @@ class BasicPage(ScrolledPanel, PanelBase):
                     if s_select > 0:
                         self.state.structurecombobox = self.structurebox.\
                         GetString(s_select)
-            if self.formfactorbox != None:
-                f_select = self.formfactorbox.GetSelection()
-                if f_select > 0:
-                        self.state.formfactorcombobox = self.formfactorbox.\
-                        GetString(f_select)
+            # if self.formfactorbox != None:
+            #     f_select = self.formfactorbox.GetSelection()
+            #     if f_select > 0:
+            self.state.formfactorcombobox = \
+                self.model_box.GetStringSelection()
                         
         #save radiobutton state for model selection
-        self.state.shape_rbutton = self.shape_rbutton.GetValue()
-        self.state.shape_indep_rbutton = self.shape_indep_rbutton.GetValue()
-        self.state.struct_rbutton = self.struct_rbutton.GetValue()
-        self.state.plugin_rbutton = self.plugin_rbutton.GetValue()
+        # ILL
+        # self.state.shape_rbutton = self.shape_rbutton.GetValue()
+        # self.state.shape_indep_rbutton = self.shape_indep_rbutton.GetValue()
+        # self.state.struct_rbutton = self.struct_rbutton.GetValue()
+        # self.state.plugin_rbutton = self.plugin_rbutton.GetValue()
         
         self.state.enable2D = copy.deepcopy(self.enable2D)
         self.state.values = copy.deepcopy(self.values)
@@ -1039,28 +1060,19 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.disp_cb_dict = state.disp_cb_dict
         self.disp_list = state.disp_list
       
-        ## set the state of the radio box
-        self.shape_rbutton.SetValue(state.shape_rbutton)
-        self.shape_indep_rbutton.SetValue(state.shape_indep_rbutton)
-        self.struct_rbutton.SetValue(state.struct_rbutton)
-        self.plugin_rbutton.SetValue(state.plugin_rbutton)
-        
-        ## fill model combobox
         self._show_combox_helper()
-        #select the current model
-        try:
-            # to support older version
-            formfactor_pos = int(state.formfactorcombobox)
-        except:
-            formfactor_pos = 0
-            for ind_form in range(self.formfactorbox.GetCount()):
-                if self.formfactorbox.GetString(ind_form) == \
-                                        state.formfactorcombobox:
-                    formfactor_pos = int(ind_form)
-                    break
-            
-        self.formfactorbox.Select(formfactor_pos)
+
+        # select the model in the gui
+        self._regenerate_model_dict()
+        if(len(self.by_model_dict[state.formfactorcombobox]) == 0):
+            self.category_box.SetStringSelection('Uncategorized')
+            self.model_box.SetStringSelection(state.formfactorcombobox)
+        else:
+            self.category_box.SetStringSelection(\
+                self.by_model_dict[state.formfactorcombobox][0] )
+            self.model_box.SetStringSelection(state.formfactorcombobox)
         
+
         try:
             # to support older version
             structfactor_pos = int(state.structurecombobox)
@@ -1105,7 +1117,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.disp_cb_dict[item].SetValue(\
                                                     state.disp_cb_dict[item])
                         # Create the dispersion objects
-                        from sans.models.dispersion_models import ArrayDispersion
+                        from sans.models.dispersion_models \
+                            import ArrayDispersion
                         disp_model = ArrayDispersion()
                         if hasattr(state, "values") and \
                                  self.disp_cb_dict[item].GetValue() == True:
@@ -1204,28 +1217,21 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.disp_cb_dict = state.disp_cb_dict
         self.disp_list = state.disp_list
       
-        ## set the state of the radio box
-        self.shape_rbutton.SetValue(state.shape_rbutton)
-        self.shape_indep_rbutton.SetValue(state.shape_indep_rbutton)
-        self.struct_rbutton.SetValue(state.struct_rbutton)
-        self.plugin_rbutton.SetValue(state.plugin_rbutton)
         
         ## fill model combobox
         self._show_combox_helper()
         #select the current model
-        try:
-            # to support older version
-            formfactor_pos = int(state.formfactorcombobox)
-        except:
-            formfactor_pos = 0
-            for ind_form in range(self.formfactorbox.GetCount()):
-                if self.formfactorbox.GetString(ind_form) == \
-                                                    (state.formfactorcombobox):
-                    formfactor_pos = int(ind_form)
-                    break
-            
-        self.formfactorbox.Select(formfactor_pos)
-        
+
+
+        self._regenerate_model_dict()
+        if(len(self.by_model_dict[state.formfactorcombobox]) == 0):
+            self.category_box.SetStringSelection('Uncategorized')
+            self.model_box.SetStringSelection(state.formfactorcombobox)
+        else:
+            self.category_box.SetStringSelection(\
+                self.by_model_dict[state.formfactorcombobox][0] )
+            self.model_box.SetStringSelection(state.formfactorcombobox)
+
         try:
             # to support older version
             structfactor_pos = int(state.structurecombobox)
@@ -1425,12 +1431,12 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         save radiobutton containing the type model that can be selected
         """
-        self.state.shape_rbutton = self.shape_rbutton.GetValue()
-        self.state.shape_indep_rbutton = self.shape_indep_rbutton.GetValue()
-        self.state.struct_rbutton = self.struct_rbutton.GetValue()
-        self.state.plugin_rbutton = self.plugin_rbutton.GetValue()
+        # self.state.shape_rbutton = self.shape_rbutton.GetValue()
+        # self.state.shape_indep_rbutton = self.shape_indep_rbutton.GetValue()
+        # self.state.struct_rbutton = self.struct_rbutton.GetValue()
+        # self.state.plugin_rbutton = self.plugin_rbutton.GetValue()
         self.state.structurecombobox = self.structurebox.GetLabel()
-        self.state.formfactorcombobox = self.formfactorbox.GetLabel()
+        self.state.formfactorcombobox = self.model_box.GetStringSelection()
        
         ## post state to fit panel
         event = PageInfoEvent(page=self)
@@ -1765,47 +1771,47 @@ class BasicPage(ScrolledPanel, PanelBase):
         if hasattr(model, "p_model"):
             class_name = model.p_model.__class__
             name = model.p_model.name
-            self.formfactorbox.Clear()
+#            self.formfactorbox.Clear()
             
             for k, list in self.model_list_box.iteritems():
                 if k in["P(Q)*S(Q)", "Shapes"] and \
                     class_name in self.model_list_box["Shapes"]:
-                    self.shape_rbutton.SetValue(True)
+#                    self.shape_rbutton.SetValue(True)
                     ## fill the form factor list with new model
-                    self._populate_box(self.formfactorbox,
-                                       self.model_list_box["Shapes"])
-                    items = self.formfactorbox.GetItems()
-                    ## set comboxbox to the selected item
-                    for i in range(len(items)):
-                        if items[i] == str(name):
-                            self.formfactorbox.SetSelection(i)
-                            break
+                    # self._populate_box(self.formfactorbox,
+                    #                    self.model_list_box["Shapes"])
+                    # items = self.formfactorbox.GetItems()
+                    # ## set comboxbox to the selected item
+                    # for i in range(len(items)):
+                    #     if items[i] == str(name):
+                    #         self.formfactorbox.SetSelection(i)
+                    #         break
                     return
-                elif k == "Shape-Independent":
-                    self.shape_indep_rbutton.SetValue(True)
-                elif k == "Structure Factors":
-                    self.struct_rbutton.SetValue(True)
-                elif k == "Multi-Functions":
-                    continue
-                else:
-                    self.plugin_rbutton.SetValue(True)
+                # elif k == "Shape-Independent":
+                #     self.shape_indep_rbutton.SetValue(True)
+                # elif k == "Structure Factors":
+                #     self.struct_rbutton.SetValue(True)
+                # elif k == "Multi-Functions":
+                #     continue
+                # else:
+                #     self.plugin_rbutton.SetValue(True)
                
-                if class_name in list:
-                    ## fill the form factor list with new model
-                    self._populate_box(self.formfactorbox, list)
-                    items = self.formfactorbox.GetItems()
-                    ## set comboxbox to the selected item
-                    for i in range(len(items)):
-                        if items[i] == str(name):
-                            self.formfactorbox.SetSelection(i)
-                            break
-                    break
-        else:
+                # if class_name in list:
+                #     # ## fill the form factor list with new model
+                #     # self._populate_box(self.formfactorbox, list)
+                #     # items = self.formfactorbox.GetItems()
+                #     # ## set comboxbox to the selected item
+                #     # for i in range(len(items)):
+                #     #     if items[i] == str(name):
+                #     #         self.formfactorbox.SetSelection(i)
+                #     #         break
+                #     # break
+                #     else:
             ## Select the model from the menu
             class_name = model.__class__
             name = model.name
-            self.formfactorbox.Clear()
-            items = self.formfactorbox.GetItems()
+##            self.formfactorbox.Clear()
+#            items = self.formfactorbox.GetItems()
     
             for k, list in self.model_list_box.iteritems():
                 if k in["P(Q)*S(Q)", "Shapes"] and \
@@ -1823,37 +1829,37 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.structurebox.SetSelection(0)
                         self.text2.Disable()
                         
-                    self.shape_rbutton.SetValue(True)
+#                    self.shape_rbutton.SetValue(True)
                     ## fill the form factor list with new model
-                    self._populate_box(self.formfactorbox,
-                                       self.model_list_box["Shapes"])
-                    items = self.formfactorbox.GetItems()
-                    ## set comboxbox to the selected item
-                    for i in range(len(items)):
-                        if items[i] == str(name):
-                            self.formfactorbox.SetSelection(i)
-                            break
+                    # self._populate_box(self.formfactorbox,
+                    #                    self.model_list_box["Shapes"])
+                    # items = self.formfactorbox.GetItems()
+                    # ## set comboxbox to the selected item
+                    # for i in range(len(items)):
+                    #     if items[i] == str(name):
+                    #         self.formfactorbox.SetSelection(i)
+                    #         break
                     return
-                elif k == "Shape-Independent":
-                    self.shape_indep_rbutton.SetValue(True)
-                elif k == "Structure Factors":
-                    self.struct_rbutton.SetValue(True)
-                elif k == "Multi-Functions":
-                    continue
-                else:
-                    self.plugin_rbutton.SetValue(True)
+                # elif k == "Shape-Independent":
+                #     self.shape_indep_rbutton.SetValue(True)
+                # elif k == "Structure Factors":
+                #     self.struct_rbutton.SetValue(True)
+                # elif k == "Multi-Functions":
+                #     continue
+                # else:
+                #     self.plugin_rbutton.SetValue(True)
                 if class_name in list:
                     self.structurebox.SetSelection(0)
                     self.structurebox.Disable()
                     self.text2.Disable()
                     ## fill the form factor list with new model
-                    self._populate_box(self.formfactorbox, list)
-                    items = self.formfactorbox.GetItems()
+                    # self._populate_box(self.formfactorbox, list)
+                    # items = self.formfactorbox.GetItems()
                     ## set comboxbox to the selected item
-                    for i in range(len(items)):
-                        if items[i] == str(name):
-                            self.formfactorbox.SetSelection(i)
-                            break
+                    # for i in range(len(items)):
+                    #     if items[i] == str(name):
+                    #         self.formfactorbox.SetSelection(i)
+                    #         break
                     break
                 
     def _draw_model(self, update_chisqr=True, source='model'):
@@ -1951,33 +1957,33 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         Fill panel's combo box according to the type of model selected
         """
-        if self.shape_rbutton.GetValue():
-            ##fill the combobox with form factor list
-            self.structurebox.SetSelection(0)
-            self.structurebox.Disable()
-            self.formfactorbox.Clear()
-            self._populate_box(self.formfactorbox,
-                               self.model_list_box["Shapes"])
-        if self.shape_indep_rbutton.GetValue():
-            ##fill the combobox with shape independent  factor list
-            self.structurebox.SetSelection(0)
-            self.structurebox.Disable()
-            self.formfactorbox.Clear()
-            self._populate_box(self.formfactorbox,
-                             self.model_list_box["Shape-Independent"])
-        if self.struct_rbutton.GetValue():
-            ##fill the combobox with structure factor list
-            self.structurebox.SetSelection(0)
-            self.structurebox.Disable()
-            self.formfactorbox.Clear()
-            self._populate_box(self.formfactorbox,
-                               self.model_list_box["Structure Factors"])
-        if self.plugin_rbutton.GetValue():
-            ##fill the combobox with form factor list
-            self.structurebox.Disable()
-            self.formfactorbox.Clear()
-            self._populate_box(self.formfactorbox,
-                               self.model_list_box["Customized Models"])
+#         if self.shape_rbutton.GetValue():
+#             ##fill the combobox with form factor list
+#             self.structurebox.SetSelection(0)
+#             self.structurebox.Disable()
+#             # self.formfactorbox.Clear()
+#             # self._populate_box(self.formfactorbox,
+#             #                    self.model_list_box["Shapes"])
+#         if self.shape_indep_rbutton.GetValue():
+#             ##fill the combobox with shape independent  factor list
+#             self.structurebox.SetSelection(0)
+#             self.structurebox.Disable()
+# #            self.formfactorbox.Clear()
+#             self._populate_box(self.formfactorbox,
+#                              self.model_list_box["Shape-Independent"])
+#         if self.struct_rbutton.GetValue():
+#             ##fill the combobox with structure factor list
+#             self.structurebox.SetSelection(0)
+#             self.structurebox.Disable()
+#  #           self.formfactorbox.Clear()
+#             self._populate_box(self.formfactorbox,
+#                                self.model_list_box["Structure Factors"])
+#         if self.plugin_rbutton.GetValue():
+#             ##fill the combobox with form factor list
+#             self.structurebox.Disable()
+#   #          self.formfactorbox.Clear()
+#             self._populate_box(self.formfactorbox,
+#                                self.model_list_box["Customized Models"])
         
     def _show_combox(self, event=None):
         """
@@ -1993,7 +1999,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.Layout()
         self.Refresh()
   
-    def _populate_box(self, combobox, list):
+    def _populate_box(self, combobox, model_list):
         """
         fill combox box with dict item
         
@@ -2001,7 +2007,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             item must model class
         """
         mlist = []
-        for models in list:
+        for models in model_list:
             model = models()
             name = model.__class__.__name__
             if models.__name__ != "NoStructure":
@@ -2132,14 +2138,14 @@ class BasicPage(ScrolledPanel, PanelBase):
         call back for model selection
         """
         ## reset dictionary containing reference to dispersion
+        if self.model_name == None:
+            return
+
         self._disp_obj_dict = {}
         self.disp_cb_dict = {}
         self.temp_multi_functional = False
-        f_id = self.formfactorbox.GetCurrentSelection()
-        #For MAC
-        form_factor = None
-        if f_id >= 0:
-            form_factor = self.formfactorbox.GetClientData(f_id)
+
+        form_factor = self.model_dict[self.model_name]
 
         if not form_factor in  self.model_list_box["multiplication"]:
             self.structurebox.Hide()
@@ -2153,6 +2159,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.structurebox.Enable()
             self.text2.Enable()
             
+
+
         if form_factor != None:
             # set multifactor for Mutifunctional models
             if form_factor().__class__ in \
@@ -2330,10 +2338,10 @@ class BasicPage(ScrolledPanel, PanelBase):
             
         return flag
     
-    def _check_value_enter(self, list, modified):
+    def _check_value_enter(self, m_list, modified):
         """
-        :param list: model parameter and panel info
-        :Note: each item of the list should be as follow:
+        :param m_list: model parameter and panel info
+        :Note: each item of the m_list should be as follow:
             item=[check button state, parameter's name,
                 paramater's value, string="+/-",
                 parameter's error of fit,
@@ -2342,9 +2350,9 @@ class BasicPage(ScrolledPanel, PanelBase):
                 parameter's units]
         """
         is_modified = modified
-        if len(list) == 0:
+        if len(m_list) == 0:
             return is_modified
-        for item in list:
+        for item in m_list:
             #skip angle parameters for 1D
             if not self.enable2D:
                 if item in self.orientation_params:
@@ -2894,25 +2902,24 @@ class BasicPage(ScrolledPanel, PanelBase):
         model_path = os.path.join(path, "model_functions.html")
         if self.model == None:
             name = 'FuncHelp'
-        else:
-            name = self.formfactorbox.GetValue()
+
         frame = HelpWindow(None, -1, pageToOpen=model_path)
         # If model name exists and model is not a custom model
-        if frame.rhelp.HasAnchor(name) and not self.plugin_rbutton.GetValue():
-            frame.Show(True)
-            frame.rhelp.ScrollToAnchor(name)
-        else:
-            if self.model != None:
-                frame.Destroy()
-                msg = 'Model description:\n'
-                if str(self.model.description).rstrip().lstrip() == '':
-                    msg += "Sorry, no information is available for this model."
-                else:
-                    msg += self.model.description + '\n'
-                info = "Info"
-                wx.MessageBox(msg, info)
-            else:
-                frame.Show(True)
+        # if frame.rhelp.HasAnchor(name) and not self.plugin_rbutton.GetValue():
+        #     frame.Show(True)
+        #     frame.rhelp.ScrollToAnchor(name)
+        # else:
+        #     if self.model != None:
+        #         frame.Destroy()
+        #         msg = 'Model description:\n'
+        #         if str(self.model.description).rstrip().lstrip() == '':
+        #             msg += "Sorry, no information is available for this model."
+        #         else:
+        #             msg += self.model.description + '\n'
+        #         info = "Info"
+        #         wx.MessageBox(msg, info)
+        #     else:
+        #         frame.Show(True)
     
     def on_pd_help_clicked(self, event):
         """
@@ -3289,10 +3296,93 @@ class BasicPage(ScrolledPanel, PanelBase):
         print "BasicPage.update_pinhole_smear was called: skipping"
         return
 
+    def _read_category_info(self):
+        """
+        Reads the categories in from file
+        """
+
+        # # ILL mod starts here - July 2012 kieranrcampbell@gmail.com
+        self.master_category_dict = defaultdict(list)
+        self.by_model_dict = defaultdict(list)
+        self.model_enabled_dict = defaultdict(bool)
+
+        categorization_file = CategoryInstaller.get_user_file()
+
+
+        try:
+            cat_file = open(categorization_file, 'rb')
+                            
+            self.master_category_dict = pickle.load(cat_file)
+            self._regenerate_model_dict()
+
+        except IOError:
+            print 'Problem reading in category file.'
+            print 'We even looked for it, made sure it was there.'
+            print 'An existential crisis if there ever was one.'
+
+    def _regenerate_model_dict(self):
+        """
+        regenerates self.by_model_dict which has each model name as the 
+        key and the list of categories belonging to that model
+        along with the enabled mapping
+        """
+
+        self.by_model_dict = defaultdict(list)
+        for category in self.master_category_dict:
+            for (model,enabled) in self.master_category_dict[category]:
+                self.by_model_dict[model].append(category)
+                self.model_enabled_dict[model] = enabled
+    
+    def _populate_listbox(self):
+        """
+        fills out the category list box
+        """
+        self._read_category_info()
+
+        self.category_box.Clear()
+        cat_list = sorted(self.master_category_dict.keys())
+        cat_list.append('Customized')
+
+        for category in cat_list:
+            if category != '':
+                self.category_box.Append(category)
+
+        if self.category_box.GetSelection() == wx.NOT_FOUND:
+            self.category_box.SetSelection(0)
+        else:
+            self.category_box.SetSelection( \
+                self.category_box.GetSelection())
+
+        self._on_change_cat(None)
+
+
+    def _on_change_cat(self, event):
+        """
+        Callback for category change action
+        """
+        self.model_name = None
+        category = self.category_box.GetStringSelection()
+        if category == None:
+            return
+        self.model_box.Clear()
+
+        if category == 'Customized':
+            for model in self.model_list_box["Customized Models"]:
+                str_m = str(model).split(".")[0]
+                self.model_box.Append(str_m)
+            print 'but not here'
+
+        else:
+            for (model,enabled) in sorted(self.master_category_dict[category],
+                                      key = lambda name: name[0]):
+                if(enabled):
+                    self.model_box.Append(model)
+
     def _fill_model_sizer(self, sizer):
         """
         fill sizer containing model info
         """
+
         ##Add model function Details button in fitpanel.
         ##The following 3 lines are for Mac. Let JHC know before modifying...
         title = "Model"
@@ -3310,64 +3400,67 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D, id=id)
         hint = "toggle view of model from 1D to 2D  or 2D to 1D"
         self.model_view.SetToolTipString(hint)
-      
-        self.shape_rbutton = wx.RadioButton(self, -1, 'Shapes',
-                                             style=wx.RB_GROUP)
-        self.shape_indep_rbutton = wx.RadioButton(self, -1,
-                                                  "Shape-Independent")
-        self.struct_rbutton = wx.RadioButton(self, -1, "Structure Factor ")
-        self.plugin_rbutton = wx.RadioButton(self, -1, "Customized Models")
-                
-        self.Bind(wx.EVT_RADIOBUTTON, self._show_combox,
-                            id=self.shape_rbutton.GetId())
-        self.Bind(wx.EVT_RADIOBUTTON, self._show_combox,
-                            id=self.shape_indep_rbutton.GetId())
-        self.Bind(wx.EVT_RADIOBUTTON, self._show_combox,
-                            id=self.struct_rbutton.GetId())
-        self.Bind(wx.EVT_RADIOBUTTON, self._show_combox,
-                            id=self.plugin_rbutton.GetId())
-        #MAC needs SetValue
-        self.shape_rbutton.SetValue(True)
-      
-        sizer_radiobutton = wx.GridSizer(2, 3, 5, 5)
-        sizer_radiobutton.Add(self.shape_rbutton)
-        sizer_radiobutton.Add(self.shape_indep_rbutton)
-        sizer_radiobutton.Add(self.model_view, 1, wx.LEFT, 20)
-        sizer_radiobutton.Add(self.plugin_rbutton)
-        sizer_radiobutton.Add(self.struct_rbutton)
-        sizer_radiobutton.Add(self.model_help, 1, wx.LEFT, 20)
+
         
+        # ILL mod starts here - Aug 2012
+
+
+        cat_text = wx.StaticText(self, -1, 'Category')
+        mod_text = wx.StaticText(self, -1, 'Model')
+        
+        id = wx.NewId()
+        self.category_box = wx.ListBox(self, size=(150, 100))
+        self.category_box.Bind(wx.EVT_LISTBOX, self._on_change_cat)
+        self.model_box = wx.ListBox(self, -1, size=(150, 100))
+        self.model_box.Bind(wx.EVT_LISTBOX, self._on_select_model)
+
+        sizer_radiobutton = wx.GridSizer(2, 3, 5, 5)
+        hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+        vbox1 = wx.BoxSizer(wx.VERTICAL)
+        vbox2 = wx.BoxSizer(wx.VERTICAL)
+        vbox3 = wx.BoxSizer(wx.VERTICAL)
+
+        vbox1.Add(cat_text, border = 5, flag = wx.EXPAND | wx.ALL)
+        vbox2.Add(mod_text, border=5, flag = wx.EXPAND | wx.ALL)
+        vbox3.Add(self.model_view, flag= wx.ALL | wx.ALIGN_LEFT
+                  , border =5)
+        vbox1.Add(self.category_box, border = 5, flag = wx.EXPAND | wx.ALL)
+        vbox2.Add(self.model_box, flag = wx.EXPAND | wx.ALL, border = 5)
+        vbox3.Add(self.model_help, border = 5, 
+                  flag = wx.LEFT | wx.ALIGN_LEFT )
+
+        hbox1.Add(vbox1, border = 5, flag = wx.EXPAND | wx.ALL)
+        hbox1.Add(vbox2, border = 5, flag = wx.EXPAND | wx.ALL)
+        hbox1.Add(vbox3, border = 5, flag = wx.EXPAND | wx.ALL)
+
         sizer_selection = wx.BoxSizer(wx.HORIZONTAL)
         mutifactor_selection = wx.BoxSizer(wx.HORIZONTAL)
         
         self.text1 = wx.StaticText(self, -1, "")
-        self.text2 = wx.StaticText(self, -1, "P(Q)*S(Q)")
+        self.text2 = wx.StaticText(self, -1, "P(Q)*S(Q) ")
         self.mutifactor_text = wx.StaticText(self, -1, "No. of Shells: ")
         self.mutifactor_text1 = wx.StaticText(self, -1, "")
         self.show_sld_button = wx.Button(self, -1, "Show SLD Profile")
         self.show_sld_button.Bind(wx.EVT_BUTTON, self._on_show_sld)
 
-        self.formfactorbox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
-        if self.model != None:
-            self.formfactorbox.SetValue(self.model.name)
         self.structurebox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
         self.multifactorbox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
         self.initialize_combox()
-        wx.EVT_COMBOBOX(self.formfactorbox, -1, self._on_select_model)
 
         wx.EVT_COMBOBOX(self.structurebox, -1, self._on_select_model)
         wx.EVT_COMBOBOX(self.multifactorbox, -1, self._on_select_model)
         ## check model type to show sizer
+
+        hbox2.Add(self.text2, border = 5, flag = wx.EXPAND | wx.ALL )
+        hbox2.Add(self.structurebox, border = 5, flag = wx.EXPAND | \
+                      wx.ALL )
+        
         if self.model != None:
             self._set_model_sizer_selection(self.model)
         
-        sizer_selection.Add(self.text1)
-        sizer_selection.Add((5, 5))
-        sizer_selection.Add(self.formfactorbox)
-        sizer_selection.Add((5, 5))
-        sizer_selection.Add(self.text2)
-        sizer_selection.Add((5, 5))
-        sizer_selection.Add(self.structurebox)
+        self._populate_listbox()
+        
        
         mutifactor_selection.Add((10, 5))
         mutifactor_selection.Add(self.mutifactor_text)
@@ -3377,10 +3470,10 @@ class BasicPage(ScrolledPanel, PanelBase):
         mutifactor_selection.Add((10, 5))
         mutifactor_selection.Add(self.show_sld_button)
 
-        boxsizer1.Add(sizer_radiobutton)
+        boxsizer1.Add(hbox1, flag = wx.EXPAND)
+        boxsizer1.Add(hbox2, flag = wx.EXPAND)
         boxsizer1.Add((10, 10))
-        boxsizer1.Add(sizer_selection)
-        boxsizer1.Add((10, 10))
+
         boxsizer1.Add(mutifactor_selection)
         
         self._set_multfactor_combobox()
