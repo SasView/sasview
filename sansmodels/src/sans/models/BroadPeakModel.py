@@ -20,7 +20,7 @@ class BroadPeakModel(BaseComponent):
         BaseComponent.__init__(self)
         self.counter = 0
         ## Name of the model
-        self.name = "BroadPeak"
+        self.name = "BroadPeakModel"
         self.description = """I(q) = scale_p/pow(q,exponent)+scale_l/
         (1.0 + pow((fabs(q-q_peak)*length_l),exponent_l) )+ background
              List of default parameters:
