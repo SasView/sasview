@@ -196,8 +196,6 @@ def write_file():
     msg += """DestDir: "{app}";\tFlags: ignoreversion\n"""
     msg += """Source: "dist\*";\tDestDir: "{app}";\t"""
     msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
-    msg += """Source: "dist\serialized_cat.p";\tDestDir: "{userappdata}\..\.sasview";\t""" 
-    msg += """Flags: recursesubdirs createallsubdirs\n"""
     msg += """Source: "dist\plugin_models\*";\tDestDir: "{userappdata}\..\.sasview\plugin_models";\t""" 
     msg += """Flags: recursesubdirs createallsubdirs\n"""
     msg += """Source: "dist\config\custom_config.py";\tDestDir: "{userappdata}\..\.sasview\config";\t""" 
