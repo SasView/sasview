@@ -79,21 +79,22 @@ class TestOnionExpShell1(unittest.TestCase):
         input = [0.01,0.01]
         st = time()
         for iter in range(0,100000):
-            self.model5.model.run(0.01)
+            out1 = self.model5.model.run(0.01)
         time_linear = time()-st
         
         # using flat function
         self.model5.model.setParam("func_shell1", 0)
         st = time()
         for iter in range(0,100000):
-            self.model5.model.run(0.01)
+            out2 = self.model5.model.run(0.01)
         time_flat = time()-st
         
         print "time (linear) = %s, \n time (flat) = %s"% (time_linear,time_flat)
         
         #Compare time of the calculation: time_linear takes a bit longer
         # but they are not much different  
-        self.assertAlmostEqual(time_linear, time_flat, 0)
+        self.assertNotEqual(out1, out2)
+        #self.assertAlmostEqual(time_linear, time_flat, 0)
   
     # this feature removed!!!
     """
