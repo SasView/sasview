@@ -9,6 +9,7 @@ Copyright (c) Institut Laue-Langevin 2012
 """
 
 import os
+import sys
 import shutil
 import cPickle as pickle
 from collections import defaultdict
@@ -46,8 +47,7 @@ class CategoryInstaller:
         """
         returns the dir where default_cat.p should be
         """
-        from sans import sansview as sasview
-        app_path = os.path.dirname(sasview.__file__)
+        app_path = sys.path[0]
         return app_path
 
     @staticmethod

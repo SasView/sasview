@@ -10,7 +10,7 @@ import copy
 import math
 import string
 import cPickle as pickle
-import shutil
+#import shutil
 from collections import defaultdict
 from wx.lib.scrolledpanel import ScrolledPanel
 from sans.guiframe.panel_base import PanelBase

@@ -1417,7 +1417,12 @@ class ViewerFrame(wx.Frame):
         self.batch_frame.Show(True)
         
     def _on_category_manager(self, event):
-        CategoryManager(self, -1, 'Model Category Manager')
+        """
+        Category manager frame
+        """
+        frame = CategoryManager(self, -1, 'Model Category Manager')
+        icon = self.GetIcon()
+        frame.SetIcon(icon)
 
     def _on_preference_menu(self, event):     
         """
