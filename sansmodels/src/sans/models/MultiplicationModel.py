@@ -218,7 +218,7 @@ class MultiplicationModel(BaseComponent):
         else:
             # Look for standard parameter
             for item in self.params.keys():
-                if item.lower()==name.lower():
+                if item.lower() == name.lower():
                     self.params[item] = value
                     return
             

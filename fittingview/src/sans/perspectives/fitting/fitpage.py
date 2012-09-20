@@ -1888,11 +1888,19 @@ class FitPage(BasicPage):
         """
         reset the state
         """
-        self.reset_page_helper(state)
-
-        self.select_param(event=None)
-        #Save state_fit
-        self.save_current_state_fit()
+        try:
+            self.reset_page_helper(state)
+    
+            self.select_param(event=None)
+            #Save state_fit
+            self.save_current_state_fit()
+        except:
+            self._show_combox_helper()
+            msg = "Error: This model state has missing or outdated "
+            msg += "information.\n"
+            msg += "%s"% (sys.exc_value)
+            wx.PostEvent(self.parent.parent,
+                         StatusEvent(status=msg, info="error"))
         self._lay_out()
         self.Refresh()
         

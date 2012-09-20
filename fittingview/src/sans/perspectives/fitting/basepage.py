@@ -2015,13 +2015,14 @@ class BasicPage(ScrolledPanel, PanelBase):
                     #self.model_box.Append(str_m)
                     m_list.append(self.model_dict[str_m])
             else:
-                for (model, enabled) in self.master_category_dict[mod_cat]:
+                cat_dic = self.master_category_dict[mod_cat]
+                for (model, enabled) in cat_dic:
                     if enabled:
                         m_list.append(self.model_dict[model])
-                    else:
-                        msg = "This model is diabled by Category Manager." 
-                        wx.PostEvent(self.parent.parent,
-                                     StatusEvent(status=msg, info="error"))
+                    #else:
+                    #    msg = "This model is disabled by Category Manager." 
+                    #    wx.PostEvent(self.parent.parent,
+                    #                 StatusEvent(status=msg, info="error"))
         except:
             msg = "%s\n" % (sys.exc_value)
             wx.PostEvent(self.parent.parent,
@@ -3456,6 +3457,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         sizer_cat_box = wx.StaticBoxSizer(cat_set_box, wx.HORIZONTAL)
         sizer_cat_box.SetMinSize((200, 50))
         self.categorybox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        self.categorybox.SetToolTip( wx.ToolTip("Select a Category/Type") )
         self._populate_listbox()
         wx.EVT_COMBOBOX(self.categorybox, -1, self._show_combox)
         #self.shape_rbutton = wx.RadioButton(self, -1, 'Shapes',
@@ -3500,6 +3502,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.show_sld_button.Bind(wx.EVT_BUTTON, self._on_show_sld)
 
         self.formfactorbox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
+        self.formfactorbox.SetToolTip( wx.ToolTip("Select a Model") )
         if self.model != None:
             self.formfactorbox.SetValue(self.model.name)
         self.structurebox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
