@@ -334,10 +334,8 @@ if is_64bits:
     bundle_option = 3
 
 #initialize category stuff
-from sans.guiframe.CategoryInstaller import CategoryInstaller
-CategoryInstaller.check_install()
-
-
+#from sans.guiframe.CategoryInstaller import CategoryInstaller
+#CategoryInstaller.check_install()
 
 setup(
     windows=[target_wx_client],

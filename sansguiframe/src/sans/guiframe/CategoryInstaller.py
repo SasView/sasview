@@ -48,6 +48,8 @@ class CategoryInstaller:
         returns the dir where default_cat.p should be
         """
         app_path = sys.path[0]
+        if os.path.isfile(app_path):
+            app_path = os.path.dirname(app_path)
         return app_path
 
     @staticmethod
