@@ -47,8 +47,8 @@ class FitPanel(nb, PanelBase):
         #dictionary of miodel {model class name, model class}
         self.menu_mng = models.ModelManager()
         self.model_list_box = self.menu_mng.get_model_list()
-        self.model_dictionary = self.menu_mng.get_model_dictionary()
         #pageClosedEvent = nb.EVT_FLATNOTEBOOK_PAGE_CLOSING
+        self.model_dictionary = self.menu_mng.get_model_dictionary()
         self.pageClosedEvent = wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE
         
         self.Bind(self.pageClosedEvent, self.on_close_page)
@@ -304,14 +304,14 @@ class FitPanel(nb, PanelBase):
             if page is not None:
                 page.set_manager(self._manager)
 
-    def set_model_list(self, m_dict):
+    def set_model_list(self, dict):
         """
         copy a dictionary of model into its own dictionary
         
         :param m_dict: dictionnary made of model name as key and model class
         as value
         """
-        self.model_list_box = m_dict
+        self.model_list_box = dict
         
     def set_model_dict(self, m_dict):
         """
@@ -367,10 +367,8 @@ class FitPanel(nb, PanelBase):
             index = self.batch_page_index
         else:
         """
-
         from fitpage import FitPage
-        panel = FitPage(parent=self, m_dict = self.model_list_box)
-
+        panel = FitPage(parent=self)
         if self.batch_on:
             self.batch_page_index += 1
             caption = "BatchPage" + str(self.batch_page_index)
@@ -383,6 +381,8 @@ class FitPanel(nb, PanelBase):
         panel.batch_on = self.batch_on
         panel._set_save_flag(not panel.batch_on)
         panel.set_model_dictionary(self.model_dictionary)
+        panel.populate_box(dict=self.model_list_box)
+        panel.formfactor_combo_init()
         panel.set_manager(self._manager)
         panel.window_caption = caption
         panel.window_name = caption

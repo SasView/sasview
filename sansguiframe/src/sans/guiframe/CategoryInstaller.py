@@ -5,7 +5,7 @@ and works fine.
 Copyright (c) Institut Laue-Langevin 2012
 
 @author kieranrcampbell@gmail.com
-
+@modified by NIST/MD sanview team
 """
 
 import os
@@ -13,7 +13,7 @@ import shutil
 import cPickle as pickle
 from collections import defaultdict
 
-user_file = 'serialized_cat.p'
+USER_FILE = 'serialized_cat.p'
 
 class CategoryInstaller:
     """
@@ -46,16 +46,16 @@ class CategoryInstaller:
         """
         returns the dir where default_cat.p should be
         """
-        import sans.dataloader.readers
-        return sans.dataloader.readers.get_data_path()
+        from sans import sansview as sasview
+        app_path = os.path.dirname(sasview.__file__)
+        return app_path
 
     @staticmethod
     def _get_home_dir():
         """
         returns the users sansview config dir
         """
-        return os.path.join(os.path.expanduser("~"),
-                            ".sansview")
+        return os.path.join(os.path.expanduser("~"), ".sasview")
 
     @staticmethod
     def _regenerate_model_dict(master_category_dict):
@@ -94,10 +94,10 @@ class CategoryInstaller:
     @staticmethod
     def get_user_file():
         """
-        returns the user data file, eg .sansview/serialized_cat.p
+        returns the user data file, eg .sasview/serialized_cat.p
         """
         return os.path.join(CategoryInstaller._get_home_dir(),
-                            user_file)
+                            USER_FILE)
 
     @staticmethod
     def get_default_file():
@@ -106,8 +106,7 @@ class CategoryInstaller:
         e.g. blahblah/default_categories.p
         """
         return os.path.join(\
-            CategoryInstaller._get_default_cat_p_dir, 
-            "default_categories.p")
+            CategoryInstaller._get_default_cat_p_dir(), "default_categories.p")
         
     @staticmethod
     def check_install(homedir = None, defaultfile = None,
@@ -127,7 +126,7 @@ class CategoryInstaller:
         if homedir == None:
             serialized_file = CategoryInstaller.get_user_file()
         else:
-            serialized_file = os.path.join(homedir, user_file)
+            serialized_file = os.path.join(homedir, USER_FILE)
 
         if os.path.exists(serialized_file):
             return

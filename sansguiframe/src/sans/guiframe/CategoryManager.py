@@ -15,6 +15,7 @@
 
 import wx
 import sys
+import os
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from collections import defaultdict
 import cPickle as pickle
@@ -289,8 +290,7 @@ class CategoryManager(wx.Frame):
 
         cat_file = open(CategoryInstaller.get_user_file(), 'wb')
 
-        pickle.dump( self.master_category_dict,
-                     cat_file )
+        pickle.dump( self.master_category_dict, cat_file )
 
    
     def _read_category_info(self):
@@ -298,10 +298,13 @@ class CategoryManager(wx.Frame):
         Read in categorization info from file
         """
         try:
-            cat_file = open(CategoryInstaller.get_user_file(),
-                            'rb')
-            self.master_category_dict = pickle.load(cat_file)
-    
+    		file = CategoryInstaller.get_user_file()
+    		if os.path.isfile(file):
+	            cat_file = open(file, 'rb')
+	            self.master_category_dict = pickle.load(cat_file)
+	        else:
+	        	cat_file = open(CategoryInstaller.get_default_file(), 'rb')
+        		self.master_category_dict = pickle.load(cat_file)
         except IOError:
             print 'Problem reading in category file. Please review'
 
@@ -420,9 +423,9 @@ class ChangeCat(wx.Dialog):
                  border = 10)
         vbox.Add(self.ok_button, flag = wx.ALL | wx.ALIGN_RIGHT, 
                  border = 10)
-
-
-        self.current_categories.SetSelection(0)
+        
+        if self.current_categories.GetCount() > 0:
+        	self.current_categories.SetSelection(0)
         self.new_text.Disable()
         self.SetSizer(vbox)
         self.Centre()
@@ -493,10 +496,6 @@ class ChangeCat(wx.Dialog):
             ret.append(str(cat))
         return ret
 
-
-
-
-
 if __name__ == '__main__':
         
     
@@ -508,5 +507,4 @@ if __name__ == '__main__':
         app = wx.App()
         CategoryManager(None, -1, 'Category Manager', sys.argv[1])
         app.MainLoop()
-
 

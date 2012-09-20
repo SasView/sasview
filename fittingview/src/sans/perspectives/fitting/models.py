@@ -678,7 +678,9 @@ class ModelManagerBase:
         #Looking for plugins
         self.stored_plugins = self.findModels()
         self.plugins = self.stored_plugins.values()
-
+        for name, plug in self.stored_plugins.iteritems():
+            self.model_dictionary[name] = plug
+            
         self._get_multifunc_models()
        
         return 0
@@ -709,6 +711,7 @@ class ModelManagerBase:
                 if name not in self.stored_plugins.keys():
                     self.stored_plugins[name] = plug
                     self.plugins.append(plug)
+                    self.model_dictionary[name] = plug
             self.model_combobox.set_list("Customized Models", self.plugins)
             return self.model_combobox.get_list()
         else:
@@ -724,9 +727,11 @@ class ModelManagerBase:
             for stored_name, stored_plug in self.stored_plugins.iteritems():
                 if name == stored_name:
                     del self.stored_plugins[name]
+                    del self.model_dictionary[name]
                     break
             self.stored_plugins[name] = plug
             self.plugins.append(plug)
+            self.model_dictionary[name] = plug
 
         self.model_combobox.reset_list("Customized Models", self.plugins)
         return self.model_combobox.get_list()

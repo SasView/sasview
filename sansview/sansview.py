@@ -13,7 +13,8 @@ import logging
 from shutil import copy
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
-                    filename=os.path.join(os.path.expanduser("~"),'sasview.log'))
+                    filename=os.path.join(os.path.expanduser("~"),
+                                          'sasview.log'))
 
 import wx
 import sys
@@ -102,19 +103,7 @@ class SasView():
                                                         APP_NAME)
             logging.error(sys.exc_value)  
 
-        # initialize category stuff
-        user_file = os.path.join(os.path.expanduser("~"),
-                                 'serialized_categories.p')
         
-        if not os.path.isfile(user_file): 
-            # either first time starting sansview or the
-            # user has deleted their category file
-            my_dir = os.path.dirname(os.path.abspath(__file__))
-            default_file = os.path.join(my_dir, '..',
-                                        'sansmodels',
-                                        'default_categories.p' )
-            copy(default_file, user_file)
-
             
         # Add welcome page
         self.gui.set_welcome_panel(WelcomePanel)

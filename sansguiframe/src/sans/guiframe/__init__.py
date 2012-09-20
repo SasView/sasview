@@ -69,8 +69,5 @@ def data_files():
     path = get_media_path(media="media")
     for f in findall(path):
         data_files.append(('media/guiframe_media', [f]))
-    path = get_media_path(media="catdata")
-    for f in findall(path):
-        data_files.append(('.', [f]))
 
     return data_files

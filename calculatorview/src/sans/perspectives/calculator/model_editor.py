@@ -784,7 +784,7 @@ class EditorPanel(wx.ScrolledWindow):
         else:
             msg = "Successful!!!"
             msg += "  " + self._notes
-            msg += " Please look for it in the 'Customized Models' box."
+            msg += " Please look for it in the Customized Models."
             info = 'Info'
             color = 'blue'
         # Not to display long error msg

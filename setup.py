@@ -9,9 +9,6 @@ import shutil
 from setuptools import setup, Extension, find_packages
 from distutils.command.build_ext import build_ext
 
-
-
-
 try:
     from numpy.distutils.misc_util import get_numpy_include_dirs
     NUMPY_INC = get_numpy_include_dirs()[0]
@@ -48,6 +45,9 @@ plugin_model_list = ['polynominal5.py', 'sph_bessel_jn.py',
 sans_dir = os.path.join(os.path.expanduser("~"),'.sasview')
 if os.path.isdir(sans_dir):
     f_path = os.path.join(sans_dir, "sasview.log")
+    if os.path.isfile(f_path):
+        os.remove(f_path)
+    f_path = os.path.join(sans_dir, "serialized_cat.p")
     if os.path.isfile(f_path):
         os.remove(f_path)
     f_path = os.path.join(sans_dir, 'config', "custom_config.py")
@@ -115,10 +115,7 @@ guiframe_path = os.path.join("sansguiframe", "src", "sans", "guiframe")
 package_dir["sans.guiframe"] = guiframe_path
 package_dir["sans.guiframe.local_perspectives"] = os.path.join(guiframe_path, 
                                                         "local_perspectives")
-package_data["sans.guiframe"] = ['images/*', 
-                                 'media/*', 
-                                 'default_categories.p']
-
+package_data["sans.guiframe"] = ['images/*', 'media/*']
 packages.extend(["sans.guiframe", "sans.guiframe.local_perspectives"])
 # build local plugin
 for dir in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
@@ -274,7 +271,8 @@ append_file(file_list=smear_sources, dir_path=smear_dir)
 package_dir["sans"] = os.path.join("sansmodels", "src", "sans")
 package_dir["sans.models"] = model_dir
 
-package_dir["sans.models.sans_extension"] = os.path.join("sansmodels", "src", "sans", "models", "sans_extension")
+package_dir["sans.models.sans_extension"] = os.path.join("sansmodels", "src", 
+                                            "sans", "models", "sans_extension")
             
 package_data['sans.models'] = [os.path.join('media', "*.*")]
 package_data['sans.models'] += [os.path.join('media','img', "*.*")]
@@ -316,7 +314,8 @@ ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
 # SasView
 
 package_dir["sans.sansview"] = "sansview"
-package_data['sans.sansview'] = ['images/*', 'media/*', 'test/*']
+package_data['sans.sansview'] = ['images/*', 'media/*', 'test/*', 
+                                 'default_categories.p']
 packages.append("sans.sansview")
 
 #required = ['lxml>=2.2.2', 'numpy>=1.4.1', 'matplotlib>=0.99.1.1', 
@@ -328,37 +327,6 @@ if os.name=='nt':
     required.extend(['html5lib', 'reportlab'])
 else:
     required.extend(['pil'])
-
-# sys.path.append(os.path.join('sansguiframe',
-#                              'src',
-#                              'sans',
-#                              'guiframe'))
-
-#install category stuff
-cat_install_path = os.path.join('sansguiframe', 'src',
-                                'sans','guiframe','CategoryInstaller.py')
-shutil.copy(cat_install_path, os.getcwd())
-
-from CategoryInstaller import CategoryInstaller
-CategoryInstaller.check_install(defaultfile = \
-                                    os.path.join('sansguiframe',
-                                                 'src',
-                                                 'sans',
-                                                 'guiframe',
-                                                 'default_categories.p'),
-                                modelsdir = \
-                                    os.path.join('fittingview',
-                                                 'src',
-                                                 'sans',
-                                                 'perspectives',
-                                                 'fitting'), 
-                                installed_models_dir = \
-                                    os.path.join('sansdataloader',
-                                                 'src',
-                                                 'sans',
-                                                 'dataloader',
-                                                 'readers') )
-
    
  # Set up SasView    
 setup(

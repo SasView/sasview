@@ -320,6 +320,7 @@ class Plugin(PluginBase):
         """
         Update custom model list in the fitpage combo box
         """
+        custom_model = 'Customized Models'
         try:
             # Update edit menus
             self.set_edit_menu_helper(self.parent, self.edit_custom_model)
@@ -331,7 +332,9 @@ class Plugin(PluginBase):
                     if hasattr(page, "formfactorbox"):
                         page.model_list_box = temp
                         current_val = page.formfactorbox.GetLabel()
-                        if page.plugin_rbutton.GetValue():
+                        #if page.plugin_rbutton.GetValue():
+                        mod_cat = page.categorybox.GetStringSelection()
+                        if mod_cat == custom_model:
                             #pos = page.formfactorbox.GetSelection()
                             page._show_combox_helper()
                             new_val = page.formfactorbox.GetLabel()

@@ -31,7 +31,8 @@ try:
         del sys.argv[path_flag_idx+1]
         sys.argv.remove('--extrapath')
 except:
-    print "Error processing extra python path needed to build SasView\n  %s" % sys.exc_value
+    print "Error processing extra python path needed to build SasView\n  %s" % \
+                sys.exc_value
 
 from distutils.core import setup
 from distutils.filelist import findall
@@ -256,6 +257,10 @@ if os.path.isfile(f):
     data_files.append(('.', [f]))
     data_files.append(('config', [f]))
 f = 'local_config.py'
+if os.path.isfile(f):
+    data_files.append(('.', [f]))
+
+f = 'default_categories.p'
 if os.path.isfile(f):
     data_files.append(('.', [f]))
     

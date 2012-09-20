@@ -43,10 +43,11 @@ list_of_state_attributes = [["engine_type", "engine_type", "string"],
                        ["qmin", "qmin", "float"],
                       ["qmax", "qmax", "float"],
                       ["npts", "npts", "float"],
-                      ["shape_rbutton", "shape_rbutton", "bool"],
-                      ["shape_indep_rbutton", "shape_indep_rbutton", "bool"],
-                      ["plugin_rbutton", "plugin_rbutton", "bool"],
-                      ["struct_rbutton", "struct_rbutton", "bool"],
+                      #["shape_rbutton", "shape_rbutton", "bool"],
+                      #["shape_indep_rbutton", "shape_indep_rbutton", "bool"],
+                      #["plugin_rbutton", "plugin_rbutton", "bool"],
+                      #["struct_rbutton", "struct_rbutton", "bool"],
+                      ["categorycombobox", "categorycombobox", "string"],
                       ["formfactorcombobox", "formfactorcombobox", "string"],
                       ["structurecombobox", "structurecombobox", "string"],
                       ["multi_factor","multi_factor","float"],
@@ -223,13 +224,14 @@ class PageState(object):
         self.saved_states = {}
         ## save selection of combobox
         self.formfactorcombobox = None
+        self.categorycombobox = None
         self.structurecombobox = None
 
         ## radio box to select type of model
-        self.shape_rbutton = False
-        self.shape_indep_rbutton = False
-        self.struct_rbutton = False
-        self.plugin_rbutton = False
+        #self.shape_rbutton = False
+        #self.shape_indep_rbutton = False
+        #self.struct_rbutton = False
+        #self.plugin_rbutton = False
         ## the indice of the current selection
         self.disp_box = 0
         ## Qrange
@@ -280,13 +282,14 @@ class PageState(object):
         obj.model_list_box = copy.deepcopy(self.model_list_box)
         obj.engine_type = copy.deepcopy(self.engine_type)
         
+        obj.categorycombobox = self.categorycombobox
         obj.formfactorcombobox = self.formfactorcombobox
         obj.structurecombobox = self.structurecombobox
         
-        obj.shape_rbutton = self.shape_rbutton
-        obj.shape_indep_rbutton = self.shape_indep_rbutton
-        obj.struct_rbutton = self.struct_rbutton
-        obj.plugin_rbutton = self.plugin_rbutton
+        #obj.shape_rbutton = self.shape_rbutton
+        #obj.shape_indep_rbutton = self.shape_indep_rbutton
+        #obj.struct_rbutton = self.struct_rbutton
+        #obj.plugin_rbutton = self.plugin_rbutton
         
         obj.manager = self.manager
         obj.event_owner = self.event_owner
@@ -379,11 +382,12 @@ class PageState(object):
             rep += "model name : %s\n" % m_name
         else:
             rep += "model name : None\n"
-        rep += "model type (form factor) selected: %s\n" % self.shape_rbutton 
+        #rep += "model type (form factor) selected: %s\n" % self.shape_rbutton 
         rep += "multi_factor : %s\n" % str(self.multi_factor)
-        rep += "model type (shape independent) selected: %s\n" % self.shape_indep_rbutton
-        rep += "model type (structure factor) selected: %s\n" % self.struct_rbutton
-        rep += "model type (plug-in ) selected: %s\n" % self.plugin_rbutton
+        rep += "model type (Category) selected: %s\n" % self.categorycombobox
+        #rep += "model type (shape independent) selected: %s\n" % self.shape_indep_rbutton
+        #rep += "model type (structure factor) selected: %s\n" % self.struct_rbutton
+        #rep += "model type (plug-in ) selected: %s\n" % self.plugin_rbutton
         rep += "data : %s\n" % str(self.data)
         rep += "Plotting Range: min: %s, max: %s, steps: %s\n" % (str(self.qmin),
                                                 str(self.qmax), str(self.npts))

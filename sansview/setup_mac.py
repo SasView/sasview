@@ -53,7 +53,8 @@ if libxml_path == None:
     raise RuntimeError, "Could not find libxml2 on the system"
 
 APP = ['sansview.py']
-DATA_FILES += ['images','test','media', 'custom_config.py', 'local_config.py']
+DATA_FILES += ['images','test','media', 'custom_config.py', 'local_config.py',
+               'default_categories.p']
 if os.path.isfile("BUILD_NUMBER"):
     DATA_FILES.append("BUILD_NUMBER")
     
@@ -91,11 +92,6 @@ def find_extension():
     return list
 
 EXTENSIONS_LIST = find_extension()
-
-#initialize category stuff
-from sans.guiframe.CategoryInstaller import CategoryInstaller
-CategoryInstaller.check_install()
-
 
  
 plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
