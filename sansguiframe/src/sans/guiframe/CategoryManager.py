@@ -257,8 +257,7 @@ class CategoryManager(wx.Frame):
                                           selected_model, 
                                       self._get_cat_list(),
                                       self.by_model_dict[selected_model])
-            icon = self.parent.GetIcon()
-            modify_dialog.SetIcon(icon)
+            
             if modify_dialog.ShowModal() == wx.ID_OK:
                 self.by_model_dict[selected_model] = \
                     modify_dialog.get_category()
