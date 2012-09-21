@@ -410,11 +410,11 @@ class ChangeCat(wx.Dialog):
         
 
         gs.AddMany( [ (self.existing_check, 5, wx.ALL),
-                      (self.exist_combo, 5, wx.ALL, 5),
+                      (self.exist_combo, 5, wx.ALL),
                       (self.new_check, 5, wx.ALL),
-                      (self.new_text, 5, wx.ALL, 5),
+                      (self.new_text, 5, wx.ALL ),
                       ((-1,-1)),
-                      (self.add_button, 5, wx.ALL | wx.ALIGN_RIGHT, 5) ] )
+                      (self.add_button, 5, wx.ALL | wx.ALIGN_RIGHT) ] )
 
         self.add_sb_sizer.Add(gs, proportion = 1, flag = wx.ALL, border = 5)
         vbox.Add(self.add_sb_sizer, flag = wx.ALL | wx.EXPAND, border = 10)
