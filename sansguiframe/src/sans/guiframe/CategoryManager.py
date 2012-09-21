@@ -362,15 +362,16 @@ class ChangeCat(wx.Dialog):
         :param cat_list: List of all categories
         :param current_cats: List of categories applied to current model
         """
-        wx.Dialog.__init__(self, parent, title = title, size=(480, 420))
+        wx.Dialog.__init__(self, parent, title = title, size=(485, 425))
 
         self.current_cats = current_cats
         if str(self.current_cats[0]) == 'Uncategorized':
             self.current_cats = []
             
         vbox = wx.BoxSizer(wx.VERTICAL)
+        self.add_sb = wx.StaticBox(self, label = "Add Category")
+        self.add_sb_sizer = wx.StaticBoxSizer(self.add_sb, wx.VERTICAL)
         gs = wx.GridSizer(3, 2, 5, 5)
-
         self.cat_list = cat_list
         
         self.cat_text = wx.StaticText(self, label = "Current categories: ")
@@ -383,10 +384,10 @@ class ChangeCat(wx.Dialog):
         self.exist_combo = wx.ComboBox(self, style = wx.CB_READONLY, 
                                        size=(220,-1), choices = cat_list)
         self.exist_combo.SetSelection(0)
-
-        self.add_sb = wx.StaticBox(self, label = "Add Category")
-        self.add_sb_sizer = wx.StaticBoxSizer(self.add_sb, wx.VERTICAL)
+        
+        
         self.remove_sb = wx.StaticBox(self, label = "Remove Category")
+        
         self.remove_sb_sizer = wx.StaticBoxSizer(self.remove_sb, 
                                                  wx.VERTICAL)
 
@@ -401,13 +402,10 @@ class ChangeCat(wx.Dialog):
         self.new_check.Bind(wx.EVT_RADIOBUTTON, self.on_newcat)
         self.existing_check.SetValue(True)
 
-        
         vbox.Add(self.cat_text, flag = wx.LEFT | wx.TOP | wx.ALIGN_LEFT, 
                  border = 10)
         vbox.Add(self.current_categories, flag = wx.ALL | wx.EXPAND, 
                  border = 10  )
-
-        
 
         gs.AddMany( [ (self.existing_check, 5, wx.ALL),
                       (self.exist_combo, 5, wx.ALL),
