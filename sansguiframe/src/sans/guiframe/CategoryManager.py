@@ -257,7 +257,8 @@ class CategoryManager(wx.Frame):
                                           selected_model, 
                                       self._get_cat_list(),
                                       self.by_model_dict[selected_model])
-
+            icon = self.parent.GetIcon()
+            modify_dialog.SetIcon(icon)
             if modify_dialog.ShowModal() == wx.ID_OK:
                 self.by_model_dict[selected_model] = \
                     modify_dialog.get_category()
@@ -366,6 +367,9 @@ class ChangeCat(wx.Dialog):
         self.current_cats = current_cats
         if str(self.current_cats[0]) == 'Uncategorized':
             self.current_cats = []
+            
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        gs = wx.GridSizer(3, 2, 5, 5)
 
         self.cat_list = cat_list
         
@@ -395,23 +399,22 @@ class ChangeCat(wx.Dialog):
 
         self.existing_check.Bind(wx.EVT_RADIOBUTTON, self.on_existing)
         self.new_check.Bind(wx.EVT_RADIOBUTTON, self.on_newcat)
+        self.existing_check.SetValue(True)
 
-
-
-        vbox = wx.BoxSizer(wx.VERTICAL)
+        
         vbox.Add(self.cat_text, flag = wx.LEFT | wx.TOP | wx.ALIGN_LEFT, 
                  border = 10)
         vbox.Add(self.current_categories, flag = wx.ALL | wx.EXPAND, 
                  border = 10  )
 
-        gs = wx.GridSizer(3, 2, 5, 5)
+        
 
         gs.AddMany( [ (self.existing_check, 5, wx.ALL),
-                      (self.exist_combo, 5, wx.ALL),
+                      (self.exist_combo, 5, wx.ALL, 5),
                       (self.new_check, 5, wx.ALL),
-                      (self.new_text, 5, wx.ALL ),
+                      (self.new_text, 5, wx.ALL, 5),
                       ((-1,-1)),
-                      (self.add_button, 5, wx.ALL | wx.ALIGN_RIGHT) ] )
+                      (self.add_button, 5, wx.ALL | wx.ALIGN_RIGHT, 5) ] )
 
         self.add_sb_sizer.Add(gs, proportion = 1, flag = wx.ALL, border = 5)
         vbox.Add(self.add_sb_sizer, flag = wx.ALL | wx.EXPAND, border = 10)
