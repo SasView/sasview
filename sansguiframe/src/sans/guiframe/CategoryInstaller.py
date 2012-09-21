@@ -5,7 +5,7 @@ and works fine.
 Copyright (c) Institut Laue-Langevin 2012
 
 @author kieranrcampbell@gmail.com
-@modified by NIST/MD sanview team
+@modified by NIST/MD sasview team
 """
 
 import os
@@ -42,15 +42,26 @@ class CategoryInstaller:
         """
         import sans.perspectives.fitting.models
         return sans.perspectives.fitting.models.get_model_python_path()
+    
     @staticmethod
     def _get_default_cat_p_dir():
         """
         returns the dir where default_cat.p should be
         """
-        app_path = sys.path[0]
-        if os.path.isfile(app_path):
-            app_path = os.path.dirname(app_path)
-        return app_path
+        cat_file = "default_categories.p"
+        app_dir = sys.path[0]
+        if os.path.isfile(app_dir):
+            app_dir = os.path.dirname(app_dir)
+        n_dir = 12
+        for i in range(n_dir): 
+            path = os.path.join(app_dir, cat_file)
+            if os.path.isfile(path):
+                path = os.path.dirname(path)
+                return path
+            else:
+                app_dir, _ = os.path.split(app_dir)
+                
+        raise RuntimeError('Could not find the App folder')         
 
     @staticmethod
     def _get_home_dir():
