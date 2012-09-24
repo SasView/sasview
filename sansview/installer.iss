@@ -70,9 +70,9 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}";	GroupDescrip
 [Files]
 Source: "dist\SasView.exe";	DestDir: "{app}";	Flags: ignoreversion
 Source: "dist\*";	DestDir: "{app}";	Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "dist\default_categories.p";    DestDir: "{userappdata}\..\.sasview";	DestName: "serialized_cat.p";
-Source: "dist\plugin_models\*";	DestDir: "{userappdata}\..\.sasview\plugin_models";	Flags: recursesubdirs createallsubdirs
-Source: "dist\config\custom_config.py";	DestDir: "{userappdata}\..\.sasview\config";	Flags: recursesubdirs createallsubdirs
+Source: "dist\plugin_models\*";	DestDir: "{userdesktop}\..\.sasview\plugin_models";	Flags: recursesubdirs createallsubdirs
+Source: "dist\config\custom_config.py";	DestDir: "{userdesktop}\..\.sasview\config";	Flags: recursesubdirs createallsubdirs
+Source: "dist\default_categories.p";    DestDir: "{userdesktop}\..\.sasview";	DestName: "serialized_cat.p";
 ;	NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

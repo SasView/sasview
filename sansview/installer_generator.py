@@ -196,12 +196,12 @@ def write_file():
     msg += """DestDir: "{app}";\tFlags: ignoreversion\n"""
     msg += """Source: "dist\*";\tDestDir: "{app}";\t"""
     msg += """Flags: ignoreversion recursesubdirs createallsubdirs\n"""
-    msg += """Source: "dist\default_categories.p";    DestDir: "{userappdata}\..\.sasview";\t""" 
+    msg += """Source: "dist\plugin_models\*";\tDestDir: "{userdesktop}\..\.sasview\plugin_models";\t""" 
+    msg += """Flags: recursesubdirs createallsubdirs\n"""
+    msg += """Source: "dist\config\custom_config.py";\tDestDir: "{userdesktop}\..\.sasview\config";\t""" 
+    msg += """Flags: recursesubdirs createallsubdirs\n"""
+    msg += """Source: "dist\default_categories.p";    DestDir: "{userdesktop}\..\.sasview";\t""" 
     msg += """DestName: "serialized_cat.p";\n"""
-    msg += """Source: "dist\plugin_models\*";\tDestDir: "{userappdata}\..\.sasview\plugin_models";\t""" 
-    msg += """Flags: recursesubdirs createallsubdirs\n"""
-    msg += """Source: "dist\config\custom_config.py";\tDestDir: "{userappdata}\..\.sasview\config";\t""" 
-    msg += """Flags: recursesubdirs createallsubdirs\n"""
     msg += """;\tNOTE: Don't use "Flags: ignoreversion" on any shared system files"""
     return msg
 
