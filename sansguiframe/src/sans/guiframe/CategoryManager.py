@@ -21,6 +21,7 @@ from collections import defaultdict
 import cPickle as pickle
 from sans.guiframe.events import ChangeCategoryEvent
 from sans.guiframe.CategoryInstaller import CategoryInstaller
+IS_MAC = (sys.platform == 'darwin')
 
 """ Notes
 The category manager mechanism works from 3 data structures used:
@@ -253,17 +254,23 @@ class CategoryManager(wx.Frame):
                 self.cat_list.GetFirstSelected(), 0).GetText()
 
 
-            modify_dialog = ChangeCat(self, 'Change Category: ' + \
-                                          selected_model, 
+            modify_dialog = ChangeCat(self, selected_model, 
                                       self._get_cat_list(),
                                       self.by_model_dict[selected_model])
             
             if modify_dialog.ShowModal() == wx.ID_OK:
-                self.by_model_dict[selected_model] = \
-                    modify_dialog.get_category()
-                self._regenerate_master_dict()
-                self._fill_lists()
-                self._set_enabled()
+                if not IS_MAC:
+                    self.dial_ok(modify_dialog, selected_model)
+
+    def dial_ok(self, dialog=None, model=None):
+        """
+        modify_dialog onclose
+        """
+        self.by_model_dict[model] = dialog.get_category()
+        self._regenerate_master_dict()
+        self._fill_lists()
+        self._set_enabled()
+
 
     def _on_ok(self, event):
         """
@@ -361,12 +368,13 @@ class ChangeCat(wx.Dialog):
         :param cat_list: List of all categories
         :param current_cats: List of categories applied to current model
         """
-        wx.Dialog.__init__(self, parent, title = title, size=(485, 425))
+        wx.Dialog.__init__(self, parent, title = 'Change Category: '+title, size=(485, 425))
 
         self.current_cats = current_cats
         if str(self.current_cats[0]) == 'Uncategorized':
             self.current_cats = []
-            
+        self.parent = parent
+        self.selcted_model = title
         vbox = wx.BoxSizer(wx.VERTICAL)
         self.add_sb = wx.StaticBox(self, label = "Add Category")
         self.add_sb_sizer = wx.StaticBoxSizer(self.add_sb, wx.VERTICAL)
@@ -430,6 +438,16 @@ class ChangeCat(wx.Dialog):
         self.SetSizer(vbox)
         self.Centre()
         self.Show(True)
+        if IS_MAC:
+            self.ok_button.Bind(wx.EVT_BUTTON, self.on_ok_mac)
+
+    def on_ok_mac(self, event):
+        """
+        On OK pressed (MAC only)
+        """
+        event.Skip()
+        self.parent.dial_ok(self, self.selcted_model)
+        self.Destroy()
 
     def on_add(self, event):
         """
