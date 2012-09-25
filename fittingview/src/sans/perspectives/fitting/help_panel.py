@@ -79,6 +79,7 @@ class HelpWindow(wx.Frame):
                       ("simultaneous_fit_help.html", "Simultaneous Fit"),
                       ("batch_help.html", "Batch Fit"),
                       ("model_use_help.html", "Model Selection"),
+                      ("category_manager_help.html", "Model Category Manager"),
                       ("%s" % self.path, "Model Functions"),
                       ("model_editor_help.html", "Custom Model Editor"),
                       ("%s" % self.path_pd, "Polydispersion Distributions"),
