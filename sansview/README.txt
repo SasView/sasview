@@ -4,6 +4,7 @@ Release Notes
 SasView 2.2.0
 	
 	- Changed the application name to 'SasView'.
+	- Model category can be modified via (Category Manager).
 	- Improved Grid/Batch window functionality.
 	- Easier Graph/Plot modification.
 	- Added a new tool; Data operation for addition, subtraction, multiplication, division, and combination of two data sets.

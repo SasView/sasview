@@ -7,14 +7,14 @@
 
 ChangesAssociations=yes
 AppName=SasView
-AppVerName=SasView-2.1.1
+AppVerName=SasView-2.2.0
 AppPublisher=(c) 2009 - 2012, UTK, UMD, NIST, ORNL, ISIS, ESS and ILL
 AppPublisherURL=http://danse.chem.utk.edu
 AppSupportURL=http://danse.chem.utk.edu
 AppUpdatesURL=http://danse.chem.utk.edu 
 ChangesEnvironment=true 
 DefaultDirName={pf}\SasView
-DefaultGroupName=.\SasView-2.1.1
+DefaultGroupName=.\SasView-2.2.0
 DisableProgramGroupPage=yes
 LicenseFile=license.txt
 OutputBaseFilename=setupSasView
@@ -78,8 +78,8 @@ Source: "dist\default_categories.p";    DestDir: "{userdesktop}\..\.sasview";	De
 [Icons]
 Name: "{group}\SasView";	Filename: "{app}\SasView.exe";	WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico" 
 Name: "{group}\{cm:UninstallProgram, SasView}";	 Filename: "{uninstallexe}" 
-Name: "{commondesktop}\SasView-2.1.1";	Filename: "{app}\SasView.exe";	Tasks: desktopicon; WorkingDir: "{app}" ; IconFilename: "{app}\images\ball.ico" 
-Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\SasView-2.1.1";	Filename: "{app}\SasView.exe";	Tasks: quicklaunchicon; WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico" 
+Name: "{commondesktop}\SasView-2.2.0";	Filename: "{app}\SasView.exe";	Tasks: desktopicon; WorkingDir: "{app}" ; IconFilename: "{app}\images\ball.ico" 
+Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\SasView-2.2.0";	Filename: "{app}\SasView.exe";	Tasks: quicklaunchicon; WorkingDir: "{app}"; IconFilename: "{app}\images\ball.ico" 
 
 
 [Run]
