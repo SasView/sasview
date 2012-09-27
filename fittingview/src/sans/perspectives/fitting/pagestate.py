@@ -849,6 +849,7 @@ class PageState(object):
                 
                 # Recover _disp_obj_dict from xml file
                 self._disp_obj_dict = {}
+                disp_model = None
                 for item in list_of_obj_dic:
                     # Get node
                     node = get_content("ns:%s" % item[0], entry)
@@ -860,9 +861,10 @@ class PageState(object):
                         try:
                             # Try to recover disp_model object from strings
                             com = "from sans.models.dispersion_models "
-                            com += "import %s as disp /ndisp_model = disp()"
+                            com += "import %s as disp"
                             com_name = disp_name.split(".")[3]
                             exec com % com_name
+                            disp_model = disp()
                             exec "self.%s['%s'] = com_name" % (item[1], name)
                         except:
                             pass
