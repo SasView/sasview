@@ -862,14 +862,15 @@ class Notebook(nb, PanelBase):
             outputs[key] = temp_key
         for key in inputs.keys():
             key_list = inputs[key]
-            if len(key_list) > 0:
+            if len(key_list) == len(inds):
                 temp_key = [item for item in key_list]
                 for ind in inds:
-                    try:
-                        temp_key[ind] = key_list[inds[ind]]
-                    except:
-                        pass
+                    temp_key[ind] = key_list[inds[ind]]
                 inputs[key] = temp_key
+            else:
+                inputs[key] = []
+                #print "Different length in %s: Removed from Listing."% key
+                
         return inputs, outputs
     
     def add_column(self):
