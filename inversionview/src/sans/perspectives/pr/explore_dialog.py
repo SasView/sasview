@@ -78,6 +78,10 @@ class OutputPlot(PlotPanel):
         self.graph.yaxis("\\rm{%s}" % DEFAULT_OUTPUT,"")
         self.graph.add(self.plot)
         self.graph.render(self)
+        
+        self.toolbar.DeleteToolByPos(0)
+        self.toolbar.DeleteToolByPos(8)
+        self.toolbar.Realize()
 
     def onContextMenu(self, event):
         """
