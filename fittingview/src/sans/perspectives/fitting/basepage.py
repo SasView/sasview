@@ -2028,6 +2028,9 @@ class BasicPage(ScrolledPanel, PanelBase):
             wx.PostEvent(self.parent.parent,
                          StatusEvent(status=msg, info="error"))
         self._populate_box(self.formfactorbox, m_list)
+    
+    def _on_modify_cat(self, event=None):  
+        self._manager.parent.on_category_panel(event)  
         
     def _show_combox(self, event=None):
         """
@@ -3476,7 +3479,15 @@ class BasicPage(ScrolledPanel, PanelBase):
         #self.Bind(wx.EVT_RADIOBUTTON, self._show_combox,
         #                    id=self.plugin_rbutton.GetId())
         #MAC needs SetValue
-        sizer_cat_box.Add(self.categorybox, 1, wx.LEFT|wx.RIGHT|wx.EXPAND, 2.5)
+        
+        show_cat_button = wx.Button(self, -1, "Modify")
+        cat_tip = "Modify model categories \n"
+        cat_tip += "(also accessible from the menu bar)."
+        show_cat_button.SetToolTip( wx.ToolTip(cat_tip) )
+        show_cat_button.Bind(wx.EVT_BUTTON, self._on_modify_cat)
+        sizer_cat_box.Add(self.categorybox, 1, wx.RIGHT, 3)
+        sizer_cat_box.Add((10,10))
+        sizer_cat_box.Add(show_cat_button)
         #self.shape_rbutton.SetValue(True)
       
         sizer_radiobutton = wx.GridSizer(2, 2, 5, 5)

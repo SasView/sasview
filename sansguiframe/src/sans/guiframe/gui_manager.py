@@ -1415,7 +1415,13 @@ class ViewerFrame(wx.Frame):
         # Show(False) before Show(True) in order to bring it to the front
         self.batch_frame.Show(False)
         self.batch_frame.Show(True)
-        
+    
+    def  on_category_panel(self, event):  
+        """
+        On cat panel
+        """
+        self._on_category_manager(event)
+          
     def _on_category_manager(self, event):
         """
         Category manager frame
