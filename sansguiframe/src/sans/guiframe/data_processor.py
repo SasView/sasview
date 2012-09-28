@@ -865,7 +865,10 @@ class Notebook(nb, PanelBase):
             if len(key_list) > 0:
                 temp_key = [item for item in key_list]
                 for ind in inds:
-                    temp_key[ind] = key_list[inds[ind]]
+                    try:
+                        temp_key[ind] = key_list[inds[ind]]
+                    except:
+                        pass
                 inputs[key] = temp_key
         return inputs, outputs
     
