@@ -9,14 +9,15 @@ except:
     print "Try easy_install unittest-xml-reporting"
 
 # Check whether we have matplotlib installed
-HAS_MPL = True
+HAS_MPL_WX = True
 try:
     import matplotlib
+    import wx
 except:
-    HAS_MPL = False
+    HAS_MPL_WX = False
 
 SKIPPED_DIRS = ["sansrealspace", "calculatorview"]
-if not HAS_MPL:
+if not HAS_MPL_WX:
     SKIPPED_DIRS.append("sansguiframe")
 
 SANSVIEW_DIR = os.pardir
