@@ -3363,6 +3363,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                             
             self.master_category_dict = pickle.load(cat_file)
             self._regenerate_model_dict()
+            cat_file.close()
 
         except IOError:
             raise

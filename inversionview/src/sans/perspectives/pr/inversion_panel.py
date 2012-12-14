@@ -967,15 +967,15 @@ class HelpDialog(wx.Dialog):
         """
         """
         from sans.pr.invertor import help
-        wx.Dialog.__init__(self, parent, id, size=(400, 420))
+        wx.Dialog.__init__(self, parent, id, size=(400, 450))
         self.SetTitle("P(r) help") 
-        
+        self.SetWindowVariant(variant=FONT_VARIANT)
 
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         explanation = help()
            
-        label_explain = wx.StaticText(self, -1, explanation, size=(350, 320))
+        label_explain = wx.StaticText(self, -1, explanation, size=(360, 350))
             
         vbox.Add(label_explain, 0, wx.ALL|wx.EXPAND, 15)
 

@@ -557,6 +557,8 @@ class FloatPanel(wx.Dialog):
             self.plotpanel = Maskplotpanel(self, -1, dimension,
                                            style=wx.TRANSPARENT_WINDOW)
             self.plotpanel._SetInitialSize()
+            self.plotpanel.prevXtrans = "x"
+            self.plotpanel.prevYtrans = "y"
             
             self.cmap = DEFAULT_CMAP
             ## Create Artist and bind it

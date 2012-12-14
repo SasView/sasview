@@ -644,6 +644,9 @@ class SmallPanel(PlotPanel):
         self.point = None
         self.position = (0.4, 0.5)
         self.scale = 'linear'
+        self.prevXtrans = "x"
+        self.prevYtrans = "y"
+        self.viewModel = "--"
         self.subplot.set_xticks([])
         self.subplot.set_yticks([])
         self.add_text()
@@ -864,9 +867,7 @@ class SmallPanel(PlotPanel):
                 dial.yvalue.Insert("log10(y)", 1)
                 dial.view.Insert("--", 0)
                 dial.view.Insert("Linear y vs x", 1)
-                dial.xvalue.SetValue("x")
-                dial.yvalue.SetValue("y")
-                dial.view.SetValue("--")
+                dial.setValues(self.prevXtrans, self.prevYtrans, self.viewModel)
                 dial.Update()
                 if dial.ShowModal() == wx.ID_OK:
                     self.xLabel, self.yLabel, self.viewModel = dial.getValues()
@@ -917,6 +918,8 @@ class SmallPanel(PlotPanel):
                 _yscale = 'log'
                 self.graph._yaxis_transformed("%s" % yname, "%s" % yunits)
             item.transformView()
+        self.prevXtrans = self.xLabel
+        self.prevYtrans = self.yLabel
         self.set_xscale(_xscale)
         self.set_yscale(_yscale)
         self.draw()

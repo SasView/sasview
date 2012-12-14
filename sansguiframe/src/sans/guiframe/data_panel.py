@@ -34,6 +34,8 @@ from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.gui_style import GUIFRAME
 from sans.guiframe.events import NewBatchEvent
 from sans.dataloader.loader import Loader
+from sans.guiframe.local_perspectives.plotting.masking \
+    import FloatPanel as QucikPlotDialog
 
 import sans.guiframe.config as config
  
@@ -441,8 +443,6 @@ class DataPanel(ScrolledPanel, PanelBase):
         Frozen plot
         """
         data = self._get_data_selection(event)
-        from sans.guiframe.local_perspectives.plotting.masking \
-        import FloatPanel as QucikPlotDialog
         if data.__class__.__name__ == "Data2D":
             dimension = 2
         else:

@@ -250,7 +250,8 @@ class DataManager(object):
                 theory_list = data_state.get_theory()
                 if theory_id in theory_list.keys():
                     del theory_list[theory_id]
-        
+        #del pure theory
+        self.delete_by_id(theory_id)
             
     def delete_by_id(self, id_list=None):
         """

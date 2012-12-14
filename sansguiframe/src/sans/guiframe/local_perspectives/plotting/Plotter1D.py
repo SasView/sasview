@@ -83,6 +83,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self._color_labels = self.get_color_label()
         self.currColorIndex = ""
         self._is_changed_legend_label = False
+        self.is_xtick = False
+        self.is_ytick = False
       
         self.hide_menu = None
         ## Unique ID (from gui_manager)
@@ -683,7 +685,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
                                   self.xaxis_font, self.yaxis_font, 
                                   find_key(self.get_loc_label(), 
                                   self.legendLoc), 
-                                  self.xcolor,self.ycolor)
+                                  self.xcolor, self.ycolor, 
+                                  self.is_xtick, self.is_ytick)
         self.graphApp.Bind(wx.EVT_CLOSE, self.on_graphApp_close)
     
 
@@ -705,10 +708,20 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.yaxis_label = graph_app.get_ylab()
         self.xaxis_unit = graph_app.get_xunit()
         self.yaxis_unit = graph_app.get_yunit()
+        self.xaxis_font = graph_app.get_xfont()
+        self.yaxis_font = graph_app.get_yfont()
+        self.is_xtick =  graph_app.get_xtick_check()
+        self.is_ytick =  graph_app.get_ytick_check()
+        if self.is_xtick:
+            self.xaxis_tick = self.xaxis_font
+        if self.is_ytick:
+            self.yaxis_tick = self.yaxis_font
 
         self.xaxis(self.xaxis_label, self.xaxis_unit, 
-                   graph_app.get_xfont(), graph_app.get_xcolor())
+                   graph_app.get_xfont(), graph_app.get_xcolor(), 
+                   self.xaxis_tick)
         self.yaxis(self.yaxis_label, self.yaxis_unit, 
-                   graph_app.get_yfont(), graph_app.get_ycolor())
+                   graph_app.get_yfont(), graph_app.get_ycolor(),
+                   self.yaxis_tick)
 
         graph_app.Destroy()

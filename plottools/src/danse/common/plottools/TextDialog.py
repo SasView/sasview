@@ -96,7 +96,7 @@ class TextDialog(wx.Dialog):
         wx.EVT_COMBOBOX(self.fontSize, -1, self.on_size)
         self.fontSize.SetMinSize((_BOX_WIDTH, -1))
         self._set_size_list()
-        self.fontSize.SetSelection(3)
+        self.fontSize.SetSelection(5)
         self.fontSize.SetToolTipString("Font size of the text.")
         #font style
         self.fontStyle = wx.ComboBox(self, -1, style=wx.CB_READONLY)

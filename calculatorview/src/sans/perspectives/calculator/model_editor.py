@@ -627,7 +627,8 @@ class EditorPanel(wx.ScrolledWindow):
         """
         Layout msg
         """
-        self._msg_box = wx.StaticText(self, -1, self._notes)
+        self._msg_box = wx.StaticText(self, -1, self._notes, 
+                                      size=(PANEL_WIDTH, -1))
         self.msg_sizer.Add(self._msg_box, 0, wx.LEFT, 10)  
                     
     def _layout_button(self):  
@@ -716,7 +717,7 @@ class EditorPanel(wx.ScrolledWindow):
         s_title = title
         if len(title) > 20:
             s_title = title[0:19] + '...'
-        self._notes += "Model function name set "
+        self._notes += "Model function name is set "
         self._notes += "to %s. \n" % str(s_title)
         return True
     
@@ -782,7 +783,7 @@ class EditorPanel(wx.ScrolledWindow):
             except:
                 pass
         else:
-            msg = "Successful!!!"
+            msg = "Successful! "
             msg += "  " + self._notes
             msg += " Please look for it in the Customized Models."
             info = 'Info'

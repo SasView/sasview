@@ -11,8 +11,9 @@ import logging
 __appname__ = "SasView"
 __version__ = sans.sansview.__version__
 __build__ = sans.sansview.__build__
-__download_page__ = 'https://sourceforge.net/projects/sansviewproject/files/'
-__update_URL__ = 'http://sansviewproject.svn.sourceforge.net/viewvc/sansviewproject/trunk/sansview.latestversion'
+__download_page__ = 'http://sourceforge.net/projects/sasview/files/'
+__update_URL__ = ['svn.code.sf.net', 
+                  '/p/sasview/code/trunk/sansview.latestversion']
 
 
 # Debug message flag
@@ -34,11 +35,11 @@ under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS
 and ILL.
 
 '''
-_homepage = "http://danse.chem.utk.edu"
-_download = "https://sourceforge.net/projects/sansviewproject/"
+_homepage = "http://www.sasview.org"
+_download = __download_page__
 _authors = []
-_paper = "http://sourceforge.net/apps/trac/sansviewproject/report"
-_license = "mailto:sansviewproject-developers@lists.sourceforge.net"
+_paper = "http://sourceforge.net/p/sasview/tickets/"
+_license = "mailto:help@sasview.org"
 
 
 icon_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "images"))
@@ -46,9 +47,12 @@ logging.info("icon path: %s" % icon_path)
 media_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "media"))
 test_path =  os.path.abspath(os.path.join(os.path.dirname(__file__), "test"))
 
-_nist_logo = "images/nist_logo.png"
-_umd_logo = "images/umd_logo.png"
-_sns_logo = "images/sns_logo.png"
+_nist_logo = os.path.join(icon_path, "nist_logo.png")
+_umd_logo = os.path.join(icon_path, "umd_logo.png")
+_sns_logo = os.path.join(icon_path, "sns_logo.png")
+_isis_logo = os.path.join(icon_path, "isis_logo.png")
+_ess_logo = os.path.join(icon_path, "ess_logo.png")
+_ill_logo = os.path.join(icon_path, "ill_logo.png")
 _nsf_logo = os.path.join(icon_path, "nsf_logo.png")
 _danse_logo = os.path.join(icon_path, "danse_logo.png")
 _inst_logo = os.path.join(icon_path, "utlogo.gif")
@@ -56,6 +60,9 @@ _nist_url = "http://www.nist.gov/"
 _umd_url = "http://www.umd.edu/"
 _sns_url = "http://neutrons.ornl.gov/"
 _nsf_url = "http://www.nsf.gov"
+_isis_url = "http://www.isis.stfc.ac.uk/"
+_ess_url = "http://ess-scandinavia.eu/"
+_ill_url = "http://www.ill.eu/"
 _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = os.path.join(icon_path, "angles_flat.png")

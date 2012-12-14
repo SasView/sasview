@@ -32,7 +32,8 @@ in_list =  [["nterms",       "nfunc"],
            ["slit_width",   "width"],
            ["slit_height",  "height"],
            ["qmin",         "qmin"],
-           ["qmax",         "qmax"]]                      
+           ["qmax",         "qmax"],
+           ["estimate_bck", "estimate_bck"]]                      
 
 ## List of P(r) inversion outputs
 out_list = [["elapsed", "elapsed"],

@@ -18,6 +18,7 @@ from sans.guiframe.events import StatusEvent
 # as the base class of plug-in models.
 from sans.models.pluginmodel import Model1DPlugin
 from sans.models.BaseComponent import BaseComponent
+from sans.guiframe.CategoryInstaller import CategoryInstaller
    
 PLUGIN_DIR = 'plugin_models'
 
@@ -936,6 +937,11 @@ class ModelManager(object):
     implement model
     """
     __modelmanager = ModelManagerBase()
+    cat_model_list = [model_name for model_name \
+                      in __modelmanager.model_dictionary.keys() \
+                      if model_name not in __modelmanager.stored_plugins.keys()]
+
+    CategoryInstaller.check_install(model_list=cat_model_list)
     
     def findModels(self):
         return self.__modelmanager.findModels()

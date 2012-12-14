@@ -1,8 +1,7 @@
 """
 """
 import logging
-import wx.lib.newevent
-
+import wx
 # Try a normal import first
 # If it fails, try specifying a version
 import matplotlib

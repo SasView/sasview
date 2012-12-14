@@ -35,6 +35,8 @@ class graphAppearance(wx.Frame):
 
         self.xfont = None
         self.yfont = None
+        self.is_xtick = False
+        self.is_ytick = False
 
 
     def InitUI(self):
@@ -171,15 +173,19 @@ class graphAppearance(wx.Frame):
 
         fonty = SimpleFont(self, wx.NewId(), title)
         fonty.set_default_font(self.xfont)
+        fonty.set_ticklabel_check(self.is_xtick)
         if(fonty.ShowModal() == wx.ID_OK):
             self.xfont = fonty.get_font()
+            self.is_xtick = fonty.get_ticklabel_check()
 
     def onyFont(self, e):
         title = 'Modify y axis font'
         fonty = SimpleFont(self, wx.NewId(), title)
         fonty.set_default_font(self.yfont)
+        fonty.set_ticklabel_check(self.is_ytick)
         if(fonty.ShowModal() == wx.ID_OK):
             self.yfont = fonty.get_font()
+            self.is_ytick = fonty.get_ticklabel_check()
 
     def on_ok(self, e):
         self.Close()
@@ -232,7 +238,7 @@ class graphAppearance(wx.Frame):
 
     def setDefaults(self,grid,legend,xlab,ylab,xunit,yunit,
                     xaxis_font,yaxis_font,legend_loc,
-                    xcolor,ycolor):
+                    xcolor,ycolor, is_xtick, is_ytick):
         self.toggle_grid.SetValue(grid)
         if self.legend:
             self.toggle_legend.SetValue(legend)
@@ -242,6 +248,8 @@ class graphAppearance(wx.Frame):
         self.yaxis_unit_text.SetValue(yunit)
         self.xfont = xaxis_font
         self.yfont = yaxis_font
+        self.is_xtick = is_xtick
+        self.is_ytick = is_ytick
 
         if not xcolor:
             self.xfont_color.SetSelection(0)
@@ -301,6 +309,12 @@ class graphAppearance(wx.Frame):
     # get y axis font
     def get_yfont(self):
         return self.yfont
+    
+    def get_xtick_check(self):
+        return self.is_xtick
+
+    def get_ytick_check(self):
+        return self.is_ytick
     
 
 if __name__ == '__main__':

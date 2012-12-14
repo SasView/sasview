@@ -8,8 +8,9 @@ from sans.guiframe.gui_style import GUIFRAME
 __appname__ = "DummyView"
 __version__ = '0.0.0'
 __build__ = '1'
-__download_page__ = 'https://sourceforge.net/projects/sansviewproject/files/'
-__update_URL__ = 'http://sansviewproject.svn.sourceforge.net/viewvc/sansviewproject/trunk/sansview.latestversion'
+__download_page__ = 'http://sourceforge.net/projects/sasview/files/'
+__update_URL__ = ['svn.code.sf.net', 
+                  '/p/sasview/code/trunk/sansview.latestversion']
 
 
 # Debug message flag
@@ -31,23 +32,29 @@ Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
 project funded by the US National Science Foundation. 
 
 '''
-_homepage = "http://danse.chem.utk.edu"
-_download = "http://danse.chem.utk.edu/sansview.html"
+_homepage = "http://www.sasview.org"
+_download = "http://sourceforge.net/projects/sasview/files/"
 _authors = []
-_paper = "http://danse.us/trac/sans/newticket"
-_license = "mailto:sansdanse@gmail.com"
+_paper = "http://sourceforge.net/p/sasview/tickets/"
+_license = "mailto:help@sasview.org"
 _nsf_logo = "images/nsf_logo.png"
 _danse_logo = "images/danse_logo.png"
 _inst_logo = "images/utlogo.gif"
 _nist_logo = "images/nist_logo.png"
 _umd_logo = "images/umd_logo.png"
 _sns_logo = "images/sns_logo.png"
+_isis_logo = "images/isis_logo.png"
+_ess_logo = "images/ess_logo.png"
+_ill_logo = "images/ill_logo.png"
 _nist_url = "http://www.nist.gov/"
 _umd_url = "http://www.umd.edu/"
 _sns_url = "http://neutrons.ornl.gov/"
 _nsf_url = "http://www.nsf.gov"
 _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
+_isis_url = "http://www.isis.stfc.ac.uk/"
+_ess_url = "http://ess-scandinavia.eu/"
+_ill_url = "http://www.ill.eu/"
 _corner_image = "images/angles_flat.png"
 _welcome_image = "images/SVwelcome.png"
 _copyright = "(c) 2008, University of Tennessee"

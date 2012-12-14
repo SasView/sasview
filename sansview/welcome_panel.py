@@ -94,7 +94,7 @@ class WelcomePage(ScrolledPanel):
         self.hyperlink_license = wx.StaticText(self, -1, 
                                                "Comments? Bugs? Requests?")
         send_ticket = "Send us a ticket at: "
-        send_ticket += "sansviewproject-developers@lists.sourceforge.net"
+        send_ticket += "help@sasview.org"
         self.hyperlink_paper = wx.lib.hyperlink.HyperLinkCtrl(self, -1,
             send_ticket, URL=config._license)
         

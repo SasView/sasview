@@ -212,6 +212,9 @@ class SLDplotpanel(PlotPanel):
         self.parent = parent
         self.window_name = "Scattering Length Density Profile"
         self.window_caption = self.window_name
+        self.prevXtrans = "x"
+        self.prevYtrans = "y"
+        self.viewModel = "--"
         # Internal list of plottable names (because graph 
         # doesn't have a dictionary of handles for the plottables)
         self.plots = {}

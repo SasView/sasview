@@ -83,8 +83,8 @@ class StartupConfiguration(wx.Dialog):
         current_bt = wx.RadioButton(panel, -1, 'Current View', (15, 55))
         current_bt.SetValue(False)
         current_bt.Bind(wx.EVT_RADIOBUTTON, self.OnCurrent)
-        msg = "\nThis new configuration will take effect after\n"
-        msg += "restarting the SansView application..."
+        msg = "\nThis new configuration will take effect when\n"
+        msg += "running this application next time."
         note_txt = wx.StaticText(panel, -1, msg, (15, 75))
         note_txt.SetForegroundColour("black")
         hbox = wx.BoxSizer(wx.HORIZONTAL)

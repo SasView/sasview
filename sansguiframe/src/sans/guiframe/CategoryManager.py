@@ -95,7 +95,7 @@ class CategoryManager(wx.Frame):
         self.by_model_dict = defaultdict(list)
         self.model_enabled_dict = defaultdict(bool)
 
-        wx.Frame.__init__(self, parent, win_id, title, size=(650, 400))
+        wx.Frame.__init__(self, parent, win_id, title, size=(660, 400))
 
         panel = wx.Panel(self, -1)
         self.parent = parent
@@ -298,7 +298,8 @@ class CategoryManager(wx.Frame):
         cat_file = open(CategoryInstaller.get_user_file(), 'wb')
 
         pickle.dump( self.master_category_dict, cat_file )
-
+        
+        cat_file.close()
    
     def _read_category_info(self):
         """
@@ -312,6 +313,7 @@ class CategoryManager(wx.Frame):
 	        else:
 	        	cat_file = open(CategoryInstaller.get_default_file(), 'rb')
         		self.master_category_dict = pickle.load(cat_file)
+        	cat_file.close()
         except IOError:
             print 'Problem reading in category file. Please review'
 

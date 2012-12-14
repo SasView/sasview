@@ -417,7 +417,10 @@ class ModelPanel2D(ModelPanel1D):
         """
         Edit legend label
         """
-        selected_plot = self.plots[self.graph.selected_plottable]
+        try:
+            selected_plot = self.plots[self.graph.selected_plottable]
+        except:
+            selected_plot = self.plots[self.data2D.id]
         label = selected_plot.label
         dial = TextDialog(None, -1, 'Change Label', label)
         if dial.ShowModal() == wx.ID_OK:
@@ -637,7 +640,7 @@ class ModelPanel2D(ModelPanel1D):
         new_plot.group_id = "2daverage"  + self.data2D.name
         new_plot.id = "Circ avg " + self.data2D.name
         new_plot.is_data = True
-        self.parent.update_theory(data_id=self.data2D, \
+        self.parent.update_theory(data_id=self.data2D.id, \
                                        theory=new_plot)
         wx.PostEvent(self.parent, 
                      NewPlotEvent(plot=new_plot, title=new_plot.name))
@@ -791,7 +794,8 @@ class ModelPanel2D(ModelPanel1D):
                                   self.xaxis_unit,self.yaxis_unit,
                                   self.xaxis_font,self.yaxis_font,
                                   find_key(self.get_loc_label(),self.legendLoc),
-                                  self.xcolor,self.ycolor)
+                                  self.xcolor,self.ycolor,
+                                   self.is_xtick, self.is_ytick)
         self.graphApp.Bind(wx.EVT_CLOSE, self.on_graphApp_close)
     
 
@@ -806,10 +810,20 @@ class ModelPanel2D(ModelPanel1D):
         self.yaxis_label = self.graphApp.get_ylab()
         self.xaxis_unit = self.graphApp.get_xunit()
         self.yaxis_unit = self.graphApp.get_yunit()
+        self.xaxis_font = self.graphApp.get_xfont()
+        self.yaxis_font = self.graphApp.get_yfont()
+        self.is_xtick =  self.graphApp.get_xtick_check()
+        self.is_ytick =  self.graphApp.get_ytick_check()
+        if self.is_xtick:
+            self.xaxis_tick = self.xaxis_font
+        if self.is_ytick:
+            self.yaxis_tick = self.yaxis_font
 
-        self.xaxis(self.xaxis_label,self.xaxis_unit,
-                   self.graphApp.get_xfont(),self.graphApp.get_xcolor())
-        self.yaxis(self.yaxis_label,self.yaxis_unit,
-                   self.graphApp.get_yfont(),self.graphApp.get_ycolor())
+        self.xaxis(self.xaxis_label, self.xaxis_unit, 
+                   self.graphApp.get_xfont(), self.graphApp.get_xcolor(), 
+                   self.xaxis_tick)
+        self.yaxis(self.yaxis_label, self.yaxis_unit, 
+                   self.graphApp.get_yfont(), self.graphApp.get_ycolor(),
+                   self.yaxis_tick)
 
         self.graphApp.Destroy()

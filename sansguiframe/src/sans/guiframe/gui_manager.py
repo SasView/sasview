@@ -22,7 +22,8 @@ import warnings
 import re
 warnings.simplefilter("ignore")
 import logging
-import urllib2
+#import urllib2
+import httplib
 
 from sans.guiframe.events import EVT_CATEGORY
 from sans.guiframe.events import EVT_STATUS
@@ -2253,9 +2254,15 @@ class ViewerFrame(wx.Frame):
         a call-back method when the current version number has been obtained.
         """
         try:
-            f=urllib2.urlopen(config.__update_URL__, 
-                              timeout=1.0)
-            content = f.read()
+            conn = httplib.HTTPConnection(config.__update_URL__[0], 
+                              timeout=3.0)
+            conn.request("GET", config.__update_URL__[1])
+            res = conn.getresponse()
+            content = res.read()
+            conn.close()
+            #f=urllib2.urlopen(config.__update_URL__, 
+            #                  timeout=1.0)
+            #content = f.read()
         except:
             content = "0.0.0"
        

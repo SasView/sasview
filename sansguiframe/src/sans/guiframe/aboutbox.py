@@ -106,10 +106,15 @@ class DialogAbout(wx.Dialog):
         self.bitmap_button_nist = wx.BitmapButton(self, -1, wx.NullBitmap)
         self.bitmap_button_umd = wx.BitmapButton(self, -1, wx.NullBitmap)
         self.bitmap_button_sns = wx.BitmapButton(self, -1, wx.NullBitmap)
-        self.bitmap_button_nsf = wx.BitmapButton(self, -1,
-                                                 wx.NullBitmap)
-        self.bitmap_button_danse = wx.BitmapButton(self, -1, wx.NullBitmap)
+        #self.bitmap_button_nsf = wx.BitmapButton(self, -1,
+        #                                         wx.NullBitmap)
+        #self.bitmap_button_danse = wx.BitmapButton(self, -1, wx.NullBitmap)
         self.bitmap_button_msu = wx.BitmapButton(self, -1, wx.NullBitmap)
+        
+        self.bitmap_button_isis = wx.BitmapButton(self, -1, wx.NullBitmap)
+        self.bitmap_button_ess = wx.BitmapButton(self, -1, wx.NullBitmap)
+        self.bitmap_button_ill = wx.BitmapButton(self, -1, wx.NullBitmap)
+        
         self.static_line_3 = wx.StaticLine(self, -1)
         self.button_OK = wx.Button(self, wx.ID_OK, "OK")
 
@@ -119,9 +124,12 @@ class DialogAbout(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.onNistLogo, self.bitmap_button_nist)
         self.Bind(wx.EVT_BUTTON, self.onUmdLogo, self.bitmap_button_umd)
         self.Bind(wx.EVT_BUTTON, self.onSnsLogo, self.bitmap_button_sns)
-        self.Bind(wx.EVT_BUTTON, self.onNsfLogo, self.bitmap_button_nsf)
-        self.Bind(wx.EVT_BUTTON, self.onDanseLogo, self.bitmap_button_danse)
+        #self.Bind(wx.EVT_BUTTON, self.onNsfLogo, self.bitmap_button_nsf)
+        #self.Bind(wx.EVT_BUTTON, self.onDanseLogo, self.bitmap_button_danse)
         self.Bind(wx.EVT_BUTTON, self.onUTLogo, self.bitmap_button_msu)
+        self.Bind(wx.EVT_BUTTON, self.onIsisLogo, self.bitmap_button_isis)
+        self.Bind(wx.EVT_BUTTON, self.onEssLogo, self.bitmap_button_ess)
+        self.Bind(wx.EVT_BUTTON, self.onIllLogo, self.bitmap_button_ill)
         # end wxGlade
         # fill in acknowledgements
         #self.text_ctrl_acknowledgement.SetValue(__acknowledgement__)
@@ -161,6 +169,7 @@ class DialogAbout(wx.Dialog):
         logo = wx.Bitmap(image)        
         self.bitmap_button_sns.SetBitmapLabel(logo)
         
+        """
         image = file_dir + "/images/nsf_logo.png"
         if os.path.isfile(config._nsf_logo):
             image = config._nsf_logo
@@ -172,13 +181,31 @@ class DialogAbout(wx.Dialog):
             image = config._danse_logo
         logo = wx.Bitmap(image)
         self.bitmap_button_danse.SetBitmapLabel(logo)
-        
+        """
         image = file_dir + "/images/utlogo.gif"
         if os.path.isfile(config._inst_logo):
             image = config._inst_logo
         logo = wx.Bitmap(image)
         self.bitmap_button_msu.SetBitmapLabel(logo)
         
+        image = file_dir + "/images/isis_logo.png"
+        if os.path.isfile(config._isis_logo):
+            image = config._isis_logo
+        logo = wx.Bitmap(image)        
+        self.bitmap_button_isis.SetBitmapLabel(logo)
+
+        image = file_dir + "/images/ess_logo.png"
+        if os.path.isfile(config._ess_logo):
+            image = config._ess_logo
+        logo = wx.Bitmap(image)
+        self.bitmap_button_ess.SetBitmapLabel(logo)
+        
+        image = file_dir + "/images/ill_logo.png"
+        if os.path.isfile(config._ill_logo):
+            image = config._ill_logo
+        logo = wx.Bitmap(image)
+        self.bitmap_button_ill.SetBitmapLabel(logo)
+                
         # resize dialog window to fit version number nicely
         if wx.VERSION >= (2, 7, 2, 0):
             size = [self.GetEffectiveMinSize()[0], self.GetSize()[1]]
@@ -200,9 +227,12 @@ class DialogAbout(wx.Dialog):
         self.bitmap_button_nist.SetSize(self.bitmap_button_nist.GetBestSize())
         self.bitmap_button_umd.SetSize(self.bitmap_button_umd.GetBestSize())
         self.bitmap_button_sns.SetSize(self.bitmap_button_sns.GetBestSize())
-        self.bitmap_button_nsf.SetSize(self.bitmap_button_nsf.GetBestSize())
-        self.bitmap_button_danse.SetSize(self.bitmap_button_danse.GetBestSize())
+        #self.bitmap_button_nsf.SetSize(self.bitmap_button_nsf.GetBestSize())
+        #self.bitmap_button_danse.SetSize(self.bitmap_button_danse.GetBestSize())
         self.bitmap_button_msu.SetSize(self.bitmap_button_msu.GetBestSize())
+        self.bitmap_button_isis.SetSize(self.bitmap_button_isis.GetBestSize())
+        self.bitmap_button_ess.SetSize(self.bitmap_button_ess.GetBestSize())
+        self.bitmap_button_ill.SetSize(self.bitmap_button_ill.GetBestSize())
         # end wxGlade
 
     def __do_layout(self):
@@ -243,19 +273,32 @@ class DialogAbout(wx.Dialog):
         sizer_main.Add(self.label_acknowledgement, 0,
                        wx.LEFT|wx.TOP|wx.BOTTOM|wx.ADJUST_MINSIZE, 7)
         sizer_main.Add(self.static_line_2, 0, wx.EXPAND, 0)
-        sizer_logos.Add(self.bitmap_button_nist, 0, wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add(self.bitmap_button_umd, 0, wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add(self.bitmap_button_sns, 0, wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add(self.bitmap_button_nsf, 0, wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add(self.bitmap_button_danse, 0,
+
+        sizer_logos.Add(self.bitmap_button_msu, 0, 
                         wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add(self.bitmap_button_msu, 0, wx.LEFT|wx.ADJUST_MINSIZE, 2)
-        sizer_logos.Add((50, 50), 0, wx.ADJUST_MINSIZE, 0)
+        #sizer_logos.Add(self.bitmap_button_danse, 0,
+        #                wx.LEFT|wx.ADJUST_MINSIZE, 2)
+        #sizer_logos.Add(self.bitmap_button_nsf, 0, 
+        #                wx.LEFT|wx.ADJUST_MINSIZE, 2)
+        sizer_logos.Add(self.bitmap_button_umd, 0, 
+                        wx.LEFT|wx.ADJUST_MINSIZE, 2)
+        sizer_logos.Add(self.bitmap_button_nist, 0, 
+                        wx.LEFT|wx.ADJUST_MINSIZE, 2)
+        sizer_logos.Add(self.bitmap_button_sns, 0, 
+                        wx.LEFT|wx.ADJUST_MINSIZE, 2)
+        sizer_logos.Add(self.bitmap_button_isis, 0, 
+                        wx.LEFT|wx.ADJUST_MINSIZE, 2)
+        sizer_logos.Add(self.bitmap_button_ess, 0, 
+                        wx.LEFT|wx.ADJUST_MINSIZE, 2)
+        sizer_logos.Add(self.bitmap_button_ill, 0, 
+                        wx.LEFT|wx.ADJUST_MINSIZE, 2)
+                
+        sizer_logos.Add((10, 50), 0, wx.ADJUST_MINSIZE, 0)
         sizer_main.Add(sizer_logos, 0, wx.EXPAND, 0)
         sizer_main.Add(self.static_line_3, 0, wx.EXPAND, 0)
-        sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer_button.Add((20, 40), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         sizer_button.Add(self.button_OK, 0, 
-                         wx.RIGHT|wx.ADJUST_MINSIZE|wx.BOTTOM, 10)
+                         wx.RIGHT|wx.ADJUST_MINSIZE|wx.CENTER, 10)
         sizer_main.Add(sizer_button, 0, wx.EXPAND, 0)
         self.SetAutoLayout(True)
         self.SetSizer(sizer_main)
@@ -303,6 +346,27 @@ class DialogAbout(wx.Dialog):
         """ 
         # wxGlade: DialogAbout.<event_handler>
         launchBrowser(config._inst_url)
+        event.Skip()
+
+    def onIsisLogo(self, event): 
+        """
+        """
+        # wxGlade: DialogAbout.<event_handler>
+        launchBrowser(config._isis_url)
+        event.Skip()
+
+    def onEssLogo(self, event):
+        """
+        """
+        # wxGlade: DialogAbout.<event_handler>
+        launchBrowser(config._ess_url)
+        event.Skip()
+
+    def onIllLogo(self, event):
+        """
+        """ 
+        # wxGlade: DialogAbout.<event_handler>
+        launchBrowser(config._ill_url)
         event.Skip()
 
 # end of class DialogAbout
