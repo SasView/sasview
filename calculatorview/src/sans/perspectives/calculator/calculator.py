@@ -63,6 +63,7 @@ class Plugin(PluginBase):
         resolution_help += "instrumental parameter values."
         mass_volume_help = "Based on the chemical formular, "
         mass_volume_help += "compute the mass density or the molar volume."
+        gensans_help = "Genneric SANS"
         pyconsole_help = "Python Console."
         #data_editor_help = "Meta Data Editor"
         return [("Data Operation", 
@@ -76,6 +77,8 @@ class Plugin(PluginBase):
                         kiessig_help, self.on_calculate_kiessig),
                           ("SANS Resolution Estimator", 
                         resolution_help, self.on_calculate_resoltuion),
+                ("Generic Scattering Calculator", 
+                        gensans_help, self.on_gen_model),
                 ("Python Shell/Editor", pyconsole_help, self.on_python_console)]
               
     def on_edit_data(self, event):
@@ -161,6 +164,14 @@ class Plugin(PluginBase):
         #self.parent.set_perspective(self.perspective)
         #if event != None:
         #    event.Skip()
+        
+    def on_gen_model(self, event):
+        from sans.perspectives.calculator.gen_scatter_panel \
+        import SasGenWindow
+        frame = SasGenWindow(parent=self.parent)
+        self.put_icon(frame)
+        frame.Show(True) 
+        
     def on_python_console(self, event):
         """
         Open Python Console

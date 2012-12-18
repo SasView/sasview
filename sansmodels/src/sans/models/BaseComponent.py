@@ -38,6 +38,8 @@ class BaseComponent:
         self.non_fittable = []
         ## parameters with orientation
         self.orientation_params = []
+        ## magnetic parameters
+        self.magnetic_params = []
         ## store dispersity reference
         self._persistency_dict = {}
         ## independent parameter name and unit [string]

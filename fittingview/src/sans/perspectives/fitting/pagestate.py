@@ -51,6 +51,7 @@ list_of_state_attributes = [["engine_type", "engine_type", "string"],
                       ["formfactorcombobox", "formfactorcombobox", "string"],
                       ["structurecombobox", "structurecombobox", "string"],
                       ["multi_factor","multi_factor","float"],
+                      ["magnetic_on","magnetic_on", "bool"],
                       ["enable_smearer","enable_smearer","bool"],
                       ["disable_smearer","disable_smearer","bool"],
                       ["pinhole_smearer","pinhole_smearer","bool"],
@@ -245,6 +246,7 @@ class PageState(object):
         self.npts = None
         self.name = ""
         self.multi_factor = None
+        self.magnetic_on = False
         ## enable smearering state
         self.enable_smearer = False
         self.disable_smearer = True
@@ -334,6 +336,7 @@ class PageState(object):
         obj.qmin = copy.deepcopy(self.qmin)
         obj.qmax = copy.deepcopy(self.qmax)
         obj.multi_factor = self.multi_factor
+        obj.magnetic_on = self.magnetic_on
         obj.npts = copy.deepcopy(self.npts)
         obj.cb1 = copy.deepcopy(self.cb1)
         obj.smearer = copy.deepcopy(self.smearer)
@@ -384,6 +387,7 @@ class PageState(object):
             rep += "model name : None\n"
         #rep += "model type (form factor) selected: %s\n" % self.shape_rbutton 
         rep += "multi_factor : %s\n" % str(self.multi_factor)
+        rep += "magnetic_on : %s\n"% str(self.magnetic_on)
         rep += "model type (Category) selected: %s\n" % self.categorycombobox
         #rep += "model type (shape independent) selected: %s\n" % self.shape_indep_rbutton
         #rep += "model type (structure factor) selected: %s\n" % self.struct_rbutton
@@ -499,6 +503,10 @@ class PageState(object):
             if name == "multi_factor ":
                 muti_factor = ("muti_factor = " + value)
                 muti_factor_string = CENTRE % muti_factor
+            if name == "magentic_on ":
+                magentic_on = ("magentic_on = " + value)
+                if string(value) == 'True':
+                    magentic_on_string = CENTRE % magentic_on
             if name == "Title":
                 if len(value.strip()) == 0:
                     continue

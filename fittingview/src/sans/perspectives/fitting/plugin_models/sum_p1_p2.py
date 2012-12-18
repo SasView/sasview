@@ -90,7 +90,8 @@ class Model(Model1DPlugin):
         ## Parameter details [units, min, max]
         self._set_details()
         self.details['scale_factor'] = ['',  None, None]
-
+        ## Magnetic Panrameters
+        self.magnetic_params = []
         
         #list of parameter that can be fitted
         self._set_fixed_params()  
@@ -104,6 +105,16 @@ class Model(Model1DPlugin):
             new_item = "p2_" + item
             if not new_item in self.orientation_params:
                 self.orientation_params.append(new_item)
+        ## magnetic params
+        for item in self.p_model1.magnetic_params:
+            new_item = "p1_" + item
+            if not new_item in self.magnetic_params:
+                self.magnetic_params.append(new_item)
+            
+        for item in self.p_model2.magnetic_params:
+            new_item = "p2_" + item
+            if not new_item in self.magnetic_params:
+                self.magnetic_params.append(new_item)
         # set multiplicity 1: muti_func Not supported.
         multiplicity1 = 1
         multiplicity2 = 1

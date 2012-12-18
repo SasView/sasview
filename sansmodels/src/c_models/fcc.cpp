@@ -52,9 +52,9 @@ typedef struct {
  * @return: function value
  */
 static double fc_analytical_2D_scaled(FCParameters *pars, double q, double q_x, double q_y) {
-  double b3_x, b3_y, b3_z, b1_x, b1_y;
+  double b3_x, b3_y, b3_z, b1_x, b1_y, b2_x, b2_y;
   double q_z;
-  double alpha, cos_val_b3, cos_val_b2, cos_val_b1;
+  double cos_val_b3, cos_val_b2, cos_val_b1;
   double a1_dot_q, a2_dot_q,a3_dot_q;
   double answer;
   double Pi = 4.0*atan(1.0);
@@ -82,21 +82,34 @@ static double fc_analytical_2D_scaled(FCParameters *pars, double q, double q_x, 
   /// Angles here are respect to detector coordinate
   ///  instead of against q coordinate in PRB 36(46), 3(6), 1754(3854)
   // b3 axis orientation
-  b3_x = sin(theta) * cos(phi);//negative sign here???
-  b3_y = sin(theta) * sin(phi);
-  b3_z = cos(theta);
-  cos_val_b3 =  b3_x*q_x + b3_y*q_y + b3_z*q_z;
-  alpha = acos(cos_val_b3);
+  b3_x = cos(theta) * cos(phi);
+  b3_y = sin(theta);
+  //b3_z = -cos(theta) * sin(phi);
+  cos_val_b3 =  b3_x*q_x + b3_y*q_y;// + b3_z*q_z;
+  
   // b1 axis orientation
-  b1_x = sin(psi);
-  b1_y = cos(psi);
-  cos_val_b1 = (b1_x*q_x + b1_y*q_y);
+  b1_x = -cos(phi)*sin(psi) * sin(theta)+sin(phi)*cos(psi);
+  b1_y = sin(psi)*cos(theta);
+  cos_val_b1 = b1_x*q_x + b1_y*q_y;
+  
   // b2 axis orientation
-  cos_val_b2 = sin(acos(cos_val_b1));
-  // alpha correction
-  cos_val_b2 *= sin(alpha);
-  cos_val_b1 *= sin(alpha);
-
+  b2_x = -sin(theta)*cos(psi)*cos(phi)-sin(psi)*sin(phi);
+  b2_y = cos(theta)*cos(psi);
+  cos_val_b2 =  b2_x*q_x + b2_y*q_y;
+  
+  // The following test should always pass
+  if (fabs(cos_val_b3)>1.0) {
+    //printf("bcc_ana_2D: Unexpected error: cos()>1\n");
+    cos_val_b3 = 1.0;
+  }
+  if (fabs(cos_val_b2)>1.0) {
+    //printf("bcc_ana_2D: Unexpected error: cos()>1\n");
+    cos_val_b2 = 1.0;
+  }
+  if (fabs(cos_val_b1)>1.0) {
+    //printf("bcc_ana_2D: Unexpected error: cos()>1\n");
+    cos_val_b1 = 1.0;
+  }
   // Compute the angle btw vector q and the a3 axis
   a3_dot_q = 0.5*aa*q*(cos_val_b2+cos_val_b1);
 
@@ -106,11 +119,7 @@ static double fc_analytical_2D_scaled(FCParameters *pars, double q, double q_x, 
   // a2 axis
   a2_dot_q = 0.5*aa*q*(cos_val_b3+cos_val_b1);
 
-  // The following test should always pass
-  if (fabs(cos_val_b3)>1.0) {
-    printf("fcc_ana_2D: Unexpected error: cos(alpha)>1\n");
-    return 0;
-  }
+
   // Get Fkq and Fkq_2
   Fkq = exp(-0.5*pow(Da/aa,2.0)*(a1_dot_q*a1_dot_q+a2_dot_q*a2_dot_q+a3_dot_q*a3_dot_q));
   Fkq_2 = Fkq*Fkq;
@@ -281,7 +290,7 @@ double FCCrystalModel :: operator()(double qx, double qy) {
             _ptvalue = 0.0;
           }
           if (weights_theta.size()>1) {
-            _ptvalue *= fabs(sin(weights_theta[j].value*pi/180.0));
+            _ptvalue *= fabs(cos(weights_theta[j].value*pi/180.0));
           }
           sum += _ptvalue;
           // This model dose not need the volume of spheres correction!!!

@@ -19,6 +19,8 @@
  //     John Wiley and Sons, New York, 1955.
  //				</text>
  //[FIXED]= <text> thickness.width;radius.width</text>
+ //[ORIENTATION_PARAMS]= <text> M0_sld_shell; M_theta_shell; M_phi_shell; M0_sld_core; M_theta_core; M_phi_core;M0_sld_solv; M_theta_solv; M_phi_solv; Up_frac_i; Up_frac_f; Up_theta; </text>
+ //[MAGNETIC_PARAMS]= <text>  M0_sld_shell; M_theta_shell; M_phi_shell;M0_sld_core; M_theta_core; M_phi_core; M0_sld_solv; M_theta_solv; M_phi_solv; Up_frac_i; Up_frac_f; Up_theta; </text>
 
 
 class CoreShellModel{
@@ -46,6 +48,54 @@ public:
 /// Incoherent Background [1/cm] 0.000
 //  [DEFAULT]=background=0 [1/cm]
   Parameter background;
+
+/// M0_sld_shell
+//  [DEFAULT]=M0_sld_shell=0.0e-6 [1/A^(2)]
+  Parameter M0_sld_shell;
+
+/// M_theta_shell
+//  [DEFAULT]=M_theta_shell=0.0 [deg]
+  Parameter M_theta_shell;
+
+/// M_phi_shell
+//  [DEFAULT]=M_phi_shell=0.0 [deg]
+  Parameter M_phi_shell;
+
+/// M0_sld_core
+//  [DEFAULT]=M0_sld_core=0.0e-6 [1/A^(2)]
+  Parameter M0_sld_core;
+
+/// M_theta_core
+//  [DEFAULT]=M_theta_core=0.0 [deg]
+  Parameter M_theta_core;
+
+/// M_phi_core
+//  [DEFAULT]=M_phi_core=0.0 [deg]
+  Parameter M_phi_core;
+
+/// M0_sld_solv
+//  [DEFAULT]=M0_sld_solv=0.0e-6 [1/A^(2)]
+  Parameter M0_sld_solv;
+
+/// M_theta_solv
+//  [DEFAULT]=M_theta_solv=0.0 [deg]
+  Parameter M_theta_solv;
+
+/// M_phi_solv
+//  [DEFAULT]=M_phi_solv=0.0 [deg]
+  Parameter M_phi_solv;
+
+/// Up_frac_i
+//  [DEFAULT]=Up_frac_i=0.5 [u/(u+d)]
+  Parameter Up_frac_i;
+
+/// Up_frac_f
+//  [DEFAULT]=Up_frac_f=0.5 [u/(u+d)]
+  Parameter Up_frac_f;
+
+/// Up_theta
+//  [DEFAULT]=Up_theta=0.0 [deg]
+  Parameter Up_theta;
 
   // Constructor
   CoreShellModel();

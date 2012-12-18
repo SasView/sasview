@@ -89,6 +89,8 @@ class WrapperGenerator:
         self.non_fittable= []
         ## parameters with orientation
         self.orientation_params =[]
+        ## parameter with magnetism
+        self.magentic_params = []
         # Model category
         self.category = None
         # Whether model belongs to multifunc
@@ -109,6 +111,7 @@ class WrapperGenerator:
         rep += "  Fittable parameters:     %s\n\n"% self.fixed
         rep += "  Non-Fittable parameters:     %s\n\n"% self.non_fittable
         rep += "  Orientation parameters:  %s\n\n"% self.orientation_params
+        rep += "  Magnetic parameters:  %s\n\n"% self.magnetic_params
         return rep
         
     def read(self):
@@ -157,6 +160,15 @@ class WrapperGenerator:
                                                     key2, key3, file=self.file)
         except:
            raise 
+       
+        ## Catch parameters with orientation
+        key = "[MAGNETIC_PARAMS]"    
+        try:
+            self.magnetic_params = lineparser.readhelper( lines,key, 
+                                                    key2,key3, file= self.file)
+        except:
+           raise 
+       
         ## Catch Description
         key = "[DESCRIPTION]"
         
@@ -469,7 +481,8 @@ class WrapperGenerator:
             
             # Catch class name
             newline = self.replaceToken(tmp_line, 
-                                        "[CPYTHONCLASS]", 'C'+self.pythonClass)
+                                        "[CPYTHONCLASS]", 
+                                        'C' + self.pythonClass)
             
             # Catch class name
             newline = self.replaceToken(newline, 
@@ -501,21 +514,20 @@ class WrapperGenerator:
                     'C' + self.pythonClass + \
                     ".__init__(self)\n        self.is_multifunc = False")
                 newline = self.replaceToken(newline, 
-                                            "[MULTIPLICITY_INFO]","None")
+                                            "[MULTIPLICITY_INFO]", "None")
 
            
             # fixed list  details
             fixed_str = str(self.fixed)
             fixed_str = fixed_str.replace(', ', ',\n                      ')
-            newline = self.replaceToken(newline, "[FIXED]",fixed_str)
+            newline = self.replaceToken(newline, "[FIXED]", fixed_str)
             
             # non-fittable list details
             pars_str = str(self.non_fittable)
             pars_str = pars_str.replace(', ', 
                                         ',\n                             ')
             newline = self.replaceToken(newline, 
-                                        "[NON_FITTABLE_PARAMS]",
-                                        pars_str)
+                                        "[NON_FITTABLE_PARAMS]", pars_str)
             
             ## parameters with orientation
             oriented_str = str(self.orientation_params)
@@ -523,12 +535,15 @@ class WrapperGenerator:
             oriented_str = oriented_str.replace(', ', formatted_endl)
             newline = self.replaceToken(newline, 
                                "[ORIENTATION_PARAMS]", oriented_str)
-            
+           ## parameters with magnetism
+            newline = self.replaceToken(newline, 
+                               "[MAGNETIC_PARAMS]", str(self.magnetic_params))
+
             if self.category:
-                newline = self.replaceToken(newline,"[CATEGORY]"
-                                            ,'"' + self.category + '"')
+                newline = self.replaceToken(newline, "[CATEGORY]", 
+                                            '"' + self.category + '"')
             else:
-                newline = self.replaceToken(newline,"[CATEGORY]",
+                newline = self.replaceToken(newline, "[CATEGORY]",
                                             "None")
             
 

@@ -16,24 +16,24 @@ class HelpPanel(ScrolledPanel):
 class HelpWindow(wx.Frame):
     """
     """
-    def __init__(self, parent, id, title='Fitting Help', pageToOpen=None):
-        wx.Frame.__init__(self, parent, id, title, size=(850, 530))
+    def __init__(self, parent, id, title='Fitting Help', pageToOpen=None, size=(850, 540)):
+        wx.Frame.__init__(self, parent, id, title, size=size)
         """
         contains help info
         """
         self.Show(False)
-        self.SetTitle('Fitting Help')
+        self.SetTitle(title) 
         from sans.perspectives.fitting import get_data_path as fit_path
         fitting_path = fit_path(media='media')
         ico_file = os.path.join(fitting_path, 'ball.ico')
         if os.path.isfile(ico_file):
             self.SetIcon(wx.Icon(ico_file, wx.BITMAP_TYPE_ICO))
         splitter = MultiSplitterWindow(self, style=wx.SP_LIVE_UPDATE)
-        rpanel = wx.Panel(splitter, -1)
-        lpanel = wx.Panel(splitter, -1, style=wx.BORDER_SUNKEN)
+        self.rpanel = wx.Panel(splitter, -1)
+        self.lpanel = wx.Panel(splitter, -1, style=wx.BORDER_SUNKEN)
         
         vbox = wx.BoxSizer(wx.VERTICAL)
-        header = wx.Panel(rpanel, -1)
+        header = wx.Panel(self.rpanel, -1)
         header.SetBackgroundColour('#6666FF')
         header.SetForegroundColour('WHITE')
         hbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -46,7 +46,7 @@ class HelpWindow(wx.Frame):
         vbox.Add(header, 0, wx.EXPAND)
        
         vboxl= wx.BoxSizer(wx.VERTICAL)
-        headerl = wx.Panel(lpanel, -1, size=(-1, 20))
+        headerl = wx.Panel(self.lpanel, -1, size=(-1, 20))
        
         headerl.SetBackgroundColour('#6666FF')
         headerl.SetForegroundColour('WHITE')
@@ -58,8 +58,8 @@ class HelpWindow(wx.Frame):
         hboxl.Add(lst, 1, wx.TOP | wx.BOTTOM | wx.LEFT, 5)
         headerl.SetSizer(hboxl)
         vboxl.Add(headerl, 0, wx.EXPAND)
-        self.lhelp = html.HtmlWindow(lpanel, -1, style=wx.NO_BORDER)
-        self.rhelp = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER,
+        self.lhelp = html.HtmlWindow(self.lpanel, -1, style=wx.NO_BORDER)
+        self.rhelp = html.HtmlWindow(self.rpanel, -1, style=wx.NO_BORDER, 
                                      size=(500, -1))
 
         # get the media path
@@ -73,7 +73,8 @@ class HelpWindow(wx.Frame):
         self.path = os.path.join(path, "model_functions.html")
         self.path_pd = os.path.join(path, "pd_help.html")
         self.path_sm = os.path.join(path, "smear_computation.html")
-       
+        self.path_mag = os.path.join(path, "polar_mag_help.html")
+        
         _html_file = [("load_data_help.html", "Load a File"),
                       ("single_fit_help.html", "Single Fit"),
                       ("simultaneous_fit_help.html", "Simultaneous Fit"),
@@ -84,6 +85,7 @@ class HelpWindow(wx.Frame):
                       ("model_editor_help.html", "Custom Model Editor"),
                       ("%s" % self.path_pd, "Polydispersion Distributions"),
                       ("%s" % self.path_sm, "Smear Computation"),
+                      ("%s" % self.path_mag, "Polarization/Magnetic Scattering"),
                       ("key_help.html", "Key Combination"),
                       ("status_bar_help.html", "Status Bar Help"),
                       ]
@@ -117,14 +119,14 @@ class HelpWindow(wx.Frame):
             
         vbox.Add(self.rhelp, 1, wx.EXPAND)
         vboxl.Add(self.lhelp, 1, wx.EXPAND)
-        rpanel.SetSizer(vbox)
-        lpanel.SetSizer(vboxl)
-        lpanel.SetFocus()
+        self.rpanel.SetSizer(vbox)
+        self.lpanel.SetSizer(vboxl)
+        self.lpanel.SetFocus()
         
         vbox1 = wx.BoxSizer(wx.HORIZONTAL)
         vbox1.Add(splitter, 1, wx.EXPAND)
-        splitter.AppendWindow(lpanel, 200)
-        splitter.AppendWindow(rpanel)
+        splitter.AppendWindow(self.lpanel, 200)
+        splitter.AppendWindow(self.rpanel)
         self.SetSizer(vbox1)
 
         self.splitter = splitter

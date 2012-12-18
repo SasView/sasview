@@ -1761,7 +1761,7 @@ class PlotPanel(wx.Panel):
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()
    
-    def _onEVT_FUNC_PROPERTY(self, remove_fit=True):
+    def _onEVT_FUNC_PROPERTY(self, remove_fit=True, show=True):
         """
         Receive the x and y transformation from myDialog,
         Transforms x and y in View
@@ -1907,7 +1907,8 @@ class PlotPanel(wx.Panel):
         self.yaxis(yname, yunits, self.yaxis_font,
                    self.yaxis_color, self.yaxis_tick)
         self.subplot.texts = self.textList
-        self.subplot.figure.canvas.draw_idle()
+        if show:
+            self.subplot.figure.canvas.draw_idle()
         
     def onFitDisplay(self, tempx, tempy, xminView,
                      xmaxView, xmin, xmax, func):

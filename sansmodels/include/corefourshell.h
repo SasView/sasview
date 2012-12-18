@@ -17,7 +17,9 @@
 //				background: incoherent background
 //		</text>
 //[FIXED]=<text>  thick_shell4.width; thick_shell1.width;thick_shell2.width;thick_shell3.width;rad_core0.width </text>
-//[ORIENTATION_PARAMS]= <text> </text>
+//[ORIENTATION_PARAMS]= <text> M0_sld_shell4; M_theta_shell4; M_phi_shell4;M0_sld_shell3; M_theta_shell3; M_phi_shell3; M0_sld_shell2; M_theta_shell2; M_phi_shell2;M0_sld_shell1; M_theta_shell1; M_phi_shell1; M0_sld_core0; M_theta_core0; M_phi_core0;M0_sld_solv; M_theta_solv; M_phi_solv; Up_frac_i; Up_frac_f; Up_theta; </text>
+//[MAGNETIC_PARAMS]= <text>  M0_sld_shell4; M_theta_shell4; M_phi_shell4;M0_sld_shell3; M_theta_shell3; M_phi_shell3;M0_sld_shell2; M_theta_shell2; M_phi_shell2;M0_sld_shell1; M_theta_shell1; M_phi_shell1; M0_sld_core0; M_theta_core0; M_phi_core0; M0_sld_solv; M_theta_solv; M_phi_solv; Up_frac_i; Up_frac_f; Up_theta; </text>
+
 
 class CoreFourShellModel{
 public:
@@ -73,6 +75,90 @@ public:
   /// Incoherent Background [1/cm]
   //  [DEFAULT]=background=0.001 [1/cm]
   Parameter background;
+
+  /// M0_sld_shell1
+  //  [DEFAULT]=M0_sld_shell1=0.0e-6 [1/A^(2)]
+  Parameter M0_sld_shell1;
+
+  /// M_theta_shell1
+  //  [DEFAULT]=M_theta_shell1=0.0 [deg]
+  Parameter M_theta_shell1;
+
+  /// M_phi_shell1
+  //  [DEFAULT]=M_phi_shell1=0.0 [deg]
+  Parameter M_phi_shell1;
+
+  /// M0_sld_shell2
+  //  [DEFAULT]=M0_sld_shell2=0.0e-6 [1/A^(2)]
+  Parameter M0_sld_shell2;
+
+  /// M_theta_shell2
+  //  [DEFAULT]=M_theta_shell2=0.0 [deg]
+  Parameter M_theta_shell2;
+
+  /// M_phi_shell2
+  //  [DEFAULT]=M_phi_shell2=0.0 [deg]
+  Parameter M_phi_shell2;
+
+  /// M0_sld_shell3
+  //  [DEFAULT]=M0_sld_shell3=0.0e-6 [1/A^(2)]
+  Parameter M0_sld_shell3;
+
+  /// M_theta_shell3
+  //  [DEFAULT]=M_theta_shell3=0.0 [deg]
+  Parameter M_theta_shell3;
+
+  /// M_phi_shell3
+  //  [DEFAULT]=M_phi_shell3=0.0 [deg]
+  Parameter M_phi_shell3;
+
+  /// M0_sld_shell4
+  //  [DEFAULT]=M0_sld_shell4=0.0e-6 [1/A^(2)]
+  Parameter M0_sld_shell4;
+
+  /// M_theta_shell4
+  //  [DEFAULT]=M_theta_shell4=0.0 [deg]
+  Parameter M_theta_shell4;
+
+  /// M_phi_shell4
+  //  [DEFAULT]=M_phi_shell4=0.0 [deg]
+  Parameter M_phi_shell4;
+
+  /// M0_sld_core0
+  //  [DEFAULT]=M0_sld_core0=0.0e-6 [1/A^(2)]
+  Parameter M0_sld_core0;
+
+  /// M_theta_core0
+  //  [DEFAULT]=M_theta_core0=0.0 [deg]
+  Parameter M_theta_core0;
+
+  /// M_phi_core0
+  //  [DEFAULT]=M_phi_core0=0.0 [deg]
+  Parameter M_phi_core0;
+
+  /// M0_sld_solv
+  //  [DEFAULT]=M0_sld_solv=0.0e-6 [1/A^(2)]
+  Parameter M0_sld_solv;
+
+  /// M_theta_solv
+  //  [DEFAULT]=M_theta_solv=0.0 [deg]
+  Parameter M_theta_solv;
+
+  /// M_phi_solv
+  //  [DEFAULT]=M_phi_solv=0.0 [deg]
+  Parameter M_phi_solv;
+
+  /// Up_frac_i
+  //  [DEFAULT]=Up_frac_i=0.5 [u/(u+d)]
+  Parameter Up_frac_i;
+
+  /// Up_frac_f
+  //  [DEFAULT]=Up_frac_f=0.5 [u/(u+d)]
+  Parameter Up_frac_f;
+
+  /// Up_theta
+  //  [DEFAULT]=Up_theta=0.0 [deg]
+  Parameter Up_theta;
 
   // Constructor
   CoreFourShellModel();

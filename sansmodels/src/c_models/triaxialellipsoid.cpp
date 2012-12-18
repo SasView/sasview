@@ -45,7 +45,7 @@ typedef struct {
 
 } TriaxialEllipsoidParameters;
 
-static double triaxial_ellipsoid_kernel(TriaxialEllipsoidParameters *pars, double q, double alpha, double nu) {
+static double triaxial_ellipsoid_kernel(TriaxialEllipsoidParameters *pars, double q, double cos_val, double cos_nu, double cos_mu) {
   double t,a,b,c;
   double kernel;
 
@@ -53,7 +53,7 @@ static double triaxial_ellipsoid_kernel(TriaxialEllipsoidParameters *pars, doubl
   b = pars->semi_axisB ;
   c = pars->semi_axisC ;
 
-  t = q * sqrt(a*a*cos(nu)*cos(nu)+b*b*sin(nu)*sin(nu)*sin(alpha)*sin(alpha)+c*c*cos(alpha)*cos(alpha));
+  t = q * sqrt(a*a*cos_nu*cos_nu+b*b*cos_mu*cos_mu+c*c*cos_val*cos_val);
   if (t==0.0){
     kernel  = 1.0;
   }else{
@@ -72,10 +72,10 @@ static double triaxial_ellipsoid_kernel(TriaxialEllipsoidParameters *pars, doubl
  * @return: function value
  */
 static double triaxial_ellipsoid_analytical_2D_scaled(TriaxialEllipsoidParameters *pars, double q, double q_x, double q_y) {
-  double cyl_x, cyl_y, cyl_z, ell_x, ell_y;
-  double q_z;
-  double cos_nu,nu;
-  double alpha, vol, cos_val;
+  double cyl_x, cyl_y, ella_x, ella_y, ellb_x, ellb_y;
+  //double q_z;
+  double cos_nu, cos_mu;
+  double vol, cos_val;
   double answer;
   double pi = 4.0*atan(1.0);
 
@@ -85,18 +85,18 @@ static double triaxial_ellipsoid_analytical_2D_scaled(TriaxialEllipsoidParameter
   double psi = pars->axis_psi * pi/180.0;
 
   // Cylinder orientation
-  cyl_x = sin(theta) * cos(phi);
-  cyl_y = sin(theta) * sin(phi);
-  cyl_z = cos(theta);
+  cyl_x = cos(theta) * cos(phi);
+  cyl_y = sin(theta);
+  //cyl_z = -cos(theta) * sin(phi);
 
   // q vector
-  q_z = 0.0;
+  //q_z = 0.0;
 
   //dx = 1.0;
   //dy = 1.0;
   // Compute the angle btw vector q and the
   // axis of the cylinder
-  cos_val = cyl_x*q_x + cyl_y*q_y + cyl_z*q_z;
+  cos_val = cyl_x*q_x + cyl_y*q_y;// + cyl_z*q_z;
 
   // The following test should always pass
   if (fabs(cos_val)>1.0) {
@@ -106,7 +106,7 @@ static double triaxial_ellipsoid_analytical_2D_scaled(TriaxialEllipsoidParameter
 
   // Note: cos(alpha) = 0 and 1 will get an
   // undefined value from CylKernel
-  alpha = acos( cos_val );
+  //alpha = acos( cos_val );
 
   //ellipse orientation:
   // the elliptical corss section was transformed and projected
@@ -115,16 +115,33 @@ static double triaxial_ellipsoid_analytical_2D_scaled(TriaxialEllipsoidParameter
   // So, all we need is to calculate the angle (nu) of the minor axis of the ellipse wrt
   // the wave vector q.
 
-  //x- y- component on the detector plane.
-  ell_x =  cos(psi);
-  ell_y =  sin(psi);
-
+  //x- y- component of a-axis on the detector plane.
+  ella_x =  -cos(phi)*sin(psi) * sin(theta)+sin(phi)*cos(psi);
+  ella_y =  sin(psi)*cos(theta);
+  
+  //x- y- component of b-axis on the detector plane.
+  ellb_x =  -sin(theta)*cos(psi)*cos(phi)-sin(psi)*sin(phi);
+  ellb_y =  cos(theta)*cos(psi);
+  
   // calculate the axis of the ellipse wrt q-coord.
-  cos_nu = ell_x*q_x + ell_y*q_y;
-  nu = acos(cos_nu);
-
+  cos_nu = ella_x*q_x + ella_y*q_y;
+  cos_mu = ellb_x*q_x + ellb_y*q_y;
+  
+  // The following test should always pass
+  if (fabs(cos_val)>1.0) {
+    //printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
+    cos_val = 1.0;
+  }
+   if (fabs(cos_nu)>1.0) {
+    //printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
+    cos_nu = 1.0;
+  }
+   if (fabs(cos_mu)>1.0) {
+    //printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
+    cos_mu = 1.0;
+  } 
   // Call the IGOR library function to get the kernel
-  answer = triaxial_ellipsoid_kernel(pars, q, alpha, nu);
+  answer = triaxial_ellipsoid_kernel(pars, q, cos_val, cos_nu, cos_mu);
 
   // Multiply by contrast^2
   answer *= (pars->sldEll- pars->sldSolv)*(pars->sldEll- pars->sldSolv);
@@ -324,7 +341,7 @@ double TriaxialEllipsoidModel :: operator()(double qx, double qy) {
                   * triaxial_ellipsoid_analytical_2DXY(&dp, qx, qy)
               * weights_semi_axisA[i].value*weights_semi_axisB[j].value*weights_semi_axisC[k].value;
               if (weights_theta.size()>1) {
-                _ptvalue *= fabs(sin(weights_theta[k].value*pi/180.0));
+                _ptvalue *= fabs(cos(weights_theta[k].value*pi/180.0));
               }
               sum += _ptvalue;
               //Find average volume

@@ -135,8 +135,8 @@ static double capcyl2d_kernel(double dp[], double q, double alpha) {
  * @return: function value
  */
 static double capcyl_analytical_2D_scaled(CapCylParameters *pars, double q, double q_x, double q_y) {
-  double cyl_x, cyl_y, cyl_z;
-  double q_z;
+  double cyl_x, cyl_y;//, cyl_z;
+  //double q_z;
   double alpha, cos_val;
   double answer;
   double dp[7];
@@ -156,16 +156,16 @@ static double capcyl_analytical_2D_scaled(CapCylParameters *pars, double q, doub
 
   //double Pi = 4.0*atan(1.0);
     // Cylinder orientation
-    cyl_x = sin(theta) * cos(phi);
-    cyl_y = sin(theta) * sin(phi);
-    cyl_z = cos(theta);
+    cyl_x = cos(theta) * cos(phi);
+    cyl_y = sin(theta);
+    //cyl_z = -cos(theta) * sin(phi);
 
     // q vector
-    q_z = 0;
+    //q_z = 0;
 
     // Compute the angle btw vector q and the
     // axis of the cylinder
-    cos_val = cyl_x*q_x + cyl_y*q_y + cyl_z*q_z;
+    cos_val = cyl_x*q_x + cyl_y*q_y;// + cyl_z*q_z;
 
     // The following test should always pass
     if (fabs(cos_val)>1.0) {
@@ -347,7 +347,7 @@ double CappedCylinderModel :: operator()(double qx, double qy) {
 							_ptvalue = 0.0;
 						}
 						if (weights_theta.size()>1) {
-							_ptvalue *= fabs(sin(weights_theta[l].value*pi/180.0));
+							_ptvalue *= fabs(cos(weights_theta[l].value*pi/180.0));
 						}
 						sum += _ptvalue;
 						// This model dose not need the volume of spheres correction!!!

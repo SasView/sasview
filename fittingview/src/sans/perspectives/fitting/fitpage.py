@@ -634,6 +634,9 @@ class FitPage(BasicPage):
             self.text_disp_min.Show(True)
 
         for item in self.model.dispersion.keys():
+            if not self.magnetic_on:
+                if item in self.model.magnetic_params:
+                    continue
             if not item in self.model.orientation_params:
                 if not item in self.disp_cb_dict:
                     self.disp_cb_dict[item] = None
@@ -751,6 +754,9 @@ class FitPage(BasicPage):
                           wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         first_orient = True
         for item in self.model.dispersion.keys():
+            if not self.magnetic_on:
+                if item in self.model.magnetic_params:
+                    continue
             if  item in self.model.orientation_params:
                 if not item in self.disp_cb_dict:
                     self.disp_cb_dict[item] = None
@@ -2942,8 +2948,34 @@ class FitPage(BasicPage):
         for item in keys:
             if item in self.model.orientation_params:
                 orient_angle = wx.StaticText(self, -1, '[For 2D only]:')
+                mag_on_button = wx.Button(self, -1, "Magnetic ON" )
+                mag_on_button.Bind(wx.EVT_BUTTON, self._on_mag_on)
+                mag_help_button = wx.Button(self, -1,"Magnetic angles?" )
+                mag_help_button.Bind(wx.EVT_BUTTON,self._on_mag_help)
                 sizer.Add(orient_angle, (iy, ix), (1, 1),
                           wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+                iy += 1
+                sizer.Add(mag_on_button,(iy, ix ),(1,1), 
+                          wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15) 
+                sizer.Add(mag_help_button,(iy, ix + 1),(1,1), 
+                          wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15) 
+                
+                #handle the magnetic buttons
+                if not self._has_magnetic:
+                    mag_on_button.Show(False)
+                elif not self.data.__class__.__name__ == "Data2D":
+                    mag_on_button.Show(False)
+                else:
+                    mag_on_button.Show(True)
+                mag_help_button.Show(False)
+                if mag_on_button.IsShown():
+                    if self.magnetic_on:
+                        mag_on_button.SetLabel("Magnetic OFF")
+                        mag_help_button.Show(True) 
+                    else:
+                        mag_on_button.SetLabel("Magnetic ON")
+                        mag_help_button.Show(False)
+                        
                 if not self.data.__class__.__name__ == "Data2D" and \
                         not self.enable2D:
                     orient_angle.Hide()
@@ -2954,6 +2986,9 @@ class FitPage(BasicPage):
         #For Gaussian only
         if type.lower() != "array":
             for item in self.model.orientation_params:
+                if not self.magnetic_on:
+                    if item in self.model.magnetic_params:
+                        continue
                 if not item in self.disp_list:
                     ##prepare a spot to store min max
                     if not item in self.model.details:

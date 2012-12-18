@@ -12,15 +12,16 @@ import sans.perspectives.calculator as calculator
 class HelpWindow(wx.Frame):
     """
     """
-    def __init__(self, parent, title="Tool Help", pageToOpen=None):
-        wx.Frame.__init__(self, parent, title, size=(700, 450))
+    def __init__(self, parent, id=-1, title="Tool Help", pageToOpen=None, 
+                                                    size=(700, 450)):
+        wx.Frame.__init__(self, parent, id, title, size=size)
         """
              contains help info
         """
-        self.SetTitle("Tool Help",) 
+        self.SetTitle(title) 
         splitter = MultiSplitterWindow(self, style=wx.SP_LIVE_UPDATE)
         rpanel = wx.Panel(splitter, -1)
-        lpanel = wx.Panel(splitter, -1, style=wx.BORDER_SUNKEN)
+        self.lpanel = wx.Panel(splitter, -1, style=wx.BORDER_SUNKEN)
         
         vbox = wx.BoxSizer(wx.VERTICAL)
         header = wx.Panel(rpanel, -1)
@@ -36,7 +37,7 @@ class HelpWindow(wx.Frame):
         vbox.Add(header, 0, wx.EXPAND)
        
         vboxl = wx.BoxSizer(wx.VERTICAL)
-        headerl = wx.Panel(lpanel, -1, size=(-1, 20))
+        headerl = wx.Panel(self.lpanel, -1, size=(-1, 20))
        
         headerl.SetBackgroundColour('#6666FF')
         headerl.SetForegroundColour('WHITE')
@@ -48,11 +49,14 @@ class HelpWindow(wx.Frame):
         hboxl.Add(lst, 1, wx.TOP | wx.BOTTOM | wx.LEFT, 5)
         headerl.SetSizer(hboxl)
         vboxl.Add(headerl, 0, wx.EXPAND)
-        self.lhelp = html.HtmlWindow(lpanel, -1, style=wx.NO_BORDER)
+        self.lhelp = html.HtmlWindow(self.lpanel, -1, style=wx.NO_BORDER)
         self.rhelp = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER, 
                                      size=(500,-1))
-        
-        self.path = calculator.get_data_path(media='media')
+        if pageToOpen != None:
+            path = os.path.dirname(pageToOpen)
+            self.path = os.path.join(path, "gen_sans_help.html")
+        else:
+            self.path = calculator.get_data_path(media='media')
        
         page1 = """<html>
             <body>
@@ -75,6 +79,8 @@ class HelpWindow(wx.Frame):
             target ="showframe">Kiessig Thickness Calculator</a><br></li>
             <li><a href ="resolution_calculator_help.html" 
             target ="showframe">Resolution Estimator</a><br></li>
+            <li><a href ="gen_sans_help.html" 
+            target ="showframe">Generic Scattering Calculator</a><br></li>
             <li><a href ="pycrust_help.html" 
             target ="showframe">Python Shell</a><br></li>
             </ul>
@@ -83,19 +89,21 @@ class HelpWindow(wx.Frame):
 
         self.lhelp.SetPage(page)
         self.lhelp.Bind(wx.html.EVT_HTML_LINK_CLICKED, self.OnLinkClicked)
-        
+        if  pageToOpen != None:
+            self.rhelp.LoadPage(str(pageToOpen))
         vbox.Add(self.rhelp, 1, wx.EXPAND)
         vboxl.Add(self.lhelp, 1, wx.EXPAND)
         rpanel.SetSizer(vbox)
-        lpanel.SetSizer(vboxl)
-        lpanel.SetFocus()
+        self.lpanel.SetSizer(vboxl)
+        self.lpanel.SetFocus()
         
         vbox1 = wx.BoxSizer(wx.HORIZONTAL)
         vbox1.Add(splitter, 1, wx.EXPAND)
-        splitter.AppendWindow(lpanel, 200)
+        splitter.AppendWindow(self.lpanel, 200)
         splitter.AppendWindow(rpanel)
         self.SetSizer(vbox1)
-       
+        
+        self.splitter = splitter
         self.Centre()
         self.Show(True)
         

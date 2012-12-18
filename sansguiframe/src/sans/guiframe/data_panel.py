@@ -34,9 +34,10 @@ from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.gui_style import GUIFRAME
 from sans.guiframe.events import NewBatchEvent
 from sans.dataloader.loader import Loader
-from sans.guiframe.local_perspectives.plotting.masking \
-    import FloatPanel as QucikPlotDialog
-
+#from sans.guiframe.local_perspectives.plotting.masking \
+#    import FloatPanel as QucikPlotDialog
+from sans.guiframe.local_perspectives.plotting.SimplePlot import PlotFrame \
+        as QucikPlotDialog
 import sans.guiframe.config as config
  
 extension_list = []
@@ -446,10 +447,16 @@ class DataPanel(ScrolledPanel, PanelBase):
         if data.__class__.__name__ == "Data2D":
             dimension = 2
         else:
-            dimension = 1
-        panel = QucikPlotDialog(base=self, data=data, 
-                                dimension=dimension, id=wx.NewId())
-        panel.ShowModal()    
+            dimension = 1 
+        #panel = QucikPlotDialog(base=self, data=data, 
+        #                        dimension=dimension, id=wx.NewId())
+        frame = QucikPlotDialog(self, -1, "Plot " + data.name, 'log_{10}')
+        self.parent.put_icon(frame)
+        frame.add_plot(data)
+        #frame.SetTitle(title)
+        frame.Show(True)
+        frame.SetFocus()
+        #panel.ShowModal()    
     
     def on_data_info(self, event):
         """

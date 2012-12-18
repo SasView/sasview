@@ -69,10 +69,12 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         ## parameters with orientation
         self.orientation_params = [ORIENTATION_PARAMS]
 
+        ## parameters with magnetism
+        self.magnetic_params = [MAGNETIC_PARAMS]
+
         self.category = [CATEGORY]
         self.multiplicity_info = [MULTIPLICITY_INFO]
         
-
     def __setstate__(self, state):
         """
         restore the state of a model from pickle
@@ -91,7 +93,6 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         """ Return a identical copy of self """
         return self._clone([PYTHONCLASS]())   
        	
-   
     def run(self, x=0.0):
         """ 
         Evaluate the model
@@ -101,7 +102,6 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         :return: scattering function P(q)
         
         """
-        
         return [CPYTHONCLASS].run(self, x)
    
     def runXY(self, x=0.0):
@@ -113,7 +113,6 @@ class [PYTHONCLASS]([CPYTHONCLASS], BaseComponent):
         :return: scattering function P(q)
         
         """
-        
         return [CPYTHONCLASS].runXY(self, x)
         
     def evalDistribution(self, x):

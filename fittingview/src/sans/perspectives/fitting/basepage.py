@@ -146,6 +146,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.disp_cb_dict = {}
         ## smearer object
         self.enable2D = False
+        self._has_magnetic = False
+        self.magnetic_on = False
         self.is_mac = ON_MAC
         self.formfactorbox = None
         self.structurebox = None
@@ -1228,6 +1230,11 @@ class BasicPage(ScrolledPanel, PanelBase):
             self.set_data(data)
             
         self.enable2D = state.enable2D
+        try:
+            self.magnetic_on = state.magnetic_on
+        except:
+            # Backward compatibility (for older state files)
+            self.magnetic_on = False
         self.engine_type = state.engine_type
 
         self.disp_cb_dict = state.disp_cb_dict
@@ -2266,7 +2273,11 @@ class BasicPage(ScrolledPanel, PanelBase):
             else:
                 self.model = None
                 return self.model
-            
+        # check if model has magnetic parameters
+        if len(self.model.magnetic_params) > 0:
+            self._has_magnetic = True 
+        else:
+            self._has_magnetic = False  
         ## post state to fit panel
         self.state.parameters = []
         self.state.model = self.model
@@ -2950,6 +2961,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         else:
             name = self.formfactorbox.GetValue()
         frame = HelpWindow(None, -1, pageToOpen=model_path)
+        # If model name exists and model is not a custom model
+        #mod_cat = self.categorybox.GetStringSelection()
         if frame.rhelp.HasAnchor(name):
             frame.Show(True)
             frame.rhelp.ScrollToAnchor(name)
@@ -2966,6 +2979,60 @@ class BasicPage(ScrolledPanel, PanelBase):
             else:
                 frame.Show(True)
 
+    def _on_mag_help(self, event):    
+        """
+        Magnetic angles help panel
+        """
+        from sans.perspectives.fitting.help_panel import  HelpWindow
+        # Get models help model_function path
+        #import sans.perspectives.fitting as fitmedia
+        from sans.models import get_data_path
+
+        media = get_data_path(media='media')
+        path = os.path.join(media, 'img', "M_angles_pic.bmp") 
+        name = "Polar/Magnetic Angles"
+        frame = HelpWindow(None, -1,  
+                           title=' Help: Polarization/Magnetization Angles',  
+                           pageToOpen=path, size=(865, 450))   
+        try: 
+            frame.splitter.DetachWindow(frame.lpanel)
+            # Display only the right side one
+            frame.lpanel.Hide() 
+            frame.Show(True)
+        except:
+            frame.Destroy() 
+            msg = 'Display Error\n'
+            info = "Info"
+            wx.MessageBox(msg, info)
+
+    def _on_mag_on(self, event):    
+        """
+        Magnetic Parameters ON/OFF
+        """
+        button = event.GetEventObject()
+
+        if button.GetLabel().count('ON') > 0:
+            self.magnetic_on = True
+            button.SetLabel("Magnetic OFF")
+            m_value = 1.0e-06
+            for key in self.model.magnetic_params:
+                if key.count('M0') > 0:
+                    self.model.setParam(key, m_value)
+                    m_value += 0.5e-06
+        else:
+            self.magnetic_on = False
+            button.SetLabel("Magnetic ON")
+            for key in self.model.magnetic_params:
+                if key.count('M0') > 0:
+                    #reset mag value to zero fo safety
+                    self.model.setParam(key, 0.0)
+                    
+        self.Show(False)    
+        self.set_model_param_sizer(self.model)
+        #self._set_sizer_dispersion() 
+        self.state.magnetic_on = self.magnetic_on
+        self.SetupScrolling()
+        self.Show(True)
             
     def on_pd_help_clicked(self, event):
         """
@@ -3423,7 +3490,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             for model in self.model_list_box[category]:
                 str_m = str(model).split(".")[0]
                 self.model_box.Append(str_m)
-            print 'but not here'
 
         else:
             for (model,enabled) in sorted(self.master_category_dict[category],

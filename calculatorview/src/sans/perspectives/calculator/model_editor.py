@@ -10,8 +10,8 @@
 import wx
 import sys
 import os
+import math
 from wx.py.editwindow import EditWindow
-import subprocess
 
 if sys.platform.count("win32") > 0:
     FONT_VARIANT = 0
@@ -23,7 +23,7 @@ else:
     PNL_HITE = 350
 M_NAME = 'Model'
 EDITOR_WIDTH = 800
-EDITOR_HEIGTH = 720
+EDITOR_HEIGTH = 735
 PANEL_WIDTH = 500
 _BOX_WIDTH = 55
 
@@ -529,6 +529,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.msg_sizer = None
         self.warning = ""
         self._description = "New Custom Model"
+        self.function_tcl = None
         #self._default_save_location = os.getcwd()
         self._do_layout()
         #self.bt_apply.Disable()
@@ -545,6 +546,7 @@ class EditorPanel(wx.ScrolledWindow):
         self.desc_sizer = wx.BoxSizer(wx.VERTICAL)
         self.param_sizer = wx.BoxSizer(wx.VERTICAL)
         self.function_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.func_horizon_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.msg_sizer = wx.BoxSizer(wx.HORIZONTAL)
         
@@ -591,6 +593,7 @@ class EditorPanel(wx.ScrolledWindow):
         Do the layout for parameter related widgets
         """
         param_txt = wx.StaticText(self, -1, 'Fit Parameters (if any): ') 
+        
         param_tip = "#Set the parameters and initial values.\n"
         param_tip += "#Example:\n"
         param_tip += "A = 1\nB = 1"
@@ -600,10 +603,10 @@ class EditorPanel(wx.ScrolledWindow):
                             wx.DefaultSize, wx.CLIP_CHILDREN|wx.SUNKEN_BORDER)
         self.param_tcl.setDisplayLineNumbers(True)
         self.param_tcl.SetToolTipString(param_tip)
+
         self.param_sizer.AddMany([(param_txt, 0, wx.LEFT, 10),
                         (self.param_tcl, 1, wx.EXPAND|wx.ALL, 10)])
-
-   
+                
     def _layout_function(self):
         """
         Do the layout for function related widgets
@@ -615,12 +618,20 @@ class EditorPanel(wx.ScrolledWindow):
         hint_function += "else:\n"
         hint_function += "    y = A + B * cos(2 * pi * x)\n"
         hint_function += "return y\n"
+        math_txt = wx.StaticText(self, -1, '*Useful math functions: ')
+        math_combo = self._fill_math_combo()
+        
         id  = wx.NewId() 
         self.function_tcl = EditWindow(self, id, wx.DefaultPosition, 
                             wx.DefaultSize, wx.CLIP_CHILDREN|wx.SUNKEN_BORDER)
         self.function_tcl.setDisplayLineNumbers(True)
         self.function_tcl.SetToolTipString(hint_function)
-        self.function_sizer.Add(function_txt, 0, wx.LEFT, 10)
+        
+        self.func_horizon_sizer.Add(function_txt)
+        self.func_horizon_sizer.Add(math_txt, 0, wx.LEFT, 250)
+        self.func_horizon_sizer.Add(math_combo, 0, wx.LEFT, 10)
+
+        self.function_sizer.Add(self.func_horizon_sizer, 0, wx.LEFT, 10)
         self.function_sizer.Add( self.function_tcl, 1, wx.EXPAND|wx.ALL, 10)
         
     def _layout_msg(self):
@@ -681,7 +692,41 @@ class EditorPanel(wx.ScrolledWindow):
                                          wx.EXPAND|wx.ALL, 5)])
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
-    
+
+    def _fill_math_combo(self):
+        """
+        Fill up the math combo box
+        """
+        self.math_combo = wx.ComboBox(self, -1, size=(100, -1), 
+                                      style=wx.CB_READONLY) 
+        for item in dir(math):
+            if item.count("_") < 1:
+                try:
+                    exec "float(math.%s)"% item
+                    self.math_combo.Append(str(item))
+                except:
+                    self.math_combo.Append(str(item) + "()" )
+        self.math_combo.Bind(wx.EVT_COMBOBOX, self._on_math_select)
+        self.math_combo.SetSelection(0)
+        return self.math_combo
+        
+    def _on_math_select(self, event):
+        """
+        On math selection on ComboBox
+        """
+        event.Skip()
+        label = self.math_combo.GetLabel() 
+        self.function_tcl.SetFocus()
+        # Put the text at the cursor position
+        pos = self.function_tcl.GetCurrentPos()
+        self.function_tcl.InsertText(pos, label)  
+        # Put the cursor at appropriate postion
+        length = len(label)
+        if label[-1] == ')':
+            length -= 1
+        f_pos = pos + length
+        self.function_tcl.GotoPos(f_pos)   
+
     def get_notes(self):
         """
         return notes
@@ -1070,7 +1115,8 @@ class Model(Model1DPlugin):
 
         ## Parameter details [units, min, max]
         self.details = {}
-        
+        ## Magnetic Panrameters
+        self.magnetic_params = []
         # non-fittable parameters
         self.non_fittable = p_model1.non_fittable  
         self.non_fittable += p_model2.non_fittable  
@@ -1104,6 +1150,16 @@ class Model(Model1DPlugin):
             new_item = "p2_" + item
             if not new_item in self.orientation_params:
                 self.orientation_params.append(new_item)
+        ## magnetic params
+        for item in self.p_model1.magnetic_params:
+            new_item = "p1_" + item
+            if not new_item in self.magnetic_params:
+                self.magnetic_params.append(new_item)
+            
+        for item in self.p_model2.magnetic_params:
+            new_item = "p2_" + item
+            if not new_item in self.magnetic_params:
+                self.magnetic_params.append(new_item)
         # get multiplicity if model provide it, else 1.
         try:
             multiplicity1 = p_model1.multiplicity

@@ -129,7 +129,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         i += 1
         _labels['Square'] = i
         i += 1
-        _labels['Diamond'] = i
+        _labels['diamond'] = i
         i += 1
         _labels['Diamond'] = i
         i += 1

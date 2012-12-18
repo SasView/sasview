@@ -27,6 +27,7 @@ using namespace std;
 extern "C" {
 	#include "libCylinder.h"
 	#include "libStructureFactor.h"
+	#include "libmultifunc/libfunc.h"
 }
 #include "cylinder.h"
 
@@ -40,6 +41,15 @@ typedef struct {
     double background;
     double cyl_theta;
     double cyl_phi;
+    double M0_sld_cyl;
+    double M_theta_cyl;
+    double M_phi_cyl;
+    double M0_sld_solv;
+    double M_theta_solv;
+    double M_phi_solv;
+    double Up_frac_i;
+	double Up_frac_f;
+	double Up_theta;
 } CylinderParameters;
 
 CylinderModel :: CylinderModel() {
@@ -53,6 +63,15 @@ CylinderModel :: CylinderModel() {
 	background = Parameter(0.0);
 	cyl_theta  = Parameter(0.0, true);
 	cyl_phi    = Parameter(0.0, true);
+	M0_sld_cyl = Parameter(0.0e-6);
+	M_theta_cyl = Parameter(0.0);
+	M_phi_cyl = Parameter(0.0); 
+	M0_sld_solv = Parameter(0.0e-6);
+	M_theta_solv = Parameter(0.0);
+	M_phi_solv = Parameter(0.0); 
+	Up_frac_i = Parameter(0.5); 
+	Up_frac_f = Parameter(0.5);
+	Up_theta = Parameter(0.0);
 }
 
 /**
@@ -121,26 +140,31 @@ double CylinderModel :: operator()(double q) {
  * @return: function value
  */
 static double cylinder_analytical_2D_scaled(CylinderParameters *pars, double q, double q_x, double q_y) {
-  double cyl_x, cyl_y, cyl_z;
-  double q_z;
-  double alpha, vol, cos_val;
-  double answer;
-  //convert angle degree to radian
-  double pi = 4.0*atan(1.0);
-  double theta = pars->cyl_theta * pi/180.0;
-  double phi = pars->cyl_phi * pi/180.0;
+    double cyl_x, cyl_y;//, cyl_z;
+    //double q_z;
+    double alpha, vol, cos_val;
+    double answer = 0.0;
+    double form = 0.0;
+    //convert angle degree to radian
+    double pi = 4.0*atan(1.0);
+    double theta = pars->cyl_theta * pi/180.0;
+    double phi = pars->cyl_phi * pi/180.0;
+    double sld_solv = pars->sldSolv;
+    double sld_cyl = pars->sldCyl;
+    double m_max = pars->M0_sld_cyl;
+    double m_max_solv = pars->M0_sld_solv;
+    double contrast = 0.0;
 
     // Cylinder orientation
-    cyl_x = sin(theta) * cos(phi);
-    cyl_y = sin(theta) * sin(phi);
-    cyl_z = cos(theta);
-
+	cyl_x = cos(theta) * cos(phi);
+    cyl_y = sin(theta);
+    //cyl_z = -cos(theta) * sin(phi);
     // q vector
-    q_z = 0.0;
+    //q_z = 0.0;
 
     // Compute the angle btw vector q and the
     // axis of the cylinder
-    cos_val = cyl_x*q_x + cyl_y*q_y + cyl_z*q_z;
+    cos_val = cyl_x*q_x + cyl_y*q_y;// + cyl_z*q_z;
 
     // The following test should always pass
     if (fabs(cos_val)>1.0) {
@@ -156,26 +180,67 @@ static double cylinder_analytical_2D_scaled(CylinderParameters *pars, double q, 
   	alpha = 1.0e-26;
   	}
   // Call the IGOR library function to get the kernel
-  answer = CylKernel(q, pars->radius, pars->length/2.0, alpha) / sin(alpha);
+  //answer = CylKernel(q, pars->radius, pars->length/2.0, alpha) / sin(alpha);
 
-  // Multiply by contrast^2
-  answer *= (pars->sldCyl - pars->sldSolv)*(pars->sldCyl - pars->sldSolv);
+    // Call the IGOR library function to get the kernel
+    form = CylKernel(q, pars->radius, pars->length/2.0, alpha) / sin(alpha);
 
-  //normalize by cylinder volume
-  //NOTE that for this (Fournet) definition of the integral, one must MULTIPLY by Vcyl
+	if (m_max < 1.0e-32 && m_max_solv < 1.0e-32){
+		// Multiply by contrast^2
+		contrast = (pars->sldCyl - pars->sldSolv);
+  		answer = contrast * contrast * form;
+	}
+	else{
+		double qx = q_x;
+		double qy = q_y;
+		double s_theta = pars->Up_theta;
+		double m_phi = pars->M_phi_cyl;
+		double m_theta = pars->M_theta_cyl;
+		double m_phi_solv = pars->M_phi_solv;
+		double m_theta_solv = pars->M_theta_solv;
+		double in_spin = pars->Up_frac_i;
+		double out_spin = pars->Up_frac_f;
+		polar_sld p_sld;
+		polar_sld p_sld_solv;
+		p_sld = cal_msld(1, qx, qy, sld_cyl, m_max, m_theta, m_phi, 
+			 			in_spin, out_spin, s_theta);
+		p_sld_solv = cal_msld(1, qx, qy, sld_solv, m_max_solv, m_theta_solv, m_phi_solv, 
+			 			in_spin, out_spin, s_theta);
+		//up_up	
+		if (in_spin > 0.0 && out_spin > 0.0){			 
+			answer += ((p_sld.uu- p_sld_solv.uu) * (p_sld.uu- p_sld_solv.uu) * form);
+			}
+		//down_down
+		if (in_spin < 1.0 && out_spin < 1.0){
+			answer += ((p_sld.dd - p_sld_solv.dd) * (p_sld.dd - p_sld_solv.dd) * form);
+			}
+		//up_down
+		if (in_spin > 0.0 && out_spin < 1.0){
+			answer += ((p_sld.re_ud - p_sld_solv.re_ud) * (p_sld.re_ud - p_sld_solv.re_ud) * form);
+			answer += ((p_sld.im_ud - p_sld_solv.im_ud) * (p_sld.im_ud - p_sld_solv.im_ud) * form);
+			}
+		//down_up	
+		if (in_spin < 1.0 && out_spin > 0.0){
+			answer += ((p_sld.re_du - p_sld_solv.re_du) * (p_sld.re_du - p_sld_solv.re_du) * form);
+			answer += ((p_sld.im_du - p_sld_solv.im_du) * (p_sld.im_du - p_sld_solv.im_du) * form);
+			}
+	}
+
+    //normalize by cylinder volume
+    //NOTE that for this (Fournet) definition of the integral, one must MULTIPLY by Vcyl
     vol = acos(-1.0) * pars->radius * pars->radius * pars->length;
-  answer *= vol;
+    answer *= vol;
 
-  //convert to [cm-1]
-  answer *= 1.0e8;
+    //convert to [cm-1]
+    answer *= 1.0e8;
 
-  //Scale
-  answer *= pars->scale;
+    //Scale
+    answer *= pars->scale;
 
-  // add in the background
-  answer += pars->background;
+    // add in the background
+    answer += pars->background;
 
-  return answer;
+    return answer;
 }
 
 /**
@@ -207,7 +272,16 @@ double CylinderModel :: operator()(double qx, double qy) {
 	dp.background = 0.0;
 	dp.cyl_theta  = cyl_theta();
 	dp.cyl_phi    = cyl_phi();
-
+	dp.Up_theta =  Up_theta();
+	dp.M_phi_cyl =  M_phi_cyl();
+	dp.M_theta_cyl =  M_theta_cyl();
+	dp.M0_sld_cyl =  M0_sld_cyl();
+	dp.M_phi_solv =  M_phi_solv();
+	dp.M_theta_solv =  M_theta_solv();
+	dp.M0_sld_solv =  M0_sld_solv();
+	dp.Up_frac_i =  Up_frac_i();
+	dp.Up_frac_f =  Up_frac_f();
+	
 	// Get the dispersion points for the radius
 	vector<WeightPoint> weights_rad;
 	radius.get_weights(weights_rad);
@@ -254,7 +328,7 @@ double CylinderModel :: operator()(double qx, double qy) {
 						* cylinder_analytical_2DXY(&dp, qx, qy)
 						*pow(weights_rad[i].value,2)*weights_len[j].value;
 					if (weights_theta.size()>1) {
-						_ptvalue *= fabs(sin(weights_theta[k].value*pi/180.0));
+						_ptvalue *= fabs(cos(weights_theta[k].value*pi/180.0));
 					}
 					sum += _ptvalue;
 					//Find average volume

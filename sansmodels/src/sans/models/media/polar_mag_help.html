@@ -1,0 +1,102 @@
+<body>
+<br>
+<p><a name="magnetic"></a><strong><span style="font-size: 14pt;"> Polarization and Magnetic Scattering</span></strong></p>
+<br>
+<br>
+The magnetic scattering is implemented in five (2D) models, SphereModel, CoreShellModel, 
+CoreMultiShellModel, CylinderModel, and ParallelepipedModel. 
+In general, the scattering length density (SLD) in each regions where the SLD (=&#946;)
+ is uniform, is a combination of the nuclear and magnetic SLDs 
+and depends on the spin states of the neutrons as follows:
+<br>
+<br>
+For magnetic scattering, only the magnetization component, <b>M</b><sub>perp</sub>, 
+perpendicular to the scattering vector <b>Q</b> contributes to the the magnetic 
+scattering length. (Figure below).
+<p>
+<img src="img/mag_vector.bmp"/>
+</p>
+<br>
+The magnetic scattering length density is then
+<p>
+<img src="img/dm_eq.gif"/>
+</p>
+<br>
+where &#947; = -1.913 the gyromagnetic ratio,  	&#956;<sub>B</sub> is the Bohr magneton, 
+r<sub>0</sub> is the classical radius of electron, 
+and <b>&#963;</b> is the Pauli spin.
+<br>
+For polarized neutron, the magnetic scattering is depending on the spin states.
+Let's consider that the incident neutrons are polarized parallel (+)/anti-parallel 
+(&#8211;) to the x' axis (See both Figures above).
+The possible out-coming states then are + and - states for both incident states.
+<br>
+ - Non-spin-flips:  	(+ +) and  	(- -)
+<br>
+ - Spin-flips:  	(+ -) and  	(- +)
+<br>
+<p>
+<img src="img/M_angles_pic.bmp"/>
+</p>
+<br>
+<br>
+Now, let's assume that the angles of the <b>Q</b> vector and the spin-axis (x') against x-axis 
+are &#966; and  &#952;<sub>up</sub>, respectively (See Figure above).
+Then, depending upon the polarization (spin) state of neutrons, the scattering length
+densities , including the nuclear scattering length density (&#946; <sub>N</sub>) are given as, for non-spin-flips,
+<p>
+<img src="img/sld1.gif"/>
+</p>
+<br>
+<br>
+for spin-flips,
+<p>
+<img src="img/sld2.gif"/>
+</p>
+<br>
+<br>
+where
+<p>
+<img src="img/mxp.gif"/>
+</p>
+<p>
+<img src="img/myp.gif"/>
+</p>
+<p>
+<img src="img/mzp.gif"/>
+</p>
+<p>
+<img src="img/mqx.gif"/>
+</p>
+<p>
+<img src="img/mqy.gif"/>
+</p>
+<br>
+<br>
+Here, the M<sub>0x</sub>, M<sub>0y</sub> and M<sub>0z</sub> are the x, y and z 
+components of the magnetization vector given in the xyz lab frame. 
+The angles of the magnetization, &#952;<sub>M</sub> and &#966;<sub>M</sub> as defined in the 
+Figure (above),
+<p>
+<img src="img/m0x_eq.gif"/>
+</p>
+<p>
+<img src="img/m0y_eq.gif"/>
+</p>
+<p>
+<img src="img/m0z_eq.gif"/>
+</p>
+<br>
+<p>
+The user input parameters are M0_sld = D<sub>M</sub>M<sub>0</sub>, Up_theta = &#952;<sub>up</sub>, 
+M_theta = &#952;<sub>M</sub>, and M_phi = &#966;<sub>M</sub>.
+The 'Up_frac_i' and 'Up_frac_f' are the ratio, (spin up) /(spin up + spin down) neutrons 
+before the sample and at the analyzer, respectively.
+</p>
+<br>
+*Note: The values of the 'Up_frac_i' and 'Up_frac_f' must be in the range between 0 and 1.
+</body>
+
+
+
+

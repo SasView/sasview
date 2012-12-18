@@ -56,8 +56,8 @@ typedef struct {
  */
 static double spheroid_analytical_2D_scaled(SpheroidParameters *pars, double q, double q_x, double q_y) {
 
-  double cyl_x, cyl_y, cyl_z;
-  double q_z;
+  double cyl_x, cyl_y;//, cyl_z;
+  //double q_z;
   double alpha, vol, cos_val;
   double answer;
   double Pi = 4.0*atan(1.0);
@@ -69,19 +69,19 @@ static double spheroid_analytical_2D_scaled(SpheroidParameters *pars, double q, 
 
 
   // ellipsoid orientation, the axis of the rotation is consistent with the ploar axis.
-  cyl_x = sin(theta) * cos(phi);
-  cyl_y = sin(theta) * sin(phi);
-  cyl_z = cos(theta);
+  cyl_x = cos(theta) * cos(phi);
+  cyl_y = sin(theta);
+  //cyl_z = -cos(theta) * sin(phi);
   //del sld
   sldcs = pars->sld_core - pars->sld_shell;
   sldss = pars->sld_shell- pars->sld_solvent;
 
   // q vector
-  q_z = 0;
+  //q_z = 0;
 
   // Compute the angle btw vector q and the
   // axis of the cylinder
-  cos_val = cyl_x*q_x + cyl_y*q_y + cyl_z*q_z;
+  cos_val = cyl_x*q_x + cyl_y*q_y;// + cyl_z*q_z;
 
   // The following test should always pass
   if (fabs(cos_val)>1.0) {
@@ -335,7 +335,7 @@ double CoreShellEllipsoidModel :: operator()(double qx, double qy) {
                   * spheroid_analytical_2DXY(&dp, qx, qy)
               * pow(weights_equat_shell[k].value,2)*weights_polar_shell[l].value;
               if (weights_theta.size()>1) {
-                _ptvalue *= fabs(sin(weights_theta[m].value*pi/180.0));
+                _ptvalue *= fabs(cos(weights_theta[m].value*pi/180.0));
               }
               sum += _ptvalue;
               //Find average volume

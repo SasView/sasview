@@ -20,8 +20,8 @@
 		f(q)^(2)*sin(alpha)*dalpha+ bkg
 		</text>
 	[FIXED]= <text>cyl_phi.width; cyl_theta.width; length.width;radius.width</text>
-	[ORIENTATION_PARAMS]= <text>cyl_phi; cyl_theta; cyl_phi.width; cyl_theta.width</text>
-
+	[ORIENTATION_PARAMS]= <text>cyl_phi; cyl_theta; cyl_phi.width; cyl_theta.width;M0_sld_cyl; M_theta_cyl; M_phi_cyl;M0_sld_solv; M_theta_solv; M_phi_solv; Up_frac_i; Up_frac_f; Up_theta;</text>
+	[MAGNETIC_PARAMS]= <text> M0_sld_cyl; M_theta_cyl; M_phi_cyl; M0_sld_solv; M_theta_solv; M_phi_solv; Up_frac_i; Up_frac_f; Up_theta; </text>
 
  **/
 class CylinderModel{
@@ -59,6 +59,42 @@ public:
   /// Orientation of the cylinder in the plane of the detector [deg]
   //  [DEFAULT]=cyl_phi=60.0 [deg]
   Parameter cyl_phi;
+
+  /// M0_sld_cyl
+  //  [DEFAULT]=M0_sld_cyl=0.0e-6 [1/A^(2)]
+  Parameter M0_sld_cyl;
+
+  /// M_theta_cyl
+  //  [DEFAULT]=M_theta_cyl=0.0 [deg]
+  Parameter M_theta_cyl;
+
+  /// M_phi_cyl
+  //  [DEFAULT]=M_phi_cyl=0.0 [deg]
+  Parameter M_phi_cyl;
+
+  /// M0_sld_solv
+  //  [DEFAULT]=M0_sld_solv=0.0e-6 [1/A^(2)]
+  Parameter M0_sld_solv;
+
+  /// M_theta_solv
+  //  [DEFAULT]=M_theta_solv=0.0 [deg]
+  Parameter M_theta_solv;
+
+  /// M_phi_solv
+  //  [DEFAULT]=M_phi_solv=0.0 [deg]
+  Parameter M_phi_solv;
+
+  /// Up_frac_i
+  //  [DEFAULT]=Up_frac_i=0.5 [u/(u+d)]
+  Parameter Up_frac_i;
+
+  /// Up_frac_f
+  //  [DEFAULT]=Up_frac_f=0.5 [u/(u+d)]
+  Parameter Up_frac_f;
+
+  /// Up_theta
+  //  [DEFAULT]=Up_theta=0.0 [deg]
+  Parameter Up_theta;
 
   // Constructor
   CylinderModel();

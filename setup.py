@@ -218,6 +218,7 @@ includedir  = os.path.join("sansmodels", "include")
 igordir = os.path.join("sansmodels", "src", "libigor")
 c_model_dir = os.path.join("sansmodels", "src", "c_models")
 smear_dir  = os.path.join("sansmodels", "src", "c_smearer")
+gen_dir  = os.path.join("sansmodels", "src", "c_gen")
 wrapper_dir  = os.path.join("sansmodels", "src", "python_wrapper", "generated")
 model_dir = os.path.join("sansmodels", "src", "sans","models")
 
@@ -281,15 +282,10 @@ packages.extend(["sans","sans.models","sans.models.sans_extension"])
     
 smearer_sources = [os.path.join(smear_dir, "smearer.cpp"),
                   os.path.join(smear_dir, "smearer_module.cpp")]
-
-
-
-
-
-
+geni_sources = [os.path.join(gen_dir, "sld2i_module.cpp")]
 if os.name=='nt':
     smearer_sources.append(os.path.join(igordir, "winFuncs.c"))
-
+    geni_sources.append(os.path.join(igordir, "winFuncs.c"))
 ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
                                 sources=model_sources,                 
                                 include_dirs=[igordir, includedir, 
@@ -307,7 +303,20 @@ ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
                                                 "smearer2d_helper_module.cpp"),
                                          os.path.join(smear_dir, 
                                                 "smearer2d_helper.cpp"),],
-                              include_dirs=[smear_dir,numpy_incl_path],
+                              include_dirs=[smear_dir, numpy_incl_path],
+                              ),
+                    
+                    Extension("sans.models.sans_extension.sld2i",
+                              sources = [os.path.join(gen_dir, 
+                                                "sld2i_module.cpp"),
+                                         os.path.join(gen_dir, 
+                                                "sld2i.cpp"),
+                                         os.path.join(c_model_dir, 
+                                                "libfunc.c"),
+                                         os.path.join(c_model_dir, 
+                                                "librefl.c"),],
+                              include_dirs=[gen_dir, includedir, 
+                                            c_model_dir, numpy_incl_path],
                               )
                     ] )
         

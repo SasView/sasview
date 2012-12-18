@@ -45,7 +45,7 @@ typedef struct {
 } EllipticalCylinderParameters;
 
 
-static double elliptical_cylinder_kernel(EllipticalCylinderParameters *pars, double q, double alpha, double nu) {
+static double elliptical_cylinder_kernel(EllipticalCylinderParameters *pars, double q, double cos_val, double cos_nu, double cos_mu) {
   double qr;
   double qL;
   double Be,Si;
@@ -54,8 +54,8 @@ static double elliptical_cylinder_kernel(EllipticalCylinderParameters *pars, dou
 
   r_major = pars->r_ratio * pars->r_minor;
 
-  qr = q*sin(alpha)*sqrt( r_major*r_major*sin(nu)*sin(nu) + pars->r_minor*pars->r_minor*cos(nu)*cos(nu) );
-  qL = q*pars->length*cos(alpha)/2.0;
+  qr = q*sqrt( r_major*r_major*cos_nu*cos_nu + pars->r_minor*pars->r_minor*cos_mu*cos_mu );
+  qL = q*pars->length*cos_val/2.0;
 
   if (qr==0){
     Be = 0.5;
@@ -82,11 +82,11 @@ static double elliptical_cylinder_kernel(EllipticalCylinderParameters *pars, dou
  * @return: function value
  */
 static double elliptical_cylinder_analytical_2D_scaled(EllipticalCylinderParameters *pars, double q, double q_x, double q_y) {
-  double cyl_x, cyl_y, cyl_z;
-  double ell_x, ell_y;
-  double q_z;
-  double alpha, vol, cos_val;
-  double nu, cos_nu;
+  double cyl_x, cyl_y;//, cyl_z;
+  double ella_x, ella_y, ellb_x, ellb_y;
+  //double q_z;
+  double vol, cos_val;
+  double cos_mu, cos_nu;
   double answer;
   //convert angle degree to radian
   double pi = 4.0*atan(1.0);
@@ -95,26 +95,16 @@ static double elliptical_cylinder_analytical_2D_scaled(EllipticalCylinderParamet
   double psi = pars->cyl_psi * pi/180.0;
 
   //Cylinder orientation
-  cyl_x = sin(theta) * cos(phi);
-  cyl_y = sin(theta) * sin(phi);
-  cyl_z = cos(theta);
+  cyl_x = cos(theta) * cos(phi);
+  cyl_y = sin(theta);
+  //cyl_z = -cos(theta) * sin(phi);
 
   // q vector
-  q_z = 0;
-
-  // Compute the angle btw vector q and the
-  // axis of the cylinder
-  cos_val = cyl_x*q_x + cyl_y*q_y + cyl_z*q_z;
-
-  // The following test should always pass
-  if (fabs(cos_val)>1.0) {
-    printf("cyl_ana_2D: Unexpected error: cos(alpha)>1\n");
-    return 0;
-  }
+  //q_z = 0;
 
   // Note: cos(alpha) = 0 and 1 will get an
   // undefined value from CylKernel
-  alpha = acos( cos_val );
+  //alpha = acos( cos_val );
 
   //ellipse orientation:
   // the elliptical corss section was transformed and projected
@@ -124,20 +114,33 @@ static double elliptical_cylinder_analytical_2D_scaled(EllipticalCylinderParamet
   // the wave vector q.
 
   //x- y- component on the detector plane.
-  ell_x =  cos(psi);
-  ell_y =  sin(psi);
+  ella_x =  -cos(phi)*sin(psi) * sin(theta)+sin(phi)*cos(psi);
+  ella_y =  sin(psi)*cos(theta);
+  ellb_x =  -sin(theta)*cos(psi)*cos(phi)-sin(psi)*sin(phi);
+  ellb_y =  cos(theta)*cos(psi);
+  
+  // Compute the angle btw vector q and the
+  // axis of the cylinder
+  cos_val = cyl_x*q_x + cyl_y*q_y;// + cyl_z*q_z;
 
   // calculate the axis of the ellipse wrt q-coord.
-  cos_nu = ell_x*q_x + ell_y*q_y;
-  nu = acos(cos_nu);
-
+  cos_nu = ella_x*q_x + ella_y*q_y;
+  cos_mu = ellb_x*q_x + ellb_y*q_y;
+  
   // The following test should always pass
-  if (fabs(cos_nu)>1.0) {
-    printf("cyl_ana_2D: Unexpected error: cos(nu)>1\n");
-    return 0;
+  if (fabs(cos_val)>1.0) {
+    //printf("cyl_ana_2D: Unexpected error: cos(alpha)>1\n");
+    cos_val = 1.0;
   }
-
-  answer = elliptical_cylinder_kernel(pars, q, alpha,nu);
+  if (fabs(cos_nu)>1.0) {
+    //printf("cyl_ana_2D: Unexpected error: cos(nu)>1\n");
+    cos_nu = 1.0;
+  }
+  if (fabs(cos_mu)>1.0) {
+    //printf("cyl_ana_2D: Unexpected error: cos(nu)>1\n");
+    cos_mu = 1.0;
+  }
+  answer = elliptical_cylinder_kernel(pars, q, cos_val, cos_nu, cos_mu);
 
   // Multiply by contrast^2
   answer *= (pars->sldCyl - pars->sldSolv) * (pars->sldCyl - pars->sldSolv);
@@ -346,7 +349,7 @@ double EllipticalCylinderModel :: operator()(double qx, double qy) {
               * weights_len[j].value
               * weights_rat[m].value;
               if (weights_theta.size()>1) {
-                _ptvalue *= fabs(sin(weights_theta[k].value*pi/180.0));
+                _ptvalue *= fabs(cos(weights_theta[k].value*pi/180.0));
               }
               sum += _ptvalue;
               //Find average volume

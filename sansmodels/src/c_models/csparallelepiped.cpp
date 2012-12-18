@@ -142,9 +142,9 @@ static double cspkernel(double dp[],double q, double ala, double alb, double alc
  */
 static double csparallelepiped_analytical_2D_scaled(CSParallelepipedParameters *pars, double q, double q_x, double q_y) {
   double dp[13];
-  double cparallel_x, cparallel_y, cparallel_z, bparallel_x, bparallel_y, parallel_x, parallel_y;
-  double q_z;
-  double alpha, cos_val_c, cos_val_b, cos_val_a, edgeA, edgeB, edgeC;
+  double cparallel_x, cparallel_y, bparallel_x, bparallel_y, parallel_x, parallel_y;
+  //double q_z;
+  double cos_val_c, cos_val_b, cos_val_a, edgeA, edgeB, edgeC;
 
   double answer;
   //convert angle degree to radian
@@ -175,42 +175,47 @@ static double csparallelepiped_analytical_2D_scaled(CSParallelepipedParameters *
 
 
   // parallelepiped c axis orientation
-  cparallel_x = sin(theta) * cos(phi);
-  cparallel_y = sin(theta) * sin(phi);
-  cparallel_z = cos(theta);
+  cparallel_x = cos(theta) * cos(phi);
+  cparallel_y = sin(theta);
+  //cparallel_z = -cos(theta) * sin(phi);
 
   // q vector
-  q_z = 0.0;
+  //q_z = 0.0;
 
   // Compute the angle btw vector q and the
   // axis of the parallelepiped
-  cos_val_c = cparallel_x*q_x + cparallel_y*q_y + cparallel_z*q_z;
-  alpha = acos(cos_val_c);
+  cos_val_c = cparallel_x*q_x + cparallel_y*q_y;// + cparallel_z*q_z;
+  //alpha = acos(cos_val_c);
 
   // parallelepiped a axis orientation
-  parallel_x = sin(psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)*sin(pars->parallel_psi);
-  parallel_y = cos(psi);//cos(pars->parallel_theta) * cos(pars->parallel_phi)*cos(pars->parallel_psi);
+  parallel_x = -cos(phi)*sin(psi) * sin(theta)+sin(phi)*cos(psi);
+  parallel_y = sin(psi)*cos(theta);
 
   cos_val_a = parallel_x*q_x + parallel_y*q_y;
 
 
 
   // parallelepiped b axis orientation
-  bparallel_x = sqrt(1.0-sin(theta)*cos(phi))*cos(psi);//cos(pars->parallel_theta) * cos(pars->parallel_phi)* cos(pars->parallel_psi);
-  bparallel_y = sqrt(1.0-sin(theta)*cos(phi))*sin(psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)* sin(pars->parallel_psi);
+  bparallel_x = -sin(theta)*cos(psi)*cos(phi)-sin(psi)*sin(phi);
+  bparallel_y = cos(theta)*cos(psi);
   // axis of the parallelepiped
-  cos_val_b = sin(acos(cos_val_a)) ;
-
-
+  cos_val_b = bparallel_x*q_x + bparallel_y*q_y;
 
   // The following test should always pass
   if (fabs(cos_val_c)>1.0) {
-    printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
-    return 0;
+    //printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
+    cos_val_c = 1.0;
   }
-
+  if (fabs(cos_val_a)>1.0) {
+    //printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
+    cos_val_a = 1.0;
+  }
+  if (fabs(cos_val_b)>1.0) {
+    //printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
+    cos_val_b = 1.0;
+  }
   // Call the IGOR library function to get the kernel
-  answer = cspkernel( dp,q, sin(alpha)*cos_val_a,sin(alpha)*cos_val_b,cos_val_c);
+  answer = cspkernel( dp, q, cos_val_a, cos_val_b, cos_val_c);
 
   //convert to [cm-1]
   answer *= 1.0e8;
@@ -433,7 +438,7 @@ double CSParallelepipedModel :: operator()(double qx, double qy) {
               * weights_longC[k].value;
 
               if (weights_parallel_theta.size()>1) {
-                _ptvalue *= fabs(sin(weights_parallel_theta[l].value*pi/180.0));
+                _ptvalue *= fabs(cos(weights_parallel_theta[l].value*pi/180.0));
               }
               sum += _ptvalue;
               //Find average volume

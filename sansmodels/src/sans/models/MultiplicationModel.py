@@ -35,7 +35,7 @@ class MultiplicationModel(BaseComponent):
         ##models 
         self.p_model = p_model
         self.s_model = s_model        
-       
+        self.magnetic_params = []
         ## dispersion
         self._set_dispersion()
         ## Define parameters
@@ -52,7 +52,8 @@ class MultiplicationModel(BaseComponent):
         ## parameters with orientation
         for item in self.p_model.orientation_params:
             self.orientation_params.append(item)
-            
+        for item in self.p_model.magnetic_params:  
+            self.magnetic_params.append(item) 
         for item in self.s_model.orientation_params:
             if not item in self.orientation_params:
                 self.orientation_params.append(item)

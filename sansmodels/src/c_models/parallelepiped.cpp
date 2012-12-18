@@ -28,6 +28,7 @@ using namespace std;
 extern "C" {
 	#include "libCylinder.h"
 	#include "libStructureFactor.h"
+	#include "libmultifunc/libfunc.h"
 }
 #include "parallelepiped.h"
 
@@ -43,6 +44,15 @@ typedef struct {
     double parallel_theta;
     double parallel_phi;
     double parallel_psi;
+    double M0_sld_pipe;
+    double M_theta_pipe;
+    double M_phi_pipe;
+    double M0_sld_solv;
+    double M_theta_solv;
+    double M_phi_solv;
+    double Up_frac_i;
+	double Up_frac_f;
+	double Up_theta;
 } ParallelepipedParameters;
 
 
@@ -84,67 +94,118 @@ static double pkernel(double a, double b,double c, double ala, double alb, doubl
  * @return: function value
  */
 static double parallelepiped_analytical_2D_scaled(ParallelepipedParameters *pars, double q, double q_x, double q_y) {
-  double cparallel_x, cparallel_y, cparallel_z, bparallel_x, bparallel_y, parallel_x, parallel_y;
-  double q_z;
-  double alpha, vol, cos_val_c, cos_val_b, cos_val_a, edgeA, edgeB, edgeC;
+  double cparallel_x, cparallel_y, bparallel_x, bparallel_y, parallel_x, parallel_y;
+  //double q_z;
+  double vol, cos_val_c, cos_val_b, cos_val_a, edgeA, edgeB, edgeC;
 
-  double answer;
+  double answer = 0.0;
+  double form = 0.0;
   double pi = 4.0*atan(1.0);
-
+  
   //convert angle degree to radian
   double theta = pars->parallel_theta * pi/180.0;
   double phi = pars->parallel_phi * pi/180.0;
   double psi = pars->parallel_psi * pi/180.0;
-
+  double sld_solv = pars->sldSolv;
+  double sld_pipe = pars->sldPipe;
+  double m_max = pars->M0_sld_pipe;
+  double m_max_solv = pars->M0_sld_solv;
+  double contrast = 0.0;
+    
   edgeA = pars->short_a;
   edgeB = pars->short_b;
   edgeC = pars->long_c;
 
 
     // parallelepiped c axis orientation
-    cparallel_x = sin(theta) * cos(phi);
-    cparallel_y = sin(theta) * sin(phi);
-    cparallel_z = cos(theta);
+    cparallel_x = cos(theta) * cos(phi);
+    cparallel_y = sin(theta);
+    //cparallel_z = -cos(theta) * sin(phi);
 
     // q vector
-    q_z = 0.0;
+    //q_z = 0.0;
 
     // Compute the angle btw vector q and the
     // axis of the parallelepiped
-    cos_val_c = cparallel_x*q_x + cparallel_y*q_y + cparallel_z*q_z;
-    alpha = acos(cos_val_c);
+    cos_val_c = cparallel_x*q_x + cparallel_y*q_y;// + cparallel_z*q_z;
+    //alpha = acos(cos_val_c);
 
     // parallelepiped a axis orientation
-    parallel_x = sin(psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)*sin(pars->parallel_psi);
-    parallel_y = cos(psi);//cos(pars->parallel_theta) * cos(pars->parallel_phi)*cos(pars->parallel_psi);
-
+    parallel_x = -cos(phi)*sin(psi) * sin(theta)+sin(phi)*cos(psi);
+    parallel_y = sin(psi)*cos(theta);
+	//parallel_z = sin(theta)*sin(phi)*sin(psi)+cos(phi)*cos(psi);
+	
     cos_val_a = parallel_x*q_x + parallel_y*q_y;
 
-
-
     // parallelepiped b axis orientation
-    bparallel_x = sqrt(1.0-sin(theta)*cos(phi))*cos(psi);//cos(pars->parallel_theta) * cos(pars->parallel_phi)* cos(pars->parallel_psi);
-    bparallel_y = sqrt(1.0-sin(theta)*cos(phi))*sin(psi);//cos(pars->parallel_theta) * sin(pars->parallel_phi)* sin(pars->parallel_psi);
+    bparallel_x = -sin(theta)*cos(psi)*cos(phi)-sin(psi)*sin(phi);
+    bparallel_y = cos(theta)*cos(psi);
+    //bparallel_z = sin(theta)*sin(phi)*cos(psi)-sin(psi)*cos(phi);
+    
     // axis of the parallelepiped
-    cos_val_b = sin(acos(cos_val_a)) ;
-
-
+    cos_val_b = bparallel_x*q_x + bparallel_y*q_y;
 
     // The following test should always pass
     if (fabs(cos_val_c)>1.0) {
-      printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
-      return 0;
+      //printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
+      cos_val_c = 1.0;
     }
-
+    if (fabs(cos_val_a)>1.0) {
+      //printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
+      cos_val_a = 1.0;
+    }
+    if (fabs(cos_val_b)>1.0) {
+      //printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
+      cos_val_b = 1.0;
+    }
   // Call the IGOR library function to get the kernel
-  answer = pkernel( q*edgeA, q*edgeB, q*edgeC, sin(alpha)*cos_val_a,sin(alpha)*cos_val_b,cos_val_c);
-
-  // Multiply by contrast^2
-  answer *= (pars->sldPipe - pars->sldSolv) * (pars->sldPipe - pars->sldSolv);
+  form = pkernel( q*edgeA, q*edgeB, q*edgeC, cos_val_a, cos_val_b, cos_val_c);
+  
+  if (m_max < 1.0e-32 && m_max_solv < 1.0e-32){
+      // Multiply by contrast^2
+      contrast = (pars->sldPipe - pars->sldSolv);
+ 	  answer = contrast * contrast * form;
+  }
+  else{
+	  double qx = q_x;
+	  double qy = q_y;
+	  double s_theta = pars->Up_theta;
+	  double m_phi = pars->M_phi_pipe;
+	  double m_theta = pars->M_theta_pipe;
+	  double m_phi_solv = pars->M_phi_solv;
+	  double m_theta_solv = pars->M_theta_solv;
+	  double in_spin = pars->Up_frac_i;
+	  double out_spin = pars->Up_frac_f;
+	  polar_sld p_sld;
+	  polar_sld p_sld_solv;
+	  p_sld = cal_msld(1, qx, qy, sld_pipe, m_max, m_theta, m_phi, 
+	  	 			in_spin, out_spin, s_theta);
+	  p_sld_solv = cal_msld(1, qx, qy, sld_solv, m_max_solv, m_theta_solv, m_phi_solv, 
+			 			in_spin, out_spin, s_theta);
+	  //up_up	
+	  if (in_spin > 0.0 && out_spin > 0.0){			 
+		  answer += ((p_sld.uu- p_sld_solv.uu) * (p_sld.uu- p_sld_solv.uu) * form);
+		  }
+	  //down_down
+	  if (in_spin < 1.0 && out_spin < 1.0){
+		  answer += ((p_sld.dd - p_sld_solv.dd) * (p_sld.dd - p_sld_solv.dd) * form);
+		  }
+	  //up_down
+	  if (in_spin > 0.0 && out_spin < 1.0){
+		  answer += ((p_sld.re_ud - p_sld_solv.re_ud) * (p_sld.re_ud - p_sld_solv.re_ud) * form);
+		  answer += ((p_sld.im_ud - p_sld_solv.im_ud) * (p_sld.im_ud - p_sld_solv.im_ud) * form);
+		  }
+	  //down_up	
+	  if (in_spin < 1.0 && out_spin > 0.0){
+		  answer += ((p_sld.re_du - p_sld_solv.re_du) * (p_sld.re_du - p_sld_solv.re_du) * form);
+		  answer += ((p_sld.im_du - p_sld_solv.im_du) * (p_sld.im_du - p_sld_solv.im_du) * form);
+		  }
+  }
+  
 
   //normalize by cylinder volume
   //NOTE that for this (Fournet) definition of the integral, one must MULTIPLY by Vparallel
-    vol = edgeA* edgeB * edgeC;
+  vol = edgeA* edgeB * edgeC;
   answer *= vol;
 
   //convert to [cm-1]
@@ -185,6 +246,15 @@ ParallelepipedModel :: ParallelepipedModel() {
 	parallel_theta  = Parameter(0.0, true);
 	parallel_phi    = Parameter(0.0, true);
 	parallel_psi    = Parameter(0.0, true);
+	M0_sld_pipe = Parameter(0.0e-6);
+	M_theta_pipe = Parameter(0.0);
+	M_phi_pipe = Parameter(0.0); 
+	M0_sld_solv = Parameter(0.0e-6);
+	M_theta_solv = Parameter(0.0);
+	M_phi_solv = Parameter(0.0); 
+	Up_frac_i = Parameter(0.5); 
+	Up_frac_f = Parameter(0.5);
+	Up_theta = Parameter(0.0);
 }
 
 /**
@@ -278,6 +348,15 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 	dp.parallel_theta  = parallel_theta();
 	dp.parallel_phi    = parallel_phi();
 	dp.parallel_psi    = parallel_psi();
+	dp.Up_theta =  Up_theta();
+	dp.M_phi_pipe =  M_phi_pipe();
+	dp.M_theta_pipe =  M_theta_pipe();
+	dp.M0_sld_pipe =  M0_sld_pipe();
+	dp.M_phi_solv =  M_phi_solv();
+	dp.M_theta_solv =  M_theta_solv();
+	dp.M0_sld_solv =  M0_sld_solv();
+	dp.Up_frac_i =  Up_frac_i();
+	dp.Up_frac_f =  Up_frac_f();
 
 
 	// Get the dispersion points for the short_edgeA
@@ -345,7 +424,7 @@ double ParallelepipedModel :: operator()(double qx, double qy) {
 								* weights_long_c[k].value;
 
 							if (weights_parallel_theta.size()>1) {
-								_ptvalue *= fabs(sin(weights_parallel_theta[l].value*pi/180.0));
+								_ptvalue *= fabs(cos(weights_parallel_theta[l].value*pi/180.0));
 							}
 							sum += _ptvalue;
 							//Find average volume

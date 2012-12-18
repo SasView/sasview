@@ -50,8 +50,8 @@ typedef struct {
  * @return: function value
  */
 static double ellipsoid_analytical_2D_scaled(EllipsoidParameters *pars, double q, double q_x, double q_y) {
-  double cyl_x, cyl_y, cyl_z;
-  double q_z;
+  double cyl_x, cyl_y;//, cyl_z;
+  //double q_z;
   double alpha, vol, cos_val;
   double answer;
   //convert angle degree to radian
@@ -60,16 +60,16 @@ static double ellipsoid_analytical_2D_scaled(EllipsoidParameters *pars, double q
   double phi = pars->axis_phi * pi/180.0;
 
   // Ellipsoid orientation
-  cyl_x = sin(theta) * cos(phi);
-  cyl_y = sin(theta) * sin(phi);
-  cyl_z = cos(theta);
+  cyl_x = cos(theta) * cos(phi);
+  cyl_y = sin(theta);
+  //cyl_z = -cos(theta) * sin(phi);
 
   // q vector
-  q_z = 0.0;
+  //q_z = 0.0;
 
   // Compute the angle btw vector q and the
   // axis of the cylinder
-  cos_val = cyl_x*q_x + cyl_y*q_y + cyl_z*q_z;
+  cos_val = cyl_x*q_x + cyl_y*q_y;// + cyl_z*q_z;
 
   // The following test should always pass
   if (fabs(cos_val)>1.0) {
@@ -251,7 +251,7 @@ double EllipsoidModel :: operator()(double qx, double qy) {
               * ellipsoid_analytical_2DXY(&dp, qx, qy)
           * pow(weights_rad_b[j].value,2) * weights_rad_a[i].value;
           if (weights_theta.size()>1) {
-            _ptvalue *= fabs(sin(weights_theta[k].value*pi/180.0));
+            _ptvalue *= fabs(cos(weights_theta[k].value*pi/180.0));
           }
           sum += _ptvalue;
           //Find average volume

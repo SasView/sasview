@@ -54,7 +54,7 @@ typedef struct {
 static double sc_analytical_2D_scaled(SCParameters *pars, double q, double q_x, double q_y) {
   double a3_x, a3_y, a3_z, a2_x, a2_y, a1_x, a1_y;
   double q_z;
-  double alpha, cos_val_a3, cos_val_a2, cos_val_a1;
+  double cos_val_a3, cos_val_a2, cos_val_a1;
   double a1_dot_q, a2_dot_q,a3_dot_q;
   double answer;
   double Pi = 4.0*atan(1.0);
@@ -79,41 +79,48 @@ static double sc_analytical_2D_scaled(SCParameters *pars, double q, double q_x, 
   latticeScale = (4.0/3.0)*Pi*(dp[1]*dp[1]*dp[1])/pow(aa,3.0);
   /// Angles here are respect to detector coordinate instead of against q coordinate(PRB 36, 3, 1754)
   // a3 axis orientation
-  a3_x = sin(theta) * cos(phi);//negative sign here???
-  a3_y = sin(theta) * sin(phi);
-  a3_z = cos(theta);
-
+  a3_x = cos(theta) * cos(phi);
+  a3_y = sin(theta);
+  //a3_z = -cos(theta) * sin(phi);
   // q vector
   q_z = 0.0;
 
   // Compute the angle btw vector q and the a3 axis
-  cos_val_a3 = a3_x*q_x + a3_y*q_y + a3_z*q_z;
-  alpha = acos(cos_val_a3);
-  //alpha = acos(cos_val_a3);
-  a3_dot_q = aa*q*cos_val_a3;
+  cos_val_a3 = a3_x*q_x + a3_y*q_y;// + a3_z*q_z;
+
   // a1 axis orientation
-  a1_x = sin(psi);
-  a1_y = cos(psi);
+  a1_x = -cos(phi)*sin(psi) * sin(theta)+sin(phi)*cos(psi);
+  a1_y = sin(psi)*cos(theta);
 
   cos_val_a1 = a1_x*q_x + a1_y*q_y;
-  a1_dot_q = aa*q*cos_val_a1*sin(alpha);
 
   // a2 axis orientation
-  a2_x = sqrt(1.0-sin(theta)*cos(phi))*cos(psi);
-  a2_y = sqrt(1.0-sin(theta)*cos(phi))*sin(psi);
+  a2_x = -sin(theta)*cos(psi)*cos(phi)-sin(psi)*sin(phi);
+  a2_y = cos(theta)*cos(psi);
   // a2 axis
-  cos_val_a2 =  sin(acos(cos_val_a1));//a2_x*q_x + a2_y*q_y;
-  a2_dot_q = aa*q*cos_val_a2*sin(alpha);
+  cos_val_a2 =  a2_x*q_x + a2_y*q_y;
 
   // The following test should always pass
   if (fabs(cos_val_a3)>1.0) {
-    printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
-    return 0;
+    //printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
+    cos_val_a3 = 1.0;
   }
+   if (fabs(cos_val_a1)>1.0) {
+    //printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
+    cos_val_a1 = 1.0;
+  }
+   if (fabs(cos_val_a2)>1.0) {
+    //printf("parallel_ana_2D: Unexpected error: cos(alpha)>1\n");
+    cos_val_a3 = 1.0;
+  }
+  a3_dot_q = aa*q*cos_val_a3;
+  a1_dot_q = aa*q*cos_val_a1;//*sin(alpha);
+  a2_dot_q = aa*q*cos_val_a2;
+  
   // Call Zq=Z1*Z2*Z3
   Zq = (1.0-exp(-qDa_2))/(1.0-2.0*exp(-0.5*qDa_2)*cos(a1_dot_q)+exp(-qDa_2));
-  Zq = Zq * (1.0-exp(-qDa_2))/(1.0-2.0*exp(-0.5*qDa_2)*cos(a2_dot_q)+exp(-qDa_2));
-  Zq = Zq * (1.0-exp(-qDa_2))/(1.0-2.0*exp(-0.5*qDa_2)*cos(a3_dot_q)+exp(-qDa_2));
+  Zq *= (1.0-exp(-qDa_2))/(1.0-2.0*exp(-0.5*qDa_2)*cos(a2_dot_q)+exp(-qDa_2));
+  Zq *= (1.0-exp(-qDa_2))/(1.0-2.0*exp(-0.5*qDa_2)*cos(a3_dot_q)+exp(-qDa_2));
 
   // Use SphereForm directly from libigor
   answer = SphereForm(dp,q)*Zq;
@@ -277,7 +284,7 @@ double SCCrystalModel :: operator()(double qx, double qy) {
             _ptvalue = 0.0;
           }
           if (weights_theta.size()>1) {
-            _ptvalue *= fabs(sin(weights_theta[j].value*pi/180.0));
+            _ptvalue *= fabs(cos(weights_theta[j].value*pi/180.0));
           }
           sum += _ptvalue;
           // This model dose not need the volume of spheres correction!!!

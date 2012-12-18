@@ -57,8 +57,8 @@ typedef struct {
  * @return: function value
  */
 static double stacked_disks_analytical_2D_scaled(StackedDisksParameters *pars, double q, double q_x, double q_y) {
-  double cyl_x, cyl_y, cyl_z;
-  double q_z;
+  double cyl_x, cyl_y;//, cyl_z;
+  //double q_z;
   double alpha, vol, cos_val;
   double d, dum, halfheight;
   double answer;
@@ -67,18 +67,16 @@ static double stacked_disks_analytical_2D_scaled(StackedDisksParameters *pars, d
   double phi = pars->axis_phi * pi/180.0;
 
 
-
   // parallelepiped orientation
-  cyl_x = sin(theta) * cos(phi);
-  cyl_y = sin(theta) * sin(phi);
-  cyl_z = cos(theta);
+  cyl_x = cos(theta) * cos(phi);
+  cyl_y = sin(theta);
 
   // q vector
-  q_z = 0;
+  //q_z = 0;
 
   // Compute the angle btw vector q and the
   // axis of the parallelepiped
-  cos_val = cyl_x*q_x + cyl_y*q_y + cyl_z*q_z;
+  cos_val = cyl_x*q_x + cyl_y*q_y;// + cyl_z*q_z;
 
   // The following test should always pass
   if (fabs(cos_val)>1.0) {
@@ -264,7 +262,7 @@ double StackedDisksModel :: operator()(double qx, double qy) {
   double norm_vol = 0.0;
   double vol = 0.0;
   double pi = 4.0*atan(1.0);
-
+  
   // Loop over length weight points
   for(int i=0; i< (int)weights_core_thick.size(); i++) {
     dp.core_thick = weights_core_thick[i].value;
@@ -293,7 +291,7 @@ double StackedDisksModel :: operator()(double qx, double qy) {
                 * stacked_disks_analytical_2DXY(&dp, qx, qy)
             *pow(weights_radius[j].value,2)*(weights_core_thick[i].value+2*weights_layer_thick[k].value);
             if (weights_theta.size()>1) {
-              _ptvalue *= fabs(sin(weights_theta[l].value*pi/180.0));
+              _ptvalue *= fabs(cos(weights_theta[l].value*pi/180.0));
             }
             sum += _ptvalue;
             //Find average volume
