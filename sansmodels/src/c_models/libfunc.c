@@ -135,7 +135,7 @@ polar_sld cal_msld(int isangle, double qx, double qy, double bn,
 	double m_sigma_x = 0.0;
 	double m_sigma_z = 0.0;
 	double m_sigma_y = 0.0;
-	double b_m = 0.0;
+	//double b_m = 0.0;
 	double q_angle = 0.0;
 	double mx = 0.0;
 	double my = 0.0;

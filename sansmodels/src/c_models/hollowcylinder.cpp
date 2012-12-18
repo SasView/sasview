@@ -51,7 +51,7 @@ typedef struct {
  * @return: function value
  */
 static double hollow_cylinder_analytical_2D_scaled(HollowCylinderParameters *pars, double q, double q_x, double q_y) {
-  double cyl_x, cyl_y, cyl_z;
+  double cyl_x, cyl_y; //, cyl_z
   //double q_z;
   double  alpha,vol, cos_val;
   double answer;

@@ -52,7 +52,7 @@ typedef struct {
  * @return: function value
  */
 static double sc_analytical_2D_scaled(SCParameters *pars, double q, double q_x, double q_y) {
-  double a3_x, a3_y, a3_z, a2_x, a2_y, a1_x, a1_y;
+  double a3_x, a3_y, a2_x, a2_y, a1_x, a1_y; //, a3_z
   double q_z;
   double cos_val_a3, cos_val_a2, cos_val_a1;
   double a1_dot_q, a2_dot_q,a3_dot_q;

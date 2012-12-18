@@ -141,7 +141,7 @@ static double sphere_analytical_2D_scaled(SphereParameters *pars, double q, doub
 		answer = SphereForm(dp, q);
 	}
 	else{
-		double contrast = sldSph - sldSolv;
+		//double contrast = sldSph - sldSolv;
 		double qx = q_x;
 		double qy = q_y;
 		double s_theta = pars->Up_theta;
