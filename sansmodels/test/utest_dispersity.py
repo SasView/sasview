@@ -28,7 +28,7 @@ class TestCylinder(unittest.TestCase):
         self.model.setParam('sldSolv', 1.e-6)
         self.model.setParam('background', 0.0)
         self.model.setParam('cyl_theta', 0.0)
-        self.model.setParam('cyl_phi', 0.0)
+        self.model.setParam('cyl_phi', 90.0)
         
     def test_simple(self):
         self.assertAlmostEqual(self.model.run(0.001), 450.355, 3)
@@ -133,7 +133,7 @@ class TestCoreShellCylinder(unittest.TestCase):
         self.model.setParam('solvent_sld', 1.e-6)
         self.model.setParam('background', 0.0)
         self.model.setParam('axis_theta', 0.0)
-        self.model.setParam('axis_phi', 0.0)
+        self.model.setParam('axis_phi', 90.0)
         
     def test_simple(self):
         """
@@ -281,7 +281,7 @@ class TestEllipsoid(unittest.TestCase):
         self.model.setParam('sldEll', 4.e-6)
         self.model.setParam('sldSolv', 1.e-6)
         self.model.setParam('background', 0.0)
-        self.model.setParam('axis_theta', 89.95445)
+        self.model.setParam('axis_theta', 0.0)
         self.model.setParam('axis_phi', 0.0)
         
     def test_simple(self):

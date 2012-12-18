@@ -86,7 +86,7 @@ class Validate2D:
                             #print "ERROR", q, theta, math.pi * 2.0 / npts * j
                             pass
                     else:
-                        sum += math.sin(theta)*model.run([q, 0])
+                        sum += math.fabs(math.cos(theta))*model.run([q, 0])
          
         value = sum/npts/npts/npts
         return value
@@ -204,7 +204,7 @@ class Validate2D:
                     if self.verbose:
                         print "ERROR", q, theta, 180 * 2.0 / npts * j
                 else:
-                    sum += math.sin(theta)*model.run([q, 0])
+                    sum += math.fabs(math.cos(theta))*model.run([q, 0])
         
         value = sum/npts/npts*math.pi/2.0
         return value

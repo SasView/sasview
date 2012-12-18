@@ -87,7 +87,7 @@ class Validate2D:
                     model.setParam(phi_label, 180.0 * 2.0 / npts * j)
                     if str(model.run([q, 0])).count("INF")>0:                        
                         print "ERROR", q, theta, 180.0 * 2.0 / npts * j
-                    sum += math.sin(theta*math.pi/180.0)*model.run([q, 0])
+                    sum += math.fabs(math.cos(theta*math.pi/180.0))*model.run([q, 0])
                     #sum += model.run([q, 0])
             
             value = sum/npts/npts*math.pi/2.0
@@ -111,7 +111,7 @@ class Validate2D:
         npts =points
         model = model_class()
         model.setParam('scale', 1.0)
-        model.setParam('contrast', 1.0)
+        #model.setParam('contrast', 1.0)
         
         theta_label = 'cyl_theta'
         if not model.params.has_key(theta_label):

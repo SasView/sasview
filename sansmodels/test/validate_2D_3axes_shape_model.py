@@ -102,8 +102,8 @@ class Validate2D:
                             print "ERROR", q, theta, 180.0 * 2.0 / npts * k
                             
                         # sin() is due to having not uniform bin number density wrt the q plane.
-                        sum += model.run([q, 0])*math.sin(theta*math.pi/180.0)
-                        weight += math.sin(theta*math.pi/180.0) 
+                        sum += model.run([q, 0])*math.fabs(math.cos(theta*math.pi/180.0))
+                        weight += math.fabs(math.cos(theta*math.pi/180.0) )
 
             value = sum/weight #*math.pi/2.0
             ana = model.run(q)
