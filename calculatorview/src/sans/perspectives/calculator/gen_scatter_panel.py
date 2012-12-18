@@ -732,8 +732,10 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             status_type = 'progress'
             self._status_info(msg, status_type)
             
-            cal_out = CalcGen(input=[self.data.qx_data, self.data.qy_data,i_out],
-                         completefn=self.complete, updatefn=self._update)
+            cal_out = CalcGen(input=[self.data.qx_data, 
+                                     self.data.qy_data,i_out], 
+                              completefn=self.complete, 
+                              updatefn=self._update)
             cal_out.queue()
             
         except:
@@ -1509,7 +1511,7 @@ class SasGenWindow(wx.Frame):
     GEN SAS main window
     """
     def __init__(self, parent=None, title="Generic Scattering Calculator",
-                size=(PANEL_WIDTH * 1.3, PANEL_HEIGHT * 1.5), *args, **kwds):
+                size=(PANEL_WIDTH * 1.3, PANEL_HEIGHT * 1.55), *args, **kwds):
         """
         Init
         """
@@ -1524,40 +1526,100 @@ class SasGenWindow(wx.Frame):
         self.omfdata = sans_gen.OMFData()
         self.sld_data = None
         self._default_save_location = os.getcwd() 
+        
         self._mgr = aui.AuiManager(self)
         self._mgr.SetDockSizeConstraint(0.5, 0.5)
         self._plot_title = ''
         self.scale2d = 'log_{10}'
         
-        #self.plot_frame = PlotFrame(self, -1, 'testView')
+        self._build_toolbar()
         self._build_menubar()
         
         self.build_panels()
         self.Centre()
         self.Show(True)
     
+    def _build_toolbar(self):
+        """
+        Build toolbar
+        """
+        tsize = (20, 20)
+        tb = self.CreateToolBar(wx.TB_HORIZONTAL | wx.TB_FLAT)
+        open_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR, 
+                                            tsize)
+        save_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_TOOLBAR,
+                                            tsize)
+        close_bmp= wx.ArtProvider.GetBitmap(wx.ART_QUIT, wx.ART_TOOLBAR, 
+                                            tsize)
+        help_bmp= wx.ArtProvider.GetBitmap(wx.ART_HELP, wx.ART_TOOLBAR, 
+                                           (17, 20))
+        
+        id = wx.NewId()
+        tb.AddLabelTool(id, "Open", open_bmp, shortHelp="Open", 
+                        longHelp="Open sld/omf file")
+        self.Bind(wx.EVT_TOOL, self.on_open_file, id=id)
+
+        id = wx.NewId()
+        tb.AddSimpleTool(id, save_bmp, "Save", "Save as sld file")
+        self.Bind(wx.EVT_TOOL, self.on_save_file, id=id)
+        
+        tb.AddSeparator()
+        id = wx.NewId()
+        tb.AddSimpleTool(id, close_bmp, "Quit", "Quit")
+        self.Bind(wx.EVT_TOOL, self.on_close, id=id)
+        
+        tb.AddSeparator()
+        id = wx.NewId()
+        tb.AddSimpleTool(id, help_bmp, "Help", "Help")
+        self.Bind(wx.EVT_TOOL, self.on_help, id=id)
+
+        tb.Realize()
+        
     def _build_menubar(self):
         """
-        Menu bar
+        Build menubar
         """
+        tsize = (13, 13)
+        open_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR, 
+                                            tsize)
+        save_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_TOOLBAR,
+                                            tsize)
+        quit_bmp= wx.ArtProvider.GetBitmap(wx.ART_QUIT, wx.ART_TOOLBAR, 
+                                           tsize)
+        help_bmp= wx.ArtProvider.GetBitmap(wx.ART_HELP, wx.ART_TOOLBAR, 
+                                           (13, 15))
+        
         menu_bar = wx.MenuBar()
         
         menu = wx.Menu()
         id = wx.NewId()
-        menu.Append(id, "&Open sld/omf file")
+        item = wx.MenuItem(menu, id, "&Open sld/omf file")
+        item.SetBitmap(open_bmp)
+        menu.AppendItem(item)
         wx.EVT_MENU(self, id, self.on_open_file)
+        
         id = wx.NewId()
-        menu.Append(id, "&Save as sld file")
+        item = wx.MenuItem(menu, id, "&Save as sld file")
+        item.SetBitmap(save_bmp)
+        menu.AppendItem(item)
         wx.EVT_MENU(self, id, self.on_save_file)
+        
+        menu.AppendSeparator()
         id = wx.NewId()
-        menu.Append(id, "&Quit")
-        menu_bar.Append(menu, "File")
+        item = wx.MenuItem(menu, id, "&Quit")
+        item.SetBitmap(quit_bmp)
+        menu.AppendItem(item)
+
+        menu_bar.Append(menu, "&File")
         wx.EVT_MENU(self, id, self.on_close)
         
         menu_help = wx.Menu()
         id = wx.NewId()
-        menu_help.Append(id, "&Theory and GUI")
+        item = wx.MenuItem(menu_help, id, "&Theory and GUI")
+        item.SetBitmap(help_bmp)
+        menu_help.AppendItem(item)
         wx.EVT_MENU(self, id, self.on_help)
+        
         menu_bar.Append(menu_help, "&Help")
         
         self.SetMenuBar(menu_bar)
@@ -1570,7 +1632,6 @@ class SasGenWindow(wx.Frame):
         
         self._mgr.AddPane(self.panel, aui.AuiPaneInfo().
                               Name(self.panel.window_name).
-                              #Caption(self.panel.window_caption).
                               CenterPane().
                               # This is where we set the size of
                               # the application window
@@ -1580,7 +1641,6 @@ class SasGenWindow(wx.Frame):
         self._mgr.AddPane(self.omfpanel, aui.AuiPaneInfo().
                               Name(self.omfpanel.window_name).
                               Caption(self.omfpanel.window_caption).
-                              #MinimizeButton(True).
                               CloseButton(False).
                               Right().
                               Floatable(False).
