@@ -29,42 +29,42 @@ font-family:"Times New Roman","serif"'><h5><a name="Slit Smear">Slit Smear</a></
 smeared scattering intensity for SANS is defined by</span></p>
 
 <p class=MsoNormal><img 
-src="./img/sm_image002.gif" align=left hspace=12></p>
+src="img/sm_image002.gif" align=left hspace=12></p>
 
 <p class=MsoNormal><span style='font-family:"Times New Roman","serif"'>           
                                  ---- 1)</span><br clear=all>
 <span style='font-family:"Times New Roman","serif"'>where Norm = <span
 style='position:relative;top:15.0pt'><img 
-src="./img/sm_image003.gif"></span>.</span></p>
+src="img/sm_image003.gif"></span>.</span></p>
 <br>
 <p class=MsoNormal><span style='font-family:"Times New Roman","serif"'>The
 functions <span style='position:relative;top:6.0pt'><img 
-src="./img/sm_image004.gif"></span> and <span style='position:
+src="img/sm_image004.gif"></span> and <span style='position:
 relative;top:6.0pt'><img 
-src="./img/sm_image005.gif"></span> refer to the slit width weighting
+src="img/sm_image005.gif"></span> refer to the slit width weighting
 function and the slit height weighting determined at the q point, respectively.
  Here, we assumes that the weighting function is described by a rectangular
 function, i.e.,</span></p>
 
 <p class=MsoNormal><span style='position:relative;top:7.0pt'><img 
- src="./img/sm_image006.gif">                                                                                                       
+ src="img/sm_image006.gif">                                                                                                       
   </span><span style='font-family:"Times New Roman","serif";position:relative;
 top:7.0pt'> ---- 2)</span></p>
 
 <p class=MsoNormal><span style='font-family:"Times New Roman","serif"'>and </span></p>
 
 <p class=MsoNormal><span style='position:relative;top:7.0pt'><img 
- src="./img/sm_image007.gif"></span>,                                                                              
+ src="img/sm_image007.gif"></span>,                                                                              
                          <span style='font-family:"Times New Roman","serif"'> ---- 3)</span></p>
 
 <p>so that <img 
-src="./img/sm_image008.gif"> <img src="./img/sm_image009.gif">  for <img 
-src="./img/sm_image010.gif"> and <i>u</i>. The <img src="./img/sm_image011.gif"> 
- and <img src="./img/sm_image012.gif">  stand for the slit height (FWHM/2) and the slit
+src="img/sm_image008.gif"> <img src="img/sm_image009.gif">  for <img 
+src="img/sm_image010.gif"> and <i>u</i>. The <img src="img/sm_image011.gif"> 
+ and <img src="img/sm_image012.gif">  stand for the slit height (FWHM/2) and the slit
 width (FWHM/2) in the q space. Now the integral of Eq. (1) is simplified to</span></p>
 
 <p class=MsoNormal><img 
-src="./img/sm_image013.gif" align=left hspace=12><span
+src="img/sm_image013.gif" align=left hspace=12><span
 style='font-family:"Times New Roman","serif"'>                                                  
           ---- 4)</span></p>
 
@@ -79,26 +79,26 @@ style='font-family:"Times New Roman","serif"'>Numerical Implementation of Eq.
 style='font-family:"Times New Roman","serif"'>1)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span style='font-family:"Times New Roman","serif"'>For </span><span
 style='position:relative;top:6.0pt'><img 
-src="./img/sm_image012.gif"></span>= 0  <span style='font-family:
+src="img/sm_image012.gif"></span>= 0  <span style='font-family:
 "Times New Roman","serif"'>and </span><span style='position:relative;
-top:6.0pt'><img src="./img/sm_image011.gif"></span> =
+top:6.0pt'><img src="img/sm_image011.gif"></span> =
 <span style='font-family:"Times New Roman","serif"'>constant:</span></p>
 
 <p>
-<img src="./img/sm_image016.gif"></p>
+<img src="img/sm_image016.gif"></p>
 
 <p> For discrete q values, at the q
 values from the data points and at the q values extended up to  q<sub>N</sub>=
-q<sub>i</sub> +  <img src="./img/sm_image011.gif"> , the smeared intensity can be
+q<sub>i</sub> +  <img src="img/sm_image011.gif"> , the smeared intensity can be
 calculated approximately, </p>
 
 <p><img 
-src="./img/sm_image017.gif">.                                                           
+src="img/sm_image017.gif">.                                                           
  ---- 5)</p>
 
 <p class=MsoListParagraphCxSpMiddle style='margin-left:.25in'><span
 style='position:relative;top:7.0pt'><img 
-src="./img/sm_image018.gif"></span> <span style='font-family:
+src="img/sm_image018.gif"></span> <span style='font-family:
 "Times New Roman","serif"'>= 0 for <i>I<sub>s</sub></i> in</span> <i><span
 style='font-family:"Times New Roman","serif"'>j &lt; i</span></i><span
 style='font-family:"Times New Roman","serif"'> or<i> j&gt;N-1</i>.</span></p>
@@ -110,28 +110,28 @@ style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
 style='font-family:"Times New Roman","serif"'>2)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span style='font-family:"Times New Roman","serif"'>For  </span><span
 style='position:relative;top:6.0pt'><img 
-src="./img/sm_image012.gif"></span>= <span style='font-family:
+src="img/sm_image012.gif"></span>= <span style='font-family:
 "Times New Roman","serif"'>constant </span> <span style='font-family:"Times New Roman","serif"'>and
 </span><span style='position:relative;top:6.0pt'><img 
-src="./img/sm_image011.gif"></span> = <span style='font-family:
+src="img/sm_image011.gif"></span> = <span style='font-family:
 "Times New Roman","serif"'>0:</span></p>
 
 <p class=MsoListParagraphCxSpMiddle style='margin-left:.25in'><span
 style='font-family:"Times New Roman","serif"'>Similarly to 1), we get</span></p>
 
 <p class=MsoListParagraphCxSpMiddle style='margin-left:.25in'>
-<img src="./img/sm_image019.gif">                                                                                        
+<img src="img/sm_image019.gif">                                                                                        
 <span style='font-family:"Times New Roman","serif"'> ---- 6)</span></p>
 
 <p class=MsoListParagraphCxSpMiddle style='margin-left:.25in'><span
 style='font-family:"Times New Roman","serif"'>for  q<sub>p</sub> = q<sub>i</sub>
 - </span><span style='position:relative;top:6.0pt'><img 
-src="./img/sm_image012.gif"></span><span style='font-family:
+src="img/sm_image012.gif"></span><span style='font-family:
 "Times New Roman","serif"'> and</span> <span style='font-family:"Times New Roman","serif"'>q<sub>N</sub>
 = q<sub>i</sub> + </span><span style='position:relative;top:6.0pt'><img
- src="./img/sm_image012.gif"></span>.  <span
+ src="img/sm_image012.gif"></span>.  <span
 style='position:relative;top:7.0pt'><img 
-src="./img/sm_image018.gif"></span> <span style='font-family:
+src="img/sm_image018.gif"></span> <span style='font-family:
 "Times New Roman","serif"'>= 0 for <i>I<sub>s</sub></i> in</span> <i><span
 style='font-family:"Times New Roman","serif"'>j &lt; p</span></i><span
 style='font-family:"Times New Roman","serif"'> or<i> j&gt;N-1</i>.</span></p>
@@ -142,10 +142,10 @@ style='font-family:"Times New Roman","serif"'> or<i> j&gt;N-1</i>.</span></p>
 style='font-family:"Times New Roman","serif"'>3)<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </span></span><span style='font-family:"Times New Roman","serif"'>For  </span><span
 style='position:relative;top:6.0pt'><img 
-src="./img/sm_image011.gif"></span>= <span style='font-family:
+src="img/sm_image011.gif"></span>= <span style='font-family:
 "Times New Roman","serif"'>constant </span> <span style='font-family:"Times New Roman","serif"'>and
 </span><span style='position:relative;top:6.0pt'><img 
-src="./img/sm_image011.gif"></span> = <span style='font-family:
+src="img/sm_image011.gif"></span> = <span style='font-family:
 "Times New Roman","serif"'>constant:</span></p>
 
 <p class=MsoListParagraphCxSpMiddle style='margin-left:.25in'><span
@@ -162,18 +162,18 @@ combines the method 1) with the numerical integration for the slit width.</span>
 </p>
 
 <p class=MsoListParagraphCxSpMiddle style='margin-left:.25in'>
-<img src="./img/sm_image020.gif">    <span style='font-family:
+<img src="img/sm_image020.gif">    <span style='font-family:
 "Times New Roman","serif"'> ---- (7)</span></p>
 
 <p class=MsoListParagraphCxSpMiddle style='margin-left:.25in'><span
 style='font-family:"Times New Roman","serif"'>for  q<sub>p</sub> = q<sub>i</sub>
 - </span><span style='position:relative;top:6.0pt'><img 
-src="./img/sm_image012.gif"></span><span style='font-family:
+src="img/sm_image012.gif"></span><span style='font-family:
 "Times New Roman","serif"'> and</span> <span style='font-family:"Times New Roman","serif"'>q<sub>N</sub>
 = q<sub>i</sub> + </span><span style='position:relative;top:6.0pt'><img
- src="./img/sm_image012.gif"></span>.  <span
+ src="img/sm_image012.gif"></span>.  <span
 style='position:relative;top:7.0pt'><img 
-src="./img/sm_image018.gif"></span> <span style='font-family:
+src="img/sm_image018.gif"></span> <span style='font-family:
 "Times New Roman","serif"'>= 0 for <i>I<sub>s</sub></i> in</span> <i><span
 style='font-family:"Times New Roman","serif"'>j &lt; p</span></i><span
 style='font-family:"Times New Roman","serif"'> or<i> j&gt;N-1</i>. </span></p>
@@ -192,7 +192,7 @@ pinhole smearing computation is done similar to the Case 2) above except that
 the weight function used was the Gaussian function, so that the Eq. 6) for this
 case becomes</span></p>
 
-<p class=MsoNormal><img src="./img/sm_image021.gif"><span
+<p class=MsoNormal><img src="img/sm_image021.gif"><span
 style='font-family:"Times New Roman","serif"'>   ---- (8)</span></p>
 
 <p class=MsoNormal><span style='font-family:"Times New Roman","serif"'>For all
@@ -213,7 +213,7 @@ style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
 2D smearing computation is done similar to the 1D pinhole smearing above
 except that the weight function used was the 2D elliptical Gaussian function</span></p>
 
-<p class=MsoNormal><img src="./img/sm_image022.gif"><span
+<p class=MsoNormal><img src="img/sm_image022.gif"><span
 style='font-family:"Times New Roman","serif"'>     ---- (9)</span></p>
 
 <p class=MsoNormal><span style='font-family:"Times New Roman","serif"'>In Eq
@@ -231,7 +231,7 @@ normalization factor.</span></p>
 
 <p class=MsoNormal align=center style='text-align:center'><span
 style='font-family:"Times New Roman","serif"'><img 
-id="Object 1" src="./img/sm_image023.gif"></span></p>
+id="Object 1" src="img/sm_image023.gif"></span></p>
 
 <p class=MsoNormal><span style='font-family:"Times New Roman","serif"'>&nbsp;</span></p>
 
@@ -243,7 +243,7 @@ and R are <b>evenly </b>(this is to simplify the equation below) distributed by
 style='font-family:"Times New Roman","serif"'>R, respectively, and it is
 assumed that I(x’, y’) is constant within the bins which in turn becomes</span></p>
 
-<p class=MsoNormal><img src="./img/sm_image024.gif"></p>
+<p class=MsoNormal><img src="img/sm_image024.gif"></p>
 
 <p class=MsoNormal>                                                                                                                                                                                <span
 style='font-family:"Times New Roman","serif"'> ---- (10)</span></p>
@@ -253,22 +253,22 @@ have found the weighting factor on each bin points, it is convenient to
 transform x’-y’ back to x-y coordinate (rotating it by -&#952;</span><span style='font-family:"Times New Roman","serif"'>
 around z axis).  Then, for the polar symmetric smear,</span></p>
 
-<p class=MsoNormal><img src="./img/sm_image025.gif"><span
+<p class=MsoNormal><img src="img/sm_image025.gif"><span
 style='position:relative;top:35.0pt'>      </span> ---- (11)</p>
 
 <p class=MsoNormal><span style='font-family:"Times New Roman","serif"'>where,</span></p>
 
-<p class=MsoNormal><img src="./img/sm_image026.gif">,</p>
+<p class=MsoNormal><img src="img/sm_image026.gif">,</p>
 
 <p class=MsoNormal><span style='font-family:"Times New Roman","serif"'>while
 for the x-y symmetric smear,</span></p>
 
-<p class=MsoNormal><img src="./img/sm_image027.gif"><span
+<p class=MsoNormal><img src="img/sm_image027.gif"><span
 style='font-family:"Times New Roman","serif"'>  ---- (12)</span></p>
 
 <p class=MsoNormal><span style='font-family:"Times New Roman","serif"'>where,</span></p>
 
-<p class=MsoNormal><img src="./img/sm_image028.gif"></p>
+<p class=MsoNormal><img src="img/sm_image028.gif"></p>
 
 <p class=MsoNormal><span style='font-family:"Times New Roman","serif"'>Here, the
 current version of the SANSVIEW uses the Eq. (11) for 2D smearing assuming that
