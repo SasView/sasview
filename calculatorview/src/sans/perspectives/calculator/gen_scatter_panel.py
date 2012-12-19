@@ -48,8 +48,8 @@ if sys.platform.count("win32") > 0:
     PANEL_HEIGHT = 370
     FONT_VARIANT = 0
 else:
-    PANEL_WIDTH = 600
-    PANEL_HEIGHT = 420
+    PANEL_WIDTH = 620
+    PANEL_HEIGHT = 370
     FONT_VARIANT = 1
 _QMAX_DEFAULT = 0.1
 _NPTS_DEFAULT = 50 
@@ -250,8 +250,10 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             Fill the sizer containing hint 
         """
         hint_msg = "We support the omf or sld data files only."
-        hint_msg +=  "           "
-        hint_msg +=  "Very slow drawing -->"
+        hint_msg +=  "         "
+        if FONT_VARIANT < 1:
+            hint_msg +=  "Very "
+        hint_msg += "SLOW drawing -->"
         hint_txt = wx.StaticText(self, -1, hint_msg)
         
         id = wx.NewId()
@@ -290,7 +292,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         On selecting a shape
         """
         event.Skip()
-        label = self.shape_combo.GetLabel().lower() 
+        label = event.GetEventObject().GetValue().lower() 
         self.default_shape = label
         self.parent.set_omfpanel_default_shap(self.default_shape)
         self.parent.set_omfpanel_npts()
@@ -617,7 +619,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         ax.plot(pos_x, pos_y, 
                 pos_z, ',', c="k", 
                 alpha=0.5, markeredgecolor='k', markersize=3) 
-
+        ax.plot_surface(pos_x, pos_y, pos_z,  rstride=4, cstride=4, color='b')
         if has_arrow and len(pos_x) > 0:     
             graph_title += "w/ Arrows" 
             def _draw_arrow(input=None, elapsed=0.1):
