@@ -75,7 +75,7 @@ def _set_error(panel, item, show_msg=False):
         item.SetBackgroundColour("pink")
         item.Refresh()
     if show_msg:
-        msg = "Error: wrong value entered."
+        msg = "Error: wrong (or out of range) value entered."
         if panel.parent.parent != None:
             wx.PostEvent(panel.parent.parent, 
                      StatusEvent(status=msg, info='Error' )) 
@@ -757,15 +757,15 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.qmax_ctl.SetBackgroundColour("white")
         try:
             npt_val = float(self.npt_ctl.GetValue())  
-            if npt_val < 2:
+            if npt_val < 2 or npt_val > 1000:
                 raise
             self.npt_ctl.SetValue(str(int(npt_val)))
             self.set_est_time()
         except:
            flag =  _set_error(self, self.npt_ctl)
         try:
-            qmax_val = float(self.qmax_ctl.GetValue())  
-            if qmax_val <= 0:
+            qmax_val = float(self.qmax_ctl.GetValue()) 
+            if qmax_val <= 0 or qmax_val > 1000:
                 raise
         except:
             flag = _set_error(self, self.qmax_ctl)       
