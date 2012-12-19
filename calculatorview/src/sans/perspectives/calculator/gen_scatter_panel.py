@@ -619,7 +619,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         ax.plot(pos_x, pos_y, 
                 pos_z, ',', c="k", 
                 alpha=0.5, markeredgecolor='k', markersize=3) 
-        ax.plot_surface(pos_x, pos_y, pos_z,  rstride=4, cstride=4, color='b')
+        
         if has_arrow and len(pos_x) > 0:     
             graph_title += "w/ Arrows" 
             def _draw_arrow(input=None, elapsed=0.1):
