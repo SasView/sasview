@@ -2,6 +2,7 @@
     Thread handler used to load data
 """
 import time
+import wx
 from data_util.calcthread import CalcThread
 from sans.dataloader.loader import Loader
         

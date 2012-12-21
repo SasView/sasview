@@ -38,7 +38,6 @@ from calculator_widgets import InputTextCtrl
 from wx.lib.scrolledpanel import ScrolledPanel
 from sans.perspectives.calculator.load_thread import GenReader
 #import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from danse.common.plottools.arrow3d import Arrow3D
 #from danse.common.plottools.toolbar import NavigationToolBar
 _BOX_WIDTH = 76
@@ -140,6 +139,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.time_text = None
         self.omfreader = sans_gen.OMFReader()
         self.sldreader = sans_gen.SLDReader()
+        self.pdbreader = sans_gen.PDBReader()
         self.model = sans_gen.GenSAS()
         self.param_dic = self.model.params
         self.parameters = []
@@ -427,11 +427,14 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         
         omf_type = self.omfreader.type
         sld_type = self.sldreader.type
+        pdb_type = self.pdbreader.type
         wildcard = []
         for type in sld_type:
             wildcard.append(type)
         for type in omf_type:
             wildcard.append(type)
+        #for type in pdb_type:
+        #    wildcard.append(type)
         wildcard = '|'.join(wildcard)
         dlg = wx.FileDialog(self, "Choose a file", location,
                             "", wildcard, wx.OPEN)
@@ -464,6 +467,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 loader = self.omfreader
             elif self.ext in self.sldreader.ext:
                 loader = self.sldreader
+            elif self.ext in self.pdbreader.ext:
+                loader = self.pdbreader
             else:
                 loader = None
             if self.reader is not None and self.reader.isrunning():
@@ -479,7 +484,6 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             self.load_update()
         except:
             self.ext = None
-            raise
             if self.parent.parent is None:
                 return 
             msg = "Generic SANS Calculator: %s" % (sys.exc_value)
@@ -516,6 +520,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 #omf_data = data
                 self.sld_data = gen.get_magsld()
             elif self.ext in self.sldreader.ext:
+                self.sld_data = data
+            elif self.ext in self.pdbreader.ext:
                 self.sld_data = data
                 #omf_data = None
             else:
@@ -595,30 +601,36 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             except:
                 logging.error("PlotPanel could not import Axes3D")
                 raise
-
+        marker = ','
+        m_size = 2
+        if output.pix_type != 'pixel':
+            marker = 'o'
+            m_size = 2
         pos_x = output.pos_x
         pos_y = output.pos_y
         pos_z = output.pos_z
         sld_mx = output.sld_mx
         sld_my = output.sld_my
         sld_mz = output.sld_mz  
-         
+
         sld_tot = (numpy.fabs(sld_mx) + numpy.fabs(sld_my) + 
                    numpy.fabs(sld_mz) + numpy.fabs(output.sld_n))
         is_nonzero = sld_tot > 0.0  
         is_zero = sld_tot == 0.0  
         if is_zero.any():
-            ax.plot(pos_x[is_zero], pos_y[is_zero], pos_z[is_zero], ',', c="y", 
-                        alpha=0.5, markeredgecolor='y', markersize=3) 
+            ax.plot(pos_x[is_zero], pos_y[is_zero], pos_z[is_zero], marker, 
+                        c="y", alpha=0.5, markeredgecolor='y', 
+                        markersize=m_size) 
             pos_x = pos_x[is_nonzero]
             pos_y = pos_y[is_nonzero]
             pos_z = pos_z[is_nonzero]
             sld_mx = sld_mx[is_nonzero]
             sld_my = sld_my[is_nonzero]
             sld_mz = sld_mz[is_nonzero]
+
         ax.plot(pos_x, pos_y, 
-                pos_z, ',', c="k", 
-                alpha=0.5, markeredgecolor='k', markersize=3) 
+                pos_z, marker, c="k", 
+                alpha=0.5, markeredgecolor="k", markersize=m_size) 
         
         if has_arrow and len(pos_x) > 0:     
             graph_title += "w/ Arrows" 
@@ -762,7 +774,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             self.npt_ctl.SetValue(str(int(npt_val)))
             self.set_est_time()
         except:
-           flag =  _set_error(self, self.npt_ctl)
+            flag =  _set_error(self, self.npt_ctl)
         try:
             qmax_val = float(self.qmax_ctl.GetValue()) 
             if qmax_val <= 0 or qmax_val > 1000:
@@ -1029,8 +1041,9 @@ class OmfPanel(ScrolledPanel, PanelBase):
         Get the pixel volume
         """
         val = 1
-        for lst in self.stepsize:
-            val *= float(lst[1].GetValue())
+        if self.sld_data.pix_type == 'pixel':
+            for lst in self.stepsize:
+                val *= float(lst[1].GetValue())
         
         return numpy.fabs(val)
                 
@@ -1364,6 +1377,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                     enable = (min_val == max_val)
                     ctr_list[1].SetValue(format_number(mean_val, True))
                     ctr_list[1].Enable(enable)
+                    ctr_list[2].SetLabel("[" + sld_data.sld_unit + "]")
                     break   
 
     def on_sld_draw(self, event):
@@ -1449,7 +1463,8 @@ class OmfPanel(ScrolledPanel, PanelBase):
                     item[1].SetBackgroundColour("pink")
                     npts = -1
                     break
-                npts *= int(n_val)
+                if numpy.isfinite(n_val):
+                    npts *= int(n_val)
             if npts > 0:
                 nop = self.set_npts_from_slddata()
                 if nop == None:
@@ -1675,9 +1690,7 @@ class SasGenWindow(wx.Frame):
         if data == None:
             return
         self.sld_data = data
-        
         enable = (not data==None)
-        #print "main mx", data.sld_mx
         self._set_omfpanel_sld_data(self.sld_data)
         self.omfpanel.bt_save.Enable(enable)
         self.set_etime()
@@ -1814,7 +1827,6 @@ class SasGenWindow(wx.Frame):
             frame.lpanel.Hide() 
             frame.Show(True)
         except:
-            raise
             frame.Destroy() 
             msg = 'Display Error\n'
             info = "Info"

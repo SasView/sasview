@@ -233,6 +233,8 @@ class OMF2SLD:
         self.output = MagSLD(self.pos_x[mask], self.pos_y[mask], 
                              self.pos_z[mask], self.sld_n[mask], 
                              self.mx[mask], self.my[mask], self.mz[mask])
+        self.output.set_pix_type('pixel')
+        self.output.set_pixel_symbols('pixel')
         
     def get_omfdata(self):
         """
@@ -428,6 +430,100 @@ class OMFReader:
             msg += "We accept only Text format OMF file."
             raise RuntimeError, msg
 
+class PDBReader:
+    """
+    PDB reader class: limited for reading the lines starting with 'ATOM'
+    """
+    type_name = "PDB"
+    ## Wildcards
+    type = ["pdb files (*.PDB, *.pdb)|*.pdb"]
+    ## List of allowed extensions
+    ext = ['.pdb', '.PDB']
+
+    def read(self, path):
+        """
+        Load data file
+        
+        :param path: file path
+        
+        :return: MagSLD
+        
+        :raise RuntimeError: when the file can't be opened
+        """
+        pos_x = numpy.zeros(0)
+        pos_y = numpy.zeros(0)
+        pos_z = numpy.zeros(0)
+        sld_n = numpy.zeros(0)
+        sld_mx = numpy.zeros(0)
+        sld_my = numpy.zeros(0)
+        sld_mz = numpy.zeros(0)
+        pix_symbol = numpy.zeros(0)#numpy.array([])
+        try:
+            input_f = open(path, 'rb')
+            buff = input_f.read()
+            #buff.replace(' ', '')
+            lines = buff.split('\n')
+            input_f.close()
+            for line in lines:
+                try:
+                    toks = line.split()
+                    # check if line starts with "ATOM"
+                    if toks[0].count('ATM') > 0 or toks[0] == 'ATOM':
+                        # define fields of interest
+                        atom_id = toks[1]
+                        atom_name = toks[2]
+                        atom_name = atom_name[0].upper() + atom_name[1:].lower()
+                        try:
+                            float(toks[3])
+                            ind = 3
+                        except:
+                            ind = 4
+                        res_name = toks[ind]
+                        #chain_name = toks[3].strip()
+                        #residue_id = toks[4].strip()
+                        try:
+                            float(toks[4])
+                        except:
+                            ind += 1
+                        ind += 1
+                        _pos_x = float(toks[ind])
+                        ind += 1
+                        _pos_y = float(toks[ind])
+                        ind += 1
+                        _pos_z = float(toks[ind])
+                        pos_x = numpy.append(pos_x, _pos_x)
+                        pos_y = numpy.append(pos_y, _pos_y)
+                        pos_z = numpy.append(pos_z, _pos_z)
+                        sld_n = numpy.append(sld_n, 7e-06)
+                        sld_mx = numpy.append(sld_mx, 0)
+                        sld_my = numpy.append(sld_my, 0)
+                        sld_mz = numpy.append(sld_mz, 0)
+                        pix_symbol = numpy.append(pix_symbol, atom_name)
+                except:
+                    pass
+            #print pix_symbol, pos_x
+            pos_x -= (min(pos_x) + max(pos_x)) / 2.0
+            pos_y -= (min(pos_y) + max(pos_y)) / 2.0
+            pos_z -= (min(pos_z) + max(pos_z)) / 2.0
+
+            output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
+            #output.set_sldms(0, 0, 0)
+            output.filename = os.path.basename(path)
+            output.set_pix_type('atom')
+            output.set_pixel_symbols(pix_symbol)
+            output.set_nodes()
+            output.sld_unit = 'A'
+            return output
+        except:
+            RuntimeError, "%s is not a sld file" % path
+
+    def write(self, path, data):
+        """
+        Write
+        """
+        #Not implemented 
+        print "Not implemented... "
+
 class SLDReader:
     """
     Class to load ascii files (7 columns).
@@ -447,7 +543,7 @@ class SLDReader:
         
         :param path: file path
         
-        :return: x, y, z, sld_n, sld_mx, sld_my, sld_mz
+        :return MagSLD: x, y, z, sld_n, sld_mx, sld_my, sld_mz
         
         :raise RuntimeError: when the file can't be opened
         :raise ValueError: when the length of the data vectors are inconsistent
@@ -491,6 +587,8 @@ class SLDReader:
 
             output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
             output.filename = os.path.basename(path)
+            output.set_pix_type('pixel')
+            output.set_pixel_symbols('pixel')
             return output
         except:
             RuntimeError, "%s is not a sld file" % path
@@ -635,6 +733,7 @@ class MagSLD:
     # Units
     _pos_unit = 'A'
     _sld_unit = '1/A^(2)'
+    _pix_type = 'pixel'
     
     def __init__(self, pos_x, pos_y, pos_z, sld_n=None, 
                  sld_mx=None, sld_my=None, sld_mz=None):
@@ -653,6 +752,7 @@ class MagSLD:
         self.has_stepsize = False
         self.pos_unit = self._pos_unit
         self.sld_unit = self._sld_unit
+        self.pix_type = 'pixel'
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.pos_z = pos_z
@@ -663,6 +763,7 @@ class MagSLD:
         self.sld_m = None
         self.sld_phi = None
         self.sld_theta = None
+        self.pix_symbol = None
         if sld_mx != None and sld_my != None and sld_mz != None:
             self.set_sldms(sld_mx, sld_my, sld_mz)
         self.set_nodes()
@@ -677,6 +778,13 @@ class MagSLD:
         _str += "SLD_unit:   %s\n" % self.sld_unit
         return _str
     
+    def set_pix_type(self, pix_type):
+        """
+        Set pixel type
+        :Param pix_type: string, 'pixel' or 'atom'
+        """
+        self.pix_type = pix_type
+        
     def set_sldn(self, sld_n):
         """
         Sets neutron SLD
@@ -684,11 +792,14 @@ class MagSLD:
         if sld_n.__class__.__name__ == 'float':
             if self.is_data:
                 # For data, put the value to only the pixels w non-zero M 
-                self.sld_n = numpy.zeros(len(self.pos_x))
                 is_nonzero = (numpy.fabs(self.sld_mx) + 
-                              numpy.fabs(self.sld_my) + 
-                              numpy.fabs(self.sld_mz)).nonzero()  
-                self.sld_n[is_nonzero] = sld_n
+                                  numpy.fabs(self.sld_my) + 
+                                  numpy.fabs(self.sld_mz)).nonzero() 
+                self.sld_n = numpy.zeros(len(self.pos_x))
+                if len(self.sld_n[is_nonzero]) > 0:
+                    self.sld_n[is_nonzero] = sld_n
+                else:
+                    self.sld_n.fill(sld_n)
             else:
                 # For non-data, put the value to all the pixels
                 self.sld_n = numpy.ones(len(self.pos_x)) * sld_n
@@ -715,7 +826,19 @@ class MagSLD:
         sld_m = numpy.sqrt(sld_mx * sld_mx + sld_my * sld_my + \
                                 sld_mz * sld_mz)  
         self.sld_m = sld_m
-        
+    
+    def set_pixel_symbols(self, symbol='pixel'):  
+        """
+        Set pixel
+        :Params pixel: str; pixel or atomic symbol, or array of strings
+        """
+        if self.sld_n == None:
+            return
+        if symbol.__class__.__name__ == 'str':
+            self.pix_symbol = numpy.repeat(symbol, len(self.sld_n))
+        else:
+            self.pix_symbol = symbol
+
     def get_sldn(self):
         """
         Returns nuclear sld
@@ -738,16 +861,20 @@ class MagSLD:
         """
         Set xnodes, ynodes, and znodes
         """
-        if not self.has_stepsize:
-            self.set_stepsize()
-        try:
-            xdist = (max(self.pos_x) - min(self.pos_x)) / self.xstepsize
-            ydist = (max(self.pos_y) - min(self.pos_y)) / self.ystepsize
-            zdist = (max(self.pos_z) - min(self.pos_z)) / self.zstepsize
-            self.xnodes = int(xdist) + 1
-            self.ynodes = int(ydist) + 1
-            self.znodes = int(zdist) + 1
-        except:
+        self.set_stepsize()
+        if self.pix_type == 'pixel':
+            try:
+                xdist = (max(self.pos_x) - min(self.pos_x)) / self.xstepsize
+                ydist = (max(self.pos_y) - min(self.pos_y)) / self.ystepsize
+                zdist = (max(self.pos_z) - min(self.pos_z)) / self.zstepsize
+                self.xnodes = int(xdist) + 1
+                self.ynodes = int(ydist) + 1
+                self.znodes = int(zdist) + 1
+            except:
+                self.xnodes = None
+                self.ynodes = None
+                self.znodes = None
+        else:
             self.xnodes = None
             self.ynodes = None
             self.znodes = None
@@ -756,28 +883,34 @@ class MagSLD:
         """
         Set xtepsize, ystepsize, and zstepsize
         """
-        try:
-            xpos_pre = self.pos_x[0]
-            ypos_pre = self.pos_y[0]
-            zpos_pre = self.pos_z[0]
-            for x_pos in self.pos_x:
-                if xpos_pre != x_pos:
-                    self.xstepsize = numpy.fabs(x_pos - xpos_pre)
-                    break
-            for y_pos in self.pos_y:
-                if ypos_pre != y_pos:
-                    self.ystepsize = numpy.fabs(y_pos - ypos_pre)
-                    break
-            for z_pos in self.pos_z:
-                if zpos_pre != z_pos:
-                    self.zstepsize = numpy.fabs(z_pos - zpos_pre)
-                    break
-            self.has_stepsize = True
-        except:
+        if self.pix_type == 'pixel':
+            try:
+                xpos_pre = self.pos_x[0]
+                ypos_pre = self.pos_y[0]
+                zpos_pre = self.pos_z[0]
+                for x_pos in self.pos_x:
+                    if xpos_pre != x_pos:
+                        self.xstepsize = numpy.fabs(x_pos - xpos_pre)
+                        break
+                for y_pos in self.pos_y:
+                    if ypos_pre != y_pos:
+                        self.ystepsize = numpy.fabs(y_pos - ypos_pre)
+                        break
+                for z_pos in self.pos_z:
+                    if zpos_pre != z_pos:
+                        self.zstepsize = numpy.fabs(z_pos - zpos_pre)
+                        break
+                self.has_stepsize = True
+            except:
+                self.xstepsize = None
+                self.ystepsize = None
+                self.zstepsize = None
+                self.has_stepsize = False
+        else:
             self.xstepsize = None
             self.ystepsize = None
             self.zstepsize = None
-            self.has_stepsize = False
+            self.has_stepsize = True
         return self.xstepsize, self.ystepsize, self.zstepsize
 
     
