@@ -472,7 +472,11 @@ class PDBReader:
                         # define fields of interest
                         atom_id = toks[1]
                         atom_name = toks[2]
-                        atom_name = atom_name[0].upper() + atom_name[1:].lower()
+                        if line[12] == '' or len(atom_name) == 4:
+                            atom_name = atom_name[0].upper() 
+                        else:
+                            atom_name = atom_name[0].upper() + \
+                                        atom_name[1].lower()
                         try:
                             float(toks[3])
                             ind = 3
