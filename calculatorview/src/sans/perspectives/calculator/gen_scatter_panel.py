@@ -19,14 +19,8 @@ matplotlib.interactive(False)
 matplotlib.use('WXAgg')
 
 from data_util.calcthread import CalcThread
-#from sans.guiframe.local_perspectives.plotting.Plotter2D import ModelPanel2D \
-#                    as PlotPanel
-#from danse.common.plottools.PlotPanel import PlotPanel
-#from danse.common.plottools.SimplePlot import PlotFrame
 from sans.guiframe.local_perspectives.plotting.SimplePlot import PlotFrame
-#from danse.common.plottools.plottables import Graph
 from sans.guiframe.dataFitting import Data2D
-#from sans.guiframe.utils import PanelMenu
 from sans.dataloader.data_info import Detector
 from sans.dataloader.data_info import Source
 from sans.guiframe.panel_base import PanelBase
@@ -37,9 +31,8 @@ from calculator_widgets import OutputTextCtrl
 from calculator_widgets import InputTextCtrl
 from wx.lib.scrolledpanel import ScrolledPanel
 from sans.perspectives.calculator.load_thread import GenReader
-#import matplotlib.pyplot as plt
 from danse.common.plottools.arrow3d import Arrow3D
-#from danse.common.plottools.toolbar import NavigationToolBar
+
 _BOX_WIDTH = 76
 #Slit length panel size 
 if sys.platform.count("win32") > 0:
@@ -50,7 +43,7 @@ else:
     PANEL_WIDTH = 620
     PANEL_HEIGHT = 370
     FONT_VARIANT = 1
-_QMAX_DEFAULT = 0.1
+_QMAX_DEFAULT = 0.3
 _NPTS_DEFAULT = 50 
 
 def add_icon(parent, frame):
@@ -433,8 +426,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             wildcard.append(type)
         for type in omf_type:
             wildcard.append(type)
-        #for type in pdb_type:
-        #    wildcard.append(type)
+        for type in pdb_type:
+            wildcard.append(type)
         wildcard = '|'.join(wildcard)
         dlg = wx.FileDialog(self, "Choose a file", location,
                             "", wildcard, wx.OPEN)
@@ -473,6 +466,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 loader = None
             if self.reader is not None and self.reader.isrunning():
                 self.reader.stop()
+            self.browse_button.Enable(False)
+            self.browse_button.SetLabel("Loading...")
             if self.parent.parent is not None:
                 wx.PostEvent(self.parent.parent, 
                                 StatusEvent(status="Loading...",
@@ -481,7 +476,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                                     completefn=self.complete_loading,
                                     updatefn=self.load_update)
             self.reader.queue()
-            self.load_update()
+            #self.load_update()
         except:
             self.ext = None
             if self.parent.parent is None:
@@ -495,7 +490,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
     def load_update(self):
         """
         print update on the status bar
-        """
+        """       
         if self.parent.parent is None:
                 return 
         if self.reader.isrunning():
@@ -510,6 +505,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         Complete the loading
         """
         #compute the slit size
+        self.browse_button.Enable(True)
+        self.browse_button.SetLabel('Load')
         try:
             filename = data.filename
             self.data_name_tcl.SetValue(str(filename))
@@ -528,9 +525,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 raise
             self._set_sld_data_helper(True)
         except:
-            #raise
             if self.parent.parent is None:
-                return 
+                raise
             msg = "Loading Error: This file format is not supported "
             msg += "for GenSANS." 
             wx.PostEvent(self.parent.parent,
@@ -539,6 +535,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             return 
         if self.parent.parent is None:
             return 
+        
         msg = "Load Complete"
         wx.PostEvent(self.parent.parent, StatusEvent(status=msg, type='stop'))
         self.SetFocus()
@@ -618,7 +615,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         is_nonzero = sld_tot > 0.0  
         is_zero = sld_tot == 0.0  
         if is_zero.any():
-            ax.plot(pos_x[is_zero], pos_y[is_zero], pos_z[is_zero], marker, 
+            ax.plot(pos_x[is_zero], pos_z[is_zero], pos_y[is_zero], marker, 
                         c="y", alpha=0.5, markeredgecolor='y', 
                         markersize=m_size) 
             pos_x = pos_x[is_nonzero]
@@ -628,8 +625,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             sld_my = sld_my[is_nonzero]
             sld_mz = sld_mz[is_nonzero]
 
-        ax.plot(pos_x, pos_y, 
-                pos_z, marker, c="k", 
+        ax.plot(pos_x, pos_z, pos_y, 
+                marker, c="k", 
                 alpha=0.5, markeredgecolor="k", markersize=m_size) 
         
         if has_arrow and len(pos_x) > 0:     
@@ -670,8 +667,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                                                       color_y,
                                                       color_z))
                         
-                        arrows = Arrow3D(panel, x_arrow, y_arrow, 
-                                                  z_arrow, colors, 
+                        arrows = Arrow3D(panel, x_arrow, z_arrow, y_arrow, 
+                                                  colors, 
                                                   mutation_scale=10, lw=1, 
                                                   arrowstyle="->", alpha = 0.5)
                         ax.add_artist(arrows)
@@ -691,9 +688,11 @@ class SasGenPanel(ScrolledPanel, PanelBase):
 
         panel.subplot.figure.subplots_adjust(left=0.05, right=0.95, 
                                              bottom=0.05, top=0.96)
+        # Use y, z axes (in mpl 3d) as z, y axes 
+        # that consistent with SANS coords.
         ax.set_xlabel('x ($\A%s$)'% output.pos_unit)
-        ax.set_ylabel('y ($\A%s$)'% output.pos_unit)
-        ax.set_zlabel('z ($\A%s$)'% output.pos_unit)
+        ax.set_ylabel('z ($\A%s$)'% output.pos_unit)
+        ax.set_zlabel('y ($\A%s$)'% output.pos_unit)
         num_graph = str(self.graph_num)
         frame.SetTitle('Graph %s: %s'% (num_graph, graph_title))        
         wx.CallAfter(frame.Show, True)
@@ -1136,7 +1135,8 @@ class OmfPanel(ScrolledPanel, PanelBase):
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         
         self.npixels_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.box_sld = wx.StaticBox(self, -1, str("Mean SLD"))
+        self.box_sld = wx.StaticBox(self, -1, 
+                                    str("Scattering Length (Density)"))
         self.box_node = wx.StaticBox(self, -1, str("Nodes"))
         self.boxsizer_sld = wx.StaticBoxSizer(self.box_sld, wx.VERTICAL)
         self.box_stepsize = wx.StaticBox(self, -1, str("Step Size"))
@@ -1359,6 +1359,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
     
     def set_sld_ctr(self, sld_data):
         """
+        Set sld textctrls
         """
         if sld_data == None:
             for ctr_list in self.slds:
@@ -1374,7 +1375,8 @@ class OmfPanel(ScrolledPanel, PanelBase):
                     min_val = numpy.min(sld_list[key])
                     max_val = numpy.max(sld_list[key])
                     mean_val = numpy.mean(sld_list[key])
-                    enable = (min_val == max_val)
+                    enable = (min_val == max_val) and \
+                             sld_data.pix_type == 'pixel'
                     ctr_list[1].SetValue(format_number(mean_val, True))
                     ctr_list[1].Enable(enable)
                     ctr_list[2].SetLabel("[" + sld_data.sld_unit + "]")

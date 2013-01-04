@@ -3,6 +3,7 @@ SANS generic computation and sld file readers
 """
 from sans.models.BaseComponent import BaseComponent
 import sans.models.sans_extension.sld2i as mod
+from periodictable import formula
 import numpy
 import os
 
@@ -53,8 +54,8 @@ class GenSAS(BaseComponent):
         self.params = {}
         self.params['scale']       = 1.0
         self.params['background']  = 0.0
-        self.params['Up_frac_i']     = 1.0
-        self.params['Up_frac_f']    = 1.0
+        self.params['Up_frac_i']     = 0.5
+        self.params['Up_frac_f']    = 0.5
         self.params['Up_theta']  = 0.0
         self.description='GenSAS'
         ## Parameter details [units, min, max]
@@ -439,7 +440,7 @@ class PDBReader:
     type = ["pdb files (*.PDB, *.pdb)|*.pdb"]
     ## List of allowed extensions
     ext = ['.pdb', '.PDB']
-
+    
     def read(self, path):
         """
         Load data file
@@ -457,48 +458,52 @@ class PDBReader:
         sld_mx = numpy.zeros(0)
         sld_my = numpy.zeros(0)
         sld_mz = numpy.zeros(0)
-        pix_symbol = numpy.zeros(0)#numpy.array([])
+        pix_symbol = numpy.zeros(0)
         try:
             input_f = open(path, 'rb')
             buff = input_f.read()
-            #buff.replace(' ', '')
             lines = buff.split('\n')
             input_f.close()
             for line in lines:
                 try:
-                    toks = line.split()
+                    #toks = line.split()
                     # check if line starts with "ATOM"
-                    if toks[0].count('ATM') > 0 or toks[0] == 'ATOM':
+                    if line[0:6].strip().count('ATM') > 0 or \
+                                line[0:6].strip() == 'ATOM':
                         # define fields of interest
-                        atom_id = toks[1]
-                        atom_name = toks[2]
-                        if line[12] == '' or len(atom_name) == 4:
-                            atom_name = atom_name[0].upper() 
-                        else:
-                            atom_name = atom_name[0].upper() + \
-                                        atom_name[1].lower()
+                        atom_id = line[6:11].strip()
+                        atom_name = line[12:16].strip()
                         try:
-                            float(toks[3])
-                            ind = 3
+                            float(line[12])
+                            atom_name = atom_name[1].upper()
                         except:
-                            ind = 4
-                        res_name = toks[ind]
-                        #chain_name = toks[3].strip()
-                        #residue_id = toks[4].strip()
-                        try:
-                            float(toks[4])
-                        except:
-                            ind += 1
-                        ind += 1
-                        _pos_x = float(toks[ind])
-                        ind += 1
-                        _pos_y = float(toks[ind])
-                        ind += 1
-                        _pos_z = float(toks[ind])
+                            if len(atom_name) == 4:
+                                atom_name = atom_name[0].upper()
+                            elif line[12] != ' ': 
+                                atom_name = atom_name[0].upper() + \
+                                        atom_name[1].lower() 
+                            else:
+                                atom_name = atom_name[0].upper()
+                        #res_name = line[17:20].strip()
+                        #chain_name = line[21:22].strip()
+                        _pos_x = float(line[30:38].strip())
+                        _pos_y = float(line[38:46].strip())
+                        _pos_z = float(line[46:54].strip())
+                        
                         pos_x = numpy.append(pos_x, _pos_x)
                         pos_y = numpy.append(pos_y, _pos_y)
                         pos_z = numpy.append(pos_z, _pos_z)
-                        sld_n = numpy.append(sld_n, 7e-06)
+                        try:
+                            #from periodictable import nsf
+                            #val = nsf.neutron_sld(atom_name)
+                            val = formula(atom_name).atoms.keys()[0].neutron.b_c
+                            # sld in Ang unit (from fm)
+                            val = float(val)
+                            val *= 1.0e-5
+                            sld_n = numpy.append(sld_n, val)
+                        except:
+                            print "Error: set the sld of %s to zero"% atom_name
+                            sld_n = numpy.append(sld_n,  0.0)                     
                         sld_mx = numpy.append(sld_mx, 0)
                         sld_my = numpy.append(sld_my, 0)
                         sld_mz = numpy.append(sld_mz, 0)
@@ -882,7 +887,7 @@ class MagSLD:
             self.xnodes = None
             self.ynodes = None
             self.znodes = None
-        
+      
     def set_stepsize(self):
         """
         Set xtepsize, ystepsize, and zstepsize
