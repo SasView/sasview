@@ -508,6 +508,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.browse_button.Enable(True)
         self.browse_button.SetLabel('Load')
         try:
+            is_pdbdata = False
             filename = data.filename
             self.data_name_tcl.SetValue(str(filename))
             self.file_name = filename.split('.')[0]
@@ -520,9 +521,17 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 self.sld_data = data
             elif self.ext in self.pdbreader.ext:
                 self.sld_data = data
+                is_pdbdata = True
                 #omf_data = None
             else:
                 raise
+            for name, _, unit in  self.parameters:
+                if name.GetLabelText() == 'background':
+                    if is_pdbdata:
+                        unit.SetLabel('[A^(2)]')
+                    else:
+                        unit.SetLabel('[1/cm]')
+                    break
             self._set_sld_data_helper(True)
         except:
             if self.parent.parent is None:
@@ -546,8 +555,6 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
         self.model.set_sld_data(self.sld_data)
         self.draw_button.Enable(self.sld_data!=None)
-        #self.parent.set_omfdata(self.sld_data)#omf_data)
-        self.model.set_sld_data(self.sld_data) 
         wx.CallAfter(self.parent.set_sld_data, self.sld_data)
         if is_draw:
             wx.CallAfter(self.sld_draw, False)
