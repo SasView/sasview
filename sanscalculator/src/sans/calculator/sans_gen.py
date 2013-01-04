@@ -54,16 +54,16 @@ class GenSAS(BaseComponent):
         self.params = {}
         self.params['scale']       = 1.0
         self.params['background']  = 0.0
-        self.params['Up_frac_i']     = 0.5
-        self.params['Up_frac_f']    = 0.5
+        self.params['Up_frac_in']     = 0.5
+        self.params['Up_frac_out']    = 0.5
         self.params['Up_theta']  = 0.0
         self.description='GenSAS'
         ## Parameter details [units, min, max]
         self.details = {}
         self.details['scale']      = ['', None, None]
         self.details['background'] = ['[1/cm]', None, None]
-        self.details['Up_frac_i']    = ['[u/(u+d)]', None, None]
-        self.details['Up_frac_f']   = ['[u/(u+d)]', None, None]
+        self.details['Up_frac_in']    = ['[u/(u+d)]', None, None]
+        self.details['Up_frac_out']   = ['[u/(u+d)]', None, None]
         self.details['Up_theta'] = ['[deg]', None, None]
         # fixed parameters
         self.fixed=[]
@@ -77,15 +77,18 @@ class GenSAS(BaseComponent):
     def _gen(self, x, y, i):
         """
         Evaluate the function
-        :Param x: x-value
+        :Param x: array of x-values
+        :Param y: array of y-values
+        :Param i: array of initial i-value 
         :return: function value
         """
         len_x = len(self.data_x)
         len_q = len(x)
         model = mod.new_GenI(len_x, self.data_x, self.data_y, self.data_z, 
                              self.data_sldn, self.data_mx, self.data_my, 
-                             self.data_mz, self.params['Up_frac_i'], 
-                             self.params['Up_frac_f'], self.params['Up_theta'])
+                             self.data_mz, self.params['Up_frac_in'], 
+                             self.params['Up_frac_out'], 
+                             self.params['Up_theta'])
         mod.genicom(model, len_q, x, y, i)
         return  self.params['scale'] * i * self.volume \
                 + self.params['background']
