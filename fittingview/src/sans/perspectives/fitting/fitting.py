@@ -1622,9 +1622,9 @@ class Plugin(PluginBase):
                                                               type="stop"))
                     
         except:
-            msg = "Fit completed 33but Following"
-            msg += " error occurred:%s" % sys.exc_value
-            wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
+            msg = "Fit completed but Following"
+            msg += " warning occurred: %s" % sys.exc_value
+            wx.PostEvent(self.parent, StatusEvent(status=msg, info="warning",
                                                   type="stop"))
            
     def _update_fit_button(self, page_id):
