@@ -2989,7 +2989,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         from sans.models import get_data_path
 
         media = get_data_path(media='media')
-        path = os.path.join(media, 'img', "M_angles_pic.bmp") 
+        path = os.path.join(media, "mag_pic.html") 
         name = "Polar/Magnetic Angles"
         frame = HelpWindow(None, -1,  
                            title=' Help: Polarization/Magnetization Angles',  
