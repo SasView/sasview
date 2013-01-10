@@ -25,6 +25,7 @@ protected:
 	double* mx_val;
 	double* my_val;
 	double* mz_val;
+	double* vol_pix;
     // spin ratios
     double inspin;
     double outspin;
@@ -33,7 +34,7 @@ protected:
 public:
     // Constructor
 	GenI(int npix, double* x, double* y, double* z, double* sldn, 
-			double* mx, double* my, double* mz, 
+			double* mx, double* my, double* mz, double* voli,
 			double in_spin, double out_spin,
 			double s_theta);
 	// compute function

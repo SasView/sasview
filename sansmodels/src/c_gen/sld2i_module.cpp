@@ -41,6 +41,7 @@ PyObject * new_GenI(PyObject *, PyObject *args) {
 	PyObject *mx_val_obj;
 	PyObject *my_val_obj;
 	PyObject *mz_val_obj;
+	PyObject *vol_pix_obj;
 	Py_ssize_t n_x;
 	//PyObject rlimit_obj;
 	//PyObject npoints_obj;
@@ -54,11 +55,12 @@ PyObject * new_GenI(PyObject *, PyObject *args) {
 	double* mx_val;
 	double* my_val;
 	double* mz_val;
+	double* vol_pix;
 	double inspin;
 	double outspin;
 	double stheta;
 
-	if (!PyArg_ParseTuple(args, "iOOOOOOOddd", &n_pix, &x_val_obj, &y_val_obj, &z_val_obj, &sldn_val_obj, &mx_val_obj, &my_val_obj, &mz_val_obj, &inspin, &outspin, &stheta)) return NULL;
+	if (!PyArg_ParseTuple(args, "iOOOOOOOOddd", &n_pix, &x_val_obj, &y_val_obj, &z_val_obj, &sldn_val_obj, &mx_val_obj, &my_val_obj, &mz_val_obj, &vol_pix_obj, &inspin, &outspin, &stheta)) return NULL;
 	OUTVECTOR(x_val_obj, x_val, n_x);
 	OUTVECTOR(y_val_obj, y_val, n_x);
 	OUTVECTOR(z_val_obj, z_val, n_x);
@@ -66,7 +68,8 @@ PyObject * new_GenI(PyObject *, PyObject *args) {
 	OUTVECTOR(mx_val_obj, mx_val, n_x);
 	OUTVECTOR(my_val_obj, my_val, n_x);
 	OUTVECTOR(mz_val_obj, mz_val, n_x);
-	GenI* sld2i = new GenI(n_pix,x_val,y_val,z_val,sldn_val,mx_val,my_val,mz_val,inspin,outspin,stheta);
+	OUTVECTOR(vol_pix_obj, vol_pix, n_x);
+	GenI* sld2i = new GenI(n_pix,x_val,y_val,z_val,sldn_val,mx_val,my_val,mz_val,vol_pix,inspin,outspin,stheta);
 	return PyCObject_FromVoidPtr(sld2i, del_sld2i);
 }
 

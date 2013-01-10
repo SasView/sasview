@@ -28,7 +28,7 @@ extern "C" {
  * @param s_theta: angle (from x-axis) of the up spin in degree
  */
 GenI :: GenI(int npix, double* x, double* y, double* z, double* sldn,
-			double* mx, double* my, double* mz,
+			double* mx, double* my, double* mz, double* voli,
 			double in_spin, double out_spin,
 			double s_theta) {
 	//this->qx_val = qx;
@@ -42,6 +42,7 @@ GenI :: GenI(int npix, double* x, double* y, double* z, double* sldn,
 	this->mx_val = mx;
 	this->my_val = my;
 	this->mz_val = mz;
+	this->vol_pix = voli;
 	this->inspin = in_spin;
 	this->outspin = out_spin;
 	this->stheta = s_theta;
@@ -51,6 +52,7 @@ GenI :: GenI(int npix, double* x, double* y, double* z, double* sldn,
  * Compute
  */
 void GenI :: genicom(int npoints, double *qx, double *qy, double *I_out){
+	// Assumes that q doesn't have qz component and sld_n is all real
 	double q = 0.0;
 	//double Pi = 4.0*atan(1.0);
 	polar_sld b_sld;
@@ -65,8 +67,8 @@ void GenI :: genicom(int npoints, double *qx, double *qy, double *I_out){
 	complex sumj_dd;
 	complex temp_fi;
 
-	int count = 0;
-	//Assume that all pixels are in same size and int * 1A
+	double count = 0.0;
+	//Assume that pixel volumes are given in vol_pix in A^3 unit
 	//int x_size = 0; //in Ang
 	//int y_size = 0; //in Ang
 	//int z_size = 0; //in Ang
@@ -80,7 +82,7 @@ void GenI :: genicom(int npoints, double *qx, double *qy, double *I_out){
 		sumj_du = cassign(0.0, 0.0);
 		sumj_dd = cassign(0.0, 0.0);		
 		//printf ("%d ", i);
-		q = sqrt(qx[i]*qx[i] + qy[i]*qy[i]);
+		q = sqrt(qx[i]*qx[i] + qy[i]*qy[i]); // + qz[i]*qz[i]);
 
 		for(int j=0; j<n_pix; j++){
 			
@@ -97,28 +99,32 @@ void GenI :: genicom(int npoints, double *qx, double *qy, double *I_out){
 				if (inspin > 0.0 && outspin > 0.0){
 					comp_sld = cassign(b_sld.uu, 0.0);
 					temp_fi = cplx_mult(comp_sld, ephase);
+					temp_fi = rcmult(vol_pix[j],temp_fi);
 					sumj_uu = cplx_add(sumj_uu, temp_fi);
 					}
 				//down_down
 				if (inspin < 1.0 && outspin < 1.0){
 					comp_sld = cassign(b_sld.dd, 0.0);
 					temp_fi = cplx_mult(comp_sld, ephase);
+					temp_fi = rcmult(vol_pix[j],temp_fi);
 					sumj_dd = cplx_add(sumj_dd, temp_fi);
 					}
 				//up_down
 				if (inspin > 0.0 && outspin < 1.0){
 					comp_sld = cassign(b_sld.re_ud, b_sld.im_ud);
 					temp_fi = cplx_mult(comp_sld, ephase);
+					temp_fi = rcmult(vol_pix[j],temp_fi);
 					sumj_ud = cplx_add(sumj_ud, temp_fi);
 					}
 				//down_up
 				if (inspin < 1.0 && outspin > 0.0){
 					comp_sld = cassign(b_sld.re_du, b_sld.im_du);
 					temp_fi = cplx_mult(comp_sld, ephase);
+					temp_fi = rcmult(vol_pix[j],temp_fi);
 					sumj_du = cplx_add(sumj_du, temp_fi);
 					}
 				if (i == 0){
-					count += 1;
+					count += vol_pix[j];
 				}
 			}
 		}
