@@ -575,25 +575,65 @@ class SLDReader:
         :raise RuntimeError: when the file can't be opened
         :raise ValueError: when the length of the data vectors are inconsistent
         """
-        
-
         try:
-            input_f = numpy.loadtxt(path, dtype='float', skiprows=1, 
-                                    ndmin=1, unpack=True)
-            pos_x = numpy.array(input_f[0])
-            pos_y = numpy.array(input_f[1])
-            pos_z = numpy.array(input_f[2])
-            sld_n = numpy.array(input_f[3])
-            sld_mx = numpy.array(input_f[4])
-            sld_my = numpy.array(input_f[5])
-            sld_mz = numpy.array(input_f[6])
-            ncols = len(input_f)
-            if ncols == 8:
-                vol_pix = numpy.array(input_f[7])
-            elif ncols == 7:
-                 vol_pix = None
-            else:
-                raise        
+            pos_x = numpy.zeros(0)
+            pos_y = numpy.zeros(0)
+            pos_z = numpy.zeros(0)
+            sld_n = numpy.zeros(0)
+            sld_mx = numpy.zeros(0)
+            sld_my = numpy.zeros(0)
+            sld_mz = numpy.zeros(0)
+            try:
+                # Use numpy to speed up loading
+                input_f = numpy.loadtxt(path, dtype='float', skiprows=1, 
+                                        ndmin=1, unpack=True)
+                raise
+                pos_x = numpy.array(input_f[0])
+                pos_y = numpy.array(input_f[1])
+                pos_z = numpy.array(input_f[2])
+                sld_n = numpy.array(input_f[3])
+                sld_mx = numpy.array(input_f[4])
+                sld_my = numpy.array(input_f[5])
+                sld_mz = numpy.array(input_f[6])
+                ncols = len(input_f)
+                if ncols == 8:
+                    vol_pix = numpy.array(input_f[7])
+                elif ncols == 7:
+                     vol_pix = None
+            except:
+                print "HERE"
+                # For older version of numpy
+                input_f = open(path, 'rb')
+                buff = input_f.read()
+                lines = buff.split('\n')
+                input_f.close()
+                for line in lines:
+                    toks = line.split()
+                    try:
+                        _pos_x = float(toks[0])
+                        _pos_y = float(toks[1])
+                        _pos_z = float(toks[2])
+                        _sld_n = float(toks[3])
+                        _sld_mx = float(toks[4])
+                        _sld_my = float(toks[5])
+                        _sld_mz = float(toks[6])
+    
+                        pos_x = numpy.append(pos_x, _pos_x)
+                        pos_y = numpy.append(pos_y, _pos_y)
+                        pos_z = numpy.append(pos_z, _pos_z)
+                        sld_n = numpy.append(sld_n, _sld_n)
+                        sld_mx = numpy.append(sld_mx, _sld_mx)
+                        sld_my = numpy.append(sld_my, _sld_my)
+                        sld_mz = numpy.append(sld_mz, _sld_mz)
+                        try:
+                            _vol_pix =  float(toks[7])
+                            vol_pix = numpy.append(vol_pix, _vol_pix)
+                        except:
+                            vol_pix = None
+                    except:
+                        # Skip non-data lines
+                        pass
+                 
             pos_x -= (min(pos_x) + max(pos_x)) / 2.0
             pos_y -= (min(pos_y) + max(pos_y)) / 2.0
             pos_z -= (min(pos_z) + max(pos_z)) / 2.0
