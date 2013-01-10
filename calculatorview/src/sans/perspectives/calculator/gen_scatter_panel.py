@@ -352,7 +352,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         n_pixs = float(self.parent.get_npix())
         x_in = n_qbins * n_pixs / 100000
         # magic equation: not very accurate
-        etime = 0.00001 + 0.085973 * x_in
+        etime = 1.0 + 0.14 * x_in
         return int(etime)
         
     def set_est_time(self):
@@ -525,13 +525,6 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 #omf_data = None
             else:
                 raise
-            for name, _, unit in  self.parameters:
-                if name.GetLabelText() == 'background':
-                    if is_pdbdata:
-                        unit.SetLabel('[A^(2)]')
-                    else:
-                        unit.SetLabel('[1/cm]')
-                    break
             self._set_sld_data_helper(True)
         except:
             if self.parent.parent is None:
@@ -574,8 +567,11 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
         Draw 3D sld profile
         """
+        color_dic = {'H':'blue', 'D':'purple', 'N': 'orange', 
+                     'O':'red', 'C':'green', 'Other':'k'}
         graph_title = self.file_name
         graph_title += "   3D SLD Profile "
+        
         flag = self.parent.check_omfpanel_inputs()
         if not flag:
             infor = 'Error'
@@ -594,6 +590,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         frame.Show(False)
         add_icon(self.parent, frame)
         panel = frame.plotpanel
+        
         try:
             # mpl >= 1.0.0
             ax = panel.figure.gca(projection='3d')
@@ -605,6 +602,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             except:
                 logging.error("PlotPanel could not import Axes3D")
                 raise
+            
         marker = ','
         m_size = 2
         if output.pix_type != 'pixel':
@@ -621,6 +619,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                    numpy.fabs(sld_mz) + numpy.fabs(output.sld_n))
         is_nonzero = sld_tot > 0.0  
         is_zero = sld_tot == 0.0  
+        
+        # Plot null points
         if is_zero.any():
             ax.plot(pos_x[is_zero], pos_z[is_zero], pos_y[is_zero], marker, 
                         c="y", alpha=0.5, markeredgecolor='y', 
@@ -631,10 +631,22 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             sld_mx = sld_mx[is_nonzero]
             sld_my = sld_my[is_nonzero]
             sld_mz = sld_mz[is_nonzero]
-
-        ax.plot(pos_x, pos_z, pos_y, 
-                marker, c="k", 
-                alpha=0.5, markeredgecolor="k", markersize=m_size) 
+        
+        # Plot selective points in color
+        for key in color_dic.keys():
+            chosen_color = output.pix_symbol == key
+            other_color = numpy.ones(len(output.pix_symbol), dtype='bool')
+            if chosen_color.any():
+                other_color = other_color  & (chosen_color != True)
+                color = color_dic[key]
+                ax.plot(pos_x[chosen_color], pos_z[chosen_color], 
+                        pos_y[chosen_color], marker, c=color, alpha=0.5, 
+                        markeredgecolor=color, markersize=m_size, label=key) 
+        # Plot All others        
+        if other_color.any():
+            ax.plot(pos_x[other_color], pos_z[other_color], pos_y[other_color], 
+                    marker, c="k", alpha=0.5, markeredgecolor="k", 
+                    markersize=m_size, label="Other") 
         
         if has_arrow and len(pos_x) > 0:     
             graph_title += "w/ Arrows" 
@@ -642,8 +654,6 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 """
                 draw w/arrow
                 """
-                #frame.SetSize(wx.Size(650, 570))
-                #event.Skip()
                 max_mx = max(numpy.fabs(sld_mx))
                 max_my = max(numpy.fabs(sld_my))
                 max_mz = max(numpy.fabs(sld_mz))
@@ -678,8 +688,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                                                   colors, 
                                                   mutation_scale=10, lw=1, 
                                                   arrowstyle="->", alpha = 0.5)
-                        ax.add_artist(arrows)
-                        
+                        ax.add_artist(arrows) 
                 except:
                     pass 
                 msg = "Arrow Drawing completed.\n"
@@ -700,6 +709,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         ax.set_xlabel('x ($\A%s$)'% output.pos_unit)
         ax.set_ylabel('z ($\A%s$)'% output.pos_unit)
         ax.set_zlabel('y ($\A%s$)'% output.pos_unit)
+        if output.pix_type == 'atom':
+            ax.legend(loc='upper left', prop={'size':10})
         num_graph = str(self.graph_num)
         frame.SetTitle('Graph %s: %s'% (num_graph, graph_title))        
         wx.CallAfter(frame.Show, True)
@@ -742,8 +753,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             _set_error(self, None, True)
             return
         try:
-            vol = self.parent.get_pix_volume()
-            self.model.set_pixel_volume(vol)
+            #vol = self.parent.get_pix_volumes()
+            #self.model.set_pixel_volumes(vol)
             self.model.set_sld_data(self.sld_data)
             self.set_input_params()
             self._create_default_2d_data()
@@ -753,7 +764,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             self._status_info(msg, status_type)
             
             cal_out = CalcGen(input=[self.data.qx_data, 
-                                     self.data.qy_data,i_out], 
+                                     self.data.qy_data, i_out], 
                               completefn=self.complete, 
                               updatefn=self._update)
             cal_out.queue()
@@ -1042,16 +1053,13 @@ class OmfPanel(ScrolledPanel, PanelBase):
         
         return self.sld_data
     
-    def get_pix_volume(self):
+    def get_pix_volumes(self):
         """
         Get the pixel volume
         """
-        val = 1
-        if self.sld_data.pix_type == 'pixel':
-            for lst in self.stepsize:
-                val *= float(lst[1].GetValue())
+        vol = self.sld_data.vol_pix
         
-        return numpy.fabs(val)
+        return vol
                 
     def _get_other_val(self):  
         """
@@ -1269,6 +1277,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
             ix += 1
             ctl = InputTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                 style=wx.TE_PROCESS_ENTER)
+            ctl.Bind(wx.EVT_TEXT, self._onstepsize )
             ctl.SetValue(format_number(value, True))
             ctl.Enable(not is_data)
             sizer.Add(ctl, (iy, ix), (1, 1), wx.EXPAND)
@@ -1386,7 +1395,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                              sld_data.pix_type == 'pixel'
                     ctr_list[1].SetValue(format_number(mean_val, True))
                     ctr_list[1].Enable(enable)
-                    ctr_list[2].SetLabel("[" + sld_data.sld_unit + "]")
+                    #ctr_list[2].SetLabel("[" + sld_data.sld_unit + "]")
                     break   
 
     def on_sld_draw(self, event):
@@ -1482,6 +1491,33 @@ class OmfPanel(ScrolledPanel, PanelBase):
         ctl.Refresh()
         return flag
     
+    def _onstepsize(self, event):
+        """
+        On stepsize event
+        """
+        flag = True
+        if event != None:
+            event.Skip()
+            ctl = event.GetEventObject()
+            ctl.SetBackgroundColour("white")
+
+        if flag and not self.sld_data.is_data:#ctl.IsEnabled():
+            s_size = 1.0
+            try:
+                for item in self.stepsize:
+                    s_val = float(item[1].GetValue())
+                    if s_val <= 0:
+                        item[1].SetBackgroundColour("pink")
+                        ctl.Refresh()
+                        return
+                    if numpy.isfinite(s_val):
+                        s_size *= s_val
+                self.sld_data.set_pixel_volumes(s_size)
+            except:
+                pass
+        ctl.Refresh()
+  
+         
     def set_npts_from_slddata(self):
         """
         Set total n. of points form the sld data
@@ -1758,11 +1794,11 @@ class SasGenWindow(wx.Frame):
         n_pix = self.omfpanel.npix_ctl.GetValue()
         return n_pix
     
-    def get_pix_volume(self):
+    def get_pix_volumes(self):
         """
         Get a pixel volume
         """
-        vol = self.omfpanel.get_pix_volume()
+        vol = self.omfpanel.get_pix_volumes()
         return vol
     
     def set_omfpanel_default_shap(self, shape):

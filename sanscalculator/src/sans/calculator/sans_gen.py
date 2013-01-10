@@ -4,12 +4,15 @@ SANS generic computation and sld file readers
 from sans.models.BaseComponent import BaseComponent
 import sans.models.sans_extension.sld2i as mod
 from periodictable import formula
+from periodictable import nsf
 import numpy
 import os
 
 MFactor_AM = 2.853E-12
 MFactor_mT = 2.3164E-9
 METER2ANG = 1.0E+10
+#Avogadro constant [1/mol]
+NA = 6.02214129e+23
 
 def mag2sld(mag, v_unit=None):
     """
@@ -47,7 +50,7 @@ class GenSAS(BaseComponent):
         self.data_mx = None
         self.data_my = None
         self.data_mz = None
-        self.volume = 1000 #[A^3]
+        self.data_vol = None #[A^3]
         ## Name of the model
         self.name = "GenSAS"
         ## Define parameters
@@ -68,11 +71,14 @@ class GenSAS(BaseComponent):
         # fixed parameters
         self.fixed=[]
         
-    def set_pixel_volume(self, volume):     
+    def set_pixel_volumes(self, volume):     
         """
         Set the volume of a pixel in (A^3) unit
+        :Param volume: pixel volume [float]
         """
-        self.volume = volume
+        if self.data_vol == None:
+            raise
+        self.data_vol = volume
         
     def _gen(self, x, y, i):
         """
@@ -86,12 +92,13 @@ class GenSAS(BaseComponent):
         len_q = len(x)
         model = mod.new_GenI(len_x, self.data_x, self.data_y, self.data_z, 
                              self.data_sldn, self.data_mx, self.data_my, 
-                             self.data_mz, self.params['Up_frac_in'], 
+                             self.data_mz, self.data_vol,
+                             self.params['Up_frac_in'], 
                              self.params['Up_frac_out'], 
                              self.params['Up_theta'])
+
         mod.genicom(model, len_q, x, y, i)
-        return  self.params['scale'] * i * self.volume \
-                + self.params['background']
+        return  self.params['scale'] * i + self.params['background']
         
     def set_sld_data(self, sld_data=None):   
         """
@@ -106,6 +113,7 @@ class GenSAS(BaseComponent):
         self.data_mx = sld_data.sld_mx
         self.data_my = sld_data.sld_my
         self.data_mz = sld_data.sld_mz
+        self.data_vol = sld_data.vol_pix
         
     def getProfile(self):
         """
@@ -125,7 +133,7 @@ class GenSAS(BaseComponent):
             i_out = numpy.zeros_like(x[0])
             y_in = numpy.zero_like(x[0])
             # 1D I is found at y =0 in the 2D pattern
-            return self._gen(x[0],y_in, i_out )
+            return self._gen(x[0], y_in, i_out )
         else:
             msg = "Q must be given as list of qx's and qy's"
             raise ValueError, msg
@@ -182,6 +190,7 @@ class OMF2SLD:
         self.my = None
         self.mz = None
         self.sld_n = None
+        self.vol_pix = None
         self.output = None
         self.omfdata = None
     
@@ -442,7 +451,7 @@ class PDBReader:
     ## Wildcards
     type = ["pdb files (*.PDB, *.pdb)|*.pdb"]
     ## List of allowed extensions
-    ext = ['.pdb', '.PDB']
+    ext = ['.pdb', '.PDB']   
     
     def read(self, path):
         """
@@ -461,6 +470,7 @@ class PDBReader:
         sld_mx = numpy.zeros(0)
         sld_my = numpy.zeros(0)
         sld_mz = numpy.zeros(0)
+        vol_pix = numpy.zeros(0)
         pix_symbol = numpy.zeros(0)
         try:
             input_f = open(path, 'rb')
@@ -497,13 +507,17 @@ class PDBReader:
                         pos_y = numpy.append(pos_y, _pos_y)
                         pos_z = numpy.append(pos_z, _pos_z)
                         try:
-                            #from periodictable import nsf
-                            #val = nsf.neutron_sld(atom_name)
-                            val = formula(atom_name).atoms.keys()[0].neutron.b_c
                             # sld in Ang unit (from fm)
-                            val = float(val)
-                            val *= 1.0e-5
+                            #val = formula(atom_name).atoms.keys()[0].neutron.b_c
+                            #val *= 1.0e-5
+                            val = nsf.neutron_sld(atom_name)[0]
+                            # sld in Ang^-2 unit
+                            val *= 1.0e-6
                             sld_n = numpy.append(sld_n, val)
+                            atom = formula(atom_name)
+                            # cm to A units
+                            vol = 1.0e+24 * atom.mass / atom.density / NA
+                            vol_pix = numpy.append(vol_pix, vol)
                         except:
                             print "Error: set the sld of %s to zero"% atom_name
                             sld_n = numpy.append(sld_n,  0.0)                     
@@ -524,7 +538,8 @@ class PDBReader:
             output.set_pix_type('atom')
             output.set_pixel_symbols(pix_symbol)
             output.set_nodes()
-            output.sld_unit = 'A'
+            output.set_pixel_volumes(vol_pix)
+            output.sld_unit = '1/A^(2)'
             return output
         except:
             RuntimeError, "%s is not a sld file" % path
@@ -560,47 +575,37 @@ class SLDReader:
         :raise RuntimeError: when the file can't be opened
         :raise ValueError: when the length of the data vectors are inconsistent
         """
-        pos_x = numpy.zeros(0)
-        pos_y = numpy.zeros(0)
-        pos_z = numpy.zeros(0)
-        sld_n = numpy.zeros(0)
-        sld_mx = numpy.zeros(0)
-        sld_my = numpy.zeros(0)
-        sld_mz = numpy.zeros(0)
-        try:
-            input_f = open(path, 'rb')
-            buff = input_f.read()
-            lines = buff.split('\n')
-            input_f.close()
-            for line in lines:
-                toks = line.split()
-                try:
-                    _pos_x = float(toks[0])
-                    _pos_y = float(toks[1])
-                    _pos_z = float(toks[2])
-                    _sld_n = float(toks[3])
-                    _sld_mx = float(toks[4])
-                    _sld_my = float(toks[5])
-                    _sld_mz = float(toks[6])
+        
 
-                    pos_x = numpy.append(pos_x, _pos_x)
-                    pos_y = numpy.append(pos_y, _pos_y)
-                    pos_z = numpy.append(pos_z, _pos_z)
-                    sld_n = numpy.append(sld_n, _sld_n)
-                    sld_mx = numpy.append(sld_mx, _sld_mx)
-                    sld_my = numpy.append(sld_my, _sld_my)
-                    sld_mz = numpy.append(sld_mz, _sld_mz)
-                except:
-                    # Skip non-data lines
-                    pass
+        try:
+            input_f = numpy.loadtxt(path, dtype='float', skiprows=1, 
+                                    ndmin=1, unpack=True)
+            pos_x = numpy.array(input_f[0])
+            pos_y = numpy.array(input_f[1])
+            pos_z = numpy.array(input_f[2])
+            sld_n = numpy.array(input_f[3])
+            sld_mx = numpy.array(input_f[4])
+            sld_my = numpy.array(input_f[5])
+            sld_mz = numpy.array(input_f[6])
+            ncols = len(input_f)
+            if ncols == 8:
+                vol_pix = numpy.array(input_f[7])
+            elif ncols == 7:
+                 vol_pix = None
+            else:
+                raise        
             pos_x -= (min(pos_x) + max(pos_x)) / 2.0
             pos_y -= (min(pos_y) + max(pos_y)) / 2.0
             pos_z -= (min(pos_z) + max(pos_z)) / 2.0
 
-            output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
+            output = MagSLD(pos_x, pos_y, pos_z, sld_n, 
+                            sld_mx, sld_my, sld_mz)
+
             output.filename = os.path.basename(path)
             output.set_pix_type('pixel')
             output.set_pixel_symbols('pixel')
+            if vol_pix != None:
+                output.set_pixel_volumes(vol_pix)
             return output
         except:
             RuntimeError, "%s is not a sld file" % path
@@ -620,6 +625,7 @@ class SLDReader:
         x_val = data.pos_x
         y_val = data.pos_y
         z_val = data.pos_z
+        vol_pix = data.vol_pix
         
         length = len(x_val)
         
@@ -638,12 +644,12 @@ class SLDReader:
             
         out = open(path, 'w')
         # First Line: Column names
-        out.write("X  Y  Z  SLDN  SLDMx  SLDMy  SLDMz")
+        out.write("X  Y  Z  SLDN SLDMx  SLDMy  SLDMz VOLUMEpix")
         for ind in range(length):
-            out.write("\n%g  %g  %g  %g  %g  %g  %g" % (x_val[ind], y_val[ind], 
+            out.write("\n%g  %g  %g  %g  %g  %g  %g %g" % (x_val[ind], y_val[ind], 
                                                     z_val[ind], sld_n[ind], 
                                                     sld_mx[ind], sld_my[ind], 
-                                                    sld_mz[ind]))  
+                                                    sld_mz[ind], vol_pix[ind]))  
         out.close()       
             
             
@@ -748,7 +754,7 @@ class MagSLD:
     _pix_type = 'pixel'
     
     def __init__(self, pos_x, pos_y, pos_z, sld_n=None, 
-                 sld_mx=None, sld_my=None, sld_mz=None):
+                 sld_mx=None, sld_my=None, sld_mz=None, vol_pix=None):
         """
         Init for mag SLD
         :params : All should be numpy 1D array
@@ -772,6 +778,7 @@ class MagSLD:
         self.sld_mx = sld_mx
         self.sld_my = sld_my
         self.sld_mz = sld_mz
+        self.vol_pix = vol_pix
         self.sld_m = None
         self.sld_phi = None
         self.sld_theta = None
@@ -850,6 +857,20 @@ class MagSLD:
             self.pix_symbol = numpy.repeat(symbol, len(self.sld_n))
         else:
             self.pix_symbol = symbol
+            
+    def set_pixel_volumes(self, vol):  
+        """
+        Set pixel volumes
+        :Params pixel: str; pixel or atomic symbol, or array of strings
+        """
+        if self.sld_n == None:
+            return
+        if vol.__class__.__name__ == 'ndarray':
+            self.vol_pix = vol
+        elif vol.__class__.__name__.count('float') > 0:
+            self.vol_pix = numpy.repeat(vol, len(self.sld_n))
+        else:
+            self.vol_pix = None
 
     def get_sldn(self):
         """
@@ -912,11 +933,16 @@ class MagSLD:
                     if zpos_pre != z_pos:
                         self.zstepsize = numpy.fabs(z_pos - zpos_pre)
                         break
+                #default pix volume
+                self.vol_pix = numpy.ones(len(self.pos_x))
+                vol = self.xstepsize * self.ystepsize * self.zstepsize
+                self.set_pixel_volumes(vol)
                 self.has_stepsize = True
             except:
                 self.xstepsize = None
                 self.ystepsize = None
                 self.zstepsize = None
+                self.vol_pix = None
                 self.has_stepsize = False
         else:
             self.xstepsize = None
@@ -1005,5 +1031,5 @@ def test():
     out = model.runXY([x,y,i])
         
 if __name__ == "__main__": 
-    #test()
+    test()
     test_load()
