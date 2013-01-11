@@ -1151,7 +1151,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         
         self.npixels_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.box_sld = wx.StaticBox(self, -1, 
-                                    str("Scattering Length (Density)"))
+                                    str("Mean SLD"))
         self.box_node = wx.StaticBox(self, -1, str("Nodes"))
         self.boxsizer_sld = wx.StaticBoxSizer(self.box_sld, wx.VERTICAL)
         self.box_stepsize = wx.StaticBox(self, -1, str("Step Size"))

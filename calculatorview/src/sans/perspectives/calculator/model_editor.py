@@ -1267,15 +1267,19 @@ class Model(Model1DPlugin):
         self._setParamHelper(name, value)
         
         ## setParam to p model 
-        model_pre = name.split('_', 1)[0]
-        new_name = name.split('_', 1)[1]
+        model_pre = ''
+        new_name = ''
+        name_split = name.split('_', 1)
+        if len(name_split) == 2:
+            model_pre = name.split('_', 1)[0]
+            new_name = name.split('_', 1)[1]
         if model_pre == "p1":
             if new_name in self.p_model1.getParamList():
                 self.p_model1.setParam(new_name, value)
         elif model_pre == "p2":
              if new_name in self.p_model2.getParamList():
                 self.p_model2.setParam(new_name, value)
-        elif name.lower() == 'scale_factor':
+        elif name == 'scale_factor':
             self.params['scale_factor'] = value
         else:
             raise ValueError, "Model does not contain parameter %s" % name

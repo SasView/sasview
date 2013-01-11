@@ -533,7 +533,6 @@ class PDBReader:
             pos_z -= (min(pos_z) + max(pos_z)) / 2.0
 
             output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
-            #output.set_sldms(0, 0, 0)
             output.filename = os.path.basename(path)
             output.set_pix_type('atom')
             output.set_pixel_symbols(pix_symbol)
@@ -601,7 +600,6 @@ class SLDReader:
                 elif ncols == 7:
                      vol_pix = None
             except:
-                print "HERE"
                 # For older version of numpy
                 input_f = open(path, 'rb')
                 buff = input_f.read()
