@@ -586,7 +586,6 @@ class SLDReader:
                 # Use numpy to speed up loading
                 input_f = numpy.loadtxt(path, dtype='float', skiprows=1, 
                                         ndmin=1, unpack=True)
-                raise
                 pos_x = numpy.array(input_f[0])
                 pos_y = numpy.array(input_f[1])
                 pos_z = numpy.array(input_f[2])

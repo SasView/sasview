@@ -644,7 +644,6 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                         markeredgecolor=color, markersize=m_size, label=key) 
         # Plot All others        
         if numpy.any(other_color):
-            print len(other_color), output.pix_symbol[other_color]
             ax.plot(pos_x[other_color], pos_z[other_color], pos_y[other_color], 
                     marker, c="k", alpha=0.5, markeredgecolor="k", 
                     markersize=m_size, label="Other") 
