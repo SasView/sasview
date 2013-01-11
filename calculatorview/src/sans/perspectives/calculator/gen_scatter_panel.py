@@ -568,7 +568,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         Draw 3D sld profile
         """
         color_dic = {'H':'blue', 'D':'purple', 'N': 'orange', 
-                     'O':'red', 'C':'green', 'Other':'k'}
+                     'O':'red', 'C':'green', 'P':'cyan', 'Other':'k'}
         graph_title = self.file_name
         graph_title += "   3D SLD Profile "
         
@@ -633,17 +633,18 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             sld_mz = sld_mz[is_nonzero]
         
         # Plot selective points in color
+        other_color = numpy.ones(len(output.pix_symbol), dtype='bool')
         for key in color_dic.keys():
             chosen_color = output.pix_symbol == key
-            other_color = numpy.ones(len(output.pix_symbol), dtype='bool')
-            if chosen_color.any():
+            if numpy.any(chosen_color):
                 other_color = other_color  & (chosen_color != True)
                 color = color_dic[key]
                 ax.plot(pos_x[chosen_color], pos_z[chosen_color], 
                         pos_y[chosen_color], marker, c=color, alpha=0.5, 
                         markeredgecolor=color, markersize=m_size, label=key) 
         # Plot All others        
-        if other_color.any():
+        if numpy.any(other_color):
+            print len(other_color), output.pix_symbol[other_color]
             ax.plot(pos_x[other_color], pos_z[other_color], pos_y[other_color], 
                     marker, c="k", alpha=0.5, markeredgecolor="k", 
                     markersize=m_size, label="Other") 
