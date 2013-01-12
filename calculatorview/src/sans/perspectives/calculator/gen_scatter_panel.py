@@ -130,6 +130,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.id = 'Generic Scattering'
         self.file_name = ''
         self.time_text = None
+        self.orient_combo = None
         self.omfreader = sans_gen.OMFReader()
         self.sldreader = sans_gen.SLDReader()
         self.pdbreader = sans_gen.PDBReader()
@@ -289,6 +290,28 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.default_shape = label
         self.parent.set_omfpanel_default_shap(self.default_shape)
         self.parent.set_omfpanel_npts()
+        
+    def _fill_orient_combo(self):
+        """
+        Fill up the orientation combo box: used only for atomic structure
+        """
+        orient_combo = wx.ComboBox(self, -1, size=(150, -1), 
+                                      style=wx.CB_READONLY) 
+        orient_combo.Append('Fixed orientation')
+        orient_combo.Append('No orientation ')
+        
+        orient_combo.Bind(wx.EVT_COMBOBOX, self._on_orient_select)
+        orient_combo.SetSelection(0)
+        return orient_combo
+    
+    def _on_orient_select(self, event):
+        """
+        On selecting a orientation
+        """
+        event.Skip()
+        cb = event.GetEventObject()
+        is_avg = cb.GetCurrentSelection() == 1
+        self.model.set_is_avg(is_avg)         
            
     def _layout_qrange(self):
         """
@@ -338,14 +361,18 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """ 
         self.est_time = '*Estimated Computation time : %s sec'
         self.time_text = wx.StaticText(self, -1, self.est_time% str(2) )
+        self.orient_combo = self._fill_orient_combo()
+        self.orient_combo.Show(False)
         self.bt_compute = wx.Button(self, wx.NewId(),'Compute')
         self.bt_compute.Bind(wx.EVT_BUTTON, self.on_compute)
         self.bt_compute.SetToolTipString("Compute 2D Scattering Pattern.")
         self.button_sizer.AddMany([(self.time_text , 0, wx.LEFT, 20),
-                                   (self.bt_compute, 0, wx.LEFT, 190)])
+                                   (self.orient_combo , 0, wx.LEFT, 20),
+                                   (self.bt_compute, 0, wx.LEFT, 20)])
         
     def estimate_ctime(self):
         """
+        Calculation time estimation
         """
         n_qbins = float(self.npt_ctl.GetValue())
         n_qbins *= n_qbins
@@ -365,7 +392,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         
     def _do_layout(self):
         """
-            Draw window content
+        Draw window content
         """
         self._define_structure()
         self._layout_data_name()
@@ -512,6 +539,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             filename = data.filename
             self.data_name_tcl.SetValue(str(filename))
             self.file_name = filename.split('.')[0]
+            self.orient_combo.SetSelection(0)
             if self.ext in self.omfreader.ext:
                 gen = sans_gen.OMF2SLD()
                 gen.set_data(data)
@@ -525,6 +553,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 #omf_data = None
             else:
                 raise
+            self.orient_combo.Show(is_pdbdata)
+            self.button_sizer.Layout()
             self._set_sld_data_helper(True)
         except:
             if self.parent.parent is None:
@@ -546,6 +576,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
         Set sld data helper
         """
+        is_avg = self.orient_combo.GetCurrentSelection() == 1
+        self.model.set_is_avg(is_avg)
         self.model.set_sld_data(self.sld_data)
         self.draw_button.Enable(self.sld_data!=None)
         wx.CallAfter(self.parent.set_sld_data, self.sld_data)
@@ -605,15 +637,16 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             
         marker = ','
         m_size = 2
-        if output.pix_type != 'pixel':
+        if output.pix_type == 'atom':
             marker = 'o'
-            m_size = 2
+            m_size = 3.5
         pos_x = output.pos_x
         pos_y = output.pos_y
         pos_z = output.pos_z
         sld_mx = output.sld_mx
         sld_my = output.sld_my
-        sld_mz = output.sld_mz  
+        sld_mz = output.sld_mz 
+        pix_symbol = output.pix_symbol 
 
         sld_tot = (numpy.fabs(sld_mx) + numpy.fabs(sld_my) + 
                    numpy.fabs(sld_mz) + numpy.fabs(output.sld_n))
@@ -631,11 +664,11 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             sld_mx = sld_mx[is_nonzero]
             sld_my = sld_my[is_nonzero]
             sld_mz = sld_mz[is_nonzero]
-        
+            pix_symbol = output.pix_symbol[is_nonzero]
         # Plot selective points in color
-        other_color = numpy.ones(len(output.pix_symbol), dtype='bool')
+        other_color = numpy.ones(len(pix_symbol), dtype='bool')
         for key in color_dic.keys():
-            chosen_color = output.pix_symbol == key
+            chosen_color = pix_symbol == key
             if numpy.any(chosen_color):
                 other_color = other_color  & (chosen_color != True)
                 color = color_dic[key]
@@ -1573,7 +1606,7 @@ class SasGenWindow(wx.Frame):
     GEN SAS main window
     """
     def __init__(self, parent=None, title="Generic Scattering Calculator",
-                size=(PANEL_WIDTH * 1.3, PANEL_HEIGHT * 1.55), *args, **kwds):
+                size=(PANEL_WIDTH * 1.3, PANEL_HEIGHT * 1.57), *args, **kwds):
         """
         Init
         """

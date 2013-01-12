@@ -7,6 +7,7 @@ from periodictable import formula
 from periodictable import nsf
 import numpy
 import os
+import copy
 
 MFactor_AM = 2.853E-12
 MFactor_mT = 2.3164E-9
@@ -51,12 +52,14 @@ class GenSAS(BaseComponent):
         self.data_my = None
         self.data_mz = None
         self.data_vol = None #[A^3]
+        self.is_avg = False
         ## Name of the model
         self.name = "GenSAS"
         ## Define parameters
         self.params = {}
         self.params['scale']       = 1.0
         self.params['background']  = 0.0
+        self.params['solvent_SLD']     = 0.0
         self.params['Up_frac_in']     = 0.5
         self.params['Up_frac_out']    = 0.5
         self.params['Up_theta']  = 0.0
@@ -65,6 +68,7 @@ class GenSAS(BaseComponent):
         self.details = {}
         self.details['scale']      = ['', None, None]
         self.details['background'] = ['[1/cm]', None, None]
+        self.details['solvent_SLD']    = ['1/A^(2)', None, None]
         self.details['Up_frac_in']    = ['[u/(u+d)]', None, None]
         self.details['Up_frac_out']   = ['[u/(u+d)]', None, None]
         self.details['Up_theta'] = ['[deg]', None, None]
@@ -79,7 +83,13 @@ class GenSAS(BaseComponent):
         if self.data_vol == None:
             raise
         self.data_vol = volume
-        
+    
+    def set_is_avg(self, is_avg=False):  
+        """
+        Sets is_avg: [bool]
+        """
+        self.is_avg = is_avg
+          
     def _gen(self, x, y, i):
         """
         Evaluate the function
@@ -89,9 +99,13 @@ class GenSAS(BaseComponent):
         :return: function value
         """
         len_x = len(self.data_x)
+        if self.is_avg:
+            len_x *= -1
         len_q = len(x)
+        sldn = copy.deepcopy(self.data_sldn)
+        sldn -= self.params['solvent_SLD']
         model = mod.new_GenI(len_x, self.data_x, self.data_y, self.data_z, 
-                             self.data_sldn, self.data_mx, self.data_my, 
+                             sldn, self.data_mx, self.data_my, 
                              self.data_mz, self.data_vol,
                              self.params['Up_frac_in'], 
                              self.params['Up_frac_out'], 

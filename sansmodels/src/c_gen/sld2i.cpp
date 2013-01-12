@@ -52,8 +52,10 @@ GenI :: GenI(int npix, double* x, double* y, double* z, double* sldn,
  * Compute
  */
 void GenI :: genicom(int npoints, double *qx, double *qy, double *I_out){
+	//npoints is given negative for angular averaging 
 	// Assumes that q doesn't have qz component and sld_n is all real
 	double q = 0.0;
+	int is_avg = 0;
 	//double Pi = 4.0*atan(1.0);
 	polar_sld b_sld;
 	double qr = 0.0;
@@ -68,6 +70,11 @@ void GenI :: genicom(int npoints, double *qx, double *qy, double *I_out){
 	complex temp_fi;
 
 	double count = 0.0;
+	//check if this computation is for averaging
+	if (n_pix < 0 ){
+		is_avg = 1;
+		n_pix = fabs(n_pix);
+	}
 	//Assume that pixel volumes are given in vol_pix in A^3 unit
 	//int x_size = 0; //in Ang
 	//int y_size = 0; //in Ang
@@ -92,9 +99,24 @@ void GenI :: genicom(int npoints, double *qx, double *qy, double *I_out){
 				b_sld = cal_msld(0, qx[i], qy[i], sldn_val[j],
 								 mx_val[j], my_val[j], mz_val[j],
 				 				 inspin, outspin, stheta);
-				qr = (qx[i]*x_val[j] + qy[i]*y_val[j]);
-				iqr = cassign(0.0, qr);
-				ephase = cplx_exp(iqr);
+				if (is_avg < 1){
+					//anisotropic
+					qr = (qx[i]*x_val[j] + qy[i]*y_val[j]);
+					iqr = cassign(0.0, qr);
+					ephase = cplx_exp(iqr);
+					}
+				else{
+					//isotropic
+					qr = sqrt(x_val[j]*x_val[j]+y_val[j]*y_val[j]+z_val[j]*z_val[j]);
+					qr *= q;
+					if (qr == 0.0){
+						ephase = cassign(0.0, 1.0);
+						}
+					else{
+						qr = sin(qr) / qr;
+						ephase = cassign(qr, 0.0);
+						}
+					}
 				//up_up
 				if (inspin > 0.0 && outspin > 0.0){
 					comp_sld = cassign(b_sld.uu, 0.0);
