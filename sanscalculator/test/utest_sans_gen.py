@@ -48,9 +48,9 @@ class sans_gen_test(unittest.TestCase):
         self.assertEqual(f.mx[0], 0)
         self.assertEqual(f.my[0], 0)
         self.assertEqual(f.mz[0], 0)
-        self.assertEqual(output.pos_x[0], -390.0)
-        self.assertEqual(output.pos_y[0], -390.0)
-        self.assertEqual(output.pos_z[0], -90.0)
+        self.assertEqual(output.pos_x[0], 0.0)
+        self.assertEqual(output.pos_y[0], 0.0)
+        self.assertEqual(output.pos_z[0], 0.0)
 
 """      
     def test_slda_and_run(self): # Works when sld reader uses loadtxt

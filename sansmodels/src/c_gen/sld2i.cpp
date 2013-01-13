@@ -117,32 +117,30 @@ void GenI :: genicom(int npoints, double *qx, double *qy, double *I_out){
 						ephase = cassign(qr, 0.0);
 						}
 					}
+				//Let's multiply pixel(atomic) volume here
+				ephase = rcmult(vol_pix[j], ephase);
 				//up_up
 				if (inspin > 0.0 && outspin > 0.0){
 					comp_sld = cassign(b_sld.uu, 0.0);
 					temp_fi = cplx_mult(comp_sld, ephase);
-					temp_fi = rcmult(vol_pix[j],temp_fi);
 					sumj_uu = cplx_add(sumj_uu, temp_fi);
 					}
 				//down_down
 				if (inspin < 1.0 && outspin < 1.0){
 					comp_sld = cassign(b_sld.dd, 0.0);
 					temp_fi = cplx_mult(comp_sld, ephase);
-					temp_fi = rcmult(vol_pix[j],temp_fi);
 					sumj_dd = cplx_add(sumj_dd, temp_fi);
 					}
 				//up_down
 				if (inspin > 0.0 && outspin < 1.0){
 					comp_sld = cassign(b_sld.re_ud, b_sld.im_ud);
 					temp_fi = cplx_mult(comp_sld, ephase);
-					temp_fi = rcmult(vol_pix[j],temp_fi);
 					sumj_ud = cplx_add(sumj_ud, temp_fi);
 					}
 				//down_up
 				if (inspin < 1.0 && outspin > 0.0){
 					comp_sld = cassign(b_sld.re_du, b_sld.im_du);
 					temp_fi = cplx_mult(comp_sld, ephase);
-					temp_fi = rcmult(vol_pix[j],temp_fi);
 					sumj_du = cplx_add(sumj_du, temp_fi);
 					}
 				if (i == 0){

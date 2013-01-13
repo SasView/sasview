@@ -294,7 +294,7 @@ class OMF2SLD:
         if len(self.mz) != length:
             raise ValueError, msg
         
-    def remove_null_points(self, remove=False):
+    def remove_null_points(self, remove=False, recenter=False):
         """
         Removes any mx, my, and mz = 0 points
         """
@@ -309,9 +309,10 @@ class OMF2SLD:
                 self.mx = self.mx[is_nonzero]
                 self.my = self.my[is_nonzero]
                 self.mz = self.mz[is_nonzero]
-        self.pos_x -= (min(self.pos_x) + max(self.pos_x)) / 2.0
-        self.pos_y -= (min(self.pos_y) + max(self.pos_y)) / 2.0
-        self.pos_z -= (min(self.pos_z) + max(self.pos_z)) / 2.0
+        if recenter:
+            self.pos_x -= (min(self.pos_x) + max(self.pos_x)) / 2.0
+            self.pos_y -= (min(self.pos_y) + max(self.pos_y)) / 2.0
+            self.pos_z -= (min(self.pos_z) + max(self.pos_z)) / 2.0
  
     def get_magsld(self):
         """
@@ -541,10 +542,10 @@ class PDBReader:
                         pix_symbol = numpy.append(pix_symbol, atom_name)
                 except:
                     pass
-            #print pix_symbol, pos_x
-            pos_x -= (min(pos_x) + max(pos_x)) / 2.0
-            pos_y -= (min(pos_y) + max(pos_y)) / 2.0
-            pos_z -= (min(pos_z) + max(pos_z)) / 2.0
+            #re-centering
+            #pos_x -= (min(pos_x) + max(pos_x)) / 2.0
+            #pos_y -= (min(pos_y) + max(pos_y)) / 2.0
+            #pos_z -= (min(pos_z) + max(pos_z)) / 2.0
 
             output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
             output.filename = os.path.basename(path)
@@ -644,10 +645,11 @@ class SLDReader:
                     except:
                         # Skip non-data lines
                         pass
-                 
-            pos_x -= (min(pos_x) + max(pos_x)) / 2.0
-            pos_y -= (min(pos_y) + max(pos_y)) / 2.0
-            pos_z -= (min(pos_z) + max(pos_z)) / 2.0
+            
+            # re-center     
+            #pos_x -= (min(pos_x) + max(pos_x)) / 2.0
+            #pos_y -= (min(pos_y) + max(pos_y)) / 2.0
+            #pos_z -= (min(pos_z) + max(pos_z)) / 2.0
 
             output = MagSLD(pos_x, pos_y, pos_z, sld_n, 
                             sld_mx, sld_my, sld_mz)
