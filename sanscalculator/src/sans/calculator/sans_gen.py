@@ -60,8 +60,8 @@ class GenSAS(BaseComponent):
         self.params['scale']       = 1.0
         self.params['background']  = 0.0
         self.params['solvent_SLD']     = 0.0
-        self.params['Up_frac_in']     = 0.5
-        self.params['Up_frac_out']    = 0.5
+        self.params['Up_frac_in']     = 1.0
+        self.params['Up_frac_out']    = 1.0
         self.params['Up_theta']  = 0.0
         self.description='GenSAS'
         ## Parameter details [units, min, max]

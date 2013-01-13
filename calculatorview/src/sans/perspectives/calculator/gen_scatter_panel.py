@@ -379,7 +379,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         n_pixs = float(self.parent.get_npix())
         x_in = n_qbins * n_pixs / 100000
         # magic equation: not very accurate
-        etime = 1.0 + 0.14 * x_in
+        etime = 1.0 + 0.085973 * x_in
         return int(etime)
         
     def set_est_time(self):
