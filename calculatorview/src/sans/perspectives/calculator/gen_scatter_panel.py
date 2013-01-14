@@ -27,8 +27,8 @@ from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.utils import format_number
 from sans.guiframe.events import StatusEvent  
 from sans.calculator import sans_gen 
-from calculator_widgets import OutputTextCtrl
-from calculator_widgets import InputTextCtrl
+from sans.perspectives.calculator.calculator_widgets import OutputTextCtrl
+from sans.perspectives.calculator.calculator_widgets import InputTextCtrl
 from wx.lib.scrolledpanel import ScrolledPanel
 from sans.perspectives.calculator.load_thread import GenReader
 from danse.common.plottools.arrow3d import Arrow3D
@@ -88,7 +88,7 @@ class CalcGen(CalcThread):
                  worktime   = 0.01):
         """
         """
-        CalcThread.__init__(self,completefn,
+        CalcThread.__init__(self, completefn,
                  updatefn,
                  yieldtime,
                  worktime)
@@ -1063,7 +1063,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                     if not flag:
                         return self.sld_data
             else:
-               sld_sets[list[0]]= None
+               sld_sets[list[0]] = None
         for key in sld_sets.keys():
             key_low = key.lower()
             if key_low.count('mx') > 0:
@@ -1610,8 +1610,8 @@ class SasGenWindow(wx.Frame):
         """
         Init
         """
-        kwds['size']= size
-        kwds['title']= title
+        kwds['size'] = size
+        kwds['title'] = title
         
         wx.Frame.__init__(self, parent, *args, **kwds)
         self.parent = parent
@@ -1644,9 +1644,9 @@ class SasGenWindow(wx.Frame):
                                             tsize)
         save_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_TOOLBAR,
                                             tsize)
-        close_bmp= wx.ArtProvider.GetBitmap(wx.ART_QUIT, wx.ART_TOOLBAR, 
+        close_bmp = wx.ArtProvider.GetBitmap(wx.ART_QUIT, wx.ART_TOOLBAR, 
                                             tsize)
-        help_bmp= wx.ArtProvider.GetBitmap(wx.ART_HELP, wx.ART_TOOLBAR, 
+        help_bmp = wx.ArtProvider.GetBitmap(wx.ART_HELP, wx.ART_TOOLBAR, 
                                            (17, 20))
         
         id = wx.NewId()
@@ -1679,9 +1679,9 @@ class SasGenWindow(wx.Frame):
                                             tsize)
         save_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_TOOLBAR,
                                             tsize)
-        quit_bmp= wx.ArtProvider.GetBitmap(wx.ART_QUIT, wx.ART_TOOLBAR, 
+        quit_bmp = wx.ArtProvider.GetBitmap(wx.ART_QUIT, wx.ART_TOOLBAR, 
                                            tsize)
-        help_bmp= wx.ArtProvider.GetBitmap(wx.ART_HELP, wx.ART_TOOLBAR, 
+        help_bmp = wx.ArtProvider.GetBitmap(wx.ART_HELP, wx.ART_TOOLBAR, 
                                            (13, 15))
         
         menu_bar = wx.MenuBar()
@@ -1890,7 +1890,7 @@ class SasGenWindow(wx.Frame):
         """
         Gen scatter angle help panel
         """
-        from help_panel import  HelpWindow
+        from sans.perspectives.calculator.help_panel import  HelpWindow
         # Get models help model_function path
         import sans.perspectives.calculator as calmedia
 
@@ -1912,6 +1912,6 @@ class SasGenWindow(wx.Frame):
            
 if __name__ == "__main__": 
     app = wx.PySimpleApp()
-    frame = SasGenWindow()    
-    frame.Show(True)
+    SGframe = SasGenWindow()    
+    SGframe.Show(True)
     app.MainLoop()     

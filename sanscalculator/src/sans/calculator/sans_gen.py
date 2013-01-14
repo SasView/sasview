@@ -63,7 +63,7 @@ class GenSAS(BaseComponent):
         self.params['Up_frac_in']     = 1.0
         self.params['Up_frac_out']    = 1.0
         self.params['Up_theta']  = 0.0
-        self.description='GenSAS'
+        self.description = 'GenSAS'
         ## Parameter details [units, min, max]
         self.details = {}
         self.details['scale']      = ['', None, None]
@@ -73,7 +73,7 @@ class GenSAS(BaseComponent):
         self.details['Up_frac_out']   = ['[u/(u+d)]', None, None]
         self.details['Up_theta'] = ['[deg]', None, None]
         # fixed parameters
-        self.fixed=[]
+        self.fixed = []
         
     def set_pixel_volumes(self, volume):     
         """
@@ -145,7 +145,7 @@ class GenSAS(BaseComponent):
         """
         if x.__class__.__name__ == 'list':
             i_out = numpy.zeros_like(x[0])
-            y_in = numpy.zero_like(x[0])
+            y_in = numpy.zeros_like(x[0])
             # 1D I is found at y =0 in the 2D pattern
             return self._gen(x[0], y_in, i_out )
         else:
@@ -162,9 +162,9 @@ class GenSAS(BaseComponent):
         if x.__class__.__name__ == 'list':
             i_out = numpy.zeros_like(x[0])
             import time
-            s=time.time()
+            s = time.time()
             out = self._gen(x[0], x[1], i_out)
-            print "i_out_time",time.time()-s
+            print "i_out_time", time.time() - s
             return out
         else:
             msg = "Q must be given as list of qx's and qy's"
@@ -345,7 +345,7 @@ class OMFReader:
         :param path: file path
         :return: x, y, z, sld_n, sld_mx, sld_my, sld_mz
         """
-        data_conv_m = None
+        #data_conv_m = None
         desc = ""
         mx = numpy.zeros(0)
         my = numpy.zeros(0)
@@ -453,9 +453,9 @@ class OMFReader:
                     output.ymax = float(ymax) * METER2ANG
                     output.zmax = float(zmax) * METER2ANG
                     output.valuemultiplier = valuemultiplier
-                    output.valuerangeminmag = mag2sld(float(valuerangeminmag),\
+                    output.valuerangeminmag = mag2sld(float(valuerangeminmag), \
                                                       valueunit)
-                    output.valuerangemaxmag = mag2sld(float(valuerangemaxmag),\
+                    output.valuerangemaxmag = mag2sld(float(valuerangemaxmag), \
                                                       valueunit)
             output.set_m(mx, my, mz)
             return output
@@ -1085,7 +1085,7 @@ def test():
     model.set_sld_data(foutput.output) 
     x = numpy.arange(1000)/10000. + 1e-5
     y = numpy.arange(1000)/10000. + 1e-5
-    z = numpy.arange(1000)/10000. + 1e-5
+    #z = numpy.arange(1000)/10000. + 1e-5
     i = numpy.zeros(1000)
     out = model.runXY([x,y,i])
         
