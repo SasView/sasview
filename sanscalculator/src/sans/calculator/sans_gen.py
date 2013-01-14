@@ -240,21 +240,27 @@ class OMF2SLD:
             self.mz = numpy.zeros(length)
         
         self._check_data_length(length)
-        self.remove_null_points()
+        self.remove_null_points(False, False)
         mask = numpy.ones(len(self.sld_n), dtype=bool)
-        if shape == 'ellipsoid':
+        if shape.lower() == 'ellipsoid':
             try:
                 # Pixel (step) size included
-                x_r = (max(self.pos_x) - min(self.pos_x) + \
-                       omfdata.xstepsize) / 2.0
-                y_r = (max(self.pos_y) - min(self.pos_y) + \
-                       omfdata.ystepsize) / 2.0
-                z_r = (max(self.pos_z) - min(self.pos_z) + \
-                       omfdata.zstepsize) / 2.0
-                x_dir2 = (self.pos_x / x_r) * (self.pos_x / x_r)
-                y_dir2 = (self.pos_y / y_r) * (self.pos_y / y_r)
-                z_dir2 = (self.pos_z / z_r) * (self.pos_z / z_r)
-                mask = (x_dir2 + y_dir2 + z_dir2) <= 1
+                x_c = max(self.pos_x) + min(self.pos_x)
+                y_c = max(self.pos_y) + min(self.pos_y)
+                z_c = max(self.pos_z) + min(self.pos_z)
+                x_d = max(self.pos_x) - min(self.pos_x)
+                y_d = max(self.pos_y) - min(self.pos_y)
+                z_d = max(self.pos_z) - min(self.pos_z)
+                x_r = (x_d + omfdata.xstepsize) / 2.0
+                y_r = (y_d + omfdata.ystepsize) / 2.0
+                z_r = (z_d + omfdata.zstepsize) / 2.0
+                x_dir2 = ((self.pos_x - x_c / 2.0) / x_r)
+                x_dir2 *= x_dir2
+                y_dir2 = ((self.pos_y - y_c / 2.0) / y_r)
+                y_dir2 *= y_dir2
+                z_dir2 = ((self.pos_z - z_c / 2.0) / z_r)
+                z_dir2 *= z_dir2
+                mask = (x_dir2 + y_dir2 + z_dir2) <= 1.0
             except:
                 pass
         self.output = MagSLD(self.pos_x[mask], self.pos_y[mask], 
