@@ -66,7 +66,7 @@ class SimplePlotPanel(PlotPanel):
         slicerpop.Append(id, '&Copy to Clipboard', 'Copy to the clipboard')
         wx.EVT_MENU(self, id, self.OnCopyFigureMenu)
 
-        if self.data2D.__class__.__name__ != 'NoneType':
+        if self.dimension != 3:
             slicerpop.AppendSeparator()
             id = wx.NewId()
             slicerpop.Append(id, '&Toggle Grid On/Off', 'Toggle Grid On/Off')
@@ -226,6 +226,13 @@ class PlotFrame(wx.Frame):
         """
         self.plotpanel.resizing = False
     
+    def im_show(self, img):
+        """
+        Show background image
+        :Param img: [imread(path) from matplotlib.pyplot]
+        """
+        self.plotpanel.subplot.imshow(img)
+        
     def set_schedule(self, schedule=False): 
         """
         """

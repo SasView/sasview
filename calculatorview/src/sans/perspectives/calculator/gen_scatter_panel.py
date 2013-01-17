@@ -634,7 +634,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             except:
                 logging.error("PlotPanel could not import Axes3D")
                 raise
-            
+        panel.dimension = 3   
         marker = ','
         m_size = 2
         if output.pix_type == 'atom':
