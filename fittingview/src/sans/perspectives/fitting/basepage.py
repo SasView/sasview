@@ -2927,6 +2927,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         # set list of graphs
         graphs = []
         canvases = []
+        res_item = None
         # call gui_manager
         gui_manager = self.parent.parent
         # loops through the panels [dic]
@@ -2934,15 +2935,23 @@ class BasicPage(ScrolledPanel, PanelBase):
             data_title = self.data.group_id
             # try to get all plots belonging to this control panel
             try:
-                if item2.group_id == data_title or \
-                        item2.group_id.count("res" + str(self.graph_id)) or \
-                        item2.group_id.count(str(self.uid)) > 0:
-                    # append to the list
-                    graphs.append(item2.figure)
-                    canvases.append(item2.canvas)
+                g_id = item2.group_id
+                if g_id == data_title or \
+                        str(g_id).count("res" + str(self.graph_id)) or \
+                        str(g_id).count(str(self.uid)) > 0:
+                    if str(g_id).count("res" + str(self.graph_id)) > 0:
+                        res_item = [item2.figure, item2.canvas]
+                    else:
+                        # append to the list
+                        graphs.append(item2.figure)
+                        canvases.append(item2.canvas)  
             except:
                 # Not for control panels
                 pass
+        # Make sure the resduals plot goes to the last
+        if res_item != None:
+            graphs.append(res_item[0])
+            canvases.append(res_item[1])
         # return the list of graphs
         return graphs, canvases
 
