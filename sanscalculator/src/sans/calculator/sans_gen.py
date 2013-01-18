@@ -60,6 +60,7 @@ class GenSAS(BaseComponent):
         self.params['scale']       = 1.0
         self.params['background']  = 0.0
         self.params['solvent_SLD']     = 0.0
+        self.params['total_volume'] = 1.0
         self.params['Up_frac_in']     = 1.0
         self.params['Up_frac_out']    = 1.0
         self.params['Up_theta']  = 0.0
@@ -69,6 +70,7 @@ class GenSAS(BaseComponent):
         self.details['scale']      = ['', None, None]
         self.details['background'] = ['[1/cm]', None, None]
         self.details['solvent_SLD']    = ['1/A^(2)', None, None]
+        self.details['total_volume']    = ['A^(3)', None, None]
         self.details['Up_frac_in']    = ['[u/(u+d)]', None, None]
         self.details['Up_frac_out']   = ['[u/(u+d)]', None, None]
         self.details['Up_theta'] = ['[deg]', None, None]
@@ -112,7 +114,9 @@ class GenSAS(BaseComponent):
                              self.params['Up_theta'])
 
         mod.genicom(model, len_q, x, y, i)
-        return  self.params['scale'] * i + self.params['background']
+        vol_correction = self.data_total_volume / self.params['total_volume']
+        return  self.params['scale'] * vol_correction * i + \
+                        self.params['background']
         
     def set_sld_data(self, sld_data=None):   
         """
@@ -128,6 +132,8 @@ class GenSAS(BaseComponent):
         self.data_my = sld_data.sld_my
         self.data_mz = sld_data.sld_mz
         self.data_vol = sld_data.vol_pix
+        self.data_total_volume = sum(sld_data.vol_pix)
+        self.params['total_volume'] = sum(sld_data.vol_pix)
         
     def getProfile(self):
         """

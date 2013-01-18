@@ -579,11 +579,33 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         is_avg = self.orient_combo.GetCurrentSelection() == 1
         self.model.set_is_avg(is_avg)
         self.model.set_sld_data(self.sld_data)
+        
         self.draw_button.Enable(self.sld_data!=None)
         wx.CallAfter(self.parent.set_sld_data, self.sld_data)
+        self._update_model_params()
         if is_draw:
             wx.CallAfter(self.sld_draw, False)
-            
+    
+    def _update_model_params(self):
+        """
+        Update the model parameter values
+        """
+        for list in self.parameters:
+            param_name = list[0].GetLabelText()
+            val = str(self.model.params[param_name])
+            list[1].SetValue(val)
+    
+    def set_volume_ctl_val(self, val):
+        """
+        Set volume txtctrl value
+        """
+        for list in self.parameters:
+            param_name = list[0].GetLabelText()
+            if param_name.lower() == 'total_volume':
+                list[1].SetValue(val)
+                list[1].Refresh()
+                break
+                            
     def _onparamEnter(self, event):
         """
         On param enter
@@ -786,8 +808,6 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             _set_error(self, None, True)
             return
         try:
-            #vol = self.parent.get_pix_volumes()
-            #self.model.set_pixel_volumes(vol)
             self.model.set_sld_data(self.sld_data)
             self.set_input_params()
             self._create_default_2d_data()
@@ -1521,9 +1541,17 @@ class OmfPanel(ScrolledPanel, PanelBase):
                 if nop == None:
                     nop = npts
                 self.display_npts(nop)
+                
         ctl.Refresh()
         return flag
     
+    def _set_volume_ctr_val(self, npts):
+        """
+        Set total volume
+        """
+        total_volume = npts * self.sld_data.vol_pix[0]
+        self.parent.set_volume_ctr_val(total_volume)
+                    
     def _onstepsize(self, event):
         """
         On stepsize event
@@ -1546,6 +1574,9 @@ class OmfPanel(ScrolledPanel, PanelBase):
                     if numpy.isfinite(s_val):
                         s_size *= s_val
                 self.sld_data.set_pixel_volumes(s_size)
+                if ctl.IsEnabled():
+                    total_volume = sum(self.sld_data.vol_pix)
+                    self.parent.set_volume_ctr_val(total_volume)
             except:
                 pass
         ctl.Refresh()
@@ -1571,6 +1602,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
             self.npix_ctl.SetValue(str(nop))
             self.npix_ctl.Refresh()
             self.parent.set_etime()
+            wx.CallAfter(self._set_volume_ctr_val, nop)
         except:
             # On Init
             pass
@@ -1606,7 +1638,7 @@ class SasGenWindow(wx.Frame):
     GEN SAS main window
     """
     def __init__(self, parent=None, title="Generic Scattering Calculator",
-                size=(PANEL_WIDTH * 1.3, PANEL_HEIGHT * 1.57), *args, **kwds):
+                size=(PANEL_WIDTH * 1.3, PANEL_HEIGHT * 1.65), *args, **kwds):
         """
         Init
         """
@@ -1834,6 +1866,15 @@ class SasGenWindow(wx.Frame):
         vol = self.omfpanel.get_pix_volumes()
         return vol
     
+    def set_volume_ctr_val(self, val):
+        """
+        Set volume txtctl value
+        """
+        try:
+            self.panel.set_volume_ctl_val(str(val))
+        except:
+            print "self.panel is not initialized yet"
+            
     def set_omfpanel_default_shap(self, shape):
         """
         Set default_shape in omfpanel
