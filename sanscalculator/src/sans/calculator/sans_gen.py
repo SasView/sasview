@@ -499,6 +499,9 @@ class PDBReader:
         sld_mz = numpy.zeros(0)
         vol_pix = numpy.zeros(0)
         pix_symbol = numpy.zeros(0)
+        x_line = numpy.zeros(0)
+        y_line = numpy.zeros(0)
+        z_line = numpy.zeros(0)
         try:
             input_f = open(path, 'rb')
             buff = input_f.read()
@@ -506,7 +509,6 @@ class PDBReader:
             input_f.close()
             for line in lines:
                 try:
-                    #toks = line.split()
                     # check if line starts with "ATOM"
                     if line[0:6].strip().count('ATM') > 0 or \
                                 line[0:6].strip() == 'ATOM':
@@ -552,6 +554,17 @@ class PDBReader:
                         sld_my = numpy.append(sld_my, 0)
                         sld_mz = numpy.append(sld_mz, 0)
                         pix_symbol = numpy.append(pix_symbol, atom_name)
+                    elif line[0:6].strip().count('CONECT') > 0 :
+                        toks = line.split()
+                        for val in toks[2:]:
+                            index = int(val) - 1
+                            num = int(toks[1]) - 1
+                            x_line = numpy.append(x_line, 
+                                                  [pos_x[num], pos_x[index]])
+                            y_line = numpy.append(y_line, 
+                                                  [pos_y[num], pos_y[index]])
+                            z_line = numpy.append(z_line, 
+                                                  [pos_z[num], pos_z[index]])        
                 except:
                     pass
             #re-centering
@@ -560,6 +573,7 @@ class PDBReader:
             #pos_z -= (min(pos_z) + max(pos_z)) / 2.0
 
             output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
+            output.set_conect_lines(x_line, y_line, z_line)
             output.filename = os.path.basename(path)
             output.set_pix_type('atom')
             output.set_pixel_symbols(pix_symbol)
@@ -833,6 +847,7 @@ class MagSLD:
         self.ynodes = 10.0
         self.znodes = 10.0
         self.has_stepsize = False
+        self.has_conect = False
         self.pos_unit = self._pos_unit
         self.sld_unit = self._sld_unit
         self.pix_type = 'pixel'
@@ -840,6 +855,9 @@ class MagSLD:
         self.pos_y = pos_y
         self.pos_z = pos_z
         self.sld_n = sld_n
+        self.line_x = None
+        self.line_y = None
+        self.line_z = None
         self.sld_mx = sld_mx
         self.sld_my = sld_my
         self.sld_mz = sld_mz
@@ -1016,7 +1034,22 @@ class MagSLD:
             self.has_stepsize = True
         return self.xstepsize, self.ystepsize, self.zstepsize
 
-    
+    def set_conect_lines(self, line_x, line_y, line_z):
+        """
+        Set bonding line data if taken from pdb
+        """
+        if line_x.__class__.__name__ != 'ndarray' or len(line_x) < 1:
+            return
+        if line_y.__class__.__name__ != 'ndarray' or len(line_y) < 1:
+            return
+        if line_z.__class__.__name__ != 'ndarray' or len(line_z) < 1:
+            return
+        self.has_conect = True
+        self.line_x = line_x 
+        self.line_y = line_y 
+        self.line_z = line_z
+        
+
 def test_load():
     from danse.common.plottools.arrow3d import Arrow3D
     import os

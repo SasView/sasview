@@ -621,8 +621,6 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
         Draw 3D sld profile
         """
-        color_dic = {'H':'blue', 'D':'purple', 'N': 'orange', 
-                     'O':'red', 'C':'green', 'P':'cyan', 'Other':'k'}
         graph_title = self.file_name
         graph_title += "   3D SLD Profile "
         
@@ -643,8 +641,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         frame = self.plot_frame
         frame.Show(False)
         add_icon(self.parent, frame)
-        panel = frame.plotpanel
-        
+        panel = frame.plotpanel    
         try:
             # mpl >= 1.0.0
             ax = panel.figure.gca(projection='3d')
@@ -657,11 +654,33 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 logging.error("PlotPanel could not import Axes3D")
                 raise
         panel.dimension = 3   
+        self._sld_plot_helper(ax, output, has_arrow)
+        # Use y, z axes (in mpl 3d) as z, y axes 
+        # that consistent with our SANS detector coords.
+        ax.set_xlabel('x ($\A%s$)'% output.pos_unit)
+        ax.set_ylabel('z ($\A%s$)'% output.pos_unit)
+        ax.set_zlabel('y ($\A%s$)'% output.pos_unit)
+        panel.subplot.figure.subplots_adjust(left=0.05, right=0.95, 
+                                             bottom=0.05, top=0.96)
+        if output.pix_type == 'atom':
+            ax.legend(loc='upper left', prop={'size':10})
+        num_graph = str(self.graph_num)
+        frame.SetTitle('Graph %s: %s'% (num_graph, graph_title))        
+        wx.CallAfter(frame.Show, True)
+        self.graph_num += 1
+
+    def _sld_plot_helper(self, ax, output, has_arrow=False):
+        """
+        Actual plot definition happens here
+        :Param ax: axis3d
+        :Param output: sld_data [MagSLD]
+        :Param has_arrow: whether or not draws M vector [bool]
+        """
+        # Set the locals
+        color_dic = {'H':'blue', 'D':'purple', 'N': 'orange', 
+                     'O':'red', 'C':'green', 'P':'cyan', 'Other':'k'}
         marker = ','
         m_size = 2
-        if output.pix_type == 'atom':
-            marker = 'o'
-            m_size = 3.5
         pos_x = output.pos_x
         pos_y = output.pos_y
         pos_z = output.pos_z
@@ -669,17 +688,17 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         sld_my = output.sld_my
         sld_mz = output.sld_mz 
         pix_symbol = output.pix_symbol 
-
-        sld_tot = (numpy.fabs(sld_mx) + numpy.fabs(sld_my) + 
+        if output.pix_type == 'atom':
+            marker = 'o'
+            m_size = 3.5
+        sld_tot = (numpy.fabs(sld_mx) + numpy.fabs(sld_my) + \
                    numpy.fabs(sld_mz) + numpy.fabs(output.sld_n))
         is_nonzero = sld_tot > 0.0  
-        is_zero = sld_tot == 0.0  
-        
-        # Plot null points
+        is_zero = sld_tot == 0.0   
+        # I. Plot null points
         if is_zero.any():
             ax.plot(pos_x[is_zero], pos_z[is_zero], pos_y[is_zero], marker, 
-                        c="y", alpha=0.5, markeredgecolor='y', 
-                        markersize=m_size) 
+                    c="y", alpha=0.5, markeredgecolor='y', markersize=m_size) 
             pos_x = pos_x[is_nonzero]
             pos_y = pos_y[is_nonzero]
             pos_z = pos_z[is_nonzero]
@@ -687,7 +706,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             sld_my = sld_my[is_nonzero]
             sld_mz = sld_mz[is_nonzero]
             pix_symbol = output.pix_symbol[is_nonzero]
-        # Plot selective points in color
+        # II. Plot selective points in color
         other_color = numpy.ones(len(pix_symbol), dtype='bool')
         for key in color_dic.keys():
             chosen_color = pix_symbol == key
@@ -697,17 +716,32 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 ax.plot(pos_x[chosen_color], pos_z[chosen_color], 
                         pos_y[chosen_color], marker, c=color, alpha=0.5, 
                         markeredgecolor=color, markersize=m_size, label=key) 
-        # Plot All others        
+        # III. Plot All others        
         if numpy.any(other_color):
+            a_name = ''
+            if output.pix_type == 'atom':
+                # Get atom names not in the list
+                a_names = [symb  for symb in pix_symbol \
+                           if symb not in color_dic.keys()]
+                a_name = a_names[0]
+                for name in a_names:
+                    new_name = ", " + name
+                    if a_name.count(new_name) == 0 and a_name != name:
+                        a_name += new_name
+            # plot in black
             ax.plot(pos_x[other_color], pos_z[other_color], pos_y[other_color], 
                     marker, c="k", alpha=0.5, markeredgecolor="k", 
-                    markersize=m_size, label="Other") 
-        
+                    markersize=m_size, label=a_name) 
+        # IV. Draws atomic bond with grey lines if any
+        if output.has_conect:
+            ax.plot(output.line_x, output.line_z, output.line_y, '-', 
+                    lw=0.6, c="grey", alpha=0.3)
+        # V. Draws magnetic vectors
         if has_arrow and len(pos_x) > 0:     
             graph_title += "w/ Arrows" 
             def _draw_arrow(input=None, elapsed=0.1):
                 """
-                draw w/arrow
+                draw magnetic vectors w/arrow
                 """
                 max_mx = max(numpy.fabs(sld_mx))
                 max_my = max(numpy.fabs(sld_my))
@@ -735,42 +769,17 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                         x_arrow = numpy.column_stack((pos_x, x2))
                         y_arrow = numpy.column_stack((pos_y, y2))
                         z_arrow = numpy.column_stack((pos_z, z2))
-                        colors =  numpy.column_stack((color_x, 
-                                                      color_y,
-                                                      color_z))
-                        
+                        colors = numpy.column_stack((color_x, color_y, color_z))
                         arrows = Arrow3D(panel, x_arrow, z_arrow, y_arrow, 
-                                                  colors, 
-                                                  mutation_scale=10, lw=1, 
-                                                  arrowstyle="->", alpha = 0.5)
+                                        colors, mutation_scale=10, lw=1, 
+                                        arrowstyle="->", alpha = 0.5)
                         ax.add_artist(arrows) 
                 except:
                     pass 
                 msg = "Arrow Drawing completed.\n"
                 status_type = 'stop'
                 self._status_info(msg, status_type) 
-            msg = "Arrow Drawing is in progress..."
-            
-            status_type = 'progress'
-            self._status_info(msg, status_type) 
-            draw_out = CalcGen(input=ax,
-                             completefn=_draw_arrow, updatefn=self._update)
-            draw_out.queue()
-
-        panel.subplot.figure.subplots_adjust(left=0.05, right=0.95, 
-                                             bottom=0.05, top=0.96)
-        # Use y, z axes (in mpl 3d) as z, y axes 
-        # that consistent with SANS coords.
-        ax.set_xlabel('x ($\A%s$)'% output.pos_unit)
-        ax.set_ylabel('z ($\A%s$)'% output.pos_unit)
-        ax.set_zlabel('y ($\A%s$)'% output.pos_unit)
-        if output.pix_type == 'atom':
-            ax.legend(loc='upper left', prop={'size':10})
-        num_graph = str(self.graph_num)
-        frame.SetTitle('Graph %s: %s'% (num_graph, graph_title))        
-        wx.CallAfter(frame.Show, True)
-        self.graph_num += 1
-        
+ 
     def set_input_params(self):
         """
         Set model parameters
