@@ -14,7 +14,7 @@ import logging
 import os
 import numpy
 from sans.dataloader.data_info import Data2D
-    
+from sans.dataloader.manipulations import reader2D_converter
     
 class Reader:
     """
@@ -37,6 +37,8 @@ class Reader:
         """
         try:
             import Image
+            import TiffImagePlugin
+            Image._initialized=2
         except:
             msg = "tiff_reader: could not load file. Missing Image module."
             raise RuntimeError, msg
@@ -55,6 +57,7 @@ class Reader:
         # Initiazed the output data object
         output.data = numpy.zeros([im.size[0], im.size[1]])
         output.err_data = numpy.zeros([im.size[0], im.size[1]])
+        output.mask = numpy.ones([im.size[0], im.size[1]], dtype=bool)
         
         # Initialize
         x_vals = []
@@ -90,6 +93,8 @@ class Reader:
         output.ybins = im.size[1]
         output.x_bins = x_vals
         output.y_bins = y_vals
+        output.qx_data = numpy.array(x_vals)
+        output.qy_data = numpy.array(y_vals)
         output.xmin = 0
         output.xmax = im.size[0] - 1
         output.ymin = 0
@@ -97,4 +102,5 @@ class Reader:
         
         # Store loading process information
         output.meta_data['loader'] = self.type_name
+        output = reader2D_converter(output)
         return output
