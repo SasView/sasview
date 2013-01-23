@@ -1627,10 +1627,10 @@ class PlotPanel(wx.Panel):
             return copy.deepcopy(self.data)
         
         # find max and min values of qx and qy
-        xmax = numpy.max(self.qx_data)
-        xmin = numpy.min(self.qx_data)
-        ymax = numpy.max(self.qy_data)
-        ymin = numpy.min(self.qy_data)
+        xmax = self.qx_data.max()
+        xmin = self.qx_data.min()
+        ymax = self.qy_data.max()
+        ymin = self.qy_data.min()
         
         # calculate the range of qx and qy: this way, it is a little
         # more independent
@@ -1646,14 +1646,16 @@ class PlotPanel(wx.Panel):
         ystep = y_size / (npix_y - 1)
 
         # max and min taking account of the bin sizes
-        xmax = xmax + xstep / 2
-        xmin = xmin - xstep / 2
-        ymax = ymax + ystep / 2
-        ymin = ymin - ystep / 2
+        xmax = xmax + xstep / 2.0
+        xmin = xmin - xstep / 2.0
+        ymax = ymax + ystep / 2.0
+        ymin = ymin - ystep / 2.0
         
         # store x and y bin centers in q space
-        x_bins = numpy.arange(xmin, xmax + xstep / 10, xstep)
-        y_bins = numpy.arange(ymin, ymax + ystep / 10, ystep)
+        x_bins = numpy.linspace(xmin, xmax, npix_x)
+        y_bins = numpy.linspace(ymin, ymax, npix_y)
+        #x_bins = numpy.arange(xmin, xmax + xstep / 10.0, xstep)
+        #y_bins = numpy.arange(ymin, ymax + ystep / 10.0, ystep)
       
         #set x_bins and y_bins
         self.x_bins = x_bins
