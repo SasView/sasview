@@ -584,7 +584,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         wx.CallAfter(self.parent.set_sld_data, self.sld_data)
         self._update_model_params()
         if is_draw:
-            wx.CallAfter(self.sld_draw, False)
+            wx.CallAfter(self.sld_draw, None, False)
     
     def _update_model_params(self):
         """
@@ -617,13 +617,10 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         except:
             pass
     
-    def sld_draw(self, has_arrow=False, event=None):
+    def sld_draw(self, event=None, has_arrow=True):
         """
         Draw 3D sld profile
         """
-        graph_title = self.file_name
-        graph_title += "   3D SLD Profile "
-        
         flag = self.parent.check_omfpanel_inputs()
         if not flag:
             infor = 'Error'
@@ -654,7 +651,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 logging.error("PlotPanel could not import Axes3D")
                 raise
         panel.dimension = 3   
-        self._sld_plot_helper(ax, output, has_arrow)
+        graph_title = self._sld_plot_helper(ax, output, has_arrow)
         # Use y, z axes (in mpl 3d) as z, y axes 
         # that consistent with our SANS detector coords.
         ax.set_xlabel('x ($\A%s$)'% output.pos_unit)
@@ -681,6 +678,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                      'O':'red', 'C':'green', 'P':'cyan', 'Other':'k'}
         marker = ','
         m_size = 2
+        graph_title = self.file_name
+        graph_title += "   3D SLD Profile "
         pos_x = output.pos_x
         pos_y = output.pos_y
         pos_z = output.pos_z
@@ -738,7 +737,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                     lw=0.6, c="grey", alpha=0.3)
         # V. Draws magnetic vectors
         if has_arrow and len(pos_x) > 0:     
-            graph_title += "w/ Arrows" 
+            graph_title += " - Magnetic Vector as Arrow -" 
+            panel = self.plot_frame.plotpanel
             def _draw_arrow(input=None, elapsed=0.1):
                 """
                 draw magnetic vectors w/arrow
@@ -779,6 +779,13 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 msg = "Arrow Drawing completed.\n"
                 status_type = 'stop'
                 self._status_info(msg, status_type) 
+            msg = "Arrow Drawing is in progress..."
+            status_type = 'progress'
+            self._status_info(msg, status_type) 
+            draw_out = CalcGen(input=ax,
+                             completefn=_draw_arrow, updatefn=self._update)
+            draw_out.queue()
+        return graph_title
  
     def set_input_params(self):
         """
@@ -1922,7 +1929,7 @@ class SasGenWindow(wx.Frame):
         """
         sld draw
         """
-        self.panel.sld_draw(has_arrow=False)
+        self.panel.sld_draw(event=None, has_arrow=False)
         
     def on_save_file(self, event):
         """
