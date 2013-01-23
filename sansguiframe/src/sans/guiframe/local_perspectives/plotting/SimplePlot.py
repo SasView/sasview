@@ -203,9 +203,67 @@ class PlotFrame(wx.Frame):
         # Panel for 1D plot
         self.parent = parent
         self._mgr = None
+        self.menu_bar = None
         self._default_save_location = None
         self.scale = scale
         self.plotpanel = SimplePlotPanel(self, -1)
+        self._build_menubar()
+
+    def _build_menubar(self):
+        """
+        Build menubar
+        """
+        tsize = (13, 13)
+        save_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_TOOLBAR,
+                                            tsize)
+        quit_bmp = wx.ArtProvider.GetBitmap(wx.ART_QUIT, wx.ART_TOOLBAR, 
+                                           tsize)
+        print_bmp = wx.ArtProvider.GetBitmap(wx.ART_PRINT, wx.ART_TOOLBAR, 
+                                           tsize)
+        preview_bmp = wx.ArtProvider.GetBitmap(wx.ART_REPORT_VIEW, wx.ART_TOOLBAR, 
+                                           tsize)
+        copy_bmp = wx.ArtProvider.GetBitmap(wx.ART_COPY, wx.ART_TOOLBAR, 
+                                           tsize)
+        menu_bar = wx.MenuBar()
+        
+        menu = wx.Menu()        
+        id = wx.NewId()
+        item = wx.MenuItem(menu, id, "&Save Image")
+        item.SetBitmap(save_bmp)
+        menu.AppendItem(item)
+        wx.EVT_MENU(self, id, self.on_save_file)
+
+        id = wx.NewId()
+        item = wx.MenuItem(menu, id, "&Print Image")
+        item.SetBitmap(print_bmp)
+        menu.AppendItem(item)
+        wx.EVT_MENU(self, id, self.on_print_image)
+
+        id = wx.NewId()
+        item = wx.MenuItem(menu, id, "&Print Preview")
+        item.SetBitmap(preview_bmp)
+        menu.AppendItem(item)
+        wx.EVT_MENU(self, id, self.on_print_preview)
+        
+        menu.AppendSeparator()
+        id = wx.NewId()
+        item = wx.MenuItem(menu, id, "&Quit")
+        item.SetBitmap(quit_bmp)
+        menu.AppendItem(item)
+
+        menu_bar.Append(menu, "&File")
+        wx.EVT_MENU(self, id, self.on_close)
+        
+        menu_edit = wx.Menu()
+        id = wx.NewId()
+        item = wx.MenuItem(menu_edit, id, "&Copy")
+        item.SetBitmap(copy_bmp)
+        menu_edit.AppendItem(item)
+        wx.EVT_MENU(self, id, self.on_copy_image)
+        
+        menu_bar.Append(menu_edit, "&Edit")
+        self.menu_bar = menu_bar
+        self.SetMenuBar(self.menu_bar)
 
     def set_plot_unfocus(self):
         """
@@ -247,7 +305,31 @@ class PlotFrame(wx.Frame):
         """
         """
         #Not implemented
-        
+    
+    def on_save_file(self, event):
+        """
+        Save image
+        """
+        self.plotpanel.onSaveImage(event)
+
+    def on_print_image(self, event):
+        """
+        Save image
+        """
+        self.plotpanel.onPrint(event)
+    
+    def on_print_preview(self, event):
+        """
+        Save image
+        """
+        self.plotpanel.onPrinterPreview(event)
+
+    def on_copy_image(self, event):
+        """
+        Save image
+        """
+        self.plotpanel.OnCopyFigureMenu(event)
+            
     def on_close(self, event):
         """
         On Close 
