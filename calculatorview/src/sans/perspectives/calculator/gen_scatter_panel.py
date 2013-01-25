@@ -733,8 +733,9 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                     markersize=m_size, label=a_name) 
         # IV. Draws atomic bond with grey lines if any
         if output.has_conect:
-            ax.plot(output.line_x, output.line_z, output.line_y, '-', 
-                    lw=0.6, c="grey", alpha=0.3)
+            for ind in range(len(output.line_x)):
+                ax.plot(output.line_x[ind], output.line_z[ind], 
+                        output.line_y[ind], '-', lw=0.6, c="grey", alpha=0.3) 
         # V. Draws magnetic vectors
         if has_arrow and len(pos_x) > 0:     
             graph_title += " - Magnetic Vector as Arrow -" 

@@ -499,14 +499,19 @@ class PDBReader:
         sld_mz = numpy.zeros(0)
         vol_pix = numpy.zeros(0)
         pix_symbol = numpy.zeros(0)
-        x_line = numpy.zeros(0)
-        y_line = numpy.zeros(0)
-        z_line = numpy.zeros(0)
+        x_line = []
+        y_line = []
+        z_line = []
+        x_lines = []
+        y_lines = []
+        z_lines = []        
         try:
             input_f = open(path, 'rb')
             buff = input_f.read()
             lines = buff.split('\n')
             input_f.close()
+            pre_num = 0
+            num = 0
             for line in lines:
                 try:
                     # check if line starts with "ATOM"
@@ -556,22 +561,37 @@ class PDBReader:
                         pix_symbol = numpy.append(pix_symbol, atom_name)
                     elif line[0:6].strip().count('CONECT') > 0 :
                         toks = line.split()
+                        num = int(toks[1]) - 1  
+                        val_list = [] 
                         for val in toks[2:]:
-                            index = int(val) - 1
-                            num = int(toks[1]) - 1
-                            x_line = numpy.append(x_line, 
-                                                  [pos_x[num], pos_x[index]])
-                            y_line = numpy.append(y_line, 
-                                                  [pos_y[num], pos_y[index]])
-                            z_line = numpy.append(z_line, 
-                                                  [pos_z[num], pos_z[index]])        
+                            try:
+                                int_val = int(val)
+                            except:
+                                break
+                            if int_val == 0:
+                                break
+                            val_list.append(int_val)
+                        #need val_list ordered      
+                        for val in val_list:
+                            index = val - 1
+                            if (pos_x[index], pos_x[num]) in x_line and \
+                               (pos_y[index], pos_y[num]) in y_line and \
+                               (pos_z[index], pos_z[num]) in z_line:
+                                continue
+                            x_line.append((pos_x[num], pos_x[index]))
+                            y_line.append((pos_y[num], pos_y[index]))
+                            z_line.append((pos_z[num], pos_z[index]))
+                    if len(x_line) > 0:
+                        x_lines.append(x_line) 
+                        y_lines.append(y_line)
+                        z_lines.append(z_line)            
                 except:
                     pass
             #re-centering
             #pos_x -= (min(pos_x) + max(pos_x)) / 2.0
             #pos_y -= (min(pos_y) + max(pos_y)) / 2.0
             #pos_z -= (min(pos_z) + max(pos_z)) / 2.0
-
+            
             output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
             output.set_conect_lines(x_line, y_line, z_line)
             output.filename = os.path.basename(path)
@@ -1038,11 +1058,11 @@ class MagSLD:
         """
         Set bonding line data if taken from pdb
         """
-        if line_x.__class__.__name__ != 'ndarray' or len(line_x) < 1:
+        if line_x.__class__.__name__ != 'list' or len(line_x) < 1:
             return
-        if line_y.__class__.__name__ != 'ndarray' or len(line_y) < 1:
+        if line_y.__class__.__name__ != 'list' or len(line_y) < 1:
             return
-        if line_z.__class__.__name__ != 'ndarray' or len(line_z) < 1:
+        if line_z.__class__.__name__ != 'list' or len(line_z) < 1:
             return
         self.has_conect = True
         self.line_x = line_x 
