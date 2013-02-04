@@ -243,7 +243,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
             Fill the sizer containing hint 
         """
-        hint_msg = "We support the omf or sld data files only."
+        hint_msg = "We support omf, sld or pdb data files only."
         hint_msg +=  "         "
         if FONT_VARIANT < 1:
             hint_msg +=  "Very "
@@ -258,7 +258,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         
         self.draw_button.Enable(False)
         self.hint_sizer.AddMany([(hint_txt, 0, wx.LEFT, 15),
-                                 (self.draw_button, 0, wx.LEFT, 15)])
+                                 (self.draw_button, 0, wx.LEFT, 7)])
     
     def _layout_shape(self):
         """
