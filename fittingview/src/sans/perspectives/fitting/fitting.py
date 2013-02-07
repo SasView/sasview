@@ -2016,7 +2016,10 @@ class Plugin(PluginBase):
         Get handy Chisqr using the output from draw1D and 2D, 
         instead of calling expansive CalcChisqr in guithread
         """
-        data_copy = deepcopy(data)
+        try:
+            data_copy = deepcopy(data)
+        except:
+            return
         # default chisqr
         chisqr = None
         #to compute chisq make sure data has valid data
