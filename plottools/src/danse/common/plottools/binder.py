@@ -288,7 +288,7 @@ class BindArtist:
                 ## crashes also here
                 x, y = transform.inverse_xy_tup((x, y))
 
-            event.xdata, event.ydata = x, y
+            #event.xdata, event.ydata = x, y
             self.trigger(self._hasclick, 'drag', event)
         else:
             found = self._find_current(event)

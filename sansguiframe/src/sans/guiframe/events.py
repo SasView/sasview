@@ -5,6 +5,8 @@ import wx.lib.newevent
 (NewLoadedDataEvent, EVT_NEW_LOADED_DATA) = wx.lib.newevent.NewEvent()
 # plot data
 (NewPlotEvent, EVT_NEW_PLOT) = wx.lib.newevent.NewEvent()
+# plot Qrange
+(PlotQrangeEvent, EVT_PLOT_QRANGE) = wx.lib.newevent.NewEvent()
 # print the messages on statusbar
 (StatusEvent,  EVT_STATUS)   = wx.lib.newevent.NewEvent()
 #create a panel slicer 

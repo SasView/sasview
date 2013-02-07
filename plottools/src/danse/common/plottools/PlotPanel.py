@@ -274,7 +274,8 @@ class PlotPanel(wx.Panel):
         self._default_save_location = os.getcwd()
         # let canvas know about axes
         self.canvas.set_panel(self)
-        
+        self.ly = None
+        self.q_ctrl = None
         #Bind focus to change the border color
         self.canvas.Bind(wx.EVT_SET_FOCUS, self.on_set_focus)
         self.canvas.Bind(wx.EVT_KILL_FOCUS, self.on_kill_focus)
@@ -452,6 +453,7 @@ class PlotPanel(wx.Panel):
         to perform the drag
         
         """
+        self.cusor_line(event)
         if self.gotLegend == 1:
             self._on_legend_motion(event)
             return
@@ -478,6 +480,11 @@ class PlotPanel(wx.Panel):
                 self._dragHelper(xdelta, ydelta)
             else:  # no dragging is perform elsewhere
                 self._dragHelper(0, 0)
+
+    def cusor_line(self, event):
+        """
+        """
+        pass
 
     def _offset_graph(self):
         """
@@ -1773,7 +1780,8 @@ class PlotPanel(wx.Panel):
         # Delete first, and then get the whole list...
         if remove_fit:
             self.graph.delete(self.fit_result)
-            
+        self.ly = None 
+        self.q_ctrl = None   
         list = []
         list = self.graph.returnPlottable()
         # Changing the scale might be incompatible with
