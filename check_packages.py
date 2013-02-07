@@ -125,3 +125,10 @@ if IS_WIN:
     os.system("CALL svn --version --quiet")
     print "==> Checking gcc compiler ( >= 4.2 required):"
     os.system("CALL gcc -v")
+else:
+    try:
+        import py2app
+        print "==> py2app-%s installed."% py2app.__version__
+    except:
+        print "!!! py2app not installed (optional for MAC bundling."
+
