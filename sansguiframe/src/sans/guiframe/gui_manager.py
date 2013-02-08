@@ -3405,6 +3405,8 @@ class ViewerFrame(wx.Frame):
         """
         Set focus on a plot panel
         """
+        if panel == None:
+            return
         self.set_plot_unfocus()
         panel.on_set_focus(None)  
         # set focusing panel
