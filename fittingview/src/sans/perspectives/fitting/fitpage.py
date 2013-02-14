@@ -1759,6 +1759,12 @@ class FitPage(BasicPage):
         id = None
         flag = False
         is_data = False
+        try:
+            old_id = self.data.id
+            old_group_id = self.data.group_id
+        except:
+            old_id = id
+            old_group_id = id
         if self.data is not None:
             is_data = check_data_validity(self.data)
         if not is_data and data is not None:
@@ -1874,9 +1880,12 @@ class FitPage(BasicPage):
             self.model_view.Disable()
             #replace data plot on combo box selection
             #by removing the previous selected data
-            #wx.PostEvent(self._manager.parent,
-            #             NewPlotEvent(action="remove",
-            #                          group_id=self.graph_id, id=id))
+            try:
+                wx.PostEvent(self._manager.parent,
+                             NewPlotEvent(action="remove",
+                                          group_id=old_group_id, id=old_id))
+            except:
+                pass
             #plot the current selected data
             wx.PostEvent(self._manager.parent,
                          NewPlotEvent(action="check", plot=self.data,
