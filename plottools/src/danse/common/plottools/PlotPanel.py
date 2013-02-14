@@ -970,17 +970,14 @@ class PlotPanel(wx.Panel):
             handles2, labels2 = zip(*hl)
             self.line_collections_list = handles2
             self.legend = self.subplot.legend(handles2, labels2,
-                                prop=FontProperties(size=10), numpoints=1,
-                                handletextsep=.05, loc=self.legendLoc)
+                            prop=FontProperties(size=10), numpoints=1,
+                            handletextsep=.05, loc=self.legendLoc)
             if self.legend != None:
                 self.legend.set_picker(self.legend_picker)
                 self.legend.set_axes(self.subplot)
+                self.legend.set_zorder(20)
         
         self.subplot.figure.canvas.draw_idle()
-
-    
-
-    # to do - remove this function when done
 
     def onChangeLegendLoc(self, event):
         """
@@ -989,29 +986,12 @@ class PlotPanel(wx.Panel):
         menu = event.GetEventObject()
         id = event.GetId()
         label = menu.GetLabel(id)
-        
-        self.legendLoc = label
-        self.legend_pos_loc = None
-        # sort them by labels
-        handles, labels = self.subplot.get_legend_handles_labels()
-        hl = sorted(zip(handles, labels),
-                    key=operator.itemgetter(1))
-        handles2, labels2 = zip(*hl)
-        self.line_collections_list = handles2
-        self.legend = self.subplot.legend(handles2, labels2,
-                            prop=FontProperties(size=10), numpoints=1,
-                            handletextsep=.05, loc=self.legendLoc)
-        if self.legend != None:
-                self.legend.set_picker(self.legend_picker)
-                self.legend.set_axes(self.subplot)
-        self.subplot.figure.canvas.draw_idle()
-        
+        self.ChangeLegendLoc(label)
 
     def ChangeLegendLoc(self, label):
         """
         Changes legend loc based on user input
         """
-        
         self.legendLoc = label
         self.legend_pos_loc = None
         # sort them by labels
@@ -1024,12 +1004,10 @@ class PlotPanel(wx.Panel):
                             prop=FontProperties(size=10), numpoints=1,
                             handletextsep=.05, loc=self.legendLoc)
         if self.legend != None:
-                self.legend.set_picker(self.legend_picker)
-                self.legend.set_axes(self.subplot)
+            self.legend.set_picker(self.legend_picker)
+            self.legend.set_axes(self.subplot)
+            self.legend.set_zorder(20)
         self.subplot.figure.canvas.draw_idle()
-        
-
-
 
     def remove_legend(self, ax=None):
         """
@@ -1282,12 +1260,13 @@ class PlotPanel(wx.Panel):
                 if self.legend != None:
                     self.legend.set_picker(self.legend_picker)
                     self.legend.set_axes(self.subplot)
+                    self.legend.set_zorder(20)
                 
             except:
                 self.legend = ax.legend(prop=FontProperties(size=10),
                                         numpoints=1, handletextsep=.05,
                                         loc=self.legendLoc)
-                 
+                
     def xaxis(self, label, units, font=None, color='black', t_font=None):
         """xaxis label and units.
         
@@ -1347,33 +1326,34 @@ class PlotPanel(wx.Panel):
         self.subplot.callbacks.connect('xlim_changed', process_xlim)
 
     def interactive_points(self, x, y, dx=None, dy=None, name='', color=0,
-                           symbol=0, markersize=5, id=None, label=None,
-                           hide_error=False):
+                           symbol=0, markersize=5, zorder=1, id=None, 
+                           label=None, hide_error=False):
         """Draw markers with error bars"""
         self.subplot.set_yscale('linear')
         self.subplot.set_xscale('linear')
         if id is None:
             id = name
         from plottable_interactor import PointInteractor
-        p = PointInteractor(self, self.subplot, zorder=3, id=id)
+        p = PointInteractor(self, self.subplot, zorder=zorder, id=id)
         if p.markersize != None:
             markersize = p.markersize
-        p.points(x, y, dx=dx, dy=dy, color=color, symbol=symbol, markersize=markersize, label=label,
-                 hide_error=hide_error)
+        p.points(x, y, dx=dx, dy=dy, color=color, symbol=symbol, zorder=zorder, 
+                 markersize=markersize, label=label, hide_error=hide_error)
         
         self.subplot.set_yscale(self.yscale, nonposy='clip')
         self.subplot.set_xscale(self.xscale)
        
     def interactive_curve(self, x, y, dy=None, name='', color=0,
-                          symbol=0, id=None, label=None):
+                          symbol=0, zorder=1, id=None, label=None):
         """Draw markers with error bars"""
         self.subplot.set_yscale('linear')
         self.subplot.set_xscale('linear')
         if id is None:
             id = name
         from plottable_interactor import PointInteractor
-        p = PointInteractor(self, self.subplot, zorder=4, id=id)
-        p.curve(x, y, dy=dy, color=color, symbol=symbol, label=label)
+        p = PointInteractor(self, self.subplot, zorder=zorder, id=id)
+        p.curve(x, y, dy=dy, color=color, symbol=symbol, zorder=zorder,
+                 label=label)
         
         self.subplot.set_yscale(self.yscale, nonposy='clip')
         self.subplot.set_xscale(self.xscale)

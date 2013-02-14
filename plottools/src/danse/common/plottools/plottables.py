@@ -1051,6 +1051,7 @@ class Data1D(Plottable):
         self.custom_color = None
         self.markersize = 5
         self.id = None
+        self.zorder = 1
         self.hide_error = False
       
     def render(self, plot, **kw):
@@ -1064,7 +1065,7 @@ class Data1D(Plottable):
             kw['markersize'] = self.markersize
             plot.interactive_points(self.view.x, self.view.y,
                                     dx=self.view.dx, dy=self.view.dy,
-              name=self.name, **kw)
+              name=self.name, zorder=self.zorder, **kw)
         else:
             kw['id'] =  self.id
             kw['hide_error'] = self.hide_error
@@ -1072,7 +1073,8 @@ class Data1D(Plottable):
             kw['color'] = self.custom_color
             kw['markersize'] = self.markersize
             plot.points(self.view.x, self.view.y, dx=self.view.dx,
-                dy=self.view.dy, marker=self.symbollist[self.symbol], **kw)
+                dy=self.view.dy, zorder=self.zorder, 
+                marker=self.symbollist[self.symbol], **kw)
        
     def changed(self):
         return False
@@ -1117,6 +1119,7 @@ class Theory1D(Plottable):
         self.view = View(self.x, self.y, None, self.dy)
         self.symbol = 0
         self.id = None
+        self.zorder = 10
         
     def render(self, plot, **kw):
         """
@@ -1125,10 +1128,11 @@ class Theory1D(Plottable):
             kw['id'] = self.id
             plot.interactive_curve(self.view.x, self.view.y,
                                    dy=self.view.dy,
-                                   name=self.name, **kw)
+                                   name=self.name, zorder=self.zorder, **kw)
         else:
             kw['id'] = self.id
-            plot.curve(self.view.x, self.view.y, dy=self.view.dy, **kw)
+            plot.curve(self.view.x, self.view.y, dy=self.view.dy, 
+                       zorder=self.zorder, **kw)
             
     def changed(self):
         return False
