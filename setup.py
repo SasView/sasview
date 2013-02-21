@@ -356,7 +356,7 @@ setup(
     zip_safe = False,
     entry_points = {
                     'console_scripts':[
-                                       "sansview = sans.sansview.sansview:run",
+                                       "sasview = sans.sansview.sansview:run",
                                        ]
                     },
     cmdclass = {'build_ext': build_ext_subclass }
