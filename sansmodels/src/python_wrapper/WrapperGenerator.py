@@ -378,6 +378,8 @@ class WrapperGenerator:
                 param_str += "        PyObject * disp_dict;\n"
                 for par in self.disp_params:
                     par = par.strip()
+                    if par == '':
+                        continue
                     param_str += "        disp_dict = PyDict_New();\n"
                     param_str += "        self->model->%s.dispersion->accept_as_source(visitor, self->model->%s.dispersion, disp_dict);\n" % (par, par)
                     param_str += "        PyDict_SetItemString(self->dispersion, \"%s\", disp_dict);\n" % par
@@ -401,6 +403,8 @@ class WrapperGenerator:
                 param_str += "    DispersionVisitor* visitor = new DispersionVisitor();\n"
                 for par in self.disp_params:
                     par = par.strip()
+                    if par == '':
+                        continue
                     param_str += "    disp_dict = PyDict_GetItemString(self->dispersion, \"%s\");\n" % par
                     param_str += "    self->model->%s.dispersion->accept_as_destination(visitor, self->model->%s.dispersion, disp_dict);\n" % (par, par)
                 
@@ -453,6 +457,8 @@ class WrapperGenerator:
             set_weights = "    // TODO: refactor this\n"
             for par in self.disp_params:
                 par = par.strip()
+                if par == '':
+                        continue
                 set_weights += "    if (!strcmp(par_name, \"%s\")) {\n" % par
                 set_weights += "        self->model->%s.dispersion = dispersion;\n" % par
                 set_weights += "    } else"
