@@ -68,7 +68,11 @@ list_of_state_attributes = [["engine_type", "engine_type", "string"],
                       ["smearer", "smearer", "float"],
                       ["smear_type","smear_type", "string"],
                       ["dq_l", "dq_l", "string"],
-                      ["dq_r","dq_r", "string"]]
+                      ["dq_r","dq_r", "string"],
+                      ["dx_max", "dx_max", "float"],
+                      ["dx_min","dx_min", "float"],
+                      ["dxl", "dxl", "float"],
+                      ["dxw","dxw", "float"]]
 
 list_of_model_attributes = [["values", "values"],
                             ["weights", "weights"]]
@@ -207,7 +211,10 @@ class PageState(object):
         self.smear_type = None
         self.dq_l = None
         self.dq_r = None
-
+        self.dx_max = None
+        self.dx_min = None
+        self.dxl = None
+        self.dxw = None
         #list of dispersion paramaters
         self.disp_list = []
         if self.model is not None:
@@ -331,7 +338,10 @@ class PageState(object):
         obj.dI_idata = copy.deepcopy(self.dI_idata)
         obj.dq_l = copy.deepcopy(self.dq_l)
         obj.dq_r = copy.deepcopy(self.dq_r)
-
+        obj.dx_max = copy.deepcopy(self.dx_max)
+        obj.dx_min = copy.deepcopy(self.dx_min)
+        obj.dxl = copy.deepcopy(self.dxl)
+        obj.dxw = copy.deepcopy(self.dxw)        
         obj.disp_box = copy.deepcopy(self.disp_box)
         obj.qmin = copy.deepcopy(self.qmin)
         obj.qmax = copy.deepcopy(self.qmax)
@@ -416,7 +426,10 @@ class PageState(object):
         rep += "Smear type : %s\n" % (self.smear_type)
         rep += "dq_l  : %s\n" % self.dq_l
         rep += "dq_r  : %s\n" % self.dq_r
-        
+        rep += "dx_max  : %s\n" % str(self.dx_max)
+        rep += "dx_min : %s\n" % str(self.dx_min)  
+        rep += "dxl  : %s\n" % str(self.dxl)
+        rep += "dxw : %s\n" % str(self.dxw)    
         rep += "model  : %s\n\n" % str(self.model)
         temp_parameters = []
         temp_fittable_param = []

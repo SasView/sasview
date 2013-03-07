@@ -937,6 +937,10 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         self.state.pinhole_smearer = \
                                 copy.deepcopy(self.pinhole_smearer.GetValue())
+        self.state.dx_max = copy.deepcopy(self.dx_max)
+        self.state.dx_min = copy.deepcopy(self.dx_min)
+        self.state.dxl = copy.deepcopy(self.dxl)
+        self.state.dxw = copy.deepcopy(self.dxw)
         self.state.slit_smearer = copy.deepcopy(self.slit_smearer.GetValue())
                   
         if len(self._disp_obj_dict) > 0:
@@ -1350,8 +1354,20 @@ class BasicPage(ScrolledPanel, PanelBase):
  
         ## we have two more options for smearing
         if self.pinhole_smearer.GetValue():
+            self.dx_min = state.dx_min
+            self.dx_max = state.dx_max
+            if self.dx_min != None:
+                self.smear_pinhole_min.SetValue(str(self.dx_min))
+            if self.dx_max != None:
+                self.smear_pinhole_max.SetValue(str(self.dx_max))
             self.onPinholeSmear(event=None)
         elif self.slit_smearer.GetValue():
+            self.dxl = state.dxl
+            self.dxw = state.dxw
+            if self.dxl != None:
+                self.smear_slit_height.SetValue(str(self.dxl))
+            if self.dxw != None:
+                self.smear_slit_width.SetValue(str(self.dxw))
             self.onSlitSmear(event=None)
         
         ## reset state of checkbox,textcrtl  and dispersity parameters value
