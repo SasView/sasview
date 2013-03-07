@@ -2,14 +2,15 @@ __version__ = "2.2.0"
 __build__ = "1"
 try:
     import pkg_resources
-    d = pkg_resources.get_distribution("sansview")
-    rev = int(d.parsed_version[5])
-    __build__ = str(rev)
+    d = pkg_resources.get_distribution("sasview")
+    __build__ = str(d.version)
 except:
     try:
         import os
-        if os.path.isfile("BUILD_NUMBER"):
-            f=open("BUILD_NUMBER",'r')
+        dir = os.path.dirname(__file__)
+        filepath = os.path.join(dir, "BUILD_NUMBER")
+        if os.path.isfile(filepath):
+            f=open(filepath, 'r')
             buff = f.read().strip()
             if len(buff)<50:
                 __build__ = buff
