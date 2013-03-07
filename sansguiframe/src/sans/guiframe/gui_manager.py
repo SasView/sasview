@@ -680,7 +680,8 @@ class ViewerFrame(wx.Frame):
                 for items in menu.GetMenuItems():
                     items.Enable(enable)
         c_panel = self.cpanel_on_focus
-
+        # disable depending on the save_app flag
+        self._save_appl_menu.Enable(c_panel.get_save_flag())
         if not enable:
             if self._toolbar is not None:
                 self._toolbar.update_toolbar(None)
