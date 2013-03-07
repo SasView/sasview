@@ -2404,6 +2404,7 @@ class FitPage(BasicPage):
             data.dxl = self.dxl * numpy.ones(data_len)
             self.smear_slit_height.SetBackgroundColour(wx.WHITE)
         except:
+            self.dxl = None
             data.dxl = numpy.zeros(data_len)
             if self.smear_slit_height.GetValue().lstrip().rstrip() != "":
                 self.smear_slit_height.SetBackgroundColour("pink")
@@ -2415,6 +2416,7 @@ class FitPage(BasicPage):
             self.smear_slit_width.SetBackgroundColour(wx.WHITE)
             data.dxw = self.dxw * numpy.ones(data_len)
         except:
+            self.dxw = None
             data.dxw = numpy.zeros(data_len)
             if self.smear_slit_width.GetValue().lstrip().rstrip() != "":
                 self.smear_slit_width.SetBackgroundColour("pink")

@@ -1367,7 +1367,9 @@ class BasicPage(ScrolledPanel, PanelBase):
             if self.dxl != None:
                 self.smear_slit_height.SetValue(str(self.dxl))
             if self.dxw != None:
-                self.smear_slit_width.SetValue(str(self.dxw))
+                self.smear_slit_width.SetValue(str(self.dxw))  
+            else:
+                self.smear_slit_width.SetValue('')  
             self.onSlitSmear(event=None)
         
         ## reset state of checkbox,textcrtl  and dispersity parameters value
