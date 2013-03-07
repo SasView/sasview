@@ -184,7 +184,7 @@ def check_system():
         import pyparsing
     except:
         try:
-            os.system("easy_install pyparsing")
+            os.system("easy_install 'pyparsing==1.5.5'")
             print "installed pyparsing"
         except:
             is_ok = False
