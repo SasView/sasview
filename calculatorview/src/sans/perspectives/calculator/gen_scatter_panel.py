@@ -725,7 +725,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 a_name = a_names[0]
                 for name in a_names:
                     new_name = ", " + name
-                    if a_name.count(new_name) == 0 and a_name != name:
+                    if a_name.count(name) == 0:
                         a_name += new_name
             # plot in black
             ax.plot(pos_x[other_color], pos_z[other_color], pos_y[other_color], 
