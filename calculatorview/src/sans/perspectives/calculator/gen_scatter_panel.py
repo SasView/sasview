@@ -938,7 +938,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         :Param input: input list [qx_data, qy_data, i_out]
         """
         out = numpy.empty(0)
-        #s = time.time()
+        s = time.time()
         for ind in range(len(input[0])):
             if self.is_avg:
                 if ind % 1 == 0 and update != None:
@@ -955,7 +955,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                           input[2][ind:ind+1]]
                 outi = self.model.runXY(inputi)
                 out = numpy.append(out, outi)
-        #print time.time() - s
+        print time.time() - s
         if self.is_avg or self.is_avg == None:
             self._draw1D(out)
         else:
@@ -2085,14 +2085,16 @@ class SasGenWindow(wx.Frame):
 
         media = calmedia.get_data_path(media='media')
         path = os.path.join(media,"gen_sans_help.html") 
-        name = "Polarization Angle"
-        frame = HelpWindow(self, -1, title=' Help: Polarization Angle',  
+        name = "Generic Scattering Calculator"
+        frame = HelpWindow(self, -1, 
+                           title=' Help: GenSANS',  
                            pageToOpen=path, size=(865, 450))   
         try: 
             frame.splitter.DetachWindow(frame.lpanel)
             # Display only the right side one
             frame.lpanel.Hide() 
             frame.Show(True)
+            add_icon(self.parent, frame)
         except:
             frame.Destroy() 
             msg = 'Display Error\n'
