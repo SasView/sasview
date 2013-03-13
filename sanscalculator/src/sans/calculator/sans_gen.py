@@ -30,6 +30,17 @@ def mag2sld(mag, v_unit=None):
     sld_m = factor * mag
     return sld_m
 
+def transform_center(pos_x, pos_y, pos_z):
+    """
+    re-center 
+    
+    :return: posx, posy, posz   [arrays]
+    """ 
+    posx = pos_x - (min(pos_x) + max(pos_x)) / 2.0
+    posy = pos_y - (min(pos_y) + max(pos_y)) / 2.0
+    posz = pos_z - (min(pos_z) + max(pos_z)) / 2.0  
+    return posx, posy, posz   
+
 class GenSAS(BaseComponent):
     """
     Generic SAS computation Model based on sld (n & m) arrays
@@ -100,20 +111,26 @@ class GenSAS(BaseComponent):
         :Param i: array of initial i-value 
         :return: function value
         """
-        len_x = len(self.data_x)
-        if self.is_avg:
+        pos_x = self.data_x
+        pos_y = self.data_y
+        pos_z = self.data_z
+        len_x = len(pos_x)
+        if self.is_avg == None:
             len_x *= -1
+            pos_x, pos_y, pos_z = transform_center(pos_x, pos_y, pos_z)
         len_q = len(x)
         sldn = copy.deepcopy(self.data_sldn)
         sldn -= self.params['solvent_SLD']
-        model = mod.new_GenI(len_x, self.data_x, self.data_y, self.data_z, 
+        model = mod.new_GenI(len_x, pos_x, pos_y, pos_z, 
                              sldn, self.data_mx, self.data_my, 
                              self.data_mz, self.data_vol,
                              self.params['Up_frac_in'], 
                              self.params['Up_frac_out'], 
                              self.params['Up_theta'])
-
-        mod.genicom(model, len_q, x, y, i)
+        if y == []:
+            mod.genicom(model, len_q, x, i)
+        else:
+            mod.genicomXY(model, len_q, x, y, i)
         vol_correction = self.data_total_volume / self.params['total_volume']
         return  self.params['scale'] * vol_correction * i + \
                         self.params['background']
@@ -150,10 +167,16 @@ class GenSAS(BaseComponent):
         :return: (I value)
         """
         if x.__class__.__name__ == 'list':
+            if len(x[1]) > 0:
+                msg = "Not a 1D."
+                raise ValueError, msg
             i_out = numpy.zeros_like(x[0])
-            y_in = numpy.zeros_like(x[0])
+            #import time
+            #s = time.time()
             # 1D I is found at y =0 in the 2D pattern
-            return self._gen(x[0], y_in, i_out )
+            out = self._gen(x[0], [], i_out )
+            #print "i_out_time", time.time() - s
+            return out
         else:
             msg = "Q must be given as list of qx's and qy's"
             raise ValueError, msg
@@ -167,10 +190,10 @@ class GenSAS(BaseComponent):
         """
         if x.__class__.__name__ == 'list':
             i_out = numpy.zeros_like(x[0])
-            import time
-            s = time.time()
+            #import time
+            #s = time.time()
             out = self._gen(x[0], x[1], i_out)
-            print "i_out_time", time.time() - s
+            #print "i_out_time", time.time() - s
             return out
         else:
             msg = "Q must be given as list of qx's and qy's"
@@ -188,7 +211,10 @@ class GenSAS(BaseComponent):
                     where qx,qy are 1D ndarrays 
         """
         if qdist.__class__.__name__ == 'list':
-            out = self.runXY(qdist)
+            if len(qdist[1]) < 1:
+                out = self.run(qdist)
+            else:
+                out = self.runXY(qdist)
             return out
         else:
             mesg = "evalDistribution is expecting an ndarray of "

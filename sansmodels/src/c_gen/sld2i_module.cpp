@@ -74,9 +74,9 @@ PyObject * new_GenI(PyObject *, PyObject *args) {
 }
 
 /**
- * GenI the given input according to a given object
+ * GenI the given input (2D) according to a given object
  */
-PyObject * genicom_input(PyObject *, PyObject *args) {
+PyObject * genicom_inputXY(PyObject *, PyObject *args) {
 	int npoints;
 	PyObject *qx_obj;
 	double *qx;
@@ -99,11 +99,38 @@ PyObject * genicom_input(PyObject *, PyObject *args) {
 	void *temp = PyCObject_AsVoidPtr(gen_obj);
 	GenI* s = static_cast<GenI *>(temp);
 
-	s->genicom(npoints, qx, qy, I_out);
+	s->genicomXY(npoints, qx, qy, I_out);
 	//return PyCObject_FromVoidPtr(s, del_genicom);
 	return Py_BuildValue("i",1);
 }
 
+/**
+ * GenI the given 1D input according to a given object
+ */
+PyObject * genicom_input(PyObject *, PyObject *args) {
+	int npoints;
+	PyObject *q_obj;
+	double *q;
+	PyObject *I_out_obj;
+	Py_ssize_t n_out;
+	double *I_out;
+	PyObject *gen_obj;
+
+	if (!PyArg_ParseTuple(args, "OiOO",  &gen_obj, &npoints, &q_obj, &I_out_obj)) return NULL;
+	OUTVECTOR(q_obj, q, n_out);
+	OUTVECTOR(I_out_obj, I_out, n_out);
+
+	// Sanity check
+	//if(n_in!=n_out) return Py_BuildValue("i",-1);
+
+	// Set the array pointers
+	void *temp = PyCObject_AsVoidPtr(gen_obj);
+	GenI* s = static_cast<GenI *>(temp);
+
+	s->genicom(npoints, q, I_out);
+	//return PyCObject_FromVoidPtr(s, del_genicom);
+	return Py_BuildValue("i",1);
+}
 
 /**
  * Define module methods
@@ -112,7 +139,9 @@ static PyMethodDef module_methods[] = {
 	{"new_GenI", (PyCFunction)new_GenI, METH_VARARGS,
 		  "Create a new GenI object"},
 	{"genicom",(PyCFunction)genicom_input, METH_VARARGS,
-		  "genicom the given input arrays"},
+		  "genicom the given 1d input arrays"},
+	{"genicomXY",(PyCFunction)genicom_inputXY, METH_VARARGS,
+		  "genicomXY the given 2d input arrays"},
     {NULL}
 };
 

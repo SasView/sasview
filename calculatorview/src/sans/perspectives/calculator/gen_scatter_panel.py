@@ -20,7 +20,8 @@ matplotlib.use('WXAgg')
 
 from data_util.calcthread import CalcThread
 from sans.guiframe.local_perspectives.plotting.SimplePlot import PlotFrame
-from sans.guiframe.dataFitting import Data2D
+from sans.guiframe.dataFitting import Data2D 
+from sans.guiframe.dataFitting import Data1D
 from sans.dataloader.data_info import Detector
 from sans.dataloader.data_info import Source
 from sans.guiframe.panel_base import PanelBase
@@ -45,6 +46,7 @@ else:
     FONT_VARIANT = 1
 _QMAX_DEFAULT = 0.3
 _NPTS_DEFAULT = 50 
+_Q1D_MIN = 0.001
 
 def add_icon(parent, frame):
     """
@@ -83,8 +85,8 @@ class CalcGen(CalcThread):
                  input = None,
                  completefn = None,
                  updatefn   = None,
-                 elapsed = 0,
-                 yieldtime  = 0.005,
+                 #elapsed = 0,
+                 yieldtime  = 0.01,
                  worktime   = 0.01):
         """
         """
@@ -95,15 +97,15 @@ class CalcGen(CalcThread):
         self.starttime = 0
         self.id = id 
         self.input = input 
+        self.update_fn = updatefn
         
     def compute(self):
         """
         excuting computation
         """
-        elapsed = time.time() - self.starttime
-       
-        self.complete(input=self.input,
-                      elapsed = elapsed)
+        #elapsed = time.time() - self.starttime
+        self.starttime = time.time()
+        self.complete(input=self.input, update=self.update_fn)
             
 class SasGenPanel(ScrolledPanel, PanelBase):
     """
@@ -139,6 +141,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.parameters = []
         self.data = None
         self.scale2d = None
+        self.is_avg = False
         self.plot_frame = None
         self.qmax_x = _QMAX_DEFAULT
         self.npts_x = _NPTS_DEFAULT
@@ -298,7 +301,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         orient_combo = wx.ComboBox(self, -1, size=(150, -1), 
                                       style=wx.CB_READONLY) 
         orient_combo.Append('Fixed orientation')
-        orient_combo.Append('No orientation ')
+        orient_combo.Append('Debye full avg.')
+        #orient_combo.Append('Debye sph. sym.')
         
         orient_combo.Bind(wx.EVT_COMBOBOX, self._on_orient_select)
         orient_combo.SetSelection(0)
@@ -310,8 +314,13 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
         event.Skip()
         cb = event.GetEventObject()
-        is_avg = cb.GetCurrentSelection() == 1
-        self.model.set_is_avg(is_avg)         
+        if cb.GetCurrentSelection() == 2:
+            self.is_avg = None
+        else:
+            is_avg = cb.GetCurrentSelection() == 1
+            self.is_avg = is_avg
+        self.model.set_is_avg(self.is_avg)
+        self.set_est_time()    
            
     def _layout_qrange(self):
         """
@@ -359,15 +368,15 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
             Do the layout for the button widgets
         """ 
-        self.est_time = '*Estimated Computation time : %s sec'
-        self.time_text = wx.StaticText(self, -1, self.est_time% str(2) )
+        self.est_time = '*Estimated Computation time : %s'
+        self.time_text = wx.StaticText(self, -1, self.est_time% str('2 sec') )
         self.orient_combo = self._fill_orient_combo()
         self.orient_combo.Show(False)
         self.bt_compute = wx.Button(self, wx.NewId(),'Compute')
         self.bt_compute.Bind(wx.EVT_BUTTON, self.on_compute)
         self.bt_compute.SetToolTipString("Compute 2D Scattering Pattern.")
         self.button_sizer.AddMany([(self.time_text , 0, wx.LEFT, 20),
-                                   (self.orient_combo , 0, wx.LEFT, 20),
+                                   (self.orient_combo , 0, wx.LEFT, 40),
                                    (self.bt_compute, 0, wx.LEFT, 20)])
         
     def estimate_ctime(self):
@@ -377,6 +386,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         n_qbins = float(self.npt_ctl.GetValue())
         n_qbins *= n_qbins
         n_pixs = float(self.parent.get_npix())
+        if self.is_avg:
+            n_pixs *= (n_pixs / 200)
         x_in = n_qbins * n_pixs / 100000
         # magic equation: not very accurate
         etime = 1.0 + 0.085973 * x_in
@@ -386,9 +397,16 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
         Set text for est. computation time
         """
+        unit = 'sec'
         if self.time_text != None:
+            self.time_text.SetForegroundColour('black')
             etime = self.estimate_ctime()
-            self.time_text.SetLabel(self.est_time% str(etime))
+            if etime > 60:
+                etime /= 60
+                unit = 'min'
+                self.time_text.SetForegroundColour('red')
+            time_str = str(etime) + ' ' + unit
+            self.time_text.SetLabel(self.est_time% time_str)
         
     def _do_layout(self):
         """
@@ -540,6 +558,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             self.data_name_tcl.SetValue(str(filename))
             self.file_name = filename.split('.')[0]
             self.orient_combo.SetSelection(0)
+            self.is_avg = False
             if self.ext in self.omfreader.ext:
                 gen = sans_gen.OMF2SLD()
                 gen.set_data(data)
@@ -576,8 +595,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
         Set sld data helper
         """
-        is_avg = self.orient_combo.GetCurrentSelection() == 1
-        self.model.set_is_avg(is_avg)
+        #is_avg = self.orient_combo.GetCurrentSelection() == 1
+        self.model.set_is_avg(self.is_avg)
         self.model.set_sld_data(self.sld_data)
         
         self.draw_button.Enable(self.sld_data!=None)
@@ -740,7 +759,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         if has_arrow and len(pos_x) > 0:     
             graph_title += " - Magnetic Vector as Arrow -" 
             panel = self.plot_frame.plotpanel
-            def _draw_arrow(input=None, elapsed=0.1):
+            def _draw_arrow(input=None, update=None):
                 """
                 draw magnetic vectors w/arrow
                 """
@@ -827,17 +846,22 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         try:
             self.model.set_sld_data(self.sld_data)
             self.set_input_params()
-            self._create_default_2d_data()
-            i_out = numpy.zeros(len(self.data.data))
+            if self.is_avg or self.is_avg == None:
+                self._create_default_1d_data()
+                i_out = numpy.zeros(len(self.data.y))
+                inputs = [self.data.x, [], i_out]
+            else:
+                self._create_default_2d_data()
+                i_out = numpy.zeros(len(self.data.data))
+                inputs=[self.data.qx_data, self.data.qy_data, i_out]
+                
             msg = "Computation is in progress..."
             status_type = 'progress'
             self._status_info(msg, status_type)
-            
-            cal_out = CalcGen(input=[self.data.qx_data, 
-                                     self.data.qy_data, i_out], 
+            cal_out = CalcGen(input=inputs, 
                               completefn=self.complete, 
                               updatefn=self._update)
-            cal_out.queue()
+            cal_out.queue()              
             
         except:
             msg = "%s."% sys.exc_value
@@ -899,24 +923,49 @@ class SasGenPanel(ScrolledPanel, PanelBase):
 
     def _update(self, time=None):
         """
-        Update the output of plotting model
+        Update the progress bar
         """
-        if self.parent.parent != None:
-            msg = "Computation/drawing is in progress..."
-            wx.PostEvent(self.parent.parent, 
-                         StatusEvent(status=msg, type="update"))
+        if self.parent.parent == None:
+            return
+        type = "progress"
+        msg = "Please wait. Computing... (Note: Window may look frozen.)"
+        wx.PostEvent(self.parent.parent, StatusEvent(status=msg,
+                                                  type=type))
                                 
-    def complete(self, input, elapsed=None):   
+    def complete(self, input, update=None):   
         """
         Gen compute complete function
         :Param input: input list [qx_data, qy_data, i_out]
         """
-        out = self.model.runXY(input)
-        self._draw2D(out)
+        out = numpy.empty(0)
+        #s = time.time()
+        for ind in range(len(input[0])):
+            if self.is_avg:
+                if ind % 1 == 0 and update != None:
+                    update()
+                    time.sleep(0.1)
+                inputi = [input[0][ind:ind+1], [], input[2][ind:ind+1]]
+                outi = self.model.run(inputi)
+                out = numpy.append(out, outi)
+            else:
+                if ind % 50 == 0  and update != None:
+                    update()
+                    time.sleep(0.001)
+                inputi = [input[0][ind:ind+1], input[1][ind:ind+1], 
+                          input[2][ind:ind+1]]
+                outi = self.model.runXY(inputi)
+                out = numpy.append(out, outi)
+        #print time.time() - s
+        if self.is_avg or self.is_avg == None:
+            self._draw1D(out)
+        else:
+            #out = self.model.runXY(input)
+            self._draw2D(out)
+            
         msg = "Gen computation completed.\n"
         status_type = 'stop'
         self._status_info(msg, status_type)
-        
+               
     def _create_default_2d_data(self):
         """
         Create 2D data by default
@@ -976,7 +1025,88 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.data.xmax = xmax
         self.data.ymin = ymin
         self.data.ymax = ymax
+
+    def _create_default_1d_data(self):
+        """
+        Create 2D data by default
+        Only when the page is on theory mode.
+        :warning: This data is never plotted.
+                    residuals.x = data_copy.x[index]
+            residuals.dy = numpy.ones(len(residuals.y))
+            residuals.dx = None
+            residuals.dxl = None
+            residuals.dxw = None
+        """
+        self.qmax_x = float(self.qmax_ctl.GetValue())
+        self.npts_x = int(float(self.npt_ctl.GetValue()))
+        qmax = self.qmax_x #/ numpy.sqrt(2)
+        ## Default values
+        xmax = qmax
+        xmin = qmax * _Q1D_MIN
+        qstep = self.npts_x
+        x = numpy.linspace(start=xmin, stop=xmax, num=qstep, endpoint=True)
+        # store x and y bin centers in q space
+        #self.data.source = Source()
+        y = numpy.ones(len(x))
+        dy = numpy.zeros(len(x))
+        dx = numpy.zeros(len(x))
+        self.data = Data1D(x=x, y=y)
+        self.data.dx = dx
+        self.data.dy = dy
+
+    def _draw1D(self, y_out):
+        """
+        Complete get the result of modelthread and create model 2D
+        that can be plot.
+        """
+        page_id = self.id
+        data = self.data
         
+        model = self.model
+        state = None
+        
+        new_plot = Data1D(x=data.x, y=y_out)
+        new_plot.dx = data.dx
+        new_plot.dy = data.dy
+        new_plot.xaxis('\\rm{Q_{x}}', '\AA^{-1}')
+        new_plot.yaxis('\\rm{Intensity}', 'cm^{-1}')
+        new_plot.is_data = False
+        new_plot.id = str(self.uid) + " GenData1D"
+        new_plot.group_id = str(self.uid) + " Model1D"
+        new_plot.name = model.name + '1d'
+        new_plot.title = "Generic model1D "
+        new_plot.id = str(page_id) + ': ' + self.file_name \
+                        + ' #%s'% str(self.graph_num) + "_1D"
+        new_plot.group_id = str(page_id) + " Model1D"  +\
+                             ' #%s'% str(self.graph_num) + "_1D"
+        new_plot.is_data = False
+
+        title = new_plot.title
+        _yaxis, _yunit = new_plot.get_yaxis()
+        _xaxis, _xunit = new_plot.get_xaxis()
+        new_plot.xaxis(str(_xaxis), str(_xunit))
+        new_plot.yaxis(str(_yaxis), str(_yunit))
+        
+        if new_plot.is_data:
+            data_name = str(new_plot.name)
+        else:
+            data_name = str(model.__class__.__name__) + '1d'
+
+        if len(title) > 1:
+            new_plot.title = "Gen Theory for %s "% model.name + data_name
+        new_plot.name = new_plot.id
+        new_plot.label = new_plot.id
+        #theory_data = deepcopy(new_plot)
+        if self.parent.parent != None:
+            self.parent.parent.update_theory(data_id=new_plot.id,
+                                           theory=new_plot,
+                                           state=state)
+        title = new_plot.title
+        num_graph = str(self.graph_num)
+        wx.CallAfter(self.parent.draw_graph, new_plot, 
+                     title="Graph %s: "% num_graph + new_plot.id )
+        self.graph_num += 1
+                
     def _draw2D(self, image):
         """
         Complete get the result of modelthread and create model 2D
@@ -994,8 +1124,9 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         new_plot.name = model.name + '2d'
         new_plot.title = "Generic model 2D "
         new_plot.id = str(page_id) + ': ' + self.file_name \
-                        + ' #%s'% str(self.graph_num)
-        new_plot.group_id = str(page_id) + " Model2D"
+                        + ' #%s'% str(self.graph_num) + "_2D"
+        new_plot.group_id = str(page_id) + " Model2D" \
+                        + ' #%s'% str(self.graph_num) + "_2D"
         new_plot.detector = data.detector
         new_plot.source = data.source
         new_plot.is_data = False
