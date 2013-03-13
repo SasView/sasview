@@ -61,9 +61,9 @@ class Plugin(PluginBase):
         resolution_help = "Approximately estimates the "
         resolution_help += "resolution of Q in 2D based on the SANS "
         resolution_help += "instrumental parameter values."
-        mass_volume_help = "Based on the chemical formular, "
+        mass_volume_help = "Based on the chemical formula, "
         mass_volume_help += "compute the mass density or the molar volume."
-        gensans_help = "Genneric SANS"
+        gensans_help = "Generic SANS"
         pyconsole_help = "Python Console."
         #data_editor_help = "Meta Data Editor"
         return [("Data Operation", 
@@ -151,21 +151,11 @@ class Plugin(PluginBase):
         frame = ResolutionWindow(parent=self.parent)
         self.put_icon(frame)
         frame.Show(True) 
-  
-        #def on_perspective(self, event):
-        """
-        Call back function for the perspective menu item.
-        We notify the parent window that the perspective
-        has changed.
-        
-        :param event: menu event
-        
-        """
-        #self.parent.set_perspective(self.perspective)
-        #if event != None:
-        #    event.Skip()
         
     def on_gen_model(self, event):
+        """
+        On Generic model menu event
+        """
         from sans.perspectives.calculator.gen_scatter_panel \
         import SasGenWindow
         frame = SasGenWindow(parent=self.parent)
