@@ -171,11 +171,8 @@ class GenSAS(BaseComponent):
                 msg = "Not a 1D."
                 raise ValueError, msg
             i_out = numpy.zeros_like(x[0])
-            #import time
-            #s = time.time()
             # 1D I is found at y =0 in the 2D pattern
             out = self._gen(x[0], [], i_out )
-            #print "i_out_time", time.time() - s
             return out
         else:
             msg = "Q must be given as list of qx's and qy's"
@@ -190,10 +187,7 @@ class GenSAS(BaseComponent):
         """
         if x.__class__.__name__ == 'list':
             i_out = numpy.zeros_like(x[0])
-            #import time
-            #s = time.time()
             out = self._gen(x[0], x[1], i_out)
-            #print "i_out_time", time.time() - s
             return out
         else:
             msg = "Q must be given as list of qx's and qy's"

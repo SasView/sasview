@@ -129,7 +129,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         #thread to read data 
         self.reader = None
         self.ext = None
-        self.id = 'Generic Scattering'
+        self.id = 'GenSANS'
         self.file_name = ''
         self.time_text = None
         self.orient_combo = None
@@ -368,7 +368,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
             Do the layout for the button widgets
         """ 
-        self.est_time = '*Estimated Computation time : %s'
+        self.est_time = '*Estimated Computation time :\n  %s'
         self.time_text = wx.StaticText(self, -1, self.est_time% str('2 sec') )
         self.orient_combo = self._fill_orient_combo()
         self.orient_combo.Show(False)
@@ -383,14 +383,16 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
         Calculation time estimation
         """
+        # magic equation: not very accurate
+        factor = 1
         n_qbins = float(self.npt_ctl.GetValue())
         n_qbins *= n_qbins
         n_pixs = float(self.parent.get_npix())
         if self.is_avg:
+            factor = 6
             n_pixs *= (n_pixs / 200)
         x_in = n_qbins * n_pixs / 100000
-        # magic equation: not very accurate
-        etime = 1.0 + 0.085973 * x_in
+        etime = factor + 0.085973 * x_in 
         return int(etime)
         
     def set_est_time(self):
@@ -938,7 +940,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         :Param input: input list [qx_data, qy_data, i_out]
         """
         out = numpy.empty(0)
-        s = time.time()
+        #s = time.time()
         for ind in range(len(input[0])):
             if self.is_avg:
                 if ind % 1 == 0 and update != None:
@@ -955,7 +957,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                           input[2][ind:ind+1]]
                 outi = self.model.runXY(inputi)
                 out = numpy.append(out, outi)
-        print time.time() - s
+        #print time.time() - s
         if self.is_avg or self.is_avg == None:
             self._draw1D(out)
         else:
