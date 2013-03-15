@@ -181,7 +181,7 @@ void GenI :: genicom(int npoints, double *q, double *I_out){
 			}
 			else{
 				//full calculation
-				#pragma omp parallel for
+				//pragma omp parallel for
 				for(size_t k=0; k<n_pix; k++){
 					sld_j =  sldn_val[j] * sldn_val[k] * vol_pix[j] * vol_pix[k];
 					qr = (x_val[j]-x_val[k])*(x_val[j]-x_val[k])+
