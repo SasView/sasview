@@ -464,11 +464,17 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         filename = ''
         if location == None:
             location = os.getcwd()
-        
+
+        exts = "*" + self.omfreader.ext[0]
+        exts += ", *" + self.sldreader.ext[0]
+        exts += ", *" + self.pdbreader.ext[0]
+        all_type = "All GEN files (%s, %s) | %s"% (exts.upper(), exts.lower(), 
+                                               exts.lower().replace(',', ';'))        
+        wildcard = [all_type]
         omf_type = self.omfreader.type
         sld_type = self.sldreader.type
         pdb_type = self.pdbreader.type
-        wildcard = []
+
         for type in sld_type:
             wildcard.append(type)
         for type in omf_type:

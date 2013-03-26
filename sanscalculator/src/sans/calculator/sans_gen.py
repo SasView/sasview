@@ -640,9 +640,10 @@ class SLDReader:
     
     ## Wildcards
     type = ["sld files (*.SLD, *.sld)|*.sld",
-            "txt files (*.TXT, *.txt)|*.txt"]
+            "txt files (*.TXT, *.txt)|*.txt",
+            "all files (*.*)|*.*"]
     ## List of allowed extensions
-    ext = ['.txt', '.TXT', '.sld', 'SLD', '.*']
+    ext = ['.sld', '.SLD', '.txt', '.TXT', '.*']
     
     def read(self, path):
         """
