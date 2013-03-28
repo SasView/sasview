@@ -1993,6 +1993,9 @@ class ViewerFrame(wx.Frame):
                     if panel.IsShown():
                         panel.Hide()
             self.get_data(path)
+            wx.PostEvent(self, StatusEvent(status="Completed loading."))
+        else:
+            wx.PostEvent(self, StatusEvent(status=" "))
         if self.defaultPanel is not None and \
             self._mgr.GetPane(self.panels["default"].window_name).IsShown():
             self.on_close_welcome_panel()
@@ -2059,7 +2062,7 @@ class ViewerFrame(wx.Frame):
         path = None
         if self._default_save_location == None:
             self._default_save_location = os.getcwd()
-        
+        wx.PostEvent(self, StatusEvent(status="Loading Analysis file..."))
         plug_wlist = self._on_open_state_app_helper()
         dlg = wx.FileDialog(self, 
                             "Choose a file", 
@@ -2110,7 +2113,7 @@ class ViewerFrame(wx.Frame):
         path = None
         if self._default_save_location == None:
             self._default_save_location = os.getcwd()
-        
+        wx.PostEvent(self, StatusEvent(status="Loading Project file..."))
         dlg = wx.FileDialog(self, 
                             "Choose a file", 
                             self._default_save_location, "",
@@ -2125,6 +2128,7 @@ class ViewerFrame(wx.Frame):
         #    os.popen(path)
         #    #self.Close()
         #except:
+        
         self.load_state(path=path)
         
     def _on_save_application(self, event):
@@ -2133,7 +2137,11 @@ class ViewerFrame(wx.Frame):
         """
         if self.cpanel_on_focus is not None:
             try:
+                wx.PostEvent(self, 
+                             StatusEvent(status="Saving Analysis file..."))
                 self.cpanel_on_focus.on_save(event)
+                wx.PostEvent(self, 
+                             StatusEvent(status="Completed saving."))
             except:
                 msg = "Error occurred while saving: "
                 msg += "To save, the application panel should have a data set.."
@@ -2145,6 +2153,7 @@ class ViewerFrame(wx.Frame):
         """
         if self._current_perspective is  None:
             return
+        wx.PostEvent(self, StatusEvent(status="Saving Project file..."))
         reader, ext = self._current_perspective.get_extensions()
         path = None
         extension = '*' + APPLICATION_STATE_EXTENSION
@@ -2175,6 +2184,7 @@ class ViewerFrame(wx.Frame):
                 fd = open(fName, 'w')
                 fd.write(doc.toprettyxml())
                 fd.close()
+                wx.PostEvent(self, StatusEvent(status="Completed Saving."))
             else:
                 msg = "%s cannot read %s\n" % (str(APPLICATION_NAME), str(path))
                 logging.error(msg)
