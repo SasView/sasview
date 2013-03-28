@@ -93,7 +93,7 @@ class FitPanel(nb, PanelBase):
                 data = page.get_data()
                 # state must be cloned
                 state = page.get_state().clone()
-                if data is not None:
+                if data is not None and page.model is not None:
                     new_doc = self._manager.state_reader.write_toXML(data,
                                                                      state)
                     if doc != None and hasattr(doc, "firstChild"):

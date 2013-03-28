@@ -1625,6 +1625,8 @@ class Reader(CansasReader):
         if state.data is None:
             data = sans.dataloader.data_info.Data1D(x=[], y=[])
             return None
+        elif not state.data.is_data:
+            return None
         else:
             #make sure title and data run is filled up.
             if state.data.title == None or state.data.title == '':
