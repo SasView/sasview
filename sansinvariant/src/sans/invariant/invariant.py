@@ -165,7 +165,7 @@ class Guinier(Transform):
              
     def _guinier(self, x):
         """
-        Retrive the guinier function after apply an inverse guinier function
+        Retrieve the guinier function after apply an inverse guinier function
         to x
         Compute a F(x) = scale* e-((radius*x)**2/3).
         
