@@ -1,5 +1,5 @@
 """
-     Installation script for DANSE calculator perspective for SansView
+     Installation script for DANSE invariant perspective for SansView
 """
 import os
 
