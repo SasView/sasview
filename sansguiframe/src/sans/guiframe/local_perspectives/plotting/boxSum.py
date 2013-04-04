@@ -52,6 +52,9 @@ class BoxSum(_BaseInteractor):
         ## Define initial result the summation 
         self.count = 0
         self.error = 0
+        self.total = 0
+        self.totalerror = 0
+        self.points = 0
         ## Flag to determine if the current figure has moved
         ## set to False == no motion , set to True== motion
         self.has_move = False
@@ -181,6 +184,10 @@ class BoxSum(_BaseInteractor):
         from sans.dataloader.manipulations import Boxavg
         box =  Boxavg(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
         self.count, self.error = box(self.base.data2D)
+        # Dig out number of points summed, SMK & PDB, 04/03/2013
+        from sans.dataloader.manipulations import Boxsum
+        boxtotal =  Boxsum(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max)
+        self.total, self.totalerror, self.points = boxtotal(self.base.data2D)
         
     def moveend(self, ev):
         """
@@ -228,8 +235,11 @@ class BoxSum(_BaseInteractor):
         params["Height"] = math.fabs(self.horizontal_lines.half_height) * 2 
         params["center_x"] = self.center.x
         params["center_y"] = self.center.y
-        params["count"] = self.count
-        params["errors"] = self.error
+        params["num_points"] = self.points
+        params["avg"] = self.count
+        params["avg_error"] = self.error
+        params["sum"] = self.total
+        params["sum_error"] = self.totalerror
         return params
     
     def get_result(self):
@@ -237,8 +247,11 @@ class BoxSum(_BaseInteractor):
             return the result of box summation
         """
         result = {}
-        result["count"] = self.count
-        result["error"] = self.error
+        result["num_points"] = self.points
+        result["avg"] = self.count
+        result["avg_error"] = self.error
+        params["sum"] = self.total
+        params["sum_error"] = self.totalerror
         return result
         
     def set_params(self, params):

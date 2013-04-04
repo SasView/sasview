@@ -83,7 +83,8 @@ class SlicerPanel(wx.Panel, PanelBase):
             keys = params.keys()
             keys.sort()
             for item in keys:
-                if not item.lower() in ["errors", "count"]:
+                if not item.lower() in ["num_points", "avg", "avg_error", "sum",
+                                         "sum_error"]:
                     n += 1
                     text = wx.StaticText(self, -1, item, style=wx.ALIGN_LEFT)
                     self.bck.Add(text, (n-1, 0), 
@@ -100,7 +101,8 @@ class SlicerPanel(wx.Panel, PanelBase):
                     self.parameters.append([item, ctl])
                     self.bck.Add(ctl, (n-1, 1), flag=wx.TOP|wx.BOTTOM, border=0)
             for item in keys:
-                if  item.lower() in ["errors", "count"]:
+                if  item.lower() in ["num_points", "avg", "avg_error", "sum",
+                                      "sum_error"]:
                     n += 1
                     text = wx.StaticText(self, -1, item + ": ", 
                                          style=wx.ALIGN_LEFT)

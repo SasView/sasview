@@ -293,7 +293,8 @@ class Boxsum(object):
          
         :param data2D: Data2D object
         
-        :return: number of counts, error on number of counts
+        :return: number of counts, error on number of counts,
+            number of points summed
         
         """
         y, err_y, y_counts = self._sum(data2D)
@@ -302,7 +303,8 @@ class Boxsum(object):
         counts = 0 if y_counts == 0 else y
         error = 0 if y_counts == 0 else math.sqrt(err_y)
         
-        return counts, error
+        # Added y_counts to return, SMK & PDB, 04/03/2013
+        return counts, error, y_counts
         
     def _sum(self, data2D):
         """
