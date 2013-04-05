@@ -1,0 +1,16 @@
+This software was developed by the University of Tennessee as part of the
+Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
+project funded by the US National Science Foundation. 
+
+If you use this program to do productive scientific research that leads
+to publication, we ask that you acknowledge use of the program by citing
+the following paper in your publication:
+
+P. Butler, M. Doucet, G. Alina, R. Cortes Hernandez, J. Zhou, P. Kienzle,
+Jae Hie Cho, Jessica T. Tumarkin
+"SANS analysis software", to be published.
+
+See the DANSE project web site for license information:
+http://wiki.cacr.caltech.edu/danse/index.php/Main_Page
+
+copyright 2008, University of Tennessee for the DANSE project
