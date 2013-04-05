@@ -671,6 +671,11 @@ class ModelManagerBase:
         self.shape_indep_list.append(GelFitModel)
         self.model_name_list.append(GelFitModel.__name__)
 
+        from sans.models.PringlesModel import PringlesModel
+        self.model_dictionary[PringlesModel.__name__] = PringlesModel
+        self.shape_indep_list.append(PringlesModel)
+        self.model_name_list.append(PringlesModel.__name__)
+
         #from sans.models.FractalO_Z import FractalO_Z
         #self.model_dictionary[FractalO_Z.__name__] = FractalO_Z
         #self.shape_indep_list.append(FractalO_Z)
