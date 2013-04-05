@@ -9,6 +9,7 @@
 #include <math.h>
 #include "parameters.hh"
 #include "pringles.h"
+#include "cephes.h"
 using namespace std;
 
 extern "C"
