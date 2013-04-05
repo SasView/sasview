@@ -139,9 +139,10 @@ class data_info_tests(unittest.TestCase):
         from sans.dataloader.manipulations import Boxsum, Boxavg
         
         r = Boxsum(x_min=.01, x_max=.015, y_min=0.01, y_max=0.015)
-        s, ds = r(self.data)
+        s, ds, npoints = r(self.data)
         self.assertAlmostEqual(s, 34.278990899999997, 4)
         self.assertAlmostEqual(ds, 7.8007981835194293, 4)
+        self.assertAlmostEqual(npoints, 324.0000, 4)        
     
         r = Boxavg(x_min=.01, x_max=.015, y_min=0.01, y_max=0.015)
         s, ds = r(self.data)
