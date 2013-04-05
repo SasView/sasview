@@ -102,7 +102,16 @@ class SasView():
             logging.error("%s: could not find Calculator plug-in module"% \
                                                         APP_NAME)
             logging.error(sys.exc_value)  
-
+        
+        #Corfunc perspective   
+        try:
+            import sans.perspectives.corfunc as module    
+            corfunc_plug = module.Plugin(standalone=False)
+            self.gui.add_perspective(corfunc_plug)
+        except:
+            logging.error("%s: could not find Corfunc plug-in module"% \
+                                                        APP_NAME)
+            logging.error(sys.exc_value)  
         
             
         # Add welcome page

@@ -134,6 +134,10 @@ packages.extend(["sans.dataloader","sans.dataloader.readers"])
 # sans.calculator
 package_dir["sans.calculator"] = "sanscalculator/src/sans/calculator"
 packages.extend(["sans.calculator"])
+
+# sans.corfunc
+package_dir["sans.corfunc"] = "corfunc/src/sans/corfunc"
+packages.extend(["sans.corfunc"])
     
 # sans.pr
 numpy_incl_path = os.path.join(NUMPY_INC, "numpy")
@@ -188,6 +192,13 @@ package_dir["sans.perspectives.calculator"] = os.path.join("calculatorview",
                                 "src", "sans", "perspectives", "calculator")
 package_data['sans.perspectives.calculator'] = ['images/*', 'media/*']
 packages.extend(["sans.perspectives", "sans.perspectives.calculator"])
+     
+# Calculator view
+package_dir["sans.perspectives"] = "corfuncview/src/sans/perspectives"
+package_dir["sans.perspectives.corfunc"] = os.path.join("corfuncview", 
+                                "src", "sans", "perspectives", "corfunc")
+package_data['sans.perspectives.corfunc'] = ['images/*', 'media/*']
+packages.extend(["sans.perspectives", "sans.perspectives.corfunc"])     
      
 # Data util
 package_dir["data_util"] = "sansutil"
