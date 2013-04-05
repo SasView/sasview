@@ -227,6 +227,7 @@ ext_modules.append( Extension("park._modeling",
 # Sans models
 includedir  = os.path.join("sansmodels", "include")
 igordir = os.path.join("sansmodels", "src", "libigor")
+cephes_dir = os.path.join("sansmodels", "src", "cephes")
 c_model_dir = os.path.join("sansmodels", "src", "c_models")
 smear_dir  = os.path.join("sansmodels", "src", "c_smearer")
 gen_dir  = os.path.join("sansmodels", "src", "c_gen")
@@ -300,7 +301,7 @@ if os.name=='nt':
 ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
                                 sources=model_sources,                 
                                 include_dirs=[igordir, includedir, 
-                                              c_model_dir, numpy_incl_path],
+                                              c_model_dir, numpy_incl_path, cephes_dir],
                                 ),       
                     # Smearer extension
                     Extension("sans.models.sans_extension.smearer",
