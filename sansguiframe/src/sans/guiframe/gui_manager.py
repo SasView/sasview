@@ -823,6 +823,8 @@ class ViewerFrame(wx.Frame):
                 is_loaded = True  
         if not is_loaded:
             self.plugins.append(plugin)  
+            msg = "Plugin %s appended" % plugin.sub_menu
+            logging.info(msg)
       
     def _get_local_plugins(self):
         """

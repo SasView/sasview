@@ -43,9 +43,7 @@ from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.events import StatusEvent
 from sans.guiframe.gui_style import GUIFRAME_ID
-from .invariant_state import Reader as reader
 from sans.dataloader.loader import Loader
-from .invariant_panel import InvariantPanel
 from sans.guiframe.plugin_base import PluginBase
 
 class Plugin(PluginBase):
