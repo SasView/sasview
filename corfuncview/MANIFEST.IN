@@ -1,6 +1,0 @@
-graft docs
-graft test
-include README.txt
-include license.txt
-include release_notes.txt
-include corfunc_eula.txt
