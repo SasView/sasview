@@ -238,7 +238,11 @@ class BasicPage(ScrolledPanel, PanelBase):
             if self.enable2D and not check_data_validity(self.data):
                 self._create_default_2d_data()
             else:
-                self._create_default_1d_data()
+                if self.pointsbox.GetValue():
+                    self._create_log_1d_data()
+                else:
+                    self._create_default_1d_data()
+                        
             if self.model != None:
                 if not self.data.is_data:
                     self._manager.page_finder[self.uid].set_fit_data(data=\
@@ -264,7 +268,33 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.data.is_data = False
         self.data.id = str(self.uid) + " data"
         self.data.group_id = str(self.uid) + " Model1D"
-       
+         
+    def _create_log_1d_data(self):
+        """
+        Create log-spaced data for fitting perspective
+        Only when the page is on theory mode.
+        :warning: This data is never plotted.
+        
+        """
+        if self.qmin_x >= 1.e-10:
+            qmin = numpy.log10(self.qmin_x)
+        else:
+            qmin = -10.    
+            
+        if self.qmax_x <= 1.e10:
+            qmax = numpy.log10(self.qmax_x)
+        else:
+            qmax = 10. 
+               
+        x = numpy.logspace(start=qmin, stop=qmax,
+                           num=self.npts_x, endpoint=True, base=10.0)
+        self.data = Data1D(x=x)
+        self.data.xaxis('\\rm{Q}', "A^{-1}")
+        self.data.yaxis('\\rm{Intensity}', "cm^{-1}")
+        self.data.is_data = False
+        self.data.id = str(self.uid) + " data"
+        self.data.group_id = str(self.uid) + " Model1D"
+      
     def _create_default_2d_data(self):
         """
         Create 2D data by default
@@ -2935,6 +2965,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._reset_plotting_range(self.state)
         self._draw_model()
         
+    def select_log(self, event):
+        """
+        Log checked to generate log spaced points for theory model
+        """
+
     def get_images(self):
         """
         Get the images of the plots corresponding this panel for report

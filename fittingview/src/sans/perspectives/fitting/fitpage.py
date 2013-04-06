@@ -347,7 +347,7 @@ class FitPage(BasicPage):
         sizer_smearer.Add(self.slit_smearer)
         sizer_smearer.Add((10, 10))
         
-        # StaticText for chi2, N(for fitting), Npts
+        # StaticText for chi2, N(for fitting), Npts + Log/linear spacing
         self.tcChi = BGTextCtrl(self, -1, "-", size=(75, 20), style=0)
         self.tcChi.SetToolTipString("Chi2/Npts(Fit)")
         self.Npts_fit = BGTextCtrl(self, -1, "-", size=(75, 20), style=0)
@@ -360,7 +360,7 @@ class FitPage(BasicPage):
         self.Npts_total.SetValue(format_number(self.npts_x))
         self.Npts_total.SetToolTipString(\
                                 " Total Npts : total number of data points")
-        
+                
         # Update and Draw button
         self.draw_button = wx.Button(self, wx.NewId(),
                                      'Compute', size=(88, 24))
@@ -368,15 +368,25 @@ class FitPage(BasicPage):
                               self._onDraw, id=self.draw_button.GetId())
         self.draw_button.SetToolTipString("Compute and Draw.")
         
+        self.points_sizer = wx.BoxSizer(wx.HORIZONTAL) 
+        self.pointsbox = wx.CheckBox(self, -1, 'Log?', (10, 10))
+        self.pointsbox.SetValue(False)
+        self.pointsbox.SetToolTipString("Check mark to use log spaced points")
+        wx.EVT_CHECKBOX(self, self.pointsbox.GetId(), self.select_log)
+        
+        self.points_sizer.Add(wx.StaticText(self, -1, 'Npts    '))
+        self.points_sizer.Add(self.pointsbox)
+
         box_description_1 = wx.StaticText(self, -1, '   Chi2/Npts')
         box_description_2 = wx.StaticText(self, -1, 'Npts(Fit)')
-        box_description_3 = wx.StaticText(self, -1, 'Total Npts')
-        box_description_3.SetToolTipString( \
-                                " Total Npts : total number of data points")
+        #box_description_3 = wx.StaticText(self, -1, 'Total Npts')
+        #box_description_3.SetToolTipString( \
+        #                        " Total Npts : total number of data points")
         
         sizer_fit.Add(box_description_1, 0, 0)
         sizer_fit.Add(box_description_2, 0, 0)
-        sizer_fit.Add(box_description_3, 0, 0)
+        sizer_fit.Add(self.points_sizer, 0, 0)
+        #sizer_fit.Add(box_description_3, 0, 0)
         sizer_fit.Add(self.draw_button, 0, 0)
         sizer_fit.Add(self.tcChi, 0, 0)
         sizer_fit.Add(self.Npts_fit, 0, 0)
@@ -527,7 +537,7 @@ class FitPage(BasicPage):
                              id=self.btEditMask.GetId())
         self.btEditMask.SetToolTipString("Edit Mask.")
         self.EditMask_title = wx.StaticText(self, -1, ' Masking(2D)')
-
+        
         sizer.Add(wx.StaticText(self, -1, '   Q range'))
         sizer.Add(wx.StaticText(self, -1, ' Min[1/A]'))
         sizer.Add(wx.StaticText(self, -1, ' Max[1/A]'))
@@ -1847,6 +1857,7 @@ class FitPage(BasicPage):
                                     self.GetParent().GetBackgroundColour())
         
         self.Npts_total.Bind(wx.EVT_MOUSE_EVENTS, self._npts_click)
+        self.pointsbox.Disable()
         self.dataSource.SetValue(data_name)
         self.state.data = data
         self.enable_fit_button()
@@ -2647,7 +2658,7 @@ class FitPage(BasicPage):
             if item[0] and item[0].IsShown():
                 param2fit.append(item[1])
         self.parent._manager.set_param2fit(self.uid, param2fit)
-
+    
     def select_param(self, event):
         """
         Select TextCtrl  checked for fitting purpose and stores them
