@@ -92,12 +92,14 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.x_size = None
         ## Default locations
         #self._default_save_location = os.getcwd() 
-        self.size = None       
+        self.size = None  
+        self.vl_ind = 0     
         ## Graph        
         #self.graph = Graph()
         self.graph.xaxis("\\rm{Q}", 'A^{-1}')
         self.graph.yaxis("\\rm{Intensity} ", "cm^{-1}")
         self.graph.render(self)
+        self.cursor_id = None
         
         # In resizing event
         self.resizing = False
@@ -216,6 +218,199 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.SetSizer(self.sizer)
         wx.CallAfter(self.parent.disable_app_menu,self)
         
+    def on_plot_qrange(self, event=None):
+        """
+        On Qmin Qmax vertical line event
+        """
+        if event == None:
+            return
+        event.Skip() 
+        active_ctrl = event.active
+        if active_ctrl == None:
+            return
+        if event.id in self.plots.keys():
+            # Set line position and color
+            colors = ['red', 'purple']
+            self.cursor_id = event.id
+            ctrl = event.ctrl
+            if self.ly == None:
+                self.ly = []
+                for ind_ly in range(len(colors)):
+                    self.ly.append(self.subplot.axvline(color=colors[ind_ly], 
+                                                        lw=2.5, alpha=0.7))
+                    self.ly[ind_ly].set_rasterized(True)      
+            try:
+                # Display x,y in the status bar if possible
+                xval = float(active_ctrl.GetValue())
+                position = self.get_data_xy_vals(xval)
+                if position != None:
+                    wx.PostEvent(self.parent, StatusEvent(status=position))
+            except:
+                pass
+            if not event.leftdown:
+                # text event 
+                try:
+                    is_moved = False
+                    for idx in range(len(self.ly)):
+                        val = float(ctrl[idx].GetValue())
+                        # check if vline moved
+                        if self.ly[idx].get_xdata() != val:
+                            self.ly[idx].set_xdata(val)
+                            is_moved = True
+                    if is_moved:
+                        self.canvas.draw() 
+                except:
+                    pass
+                event.Skip() 
+                return
+            self.q_ctrl = ctrl
+            try:
+                pos_x_min = float(self.q_ctrl[0].GetValue())
+            except:
+                pos_x_min = xmin
+            try:
+                pos_x_max = float(self.q_ctrl[1].GetValue())
+            except:
+                pos_x_max = xmax
+            pos_x = [pos_x_min, pos_x_max]
+            for ind_ly in range(len(colors)):
+                self.ly[ind_ly].set_color(colors[ind_ly])
+                self.ly[ind_ly].set_xdata(pos_x[ind_ly])
+            self.canvas.draw()
+        else:
+            self.q_ctrl = None
+    
+    def get_data_xy_vals(self, xval):
+        """
+        Get x, y data values near x = x_val
+        """
+        try:
+            x_data = self.plots[self.cursor_id].x
+            y_data = self.plots[self.cursor_id].y
+            indx = self._find_nearest(x_data, xval)
+            pos_x = x_data[indx]
+            pos_y = y_data[indx]
+            position = str(pos_x), str(pos_y)
+            return position
+        except:
+            return None
+           
+    def _find_nearest(self, array, value):
+        """
+        Find and return the nearest value in array to the value.
+        Used in cusor_line()
+        :Param array: numpy array
+        :Param value: float
+        """
+        idx = (numpy.abs(array - value)).argmin()
+        return int(idx)#array.flat[idx]
+    
+    def _check_line_positions(self, pos_x=None, nop=None):
+        """
+        Check vertical line positions
+        :Param pos_x: position of the current line [float]
+        :Param nop: number of plots [int]
+        """
+        ly = self.ly
+        ly0x = ly[0].get_xdata()
+        ly1x = ly[1].get_xdata()
+        self.q_ctrl[0].SetBackgroundColour('white')
+        self.q_ctrl[1].SetBackgroundColour('white')
+        if ly0x >= ly1x:
+            if self.vl_ind == 0:
+                ly[1].set_xdata(pos_x)
+                ly[1].set_zorder(nop)
+                self.q_ctrl[1].SetValue(str(pos_x))
+                self.q_ctrl[0].SetBackgroundColour('pink')
+            elif self.vl_ind == 1:
+                ly[0].set_xdata(pos_x)
+                ly[0].set_zorder(nop)
+                self.q_ctrl[0].SetValue(str(pos_x))
+                self.q_ctrl[1].SetBackgroundColour('pink')
+                
+    def _get_cusor_lines(self, event):
+        """
+        Revmove or switch cursor line if drawn
+        :Param event: LeftClick mouse event
+        """  
+        ax = event.inaxes
+        dclick = event.action == 'dclick'
+        if ax == None or dclick:
+            # remove the vline
+            self._check_zoom_plot()
+            self.canvas.draw()
+            self.q_ctrl = None
+            return 
+        if self.ly != None and event.xdata != None:
+            # Selecting a new line if cursor lines are displayed already
+            dqmin = math.fabs(event.xdata - self.ly[0].get_xdata())
+            dqmax = math.fabs(event.xdata - self.ly[1].get_xdata())
+            is_qmax = dqmin > dqmax
+            if is_qmax:
+                self.vl_ind = 1
+            else:
+                self.vl_ind = 0 
+                     
+    def cusor_line(self, event):
+        """
+        Move the cursor line to write Q range
+        """
+        if self.q_ctrl == None:
+            return
+        #release a q range vline
+        if self.ly != None and not self.leftdown:
+            for ly in self.ly:
+                ly.set_alpha(0.7)
+                self.canvas.draw()
+            return
+        ax = event.inaxes
+        if ax == None or not hasattr(event, 'action'):
+            return
+        end_drag = event.action != 'drag' and event.xdata != None
+        nop = len(self.plots)
+        pos_x, pos_y = float(event.xdata), float(event.ydata)
+        try:
+            ly = self.ly
+            ly0x = ly[0].get_xdata()
+            ly1x = ly[1].get_xdata()
+            if ly0x == ly1x:
+                if ly[0].get_zorder() > ly[1].get_zorder():
+                    self.vl_ind = 0
+                else:
+                    self.vl_ind = 1
+            vl_ind = self.vl_ind
+            x_data = self.plots[self.cursor_id].x
+            y_data = self.plots[self.cursor_id].y
+            xmin = x_data.min()
+            xmax = x_data.max()
+            indx = self._find_nearest(x_data, pos_x)
+            #pos_x = self._find_nearest(x_data, pos_x)
+            #indx = int(numpy.searchsorted(x_data, [pos_x])[0])
+            # Need to hold LeftButton to drag
+            if end_drag:
+                if event.button:
+                    self._check_line_positions(pos_x, nop)
+                return   
+            if indx >= len(x_data):
+                indx = len(x_data) - 1
+            pos_x = x_data[indx]
+            pos_y = y_data[indx]
+            if xmin == ly1x:
+                vl_ind = 1
+            elif xmax == ly0x:
+                vl_ind = 0
+            else:
+                ly[vl_ind].set_xdata(pos_x)
+                ly[vl_ind].set_zorder(nop + 1)
+                self._check_line_positions(pos_x, nop)
+            ly[vl_ind].set_xdata(pos_x)
+            ly[vl_ind].set_alpha(1.0)
+            ly[vl_ind].set_zorder(nop + 1)
+            self.canvas.draw()
+            self.q_ctrl[vl_ind].SetValue(str(pos_x))
+        except:
+            pass
+               
     def set_resizing(self, resizing=False):
         """
         Set the resizing (True/False)
@@ -339,8 +534,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
         left button down and ready to drag
         Display the position of the mouse on the statusbar
         """
-        PlotPanel.onLeftDown(self, event)
+        self._get_cusor_lines(event)
         ax = event.inaxes
+        PlotPanel.onLeftDown(self, event)
+
         if ax != None:
             try:
                 pos_x = float(event.xdata)# / size_x

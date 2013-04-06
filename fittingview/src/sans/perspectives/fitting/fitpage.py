@@ -11,6 +11,7 @@ import math
 import time
 from sans.guiframe.events import StatusEvent
 from sans.guiframe.events import NewPlotEvent
+from sans.guiframe.events import PlotQrangeEvent
 from sans.guiframe.dataFitting import check_data_validity
 from sans.guiframe.utils import format_number
 from sans.guiframe.utils import check_float
@@ -515,15 +516,30 @@ class FitPage(BasicPage):
      
         self.qmin = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                     style=wx.TE_PROCESS_ENTER,
-                                    text_enter_callback=self._onQrangeEnter)
+                                    set_focus_callback=self.qrang_set_focus,
+                                    text_enter_callback=self._onQrangeEnter,
+                                    name='qmin')
         self.qmin.SetValue(str(self.qmin_x))
-        self.qmin.SetToolTipString("Minimun value of Q in linear scale.")
+        q_tip = "Click outside of the axes\n to remove the lines."
+        qmin_tip = "Minimun value of Q.\n"
+        qmin_tip += q_tip
+        self.qmin.SetToolTipString(qmin_tip)
      
         self.qmax = self.ModelTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                        style=wx.TE_PROCESS_ENTER,
-                                       text_enter_callback=self._onQrangeEnter)
+                                       set_focus_callback=self.qrang_set_focus,
+                                       text_enter_callback=self._onQrangeEnter,
+                                       name='qmax')
         self.qmax.SetValue(str(self.qmax_x))
-        self.qmax.SetToolTipString("Maximum value of Q in linear scale.")
+        qmax_tip = "Maximum value of Q.\n"
+        qmax_tip += q_tip
+        self.qmax.SetToolTipString(qmax_tip)
+        self.qmin.Bind(wx.EVT_MOUSE_EVENTS, self.qrange_click)
+        self.qmax.Bind(wx.EVT_MOUSE_EVENTS, self.qrange_click)
+        self.qmin.Bind(wx.EVT_KEY_DOWN, self.on_key)
+        self.qmax.Bind(wx.EVT_KEY_DOWN, self.on_key)
+        self.qmin.Bind(wx.EVT_TEXT, self.on_qrange_text)
+        self.qmax.Bind(wx.EVT_TEXT, self.on_qrange_text)
         id = wx.NewId()
         self.reset_qrange = wx.Button(self, id, 'Reset', size=(77, 20))
       
@@ -1317,7 +1333,80 @@ class FitPage(BasicPage):
         event = PageInfoEvent(page=self)
         wx.PostEvent(self.parent, event)
         self.state_change = False
-         
+        
+    def qrang_set_focus(self, event=None):  
+        """
+        ON Qrange focus
+        """
+        if event != None:
+            event.Skip()
+        #tcrtl = event.GetEventObject()
+        self._validate_qrange(self.qmin, self.qmax)
+        
+    def qrange_click(self, event):
+        """
+        On Qrange textctrl click, make the qrange lines in the plot
+        """
+        if event != None:
+            event.Skip()
+        if self.data.__class__.__name__ == "Data2D":
+            return
+        is_click = event.LeftDown()
+        if is_click:
+            d_id = self.data.id
+            d_group_id = self.data.group_id
+            act_ctrl = event.GetEventObject()
+            wx.PostEvent(self.parent.parent, 
+                         PlotQrangeEvent(ctrl=[self.qmin, self.qmax], id=d_id, 
+                                     group_id=d_group_id, leftdown=is_click,
+                                     active=act_ctrl))
+            
+    def on_qrange_text(self, event):
+        """
+        #On q range value updated. DO not combine with qrange_click().
+        """
+        if event != None:
+            event.Skip()
+        if self.data.__class__.__name__ == "Data2D":
+            return
+        act_ctrl = event.GetEventObject()
+        d_id = self.data.id
+        d_group_id = self.data.group_id
+        wx.PostEvent(self.parent.parent, 
+                     PlotQrangeEvent(ctrl=[self.qmin, self.qmax], id=d_id, 
+                                     group_id=d_group_id, leftdown=False, 
+                                     active=act_ctrl))
+        self._validate_qrange(self.qmin, self.qmax)
+    
+    def on_key(self, event):   
+        """
+        On Key down
+        """
+        event.Skip()
+        if self.data.__class__.__name__ == "Data2D":
+            return
+        ctrl = event.GetEventObject()
+        try:
+            x_data = float(ctrl.GetValue())
+        except:
+            return 
+        key = event.GetKeyCode()
+        length = len(self.data.x)
+        indx = (numpy.abs(self.data.x - x_data)).argmin()
+        #return array.flat[idx]
+        if key == wx.WXK_PAGEUP or key == wx.WXK_NUMPAD_PAGEUP:
+            indx += 1
+            if indx >= length:
+                indx = length - 1
+        elif key == wx.WXK_PAGEDOWN or key == wx.WXK_NUMPAD_PAGEDOWN:
+            indx -= 1
+            if indx < 0:
+                indx = 0
+        else:
+            return
+        ctrl.SetValue(str(self.data.x[indx]))
+        self._validate_qrange(self.qmin, self.qmax)
+               
     def _onQrangeEnter(self, event):
         """
         Check validity of value enter in the Q range field
@@ -1798,9 +1887,9 @@ class FitPage(BasicPage):
             if self.model != None:
                 self._set_bookmark_flag(not self.batch_on)
                 self._keep.Enable(not self.batch_on)
-                
-            self._set_save_flag(True)
-            self._set_preview_flag(True)
+            if self.data.is_data:    
+                self._set_save_flag(True)
+                self._set_preview_flag(True)
 
             self._set_smear(data)
             # more disables for 2D

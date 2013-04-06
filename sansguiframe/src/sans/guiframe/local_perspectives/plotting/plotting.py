@@ -14,6 +14,7 @@
 import wx
 import sys
 from sans.guiframe.events import EVT_NEW_PLOT
+from sans.guiframe.events import EVT_PLOT_QRANGE
 from sans.guiframe.events import StatusEvent 
 from sans.guiframe.events import DeletePlotPanelEvent
 from sans.guiframe.plugin_base import PluginBase
@@ -81,9 +82,24 @@ class Plugin(PluginBase):
         self.parent = parent
         # Connect to plotting events
         self.parent.Bind(EVT_NEW_PLOT, self._on_plot_event)
+        self.parent.Bind(EVT_PLOT_QRANGE, self._on_plot_qrange)
         # We have no initial panels for this plug-in
         return []
-   
+    
+    def _on_plot_qrange(self, event= None):
+        """
+        On Qmin Qmax vertical line event
+        """
+        if event == None:
+            return
+        if event.id in self.plot_panels.keys():
+            panel = self.plot_panels[event.id]
+        elif event.group_id in self.plot_panels.keys():
+            panel = self.plot_panels[event.group_id]
+        else:
+            return
+        panel.on_plot_qrange(event)
+            
     def _on_show_panel(self, event):
         """show plug-in panel"""
         pass

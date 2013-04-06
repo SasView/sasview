@@ -65,6 +65,7 @@ class Plugin(PluginBase):
         mass_volume_help += "compute the mass density or the molar volume."
         gensans_help = "Generic SANS"
         pyconsole_help = "Python Console."
+        imageviewer_help = "Load an image file and display the image."
         #data_editor_help = "Meta Data Editor"
         return [("Data Operation", 
                         data_oper_help, self.on_data_operation),
@@ -79,7 +80,8 @@ class Plugin(PluginBase):
                         resolution_help, self.on_calculate_resoltuion),
                 ("Generic Scattering Calculator", 
                         gensans_help, self.on_gen_model),
-                ("Python Shell/Editor", pyconsole_help, self.on_python_console)]
+                ("Python Shell/Editor", pyconsole_help, self.on_python_console),
+                ("Image Viewer", imageviewer_help, self.on_image_viewer),]
               
     def on_edit_data(self, event):
         """
@@ -161,6 +163,16 @@ class Plugin(PluginBase):
         frame = SasGenWindow(parent=self.parent)
         self.put_icon(frame)
         frame.Show(True) 
+
+    def on_image_viewer(self, event):
+        """
+        Get choose an image file dialog
+        
+        :param event: menu event
+        """
+        from sans.perspectives.calculator.image_viewer import ImageView
+        image_view = ImageView(parent=self.parent)
+        image_view.load()
         
     def on_python_console(self, event):
         """
@@ -192,5 +204,3 @@ class Plugin(PluginBase):
                     frame.SetIcon(icon)
                 except:
                     pass      
-  
-    

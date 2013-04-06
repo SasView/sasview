@@ -141,7 +141,16 @@ class ModelPanel2D(ModelPanel1D):
         ## store default value of zmin and zmax 
         self.default_zmin_ctl = self.zmin_2D
         self.default_zmax_ctl = self.zmax_2D
-       
+
+    def on_plot_qrange(self, event=None):
+        """
+        On Qmin Qmax vertical line event
+        """
+        # Not implemented
+        if event == None:
+            return
+        event.Skip() 
+                       
     def onLeftDown(self, event): 
         """
         left button down and ready to drag

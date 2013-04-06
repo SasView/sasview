@@ -661,7 +661,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.sld_data = self.parent.get_sld_from_omf()
         output = self.sld_data  
         #frame_size = wx.Size(470, 470)    
-        self.plot_frame = PlotFrame(self, -1, 'testView')
+        self.plot_frame = PlotFrame(self.parent.parent, -1, 'testView')
         frame = self.plot_frame
         frame.Show(False)
         add_icon(self.parent, frame)
@@ -1789,7 +1789,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                 break
         return flag
 
-class SasGenWindow(wx.Frame):
+class SasGenWindow(wx.MDIChildFrame):
     """
     GEN SAS main window
     """
@@ -1801,7 +1801,7 @@ class SasGenWindow(wx.Frame):
         kwds['size'] = size
         kwds['title'] = title
         
-        wx.Frame.__init__(self, parent, *args, **kwds)
+        wx.MDIChildFrame.__init__(self, parent, *args, **kwds)
         self.parent = parent
         self.omfpanel = OmfPanel(parent=self)
         self.panel = SasGenPanel(parent=self)
@@ -2001,7 +2001,7 @@ class SasGenWindow(wx.Frame):
     def draw_graph(self, plot, title=''):
         """
         """
-        frame = PlotFrame(self, -1, 'testView', self.scale2d)
+        frame = PlotFrame(self.parent, -1, 'testView', self.scale2d)
         add_icon(self.parent, frame)
         frame.add_plot(plot)
         frame.SetTitle(title)

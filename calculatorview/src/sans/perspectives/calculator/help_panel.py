@@ -83,6 +83,8 @@ class HelpWindow(wx.Frame):
             target ="showframe">Generic Scattering Calculator</a><br></li>
             <li><a href ="pycrust_help.html" 
             target ="showframe">Python Shell</a><br></li>
+            <li><a href ="load_image_help.html" 
+            target ="showframe">Image Viewer</a><br></li>
             </ul>
             </body>
             </html>"""
