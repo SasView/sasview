@@ -253,7 +253,7 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
 class SlitLengthCalculatorWindow(wx.Frame):
     """
     """
-    def __init__(self, parent=None, title="Slit Size Calculator",
+    def __init__(self, parent=None, manager=None, title="Slit Size Calculator",
                 size=(PANEL_WIDTH,PANEL_HEIGHT), *args, **kwds):
         """
         """
@@ -261,9 +261,19 @@ class SlitLengthCalculatorWindow(wx.Frame):
         kwds['title']= title
         wx.Frame.__init__(self, parent, *args, **kwds)
         self.parent = parent
+        self.manager = manager
         self.panel = SlitLengthCalculatorPanel(parent=self)
+        self.Bind(wx.EVT_CLOSE, self.on_close)
         self.Centre()
         self.Show(True)
+
+    def on_close(self, event):
+        """
+        Close event
+        """
+        if self.manager != None:
+            self.manager.cal_slit_frame = None
+        self.Destroy()
         
 if __name__ == "__main__": 
     app = wx.PySimpleApp()

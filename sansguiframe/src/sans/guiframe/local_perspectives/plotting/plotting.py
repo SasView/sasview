@@ -20,7 +20,7 @@ from sans.guiframe.events import DeletePlotPanelEvent
 from sans.guiframe.plugin_base import PluginBase
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import Data2D
-
+from sans.guiframe.gui_manager import MDIFrame
 DEFAULT_MENU_ITEM_LABEL = "No graph available"
 DEFAULT_MENU_ITEM_ID = wx.NewId()
 
@@ -68,11 +68,14 @@ class Plugin(PluginBase):
         :param parent: parent window
         
         """
+        return []
+        """
         self.menu = wx.Menu()
         self.menu.Append(DEFAULT_MENU_ITEM_ID, DEFAULT_MENU_ITEM_LABEL, 
                              "No graph available")
         self.menu.FindItemByPosition(0).Enable(False)
         return [(self.menu, "Show")]
+        """
     
     def get_panels(self, parent):
         """
@@ -125,14 +128,6 @@ class Plugin(PluginBase):
             panel.graph.reset()
             self.hide_panel(group_id)
         self.plot_panels = {}
-        item = self.menu.FindItemByPosition(0)
-        while item != None:
-            self.menu.DeleteItem(item) 
-            try:
-                item = self.menu.FindItemByPosition(0)
-            except:
-                item = None
-               
     
     def clear_panel_by_id(self, group_id):
         """
@@ -150,10 +145,7 @@ class Plugin(PluginBase):
         """
         hide panel with group ID = group_id
         """
-        if group_id in self.plot_panels.keys():
-            panel = self.plot_panels[group_id]
-            self.parent.hide_panel(panel.uid)
-            return True
+        # Not implemeted
         return False
     
     def create_panel_helper(self, new_panel, data, group_id, title=None):
@@ -170,25 +162,22 @@ class Plugin(PluginBase):
         new_panel.window_caption = title
         new_panel.window_name = data.title
         event_id = self.parent.popup_panel(new_panel)
-        #remove the default item in the menu
-        if len(self.plot_panels) == 0:
-            pos = self.menu.FindItem(DEFAULT_MENU_ITEM_LABEL)
-            if pos != -1:
-                self.menu.Delete(DEFAULT_MENU_ITEM_ID)
+
         # Set UID to allow us to reference the panel later
         new_panel.uid = event_id
         # Ship the plottable to its panel
         wx.CallAfter(new_panel.plot_data, data) 
+        #new_panel.canvas.set_resizing(new_panel.resizing)
         self.plot_panels[new_panel.group_id] = new_panel
         
         # Set Graph menu and help string        
-        helpString = 'Show/Hide Graph: '
+        self.help_string = ' Graph: '
         for plot in  new_panel.plots.itervalues():
-            helpString += (' ' + plot.label + ';')
-        self.menu.AppendCheckItem(event_id, new_panel.window_caption, 
-                                  helpString)
-        self.menu.Check(event_id, IS_WIN)
-        wx.EVT_MENU(self.parent, event_id, self._on_check_menu)
+            help_string += (' ' + plot.label + ';')
+        #self.menu.AppendCheckItem(event_id, new_panel.window_caption, 
+        #                          helpString)
+        #self.menu.Check(event_id, IS_WIN)
+        #wx.EVT_MENU(self.parent, event_id, self._on_check_menu)
 
         
     def create_1d_panel(self, data, group_id):
@@ -202,8 +191,13 @@ class Plugin(PluginBase):
             xtransform = data.xtransform
             ytransform = data.ytransform
             ## create a plotpanel for 1D Data
-            new_panel = ModelPanel1D(self.parent, -1, xtransform=xtransform,
+            win = MDIFrame(self.parent, None, 'None', (100, 200))
+            new_panel = ModelPanel1D(win, -1, xtransform=xtransform,
                      ytransform=ytransform, style=wx.RAISED_BORDER)
+            win.set_panel(new_panel)
+            win.Show(False)
+            new_panel.frame = win
+            #win.Show(True)
             return  new_panel
         
         msg = "1D Panel of group ID %s could not be created" % str(group_id)
@@ -216,9 +210,14 @@ class Plugin(PluginBase):
             ##Create a new plotpanel for 2D data
             from Plotter2D import ModelPanel2D
             scale = data.scale
-            new_panel = ModelPanel2D(self.parent, id = -1,
+            win = MDIFrame(self.parent, None, 'None', (200, 150))
+            win.Show(False)
+            new_panel = ModelPanel2D(win, id = -1,
                                 data2d=data, scale = scale, 
                                 style=wx.RAISED_BORDER)
+            win.set_panel(new_panel)
+            new_panel.frame = win
+            #win.Show(True)
             return new_panel
         msg = "2D Panel of group ID %s could not be created" % str(group_id)
         raise ValueError, msg
@@ -246,24 +245,7 @@ class Plugin(PluginBase):
             if panel.group_id not in data.list_group_id:
                 data.list_group_id.append(panel.group_id)
             wx.CallAfter(panel.plot_data, data)
-            #Do not show residual plot when it is hidden
-            #ToDo: find better way
-            if str(panel.group_id)[0:3] == 'res' and not panel.IsShown():
-                return
-            self.parent.show_panel(panel.uid)   
-    
-    def delete_menu_item(self, name, uid):
-        """
-        """
-        #remove menu item
-        pos = self.menu.FindItem(name) 
-        if pos != -1:
-            self.menu.Delete(uid)
-        if self.menu.GetMenuItemCount() == 0:
-            self.menu.Append(DEFAULT_MENU_ITEM_ID, DEFAULT_MENU_ITEM_LABEL, 
-                             "No graph available")
-            self.menu.FindItemByPosition(0).Enable(False)
-        
+
     def delete_panel(self, group_id):
         """
         """
@@ -274,10 +256,11 @@ class Plugin(PluginBase):
                          DeletePlotPanelEvent(name=panel.window_caption,
                                     caption=panel.window_caption))
             #remove menu item
-            self.delete_menu_item(panel.window_caption, panel.uid)
+            #self.delete_menu_item(panel.window_caption, panel.uid)
             del self.plot_panels[group_id]
             if uid in self.parent.plot_panels.keys():
                 del self.parent.plot_panels[uid]
+                panel.frame.Destroy()
             return True
 
         return False
@@ -351,21 +334,7 @@ class Plugin(PluginBase):
                 new_panel = self.create_2d_panel(data, group_id)
             self.create_panel_helper(new_panel, data, group_id, title) 
         return
-
-    def _on_check_menu(self, event):
-        """
-        Check mark on menu
-        """
-        #event.Skip()
-        event_id = event.GetId()
-
-        if self.menu.IsChecked(event_id):
-            self.parent.on_view(event)
-            self.menu.Check(event_id, IS_WIN)
-        else:
-            self.parent.hide_panel(event_id)
-            self.menu.Check(event_id, False)
-        
+       
     def help(self, evt):
         """
         Show a general help dialog. 

@@ -6,7 +6,7 @@
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
 #project funded by the US National Science Foundation. 
 #
-#See the license text in license.txt
+#See the license text in license.txtz
 #
 #copyright 2008, University of Tennessee
 ################################################################################
@@ -191,7 +191,7 @@ except:
 APPLICATION_WLIST = config.APPLICATION_WLIST
 IS_WIN = True
 CLOSE_SHOW = True
-TIME_FACTOR = 1
+TIME_FACTOR = 2
 NOT_SO_GRAPH_LIST = ["BoxSum"]
 if sys.platform.count("win32")==0:
     IS_WIN = False
@@ -200,7 +200,7 @@ if sys.platform.count("win32")==0:
         if int(str(wx.__version__).split('.')[1]) < 9:
             CLOSE_SHOW = False
     
-class ViewerFrame(wx.Frame):
+class ViewerFrame(wx.MDIParentFrame):
     """
     Main application frame
     """
@@ -214,11 +214,9 @@ class ViewerFrame(wx.Frame):
         Initialize the Frame object
         """
 
-        wx.Frame.__init__(self, parent=parent, title=title, pos=pos, size=size)
+        wx.MDIParentFrame.__init__(self, parent=parent, title=title, pos=pos, size=size)
         # title
         self.title = title
-        # Preferred window size
-        self._window_width, self._window_height = size
         self.__gui_style = gui_style       
         path = os.path.dirname(__file__)
         temp_path = os.path.join(path,'images')
@@ -291,12 +289,13 @@ class ViewerFrame(wx.Frame):
         self.panel_on_focus = None
         #control_panel on focus
         self.cpanel_on_focus = None
+
         self.loader = Loader()   
         #data manager
         self.batch_on = False
         from sans.guiframe.data_manager import DataManager
         self._data_manager = DataManager()
-        self._data_panel = DataPanel(parent=self)
+        self._data_panel = None#DataPanel(parent=self)
         if self.panel_on_focus is not None:
             self._data_panel.set_panel_on_focus(
                                 self.panel_on_focus.window_caption)
@@ -311,6 +310,7 @@ class ViewerFrame(wx.Frame):
         self.batch_frame.Hide()
         self.on_batch_selection(event=None)
         self.add_icon()
+        
         # Register the close event so it calls our own method
         wx.EVT_CLOSE(self, self.WindowClose)
         # Register to status events
@@ -323,6 +323,8 @@ class ViewerFrame(wx.Frame):
         self.Bind(EVT_NEW_COLOR, self.on_color_selection)
         self.Bind(EVT_CATEGORY, self.on_change_categories)
         self.setup_custom_conf()
+        # Preferred window size
+        self._window_width, self._window_height = size
         
     def add_icon(self):
         """
@@ -344,7 +346,20 @@ class ViewerFrame(wx.Frame):
                     frame.SetIcon(icon)
                 except:
                     pass  
-        
+                
+    def get_client_size(self):
+        """
+        return client size tuple
+        """
+        width, height = self.GetClientSizeTuple()
+        height -= 45
+        # Adjust toolbar height
+        toolbar = self.GetToolBar()
+        if toolbar != None:
+            _, tb_h = toolbar.GetSizeTuple()
+            height -= tb_h 
+        return width, height
+    
     def on_change_categories(self, evt):
         # ILL
         fitpanel = None
@@ -596,8 +611,13 @@ class ViewerFrame(wx.Frame):
                 if plugin.sub_menu == DEFAULT_PERSPECTIVE:
                     
                     plugin.on_perspective(event=None)
+                    frame = plugin.get_frame()
+                    frame.Show(True)
                     #self._check_applications_menu()
-                    break
+                    #break
+                else:
+                    frame = plugin.get_frame()
+                    frame.Show(False) 
             except:
                 pass  
         return          
@@ -650,7 +670,8 @@ class ViewerFrame(wx.Frame):
         if self.panel_on_focus is not None:
             #Disable save application if the current panel is in batch mode
             flag = self.panel_on_focus.get_save_flag()
-            self._save_appl_menu.Enable(flag)
+            if self._save_appl_menu != None:
+                self._save_appl_menu.Enable(flag)
 
             if self.panel_on_focus not in self.plot_panels.values():
                 for ID in self.panels.keys():
@@ -664,37 +685,20 @@ class ViewerFrame(wx.Frame):
                 self._update_toolbar_helper()
                 #update edit menu
                 self.enable_edit_menu()
-    
+
     def disable_app_menu(self, p_panel=None):  
         """
         Disables all menus in the menubar
         """
-        if p_panel == None:
-            return
-        p_name = p_panel.window_name
-        enable = not self._mgr.GetPane(p_name).IsMaximized()
-        if self._data_panel is not None:
-            self._data_panel.disable_app_combo(enable)
-        if self._menubar is not None:
-            for menu, _ in self._menubar.GetMenus():
-                for items in menu.GetMenuItems():
-                    items.Enable(enable)
-        c_panel = self.cpanel_on_focus
-        # disable depending on the save_app flag
-        self._save_appl_menu.Enable(c_panel.get_save_flag())
-        if not enable:
-            if self._toolbar is not None:
-                self._toolbar.update_toolbar(None)
-            p_panel.on_set_focus(None)
-        else:
-            self._toolbar.update_toolbar(c_panel)
+        return
         
     def set_panel_on_focus_helper(self):
         """
         Helper for panel on focus with data_panel
         """
         ID = self.panel_on_focus.uid
-        self._data_panel.set_panel_on_focus(ID)
+        if self._data_panel != None:
+            self._data_panel.set_panel_on_focus(ID)
         #update combo
         if self.panel_on_focus in self.plot_panels.values():
             combo = self._data_panel.cb_plotpanel
@@ -706,7 +710,7 @@ class ViewerFrame(wx.Frame):
             if self.cpanel_on_focus != cpanel:
                 cpanel.on_tap_focus()
                 self.cpanel_on_focus = self.panel_on_focus
-                
+      
     def reset_bookmark_menu(self, panel):
         """
         Reset Bookmark menu list
@@ -757,7 +761,7 @@ class ViewerFrame(wx.Frame):
         # Set up extra custom tool menu
         self._setup_extra_custom()
         self._check_update(None)
-    
+
     def _setup_extra_custom(self):  
         """
         Set up toolbar and welcome view if needed
@@ -780,13 +784,13 @@ class ViewerFrame(wx.Frame):
         self.sb = StatusBar(self, wx.ID_ANY)
         self.SetStatusBar(self.sb)
         # Add panel
-        default_flag = wx.aui.AUI_MGR_DEFAULT#| wx.aui.AUI_MGR_ALLOW_ACTIVE_PANE
-        self._mgr = wx.aui.AuiManager(self, flags=default_flag)
-        self._mgr.SetDockSizeConstraint(0.5, 0.5)
+        #default_flag = wx.aui.AUI_MGR_DEFAULT#| wx.aui.AUI_MGR_ALLOW_ACTIVE_PANE
+        #self._mgr = wx.aui.AuiManager(self, flags=default_flag)
+        #self._mgr.SetDockSizeConstraint(0.5, 0.5)
         # Load panels
         self._load_panels()
         self.set_default_perspective()
-        self._mgr.Update()
+        #self._mgr.Update()
         
     def SetStatusText(self, *args, **kwds):
         """
@@ -905,7 +909,6 @@ class ViewerFrame(wx.Frame):
                                 config.printEVT(msg)
                     except:
                         msg = "ViewerFrame._find_plugins: %s" % sys.exc_value
-                        #print msg
                         logging.error(msg)
                     finally:
                         if not file == None:
@@ -924,34 +927,42 @@ class ViewerFrame(wx.Frame):
         :param panel_class: class of the welcome panel to be instantiated
         
         """
-        self.defaultPanel = panel_class(self, -1, style=wx.RAISED_BORDER)
+        win = MDIFrame(self, None, 'None', (100, 200))
+        self.defaultPanel = panel_class(win, -1, style=wx.RAISED_BORDER)
+        win.set_panel(self.defaultPanel)
+        self.defaultPanel.set_frame(win)
+        #win.EnableCloseButton(False)
+        win.Show(False)
         
     def _get_panels_size(self, p):
         """
         find the proper size of the current panel
         get the proper panel width and height
         """
-        ## Check and set the size
+        self._window_width, self._window_height = self.get_client_size()
+        ## Default size
         if DATAPANEL_WIDTH < 0:
-            panel_width = int(self._window_width * 0.22)
+            panel_width = int(self._window_width * 0.25)
         else:
             panel_width = DATAPANEL_WIDTH
-        panel_height = int(self._window_height * 0.9)
+        panel_height = int(self._window_height)
         style = self.__gui_style & (GUIFRAME.MANAGER_ON)
         if self._data_panel is not None  and (p == self._data_panel):
             return panel_width, panel_height
         if hasattr(p, "CENTER_PANE") and p.CENTER_PANE:
-            style = self.__gui_style & (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON)
-            if style == (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON):
-                panel_width = self._window_width - panel_width
+            #style = self.__gui_style & (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON)
+            #if style == (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON):
+            panel_width = self._window_width * 0.45
             return panel_width, panel_height
+        elif p == self.defaultPanel:
+            return self._window_width, panel_height
+        #total_width = panel_width + self._window_width - 2.3 * panel_width
         return panel_width, panel_height
     
     def _load_panels(self):
         """
         Load all panels in the panels directory
         """
-        
         # Look for plug-in panels
         panels = []    
         for item in self.plugins:
@@ -962,10 +973,19 @@ class ViewerFrame(wx.Frame):
         # Show a default panel with some help information
         # It also sets the size of the application windows
         #TODO: Use this for splash screen
-        if self.defaultPanel is None:
-            self.defaultPanel = DefaultPanel(self, -1, style=wx.RAISED_BORDER)
+        #if self.defaultPanel is None:
+        #    self.defaultPanel = DefaultPanel(self, -1, style=wx.RAISED_BORDER)
         # add a blank default panel always present 
         self.panels["default"] = self.defaultPanel
+        w, h = self._get_panels_size(self.defaultPanel)
+        #win = MDIFrame(self, DefaultPanel, "default", 
+        #               (self._window_width, self._window_height))
+        #win.set_panel(self.defaultPanel)
+        #self.defaultPanel.set_frame(win)
+        frame = self.defaultPanel.get_frame()
+        frame.SetSize((self._window_width, self._window_height))
+        frame.Show(True)
+        """
         self._mgr.AddPane(self.defaultPanel, wx.aui.AuiPaneInfo().
                               Name("default").
                               CenterPane().
@@ -974,47 +994,53 @@ class ViewerFrame(wx.Frame):
                               BestSize(wx.Size(self._window_width, 
                                                self._window_height)).
                               Show())
-
+        """
         #add data panel 
-        self.panels["data_panel"] = self._data_panel
+        
         w, h = self._get_panels_size(self._data_panel)
-        self._mgr.AddPane(self._data_panel, wx.aui.AuiPaneInfo().
-                              Name(self._data_panel.window_name).
-                              Caption(self._data_panel.window_caption).
-                              Left().
-                              CloseButton(CLOSE_SHOW).
-                              TopDockable(False).
-                              BottomDockable(False).
-                              LeftDockable(True).
-                              RightDockable(False).
-                              BestSize(wx.Size(w, h)).
-                              Hide())
-
+        win = MDIFrame(self, None, 'None', (w,h))
+        self._data_panel = DataPanel(parent=win)
+        win.set_panel(self._data_panel)
+        win.EnableCloseButton(False)
+        self.panels["data_panel"] = self._data_panel
+        self._data_panel.set_frame(win)
         style = self.__gui_style & GUIFRAME.MANAGER_ON
-        data_pane = self._mgr.GetPane(self.panels["data_panel"].window_name)
         if style != GUIFRAME.MANAGER_ON:
-            data_pane.Hide()
+            flag = False
         else:
-            data_pane.Show()
-            
+            flag = True
+        win.Show(flag)
+        d_panel_width = w
         # Add the panels to the AUI manager
         for panel_class in panels:
-            p = panel_class
+            frame = panel_class.get_frame()
             id = wx.NewId()
             # Check whether we need to put this panel
             # in the center pane
-            if hasattr(p, "CENTER_PANE") and p.CENTER_PANE:
-                w, h = self._get_panels_size(p)
-                if p.CENTER_PANE:
-                    self.panels[str(id)] = p
+            
+            if hasattr(panel_class, "CENTER_PANE") and panel_class.CENTER_PANE:
+                w, h = self._get_panels_size(panel_class)
+                if panel_class.CENTER_PANE:
+                    self.panels[str(id)] = panel_class
+                    _, pos_y = frame.GetPositionTuple()
+                    frame.SetPosition((d_panel_width, pos_y))
+                    frame.SetSize((w, h))
+                    frame.Show(False)
+                    """
                     self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                                           Name(p.window_name).
                                           CenterPane().
                                           Center().
                                           CloseButton(False).
                                           Hide())
+                    """
             else:
-                self.panels[str(id)] = p
+                self.panels[str(id)] = panel_class
+                frame.SetSize((w, h))
+                frame.Show(False)
+                #win = MDIFrame(self, p, p.window_name, (w, h))
+                #win.set_panel(p)
+                """
                 self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                                   Name(p.window_name).Caption(p.window_caption).
                                   Right().
@@ -1025,7 +1051,10 @@ class ViewerFrame(wx.Frame):
                                   RightDockable().
                                   MinimizeButton().
                                   Hide())        
-      
+                """
+        #if frame != None:
+        #    frame.EnableCloseButton(False)
+        
     def update_data(self, prev_data, new_data):
         """
         Update the data.
@@ -1107,11 +1136,12 @@ class ViewerFrame(wx.Frame):
         This will check which panel has been closed and
         delete it.
         """
-        panel = event.GetPane()
-        if panel.IsMaximized():
-            self._mgr.RestoreMaximizedPane()
+        frame = event.GetEventObject()
+        #panel = frame.panel
+        #if panel.IsMaximized():
+        #    self._mgr.RestoreMaximizedPane()
         for ID in self.plot_panels.keys():
-            if self.plot_panels[ID].window_name == panel.name:
+            if self.plot_panels[ID].window_name == frame.name:
                 self.disable_app_menu(self.plot_panels[ID])
                 self.delete_panel(ID)
                 break
@@ -1129,6 +1159,19 @@ class ViewerFrame(wx.Frame):
         """
         ID = wx.NewId()
         self.panels[str(ID)] = p
+        ## Check and set the size
+        if PLOPANEL_WIDTH < 0:
+            p_panel_width = int(self._window_width * 0.45)
+        else:
+            p_panel_width = PLOPANEL_WIDTH
+        p_panel_height = int(p_panel_width * 0.76)
+        p.frame.SetSize((p_panel_width, p_panel_height))
+        """
+        dw, dh = self._get_panels_size(self._data_panel)
+        dw += p_panel_width
+        _, dh = self.GetToolBar().GetSizeTuple()
+        p.frame.SetPosition((dw, -dh))
+        """
         self.graph_num += 1
         if p.window_caption.split()[0] in NOT_SO_GRAPH_LIST:
             windowcaption = p.window_caption
@@ -1153,13 +1196,12 @@ class ViewerFrame(wx.Frame):
         style1 = self.__gui_style & GUIFRAME.FIXED_PANEL
         style2 = self.__gui_style & GUIFRAME.FLOATING_PANEL
         
-        ## Check and set the size
-        if PLOPANEL_WIDTH < 0:
-            p_panel_width = int(self._window_width * 0.36)
-        else:
-            p_panel_width = PLOPANEL_WIDTH
-        p_panel_height = int(p_panel_width * 0.75)
-        
+        p.frame.SetTitle(p.window_caption)
+        p.frame.name = p.window_name
+        p.frame.Show(True)
+        #if p not in self.schedule_full_draw_list:
+        #    self.schedule_full_draw_list.append(p)
+        """
         if style1 == GUIFRAME.FIXED_PANEL:
             self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                               Name(p.window_name).
@@ -1175,7 +1217,6 @@ class ViewerFrame(wx.Frame):
                               BestSize(wx.Size(p_panel_width, 
                                                p_panel_height)))
             self._popup_fixed_panel(p)
-    
         elif style2 == GUIFRAME.FLOATING_PANEL:
             self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
                               Name(p.window_name).Caption(p.window_caption).
@@ -1187,8 +1228,9 @@ class ViewerFrame(wx.Frame):
                                                p_panel_height)))
             
             self._popup_floating_panel(p)
+        """
         # Register for closing of panels
-        self.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.on_panel_close)
+        #self.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.on_panel_close)
         # Register for showing/hiding the panel
         wx.EVT_MENU(self, ID, self.on_view)
         if p not in self.plot_panels.values() and p.group_id != None:
@@ -1230,7 +1272,7 @@ class ViewerFrame(wx.Frame):
         self._add_menu_application()
         self._add_menu_tool()
         self._add_current_plugin_menu()
-        self._add_menu_window()
+        #self._add_menu_window()
         self._add_help_menu()
         self.SetMenuBar(self._menubar)
         
@@ -1250,7 +1292,7 @@ class ViewerFrame(wx.Frame):
         """
         application_name = 'No Selected Analysis'
         panel_name = 'No Panel on Focus'
-        c_panel = self.cpanel_on_focus
+        c_panel = self.cpanel_on_focus        
         if self._toolbar is  None:
             return
         if c_panel is not None:
@@ -1444,93 +1486,6 @@ class ViewerFrame(wx.Frame):
         
         self.panel = ConfDialog(parent=self, gui=self.__gui_style)
         self.panel.ShowModal()
-        #wx.PostEvent(self.parent, event)
-        
-
-    def _add_menu_window(self):
-        """
-        add a menu window to the menu bar
-        Window menu
-        Attach a menu item for each panel in our
-        panel list that also appears in a plug-in.
-        
-        Only add the panel menu if there is only one perspective and
-        it has more than two panels.
-        Note: the first plug-in is always the plotting plug-in. 
-        The first application
-        #plug-in is always the second one in the list.
-        """
-        self._window_menu = wx.Menu()
-        if self._plotting_plugin is not None:
-            for (menu, name) in self._plotting_plugin.populate_menu(self):
-                self._window_menu.AppendSubMenu(menu, name)
-        self._menubar.Append(self._window_menu, '&Graph')
-
-        style = self.__gui_style & GUIFRAME.PLOTTING_ON
-        if style == GUIFRAME.PLOTTING_ON:
-            
-            self._window_menu.AppendSeparator()
-            id = wx.NewId()
-            hint = "Hide all the graph panels"
-            self._window_menu.Append(id, '&Hide  All', hint)
-            wx.EVT_MENU(self, id, self.hide_all_plotpanels)
-            id = wx.NewId()
-            hint = "Show all the graph panels"
-            self._window_menu.Append(id, '&Show All', hint)
-            wx.EVT_MENU(self, id, self.show_all_plotpanels)
-            
-            self._window_menu.AppendSeparator()
-            id = wx.NewId()
-            preferences_menu = wx.Menu()
-            hint = "All plot panels will floating"
-            preferences_menu.AppendRadioItem(id, '&Float All', hint)
-            wx.EVT_MENU(self, id, self.set_plotpanel_floating)
-            style = self.__gui_style & GUIFRAME.FLOATING_PANEL
-            f_menu = preferences_menu.FindItemById(id)
-            if style == GUIFRAME.FLOATING_PANEL: 
-                f_checked = True
-            else:
-                f_checked = False
-            f_menu.Check(f_checked)
-
-            id = wx.NewId()
-            hint = "All plot panels will displayed within the frame"
-            preferences_menu.AppendRadioItem(id, '&Dock All', hint)
-            wx.EVT_MENU(self, id, self.set_plotpanel_fixed) 
-            if not f_checked:
-                d_menu = preferences_menu.FindItemById(id)
-                d_menu.Check(True)
-            preferences_menu.AppendSeparator()
-            id = wx.NewId()
-            hint = "Clean up the dock area for plots on new-plot"
-            preferences_menu.AppendCheckItem(id, '&CleanUp Dock on NewPlot', 
-                                             hint)
-            wx.EVT_MENU(self, id, self.on_cleanup_dock)
-            flag = self.cleanup_plots
-            if self.cleanup_plots:
-                c_menu = preferences_menu.FindItemById(id)
-                c_menu.Check(True)  
-            self._window_menu.AppendSubMenu(preferences_menu,'&Preferences')
-        if self._window_menu.GetMenuItemCount() == 0:
-            pos = self._menubar.FindMenu('Graph')
-            self._menubar.Remove(pos)
-        #wx.EVT_MENU(self, id, self.show_preferences_panel)   
-        #if len(self.plugins) == 2:
-        #    plug = self.plugins[1]
-        #    pers = plug.get_perspective()
-        #
-        #    if len(pers) > 1:
-        #        self._window_menu = wx.Menu()
-        #        for item in self.panels:
-        #            if item == 'default':
-        #                continue
-        #            panel = self.panels[item]
-        #            if panel.window_name in pers:
-        #                self._window_menu.Append(int(item),
-        #                                          panel.window_caption,
-        #                                "Show %s window" % panel.window_caption)
-        #                wx.EVT_MENU(self, int(item), self.on_view)
-        #        self._menubar.Append(self._window_menu, '&Window')
 
                 
     def _add_menu_application(self):
@@ -1561,6 +1516,7 @@ class ViewerFrame(wx.Frame):
                         self._applications_menu.AppendCheckItem(id, plug.sub_menu,
                                       "Switch to analysis: %s" % plug.sub_menu)
                     wx.EVT_MENU(self, id, plug.on_perspective)
+
             #self._applications_menu.
             if (not plug_data_count or not plug_no_data_count):
                 self._applications_menu.RemoveItem(separator)
@@ -1652,9 +1608,7 @@ class ViewerFrame(wx.Frame):
         self._edit_menu.Append(GUIFRAME_ID.PREVIEW_ID, '&Report Results',
                                'Preview current panel')
         wx.EVT_MENU(self, GUIFRAME_ID.PREVIEW_ID, self.on_preview_panel)
-        #self._edit_menu.Append(GUIFRAME_ID.PRINT_ID, '&Print',
-        #                       'Print current panel')
-        #wx.EVT_MENU(self, GUIFRAME_ID.PRINT_ID, self.on_print_panel)
+
         self._edit_menu.Append(GUIFRAME_ID.RESET_ID, '&Reset Page', 
                                'Reset current panel')
         wx.EVT_MENU(self, GUIFRAME_ID.RESET_ID, self.on_reset_panel)
@@ -1715,157 +1669,29 @@ class ViewerFrame(wx.Frame):
         self.show_panel(evt.GetId(), 'on')      
         wx.CallLater(5*TIME_FACTOR, self.set_schedule(True))
         self.set_plot_unfocus()
-        
-    def on_close_welcome_panel(self):
-        """
-        Close the welcome panel
-        """
-        if self.defaultPanel is None:
-            return 
-        default_panel = self._mgr.GetPane(self.panels["default"].window_name)
-        if default_panel.IsShown():
-            default_panel.Hide()
-            # Recover current perspective
-            perspective = self._current_perspective
-            perspective.on_perspective(event=None)
-            self._mgr.Update()
-            # Show toolbar
-            #style = self.__gui_style & GUIFRAME.TOOLBAR_ON
-            #if (style == GUIFRAME.TOOLBAR_ON) & (not self._toolbar.IsShown()):
-            #    self._on_toggle_toolbar()
-            
+ 
     def show_welcome_panel(self, event):
         """    
         Display the welcome panel
         """
         if self.defaultPanel is None:
             return 
-        for id, panel in self.panels.iteritems():
-            if id  ==  'default':
-                # Show default panel
-                if not self._mgr.GetPane(self.panels["default"].window_name).IsShown():
-                    self._mgr.GetPane(self.panels["default"].window_name).Show(True)
-            elif id == "data_panel":
-                flag = self._mgr.GetPane(self.panels["data_panel"].window_name).IsShown()
-                self._mgr.GetPane(self.panels["data_panel"].window_name).Show(flag)
-            elif panel not in self.plot_panels.values() :
-                self._mgr.GetPane(self.panels[id].window_name).IsShown()
-                self._mgr.GetPane(self.panels[id].window_name).Hide()
-        #style = self.__gui_style & GUIFRAME.TOOLBAR_ON
-        #if (style == GUIFRAME.TOOLBAR_ON) & (self._toolbar.IsShown()):
-        #    #    self._toolbar.Show(True)
-        #    self._on_toggle_toolbar()
-
-        self._mgr.Update()
-       
-    def show_panel(self, uid, show=None):
-        """
-        Shows the panel with the given id
-        
-        :param uid: unique ID number of the panel to show
-        
-        """
-        ID = str(uid)
-        config.printEVT("show_panel: %s" % ID)
-        if ID in self.panels.keys():
-            if not self._mgr.GetPane(self.panels[ID].window_name).IsShown(): 
-                if show == 'on':
-                    self._mgr.GetPane(self.panels[ID].window_name).Show()   
-                elif self.panels[ID].window_caption.split(" ")[0] == \
-                                                            "Residuals":
-                    self._mgr.GetPane(self.panels[ID].window_name).Hide()
-                else:
-                    self._mgr.GetPane(self.panels[ID].window_name).Show()
-                # Hide default panel
-                self._mgr.GetPane(self.panels["default"].window_name).Hide()
-        self._mgr.Update()     
-        self._redraw_idle()
-
-    def show_all_plotpanels(self, event):
-        """
-        Show all plotpanels shown
-        
-        :param event: menu event
-        """
-        #event.Skip()
-        any_hidden = False
-        for id in self.plot_panels.keys():
-            if self._mgr.GetPane(self.plot_panels[id].window_name).IsShown():
-                continue
-            else:
-                any_hidden = True
-                self.show_panel(id)
-        if not any_hidden:
-            msg = "No hidden graph panel exists."
-        else:
-            # Make sure the Checkmenuitem checked: Need this for-loop \
-            # because the check menu is not responding on floating panel 
-            if IS_WIN:
-                try:
-                    for item in self._plotting_plugin.menu.GetMenuItems():
-                        item.Check(True)
-                except:
-                    # MAC is not using checkmenuitem
-                    pass
-            msg = "All graph panels are shown."
-        wx.PostEvent(self, StatusEvent(status=msg))
+        frame = self.panels['default'].get_frame()
+        if frame == None:
+            return
+        # Show default panel
+        if not frame.IsShown():
+            frame.Show(True)
             
-    def hide_all_plotpanels(self, event):
+    def on_close_welcome_panel(self):
         """
-        Hide all plotpanels shown
-        
-        :param event: menu event
+        Close the welcome panel
         """
-        #event.Skip()
-        any_shown = False
-        for ID in self.plot_panels.keys():
-            if self._mgr.GetPane(self.plot_panels[ID].window_name).IsShown():
-                any_shown = True
-                try:
-                    self.hide_panel(ID)
-                except:
-                    print "hide_panel: No such plot id %s" % ID
-            else:
-                continue
-        if not any_shown:
-            msg = "No shown graph panel exists."
-        else:
-            # Make sure the Checkmenuitem unchecked: Need this for-loop 
-            # because the check menu is not responding on floating panel 
-            if IS_WIN:
-                try:
-                    for item in self._plotting_plugin.menu.GetMenuItems():
-                        item.Check(False)
-                except:
-                    # MAC is not using checkmenuitem
-                    pass
-            msg = "All graph panels are hidden."
-        wx.PostEvent(self, StatusEvent(status=msg))
-                    
-    def hide_panel(self, uid):
-        """
-        hide panel except default panel
-        """
-        ID = str(uid)
-        caption = self.panels[ID].window_caption
-        config.printEVT("hide_panel: %s" % ID)
-        if ID in self.panels.keys():
-            pane = self._mgr.GetPane(self.panels[ID].window_name)
-            if pane.IsMaximized():
-                self._mgr.RestoreMaximizedPane()
-                self.disable_app_menu(self.panels[ID])
-            if pane.IsShown():
-                pane.Hide()
-                item = self._plotting_plugin.menu.FindItemById(uid)
-                item.Check(False)
-                if self._data_panel is not None and \
-                            ID in self.plot_panels.keys():
-                    self._data_panel.cb_plotpanel.Append(str(caption), 
-                                                         self.panels[ID])
-                # Do not Hide default panel here...
-                #self._mgr.GetPane(self.panels["default"].window_name).Hide()
-            wx.CallAfter(self._mgr.Update)
-            self.cpanel_on_focus.SetFocus()
+        if self.defaultPanel is None:
+            return 
+        default_panel = self.panels["default"].frame
+        if default_panel.IsShown():
+            default_panel.Show(False) 
                 
     def delete_panel(self, uid):
         """
@@ -1881,11 +1707,13 @@ class ViewerFrame(wx.Frame):
         if ID in self.panels.keys():
             self.panel_on_focus = None
             panel = self.panels[ID]
-            self._mgr.DetachPane(panel)
+            #self._mgr.DetachPane(panel)
+            if hasattr(panel, "connect"):
+                panel.connect.disconnect()
             self._plotting_plugin.delete_panel(panel.group_id)
-            panel.Hide()
-            panel.clear()
-            panel.Close()
+            #panel.Hide()
+            #panel.clear()
+            #panel.Close()
             if panel in self.schedule_full_draw_list:
                 self.schedule_full_draw_list.remove(panel) 
             
@@ -1894,19 +1722,7 @@ class ViewerFrame(wx.Frame):
                 del self.plot_panels[ID]
             if ID in self.panels.keys():
                 del self.panels[ID]
-            #CallAfter: make sure panel is clear before updating mgr
-            wx.CallAfter(self._mgr.Update)
             return 
-      
-    def clear_panel(self):
-        """
-        Clear the panel
-        """
-        for item in self.panels:
-            try:
-                self.panels[item].clear_panel()
-            except:
-                pass
             
     def create_gui_data(self, data, path=None):
         """
@@ -1953,9 +1769,7 @@ class ViewerFrame(wx.Frame):
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style == GUIFRAME.MANAGER_ON:
             if self._data_panel is not None:
-                #data_state = self._data_manager.get_selected_data()
-                #self._data_panel.load_data_list(data_state)
-                self._mgr.GetPane(self._data_panel.window_name).Show(True)
+                self._data_panel.frame.Show(True)
       
     def load_from_cmd(self,  path):   
         """
@@ -1980,8 +1794,31 @@ class ViewerFrame(wx.Frame):
             self.load_state(path)
 
         self._default_save_location = os.path.dirname(path)
-
-    def load_state(self, path):   
+        
+    def show_panel(self, uid, show=None):
+        """
+        Shows the panel with the given id
+        
+        :param uid: unique ID number of the panel to show
+        
+        """
+        ID = str(uid)
+        config.printEVT("show_panel: %s" % ID)
+        if ID in self.panels.keys():
+            if not self.panels[ID].frame.IsShown(): 
+                if show == 'on':
+                    self.panels[ID].frame.Show()   
+                elif self.panels[ID].window_caption.split(" ")[0] == \
+                                                            "Residuals":
+                    self._mgr.GetPane(self.panels[ID].window_name).Hide()
+                else:
+                    self._mgr.GetPane(self.panels[ID].window_name).Show()
+                # Hide default panel
+                self._mgr.GetPane(self.panels["default"].window_name).Hide()
+        self._mgr.Update()     
+        self._redraw_idle()
+        
+    def load_state(self, path, is_project=False):   
         """
         load data from command line or application
         """
@@ -1989,18 +1826,17 @@ class ViewerFrame(wx.Frame):
             basename  = os.path.basename(path)
             if APPLICATION_STATE_EXTENSION is not None \
                 and basename.endswith(APPLICATION_STATE_EXTENSION):
-                #Hide current plot_panels i
-                for ID in self.plot_panels.keys():
-                    panel = self._mgr.GetPane(self.plot_panels[ID].window_name)
-                    if panel.IsShown():
-                        panel.Hide()
+                if is_project:
+                    for ID in self.plot_panels.keys():
+                        panel = self.plot_panels[ID]
+                        panel.on_close(None)
             self.get_data(path)
             wx.PostEvent(self, StatusEvent(status="Completed loading."))
         else:
             wx.PostEvent(self, StatusEvent(status=" "))
-        if self.defaultPanel is not None and \
-            self._mgr.GetPane(self.panels["default"].window_name).IsShown():
-            self.on_close_welcome_panel()
+        #if self.defaultPanel is not None and \
+        #    self._mgr.GetPane(self.panels["default"].window_name).IsShown():
+        #    self.on_close_welcome_panel()
             
     def load_data(self, path):
         """
@@ -2131,7 +1967,7 @@ class ViewerFrame(wx.Frame):
         #    #self.Close()
         #except:
         
-        self.load_state(path=path)
+        self.load_state(path=path, is_project=True)
         
     def _on_save_application(self, event):
         """
@@ -2415,30 +2251,34 @@ class ViewerFrame(wx.Frame):
         
         :param panels: list of panels
         """
-        #style = self.__gui_style & GUIFRAME.TOOLBAR_ON
-        #if (style == GUIFRAME.TOOLBAR_ON) & (not self._toolbar.IsShown()):
-        #    self._on_toggle_toolbar()
-        for item in self.panels:
+        for item in self.panels.keys():
             # Check whether this is a sticky panel
             if hasattr(self.panels[item], "ALWAYS_ON"):
                 if self.panels[item].ALWAYS_ON:
                     continue 
-            
+            if self.panels[item] == None:
+                continue
             if self.panels[item].window_name in panels:
-                if not self._mgr.GetPane(self.panels[item].window_name).IsShown():
-                    self._mgr.GetPane(self.panels[item].window_name).Show()
+                frame = self.panels[item].get_frame()
+                if not frame.IsShown():
+                    frame.Show(True)
             else:
                 # always show the data panel if enable
                 style = self.__gui_style & GUIFRAME.MANAGER_ON
                 if (style == GUIFRAME.MANAGER_ON) and self.panels[item] == self._data_panel:
                     if 'data_panel' in self.panels.keys():
-                        flag = self._mgr.GetPane(self.panels['data_panel'].window_name).IsShown()
-                        self._mgr.GetPane(self.panels['data_panel'].window_name).Show(flag)
+                        frame = self.panels['data_panel'].get_frame()
+                        if frame == None:
+                            continue
+                        flag = frame.IsShown()
+                        frame.Show(flag)
                 else:
-                    if self._mgr.GetPane(self.panels[item].window_name).IsShown():
-                        self._mgr.GetPane(self.panels[item].window_name).Hide()
-                
-        self._mgr.Update()
+                    frame = self.panels[item].get_frame()
+                    if frame == None:
+                        continue
+
+                    if frame.IsShown():
+                        frame.Show(False)
         
     def show_data_panel(self, event=None, action=True):
         """
@@ -2447,24 +2287,20 @@ class ViewerFrame(wx.Frame):
         if self._data_panel_menu == None:
             return
         label = self._data_panel_menu.GetText()
+        pane = self.panels["data_panel"]
+        frame = pane.get_frame()
         if label == 'Show Data Explorer':
-            pane = self._mgr.GetPane(self.panels["data_panel"].window_name)
             #if not pane.IsShown():
             if action: 
-                pane.Show(True)
-                self._mgr.Update()
+                frame.Show(True)
             self.__gui_style = self.__gui_style | GUIFRAME.MANAGER_ON
-            
             self._data_panel_menu.SetText('Hide Data Explorer')
         else:
-            pane = self._mgr.GetPane(self.panels["data_panel"].window_name)
-            #if not pane.IsShown():
             if action:
-                pane.Show(False)
-                self._mgr.Update()
+                frame.Show(False)
             self.__gui_style = self.__gui_style & (~GUIFRAME.MANAGER_ON)
             self._data_panel_menu.SetText('Show Data Explorer')
-    
+
     def add_data_helper(self, data_list):
         """
         """
@@ -2492,12 +2328,10 @@ class ViewerFrame(wx.Frame):
         if style == GUIFRAME.MANAGER_ON:
             #wait for button press from the data panel to set_data 
             if self._data_panel is not None:
-                self._mgr.GetPane(self._data_panel.window_name).Show(True)
-                self._mgr.Update() 
+                self._data_panel.frame.Show(True)
         else:
             #automatically send that to the current perspective
             self.set_data(data_id=data_list.keys())
-            self.on_close_welcome_panel()
        
     def set_data(self, data_id, theory_id=None): 
         """
@@ -2505,15 +2339,8 @@ class ViewerFrame(wx.Frame):
         """
         list_data, _ = self._data_manager.get_by_id(data_id)
         if self._current_perspective is not None:
-            if self.cleanup_plots:
-                for uid, panel in self.plot_panels.iteritems():
-                    #panel = self.plot_panels[uid]
-                    window = self._mgr.GetPane(panel.window_name)
-                    # To hide all docked plot panels when set the data
-                    if not window.IsFloating():
-                        self.hide_panel(uid)
             self._current_perspective.set_data(list_data.values())
-            self.on_close_welcome_panel()
+
         else:
             msg = "Guiframe does not have a current perspective"
             logging.info(msg)
@@ -2565,12 +2392,6 @@ class ViewerFrame(wx.Frame):
                         wx.PostEvent(self, StatusEvent(status=message, 
                                                    info='warning'))
             else:
-                if self.cleanup_plots:
-                    for id, panel in self.plot_panels.iteritems():
-                        window = self._mgr.GetPane(panel.window_name)
-                        # To hide all docked plot panels when set the data
-                        if not window.IsFloating():
-                            self.hide_panel(id)
                 #if not append then new plot
                 from sans.guiframe.dataFitting import Data2D
                 if issubclass(Data2D, new_plot.__class__):
@@ -2592,17 +2413,6 @@ class ViewerFrame(wx.Frame):
         else delete theory
         """
         temp = data_id + theory_id
-        """
-        value = [plug.is_in_use(temp) for plug in self.plugins]
-        if len(value) > 0:
-            print "value"
-            return
-            from data_panel import DataDialog
-            dlg = DataDialog(data_list=data_list, nb_data=MAX_NBR_DATA)
-            if dlg.ShowModal() == wx.ID_OK:
-                selected_data_list = dlg.get_data()
-            dlg.Destroy()
-        """
         for plug in self.plugins:
             plug.delete_data(temp)
         total_plot_list = []
@@ -2891,16 +2701,20 @@ class ViewerFrame(wx.Frame):
             for panel in self.panels.values():
                 if hasattr(panel, 'CENTER_PANE') and panel.CENTER_PANE:
                     for name in self._current_perspective.get_perspective():
-                        if name == panel.window_name:
-                            panel.on_set_focus(event=None)
-                            break               
+                        frame = panel.get_frame()
+                        if frame != None:
+                            if name == panel.window_name:
+                                panel.on_set_focus(event=None)
+                                frame.Show(True)
+                            else:
+                                frame.Show(False)
+                            #break               
             name = self._current_perspective.sub_menu
             if self._data_panel is not None:
                 self._data_panel.set_active_perspective(name)
                 self._check_applications_menu()
             #Set the SasView title
             self._set_title_name(name)
-          
             
     def _set_title_name(self, name):
         """
@@ -2925,83 +2739,6 @@ class ViewerFrame(wx.Frame):
                             menu.Check(True)
                         else:
                             menu.Check(False) 
-           
-    def set_plotpanel_floating(self, event=None):
-        """
-        make the plot panel floatable
-        """
-        
-        self.__gui_style &= (~GUIFRAME.FIXED_PANEL)
-        self.__gui_style |= GUIFRAME.FLOATING_PANEL
-        plot_panel = []
-        id = event.GetId()
-        menu = self._window_menu.FindItemById(id)
-        if self._plotting_plugin is not None:
-            plot_panel = self.plot_panels.values()
-            for p in plot_panel:
-                self._popup_floating_panel(p)
-            menu.Check(True)
-            
-    def set_plotpanel_fixed(self, event=None):
-        """
-        make the plot panel fixed
-        """
-        self.__gui_style &= (~GUIFRAME.FLOATING_PANEL)
-        self.__gui_style |= GUIFRAME.FIXED_PANEL
-        plot_panel = []
-        id = event.GetId()
-        menu = self._window_menu.FindItemById(id)
-        if self._plotting_plugin is not None:
-            plot_panel = self.plot_panels.values()
-            for p in plot_panel:
-                self._popup_fixed_panel(p)
-            menu.Check(True)
-            
-    def on_cleanup_dock(self, event=None):     
-        """
-        Set Cleanup Dock option
-        """
-        if event == None:
-            return
-        id = event.GetId()
-        menu = self._window_menu.FindItemById(id)
-        Flag = self.cleanup_plots
-        if not Flag:
-            menu.Check(True)
-            self.cleanup_plots = True
-            msg = "Cleanup-Dock option set to 'ON'."
-        else:
-            menu.Check(False)
-            self.cleanup_plots = False
-            msg = "Cleanup-Dock option set to 'OFF'."
-
-        wx.PostEvent(self, StatusEvent(status= msg))
-         
-    def _popup_fixed_panel(self, p):
-        """
-        """
-        style = self.__gui_style & GUIFRAME.FIXED_PANEL
-        if style == GUIFRAME.FIXED_PANEL:
-            pane = self._mgr.GetPane(p.window_name)
-            pane.Dock()
-            pane.Floatable()
-            pane.Right()
-            pane.TopDockable(False)
-            pane.BottomDockable(False)
-            pane.LeftDockable(False)
-            pane.RightDockable(True)
-            self._mgr.Update()
-            
-    def _popup_floating_panel(self, p):
-        """
-        """
-        style = self.__gui_style &  GUIFRAME.FLOATING_PANEL
-        if style == GUIFRAME.FLOATING_PANEL: 
-            pane = self._mgr.GetPane(p.window_name)
-            pane.Floatable(True)
-            pane.Float()
-            pane.Dockable(False)
-            self._mgr.Update()
             
     def enable_add_data(self, new_plot):
         """
@@ -3232,7 +2969,7 @@ class ViewerFrame(wx.Frame):
         :param name: window_name in AuiPaneInfo
         : return: AuiPaneInfo of the name
         """
-        return self._mgr.GetPane(name) 
+        return None#self._mgr.GetPane(name) 
     
     def enable_undo(self):
         """
@@ -3324,7 +3061,15 @@ class ViewerFrame(wx.Frame):
         """
         if self.cpanel_on_focus is not None:
             self._toolbar.enable_reset(self.panel_on_focus)
-
+            
+    def get_toolbar_height(self):
+        """
+        """
+        size_y = 0
+        if self.GetToolBar() != None and self.GetToolBar().IsShown():
+            _, size_y = self.GetToolBar().GetSizeTuple()
+        return size_y
+    
     def set_schedule_full_draw(self, panel=None, func='del'):
         """
         Add/subtract the schedule full draw list with the panel given
@@ -3353,22 +3098,23 @@ class ViewerFrame(wx.Frame):
         """
         Draw the panels with axes in the schedule to full dwar list
         """
+        
         count = len(self.schedule_full_draw_list)
         #if not self.schedule:
         if count < 1:
             self.set_schedule(False)
             return
+
         else:
             ind = 0
             # if any of the panel is shown do full_draw
             for panel in self.schedule_full_draw_list:
                 ind += 1
-                if self._mgr.GetPane(panel.window_name).IsShown():
+                if panel.frame.IsShown():
                     break
                 # otherwise, return
                 if ind == count:
                     return
-
         #Simple redraw only for a panel shown
         def f_draw(panel):
             """
@@ -3377,30 +3123,28 @@ class ViewerFrame(wx.Frame):
             try:
                 # This checking of GetCapture is to stop redrawing
                 # while any panel is capture.
-                if self.GetCapture() == None:
+                frame = panel.frame
+                
+                if not frame.GetCapture():
                     # draw if possible
                     panel.set_resizing(False)
-                    panel.Show(False)
+                    #panel.Show(True)
                     panel.draw_plot()
-                    
-                    # Check if the panel is not shown
-                    if not self._mgr.GetPane(panel.window_name).IsShown():
-                        self._mgr.GetPane(panel.window_name).Hide()
-                    else:
-                        panel.Show(True)
+                # Check if the panel is not shown
+                flag = frame.IsShown()
+                frame.Show(flag)
+                   
             except:
-                pass
-        
+                raise
+     
         # Draw all panels        
-        map(f_draw, self.schedule_full_draw_list)
-        
+        #map(f_draw, self.schedule_full_draw_list)
+        f_draw(self.schedule_full_draw_list[0])
         # Reset the attr  
         if len(self.schedule_full_draw_list) == 0:
             self.set_schedule(False)
         else:
             self.set_schedule(True)
-        # do not update mgr
-        #self._mgr.Update()
         
     def set_schedule(self, schedule=False):  
         """
@@ -3702,7 +3446,7 @@ class ViewApp(wx.App):
                                               wx.SPLASH_CENTRE_ON_SCREEN),
                                  style=(wx.SIMPLE_BORDER|
                                         wx.FRAME_NO_TASKBAR|
-                                        wx.STAY_ON_TOP),
+                                        wx.FRAME_FLOAT_ON_PARENT),
                                         
                         milliseconds=SS_MAX_DISPLAY_TIME,
                         parent=parent,
@@ -3723,6 +3467,68 @@ class ViewApp(wx.App):
         event.Skip()
         self.maximize_win()
 
+
+class MDIFrame(wx.MDIChildFrame):
+    """
+    Frame for panels
+    """
+    def __init__(self, parent, panel, title="Untitled",
+                size=(300,200), *args, **kwds):
+        """
+        comment
+        :param parent: parent panel/container
+        """
+        kwds['size']= size
+        kwds['title']= title
+        # Initialize the Frame object
+        wx.MDIChildFrame.__init__(self, parent, *args, **kwds)
+        self.parent = parent
+        self.name = "Untitled"
+        self.batch_on = self.parent.batch_on
+        self.panel = panel
+        if panel != None:
+            self.set_panel(panel)
+        self.Show(False)
+    
+    def show_data_panel(self, action):
+        """
+        """
+        self.parent.show_data_panel(action)
+        
+    def set_panel(self, panel):
+        """
+        """
+        self.panel = panel
+        self.name = panel.window_name
+        self.SetTitle(panel.window_caption)
+        self.SetHelpText(panel.help_string)
+        width, height = self.parent._get_panels_size(panel)
+        if hasattr(panel, "CENTER_PANE") and panel.CENTER_PANE:
+            width *= 0.6  
+        self.SetSize((width, height))
+        self.parent.put_icon(self)
+        self.Bind(wx.EVT_SET_FOCUS, self.set_panel_focus)
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+        self.Show(False)
+    
+    def set_panel_focus(self, event):
+        """
+        """
+        self.panel.SetFocus()
+        self.parent.panel_on_focus = self.panel
+        #self.parent.set_panel_on_focus_helper()
+        
+    def OnClose(self, event):
+        """
+        On Close event
+        """
+        #event.Skip()
+        self.panel.on_close(event)
+        #self.parent.delete_panel(event)
+        #self.DestroyChildren()
+        #self.panel = None
+        #wx.CallAfter(self.Destroy)
+        
 if __name__ == "__main__": 
     app = ViewApp(0)
     app.MainLoop()

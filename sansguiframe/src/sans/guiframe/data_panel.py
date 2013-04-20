@@ -141,8 +141,9 @@ class DataPanel(ScrolledPanel, PanelBase):
         #Default location
         self._default_save_location = None  
         self.all_data1d = True
-        self.parent = parent
-        self.manager = manager
+        self.parent = parent.parent
+        self._manager = manager
+        self.frame = None
         if list is None:
             list = []
         self.list_of_data = list
@@ -1007,7 +1008,13 @@ class DataPanel(ScrolledPanel, PanelBase):
                 break
         self.enable_append()
         self.enable_remove_plot()
-       
+    
+    def set_plot_unfocus(self):
+        """
+        Unfocus plot
+        """
+        return
+    
     def _on_perspective_selection(self, event=None):
         """
         select the current perspective for guiframe
@@ -1046,6 +1053,22 @@ class DataPanel(ScrolledPanel, PanelBase):
                              NewPlotEvent(group_id=panel.group_id,
                                           action="delete"))
         self.enable_remove_plot()
+    
+    def set_frame(self, frame):
+        """
+        """
+        self.frame = frame
+    
+    def get_frame(self):
+        """
+        """
+        return self.frame 
+
+    def set_schedule_full_draw(self, panel=None, func='del'):
+        """
+        Send full draw to guimanager
+        """
+        self.parent.set_schedule_full_draw(panel, func)
         
     def enable_remove_plot(self):
         """
@@ -1260,7 +1283,7 @@ class DataDialog(wx.Dialog):
             if cb.GetValue():
                 temp.append(data)
         return temp
-            
+               
 class DataFrame(wx.Frame):
     """
     Data Frame
@@ -1281,9 +1304,9 @@ class DataFrame(wx.Frame):
         wx.Frame.__init__(self, parent=parent, *args, **kwds)
         self.parent = parent
         self.owner = owner
-        self.manager = manager
+        self._manager = manager
         self.panel = DataPanel(parent=self, 
-                               #size=size,
+                               manager=manager,
                                list_of_perspective=list_of_perspective)
      
     def load_data_list(self, list=[]):

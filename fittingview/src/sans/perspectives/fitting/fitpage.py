@@ -67,6 +67,7 @@ class FitPage(BasicPage):
         self.fill_data_combobox(data_list=self.data_list)
         #create a default data for an empty panel
         self.create_default_data()
+        #self._manager.frame.Bind(wx.EVT_SET_FOCUS, self.on_set_focus)
     
     def enable_fit_button(self):
         """
@@ -984,7 +985,7 @@ class FitPage(BasicPage):
         wx.CallAfter(self._onparamEnter_helper)
         if not flag:
             msg = "The parameters are invalid"
-            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+            wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
             return
         
     def _onFit(self, event):
@@ -999,8 +1000,8 @@ class FitPage(BasicPage):
             wx.CallAfter(self.set_fitbutton)
             return
 
-        if len(self.parent._manager.fit_thread_list) > 0 and\
-                    self.parent._manager._fit_engine != "park" and\
+        if len(self._manager.fit_thread_list) > 0 and\
+                    self._manager._fit_engine != "park" and\
                     self._manager.sim_page != None and \
                     self._manager.sim_page.uid == self.uid:
             msg = "The FitEnging will be set to 'ParkMC'\n"
@@ -1035,7 +1036,7 @@ class FitPage(BasicPage):
                 
         if not flag:
             msg = "Fitting range or parameters are invalid"
-            wx.PostEvent(self.parent.parent,
+            wx.PostEvent(self._manager.parent,
                          StatusEvent(status=msg, type="stop"))
             return
               
@@ -1258,7 +1259,7 @@ class FitPage(BasicPage):
         tcrtl = event.GetEventObject()
         #Clear msg if previously shown.
         msg = ""
-        wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+        wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
 
         if check_float(tcrtl):
             flag = self._onparamEnter_helper()
@@ -1300,7 +1301,7 @@ class FitPage(BasicPage):
         else:
             self.save_current_state()
             msg = "Cannot Plot :Must enter a number!!!  "
-            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+            wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
              
         self.save_current_state()
         return
@@ -1312,7 +1313,7 @@ class FitPage(BasicPage):
         tcrtl = event.GetEventObject()
         #Clear msg if previously shown.
         msg = ""
-        wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+        wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         # Flag to register when a parameter has changed.
         is_modified = False
         if tcrtl.GetValue().lstrip().rstrip() != "":
@@ -1323,7 +1324,7 @@ class FitPage(BasicPage):
             except:
                 tcrtl.SetBackgroundColour("pink")
                 msg = "Model Error:wrong value entered : %s" % sys.exc_value
-                wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+                wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 return
         else:
             tcrtl.SetBackgroundColour(wx.WHITE)
@@ -1356,7 +1357,7 @@ class FitPage(BasicPage):
             d_id = self.data.id
             d_group_id = self.data.group_id
             act_ctrl = event.GetEventObject()
-            wx.PostEvent(self.parent.parent, 
+            wx.PostEvent(self._manager.parent, 
                          PlotQrangeEvent(ctrl=[self.qmin, self.qmax], id=d_id, 
                                      group_id=d_group_id, leftdown=is_click,
                                      active=act_ctrl))
@@ -1372,7 +1373,7 @@ class FitPage(BasicPage):
         act_ctrl = event.GetEventObject()
         d_id = self.data.id
         d_group_id = self.data.group_id
-        wx.PostEvent(self.parent.parent, 
+        wx.PostEvent(self._manager.parent, 
                      PlotQrangeEvent(ctrl=[self.qmin, self.qmax], id=d_id, 
                                      group_id=d_group_id, leftdown=False, 
                                      active=act_ctrl))
@@ -1414,7 +1415,7 @@ class FitPage(BasicPage):
         tcrtl = event.GetEventObject()
         #Clear msg if previously shown.
         msg = ""
-        wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+        wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         # For theory mode
         if not self.data.is_data:
             self.npts_x = self.Npts_total.GetValue()
@@ -1435,12 +1436,12 @@ class FitPage(BasicPage):
                 else:
                     tcrtl.SetBackgroundColour("pink")
                     msg = "Model Error:wrong value entered : %s" % sys.exc_value
-                    wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+                    wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                     return
             except:
                 tcrtl.SetBackgroundColour("pink")
                 msg = "Model Error:wrong value entered : %s" % sys.exc_value
-                wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+                wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 return
             #Check if # of points for theory model are valid(>0).
             # check for 2d
@@ -1456,7 +1457,7 @@ class FitPage(BasicPage):
                 if len(index_data[index_data]) < 10:
                     msg = "Cannot Plot :No or too little npts in"
                     msg += " that data range!!!  "
-                    wx.PostEvent(self.parent.parent,
+                    wx.PostEvent(self._manager.parent,
                                  StatusEvent(status=msg))
                     return
                 else:
@@ -1474,7 +1475,7 @@ class FitPage(BasicPage):
         else:
             tcrtl.SetBackgroundColour("pink")
             msg = "Model Error:wrong value entered!!!"
-            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+            wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         
         self._draw_model()
         self.save_current_state()
@@ -1766,7 +1767,7 @@ class FitPage(BasicPage):
             event.Skip()
             self.set_npts2fit()
             msg = "No model is found on updating MASK in the model plot... "
-            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+            wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         else:
             event.Skip()
             msg = ' Please consider your Q range, too.'
@@ -1982,7 +1983,7 @@ class FitPage(BasicPage):
             #by removing the previous selected data
             try:
                 wx.PostEvent(self._manager.parent,
-                             NewPlotEvent(action="remove",
+                             NewPlotEvent(action="delete",
                                           group_id=old_group_id, id=old_id))
             except:
                 pass
@@ -2014,7 +2015,7 @@ class FitPage(BasicPage):
             msg = "Error: This model state has missing or outdated "
             msg += "information.\n"
             msg += "%s"% (sys.exc_value)
-            wx.PostEvent(self.parent.parent,
+            wx.PostEvent(self._manager.parent,
                          StatusEvent(status=msg, info="error"))
         self._lay_out()
         self.Refresh()
@@ -2679,7 +2680,7 @@ class FitPage(BasicPage):
         for item in self.param_toFit:
             if item[0] and item[0].IsShown():
                 param2fit.append(item[1])
-        self.parent._manager.set_param2fit(self.uid, param2fit)
+        self._manager.set_param2fit(self.uid, param2fit)
                 
     def select_all_param(self, event):
         """
@@ -2811,7 +2812,7 @@ class FitPage(BasicPage):
         for item in self.param_toFit:
             if item[0] and item[0].IsShown():
                 param2fit.append(item[1])
-        self.parent._manager.set_param2fit(self.uid, param2fit)
+        self._manager.set_param2fit(self.uid, param2fit)
         
     def set_model_param_sizer(self, model):
         """
@@ -3236,7 +3237,7 @@ class FitPage(BasicPage):
             msg += " Check if the Scipy fit engine is selected in the menubar."
             infor = 'warning'
             # inform msg to wx
-            wx.PostEvent(self.parent.parent,
+            wx.PostEvent(self._manager.parent,
                         StatusEvent(status=msg, info=infor))
         
     def _onModel2D(self, event):

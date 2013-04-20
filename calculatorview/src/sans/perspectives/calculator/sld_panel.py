@@ -440,7 +440,8 @@ class SldWindow(wx.Frame):
     """
     """
     def __init__(self, parent=None, title="SLD Calculator",
-                  base=None, size=(PANEL_SIZE, PANEL_SIZE), *args, **kwds):
+                  base=None, manager=None, 
+                  size=(PANEL_SIZE, PANEL_SIZE), *args, **kwds):
         """
         """
         kwds['title'] = title
@@ -448,9 +449,22 @@ class SldWindow(wx.Frame):
         wx.Frame.__init__(self, parent, *args, **kwds)
         """
         """
+        self.parent = parent
+        self.base = base
+        self.manager = manager
         self.panel = SldPanel(self, base=base)
+        self.Bind(wx.EVT_CLOSE, self.on_close)
         self.Centre()
         self.Show(True)
+    
+    def on_close(self, event):
+        """
+        On close event
+        """
+        if self.manager != None:
+            self.manager.sld_frame = None
+        self.Destroy()
+        
         
 class ViewApp(wx.App):
     """

@@ -31,7 +31,8 @@ class SlicerPanel(wx.Panel, PanelBase):
         if params is None:
             params = {}
         self.params = params
-        self.parent = parent
+        self.parent = base.parent
+        self.frame = None
         self.type = type
         self.listeners = []
         self.parameters = []
@@ -117,7 +118,9 @@ class SlicerPanel(wx.Panel, PanelBase):
         self.bck.Layout()
         #self.bck.Fit(self)
         self.Layout()
-        self.parent.GetSizer().Layout()
+        psizer = self.parent.GetSizer()
+        if psizer != None:
+            psizer.Layout()
         
     def onSetFocus(self, evt):
         """
@@ -162,5 +165,11 @@ class SlicerPanel(wx.Panel, PanelBase):
             ## base is guiframe is this case
             event = SlicerParameterEvent(type=self.type, params=params)
             wx.PostEvent(self.base, event)
-            
-        
+
+    def on_close(self, event):
+        """
+        On Close Event
+        """
+        ID = self.uid
+        self.parent.delete_panel(ID)            
+        self.frame.Destroy()

@@ -115,6 +115,8 @@ class PlotPanel(wx.Panel):
         """
         wx.Panel.__init__(self, parent, id=id, **kwargs)
         self.parent = parent
+        if hasattr(parent, "parent"):
+            self.parent = self.parent.parent
         self.dimension = 1
         self.gotLegend = 0  # to begin, legend is not picked.
         self.legend_pos_loc = None

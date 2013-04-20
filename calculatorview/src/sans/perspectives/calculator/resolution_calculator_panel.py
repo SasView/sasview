@@ -1392,23 +1392,27 @@ class ResolutionWindow(wx.Frame):
     """
     Resolution Window
     """
-    def __init__(self, parent = None, title = "SANS Resolution Estimator",
-                  size=(PANEL_WIDTH * 2, PANEL_HEIGHT), *args, **kwds):
+    def __init__(self, parent = None, manager=None, 
+                 title = "SANS Resolution Estimator",
+                 size=(PANEL_WIDTH * 2, PANEL_HEIGHT), *args, **kwds):
         kwds['title'] = title
         kwds['size'] = size
         wx.Frame.__init__(self, parent=None, *args, **kwds)
         self.parent = parent
+        self.manager = manager
         self.panel = ResolutionCalculatorPanel(parent=self)
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Centre()
         self.Show(True)
-        wx.EVT_CLOSE(self, self.OnClose)
     
     def OnClose(self, event):  
         """
         On close event
         """
         _pylab_helpers.Gcf.figs = {}
-        self.Destroy()  
+        if self.manager != None:
+            self.manager.cal_res_frame = None
+        self.Destroy() 
 
         
 if __name__ == "__main__": 

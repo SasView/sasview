@@ -194,7 +194,7 @@ class SLDPanel(wx.Dialog):
         """
         Show data dialog
         """   
-        self.parent.parent.parent.show_data1d(data, name)
+        self.parent._manager.parent.show_data1d(data, name)
         
 class SLDplotpanel(PlotPanel):
     """
@@ -299,7 +299,7 @@ class SLDplotpanel(PlotPanel):
         if self.parent != None:
             # What an ancestor!
             fit_panel = self.parent.parent.parent
-            fit_panel.parent.save_data1d(data, default_name)
+            fit_panel._manager.parent.save_data1d(data, default_name)
              
 class ViewerFrame(wx.Frame):
     """

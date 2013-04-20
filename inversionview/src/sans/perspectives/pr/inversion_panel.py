@@ -45,7 +45,7 @@ class InversionControl(ScrolledPanel, PanelBase):
         
         self.plots = plots
         self.radio_buttons = {}
-        self.parent = parent
+        self.parent = parent.parent
         
         ## Data file TextCtrl
         self.data_file  = None

@@ -635,10 +635,11 @@ class DataEditorPanel(wx.ScrolledWindow):
         event.Skip()
         
 class DataEditorWindow(wx.Frame):
-    def __init__(self, parent, data=None, *args, **kwds):
+    def __init__(self, parent, manager, data=None, *args, **kwds):
         kwds["size"] = (PANEL_WIDTH, PANEL_HEIGTH)
         wx.Frame.__init__(self, parent, *args, **kwds)
         self.parent = parent
+        self.manager = manager
         self.panel = DataEditorPanel(parent=self, data=data)
         self.Show()
         

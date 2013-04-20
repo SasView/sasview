@@ -56,6 +56,7 @@ class PanelBase:
             self.batch_on = self.parent.batch_on
        
         self.group_id = None
+        self.help_string = ''
 
     def on_batch_selection(self, event):
         """
@@ -425,4 +426,19 @@ class PanelBase:
     def get_manager(self):
         """
         """
-        return self._manager
+        return self._manager  
+      
+    def get_frame(self):
+        """
+        """
+        if self._manager == None:
+            return None
+        return self._manager.frame
+    
+    def on_close(self, event):
+        """
+        On Close Event
+        """
+        if self.frame != None:
+            self.frame.Destroy()
+            

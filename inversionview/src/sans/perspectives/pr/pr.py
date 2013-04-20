@@ -21,6 +21,7 @@ import time
 import math
 import numpy
 import pylab
+from sans.guiframe.gui_manager import MDIFrame
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.events import StatusEvent 
@@ -1253,9 +1254,12 @@ class Plugin(PluginBase):
         from inversion_panel import InversionControl
         
         self.parent = parent
-        self.control_panel = InversionControl(self.parent, -1, 
+        self.frame = MDIFrame(self.parent, None, 'None', (100, 200))     
+        self.control_panel = InversionControl(self.frame, -1, 
                                               style=wx.RAISED_BORDER,
                                               standalone=self.standalone)
+        self.frame.set_panel(self.control_panel)
+        self._frame_set_helper()
         self.control_panel.set_manager(self)
         self.control_panel.nfunc = self.nfunc
         self.control_panel.d_max = self.max_length
@@ -1264,7 +1268,7 @@ class Plugin(PluginBase):
         self.perspective.append(self.control_panel.window_name)
      
         return [self.control_panel]
-    
+        
     def set_data(self, data_list=None):
         """
         receive a list of data to compute pr

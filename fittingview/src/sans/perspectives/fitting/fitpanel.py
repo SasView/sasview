@@ -70,7 +70,7 @@ class FitPanel(nb, PanelBase):
         self.Bind(basepage.EVT_NEXT_STATE, self._onRedo)
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CHANGED, self.on_page_changing)
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSED, self.on_closed)
-
+        
     def on_closed(self, event):
         """
         """
@@ -160,7 +160,8 @@ class FitPanel(nb, PanelBase):
         pos = self.GetSelection()
         if pos != -1:
             selected_page = self.GetPage(pos)
-            wx.PostEvent(self.parent, PanelOnFocusEvent(panel=selected_page))
+            wx.PostEvent(self._manager.parent, 
+                         PanelOnFocusEvent(panel=selected_page))
         self.enable_close_button()
        
     def on_set_focus(self, event):
@@ -169,7 +170,8 @@ class FitPanel(nb, PanelBase):
         pos = self.GetSelection()
         if pos != -1:
             selected_page = self.GetPage(pos)
-            wx.PostEvent(self.parent, PanelOnFocusEvent(panel=selected_page))
+            wx.PostEvent(self._manager.parent, 
+                         PanelOnFocusEvent(panel=selected_page))
         
     def get_data(self):
         """

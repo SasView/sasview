@@ -712,7 +712,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## post help message for the selected model
         msg = menu.GetHelpString(event.GetId())
         msg += " reloaded"
-        wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+        wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         self.Show(False)
         name = menu.GetLabel(event.GetId())
         self._on_select_model_helper()
@@ -745,14 +745,14 @@ class BasicPage(ScrolledPanel, PanelBase):
         path = None
         if self.parent != None:
             self._default_save_location = \
-                        self.parent.parent._default_save_location
+                        self._manager.parent._default_save_location
         dlg = wx.FileDialog(self, "Choose a file", self._default_save_location,
                                         self.window_caption, "*.fitv", wx.SAVE)
 
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
-            self.parent.parent._default_save_location =\
+            self._manager.parent._default_save_location =\
                                  self._default_save_location
         else:
             return None
@@ -802,11 +802,11 @@ class BasicPage(ScrolledPanel, PanelBase):
             msg = "Error was occured "
             msg += ": No valid parameter values to paste from the clipboard..."
             infor = "error"
-            wx.PostEvent(self.parent.parent,
+            wx.PostEvent(self._manager.parent,
                     StatusEvent(status=msg, info=infor))
             raise
         # inform msg to wx
-        wx.PostEvent(self.parent.parent,
+        wx.PostEvent(self._manager.parent,
                     StatusEvent(status=msg, info=infor))
         
     def _get_time_stamp(self):
@@ -842,12 +842,12 @@ class BasicPage(ScrolledPanel, PanelBase):
         msg = "Model saved at %s on %s" % (current_time, current_date)
         ## post help message for the selected model
         msg += " Saved! right click on this page to retrieve this model"
-        wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+        wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         
         id = wx.NewId()
         self.popUpMenu.Append(id, name, str(msg))
         wx.EVT_MENU(self, id, self.onResetModel)
-        wx.PostEvent(self.parent.parent,
+        wx.PostEvent(self._manager.parent,
                      AppendBookmarkEvent(title=name,
                                          hint=str(msg),
                                          handler=self._back_to_bookmark))
@@ -876,7 +876,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         try:
             if path == None:
-                wx.PostEvent(self.parent.parent,
+                wx.PostEvent(self._manager.parent,
                             StatusEvent(status= \
                             " Selected Distribution was not loaded: %s" % path))
                 return None, None
@@ -1489,7 +1489,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         if self.parent != None:
             self._default_save_location = \
-                        self.parent.parent.get_save_location()
+                        self._manager.parent.get_save_location()
         dlg = wx.FileDialog(self, "Choose a weight file",
                                 self._default_save_location, "",
                                 "*.*", wx.OPEN)
@@ -1701,7 +1701,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         if not flag:
             msg = "Cannot Plot or Fit :Must select a "
             msg += " model or Fitting range is not valid!!!  "
-            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+            wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         
         try:
             self.save_current_state()
@@ -2080,7 +2080,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     #                 StatusEvent(status=msg, info="error"))
         except:
             msg = "%s\n" % (sys.exc_value)
-            wx.PostEvent(self.parent.parent,
+            wx.PostEvent(self._manager.parent,
                          StatusEvent(status=msg, info="error"))
         self._populate_box(self.formfactorbox, m_list)
     
@@ -2187,7 +2187,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         tcrtl = event.GetEventObject()
         #Clear msg if previously shown.
         msg = ""
-        wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+        wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         # Flag to register when a parameter has changed.
         is_modified = False
         if tcrtl.GetValue().lstrip().rstrip() != "":
@@ -2222,11 +2222,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                         is_modified = True
                 else:
                     msg = "Cannot Plot :No npts in that Qrange!!!  "
-                    wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+                    wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         else:
             tcrtl.SetBackgroundColour("pink")
             msg = "Model Error:wrong value entered!!!"
-            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+            wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         self.save_current_state()
         event = PageInfoEvent(page=self)
         wx.PostEvent(self.parent, event)
@@ -2366,7 +2366,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 qmax_ctrl.SetBackgroundColour("pink")
                 qmax_ctrl.Refresh()
                 msg = "Invalid Q range: Q min must be smaller than Q max"
-                wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+                wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 return False
         return True
     
@@ -2398,7 +2398,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.qmax.Refresh()
                 msg = "Npts of Data Error :"
                 msg += "No or too little npts of %s." % data.name
-                wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+                wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 self.fitrange = False
                 flag = False
             else:
@@ -2433,7 +2433,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.qmax.Refresh()
                 msg = "Npts of Data Error :"
                 msg += "No or too little npts of %s." % data.name
-                wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+                wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 self.fitrange = False
                 flag = False
             else:
@@ -2484,7 +2484,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                                            
                         except:
                             msg = "Wrong Fit parameter range entered "
-                            wx.PostEvent(self.parent.parent,
+                            wx.PostEvent(self._manager.parent,
                                          StatusEvent(status=msg))
                             raise ValueError, msg
                         is_modified = True
@@ -2501,7 +2501,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                             item[2].SetBackgroundColour(wx.WHITE)
                         except:
                             msg = "Wrong Fit parameter range entered "
-                            wx.PostEvent(self.parent.parent,
+                            wx.PostEvent(self._manager.parent,
                                          StatusEvent(status=msg))
                             raise ValueError, msg
                         is_modified = True
@@ -2510,7 +2510,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                     if not self._validate_qrange(item[5], item[6]):
                         msg = "Wrong Fit range entered for parameter "
                         msg += "name %s of model %s " % (name, self.model.name)
-                        wx.PostEvent(self.parent.parent,
+                        wx.PostEvent(self._manager.parent,
                                      StatusEvent(status=msg))
                 
                 if name in self.model.details.keys():
@@ -2532,7 +2532,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             except:
                 item[2].SetBackgroundColour("pink")
                 msg = "Wrong Fit parameter value entered "
-                wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+                wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 
         return is_modified
         
@@ -2762,7 +2762,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             disp_box.SetBackgroundColour("pink")
             # Focus on Fit button so that users can see the pinky box
             self.btFit.SetFocus()
-            wx.PostEvent(self.parent.parent,
+            wx.PostEvent(self._manager.parent,
                          StatusEvent(status=msg, info="error"))
         
     def _set_array_disp(self, name=None, disp=None):
@@ -2784,8 +2784,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             #self.noDisper_rbox.SetValue(True)
             return
         self._default_save_location = os.path.dirname(path)
-        if self.parent != None:
-            self.parent.parent._default_save_location =\
+        if self._manager != None:
+            self._manager.parent._default_save_location =\
                              self._default_save_location
 
         basename = os.path.basename(path)
@@ -2799,7 +2799,7 @@ class BasicPage(ScrolledPanel, PanelBase):
 
         # Tell the user that we are about to apply the distribution
         msg = "Applying loaded %s distribution: %s" % (name, path)
-        wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+        wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         self._set_array_disp_model(name=name, disp=disp,
                                     values=values, weights=weights)
         return basename
@@ -2946,7 +2946,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             
         if flag == False:
             msg = "Cannot Plot :Must enter a number!!!  "
-            wx.PostEvent(self.parent.parent, StatusEvent(status=msg))
+            wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         else:
             # set relative text ctrs.
             self.qmin.SetValue(str(self.qmin_x))
@@ -2982,7 +2982,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         canvases = []
         res_item = None
         # call gui_manager
-        gui_manager = self.parent.parent
+        gui_manager = self._manager.parent
         # loops through the panels [dic]
         for _, item2 in gui_manager.plot_panels.iteritems():
             data_title = self.data.group_id

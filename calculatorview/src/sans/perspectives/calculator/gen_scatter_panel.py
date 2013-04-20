@@ -18,6 +18,7 @@ matplotlib.interactive(False)
 #Use the WxAgg back end. The Wx one takes too long to render
 matplotlib.use('WXAgg')
 
+#from sans.guiframe.gui_manager import MDIFrame
 from data_util.calcthread import CalcThread
 from sans.guiframe.local_perspectives.plotting.SimplePlot import PlotFrame
 from sans.guiframe.dataFitting import Data2D 
@@ -1112,7 +1113,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         title = new_plot.title
         num_graph = str(self.graph_num)
         wx.CallAfter(self.parent.draw_graph, new_plot, 
-                     title="Graph %s: "% num_graph + new_plot.id )
+                     title="GEN Graph %s: "% num_graph + new_plot.id )
         self.graph_num += 1
                 
     def _draw2D(self, image):
@@ -1171,9 +1172,9 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         title = new_plot.title
         num_graph = str(self.graph_num)
         wx.CallAfter(self.parent.draw_graph, new_plot, 
-                     title="Graph %s: "% num_graph + new_plot.id )
+                     title="GEN Graph %s: "% num_graph + new_plot.id )
         self.graph_num += 1
-        
+         
     def set_scale2d(self, scale):
         """
         Set SLD plot scale
@@ -1793,7 +1794,7 @@ class SasGenWindow(wx.Frame):
     """
     GEN SAS main window
     """
-    def __init__(self, parent=None, title="Generic Scattering Calculator",
+    def __init__(self, parent=None, manager= None, title="Generic Scattering Calculator",
                 size=(PANEL_WIDTH * 1.3, PANEL_HEIGHT * 1.65), *args, **kwds):
         """
         Init
@@ -1803,6 +1804,7 @@ class SasGenWindow(wx.Frame):
         
         wx.Frame.__init__(self, parent, *args, **kwds)
         self.parent = parent
+        self.base = manager
         self.omfpanel = OmfPanel(parent=self)
         self.panel = SasGenPanel(parent=self)
         self.data = None
@@ -1814,9 +1816,9 @@ class SasGenWindow(wx.Frame):
         self._mgr.SetDockSizeConstraint(0.5, 0.5)
         self._plot_title = ''
         self.scale2d = 'log_{10}'
+        self.Bind(wx.EVT_CLOSE, self.on_close)
         
         self._build_toolbar()
-        self._build_menubar()
         
         self.build_panels()
         self.Centre()
@@ -2007,7 +2009,13 @@ class SasGenWindow(wx.Frame):
         frame.SetTitle(title)
         frame.Show(True)
         frame.SetFocus()
-    
+
+    def set_schedule_full_draw(self, panel=None, func='del'):  
+        """
+        Send full draw to gui frame
+        """
+        self.parent.set_schedule_full_draw(panel, func)
+        
     def get_npix(self):
         """
         Get no. of pixels from omf panel
@@ -2081,6 +2089,8 @@ class SasGenWindow(wx.Frame):
         """
         Close
         """
+        if self.base != None:
+            self.base.gen_frame = None
         self.Destroy()
         
     def on_help(self, event):    

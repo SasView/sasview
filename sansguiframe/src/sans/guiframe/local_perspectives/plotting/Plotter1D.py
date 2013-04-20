@@ -72,8 +72,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
         PanelBase.__init__(self, parent)
         ## Reference to the parent window
         self.parent = parent
+        if hasattr(parent, "parent"):
+            self.parent = self.parent.parent
         ## Plottables
         self.plots = {}
+        self.frame = None
         #context menu
         self._slicerpop = None
         
@@ -334,13 +337,14 @@ class ModelPanel1D(PlotPanel, PanelBase):
         :Param event: LeftClick mouse event
         """  
         ax = event.inaxes
-        dclick = event.action == 'dclick'
-        if ax == None or dclick:
-            # remove the vline
-            self._check_zoom_plot()
-            self.canvas.draw()
-            self.q_ctrl = None
-            return 
+        if hasattr(event, "action"):
+            dclick = event.action == 'dclick'
+            if ax == None or dclick:
+                # remove the vline
+                self._check_zoom_plot()
+                self.canvas.draw()
+                self.q_ctrl = None
+                return 
         if self.ly != None and event.xdata != None:
             # Selecting a new line if cursor lines are displayed already
             dqmin = math.fabs(event.xdata - self.ly[0].get_xdata())
@@ -441,7 +445,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
             if id in theory_list.keys():
                 data = theory_list[id]
             # Update Graph menu and help string        
-            h_id = self.parent._window_menu.FindItem(self.window_caption)
+            #h_id = self.parent._window_menu.FindItem(self.window_caption)
             if data != None:
                 if data.__class__.__name__ == 'list':
                     label = data[0].label
@@ -449,10 +453,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
                     label = data.label
             else:
                 label = '???'
-            helpString = self.parent._window_menu.GetHelpString(h_id) 
+            #helpString = self.parent._window_menu.GetHelpString(h_id) 
             d_string = (' ' + str(label) +';')
-            new_tip = helpString.replace(d_string, '')
-            self.parent._window_menu.SetHelpString(h_id, new_tip)  
+            #new_tip = helpString.replace(d_string, '')
+            #self.parent._window_menu.SetHelpString(h_id, new_tip)  
 
             del self.plots[id]
             self.graph.render(self)
@@ -517,12 +521,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
             if self.is_zoomed:
                 self.is_zoomed = False
             # Update Graph menu and help string        
-            pos = self.parent._window_menu.FindItem(self.window_caption)
+            #pos = self.parent._window_menu.FindItem(self.window_caption)
             helpString = 'Show/Hide Graph: '
             for plot in  self.plots.itervalues():
                 helpString += (' ' + str(plot.label) +';')
-            self.parent._window_menu.SetHelpString(pos, helpString)      
-          
+            #self.parent._window_menu.SetHelpString(pos, helpString)  
+                
     def draw_plot(self):
         """
         Draw plot
@@ -800,6 +804,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """
         Add refresh, add/hide button in the tool bar
         """
+        return
         if self.parent.__class__.__name__ != 'ViewerFrame':
             return
         self.toolbar.AddSeparator()
@@ -816,6 +821,13 @@ class ModelPanel1D(PlotPanel, PanelBase):
         if self.parent is not None:
             self.parent.hide_panel(self.uid)
 
+    def on_close(self, event):
+        """
+        On Close Event
+        """
+        ID = self.uid
+        self.parent.delete_panel(ID)
+    
     def createAppDialog(self, event):
         """
         Create the custom dialog for fit appearance modification
@@ -858,12 +870,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
                         self.get_symbol_label()[info[2]] 
             self.appearance_selected_plot.label = str(info[3])
 
-            pos = self.parent._window_menu.FindItem(self.window_caption)
-            helpString = 'Show/Hide Graph: '
-            for plot in  self.plots.itervalues():
-                helpString += (' ' + str(plot.label) + ';')
-                self.parent._window_menu.SetHelpString(pos, helpString)
-                self._is_changed_legend_label = True
+            #pos = self.parent._window_menu.FindItem(self.window_caption)
+            #helpString = 'Show/Hide Graph: '
+            #for plot in  self.plots.itervalues():
+            #    helpString += (' ' + str(plot.label) + ';')
+            #    self.parent._window_menu.SetHelpString(pos, helpString)
+            #    self._is_changed_legend_label = True
                 
         self.appD.Destroy()
         self._check_zoom_plot()

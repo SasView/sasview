@@ -125,22 +125,22 @@ class StartupConfiguration(wx.Dialog):
         try:
             p_size = None
             for panel in self.parent.plot_panels.values():
-                p_panel = self.parent._mgr.GetPane(panel.window_name)
-                if p_panel.IsShown():
-                    if p_size == None or panel.size > p_size:
-                        p_size = panel.size
+                #p_panel = self.parent._mgr.GetPane(panel.window_name)
+                width, _ = panel.frame.GetSizeTuple()
+                if panel.frame.IsShown():
+                    if p_size == None or width > p_size:
+                        p_size = width
             if p_size == None:
                 p_size = CURRENT_STRINGS['PLOPANEL_WIDTH']
             self.current_string['PLOPANEL_WIDTH'] = p_size
             
-            data_pw, _ = self.parent.panels["data_panel"].GetSizeTuple()
+            data_pw, _ = self.parent.panels["data_panel"].frame.GetSizeTuple()
             if data_pw == None:
                 data_pw = CURRENT_STRINGS['DATAPANEL_WIDTH']
             self.current_string['DATAPANEL_WIDTH'] = data_pw
             
             #label = self.parent._data_panel_menu.GetText()
-            label = self.parent._mgr.GetPane(\
-                        self.parent.panels['data_panel'].window_name).IsShown()
+            label = self.parent.panels['data_panel'].frame.IsShown()
             if label:# == 'Hide Data Explorer':
                 self.current_string['DATALOADER_SHOW'] = True
             else:
@@ -157,7 +157,7 @@ class StartupConfiguration(wx.Dialog):
             else:
                 self.current_string['FIXED_PANEL'] = True
                 
-            if self.parent._mgr.GetPane(self.parent.panels['default'].window_name).IsShown():
+            if self.parent.panels['default'].frame.IsShown():
                 self.current_string['WELCOME_PANEL_SHOW'] = True
             else:
                 self.current_string['WELCOME_PANEL_SHOW'] = False
@@ -196,7 +196,6 @@ class StartupConfiguration(wx.Dialog):
         event.Skip()
         fname = os.path.join(self.path, 'custom_config.py')
         self.write_string(fname, self.return_string)
-    
         self.Destroy()
 
     def write_string(self, fname, strings):

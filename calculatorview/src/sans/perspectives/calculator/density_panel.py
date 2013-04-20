@@ -374,7 +374,8 @@ class DensityWindow(wx.Frame):
     """
     """
     def __init__(self, parent=None, title="Density/Volume Calculator",
-                  base=None, size=(PANEL_SIZE, PANEL_SIZE/1.7), *args, **kwds):
+                  base=None, manager=None, 
+                  size=(PANEL_SIZE, PANEL_SIZE/1.7), *args, **kwds):
         """
         """
         kwds['title'] = title
@@ -382,9 +383,20 @@ class DensityWindow(wx.Frame):
         wx.Frame.__init__(self, parent, *args, **kwds)
         """
         """
+        self.manager = manager
         self.panel = DensityPanel(self, base=base)
+        self.Bind(wx.EVT_CLOSE, self.on_close)
         self.Centre()
         self.Show(True)
+    
+    def on_close(self, event):
+        """
+        On close event
+        """
+        if self.manager != None:
+            self.manager.cal_md_frame = None
+        self.Destroy()
+        
         
 class ViewApp(wx.App):
     """

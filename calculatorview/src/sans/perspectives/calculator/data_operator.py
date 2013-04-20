@@ -614,6 +614,15 @@ class DataOperPanel(wx.ScrolledWindow):
         #must post event here
         event.Skip()
     
+    def disconnect_panels(self):
+        """
+        """
+        self.out_pic.connect.disconnect()
+        self.equal_pic.connect.disconnect()
+        self.data1_pic.connect.disconnect()
+        self.operator_pic.connect.disconnect()
+        self.data2_pic.connect.disconnect()
+    
     def on_close(self, event):
         """
         leave data as it is and close
@@ -925,10 +934,11 @@ class SmallPanel(PlotPanel):
         self.draw()
         
 class DataOperatorWindow(wx.Frame):
-    def __init__(self, parent, *args, **kwds):
+    def __init__(self, parent, manager, *args, **kwds):
         kwds["size"] = (PANEL_WIDTH, PANEL_HEIGTH)
         wx.Frame.__init__(self, parent, *args, **kwds)
         self.parent = parent
+        self.manager = manager
         self.panel = DataOperPanel(parent=self)
         wx.EVT_CLOSE(self, self.OnClose)
         self.CenterOnParent()
@@ -938,7 +948,10 @@ class DataOperatorWindow(wx.Frame):
         """
         On close event
         """
-        self.Show(False)
+        if self.manager != None:
+            self.manager.data_operator_frame = None
+        self.panel.disconnect_panels()
+        self.Destroy()
 
         
 if __name__ == "__main__":

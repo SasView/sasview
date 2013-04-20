@@ -69,6 +69,8 @@ class ImageView:
                 if parent != None:
                     parent.put_icon(plot_frame)
             except:
+                print "parent", parent
+                raise
                 err_msg += "Failed to load '%s'.\n"% basename
         if err_msg:
             if parent is not None:

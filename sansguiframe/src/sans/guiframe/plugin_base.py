@@ -40,6 +40,7 @@ class PluginBase:
         self.standalone = standalone
         ## Reference to the parent window. Filled by get_panels() below.
         self.parent = None
+        self.frame = None
         #plugin state reader
         self.state_reader = None 
         self._extensions = ''
@@ -144,6 +145,20 @@ class PluginBase:
         """
         return []
     
+    def get_frame(self):
+        """
+        Returns MDIChildFrame
+        """
+        return self.frame
+
+    def _frame_set_helper(self):
+        """
+        Sets default frame config
+        """
+        if self.frame != None:
+            self.frame.EnableCloseButton(False)
+            self.frame.Show(False)
+    
     def get_panels(self, parent):
         """
         Create and return the list of wx.Panels for your plug-in.
@@ -211,9 +226,21 @@ class PluginBase:
         :param event: menu event
         
         """
+        old_frame = None
+        tool_height = self.parent.get_toolbar_height()
+        old_persp = self.parent.get_current_perspective()
+        if old_persp != None:
+            old_frame = old_persp.get_frame()
         self.parent.check_multimode(self)
         self.parent.set_current_perspective(self)
         self.parent.set_perspective(self.perspective)
+        
+        if self.frame != None:
+            if old_frame != None:
+                pos_x, pos_y = old_frame.GetPositionTuple()
+                self.frame.SetPosition((pos_x, pos_y - tool_height))
+            if not self.frame.IsShown():
+                self.frame.Show(True)
         
         
     def set_batch_selection(self, flag):

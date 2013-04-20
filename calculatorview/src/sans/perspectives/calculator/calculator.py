@@ -11,9 +11,20 @@ Calculator Module
 #copyright 2010, University of Tennessee
 ################################################################################
 
-
+import wx
 from sans.guiframe.plugin_base import PluginBase
 from sans.perspectives.calculator.data_operator import DataOperatorWindow
+from sans.perspectives.calculator.data_editor import DataEditorWindow
+from sans.perspectives.calculator.kiessig_calculator_panel import KiessigWindow
+from sans.perspectives.calculator.sld_panel import SldWindow
+from sans.perspectives.calculator.density_panel import DensityWindow
+from sans.perspectives.calculator.slit_length_calculator_panel \
+            import SlitLengthCalculatorWindow
+from sans.perspectives.calculator.resolution_calculator_panel \
+            import ResolutionWindow
+from sans.perspectives.calculator.gen_scatter_panel import SasGenWindow
+from sans.perspectives.calculator.image_viewer import ImageView
+from sans.perspectives.calculator.pyconsole import PyConsole
 import logging
 
 class Plugin(PluginBase):
@@ -26,8 +37,18 @@ class Plugin(PluginBase):
         # Log startup
         logging.info("Calculator plug-in started")   
         self.sub_menu = "Tool" 
+        self.data_edit_frame = None
         # data operator use one frame all the time
         self.data_operator_frame = None
+        self.kiessig_frame = None
+        self.sld_frame = None
+        self.cal_md_frame = None
+        self.cal_slit_frame = None
+        self.cal_res_frame = None
+        self.gen_frame = None
+        self.image_view = None
+        self.py_frame = None
+        
         
     def help(self, evt):
         """
@@ -87,11 +108,13 @@ class Plugin(PluginBase):
         """
         Edit meta data 
         """
-        from sans.perspectives.calculator.data_editor import DataEditorWindow
-        frame = DataEditorWindow(parent=self.parent, data=[],
-                                  title="Data Editor")
-        self.put_icon(frame)
-        frame.Show(True)
+        if self.data_edit_frame == None:
+            self.data_edit_frame = DataEditorWindow(parent=self.parent, 
+                                                    manager=self, data=[],
+                                                    title="Data Editor")
+            self.put_icon(self.data_edit_frame)
+        self.data_edit_frame.Show(False)    
+        self.data_edit_frame.Show(True)
               
     def on_data_operation(self, event):
         """
@@ -100,6 +123,7 @@ class Plugin(PluginBase):
         if self.data_operator_frame == None:
             # Use one frame all the time
             self.data_operator_frame = DataOperatorWindow(parent=self.parent, 
+                                                manager=self, 
                                                 title="Data Operation")
             self.put_icon(self.data_operator_frame)
         self.data_operator_frame.Show(False)
@@ -110,59 +134,67 @@ class Plugin(PluginBase):
         """
         Compute the Kiessig thickness
         """
-        from sans.perspectives.calculator.kiessig_calculator_panel \
-        import KiessigWindow
-        frame = KiessigWindow()
-        self.put_icon(frame)
-        frame.Show(True) 
-    
+        if self.kiessig_frame == None:
+            frame = KiessigWindow(parent=self.parent, manager=self)
+            self.put_icon(frame)
+            self.kiessig_frame = frame
+        self.kiessig_frame.Show(False)
+        self.kiessig_frame.Show(True) 
+        
     def on_calculate_sld(self, event):
         """
         Compute the scattering length density of molecula
         """
-        from sans.perspectives.calculator.sld_panel import SldWindow
-        frame = SldWindow(base=self.parent)
-        self.put_icon(frame)
-        frame.Show(True) 
+        if self.sld_frame == None:
+            frame = SldWindow(base=self.parent, manager=self)
+            self.put_icon(frame)
+            self.sld_frame = frame
+        self.sld_frame.Show(False)
+        self.sld_frame.Show(True) 
     
     def on_calculate_dv(self, event):
         """
         Compute the mass density or molar voulme
         """
-        from sans.perspectives.calculator.density_panel import DensityWindow
-        frame = DensityWindow(base=self.parent)
-        self.put_icon(frame)
-        frame.Show(True) 
+        if self.cal_md_frame == None:
+            frame = DensityWindow(base=self.parent, manager=self)
+            self.put_icon(frame)
+            self.cal_md_frame = frame
+        self.cal_md_frame.Show(False)
+        self.cal_md_frame.Show(True) 
               
     def on_calculate_slit_size(self, event):
         """
         Compute the slit size a given data
         """
-        from sans.perspectives.calculator.slit_length_calculator_panel \
-        import SlitLengthCalculatorWindow
-        frame = SlitLengthCalculatorWindow(parent=self.parent)  
-        self.put_icon(frame)  
-        frame.Show(True)
+        if self.cal_slit_frame == None:
+            frame = SlitLengthCalculatorWindow(parent=self.parent, manager=self)  
+            self.put_icon(frame)
+            self.cal_slit_frame = frame 
+        self.cal_slit_frame.Show(False)     
+        self.cal_slit_frame.Show(True)
         
     def on_calculate_resoltuion(self, event):
         """
         Estimate the instrumental resolution
         """
-        from sans.perspectives.calculator.resolution_calculator_panel \
-        import ResolutionWindow
-        frame = ResolutionWindow(parent=self.parent)
-        self.put_icon(frame)
-        frame.Show(True) 
+        if self.cal_res_frame == None:
+            frame = ResolutionWindow(parent=self.parent, manager=self)
+            self.put_icon(frame)
+            self.cal_res_frame = frame
+        self.cal_res_frame.Show(False)
+        self.cal_res_frame.Show(True) 
         
     def on_gen_model(self, event):
         """
         On Generic model menu event
         """
-        from sans.perspectives.calculator.gen_scatter_panel \
-        import SasGenWindow
-        frame = SasGenWindow(parent=self.parent)
-        self.put_icon(frame)
-        frame.Show(True) 
+        if self.gen_frame == None:
+            frame = SasGenWindow(parent=self.parent, manager=self)
+            self.put_icon(frame)
+            self.gen_frame = frame
+        self.gen_frame.Show(False)
+        self.gen_frame.Show(True) 
 
     def on_image_viewer(self, event):
         """
@@ -170,9 +202,8 @@ class Plugin(PluginBase):
         
         :param event: menu event
         """
-        from sans.perspectives.calculator.image_viewer import ImageView
-        image_view = ImageView(parent=self.parent)
-        image_view.load()
+        self.image_view = ImageView(parent=self.parent)
+        self.image_view.load()
         
     def on_python_console(self, event):
         """
@@ -188,10 +219,13 @@ class Plugin(PluginBase):
         
         :param filename: file name to open in editor
         """
-        from sans.perspectives.calculator.pyconsole import PyConsole
-        frame = PyConsole(parent=self.parent, filename=filename)
-        self.put_icon(frame)
-        frame.Show(True) 
+        if self.py_frame == None:
+            frame = PyConsole(parent=self.parent, base=self, 
+                              filename=filename)
+            self.put_icon(frame)
+            self.py_frame = frame
+        self.py_frame.Show(False)
+        self.py_frame.Show(True) 
         
     def put_icon(self, frame):
         """

@@ -39,7 +39,7 @@ class PyConsole(editor.EditorNotebookFrame):
     window_caption = "Custom Model Editor"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = False
-    def __init__(self, parent=None, manager=None, panel=None,
+    def __init__(self, parent=None, base=None, manager=None, panel=None,
                     title='Python Shell/Editor', filename=None,
                     size=(PANEL_WIDTH, PANEL_HEIGHT)):
         self.config = None
@@ -48,6 +48,7 @@ class PyConsole(editor.EditorNotebookFrame):
                                         filename=filename)
         self.parent = parent
         self._manager = manager
+        self.base = base
         self.panel = panel
         self._add_menu()
         if filename != None:
@@ -67,6 +68,7 @@ class PyConsole(editor.EditorNotebookFrame):
         self.Bind(wx.EVT_MENU, self.OnRun, id=ID_RUN)
         self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateCompileMenu, id=ID_COMPILE)
         self.Bind(wx.EVT_UPDATE_UI, self.OnUpdateCompileMenu, id=ID_RUN)
+        self.Bind(wx.EVT_CLOSE, self.on_close)
         if not title.count('Python Shell'):
             # Delete menu item (open and new) if not python shell
             #self.fileMenu.Delete(wx.ID_NEW)
@@ -292,6 +294,14 @@ class PyConsole(editor.EditorNotebookFrame):
             # This menu option is not supported in the current context.
             event.Enable(False)
             
+    def on_close(self, event):
+        """
+        Close event
+        """
+        if self.base != None:
+            self.base.py_frame = None
+        self.Destroy()
+                    
 ABOUT =  "Welcome to Python %s! \n\n"% sys.version.split()[0]
 ABOUT += "This uses Py Shell/Editor in wx (developed by Patrick K. O'Brien).\n"
 ABOUT += "If this is your first time using Python, \n"

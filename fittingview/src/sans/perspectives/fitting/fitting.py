@@ -40,6 +40,7 @@ from .pagestate import Reader
 from .fitpage import Chi2UpdateEvent
 from sans.perspectives.calculator.model_editor import TextDialog
 from sans.perspectives.calculator.model_editor import EditorWindow
+from sans.guiframe.gui_manager import MDIFrame
 
 MAX_NBR_DATA = 4
 SANS_F_TOL = 5e-05
@@ -426,7 +427,7 @@ class Plugin(PluginBase):
             page.Show(True)
             page.Refresh()
             page.SetFocus()
-            self.parent._mgr.Update()
+            #self.parent._mgr.Update()
             msg = "%s already opened\n" % str(page.window_caption)
             wx.PostEvent(self.parent, StatusEvent(status=msg))
             
@@ -499,7 +500,10 @@ class Plugin(PluginBase):
         self.parent = parent
         #self.parent.Bind(EVT_FITSTATE_UPDATE, self.on_set_state_helper)
         # Creation of the fit panel
-        self.fit_panel = FitPanel(parent=self.parent, manager=self)
+        self.frame = MDIFrame(self.parent, None, 'None', (100, 200))
+        self.fit_panel = FitPanel(parent=self.frame, manager=self)
+        self.frame.set_panel(self.fit_panel)
+        self._frame_set_helper()
         self.on_add_new_page(event=None)
         #Set the manager for the main panel
         self.fit_panel.set_manager(self)
@@ -512,7 +516,7 @@ class Plugin(PluginBase):
         self.index_theory = 0
         self.parent.Bind(EVT_SLICER_PANEL, self._on_slicer_event)
         self.parent.Bind(EVT_SLICER_PARS_UPDATE, self._onEVT_SLICER_PANEL)
-        self.parent._mgr.Bind(wx.aui.EVT_AUI_PANE_CLOSE,self._onclearslicer)
+        #self.parent._mgr.Bind(wx.aui.EVT_AUI_PANE_CLOSE,self._onclearslicer)
         #Create reader when fitting panel are created
         self.state_reader = Reader(self.set_state)
         #append that reader to list of available reader
@@ -576,14 +580,6 @@ class Plugin(PluginBase):
                 msg = "Fitting Set_data: " + str(sys.exc_value)
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
     
-    def set_top_panel(self):
-        """
-        Close default (welcome) panel
-        """
-        if 'default' in self.parent.panels:
-            self.parent.on_close_welcome_panel()
-
-        
     def set_theory(self, theory_list=None):
         """
         """
@@ -1167,7 +1163,6 @@ class Plugin(PluginBase):
                 msg = "Page was already Created"
                 wx.PostEvent(self.parent, StatusEvent(status=msg,
                                                        info="warning"))
-            self.set_top_panel()
         except:
             msg = "Creating Fit page: %s"%sys.exc_value
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="error"))
@@ -1223,12 +1218,13 @@ class Plugin(PluginBase):
         :param event: contains type of slicer , paramaters for updating
             the panel and panel_name to find the slicer 's panel concerned.
         """
+        event.panel_name
         for item in self.parent.panels:
             name = event.panel_name
             if self.parent.panels[item].window_caption.startswith(name):
                 self.parent.panels[item].set_slicer(event.type, event.params)
                 
-        self.parent._mgr.Update()
+        #self.parent._mgr.Update()
    
     def _closed_fitpage(self, event):
         """
@@ -1307,7 +1303,6 @@ class Plugin(PluginBase):
             else:
                 data = plottable
                 self.add_fit_page(data=[data])
-        self.set_top_panel()
             
     def update_fit(self, result=None, msg=""):
         """
@@ -1688,16 +1683,16 @@ class Plugin(PluginBase):
             new_panel = event.panel
             self.slicer_panels.append(event.panel)
             # Set group ID if available
-            event_id = self.parent.popup_panel(new_panel)
-            new_panel.uid = event_id
-            self.mypanels.append(new_panel)
+            event_id = self.parent.popup_panel(event.panel)
+            event.panel.uid = event_id
+            self.mypanels.append(event.panel)
        
     def _onclearslicer(self, event):
         """
         Clear the boxslicer when close the panel associate with this slicer
         """
-        name = event.GetPane().caption
-    
+        name = event.GetEventObject().frame.GetTitle()
+        print "name", name
         for panel in self.slicer_panels:
             if panel.window_caption == name:
                 
@@ -1705,7 +1700,7 @@ class Plugin(PluginBase):
                     if hasattr(self.parent.panels[item], "uid"):
                         if self.parent.panels[item].uid == panel.base.uid:
                             self.parent.panels[item].onClearSlicer(event)
-                            self.parent._mgr.Update()
+                            #self.parent._mgr.Update()
                             break
                 break
     

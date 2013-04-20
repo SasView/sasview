@@ -190,15 +190,27 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
         self.on_compute(event)
              
 class KiessigWindow(wx.Frame):
-    def __init__(self, parent=None, title="Kiessig Thickness Calculator",
-                  size=(PANEL_WIDTH,PANEL_HEIGHT), *args, **kwds):
+    def __init__(self, parent=None, manager=None, 
+                 title="Kiessig Thickness Calculator",
+                 size=(PANEL_WIDTH,PANEL_HEIGHT), *args, **kwds):
         kwds['title'] = title
         kwds['size'] = size
         wx.Frame.__init__(self, parent, *args, **kwds)
         self.parent = parent
+        self.manager = manager
         self.panel = KiessigThicknessCalculatorPanel(parent=self)
+        self.Bind(wx.EVT_CLOSE, self.on_close)
         self.Centre()
         self.Show(True)
+        
+    def on_close(self, event):
+        """
+        Close event
+        """
+        if self.manager != None:
+            self.manager.kiessig_frame = None
+        self.Destroy()
+
         
 if __name__ == "__main__": 
     app = wx.PySimpleApp()

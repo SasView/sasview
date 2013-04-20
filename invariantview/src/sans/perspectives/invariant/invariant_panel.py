@@ -70,7 +70,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
         #Object that receive status event
-        self.parent = parent
+        self.parent = parent.parent
         #plug-in using this panel
         self._manager = manager 
         #Data uses for computation
@@ -645,7 +645,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                                                   info="warning",
                                                   type="stop"))
             return
-        self.Show(False)
+        #self.Show(False)
         r_msg = ''
         try:
             r_msg = 'Low Q: '
@@ -711,7 +711,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             self._set_save_flag(True)
             wx.PostEvent(self.parent,
                 StatusEvent(status='\nFinished invariant computation...'))
-        self.Show(True)
+        #self.Show(True)
         self.Refresh()
             
     def on_undo(self, event=None):

@@ -36,7 +36,8 @@ class WelcomePanel(wx.aui.AuiNotebook, PanelBase):
         wx.aui.AuiNotebook.__init__(self, parent, *args, **kwds)
         PanelBase.__init__(self)
         #For sasview the parent is guiframe
-        self.parent = parent
+        self.parent = parent.parent
+        self.frame = None
        
         welcome_page = WelcomePage(self)
         self.AddPage(page=welcome_page, caption="Welcome")
@@ -62,6 +63,18 @@ class WelcomePanel(wx.aui.AuiNotebook, PanelBase):
         """
         """
         pass
+    
+    def set_frame(self, frame):
+        """
+        """
+        self.frame = frame
+        if frame != None:
+            self.frame.Bind(wx.EVT_CLOSE, self.on_close_page)
+    
+    def get_frame(self):
+        """
+        """
+        return self.frame
     
     
 class WelcomePage(ScrolledPanel):

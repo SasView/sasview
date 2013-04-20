@@ -16,7 +16,7 @@ import sys
 import wx
 import copy
 import logging
-
+from sans.guiframe.gui_manager import MDIFrame
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.events import StatusEvent
@@ -82,7 +82,10 @@ class Plugin(PluginBase):
         """
         ## Save a reference to the parent
         self.parent = parent
-        self.invariant_panel = InvariantPanel(parent=self.parent)
+        self.frame = MDIFrame(self.parent, None, 'None', (100, 200))     
+        self.invariant_panel = InvariantPanel(parent=self.frame)        
+        self.frame.set_panel(self.invariant_panel)
+        self._frame_set_helper()
         self.invariant_panel.set_manager(manager=self)
         self.perspective.append(self.invariant_panel.window_name)  
         #Create reader when fitting panel are created

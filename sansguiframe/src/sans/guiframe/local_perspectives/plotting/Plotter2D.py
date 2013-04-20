@@ -105,9 +105,10 @@ class ModelPanel2D(ModelPanel1D):
         Initialize the panel
         """
         ModelPanel1D.__init__(self, parent, id=id, style=style, **kwargs)
-        
-        ## Reference to the parent window
         self.parent = parent
+        ## Reference to the parent window
+        if hasattr(parent, "parent"):
+            self.parent = self.parent.parent
         ## Dictionary containing Plottables
         self.plots = {}
         ## Save reference of the current plotted 
@@ -246,10 +247,10 @@ class ModelPanel2D(ModelPanel1D):
                                    color=self.title_color)
             self.subplot.figure.canvas.draw_idle()    
         # Update Graph menu and help string        
-        pos = self.parent._window_menu.FindItem(self.window_caption)
+        #pos = self.parent._window_menu.FindItem(self.window_caption)
         helpString = 'Show/Hide Graph: '
         helpString += (' ' + str(data.label) +';')
-        self.parent._window_menu.SetHelpString(pos, helpString)
+        #self.parent._window_menu.SetHelpString(pos, helpString)
         ## store default value of zmin and zmax 
         self.default_zmin_ctl = self.zmin_2D
         self.default_zmax_ctl = self.zmax_2D
@@ -466,10 +467,10 @@ class ModelPanel2D(ModelPanel1D):
         
         # Update Graph menu and help string 
         if self.title_label != None:     
-            pos = self.parent._window_menu.FindItem(self.window_caption)
+            #pos = self.parent._window_menu.FindItem(self.window_caption)
             helpString = 'Show/Hide Graph: '
             helpString += (' ' + str(self.title_label) +';')
-            self.parent._window_menu.SetHelpString(pos, helpString)
+            #self.parent._window_menu.SetHelpString(pos, helpString)
 
         
     def _onEditDetector(self, event):
@@ -690,6 +691,7 @@ class ModelPanel2D(ModelPanel1D):
     def onBoxSum(self, event):
         """
         """
+        from sans.guiframe.gui_manager import MDIFrame
         from boxSum import BoxSum
         self.onClearSlicer(event)
         self.slicer_z += 1
@@ -703,7 +705,8 @@ class ModelPanel2D(ModelPanel1D):
         params = self.slicer.get_params()
         ## Create a new panel to display results of summation of Data2D
         from slicerpanel import SlicerPanel
-        new_panel = SlicerPanel(parent=self.parent, id=-1,
+        win = MDIFrame(self.parent, None, 'None', (100, 200))
+        new_panel = SlicerPanel(parent=win, id=-1,
                                     base=self, type=type,
                                     params=params, style=wx.RAISED_BORDER)
         
@@ -712,14 +715,19 @@ class ModelPanel2D(ModelPanel1D):
         new_panel.window_name = self.slicer.__class__.__name__+ " " + \
                                     str(self.data2D.name)
         ## Store a reference of the new created panel
-        self.panel_slicer = new_panel
+        
         ## save the window_caption of the new panel in the current slicer
         self.slicer.set_panel_name(name=new_panel.window_caption)
         ## post slicer panel to guiframe to display it 
         from sans.guiframe.events import SlicerPanelEvent
-        wx.PostEvent(self.parent, SlicerPanelEvent(panel=self.panel_slicer,
+        
+        win.set_panel(new_panel)
+        new_panel.frame = win
+        wx.PostEvent(self.parent, SlicerPanelEvent(panel=new_panel,
                                                     main_panel=self))
-
+        wx.CallAfter(new_panel.frame.Show)
+        self.panel_slicer = new_panel
+        
     def onBoxavgX(self,event):
         """
         Perform 2D data averaging on Qx

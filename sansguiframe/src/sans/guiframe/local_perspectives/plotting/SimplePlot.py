@@ -20,6 +20,7 @@ class SimplePlotPanel(PlotPanel):
         Init
         """
         PlotPanel.__init__(self, parent, id=id, style=style, **kwargs)
+
         self.SetColor(wx.WHITE)
         
         self.toolbar = NavigationToolBar(parent=self, canvas=self.canvas)
@@ -197,8 +198,7 @@ class PlotFrame(wx.Frame):
         :param parent: parent panel/container
         """
         # Initialize the Frame object
-        wx.Frame.__init__(self, parent, id, title,
-                          wx.DefaultPosition, size)
+        wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, size)
         
         # Panel for 1D plot
         self.parent = parent
