@@ -197,7 +197,7 @@ PARENT_STYLE = wx.DEFAULT_FRAME_STYLE
 if sys.platform.count("darwin") > 0:
     IS_WIN = False
     TIME_FACTOR = 2
-    PARENT_STYLE = wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP
+    PARENT_STYLE = wx.DEFAULT_FRAME_STYLE #| wx.STAY_ON_TOP
     if int(str(wx.__version__).split('.')[0]) == 2:
         if int(str(wx.__version__).split('.')[1]) < 9:
             CLOSE_SHOW = False
@@ -978,6 +978,9 @@ class ViewerFrame(wx.MDIParentFrame):
         w, h = self._get_panels_size(self.defaultPanel)
         frame = self.defaultPanel.get_frame()
         frame.SetSize((self._window_width, self._window_height))
+        if not IS_WIN:
+            x_pos, _ = frame.GetPositionTuple()
+            frame.SetPosition((x_pos, mac_pos_y + 75))
         frame.Show(True)
         #add data panel 
         
@@ -1016,7 +1019,7 @@ class ViewerFrame(wx.MDIParentFrame):
                 frame.Show(False)
             if not IS_WIN:
                 x_pos, _ = frame.GetPositionTuple()
-                frame.SetPosition((x_pos, mac_pos_y + 50))
+                frame.SetPosition((x_pos, mac_pos_y + 75))
 
         if not IS_WIN:
             self.SetSize((self._window_width, mac_pos_y))
@@ -1164,39 +1167,10 @@ class ViewerFrame(wx.MDIParentFrame):
         
         p.frame.SetTitle(p.window_caption)
         p.frame.name = p.window_name
+        if not IS_WIN:
+            p.frame.Center()
         p.frame.Show(True)
-        #if p not in self.schedule_full_draw_list:
-        #    self.schedule_full_draw_list.append(p)
-        """
-        if style1 == GUIFRAME.FIXED_PANEL:
-            self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
-                              Name(p.window_name).
-                              Caption(p.window_caption).
-                              Position(10).
-                              Floatable().
-                              Right().
-                              Dock().
-                              MinimizeButton(True).MaximizeButton(True).
-                              Resizable(True).
-                              # Use a large best size to make sure the AUI 
-                              # manager takes all the available space
-                              BestSize(wx.Size(p_panel_width, 
-                                               p_panel_height)))
-            self._popup_fixed_panel(p)
-        elif style2 == GUIFRAME.FLOATING_PANEL:
-            self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
-                              Name(p.window_name).Caption(p.window_caption).
-                              MinimizeButton(True).MaximizeButton(True).
-                              Resizable(True).
-                              # Use a large best size to make sure the AUI
-                              #  manager takes all the available space
-                              BestSize(wx.Size(p_panel_width, 
-                                               p_panel_height)))
-            
-            self._popup_floating_panel(p)
-        """
-        # Register for closing of panels
-        #self.Bind(wx.aui.EVT_AUI_PANE_CLOSE, self.on_panel_close)
+
         # Register for showing/hiding the panel
         wx.EVT_MENU(self, ID, self.on_view)
         if p not in self.plot_panels.values() and p.group_id != None:
