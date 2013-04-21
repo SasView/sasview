@@ -16,10 +16,12 @@ from sans.dataloader.data_info import Data2D
 from sans.dataloader.data_info import Detector
 from sans.dataloader.manipulations import reader2D_converter
 _BOX_WIDTH = 60
+IS_WIN = True
 if sys.platform.count("win32") > 0:
     _DIALOG_WIDTH = 400
 else:
     _DIALOG_WIDTH = 480
+    IS_WIN = False
 
 class ImageView:
     """
@@ -90,12 +92,15 @@ class ImageView:
         wlist = ''
         elist = ["All images (*.png, *.bmp, *.gif, *.jpg, *.tif, *.tiff) | \
                 *.png; *.bmp; *.gif; *.jpg; *.tif; *.tiff", 
-                "PNG files (*.png) | *.png", 
-                "BMP files (*.bmp) | *.bmp", 
-                "GIF files (*.gif) | *.gif",
-                "JPG files (*.jpg) | *.jpg",
-                "TIF files (*.tif) | *.tif",
-                "TIFF files (*.tiff) | *.tiff"]
+                "PNG files (*.PNG, *.png) | *.png", 
+                "BMP files (*.BMP, *.bmp) | *.bmp", 
+                "GIF files (*.GIF, *.gif) | *.gif",
+                "JPG files (*.JPG, *.jpg) | *.jpg",
+                "TIF files (*.TIF, *.tif) | *.tif",
+                "TIFF files (*.TIFF, *.tiff) | *.tiff"]
+        if not IS_WIN:
+            del elist[0]
+        elist.append("All files (*.*) | *.*")
         wlist = '|'.join(elist)        
         style = wx.OPEN|wx.FD_MULTIPLE
         dlg = wx.FileDialog(parent, "Image Viewer: Choose a image file", 
