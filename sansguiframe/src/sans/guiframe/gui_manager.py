@@ -786,14 +786,9 @@ class ViewerFrame(wx.MDIParentFrame):
         from sans.guiframe.gui_statusbar import StatusBar
         self.sb = StatusBar(self, wx.ID_ANY)
         self.SetStatusBar(self.sb)
-        # Add panel
-        #default_flag = wx.aui.AUI_MGR_DEFAULT#| wx.aui.AUI_MGR_ALLOW_ACTIVE_PANE
-        #self._mgr = wx.aui.AuiManager(self, flags=default_flag)
-        #self._mgr.SetDockSizeConstraint(0.5, 0.5)
         # Load panels
         self._load_panels()
         self.set_default_perspective()
-        #self._mgr.Update()
         
     def SetStatusText(self, *args, **kwds):
         """
@@ -934,7 +929,6 @@ class ViewerFrame(wx.MDIParentFrame):
         self.defaultPanel = panel_class(win, -1, style=wx.RAISED_BORDER)
         win.set_panel(self.defaultPanel)
         self.defaultPanel.set_frame(win)
-        #win.EnableCloseButton(False)
         win.Show(False)
         
     def _get_panels_size(self, p):
@@ -3495,12 +3489,7 @@ class MDIFrame(wx.MDIChildFrame):
         """
         On Close event
         """
-        #event.Skip()
         self.panel.on_close(event)
-        #self.parent.delete_panel(event)
-        #self.DestroyChildren()
-        #self.panel = None
-        #wx.CallAfter(self.Destroy)
         
 if __name__ == "__main__": 
     app = ViewApp(0)
