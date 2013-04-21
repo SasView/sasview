@@ -193,9 +193,11 @@ IS_WIN = True
 CLOSE_SHOW = True
 TIME_FACTOR = 2
 NOT_SO_GRAPH_LIST = ["BoxSum"]
+PARENT_STYLE = wx.DEFAULT_FRAME_STYLE
 if sys.platform.count("darwin") > 0:
     IS_WIN = False
     TIME_FACTOR = 2
+    PARENT_STYLE = wx.DEFAULT_FRAME_STYLE | wx.STAY_ON_TOP
     if int(str(wx.__version__).split('.')[0]) == 2:
         if int(str(wx.__version__).split('.')[1]) < 9:
             CLOSE_SHOW = False
@@ -208,7 +210,7 @@ class ViewerFrame(wx.MDIParentFrame):
     def __init__(self, parent, title, 
                  size=(GUIFRAME_WIDTH, GUIFRAME_HEIGHT),
                  gui_style=DEFAULT_STYLE, 
-                 style=wx.DEFAULT_FRAME_STYLE,
+                 style=PARENT_STYLE,
                  pos=wx.DefaultPosition):
         """
         Initialize the Frame object
@@ -1052,8 +1054,14 @@ class ViewerFrame(wx.MDIParentFrame):
                                   MinimizeButton().
                                   Hide())        
                 """
+            if not IS_WIN:
+                x_pos, _ = frame.GetPositionTuple()
+                _, y_size = self.GetSizeTuple()
+                frame.SetPosition((x_pos, y_size))
         #if frame != None:
         #    frame.EnableCloseButton(False)
+        if not IS_WIN:
+            self.SetSize((self._window_width, 5))
         
     def update_data(self, prev_data, new_data):
         """
@@ -3419,9 +3427,6 @@ class ViewApp(wx.App):
             else:
                 posX = (displayWidth - customWidth)/2
                 posY = (displayHeight - customHeight)/2
-        else:
-            customHeight = 80
-            is_maximized = False
         # Return the suggested position and size for the application frame.    
         return (posX, posY), (customWidth, customHeight), is_maximized
 
