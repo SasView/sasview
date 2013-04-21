@@ -989,12 +989,11 @@ class ViewerFrame(wx.MDIParentFrame):
         #win.EnableCloseButton(False)
         data_panel = DataPanel(parent=win,  id=-1)
         win.set_panel(data_panel)
-        data_panel.set_frame(win)
+        #data_panel.set_frame(win)
         self.panels["data_panel"] = data_panel
         self._data_panel = data_panel
-        frame = self._data_panel.get_frame()
         w, h = self._get_panels_size(self._data_panel)
-        frame.SetSize((w, h))
+        win.SetSize((w, h))
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style != GUIFRAME.MANAGER_ON:
             flag = False
@@ -1002,8 +1001,8 @@ class ViewerFrame(wx.MDIParentFrame):
             flag = True
         if not IS_WIN:
             x_pos, _ = win.GetPositionTuple()
-            frame.SetPosition((x_pos, mac_pos_y + 70))
-        frame.Show(flag)
+            win.SetPosition((x_pos, mac_pos_y + 70))
+        win.Show(flag)
         d_panel_width = w
         # Add the panels to the AUI manager
         for panel_class in panels:
@@ -1021,6 +1020,7 @@ class ViewerFrame(wx.MDIParentFrame):
                     frame.SetSize((w, h))
                     frame.Show(False)
             elif panel_class == self._data_panel:
+                panel_class.frame.Show(flag)
                 continue
             else:
                 self.panels[str(id)] = panel_class

@@ -131,10 +131,10 @@ class DataPanel(ScrolledPanel, PanelBase):
                  size=(PANEL_WIDTH, PANEL_HEIGHT),
                  id=-1,
                  list_of_perspective=None, manager=None, *args, **kwds):
-        kwds['size'] = size
-        kwds['style'] = STYLE_FLAG
+        #kwds['size'] = size
+        #kwds['style'] = STYLE_FLAG
         ScrolledPanel.__init__(self, parent=parent, id=id, *args, **kwds)
-        PanelBase.__init__(self)
+        PanelBase.__init__(self, parent)
         self.SetupScrolling()
         #Set window's font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
@@ -144,7 +144,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.all_data1d = True
         self.parent = parent.parent
         self._manager = manager
-        self.frame = None
+        self.frame = parent
         if list is None:
             list = []
         self.list_of_data = list
