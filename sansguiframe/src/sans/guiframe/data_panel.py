@@ -1063,7 +1063,13 @@ class DataPanel(ScrolledPanel, PanelBase):
         """
         """
         return self.frame 
-
+    
+    def on_close(self, event):
+        """
+        On close event
+        """
+        self.parent.show_data_panel(event)
+                        
     def set_schedule_full_draw(self, panel=None, func='del'):
         """
         Send full draw to guimanager

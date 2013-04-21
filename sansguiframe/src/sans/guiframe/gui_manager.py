@@ -982,23 +982,9 @@ class ViewerFrame(wx.MDIParentFrame):
         # add a blank default panel always present 
         self.panels["default"] = self.defaultPanel
         w, h = self._get_panels_size(self.defaultPanel)
-        #win = MDIFrame(self, DefaultPanel, "default", 
-        #               (self._window_width, self._window_height))
-        #win.set_panel(self.defaultPanel)
-        #self.defaultPanel.set_frame(win)
         frame = self.defaultPanel.get_frame()
         frame.SetSize((self._window_width, self._window_height))
         frame.Show(True)
-        """
-        self._mgr.AddPane(self.defaultPanel, wx.aui.AuiPaneInfo().
-                              Name("default").
-                              CenterPane().
-                              # This is where we set the size of
-                              # the application window
-                              BestSize(wx.Size(self._window_width, 
-                                               self._window_height)).
-                              Show())
-        """
         #add data panel 
         
         w, h = self._get_panels_size(self._data_panel)
@@ -1036,10 +1022,10 @@ class ViewerFrame(wx.MDIParentFrame):
                 frame.Show(False)
             if not IS_WIN:
                 x_pos, _ = frame.GetPositionTuple()
-                frame.SetPosition((x_pos, mac_pos_y))
+                frame.SetPosition((x_pos, mac_pos_y + 50))
 
         if not IS_WIN:
-            self.SetSize((self._window_width, 40))
+            self.SetSize((self._window_width, mac_pos_y))
         
     def update_data(self, prev_data, new_data):
         """
