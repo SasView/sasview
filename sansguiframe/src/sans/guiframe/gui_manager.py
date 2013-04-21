@@ -216,7 +216,8 @@ class ViewerFrame(wx.MDIParentFrame):
         Initialize the Frame object
         """
 
-        wx.MDIParentFrame.__init__(self, parent=parent, title=title, pos=pos, size=size)
+        wx.MDIParentFrame.__init__(self, parent=parent, title=title, pos=pos, 
+                                   style=style, size=size)
         # title
         self.title = title
         self.__gui_style = gui_style       
@@ -966,7 +967,8 @@ class ViewerFrame(wx.MDIParentFrame):
         Load all panels in the panels directory
         """
         # Look for plug-in panels
-        panels = []    
+        panels = []  
+        mac_pos_y = 40  
         for item in self.plugins:
             if hasattr(item, "get_panels"):
                 ps = item.get_panels(self)
@@ -1001,6 +1003,7 @@ class ViewerFrame(wx.MDIParentFrame):
         
         w, h = self._get_panels_size(self._data_panel)
         win = MDIFrame(self, None, 'None', (w,h))
+        win.EnableCloseButton(False)
         self._data_panel = DataPanel(parent=win)
         win.set_panel(self._data_panel)
         self.panels["data_panel"] = self._data_panel
@@ -1010,7 +1013,6 @@ class ViewerFrame(wx.MDIParentFrame):
             flag = False
         else:
             flag = True
-        self._data_panel.frame.EnableCloseButton(False)
         win.Show(flag)
         d_panel_width = w
         # Add the panels to the AUI manager
@@ -1028,40 +1030,16 @@ class ViewerFrame(wx.MDIParentFrame):
                     frame.SetPosition((d_panel_width, pos_y))
                     frame.SetSize((w, h))
                     frame.Show(False)
-                    """
-                    self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
-                                          Name(p.window_name).
-                                          CenterPane().
-                                          Center().
-                                          CloseButton(False).
-                                          Hide())
-                    """
             else:
                 self.panels[str(id)] = panel_class
                 frame.SetSize((w, h))
                 frame.Show(False)
-                #win = MDIFrame(self, p, p.window_name, (w, h))
-                #win.set_panel(p)
-                """
-                self._mgr.AddPane(p, wx.aui.AuiPaneInfo().
-                                  Name(p.window_name).Caption(p.window_caption).
-                                  Right().
-                                  Dock().
-                                  TopDockable().
-                                  BottomDockable().
-                                  LeftDockable().
-                                  RightDockable().
-                                  MinimizeButton().
-                                  Hide())        
-                """
             if not IS_WIN:
                 x_pos, _ = frame.GetPositionTuple()
-                _, y_size = self.GetSizeTuple()
-                frame.SetPosition((x_pos, y_size))
-        #if frame != None:
-        #    frame.EnableCloseButton(False)
+                frame.SetPosition((x_pos, mac_pos_y))
+
         if not IS_WIN:
-            self.SetSize((self._window_width, 5))
+            self.SetSize((self._window_width, 40))
         
     def update_data(self, prev_data, new_data):
         """
