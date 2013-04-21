@@ -980,7 +980,7 @@ class ViewerFrame(wx.MDIParentFrame):
         frame.SetSize((self._window_width, self._window_height))
         if not IS_WIN:
             x_pos, _ = frame.GetPositionTuple()
-            frame.SetPosition((x_pos, mac_pos_y + 75))
+            frame.SetPosition((x_pos, mac_pos_y + 72))
         frame.Show(True)
         #add data panel 
         
@@ -996,6 +996,9 @@ class ViewerFrame(wx.MDIParentFrame):
             flag = False
         else:
             flag = True
+        if not IS_WIN:
+            x_pos, _ = frame.GetPositionTuple()
+            frame.SetPosition((x_pos, mac_pos_y + 72))
         win.Show(flag)
         d_panel_width = w
         # Add the panels to the AUI manager
@@ -1019,7 +1022,7 @@ class ViewerFrame(wx.MDIParentFrame):
                 frame.Show(False)
             if not IS_WIN:
                 x_pos, _ = frame.GetPositionTuple()
-                frame.SetPosition((x_pos, mac_pos_y + 75))
+                frame.SetPosition((x_pos, mac_pos_y + 72))
 
         if not IS_WIN:
             self.SetSize((self._window_width, mac_pos_y))
@@ -1169,6 +1172,8 @@ class ViewerFrame(wx.MDIParentFrame):
         p.frame.name = p.window_name
         if not IS_WIN:
             p.frame.Center()
+            x_pos, _ = p.frame.GetPositionTuple()
+            p.frame.SetPosition((x_pos, 112))
         p.frame.Show(True)
 
         # Register for showing/hiding the panel
