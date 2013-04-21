@@ -193,7 +193,7 @@ IS_WIN = True
 CLOSE_SHOW = True
 TIME_FACTOR = 2
 NOT_SO_GRAPH_LIST = ["BoxSum"]
-if sys.platform.count("win32")==0:
+if sys.platform.count("darwin") > 0:
     IS_WIN = False
     TIME_FACTOR = 2
     if int(str(wx.__version__).split('.')[0]) == 2:
@@ -1001,7 +1001,6 @@ class ViewerFrame(wx.MDIParentFrame):
         win = MDIFrame(self, None, 'None', (w,h))
         self._data_panel = DataPanel(parent=win)
         win.set_panel(self._data_panel)
-        win.EnableCloseButton(False)
         self.panels["data_panel"] = self._data_panel
         self._data_panel.set_frame(win)
         style = self.__gui_style & GUIFRAME.MANAGER_ON
@@ -1009,6 +1008,7 @@ class ViewerFrame(wx.MDIParentFrame):
             flag = False
         else:
             flag = True
+        self._data_panel.frame.EnableCloseButton(False)
         win.Show(flag)
         d_panel_width = w
         # Add the panels to the AUI manager
@@ -3247,6 +3247,8 @@ class ViewApp(wx.App):
                              gui_style = DEFAULT_STYLE,
                              size=size)
         self.frame.Hide()
+        if not IS_WIN:
+            self.frame.EnableCloseButton(False)
         self.s_screen = None
 
         try:
@@ -3417,7 +3419,9 @@ class ViewApp(wx.App):
             else:
                 posX = (displayWidth - customWidth)/2
                 posY = (displayHeight - customHeight)/2
-        
+        else:
+            customHeight = 80
+            is_maximized = False
         # Return the suggested position and size for the application frame.    
         return (posX, posY), (customWidth, customHeight), is_maximized
 
