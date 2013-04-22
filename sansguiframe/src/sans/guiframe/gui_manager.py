@@ -193,11 +193,9 @@ IS_WIN = True
 CLOSE_SHOW = True
 TIME_FACTOR = 2
 NOT_SO_GRAPH_LIST = ["BoxSum"]
-PARENT_STYLE = wx.DEFAULT_FRAME_STYLE
 if sys.platform.count("darwin") > 0:
     IS_WIN = False
     TIME_FACTOR = 2
-    PARENT_STYLE = wx.DEFAULT_FRAME_STYLE #| wx.STAY_ON_TOP
     if int(str(wx.__version__).split('.')[0]) == 2:
         if int(str(wx.__version__).split('.')[1]) < 9:
             CLOSE_SHOW = False
@@ -210,14 +208,13 @@ class ViewerFrame(wx.MDIParentFrame):
     def __init__(self, parent, title, 
                  size=(GUIFRAME_WIDTH, GUIFRAME_HEIGHT),
                  gui_style=DEFAULT_STYLE, 
-                 style=PARENT_STYLE,
+                 style=wx.DEFAULT_FRAME_STYLE,
                  pos=wx.DefaultPosition):
         """
         Initialize the Frame object
         """
 
-        wx.MDIParentFrame.__init__(self, parent=parent, title=title, pos=pos, 
-                                   style=style, size=size)
+        wx.MDIParentFrame.__init__(self, parent=parent, title=title, pos=pos, size=size)
         # title
         self.title = title
         self.__gui_style = gui_style       
