@@ -1,22 +1,22 @@
 Release Notes
 =============
 
-SasView 2.2.0
+SasView 3.0.0
+
+    - Implemented Polarization and magnetic SANS parameters in some models.
+    - New Tool: Generic SANS / PDB reader & atomic scattering calculator
+    - New Tool: Image viewer
+    - Use MDI frames in GUI
+
+	- Previous Versions: 
 	
 	- Changed the application name to 'SasView'.
 	- Model category can be modified via (Category Manager).
 	- Improved Grid/Batch window functionality.
-	- Easier Graph/Plot modification.
 	- Added a new tool; Data operation for addition, subtraction, multiplication, division, and combination of two data sets.
 	- Extended Sum Model Editor to Summation and Multiplication Editor.
-	- More options for 1d plot symbols.
 	- Better compiling error captures in the 'New' model editor.
 	- More outputs (e.g., Rg, background, or rod diameter) on LinearFit in certain axis scales.
-	- More models.
-	- Fixed many minor bugs.
-	
-	-version 2.1
-	
 	- Added DataInfo for data in the DataExplorer and plots
 	- Added Maximize/Restore button in the title bar of the graphs
 	- The 'x' button now works as deleting the graph
@@ -24,17 +24,12 @@ SasView 2.2.0
 	- Fixed some bugs and improved some behaviors in the batch/grid panel.
 	- Edit SUM Model from the menubar can now generate more than one sum model.
 	- Report can now be saved as a pdf format on WIN and MAC.
-		
 	- Multiprocessor support(Windows)
 	- Simple custom model editor
 	- Advanced model editor
 	- Sum model editing panel 
 	- 3D graphic (for 2d data/results) and legend moves with mouse
 	- New Tool: density to vol fraction calculator and Python file editor
-	
- 	- Previous Versions: 
-
-	- Release date: 10/21/2011
 	- Batch Fit included.
 	- More Graph modifications.
 	- More options for the fit weighting.
