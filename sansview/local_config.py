@@ -67,7 +67,7 @@ _danse_url = "http://www.cacr.caltech.edu/projects/danse/release/index.html"
 _inst_url = "http://www.utk.edu"
 _corner_image = os.path.join(icon_path, "angles_flat.png")
 _welcome_image = os.path.join(icon_path, "SVwelcome.png")
-_copyright = "(c) 2009 - 2012, UTK, UMD, NIST, ORNL, ISIS, ESS and ILL"
+_copyright = "(c) 2009 - 2013, UTK, UMD, NIST, ORNL, ISIS, ESS and ILL"
 
 
 #edit the list of file state your plugin can read
