@@ -1750,21 +1750,8 @@ class ViewerFrame(wx.MDIParentFrame):
         :param uid: unique ID number of the panel to show
         
         """
-        ID = str(uid)
-        config.printEVT("show_panel: %s" % ID)
-        if ID in self.panels.keys():
-            if not self.panels[ID].frame.IsShown(): 
-                if show == 'on':
-                    self.panels[ID].frame.Show()   
-                elif self.panels[ID].window_caption.split(" ")[0] == \
-                                                            "Residuals":
-                    self._mgr.GetPane(self.panels[ID].window_name).Hide()
-                else:
-                    self._mgr.GetPane(self.panels[ID].window_name).Show()
-                # Hide default panel
-                self._mgr.GetPane(self.panels["default"].window_name).Hide()
-        self._mgr.Update()     
-        self._redraw_idle()
+        #Not implemeted
+        return
         
     def load_state(self, path, is_project=False):   
         """
@@ -1782,9 +1769,6 @@ class ViewerFrame(wx.MDIParentFrame):
             wx.PostEvent(self, StatusEvent(status="Completed loading."))
         else:
             wx.PostEvent(self, StatusEvent(status=" "))
-        #if self.defaultPanel is not None and \
-        #    self._mgr.GetPane(self.panels["default"].window_name).IsShown():
-        #    self.on_close_welcome_panel()
             
     def load_data(self, path):
         """
@@ -1909,11 +1893,6 @@ class ViewerFrame(wx.MDIParentFrame):
             if path is not None:
                 self._default_save_location = os.path.dirname(path)
         dlg.Destroy()
-        
-        #try:   
-        #    os.popen(path)
-        #    #self.Close()
-        #except:
         
         self.load_state(path=path, is_project=True)
         
@@ -2870,7 +2849,7 @@ class ViewerFrame(wx.MDIParentFrame):
         :param new_caption: new caption [string]
         """
         # wx.aui.AuiPaneInfo
-        pane_info = self.get_paneinfo(name) 
+        pane_info = self.get_paneinfo(old_caption) 
         # update the data_panel.cb_plotpanel
         if 'data_panel' in self.panels.keys():
             # remove from data_panel combobox
@@ -2905,9 +2884,7 @@ class ViewerFrame(wx.MDIParentFrame):
                     self._window_menu.SetLabel(pos, caption)
                 break
         # New Caption
-        pane_info.Caption(caption)
-        # update aui manager
-        self._mgr.Update()
+        pane_info.SetTitle(caption)
         return caption
         
     def get_paneinfo(self, name):
@@ -2917,7 +2894,10 @@ class ViewerFrame(wx.MDIParentFrame):
         :param name: window_name in AuiPaneInfo
         : return: AuiPaneInfo of the name
         """
-        return None#self._mgr.GetPane(name) 
+        for panel in self.plot_panels.values():
+            if panel.frame.GetTitle() == name:
+                return panel.frame
+        return None
     
     def enable_undo(self):
         """
