@@ -112,7 +112,7 @@ class Plugin(PluginBase):
             self.data_edit_frame = DataEditorWindow(parent=self.parent, 
                                                     manager=self, data=[],
                                                     title="Data Editor")
-            #self.put_icon(self.data_edit_frame)
+            self.put_icon(self.data_edit_frame)
         else:
             self.data_edit_frame.Show(False)    
         self.data_edit_frame.Show(True)
@@ -126,7 +126,7 @@ class Plugin(PluginBase):
             self.data_operator_frame = DataOperatorWindow(parent=self.parent, 
                                                 manager=self, 
                                                 title="Data Operation")
-            #self.put_icon(self.data_operator_frame)
+            self.put_icon(self.data_operator_frame)
         else:
             self.data_operator_frame.Show(False)
         self.data_operator_frame.panel.set_panel_on_focus(None)
@@ -138,7 +138,7 @@ class Plugin(PluginBase):
         """
         if self.kiessig_frame == None:
             frame = KiessigWindow(parent=self.parent, manager=self)
-            #self.put_icon(frame)
+            self.put_icon(frame)
             self.kiessig_frame = frame
         else:
             self.kiessig_frame.Show(False)
@@ -151,7 +151,7 @@ class Plugin(PluginBase):
         if self.sld_frame == None:
             frame = SldWindow(parent=self.parent, 
                                   base=self.parent, manager=self)
-            #self.put_icon(frame)
+            self.put_icon(frame)
             self.sld_frame = frame
         else:
             self.sld_frame.Show(False)
@@ -164,7 +164,7 @@ class Plugin(PluginBase):
         if self.cal_md_frame == None:
             frame = DensityWindow(parent=self.parent, 
                                   base=self.parent, manager=self)
-            #self.put_icon(frame)
+            self.put_icon(frame)
             self.cal_md_frame = frame
         else:
             self.cal_md_frame.Show(False)
@@ -176,7 +176,7 @@ class Plugin(PluginBase):
         """
         if self.cal_slit_frame == None:
             frame = SlitLengthCalculatorWindow(parent=self.parent, manager=self)  
-            #self.put_icon(frame)
+            self.put_icon(frame)
             self.cal_slit_frame = frame 
         else:
             self.cal_slit_frame.Show(False)     
@@ -200,7 +200,7 @@ class Plugin(PluginBase):
         """
         if self.gen_frame == None:
             frame = SasGenWindow(parent=self.parent, manager=self)
-            #self.put_icon(frame)
+            self.put_icon(frame)
             self.gen_frame = frame
         else:
             self.gen_frame.Show(False)
