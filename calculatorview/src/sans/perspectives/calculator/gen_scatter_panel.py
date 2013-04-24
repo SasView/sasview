@@ -1790,7 +1790,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                 break
         return flag
 
-class SasGenWindow(wx.Frame):
+class SasGenWindow(wx.MDIChildFrame):
     """
     GEN SAS main window
     """
@@ -1799,10 +1799,16 @@ class SasGenWindow(wx.Frame):
         """
         Init
         """
+        if parent != None:
+            # set max size depending up on client size
+            wth, hgt = parent.get_client_size()
+            if hgt < size[1]:
+                size = (size[0], hgt)
+            if wth < size[0]:
+                size = (wth, size[1])
         kwds['size'] = size
         kwds['title'] = title
-        
-        wx.Frame.__init__(self, parent, *args, **kwds)
+        wx.MDIChildFrame.__init__(self, parent, *args, **kwds)
         self.parent = parent
         self.base = manager
         self.omfpanel = OmfPanel(parent=self)
@@ -1821,7 +1827,8 @@ class SasGenWindow(wx.Frame):
         self._build_toolbar()
         
         self.build_panels()
-        self.Centre()
+        #self.Centre()
+        self.SetPosition((0, 0))
         self.Show(True)
     
     def _build_toolbar(self):
@@ -2003,13 +2010,16 @@ class SasGenWindow(wx.Frame):
     def draw_graph(self, plot, title=''):
         """
         """
+        from sans.guiframe.events import NewPlotEvent 
+        wx.PostEvent(self.parent, NewPlotEvent(plot=plot, title=title))
+        """
         frame = PlotFrame(self, -1, 'testView', self.scale2d)
         add_icon(self.parent, frame)
         frame.add_plot(plot)
         frame.SetTitle(title)
         frame.Show(True)
         frame.SetFocus()
-
+        """
     def set_schedule_full_draw(self, panel=None, func='del'):  
         """
         Send full draw to gui frame

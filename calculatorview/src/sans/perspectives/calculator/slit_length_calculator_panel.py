@@ -250,7 +250,7 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
         wx.PostEvent(self.parent.parent, StatusEvent(status=msg, type='stop'))
     
     
-class SlitLengthCalculatorWindow(wx.Frame):
+class SlitLengthCalculatorWindow(wx.MDIChildFrame):
     """
     """
     def __init__(self, parent=None, manager=None, title="Slit Size Calculator",
@@ -259,12 +259,13 @@ class SlitLengthCalculatorWindow(wx.Frame):
         """
         kwds['size']= size
         kwds['title']= title
-        wx.Frame.__init__(self, parent, *args, **kwds)
+        wx.MDIChildFrame.__init__(self, parent, *args, **kwds)
         self.parent = parent
         self.manager = manager
         self.panel = SlitLengthCalculatorPanel(parent=self)
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.Centre()
+        #self.Centre()
+        self.SetPosition((0, 0))
         self.Show(True)
 
     def on_close(self, event):

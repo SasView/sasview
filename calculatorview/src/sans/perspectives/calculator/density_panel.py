@@ -370,7 +370,7 @@ class DensityPanel(ScrolledPanel, PanelBase):
         output = "%-12.5f" % value
         return output.lstrip().rstrip()  
         
-class DensityWindow(wx.Frame):
+class DensityWindow(wx.MDIChildFrame):
     """
     """
     def __init__(self, parent=None, title="Density/Volume Calculator",
@@ -380,13 +380,14 @@ class DensityWindow(wx.Frame):
         """
         kwds['title'] = title
         kwds['size'] = size
-        wx.Frame.__init__(self, parent, *args, **kwds)
+        wx.MDIChildFrame.__init__(self, parent, *args, **kwds)
         """
         """
         self.manager = manager
         self.panel = DensityPanel(self, base=base)
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.Centre()
+        #self.Centre()
+        self.SetPosition((0, 0))
         self.Show(True)
     
     def on_close(self, event):

@@ -933,15 +933,16 @@ class SmallPanel(PlotPanel):
         self.set_yscale(_yscale)
         self.draw()
         
-class DataOperatorWindow(wx.Frame):
+class DataOperatorWindow(wx.MDIChildFrame):
     def __init__(self, parent, manager, *args, **kwds):
         kwds["size"] = (PANEL_WIDTH, PANEL_HEIGTH)
-        wx.Frame.__init__(self, parent, *args, **kwds)
+        wx.MDIChildFrame.__init__(self, parent, *args, **kwds)
         self.parent = parent
         self.manager = manager
         self.panel = DataOperPanel(parent=self)
         wx.EVT_CLOSE(self, self.OnClose)
-        self.CenterOnParent()
+        #self.CenterOnParent()
+        self.SetPosition((0, 0))
         self.Show()
     
     def OnClose(self, event=None):  

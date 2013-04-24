@@ -822,6 +822,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         # Compute the resolution
         if self.image != None:
             #_pylab_helpers.Gcf.set_active(self.fm)
+            _pylab_helpers.Gcf.figs = {}
             # Clear the image before redraw
             self.image.clf()
             # reset the image
@@ -1388,21 +1389,29 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         except:
             raise 
         
-class ResolutionWindow(wx.Frame):
+class ResolutionWindow(wx.MDIChildFrame):
     """
     Resolution Window
     """
     def __init__(self, parent = None, manager=None, 
                  title = "SANS Resolution Estimator",
                  size=(PANEL_WIDTH * 2, PANEL_HEIGHT), *args, **kwds):
+        if parent != None:
+            # set max size depending up on client size
+            wth, hgt = parent.get_client_size()
+            if hgt < size[1]:
+                size = (size[0], hgt)
+            if wth < size[0]:
+                size = (wth, size[1])
         kwds['title'] = title
         kwds['size'] = size
-        wx.Frame.__init__(self, parent=None, *args, **kwds)
+        wx.MDIChildFrame.__init__(self, parent=parent, *args, **kwds)
         self.parent = parent
         self.manager = manager
         self.panel = ResolutionCalculatorPanel(parent=self)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
-        self.Centre()
+        self.SetPosition((0, 0))
+        #self.Center()
         self.Show(True)
     
     def OnClose(self, event):  

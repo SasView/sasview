@@ -112,8 +112,9 @@ class Plugin(PluginBase):
             self.data_edit_frame = DataEditorWindow(parent=self.parent, 
                                                     manager=self, data=[],
                                                     title="Data Editor")
-            self.put_icon(self.data_edit_frame)
-        self.data_edit_frame.Show(False)    
+            #self.put_icon(self.data_edit_frame)
+        else:
+            self.data_edit_frame.Show(False)    
         self.data_edit_frame.Show(True)
               
     def on_data_operation(self, event):
@@ -125,8 +126,9 @@ class Plugin(PluginBase):
             self.data_operator_frame = DataOperatorWindow(parent=self.parent, 
                                                 manager=self, 
                                                 title="Data Operation")
-            self.put_icon(self.data_operator_frame)
-        self.data_operator_frame.Show(False)
+            #self.put_icon(self.data_operator_frame)
+        else:
+            self.data_operator_frame.Show(False)
         self.data_operator_frame.panel.set_panel_on_focus(None)
         self.data_operator_frame.Show(True)
         
@@ -136,9 +138,10 @@ class Plugin(PluginBase):
         """
         if self.kiessig_frame == None:
             frame = KiessigWindow(parent=self.parent, manager=self)
-            self.put_icon(frame)
+            #self.put_icon(frame)
             self.kiessig_frame = frame
-        self.kiessig_frame.Show(False)
+        else:
+            self.kiessig_frame.Show(False)
         self.kiessig_frame.Show(True) 
         
     def on_calculate_sld(self, event):
@@ -146,10 +149,12 @@ class Plugin(PluginBase):
         Compute the scattering length density of molecula
         """
         if self.sld_frame == None:
-            frame = SldWindow(base=self.parent, manager=self)
-            self.put_icon(frame)
+            frame = SldWindow(parent=self.parent, 
+                                  base=self.parent, manager=self)
+            #self.put_icon(frame)
             self.sld_frame = frame
-        self.sld_frame.Show(False)
+        else:
+            self.sld_frame.Show(False)
         self.sld_frame.Show(True) 
     
     def on_calculate_dv(self, event):
@@ -157,10 +162,12 @@ class Plugin(PluginBase):
         Compute the mass density or molar voulme
         """
         if self.cal_md_frame == None:
-            frame = DensityWindow(base=self.parent, manager=self)
-            self.put_icon(frame)
+            frame = DensityWindow(parent=self.parent, 
+                                  base=self.parent, manager=self)
+            #self.put_icon(frame)
             self.cal_md_frame = frame
-        self.cal_md_frame.Show(False)
+        else:
+            self.cal_md_frame.Show(False)
         self.cal_md_frame.Show(True) 
               
     def on_calculate_slit_size(self, event):
@@ -169,9 +176,10 @@ class Plugin(PluginBase):
         """
         if self.cal_slit_frame == None:
             frame = SlitLengthCalculatorWindow(parent=self.parent, manager=self)  
-            self.put_icon(frame)
+            #self.put_icon(frame)
             self.cal_slit_frame = frame 
-        self.cal_slit_frame.Show(False)     
+        else:
+            self.cal_slit_frame.Show(False)     
         self.cal_slit_frame.Show(True)
         
     def on_calculate_resoltuion(self, event):
@@ -182,7 +190,8 @@ class Plugin(PluginBase):
             frame = ResolutionWindow(parent=self.parent, manager=self)
             self.put_icon(frame)
             self.cal_res_frame = frame
-        self.cal_res_frame.Show(False)
+        else:
+            self.cal_res_frame.Show(False)
         self.cal_res_frame.Show(True) 
         
     def on_gen_model(self, event):
@@ -191,9 +200,10 @@ class Plugin(PluginBase):
         """
         if self.gen_frame == None:
             frame = SasGenWindow(parent=self.parent, manager=self)
-            self.put_icon(frame)
+            #self.put_icon(frame)
             self.gen_frame = frame
-        self.gen_frame.Show(False)
+        else:
+            self.gen_frame.Show(False)
         self.gen_frame.Show(True) 
 
     def on_image_viewer(self, event):
@@ -224,7 +234,8 @@ class Plugin(PluginBase):
                               filename=filename)
             self.put_icon(frame)
             self.py_frame = frame
-        self.py_frame.Show(False)
+        else:
+            self.py_frame.Show(False)
         self.py_frame.Show(True) 
         
     def put_icon(self, frame):

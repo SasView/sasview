@@ -436,7 +436,7 @@ class SldPanel(wx.Panel, PanelBase):
         self.neutron_length_ctl.SetValue("")
         
         
-class SldWindow(wx.Frame):
+class SldWindow(wx.MDIChildFrame):
     """
     """
     def __init__(self, parent=None, title="SLD Calculator",
@@ -446,7 +446,7 @@ class SldWindow(wx.Frame):
         """
         kwds['title'] = title
         kwds['size'] = size
-        wx.Frame.__init__(self, parent, *args, **kwds)
+        wx.MDIChildFrame.__init__(self, parent, *args, **kwds)
         """
         """
         self.parent = parent
@@ -454,7 +454,8 @@ class SldWindow(wx.Frame):
         self.manager = manager
         self.panel = SldPanel(self, base=base)
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.Centre()
+        #self.Centre()
+        self.SetPosition((0, 0))
         self.Show(True)
     
     def on_close(self, event):
