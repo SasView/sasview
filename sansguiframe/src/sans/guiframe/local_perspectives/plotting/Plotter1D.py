@@ -538,10 +538,10 @@ class ModelPanel1D(PlotPanel, PanelBase):
         left button down and ready to drag
         Display the position of the mouse on the statusbar
         """
+        #self.parent.set_plot_unfocus() 
         self._get_cusor_lines(event)
         ax = event.inaxes
         PlotPanel.onLeftDown(self, event)
-
         if ax != None:
             try:
                 pos_x = float(event.xdata)# / size_x

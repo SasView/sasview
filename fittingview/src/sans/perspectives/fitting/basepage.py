@@ -804,7 +804,6 @@ class BasicPage(ScrolledPanel, PanelBase):
             infor = "error"
             wx.PostEvent(self._manager.parent,
                     StatusEvent(status=msg, info=infor))
-            raise
         # inform msg to wx
         wx.PostEvent(self._manager.parent,
                     StatusEvent(status=msg, info=infor))

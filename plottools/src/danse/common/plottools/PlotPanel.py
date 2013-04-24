@@ -302,6 +302,8 @@ class PlotPanel(wx.Panel):
         # light blue
         self.color = '#0099f7'
         self.figure.set_edgecolor(self.color)
+        if self.parent and self.window_caption:
+            self.parent.send_focus_to_datapanel(self.window_caption)
         self.draw()
         
     def on_kill_focus(self, event):

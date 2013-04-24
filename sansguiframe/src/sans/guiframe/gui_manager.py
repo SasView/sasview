@@ -691,14 +691,20 @@ class ViewerFrame(wx.MDIParentFrame):
         Disables all menus in the menubar
         """
         return
-        
+    
+    def send_focus_to_datapanel(self, name):  
+        """
+        Send focusing on ID to data explorer
+        """
+        if self._data_panel != None:
+            self._data_panel.set_panel_on_focus(name)
+            
     def set_panel_on_focus_helper(self):
         """
         Helper for panel on focus with data_panel
         """
-        ID = self.panel_on_focus.uid
-        if self._data_panel != None:
-            self._data_panel.set_panel_on_focus(ID)
+        caption = self.panel_on_focus.window_caption
+        self.send_focus_to_datapanel(caption)
         #update combo
         if self.panel_on_focus in self.plot_panels.values():
             combo = self._data_panel.cb_plotpanel
@@ -3092,7 +3098,7 @@ class ViewerFrame(wx.MDIParentFrame):
         """
         if panel == None:
             return
-        self.set_plot_unfocus()
+        #self.set_plot_unfocus()
         panel.on_set_focus(None)  
         # set focusing panel
         self.panel_on_focus = panel  
