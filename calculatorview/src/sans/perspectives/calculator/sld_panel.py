@@ -19,6 +19,7 @@ from periodictable import formula
 from periodictable.xsf import xray_energy
 from periodictable.xsf import xray_sld_from_atoms
 from periodictable.nsf import neutron_scattering
+from sans.perspectives.calculator import calculator_widgets as widget   
        
 WAVELENGTH = 6.0
 _BOX_WIDTH = 76
@@ -436,7 +437,7 @@ class SldPanel(wx.Panel, PanelBase):
         self.neutron_length_ctl.SetValue("")
         
         
-class SldWindow(wx.MDIChildFrame):
+class SldWindow(widget.CHILD_FRAME):
     """
     """
     def __init__(self, parent=None, title="SLD Calculator",
@@ -446,7 +447,7 @@ class SldWindow(wx.MDIChildFrame):
         """
         kwds['title'] = title
         kwds['size'] = size
-        wx.MDIChildFrame.__init__(self, parent, *args, **kwds)
+        widget.CHILD_FRAME.__init__(self, parent, *args, **kwds)
         """
         """
         self.parent = parent

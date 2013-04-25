@@ -15,6 +15,7 @@ from sans.guiframe.panel_base import PanelBase
 from sans.calculator.kiessig_calculator import KiessigThicknessCalculator 
 from calculator_widgets import OutputTextCtrl
 from calculator_widgets import InputTextCtrl
+from sans.perspectives.calculator import calculator_widgets as widget   
 
 _BOX_WIDTH = 77
 #Slit length panel size 
@@ -189,13 +190,13 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
         """
         self.on_compute(event)
              
-class KiessigWindow(wx.MDIChildFrame):
+class KiessigWindow(widget.CHILD_FRAME):
     def __init__(self, parent=None, manager=None, 
                  title="Kiessig Thickness Calculator",
                  size=(PANEL_WIDTH,PANEL_HEIGHT), *args, **kwds):
         kwds['title'] = title
         kwds['size'] = size
-        wx.MDIChildFrame.__init__(self, parent, *args, **kwds)
+        widget.CHILD_FRAME.__init__(self, parent, *args, **kwds)
         self.parent = parent
         self.manager = manager
         self.panel = KiessigThicknessCalculatorPanel(parent=self)

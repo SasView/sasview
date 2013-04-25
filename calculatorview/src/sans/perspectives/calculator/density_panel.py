@@ -9,6 +9,7 @@ from wx.lib.scrolledpanel import ScrolledPanel
 from sans.guiframe.utils import check_float
 from sans.guiframe.events import StatusEvent  
 from periodictable import formula as Formula
+from sans.perspectives.calculator import calculator_widgets as widget
        
 AVOGADRO =  6.02214129e23
 _INPUTS = ['Mass Density', 'Molar Volume']
@@ -370,7 +371,7 @@ class DensityPanel(ScrolledPanel, PanelBase):
         output = "%-12.5f" % value
         return output.lstrip().rstrip()  
         
-class DensityWindow(wx.MDIChildFrame):
+class DensityWindow(widget.CHILD_FRAME):
     """
     """
     def __init__(self, parent=None, title="Density/Volume Calculator",
@@ -380,7 +381,7 @@ class DensityWindow(wx.MDIChildFrame):
         """
         kwds['title'] = title
         kwds['size'] = size
-        wx.MDIChildFrame.__init__(self, parent, *args, **kwds)
+        widget.CHILD_FRAME.__init__(self, parent, *args, **kwds)
         """
         """
         self.manager = manager

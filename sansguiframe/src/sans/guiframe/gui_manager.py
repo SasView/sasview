@@ -193,15 +193,21 @@ APPLICATION_WLIST = config.APPLICATION_WLIST
 IS_WIN = True
 CLOSE_SHOW = True
 TIME_FACTOR = 2
+MDI_STYLE = wx.DEFAULT_FRAME_STYLE
 NOT_SO_GRAPH_LIST = ["BoxSum"]
-if sys.platform.count("darwin") > 0:
+PARENT_FRAME = wx.MDIParentFrame
+CHILD_FRAME = wx.MDIChildFrame
+if sys.platform.count("win32") < 1:
     IS_WIN = False
     TIME_FACTOR = 2
     if int(str(wx.__version__).split('.')[0]) == 2:
         if int(str(wx.__version__).split('.')[1]) < 9:
             CLOSE_SHOW = False
+    if sys.platform.count("darwin") < 1:
+        PARENT_FRAME = wx.Frame
+        CHILD_FRAME = wx.Frame
     
-class ViewerFrame(wx.MDIParentFrame):
+class ViewerFrame(PARENT_FRAME):
     """
     Main application frame
     """
@@ -215,7 +221,7 @@ class ViewerFrame(wx.MDIParentFrame):
         Initialize the Frame object
         """
 
-        wx.MDIParentFrame.__init__(self, parent=parent, title=title, pos=pos, size=size)
+        PARENT_FRAME.__init__(self, parent=parent, title=title, pos=pos, size=size)
         # title
         self.title = title
         self.__gui_style = gui_style       
@@ -1175,8 +1181,8 @@ class ViewerFrame(wx.MDIParentFrame):
             p.window_caption = caption 
         p.window_name = windowname + str(self.graph_num)
         
-        style1 = self.__gui_style & GUIFRAME.FIXED_PANEL
-        style2 = self.__gui_style & GUIFRAME.FLOATING_PANEL
+        #style1 = self.__gui_style & GUIFRAME.FIXED_PANEL
+        #style2 = self.__gui_style & GUIFRAME.FLOATING_PANEL
         
         p.frame.SetTitle(p.window_caption)
         p.frame.name = p.window_name
@@ -3405,7 +3411,7 @@ class ViewApp(wx.App):
         self.maximize_win()
 
 
-class MDIFrame(wx.MDIChildFrame):
+class MDIFrame(CHILD_FRAME):
     """
     Frame for panels
     """
@@ -3417,8 +3423,9 @@ class MDIFrame(wx.MDIChildFrame):
         """
         kwds['size']= size
         kwds['title']= title
+        kwds['style'] = MDI_STYLE
         # Initialize the Frame object
-        wx.MDIChildFrame.__init__(self, parent, *args, **kwds)
+        CHILD_FRAME.__init__(self, parent, *args, **kwds)
         self.parent = parent
         self.name = "Untitled"
         self.batch_on = self.parent.batch_on

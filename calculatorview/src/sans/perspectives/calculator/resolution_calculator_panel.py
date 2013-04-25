@@ -29,6 +29,8 @@ from sans.perspectives.calculator.calculator_widgets import OutputTextCtrl
 from sans.perspectives.calculator.calculator_widgets import InputTextCtrl
 from wx.lib.scrolledpanel import ScrolledPanel
 from math import fabs
+from sans.perspectives.calculator import calculator_widgets as widget   
+
 _BOX_WIDTH = 100
 _Q_DEFAULT = 0.0
 #Slit length panel size 
@@ -1389,7 +1391,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         except:
             raise 
         
-class ResolutionWindow(wx.MDIChildFrame):
+class ResolutionWindow(widget.CHILD_FRAME):
     """
     Resolution Window
     """
@@ -1405,7 +1407,7 @@ class ResolutionWindow(wx.MDIChildFrame):
                 size = (wth, size[1])
         kwds['title'] = title
         kwds['size'] = size
-        wx.MDIChildFrame.__init__(self, parent=parent, *args, **kwds)
+        widget.CHILD_FRAME.__init__(self, parent=parent, *args, **kwds)
         self.parent = parent
         self.manager = manager
         self.panel = ResolutionCalculatorPanel(parent=self)

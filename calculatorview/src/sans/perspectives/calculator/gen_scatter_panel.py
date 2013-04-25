@@ -34,6 +34,7 @@ from sans.perspectives.calculator.calculator_widgets import InputTextCtrl
 from wx.lib.scrolledpanel import ScrolledPanel
 from sans.perspectives.calculator.load_thread import GenReader
 from danse.common.plottools.arrow3d import Arrow3D
+from sans.perspectives.calculator import calculator_widgets as widget   
 
 _BOX_WIDTH = 76
 #Slit length panel size 
@@ -1790,7 +1791,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                 break
         return flag
 
-class SasGenWindow(wx.MDIChildFrame):
+class SasGenWindow(widget.CHILD_FRAME):
     """
     GEN SAS main window
     """
@@ -1808,7 +1809,7 @@ class SasGenWindow(wx.MDIChildFrame):
                 size = (wth, size[1])
         kwds['size'] = size
         kwds['title'] = title
-        wx.MDIChildFrame.__init__(self, parent, *args, **kwds)
+        widget.CHILD_FRAME.__init__(self, parent, *args, **kwds)
         self.parent = parent
         self.base = manager
         self.omfpanel = OmfPanel(parent=self)

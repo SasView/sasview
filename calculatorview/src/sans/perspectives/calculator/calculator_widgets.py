@@ -8,7 +8,11 @@ See the license text in license.txt
 copyright 2009, University of Tennessee
 """
 import wx
-#import os
+import sys
+CHILD_FRAME = wx.MDIChildFrame
+if sys.platform.count("win32") < 1:
+    if sys.platform.count("darwin") < 1:
+        CHILD_FRAME = wx.Frame
 
 class InputTextCtrl(wx.TextCtrl):
     """

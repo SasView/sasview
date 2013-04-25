@@ -18,6 +18,7 @@ from sans.guiframe.events import StatusEvent
 from sans.calculator.slit_length_calculator import SlitlengthCalculator  
 from calculator_widgets import OutputTextCtrl
 from calculator_widgets import InterActiveOutputTextCtrl
+from sans.perspectives.calculator import calculator_widgets as widget   
 
 _BOX_WIDTH = 76
 #Slit length panel size 
@@ -250,7 +251,7 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
         wx.PostEvent(self.parent.parent, StatusEvent(status=msg, type='stop'))
     
     
-class SlitLengthCalculatorWindow(wx.MDIChildFrame):
+class SlitLengthCalculatorWindow(widget.CHILD_FRAME):
     """
     """
     def __init__(self, parent=None, manager=None, title="Slit Size Calculator",
@@ -259,7 +260,7 @@ class SlitLengthCalculatorWindow(wx.MDIChildFrame):
         """
         kwds['size']= size
         kwds['title']= title
-        wx.MDIChildFrame.__init__(self, parent, *args, **kwds)
+        widget.CHILD_FRAME.__init__(self, parent, *args, **kwds)
         self.parent = parent
         self.manager = manager
         self.panel = SlitLengthCalculatorPanel(parent=self)

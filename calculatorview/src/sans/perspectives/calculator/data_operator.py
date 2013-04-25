@@ -14,7 +14,7 @@ from danse.common.plottools import transform
 from matplotlib.font_manager import FontProperties
 from matplotlib.figure import Figure
 from sans.guiframe.events import StatusEvent 
-       
+from sans.perspectives.calculator import calculator_widgets as widget   
 #Control panel width 
 if sys.platform.count("win32") > 0:
     PANEL_WIDTH = 790
@@ -933,10 +933,10 @@ class SmallPanel(PlotPanel):
         self.set_yscale(_yscale)
         self.draw()
         
-class DataOperatorWindow(wx.MDIChildFrame):
+class DataOperatorWindow(widget.CHILD_FRAME):
     def __init__(self, parent, manager, *args, **kwds):
         kwds["size"] = (PANEL_WIDTH, PANEL_HEIGTH)
-        wx.MDIChildFrame.__init__(self, parent, *args, **kwds)
+        widget.CHILD_FRAME.__init__(self, parent, *args, **kwds)
         self.parent = parent
         self.manager = manager
         self.panel = DataOperPanel(parent=self)
