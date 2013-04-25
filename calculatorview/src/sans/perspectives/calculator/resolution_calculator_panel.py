@@ -1410,8 +1410,7 @@ class ResolutionWindow(wx.MDIChildFrame):
         self.manager = manager
         self.panel = ResolutionCalculatorPanel(parent=self)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
-        self.SetPosition((0, 0))
-        #self.Center()
+        self.SetPosition((25, 100))
         self.Show(True)
     
     def OnClose(self, event):  

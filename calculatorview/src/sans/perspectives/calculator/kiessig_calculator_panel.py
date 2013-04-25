@@ -200,8 +200,7 @@ class KiessigWindow(wx.MDIChildFrame):
         self.manager = manager
         self.panel = KiessigThicknessCalculatorPanel(parent=self)
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        #self.Centre()
-        self.SetPosition((0, 0))
+        self.SetPosition((25, 100))
         self.Show(True)
         
     def on_close(self, event):

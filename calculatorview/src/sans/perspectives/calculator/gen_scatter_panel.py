@@ -1827,8 +1827,7 @@ class SasGenWindow(wx.MDIChildFrame):
         self._build_toolbar()
         
         self.build_panels()
-        #self.Centre()
-        self.SetPosition((0, 0))
+        self.SetPosition((25, 100))
         self.Show(True)
     
     def _build_toolbar(self):

@@ -941,8 +941,7 @@ class DataOperatorWindow(wx.MDIChildFrame):
         self.manager = manager
         self.panel = DataOperPanel(parent=self)
         wx.EVT_CLOSE(self, self.OnClose)
-        #self.CenterOnParent()
-        self.SetPosition((0, 0))
+        self.SetPosition((25, 100))
         self.Show()
     
     def OnClose(self, event=None):  
