@@ -6,6 +6,7 @@ SasView 3.0.0
     - Implemented Polarization and magnetic SANS parameters in some models.
     - New Tool: Generic SANS / PDB reader & atomic scattering calculator
     - New Tool: Image viewer
+    - Redefined angles of angular parameters for anisotropic models
     - Use MDI frames in GUI
 
 	- Previous Versions: 
