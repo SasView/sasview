@@ -42,6 +42,7 @@ from sans.guiframe.data_processor import GridFrame
 from sans.guiframe.events import EVT_NEW_BATCH
 from sans.guiframe.CategoryManager import CategoryManager
 from sans.dataloader.loader import Loader
+from matplotlib import _pylab_helpers
 
 def get_app_dir():
     """
@@ -2019,6 +2020,7 @@ class ViewerFrame(wx.MDIParentFrame):
         """
         flag = self.quit_guiframe()
         if flag:
+            _pylab_helpers.Gcf.figs = {}
             self.Close()
             
     def Close(self, event=None):
