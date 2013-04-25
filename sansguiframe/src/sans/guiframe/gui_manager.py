@@ -191,6 +191,7 @@ except:
     PLUGINS_WLIST = ''
 APPLICATION_WLIST = config.APPLICATION_WLIST
 IS_WIN = True
+IS_LINUX = False
 CLOSE_SHOW = True
 TIME_FACTOR = 2
 MDI_STYLE = wx.DEFAULT_FRAME_STYLE
@@ -204,6 +205,7 @@ if sys.platform.count("win32") < 1:
         if int(str(wx.__version__).split('.')[1]) < 9:
             CLOSE_SHOW = False
     if sys.platform.count("darwin") < 1:
+        IS_LINUX = True
         PARENT_FRAME = wx.Frame
         CHILD_FRAME = wx.Frame
     
@@ -988,9 +990,12 @@ class ViewerFrame(PARENT_FRAME):
         w, h = self._get_panels_size(self.defaultPanel)
         frame = self.defaultPanel.get_frame()
         frame.SetSize((self._window_width, self._window_height))
+        size_t_bar = 70
         if not IS_WIN:
             x_pos, _ = frame.GetPositionTuple()
-            frame.SetPosition((x_pos, mac_pos_y + 70))
+            if IS_LINUX:
+                size_t_bar = 115
+            frame.SetPosition((x_pos, mac_pos_y + size_t_bar))
         frame.Show(True)
         #add data panel 
         
@@ -1011,7 +1016,7 @@ class ViewerFrame(PARENT_FRAME):
             flag = True
         if not IS_WIN:
             x_pos, _ = win.GetPositionTuple()
-            win.SetPosition((x_pos, mac_pos_y + 70))
+            win.SetPosition((x_pos, mac_pos_y + size_t_bar))
         win.Show(flag)
         d_panel_width = w
         # Add the panels to the AUI manager
@@ -1038,10 +1043,13 @@ class ViewerFrame(PARENT_FRAME):
                 frame.Show(False)
             if not IS_WIN:
                 x_pos, _ = frame.GetPositionTuple()
-                frame.SetPosition((x_pos, mac_pos_y + 70))
+                frame.SetPosition((x_pos, mac_pos_y + size_t_bar))
 
         if not IS_WIN:
-            self.SetSize((self._window_width, mac_pos_y))
+            win_height = mac_pos_y
+            if IS_LINUX:
+                win_height = mac_pos_y + 55
+            self.SetSize((self._window_width, win_height))
         
     def update_data(self, prev_data, new_data):
         """
@@ -3009,7 +3017,8 @@ class ViewerFrame(PARENT_FRAME):
         """
         size_y = 0
         if self.GetToolBar() != None and self.GetToolBar().IsShown():
-            _, size_y = self.GetToolBar().GetSizeTuple()
+            if not IS_LINUX:
+                _, size_y = self.GetToolBar().GetSizeTuple()
         return size_y
     
     def set_schedule_full_draw(self, panel=None, func='del'):
