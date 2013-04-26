@@ -3468,9 +3468,9 @@ class MDIFrame(CHILD_FRAME):
     def set_panel_focus(self, event):
         """
         """
-        self.panel.SetFocus()
-        self.parent.panel_on_focus = self.panel
-        #self.parent.set_panel_on_focus_helper()
+        if self.parent.panel_on_focus != self.panel:
+            self.panel.SetFocus()
+            self.parent.panel_on_focus = self.panel
         
     def OnClose(self, event):
         """
