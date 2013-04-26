@@ -473,6 +473,7 @@ class ViewApp(wx.App):
     def OnInit(self):
         """
         """
+        widget.CHILD_FRAME = wx.Frame
         frame = SldWindow(None, title='SLD Calculator')    
         frame.Show(True)
         self.SetTopWindow(frame)

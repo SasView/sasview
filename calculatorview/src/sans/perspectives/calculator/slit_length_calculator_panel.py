@@ -278,6 +278,7 @@ class SlitLengthCalculatorWindow(widget.CHILD_FRAME):
         
 if __name__ == "__main__": 
     app = wx.PySimpleApp()
+    widget.CHILD_FRAME = wx.Frame
     frame = SlitLengthCalculatorWindow()    
     frame.Show(True)
     app.MainLoop()     

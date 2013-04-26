@@ -1427,6 +1427,7 @@ class ResolutionWindow(widget.CHILD_FRAME):
         
 if __name__ == "__main__": 
     app = wx.PySimpleApp()
+    widget.CHILD_FRAME = wx.Frame
     frame = ResolutionWindow()    
     frame.Show(True)
     app.MainLoop()     

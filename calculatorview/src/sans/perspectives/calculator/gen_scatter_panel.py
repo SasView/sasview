@@ -34,7 +34,8 @@ from sans.perspectives.calculator.calculator_widgets import InputTextCtrl
 from wx.lib.scrolledpanel import ScrolledPanel
 from sans.perspectives.calculator.load_thread import GenReader
 from danse.common.plottools.arrow3d import Arrow3D
-from sans.perspectives.calculator import calculator_widgets as widget   
+from sans.perspectives.calculator import calculator_widgets as widget
+from sans.guiframe.events import NewPlotEvent    
 
 _BOX_WIDTH = 76
 #Slit length panel size 
@@ -2010,21 +2011,23 @@ class SasGenWindow(widget.CHILD_FRAME):
     def draw_graph(self, plot, title=''):
         """
         """
-        from sans.guiframe.events import NewPlotEvent 
-        wx.PostEvent(self.parent, NewPlotEvent(plot=plot, title=title))
-        """
-        frame = PlotFrame(self, -1, 'testView', self.scale2d)
-        add_icon(self.parent, frame)
-        frame.add_plot(plot)
-        frame.SetTitle(title)
-        frame.Show(True)
-        frame.SetFocus()
-        """
+        try: 
+            wx.PostEvent(self.parent, NewPlotEvent(plot=plot, title=title))
+        except:
+            # standalone
+            frame = PlotFrame(self, -1, 'testView', self.scale2d)
+            #add_icon(self.parent, frame)
+            frame.add_plot(plot)
+            frame.SetTitle(title)
+            frame.Show(True)
+            frame.SetFocus()
+
     def set_schedule_full_draw(self, panel=None, func='del'):  
         """
         Send full draw to gui frame
         """
-        self.parent.set_schedule_full_draw(panel, func)
+        if self.parent != None:
+            self.parent.set_schedule_full_draw(panel, func)
         
     def get_npix(self):
         """
@@ -2131,6 +2134,7 @@ class SasGenWindow(widget.CHILD_FRAME):
            
 if __name__ == "__main__": 
     app = wx.PySimpleApp()
+    widget.CHILD_FRAME = wx.Frame
     SGframe = SasGenWindow()    
     SGframe.Show(True)
     app.MainLoop()     

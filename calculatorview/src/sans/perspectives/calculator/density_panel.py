@@ -405,6 +405,7 @@ class ViewApp(wx.App):
     def OnInit(self):
         """
         """
+        widget.CHILD_FRAME = wx.Frame
         frame = DensityWindow(None, title="Density/Volume Calculator")    
         frame.Show(True)
         self.SetTopWindow(frame)

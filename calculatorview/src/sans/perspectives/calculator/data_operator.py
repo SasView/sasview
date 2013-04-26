@@ -955,8 +955,9 @@ class DataOperatorWindow(widget.CHILD_FRAME):
 
         
 if __name__ == "__main__":
-   
+
     app  = wx.App()
+    widget.CHILD_FRAME = wx.Frame
     window = DataOperatorWindow(parent=None, data=[], title="Data Editor")
     app.MainLoop()
  
