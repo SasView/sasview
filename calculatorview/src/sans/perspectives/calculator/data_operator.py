@@ -941,7 +941,7 @@ class DataOperatorWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = DataOperPanel(parent=self)
         wx.EVT_CLOSE(self, self.OnClose)
-        self.SetPosition((25, 100))
+        self.SetPosition((25, 150))
         self.Show()
     
     def OnClose(self, event=None):  

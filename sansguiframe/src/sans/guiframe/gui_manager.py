@@ -1050,7 +1050,8 @@ class ViewerFrame(PARENT_FRAME):
             if IS_LINUX:
                 win_height = mac_pos_y + 55
             self.SetSize((self._window_width, win_height))
-            self.SetMaxSize((-1, win_height))
+            max_height = mac_pos_y + 70
+            self.SetMaxSize((-1, max_height))
         
     def update_data(self, prev_data, new_data):
         """

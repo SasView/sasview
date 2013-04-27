@@ -1412,7 +1412,7 @@ class ResolutionWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = ResolutionCalculatorPanel(parent=self)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
-        self.SetPosition((25, 100))
+        self.SetPosition((25, 150))
         self.Show(True)
     
     def OnClose(self, event):  

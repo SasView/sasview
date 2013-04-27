@@ -201,7 +201,7 @@ class KiessigWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = KiessigThicknessCalculatorPanel(parent=self)
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.SetPosition((25, 100))
+        self.SetPosition((25, 160))
         self.Show(True)
         
     def on_close(self, event):

@@ -1829,7 +1829,7 @@ class SasGenWindow(widget.CHILD_FRAME):
         self._build_toolbar()
         
         self.build_panels()
-        self.SetPosition((25, 100))
+        self.SetPosition((25, 150))
         self.Show(True)
     
     def _build_toolbar(self):

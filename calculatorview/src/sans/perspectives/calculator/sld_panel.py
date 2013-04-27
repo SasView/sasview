@@ -455,7 +455,7 @@ class SldWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = SldPanel(self, base=base)
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.SetPosition((25, 100))
+        self.SetPosition((25, 150))
         self.Show(True)
     
     def on_close(self, event):
