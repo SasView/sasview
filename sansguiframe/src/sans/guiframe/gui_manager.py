@@ -3200,9 +3200,6 @@ class ViewApp(wx.App):
         self.frame.Hide()
         if not IS_WIN:
             self.frame.EnableCloseButton(False)
-            # It is floating toolbar/statusbar 
-            max_height = 90
-            self.frame.SetMaxSize((-1, max_height))
         self.s_screen = None
 
         try:
