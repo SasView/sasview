@@ -1031,7 +1031,7 @@ class ViewerFrame(PARENT_FRAME):
                 if panel_class.CENTER_PANE:
                     self.panels[str(id)] = panel_class
                     _, pos_y = frame.GetPositionTuple()
-                    frame.SetPosition((d_panel_width, pos_y))
+                    frame.SetPosition((d_panel_width + 1, pos_y))
                     frame.SetSize((w, h))
                     frame.Show(False)
             elif panel_class == self._data_panel:
@@ -1049,7 +1049,7 @@ class ViewerFrame(PARENT_FRAME):
             win_height = mac_pos_y
             if IS_LINUX:
                 win_height = mac_pos_y + 55
-            self.SetSize((self._window_width, win_height))
+            self.SetMaxSize((-1, win_height))
         
     def update_data(self, prev_data, new_data):
         """
