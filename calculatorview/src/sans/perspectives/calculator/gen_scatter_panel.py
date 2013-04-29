@@ -1801,13 +1801,6 @@ class SasGenWindow(widget.CHILD_FRAME):
         """
         Init
         """
-        if parent != None:
-            # set max size depending up on client size
-            wth, hgt = parent.get_client_size()
-            if hgt < size[1]:
-                size = (size[0], hgt)
-            if wth < size[0]:
-                size = (wth, size[1])
         kwds['size'] = size
         kwds['title'] = title
         widget.CHILD_FRAME.__init__(self, parent, *args, **kwds)

@@ -1398,13 +1398,6 @@ class ResolutionWindow(widget.CHILD_FRAME):
     def __init__(self, parent = None, manager=None, 
                  title = "SANS Resolution Estimator",
                  size=(PANEL_WIDTH * 2, PANEL_HEIGHT), *args, **kwds):
-        if parent != None:
-            # set max size depending up on client size
-            wth, hgt = parent.get_client_size()
-            if hgt < size[1]:
-                size = (size[0], hgt)
-            if wth < size[0]:
-                size = (wth, size[1])
         kwds['title'] = title
         kwds['size'] = size
         widget.CHILD_FRAME.__init__(self, parent=parent, *args, **kwds)
