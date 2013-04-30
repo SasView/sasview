@@ -279,8 +279,6 @@ class ViewerFrame(PARENT_FRAME):
         self._num_perspectives = 0
         # plot duck cleanup option
         self.cleanup_plots = CLEANUP_PLOT
-        # (un)-focus color
-        #self.color = '#b3b3b3'
         ## Find plug-ins
         # Modify this so that we can specify the directory to look into
         self.plugins = []
@@ -626,7 +624,6 @@ class ViewerFrame(PARENT_FRAME):
                     plugin.on_perspective(event=None)
                     frame = plugin.get_frame()
                     frame.Show(True)
-                    #self._check_applications_menu()
                     #break
                 else:
                     frame = plugin.get_frame()
@@ -963,8 +960,6 @@ class ViewerFrame(PARENT_FRAME):
         if self._data_panel is not None  and (p == self._data_panel):
             return panel_width, panel_height
         if hasattr(p, "CENTER_PANE") and p.CENTER_PANE:
-            #style = self.__gui_style & (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON)
-            #if style == (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON):
             panel_width = self._window_width * 0.45
             if custom_config != None:
                 if custom_config.CONTROL_WIDTH > 0:
@@ -974,7 +969,6 @@ class ViewerFrame(PARENT_FRAME):
             return panel_width, panel_height
         elif p == self.defaultPanel:
             return self._window_width, panel_height
-        #total_width = panel_width + self._window_width - 2.3 * panel_width
         return panel_width, panel_height
     
     def _load_panels(self):
@@ -1007,13 +1001,9 @@ class ViewerFrame(PARENT_FRAME):
             frame.SetPosition((x_pos, mac_pos_y + size_t_bar))
         frame.Show(True)
         #add data panel 
-        
-        #w, h = self._get_panels_size(self._data_panel)
         win = MDIFrame(self, None, 'None', (100, 200))
-        #win.EnableCloseButton(False)
         data_panel = DataPanel(parent=win,  id=-1)
         win.set_panel(data_panel)
-        #data_panel.set_frame(win)
         self.panels["data_panel"] = data_panel
         self._data_panel = data_panel
         w, h = self._get_panels_size(self._data_panel)
@@ -1144,9 +1134,6 @@ class ViewerFrame(PARENT_FRAME):
         delete it.
         """
         frame = event.GetEventObject()
-        #panel = frame.panel
-        #if panel.IsMaximized():
-        #    self._mgr.RestoreMaximizedPane()
         for ID in self.plot_panels.keys():
             if self.plot_panels[ID].window_name == frame.name:
                 self.disable_app_menu(self.plot_panels[ID])
@@ -1173,17 +1160,11 @@ class ViewerFrame(PARENT_FRAME):
             p_panel_width = PLOPANEL_WIDTH
         p_panel_height = int(p_panel_width * 0.76)
         p.frame.SetSize((p_panel_width, p_panel_height))
-        """
-        dw, dh = self._get_panels_size(self._data_panel)
-        dw += p_panel_width
-        _, dh = self.GetToolBar().GetSizeTuple()
-        p.frame.SetPosition((dw, -dh))
-        """
         self.graph_num += 1
         if p.window_caption.split()[0] in NOT_SO_GRAPH_LIST:
             windowcaption = p.window_caption
         else:
-            windowcaption = 'Graph'#p.window_caption
+            windowcaption = 'Graph'
         windowname = p.window_name
 
         # Append nummber
@@ -1199,9 +1180,6 @@ class ViewerFrame(PARENT_FRAME):
         if p.window_caption.split()[0] not in NOT_SO_GRAPH_LIST:
             p.window_caption = caption 
         p.window_name = windowname + str(self.graph_num)
-        
-        #style1 = self.__gui_style & GUIFRAME.FIXED_PANEL
-        #style2 = self.__gui_style & GUIFRAME.FLOATING_PANEL
         
         p.frame.SetTitle(p.window_caption)
         p.frame.name = p.window_name
@@ -1474,8 +1452,6 @@ class ViewerFrame(PARENT_FRAME):
         # Only add the perspective menu if there are more than one perspectives
         add menu application
         """
-        #style = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
-        #if style == GUIFRAME.MULTIPLE_APPLICATIONS:
         if self._num_perspectives  > 1:
             plug_data_count = False
             plug_no_data_count = False
@@ -1497,7 +1473,6 @@ class ViewerFrame(PARENT_FRAME):
                                       "Switch to analysis: %s" % plug.sub_menu)
                     wx.EVT_MENU(self, id, plug.on_perspective)
 
-            #self._applications_menu.
             if (not plug_data_count or not plug_no_data_count):
                 self._applications_menu.RemoveItem(separator)
             self._menubar.Append(self._applications_menu, '&Analysis')
@@ -1548,7 +1523,6 @@ class ViewerFrame(PARENT_FRAME):
                                  'Save the state of the whole analysis')
             wx.EVT_MENU(self, id, self._on_save_project)
         if style1 == GUIFRAME.MULTIPLE_APPLICATIONS:
-            #self._file_menu.AppendSeparator()
             id = wx.NewId()
             self._save_appl_menu = self._file_menu.Append(id, 
                                                       '&Save Analysis',
@@ -1687,13 +1661,11 @@ class ViewerFrame(PARENT_FRAME):
         if ID in self.panels.keys():
             self.panel_on_focus = None
             panel = self.panels[ID]
-            #self._mgr.DetachPane(panel)
+
             if hasattr(panel, "connect"):
                 panel.connect.disconnect()
             self._plotting_plugin.delete_panel(panel.group_id)
-            #panel.Hide()
-            #panel.clear()
-            #panel.Close()
+
             if panel in self.schedule_full_draw_list:
                 self.schedule_full_draw_list.remove(panel) 
             
@@ -2069,9 +2041,6 @@ class ViewerFrame(PARENT_FRAME):
             res = conn.getresponse()
             content = res.read()
             conn.close()
-            #f=urllib2.urlopen(config.__update_URL__, 
-            #                  timeout=1.0)
-            #content = f.read()
         except:
             content = "0.0.0"
        
@@ -2250,7 +2219,6 @@ class ViewerFrame(PARENT_FRAME):
         pane = self.panels["data_panel"]
         frame = pane.get_frame()
         if label == 'Show Data Explorer':
-            #if not pane.IsShown():
             if action: 
                 frame.Show(True)
             self.__gui_style = self.__gui_style | GUIFRAME.MANAGER_ON
@@ -2628,7 +2596,6 @@ class ViewerFrame(PARENT_FRAME):
                 dx_val = data.dqx_data[index]
             if data.dqy_data != None: 
                 dy_val = data.dqy_data[index]
-            #if data.mask != None: mask_val = data.mask[index] 
   
             text += "%s \t%s \t%s \t%s \t%s \t%s \t%s\n" % (index,
                                             x_val, 
@@ -2760,8 +2727,7 @@ class ViewerFrame(PARENT_FRAME):
             self._edit_menu.Enable(GUIFRAME_ID.COPY_ID, flag)
             flag = self.cpanel_on_focus.get_paste_flag()
             self._edit_menu.Enable(GUIFRAME_ID.PASTE_ID, flag)
-            #flag = self.cpanel_on_focus.get_print_flag()
-            #self._edit_menu.Enable(GUIFRAME_ID.PRINT_ID, flag)
+
             flag = self.cpanel_on_focus.get_preview_flag()
             self._edit_menu.Enable(GUIFRAME_ID.PREVIEW_ID, flag)
             flag = self.cpanel_on_focus.get_reset_flag()
@@ -2772,7 +2738,7 @@ class ViewerFrame(PARENT_FRAME):
             self._edit_menu.Enable(GUIFRAME_ID.REDO_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.COPY_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.PASTE_ID, flag)
-            #self._edit_menu.Enable(GUIFRAME_ID.PRINT_ID, flag)
+
             self._edit_menu.Enable(GUIFRAME_ID.PREVIEW_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.RESET_ID, flag)
             
@@ -3013,8 +2979,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         drag 
         """
-        #if self.cpanel_on_focus is not None:
-        #    self._toolbar.enable_drag(self.panel_on_focus)
+        #Not implemeted
             
     def enable_reset(self):
         """
@@ -3099,9 +3064,11 @@ class ViewerFrame(PARENT_FRAME):
             except:
                 raise
      
-        # Draw all panels        
-        #map(f_draw, self.schedule_full_draw_list)
-        f_draw(self.schedule_full_draw_list[0])
+        # Draw all panels 
+        if count == 1:
+            f_draw(self.schedule_full_draw_list[0])  
+        else:
+            map(f_draw, self.schedule_full_draw_list)
         # Reset the attr  
         if len(self.schedule_full_draw_list) == 0:
             self.set_schedule(False)
@@ -3233,9 +3200,7 @@ class ViewApp(wx.App):
             msg += str (sys.exc_value)
             logging.error(msg)
             self.frame.Show()
- 
-        #if hasattr(self.frame, 'special'):
-        #    self.frame.special.SetCurrent()
+
         self.SetTopWindow(self.frame)
   
         return True
@@ -3308,8 +3273,6 @@ class ViewApp(wx.App):
         except:
             raise
         self.frame.build_gui()
-        #if self.s_screen is not None and self.s_screen.IsShown():
-        #    self.s_screen.Close()
         
     def set_welcome_panel(self, panel_class):
         """
