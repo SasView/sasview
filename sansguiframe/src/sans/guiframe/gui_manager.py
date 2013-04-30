@@ -3045,7 +3045,7 @@ class ViewerFrame(PARENT_FRAME):
         #Simple redraw only for a panel shown
         def f_draw(panel):
             """
-            Draw A panel in the full dwar list
+            Draw A panel in the full draw list
             """
             try:
                 # This checking of GetCapture is to stop redrawing
@@ -3059,10 +3059,9 @@ class ViewerFrame(PARENT_FRAME):
                     panel.draw_plot()
                 # Check if the panel is not shown
                 flag = frame.IsShown()
-                frame.Show(flag)
-                   
+                frame.Show(flag)  
             except:
-                raise
+                pass
      
         # Draw all panels 
         if count == 1:
