@@ -154,6 +154,8 @@ try:
     DATAPANEL_WIDTH = custom_config.DATAPANEL_WIDTH
     GUIFRAME_WIDTH = custom_config.GUIFRAME_WIDTH 
     GUIFRAME_HEIGHT = custom_config.GUIFRAME_HEIGHT
+    CONTROL_WIDTH = custom_config.CONTROL_WIDTH 
+    CONTROL_HEIGHT = custom_config.CONTROL_HEIGHT
     DEFAULT_PERSPECTIVE = custom_config.DEFAULT_PERSPECTIVE
     CLEANUP_PLOT = custom_config.CLEANUP_PLOT
     # custom open_path
@@ -171,6 +173,8 @@ except:
     DATAPANEL_WIDTH = config.DATAPANEL_WIDTH
     GUIFRAME_WIDTH = config.GUIFRAME_WIDTH 
     GUIFRAME_HEIGHT = config.GUIFRAME_HEIGHT
+    CONTROL_WIDTH = -1 
+    CONTROL_HEIGHT = -1
     DEFAULT_PERSPECTIVE = None
     CLEANUP_PLOT = False
     DEFAULT_OPEN_FOLDER = PATH_APP
@@ -962,6 +966,11 @@ class ViewerFrame(PARENT_FRAME):
             #style = self.__gui_style & (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON)
             #if style == (GUIFRAME.PLOTTING_ON|GUIFRAME.MANAGER_ON):
             panel_width = self._window_width * 0.45
+            if custom_config != None:
+                if custom_config.CONTROL_WIDTH > 0:
+                    panel_width = CONTROL_WIDTH
+                if custom_config.CONTROL_HEIGHT > 0:
+                    panel_height = CONTROL_HEIGHT
             return panel_width, panel_height
         elif p == self.defaultPanel:
             return self._window_width, panel_height

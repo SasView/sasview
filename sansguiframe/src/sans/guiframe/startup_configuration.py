@@ -20,6 +20,8 @@ from sans.guiframe.customdir  import SetupCustom
 # default configuration
 DEFAULT_STRINGS = {'GUIFRAME_WIDTH':-1,
                    'GUIFRAME_HEIGHT':-1,
+                   'CONTROL_WIDTH':-1,
+                   'CONTROL_HEIGHT':-1,
                    'PLOPANEL_WIDTH':-1,
                    'DATAPANEL_WIDTH':-1,
                    'DATALOADER_SHOW':True,
@@ -32,6 +34,8 @@ DEFAULT_STRINGS = {'GUIFRAME_WIDTH':-1,
 try:
     CURRENT_STRINGS = {'GUIFRAME_WIDTH':CURRENT.GUIFRAME_WIDTH,
                        'GUIFRAME_HEIGHT':CURRENT.GUIFRAME_HEIGHT,
+                       'CONTROL_WIDTH':CURRENT.CONTROL_WIDTH,
+                       'CONTROL_HEIGHT':CURRENT.CONTROL_HEIGHT,
                        'PLOPANEL_WIDTH':CURRENT.PLOPANEL_WIDTH,
                        'DATAPANEL_WIDTH':CURRENT.DATAPANEL_WIDTH,
                        'DATALOADER_SHOW':CURRENT.DATALOADER_SHOW,
@@ -134,6 +138,15 @@ class StartupConfiguration(wx.Dialog):
                 p_size = CURRENT_STRINGS['PLOPANEL_WIDTH']
             self.current_string['PLOPANEL_WIDTH'] = p_size
             
+            try:
+                control_frame = self.parent.get_current_perspective().frame
+                control_w, control_h = control_frame.GetSizeTuple()
+                self.current_string['CONTROL_WIDTH'] = control_w
+                self.current_string['CONTROL_HEIGHT'] = control_h
+            except:
+                self.current_string['CONTROL_WIDTH'] = -1
+                self.current_string['CONTROL_HEIGHT'] = -1
+                
             data_pw, _ = self.parent.panels["data_panel"].frame.GetSizeTuple()
             if data_pw == None:
                 data_pw = CURRENT_STRINGS['DATAPANEL_WIDTH']
