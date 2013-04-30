@@ -15,7 +15,7 @@
 
 import os, sys
 import platform
-
+import local_config
 
 if len(sys.argv) == 1:
     sys.argv.append('py2exe')
@@ -205,9 +205,9 @@ class Target:
     def __init__(self, **kw):
         self.__dict__.update(kw)
         # for the versioninfo resources
-        self.version = "2.1.0"
-        self.company_name = "U Tennessee"
-        self.copyright = "copyright 2009 - 2012"
+        self.version = local_config.__version__
+        self.company_name = "SasView.org"
+        self.copyright = "copyright 2009 - 2013"
         self.name = "SasView"
         
 #
@@ -332,7 +332,8 @@ target_wx_client = Target(
 bundle_option = 2
 if is_64bits:
     bundle_option = 3
-
+import installer_generator as gen
+gen.generate_installer()
 #initialize category stuff
 #from sans.guiframe.CategoryInstaller import CategoryInstaller
 #CategoryInstaller.check_install()
