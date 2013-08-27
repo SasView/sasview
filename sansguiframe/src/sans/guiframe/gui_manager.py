@@ -961,11 +961,10 @@ class ViewerFrame(PARENT_FRAME):
             return panel_width, panel_height
         if hasattr(p, "CENTER_PANE") and p.CENTER_PANE:
             panel_width = self._window_width * 0.45
-            if custom_config != None:
-                if custom_config.CONTROL_WIDTH > 0:
-                    panel_width = CONTROL_WIDTH
-                if custom_config.CONTROL_HEIGHT > 0:
-                    panel_height = CONTROL_HEIGHT
+            if CONTROL_WIDTH > 0:
+                panel_width = CONTROL_WIDTH
+            if CONTROL_HEIGHT > 0:
+                panel_height = CONTROL_HEIGHT
             return panel_width, panel_height
         elif p == self.defaultPanel:
             return self._window_width, panel_height
