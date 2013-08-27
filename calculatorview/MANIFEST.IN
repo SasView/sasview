@@ -1,7 +1,0 @@
-graft docs
-graft test
-include README.txt
-include release_notes.txt
-include license.txt
-
-
