@@ -1,8 +1,0 @@
-graft images
-graft plugins
-include release_notes.txt
-include license.txt
-include README.txt
-
-
-
