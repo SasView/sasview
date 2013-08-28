@@ -1,2 +1,0 @@
-1-[problem] how to fit more than 2 parameters with park?
-2-[problem] how to fit only the parameter selected with park?

@@ -1,4 +1,0 @@
-1- the combox must contains class.__name__ or model name?
-2- model plugin need dataplugin 's modules 
-3- sort combox list
-4- use 2 combo box instead?
