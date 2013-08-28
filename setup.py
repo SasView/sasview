@@ -107,88 +107,68 @@ class build_ext_subclass( build_ext ):
 
 
 # sans.invariant
-#package_dir["sans.invariant"] = "sansinvariant/src/sans/invariant"
-#packages.extend(["sans.invariant"])
+package_dir["sans.invariant"] = os.path.join("src", "sans", "invariant")
+packages.extend(["sans.invariant"])
 
 # sans.guiframe
-#guiframe_path = os.path.join("sansguiframe", "src", "sans", "guiframe")
-#package_dir["sans.guiframe"] = guiframe_path
-#package_dir["sans.guiframe.local_perspectives"] = os.path.join(guiframe_path, 
-#                                                        "local_perspectives")
-#package_data["sans.guiframe"] = ['images/*', 'media/*']
-#packages.extend(["sans.guiframe", "sans.guiframe.local_perspectives"])
+guiframe_path = os.path.join("src", "sans", "guiframe")
+package_dir["sans.guiframe"] = guiframe_path
+package_dir["sans.guiframe.local_perspectives"] = os.path.join(os.path.join(guiframe_path, "local_perspectives"))
+package_data["sans.guiframe"] = ['images/*', 'media/*']
+packages.extend(["sans.guiframe", "sans.guiframe.local_perspectives"])
 # build local plugin
-#for dir in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
-#    if dir not in ['.svn','__init__.py', '__init__.pyc']:
-#        package_name = "sans.guiframe.local_perspectives." + dir
-#        packages.append(package_name)
-#        package_dir[package_name] = os.path.join(guiframe_path, 
-#                                                 "local_perspectives", dir)
+for dir in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
+    if dir not in ['.svn','__init__.py', '__init__.pyc']:
+        package_name = "sans.guiframe.local_perspectives." + dir
+        packages.append(package_name)
+        package_dir[package_name] = os.path.join(guiframe_path, "local_perspectives", dir)
 
 # sans.dataloader
-#package_dir["sans.dataloader"] = os.path.join("sansdataloader", 
-#                                              "src", "sans", "dataloader")
-#package_data["sans.dataloader.readers"] = ['defaults.xml']
-#packages.extend(["sans.dataloader","sans.dataloader.readers"])
+package_dir["sans.dataloader"] = os.path.join("src", "sans", "dataloader")
+package_data["sans.dataloader.readers"] = ['defaults.xml']
+packages.extend(["sans.dataloader","sans.dataloader.readers"])
 
 # sans.calculator
-#package_dir["sans.calculator"] = "sanscalculator/src/sans/calculator"
-#packages.extend(["sans.calculator"])
+package_dir["sans.calculator"] =os.path.join("src", "sans", "calculator")
+packages.extend(["sans.calculator"])
     
 # sans.pr
 numpy_incl_path = os.path.join(NUMPY_INC, "numpy")
 srcdir  = os.path.join("src", "sans", "pr", "c_extensions")
-
-
-    
-#package_dir["sans.pr.core"] = srcdir
-#package_dir["sans.pr"] = os.path.join("pr_inversion", "src","sans", "pr")
-#packages.extend(["sans.pr","sans.pr.core"])
+package_dir["sans.pr.core"] = srcdir
+package_dir["sans.pr"] = os.path.join("src","sans", "pr")
+packages.extend(["sans.pr","sans.pr.core"])
 ext_modules.append( Extension("sans.pr.core.pr_inversion",
-                              sources = [ os.path.join(srcdir, "Cinvertor.c"),
+                              sources = [os.path.join(srcdir, "Cinvertor.c"),
                                          os.path.join(srcdir, "invertor.c"),
                                          ],
                               include_dirs=[numpy_incl_path],
                               ) )
         
 # sans.fit (park integration)
-#package_dir["sans.fit"] = "park_integration/src/sans/fit"
-#packages.append("sans.fit")
+package_dir["sans.fit"] = os.path.join("src", "sans", "fit")
+packages.append("sans.fit")
 
-# inversion view
-#package_dir["sans.perspectives"] = "inversionview/src/sans/perspectives"
-#package_dir["sans.perspectives.pr"] = "inversionview/src/sans/perspectives/pr"
-#packages.extend(["sans.perspectives","sans.perspectives.pr"])
-#package_data["sans.perspectives.pr"] = ['images/*']
+# Perspectives
+package_dir["sans.perspectives"] = os.path.join("src", "sans", "perspectives")
+package_dir["sans.perspectives.pr"] = os.path.join("src", "sans", "perspectives", "pr")
+packages.extend(["sans.perspectives","sans.perspectives.pr"])
+package_data["sans.perspectives.pr"] = ['images/*']
 
-# Invariant view
-#package_dir["sans.perspectives"] = os.path.join("invariantview", "src", 
-#                                                "sans", "perspectives")
-#package_dir["sans.perspectives.invariant"] = os.path.join("invariantview", 
-#                                    "src", "sans", "perspectives", "invariant")
-                
-#package_data['sans.perspectives.invariant'] = [os.path.join("media",'*')]
-#packages.extend(["sans.perspectives","sans.perspectives.invariant"]) 
+package_dir["sans.perspectives.invariant"] = os.path.join("src", "sans", "perspectives", "invariant")
+packages.extend(["sans.perspectives.invariant"])
+package_data['sans.perspectives.invariant'] = [os.path.join("media",'*')]
 
-# Fitting view
-#fitting_path = os.path.join("fittingview", "src", "sans", 
-#                            "perspectives", "fitting")
-#package_dir["sans.perspectives"] = os.path.join("fittingview", 
-#                                            "src", "sans", "perspectives"),
-#package_dir["sans.perspectives.fitting"] = fitting_path
-#package_dir["sans.perspectives.fitting.plugin_models"] = \
-#                                os.path.join(fitting_path, "plugin_models")
+package_dir["sans.perspectives.fitting"] = os.path.join("src", "sans", "perspectives", "fitting")
+package_dir["sans.perspectives.fitting.plugin_models"] = os.path.join("src", "sans", "perspectives", "fitting", "plugin_models")
+packages.extend(["sans.perspectives.fitting", 
+                 "sans.perspectives.fitting.plugin_models"])
 package_data['sans.perspectives.fitting'] = ['media/*','plugin_models/*']
-#packages.extend(["sans.perspectives", "sans.perspectives.fitting", 
-#                 "sans.perspectives.fitting.plugin_models"])
 
-# Calculator view
-#package_dir["sans.perspectives"] = "calculatorview/src/sans/perspectives"
-#package_dir["sans.perspectives.calculator"] = os.path.join("calculatorview", 
-#                                "src", "sans", "perspectives", "calculator")
-#package_data['sans.perspectives.calculator'] = ['images/*', 'media/*']
-#packages.extend(["sans.perspectives", "sans.perspectives.calculator"])    
-     
+package_dir["sans.perspectives.calculator"] = os.path.join("src", "sans", "perspectives", "calculator")
+packages.extend(["sans.perspectives", "sans.perspectives.calculator"])    
+package_data['sans.perspectives.calculator'] = ['images/*', 'media/*']
+    
 # Data util
 package_dir["data_util"] = os.path.join("src", "sansutil")
 packages.extend(["data_util"])
@@ -228,10 +208,10 @@ if os.path.isdir(wrapper_dir):
 else:
     os.makedirs(wrapper_dir)
 sys.path.append(os.path.join("src", "sans", "models", "src", "python_wrapper"))
-#from wrapping import generate_wrappers
-#generate_wrappers(header_dir = includedir, 
-#                  output_dir = model_dir,
-#                  c_wrapper_dir = wrapper_dir)
+from wrapping import generate_wrappers
+generate_wrappers(header_dir = includedir, 
+                  output_dir = model_dir,
+                  c_wrapper_dir = wrapper_dir)
 
 IGNORED_FILES = [".svn"]
 if not os.name=='nt':
