@@ -54,7 +54,7 @@ class CategoryInstaller:
         #TODO: Fix for RPM installation. This method should be cleaned up.
         path = os.path.join(app_dir, 'sans', 'sansview', cat_file)
         if os.path.isfile(path):
-            return path
+            return os.path.dirname(path)
 
         if os.path.isfile(app_dir):
             app_dir = os.path.dirname(app_dir)
