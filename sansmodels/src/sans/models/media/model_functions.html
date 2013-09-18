@@ -32,9 +32,9 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p style="margin-left: 0.85in; text-indent: -0.35in;"><b>1.1.</b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp; </span>Definition</b></p>
 <p>The 1D scattering intensity is calculated in the following way (Guinier, 1955):</p>
 <p style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="img/image004.PNG" alt="" /></span></p>
-<p>where scale is a scale factor* volume fraction, V is the volume of the scatterer, r is the radius of the sphere, bkg is the background level and sldXXX is the scattering length density (SLD) of the scatterer or the solvent.</p>
-<p>Note that if your data is in absolute scale, the 'scale' should represent the volume fraction (unitless) if you have a good fit. If not, it should represent the volume fraction * a factor (by which your data might need to be rescaled).</p>
-<p>The 2D scattering intensity is the same as P(q) above, regardless of the orientation of the q vector.</p>
+<p>where r is the radius of the sphere, bkg is the background level and sldXXX is the scattering length density (SLD) of the scatterer or the solvent.<\p>
+<p>Note that if your data is on an absolute scale, the 'scale' should represent the volume fraction (unitless) * volume of a scatterer, V.</p>
+<p>The 2D scattering intensity is the same as above, regardless of the orientation of the q vector.</p>
 <p>The returned value is scaled to units of [cm-1] and the parameters of the sphere model are the following:</p>
 <div align="center">
 <table style="border-collapse: collapse;" border="2" cellspacing="0" cellpadding="0">
@@ -114,6 +114,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p style="text-align: center; page-break-after: avoid;" align="center"><img src="img/image005.jpg" alt="sphere_1D_validation" width="573" height="315" /></p>
 <p style="text-align: center; page-break-after: avoid;" align="center">&nbsp;</p>
 <p>Figure 1: Comparison of the DANSE scattering intensity for a sphere with the output of the NIST SANS analysis software. The parameters were set to: Scale=1.0, Radius=60 &Aring;, Contrast=1e-6 &Aring; -2, and Background=0.01 cm -1.</p>
+<p style="margin-left: 0.25in;"><i>2013/09/09 - Description reviewed by King, S. and Parker, P.</i></p>
 <p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.2.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="BinaryHSModel"></a><b><span style="font-size: 14pt;">BinaryHSModel</span></b></p>
 <p>This model (binary hard sphere model) provides the scattering intensity, for binary mixture of spheres including hard sphere interaction between those particles. Using Percus-Yevick closure, the calculation is an exact multi-component solution:</p>
 <p style="text-align: center;" align="center"><span style="position: relative; top: 5pt;"><img src="img/image006.PNG" alt="" /></span></p>
@@ -4804,7 +4805,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 </tr>
 <tr style="height: 19.25pt;">
 <td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>exponent_l (=n)</p>
+<p>exponent_p (=n)</p>
 </td>
 <td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">&nbsp;</td>
 <td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
@@ -4813,7 +4814,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 </tr>
 <tr style="height: 19.25pt;">
 <td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>exponent_p (=m)</p>
+<p>exponent_l (=m)</p>
 </td>
 <td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">&nbsp;</td>
 <td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
@@ -4838,6 +4839,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p style="text-align: center;" align="center"><b>Figure. 1D plot using the default values (w/200 data point).</b></p>
 <p style="margin-left: 0.25in; text-align: center;" align="center">&nbsp;</p>
 <p style="margin-left: 0.25in;">Reference: None.</p>
+<p style="margin-left: 0.25in;"><i>2013/09/09 - Description reviewed by King, S. and Parker, P.</i></p>
 <p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">3.3.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><b><span style="font-size: 14pt;">&nbsp;<a name="CorrLength"></a>CorrLength (CorrelationLengthModel)</span></b></p>
 <p style="margin-left: 0.25in;">Calculate an empirical functional form for SANS data characterized by a low-Q signal and a high-Q signal</p>
 <p>The returned value is scaled to units of [cm-1sr-1], absolute scale.</p>
@@ -4892,7 +4894,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 </tr>
 <tr style="height: 19.25pt;">
 <td style="border-width: medium 1pt 1pt; vertical-align: top; width: 107pt; height: 19.25pt;">
-<p>exponent_l (=n)</p>
+<p>exponent_p (=n)</p>
 </td>
 <td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">&nbsp;</td>
 <td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
@@ -4901,7 +4903,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 </tr>
 <tr style="height: 19.25pt;">
 <td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>exponent_p (=m)</p>
+<p>exponent_l (=m)</p>
 </td>
 <td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">&nbsp;</td>
 <td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
@@ -4927,6 +4929,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p style="margin-left: 0.25in; text-align: center;" align="center">&nbsp;</p>
 <p style="margin-left: 0.25in;">REFERENCE</p>
 <p style="margin-left: 0.25in;">B. Hammouda, D.L. Ho and S.R. Kline, &ldquo;Insight into Clustering in Poly(ethylene oxide) Solutions&rdquo;, Macromolecules 37, 6932-6937 (2004).</p>
+<p style="margin-left: 0.25in;"><i>2013/09/09 - Description reviewed by King, S. and Parker, P.</i></p>
 <p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">3.4.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><b><span style="font-size: 14pt;">&nbsp;<a name="Lorentz"></a>(Ornstein-Zernicke) Lorentz (Model)</span></b></p>
 <p style="text-indent: 0.25in;">The Ornstein-Zernicke model is defined by:</p>
 <p><span style="font-size: 14pt;">&nbsp;</span></p>
@@ -5054,6 +5057,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p style="margin-left: 0.5in;">Debye, Anderson, Brumberger, "Scattering by an Inhomogeneous Solid. II. The Correlation Function and its Application", J. Appl. Phys. 28 (6), 679 (1957).</p>
 <p style="margin-left: 0.5in;">&nbsp;</p>
 <p style="margin-left: 0.5in;">Debye, Bueche, "Scattering by an Inhomogeneous Solid", J. Appl. Phys. 20, 518 (1949).</p>
+<p style="margin-left: 0.25in;"><i>2013/09/09 - Description reviewed by King, S. and Parker, P.</i></p>
 <p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">3.6.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><b><span style="font-size: 14pt;">&nbsp; <a name="Absolute Power_Law"></a>Absolute Power_Law </span></b></p>
 <p style="margin-left: 0.25in;">This model describes a power law with background.</p>
 <p style="text-align: center;" align="center"><span style="font-size: 14pt; position: relative; top: 5pt;"><img src="img/image182.PNG" alt="" /></span></p>
@@ -5384,6 +5388,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p style="margin-left: 0.25in; text-align: center;" align="center">&nbsp;</p>
 <p style="margin-left: 0.25in;">References:</p>
 <p style="margin-left: 0.25in; text-indent: 0.25in;">D. Mildner, and P. Hall,&nbsp; J. Phys. D.: Appl. Phys.,&nbsp; 19, 1535-1545&nbsp; (1986), Equation(9).</p>
+<p style="margin-left: 0.25in;"><i>2013/09/09 - Description reviewed by King, S. and Parker, P.</i></p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 <p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">3.10.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b> <b><span style="font-size: 14pt;"> <a name="Surface_Fractal"></a><a name="SurfaceFractalModel"></a>SurfaceFractalModel</span></b></p>
