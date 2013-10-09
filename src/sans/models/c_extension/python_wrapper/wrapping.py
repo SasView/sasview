@@ -27,8 +27,8 @@ def write_c_models(model_list):
     # and 'sansmodels/src/c_models/c_models.cpp'
     
 
-    template_file = open(os.path.join("src", "sans", "models","src","c_models","c_models.cpp.template"),"r")
-    write_file = open(os.path.join("src", "sans",  "models","src","c_models","c_models.cpp"),"w")
+    template_file = open(os.path.join("src", "sans", "models","c_extension","c_models","c_models.cpp.template"),"r")
+    write_file = open(os.path.join("src", "sans",  "models","c_extension","c_models","c_models.cpp"),"w")
     buf = template_file.read()
     lines = buf.split('\n')
     
