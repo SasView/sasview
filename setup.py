@@ -4,9 +4,7 @@
 """
 import sys
 import os
-import platform
-import shutil
-from setuptools import setup, Extension, find_packages
+from setuptools import setup, Extension
 from distutils.command.build_ext import build_ext
 
 try:
@@ -55,9 +53,9 @@ if os.path.isdir(sans_dir):
         os.remove(f_path)
     f_path = os.path.join(sans_dir, 'plugin_models')
     if os.path.isdir(f_path):
-        for file in os.listdir(f_path): 
-            if file in plugin_model_list:
-                file_path =  os.path.join(f_path, file)
+        for f in os.listdir(f_path): 
+            if f in plugin_model_list:
+                file_path =  os.path.join(f_path, f)
                 os.remove(file_path)
                     
 # 'sys.maxsize' and 64bit: Not supported for python2.5
@@ -92,8 +90,8 @@ class build_ext_subclass( build_ext ):
         # OpenMP build options
         if enable_openmp:
             if copt.has_key(c):
-               for e in self.extensions:
-                   e.extra_compile_args = copt[ c ]
+                for e in self.extensions:
+                    e.extra_compile_args = copt[ c ]
             if lopt.has_key(c):
                 for e in self.extensions:
                     e.extra_link_args = lopt[ c ]
@@ -105,6 +103,9 @@ class build_ext_subclass( build_ext ):
 
         build_ext.build_extensions(self)
 
+# sans module
+package_dir["sans"] = os.path.join("src", "sans")
+packages.append("sans")
 
 # sans.invariant
 package_dir["sans.invariant"] = os.path.join("src", "sans", "invariant")
@@ -117,11 +118,11 @@ package_dir["sans.guiframe.local_perspectives"] = os.path.join(os.path.join(guif
 package_data["sans.guiframe"] = ['images/*', 'media/*']
 packages.extend(["sans.guiframe", "sans.guiframe.local_perspectives"])
 # build local plugin
-for dir in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
-    if dir not in ['.svn','__init__.py', '__init__.pyc']:
-        package_name = "sans.guiframe.local_perspectives." + dir
+for d in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
+    if d not in ['.svn','__init__.py', '__init__.pyc']:
+        package_name = "sans.guiframe.local_perspectives." + d
         packages.append(package_name)
-        package_dir[package_name] = os.path.join(guiframe_path, "local_perspectives", dir)
+        package_dir[package_name] = os.path.join(guiframe_path, "local_perspectives", d)
 
 # sans.dataloader
 package_dir["sans.dataloader"] = os.path.join("src", "sans", "dataloader")
@@ -216,7 +217,6 @@ IGNORED_FILES = [".svn"]
 if not os.name=='nt':
     IGNORED_FILES.extend(["gamma_win.c","winFuncs.c"])
 
-
 EXTENSIONS = [".c", ".cpp"]
 
 def append_file(file_list, dir_path):
@@ -246,6 +246,52 @@ append_file(file_list=model_sources, dir_path=wrapper_dir)
 smear_sources = []
 append_file(file_list=smear_sources, dir_path=smear_dir)
         
+package_dir["sans.models"] = model_dir
+package_dir["sans.models.sans_extension"] = os.path.join("src", "sans", "models", "sans_extension")
+package_data['sans.models'] = [os.path.join('media', "*.*")]
+package_data['sans.models'] += [os.path.join('media','img', "*.*")]
+packages.extend(["sans.models","sans.models.sans_extension"])
+    
+smearer_sources = [os.path.join(smear_dir, "smearer.cpp"),
+                  os.path.join(smear_dir, "smearer_module.cpp")]
+geni_sources = [os.path.join(gen_dir, "sld2i_module.cpp")]
+if os.name=='nt':
+    smearer_sources.append(os.path.join(igordir, "winFuncs.c"))
+    geni_sources.append(os.path.join(igordir, "winFuncs.c"))
+ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
+                                sources=model_sources,                 
+                                include_dirs=[igordir, includedir, 
+                                              c_model_dir, numpy_incl_path, cephes_dir],
+                                ),       
+                    # Smearer extension
+                    Extension("sans.models.sans_extension.smearer",
+                              sources = smearer_sources,
+                              include_dirs=[igordir, 
+                                            smear_dir, numpy_incl_path],
+                              ),
+                    
+                    Extension("sans.models.sans_extension.smearer2d_helper",
+                              sources = [os.path.join(smear_dir, 
+                                                "smearer2d_helper_module.cpp"),
+                                         os.path.join(smear_dir, 
+                                                "smearer2d_helper.cpp"),],
+                              include_dirs=[smear_dir, numpy_incl_path],
+                              ),
+                    
+                    Extension("sans.models.sans_extension.sld2i",
+                              sources = [os.path.join(gen_dir, 
+                                                "sld2i_module.cpp"),
+                                         os.path.join(gen_dir, 
+                                                "sld2i.cpp"),
+                                         os.path.join(c_model_dir, 
+                                                "libfunc.c"),
+                                         os.path.join(c_model_dir, 
+                                                "librefl.c"),],
+                              include_dirs=[gen_dir, includedir, 
+                                            c_model_dir, numpy_incl_path],
+                              )
+                    ] )
+        
 # SasView
 
 package_dir["sans.sansview"] = "sansview"
@@ -263,14 +309,14 @@ if os.name=='nt':
 else:
     required.extend(['pil'])
    
- # Set up SasView    
+# Set up SasView    
 setup(
     name="sasview",
     version = VERSION,
     description = "SasView application",
     author = "University of Tennessee",
     author_email = "sansdanse@gmail.com",
-    url = "http://danse.chem.utk.edu",
+    url = "http://sasview.org",
     license = "PSF",
     keywords = "small-angle x-ray and neutron scattering analysis",
     download_url = "https://sourceforge.net/projects/sansviewproject/files/",
