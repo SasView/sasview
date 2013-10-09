@@ -48,20 +48,15 @@ class CategoryInstaller:
         """
         returns the dir where default_cat.p should be
         """
+        import sans.sansview
         cat_file = "default_categories.p"
-        app_dir = sys.path[0]
-        if os.path.isfile(app_dir):
-            app_dir = os.path.dirname(app_dir)
-        n_dir = 12
-        for i in range(n_dir): 
-            path = os.path.join(app_dir, cat_file)
-            if os.path.isfile(path):
-                path = os.path.dirname(path)
-                return path
-            else:
-                app_dir, _ = os.path.split(app_dir)
-                
-        raise RuntimeError('Could not find the App folder')         
+        dir, file_name = os.path.split(sans.sansview.__file__)
+        cat_file_path = os.path.join(dir, cat_file)
+        if os.path.isfile(cat_file_path):
+            cat_file_dir = os.path.dirname(cat_file_path)
+            return cat_file_dir
+        
+        raise RuntimeError('CategoryInstaller: Could not find folder containing default categories')
 
     @staticmethod
     def _get_home_dir():

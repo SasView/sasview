@@ -93,10 +93,11 @@ def _find_local_config(file, path):
         fObj, path_config, descr = imp.find_module(file, [path])
         config_module = imp.load_module(file, fObj, path_config, descr) 
     except:
-        pass
+        logging.error("Error loading %s/%s: %s" % (path, file, sys.exc_value))
     finally:
         if fObj is not None:
             fObj.close()
+    logging.info("GuiManager loaded %s/%s" % (path, file))
     return config_module
 
 # Get APP folder
