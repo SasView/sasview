@@ -192,12 +192,12 @@ ext_modules.append( Extension("park._modeling",
 
 # Sans models
 includedir  = os.path.join("src", "sans", "models", "include")
-igordir = os.path.join("src", "sans", "models", "src", "libigor")
-cephes_dir = os.path.join("src", "sans", "models", "src", "cephes")
-c_model_dir = os.path.join("src", "sans", "models", "src", "c_models")
-smear_dir  = os.path.join("src", "sans", "models", "src", "c_smearer")
-gen_dir  = os.path.join("src", "sans", "models", "src", "c_gen")
-wrapper_dir  = os.path.join("src", "sans", "models", "src", "python_wrapper", "generated")
+igordir = os.path.join("src", "sans", "models", "c_extension", "libigor")
+cephes_dir = os.path.join("src", "sans", "models", "c_extension", "cephes")
+c_model_dir = os.path.join("src", "sans", "models", "c_extension", "c_models")
+smear_dir  = os.path.join("src", "sans", "models", "c_extension", "c_smearer")
+gen_dir  = os.path.join("src", "sans", "models", "c_extension", "c_gen")
+wrapper_dir  = os.path.join("src", "sans", "models", "c_extension", "python_wrapper", "generated")
 model_dir = os.path.join("src", "sans","models")
 
 if os.path.isdir(wrapper_dir):
@@ -206,7 +206,7 @@ if os.path.isdir(wrapper_dir):
         os.remove(file_path)
 else:
     os.makedirs(wrapper_dir)
-sys.path.append(os.path.join("src", "sans", "models", "src", "python_wrapper"))
+sys.path.append(os.path.join("src", "sans", "models", "c_extension", "python_wrapper"))
 from wrapping import generate_wrappers
 generate_wrappers(header_dir = includedir, 
                   output_dir = model_dir,
@@ -245,53 +245,6 @@ append_file(file_list=model_sources, dir_path=wrapper_dir)
 
 smear_sources = []
 append_file(file_list=smear_sources, dir_path=smear_dir)
-
-
-#package_dir["sans.models"] = model_dir
-#package_dir["sans.models.sans_extension"] = os.path.join("src", "sans", "models", "sans_extension")
-#package_data['sans.models'] = [os.path.join('media', "*.*")]
-#package_data['sans.models'] += [os.path.join('media','img', "*.*")]
-#packages.extend(["sans","sans.models","sans.models.sans_extension"])
-#    
-#smearer_sources = [os.path.join(smear_dir, "smearer.cpp"),
-#                  os.path.join(smear_dir, "smearer_module.cpp")]
-#geni_sources = [os.path.join(gen_dir, "sld2i_module.cpp")]
-#if os.name=='nt':
-#    smearer_sources.append(os.path.join(igordir, "winFuncs.c"))
-#    geni_sources.append(os.path.join(igordir, "winFuncs.c"))
-#ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
-#                                sources=model_sources,                 
-#                                include_dirs=[igordir, includedir, 
-#                                              c_model_dir, numpy_incl_path, cephes_dir],
-#                                ),       
-#                    # Smearer extension
-#                    Extension("sans.models.sans_extension.smearer",
-#                              sources = smearer_sources,
-#                              include_dirs=[igordir, 
-#                                            smear_dir, numpy_incl_path],
-#                              ),
-#                    
-#                    Extension("sans.models.sans_extension.smearer2d_helper",
-#                              sources = [os.path.join(smear_dir, 
-#                                                "smearer2d_helper_module.cpp"),
-#                                         os.path.join(smear_dir, 
-#                                                "smearer2d_helper.cpp"),],
-#                              include_dirs=[smear_dir, numpy_incl_path],
-#                              ),
-#                    
-#                    Extension("sans.models.sans_extension.sld2i",
-#                              sources = [os.path.join(gen_dir, 
-#                                                "sld2i_module.cpp"),
-#                                         os.path.join(gen_dir, 
-#                                                "sld2i.cpp"),
-#                                         os.path.join(c_model_dir, 
-#                                                "libfunc.c"),
-#                                         os.path.join(c_model_dir, 
-#                                                "librefl.c"),],
-#                              include_dirs=[gen_dir, includedir, 
-#                                            c_model_dir, numpy_incl_path],
-#                              )
-#                    ] )
         
 # SasView
 
