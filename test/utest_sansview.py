@@ -20,7 +20,6 @@ SKIPPED_DIRS = ["sansrealspace", "calculatorview"]
 if not HAS_MPL_WX:
     SKIPPED_DIRS.append("sansguiframe")
 
-SANSVIEW_DIR = os.pardir
 COMMAND_SEP = ';'
 if os.name == 'nt':
     COMMAND_SEP = '&'
@@ -32,14 +31,14 @@ def run_tests():
     n_errors = 0
     n_failures = 0
     
-    for d in os.listdir(SANSVIEW_DIR):
+    for d in os.listdir(os.getcwd()):
         
         # Check for modules to be skipped
         if d in SKIPPED_DIRS:
             continue
         
         # Go through modules looking for unit tests
-        module_dir = os.path.join(os.getcwd(),SANSVIEW_DIR,d,"test")
+        module_dir = os.path.join(os.getcwd(),d,"test")
         if os.path.isdir(module_dir):
             for f in os.listdir(module_dir):
                 file_path = os.path.join(module_dir,f)
