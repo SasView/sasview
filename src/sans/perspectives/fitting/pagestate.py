@@ -1497,7 +1497,10 @@ class Reader(CansasReader):
                 list = []
                 if field is not None:
                     list = [parse_entry_helper(node, item) for node in field]
-                exec "data_info.%s = numpy.array(list)" % item[0]
+                if len(list) < 2:
+                    exec "data_info.%s = None" % item[0]
+                else:
+                    exec "data_info.%s = numpy.array(list)" % item[0]
         
         return data_info
 
