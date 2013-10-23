@@ -4,9 +4,7 @@
 """
 import sys
 import os
-import platform
-import shutil
-from setuptools import setup, Extension, find_packages
+from setuptools import setup, Extension
 from distutils.command.build_ext import build_ext
 
 try:
@@ -55,9 +53,9 @@ if os.path.isdir(sans_dir):
         os.remove(f_path)
     f_path = os.path.join(sans_dir, 'plugin_models')
     if os.path.isdir(f_path):
-        for file in os.listdir(f_path): 
-            if file in plugin_model_list:
-                file_path =  os.path.join(f_path, file)
+        for f in os.listdir(f_path): 
+            if f in plugin_model_list:
+                file_path =  os.path.join(f_path, f)
                 os.remove(file_path)
                     
 # 'sys.maxsize' and 64bit: Not supported for python2.5
@@ -92,8 +90,8 @@ class build_ext_subclass( build_ext ):
         # OpenMP build options
         if enable_openmp:
             if copt.has_key(c):
-               for e in self.extensions:
-                   e.extra_compile_args = copt[ c ]
+                for e in self.extensions:
+                    e.extra_compile_args = copt[ c ]
             if lopt.has_key(c):
                 for e in self.extensions:
                     e.extra_link_args = lopt[ c ]
@@ -105,100 +103,80 @@ class build_ext_subclass( build_ext ):
 
         build_ext.build_extensions(self)
 
+# sans module
+package_dir["sans"] = os.path.join("src", "sans")
+packages.append("sans")
 
 # sans.invariant
-package_dir["sans.invariant"] = "sansinvariant/src/sans/invariant"
+package_dir["sans.invariant"] = os.path.join("src", "sans", "invariant")
 packages.extend(["sans.invariant"])
 
 # sans.guiframe
-guiframe_path = os.path.join("sansguiframe", "src", "sans", "guiframe")
+guiframe_path = os.path.join("src", "sans", "guiframe")
 package_dir["sans.guiframe"] = guiframe_path
-package_dir["sans.guiframe.local_perspectives"] = os.path.join(guiframe_path, 
-                                                        "local_perspectives")
+package_dir["sans.guiframe.local_perspectives"] = os.path.join(os.path.join(guiframe_path, "local_perspectives"))
 package_data["sans.guiframe"] = ['images/*', 'media/*']
 packages.extend(["sans.guiframe", "sans.guiframe.local_perspectives"])
 # build local plugin
-for dir in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
-    if dir not in ['.svn','__init__.py', '__init__.pyc']:
-        package_name = "sans.guiframe.local_perspectives." + dir
+for d in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
+    if d not in ['.svn','__init__.py', '__init__.pyc']:
+        package_name = "sans.guiframe.local_perspectives." + d
         packages.append(package_name)
-        package_dir[package_name] = os.path.join(guiframe_path, 
-                                                 "local_perspectives", dir)
+        package_dir[package_name] = os.path.join(guiframe_path, "local_perspectives", d)
 
 # sans.dataloader
-package_dir["sans.dataloader"] = os.path.join("sansdataloader", 
-                                              "src", "sans", "dataloader")
+package_dir["sans.dataloader"] = os.path.join("src", "sans", "dataloader")
 package_data["sans.dataloader.readers"] = ['defaults.xml']
 packages.extend(["sans.dataloader","sans.dataloader.readers"])
 
 # sans.calculator
-package_dir["sans.calculator"] = "sanscalculator/src/sans/calculator"
+package_dir["sans.calculator"] =os.path.join("src", "sans", "calculator")
 packages.extend(["sans.calculator"])
     
 # sans.pr
 numpy_incl_path = os.path.join(NUMPY_INC, "numpy")
-srcdir  = os.path.join("pr_inversion", "src", "sans", "pr", "c_extensions")
-
-
-    
+srcdir  = os.path.join("src", "sans", "pr", "c_extensions")
 package_dir["sans.pr.core"] = srcdir
-package_dir["sans.pr"] = os.path.join("pr_inversion", "src","sans", "pr")
+package_dir["sans.pr"] = os.path.join("src","sans", "pr")
 packages.extend(["sans.pr","sans.pr.core"])
 ext_modules.append( Extension("sans.pr.core.pr_inversion",
-                              sources = [ os.path.join(srcdir, "Cinvertor.c"),
+                              sources = [os.path.join(srcdir, "Cinvertor.c"),
                                          os.path.join(srcdir, "invertor.c"),
                                          ],
                               include_dirs=[numpy_incl_path],
                               ) )
         
 # sans.fit (park integration)
-package_dir["sans.fit"] = "park_integration/src/sans/fit"
+package_dir["sans.fit"] = os.path.join("src", "sans", "fit")
 packages.append("sans.fit")
 
-# inversion view
-package_dir["sans.perspectives"] = "inversionview/src/sans/perspectives"
-package_dir["sans.perspectives.pr"] = "inversionview/src/sans/perspectives/pr"
+# Perspectives
+package_dir["sans.perspectives"] = os.path.join("src", "sans", "perspectives")
+package_dir["sans.perspectives.pr"] = os.path.join("src", "sans", "perspectives", "pr")
 packages.extend(["sans.perspectives","sans.perspectives.pr"])
 package_data["sans.perspectives.pr"] = ['images/*']
 
-# Invariant view
-package_dir["sans.perspectives"] = os.path.join("invariantview", "src", 
-                                                "sans", "perspectives")
-package_dir["sans.perspectives.invariant"] = os.path.join("invariantview", 
-                                    "src", "sans", "perspectives", "invariant")
-                
+package_dir["sans.perspectives.invariant"] = os.path.join("src", "sans", "perspectives", "invariant")
+packages.extend(["sans.perspectives.invariant"])
 package_data['sans.perspectives.invariant'] = [os.path.join("media",'*')]
-packages.extend(["sans.perspectives","sans.perspectives.invariant"]) 
 
-# Fitting view
-fitting_path = os.path.join("fittingview", "src", "sans", 
-                            "perspectives", "fitting")
-package_dir["sans.perspectives"] = os.path.join("fittingview", 
-                                            "src", "sans", "perspectives"),
-package_dir["sans.perspectives.fitting"] = fitting_path
-package_dir["sans.perspectives.fitting.plugin_models"] = \
-                                os.path.join(fitting_path, "plugin_models")
-package_data['sans.perspectives.fitting'] = ['media/*','plugin_models/*']
-packages.extend(["sans.perspectives", "sans.perspectives.fitting", 
+package_dir["sans.perspectives.fitting"] = os.path.join("src", "sans", "perspectives", "fitting")
+package_dir["sans.perspectives.fitting.plugin_models"] = os.path.join("src", "sans", "perspectives", "fitting", "plugin_models")
+packages.extend(["sans.perspectives.fitting", 
                  "sans.perspectives.fitting.plugin_models"])
+package_data['sans.perspectives.fitting'] = ['media/*','plugin_models/*']
 
-# Calculator view
-package_dir["sans.perspectives"] = "calculatorview/src/sans/perspectives"
-package_dir["sans.perspectives.calculator"] = os.path.join("calculatorview", 
-                                "src", "sans", "perspectives", "calculator")
-package_data['sans.perspectives.calculator'] = ['images/*', 'media/*']
 packages.extend(["sans.perspectives", "sans.perspectives.calculator"])    
-     
+package_data['sans.perspectives.calculator'] = ['images/*', 'media/*']
+    
 # Data util
-package_dir["data_util"] = "sansutil"
+package_dir["data_util"] = os.path.join("src", "data_util")
 packages.extend(["data_util"])
 
 # Plottools
-package_dir["danse"] = os.path.join("plottools", "src", "danse")
-package_dir["danse.common"] = os.path.join("plottools", "src", 
-                                           "danse", "common")
-package_dir["danse.common.plottools"] = os.path.join("plottools", 
-                                    "src", "danse", "common", "plottools")
+package_dir["danse"] = os.path.join("src", "danse")
+package_dir["danse.common"] = os.path.join("src", "danse", "common")
+package_dir["danse.common.plottools"] = os.path.join("src", "danse", "common", "plottools")
 packages.extend(["danse", "danse.common", "danse.common.plottools"])
 
 # Park 1.2.1
@@ -214,14 +192,14 @@ ext_modules.append( Extension("park._modeling",
                               ) )
 
 # Sans models
-includedir  = os.path.join("sansmodels", "include")
-igordir = os.path.join("sansmodels", "src", "libigor")
-cephes_dir = os.path.join("sansmodels", "src", "cephes")
-c_model_dir = os.path.join("sansmodels", "src", "c_models")
-smear_dir  = os.path.join("sansmodels", "src", "c_smearer")
-gen_dir  = os.path.join("sansmodels", "src", "c_gen")
-wrapper_dir  = os.path.join("sansmodels", "src", "python_wrapper", "generated")
-model_dir = os.path.join("sansmodels", "src", "sans","models")
+includedir  = os.path.join("src", "sans", "models", "include")
+igordir = os.path.join("src", "sans", "models", "c_extension", "libigor")
+cephes_dir = os.path.join("src", "sans", "models", "c_extension", "cephes")
+c_model_dir = os.path.join("src", "sans", "models", "c_extension", "c_models")
+smear_dir  = os.path.join("src", "sans", "models", "c_extension", "c_smearer")
+gen_dir  = os.path.join("src", "sans", "models", "c_extension", "c_gen")
+wrapper_dir  = os.path.join("src", "sans", "models", "c_extension", "python_wrapper", "generated")
+model_dir = os.path.join("src", "sans","models")
 
 if os.path.isdir(wrapper_dir):
     for file in os.listdir(wrapper_dir): 
@@ -229,7 +207,7 @@ if os.path.isdir(wrapper_dir):
         os.remove(file_path)
 else:
     os.makedirs(wrapper_dir)
-sys.path.append(os.path.join("sansmodels", "src", "python_wrapper"))
+sys.path.append(os.path.join("src", "sans", "models", "c_extension", "python_wrapper"))
 from wrapping import generate_wrappers
 generate_wrappers(header_dir = includedir, 
                   output_dir = model_dir,
@@ -238,7 +216,6 @@ generate_wrappers(header_dir = includedir,
 IGNORED_FILES = [".svn"]
 if not os.name=='nt':
     IGNORED_FILES.extend(["gamma_win.c","winFuncs.c"])
-
 
 EXTENSIONS = [".c", ".cpp"]
 
@@ -268,18 +245,12 @@ append_file(file_list=model_sources, dir_path=wrapper_dir)
 
 smear_sources = []
 append_file(file_list=smear_sources, dir_path=smear_dir)
-
-
-package_dir["sans"] = os.path.join("sansmodels", "src", "sans")
+        
 package_dir["sans.models"] = model_dir
-
-package_dir["sans.models.sans_extension"] = os.path.join("sansmodels", "src", 
-                                            "sans", "models", "sans_extension")
-            
+package_dir["sans.models.sans_extension"] = os.path.join("src", "sans", "models", "sans_extension")
 package_data['sans.models'] = [os.path.join('media', "*.*")]
 package_data['sans.models'] += [os.path.join('media','img', "*.*")]
-
-packages.extend(["sans","sans.models","sans.models.sans_extension"])
+packages.extend(["sans.models","sans.models.sans_extension"])
     
 smearer_sources = [os.path.join(smear_dir, "smearer.cpp"),
                   os.path.join(smear_dir, "smearer_module.cpp")]
@@ -338,14 +309,14 @@ if os.name=='nt':
 else:
     required.extend(['pil'])
    
- # Set up SasView    
+# Set up SasView    
 setup(
     name="sasview",
     version = VERSION,
     description = "SasView application",
     author = "University of Tennessee",
     author_email = "sansdanse@gmail.com",
-    url = "http://danse.chem.utk.edu",
+    url = "http://sasview.org",
     license = "PSF",
     keywords = "small-angle x-ray and neutron scattering analysis",
     download_url = "https://sourceforge.net/projects/sansviewproject/files/",

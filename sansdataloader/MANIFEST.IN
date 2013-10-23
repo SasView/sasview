@@ -1,5 +1,0 @@
-graft src\sans\dataloader\readers\*.xml
-graft test
-include licence.txt
-include README.txt
-include release_notes.txt

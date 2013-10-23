@@ -1,1 +1,0 @@
-- Need support for images. tiff_reader.py needs to be tested.
