@@ -5,7 +5,7 @@ import wx
 import os
 import sys
 from copy import deepcopy
-from danse.common.plottools.plottables import Graph
+from sans.plottools.plottables import Graph
 from Plotter1D import ModelPanel1D as PlotPanel
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.gui_style import GUIFRAME_ID

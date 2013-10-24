@@ -4,7 +4,6 @@ Implement grid used to store data
 import wx
 import numpy
 import math
-import time
 import re
 import os
 import sys
@@ -15,10 +14,9 @@ import wx.aui
 from wx.aui import AuiNotebook as nb
 import wx.lib.sheet as sheet
 from sans.guiframe.panel_base import PanelBase
-from sans.guiframe.utils import format_number
 from sans.guiframe.events import NewPlotEvent 
 from sans.guiframe.events import StatusEvent  
-from danse.common.plottools import plottables
+from sans.plottools import plottables
 from sans.guiframe.dataFitting import Data1D
 
 FUNC_DICT = {"sqrt": "math.sqrt",
@@ -1050,7 +1048,6 @@ class GridPanel(SPanel):
                                     wx.PostEvent(self.parent.parent, 
                                                  StatusEvent(status=msg,
                                                               info="error"))
-                                    #time.sleep(0.5) 
                                     return
 
                         wx.PostEvent(self.parent.parent, 
@@ -1065,12 +1062,9 @@ class GridPanel(SPanel):
                     msg = "Row %s , " % str(row)
                     msg += "Column %s is NOT " % str(label)
                     msg += "the results of fits to view..."
-                    #raise ValueError, msg
                     wx.PostEvent(self.parent.parent, 
                          StatusEvent(status=msg, info="error")) 
-                    #time.sleep(0.5)
                     return
-                    #continue
     
     def on_plot(self, event):
         """

@@ -2004,7 +2004,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         # get profile data
         x, y = self.model.getProfile()
 
-        from danse.common.plottools import Data1D as pf_data1d
+        from sans.plottools import Data1D as pf_data1d
         #from sans.perspectives.theory.profile_dialog import SLDPanel
         from sans.guiframe.local_perspectives.plotting.profile_dialog \
         import SLDPanel

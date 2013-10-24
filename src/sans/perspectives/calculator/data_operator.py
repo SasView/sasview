@@ -5,14 +5,11 @@ import wx
 import sys
 import time
 import numpy
-from sans.dataloader.data_info import Data2D
 from sans.dataloader.data_info import Data1D
-from danse.common.plottools.PlotPanel import PlotPanel
-from danse.common.plottools.plottables import Graph
-from danse.common.plottools.canvas import FigureCanvas
-from danse.common.plottools import transform
+from sans.plottools.PlotPanel import PlotPanel
+from sans.plottools.plottables import Graph
+from sans.plottools import transform
 from matplotlib.font_manager import FontProperties
-from matplotlib.figure import Figure
 from sans.guiframe.events import StatusEvent 
 from sans.perspectives.calculator import calculator_widgets as widget   
 #Control panel width 
@@ -864,7 +861,7 @@ class SmallPanel(PlotPanel):
         if len(list.keys()) > 0:
             first_item = list.keys()[0]
             if first_item.x != []:
-                from danse.common.plottools.PropertyDialog import Properties
+                from sans.plottools.PropertyDialog import Properties
                 dial = Properties(self, -1, 'Change Scale')
                 # type of view or model used
                 dial.xvalue.Clear()

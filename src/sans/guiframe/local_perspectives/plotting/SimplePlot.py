@@ -4,9 +4,8 @@ Simple Plot Frame : supporting only copy, print, scale
 import wx
 from sans.guiframe.local_perspectives.plotting.Plotter2D import ModelPanel2D \
                     as PlotPanel
-from danse.common.plottools.toolbar import NavigationToolBar
-#from danse.common.plottools.PlotPanel import PlotPanel 
-from danse.common.plottools.plottables import Graph
+from sans.plottools.toolbar import NavigationToolBar
+from sans.plottools.plottables import Graph
 from sans.guiframe.utils import PanelMenu
 
 class SimplePlotPanel(PlotPanel):   

@@ -33,7 +33,7 @@ from sans.perspectives.calculator.calculator_widgets import OutputTextCtrl
 from sans.perspectives.calculator.calculator_widgets import InputTextCtrl
 from wx.lib.scrolledpanel import ScrolledPanel
 from sans.perspectives.calculator.load_thread import GenReader
-from danse.common.plottools.arrow3d import Arrow3D
+from sans.plottools.arrow3d import Arrow3D
 from sans.perspectives.calculator import calculator_widgets as widget
 from sans.guiframe.events import NewPlotEvent    
 

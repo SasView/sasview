@@ -26,11 +26,8 @@ The following is a checklist of functionality to look for while testing:
 """
 
 import wx
-from danse.common.plottools.PlotPanel import PlotPanel
-from danse.common.plottools.plottables import Plottable, Graph, Data1D, Theory1D
-import  sys
-import numpy
-
+from sans.plottools.PlotPanel import PlotPanel
+from sans.plottools.plottables import Text, Graph
 
 class TestPlotPanel(PlotPanel):
     
@@ -76,8 +73,6 @@ class TestPlotPanel(PlotPanel):
 # ---------------------------------------------------------------
 def sample_graph():
     # Construct a simple graph
-
-    from danse.common.plottools.plottables import Text, Graph
     
     T1 = Text(text='text example 1', xpos=0.2, ypos=0.2)
     T2 = Text(text='text example 2', xpos=0.5, ypos=0.5)
@@ -105,7 +100,6 @@ def demo_plotter(graph):
 
     
 if __name__ == "__main__":
-    pass
     demo_plotter(sample_graph())
 
             

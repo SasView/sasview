@@ -36,8 +36,8 @@
      
 """
 import wx
-from danse.common.plottools.PlotPanel import PlotPanel
-from danse.common.plottools.plottables import Plottable, Graph, Data1D, Theory1D,Data2D
+from sans.plottools.PlotPanel import PlotPanel
+from sans.plottools.plottables import Data1D, Theory1D, Data2D
 import  sys,os
 import numpy
 import random, math
@@ -199,8 +199,7 @@ class ViewerFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             mypath = os.path.basename(path)
-            #from danse.common.plottools.plottables import Data2D
-            from DataLoader.loader import  Loader
+            from sans.dataloader.loader import  Loader
            
             #Instantiate a loader 
             L=Loader()

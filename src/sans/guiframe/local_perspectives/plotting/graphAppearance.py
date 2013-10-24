@@ -17,7 +17,7 @@ Dialog for general graph appearance
 """
 
 import wx
-from danse.common.plottools.SimpleFont import SimpleFont
+from sans.plottools.SimpleFont import SimpleFont
 
 COLOR = ['black', 'blue', 'green', 'red', 'cyan', 'magenta', 'yellow']
 

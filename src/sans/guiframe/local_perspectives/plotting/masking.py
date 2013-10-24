@@ -24,8 +24,8 @@ import matplotlib.cm as cm
 import math
 import copy
 import numpy
-from danse.common.plottools.PlotPanel import PlotPanel
-from danse.common.plottools.plottables import Graph
+from sans.plottools.PlotPanel import PlotPanel
+from sans.plottools.plottables import Graph
 from binder import BindArtist
 from sans.guiframe.dataFitting import Data1D, Data2D
 from boxMask import BoxMask

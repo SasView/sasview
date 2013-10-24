@@ -25,8 +25,8 @@ The following is a checklist of functionality to look for while testing:
 """
 
 import wx
-from danse.common.plottools.PlotPanel import PlotPanel
-from danse.common.plottools.plottables import Plottable, Graph, Data1D, Theory1D
+from sans.plottools.PlotPanel import PlotPanel
+from sans.plottools.plottables import Graph, Data1D, Theory1D
 import  sys
 sys.platform = 'win95'
 import numpy
@@ -83,8 +83,6 @@ def sample_graph():
     x = numpy.linspace(0,2.0, 50)
     y = numpy.sin(2*numpy.pi*x*2.8)
     dy = numpy.sqrt(100*numpy.abs(y))/100
-    
-    from danse.common.plottools.plottables import Data1D, Theory1D,  Graph
     
     data = Data1D(x,y,dy=dy)
     data.xaxis('distance', 'm')

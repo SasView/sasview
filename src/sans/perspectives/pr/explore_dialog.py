@@ -28,10 +28,10 @@ import warnings
 warnings.simplefilter("ignore")
 
 # Import plotting classes
-from danse.common.plottools.PlotPanel import PlotPanel
-from danse.common.plottools import Data1D as Model1D
+from sans.plottools.PlotPanel import PlotPanel
+from sans.plottools import Data1D as Model1D
 from sans.guiframe.gui_style import GUIFRAME_ID
-from danse.common.plottools.plottables import Graph
+from sans.plottools.plottables import Graph
 
 from pr_widgets import PrTextCtrl
 

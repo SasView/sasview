@@ -36,8 +36,8 @@
      
 """
 import wx
-from danse.common.plottools.PlotPanel import PlotPanel
-from danse.common.plottools.plottables import Plottable, Graph, Data1D, Theory1D
+from sans.plottools.PlotPanel import PlotPanel
+from sans.plottools.plottables import Data1D
 import  sys
 import numpy
 import random, math

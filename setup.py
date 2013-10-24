@@ -66,9 +66,18 @@ if sys.version_info >= (2, 6):
     
 enable_openmp = True                    
 
-if sys.platform =='darwin' and not is_64bits:
-    # Disable OpenMP
-    enable_openmp = False
+if sys.platform =='darwin':
+    if not is_64bits:
+        # Disable OpenMP
+        enable_openmp = False
+    else:
+        # Newer versions of Darwin don't support openmp
+        try:
+            darwin_ver = int(os.uname()[2].split('.')[0])
+            if darwin_ver >= 12:
+                enable_openmp = False
+        except:
+            print "PROBLEM determining Darwin version"
 
 # Options to enable OpenMP
 copt =  {'msvc': ['/openmp'],
@@ -174,10 +183,8 @@ package_dir["data_util"] = os.path.join("src", "data_util")
 packages.extend(["data_util"])
 
 # Plottools
-package_dir["danse"] = os.path.join("src", "danse")
-package_dir["danse.common"] = os.path.join("src", "danse", "common")
-package_dir["danse.common.plottools"] = os.path.join("src", "danse", "common", "plottools")
-packages.extend(["danse", "danse.common", "danse.common.plottools"])
+package_dir["sans.plottools"] = os.path.join("src", "sans", "plottools")
+packages.append("sans.plottools")
 
 # Park 1.2.1
 package_dir["park"]="park-1.2.1/park"

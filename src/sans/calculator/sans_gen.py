@@ -1092,7 +1092,7 @@ class MagSLD:
         
 
 def test_load():
-    from danse.common.plottools.arrow3d import Arrow3D
+    from sans.plottools.arrow3d import Arrow3D
     import os
     dir = os.path.abspath(os.path.curdir)
     print dir

@@ -12,29 +12,15 @@
 
 import wx
 import sys
-import os
-import pylab
 import math
 import numpy
-import time
 
-from danse.common.plottools.PlotPanel import PlotPanel
-from danse.common.plottools.SizeDialog import SizeDialog
-from danse.common.plottools.LabelDialog import LabelDialog
-#from danse.common.plottools.plottables import Graph
-from sans.guiframe import dataFitting 
-from sans.guiframe.events import EVT_NEW_PLOT
+from sans.plottools.PlotPanel import PlotPanel
 from sans.guiframe.events import StatusEvent 
-from sans.guiframe.events import NewPlotEvent
-from sans.guiframe.events import NewColorEvent
-from sans.guiframe.events import SlicerEvent
 from sans.guiframe.events import PanelOnFocusEvent
-from sans.guiframe.events import EVT_NEW_LOADED_DATA
 from sans.guiframe.utils import PanelMenu
-from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.panel_base import PanelBase
 from sans.guiframe.gui_style import GUIFRAME_ICON
-from danse.common.plottools.binder import BindArtist
 from appearanceDialog import appearanceDialog
 from graphAppearance import graphAppearance
 

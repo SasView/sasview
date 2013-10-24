@@ -12,16 +12,11 @@
 
 import wx
 import sys
-import os
 import math
 import numpy
-import pylab
-import danse.common.plottools
-from danse.common.plottools.PlotPanel import PlotPanel
-from danse.common.plottools.plottables import Graph
-from danse.common.plottools.TextDialog import TextDialog
-from sans.guiframe.events import EVT_NEW_PLOT
-from sans.guiframe.events import EVT_SLICER_PARS
+from sans.plottools.PlotPanel import PlotPanel
+from sans.plottools.plottables import Graph
+from sans.plottools.TextDialog import TextDialog
 from sans.guiframe.events import StatusEvent 
 from sans.guiframe.events import NewPlotEvent
 from sans.guiframe.events import PanelOnFocusEvent
@@ -29,8 +24,7 @@ from sans.guiframe.events import SlicerEvent
 from sans.guiframe.utils import PanelMenu
 from  sans.guiframe.local_perspectives.plotting.binder import BindArtist
 from Plotter1D import ModelPanel1D
-from danse.common.plottools.toolbar import NavigationToolBar 
-from sans.guiframe.dataFitting import Data1D
+from sans.plottools.toolbar import NavigationToolBar 
 from matplotlib.font_manager import FontProperties
 from graphAppearance import graphAppearance
 (InternalEvent, EVT_INTERNAL) = wx.lib.newevent.NewEvent()
