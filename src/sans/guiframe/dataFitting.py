@@ -4,7 +4,7 @@ Adapters for fitting module
 import copy
 import numpy
 import math
-from data_util.uncertainty import Uncertainty
+from sans.data_util.uncertainty import Uncertainty
 from sans.plottools.plottables import Data1D as PlotData1D
 from sans.plottools.plottables import Data2D as PlotData2D
 from sans.plottools.plottables import Theory1D as PlotTheory1D

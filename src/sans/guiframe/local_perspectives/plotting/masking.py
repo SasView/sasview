@@ -46,7 +46,7 @@ else:
     PANEL_SIZE = 300
     FONT_VARIANT = 1
     
-from data_util.calcthread import CalcThread
+from sans.data_util.calcthread import CalcThread
 
 class CalcPlot(CalcThread):
     """

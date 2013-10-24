@@ -3,7 +3,7 @@ import time
 import sys
 import os
 
-from data_util.calcthread import CalcThread
+from sans.data_util.calcthread import CalcThread
 
         
 EXTENSIONS = ['.svs', '.prv', '.inv', '.fitv']
