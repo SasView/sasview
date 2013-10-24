@@ -20,7 +20,7 @@ from sans.dataloader.data_info import Data1D
 # Check whether we have a converter available
 has_converter = True
 try:
-    from data_util.nxsunit import Converter
+    from sans.data_util.nxsunit import Converter
 except:
     has_converter = False
 _ZERO = 1e-16

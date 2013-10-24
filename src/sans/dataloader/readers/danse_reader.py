@@ -22,7 +22,7 @@ from sans.dataloader.manipulations import reader2D_converter
 # Look for unit converter
 has_converter = True
 try:
-    from data_util.nxsunit import Converter
+    from sans.data_util.nxsunit import Converter
 except:
     has_converter = False
 

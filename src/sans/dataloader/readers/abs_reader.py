@@ -15,7 +15,7 @@ from sans.dataloader.data_info import Detector
 
 has_converter = True
 try:
-    from data_util.nxsunit import Converter
+    from sans.data_util.nxsunit import Converter
 except:
     has_converter = False
     

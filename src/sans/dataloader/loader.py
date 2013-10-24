@@ -25,7 +25,7 @@ import sys
 import logging
 import time
 from zipfile import ZipFile
-from data_util.registry import ExtensionRegistry
+from sans.data_util.registry import ExtensionRegistry
 # Default readers are defined in the readers sub-module
 import readers
 from readers import ascii_reader

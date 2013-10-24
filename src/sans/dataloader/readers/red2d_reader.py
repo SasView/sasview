@@ -16,7 +16,7 @@ from sans.dataloader.data_info import Data2D, Detector
 # Look for unit converter
 has_converter = True
 try:
-    from data_util.nxsunit import Converter
+    from sans.data_util.nxsunit import Converter
 except:
     has_converter = False
     

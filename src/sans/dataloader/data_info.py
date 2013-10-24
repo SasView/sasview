@@ -21,7 +21,7 @@
 #        an adapter class for plottables when needed.
 
 #from sans.guitools.plottables import Data1D as plottable_1D
-from data_util.uncertainty import Uncertainty
+from sans.data_util.uncertainty import Uncertainty
 import numpy
 import math
 

@@ -16,7 +16,7 @@ import xml.dom.minidom
 _ZERO = 1e-16
 HAS_CONVERTER = True
 try:
-    from data_util.nxsunit import Converter
+    from sans.data_util.nxsunit import Converter
 except:
     HAS_CONVERTER = False
  
