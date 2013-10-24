@@ -8,11 +8,9 @@ See the license text in license.txt
 copyright 2009, University of Tennessee
 """
 import wx
-import sys
 import os
 import numpy
 import time
-from copy import deepcopy
 import logging
 
 # Application imports
@@ -23,7 +21,7 @@ from sans.guiframe.dataFitting import Data1D
 # Real-space simulation import
 import sans.realspace.VolumeCanvas as VolumeCanvas
 
-from data_util.calcthread import CalcThread
+from sans.data_util.calcthread import CalcThread
 from sans.guicomm.events import NewPlotEvent, StatusEvent    
 
 class Calc1D(CalcThread):

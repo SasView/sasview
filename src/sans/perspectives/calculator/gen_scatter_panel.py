@@ -19,7 +19,7 @@ matplotlib.interactive(False)
 matplotlib.use('WXAgg')
 
 #from sans.guiframe.gui_manager import MDIFrame
-from data_util.calcthread import CalcThread
+from sans.data_util.calcthread import CalcThread
 from sans.guiframe.local_perspectives.plotting.SimplePlot import PlotFrame
 from sans.guiframe.dataFitting import Data2D 
 from sans.guiframe.dataFitting import Data1D

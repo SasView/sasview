@@ -11,7 +11,7 @@
 
 import sys
 import time
-from data_util.calcthread import CalcThread
+from sans.data_util.calcthread import CalcThread
 
 class CalcPr(CalcThread):
     """

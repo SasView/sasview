@@ -5,7 +5,7 @@
 import time
 import numpy
 import math
-from data_util.calcthread import CalcThread
+from sans.data_util.calcthread import CalcThread
 
 class Calc2D(CalcThread):
     """

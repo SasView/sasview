@@ -2,8 +2,7 @@
 Thread for Resolution computation
 """ 
 import time
-from data_util.calcthread import CalcThread
-import sys
+from sans.data_util.calcthread import CalcThread
 
 class CalcRes(CalcThread):
     """

@@ -1,7 +1,7 @@
 
 import sys
 import time
-from data_util.calcthread import CalcThread
+from sans.data_util.calcthread import CalcThread
 
 def map_getattr(classInstance, classFunc, *args):
     """

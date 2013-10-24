@@ -2,7 +2,7 @@
     Thread handler used to load data
 """
 import time
-from data_util.calcthread import CalcThread
+from sans.data_util.calcthread import CalcThread
 from sans.dataloader.loader import Loader
         
 class DataReader(CalcThread):
