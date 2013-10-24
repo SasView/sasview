@@ -179,8 +179,8 @@ packages.extend(["sans.perspectives", "sans.perspectives.calculator"])
 package_data['sans.perspectives.calculator'] = ['images/*', 'media/*']
     
 # Data util
-package_dir["data_util"] = os.path.join("src", "data_util")
-packages.extend(["data_util"])
+package_dir["data_util"] = os.path.join("src", "sans", "data_util")
+packages.append("sans.data_util")
 
 # Plottools
 package_dir["sans.plottools"] = os.path.join("src", "sans", "plottools")
