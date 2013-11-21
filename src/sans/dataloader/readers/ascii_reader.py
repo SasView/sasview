@@ -123,7 +123,12 @@ class Reader:
                 #minimum required number of columns of data; ( <= 4).
                 lentoks = 2
                 for line in lines:
+                    # Initial try for CSV (split on ,)
                     toks = line.split(',')
+                    # Now try SCSV (split on ;)
+                    if len(toks) < 2:
+                        toks = line.split(';')
+                    # Now go for whitespace                    
                     if len(toks) < 2:
                         toks = line.split()
                     try:
