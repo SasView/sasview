@@ -15,18 +15,12 @@
 				<I unit="1/cm">
 					1000.0
 				</I>
+                <Idev unit="1/cm">
+                    3.0
+                </Idev>
 				<Qdev unit="1/A">
 					0.01
 				</Qdev>
-				<dQl unit="1/A">
-					0.0
-				</dQl>
-				<dQw unit="1/A">
-					0.0
-				</dQw>
-				<Idev unit="1/cm">
-					3.0
-				</Idev>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">
@@ -35,18 +29,12 @@
 				<I unit="1/cm">
 					1001.0
 				</I>
+                <Idev unit="1/cm">
+                    4.0
+                </Idev>
 				<Qdev unit="1/A">
 					0.02
 				</Qdev>
-				<dQl unit="1/A">
-					0.0
-				</dQl>
-				<dQw unit="1/A">
-					0.0
-				</dQw>
-				<Idev unit="1/cm">
-					4.0
-				</Idev>
 			</Idata>
 		</SASdata>
 		<SASsample name="my sample">
@@ -62,28 +50,28 @@
 			<temperature unit="C">
 				0.0
 			</temperature>
+            <position>
+                <x unit="mm">
+                    10.0
+                </x>
+                <y unit="mm">
+                    0.0
+                </y>
+            </position>
+            <orientation>
+                <roll unit="degree">
+                    22.5
+                </roll>
+                <pitch unit="degree">
+                    0.02
+                </pitch>
+            </orientation>
 			<details>
 				http://chemtools.chem.soton.ac.uk/projects/blog/blogs.php/bit_id/2720
 			</details>
 			<details>
 				Some text here
 			</details>
-			<position>
-				<x unit="mm">
-					10.0
-				</x>
-				<y unit="mm">
-					0.0
-				</y>
-			</position>
-			<orientation>
-				<roll unit="degree">
-					22.5
-				</roll>
-				<pitch unit="degree">
-					0.02
-				</pitch>
-			</orientation>
 		</SASsample>
 		<SASinstrument>
 			<name>
@@ -93,17 +81,17 @@
 				<radiation>
 					neutron
 				</radiation>
+                <beam_size name="bm">
+                    <x unit="mm">
+                        12.0
+                    </x>
+                    <y unit="mm">
+                        13.0
+                    </y>
+                </beam_size>
 				<beam_shape>
 					disc
 				</beam_shape>
-				<beam_size name="bm">
-					<x unit="mm">
-						12.0
-					</x>
-					<y unit="mm">
-						13.0
-					</y>
-				</beam_size>
 				<wavelength unit="A">
 					6.0
 				</wavelength>
@@ -122,14 +110,14 @@
 					123.0
 				</length>
 				<aperture name="source" type="radius">
-					<distance unit="mm">
-						11000
-					</distance>
 					<size>
 						<x unit="mm">
 							50.0
 						</x>
 					</size>
+					<distance unit="mm">
+                        11000
+                    </distance>
 				</aperture>
 				<aperture name="sample" type="radius">
 					<size name="size name">
@@ -154,6 +142,17 @@
 						0.002
 					</y>
 				</offset>
+                <orientation>
+                    <roll unit="degree">
+                        1.0
+                    </roll>
+                    <pitch unit="degree">
+                        0.0
+                    </pitch>
+                    <yaw unit="degree">
+                        0.0
+                    </yaw>
+                </orientation>
 				<beam_center>
 					<x unit="mm">
 						322.64
@@ -170,17 +169,6 @@
 						5.0
 					</y>
 				</pixel_size>
-				<orientation>
-					<roll unit="degree">
-						1.0
-					</roll>
-					<pitch unit="degree">
-						0.0
-					</pitch>
-					<yaw unit="degree">
-						0.0
-					</yaw>
-				</orientation>
 			</SASdetector>
 		</SASinstrument>
 		<SASprocess>
@@ -257,6 +245,8 @@
 			<term name="ABS:XSECT" unit="mm">
 				1
 			</term>
+			<SASProcessnote />
 		</SASprocess>
+		<SASnote />
 	</SASentry>
 </SASroot>
