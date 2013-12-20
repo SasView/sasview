@@ -156,7 +156,7 @@ class testLoader(unittest.TestCase):
         
     def testload6(self):
         """test file with unknown extension"""
-        self.assertRaises(ValueError, self.L.load, 'hello.missing')
+        self.assertRaises(RuntimeError, self.L.load, 'hello.missing')
         
         # Lookup is not supported as a public method
         #self.assertRaises(ValueError, self.L.lookup, 'hello.missing')
