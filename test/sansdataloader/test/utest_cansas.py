@@ -20,16 +20,9 @@ import StringIO
 
 from lxml import etree
 import xml.dom.minidom
-_ZERO = 1e-16
-HAS_CONVERTER = True
-try:
-    from data_util.nxsunit import Converter
-except:
-    HAS_CONVERTER = False
  
 CANSAS_FORMAT = cansasConstants.CANSAS_FORMAT
 CANSAS_NS = cansasConstants.CANSAS_NS
-ALLOW_ALL = True
     
 class cansas_reader(unittest.TestCase):
     
@@ -47,6 +40,7 @@ class cansas_reader(unittest.TestCase):
         self.isis_1_1_notrans = "ISIS_1_1_notrans.xml"
         self.schema_1_0 = "cansas1d_v1_0.xsd"
         self.schema_1_1 = "cansas1d_v1_1.xsd"
+        
     
     def get_number_of_entries(self, dictionary, name, i):
         if dictionary.get(name) is not None:
@@ -55,6 +49,7 @@ class cansas_reader(unittest.TestCase):
             name += "_{0}".format(i)
             name = self.get_number_of_entries(dictionary, name, i)
         return name
+    
 
     def test_xml_validate(self):
         string = "<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\n"
@@ -73,6 +68,7 @@ class cansas_reader(unittest.TestCase):
         self.assertTrue(xmlschema.validate(valid))
         self.assertFalse(xmlschema.validate(invalid))
         
+        
     def test_real_xml(self):
         reader = XMLreader(self.xml_valid, self.schema_1_0)
         valid = reader.validateXML()
@@ -80,8 +76,10 @@ class cansas_reader(unittest.TestCase):
             self.assertTrue(valid)
         else:
             self.assertFalse(valid)
+            
         
     def test_cansas_xml(self):
+        filename = "isis_1_1_write_test.xml"
         xmlreader = XMLreader(self.isis_1_1, self.schema_1_1)
         valid = xmlreader.validateXML()
         self.assertTrue(valid)
@@ -90,8 +88,17 @@ class cansas_reader(unittest.TestCase):
         for data in dataloader:
             self.assertTrue(data.title == "TK49 c10_SANS")
             self.assertTrue(data.x.size == 138)
-            self.assertTrue(len(data.meta_data) == 417)
+            self.assertTrue(len(data.meta_data) == 2)
             self.assertTrue(data.detector[0].distance_unit == "mm")
+            reader.write(filename, data)
+            reader2 = Reader()
+            return_data = reader2.read(filename)
+            data_new = return_data
+            self.data = return_data[0]
+            self.assertTrue(self.data.x.size == 138)
+            self.assertTrue(len(self.data.meta_data) == 2)
+            self.assertTrue(self.data.detector[0].distance_unit == "mm")
+            self.assertTrue(self.data.title == "TK49 c10_SANS")
                     
     def test_entry_name_recurse(self):
         test_values = [1,2,3,4,5,6]
@@ -101,6 +108,7 @@ class cansas_reader(unittest.TestCase):
             new_key = self.get_number_of_entries(d, base_key, i = 0)
             d[new_key] = value
         self.assertTrue(len(d) == 6)
+        
     
     def test_load_cansas_file(self):
         valid = []
@@ -118,6 +126,7 @@ class cansas_reader(unittest.TestCase):
         self.assertTrue(reader6.validateXML())
         reader7 = XMLreader(self.isis_1_1, self.schema_1_0)
         self.assertFalse(reader7.validateXML())
+        
     
     def test_old_cansas_files(self):
         reader1 = XMLreader(self.cansas1d, self.schema_1_0)

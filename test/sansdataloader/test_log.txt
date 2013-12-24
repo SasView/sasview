@@ -1,0 +1,3 @@
+2013-12-09 16:37:01,908 DEBUG Inside testLoad module
+2013-12-09 16:37:01,947 WARNING DataLoader couldn't locate DataLoader plugin folder. "C:\Users\jkrzywon\Desktop\eclipse\plugins\org.python.pydev_2.7.1.2012100913\../plugins" does not exist
+2013-12-09 16:37:01,950 WARNING DataLoader couldn't locate DataLoader plugin folder. "C:\Users\jkrzywon\Desktop\eclipse\plugins\org.python.pydev_2.7.1.2012100913\../plugins" does not exist

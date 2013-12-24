@@ -158,12 +158,10 @@ class danse_reader(unittest.TestCase):
 class cansas_reader(unittest.TestCase):
     
     def setUp(self):
-        self.data = Loader().load("cansas1d.xml")
-        if isinstance(self.data, list):
-            self.data = self.data[0]
+        data = Loader().load("cansas1d.xml")
+        self.data = data[0]
  
     def test_cansas_checkdata(self):
-        print "\rtest_cansas_checkdata"
         self.assertEqual(self.data.filename, "cansas1d.xml")
         self._checkdata()
         
@@ -211,8 +209,8 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.sample.position.y, 0)
 
         self.assertEqual(self.data.sample.orientation_unit, 'degree')
-        self.assertEqual(self.data.sample.orientation.x, 22.5)
-        self.assertEqual(self.data.sample.orientation.y, 0.02)
+        self.assertAlmostEqual(self.data.sample.orientation.x, 22.5, 6)
+        self.assertAlmostEqual(self.data.sample.orientation.y, 0.02, 6)
 
         self.assertEqual(self.data.sample.details[0], "http://chemtools.chem.soton.ac.uk/projects/blog/blogs.php/bit_id/2720") 
         self.assertEqual(self.data.sample.details[1], "Some text here") 
@@ -249,10 +247,6 @@ class cansas_reader(unittest.TestCase):
         for item in self.data.collimation[0].aperture:
             self.assertEqual(item.size_unit,'mm')
             self.assertEqual(item.distance_unit,'mm')
-            print "size.x = {0}".format(item.size.x)
-            print "distance = {0}".format(item.distance)
-            print "name = {0}".format(item.name)
-            print "type = {0}".format(item.type)
             
             if item.size.x==50 \
                 and item.distance==11000.0 \
@@ -265,7 +259,6 @@ class cansas_reader(unittest.TestCase):
                 _found2 = True
                 
         if _found1==False or _found2==False:
-            print item.distance
             raise RuntimeError, "Could not find all data %s %s" % (_found1, _found2) 
             
         # Detector
@@ -274,7 +267,7 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.detector[0].distance, 4150)
         
         self.assertEqual(self.data.detector[0].orientation_unit, "degree")
-        self.assertEqual(self.data.detector[0].orientation.x, 1.0)
+        self.assertAlmostEqual(self.data.detector[0].orientation.x, 1.0, 6)
         self.assertEqual(self.data.detector[0].orientation.y, 0.0)
         self.assertEqual(self.data.detector[0].orientation.z, 0.0)
         
@@ -317,7 +310,6 @@ class cansas_reader(unittest.TestCase):
         
         
     def test_writer(self):
-        print "\rtest_writer"
         from sans.dataloader.readers.cansas_reader import Reader
         r = Reader()
         x = numpy.ones(5)
@@ -326,7 +318,8 @@ class cansas_reader(unittest.TestCase):
         
         filename = "write_test.xml"
         r.write(filename, self.data)
-        self.data = Loader().load(filename)[0]
+        data = Loader().load(filename)
+        self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         self._checkdata()
         
@@ -335,11 +328,9 @@ class cansas_reader(unittest.TestCase):
             Check units.
             Note that not all units are available.
         """
-        print "\rtest_units"
         filename = "cansas1d_units.xml"
-        self.data = Loader().load(filename)
-        if isinstance(self.data, list):
-            self.data = self.data[0]
+        data = Loader().load(filename)
+        self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         self._checkdata()
         
@@ -348,11 +339,9 @@ class cansas_reader(unittest.TestCase):
             Check units.
             Note that not all units are available.
         """
-        print "\rtest_badunits"
         filename = "cansas1d_badunits.xml"
-        self.data = Loader().load(filename)
-        if isinstance(self.data, list):
-            self.data = self.data[0]
+        data = Loader().load(filename)
+        self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         # The followed should not have been loaded
         self.assertEqual(self.data.sample.thickness, None)
@@ -367,17 +356,14 @@ class cansas_reader(unittest.TestCase):
         """
             Check slit data
         """
-        print "\rtest_slits"
         filename = "cansas1d_slit.xml"
-        self.data = Loader().load(filename)
-        if isinstance(self.data, list):
-            self.data = self.data[0]
+        data = Loader().load(filename)
+        self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         self.assertEqual(self.data.run[0], "1234")
         
         # Data
         self.assertEqual(len(self.data.x), 2)
-        print self.data.x
         self.assertEqual(self.data.x_unit, '1/A')
         self.assertEqual(self.data.y_unit, '1/cm')
         self.assertEqual(self.data.x[0], 0.02)
@@ -391,9 +377,9 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.dxl[1], 0.005)
         self.assertEqual(self.data.dxw[1], 0.001)
         self.assertEqual(self.data.dy[1], 4)
-        # self.assertEqual(self.data.run_name['1234'], 'run name')
+        self.assertEqual(self.data.run_name['1234'], 'run name')
         self.assertEqual(self.data.title, "Test title")
-
+        
             
 
 if __name__ == '__main__':

@@ -15,7 +15,8 @@ from time import time
 class smear_tests(unittest.TestCase):
     
     def setUp(self):
-        self.data = Loader().load("cansas1d_slit.xml")
+        data = Loader().load("cansas1d_slit.xml")
+        self.data = data[0]
         
         x = 0.001*numpy.arange(1,11)
         y = 12.0-numpy.arange(1,11)

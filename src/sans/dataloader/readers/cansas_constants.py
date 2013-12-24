@@ -14,7 +14,7 @@ class cansasConstants:
     CANSAS_FORMAT = {
                      "SASentry" : {
                                    "units_optional" : True,
-                                   "variable" : " ",
+                                   "variable" : None,
                                    "storeas" : "content",
                                    "attributes" : {"name" : {"variable" : "{0}.run_name[node_value] = \"{1}\""}},
                                    "children" : {
@@ -25,10 +25,11 @@ class cansasConstants:
                                                           },
                                                  "SASdata" : {
                                                               "attributes" : {"name" : {"variable" : "{0}.meta_data[\"{2}\"] = \"{1}\"",}},
+                                                              "variable" : None,
                                                               "children" : {"Idata" : {
                                                                                        "storeas" : "float",
-                                                                                       "variable" : None,
                                                                                        "units_optional" : False,
+                                                                                       "variable" : None,
                                                                                        "attributes" : {
                                                                                                        "name" : {
                                                                                                                  "variable" : "{0}.meta_data[\"{2}\"] = \"{1}\"",
@@ -42,26 +43,27 @@ class cansasConstants:
                                                                                        "children" : {
                                                                                                      "Q" : {
                                                                                                             "variable" : "{0}.x = numpy.append({0}.x, {1})",
-                                                                                                            "unit" : "_xunit",
+                                                                                                            "unit" : "x_unit",
                                                                                                             "attributes" : {
                                                                                                                             "unit" : {
-                                                                                                                                      "variable" : "{0}._xunit",
+                                                                                                                                      "variable" : "{0}._xunit = \"{1}\"",
                                                                                                                                       "storeas" : "content"
                                                                                                                                       }
                                                                                                                             }
                                                                                                             },
                                                                                                      "I" : {
                                                                                                             "variable" : "{0}.y = numpy.append({0}.y, {1})",
-                                                                                                            "unit" : "_yunit",
+                                                                                                            "unit" : "y_unit",
                                                                                                             "attributes" : {
                                                                                                                             "unit" : {
-                                                                                                                                      "variable" : "{0}._yunit",
+                                                                                                                                      "variable" : "{0}._yunit = \"{1}\"",
                                                                                                                                       "storeas" : "content"
                                                                                                                                       }
                                                                                                                             }
                                                                                                             },
                                                                                                      "Idev" : {
                                                                                                                "variable" : "{0}.dy = numpy.append({0}.dy, {1})",
+                                                                                                               "unit" : "y_unit",
                                                                                                                "attributes" : {
                                                                                                                                "unit" : {
                                                                                                                                          "variable" : "{0}.meta_data[\"{2}\"] = \"{1}\"",
@@ -71,6 +73,7 @@ class cansasConstants:
                                                                                                                },
                                                                                                      "Qdev" : {
                                                                                                                "variable" : "{0}.dx = numpy.append({0}.dx, {1})",
+                                                                                                               "unit" : "x_unit",
                                                                                                                "attributes" : {
                                                                                                                                "unit" : {
                                                                                                                                          "variable" : "{0}.meta_data[\"{2}\"] = \"{1}\"",
@@ -80,6 +83,7 @@ class cansasConstants:
                                                                                                                },
                                                                                                      "dQw" : {
                                                                                                               "variable" : "{0}.dxw = numpy.append({0}.dxw, {1})",
+                                                                                                              "unit" : "x_unit",
                                                                                                               "attributes" : {
                                                                                                                               "unit" : {
                                                                                                                                         "variable" : "{0}.meta_data[\"{2}\"] = \"{1}\"",
@@ -89,6 +93,7 @@ class cansasConstants:
                                                                                                               },
                                                                                                      "dQl" : {
                                                                                                               "variable" : "{0}.dxl = numpy.append({0}.dxl, {1})",
+                                                                                                              "unit" : "x_unit",
                                                                                                               "attributes" : {
                                                                                                                               "unit" : {
                                                                                                                                         "variable" : "{0}.meta_data[\"{2}\"] = \"{1}\"",
@@ -98,6 +103,7 @@ class cansasConstants:
                                                                                                               },
                                                                                                      "Qmean" : {
                                                                                                                 "storeas" : "content",
+                                                                                                                "unit" : "x_unit",
                                                                                                                 "variable" : "{0}.meta_data[\"{2}\"] = {1}",
                                                                                                                 "attributes" : {"unit" : {"variable" : "{0}.meta_data[\"{2}\"] = \"{1}\""}},
                                                                                                                 },
@@ -115,31 +121,53 @@ class cansasConstants:
                                                                             }
                                                               },
                                                  "SAStransmission_spectrum" : {
+                                                                               "variable" : None,
                                                                                "children" : {
                                                                                              "Tdata" : {
+                                                                                                        "storeas" : "float",
+                                                                                                        "variable" : None,
                                                                                                         "children" : {
                                                                                                                       "Lambda" : {
-                                                                                                                                  "variable" : "{0}.meta_data[\"{2}\"] = \"{1}\"",
-                                                                                                                                  "attributes" : {"unit" : {"variable" : "{0}.meta_data[\"{2}\"] = \"{1}\""}}
+                                                                                                                                  "variable" : "{0}.trans_spectrum.wavelength.append({1})",
+                                                                                                                                  "unit" : "trans_spectrum.wavelength_unit",
+                                                                                                                                  "attributes" : {
+                                                                                                                                                  "unit" : {
+                                                                                                                                                            "variable" : "{0}.trans_spectrum.wavelength_unit = \"{1}\"",
+                                                                                                                                                            "storeas" : "content"
+                                                                                                                                                            }
+                                                                                                                                                  }
                                                                                                                                   },
                                                                                                                       "T" : {
-                                                                                                                             "variable" : "{0}.meta_data[\"{2}\"] = \"{1}\"",
-                                                                                                                             "attributes" : {"unit" : {"variable" : "{0}.meta_data[\"{2}\"] = \"{1}\""}}
+                                                                                                                             "variable" : "{0}.trans_spectrum.transmission.append({1})",
+                                                                                                                             "unit" : "trans_spectrum.transmission_unit",
+                                                                                                                             "attributes" : {
+                                                                                                                                             "unit" : {
+                                                                                                                                                       "variable" : "{0}.trans_spectrum.transmission_unit = \"{1}\"",
+                                                                                                                                                       "storeas" : "content"
+                                                                                                                                                       }
+                                                                                                                                             }
                                                                                                                              },
                                                                                                                       "Tdev" : {
-                                                                                                                                "variable" : "{0}.meta_data[\"{2}\"] = \"{1}\"",
-                                                                                                                                "attributes" : {"unit" : {"variable" : "{0}.meta_data[\"{2}\"] = \"{1}\""}}
+                                                                                                                                "variable" : "{0}.trans_spectrum.transmission_deviation.append({1})",
+                                                                                                                                "unit" : "trans_spectrum.transmission_deviation_unit",
+                                                                                                                                "attributes" : {
+                                                                                                                                             "unit" : {
+                                                                                                                                                       "variable" : "{0}.trans_spectrum.transmission_deviation_unit = \"{1}\"",
+                                                                                                                                                       "storeas" : "content"
+                                                                                                                                                       }
+                                                                                                                                             }
                                                                                                                                 },
                                                                                                                       "<any>" : {"variable" : "{0}.meta_data[\"{2}\"] = \"{1}\""},
                                                                                                                       }
                                                                                                         },
                                                                                              "<any>" : {"variable" : "{0}.meta_data[\"{2}\"] = \"{1}\""},
                                                                                              },
-                                                                               "attributes" : {"name" : {"variable" : "{0}.meta_data[\"{2}\"] = \"{1}\""},
-                                                                                               "timestamp" : {"variable" : "{0}.meta_data[\"{2}\"] = \"{1}\""},}
+                                                                               "attributes" : {"name" : {"variable" : "{0}.trans_spectrum.name = \"{1}\""},
+                                                                                               "timestamp" : {"variable" : "{0}.trans_spectrum.timestamp = \"{1}\""},}
                                                                                },
                                                  "SASsample" : {
                                                                 "attributes" : {"name" : {"variable" : "{0}.sample.name = \"{1}\""},},
+                                                                "variable" : None,
                                                                 "children" : {
                                                                               "ID" : {"variable" : "{0}.sample.ID = \"{1}\""},
                                                                               "thickness" : {
@@ -170,6 +198,7 @@ class cansasConstants:
                                                                                                }, 
                                                                               "position" : {
                                                                                             "children" : {
+                                                                                                          "variable" : None,
                                                                                                           "x" : {
                                                                                                                  "variable" : "{0}.sample.position.x = {1}",
                                                                                                                  "unit" : "sample.position_unit",
@@ -204,6 +233,7 @@ class cansasConstants:
                                                                                                           },
                                                                                             },
                                                                               "orientation" : {
+                                                                                               "variable" : None,
                                                                                                "children" : {
                                                                                                              "roll" : {
                                                                                                                        "variable" : "{0}.sample.orientation.x = {1}",
@@ -245,14 +275,18 @@ class cansasConstants:
                                                                               },
                                                                 },
                                                  "SASinstrument" : {
+                                                                    "variable" : None,
                                                                     "children" : {
+                                                                                  "variable" : None,
                                                                                   "name" : {"variable" : "{0}.instrument = \"{1}\""},
                                                                                   "SASsource" : {
                                                                                                  "attributes" : {"name" : {"variable" : "{0}.source.name = \"{1}\""}},
+                                                                                                 "variable" : None,
                                                                                                  "children" : {
                                                                                                                "radiation" : {"variable" : "{0}.source.radiation = \"{1}\""},
                                                                                                                "beam_size" : {
                                                                                                                               "attributes" : {"name" : {"variable" : "{0}.source.beam_size_name = \"{1}\""}},
+                                                                                                                              "variable" : None,
                                                                                                                               "children" : {
                                                                                                                                             "x" : {
                                                                                                                                                    "variable" : "{0}.source.beam_size.x = {1}",
@@ -342,6 +376,7 @@ class cansasConstants:
                                                                                                                                                 },
                                                                                                                                 },
                                                                                                                     "aperture" : {
+                                                                                                                                  "variable" : None,
                                                                                                                                   "attributes" : {
                                                                                                                                                   "name" : {"variable" : "{0}.name = \"{1}\""},
                                                                                                                                                   "type" : {"variable" : "{0}.type = \"{1}\""},
@@ -385,9 +420,13 @@ class cansasConstants:
                                                                                                                                                                                },
                                                                                                                                                                         }
                                                                                                                                                           },
-                                                                                                                                                "distance" : {"attributes" : {"unit" : {"variable" : "{0}.distance_unit = \"{1}\""}},
+                                                                                                                                                "distance" : {
+                                                                                                                                                              "storeas" : "float",
+                                                                                                                                                              "attributes" : {
+                                                                                                                                                                              "storeas" : "content",
+                                                                                                                                                                              "unit" : {"variable" : "{0}.distance_unit = \"{1}\""}},
                                                                                                                                                               "variable" : "{0}.distance = {1}",
-                                                                                                                                                              "unit" : "length_unit",
+                                                                                                                                                              "unit" : "distance_unit",
                                                                                                                                                               }
                                                                                                                                                 }
                                                                                                                                   },
@@ -418,6 +457,7 @@ class cansasConstants:
                                                                                                                                           },
                                                                                                                           },
                                                                                                                  "offset" : {
+                                                                                                                             "variable" : None,
                                                                                                                              "children" : {
                                                                                                                                            "x" : {
                                                                                                                                                   "variable" : "{0}.offset.x = {1}",
@@ -452,6 +492,7 @@ class cansasConstants:
                                                                                                                                            }
                                                                                                                              },
                                                                                                                  "orientation" : {
+                                                                                                                                  "variable" : None,
                                                                                                                                   "children" : {
                                                                                                                                                 "roll" : {
                                                                                                                                                           "variable" : "{0}.orientation.x = {1}",
@@ -480,6 +521,7 @@ class cansasConstants:
                                                                                                                                                 }
                                                                                                                                   },
                                                                                                                  "beam_center" : {
+                                                                                                                                  "variable" : None,
                                                                                                                                   "children" : {
                                                                                                                                                 "x" : {
                                                                                                                                                        "variable" : "{0}.beam_center.x = {1}",
@@ -508,6 +550,7 @@ class cansasConstants:
                                                                                                                                                 }
                                                                                                                                   },
                                                                                                                  "pixel_size" : {
+                                                                                                                                 "variable" : None,
                                                                                                                                  "children" : {
                                                                                                                                                "x" : {
                                                                                                                                                       "variable" : "{0}.pixel_size.x = {1}",
@@ -550,11 +593,11 @@ class cansasConstants:
                                                                                    },
                                                                     },
                                                  "SASprocess" : {
-                                                                 "variable" : " ",
+                                                                 "variable" : None,
                                                                  "children" : {
-                                                                               "name" : {"variable" : "{0}.name = \"{1}\""},
-                                                                               "date" : {"variable" : "{0}.date = \"{1}\""},
-                                                                               "description" : {"variable" : "{0}.description = \"{1}\""},
+                                                                               "name" : {"variable" : "{0}.name = \'{1}\'"},
+                                                                               "date" : {"variable" : "{0}.date = \'{1}\'"},
+                                                                               "description" : {"variable" : "{0}.description = \'{1}\'"},
                                                                                "term" : {
                                                                                          "variable" : None,
                                                                                          "attributes" : {
@@ -562,12 +605,14 @@ class cansasConstants:
                                                                                                          "name" : {"variable" : None}
                                                                                                          }
                                                                                          },
-                                                                               "SASprocessnote" : {"children" : {"<any>" : {"variable" : "{0}.notes.append(\"{2}: {1}\")"}}},
-                                                                               "<any>" : {"variable" : "{0}.notes.append(\"{2}: {1}\")",}
+                                                                               "SASprocessnote" : {
+                                                                                                   "variable" : None,
+                                                                                                   "children" : {"<any>" : {"variable" : "{0}.notes.append(\'2}: {1}\')"}}},
+                                                                               "<any>" : {"variable" : "{0}.notes.append(\'{2}: {1}\')",}
                                                                                },
                                                                  },
-                                                 "SASnote" : {"variable" : "{0}.notes.append(\"{1}\")"},
-                                                 "<any>" : {"variable" : "{0}.meta_data[\"{2}\" = \"{1}\""},
+                                                 "SASnote" : {"variable" : "{0}.notes.append(\'{1}\')"},
+                                                 "<any>" : {"variable" : "{0}.meta_data[\"{2}\"] = \'{1}\'"},
                                                  }
                                    }
                      }

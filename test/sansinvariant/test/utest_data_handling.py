@@ -91,7 +91,8 @@ class TestInvariantCalculator(unittest.TestCase):
         Test main functionality of the Invariant calculator
     """
     def setUp(self):
-        self.data = Loader().load("latex_smeared_slit.xml")
+        data = Loader().load("latex_smeared_slit.xml")
+        self.data = data[0]
         self.data.dxl = None
         
     def test_initial_data_processing(self):

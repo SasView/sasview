@@ -14,7 +14,8 @@ import os.path
 class data_info_tests(unittest.TestCase):
     
     def setUp(self):
-        self.data = Loader().load("cansas1d.xml")
+        data = Loader().load("cansas1d.xml")
+        self.data = data[0]
         
     def test_clone1D(self):
         """
@@ -28,7 +29,8 @@ class data_info_tests(unittest.TestCase):
 class theory1d_tests(unittest.TestCase):
     
     def setUp(self):
-        self.data = Loader().load("cansas1d.xml")
+        data = Loader().load("cansas1d.xml")
+        self.data = data[0]
         
     def test_clone_theory1D(self):
         """

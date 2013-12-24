@@ -10,7 +10,7 @@
 		<Run name='run name'>1234</Run>
 		<SASdata>
 			<Idata>
-				<Q unit="1/nm">0.002</Q>
+				<Q unit="1/nm">0.2</Q>
 				<I unit="1/nm">0.0001</I>
 				<Idev unit="1/nm">.0000003</Idev>
 				<Qdev unit="1/nm">0.1</Qdev>
