@@ -1,5 +1,5 @@
 """
-    CanSAS data reader
+    CanSAS data reader - new recursive cansasVersion.
 """
 ############################################################################
 #This software was developed by the University of Tennessee as part of the
@@ -12,20 +12,6 @@
 #copyright 2008,2009 University of Tennessee
 #############################################################################
 
-# Known issue: reader not compatible with multiple SASdata entries
-# within a single SASentry. Will raise a runtime error.
-
-#TODO: check that all vectors are written only if they have at 
-#    least one non-empty value
-#TODO: Writing only allows one SASentry per file.
-#     Would be best to allow multiple entries.
-#TODO: Store error list
-#TODO: Allow for additional meta data for each section
-#TODO: Notes need to be implemented. They can be any XML 
-#    structure in version 1.0
-#      Process notes have the same problem.
-#TODO: Unit conversion is not complete (temperature units are missing)
-
 import logging
 import numpy
 import os
@@ -35,16 +21,19 @@ from sans.dataloader.data_info import Collimation
 from sans.dataloader.data_info import Detector
 from sans.dataloader.data_info import Process
 from sans.dataloader.data_info import Aperture
-from lxml import etree
+import xml_reader
 import xml.dom.minidom
+from cansas_constants import cansasConstants
+
 _ZERO = 1e-16
 HAS_CONVERTER = True
 try:
     from sans.data_util.nxsunit import Converter
 except:
     HAS_CONVERTER = False
-
-CANSAS_NS = "cansas1d/1.0"
+    
+CANSAS_FORMAT = cansasConstants.CANSAS_FORMAT
+CANSAS_NS = cansasConstants.CANSAS_NS
 ALLOW_ALL = True
 
 
@@ -66,7 +55,7 @@ def write_node(doc, parent, name, value, attr={}):
         parent.appendChild(node)
         return True
     return False
-
+                
 
 def get_content(location, node):
     """
@@ -108,500 +97,365 @@ def get_float(location, node):
             attr['unit'] = nodes[0].get('unit')
     return value, attr
 
-            
-class Reader:
+
+
+class CANSASError(Exception):
+    """Base class all CANSAS reader exceptions are derived"""
+    pass
+
+class NotCANSASFileError(CANSASError):
+    def __init__(self):
+        self.value = "This is not a proper CanSAS file."
+    def __str__(self):
+        return repr(self.value)
+
+class Reader():
     """
     Class to load cansas 1D XML files
     
     :Dependencies:
-        The CanSas reader requires PyXML 0.8.4 or later.
+        The CanSAS reader requires PyXML 0.8.4 or later.
     """
-    ## CanSAS version
-    version = '1.0'
-    ## File type
-    type_name = "CanSAS 1D"
+    ##CanSAS version - defaults to version 1.0
+    cansasVersion = "1.0"
+    ##Data reader
+    reader = xml_reader.XMLreader()
+    errors = []
+    
+    type_name = "canSAS"
+    
     ## Wildcards
-    type = ["CanSAS 1D files (*.xml)|*.xml",
-                        "CanSAS 1D AVE files (*.AVEx)|*.AVEx",
-                         "CanSAS 1D AVE files (*.ABSx)|*.ABSx"]
-
+    type = ["XML files (*.xml)|*.xml"]
     ## List of allowed extensions
-    ext = ['.xml', '.XML', '.avex', '.AVEx', '.absx', 'ABSx']
+    ext = ['.xml', '.XML']
+    
+    ## Flag to bypass extension check
+    allow_all = True
     
     def __init__(self):
         ## List of errors
         self.errors = []
+        
+    def isCansas(self):
+        """
+        Checks to see if the xml file is a CanSAS file
+        """
+        if self.reader.validateXML():
+            xmlns = self.reader.xmlroot.keys()
+            if (CANSAS_NS.get(self.cansasVersion).get("ns") == self.reader.xmlroot.get(xmlns[1]).rsplit(" ")[0]):
+                return True
+        return False
     
-    def read(self, path):
+    def read(self, xml):
         """
-        Load data file
+        Validate and read in an xml file in the canSAS format.
         
-        :param path: file path
-        
-        :return: Data1D object if a single SASentry was found, 
-                    or a list of Data1D objects if multiple entries were found,
-                    or None of nothing was found
-                    
-        :raise RuntimeError: when the file can't be opened
-        :raise ValueError: when the length of the data vectors are inconsistent
+        :param xml: A canSAS file path in proper XML format
         """
+        # X - Q value; Y - Intensity (Abs)
+        x = numpy.empty(0)
+        y = numpy.empty(0)
+        dx = numpy.empty(0)
+        dy = numpy.empty(0)
+        dxl = numpy.empty(0)
+        dxw = numpy.empty(0)
+        
+        # output - Final list of Data1D objects
         output = []
-        if os.path.isfile(path):
-            basename = os.path.basename(path)
-            root, extension = os.path.splitext(basename)
-            if ALLOW_ALL or extension.lower() in self.ext:
+        # ns - Namespace hierarchy for current xml object
+        ns = []
+        
+        # Check that the file exists
+        if os.path.isfile(xml):
+            basename = os.path.basename(xml)
+            _, extension = os.path.splitext(basename)
+            # If the fiel type is not allowed, return nothing
+            if extension in self.ext or self.allow_all:
+                base_name = xml_reader.__file__
+                base = base_name.split("\\sans\\")[0]
+                
+                # Load in the xml file and get the cansas version from the header
+                self.reader.setXMLFile(xml)
+                root = self.reader.xmlroot
+                if root is None:
+                    root = {}
+                self.cansasVersion = root.get("version", "1.0")
+                
+                # Generic values for the cansas file based on the version
+                cansas_defaults = CANSAS_NS.get(self.cansasVersion, "1.0")
+                schema_path = "{0}\\sans\\dataloader\\readers\\schema\\{1}".format(base, cansas_defaults.get("schema")).replace("\\", "/")
+                
+                # Link a schema to the XML file.
+                self.reader.setSchema(schema_path)
+            
+                # Try to load the file, but raise an error if unable to.
+                # Check the file matches the XML schema
                 try:
-                    tree = etree.parse(path, parser=etree.ETCompatXMLParser())
-                    # Check the format version number
-                    # Specifying the namespace will take care of the file
-                    # format version
-                    root = tree.getroot()
-                    
-                    entry_list = root.xpath('/ns:SASroot/ns:SASentry',
-                                             namespaces={'ns': CANSAS_NS})
-                    
-                    for entry in entry_list:
-                        self.errors = []
-                        sas_entry = self._parse_entry(entry)
-                        sas_entry.filename = basename
+                    if self.isCansas():
+                        # Get each SASentry from the XML file and add it to a list.
+                        entry_list = root.xpath('/ns:SASroot/ns:SASentry',
+                                                     namespaces={'ns': cansas_defaults.get("ns")})
+                        ns.append("SASentry")
                         
-                        # Store loading process information
-                        sas_entry.errors = self.errors
-                        sas_entry.meta_data['loader'] = self.type_name
-                        output.append(sas_entry)
+                        # If there are multiple files, modify the name for each is unique
+                        multipleFiles = len(entry_list) - 1
+                        n = 0
+                        name = basename
+                        # Parse each SASentry item
+                        for entry in entry_list:
+                            
+                            # Define a new Data1D object with zeroes for x and y
+                            data1D = Data1D(x,y,dx,dy)
+                            data1D.dxl = dxl
+                            data1D.dxw = dxw
+                            
+                            # If more than one SASentry, number each in order
+                            if multipleFiles:
+                                name += "_{0}".format(n)
+                                n += 1
+                            
+                            # Set the Data1D name and then parse the entry. The entry is appended to a list of entry values
+                            data1D.filename = name
+                            data1D.meta_data["loader"] = "CanSAS 1D"
+                            return_value, extras = self._parse_entry(entry, ns, data1D)
+                            del extras[:]
+                            
+                            #Final cleanup - Remove empty nodes, verify array sizes are correct
+                            for error in self.errors:
+                                return_value.errors.append(error)
+                            del self.errors[:]
+                            numpy.trim_zeros(return_value.x)
+                            numpy.trim_zeros(return_value.y)
+                            numpy.trim_zeros(return_value.dy)
+                            size_dx = return_value.dx.size
+                            size_dxl = return_value.dxl.size
+                            size_dxw = return_value.dxw.size
+                            if size_dxl == 0 and size_dxw == 0:
+                                return_value.dxl = None
+                                return_value.dxw = None
+                                numpy.trim_zeros(return_value.dx)
+                            elif size_dx == 0:
+                                return_value.dx = None
+                                size_dx = size_dxl
+                                numpy.trim_zeros(return_value.dxl)
+                                numpy.trim_zeros(return_value.dxw)
+                            
+                            output.append(return_value)
+                    else:
+                        value = self.reader.findInvalidXML()
+                        output.append("Invalid XML at: {0}".format(value))
                 except:
-                    raise RuntimeError, "%s cannot be read \n" % path
-        else:
-            raise RuntimeError, "%s is not a file" % path
-        # Return output consistent with the loader's api
-        if len(output) == 0:
-            #cannot return none when it cannot read
-            #return None
-            raise RuntimeError, "%s cannot be read \n" % path
-        elif len(output) == 1:
-            return output[0]
-        else:
-            return output
-                
-    def _parse_entry(self, dom):
-        """
-        Parse a SASentry
-        
-        :param node: SASentry node
-        
-        :return: Data1D object
-        """
-        x = numpy.zeros(0)
-        y = numpy.zeros(0)
-        
-        data_info = Data1D(x, y)
-        
-        # Look up title
-        self._store_content('ns:Title', dom, 'title', data_info)
-        
-        # Look up run number
-        nodes = dom.xpath('ns:Run', namespaces={'ns': CANSAS_NS})
-        for item in nodes:
-            if item.text is not None:
-                value = item.text.strip()
-                if len(value) > 0:
-                    data_info.run.append(value)
-                    if item.get('name') is not None:
-                        data_info.run_name[value] = item.get('name')
-                           
-        # Look up instrument name
-        self._store_content('ns:SASinstrument/ns:name', dom, 'instrument',
-                             data_info)
-
-        # Notes
-        note_list = dom.xpath('ns:SASnote', namespaces={'ns': CANSAS_NS})
-        for note in note_list:
+                    # If the file does not match the schema, raise this error
+                    raise RuntimeError, "%s cannot be read \n" % xml
+                return output
+        # Return a list of parsed entries that dataloader can manage
+        return None
+    
+    def _create_unique_key(self, dictionary, name, i):
+        if dictionary.get(name) is not None:
+            i += 1
+            name = name.split("_")[0]
+            name += "_{0}".format(i)
+            name = self._create_unique_key(dictionary, name, i)
+        return name
+    
+    def _iterate_namespace(self, ns):
+        # The current level to look through in cansas_constants.
+        current_level = CANSAS_FORMAT.get("SASentry")
+        # Defaults for variable and datatype
+        ns_variable = "{0}.meta_data[\"{2}\"] = \"{1}\""
+        ns_datatype = "content"
+        ns_optional = True
+        for name in ns:
+            if name != "SASentry":
+                current_level = current_level.get("children").get(name, "")
+                if current_level == "":
+                    current_level = current_level.get("<any>", "")
+                cl_variable = current_level.get("variable", "")
+                cl_datatype = current_level.get("storeas", "")
+                cl_units_optional = current_level.get("units_required", "")
+                # Where are how to store the variable for the given namespace
+                # The CANSAS_CONSTANTS tree is hierarchical, so is no value, inherit
+                ns_variable = cl_variable if cl_variable != "" else ns_variable
+                ns_datatype = cl_datatype if cl_datatype != "" else ns_datatype
+                ns_optional = cl_units_optional if cl_units_optional != ns_optional else ns_optional
+        return current_level, ns_variable, ns_datatype, ns_optional
+    
+    def _unit_conversion(self, new_current_level, attr, data1D, node_value, optional = True):
+        value_unit = ''
+        if 'unit' in attr and new_current_level.get('unit') is not None:
             try:
-                if note.text is not None:
-                    note_value = note.text.strip()
-                    if len(note_value) > 0:
-                        data_info.notes.append(note_value)
+                if isinstance(node_value, float) is False:
+                    exec("node_value = float({0})".format(node_value))
+                default_unit = None
+                unitname = new_current_level.get("unit")
+                exec "default_unit = data1D.{0}".format(unitname)
+                local_unit = attr['unit']
+                if local_unit.lower() != default_unit.lower() and local_unit is not None\
+                    and local_unit.lower() != "none" and default_unit is not None:
+                    if HAS_CONVERTER == True:
+                        try:
+                            data_conv_q = Converter(attr['unit'])
+                            value_unit = default_unit
+                            exec "node_value = data_conv_q(node_value, units=data1D.{0})".format(unitname)
+                        except:
+                            err_msg = "CanSAS reader: could not convert "
+                            err_msg += "Q unit {0}; ".format(local_unit)
+                            intermediate = "err_msg += \"expecting [{1}]  {2}\".format(data1D.{0}, sys.exc_info()[1])".format(unitname, "{0}", "{1}")
+                            exec intermediate
+                            self.errors.append(err_msg)
+                            if optional:
+                                logging.info(err_msg)
+                            else:
+                                raise ValueError, err_msg
+                    else:
+                        value_unit = local_unit
+                        err_msg = "CanSAS reader: unrecognized %s unit [%s];"\
+                        % (node_value, default_unit)
+                        err_msg += " expecting [%s]" % local_unit
+                        self.errors.append(err_msg)
+                        if optional:
+                            logging.info(err_msg)
+                        else:
+                            raise ValueError, err_msg
+                else:
+                    value_unit = local_unit
             except:
-                err_mess = "cansas_reader.read: error processing"
-                err_mess += " entry notes\n  %s" % sys.exc_value
-                self.errors.append(err_mess)
-                logging.error(err_mess)
+                err_msg = "CanSAS reader: could not convert "
+                err_msg += "Q unit [%s]; " % attr['unit'],
+                exec "err_msg += \"expecting [%s]\n  %s\" % (data1D.{0}, sys.exc_info()[1])".format(unitname)
+                self.errors.append(err_msg)
+                if optional:
+                    logging.info(err_msg)
+                else:
+                    raise ValueError, err_msg
+        elif 'unit' in attr:
+            value_unit = attr['unit']
+        node_value = "float({0})".format(node_value)
+        return node_value, value_unit
+    
+    def _parse_entry(self, dom, ns, data1D, extras = []):
+        """
+        Parse a SASEntry - new recursive method for parsing the dom of
+            the CanSAS data format. This will allow multiple data files
+            and extra nodes to be read in simultaneously.
         
-        # Sample info ###################
-        entry = get_content('ns:SASsample', dom)
-        if entry is not None:
-            data_info.sample.name = entry.get('name')
-            
-        self._store_content('ns:SASsample/ns:ID',
-                     dom, 'ID', data_info.sample)
-        self._store_float('ns:SASsample/ns:thickness',
-                     dom, 'thickness', data_info.sample)
-        self._store_float('ns:SASsample/ns:transmission',
-                     dom, 'transmission', data_info.sample)
-        self._store_float('ns:SASsample/ns:temperature',
-                     dom, 'temperature', data_info.sample)
+        :param dom: dom object with a namespace base of ns
+        :param ns: A list of element names that lead up to the dom object
+        :param data1D: The data1D object that will be modified
+        """
+         
+        # A portion of every namespace entry
+        base_ns = "{0}{1}{2}".format("{", CANSAS_NS.get(self.cansasVersion).get("ns"), "}")
+        unit = ''
         
-        nodes = dom.xpath('ns:SASsample/ns:details',
-                          namespaces={'ns': CANSAS_NS})
-        for item in nodes:
+        # Go through each child in the parent element
+        for node in dom:
             try:
-                if item.text is not None:
-                    detail_value = item.text.strip()
-                    if len(detail_value) > 0:
-                        data_info.sample.details.append(detail_value)
-            except:
-                err_mess = "cansas_reader.read: error processing "
-                err_mess += " sample details\n  %s" % sys.exc_value
-                self.errors.append(err_mess)
-                logging.error(err_mess)
-        
-        # Position (as a vector)
-        self._store_float('ns:SASsample/ns:position/ns:x',
-                     dom, 'position.x', data_info.sample)
-        self._store_float('ns:SASsample/ns:position/ns:y',
-                     dom, 'position.y', data_info.sample)
-        self._store_float('ns:SASsample/ns:position/ns:z',
-                     dom, 'position.z', data_info.sample)
-        
-        # Orientation (as a vector)
-        self._store_float('ns:SASsample/ns:orientation/ns:roll',
-                     dom, 'orientation.x', data_info.sample)
-        self._store_float('ns:SASsample/ns:orientation/ns:pitch',
-                     dom, 'orientation.y', data_info.sample)
-        self._store_float('ns:SASsample/ns:orientation/ns:yaw',
-                     dom, 'orientation.z', data_info.sample)
-       
-        # Source info ###################
-        entry = get_content('ns:SASinstrument/ns:SASsource', dom)
-        if entry is not None:
-            data_info.source.name = entry.get('name')
-        
-        self._store_content('ns:SASinstrument/ns:SASsource/ns:radiation',
-                     dom, 'radiation', data_info.source)
-        self._store_content('ns:SASinstrument/ns:SASsource/ns:beam_shape',
-                     dom, 'beam_shape', data_info.source)
-        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength',
-                     dom, 'wavelength', data_info.source)
-        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_min',
-                     dom, 'wavelength_min', data_info.source)
-        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_max',
-                     dom, 'wavelength_max', data_info.source)
-        self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_spread',
-                     dom, 'wavelength_spread', data_info.source)
-        
-        # Beam size (as a vector)   
-        entry = get_content('ns:SASinstrument/ns:SASsource/ns:beam_size', dom)
-        if entry is not None:
-            data_info.source.beam_size_name = entry.get('name')
-            
-        self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:x',
-                     dom, 'beam_size.x', data_info.source)
-        self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:y',
-                     dom, 'beam_size.y', data_info.source)
-        self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:z',
-                     dom, 'beam_size.z', data_info.source)
-        
-        # Collimation info ###################
-        nodes = dom.xpath('ns:SASinstrument/ns:SAScollimation',
-                          namespaces={'ns': CANSAS_NS})
-        for item in nodes:
-            collim = Collimation()
-            if item.get('name') is not None:
-                collim.name = item.get('name')
-            self._store_float('ns:length', item, 'length', collim)
-            
-            # Look for apertures
-            apert_list = item.xpath('ns:aperture', namespaces={'ns': CANSAS_NS})
-            for apert in apert_list:
-                aperture = Aperture()
+                # Get the element name and set the current ns level
+                tagname = node.tag.replace(base_ns, "")
+                tagname_original = tagname
+                ns.append(tagname)
+                attr = node.attrib
                 
-                # Get the name and type of the aperture
-                aperture.name = apert.get('name')
-                aperture.type = apert.get('type')
+                # Look for special cases
+                save_data1D = data1D
+                if tagname == "SASdetector":
+                    data1D = Detector()
+                elif tagname == "SAScollimation":
+                    data1D = Collimation()
+                elif tagname == "SASprocess":
+                    data1D = Process()
+                    for child in node:
+                        if child.tag.replace(base_ns, "") == "term":
+                            term_attr = {}
+                            for attr in child.keys():
+                                term_attr[attr] = ' '.join(child.get(attr).split())
+                            if child.text is not None:
+                                term_attr['value'] = ' '.join(child.text.split())
+                            data1D.term.append(term_attr)
+                elif tagname == "aperture":
+                    data1D = Aperture()
+                
+                # Get where to store content
+                new_current_level, ns_variable, ns_datatype, optional = self._iterate_namespace(ns)
+                # If the element is a child element, recurse
+                if node.getchildren() is not None:
+                    # Returned value is new Data1D object with all previous and new values in it.
+                    data1D, extras = self._parse_entry(node, ns, data1D, extras)
                     
-                self._store_float('ns:distance', apert, 'distance', aperture)
+                #Get the information from the node
+                node_value = node.text
+                if node_value == "":
+                    node_value = None
+                if node_value is not None:
+                    node_value = ' '.join(node_value.split())
                 
-                entry = get_content('ns:size', apert)
-                if entry is not None:
-                    aperture.size_name = entry.get('name')
+                # If the value is a float, compile with units.
+                if ns_datatype == "float":
+                    # If an empty value is given, store as zero.
+                    if node_value is None or node_value.isspace() or node_value.lower() == "nan":
+                        node_value = "0.0"
+                    node_value, unit = self._unit_conversion(new_current_level, attr, data1D, node_value, optional)
+                    
+                # If appending to a dictionary (meta_data | run_name), name sure the key is unique
+                if ns_variable == "{0}.meta_data[\"{2}\"] = \"{1}\"":
+                    # If we are within a Process, Detector, Collimation or Aperture instance, pull out old data1D
+                    tagname = self._create_unique_key(data1D.meta_data, tagname, 0)
+                    if isinstance(data1D, Data1D) == False:
+                        store_me = ns_variable.format("data1D", node_value, tagname)
+                        extras.append(store_me)
+                        ns_variable = None
+                if ns_variable == "{0}.run_name[\"{2}\"] = \"{1}\"":
+                    tagname = self._create_unique_key(data1D.run_name, tagname, 0)
                 
-                self._store_float('ns:size/ns:x', apert, 'size.x', aperture)
-                self._store_float('ns:size/ns:y', apert, 'size.y', aperture)
-                self._store_float('ns:size/ns:z', apert, 'size.z', aperture)
-                
-                collim.aperture.append(aperture)
-                
-            data_info.collimation.append(collim)
-        
-        # Detector info ######################
-        nodes = dom.xpath('ns:SASinstrument/ns:SASdetector',
-                           namespaces={'ns': CANSAS_NS})
-        for item in nodes:
-            
-            detector = Detector()
-            
-            self._store_content('ns:name', item, 'name', detector)
-            self._store_float('ns:SDD', item, 'distance', detector)
-            
-            # Detector offset (as a vector)
-            self._store_float('ns:offset/ns:x', item, 'offset.x', detector)
-            self._store_float('ns:offset/ns:y', item, 'offset.y', detector)
-            self._store_float('ns:offset/ns:z', item, 'offset.z', detector)
-            
-            # Detector orientation (as a vector)
-            self._store_float('ns:orientation/ns:roll', item, 'orientation.x',
-                               detector)
-            self._store_float('ns:orientation/ns:pitch', item, 'orientation.y',
-                               detector)
-            self._store_float('ns:orientation/ns:yaw', item, 'orientation.z',
-                               detector)
-            
-            # Beam center (as a vector)
-            self._store_float('ns:beam_center/ns:x', item, 'beam_center.x',
-                               detector)
-            self._store_float('ns:beam_center/ns:y', item, 'beam_center.y',
-                              detector)
-            self._store_float('ns:beam_center/ns:z', item, 'beam_center.z',
-                               detector)
-            
-            # Pixel size (as a vector)
-            self._store_float('ns:pixel_size/ns:x', item, 'pixel_size.x',
-                               detector)
-            self._store_float('ns:pixel_size/ns:y', item, 'pixel_size.y',
-                               detector)
-            self._store_float('ns:pixel_size/ns:z', item, 'pixel_size.z',
-                               detector)
-            
-            self._store_float('ns:slit_length', item, 'slit_length', detector)
-            
-            data_info.detector.append(detector)
-
-        # Processes info ######################
-        nodes = dom.xpath('ns:SASprocess', namespaces={'ns': CANSAS_NS})
-        for item in nodes:
-            process = Process()
-            self._store_content('ns:name', item, 'name', process)
-            self._store_content('ns:date', item, 'date', process)
-            self._store_content('ns:description', item, 'description', process)
-            
-            term_list = item.xpath('ns:term', namespaces={'ns': CANSAS_NS})
-            for term in term_list:
-                try:
-                    term_attr = {}
-                    for attr in term.keys():
-                        term_attr[attr] = term.get(attr).strip()
-                    if term.text is not None:
-                        term_attr['value'] = term.text.strip()
-                        process.term.append(term_attr)
-                except:
-                    err_mess = "cansas_reader.read: error processing "
-                    err_mess += " process term\n  %s" % sys.exc_value
-                    self.errors.append(err_mess)
-                    logging.error(err_mess)
-            
-            note_list = item.xpath('ns:SASprocessnote',
-                                   namespaces={'ns': CANSAS_NS})
-            for note in note_list:
-                if note.text is not None:
-                    process.notes.append(note.text.strip())
-            
-            data_info.process.append(process)
-            
-        # Data info ######################
-        nodes = dom.xpath('ns:SASdata', namespaces={'ns': CANSAS_NS})
-        if len(nodes) > 1:
-            msg = "CanSAS reader is not compatible with multiple"
-            msg += " SASdata entries"
-            raise RuntimeError, msg
-        
-        nodes = dom.xpath('ns:SASdata/ns:Idata', namespaces={'ns': CANSAS_NS})
-
-        x = numpy.zeros(0)
-        y = numpy.zeros(0)
-        dx = numpy.zeros(0)
-        dy = numpy.zeros(0)
-        dxw = numpy.zeros(0)
-        dxl = numpy.zeros(0)
-        
-        for item in nodes:
-            _x, attr = get_float('ns:Q', item)
-            _dx, attr_d = get_float('ns:Qdev', item)
-            _dxl, attr_l = get_float('ns:dQl', item)
-            _dxw, attr_w = get_float('ns:dQw', item)
-            if _dx == None:
-                _dx = 0.0
-            if _dxl == None:
-                _dxl = 0.0
-            if _dxw == None:
-                _dxw = 0.0
-                
-            if 'unit' in attr and \
-                attr['unit'].lower() != data_info.x_unit.lower():
-                if HAS_CONVERTER == True:
-                    try:
-                        data_conv_q = Converter(attr['unit'])
-                        _x = data_conv_q(_x, units=data_info.x_unit)
-                    except:
-                        msg = "CanSAS reader: could not convert "
-                        msg += "Q unit [%s]; " % attr['unit'],
-                        msg += "expecting [%s]\n  %s" % (data_info.x_unit,
-                                                         sys.exc_value)
-                        raise ValueError, msg
-                        
-                else:
-                    msg = "CanSAS reader: unrecognized Q unit [%s]; "\
-                    % attr['unit']
-                    msg += "expecting [%s]" % data_info.x_unit
-                    raise ValueError, msg
-                        
-            # Error in Q
-            if 'unit' in attr_d and \
-                attr_d['unit'].lower() != data_info.x_unit.lower():
-                if HAS_CONVERTER == True:
-                    try:
-                        data_conv_q = Converter(attr_d['unit'])
-                        _dx = data_conv_q(_dx, units=data_info.x_unit)
-                    except:
-                        msg = "CanSAS reader: could not convert dQ unit [%s]; "\
-                        % attr['unit']
-                        msg += " expecting "
-                        msg += "[%s]\n  %s" % (data_info.x_unit, sys.exc_value)
-                        raise ValueError, msg
-                        
-                else:
-                    msg = "CanSAS reader: unrecognized dQ unit [%s]; "\
-                    % attr['unit']
-                    msg += "expecting [%s]" % data_info.x_unit
-                    raise ValueError, msg
-                        
-            # Slit length
-            if 'unit' in attr_l and \
-                attr_l['unit'].lower() != data_info.x_unit.lower():
-                if HAS_CONVERTER == True:
-                    try:
-                        data_conv_q = Converter(attr_l['unit'])
-                        _dxl = data_conv_q(_dxl, units=data_info.x_unit)
-                    except:
-                        msg = "CanSAS reader: could not convert dQl unit [%s];"\
-                        % attr['unit']
-                        msg += " expecting [%s]\n  %s" % (data_info.x_unit,
-                                                          sys.exc_value)
-                        raise ValueError, msg 
-                else:
-                    msg = "CanSAS reader: unrecognized dQl unit [%s];"\
-                    % attr['unit']
-                    msg += " expecting [%s]" % data_info.x_unit
-                    raise ValueError, msg
-                        
-            # Slit width
-            if 'unit' in attr_w and \
-            attr_w['unit'].lower() != data_info.x_unit.lower():
-                if HAS_CONVERTER == True:
-                    try:
-                        data_conv_q = Converter(attr_w['unit'])
-                        _dxw = data_conv_q(_dxw, units=data_info.x_unit)
-                    except:
-                        msg = "CanSAS reader: could not convert dQw unit [%s];"\
-                        % attr['unit']
-                        msg += " expecting [%s]\n  %s" % (data_info.x_unit,
-                                                          sys.exc_value)
-                        raise ValueError, msg
-                        
-                else:
-                    msg = "CanSAS reader: unrecognized dQw unit [%s];"\
-                    % attr['unit']
-                    msg += " expecting [%s]" % data_info.x_unit
-                    raise ValueError, msg
-            _y, attr = get_float('ns:I', item)
-            _dy, attr_d = get_float('ns:Idev', item)
-            if _dy == None:
-                _dy = 0.0
-            if 'unit' in attr and \
-            attr['unit'].lower() != data_info.y_unit.lower():
-                if HAS_CONVERTER == True:
-                    try:
-                        data_conv_i = Converter(attr['unit'])
-                        _y = data_conv_i(_y, units=data_info.y_unit)
-                    except:
-                        if attr['unit'].lower() == 'count':
+                # Check for Data1D object and any extra commands to save
+                if isinstance(data1D, Data1D):
+                    for item in extras:
+                        exec item
+                # Don't bother saving empty information unless it is a float
+                if ns_variable is not None and node_value is not None and node_value.isspace() == False:
+                    # Format a string and then execute it.
+                    store_me = ns_variable.format("data1D", node_value, tagname)
+                    exec store_me
+                # Get attributes and process them
+                if attr is not None:
+                    for key in node.keys():
+                        try:
+                            cansas_attrib = new_current_level.get("attributes").get(key)
+                            attrib_variable = cansas_attrib.get("variable")
+                            if key == 'unit' and unit != '':
+                                attrib_value = unit
+                            else:
+                                attrib_value = node.attrib[key]
+                            store_attr = attrib_variable.format("data1D", attrib_value, key)
+                            exec store_attr
+                        except AttributeError as e:
                             pass
-                        else:
-                            msg = "CanSAS reader: could not"
-                            msg += " convert I(q) unit [%s];" % str(attr['unit'])
-                            msg += " expecting [%s]\n" % str(data_info.y_unit)
-                            msg += "  %s" % str(sys.exc_value)
-                            raise ValueError, msg
+                            
+                     
+            except Exception as e:
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print(e, exc_type, fname, exc_tb.tb_lineno, tagname, exc_obj)
+            finally:
+                # Save special cases in original data1D object and then restore the data1D
+                if tagname_original == "SASdetector":
+                    save_data1D.detector.append(data1D)
+                elif tagname_original == "SAScollimation":
+                    save_data1D.collimation.append(data1D)
+                elif tagname_original == "SASprocess":
+                    save_data1D.process.append(data1D)
+                elif tagname_original == "aperture":
+                    save_data1D.aperture.append(data1D)
                 else:
-                    msg = "CanSAS reader: unrecognized I(q) unit [%s];"\
-                    % attr['unit']
-                    msg += " expecting [%s]" % data_info.y_unit
-                    raise ValueError, msg 
-                        
-            if 'unit' in attr_d and \
-            attr_d['unit'].lower() != data_info.y_unit.lower():
-                if HAS_CONVERTER == True:
-                    try:
-                        data_conv_i = Converter(attr_d['unit'])
-                        _dy = data_conv_i(_dy, units=data_info.y_unit)
-                    except:
-                        if attr_d['unit'].lower() == 'count':
-                            pass
-                        else:
-                            msg = "CanSAS reader: could not convert dI(q) unit "
-                            msg += "[%s]; expecting [%s]\n  %s" % (attr_d['unit'],
-                                                 data_info.y_unit, sys.exc_value)
-                            raise ValueError, msg
-                else:
-                    msg = "CanSAS reader: unrecognized dI(q) unit [%s]; "\
-                    % attr_d['unit']
-                    msg += "expecting [%s]" % data_info.y_unit
-                    raise ValueError, msg
-                
-            if _x is not None and _y is not None:
-                x = numpy.append(x, _x)
-                y = numpy.append(y, _y)
-                dx = numpy.append(dx, _dx)
-                dy = numpy.append(dy, _dy)
-                dxl = numpy.append(dxl, _dxl)
-                dxw = numpy.append(dxw, _dxw)
-        # Zeros in dx, dy
-        if not numpy.all(dx == 0):
-            dx[dx == 0] = _ZERO
-        if not numpy.all(dy == 0):
-            dy[dy == 0] = _ZERO
-       
-        data_info.x = x[x != 0]
-        data_info.y = y[x != 0]
-        data_info.dx = dx[x != 0]
+                    save_data1D = data1D
+                data1D = save_data1D
+                # Remove tagname from ns to restore original base
+                ns.remove(tagname_original)
         
-        data_info.dy = dy[x != 0]
-        data_info.dxl = dxl[x != 0]
-        data_info.dxw = dxw[x != 0]
+        return data1D, extras
         
-        data_conv_q = None
-        data_conv_i = None
-        
-        if HAS_CONVERTER == True and data_info.x_unit != '1/A':
-            data_conv_q = Converter('1/A')
-            # Test it
-            data_conv_q(1.0, data_info.x_unit)
-            
-        if HAS_CONVERTER == True and data_info.y_unit != '1/cm':
-            data_conv_i = Converter('1/cm')
-            # Test it
-            data_conv_i(1.0, data_info.y_unit)
-                
-        if data_conv_q is not None:
-            data_info.xaxis("\\rm{Q}", data_info.x_unit)
-        else:
-            data_info.xaxis("\\rm{Q}", 'A^{-1}')
-        if data_conv_i is not None:
-            data_info.yaxis("\\rm{Intensity}", data_info.y_unit)
-        else:
-            data_info.yaxis("\\rm{Intensity}", "cm^{-1}")
-
-        return data_info
-
     def _to_xml_doc(self, datainfo):
         """
         Create an XML document to contain the content of a Data1D
@@ -612,14 +466,15 @@ class Reader:
         if not issubclass(datainfo.__class__, Data1D):
             raise RuntimeError, "The cansas writer expects a Data1D instance"
         
+        ns = CANSAS_NS.get(self.cansasVersion).get("ns")
         doc = xml.dom.minidom.Document()
         main_node = doc.createElement("SASroot")
-        main_node.setAttribute("version", self.version)
-        main_node.setAttribute("xmlns", "cansas1d/%s" % self.version)
+        main_node.setAttribute("version", self.cansasVersion)
+        main_node.setAttribute("xmlns", ns)
         main_node.setAttribute("xmlns:xsi",
                                "http://www.w3.org/2001/XMLSchema-instance")
         main_node.setAttribute("xsi:schemaLocation",
-                               "cansas1d/%s http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd" % self.version)
+                               "{0} http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd".format(ns))
         
         doc.appendChild(main_node)
         
@@ -645,18 +500,34 @@ class Reader:
             if len(datainfo.y) >= i:
                 write_node(doc, pt, "I", datainfo.y[i],
                             {'unit': datainfo.y_unit})
+            if datainfo.dy != None and len(datainfo.dy) >= i:
+                write_node(doc, pt, "Idev", datainfo.dy[i],
+                            {'unit': datainfo.y_unit})
             if datainfo.dx != None and len(datainfo.dx) >= i:
                 write_node(doc, pt, "Qdev", datainfo.dx[i],
-                            {'unit': datainfo.x_unit})
-            if datainfo.dxl != None and len(datainfo.dxl) >= i:
-                write_node(doc, pt, "dQl", datainfo.dxl[i],
                             {'unit': datainfo.x_unit})
             if datainfo.dxw != None and len(datainfo.dxw) >= i:
                 write_node(doc, pt, "dQw", datainfo.dxw[i],
                             {'unit': datainfo.x_unit})
-            if datainfo.dy != None and len(datainfo.dy) >= i:
-                write_node(doc, pt, "Idev", datainfo.dy[i],
-                            {'unit': datainfo.y_unit})
+            if datainfo.dxl != None and len(datainfo.dxl) >= i:
+                write_node(doc, pt, "dQl", datainfo.dxl[i],
+                            {'unit': datainfo.x_unit})
+
+        # Transmission Spectrum Info
+        if len(datainfo.trans_spectrum.wavelength) > 0:
+            node = doc.createElement("SAStransmission_spectrum")
+            entry_node.appendChild(node)
+            for i in range(len(datainfo.trans_spectrum.wavelength)):
+                pt = doc.createElement("Tdata")
+                node.appendChild(pt)
+                write_node(doc, pt, "Lambda", datainfo.trans_spectrum.wavelength[i], 
+                           {'unit': datainfo.trans_spectrum.wavelength_unit})
+                write_node(doc, pt, "T", datainfo.trans_spectrum.transmission[i], 
+                           {'unit': datainfo.trans_spectrum.transmission_unit})
+                if datainfo.trans_spectrum.transmission_deviation != None \
+                and len(datainfo.trans_spectrum.transmission_deviation) >= i:
+                    write_node(doc, pt, "Tdev", datainfo.trans_spectrum.transmission_deviation[i], 
+                               {'unit': datainfo.trans_spectrum.transmission_deviation_unit})
 
         # Sample info
         sample = doc.createElement("SASsample")
@@ -669,9 +540,6 @@ class Reader:
         write_node(doc, sample, "transmission", datainfo.sample.transmission)
         write_node(doc, sample, "temperature", datainfo.sample.temperature,
                    {"unit": datainfo.sample.temperature_unit})
-        
-        for item in datainfo.sample.details:
-            write_node(doc, sample, "details", item)
         
         pos = doc.createElement("position")
         written = write_node(doc, pos, "x", datainfo.sample.position.x,
@@ -698,6 +566,9 @@ class Reader:
         if written == True:
             sample.appendChild(ori)
         
+        for item in datainfo.sample.details:
+            write_node(doc, sample, "details", item)
+        
         # Instrument info
         instr = doc.createElement("SASinstrument")
         entry_node.appendChild(instr)
@@ -709,9 +580,8 @@ class Reader:
         if datainfo.source.name is not None:
             source.setAttribute("name", str(datainfo.source.name))
         instr.appendChild(source)
-        
         write_node(doc, source, "radiation", datainfo.source.radiation)
-        write_node(doc, source, "beam_shape", datainfo.source.beam_shape)
+        
         size = doc.createElement("beam_size")
         if datainfo.source.beam_size_name is not None:
             size.setAttribute("name", str(datainfo.source.beam_size_name))
@@ -726,6 +596,7 @@ class Reader:
         if written == True:
             source.appendChild(size)
             
+        write_node(doc, source, "beam_shape", datainfo.source.beam_shape)
         write_node(doc, source, "wavelength",
                    datainfo.source.wavelength,
                    {"unit": datainfo.source.wavelength_unit})
@@ -757,9 +628,6 @@ class Reader:
                     ap.setAttribute("type", str(apert.type))
                 coll.appendChild(ap)
                 
-                write_node(doc, ap, "distance", apert.distance,
-                           {"unit": apert.distance_unit})
-                
                 size = doc.createElement("size")
                 if apert.size_name is not None:
                     size.setAttribute("name", str(apert.size_name))
@@ -771,6 +639,9 @@ class Reader:
                                                {"unit": apert.size_unit})
                 if written == True:
                     ap.appendChild(size)
+                
+                write_node(doc, ap, "distance", apert.distance,
+                           {"unit": apert.distance_unit})
 
         #   Detectors
         for item in datainfo.detector:
@@ -778,9 +649,6 @@ class Reader:
             written = write_node(doc, det, "name", item.name)
             written = written | write_node(doc, det, "SDD", item.distance,
                                            {"unit": item.distance_unit})
-            written = written | write_node(doc, det, "slit_length",
-                                           item.slit_length,
-                                           {"unit": item.slit_length_unit})
             if written == True:
                 instr.appendChild(det)
             
@@ -793,6 +661,18 @@ class Reader:
                                            {"unit": item.offset_unit})
             if written == True:
                 det.appendChild(off)
+                
+            ori = doc.createElement("orientation")
+            written = write_node(doc, ori, "roll", item.orientation.x,
+                                 {"unit": item.orientation_unit})
+            written = written | write_node(doc, ori, "pitch",
+                                           item.orientation.y,
+                                           {"unit": item.orientation_unit})
+            written = written | write_node(doc, ori, "yaw",
+                                           item.orientation.z,
+                                           {"unit": item.orientation_unit})
+            if written == True:
+                det.appendChild(ori)
             
             center = doc.createElement("beam_center")
             written = write_node(doc, center, "x", item.beam_center.x,
@@ -815,19 +695,10 @@ class Reader:
                                            {"unit": item.pixel_size_unit})
             if written == True:
                 det.appendChild(pix)
-                
-            ori = doc.createElement("orientation")
-            written = write_node(doc, ori, "roll", item.orientation.x,
-                                 {"unit": item.orientation_unit})
-            written = written | write_node(doc, ori, "pitch",
-                                           item.orientation.y,
-                                           {"unit": item.orientation_unit})
-            written = written | write_node(doc, ori, "yaw",
-                                           item.orientation.z,
-                                           {"unit": item.orientation_unit})
-            if written == True:
-                det.appendChild(ori)
-                
+            written = written | write_node(doc, det, "slit_length",
+                                           item.slit_length,
+                                           {"unit": item.slit_length_unit})
+            
         # Processes info
         for item in datainfo.process:
             node = doc.createElement("SASprocess")
@@ -842,7 +713,22 @@ class Reader:
                 write_node(doc, node, "term", value, term)
             for note in item.notes:
                 write_node(doc, node, "SASprocessnote", note)
-        
+            if len(item.notes) == 0:
+                write_node(doc, node, "SASprocessnote", "")
+                
+        # Note info
+        if len(datainfo.notes) == 0:
+            node = doc.createElement("SASnote")
+            entry_node.appendChild(node)
+            if node.hasChildNodes():
+                for child in node.childNodes:
+                    node.removeChild(child)
+        else:
+            for item in datainfo.notes:
+                node = doc.createElement("SASnote")
+                entry_node.appendChild(node)
+                node.appendChild(doc.createTextNode(item))
+                
         # Return the document, and the SASentry node associated with
         # the data we just wrote
         return doc, entry_node
@@ -860,84 +746,3 @@ class Reader:
         fd = open(filename, 'w')
         fd.write(doc.toprettyxml())
         fd.close()
-        
-    def _store_float(self, location, node, variable, storage, optional=True):
-        """
-        Get the content of a xpath location and store
-        the result. Check that the units are compatible
-        with the destination. The value is expected to
-        be a float.
-        
-        The xpath location might or might not exist.
-        If it does not exist, nothing is done
-        
-        :param location: xpath location to fetch
-        :param node: node to read the data from
-        :param variable: name of the data member to store it in [string]
-        :param storage: data object that has the 'variable' data member
-        :param optional: if True, no exception will be raised
-            if unit conversion can't be done
-
-        :raise ValueError: raised when the units are not recognized
-        """
-        entry = get_content(location, node)
-        try:
-            value = float(entry.text)
-        except:
-            value = None
-            
-        if value is not None:
-            # If the entry has units, check to see that they are
-            # compatible with what we currently have in the data object
-            units = entry.get('unit')
-            if units is not None:
-                toks = variable.split('.')
-                local_unit = None
-                exec "local_unit = storage.%s_unit" % toks[0]
-                if local_unit != None and units.lower() != local_unit.lower():
-                    if HAS_CONVERTER == True:
-                        try:
-                            conv = Converter(units)
-                            exec "storage.%s = %g" % (variable,
-                                            conv(value, units=local_unit))
-                        except:
-                            err_mess = "CanSAS reader: could not convert"
-                            err_mess += " %s unit [%s]; expecting [%s]\n  %s" \
-                                % (variable, units, local_unit, sys.exc_value)
-                            self.errors.append(err_mess)
-                            if optional:
-                                logging.info(err_mess)
-                            else:
-                                raise ValueError, err_mess
-                    else:
-                        err_mess = "CanSAS reader: unrecognized %s unit [%s];"\
-                        % (variable, units)
-                        err_mess += " expecting [%s]" % local_unit
-                        self.errors.append(err_mess)
-                        if optional:
-                            logging.info(err_mess)
-                        else:
-                            raise ValueError, err_mess
-                else:
-                    exec "storage.%s = value" % variable
-            else:
-                exec "storage.%s = value" % variable
-                
-    def _store_content(self, location, node, variable, storage):
-        """
-        Get the content of a xpath location and store
-        the result. The value is treated as a string.
-        
-        The xpath location might or might not exist.
-        If it does not exist, nothing is done
-        
-        :param location: xpath location to fetch
-        :param node: node to read the data from
-        :param variable: name of the data member to store it in [string]
-        :param storage: data object that has the 'variable' data member
-        
-        :return: return a list of errors
-        """
-        entry = get_content(location, node)
-        if entry is not None and entry.text is not None:
-            exec "storage.%s = entry.text.strip()" % variable
