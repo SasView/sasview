@@ -13,17 +13,17 @@
 				<Q unit="1/A">0.02</Q>
 				<I unit="1/cm">1000</I>
 				<Idev unit="1/cm">3</Idev>
-				<dQl unit="1/A">0.005</dQl>
 				<dQw unit="1/A">0.001</dQw>
-				<Shadowfactor><!-- Shadowfactor is optional --></Shadowfactor>
+				<dQl unit="1/A">0.005</dQl>
+                <Shadowfactor><!-- Shadowfactor is optional --></Shadowfactor>
 			</Idata>
 			<Idata>
 				<Q unit="1/A">0.03</Q>
 				<I unit="1/cm">1001</I>
 				<Idev unit="1/cm">4</Idev>
-				<dQl unit="1/A">0.005</dQl>
 				<dQw unit="1/A">0.001</dQw>
-				<Shadowfactor><!-- Shadowfactor is optional --></Shadowfactor>
+				<dQl unit="1/A">0.005</dQl>
+                <Shadowfactor><!-- Shadowfactor is optional --></Shadowfactor>
 			</Idata>
 		</SASdata>
 		<SASsample name='my sample'>
@@ -48,7 +48,7 @@
 			</details>
 			
 		</SASsample>
-		<SASinstrument name="TEST instrument">
+		<SASinstrument>
 			<name>canSAS instrument</name>
 			<SASsource name="source name">
 				<radiation>neutron</radiation>
@@ -84,15 +84,15 @@
 					<!-- sample-to-detector distance -->
 					4.150
 				</SDD>
-				<orientation>
+				<offset>
+                    <x unit="mm">1</x>
+                    <y unit="mm">2</y>
+                </offset>
+                <orientation>
 					<roll unit="degree">1.00</roll>
 					<pitch unit="degree">0.00</pitch>
 					<yaw unit="degree">0.00</yaw>
 				</orientation>
-				<offset>
-					<x unit="mm">1</x>
-					<y unit="mm">2</y>
-				</offset>
 				<beam_center>
 					<x unit="mm">322.64</x>
 					<y unit="mm">327.68</y>

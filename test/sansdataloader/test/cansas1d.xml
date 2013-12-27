@@ -48,7 +48,7 @@
 			</details>
 			
 		</SASsample>
-		<SASinstrument name="TEST instrument">
+		<SASinstrument>
 			<name>canSAS instrument</name>
 			<SASsource name="source name">
 				<radiation>neutron</radiation>
@@ -84,15 +84,15 @@
 					<!-- sample-to-detector distance -->
 					4.150
 				</SDD>
-				<orientation>
+				<offset>
+                    <x unit="mm">1</x>
+                    <y unit="mm">2</y>
+                </offset>
+                <orientation>
 					<roll unit="degree">1.00</roll>
 					<pitch unit="degree">0.00</pitch>
 					<yaw unit="degree">0.00</yaw>
 				</orientation>
-				<offset>
-					<x unit="mm">1</x>
-					<y unit="mm">2</y>
-				</offset>
 				<beam_center>
 					<x unit="mm">322.64</x>
 					<y unit="mm">327.68</y>
@@ -134,7 +134,7 @@
 			<term name="ABS:DSTAND" unit="mm">1</term>
 			<term name="ABS:IZERO">230.09</term>
 			<term name="ABS:XSECT" unit="mm">1</term>
-			<SASprocessnote/>
+			<SASprocessnote>No Information</SASprocessnote>
 		</SASprocess>
 		<SASnote />
 	</SASentry>

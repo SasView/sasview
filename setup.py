@@ -135,8 +135,8 @@ for d in os.listdir(os.path.join(guiframe_path, "local_perspectives")):
 
 # sans.dataloader
 package_dir["sans.dataloader"] = os.path.join("src", "sans", "dataloader")
-package_data["sans.dataloader.readers"] = ['defaults.xml']
-packages.extend(["sans.dataloader","sans.dataloader.readers"])
+package_data["sans.dataloader.readers"] = ['defaults.xml','schema/*.xsd']
+packages.extend(["sans.dataloader","sans.dataloader.readers","sans.dataloader.readers.schema"])
 
 # sans.calculator
 package_dir["sans.calculator"] =os.path.join("src", "sans", "calculator")
