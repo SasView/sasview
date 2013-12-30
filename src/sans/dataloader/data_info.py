@@ -400,6 +400,40 @@ class Process:
             _str += "   Note:         %s\n" % item
         return _str
     
+class TransmissionSpectrum:
+    """
+    Class that holds information about transmission spectrum
+    for white beams and spallation sources.
+    """
+    name = ''
+    timestamp = ''
+    ## Wavelength (float) [A]
+    wavelength = None
+    wavelength_unit = 'A'
+    ## Transmission (float) [unit less]
+    transmission = None
+    transmission_unit = ''
+    ## Transmission Deviation (float) [unit less]
+    transmission_deviation = None
+    transmission_deviation_unit = ''
+    
+    def __init__(self):
+        self.wavelength = []
+        self.transmission = []
+        self.transmission_deviation = []
+    
+    def __str__(self):
+        _str  = "Transmission Spectrum:\n"
+        _str += "   Name:       {0}".format(self.name)
+        _str += "   Timestamp:  {1}".format(self.timestamp)
+        _str += "   Wavelength [{0}] | Transmission [{1}] | Trans Dev [{2}]\n".format(self.wavelength_unit, self.transmission_unit, self.transmission_deviation_unit)
+        for i in range(len(self.wavelength)):
+            _str += "   {0}, {1}".format(self.wavelength[i], self.transmission[i])
+            if len(self.transmission_deviation > i):
+                _str += ", {0}".format(self.transmission_deviation[i])
+            _str += "\n"
+        return _str
+    
   
 class DataInfo:
     """
@@ -430,6 +464,8 @@ class DataInfo:
     source     = None
     ## Collimation information
     collimation = None
+    ## Transmission Spectrum INfo
+    trans_spectrum = None
     ## Additional meta-data
     meta_data  = None
     ## Loading errors
@@ -460,6 +496,8 @@ class DataInfo:
         self.source     = Source()
         ## Collimation information
         self.collimation = []
+        ## Transmission Spectrum
+        self.trans_spectrum = TransmissionSpectrum()
         ## Additional meta-data
         self.meta_data  = {}
         ## Loading errors
