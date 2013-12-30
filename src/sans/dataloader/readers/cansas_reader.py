@@ -172,7 +172,8 @@ class Reader():
             # If the fiel type is not allowed, return nothing
             if extension in self.ext or self.allow_all:
                 base_name = xml_reader.__file__
-                base = base_name.split("\\sans\\")[0]
+                base_name = base_name.replace("\\","/")
+                base = base_name.split("/sans/")[0]
                 
                 # Load in the xml file and get the cansas version from the header
                 self.reader.setXMLFile(xml)
@@ -183,7 +184,7 @@ class Reader():
                 
                 # Generic values for the cansas file based on the version
                 cansas_defaults = CANSAS_NS.get(self.cansasVersion, "1.0")
-                schema_path = "{0}\\sans\\dataloader\\readers\\schema\\{1}".format(base, cansas_defaults.get("schema")).replace("\\", "/")
+                schema_path = "{0}/sans/dataloader/readers/schema/{1}".format(base, cansas_defaults.get("schema")).replace("\\", "/")
                 
                 # Link a schema to the XML file.
                 self.reader.setSchema(schema_path)
