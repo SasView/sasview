@@ -34,7 +34,6 @@ class cansas_reader(unittest.TestCase):
         self.cansas1d = "cansas1d.xml"
         self.cansas1d_slit = "cansas1d_slit.xml"
         self.cansas1d_units = "cansas1d_units.xml"
-        self.write_test = "write_test.xml"
         self.isis_1_0 = "ISIS_1_0.xml"
         self.isis_1_1 = "ISIS_1_1.xml"
         self.isis_1_1_notrans = "ISIS_1_1_notrans.xml"
@@ -137,8 +136,6 @@ class cansas_reader(unittest.TestCase):
         self.assertTrue(reader3.validateXML())
         reader4 = XMLreader(self.cansas1d_slit, self.schema_1_0)
         self.assertTrue(reader4.validateXML())
-        reader5 = XMLreader(self.write_test, self.schema_1_0)
-        self.assertTrue(reader5.validateXML())
         
 
 if __name__ == '__main__':
