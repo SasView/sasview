@@ -32,8 +32,8 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p style="margin-left: 0.85in; text-indent: -0.35in;"><b>1.1.</b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp; </span>Definition</b></p>
 <p>The 1D scattering intensity is calculated in the following way (Guinier, 1955):</p>
 <p style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="img/image004.PNG" alt="" /></span></p>
-<p>where r is the radius of the sphere, bkg is the background level and sldXXX is the scattering length density (SLD) of the scatterer or the solvent.<\p>
-<p>Note that if your data is on an absolute scale, the 'scale' should represent the volume fraction (unitless) * volume of a scatterer, V.</p>
+<p>where scale is a volume fraction, V is the volume of the scatterer, r is the radius of the sphere, bkg is the background level and sldXXX is the scattering length density (SLD) of the scatterer or the solvent.<\p>
+<p>Note that if your data is in absolute scale, the 'scale' should represent the volume fraction (unitless) if you have a good fit.  If not, it should represent the volume fraction * a factor (by which your data might need to be rescaled).</p>
 <p>The 2D scattering intensity is the same as above, regardless of the orientation of the q vector.</p>
 <p>The returned value is scaled to units of [cm-1] and the parameters of the sphere model are the following:</p>
 <div align="center">
@@ -114,7 +114,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p style="text-align: center; page-break-after: avoid;" align="center"><img src="img/image005.jpg" alt="sphere_1D_validation" width="573" height="315" /></p>
 <p style="text-align: center; page-break-after: avoid;" align="center">&nbsp;</p>
 <p>Figure 1: Comparison of the DANSE scattering intensity for a sphere with the output of the NIST SANS analysis software. The parameters were set to: Scale=1.0, Radius=60 &Aring;, Contrast=1e-6 &Aring; -2, and Background=0.01 cm -1.</p>
-<p style="margin-left: 0.25in;"><i>2013/09/09 - Description reviewed by King, S. and Parker, P.</i></p>
+<p style="margin-left: 0.25in;"><i>2013/09/09 and 2014/01/06 - Description reviewed by King, S. and Parker, P.</i></p>
 <p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.2.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="BinaryHSModel"></a><b><span style="font-size: 14pt;">BinaryHSModel</span></b></p>
 <p>This model (binary hard sphere model) provides the scattering intensity, for binary mixture of spheres including hard sphere interaction between those particles. Using Percus-Yevick closure, the calculation is an exact multi-component solution:</p>
 <p style="text-align: center;" align="center"><span style="position: relative; top: 5pt;"><img src="img/image006.PNG" alt="" /></span></p>
