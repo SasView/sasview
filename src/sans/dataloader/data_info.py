@@ -424,14 +424,15 @@ class TransmissionSpectrum:
     
     def __str__(self):
         _str  = "Transmission Spectrum:\n"
-        _str += "   Name:       {0}".format(self.name)
-        _str += "   Timestamp:  {1}".format(self.timestamp)
-        _str += "   Wavelength [{0}] | Transmission [{1}] | Trans Dev [{2}]\n".format(self.wavelength_unit, self.transmission_unit, self.transmission_deviation_unit)
-        for i in range(len(self.wavelength)):
-            _str += "   {0}, {1}".format(self.wavelength[i], self.transmission[i])
-            if len(self.transmission_deviation > i):
-                _str += ", {0}".format(self.transmission_deviation[i])
-            _str += "\n"
+        _str += "   Name:             \t{0}\n".format(self.name)
+        _str += "   Timestamp:        \t{0}\n".format(self.timestamp)
+        _str += "   Wavelength unit:  \t{0}\n".format(self.wavelength_unit)
+        _str += "   Transmission unit:\t{0}\n".format(self.transmission_unit)
+        _str += "   Trans. Dev. unit:  \t{0}\n".format(\
+                                            self.transmission_deviation_unit)
+        length_list = [len(self.wavelength), len(self.transmission), \
+                len(self.transmission_deviation)]
+        _str += "   Number of Pts:    \t{0}\n".format(max(length_list))
         return _str
     
   
@@ -497,7 +498,7 @@ class DataInfo:
         ## Collimation information
         self.collimation = []
         ## Transmission Spectrum
-        self.trans_spectrum = TransmissionSpectrum()
+        self.trans_spectrum = []
         ## Additional meta-data
         self.meta_data  = {}
         ## Loading errors
@@ -532,7 +533,8 @@ class DataInfo:
             _str += "%s\n" % str(item)
         for item in self.notes:
             _str += "%s\n" % str(item)
-
+        for item in self.trans_spectrum:
+            _str += "%s\n" % str(item)
         return _str
             
     # Private method to perform operation. Not implemented for DataInfo,
@@ -756,18 +758,19 @@ class Data1D(plottable_1D, DataInfo):
             dy = numpy.zeros(length)
             clone = Data1D(x, y, dx=dx, dy=dy)
         
-        clone.title       = self.title
-        clone.run         = self.run
-        clone.filename    = self.filename
-        clone.instrument  = self.instrument
-        clone.notes       = deepcopy(self.notes)
-        clone.process     = deepcopy(self.process)
-        clone.detector    = deepcopy(self.detector)
-        clone.sample      = deepcopy(self.sample)
-        clone.source      = deepcopy(self.source)
-        clone.collimation = deepcopy(self.collimation)
-        clone.meta_data   = deepcopy(self.meta_data)
-        clone.errors      = deepcopy(self.errors)
+        clone.title          = self.title
+        clone.run            = self.run
+        clone.filename       = self.filename
+        clone.instrument     = self.instrument
+        clone.notes          = deepcopy(self.notes)
+        clone.process        = deepcopy(self.process)
+        clone.detector       = deepcopy(self.detector)
+        clone.sample         = deepcopy(self.sample)
+        clone.source         = deepcopy(self.source)
+        clone.collimation    = deepcopy(self.collimation)
+        clone.trans_spectrum = deepcopy(self.trans_spectrum)
+        clone.meta_data      = deepcopy(self.meta_data)
+        clone.errors         = deepcopy(self.errors)
         
         return clone
 

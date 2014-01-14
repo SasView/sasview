@@ -17,6 +17,12 @@ parser = etree.ETCompatXMLParser()
 
 class XMLreader():
     
+    xml = None
+    xmldoc = None
+    xmlroot = None
+    schema = None
+    schemadoc = None
+    
     def __init__(self, xml = None, schema = None, root = None):
         self.xml = xml
         self.schema = schema
@@ -46,16 +52,17 @@ class XMLreader():
             self.xmldoc = etree.parse(self.xml, parser = parser)
             self.xmlroot = self.xmldoc.getroot()
         except Exception:
-            ##!TODO: raise exception if no xml is passed to this function
-            print "No xml file was found!"
+            self.xml = None
+            self.xmldoc = None
+            self.xmlroot = None
     
     def setSchema(self, schema):
         try:
             self.schema = schema
             self.schemadoc = etree.parse(self.schema, parser = parser)
         except Exception:
-            ##!TODO: raise exception if no schema is passed to this function
-            print "No schema file was found!"
+            self.schema = None
+            self.schemadoc = None
     
     def validateXML(self):
         """

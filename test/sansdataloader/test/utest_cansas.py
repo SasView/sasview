@@ -37,6 +37,7 @@ class cansas_reader(unittest.TestCase):
         self.isis_1_0 = "ISIS_1_0.xml"
         self.isis_1_1 = "ISIS_1_1.xml"
         self.isis_1_1_notrans = "ISIS_1_1_notrans.xml"
+        self.isis_1_1_doubletrans = "ISIS_1_1_doubletrans.xml"
         self.schema_1_0 = "cansas1d_v1_0.xsd"
         self.schema_1_1 = "cansas1d_v1_1.xsd"
         
@@ -76,28 +77,50 @@ class cansas_reader(unittest.TestCase):
         else:
             self.assertFalse(valid)
             
+            
+    def _check_data(self, data):
+        self.assertTrue(data.title == "TK49 c10_SANS")
+        self.assertTrue(data.x.size == 138)
+        self.assertTrue(len(data.meta_data) == 2)
+        self.assertTrue(data.detector[0].distance_unit == "mm")
+        self.assertTrue(data.detector[1].distance_unit == "mm")
+        self.assertTrue(data.detector[0].name == "HAB")
+        self.assertTrue(data.detector[1].name == "main-detector-bank")
+        self.assertTrue(data.detector[0].distance == 575.0)
+        self.assertTrue(data.detector[1].distance == 4145.02)
+        spectrum = data.trans_spectrum[0]
+        self.assertTrue(len(spectrum.wavelength) == 138)
+        self.assertTrue(data.process[0].name == "Mantid generated CanSAS1D XML")
+        
         
     def test_cansas_xml(self):
         filename = "isis_1_1_write_test.xml"
         xmlreader = XMLreader(self.isis_1_1, self.schema_1_1)
         valid = xmlreader.validateXML()
         self.assertTrue(valid)
-        reader = Reader()
-        dataloader = reader.read(self.isis_1_1)
-        for data in dataloader:
-            self.assertTrue(data.title == "TK49 c10_SANS")
-            self.assertTrue(data.x.size == 138)
-            self.assertTrue(len(data.meta_data) == 2)
-            self.assertTrue(data.detector[0].distance_unit == "mm")
-            reader.write(filename, data)
+        reader_generic = Loader()
+        dataloader = reader_generic.load(self.isis_1_1)
+        reader_cansas = Reader()
+        cansasreader = reader_cansas.read(self.isis_1_1)
+        for i in range(len(dataloader)):
+            self._check_data(dataloader[i])
+            self._check_data(cansasreader[i])
+            reader_generic.save(filename, dataloader[i], None)
             reader2 = Reader()
             return_data = reader2.read(filename)
             data_new = return_data
-            self.data = return_data[0]
-            self.assertTrue(self.data.x.size == 138)
-            self.assertTrue(len(self.data.meta_data) == 2)
-            self.assertTrue(self.data.detector[0].distance_unit == "mm")
-            self.assertTrue(self.data.title == "TK49 c10_SANS")
+            written_data = return_data[0]
+            self._check_data(written_data)
+            
+    
+    def test_double_trans_spectra(self):
+        xmlreader = XMLreader(self.isis_1_1_doubletrans, self.schema_1_1)
+        self.assertTrue(xmlreader.validateXML())
+        reader = Loader()
+        data = reader.load(self.isis_1_1_doubletrans)
+        for item in data:
+            self._check_data(item)
+    
                     
     def test_entry_name_recurse(self):
         test_values = [1,2,3,4,5,6]

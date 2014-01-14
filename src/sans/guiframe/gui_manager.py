@@ -2484,7 +2484,8 @@ class ViewerFrame(PARENT_FRAME):
             wx.PostEvent(self, StatusEvent(status=msg,
                                        info="error"))
             raise ValueError, msg
-        text = data.__str__() 
+        ## text = str(data)
+        text = data.__str__()
         text += 'Data Min Max:\n'
         text += 'X_min = %s:  X_max = %s\n'% (xmin, max(data.x))
         text += 'Y_min = %s:  Y_max = %s\n'% (ymin, max(data.y))
@@ -2493,19 +2494,19 @@ class ViewerFrame(PARENT_FRAME):
         text += '\nData Points:\n'
         x_st = "X"
         for index in range(len(data.x)):
-            if data.dy != None:
+            if data.dy != None and len(data.dy) > index:
                 dy_val = data.dy[index]
             else:
                 dy_val = 0.0
-            if data.dx != None:
+            if data.dx != None and len(data.dx) > index:
                 dx_val = data.dx[index]
             else:
                 dx_val = 0.0
-            if data.dxl != None:
+            if data.dxl != None and len(data.dxl) > index:
                 if index == 0: 
                     x_st = "Xl"
                 dx_val = data.dxl[index]
-            elif data.dxw != None:
+            elif data.dxw != None and len(data.dxw) > index:
                 if index == 0: 
                     x_st = "Xw"
                 dx_val = data.dxw[index]
