@@ -48,10 +48,18 @@ class CategoryInstaller:
         """
         returns the dir where default_cat.p should be
         """
+        # The default categories file is usually found with the code
         import sans.sansview
         cat_file = "default_categories.p"
         dir, file_name = os.path.split(sans.sansview.__file__)
         cat_file_path = os.path.join(dir, cat_file)
+        if os.path.isfile(cat_file_path):
+            cat_file_dir = os.path.dirname(cat_file_path)
+            return cat_file_dir
+        
+        # When deploying using py2app, the default categories file
+        # can be found in Contents/Resources
+        cat_file_path = os.path.join(os.path.dirname(sys.executable), '..', 'Resources', 'default_categories.p')
         if os.path.isfile(cat_file_path):
             cat_file_dir = os.path.dirname(cat_file_path)
             return cat_file_dir
