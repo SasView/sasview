@@ -7,9 +7,50 @@ class cansasConstants:
     ns = ''
     format = ''
     
+    
     def __init__(self):
         self.ns = self.CANSAS_NS
         self.format = self.CANSAS_FORMAT
+    
+    
+    def _iterate_namespace(self, namespace):
+        """
+        Method to iterate through a cansas constants tree based on a list of
+        names
+        
+        :param namespace: A list of names that match the tree structure of
+            cansas_constants
+        """
+        # The current level to look through in cansas_constants.
+        return_me = currentLevel()
+        return_me.current_level = self.CANSAS_FORMAT.get("SASentry")
+        # Defaults for variable and datatype
+        return_me.ns_variable = "{0}.meta_data[\"{2}\"] = \"{1}\""
+        return_me.ns_datatype = "content"
+        return_me.ns_optional = True
+        for name in namespace:
+            if name != "SASentry":
+                return_me.current_level = \
+                        return_me.current_level.get("children").get(name, "")
+                if return_me.current_level == "":
+                    return_me.current_level = \
+                            return_me.current_level.get("<any>", "")
+                cl_variable = return_me.current_level.get("variable", "")
+                cl_datatype = return_me.current_level.get("storeas", "")
+                cl_units_optional = \
+                            return_me.current_level.get("units_required", "")
+                # Where are how to store the variable for the given namespace
+                # CANSAS_CONSTANTS tree is hierarchical, so is no value, inherit
+                return_me.ns_variable = cl_variable if cl_variable != "" else \
+                                    return_me.ns_variable
+                return_me.ns_datatype = cl_datatype if cl_datatype != "" else \
+                                    return_me.ns_datatype
+                return_me.ns_optional = cl_units_optional if \
+                                    cl_units_optional != return_me.ns_optional \
+                                    else return_me.ns_optional
+        return return_me    
+    
+    
     """
     CANSAS_NS holds the base namespace and the default schema file information
     """
@@ -23,6 +64,7 @@ class cansasConstants:
                           "schema" : "cansas1d_v1_1.xsd"
                           }
                  }
+    
     
     """
     The constants below hold information on where to store the CanSAS data when
@@ -696,4 +738,16 @@ class cansasConstants:
                                                  }
                                    }
                      }
-    
+   
+class currentLevel:
+     
+    current_level = ''
+    ns_variable = ''
+    ns_datatype = ''
+    ns_optional = True
+     
+    def __init__(self):
+        self.current_level = ''
+        self.ns_variable = ''
+        self.ns_datatype = "content"
+        self.ns_optional = True

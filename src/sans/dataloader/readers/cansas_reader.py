@@ -39,26 +39,6 @@ CANSAS_NS = constants.ns
 ALLOW_ALL = True
 
 
-def write_node(doc, parent, name, value, attr={}):
-    """
-    :param doc: document DOM
-    :param parent: parent node
-    :param name: tag of the element
-    :param value: value of the child text node
-    :param attr: attribute dictionary
-    
-    :return: True if something was appended, otherwise False
-    """
-    if value is not None:
-        node = doc.createElement(name)
-        node.appendChild(doc.createTextNode(str(value)))
-        for item in attr:
-            node.setAttribute(item, attr[item])
-        parent.appendChild(node)
-        return True
-    return False
-                
-
 def get_content(location, node):
     """
     Get the first instance of the content of a xpath location.
@@ -100,16 +80,25 @@ def get_float(location, node):
     return value, attr
 
 
-
-class CANSASError(Exception):
-    """Base class all CANSAS reader exceptions are derived"""
-    pass
-
-class NotCANSASFileError(CANSASError):
-    def __init__(self):
-        self.value = "This is not a proper CanSAS file."
-    def __str__(self):
-        return repr(self.value)
+def write_node(doc, parent, name, value, attr={}):
+    """
+    :param doc: document DOM
+    :param parent: parent node
+    :param name: tag of the element
+    :param value: value of the child text node
+    :param attr: attribute dictionary
+    
+    :return: True if something was appended, otherwise False
+    """
+    if value is not None:
+        node = doc.createElement(name)
+        node.appendChild(doc.createTextNode(str(value)))
+        for item in attr:
+            node.setAttribute(item, attr[item])
+        parent.appendChild(node)
+        return True
+    return False
+                
 
 class Reader():
     """
@@ -273,36 +262,6 @@ class Reader():
             name = self._create_unique_key(dictionary, name, i)
         return name
     
-    def _iterate_namespace(self, namespace):
-        """
-        Method to iterate through a cansas constants tree based on a list of
-        names
-        
-        :param namespace: A list of names that match the tree structure of
-            cansas_constants
-        """
-        # The current level to look through in cansas_constants.
-        current_level = CANSAS_FORMAT.get("SASentry")
-        # Defaults for variable and datatype
-        ns_variable = "{0}.meta_data[\"{2}\"] = \"{1}\""
-        ns_datatype = "content"
-        ns_optional = True
-        for name in namespace:
-            if name != "SASentry":
-                current_level = current_level.get("children").get(name, "")
-                if current_level == "":
-                    current_level = current_level.get("<any>", "")
-                cl_variable = current_level.get("variable", "")
-                cl_datatype = current_level.get("storeas", "")
-                cl_units_optional = current_level.get("units_required", "")
-                # Where are how to store the variable for the given namespace
-                # CANSAS_CONSTANTS tree is hierarchical, so is no value, inherit
-                ns_variable = cl_variable if cl_variable != "" else ns_variable
-                ns_datatype = cl_datatype if cl_datatype != "" else ns_datatype
-                ns_optional = cl_units_optional if cl_units_optional != \
-                                    ns_optional else ns_optional
-        return current_level, ns_variable, ns_datatype, ns_optional
-    
     
     def _unit_conversion(self, new_current_level, attr, data1d, \
                                     node_value, optional = True):
@@ -396,9 +355,10 @@ class Reader():
                 tagname_original = tagname
                 ns.append(tagname)
                 attr = node.attrib
+                children = node.getchildren()
+                save_data1d = data1d
                 
                 # Look for special cases
-                save_data1d = data1d
                 if tagname == "SASdetector":
                     data1d = Detector()
                 elif tagname == "SAScollimation":
@@ -419,13 +379,26 @@ class Reader():
                             data1d.term.append(term_attr)
                 elif tagname == "aperture":
                     data1d = Aperture()
-                
+                if tagname == "Idata" and children is not None:
+                    dql = 0
+                    dqw = 0
+                    for child in children:
+                        tag = child.tag.replace(base_ns, "")
+                        if tag == "dQl":
+                            dql = 1
+                        if tag == "dQw":
+                            dqw = 1
+                    if dqw == 1 and dql == 0:
+                        data1d.dxl = numpy.append(data1d.dxl, 0.0)
+                    elif dql == 1 and dqw == 0:
+                        data1d.dxw = numpy.append(data1d.dxw, 0.0)
+                                
                 # Get where to store content
-                new_current_level, ns_var, ns_datatype, \
-                                    optional = self._iterate_namespace(ns)
+                cs_values = constants._iterate_namespace(ns)
                 # If the element is a child element, recurse
-                if node.getchildren() is not None:
-                    # Returned value is new Data1D object with all previous and new values in it.
+                if children is not None:
+                    # Returned value is new Data1D object with all previous and 
+                    # new values in it.
                     data1d, extras = self._parse_entry(node, ns, data1d, extras)
                     
                 #Get the information from the node
@@ -436,40 +409,47 @@ class Reader():
                     node_value = ' '.join(node_value.split())
                 
                 # If the value is a float, compile with units.
-                if ns_datatype == "float":
+                if cs_values.ns_datatype == "float":
                     # If an empty value is given, store as zero.
                     if node_value is None or node_value.isspace() \
                                             or node_value.lower() == "nan":
                         node_value = "0.0"
-                    node_value, unit = self._unit_conversion(new_current_level,\
-                                             attr, data1d, node_value, optional)
+                    node_value, unit = self._unit_conversion(\
+                                cs_values.current_level, attr, data1d, \
+                                node_value, cs_values.ns_optional)
                     
-                # If appending to a dictionary (meta_data | run_name), name sure the key is unique
-                if ns_var == "{0}.meta_data[\"{2}\"] = \"{1}\"":
-                    # If we are within a Process, Detector, Collimation or Aperture instance, pull out old data1d
-                    tagname = self._create_unique_key(data1d.meta_data, tagname, 0)
+                # If appending to a dictionary (meta_data | run_name)
+                # make sure the key is unique
+                if cs_values.ns_variable == "{0}.meta_data[\"{2}\"] = \"{1}\"":
+                    # If we are within a Process, Detector, Collimation or 
+                    # Aperture instance, pull out old data1d
+                    tagname = self._create_unique_key(data1d.meta_data, \
+                                                      tagname, 0)
                     if isinstance(data1d, Data1D) == False:
-                        store_me = ns_var.format("data1d", node_value, tagname)
+                        store_me = cs_values.ns_variable.format("data1d", \
+                                                            node_value, tagname)
                         extras.append(store_me)
-                        ns_var = None
-                if ns_var == "{0}.run_name[\"{2}\"] = \"{1}\"":
-                    tagname = self._create_unique_key(data1d.run_name, tagname, 0)
+                        cs_values.ns_variable = None
+                if cs_values.ns_variable == "{0}.run_name[\"{2}\"] = \"{1}\"":
+                    tagname = self._create_unique_key(data1d.run_name, \
+                                                      tagname, 0)
                 
                 # Check for Data1D object and any extra commands to save
                 if isinstance(data1d, Data1D):
                     for item in extras:
                         exec item
                 # Don't bother saving empty information unless it is a float
-                if ns_var is not None and node_value is not None and \
+                if cs_values.ns_variable is not None and node_value is not None and \
                             node_value.isspace() == False:
                     # Format a string and then execute it.
-                    store_me = ns_var.format("data1d", node_value, tagname)
+                    store_me = cs_values.ns_variable.format("data1d", node_value, tagname)
                     exec store_me
                 # Get attributes and process them
                 if attr is not None:
                     for key in node.keys():
                         try:
-                            cansas_attrib = new_current_level.get("attributes").get(key)
+                            cansas_attrib = \
+                            cs_values.current_level.get("attributes").get(key)
                             attrib_variable = cansas_attrib.get("variable")
                             if key == 'unit' and unit != '':
                                 attrib_value = unit
@@ -524,8 +504,7 @@ class Reader():
         main_node.setAttribute("xmlns", ns)
         main_node.setAttribute("xmlns:xsi",
                                "http://www.w3.org/2001/XMLSchema-instance")
-        main_node.setAttribute("xsi:schemaLocation",
-                               "{0} http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd".format(ns))
+        main_node.setAttribute("xsi:schemaLocation", "{0} http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd".format(ns))
         
         doc.appendChild(main_node)
         
