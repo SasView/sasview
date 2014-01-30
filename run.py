@@ -120,5 +120,5 @@ sans.models = import_package('sans.models', os.path.join(build_path, 'sans', 'mo
 #multiprocessing.freeze_support()
 
 # start sasview
-from sans.sansview.sansview import run
-run()
+from sans.sansview.sansview import SasView
+SasView()
