@@ -6,10 +6,104 @@
 <p><b><span style="font-size: 16pt;">Model Functions</span></b></p>
 <ul style="margin-top: 0in;" type="disc">
 <li><a href="#Introduction"><b>Introduction</b></a></li>
-<li><a href="#Shapes"><b>Shapes</b></a>: <a href="#SphereModel">SphereModel (Magnetic 2D Model)</a>, <a href="#BinaryHSModel">BinaryHSModel</a>, <a href="#FuzzySphereModel">FuzzySphereModel</a>, <a href="#RaspBerryModel">RaspBerryModel</a>, <a href="#CoreShellModel">CoreShellModel (Magnetic 2D Model)</a>,&nbsp;<a href="#Core2ndMomentModel">Core2ndMomentModel</a>, <a href="#CoreMultiShellModel">CoreMultiShellModel (Magnetic 2D Model)</a>, <a href="#VesicleModel">VesicleModel</a>, <a href="#MultiShellModel">MultiShellModel</a>, &nbsp;<a href="#OnionExpShellModel">OnionExpShellModel</a>, <a href="#SphericalSLDModel">SphericalSLDModel</a>, <a href="#LinearPearlsModel">LinearPearlsModel</a>, <a href="#PearlNecklaceModel">PearlNecklaceModel</a> , <a href="#CylinderModel">CylinderModel (Magnetic 2D Model)</a>, <a href="#CoreShellCylinderModel">CoreShellCylinderModel</a>, <a href="#CoreShellBicelleModel">CoreShellBicelleModel</a>,<a href="#HollowCylinderModel">HollowCylinderModel</a>, <a href="#FlexibleCylinderModel">FlexibleCylinderModel</a>, <a href="#FlexibleCylinderModel">FlexCylEllipXModel</a>, <a href="#StackedDisksModel">StackedDisksModel</a>, <a href="#ParallelepipedModel">ParallelepipedModel (Magnetic 2D Model)</a>, <a href="#CSParallelepipedModel">CSParallelepipedModel</a>, <a href="#EllipticalCylinderModel">EllipticalCylinderModel</a>, <a href="#BarBellModel">BarBellModel</a>, <a href="#CappedCylinderModel">CappedCylinderModel</a>, <a href="#EllipsoidModel">EllipsoidModel</a>, <a href="#CoreShellEllipsoidModel">CoreShellEllipsoidModel</a>, <a href="#TriaxialEllipsoidModel">TriaxialEllipsoidModel</a>, <a href="#LamellarModel">LamellarModel</a>, <a href="#LamellarFFHGModel">LamellarFFHGModel</a>, <a href="#LamellarPSModel">LamellarPSModel</a>, <a href="#LamellarPSHGModel">LamellarPSHGModel</a>, <a href="#LamellarPCrystalModel">LamellarPCrystalModel</a>, <a href="#SCCrystalModel">SCCrystalModel</a>, <a href="#FCCrystalModel">FCCrystalModel</a>, <a href="#BCCrystalModel">BCCrystalModel</a>.</li>
-<li><a href="#Shape-Independent"><b>Shape-Independent</b></a>: <a href="#Absolute%20Power_Law">AbsolutePower_Law</a>, <a href="#BEPolyelectrolyte">BEPolyelectrolyte</a>, <a href="#BroadPeakModel">BroadPeakModel,<span><span style="text-decoration: underline;"><span style="color: blue;">CorrLength</span></span></span><span>,</span></a> <a href="#DABModel">DABModel</a>, <a href="#Debye">Debye</a>, <a href="#Number_Density_Fractal">FractalModel</a>, <a href="#FractalCoreShell">FractalCoreShell</a>, <a href="#GaussLorentzGel">GaussLorentzGel</a>, <a href="#Guinier">Guinier</a>, <a href="#GuinierPorod">GuinierPorod</a>, <a href="#Lorentz">Lorentz</a>, <a href="#Mass_Fractal">MassFractalModel</a>, <a href="#MassSurface_Fractal">MassSurfaceFractal</a>, <a href="#Peak%20Gauss%20Model">PeakGaussModel</a>, <a href="#Peak%20Lorentz%20Model">PeakLorentzModel</a>, <a href="#Poly_GaussCoil">Poly_GaussCoil</a>, <a href="#PolymerExclVolume">PolyExclVolume</a>, <a href="#PorodModel">PorodModel</a>, <a href="#RPA10Model">RPA10Model</a>, <a href="#StarPolymer">StarPolymer</a>, <a href="#Surface_Fractal">SurfaceFractalModel</a>, <a href="#TeubnerStreyModel">Teubner Strey</a>, <a href="#TwoLorentzian">TwoLorentzian</a>, <a href="#TwoPowerLaw">TwoPowerLaw</a>, <a href="#UnifiedPowerRg">UnifiedPowerRg</a>, <a href="#LineModel">LineModel</a>, <a href="#ReflectivityModel">ReflectivityModel</a>, <a href="#ReflectivityIIModel">ReflectivityIIModel</a>, <a href="#GelFitModel">GelFitModel</a>.</li>
-<li><a href="#Model"><b>Customized Models</b></a>: <a href="#testmodel">testmodel</a>, <a href="#testmodel_2">testmodel_2</a>, <a href="#sum_p1_p2">sum_p1_p2</a>, <a href="#sum_Ap1_1_Ap2">sum_Ap1_1_Ap2</a>, <a href="#polynomial5">polynomial5</a>, <a href="#sph_bessel_jn">sph_bessel_jn</a>.</li>
-<li><a href="#Structure_Factors"><b>Structure Factors</b></a>: <a href="#HardsphereStructure">HardSphereStructure</a>, <a href="#SquareWellStructure">SquareWellStructure</a>, <a href="#HayterMSAStructure">HayterMSAStructure</a>, <a href="#StickyHSStructure">StickyHSStructure</a>.</li>
+<li><a href="#Shapes"><b>Shapes</b></a>: 
+	<ul>
+	<li>Sphere based:<br/>
+	<a href="#SphereModel">SphereModel (Magnetic 2D Model)</a>, 
+	<a href="#BinaryHSModel">BinaryHSModel</a>, 
+	<a href="#FuzzySphereModel">FuzzySphereModel</a>, 
+	<a href="#RaspBerryModel">RaspBerryModel</a>, 
+	<a href="#CoreShellModel">CoreShellModel (Magnetic 2D Model)</a>,
+	<a href="#Core2ndMomentModel">Core2ndMomentModel</a>, 
+	<a href="#CoreMultiShellModel">CoreMultiShellModel (Magnetic 2D Model)</a>, 
+	<a href="#VesicleModel">VesicleModel</a>, 
+	<a href="#MultiShellModel">MultiShellModel</a>, 
+	<a href="#OnionExpShellModel">OnionExpShellModel</a>, 
+	<a href="#SphericalSLDModel">SphericalSLDModel</a>, 
+	<a href="#LinearPearlsModel">LinearPearlsModel</a>, 
+	<a href="#PearlNecklaceModel">PearlNecklaceModel</a>
+	</li>
+	<li>Cylinder based:<br/>
+	<a href="#CylinderModel">CylinderModel (Magnetic 2D Model)</a>, 
+	<a href="#CoreShellCylinderModel">CoreShellCylinderModel</a>, 
+	<a href="#CoreShellBicelleModel">CoreShellBicelleModel</a>,
+	<a href="#HollowCylinderModel">HollowCylinderModel</a>,
+	<a href="#FlexibleCylinderModel">FlexibleCylinderModel</a>,
+	<a href="#FlexibleCylinderModel">FlexCylEllipXModel</a>,
+	<a href="#StackedDisksModel">StackedDisksModel</a>,
+	<a href="#EllipticalCylinderModel">EllipticalCylinderModel</a>, 
+	<a href="#BarBellModel">BarBellModel</a>, 
+	<a href="#CappedCylinderModel">CappedCylinderModel</a>,
+	<a href="#PringleModel">PringleModel</a> 
+	</li>
+	<li>Parallelpipeds:<br/>
+	<a href="#ParallelepipedModel">ParallelepipedModel (Magnetic 2D Model)</a>,
+	<a href="#CSParallelepipedModel">CSParallelepipedModel</a>
+	</li>
+	<li>Ellipsoids:<br/>
+	<a href="#EllipsoidModel">EllipsoidModel</a>, 
+	<a href="#CoreShellEllipsoidModel">CoreShellEllipsoidModel</a>, 
+	<a href="#TriaxialEllipsoidModel">TriaxialEllipsoidModel</a>
+	</li>
+	<li>Lamellar:<br/> 
+	<a href="#LamellarModel">LamellarModel</a>, 
+	<a href="#LamellarFFHGModel">LamellarFFHGModel</a>, 
+	<a href="#LamellarPSModel">LamellarPSModel</a>, 
+	<a href="#LamellarPSHGModel">LamellarPSHGModel</a>
+	</li>
+	<li>Paracrystals:<br/>
+	<a href="#LamellarPCrystalModel">LamellarPCrystalModel</a>, 
+	<a href="#SCCrystalModel">SCCrystalModel</a>, 
+	<a href="#FCCrystalModel">FCCrystalModel</a>, 
+	<a href="#BCCrystalModel">BCCrystalModel</a>.</li>
+	</li>
+	</ul>
+<li><a href="#Shape-Independent"><b>Shape-Independent</b></a>: 
+	<a href="#Absolute%20Power_Law">AbsolutePower_Law</a>, 
+	<a href="#BEPolyelectrolyte">BEPolyelectrolyte</a>, 
+	<a href="#BroadPeakModel">BroadPeakModel</a>,
+	<a href="#CorrLength">CorrLength</a>, 
+	<a href="#DABModel">DABModel</a>, 
+	<a href="#Debye">Debye</a>, 
+	<a href="#Number_Density_Fractal">FractalModel</a>, 
+	<a href="#FractalCoreShell">FractalCoreShell</a>, 
+	<a href="#GaussLorentzGel">GaussLorentzGel</a>, 
+	<a href="#Guinier">Guinier</a>, 
+	<a href="#GuinierPorod">GuinierPorod</a>, 
+	<a href="#Lorentz">Lorentz</a>, 
+	<a href="#Mass_Fractal">MassFractalModel</a>, 
+	<a href="#MassSurface_Fractal">MassSurfaceFractal</a>, 
+	<a href="#Peak%20Gauss%20Model">PeakGaussModel</a>, 
+	<a href="#Peak%20Lorentz%20Model">PeakLorentzModel</a>, 
+	<a href="#Poly_GaussCoil">Poly_GaussCoil</a>, 
+	<a href="#PolymerExclVolume">PolyExclVolume</a>, 
+	<a href="#PorodModel">PorodModel</a>, 
+	<a href="#RPA10Model">RPA10Model</a>, 
+	<a href="#StarPolymer">StarPolymer</a>, 
+	<a href="#Surface_Fractal">SurfaceFractalModel</a>, 
+	<a href="#TeubnerStreyModel">Teubner Strey</a>, 
+	<a href="#TwoLorentzian">TwoLorentzian</a>, 
+	<a href="#TwoPowerLaw">TwoPowerLaw</a>, 
+	<a href="#UnifiedPowerRg">UnifiedPowerRg</a>, 
+	<a href="#LineModel">LineModel</a>, 
+	<a href="#ReflectivityModel">ReflectivityModel</a>, 
+	<a href="#ReflectivityIIModel">ReflectivityIIModel</a>, 
+	<a href="#GelFitModel">GelFitModel</a>.</li>
+	
+<li><a href="#Model"><b>Customized Models</b></a>: 
+	<a href="#testmodel">testmodel</a>, 
+	<a href="#testmodel_2">testmodel_2</a>, 
+	<a href="#sum_p1_p2">sum_p1_p2</a>, 
+	<a href="#sum_Ap1_1_Ap2">sum_Ap1_1_Ap2</a>, 
+	<a href="#polynomial5">polynomial5</a>, 
+	<a href="#sph_bessel_jn">sph_bessel_jn</a>.</li>
+	
+<li><a href="#Structure_Factors"><b>Structure Factors</b></a>: 
+	<a href="#HardsphereStructure">HardSphereStructure</a>, 
+	<a href="#SquareWellStructure">SquareWellStructure</a>, 
+	<a href="#HayterMSAStructure">HayterMSAStructure</a>, 
+	<a href="#StickyHSStructure">StickyHSStructure</a>.</li>
+	
 <li><a href="#References"><b>References</b></a></li>
 </ul>
 <p style="margin-left: 0.25in; text-indent: -0.25in;"><b><span style="font-size: 16pt;">1.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp; </span></b><a name="Introduction"></a><b><span style="font-size: 16pt;">Introduction </span></b></p>
@@ -2661,7 +2755,520 @@ oriented HollowCylinderModel.</p>
 <p>Guinier, A. and Fournet, G., "Small-Angle Scattering of X-Rays", John Wiley and Sons, New York, 1955.</p>
 <p>Kratky, O. and Porod, G., J. Colloid Science, 4, 35, 1949.</p>
 <p>Higgins, J.S. and Benoit, H.C., "Polymers and Neutron Scattering", Clarendon, Oxford, 1994.</p>
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.21.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="ParallelepipedModel"></a><b><span style="font-size: 14pt;">ParallelepipedModel (Magnetic 2D Model) </span></b></p>
+
+
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.21.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="EllipticalCylinderModel"></a><b><span style="font-size: 14pt;">Elliptical Cylinder Model</span></b></p>
+<p>This function calculates the scattering from an oriented elliptical cylinder.</p>
+<p><b>For 2D (orientated system):</b></p>
+<p>The angles theta and phi define the orientation of the axis of the cylinder. The angle psi is defined as the orientation of the major axis of the ellipse with respect to the vector Q. A gaussian poydispersity can be added to any of the orientation angles, and also for the minor radius and the ratio of the ellipse radii.</p>
+<p style="text-align: center;" align="center"><img id="Picture 40" src="img/image098.gif" alt="" width="352" height="172" /></p>
+<p style="text-align: center;" align="center"><b>Figure. a= r_minor and </b><b><span style="font-family: Symbol;">n</span>= r_ratio (i.e., r_major/r_minor).</b></p>
+<p>The function calculated is:</p>
+<p style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="img/image099.PNG" alt="" /></span>&nbsp;</p>
+<p>with the functions:</p>
+<p>&nbsp;</p>
+<p style="text-align: center;" align="center"><img src="img/image100.PNG" alt="" /></p>
+<p>&nbsp;</p>
+<p>and the angle psi is defined as the orientation of the major axis of the ellipse with respect to the vector Q.</p>
+<p><b>For 1D (no preferred orientation):</b></p>
+<p>The form factor is averaged over all possible orientation before normalized by the particle volume: P(q) = scale*&lt;f^2&gt;/V .</p>
+<p>The returned value is scaled to units of [cm-1].</p>
+<p>To provide easy access to the orientation of the elliptical, we define the axis of the cylinder using two angles &theta; , <span style="font-family: 'Arial','sans-serif';">&phi; </span>and<span style="font-family: Symbol;">Y</span>. Similarly to the case of the cylinder, those angles, &theta; &nbsp;and <span style="font-family: 'Arial','sans-serif';">&phi;,</span> are defined on Figure 2 of CylinderModel. The angle <span style="font-family: Symbol;">Y </span>is the rotational angle around its own long_c axis against the q plane. For example, <span style="font-family: Symbol;">Y </span>= 0 when the r_minor axis is parallel to the x-axis of the detector.</p>
+<p>All angle parameters are valid and given only for 2D calculation (Oriented system).</p>
+<p style="text-align: center;" align="center"><img id="Picture 105" src="img/image101.jpg" /></p>
+<p style="text-align: center;" align="center"><b>Figure. Definition of angels for 2D</b>.</p>
+<p style="text-align: center;" align="center"><img id="Picture 114" src="img/image062.jpg" alt="" width="379" height="256" /></p>
+<p style="text-align: center;" align="center"><span style="font-size: 12pt;">Figure. Examples of the angles for oriented elliptical cylinders </span></p>
+<p style="text-align: center;" align="center"><span style="font-size: 12pt;">against the detector plane.</span></p>
+<p><b>For P*S</b>: The 2nd virial coefficient of the solid cylinder is calculate based on the averaged radius (=sqrt(r_minor^2*r_ratio))&nbsp; and length values, and used as the effective radius toward S(Q) when P(Q)*S(Q) is applied.</p>
+<div align="center">
+<table style="border-collapse: collapse;" border="2" cellspacing="0" cellpadding="0">
+<tbody>
+<tr style="height: 19.25pt;">
+<td style="border: 1pt solid width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>Parameter name</p>
+</td>
+<td style="border-width: 1pt 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>Units</p>
+</td>
+<td style="border-width: 1pt 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>Default value</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>scale</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>None</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>1.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; vertical-align: top; width: 107pt; height: 19.25pt;">
+<p>r_minor</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>&Aring;</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>20.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>r_ratio</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>&Aring;</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>1.5</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>length</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>&Aring;</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>400.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>sldCyl</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>&Aring; -2</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>4e-6</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>sldSolv</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>&Aring; -2</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>1e-006</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>background</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">&nbsp;</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>0</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p style="text-align: center;" align="center"><img id="Picture 503" src="img/image102.jpg" alt="" width="443" height="328" /></p>
+<p style="text-align: center;" align="center"><b>Figure. 1D plot using the default values (w/1000 data point).</b></p>
+<p style="margin-left: 1.35in; text-indent: -0.25in;"><span style="font-family: Symbol;">&middot;</span><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>Validation of the elliptical cylinder 2D model</b></p>
+<p>Validation of our code was done by comparing the output of the 1D calculation to the angular average of the output of 2 D calculation over all possible angles. The Figure below shows the comparison where the solid dot refers to averaged 2D while the line represents the result of 1D calculation (for 2D averaging, 76, 180, 76 points are taken for the angles of theta, phi, and psi respectively).</p>
+<p style="text-align: center;" align="center"><img id="Picture 106" src="img/image103.gif" alt="" width="448" height="278" /></p>
+<p style="text-align: center;" align="center"><b>Figure. Comparison between 1D and averaged 2D.</b></p>
+<p><b>&nbsp;</b></p>
+<p>In the 2D average, more binning in the angle phi is necessary to get the proper result. The following figure shows the results of the averaging by varying the number of bin over angles.</p>
+<p style="text-align: center;" align="center"><img id="Picture 107" src="img/image104.gif" alt="" width="409" height="303" /></p>
+<p style="text-align: center;" align="center"><b>Figure. The intensities averaged from 2D over different number </b></p>
+<p style="text-align: center;" align="center"><b>of points of binning of angles.</b></p>
+<p>REFERENCE</p>
+<p style="text-indent: 0.25in;">L. A. Feigin and D. I. Svergun &ldquo;Structure Analysis by Small-Angle X-Ray and Neutron Scattering&rdquo;, Plenum, New York, (1987).</p>
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.22.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="BarBellModel"></a><b><span style="font-size: 14pt;">BarBell(/DumBell)Model</span></b></p>
+<p>Calculates the scattering from a barbell-shaped cylinder (This model simply becomes the DumBellModel when the length of the cylinder, L, is set to zero). That is, a sphereocylinder with spherical end caps that have a radius larger than that of the cylinder and the center of the end cap radius lies outside of the cylinder All dimensions of the barbell are considered to be monodisperse. See the diagram for the details of the geometry and restrictions on parameter values.&nbsp;</p>
+<p style="margin-left: 0.85in; text-indent: -0.35in;"><b>1.1.</b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp; </span>Definition</b></p>
+<p>The returned value is scaled to units of [cm-1sr-1], absolute scale.</p>
+<p>The barbell geometry is defined as:</p>
+<p style="text-align: center;" align="center"><img src="img/image105.jpg" alt="" width="519" height="181" /></p>
+<p>r is the radius of the cylinder. All other parameters are as defined in the diagram. Since the end cap radius R &gt;= r and by definition for this geometry h &gt; 0,&nbsp; h is then defined by r and R as:</p>
+<p>h = sqrt(R^2 - r^2).</p>
+<p>The scattering intensity I(q) is calculated as:</p>
+<p style="text-align: center;" align="center"><span style="position: relative; top: 12pt;"><img src="img/image106.PNG" alt="" /></span></p>
+<p>where the amplitude A(q) is given as:</p>
+<p>&nbsp;</p>
+<p style="text-align: center;" align="center"><img src="img/image107.PNG" alt="" /></p>
+<p>&nbsp;</p>
+<p>The &lt; &gt; brackets denote an average of the structure over all orientations. &lt;A^2(q)&gt; is then the form factor, P(q). The scale factor is equivalent to the volume fraction of cylinders, each of volume, V. Contrast is the difference of scattering length densities of the cylinder and the surrounding solvent.</p>
+<p>The volume of the barbell is:</p>
+<p style="text-align: center;" align="center"><img src="img/image108.jpg" alt="" width="227" height="46" /></p>
+<p>and its radius of gyration:</p>
+<p style="text-align: center;" align="center"><img src="img/image109.jpg" alt="" width="368" height="103" /></p>
+<p>The necessary conditions of R &gt;= r is not enforced in the model. It is up to you to restrict this during analysis.</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; REFERENCES</p>
+<p>H. Kaya, J. Appl. Cryst. (2004) 37, 223-230.</p>
+<p>H. Kaya and N-R deSouza, J. Appl. Cryst. (2004) 37, 508-509. (addenda and errata)</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TEST DATASET</p>
+<p>This example dataset is produced by running the Macro PlotBarbell(), using 200 data points, qmin = 0.001 &Aring;-1,&nbsp; qmax = 0.7 &Aring;-1 and the above default values.</p>
+<div align="center">
+<table style="border-collapse: collapse;" border="2" cellspacing="0" cellpadding="0">
+<tbody>
+<tr style="height: 19.25pt;">
+<td style="border: 1pt solid width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>Parameter name</p>
+</td>
+<td style="border-width: 1pt 1pt 1pt medium; vertical-align: top; width: 107pt; height: 19.25pt;">
+<p>Units</p>
+</td>
+<td style="border-width: 1pt 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>Default value</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>scale</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>None</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>1.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>len_bar</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>&Aring;</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>400.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>rad_bar</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>&Aring;</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>20.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>rad_bell</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>&Aring;</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>40.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>sld_barbell</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>&Aring; -2</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>1.0e-006</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>sld_solv</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>&Aring; -2</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>6.3e-006</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>background</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">&nbsp;</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>0</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p style="text-align: center;" align="center"><img id="Picture 59" src="img/image110.jpg" alt="" width="480" height="356" /></p>
+<p style="text-align: center;" align="center"><b>Figure. 1D plot using the default values (w/256 data point).</b></p>
+<p>For 2D data: The 2D scattering intensity is calculated similar to the 2D cylinder model. At the theta = 45 deg and phi =0 deg with default values for other parameters,</p>
+<p style="text-align: center;" align="center"><img id="Picture 66" src="img/image111.jpg" alt="" width="425" height="346" /></p>
+<p style="text-align: center;" align="center"><b>Figure. 2D plot (w/(256X265) data points).</b></p>
+
+<p style="text-align: center; page-break-after: avoid;" align="center"><img src="img/image061.jpg" /></p>
+<p style="text-align: center;" align="center"><img src="img/image062.jpg" alt="" width="379" height="256" /></p>
+<p style="text-align: center;" align="center">Figure. Examples of the angles for oriented pp against the detector plane.</p>
+
+
+<p style="text-align: center;" align="center"><a name="_Ref173213915"></a><a name="_Ref173306040"></a>Figure. Definition of the angles for oriented 2D barbells.</p>
+
+
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.23.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="CappedCylinderModel"></a><b><span style="font-size: 14pt;">CappedCylinder(/ConvexLens)Model</span></b></p>
+<p>Calculates the scattering from a cylinder with spherical section end-caps(This model simply becomes the ConvexLensModel when the length of the cylinder L = 0. &nbsp;That is, a sphereocylinder with end caps that have a radius larger than that of the cylinder and the center of the end cap radius lies within the cylinder. See the diagram for the details of the geometry and restrictions on parameter values.</p>
+<p style="margin-left: 0.85in; text-indent: -0.35in;">&nbsp;</p>
+<p style="margin-left: 0.85in; text-indent: -0.35in;"><b>1.1.</b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp; </span>Definition</b></p>
+<p>The returned value is scaled to units of [cm-1sr-1], absolute scale.</p>
+<p>The Capped Cylinder geometry is defined as:</p>
+<p style="text-align: center;" align="center"><img src="img/image112.jpg" alt="" width="416" height="223" /></p>
+<p>r is the radius of the cylinder. All other parameters are as defined in the diagram. Since the end cap radius R &gt;= r and by definition for this geometry h &lt; 0,&nbsp; h is then defined by r and R as:</p>
+<p>h = -1*sqrt(R^2 - r^2).</p>
+<p>The scattering intensity I(q) is calculated as:</p>
+<p style="text-align: center;" align="center"><img src="img/image113.jpg" alt="" width="288" height="45" /></p>
+<p>where the amplitude A(q) is given as:</p>
+<p style="text-align: center;" align="center"><img src="img/image114.jpg" alt="" width="384" height="159" /></p>
+<p>The &lt; &gt; brackets denote an average of the structure over all orientations. &lt;A^2(q)&gt; is then the form factor, P(q). The scale factor is equivalent to the volume fraction of cylinders, each of volume, V. Contrast is the difference of scattering length densities of the cylinder and the surrounding solvent.</p>
+<p>The volume of the Capped Cylinder is:</p>
+<p>(with h as a positive value here)</p>
+<p style="text-align: center;" align="center"><img src="img/image115.jpg" alt="" width="257" height="47" /></p>
+<p>and its radius of gyration:</p>
+<p style="text-align: center;" align="center"><img src="img/image116.jpg" alt="" width="406" height="114" /></p>
+<p>The necessary conditions of R &gt;= r is not enforced in the model. It is up to you to restrict this during analysis.</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; REFERENCES</p>
+<p>H. Kaya, J. Appl. Cryst. (2004) 37, 223-230.</p>
+<p>H. Kaya and N-R deSouza, J. Appl. Cryst. (2004) 37, 508-509. (addenda and errata)</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TEST DATASET</p>
+<p>This example dataset is produced by running the Macro CappedCylinder(), using 200 data points, qmin = 0.001 &Aring;-1,&nbsp; qmax = 0.7 &Aring;-1 and the above default values.</p>
+<div align="center">
+<table style="border-collapse: collapse;" border="2" cellspacing="0" cellpadding="0">
+<tbody>
+<tr style="height: 19.25pt;">
+<td style="border: 1pt solid width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>Parameter name</p>
+</td>
+<td style="border-width: 1pt 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>Units</p>
+</td>
+<td style="border-width: 1pt 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>Default value</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>scale</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>None</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>1.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; vertical-align: top; width: 107pt; height: 19.25pt;">
+<p>len_cyl</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>&Aring;</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>400.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>rad_cap</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>&Aring;</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>40.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>rad_cyl</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>&Aring;</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>20.0</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>sld_capcyl</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>&Aring; -2</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>1.0e-006</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>sld_solv</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>&Aring; -2</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>6.3e-006</p>
+</td>
+</tr>
+<tr style="height: 19.25pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>background</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">&nbsp;</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
+<p>0</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p style="text-align: center;" align="center"><img id="Picture 72" src="img/image117.jpg" alt="" width="533" height="381" /></p>
+<p style="text-align: center;" align="center"><b>Figure. 1D plot using the default values (w/256 data point).</b></p>
+<p>For 2D data: The 2D scattering intensity is calculated similar to the 2D cylinder model. At the theta = 45 deg and phi =0 deg with default values for other parameters,</p>
+<p style="text-align: center;" align="center"><img id="Picture 71" src="img/image118.jpg" alt="" width="402" height="334" /></p>
+<p style="text-align: center;" align="center"><b>Figure. 2D plot (w/(256X265) data points).</b></p>
+<p style="text-align: center; page-break-after: avoid;" align="center"><img src="img/image061.jpg" /></p>
+<p style="text-align: center;" align="center"><a name="_Ref173213915"></a><a name="_Ref173306040"></a>Figure. Definition of the angles for oriented 2D cylinders.</p>
+<p style="text-align: center;" align="center"><img src="img/image062.jpg" alt="" width="379" height="256" /></p>
+<p style="text-align: center;" align="center">Figure. Examples of the angles for oriented pp against the detector plane.</p>
+
+<!-- Pringle form factor AJJ 2014-02-17 -->
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.24.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="PringleModel"></a><b><span style="font-size: 14pt;">PringleModel</span></b></p>
+<p>This model provides the form factor, P(<em>q</em>), for a 'pringle' or 'saddle-shaped' object (a hyperbolic paraboloid).</p>
+<p style="text-align: center;" align="center">&nbsp;&nbsp;</p>
+<p>The returned value is in units of [cm-1], on absolute scale.</p>
+<p>The form factor calculated is:</p>
+<p style="text-align: center;" align="center"><img src="img/pringle_eqn_1.jpg" alt="" height='60px'/></p>
+<p>where</p>
+<p style="text-align: center;" align="center"><img src="img/pringle_eqn_2.jpg" alt="" height='120px'/></p>
+<p>&nbsp;</p>
+<p>The parameters of the model and a plot comparing the pringle model with the equivalent cylinder are shown below.</p>
+<div align="center">
+<table style="border-collapse: collapse;" border="2" cellspacing="0" cellpadding="0">
+<tbody>
+<tr style="height: 18.8pt;">
+<td style="border: 1pt solid width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>Parameter name</p>
+</td>
+<td style="border-width: 1pt 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>Units</p>
+</td>
+<td style="border-width: 1pt 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>Default value</p>
+</td>
+</tr>
+<tr style="height: 18.8pt;">
+<td style="border-width: medium 1pt 1pt; vertical-align: top; width: 107pt; height: 18.8pt;">
+<p>background</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>cm-1</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>0.0</p>
+</td>
+</tr>
+<tr style="height: 18.8pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>alpha</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p></p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>0.001</p>
+</td>
+</tr>
+<tr style="height: 18.8pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>beta</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p></p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>0.02</p>
+</td>
+</tr>
+<tr style="height: 18.8pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>radius</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">&nbsp;</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>60</p>
+</td>
+</tr>
+<tr style="height: 18.8pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>scale</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">&nbsp;</td>
+<p></p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>1</p>
+</td>
+</tr>
+<tr style="height: 18.8pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>sld_pringle</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>&Aring; -2</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>1e-006</p>
+</td>
+</tr>
+<tr style="height: 18.8pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>sld_solvent</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>&Aring; -2</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>6.3e-006</p>
+</td>
+</tr>
+<tr style="height: 18.8pt;">
+<td style="border-width: medium 1pt 1pt; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>thickness</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>&Aring;</p>
+</td>
+<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 18.8pt;" valign="top" width="143">
+<p>10</p>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p style="text-align: center;" align="center"><img id="Picture 492" src="img/pringle-vs-cylinder.png" alt="" width="455" height="351" /></p>
+<p style="text-align: center;" align="center"><b>Figure. 1D plot using the default values (w/150 data point).</b></p>
+<p>REFERENCE</p>
+<p>S. Alexandru Rautu, Private Communication.</p>
+
+
+
+
+
+
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.25.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="ParallelepipedModel"></a><b><span style="font-size: 14pt;">ParallelepipedModel (Magnetic 2D Model) </span></b></p>
 <p>This model provides the form factor, P(<em>q</em>), for a rectangular cylinder (below) where the form factor is normalized by the volume of the cylinder. P(q) = scale*&lt;f^2&gt;/V+background where the volume V= ABC and the averaging &lt; &gt;&nbsp; is applied over all orientation for 1D. &nbsp;</p>
 For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarization/Magnetic Scattering</a>' in Fitting Help.
 <p><span style="font-size: 14pt;">&nbsp;</span></p>
@@ -2770,7 +3377,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p>REFERENCE</p>
 <p>Mittelbach and Porod, Acta Physica Austriaca 14 (1961) 185-211.</p>
 <p>Equations (1), (13-14). (in German)</p>
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.22.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><b><span style="font-size: 14pt;"><a name="CSParallelepipedModel"></a>CSParallelepipedModel</span></b></p>
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.26.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><b><span style="font-size: 14pt;"><a name="CSParallelepipedModel"></a>CSParallelepipedModel</span></b></p>
 <p>Calculates the form factor for a rectangular solid with a core-shell structure. The thickness and the scattering length density of the shell or "rim" can be different on all three (pairs) of faces.&nbsp; The form factor is normalized by the particle volume such that P(q) = scale*&lt;f^2&gt;/Vol + bkg, where &lt; &gt; is an average over all possible orientations of the rectangular solid. An instrument resolution smeared version is also provided.</p>
 <p>The function calculated is the form factor of the rectangular solid below. The core of the solid is defined by the dimensions ABC such that A &lt; B &lt; C.&nbsp;</p>
 <p style="text-align: center;" align="center"><img id="Picture 38" src="img/image087.jpg" alt="" width="326" height="247" />&nbsp;</p>
@@ -2962,396 +3569,13 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; REFERENCE</p>
 <p>see: Mittelbach and Porod, Acta Physica Austriaca 14 (1961) 185-211.</p>
 <p>Equations (1), (13-14). (yes, it's in German)&nbsp;</p>
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.23.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="EllipticalCylinderModel"></a><b><span style="font-size: 14pt;">Elliptical Cylinder Model</span></b></p>
-<p>This function calculates the scattering from an oriented elliptical cylinder.</p>
-<p><b>For 2D (orientated system):</b></p>
-<p>The angles theta and phi define the orientation of the axis of the cylinder. The angle psi is defined as the orientation of the major axis of the ellipse with respect to the vector Q. A gaussian poydispersity can be added to any of the orientation angles, and also for the minor radius and the ratio of the ellipse radii.</p>
-<p style="text-align: center;" align="center"><img id="Picture 40" src="img/image098.gif" alt="" width="352" height="172" /></p>
-<p style="text-align: center;" align="center"><b>Figure. a= r_minor and </b><b><span style="font-family: Symbol;">n</span>= r_ratio (i.e., r_major/r_minor).</b></p>
-<p>The function calculated is:</p>
-<p style="text-align: center;" align="center"><span style="position: relative; top: 16pt;"><img src="img/image099.PNG" alt="" /></span>&nbsp;</p>
-<p>with the functions:</p>
-<p>&nbsp;</p>
-<p style="text-align: center;" align="center"><img src="img/image100.PNG" alt="" /></p>
-<p>&nbsp;</p>
-<p>and the angle psi is defined as the orientation of the major axis of the ellipse with respect to the vector Q.</p>
-<p><b>For 1D (no preferred orientation):</b></p>
-<p>The form factor is averaged over all possible orientation before normalized by the particle volume: P(q) = scale*&lt;f^2&gt;/V .</p>
-<p>The returned value is scaled to units of [cm-1].</p>
-<p>To provide easy access to the orientation of the elliptical, we define the axis of the cylinder using two angles &theta; , <span style="font-family: 'Arial','sans-serif';">&phi; </span>and<span style="font-family: Symbol;">Y</span>. Similarly to the case of the cylinder, those angles, &theta; &nbsp;and <span style="font-family: 'Arial','sans-serif';">&phi;,</span> are defined on Figure 2 of CylinderModel. The angle <span style="font-family: Symbol;">Y </span>is the rotational angle around its own long_c axis against the q plane. For example, <span style="font-family: Symbol;">Y </span>= 0 when the r_minor axis is parallel to the x-axis of the detector.</p>
-<p>All angle parameters are valid and given only for 2D calculation (Oriented system).</p>
-<p style="text-align: center;" align="center"><img id="Picture 105" src="img/image101.jpg" /></p>
-<p style="text-align: center;" align="center"><b>Figure. Definition of angels for 2D</b>.</p>
-<p style="text-align: center;" align="center"><img id="Picture 114" src="img/image062.jpg" alt="" width="379" height="256" /></p>
-<p style="text-align: center;" align="center"><span style="font-size: 12pt;">Figure. Examples of the angles for oriented elliptical cylinders </span></p>
-<p style="text-align: center;" align="center"><span style="font-size: 12pt;">against the detector plane.</span></p>
-<p><b>For P*S</b>: The 2nd virial coefficient of the solid cylinder is calculate based on the averaged radius (=sqrt(r_minor^2*r_ratio))&nbsp; and length values, and used as the effective radius toward S(Q) when P(Q)*S(Q) is applied.</p>
-<div align="center">
-<table style="border-collapse: collapse;" border="2" cellspacing="0" cellpadding="0">
-<tbody>
-<tr style="height: 19.25pt;">
-<td style="border: 1pt solid width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>Parameter name</p>
-</td>
-<td style="border-width: 1pt 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>Units</p>
-</td>
-<td style="border-width: 1pt 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>Default value</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>scale</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>None</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>1.0</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; vertical-align: top; width: 107pt; height: 19.25pt;">
-<p>r_minor</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>&Aring;</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>20.0</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>r_ratio</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>&Aring;</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>1.5</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>length</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>&Aring;</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>400.0</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>sldCyl</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>&Aring; -2</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>4e-6</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>sldSolv</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>&Aring; -2</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>1e-006</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>background</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">&nbsp;</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>0</p>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<p style="text-align: center;" align="center"><img id="Picture 503" src="img/image102.jpg" alt="" width="443" height="328" /></p>
-<p style="text-align: center;" align="center"><b>Figure. 1D plot using the default values (w/1000 data point).</b></p>
-<p style="margin-left: 1.35in; text-indent: -0.25in;"><span style="font-family: Symbol;">&middot;</span><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><b>Validation of the elliptical cylinder 2D model</b></p>
-<p>Validation of our code was done by comparing the output of the 1D calculation to the angular average of the output of 2 D calculation over all possible angles. The Figure below shows the comparison where the solid dot refers to averaged 2D while the line represents the result of 1D calculation (for 2D averaging, 76, 180, 76 points are taken for the angles of theta, phi, and psi respectively).</p>
-<p style="text-align: center;" align="center"><img id="Picture 106" src="img/image103.gif" alt="" width="448" height="278" /></p>
-<p style="text-align: center;" align="center"><b>Figure. Comparison between 1D and averaged 2D.</b></p>
-<p><b>&nbsp;</b></p>
-<p>In the 2D average, more binning in the angle phi is necessary to get the proper result. The following figure shows the results of the averaging by varying the number of bin over angles.</p>
-<p style="text-align: center;" align="center"><img id="Picture 107" src="img/image104.gif" alt="" width="409" height="303" /></p>
-<p style="text-align: center;" align="center"><b>Figure. The intensities averaged from 2D over different number </b></p>
-<p style="text-align: center;" align="center"><b>of points of binning of angles.</b></p>
-<p>REFERENCE</p>
-<p style="text-indent: 0.25in;">L. A. Feigin and D. I. Svergun &ldquo;Structure Analysis by Small-Angle X-Ray and Neutron Scattering&rdquo;, Plenum, New York, (1987).</p>
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.24.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="BarBellModel"></a><b><span style="font-size: 14pt;">BarBell(/DumBell)Model</span></b></p>
-<p>Calculates the scattering from a barbell-shaped cylinder (This model simply becomes the DumBellModel when the length of the cylinder, L, is set to zero). That is, a sphereocylinder with spherical end caps that have a radius larger than that of the cylinder and the center of the end cap radius lies outside of the cylinder All dimensions of the barbell are considered to be monodisperse. See the diagram for the details of the geometry and restrictions on parameter values.&nbsp;</p>
-<p style="margin-left: 0.85in; text-indent: -0.35in;"><b>1.1.</b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp; </span>Definition</b></p>
-<p>The returned value is scaled to units of [cm-1sr-1], absolute scale.</p>
-<p>The barbell geometry is defined as:</p>
-<p style="text-align: center;" align="center"><img src="img/image105.jpg" alt="" width="519" height="181" /></p>
-<p>r is the radius of the cylinder. All other parameters are as defined in the diagram. Since the end cap radius R &gt;= r and by definition for this geometry h &gt; 0,&nbsp; h is then defined by r and R as:</p>
-<p>h = sqrt(R^2 - r^2).</p>
-<p>The scattering intensity I(q) is calculated as:</p>
-<p style="text-align: center;" align="center"><span style="position: relative; top: 12pt;"><img src="img/image106.PNG" alt="" /></span></p>
-<p>where the amplitude A(q) is given as:</p>
-<p>&nbsp;</p>
-<p style="text-align: center;" align="center"><img src="img/image107.PNG" alt="" /></p>
-<p>&nbsp;</p>
-<p>The &lt; &gt; brackets denote an average of the structure over all orientations. &lt;A^2(q)&gt; is then the form factor, P(q). The scale factor is equivalent to the volume fraction of cylinders, each of volume, V. Contrast is the difference of scattering length densities of the cylinder and the surrounding solvent.</p>
-<p>The volume of the barbell is:</p>
-<p style="text-align: center;" align="center"><img src="img/image108.jpg" alt="" width="227" height="46" /></p>
-<p>and its radius of gyration:</p>
-<p style="text-align: center;" align="center"><img src="img/image109.jpg" alt="" width="368" height="103" /></p>
-<p>The necessary conditions of R &gt;= r is not enforced in the model. It is up to you to restrict this during analysis.</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; REFERENCES</p>
-<p>H. Kaya, J. Appl. Cryst. (2004) 37, 223-230.</p>
-<p>H. Kaya and N-R deSouza, J. Appl. Cryst. (2004) 37, 508-509. (addenda and errata)</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TEST DATASET</p>
-<p>This example dataset is produced by running the Macro PlotBarbell(), using 200 data points, qmin = 0.001 &Aring;-1,&nbsp; qmax = 0.7 &Aring;-1 and the above default values.</p>
-<div align="center">
-<table style="border-collapse: collapse;" border="2" cellspacing="0" cellpadding="0">
-<tbody>
-<tr style="height: 19.25pt;">
-<td style="border: 1pt solid width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>Parameter name</p>
-</td>
-<td style="border-width: 1pt 1pt 1pt medium; vertical-align: top; width: 107pt; height: 19.25pt;">
-<p>Units</p>
-</td>
-<td style="border-width: 1pt 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>Default value</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>scale</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>None</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>1.0</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>len_bar</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>&Aring;</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>400.0</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>rad_bar</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>&Aring;</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>20.0</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>rad_bell</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>&Aring;</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>40.0</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>sld_barbell</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>&Aring; -2</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>1.0e-006</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>sld_solv</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>&Aring; -2</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>6.3e-006</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>background</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">&nbsp;</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>0</p>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<p style="text-align: center;" align="center"><img id="Picture 59" src="img/image110.jpg" alt="" width="480" height="356" /></p>
-<p style="text-align: center;" align="center"><b>Figure. 1D plot using the default values (w/256 data point).</b></p>
-<p>For 2D data: The 2D scattering intensity is calculated similar to the 2D cylinder model. At the theta = 45 deg and phi =0 deg with default values for other parameters,</p>
-<p style="text-align: center;" align="center"><img id="Picture 66" src="img/image111.jpg" alt="" width="425" height="346" /></p>
-<p style="text-align: center;" align="center"><b>Figure. 2D plot (w/(256X265) data points).</b></p>
-
-<p style="text-align: center; page-break-after: avoid;" align="center"><img src="img/image061.jpg" /></p>
-<p style="text-align: center;" align="center"><img src="img/image062.jpg" alt="" width="379" height="256" /></p>
-<p style="text-align: center;" align="center">Figure. Examples of the angles for oriented pp against the detector plane.</p>
-
-
-<p style="text-align: center;" align="center"><a name="_Ref173213915"></a><a name="_Ref173306040"></a>Figure. Definition of the angles for oriented 2D barbells.</p>
-
-
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.25.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="CappedCylinderModel"></a><b><span style="font-size: 14pt;">CappedCylinder(/ConvexLens)Model</span></b></p>
-<p>Calculates the scattering from a cylinder with spherical section end-caps(This model simply becomes the ConvexLensModel when the length of the cylinder L = 0. &nbsp;That is, a sphereocylinder with end caps that have a radius larger than that of the cylinder and the center of the end cap radius lies within the cylinder. See the diagram for the details of the geometry and restrictions on parameter values.</p>
-<p style="margin-left: 0.85in; text-indent: -0.35in;">&nbsp;</p>
-<p style="margin-left: 0.85in; text-indent: -0.35in;"><b>1.1.</b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp; </span>Definition</b></p>
-<p>The returned value is scaled to units of [cm-1sr-1], absolute scale.</p>
-<p>The Capped Cylinder geometry is defined as:</p>
-<p style="text-align: center;" align="center"><img src="img/image112.jpg" alt="" width="416" height="223" /></p>
-<p>r is the radius of the cylinder. All other parameters are as defined in the diagram. Since the end cap radius R &gt;= r and by definition for this geometry h &lt; 0,&nbsp; h is then defined by r and R as:</p>
-<p>h = -1*sqrt(R^2 - r^2).</p>
-<p>The scattering intensity I(q) is calculated as:</p>
-<p style="text-align: center;" align="center"><img src="img/image113.jpg" alt="" width="288" height="45" /></p>
-<p>where the amplitude A(q) is given as:</p>
-<p style="text-align: center;" align="center"><img src="img/image114.jpg" alt="" width="384" height="159" /></p>
-<p>The &lt; &gt; brackets denote an average of the structure over all orientations. &lt;A^2(q)&gt; is then the form factor, P(q). The scale factor is equivalent to the volume fraction of cylinders, each of volume, V. Contrast is the difference of scattering length densities of the cylinder and the surrounding solvent.</p>
-<p>The volume of the Capped Cylinder is:</p>
-<p>(with h as a positive value here)</p>
-<p style="text-align: center;" align="center"><img src="img/image115.jpg" alt="" width="257" height="47" /></p>
-<p>and its radius of gyration:</p>
-<p style="text-align: center;" align="center"><img src="img/image116.jpg" alt="" width="406" height="114" /></p>
-<p>The necessary conditions of R &gt;= r is not enforced in the model. It is up to you to restrict this during analysis.</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; REFERENCES</p>
-<p>H. Kaya, J. Appl. Cryst. (2004) 37, 223-230.</p>
-<p>H. Kaya and N-R deSouza, J. Appl. Cryst. (2004) 37, 508-509. (addenda and errata)</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TEST DATASET</p>
-<p>This example dataset is produced by running the Macro CappedCylinder(), using 200 data points, qmin = 0.001 &Aring;-1,&nbsp; qmax = 0.7 &Aring;-1 and the above default values.</p>
-<div align="center">
-<table style="border-collapse: collapse;" border="2" cellspacing="0" cellpadding="0">
-<tbody>
-<tr style="height: 19.25pt;">
-<td style="border: 1pt solid width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>Parameter name</p>
-</td>
-<td style="border-width: 1pt 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>Units</p>
-</td>
-<td style="border-width: 1pt 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>Default value</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>scale</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>None</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>1.0</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; vertical-align: top; width: 107pt; height: 19.25pt;">
-<p>len_cyl</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>&Aring;</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>400.0</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>rad_cap</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>&Aring;</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>40.0</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>rad_cyl</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>&Aring;</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>20.0</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>sld_capcyl</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>&Aring; -2</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>1.0e-006</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>sld_solv</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>&Aring; -2</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>6.3e-006</p>
-</td>
-</tr>
-<tr style="height: 19.25pt;">
-<td style="border-width: medium 1pt 1pt; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>background</p>
-</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">&nbsp;</td>
-<td style="border-width: medium 1pt 1pt medium; width: 107pt; height: 19.25pt;" valign="top" width="143">
-<p>0</p>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<p style="text-align: center;" align="center"><img id="Picture 72" src="img/image117.jpg" alt="" width="533" height="381" /></p>
-<p style="text-align: center;" align="center"><b>Figure. 1D plot using the default values (w/256 data point).</b></p>
-<p>For 2D data: The 2D scattering intensity is calculated similar to the 2D cylinder model. At the theta = 45 deg and phi =0 deg with default values for other parameters,</p>
-<p style="text-align: center;" align="center"><img id="Picture 71" src="img/image118.jpg" alt="" width="402" height="334" /></p>
-<p style="text-align: center;" align="center"><b>Figure. 2D plot (w/(256X265) data points).</b></p>
-<p style="text-align: center; page-break-after: avoid;" align="center"><img src="img/image061.jpg" /></p>
-<p style="text-align: center;" align="center"><a name="_Ref173213915"></a><a name="_Ref173306040"></a>Figure. Definition of the angles for oriented 2D cylinders.</p>
-<p style="text-align: center;" align="center"><img src="img/image062.jpg" alt="" width="379" height="256" /></p>
-<p style="text-align: center;" align="center">Figure. Examples of the angles for oriented pp against the detector plane.</p>
 
 
 
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.26.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="EllipsoidModel"></a><b><span style="font-size: 14pt;">Ellipsoid Model</span></b></p>
+
+
+
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.27.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="EllipsoidModel"></a><b><span style="font-size: 14pt;">Ellipsoid Model</span></b></p>
 <p>This model provides the form factor for an ellipsoid (ellipsoid of revolution) with uniform scattering length density. The form factor is normalized by the particle volume.</p>
 <p style="margin-left: 0.85in; text-indent: -0.35in;"><b>1.1.</b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp; </span>Definition</b></p>
 <p>The output of the 2D scattering intensity function for oriented ellipsoids is given by (Feigin, 1987):</p>
@@ -3485,7 +3709,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p style="text-align: center; page-break-after: avoid;" align="center">&nbsp;</p>
 <p><a name="_Ref173223004"></a>Figure 6: Comparison of the intensity for uniformly distributed ellipsoids calculated from our 2D model and the intensity from the NIST SANS analysis software. The parameters used were: Scale=1.0, Radius_a=20 &Aring;, Radius_b=400 &Aring;, Contrast=3e-6 &Aring; -2, and Background=0.0 cm -1.</p>
 <p>&nbsp;</p>
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.27.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="CoreShellEllipsoidModel"></a><b><span style="font-size: 14pt;">CoreShellEllipsoidModel </span></b></p>
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.28.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="CoreShellEllipsoidModel"></a><b><span style="font-size: 14pt;">CoreShellEllipsoidModel </span></b></p>
 <p>This model provides the form factor, P(<em>q</em>), for a core shell ellipsoid (below) where the form factor is normalized by the volume of the cylinder. P(q) = scale*&lt;f^2&gt;/V+background where the volume V= 4pi/3*rmaj*rmin2 and the averaging &lt; &gt;&nbsp; is applied over all orientation for 1D. &nbsp;</p>
 <p style="text-align: center;" align="center">&nbsp;&nbsp;<img id="Picture 41" src="img/image125.gif" alt="" width="335" height="179" /></p>
 <p>The returned value is in units of [cm-1], on absolute scale.</p>
@@ -3620,7 +3844,11 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p>REFERENCE</p>
 <p>Kotlarchyk, M.; Chen, S.-H. J. Chem. Phys., 1983, 79, 2461.</p>
 <p>Berr, S.&nbsp; J. Phys. Chem., 1987, 91, 4760.</p>
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.28.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="TriaxialEllipsoidModel"></a><b><span style="font-size: 14pt;">TriaxialEllipsoidModel</span></b></p>
+
+
+
+
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.29.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="TriaxialEllipsoidModel"></a><b><span style="font-size: 14pt;">TriaxialEllipsoidModel</span></b></p>
 <p>This model provides the form factor, P(<em>q</em>), for an ellipsoid (below) where all three axes are of different lengths, i.e.,&nbsp; Ra =&lt; Rb =&lt; Rc (Note that users should maintains this inequality for the all calculations).&nbsp; P(q) = scale*&lt;f^2&gt;/V+background where the volume V= 4pi/3*Ra*Rb*Rc, and the averaging &lt; &gt;&nbsp; is applied over all orientation for 1D. &nbsp;</p>
 <p style="text-align: center;" align="center">&nbsp;&nbsp;<img id="Picture 42" src="img/image128.jpg" alt="" width="376" height="226" /></p>
 <p style="text-align: center;" align="center">&nbsp;&nbsp;</p>
@@ -3735,7 +3963,13 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p>Our model uses the form factor calculations implemented in a c-library provided by the NIST Center for Neutron Research (Kline, 2006):</p>
 <p>REFERENCE</p>
 <p>L. A. Feigin and D. I. Svergun &ldquo;Structure Analysis by Small-Angle X-Ray and Neutron Scattering&rdquo;, Plenum, New York, 1987.</p>
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.29.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="LamellarModel"></a><b><span style="font-size: 14pt;">LamellarModel</span></b></p>
+
+
+
+
+
+
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.30.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="LamellarModel"></a><b><span style="font-size: 14pt;">LamellarModel</span></b></p>
 <p>This model provides the scattering intensity, I(<em>q</em>), for a lyotropic lamellar phase where a uniform SLD and random distribution in solution are assumed. &nbsp;The ploydispersion in the bilayer thickness can be applied from the GUI.</p>
 <p>The scattering intensity I(q) is:</p>
 <p style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="img/image133.PNG" alt="" /></span></p>
@@ -3822,7 +4056,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p>REFERENCE</p>
 <p>Nallet, Laversanne, and Roux, J. Phys. II France, 3, (1993) 487-502.</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.30.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="LamellarFFHGModel"></a><b><span style="font-size: 14pt;">LamellarFFHGModel</span></b></p>
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.31.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="LamellarFFHGModel"></a><b><span style="font-size: 14pt;">LamellarFFHGModel</span></b></p>
 <p>This model provides the scattering intensity, I(<em>q</em>), for a lyotropic lamellar phase where a random distribution in solution are assumed. &nbsp;The SLD of the head region is taken to be different from the SLD of the tail region.</p>
 <p>The scattering intensity I(q) is:</p>
 <p style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="img/image136.PNG" alt="" /></span></p>
@@ -3931,7 +4165,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p>REFERENCE</p>
 <p>Nallet, Laversanne, and Roux, J. Phys. II France, 3, (1993) 487-502.</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.31.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="LamellarPSModel"></a><b><span style="font-size: 14pt;">LamellarPSModel</span></b></p>
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.32.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="LamellarPSModel"></a><b><span style="font-size: 14pt;">LamellarPSModel</span></b></p>
 <p>This model provides the scattering intensity (<b>form factor</b> <b>*</b> <b>structure factor</b>), I(<em>q</em>), for a lyotropic lamellar phase where a random distribution in solution are assumed.</p>
 <p>The scattering intensity I(q) is:</p>
 <p style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="img/image139.PNG" alt="" /></span></p>
@@ -4044,7 +4278,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p>REFERENCE</p>
 <p>Nallet, Laversanne, and Roux, J. Phys. II France, 3, (1993) 487-502.</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.32.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="LamellarPSHGModel"></a><b><span style="font-size: 14pt;">LamellarPSHGModel</span></b></p>
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.33.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="LamellarPSHGModel"></a><b><span style="font-size: 14pt;">LamellarPSHGModel</span></b></p>
 <p>This model provides the scattering intensity (<b>form factor</b> <b>*</b> <b>structure factor</b>), I(<em>q</em>), for a lyotropic lamellar phase where a random distribution in solution are assumed. &nbsp;The SLD of the head region is taken to be different from the SLD of the tail region.</p>
 <p>The scattering intensity I(q) is:</p>
 <p style="text-align: center;" align="center"><span style="position: relative; top: 15pt;"><img src="img/image139.PNG" alt="" /></span></p>
@@ -4191,7 +4425,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p>REFERENCE</p>
 <p>Nallet, Laversanne, and Roux, J. Phys. II France, 3, (1993) 487-502.</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; also in J. Phys. Chem. B, 105, (2001) 11081-11088.</p>
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.33.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="LamellarPCrystalModel"></a><b><span style="font-size: 14pt;">LamellarPCrystalModel</span></b></p>
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.34.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="LamellarPCrystalModel"></a><b><span style="font-size: 14pt;">LamellarPCrystalModel</span></b></p>
 <p>Lamella ParaCrystal Model: Calculates the scattering from a stack of repeating lamellar structures. The stacks of lamellae (infinite in lateral dimension) are treated as a paracrystal to account for the repeating spacing. The repeat distance is further characterized by a Gaussian polydispersity. This model can be used for large multilamellar vesicles.</p>
 <p>The scattering intensity I(q) is calculated as:</p>
 <p style="text-align: center;" align="center"><img src="img/image145.jpg" alt="" width="280" height="48" /></p>
@@ -4307,7 +4541,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p>See the reference for details.</p>
 <p>REFERENCE</p>
 <p>M. Bergstrom, J. S. Pedersen, P. Schurtenberger, S. U. Egelhaaf, J. Phys. Chem. B, 103 (1999) 9888-9897.</p>
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.34.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="SCCrystalModel"></a><b><span style="font-size: 14pt;">SC(Simple Cubic Para-)CrystalModel</span></b></p>
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.35.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="SCCrystalModel"></a><b><span style="font-size: 14pt;">SC(Simple Cubic Para-)CrystalModel</span></b></p>
 <p>Calculates the scattering from a simple cubic lattice with paracrystalline distortion. Thermal vibrations are considered to be negligible, and the size of the paracrystal is infinitely large. Paracrystalline distortion is assumed to be isotropic and characterized by a Gaussian distribution.</p>
 <p>The returned value is scaled to units of [cm-1sr-1], absolute scale.</p>
 <p>The scattering intensity I(q) is calculated as:</p>
@@ -4431,7 +4665,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p>&nbsp;</p>
 <p style="text-align: center;" align="center"><b><img src="img/image157.jpg" alt="" width="447" height="322" /></b></p>
 <p style="text-align: center;" align="center"><b>Figure. 2D plot using the default values (w/200X200 pixels).</b></p>
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.35.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="FCCrystalModel"></a><b><span style="font-size: 14pt;">FC(Face Centered Cubic Para-)CrystalModel</span></b></p>
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.36.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="FCCrystalModel"></a><b><span style="font-size: 14pt;">FC(Face Centered Cubic Para-)CrystalModel</span></b></p>
 <p>Calculates the scattering from a face-centered cubic lattice with paracrystalline distortion. Thermal vibrations are considered to be negligible, and the size of the paracrystal is infinitely large. Paracrystalline distortion is assumed to be isotropic and characterized by a Gaussian distribution.&nbsp;</p>
 <p>The returned value is scaled to units of [cm-1sr-1], absolute scale.</p>
 <p>The scattering intensity I(q) is calculated as:</p>
@@ -4556,7 +4790,7 @@ For magnetic scattering, please see the '<a href="polar_mag_help.html">Polarizat
 <p>&nbsp;</p>
 <p style="text-align: center;" align="center"><img src="img/image166.jpg" alt="" width="473" height="352" /></p>
 <p style="text-align: center;" align="center"><b>Figure. 2D plot using the default values (w/200X200 pixels).</b></p>
-<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.36.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="BCCrystalModel"></a><b><span style="font-size: 14pt;">BC(Body Centered Cubic Para-)CrystalModel</span></b></p>
+<p style="margin-left: 0.55in; text-indent: -0.3in;"><b><span style="font-size: 14pt;">2.37.</span></b><b><span style="font-size: 7pt;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></b><a name="BCCrystalModel"></a><b><span style="font-size: 14pt;">BC(Body Centered Cubic Para-)CrystalModel</span></b></p>
 <p>Calculates the scattering from a body-centered cubic lattice with paracrystalline distortion. Thermal vibrations are considered to be negligible, and the size of the paracrystal is infinitely large. Paracrystalline distortion is assumed to be isotropic and characterized by a Gaussian distribution.The returned value is scaled to units of [cm-1sr-1], absolute scale.</p>
 <p>The scattering intensity I(q) is calculated as:</p>
 <p style="text-align: center;" align="center"><img id="Picture 25" src="img/image167.jpg" alt="" width="183" height="42" /></p>
