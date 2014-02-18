@@ -499,12 +499,21 @@ class Reader():
         
         ns = CANSAS_NS.get(self.cansas_version).get("ns")
         doc = xml.dom.minidom.Document()
+        
         main_node = doc.createElement("SASroot")
+        if self.cansas_version == "1.1":
+            pi = doc.createProcessingInstruction('xml-stylesheet', \
+                                    'type="text/xsl" href="cansasxml-html.xsl"')
+            root = doc.firstChild
+            doc.insertBefore(pi, root)
         main_node.setAttribute("version", self.cansas_version)
         main_node.setAttribute("xmlns", ns)
         main_node.setAttribute("xmlns:xsi",
                                "http://www.w3.org/2001/XMLSchema-instance")
-        main_node.setAttribute("xsi:schemaLocation", "{0} http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd".format(ns))
+        if self.cansas_version == "1.0":
+            main_node.setAttribute("xsi:schemaLocation", "cansas1d/1.0 http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd")
+        elif self.cansas_version == "1.1":
+            main_node.setAttribute("xsi:schemaLocation", "urn:cansas1d:1.1 http://www.cansas.org/formats/1.1/cansas1d.xsd")
         
         doc.appendChild(main_node)
         
