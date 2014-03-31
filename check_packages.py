@@ -3,6 +3,7 @@ Checking and reinstalling the external packages
 """
 import os
 import sys
+
 if sys.platform =='win32':
     IS_WIN = True
 else:
@@ -10,44 +11,50 @@ else:
 try:
     import setuptools
     print "==> setuptools-%s installed."% setuptools.__version__
-    #if setuptools.__version__ != '0.6c11':
-    #    print "!!! Recommend to install 0.6c11." 
+    if setuptools.__version__ != '0.6c11':
+        print "!!! Recommend to install 0.6c11." 
 except:
     print "!!! setuptools-0.6c11 not installed."
 try:
     import pyparsing
-    if pyparsing.__version__ == '1.5.5':
-        print "==> pyparsing-%s installed."% pyparsing.__version__
-    else:
+    print "==> pyparsing-%s installed."% pyparsing.__version__
+    if pyparsing.__version__ != '1.5.5':
         print "!!! 1.5.5 recommended."
 except:
     print "==> pyparsing-1.5.5 not installed."
 try:
     import html5lib
+    print "==> html5lib-%s installed."% html5lib.__version__
     if html5lib.__version__.count('0.95') > 0:
-        print "==> html5lib-%s installed."% html5lib.__version__
-    else:
         print "!!! 0.95 recommended."
 except:
     print "!!! html5lib-0.95 not installed."
 try:
     import pyPdf
-    print "==> pyPdf installed."
+    print "==> pyPdf-%s installed."% pyPdf.__version__
+    if pyPdf.__version__ != '1.13':
+	print "!!! 1.13 recommended."
 except:
     print "!!! pyPdf-1.13 not installed (optional)."
 try:
     import reportlab
-    print "==> reportlab installed."
+    print "==> reportlab-%s installed."% reportlab.__version__
+    if reportlab.__version__ != '2.5':
+        print "!!! 2.5 recommended"
 except:
     print "!!! reportlab-2.5 not installed."
 try:
     import lxml
-    print "==> lxml installed."
+    print "==> lxml-%s installed."% lxml.__version__
+    if lxml.__version__ != '2.3':
+        print "!!! 2.3 recommended"
 except:
     print "!!! lxml-2.3 not installed."
 try:
-    import PIL
-    print "==> PIL installed."
+    import Image
+    print "==> PIL-%s installed."% Image.VERSION
+    if Image.VERSION != '1.1.7':
+        print "!!! 1.1.7 recommended."
 except:
     print "!!! PIL-1.1.7 not installed."
 try:
