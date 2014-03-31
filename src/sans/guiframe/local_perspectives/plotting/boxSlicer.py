@@ -26,6 +26,8 @@ class BoxInteractor(_BaseInteractor):
         self.axes = axes
         ##connecting artist
         self.connect = self.base.connect
+        ## which direction is the preferred interaction direction
+        self.direction = None
         ## determine x y  values
         self.x = 0.5 * min(math.fabs(self.base.data2D.xmax),
                            math.fabs(self.base.data2D.xmin))
@@ -141,6 +143,9 @@ class BoxInteractor(_BaseInteractor):
         :param direction: the direction of averaging
         
         """
+        if self.direction == None:
+            self.direction = direction
+            
         x_min = -1 * math.fabs(self.vertical_lines.x)
         x_max = math.fabs(self.vertical_lines.x)
         y_min = -1 * math.fabs(self.horizontal_lines.y)
@@ -153,18 +158,21 @@ class BoxInteractor(_BaseInteractor):
                 msg = "post data:cannot average , averager is empty"
                 raise ValueError, msg
             self.averager = new_slab
-        if direction == "X":
+        if self.direction == "X":
             if self.fold:
                 x_low = 0
             else:
                 x_low = math.fabs(x_min)
             bin_width = (x_max + x_low)/self.nbins
-        else:
+        elif self.direction == "Y":
             if self.fold:
                 y_low = 0
             else:
                 y_low = math.fabs(y_min)
             bin_width = (y_max + y_low)/self.nbins
+        else:
+            msg = "post data:no Box Average direction was supplied"
+            raise ValueError, msg
         ## Average data2D given Qx or Qy
         box = self.averager(x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max,
                          bin_width=bin_width)
