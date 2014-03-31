@@ -437,8 +437,9 @@ class PanelBase:
     
     def on_close(self, event):
         """
-        On Close Event
+            Close event. Hide the whole window.
         """
-        if self.frame != None:
-            self.frame.Destroy()
+        parent = self.GetParent()
+        if parent is not None:
+            parent.Hide()
             
