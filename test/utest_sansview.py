@@ -77,7 +77,7 @@ def run_tests():
     print "Results by test modules:"
     print "    PASSED: %d" % passed
     ratio = 100.0*failed/(failed+passed)
-    print "    FAILED: %d    (%2.2g%%)" % (failed,ratio) 
+    print "    FAILED: %d    (%.0f%%)" % (failed,ratio) 
     
     print "Results by tests:"
     print "    Tests run:    %d" % n_tests
