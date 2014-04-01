@@ -304,7 +304,8 @@ class Reader():
                             raise ValueError(err_msg)
                             return
                         except:
-                            err_msg = "error occured"
+                            err_msg = "CanSAS reader: could not convert the units"
+                            self.errors.append(err_msg)
                             return
                     else:
                         value_unit = local_unit
@@ -413,12 +414,9 @@ class Reader():
                     if node_value is None or node_value.isspace() \
                                             or node_value.lower() == "nan":
                         node_value = "0.0"
-                    try:
-                        node_value, unit = self._unit_conversion(\
+                    node_value, unit = self._unit_conversion(\
                                 cs_values.current_level, attr, data1d, \
                                 tagname, node_value, cs_values.ns_optional)
-                    except TypeError:
-                        print "TypeError with units of {0} and node of {1}".format(attr['unit'], tagname)
                     
                 # If appending to a dictionary (meta_data | run_name)
                 # make sure the key is unique
@@ -462,8 +460,9 @@ class Reader():
                             exec store_attr
                         except AttributeError as e:
                             pass
-                            
-                     
+            
+            except TypeError:
+                pass
             except Exception as e:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
                 fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
