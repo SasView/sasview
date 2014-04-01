@@ -11,4 +11,4 @@ cd $WORKSPACE/test
 
 export PYTHONPATH=$PYTHONPATH:$WORKSPACE/sasview-install:$WORKSPACE/utils
 
-$PYTHON utest_sasview.py
+$PYTHON utest_sansview.py
