@@ -2,6 +2,7 @@
 
 # try to find reasonable settings, if not provided in the environment
 PYTHON=${PYTHON:-`which python`}
+EASY_INSTALL=${EASY_INSTALL:-`which easy_install`}
 PYLINT=${PYLINT:-`which pylint`}
 BUILD_TOOLS_DIR=`dirname $0`
 WORKSPACE=${WORKSPACE:-`readlink -f $BUILD_TOOLS_DIR/..`}
@@ -18,4 +19,4 @@ export PYTHONPATH=$PYTHONPATH:$WORKSPACE/sasview-install:$WORKSPACE/utils
 $PYTHON setup.py bdist_egg
 
 cd $WORKSPACE/dist
-easy_install -N -d ../sasview-install sasview*.egg
+EASY_INSTALL -N -d ../sasview-install sasview*.egg
