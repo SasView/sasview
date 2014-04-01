@@ -264,7 +264,7 @@ class Reader():
     
     
     def _unit_conversion(self, new_current_level, attr, data1d, \
-                                    node_value, optional = True):
+                                    tagname, node_value, optional = True):
         """
         A unit converter method used to convert the data included in the file
         to the default units listed in data_info
@@ -290,29 +290,30 @@ class Reader():
                      default_unit is not None:
                     if HAS_CONVERTER == True:
                         try:
+                            ## Check local units - bad units should raise KeyError
+                            Converter(local_unit)
                             data_conv_q = Converter(attr['unit'])
                             value_unit = default_unit
                             exec "node_value = data_conv_q(node_value, units=data1d.{0})".format(unitname)
-                        except:
+                        except KeyError as e:
                             err_msg = "CanSAS reader: could not convert "
-                            err_msg += "Q unit {0}; ".format(local_unit)
+                            err_msg += "{0} unit {1}; ".format(tagname, local_unit)
                             intermediate = "err_msg += \"expecting [{1}]  {2}\".format(data1d.{0}, sys.exc_info()[1])".format(unitname, "{0}", "{1}")
                             exec intermediate
                             self.errors.append(err_msg)
-                            if optional:
-                                logging.info(err_msg)
-                            else:
-                                raise ValueError, err_msg
+                            raise ValueError(err_msg)
+                            return
+                        except:
+                            err_msg = "error occured"
+                            return
                     else:
                         value_unit = local_unit
                         err_msg = "CanSAS reader: unrecognized %s unit [%s];"\
                         % (node_value, default_unit)
                         err_msg += " expecting [%s]" % local_unit
                         self.errors.append(err_msg)
-                        if optional:
-                            logging.info(err_msg)
-                        else:
-                            raise ValueError, err_msg
+                        raise ValueError, err_msg
+                        return
                 else:
                     value_unit = local_unit
             except:
@@ -320,10 +321,8 @@ class Reader():
                 err_msg += "Q unit [%s]; " % attr['unit'],
                 exec "err_msg += \"expecting [%s]\n  %s\" % (data1d.{0}, sys.exc_info()[1])".format(unitname)
                 self.errors.append(err_msg)
-                if optional:
-                    logging.info(err_msg)
-                else:
-                    raise ValueError, err_msg
+                raise ValueError, err_msg
+                return
         elif 'unit' in attr:
             value_unit = attr['unit']
         node_value = "float({0})".format(node_value)
@@ -414,9 +413,12 @@ class Reader():
                     if node_value is None or node_value.isspace() \
                                             or node_value.lower() == "nan":
                         node_value = "0.0"
-                    node_value, unit = self._unit_conversion(\
+                    try:
+                        node_value, unit = self._unit_conversion(\
                                 cs_values.current_level, attr, data1d, \
-                                node_value, cs_values.ns_optional)
+                                tagname, node_value, cs_values.ns_optional)
+                    except TypeError:
+                        print "TypeError with units of {0} and node of {1}".format(attr['unit'], tagname)
                     
                 # If appending to a dictionary (meta_data | run_name)
                 # make sure the key is unique
