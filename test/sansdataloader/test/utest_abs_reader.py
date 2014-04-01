@@ -349,7 +349,7 @@ class cansas_reader(unittest.TestCase):
         self.assertEqual(self.data.sample.transmission, 0.327)
         
         self.assertEqual(self.data.meta_data['loader'], "CanSAS 1D")
-        self.assertEqual(len(self.data.errors), 1)
+        self.assertEqual(len(self.data.errors), 0)
         
         
     def test_slits(self):
