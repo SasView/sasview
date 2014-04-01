@@ -249,7 +249,9 @@ class ModelPanel2D(ModelPanel1D):
         self.default_zmin_ctl = self.zmin_2D
         self.default_zmax_ctl = self.zmax_2D
         # Check if zoomed
-        toolbar_zoomed = self.toolbar.GetToolEnabled(self.toolbar._NTB2_BACK)
+        try: tb = self.toolbar.wx_ids['Back']
+        except AttributeError: tb = self.toolbar._NTB2_BACK # Cruft
+        toolbar_zoomed = self.toolbar.GetToolEnabled(tb)
         if not self.is_zoomed and not toolbar_zoomed:
             return
         # Recover the x,y limits

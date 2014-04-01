@@ -1106,7 +1106,10 @@ class PlotPanel(wx.Panel):
         ## Set the view scale for all plots
         self._onEVT_FUNC_PROPERTY(False)
         # Check if zoomed
-        toolbar_zoomed = self.toolbar.GetToolEnabled(self.toolbar._NTB2_BACK)
+        try: tb = self.toolbar.wx_ids['Back']
+        except AttributeError: tb = self.toolbar._NTB2_BACK # Cruft
+        toolbar_zoomed = self.toolbar.GetToolEnabled(tb)
+
         if self.is_zoomed or toolbar_zoomed:
             # Recover the x,y limits
             self.subplot.set_xlim((xlo, xhi))
@@ -1258,7 +1261,13 @@ class PlotPanel(wx.Panel):
                             key=operator.itemgetter(1))
                 handles2, labels2 = zip(*hl)
                 self.line_collections_list = handles2
-                self.legend = ax.legend(handles2, labels2, numpoints=1,
+                try:
+                    self.legend = ax.legend(handles2, labels2, numpoints=1,
+                                prop=FontProperties(size=10),
+                                handletextsep=.05, loc=self.legendLoc)
+                except TypeError:  # Cruft
+                    # older MPL uses handletextsep instead of handletextpad
+                    self.legend = ax.legend(handles2, labels2, numpoints=1,
                                 prop=FontProperties(size=10),
                                 handletextsep=.05, loc=self.legendLoc)
                 if self.legend != None:
@@ -1267,7 +1276,13 @@ class PlotPanel(wx.Panel):
                     self.legend.set_zorder(20)
                 
             except:
-                self.legend = ax.legend(prop=FontProperties(size=10),
+                try:
+                    self.legend = ax.legend(prop=FontProperties(size=10),
+                                        numpoints=1, handletextpad=.05,
+                                        loc=self.legendLoc)
+                except TypeError:  # Cruft
+                    # older MPL uses handletextsep instead of handletextpad
+                    self.legend = ax.legend(prop=FontProperties(size=10),
                                         numpoints=1, handletextsep=.05,
                                         loc=self.legendLoc)
                 

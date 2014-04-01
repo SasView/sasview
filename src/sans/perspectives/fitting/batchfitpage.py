@@ -24,7 +24,7 @@ class BatchFitPage(FitPage):
     window_name = "BatchFit"
     window_caption  = "BatchFit"
 
-    def __init__(self, parent, color='rand'):
+    def __init__(self, parent, color=None):
         """ 
         Initialization of the Panel
         """

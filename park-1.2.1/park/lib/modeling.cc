@@ -1,5 +1,5 @@
 /* This program is public domain. */
-
+#include <cstdio> // CRUFT: mingw-xy bug requires FILENAME_MAX for wchar.h to import
 #include <iostream>
 #include <iomanip>
 #include <Python.h>

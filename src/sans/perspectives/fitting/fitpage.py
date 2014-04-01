@@ -36,7 +36,7 @@ class FitPage(BasicPage):
         on fit Panel window.
     """
 
-    def __init__(self, parent, color='rand'):
+    def __init__(self, parent, color=None):
         """
         Initialization of the Panel
         """
@@ -136,8 +136,9 @@ class FitPage(BasicPage):
                 self.dataSource.Append(str(data.name), clientData=data)
                 if not is_data:
                     is_data = check_data_validity(data)
-        self.dataSource.SetSelection(0)
-        self.on_select_data(event=None)
+        if is_data:
+            self.dataSource.SetSelection(0)
+            self.on_select_data(event=None)
                 
     def on_select_data(self, event=None):
         """

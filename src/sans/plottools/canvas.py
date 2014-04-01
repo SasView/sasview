@@ -265,5 +265,9 @@ class FigureCanvas(FigureCanvasWxAgg):
             # Todo: better design
             self.panel.parent.set_plot_unfocus()
             self.panel.on_set_focus(None)
-        
         return
+
+    # CRUFT: wx 3.0.0.0 on OS X doesn't release the mouse on leaving window
+    def _onLeave(self, evt):
+        if self.HasCapture(): self.ReleaseMouse()
+        super(FigureCanvas,self)._onLeave(evt)

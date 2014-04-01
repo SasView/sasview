@@ -30,7 +30,6 @@ class WelcomePanel(wx.aui.AuiNotebook, PanelBase):
    
     
     def __init__(self, parent, *args, **kwds):
-        
         kwds["style"] = wx.aui.AUI_NB_DEFAULT_STYLE
         
         wx.aui.AuiNotebook.__init__(self, parent, *args, **kwds)
@@ -40,7 +39,7 @@ class WelcomePanel(wx.aui.AuiNotebook, PanelBase):
         self.frame = None
        
         welcome_page = WelcomePage(self)
-        self.AddPage(page=welcome_page, caption="Welcome")
+        self.AddPage(welcome_page, "Welcome")
         
         self.Bind(wx.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.on_close_page)
         self.Center()

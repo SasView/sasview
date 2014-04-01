@@ -328,7 +328,7 @@ class DataPanel(ScrolledPanel, PanelBase):
         self.bt_freeze.SetToolTipString(freeze_tip)
         wx.EVT_BUTTON(self, self.bt_freeze.GetId(), self.on_freeze)
        
-        if sys.platform == 'darwin' and build_options.WXPORT == 'osx_cocoa':
+        if sys.platform == 'darwin':
             self.cb_plotpanel = wx.ComboBox(self, -1, 
                                             style=wx.CB_READONLY)
         else:

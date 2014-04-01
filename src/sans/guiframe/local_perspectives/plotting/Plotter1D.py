@@ -484,7 +484,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 wx.PostEvent(self.parent, StatusEvent(status=\
                     "Plotting Error: %s"% msg, info="error")) 
             # Check if zoomed
-            toolbar_zoomed = self.toolbar.GetToolEnabled(self.toolbar._NTB2_BACK)
+            try: tb = self.toolbar.wx_ids['Back']
+            except AttributeError: tb = self.toolbar._NTB2_BACK # Cruft
+            toolbar_zoomed = self.toolbar.GetToolEnabled(tb)
             if self.is_zoomed or toolbar_zoomed:
                 # Recover the x,y limits
                 self.subplot.set_xlim((xlo, xhi))     
@@ -564,7 +566,9 @@ class ModelPanel1D(PlotPanel, PanelBase):
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()  
         # Check if zoomed
-        toolbar_zoomed = self.toolbar.GetToolEnabled(self.toolbar._NTB2_BACK)
+        try: tb = self.toolbar.wx_ids['Back']
+        except AttributeError: tb = self.toolbar._NTB2_BACK # Cruft
+        toolbar_zoomed = self.toolbar.GetToolEnabled(tb)
         if self.is_zoomed or toolbar_zoomed:
             # Recover the x,y limits
             self.subplot.set_xlim((xlo, xhi))     
