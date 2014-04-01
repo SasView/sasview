@@ -80,6 +80,7 @@ class Properties(wx.Dialog):
         self.view.Insert("Guinier lny vs x^(2)", 2)
         self.view.Insert("XS Guinier ln(y*x) vs x^(2)", 3)
         self.view.Insert("Porod y*x^(4) vs x^(4)", 4)
+        self.view.Insert("Kratky y*x^(2) vs x",5)        
         self.SetSizer(vbox)
         self.Fit()
         self.Centre()

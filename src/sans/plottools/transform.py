@@ -134,6 +134,10 @@ def toYX4(y, x):
     """
     return math.pow(x, 4) * y
 
+def toYX2(y, x):
+    """
+    """
+    return math.pow(x, 2) * y
 
 def toLogXY(y, x):
     """

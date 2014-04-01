@@ -1896,6 +1896,11 @@ class PlotPanel(wx.Panel):
                 item.transformY(transform.toYX4, transform.errToYX4)
                 self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname, xname),
                                                "%s%s" % (yunits, xunits))
+            if(self.viewModel == "Kratky y*x^(2) vs x"):
+                item.transformY(transform.toYX2, transform.errToYX2)
+                self.graph._yaxis_transformed("%s \ \ %s^{2}" % (yname, xname),
+                                               "%s%s" % (yunits, xunits))                
+                
             item.transformView()
   
         # set new label and units
