@@ -19,4 +19,4 @@ export PYTHONPATH=$PYTHONPATH:$WORKSPACE/sasview-install:$WORKSPACE/utils
 $PYTHON setup.py bdist_egg
 
 cd $WORKSPACE/dist
-EASY_INSTALL -N -d ../sasview-install sasview*.egg
+$EASY_INSTALL -N -d ../sasview-install sasview*.egg
