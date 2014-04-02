@@ -172,8 +172,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         """    
         self.graph.reset()
         self.plots      = {}
-        if self.is_zoomed:
-            self.is_zoomed = False
+        self.is_zoomed = False
         
     def _OnReSize(self, event):   
         """
@@ -479,15 +478,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
             ## Set the view scale for all plots
             try:
                 self._onEVT_FUNC_PROPERTY()
-            except:
+            except Exception, exc:
                 msg=" Encountered singular points..."
                 wx.PostEvent(self.parent, StatusEvent(status=\
-                    "Plotting Error: %s"% msg, info="error")) 
-            # Check if zoomed
-            try: tb = self.toolbar.wx_ids['Back']
-            except AttributeError: tb = self.toolbar._NTB2_BACK # Cruft
-            toolbar_zoomed = self.toolbar.GetToolEnabled(tb)
-            if self.is_zoomed or toolbar_zoomed:
+                    "Plotting Error: %s"% str(exc), info="error"))
+            if self.is_zoomed:
                 # Recover the x,y limits
                 self.subplot.set_xlim((xlo, xhi))     
                 self.subplot.set_ylim((ylo, yhi))  
@@ -501,13 +496,12 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 if IS_MAC:
                     # MAC: forcing to plot 2D avg
                     self.canvas._onDrawIdle()
-            except:
+            except Exception,exc:
                 msg=" Encountered singular points..."
                 wx.PostEvent(self.parent, StatusEvent(status=\
-                    "Plotting Error: %s"% msg, info="error")) 
+                    "Plotting Error: %s"% str(exc), info="error"))
             self.toolbar.update()
-            if self.is_zoomed:
-                self.is_zoomed = False
+            self.is_zoomed = False
             # Update Graph menu and help string        
             #pos = self.parent._window_menu.FindItem(self.window_caption)
             helpString = 'Show/Hide Graph: '
@@ -565,11 +559,7 @@ class ModelPanel1D(PlotPanel, PanelBase):
         ## increment graph color
         self.graph.render(self)
         self.subplot.figure.canvas.draw_idle()  
-        # Check if zoomed
-        try: tb = self.toolbar.wx_ids['Back']
-        except AttributeError: tb = self.toolbar._NTB2_BACK # Cruft
-        toolbar_zoomed = self.toolbar.GetToolEnabled(tb)
-        if self.is_zoomed or toolbar_zoomed:
+        if self.is_zoomed:
             # Recover the x,y limits
             self.subplot.set_xlim((xlo, xhi))     
             self.subplot.set_ylim((ylo, yhi)) 

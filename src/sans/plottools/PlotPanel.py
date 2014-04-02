@@ -2,7 +2,6 @@
 """
 import logging
 import wx
-import os
 # Try a normal import first
 # If it fails, try specifying a version
 import matplotlib
@@ -11,15 +10,18 @@ matplotlib.interactive(False)
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 from matplotlib.figure import Figure
-from sans.plottools import transform
-from sans.plottools.plottables import Data1D
-from sans.plottools.binder import BindArtist
+import os
+import transform
+from plottables import Data1D
+#TODO: make the plottables interactive
+from binder import BindArtist
 from matplotlib.font_manager import FontProperties
 DEBUG = False
 
-from sans.plottools.plottables import Graph
-from sans.plottools.TextDialog import TextDialog
-from sans.plottools.LabelDialog import LabelDialog
+from plottables import Graph
+from plottables import Text
+from TextDialog import TextDialog
+from LabelDialog import LabelDialog
 import operator
 
 import math
@@ -35,53 +37,54 @@ def show_tree(obj, d=0):
     if 'get_children' in dir(obj):
         for a in obj.get_children(): show_tree(a, d+1)
      
-from sans.plottools.unitConverter import UnitConvertion as convertUnit
+from unitConverter import UnitConvertion as convertUnit
 
 
 def _rescale(lo, hi, step, pt=None, bal=None, scale='linear'):
-    """
-    Rescale (lo,hi) by step, returning the new (lo,hi)
-    The scaling is centered on pt, with positive values of step
-    driving lo/hi away from pt and negative values pulling them in.
-    If bal is given instead of point, it is already in [0,1] coordinates.
+        """
+        Rescale (lo,hi) by step, returning the new (lo,hi)
+        The scaling is centered on pt, with positive values of step
+        driving lo/hi away from pt and negative values pulling them in.
+        If bal is given instead of point, it is already in [0,1] coordinates.
     
-    This is a helper function for step-based zooming.
-    """
-    # Convert values into the correct scale for a linear transformation
-    # TODO: use proper scale transformers
-    loprev = lo
-    hiprev = hi
-    if scale == 'log':
-        assert lo > 0
-        if lo > 0:
-            lo = math.log10(lo)
-        if hi > 0:
-            hi = math.log10(hi)
-        if pt is not None:
-            pt = math.log10(pt)
-    
-    # Compute delta from axis range * %, or 1-% if present is negative
-    if step > 0:
-        delta = float(hi - lo) * step / 100
-    else:
-        delta = float(hi - lo) * step / (100 - step)
-
-    # Add scale factor proportionally to the lo and hi values,
-    # preserving the
-    # point under the mouse
-    if bal is None:
-        bal = float(pt - lo) / (hi - lo)
-    lo = lo - (bal * delta)
-    hi = hi + (1 - bal) * delta
-
-    # Convert transformed values back to the original scale
-    if scale == 'log':
-        if (lo <= -250) or (hi >= 250):
-            lo = loprev
-            hi = hiprev
+        This is a helper function for step-based zooming.
+        
+        """
+        # Convert values into the correct scale for a linear transformation
+        # TODO: use proper scale transformers
+        loprev = lo
+        hiprev = hi
+        if scale == 'log':
+            assert lo > 0
+            if lo > 0:
+                lo = math.log10(lo)
+            if hi > 0:
+                hi = math.log10(hi)
+            if pt is not None:
+                pt = math.log10(pt)
+        
+        # Compute delta from axis range * %, or 1-% if persent is negative
+        if step > 0:
+            delta = float(hi - lo) * step / 100
         else:
-            lo, hi = math.pow(10., lo), math.pow(10., hi)
-    return (lo, hi)
+            delta = float(hi - lo) * step / (100 - step)
+    
+        # Add scale factor proportionally to the lo and hi values,
+        # preserving the
+        # point under the mouse
+        if bal is None:
+            bal = float(pt - lo) / (hi - lo)
+        lo = lo - (bal * delta)
+        hi = hi + (1 - bal) * delta
+    
+        # Convert transformed values back to the original scale
+        if scale == 'log':
+            if (lo <= -250) or (hi >= 250):
+                lo = loprev
+                hi = hiprev
+            else:
+                lo, hi = math.pow(10., lo), math.pow(10., hi)
+        return (lo, hi)
 
 
 def CopyImage(canvas):
@@ -121,7 +124,7 @@ class PlotPanel(wx.Panel):
         self.line_collections_list = []
         self.figure = Figure(None, dpi, linewidth=2.0)
         self.color = '#b3b3b3'
-        from sans.plottools.canvas import FigureCanvas
+        from canvas import FigureCanvas
         self.canvas = FigureCanvas(self, -1, self.figure)
         self.SetColor(color)
         #self.SetBackgroundColour(parent.GetBackgroundColour())
@@ -154,9 +157,9 @@ class PlotPanel(wx.Panel):
         self.Bind(wx.EVT_CONTEXT_MENU, self.onContextMenu)
         
         # Define some constants
-        self.colorlist = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
-        self.symbollist = ['o', 'x', '^', 'v', '<', '>', '+',
-                           's', 'd', 'D', 'h', 'H', 'p', '-']
+        self.colorlist = ['b','g','r','c','m','y','k']
+        self.symbollist = ['o','x','^','v','<','>','+',
+                           's','d','D','h','H','p', '-']
         
         #List of texts currently on the plot
         self.textList = []
@@ -971,8 +974,8 @@ class PlotPanel(wx.Panel):
             handles2, labels2 = zip(*hl)
             self.line_collections_list = handles2
             self.legend = self.subplot.legend(handles2, labels2,
-                            prop=FontProperties(size=10), numpoints=1,
-                            handletextsep=.05, loc=self.legendLoc)
+                            prop=FontProperties(size=10),
+                            loc=self.legendLoc)
             if self.legend != None:
                 self.legend.set_picker(self.legend_picker)
                 self.legend.set_axes(self.subplot)
@@ -1002,8 +1005,8 @@ class PlotPanel(wx.Panel):
         handles2, labels2 = zip(*hl)
         self.line_collections_list = handles2
         self.legend = self.subplot.legend(handles2, labels2,
-                            prop=FontProperties(size=10), numpoints=1,
-                            handletextsep=.05, loc=self.legendLoc)
+                            prop=FontProperties(size=10),
+                            loc=self.legendLoc)
         if self.legend != None:
             self.legend.set_picker(self.legend_picker)
             self.legend.set_axes(self.subplot)
@@ -1102,15 +1105,23 @@ class PlotPanel(wx.Panel):
         ylo, yhi = self.subplot.get_ylim()
         ## Set the view scale for all plots
         self._onEVT_FUNC_PROPERTY(False)
-        # Check if zoomed
-        try: tb = self.toolbar.wx_ids['Back']
-        except AttributeError: tb = self.toolbar._NTB2_BACK # Cruft
-        toolbar_zoomed = self.toolbar.GetToolEnabled(tb)
-
-        if self.is_zoomed or toolbar_zoomed:
+        if self.is_zoomed:
             # Recover the x,y limits
             self.subplot.set_xlim((xlo, xhi))
             self.subplot.set_ylim((ylo, yhi))
+
+    @property
+    def is_zoomed(self):
+        if hasattr(self.toolbar, "wx_ids"):
+            back = self.toolbar.wx_ids['Back']
+        else: # CRUFT
+            back = self.toolbar._NTB2_BACK
+        toolbar_zoomed = self.toolbar.GetToolEnabled(back)
+        return self._is_zoomed or toolbar_zoomed
+
+    @is_zoomed.setter
+    def is_zoomed(self, value):
+        self._is_zoomed = value
                    
     def _on_yaxis_label(self, event):
         """
@@ -1258,29 +1269,16 @@ class PlotPanel(wx.Panel):
                             key=operator.itemgetter(1))
                 handles2, labels2 = zip(*hl)
                 self.line_collections_list = handles2
-                try:
-                    self.legend = ax.legend(handles2, labels2, numpoints=1,
+                self.legend = ax.legend(handles2, labels2,
                                 prop=FontProperties(size=10),
-                                handletextsep=.05, loc=self.legendLoc)
-                except TypeError:  # Cruft
-                    # older MPL uses handletextsep instead of handletextpad
-                    self.legend = ax.legend(handles2, labels2, numpoints=1,
-                                prop=FontProperties(size=10),
-                                handletextsep=.05, loc=self.legendLoc)
+                                loc=self.legendLoc)
                 if self.legend != None:
                     self.legend.set_picker(self.legend_picker)
                     self.legend.set_axes(self.subplot)
                     self.legend.set_zorder(20)
                 
             except:
-                try:
-                    self.legend = ax.legend(prop=FontProperties(size=10),
-                                        numpoints=1, handletextpad=.05,
-                                        loc=self.legendLoc)
-                except TypeError:  # Cruft
-                    # older MPL uses handletextsep instead of handletextpad
-                    self.legend = ax.legend(prop=FontProperties(size=10),
-                                        numpoints=1, handletextsep=.05,
+                self.legend = ax.legend(prop=FontProperties(size=10),
                                         loc=self.legendLoc)
                 
     def xaxis(self, label, units, font=None, color='black', t_font=None):
@@ -1893,11 +1891,6 @@ class PlotPanel(wx.Panel):
                 item.transformY(transform.toYX4, transform.errToYX4)
                 self.graph._yaxis_transformed("%s \ \ %s^{4}" % (yname, xname),
                                                "%s%s" % (yunits, xunits))
-            if(self.viewModel == "Kratky y*x^(2) vs x"):
-                item.transformY(transform.toYX2, transform.errToYX2)
-                self.graph._yaxis_transformed("%s \ \ %s^{2}" % (yname, xname),
-                                               "%s%s" % (yunits, xunits))                
-                
             item.transformView()
   
         # set new label and units
@@ -1996,8 +1989,7 @@ class PlotPanel(wx.Panel):
             item.onReset()
         self.graph.render(self)
         self._onEVT_FUNC_PROPERTY(False)
-        if self.is_zoomed:
-                self.is_zoomed = False
+        self.is_zoomed = False
         self.toolbar.update()
         
     def onPrinterSetup(self, event=None):
