@@ -495,7 +495,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## dictionary containing list of models
         self.model_list_box = page_info.model_list_box
         ## Data member to store the dispersion object created
-        self.populate_box(dict=self.model_list_box)
+        self.populate_box(model_dict=self.model_list_box)
         
     def onContextMenu(self, event):
         """
@@ -598,14 +598,14 @@ class BasicPage(ScrolledPanel, PanelBase):
         self._manager = manager
         self.state.manager = manager
         
-    def populate_box(self, dict):
+    def populate_box(self, model_dict):
         """
         Store list of model
         
-        :param dict: dictionary containing list of models
+        :param model_dict: dictionary containing list of models
         
         """
-        self.model_list_box = dict
+        self.model_list_box = model_dict
         self.state.model_list_box = self.model_list_box
         self.initialize_combox()
         
@@ -927,18 +927,13 @@ class BasicPage(ScrolledPanel, PanelBase):
             if self.formfactorbox != None:
                 f_select = self.formfactorbox.GetSelection()
                 if f_select > 0:
-                        self.state.formfactorcombobox = self.formfactorbox.\
-                        GetString(f_select)
+                    self.state.formfactorcombobox = self.formfactorbox.\
+                    GetString(f_select)
         if self.categorybox != None:
-                cb_select = self.categorybox.GetSelection()
-                if cb_select > 0:
-                        self.state.categorycombobox = self.categorybox.\
-                        GetString(cb_select)                
-        #save radiobutton state for model selection
-        #self.state.shape_rbutton = self.shape_rbutton.GetValue()
-        #self.state.shape_indep_rbutton = self.shape_indep_rbutton.GetValue()
-        #self.state.struct_rbutton = self.struct_rbutton.GetValue()
-        #self.state.plugin_rbutton = self.plugin_rbutton.GetValue()
+            cb_select = self.categorybox.GetSelection()
+            if cb_select > 0:
+                self.state.categorycombobox = self.categorybox.\
+                GetString(cb_select)
         
         self.state.enable2D = copy.deepcopy(self.enable2D)
         self.state.values = copy.deepcopy(self.values)
@@ -1044,7 +1039,6 @@ class BasicPage(ScrolledPanel, PanelBase):
 
             if len(self.disp_cb_dict) > 0:
                 for k, v in self.disp_cb_dict.iteritems():
-         
                     if v == None:
                         self.state.disp_cb_dict[k] = v
                     else:
@@ -1052,7 +1046,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                             self.state.disp_cb_dict[k] = v.GetValue()
                         except:
                             self.state.disp_cb_dict[k] = None
-           
             if len(self._disp_obj_dict) > 0:
                 for k, v in self._disp_obj_dict.iteritems():
                     self.state._disp_obj_dict[k] = v

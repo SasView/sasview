@@ -16,9 +16,9 @@ import sys
 import copy
 import logging
 import numpy
+import string
 
 import xml.dom.minidom
-from xml.dom.minidom import parse
 from lxml import etree
 
 import sans.dataloader
@@ -192,7 +192,7 @@ class PageState(object):
         self.event_owner = None
         ##page name
         self.page_name = ""
-        # Contains link between  model ,all its parameters, and panel organization
+        # Contains link between model, all its parameters, and panel organization
         self.parameters = []
         # String parameter list that can not be fitted
         self.str_parameters = []
@@ -204,7 +204,7 @@ class PageState(object):
         self.fittable_param = []
         ## orientation parameters
         self.orientation_params = []
-        ## orientation parmaters for gaussian dispersity
+        ## orientation parameters for gaussian dispersity
         self.orientation_params_disp = []
         ## smearer info
         self.smearer = None
@@ -215,7 +215,7 @@ class PageState(object):
         self.dx_min = None
         self.dxl = None
         self.dxw = None
-        #list of dispersion paramaters
+        #list of dispersion parameters
         self.disp_list = []
         if self.model is not None:
             self.disp_list = self.model.getDispParamList()
@@ -599,7 +599,7 @@ class PageState(object):
         
         : param figs: list of pylab figures [list]
         """
-        from report_dialog import ReportDialog
+        from sans.perspectives.fitting.report_dialog import ReportDialog
         # get the strings for report
         html_str, text_str, title = self.set_report_string()
         # Allow 2 figures to append
@@ -629,11 +629,11 @@ class PageState(object):
         dialog = ReportDialog(report_list, None, -1, "")
         dialog.ShowModal()
         
-    def _toXML_helper(self, list, element, newdoc):
+    def _toXML_helper(self, thelist, element, newdoc):
         """
         Helper method to create xml file for saving state
         """
-        for item in list:
+        for item in thelist:
             sub_element = newdoc.createElement('parameter')
             sub_element.setAttribute('name', str(item[1]))
             sub_element.setAttribute('value', str(item[2]))

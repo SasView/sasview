@@ -383,7 +383,7 @@ class FitPanel(nb, PanelBase):
         panel.batch_on = self.batch_on
         panel._set_save_flag(not panel.batch_on)
         panel.set_model_dictionary(self.model_dictionary)
-        panel.populate_box(dict=self.model_list_box)
+        panel.populate_box(model_dict=self.model_list_box)
         panel.formfactor_combo_init()
         panel.set_manager(self._manager)
         panel.window_caption = caption

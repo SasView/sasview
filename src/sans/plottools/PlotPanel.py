@@ -2,6 +2,7 @@
 """
 import logging
 import wx
+import os
 # Try a normal import first
 # If it fails, try specifying a version
 import matplotlib
@@ -10,18 +11,15 @@ matplotlib.interactive(False)
 matplotlib.use('WXAgg')
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
 from matplotlib.figure import Figure
-import os
-import transform
-from plottables import Data1D
-#TODO: make the plottables interactive
-from binder import BindArtist
+from sans.plottools import transform
+from sans.plottools.plottables import Data1D
+from sans.plottools.binder import BindArtist
 from matplotlib.font_manager import FontProperties
 DEBUG = False
 
-from plottables import Graph
-from plottables import Text
-from TextDialog import TextDialog
-from LabelDialog import LabelDialog
+from sans.plottools.plottables import Graph
+from sans.plottools.TextDialog import TextDialog
+from sans.plottools.LabelDialog import LabelDialog
 import operator
 
 import math
@@ -37,54 +35,53 @@ def show_tree(obj, d=0):
     if 'get_children' in dir(obj):
         for a in obj.get_children(): show_tree(a, d+1)
      
-from unitConverter import UnitConvertion as convertUnit
+from sans.plottools.unitConverter import UnitConvertion as convertUnit
 
 
 def _rescale(lo, hi, step, pt=None, bal=None, scale='linear'):
-        """
-        Rescale (lo,hi) by step, returning the new (lo,hi)
-        The scaling is centered on pt, with positive values of step
-        driving lo/hi away from pt and negative values pulling them in.
-        If bal is given instead of point, it is already in [0,1] coordinates.
+    """
+    Rescale (lo,hi) by step, returning the new (lo,hi)
+    The scaling is centered on pt, with positive values of step
+    driving lo/hi away from pt and negative values pulling them in.
+    If bal is given instead of point, it is already in [0,1] coordinates.
     
-        This is a helper function for step-based zooming.
-        
-        """
-        # Convert values into the correct scale for a linear transformation
-        # TODO: use proper scale transformers
-        loprev = lo
-        hiprev = hi
-        if scale == 'log':
-            assert lo > 0
-            if lo > 0:
-                lo = math.log10(lo)
-            if hi > 0:
-                hi = math.log10(hi)
-            if pt is not None:
-                pt = math.log10(pt)
-        
-        # Compute delta from axis range * %, or 1-% if persent is negative
-        if step > 0:
-            delta = float(hi - lo) * step / 100
+    This is a helper function for step-based zooming.
+    """
+    # Convert values into the correct scale for a linear transformation
+    # TODO: use proper scale transformers
+    loprev = lo
+    hiprev = hi
+    if scale == 'log':
+        assert lo > 0
+        if lo > 0:
+            lo = math.log10(lo)
+        if hi > 0:
+            hi = math.log10(hi)
+        if pt is not None:
+            pt = math.log10(pt)
+    
+    # Compute delta from axis range * %, or 1-% if present is negative
+    if step > 0:
+        delta = float(hi - lo) * step / 100
+    else:
+        delta = float(hi - lo) * step / (100 - step)
+
+    # Add scale factor proportionally to the lo and hi values,
+    # preserving the
+    # point under the mouse
+    if bal is None:
+        bal = float(pt - lo) / (hi - lo)
+    lo = lo - (bal * delta)
+    hi = hi + (1 - bal) * delta
+
+    # Convert transformed values back to the original scale
+    if scale == 'log':
+        if (lo <= -250) or (hi >= 250):
+            lo = loprev
+            hi = hiprev
         else:
-            delta = float(hi - lo) * step / (100 - step)
-    
-        # Add scale factor proportionally to the lo and hi values,
-        # preserving the
-        # point under the mouse
-        if bal is None:
-            bal = float(pt - lo) / (hi - lo)
-        lo = lo - (bal * delta)
-        hi = hi + (1 - bal) * delta
-    
-        # Convert transformed values back to the original scale
-        if scale == 'log':
-            if (lo <= -250) or (hi >= 250):
-                lo = loprev
-                hi = hiprev
-            else:
-                lo, hi = math.pow(10., lo), math.pow(10., hi)
-        return (lo, hi)
+            lo, hi = math.pow(10., lo), math.pow(10., hi)
+    return (lo, hi)
 
 
 def CopyImage(canvas):
@@ -124,7 +121,7 @@ class PlotPanel(wx.Panel):
         self.line_collections_list = []
         self.figure = Figure(None, dpi, linewidth=2.0)
         self.color = '#b3b3b3'
-        from canvas import FigureCanvas
+        from sans.plottools.canvas import FigureCanvas
         self.canvas = FigureCanvas(self, -1, self.figure)
         self.SetColor(color)
         #self.SetBackgroundColour(parent.GetBackgroundColour())
@@ -157,9 +154,9 @@ class PlotPanel(wx.Panel):
         self.Bind(wx.EVT_CONTEXT_MENU, self.onContextMenu)
         
         # Define some constants
-        self.colorlist = ['b','g','r','c','m','y','k']
-        self.symbollist = ['o','x','^','v','<','>','+',
-                           's','d','D','h','H','p', '-']
+        self.colorlist = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+        self.symbollist = ['o', 'x', '^', 'v', '<', '>', '+',
+                           's', 'd', 'D', 'h', 'H', 'p', '-']
         
         #List of texts currently on the plot
         self.textList = []
