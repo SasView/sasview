@@ -173,8 +173,8 @@ class Plugin(PluginBase):
         wx.EVT_MENU(owner, id1, self.on_add_new_page)
         self.menu1.AppendSeparator()
         self.id_simfit = wx.NewId()
-        simul_help = "Simultaneous Fit"
-        self.menu1.Append(self.id_simfit, '&Simultaneous Fit', simul_help)
+        simul_help = "Constrained or Simultaneous Fit"
+        self.menu1.Append(self.id_simfit, '&Constrained or Simultaneous Fit', simul_help)
         wx.EVT_MENU(owner, self.id_simfit, self.on_add_sim_page)
         self.sim_menu = self.menu1.FindItemById(self.id_simfit)
         self.sim_menu.Enable(False)
@@ -417,7 +417,7 @@ class Plugin(PluginBase):
         Create a page to access simultaneous fit option
         """
         id = event.GetId()
-        caption = "Simultaneous Fit"
+        caption = "Const & Simul Fit"
         page = self.sim_page
         if id == self.id_batchfit:
             caption = "Combined Batch"
@@ -433,7 +433,7 @@ class Plugin(PluginBase):
             
         if page != None:
             return set_focus_page(page)
-        if caption == "Simultaneous Fit":
+        if caption == "Const & Simul Fit":
             self.sim_page = self.fit_panel.add_sim_page(caption=caption)
         else:
             self.batch_page = self.fit_panel.add_sim_page(caption=caption)

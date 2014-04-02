@@ -329,13 +329,13 @@ class FitPanel(nb, PanelBase):
         """
         return self.GetPage(self.GetSelection())
     
-    def add_sim_page(self, caption="Simultaneous Fit"):
+    def add_sim_page(self, caption="Const & Simul Fit"):
         """
         Add the simultaneous fit page
         """
         from simfitpage import SimultaneousFitPage
         page_finder = self._manager.get_page_finder()
-        if caption == "Simultaneous Fit":
+        if caption == "Const & Simul Fit":
             self.sim_page = SimultaneousFitPage(self, page_finder=page_finder,
                                                  id=-1, batch_on=False)
             self.sim_page.window_caption = caption
