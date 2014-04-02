@@ -89,6 +89,8 @@ lopt =  {'msvc': ['/MANIFEST'],
 
 # Platform-specific link options
 platform_lopt = {'msvc' : ['/MANIFEST']}
+platform_copt = {'unix' : ['-Wno-error=unused-command-line-argument-hard-error-in-future']}
+
 
 class build_ext_subclass( build_ext ):
     def build_extensions(self):
@@ -109,6 +111,11 @@ class build_ext_subclass( build_ext ):
         if platform_lopt.has_key(c):
             for e in self.extensions:
                 e.extra_link_args = platform_lopt[ c ]
+
+        if platform_copt.has_key(c):
+            for e in self.extensions:
+                e.extra_compile_args = platform_copt[ c ]
+
 
         build_ext.build_extensions(self)
 
