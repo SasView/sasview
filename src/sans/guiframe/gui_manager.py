@@ -1563,6 +1563,24 @@ class ViewerFrame(PARENT_FRAME):
         self._edit_menu.Append(GUIFRAME_ID.PASTE_ID, '&Paste Params', 
                                'Paste parameter values')
         wx.EVT_MENU(self, GUIFRAME_ID.PASTE_ID, self.on_paste_panel)
+
+        self._edit_menu.AppendSeparator()
+
+        self._edit_menu_copyas = wx.Menu()
+        #Sub menu for Copy As...
+        self._edit_menu_copyas.Append(GUIFRAME_ID.COPYEX_ID, 'Copy current tab to Excel',
+                               'Copy parameter values in tabular format')
+        wx.EVT_MENU(self, GUIFRAME_ID.COPYEX_ID, self.on_copy_panel)
+
+        self._edit_menu_copyas.Append(GUIFRAME_ID.COPYLAT_ID, 'Copy current tab to LaTeX',
+                               'Copy parameter values in tabular format')
+        wx.EVT_MENU(self, GUIFRAME_ID.COPYLAT_ID, self.on_copy_panel)
+
+
+        self._edit_menu.AppendMenu(GUIFRAME_ID.COPYAS_ID, 'Copy Params as...', self._edit_menu_copyas,
+                               'Copy parameter values in various formats')
+
+
         self._edit_menu.AppendSeparator()
         
         self._edit_menu.Append(GUIFRAME_ID.PREVIEW_ID, '&Report Results',
@@ -2735,6 +2753,12 @@ class ViewerFrame(PARENT_FRAME):
             flag = self.cpanel_on_focus.get_paste_flag()
             self._edit_menu.Enable(GUIFRAME_ID.PASTE_ID, flag)
 
+            #Copy menu
+            flag = self.cpanel_on_focus.get_copy_flag()
+            #self._edit_menu.ENABLE(GUIFRAME_ID.COPYAS_ID,flag)
+            self._edit_menu_copyas.Enable(GUIFRAME_ID.COPYEX_ID, flag)
+            self._edit_menu_copyas.Enable(GUIFRAME_ID.COPYLAT_ID, flag)
+
             flag = self.cpanel_on_focus.get_preview_flag()
             self._edit_menu.Enable(GUIFRAME_ID.PREVIEW_ID, flag)
             flag = self.cpanel_on_focus.get_reset_flag()
@@ -2745,7 +2769,9 @@ class ViewerFrame(PARENT_FRAME):
             self._edit_menu.Enable(GUIFRAME_ID.REDO_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.COPY_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.PASTE_ID, flag)
-
+            #self._edit_menu.Enable(GUIFRAME_ID.COPYEX_ID, flag)
+            #self._edit_menu.Enable(GUIFRAME_ID.COPYLAT_ID, flag)
+            #self._edit_menu.Enable(GUIFRAME_ID.COPYAS_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.PREVIEW_ID, flag)
             self._edit_menu.Enable(GUIFRAME_ID.RESET_ID, flag)
             

@@ -36,7 +36,11 @@ class GUIFRAME_ID:
     PRINT_ID = wx.NewId()
     CURRENT_APPLICATION = wx.NewId()
     CURVE_SYMBOL_NUM = 13
-    
+    COPYEX_ID = wx.NewId()
+    COPYLAT_ID = wx.NewId()
+    COPYAS_ID = wx.NewId()
+
+
 class GUIFRAME_ICON:
     PATH = get_data_path(media='images')
     FRAME_ICON_PATH = os.path.join(PATH, 'ball.ico')

@@ -21,6 +21,7 @@ from sans.guiframe.events import AppendBookmarkEvent
 from sans.guiframe.dataFitting import Data2D
 from sans.guiframe.dataFitting import Data1D
 from sans.guiframe.dataFitting import check_data_validity
+from sans.guiframe.gui_style import GUIFRAME_ID
 from sans.dataloader.data_info import Detector
 from sans.dataloader.data_info import Source
 from sans.perspectives.fitting.pagestate import PageState
@@ -771,7 +772,15 @@ class BasicPage(ScrolledPanel, PanelBase):
         if event != None:
             event.Skip()
         # It seems MAC needs wxCallAfter
-        wx.CallAfter(self.get_copy)
+        if event.GetId() == GUIFRAME_ID.COPYEX_ID:
+            print "copy excel"
+            wx.CallAfter(self.get_copy_excel)
+        elif event.GetId() == GUIFRAME_ID.COPYLAT_ID:
+            print "copy latex"
+            wx.CallAfter(self.get_copy_latex)
+        else:
+            wx.CallAfter(self.get_copy)
+
         
     def on_paste(self, event):
         """
@@ -3156,7 +3165,102 @@ class BasicPage(ScrolledPanel, PanelBase):
             return content
         else:
             return False
-    
+
+    def get_copy_excel(self):
+        """
+        Get copy params to clipboard
+        """
+        content = self.get_copy_params_excel()
+        flag = self.set_clipboard(content)
+        self._copy_info(flag)
+        return flag
+
+    def get_copy_params_excel(self):
+        """
+        Get the string copies of the param names and values in the tap
+        """
+        content = ''
+
+        crlf = chr(13) + chr(10)
+        tab = chr(9)
+
+        # Do it if params exist
+        if  self.parameters != []:
+
+            for param in self.parameters:
+                content += param[1] #parameter name
+                content += tab
+                content += param[1]+"_err"
+                content += tab
+
+            content += crlf
+
+            #row of values and errors...
+            for param in self.parameters:
+                content += param[2].GetValue() #value
+                content +=tab
+                content += param[4].GetValue() #error
+                content +=tab
+
+            return content
+        else:
+            return False
+
+
+    def get_copy_latex(self):
+        """
+        Get copy params to clipboard
+        """
+        content = self.get_copy_params_latex()
+        flag = self.set_clipboard(content)
+        self._copy_info(flag)
+        return flag
+
+    def get_copy_params_latex(self):
+        """
+        Get the string copies of the param names and values in the tap
+        """
+        content = '\\begin{table}'
+        content += '\\begin{tabular}[h]'
+
+        crlf = chr(13) + chr(10)
+        tab = chr(9)
+
+        # Do it if params exist
+        if  self.parameters != []:
+
+            content += '{|'
+            for param in self.parameters:
+                content += 'l|l|'
+            content += '}\hline'
+            content += crlf
+
+            for index, param in enumerate(self.parameters):
+                content += param[1].replace('_','\_') #parameter name
+                content += ' & '
+                content += param[1].replace('_','\_')+"\_err"
+                if index < len(self.parameters)-1:
+                    content += ' & '
+            content += '\\\\ \\hline'
+            content += crlf
+
+            #row of values and errors...
+            for index, param in enumerate(self.parameters):
+                content += param[2].GetValue() #parameter value
+                content += ' & '
+                content += param[4].GetValue() #parameter error
+                if index < len(self.parameters)-1:
+                    content += ' & '
+            content += '\\\\ \\hline'
+            content += crlf
+
+            content += '\\end{tabular}'
+            content += '\\end{table}'
+            return content
+        else:
+            return False
+
+
     def set_clipboard(self, content=None):
         """
         Put the string to the clipboard
