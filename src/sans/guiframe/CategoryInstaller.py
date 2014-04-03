@@ -11,10 +11,10 @@ Copyright (c) Institut Laue-Langevin 2012
 import os
 import sys
 import shutil
-import cPickle as pickle
+import json
 from collections import defaultdict
 
-USER_FILE = 'serialized_cat.p'
+USER_FILE = 'serialized_cat.json'
 
 class CategoryInstaller:
     """
@@ -44,15 +44,15 @@ class CategoryInstaller:
         return sans.perspectives.fitting.models.get_model_python_path()
     
     @staticmethod
-    def _get_default_cat_p_dir():
+    def _get_default_cat_file_dir():
         """
-        returns the dir where default_cat.p should be
+        returns the dir where default_cat.j should be
         """
         # The default categories file is usually found with the code, except
         # when deploying using py2app (it will be in Contents/Resources), or
         # py2exe (it will be in the exec dir).
         import sans.sansview
-        cat_file = "default_categories.p"
+        cat_file = "default_categories.json"
         
         possible_cat_file_paths = [
             os.path.join(os.path.split(sans.sansview.__file__)[0], cat_file),           # Source
@@ -110,7 +110,7 @@ class CategoryInstaller:
     @staticmethod
     def get_user_file():
         """
-        returns the user data file, eg .sasview/serialized_cat.p
+        returns the user data file, eg .sasview/serialized_cat.json
         """
         return os.path.join(CategoryInstaller._get_home_dir(),
                             USER_FILE)
@@ -119,16 +119,16 @@ class CategoryInstaller:
     def get_default_file():
         """
         returns the path of the default file
-        e.g. blahblah/default_categories.p
+        e.g. blahblah/default_categories.json
         """
         return os.path.join(\
-            CategoryInstaller._get_default_cat_p_dir(), "default_categories.p")
+            CategoryInstaller._get_default_cat_file_dir(), "default_categories.json")
         
     @staticmethod
     def check_install(homedir = None, model_list=None):
         """
         the main method of this class
-        makes sure serialized_cat.p exists and if not
+        makes sure serialized_cat.json exists and if not
         compile it and install
         :param homefile: Override the default home directory
         :param model_list: List of model names except customized models
@@ -145,7 +145,8 @@ class CategoryInstaller:
             cat_file = open(serialized_file, 'rb')
         else:
             cat_file = open(default_file, 'rb')
-        master_category_dict = pickle.Unpickler(cat_file).load()
+        master_category_dict = json.load(cat_file)
+#        master_category_dict = pickle.Unpickler(cat_file).load()
         (by_model_dict, model_enabled_dict) = \
                 CategoryInstaller._regenerate_model_dict(master_category_dict)
         cat_file.close()
@@ -172,7 +173,7 @@ class CategoryInstaller:
                 CategoryInstaller._regenerate_master_dict(by_model_dict,
                                                           model_enabled_dict)
             
-            pickle.dump( master_category_dict,
+            json.dump( master_category_dict,
                          open(serialized_file, 'wb') )
             
             try:

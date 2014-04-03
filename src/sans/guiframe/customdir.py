@@ -34,9 +34,9 @@ def _setup_conf_dir(path):
     if not os.path.isdir(dir):
         os.makedirs(dir)
     file = os.path.join(dir, "custom_config.py")
-    u_dir = _find_usersasview_dir()
-    cat_file = os.path.join(u_dir, "serialized_cat.p")
-    # Place example user models as needed
+    cat_file = CategoryInstaller.get_user_file()
+    # If the user category file doesn't exist copy the default to
+    # the user directory
     if not os.path.isfile(cat_file):
         try:
             default_cat_file = CategoryInstaller.get_default_file()

@@ -9,8 +9,7 @@ import time
 import copy
 import math
 import string
-import cPickle as pickle
-#import shutil
+import json
 from collections import defaultdict
 from wx.lib.scrolledpanel import ScrolledPanel
 from sans.guiframe.panel_base import PanelBase
@@ -3584,9 +3583,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             categorization_file = CategoryInstaller.get_user_file()
             if not os.path.isfile(categorization_file):
                 categorization_file = CategoryInstaller.get_default_file()
-            cat_file = open(categorization_file, 'rb')
-                            
-            self.master_category_dict = pickle.load(cat_file)
+            cat_file = open(categorization_file, 'rb')                           
+            self.master_category_dict = json.load(cat_file)
             self._regenerate_model_dict()
             cat_file.close()
 

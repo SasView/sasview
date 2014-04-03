@@ -45,7 +45,7 @@ if os.path.isdir(sans_dir):
     f_path = os.path.join(sans_dir, "sasview.log")
     if os.path.isfile(f_path):
         os.remove(f_path)
-    f_path = os.path.join(sans_dir, "serialized_cat.p")
+    f_path = os.path.join(sans_dir, "serialized_cat.json")
     if os.path.isfile(f_path):
         os.remove(f_path)
     f_path = os.path.join(sans_dir, 'config', "custom_config.py")
@@ -320,7 +320,7 @@ ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
 
 package_dir["sans.sansview"] = "sansview"
 package_data['sans.sansview'] = ['images/*', 'media/*', 'test/*', 
-                                 'default_categories.p']
+                                 'default_categories.json']
 packages.append("sans.sansview")
 
 #required = ['lxml>=2.2.2', 'numpy>=1.4.1', 'matplotlib>=0.99.1.1', 

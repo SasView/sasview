@@ -14,7 +14,7 @@ import sys
 import os
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 from collections import defaultdict
-import cPickle as pickle
+import json
 from sans.guiframe.events import ChangeCategoryEvent
 from sans.guiframe.CategoryInstaller import CategoryInstaller
 IS_MAC = (sys.platform == 'darwin')
@@ -293,7 +293,7 @@ class CategoryManager(wx.Frame):
 
         cat_file = open(CategoryInstaller.get_user_file(), 'wb')
 
-        pickle.dump( self.master_category_dict, cat_file )
+        json.dump(self.master_category_dict, cat_file )
         
         cat_file.close()
    
@@ -302,14 +302,16 @@ class CategoryManager(wx.Frame):
         Read in categorization info from file
         """
         try:
-    		file = CategoryInstaller.get_user_file()
-    		if os.path.isfile(file):
-	            cat_file = open(file, 'rb')
-	            self.master_category_dict = pickle.load(cat_file)
-	        else:
-	        	cat_file = open(CategoryInstaller.get_default_file(), 'rb')
-        		self.master_category_dict = pickle.load(cat_file)
-        	cat_file.close()
+            file = CategoryInstaller.get_user_file()
+            if os.path.isfile(file):
+                cat_file = open(file, 'rb')
+#               self.master_category_dict = pickle.load(cat_file)
+                self.master_category_dict = json.load(cat_file)
+            else:
+                cat_file = open(CategoryInstaller.get_default_file(), 'rb')
+#        		self.master_category_dict = pickle.load(cat_file)
+                self.master_category_dict = json.load(cat_file)
+            cat_file.close()
         except IOError:
             print 'Problem reading in category file. Please review'
 

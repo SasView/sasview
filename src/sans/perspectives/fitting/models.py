@@ -947,7 +947,6 @@ class ModelManager(object):
                       if model_name not in __modelmanager.stored_plugins.keys()]
 
     CategoryInstaller.check_install(model_list=cat_model_list)
-    
     def findModels(self):
         return self.__modelmanager.findModels()
     

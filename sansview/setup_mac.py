@@ -54,7 +54,7 @@ if libxml_path == None:
 
 APP = ['sansview.py']
 DATA_FILES += ['images','test','media', 'custom_config.py', 'local_config.py',
-               'default_categories.p']
+               'default_categories.json']
 if os.path.isfile("BUILD_NUMBER"):
     DATA_FILES.append("BUILD_NUMBER")
     
