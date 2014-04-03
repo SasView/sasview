@@ -228,7 +228,7 @@ class ViewerFrame(PARENT_FRAME):
         Initialize the Frame object
         """
 
-        PARENT_FRAME.__init__(self, parent=parent, title=title, pos=pos, size=size)
+        PARENT_FRAME.__init__(self, parent=parent, title=title, pos=pos, size=size, style=wx.SYSTEM_MENU | wx.CAPTION | wx.CLOSE_BOX)
         # title
         self.title = title
         self.__gui_style = gui_style       
@@ -977,7 +977,7 @@ class ViewerFrame(PARENT_FRAME):
         """
         # Look for plug-in panels
         panels = []  
-        mac_pos_y = 40  
+        mac_pos_y = 85
         for item in self.plugins:
             if hasattr(item, "get_panels"):
                 ps = item.get_panels(self)
@@ -1047,7 +1047,7 @@ class ViewerFrame(PARENT_FRAME):
         if not IS_WIN:
             win_height = mac_pos_y
             if IS_LINUX:
-                win_height = mac_pos_y + 55
+                win_height = mac_pos_y + 10
                 self.SetMaxSize((-1, win_height))
             else:
                 self.SetSize((self._window_width, win_height))
@@ -1238,9 +1238,11 @@ class ViewerFrame(PARENT_FRAME):
         """
         add toolbar to the frame
         """
-        #set toolbar
-        self._toolbar = GUIToolBar(self, -1)
-        self.SetToolBar(self._toolbar)
+        # Set toolbar
+        self._toolbar = GUIToolBar(self)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(self._toolbar, 0, wx.EXPAND)
+        self.SetSizer(sizer)
         self._update_toolbar_helper()
         self._on_toggle_toolbar(event=None)
     

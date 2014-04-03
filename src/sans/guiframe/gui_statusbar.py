@@ -3,9 +3,9 @@ import sys
 from wx import StatusBar as wxStatusB
 from wx.lib import newevent
 import wx.richtext
-import time
 from sans.guiframe.gui_style import GUIFRAME_ICON
-#numner of fields of the status bar 
+
+# Number of fields on the status bar 
 NB_FIELDS = 4
 #position of the status bar's fields
 ICON_POSITION = 0
@@ -13,7 +13,7 @@ MSG_POSITION  = 1
 GAUGE_POSITION  = 2
 CONSOLE_POSITION  = 3
 BUTTON_SIZE = 40
-
+STATUS_BAR_ICON_SIZE = 12
 CONSOLE_WIDTH = 500
 CONSOLE_HEIGHT = 300
 if sys.platform.count("win32") > 0:
@@ -48,13 +48,13 @@ class ConsolePanel(wx.Panel):
             return
         color = (0, 0, 0) #black
         icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_INFORMATION,
-                                                 wx.ART_TOOLBAR)
+                                             wx.ART_TOOLBAR)
         if hasattr(event, "info"):
             icon_type = event.info.lower()
             if icon_type == "warning":
                 color = (0, 0, 255) # blue
                 icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_WARNING,
-                                                      wx.ART_TOOLBAR)
+                                                     wx.ART_TOOLBAR)
             if icon_type == "error":
                 color = (255, 0, 0) # red
                 icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_ERROR, 
@@ -69,7 +69,6 @@ class ConsolePanel(wx.Panel):
         self.msg_txt.AppendText(status)
         self.msg_txt.EndTextColour()
         
-           
         
 class Console(wx.Frame):
     """
@@ -82,7 +81,6 @@ class Console(wx.Frame):
         self.panel = ConsolePanel(self)
         self.panel.set_message(status=status)
         wx.EVT_CLOSE(self, self.Close)
-        
         
     def set_multiple_messages(self, messages=[]):
         """
@@ -111,16 +109,12 @@ class StatusBar(wxStatusB):
         self.parent.SetStatusBarPane(MSG_POSITION)
 
         #Layout of status bar
-        width, height = wx.ArtProvider.GetSizeHint(wx.ART_TOOLBAR)        
+        width = STATUS_BAR_ICON_SIZE
+        height = STATUS_BAR_ICON_SIZE
         self.SetFieldsCount(NB_FIELDS) 
         # Leave some space for the resize handle in the last field
         self.SetStatusWidths([width+4, -2, -1, width+15])
         self.SetMinHeight(height)
-        
-        rect = self.GetFieldRect(ICON_POSITION)
-        if rect.height > height:
-            height = rect.GetHeight()  
-            width = rect.GetWidth()
         
         #display default message
         self.msg_position = MSG_POSITION 
@@ -149,7 +143,7 @@ class StatusBar(wxStatusB):
         console_hint = "History of status bar messages"
         self.bitmap_bt_console.SetToolTipString(console_hint)
         self.bitmap_bt_console.Bind(wx.EVT_BUTTON, self._onMonitor,
-                                            id=self.bitmap_bt_console.GetId())
+                                    id=self.bitmap_bt_console.GetId())
         
         self.reposition()
         ## Current progress value of the bar 
@@ -173,9 +167,9 @@ class StatusBar(wxStatusB):
                         pass
         self.frame.set_multiple_messages(self.list_msg)
         self.frame.Hide()
-        self.progress = 0      
-        self.timer = wx.Timer(self, -1) 
-        self.timer_stop = wx.Timer(self, -1) 
+        self.progress = 0
+        self.timer = wx.Timer(self, -1)
+        self.timer_stop = wx.Timer(self, -1)
         self.thread = None
         self.Bind(wx.EVT_TIMER, self._on_time, self.timer) 
         self.Bind(wx.EVT_TIMER, self._on_time_stop, self.timer_stop) 
@@ -218,7 +212,7 @@ class StatusBar(wxStatusB):
         self.list_msg.append(text)
         icon_bmp = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_TOOLBAR)
         self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
-      
+
         if self.frame is not None :
             self.frame.set_message(status=text, event=event)
         
@@ -296,14 +290,7 @@ class StatusBar(wxStatusB):
             return 
         
         # Get the size of the button images
-        width, height = wx.ArtProvider.GetSizeHint(wx.ART_TOOLBAR)        
-
-        # Get the size of the field and choose the size of the 
-        # image accordingly
-        rect = self.GetFieldRect(ICON_POSITION)
-        if rect.height > height:
-            height = rect.GetHeight()
-            width = rect.GetWidth()
+        height = STATUS_BAR_ICON_SIZE
         
         msg = event.info.lower()
         if msg == "warning":
@@ -339,7 +326,6 @@ class StatusBar(wxStatusB):
         if hasattr(event, "status"):
             self.SetStatusText(text=str(event.status), event=event)
        
- 
     def set_gauge(self, event):
         """
         change the state of the gauge according the state of the current job
