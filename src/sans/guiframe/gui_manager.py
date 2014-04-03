@@ -1238,11 +1238,15 @@ class ViewerFrame(PARENT_FRAME):
         """
         add toolbar to the frame
         """
-        # Set toolbar
         self._toolbar = GUIToolBar(self)
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self._toolbar, 0, wx.EXPAND)
-        self.SetSizer(sizer)
+        # The legacy code doesn't work well for wx 3.0
+        # but the old code produces better results with wx 2.8
+        if wx.VERSION_STRING >= '3.0.0.0':
+            sizer = wx.BoxSizer(wx.VERTICAL)
+            sizer.Add(self._toolbar, 0, wx.EXPAND)
+            self.SetSizer(sizer)
+        else:
+            self.SetToolBar(self._toolbar)
         self._update_toolbar_helper()
         self._on_toggle_toolbar(event=None)
     
