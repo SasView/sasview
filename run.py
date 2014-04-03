@@ -14,9 +14,9 @@ import os
 import sys
 import imp
 from glob import glob
-from distutils.util import get_platform
 
 # find the directories for the source and build
+from distutils.util import get_platform
 root = os.path.abspath(os.path.dirname(__file__))
 platform = '%s-%s'%(get_platform(),sys.version[:3])
 build_path = os.path.join(root, 'build','lib.'+platform)

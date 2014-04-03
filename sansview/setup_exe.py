@@ -15,6 +15,16 @@
 
 import os, sys
 import platform
+
+# put the build directory at the front of the path
+if os.path.abspath(os.path.dirname(__file__)) != os.path.abspath(os.getcwd()):
+    raise RuntimeError("Must run setup_exe from the sansview directory")
+from distutils.util import get_platform
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+platform = '%s-%s'%(get_platform(),sys.version[:3])
+build_path = os.path.join(root, 'build','lib.'+platform)
+sys.path.insert(0, build_path)
+
 import local_config
 
 if len(sys.argv) == 1:
@@ -290,6 +300,9 @@ if py26MSdll_x86 != None:
     data_files.append(("Microsoft.VC90.CRT", py26MSdll_x86))
 
 
+# NOTE:
+#  need an empty __init__.py in site-packages/numpy/distutils/tests and site-packages/mpl_toolkits
+
 # packages
 #
 packages = ['matplotlib', 'scipy', 'pytz', 'encodings', 'comtypes', 'win32com', 'ho.pisa']
@@ -310,16 +323,20 @@ includes = ['site']
 # Exclude packages that are not needed but are often found on build systems
 excludes = ['Tkinter', 'PyQt4', '_ssl', '_tkagg', 'sip']
 
-dll_excludes = ['libgdk_pixbuf-2.0-0.dll',
-                'libgobject-2.0-0.dll',
-                'libgdk-win32-2.0-0.dll',
-                'tcl84.dll',
-                'tk84.dll',
-                'QtGui4.dll',
-                'QtCore4.dll',
-                'msvcp90.dll',
-                'w9xpopen.exe',
-                'cygwin1.dll']
+
+dll_excludes = [
+    # Various matplotlib backends we are not using
+    'libgdk_pixbuf-2.0-0.dll', 'libgobject-2.0-0.dll', 'libgdk-win32-2.0-0.dll',
+    'tcl84.dll', 'tk84.dll', 'QtGui4.dll', 'QtCore4.dll',
+    # numpy 1.8 openmp bindings (still seems to use all the cores without them)
+    'libiomp5md.dll', 'libifcoremd.dll', 'libmmd.dll', 'svml_dispmd.dll','libifportMD.dll',
+    # microsoft C runtime (not allowed to ship with the app; need to ship vcredist
+    'msvcp90.dll',
+    # 32-bit windows console piping
+    'w9xpopen.exe',
+    # accidental links to msys/cygwin binaries; shouldn't be needed
+    'cygwin1.dll',
+    ]
 
 target_wx_client = Target(
     description = 'SasView',
