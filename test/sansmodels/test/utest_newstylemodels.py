@@ -62,31 +62,6 @@ class TestBaseModel(unittest.TestCase):
         def setother():
             print self.model.other
         self.assertRaises(AttributeError, setother)
-        
-class TestAdaptor(unittest.TestCase):
-    """
-        Testing C++ Cylinder model
-    """
-    def setUp(self):
-        from sans.models.NewCylinderModel import CylinderModel
-        self.model = CylinderModel()
-        
-        
-    def test_setparam(self):
-        self.model.setParam("length", 151.0)
-        self.assertEquals(self.model.getParam("length"), 151.0)
-        
-        
-        
-        print self.model(0.001)
-        print self.model.parameters['length']
-        self.model.setParam("length", 250.0)
-        self.assertEquals(self.model.getParam("length"), 250.0)
-        
-        print self.model.parameters['length']
-        print self.model(0.001)
-        
-    
   
 if __name__ == '__main__':
     unittest.main()

@@ -251,8 +251,7 @@ class InvariantState(object):
         
         : param file: file to write to
         : param doc: XML document object [optional]
-        : param entry_node: XML node within the XML document at which 
-            we will append the data [optional]   
+        : param entry_node: XML node within the XML document at which we will append the data [optional]
         """
         from xml.dom.minidom import getDOMImplementation
         import time

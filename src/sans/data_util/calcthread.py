@@ -32,10 +32,12 @@ class CalcThread:
     yieldtime, worktime, update and complete.
     
     When defining the compute() method you need to include code which
-    allows the GUI to run.  They are as follows:
-        self.isquit()          call frequently to check for interrupts
-        self.update(kw=...)    call when the GUI could be updated
-        self.complete(kw=...)  call before exiting compute()
+    allows the GUI to run.  They are as follows: ::
+
+        self.isquit()          # call frequently to check for interrupts
+        self.update(kw=...)    # call when the GUI could be updated
+        self.complete(kw=...)  # call before exiting compute()
+
     The update() and complete() calls accept field=value keyword
     arguments which are passed to the called function.  complete()
     should be called before exiting the GUI function.  A KeyboardInterrupt
@@ -45,16 +47,16 @@ class CalcThread:
     The following documentation should be included in the description
     of the derived class.
 
-    The user of this class will call the following:
+    The user of this class will call the following: ::
 
-        thread = Work(...,kw=...)  prepare the work thread.
-        thread.queue(...,kw=...)   queue a work unit
-        thread.requeue(...,kw=...) replace work unit on the end of queue
-        thread.reset(...,kw=...)   reset the queue to the given work unit
-        thread.stop()              clear the queue and halt
-        thread.interrupt()         halt the current work unit but continue
-        thread.ready(delay=0.)     request an update signal after delay
-        thread.isrunning()         returns true if compute() is running
+        thread = Work(...,kw=...)  # prepare the work thread.
+        thread.queue(...,kw=...)   # queue a work unit
+        thread.requeue(...,kw=...) # replace work unit on the end of queue
+        thread.reset(...,kw=...)   # reset the queue to the given work unit
+        thread.stop()              # clear the queue and halt
+        thread.interrupt()         # halt the current work unit but continue
+        thread.ready(delay=0.)     # request an update signal after delay
+        thread.isrunning()         # returns true if compute() is running
 
     Use queue() when all work must be done.  Use requeue() when intermediate
     work items don't need to be done (e.g., in response to a mouse move
@@ -62,7 +64,7 @@ class CalcThread:
     before the new event (e.g., in response to a mouse release event).  Use
     stop() to halt the current and pending computations (e.g., in response to
     a stop button).
-    
+
     The methods queue(), requeue() and reset() are proxies for the compute()
     method in the subclass.  Look there for a description of the arguments.
     The compute() method can be called directly to run the computation in
@@ -81,7 +83,7 @@ class CalcThread:
     be passed as keyword arguments.  Details of how the functions
     should be implemented vary from framework to framework.
 
-    For wx, something like the following is needed:
+    For wx, something like the following is needed: ::
 
         import wx, wx.lib.newevent
         (CalcCompleteEvent, EVT_CALC_COMPLETE) = wx.lib.newevent.NewEvent()

@@ -342,25 +342,27 @@ class Transform:
     
     A transform has a number of attributes.
     
-    name: user visible name for the transform.  This will
-        appear in the context menu for the axis and the transform
-        menu for the graph.
+    name
+      user visible name for the transform.  This will
+      appear in the context menu for the axis and the transform
+      menu for the graph.
         
-    type: operational axis.  This determines whether the
-        transform should appear on x,y or z axis context
-        menus, or if it should appear in the context menu for
-        the graph.
+    type
+      operational axis.  This determines whether the
+      transform should appear on x,y or z axis context
+      menus, or if it should appear in the context menu for
+      the graph.
         
-    inventory: (not implemented) 
-        a dictionary of user settable parameter names and
-        their associated types.  These should appear as keyword
-        arguments to the transform call.  For example, Fresnel
-        reflectivity requires the substrate density:
-             { 'rho': type.Value(10e-6/units.angstrom**2) }
-             
-        Supply reasonable defaults in the callback so that
-        limited plotting clients work even though they cannot
-        set the inventory.
+    inventory
+      (not implemented) 
+      a dictionary of user settable parameter names and
+      their associated types.  These should appear as keyword
+      arguments to the transform call.  For example, Fresnel
+      reflectivity requires the substrate density:
+      ``{ 'rho': type.Value(10e-6/units.angstrom**2) }``       
+      Supply reasonable defaults in the callback so that
+      limited plotting clients work even though they cannot
+      set the inventory.
         
     """
     def __call__(self, plottable, **kwargs):

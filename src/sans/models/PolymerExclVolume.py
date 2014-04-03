@@ -24,11 +24,13 @@ class PolymerExclVolume(BaseComponent):
     This file was auto-generated from ..\c_extensions\polyexclvol.h.
     Refer to that file and the structure it contains
     for details of the model.
+
     List of default parameters:
-         scale           = 0.01 
-         rg              = 100.0 [A]
-         m               = 3.0 
-         background      = 0.0 [1/cm]
+    
+    * scale           = 0.01 
+    * rg              = 100.0 [A]
+    * m               = 3.0 
+    * background      = 0.0 [1/cm]
 
     """
         

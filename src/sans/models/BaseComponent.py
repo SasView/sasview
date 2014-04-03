@@ -95,38 +95,42 @@ class BaseComponent:
         """
         Evaluate a distribution of q-values.
         
-        * For 1D, a numpy array is expected as input:
+        * For 1D, a numpy array is expected as input: ::
         
             evalDistribution(q)
             
-        where q is a numpy array.
+          where q is a numpy array.
         
         
         * For 2D, a list of numpy arrays are expected: [qx_prime,qy_prime],
-          where 1D arrays,
+          where 1D arrays, ::
         
-        qx_prime = [ qx[0], qx[1], qx[2], ....]
-        and
-        qy_prime = [ qy[0], qy[1], qy[2], ....] 
+              qx_prime = [ qx[0], qx[1], qx[2], ....]
+
+          and ::
+
+              qy_prime = [ qy[0], qy[1], qy[2], ....] 
         
-        Then get
-        q = numpy.sqrt(qx_prime^2+qy_prime^2)
+        Then get ::
+
+            q = numpy.sqrt(qx_prime^2+qy_prime^2)
         
-        that is a qr in 1D array;
-        q = [q[0], q[1], q[2], ....] 
+        that is a qr in 1D array; ::
+
+            q = [q[0], q[1], q[2], ....] 
         
-        :Note: Due to 2D speed issue, no anisotropic scattering 
-            is supported for python models, thus C-models should have
-             their own evalDistribution methods.
+        ..note::
+          Due to 2D speed issue, no anisotropic scattering 
+          is supported for python models, thus C-models should have
+          their own evalDistribution methods.
         
-        The method is then called the following way:
+        The method is then called the following way: ::
         
-        evalDistribution(q)
+            evalDistribution(q)
+
         where q is a numpy array.
         
-        :param qdist: ndarray of scalar q-values or list [qx,qy] 
-                    where qx,qy are 1D ndarrays 
-        
+        :param qdist: ndarray of scalar q-values or list [qx,qy] where qx,qy are 1D ndarrays
         """
         if qdist.__class__.__name__ == 'list':
             # Check whether we have a list of ndarrays [qx,qy]

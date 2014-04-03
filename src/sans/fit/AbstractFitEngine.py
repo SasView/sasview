@@ -556,8 +556,7 @@ class FitEngine:
         set a model on a given  in the fit engine.
         
         :param model: sans.models type 
-        :param : is the key of the fitArrange dictionary where model is 
-                saved as a value
+        :param id: is the key of the fitArrange dictionary where model is saved as a value
         :param pars: the list of parameters to fit 
         :param constraints: list of 
             tuple (name of parameter, value of parameters)
@@ -565,8 +564,7 @@ class FitEngine:
             parameters.
             Example:  
             we want to fit 2 model M1 and M2 both have parameters A and B.
-            constraints can be:
-             constraints = [(M1.A, M2.B+2), (M1.B= M2.A *5),...,]
+            constraints can be ``constraints = [(M1.A, M2.B+2), (M1.B= M2.A *5),...,]``
             
              
         :note: pars must contains only name of existing model's parameters

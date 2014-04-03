@@ -258,8 +258,7 @@ class BoxSum(_BaseInteractor):
         """
         Receive a dictionary and reset the slicer with values contained 
         in the values of the dictionary.
-        :param params: a dictionary containing name of slicer parameters and 
-            values the user assigned to the slicer.
+        :param params: a dictionary containing name of slicer parameters and values the user assigned to the slicer.
         """
         x_max = math.fabs(params["Width"] )/2
         y_max = math.fabs(params["Height"] )/2

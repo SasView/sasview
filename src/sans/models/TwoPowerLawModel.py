@@ -16,12 +16,14 @@ class TwoPowerLawModel(BaseComponent):
     I(q) = coef_A*pow(qval,-1.0*power1) for q<=qc
         =C*pow(qval,-1.0*power2) for q>qc
     where C=coef_A*pow(qc,-1.0*power1)/pow(qc,-1.0*power2).
+    
     List of default parameters:
-     coef_A = coefficient
-     power1 = (-) Power @ low Q
-     power2 = (-) Power @ high Q
-     qc = crossover Q-value
-     background = incoherent background
+    
+    * coef_A = coefficient
+    * power1 = (-) Power @ low Q
+    * power2 = (-) Power @ high Q
+    * qc = crossover Q-value
+    * background = incoherent background
     """
         
     def __init__(self):

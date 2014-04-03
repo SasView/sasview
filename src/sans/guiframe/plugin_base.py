@@ -16,14 +16,15 @@ class PluginBase:
     Plug-ins should be placed in a sub-directory called "perspectives".
     For example, a plug-in called Foo should be place in "perspectives/Foo".
     That directory contains at least two files:
-        perspectives/Foo/__init__.py contains two lines:
+
+    1. perspectives/Foo/__init__.py contains two lines: ::
         
-            PLUGIN_ID = "Foo plug-in 1.0"
-            from Foo import *
+        PLUGIN_ID = "Foo plug-in 1.0"
+        from Foo import *
             
-        perspectives/Foo/Foo.py contains the definition of the Plugin
-        class for the Foo plug-in. The interface of that Plugin class
-        should follow the interface of the class you are looking at.
+    2. perspectives/Foo/Foo.py contains the definition of the Plugin
+       class for the Foo plug-in. The interface of that Plugin class
+       should follow the interface of the class you are looking at.
         
     See dummyapp.py for a plugin example.
     """

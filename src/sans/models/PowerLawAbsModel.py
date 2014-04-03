@@ -1,5 +1,5 @@
 """ 
-    Provide F(x) = scale* (|x|)^(-m) + bkd
+    Provide F(x) = scale* (\|x\|)^(-m) + bkd
     Power law function as a BaseComponent model
 """
 from sans.models.PowerLawModel import PowerLawModel
@@ -7,14 +7,15 @@ import math
 
 class PowerLawAbsModel(PowerLawModel):
     """
-        Class that evaluates a absolute Power_Law model.
-        
+    Class that evaluates a absolute Power_Law model. ::
+    
         F(x) = scale* (|x|)^(-m) + bkd
-        
-        The model has three parameters: 
-            m     =  power
-            scale  =  scale factor
-            bkd    =  incoherent background
+    
+    The model has three parameters:
+
+    * m     =  power
+    * scale  =  scale factor
+    * bkd    =  incoherent background
     """
     
     def __init__(self):

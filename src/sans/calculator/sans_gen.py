@@ -196,13 +196,9 @@ class GenSAS(BaseComponent):
     def evalDistribution(self, qdist):
         """
         Evaluate a distribution of q-values.
-        * For 1D, a numpy array is expected as input:
-            evalDistribution(q)   
-        where q is a numpy array.
-        * For 2D, a list of numpy arrays are expected: [qx_prime,qy_prime],
-          where 1D arrays,  
-        :param qdist: ndarray of scalar q-values or list [qx,qy] 
-                    where qx,qy are 1D ndarrays 
+        * For 1D, a numpy array is expected as input: evalDistribution(q) where q is a numpy array.
+        * For 2D, a list of numpy arrays are expected: [qx_prime,qy_prime], where 1D arrays.
+        :param qdist: ndarray of scalar q-values or list [qx,qy] where qx,qy are 1D ndarrays 
         """
         if qdist.__class__.__name__ == 'list':
             if len(qdist[1]) < 1:
@@ -951,7 +947,7 @@ class MagSLD:
            
     def set_sldms(self, sld_mx, sld_my, sld_mz):
         """
-        Sets (|m|, m_theta, m_phi)
+        Sets (\|m\|, m_theta, m_phi)
         """
         if sld_mx.__class__.__name__ == 'float':
             self.sld_mx = numpy.ones(len(self.pos_x)) * sld_mx

@@ -6,9 +6,11 @@ from sans.models.BaseComponent import BaseComponent
 import copy
 
 class Constant(BaseComponent):
-    """ Class that evaluates a constant model. 
-        List of default parameters:
-         value           = 1.0 
+    """
+    Class that evaluates a constant model. 
+    List of default parameters:
+    
+    * value           = 1.0 
     """
         
     def __init__(self):

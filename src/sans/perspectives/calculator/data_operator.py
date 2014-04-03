@@ -28,9 +28,6 @@ else:
       
 class DataOperPanel(wx.ScrolledWindow):
     """
-    :param data: when not empty the class can 
-                same information into a data object
-        and post event containing the changed data object to some other frame
     """
     def __init__(self, parent, *args, **kwds):
         kwds['name'] = "Data Operation"

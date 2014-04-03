@@ -472,8 +472,7 @@ class ResolutionCalculator(object):
     def get_variance(self, size=[], distance=0, phi=0, comp='radial'):
         """
         Get the variance when the slit/pinhole size is given
-        : size: list that can be one(diameter for circular)
-                or two components(lengths for rectangular)
+        : size: list that can be one(diameter for circular) or two components(lengths for rectangular)
         : distance: [z, x] where z along the incident beam, x // qx_value
         : comp: direction of the sigma; can be 'phi', 'y', 'x', and 'radial'
         

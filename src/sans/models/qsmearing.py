@@ -499,18 +499,16 @@ def get_qextrapolate(width, data_x):
     """
     Make fake data_x points extrapolated outside of the data_x points
     
-    : param width: array of std of q resolution
-    : param Data1D.x: Data1D.x array
+    :param width: array of std of q resolution
+    :param Data1D.x: Data1D.x array
     
-    : return new_width, data_x_ext: extrapolated width array and x array
+    :return new_width, data_x_ext: extrapolated width array and x array
     
-    : assumption1: data_x is ordered from lower q to higher q
-    : assumption2: len(data) = len(width)
-    : assumption3: the distance between the data points is more compact 
-            than the size of width 
-    : Todo1: Make sure that the assumptions are correct for Data1D
-    : Todo2: This fixes the edge problem in Qsmearer but still needs to make 
-            smearer interface 
+    :assumption1: data_x is ordered from lower q to higher q
+    :assumption2: len(data) = len(width)
+    :assumption3: the distance between the data points is more compact than the size of width 
+    :Todo1: Make sure that the assumptions are correct for Data1D
+    :Todo2: This fixes the edge problem in Qsmearer but still needs to make smearer interface 
     """
     # Length of the width
     length = len(width)

@@ -60,16 +60,19 @@ class Invertor(Cinvertor):
     Npts is the number of points.
     
     In the following i refers to the ith base function coefficient.
-    The matrix has its entries j in its first Npts rows set to
+    The matrix has its entries j in its first Npts rows set to ::
+
         A[j][i] = (Fourier transformed base function for point j)
         
     We them choose a number of r-points, n_r, to evaluate the second
     derivative of P(r) at. This is used as our regularization term.
-    For a vector r of length n_r, the following n_r rows are set to
+    For a vector r of length n_r, the following n_r rows are set to ::
+
         A[j+Npts][i] = (2nd derivative of P(r), d**2(P(r))/d(r)**2,
         evaluated at r[j])
         
-    The vector b has its first Npts entries set to
+    The vector b has its first Npts entries set to ::
+
         b[j] = (I(q) observed for point j)
         
     The following n_r entries are set to zero.
@@ -78,10 +81,11 @@ class Invertor(Cinvertor):
     the matrix and find the coefficients x.
     
     Methods inherited from Cinvertor:
-    - get_peaks(pars): returns the number of P(r) peaks
-    - oscillations(pars): returns the oscillation parameters for the output P(r)
-    - get_positive(pars): returns the fraction of P(r) that is above zero
-    - get_pos_err(pars): returns the fraction of P(r) that is 1-sigma above zero
+
+    * ``get_peaks(pars)``: returns the number of P(r) peaks
+    * ``oscillations(pars)``: returns the oscillation parameters for the output P(r)
+    * ``get_positive(pars)``: returns the fraction of P(r) that is above zero
+    * ``get_pos_err(pars)``: returns the fraction of P(r) that is 1-sigma above zero
     """
     ## Chisqr of the last computation
     chi2  = 0
@@ -251,15 +255,18 @@ class Invertor(Cinvertor):
         Npts is the number of points.
         
         In the following i refers to the ith base function coefficient.
-        The matrix has its entries j in its first Npts rows set to
+        The matrix has its entries j in its first Npts rows set to ::
+
             A[i][j] = (Fourier transformed base function for point j)
             
         We them choose a number of r-points, n_r, to evaluate the second
         derivative of P(r) at. This is used as our regularization term.
-        For a vector r of length n_r, the following n_r rows are set to
+        For a vector r of length n_r, the following n_r rows are set to ::
+
             A[i+Npts][j] = (2nd derivative of P(r), d**2(P(r))/d(r)**2, evaluated at r[j])
             
-        The vector b has its first Npts entries set to
+        The vector b has its first Npts entries set to ::
+
             b[j] = (I(q) observed for point j)
             
         The following n_r entries are set to zero.
@@ -270,7 +277,6 @@ class Invertor(Cinvertor):
         :param nfunc: number of base functions to use.
         :param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
         :return: c_out, c_cov - the coefficients with covariance matrix
-        
         """
         # Reset the background value before proceeding
         self.background = 0.0
@@ -394,16 +400,19 @@ class Invertor(Cinvertor):
         Npts is the number of points.
         
         In the following i refers to the ith base function coefficient.
-        The matrix has its entries j in its first Npts rows set to
+        The matrix has its entries j in its first Npts rows set to ::
+
             A[i][j] = (Fourier transformed base function for point j)
             
         We them choose a number of r-points, n_r, to evaluate the second
         derivative of P(r) at. This is used as our regularization term.
-        For a vector r of length n_r, the following n_r rows are set to
+        For a vector r of length n_r, the following n_r rows are set to ::
+
             A[i+Npts][j] = (2nd derivative of P(r), d**2(P(r))/d(r)**2,
             evaluated at r[j])
             
-        The vector b has its first Npts entries set to
+        The vector b has its first Npts entries set to ::
+
             b[j] = (I(q) observed for point j)
             
         The following n_r entries are set to zero.
@@ -412,8 +421,7 @@ class Invertor(Cinvertor):
         the matrix and find the coefficients x.
         
         :param nfunc: number of base functions to use.
-        :param nr: number of r points to evaluate the 2nd derivative at
-            for the reg. term.
+        :param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
 
         If the result does not allow us to compute the covariance matrix,
         a matrix filled with zeros will be returned.
@@ -511,9 +519,9 @@ class Invertor(Cinvertor):
         Returns a reasonable guess for the
         number of terms
         
-        :param isquit_func: reference to thread function to call to
-                            check whether the computation needs to
-                            be stopped.
+        :param isquit_func:
+          reference to thread function to call to check whether the computation needs to
+          be stopped.
         
         :return: number of terms, alpha, message
         

@@ -14,49 +14,49 @@ class ExtensionRegistry(object):
 
     Note that there may be multiple loaders for the same extension.
 
-    Example:
+    Example: ::
 
-    registry = ExtensionRegistry()
+        registry = ExtensionRegistry()
 
-    # Add an association by setting an element
-    registry['.zip'] = unzip
-    
-    # Multiple extensions for one loader
-    registry['.tgz'] = untar
-    registry['.tar.gz'] = untar
+        # Add an association by setting an element
+        registry['.zip'] = unzip
+        
+        # Multiple extensions for one loader
+        registry['.tgz'] = untar
+        registry['.tar.gz'] = untar
 
-    # Generic extensions to use after trying more specific extensions; 
-    # these will be checked after the more specific extensions fail.
-    registry['.gz'] = gunzip
+        # Generic extensions to use after trying more specific extensions; 
+        # these will be checked after the more specific extensions fail.
+        registry['.gz'] = gunzip
 
-    # Multiple loaders for one extension
-    registry['.cx'] = cx1
-    registry['.cx'] = cx2
-    registry['.cx'] = cx3
+        # Multiple loaders for one extension
+        registry['.cx'] = cx1
+        registry['.cx'] = cx2
+        registry['.cx'] = cx3
 
-    # Show registered extensions
-    print registry.extensions()
-    
-    # Can also register a format name for explicit control from caller
-    registry['cx3'] = cx3
-    print registry.formats()
+        # Show registered extensions
+        print registry.extensions()
+        
+        # Can also register a format name for explicit control from caller
+        registry['cx3'] = cx3
+        print registry.formats()
 
-    # Retrieve loaders for a file name
-    registry.lookup('hello.cx') -> [cx3,cx2,cx1]
+        # Retrieve loaders for a file name
+        registry.lookup('hello.cx') -> [cx3,cx2,cx1]
 
-    # Run loader on a filename
-    registry.load('hello.cx') ->
-        try:
-            return cx3('hello.cx')
-        except:
+        # Run loader on a filename
+        registry.load('hello.cx') ->
             try:
-                return cx2('hello.cx')
+                return cx3('hello.cx')
             except:
-                return cx1('hello.cx')
+                try:
+                    return cx2('hello.cx')
+                except:
+                    return cx1('hello.cx')
 
-    # Load in a specific format ignoring extension
-    registry.load('hello.cx',format='cx3') ->
-        return cx3('hello.cx')
+        # Load in a specific format ignoring extension
+        registry.load('hello.cx',format='cx3') ->
+            return cx3('hello.cx')
     """
     def __init__(self, **kw):
         self.loaders = {}

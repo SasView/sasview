@@ -1,5 +1,5 @@
 """
-   This software was developed by the University of Tennessee as part of the
+This software was developed by the University of Tennessee as part of the
 Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
 project funded by the US National Science Foundation. 
 

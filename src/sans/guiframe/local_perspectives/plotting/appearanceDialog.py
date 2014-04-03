@@ -1,13 +1,11 @@
 #!/usr/bin/python
 """
 Dialog for appearance of plot symbols, color, size etc.
-/**
-    This software was developed by Institut Laue-Langevin as part of
-    Distributed Data Analysis of Neutron Scattering Experiments (DANSE).
 
-    Copyright 2012 Institut Laue-Langevin
+This software was developed by Institut Laue-Langevin as part of
+Distributed Data Analysis of Neutron Scattering Experiments (DANSE).
 
-**/
+Copyright 2012 Institut Laue-Langevin
 """
 import wx
 import operator

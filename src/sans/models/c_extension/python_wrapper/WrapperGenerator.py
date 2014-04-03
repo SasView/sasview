@@ -125,7 +125,7 @@ class WrapperGenerator:
         f = open(self.file,'r')
         buf = f.read()
         
-        self.default_list = "List of default parameters:\n"
+        self.default_list = "\n    List of default parameters:\n\n"
         #lines = string.split(buf,'\n')
         lines = buf.split('\n')
         self.details  = "## Parameter details [units, min, max]\n"
@@ -292,7 +292,7 @@ class WrapperGenerator:
                     units = ""
                     if len(toks2) >= 2:
                         units = toks2[1]
-                    self.default_list += "         %-15s = %s %s\n" % \
+                    self.default_list += "    * %-15s = %s %s\n" % \
                         (toks[1], val, units)
                     
                     # Check for min and max
