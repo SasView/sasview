@@ -89,6 +89,7 @@ lopt =  {'msvc': ['/MANIFEST'],
 
 # Platform-specific link options
 platform_lopt = {'msvc' : ['/MANIFEST']}
+platform_copt = {}
 
 # Set copts to get compile working on OS X >= 10.9 using clang
 if sys.platform =='darwin':
