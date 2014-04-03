@@ -89,7 +89,16 @@ lopt =  {'msvc': ['/MANIFEST'],
 
 # Platform-specific link options
 platform_lopt = {'msvc' : ['/MANIFEST']}
-platform_copt = {'unix' : ['-Wno-error=unused-command-line-argument-hard-error-in-future']}
+
+# Set copts to get compile working on OS X >= 10.9 using clang
+if sys.platform =='darwin':
+    try:
+        darwin_ver = int(os.uname()[2].split('.')[0])
+        if darwin_ver >= 13:
+            platform_copt = {'unix' : ['-Wno-error=unused-command-line-argument-hard-error-in-future']}
+    except:
+        print "PROBLEM determining Darwin version"
+
 
 
 class build_ext_subclass( build_ext ):
