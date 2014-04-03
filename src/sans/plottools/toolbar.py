@@ -3,6 +3,19 @@
 """
 import wx
 from matplotlib.backends.backend_wxagg import NavigationToolbar2WxAgg
+from matplotlib.backends.backend_wx import _load_bitmap
+import logging
+
+# Event binding code changed after version 2.5
+if wx.VERSION_STRING >= '2.5':
+    def bind(actor,event,action,**kw):
+        actor.Bind(event,action,**kw)
+else:
+    def bind(actor,event,action,id=None):
+        if id is not None:
+            event(actor, id, action)
+        else:
+            event(actor,action)
 
 class NavigationToolBar(NavigationToolbar2WxAgg):
     """
@@ -10,75 +23,84 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
     """
     def __init__(self, canvas, parent=None):
         NavigationToolbar2WxAgg.__init__(self, canvas)
-        #the panel using this toolbar
-        self.parent = parent
-        #save canvas
-        self.canvas = canvas
-        #remove some icones
-        self.delete_option()
-        #add more icone
-        self.add_option()
-       
-    def delete_option(self):
-        """
-        remove default toolbar item
-        """
-        #delte reset button
-        self.DeleteToolByPos(0)
-        #delete unwanted button that configures subplot parameters
-        self.DeleteToolByPos(5)
         
-    def add_option(self):
-        """
-        add item to the toolbar
-        """
-        #add print button
-        id_context = wx.NewId()
+    def _init_toolbar(self):
+        self._parent = self.canvas.GetParent()
+        _NTB2_HOME         = wx.NewId()
+        self._NTB2_BACK    = wx.NewId()
+        self._NTB2_FORWARD = wx.NewId()
+        self._NTB2_PAN     = wx.NewId()
+        self._NTB2_ZOOM    = wx.NewId()
+        _NTB2_SAVE         = wx.NewId()
+        _NTB2_PRINT        = wx.NewId()
+        _NTB2_RESET        = wx.NewId()
+
+        self.SetToolBitmapSize(wx.Size(24,24))
+
         context_tip = 'Graph Menu: \n'
         context_tip += '    For more menu options, \n'
         context_tip += '    right-click the data symbols.'
         context = wx.ArtProvider.GetBitmap(wx.ART_LIST_VIEW, wx.ART_TOOLBAR)
-        self.InsertSimpleTool(0, id_context, context,
-                                   context_tip, context_tip)
-        wx.EVT_TOOL(self, id_context, self.on_menu)
+        self.AddSimpleTool(_NTB2_HOME, context, context_tip, context_tip)
+
         self.InsertSeparator(1)
         
-        id_print = wx.NewId()
+        self.AddSimpleTool(self._NTB2_BACK, _load_bitmap('back.png'),
+                           'Back', 'Back navigation view')
+        self.AddSimpleTool(self._NTB2_FORWARD, _load_bitmap('forward.png'),
+                           'Forward', 'Forward navigation view')
+        # todo: get new bitmap
+        self.AddCheckTool(self._NTB2_PAN, _load_bitmap('move.png'),
+                           shortHelp='Pan',
+                           longHelp='Pan with left, zoom with right')
+        self.AddCheckTool(self._NTB2_ZOOM, _load_bitmap('zoom_to_rect.png'),
+                           shortHelp='Zoom', longHelp='Zoom to rectangle')
+
+        self.AddSeparator()
+        self.AddSimpleTool(_NTB2_SAVE, _load_bitmap('filesave.png'),
+                           'Save', 'Save plot contents to file')
+        
         print_bmp = wx.ArtProvider.GetBitmap(wx.ART_PRINT, wx.ART_TOOLBAR)
-        self.AddSimpleTool(id_print, print_bmp,
-                           'Print', 'Activate printing')
-        wx.EVT_TOOL(self, id_print, self.on_print)
-        #add reset button
-        id_reset = wx.NewId()
+        self.AddSimpleTool(_NTB2_PRINT, print_bmp, 'Print', 'Print plot')
+        
         reset_bmp = wx.ArtProvider.GetBitmap(wx.ART_GO_HOME, wx.ART_TOOLBAR)
-        self.AddSimpleTool(id_reset, reset_bmp,
-                           'Reset Graph Range', 'Reset graph range')
-        wx.EVT_TOOL(self, id_reset, self.on_reset)
+        self.AddSimpleTool(_NTB2_RESET, reset_bmp, 'Reset', 'Reset graph range')
+
+        bind(self, wx.EVT_TOOL, self.on_menu, id=_NTB2_HOME)
+        bind(self, wx.EVT_TOOL, self.forward, id=self._NTB2_FORWARD)
+        bind(self, wx.EVT_TOOL, self.back, id=self._NTB2_BACK)
+        bind(self, wx.EVT_TOOL, self.zoom, id=self._NTB2_ZOOM)
+        bind(self, wx.EVT_TOOL, self.pan, id=self._NTB2_PAN)
+        bind(self, wx.EVT_TOOL, self.save, id=_NTB2_SAVE)
+        bind(self, wx.EVT_TOOL, self.on_print, id=_NTB2_PRINT)
+        bind(self, wx.EVT_TOOL, self.on_reset, id=_NTB2_RESET)
+
+        self.Realize()
         
     def on_menu(self, event):
         """
-        activate reset
+            Plot menu
         """
         try:
-            self.parent.onToolContextMenu(event=event)
+            self._parent.onToolContextMenu(event=event)
         except:
-            pass
+            logging.error("Plot toolbar could not show menu")
         
     def on_reset(self, event):
         """
-        activate reset
+            Reset plot
         """
         try:
-            self.parent.onResetGraph(event=event)
+            self._parent.onResetGraph(event=event)
         except:
-            pass
+            logging.error("Plot toolbar could not reset plot")
         
     def on_print(self, event):
         """
-        activate print
+            Print
         """
         try:
-            self.canvas.Printer_Print(event=event)
+            self.canvas.Printer_Preview(event=event)
         except:
-            pass
+            logging.error("Plot toolbar could not print")
         
