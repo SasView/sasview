@@ -19,7 +19,7 @@ import urllib2
 import StringIO
 
 from lxml import etree
-import xml.dom.minidom
+from xml.dom import minidom
  
 CANSAS_FORMAT = cansasConstants.CANSAS_FORMAT
 CANSAS_NS = cansasConstants.CANSAS_NS
@@ -49,7 +49,7 @@ class cansas_reader(unittest.TestCase):
             name += "_{0}".format(i)
             name = self.get_number_of_entries(dictionary, name, i)
         return name
-    
+       
 
     def test_xml_validate(self):
         string = "<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\n"
@@ -81,7 +81,7 @@ class cansas_reader(unittest.TestCase):
     def _check_data(self, data):
         self.assertTrue(data.title == "TK49 c10_SANS")
         self.assertTrue(data.x.size == 138)
-        self.assertTrue(len(data.meta_data) == 2)
+        self.assertTrue(len(data.meta_data) == 3)
         self.assertTrue(data.detector[0].distance_unit == "mm")
         self.assertTrue(data.detector[1].distance_unit == "mm")
         self.assertTrue(data.detector[0].name == "HAB")
@@ -89,6 +89,7 @@ class cansas_reader(unittest.TestCase):
         self.assertTrue(data.detector[0].distance == 575.0)
         self.assertTrue(data.detector[1].distance == 4145.02)
         self.assertTrue(data.process[0].name == "Mantid generated CanSAS1D XML")
+        self.assertTrue(data.meta_data["xmlpreprocess"]["xml-stylesheet"] != None)
         
     
     def _check_data_1_1(self, data):
@@ -154,10 +155,12 @@ class cansas_reader(unittest.TestCase):
         reader7 = XMLreader(self.isis_1_1, self.schema_1_0)
         self.assertFalse(reader7.validateXML())
         
-    
+       
     def test_old_cansas_files(self):
         reader1 = XMLreader(self.cansas1d, self.schema_1_0)
         self.assertTrue(reader1.validateXML())
+        file_loader = Loader()
+        file1 = file_loader.load(self.cansas1d)
         reader2 = XMLreader(self.cansas1d_units, self.schema_1_0)
         self.assertTrue(reader2.validateXML())
         reader3 = XMLreader(self.cansas1d_badunits, self.schema_1_0)
@@ -165,7 +168,6 @@ class cansas_reader(unittest.TestCase):
         reader4 = XMLreader(self.cansas1d_slit, self.schema_1_0)
         self.assertTrue(reader4.validateXML())
         
-    
     def test_save_cansas_v1_0(self):
         filename = "isis_1_0_write_test.xml"
         xmlreader = XMLreader(self.isis_1_0, self.schema_1_0)
@@ -185,6 +187,47 @@ class cansas_reader(unittest.TestCase):
             written_data = return_data[0]
             self._check_data(written_data)
         
-
+        
+    def test_processing_instructions(self):
+        reader = XMLreader(self.isis_1_1, self.schema_1_1)
+        valid = reader.validateXML()
+        if valid:
+            ## find the processing instructions and make into a dictionary
+            dic = self.getProcessingInstructions(reader)
+            self.assertTrue(dic == {'xml-stylesheet': 'type="text/xsl" href="cansas1d.xsl" '})
+            
+            xml = "<test><a><b><c></c></b></a></test>"
+            xmldoc = minidom.parseString(xml)
+            
+            ## take the processing instructions and put them back in
+            xmldoc = self.setProcessingInstructions(xmldoc, dic)
+            xml_output = xmldoc.toprettyxml()
+            
+    
+    def setProcessingInstructions(self, minidomObject, dic):
+        xmlroot = minidomObject.firstChild
+        for item in dic:
+            pi = minidomObject.createProcessingInstruction(item, dic[item])
+            minidomObject.insertBefore(pi, xmlroot)
+        return minidomObject
+    
+    
+    def getProcessingInstructions(self, XMLreaderObject):
+        dict = {}
+        pi = XMLreaderObject.xmlroot.getprevious()
+        i = 0
+        while pi is not None:
+            attr = {}
+            pi_name = ""
+            pi_string = etree.tostring(pi)
+            if isinstance(pi_string, str):
+                pi_string = pi_string.replace("<?", "").replace("?>", "")
+                split = pi_string.split(" ", 1)
+                pi_name = split[0]
+                attr = split[1]
+            dict[pi_name] = attr
+            pi = pi.getprevious()
+        return dict
+        
 if __name__ == '__main__':
     unittest.main()    

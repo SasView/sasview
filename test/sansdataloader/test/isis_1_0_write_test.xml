@@ -1,4 +1,5 @@
 <?xml version="1.0" ?>
+<?xml-stylesheet type="text/xsl" href="cansasxml-html.xsl" ?>
 <SASroot version="1.0" xmlns="cansas1d/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="cansas1d/1.0 http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd">
 	<SASentry>
 		<Title>

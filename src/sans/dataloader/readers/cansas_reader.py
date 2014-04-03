@@ -27,6 +27,7 @@ import xml.dom.minidom
 from sans.dataloader.readers.cansas_constants import cansasConstants
 
 _ZERO = 1e-16
+PREPROCESS = "xmlpreprocess"
 HAS_CONVERTER = True
 try:
     from sans.data_util.nxsunit import Converter
@@ -211,6 +212,13 @@ class Reader():
                             # The entry is appended to a list of entry values
                             data1d.filename = name
                             data1d.meta_data["loader"] = "CanSAS 1D"
+                            
+                            # Get all preprocessing events
+                            self.reader.setProcessingInstructions()
+                            data1d.meta_data[PREPROCESS] = \
+                                    self.reader.processingInstructions
+                            
+                            # Parse the XML file
                             return_value, extras = \
                                 self._parse_entry(entry, ns, data1d)
                             del extras[:]
@@ -246,14 +254,14 @@ class Reader():
         # Return a list of parsed entries that dataloader can manage
         return None
     
-    def _create_unique_key(self, dictionary, name, i):
+    def _create_unique_key(self, dictionary, name, i = 0):
         """
         Create a unique key value for any dictionary to prevent overwriting
-        
+        Recurses until a unique key value is found.
         
         :param dictionary: A dictionary with any number of entries
         :param name: The index of the item to be added to dictionary
-        :param i: The number to be appended to the name
+        :param i: The number to be appended to the name, starts at 0
         """
         if dictionary.get(name) is not None:
             i += 1
@@ -290,7 +298,7 @@ class Reader():
                      default_unit is not None:
                     if HAS_CONVERTER == True:
                         try:
-                            ## Check local units - bad units should raise KeyError
+                            ## Check local units - bad units raise KeyError
                             Converter(local_unit)
                             data_conv_q = Converter(attr['unit'])
                             value_unit = default_unit
@@ -346,6 +354,8 @@ class Reader():
         base_ns = "{0}{1}{2}".format("{", \
                             CANSAS_NS.get(self.cansas_version).get("ns"), "}")
         unit = ''
+        tagname = ''
+        tagname_original = ''
         
         # Go through each child in the parent element
         for node in dom:
@@ -439,10 +449,12 @@ class Reader():
                     for item in extras:
                         exec item
                 # Don't bother saving empty information unless it is a float
-                if cs_values.ns_variable is not None and node_value is not None and \
+                if cs_values.ns_variable is not None and \
+                            node_value is not None and \
                             node_value.isspace() == False:
                     # Format a string and then execute it.
-                    store_me = cs_values.ns_variable.format("data1d", node_value, tagname)
+                    store_me = cs_values.ns_variable.format("data1d", \
+                                                            node_value, tagname)
                     exec store_me
                 # Get attributes and process them
                 if attr is not None:
@@ -502,11 +514,8 @@ class Reader():
         doc = xml.dom.minidom.Document()
         
         main_node = doc.createElement("SASroot")
-        if self.cansas_version == "1.1":
-            pi = doc.createProcessingInstruction('xml-stylesheet', \
-                                    'type="text/xsl" href="cansasxml-html.xsl"')
-            root = doc.firstChild
-            doc.insertBefore(pi, root)
+        
+        doc = self.setProcessingInstructions(doc, datainfo.meta_data[PREPROCESS])
         main_node.setAttribute("version", self.cansas_version)
         main_node.setAttribute("xmlns", ns)
         main_node.setAttribute("xmlns:xsi",
@@ -788,3 +797,14 @@ class Reader():
         fd = open(filename, 'w')
         fd.write(doc.toprettyxml())
         fd.close()
+    
+    ## Once I convert the writer to lxml from minidom
+    ## This can be moved into xml_reader
+    def setProcessingInstructions(self, minidomObject, dic):
+        xmlroot = minidomObject.firstChild
+        for item in dic:
+            pi = minidomObject.createProcessingInstruction(item, dic[item])
+            minidomObject.insertBefore(pi, xmlroot)
+        return minidomObject
+    
+    
