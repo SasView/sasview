@@ -139,6 +139,9 @@ class FitPage(BasicPage):
         if is_data:
             self.dataSource.SetSelection(0)
             self.on_select_data(event=None)
+
+        if len(data_list) == 1:
+            self.dataSource.Disable()
                 
     def on_select_data(self, event=None):
         """
