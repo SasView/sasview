@@ -595,8 +595,8 @@ class FitEngine:
                     self.param_list.append(item)
                 else:
                     
-                    msg = "wrong parameter %s used" % str(item)
-                    msg += "to set model %s. Choose" % str(new_model.model.name)
+                    msg = "wrong parameter %s used " % str(item)
+                    msg += "to set model %s. Choose " % str(new_model.model.name)
                     msg += "parameter name within %s" % \
                                 str(new_model.model.getParamList())
                     raise ValueError, msg
