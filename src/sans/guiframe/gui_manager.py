@@ -976,8 +976,11 @@ class ViewerFrame(PARENT_FRAME):
         Load all panels in the panels directory
         """
         # Look for plug-in panels
-        panels = []  
-        mac_pos_y = 85
+        panels = []
+        if wx.VERSION_STRING >= '3.0.0.0':
+            mac_pos_y = 85
+        else:
+            mac_pos_y = 40
         for item in self.plugins:
             if hasattr(item, "get_panels"):
                 ps = item.get_panels(self)
@@ -1047,7 +1050,10 @@ class ViewerFrame(PARENT_FRAME):
         if not IS_WIN:
             win_height = mac_pos_y
             if IS_LINUX:
-                win_height = mac_pos_y + 10
+                if wx.VERSION_STRING >= '3.0.0.0':
+                    win_height = mac_pos_y + 10
+                else:
+                    win_height = mac_pos_y + 55
                 self.SetMaxSize((-1, win_height))
             else:
                 self.SetSize((self._window_width, win_height))
