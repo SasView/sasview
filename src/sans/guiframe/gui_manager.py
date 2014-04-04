@@ -1450,14 +1450,17 @@ class ViewerFrame(PARENT_FRAME):
         """
         Build a panel to allow to edit Mask
         """
-        
         from sans.guiframe.startup_configuration \
         import StartupConfiguration as ConfDialog
         
-        self.panel = ConfDialog(parent=self, gui=self.__gui_style)
-        self.panel.ShowModal()
-
-                
+        dialog = ConfDialog(parent=self, gui=self.__gui_style)
+        result = dialog.ShowModal()
+        if result == wx.ID_OK:
+            dialog.write_custom_config()
+            # post event for info
+            wx.PostEvent(self, StatusEvent(status="Wrote custom configuration", info='info'))
+        dialog.Destroy()
+        
     def _add_menu_application(self):
         """
         # Attach a menu item for each defined perspective or application.

@@ -92,15 +92,13 @@ class StartupConfiguration(wx.Dialog):
         note_txt = wx.StaticText(panel, -1, msg, (15, 75))
         note_txt.SetForegroundColour("black")
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        cancelButton = wx.Button(self, -1, 'Cancel', size=(70, 25))
-        hbox.Add(cancelButton, 1, wx.RIGHT, 5)
-        cancelButton.Bind(wx.EVT_BUTTON, self.OnCancel)
-        okButton = wx.Button(self, -1, 'OK', size=(70, 25))
+        
+        okButton = wx.Button(self, wx.ID_OK, 'Set', size=(70, 25))
+        closeButton = wx.Button(self,wx.ID_CANCEL, 'Cancel', size=(70, 25))
+        hbox.Add(closeButton, 1, wx.RIGHT, 5)
         hbox.Add(okButton, 1, wx.RIGHT, 5)
-        okButton.Bind(wx.EVT_BUTTON, self.OnClose)
-        vbox.Add(panel)
-
-        vbox.Add(hbox, 1, wx.ALIGN_CENTER | wx.RIGHT | wx.BOTTOM, 5)
+        vbox.Add(panel, 1, wx.ALIGN_CENTER | wx.BOTTOM, 5)
+        vbox.Add(hbox, 1, wx.ALIGN_CENTER | wx.BOTTOM, 5)
         # set sizer
         self.SetSizer(vbox)
         #pos = self.parent.GetPosition()
@@ -191,25 +189,13 @@ class StartupConfiguration(wx.Dialog):
         # event object and selection
         self.return_string = self.current_string
         return self.return_string
-
-    def OnCancel(self, event):
-        """
-        Close event
-        """
-        # clear event
-        event.Skip()
-        self.return_string = {}
-        self.Destroy()
     
-    def OnClose(self, event):
+    def write_custom_config(self):
         """
-        Close event
+            Write custom configuration
         """
-        # clear event
-        event.Skip()
         fname = os.path.join(self.path, 'custom_config.py')
         self.write_string(fname, self.return_string)
-        self.Destroy()
 
     def write_string(self, fname, strings):
         """
