@@ -90,7 +90,6 @@ def pmapreduce(mapper, collector, inputs):
     fn = _pmapreduce_profile if profile_mapper else _pmapreduce_thread        
     thread.start_new_thread(fn,(mapper,collector, inputs))
 
-
 def main():
     import time,numpy
     class TestCollector(object):

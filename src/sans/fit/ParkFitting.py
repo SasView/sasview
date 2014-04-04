@@ -19,10 +19,8 @@ from park.assembly import Assembly
 from park.assembly import Part
 from park.fitmc import FitSimplex 
 import park.fitmc
-from park.fitmc import FitMC
 from park.fit import Fitter
 from park.formatnum import format_uncertainty
-#from Loader import Load
 from sans.fit.AbstractFitEngine import FitEngine
 from sans.fit.AbstractFitEngine import FResult
   

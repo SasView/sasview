@@ -64,21 +64,17 @@ class DataManager(object):
         else: 
             new_plot = Data1D(x=[], y=[], dx=None, dy=None)
            
-        new_plot.copy_from_datainfo(data) 
-        data.clone_without_data(clone=new_plot)  
+        new_plot.copy_from_datainfo(data)
+        data.clone_without_data(clone=new_plot)
         #creating a name for data
-        name = ""
         title = ""
-        file_name = ""
-        if path is not None:
-            file_name = os.path.basename(path)
-        if file_name == "":
-            file_name = data.filename
-        if data.run:
-            run_num = data.run[0]
-        name = file_name
-        if name == "":
-            name = run_num
+        file_name = os.path.basename(path) if path is not None else data.filename
+        if file_name:
+            name = file_name
+        elif data.run:
+            name = data.run[0]
+        else:
+            name = "data"
         name = self.rename(name)
         #find title
         if data.title.strip():
