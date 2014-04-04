@@ -14,28 +14,16 @@ import os
 import sys
 import imp
 from glob import glob
+from contextlib import contextmanager
+from os.path import abspath, dirname, join as joinpath
 
-# find the directories for the source and build
-from distutils.util import get_platform
-root = os.path.abspath(os.path.dirname(__file__))
-platform = '%s-%s'%(get_platform(),sys.version[:3])
-build_path = os.path.join(root, 'build','lib.'+platform)
-
-# Make sure that we have a private version of mplconfig
-mplconfig = os.path.join(os.getcwd(), '.mplconfig')
-os.environ['MPLCONFIGDIR'] = mplconfig
-if not os.path.exists(mplconfig): os.mkdir(mplconfig)
-#import matplotlib
-#matplotlib.use('Agg')
-#print matplotlib.__file__
-#import pylab; pylab.hold(False)
 
 def addpath(path):
     """
     Add a directory to the python path environment, and to the PYTHONPATH
     environment variable for subprocesses.
     """
-    path = os.path.abspath(path)
+    path = abspath(path)
     if 'PYTHONPATH' in os.environ:
         PYTHONPATH = path + os.pathsep + os.environ['PYTHONPATH']
     else:
@@ -43,7 +31,6 @@ def addpath(path):
     os.environ['PYTHONPATH'] = PYTHONPATH
     sys.path.insert(0, path)
 
-from contextlib import contextmanager
 @contextmanager
 def cd(path):
     """
@@ -56,73 +43,87 @@ def cd(path):
 
 def import_package(modname, path):
     """Import a package into a particular point in the python namespace"""
-    mod = imp.load_source(modname, os.path.abspath(os.path.join(path,'__init__.py')))
+    mod = imp.load_source(modname, abspath(joinpath(path,'__init__.py')))
     sys.modules[modname] = mod
-    mod.__path__ = [os.path.abspath(path)]
+    mod.__path__ = [abspath(path)]
     return mod
 
 def import_dll(modname):
     """Import a DLL from the build directory"""
     # build_path comes from context
-    path = glob(os.path.join(build_path, *modname.split('.'))+'.*')[0]
+    path = glob(joinpath(build_path, *modname.split('.'))+'.*')[0]
     #print "importing", modname, "from", path
     return imp.load_dynamic(modname, path)
 
+def prepare():
+    # Don't create *.pyc files
+    sys.dont_write_bytecode = True
 
-# Don't create *.pyc files
-sys.dont_write_bytecode = True
+    # Debug numpy warnings
+    #import numpy; numpy.seterr(all='raise')
 
-# Debug numpy warnings
-#import numpy; numpy.seterr(all='raise')
+    # find the directories for the source and build
+    from distutils.util import get_platform
+    root = abspath(dirname(__file__))
+    platform = '%s-%s'%(get_platform(),sys.version[:3])
+    build_path = joinpath(root, 'build','lib.'+platform)
 
-# add periodictable to the path
-try: import periodictable
-except: addpath(os.path.join(root, '..','periodictable'))
+    # Make sure that we have a private version of mplconfig
+    mplconfig = joinpath(abspath(dirname(__file__)), '.mplconfig')
+    os.environ['MPLCONFIGDIR'] = mplconfig
+    if not os.path.exists(mplconfig): os.mkdir(mplconfig)
+    #import matplotlib
+    #matplotlib.use('Agg')
+    #print matplotlib.__file__
+    #import pylab; pylab.hold(False)
+    # add periodictable to the path
+    try: import periodictable
+    except: addpath(joinpath(root, '..','periodictable'))
 
-# select wx version
-#addpath(os.path.join(root, '..','wxPython-src-3.0.0.0','wxPython'))
+    # select wx version
+    #addpath(os.path.join(root, '..','wxPython-src-3.0.0.0','wxPython'))
 
-# Build project if the build directory does not already exist.
-if not os.path.exists(build_path):
-    import subprocess
-    with cd(root):
-        subprocess.call((sys.executable, "setup.py", "build"), shell=False)
+    # Build project if the build directory does not already exist.
+    if not os.path.exists(build_path):
+        import subprocess
+        with cd(root):
+            subprocess.call((sys.executable, "setup.py", "build"), shell=False)
 
-# Put the source trees on the path
-addpath(os.path.join(root, 'src'))
-addpath(os.path.join(root, 'park-1.2.1'))
+    # Put the source trees on the path
+    addpath(joinpath(root, 'src'))
+    addpath(joinpath(root, 'park-1.2.1'))
 
-# Import the sansview package from root/sansview as sans.sansview.  It would
-# be better to just store the package in src/sans/sansview.
-import sans
-sans.sansview = import_package('sans.sansview', os.path.join(root,'sansview'))
+    # Import the sansview package from root/sansview as sans.sansview.  It would
+    # be better to just store the package in src/sans/sansview.
+    import sans
+    sans.sansview = import_package('sans.sansview', joinpath(root,'sansview'))
 
-# The sans.models package Compiled Model files should be pulled in from the build directory even though
-# the source is stored in src/sans/models.
+    # The sans.models package Compiled Model files should be pulled in from the build directory even though
+    # the source is stored in src/sans/models.
 
-# Compiled modules need to be pulled from the build directory.
-# Some packages are not where they are needed, so load them explicitly.
-import sans.pr
-sans.pr.core = import_package('sans.pr.core',
-                              os.path.join(build_path, 'sans', 'pr', 'core'))
-#import_dll('park._modeling')
+    # Compiled modules need to be pulled from the build directory.
+    # Some packages are not where they are needed, so load them explicitly.
+    import sans.pr
+    sans.pr.core = import_package('sans.pr.core',
+                                  joinpath(build_path, 'sans', 'pr', 'core'))
+    #import_dll('park._modeling')
 
-#park = import_package('park',os.path.join(build_path,'park'))
+    #park = import_package('park',os.path.join(build_path,'park'))
 
-# Pull the entire sans.models package from the build directory since it contains
-# a mixture of autogenerated python and C.  Any changes in models will require
-# a rebuild with setup.py build
-sans.models = import_package('sans.models', os.path.join(build_path, 'sans', 'models'))
+    # Pull the entire sans.models package from the build directory since it contains
+    # a mixture of autogenerated python and C.  Any changes in models will require
+    # a rebuild with setup.py build
+    sans.models = import_package('sans.models', joinpath(build_path, 'sans', 'models'))
 
-sys.path.append(build_path)
+    sys.path.append(build_path)
 
-#print "\n".join(sys.path)
-#from sans.models import SphereModel
+    #print "\n".join(sys.path)
+    #from sans.models import SphereModel
 
-# Won't need freeze support when running from the source tree
-#import multiprocessing
-#multiprocessing.freeze_support()
-
-# start sasview
-from sans.sansview.sansview import SasView
-SasView()
+if __name__ == "__main__":
+    # start sasview
+    #import multiprocessing
+    #multiprocessing.freeze_support()
+    prepare()
+    from sans.sansview.sansview import SasView
+    SasView()

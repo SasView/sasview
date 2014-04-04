@@ -7,6 +7,7 @@ try:
 except:
     print "xmlrunner needs to be installed to run these tests"
     print "Try easy_install unittest-xml-reporting"
+    sys.exit(1)
 
 # Check whether we have matplotlib installed
 HAS_MPL_WX = True
@@ -20,35 +21,37 @@ SKIPPED_DIRS = ["sansrealspace", "calculatorview"]
 if not HAS_MPL_WX:
     SKIPPED_DIRS.append("sansguiframe")
 
-COMMAND_SEP = ';'
-if os.name == 'nt':
-    COMMAND_SEP = '&'
+#COMMAND_SEP = ';'
+#if os.name == 'nt':
+#    COMMAND_SEP = '&'
 
 def run_tests():
+    test_root = os.path.abspath(os.path.dirname(__file__))
+    run_one_py = os.path.join(test_root, 'run_one.py')
     passed = 0
     failed = 0
     n_tests = 0
     n_errors = 0
     n_failures = 0
     
-    for d in os.listdir(os.getcwd()):
+    for d in os.listdir(test_root):
         
         # Check for modules to be skipped
         if d in SKIPPED_DIRS:
             continue
         
         # Go through modules looking for unit tests
-        module_dir = os.path.join(os.getcwd(),d,"test")
+        module_dir = os.path.join(test_root, d, "test")
         if os.path.isdir(module_dir):
             for f in os.listdir(module_dir):
                 file_path = os.path.join(module_dir,f)
                 if os.path.isfile(file_path) and f.startswith("utest_") and f.endswith(".py"):
                     module_name,_ = os.path.splitext(f)
-                    code = "cd %s%s%s -c \"import sys;import xmlrunner;import unittest;sys.path.insert(0, '%s');" % (module_dir, COMMAND_SEP, sys.executable, module_dir)
-                    code += "from %s import *;" % module_name
-                    code += "unittest.main(testRunner=xmlrunner.XMLTestRunner(output='logs'))\""
+                    code = '"%s" %s %s'%(sys.executable, run_one_py, file_path)
                     proc = subprocess.Popen(code, shell=True, stdout=subprocess.PIPE, stderr = subprocess.STDOUT)
                     std_out, std_err = proc.communicate()
+                    #print std_out
+                    #sys.exit()
                     has_failed = True
                     m = re.search("Ran ([0-9]+) test", std_out)
                     if m is not None:
