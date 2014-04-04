@@ -11,6 +11,7 @@ run = imp.load_source('sasview_run', run_py)
 run.prepare()
 #print "\n".join(sys.path)
 test_path,test_file = splitpath(sys.argv[1])
+print "test file",sys.argv[1]
 #print test_path, test_file
 sys.argv = [sys.argv[0]]
 os.chdir(test_path)

@@ -5,6 +5,11 @@
 import unittest
 
 from sans.fit.AbstractFitEngine import Model
+from sans.dataloader.loader import Loader
+from sans.fit.Fitting import Fit
+from sans.models.LineModel import LineModel
+from sans.models.Constant import Constant
+
 import math
 class testFitModule(unittest.TestCase):
     """ test fitting """
@@ -12,36 +17,31 @@ class testFitModule(unittest.TestCase):
     def test1(self):
         """ Fit 1 data (testdata_line.txt)and 1 model(lineModel) """
         #load data
-        from DataLoader.loader import Loader
         data = Loader().load("testdata_line.txt")
         #Importing the Fit module
-        from sans.fit.Fitting import Fit
         fitter = Fit('scipy')
         # Receives the type of model for the fitting
-        from sans.models.LineModel import LineModel
         model1  = LineModel()
         model1.name = "M1"
-        model = Model(model1)
+        model = Model(model1,data)
         #fit with scipy test
         
         pars1= ['param1','param2']
         fitter.set_data(data,1)
         try:fitter.set_model(model,1,pars1)
-        except ValueError,msg:
-            print "ValueError was raised: "+str(msg)
-            #assert str(msg)=="wrong paramter %s used to set model %s. Choose\
-            #                 parameter name within %s"%('param1', model.model.name,str(model.model.getParamList()))
-        else: raise AssertError,"No error raised for scipy fitting with wrong parameters name to fit"
+        except ValueError,exc:
+            #print "ValueError was correctly raised: "+str(msg)
+            assert str(exc).startswith('wrong parameter')
+        else: raise AssertionError("No error raised for scipy fitting with wrong parameters name to fit")
         pars1= ['A','B']
         fitter.set_model(model,1,pars1)
         fitter.select_problem_for_fit(id=1,value=1)
-        result1 = fitter.fit()
-        self.assert_(result1)
-        
-        self.assertTrue( math.fabs(result1.pvec[0]-4)/3 <= result1.stderr[0] )
-        self.assertTrue( math.fabs(result1.pvec[1]-2.5)/3 <= result1.stderr[1])
-        self.assertTrue( result1.fitness/len(data.x) < 2 )
-        
+        result, = fitter.fit()
+
+        self.assertTrue( math.fabs(result.pvec[0]-4)/3 <= result.stderr[0] )
+        self.assertTrue( math.fabs(result.pvec[1]-2.5)/3 <= result.stderr[1])
+        self.assertTrue( result.fitness/len(data.x) < 2 )
+
         #fit with park test
         fitter = Fit('park')
         fitter.set_data(data,1)
@@ -65,17 +65,14 @@ class testFitModule(unittest.TestCase):
     def test2(self):
         """ fit 2 data and 2 model with no constrainst"""
         #load data
-        from DataLoader.loader import Loader
         l = Loader()
         data1=l.load("testdata_line.txt")
       
         data2=l.load("testdata_line1.txt")
      
         #Importing the Fit module
-        from sans.fit.Fitting import Fit
         fitter = Fit('scipy')
         # Receives the type of model for the fitting
-        from sans.models.LineModel import LineModel
         model11  = LineModel()
         model11.name= "M1"
         model22  = LineModel()
@@ -92,13 +89,13 @@ class testFitModule(unittest.TestCase):
         fitter.set_model(model2,2,pars1)
         fitter.select_problem_for_fit(id=2,value=0)
         
-        try: result1 = fitter.fit()
+        try: result1, = fitter.fit()
         except RuntimeError,msg:
            assert str(msg)=="No Assembly scheduled for Scipy fitting."
         else: raise AssertError,"No error raised for scipy fitting with no model"
         fitter.select_problem_for_fit(id=1,value=1)
         fitter.select_problem_for_fit(id=2,value=1)
-        try: result1 = fitter.fit()
+        try: result1, = fitter.fit()
         except RuntimeError,msg:
            assert str(msg)=="Scipy can't fit more than a single fit problem at a time."
         else: raise AssertError,"No error raised for scipy fitting with more than 2 models"
@@ -122,19 +119,16 @@ class testFitModule(unittest.TestCase):
     def test3(self):
         """ fit 2 data and 2 model with 1 constrainst"""
         #load data
-        from DataLoader.loader import Loader
         l = Loader()
         data1= l.load("testdata_line.txt")
         data2= l.load("testdata_cst.txt")
        
         # Receives the type of model for the fitting
-        from sans.models.LineModel import LineModel
         model11  = LineModel()
         model11.name= "line"
         model11.setParam("A", 1.0)
         model11.setParam("B",1.0)
         
-        from sans.models.Constant import Constant
         model22  = Constant()
         model22.name= "cst"
         model22.setParam("value", 1.0)
@@ -150,7 +144,6 @@ class testFitModule(unittest.TestCase):
         pars2= ['value']
         
         #Importing the Fit module
-        from sans.fit.Fitting import Fit
         fitter = Fit('park')
         fitter.set_data(data1,1)
         fitter.set_model(model1,1,pars1)
@@ -169,14 +162,12 @@ class testFitModule(unittest.TestCase):
     def test4(self):
         """ fit 2 data concatenates with limited range of x and  one model """
             #load data
-        from DataLoader.loader import Loader
         l = Loader()
         data1 = l.load("testdata_line.txt")
         data2 = l.load("testdata_line1.txt")
         
        
         # Receives the type of model for the fitting
-        from sans.models.LineModel import LineModel
         model1  = LineModel()
         model1.name= "M1"
         model1.setParam("A", 1.0)
@@ -186,14 +177,13 @@ class testFitModule(unittest.TestCase):
         #fit with scipy test
         pars1= ['A','B']
         #Importing the Fit module
-        from sans.fit.Fitting import Fit
         fitter = Fit('scipy')
         fitter.set_data(data1,1,qmin=0, qmax=7)
         fitter.set_model(model,1,pars1)
         fitter.set_data(data2,1,qmin=1,qmax=10)
         fitter.select_problem_for_fit(id=1,value=1)
         
-        result1 = fitter.fit()
+        result1, = fitter.fit()
         self.assert_(result1)
 
         self.assertTrue( math.fabs(result1.pvec[0]-4)/3 <= result1.stderr[0] )

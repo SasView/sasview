@@ -3,11 +3,14 @@
     @author M. Doucet
 """
 import unittest
-from sans.fit.AbstractFitEngine import Model
 import math
 import numpy
+from sans.fit.AbstractFitEngine import Model
 from sans.fit.Fitting import Fit
-from DataLoader.loader import Loader
+from sans.dataloader.loader import Loader
+from sans.models.qsmearing import smear_selection
+from sans.models.CylinderModel import CylinderModel
+from sans.models.SphereModel import SphereModel
 
 class testFitModule(unittest.TestCase):
     """ test fitting """
@@ -23,17 +26,17 @@ class testFitModule(unittest.TestCase):
         fitter.set_data(out,1)
         
         # Receives the type of model for the fitting
-        from sans.models.CylinderModel import CylinderModel
         model1  = CylinderModel()
-        model1.setParam('contrast', 1)
+        model1.setParam('sldCyl', 3.0e-6)
+        model1.setParam('sldSolv', 0.0)
         model = Model(model1)
         model.set(scale=1e-10)
         pars1 =['length','radius','scale']
         fitter.set_model(model,1,pars1)
         
         # What the hell is this line for?
-        fitter.select_problem_for_fit(Uid=1,value=1)
-        result1 = fitter.fit()
+        fitter.select_problem_for_fit(id=1,value=1)
+        result1, = fitter.fit()
         
         self.assert_(result1)
         self.assertTrue(len(result1.pvec)>0 or len(result1.pvec)==0 )
@@ -59,10 +62,10 @@ class testFitModule(unittest.TestCase):
         # Set up the fit
         fitter = Fit('scipy')
         # Receives the type of model for the fitting
-        from sans.models.CylinderModel import CylinderModel
         model1  = CylinderModel()
-        model1.setParam('contrast', 1)
-        
+        model1.setParam('sldCyl', 3.0e-6)
+        model1.setParam('sldSolv', 0.0)
+
         # Dispersion parameters
         model1.dispersion['radius']['width'] = 0.001
         model1.dispersion['radius']['npts'] = 50        
@@ -73,8 +76,8 @@ class testFitModule(unittest.TestCase):
         fitter.set_data(out,1)
         model.set(scale=1e-10)
         fitter.set_model(model,1,pars1)
-        fitter.select_problem_for_fit(Uid=1,value=1)
-        result1 = fitter.fit()
+        fitter.select_problem_for_fit(id=1,value=1)
+        result1, = fitter.fit()
         
         self.assert_(result1)
         self.assertTrue(len(result1.pvec)>0 or len(result1.pvec)==0 )
@@ -96,7 +99,6 @@ class smear_testdata(unittest.TestCase):
     def setUp(self):
         print "TEST DONE WITHOUT PROPER OUTPUT CHECK:"
         print "   ---> TEST NEEDS TO BE COMPLETED"
-        from sans.models.SphereModel import SphereModel
         data = Loader().load("latex_smeared.xml")
         self.data_res = data[0]
         self.data_slit = data[1]
@@ -108,8 +110,7 @@ class smear_testdata(unittest.TestCase):
         self.sphere.setParam('radius.width',500)
         
     def test_reso(self):
-        from DataLoader.qsmearing import smear_selection
-        
+
         # Let the data module find out what smearing the
         # data needs
         smear = smear_selection(self.data_res)
@@ -122,17 +123,17 @@ class smear_testdata(unittest.TestCase):
         # We should improve that and have a way to get access to the
         # data for a given fit.
         fitter.set_data(self.data_res,1)
-        fitter._engine.fitArrangeDict[1].dList[0].smearer = smear
+        fitter._engine.fit_arrange_dict[1].data_list[0].smearer = smear
         print "smear ",smear
         # Model: maybe there's a better way to do this.
         # Ideally we should have to create a new model from our sans model.
         fitter.set_model(Model(self.sphere),1, ['radius','scale'])
         
         # Why do we have to do this...?
-        fitter.select_problem_for_fit(Uid=1,value=1)
+        fitter.select_problem_for_fit(id=1,value=1)
         
         # Perform the fit (might take a while)
-        result1 = fitter.fit()
+        result1, = fitter.fit()
         
         # Replace this with proper test once we know what the
         # result should be 
@@ -140,8 +141,6 @@ class smear_testdata(unittest.TestCase):
         print result1.stderr
         
     def test_slit(self):
-        from DataLoader.qsmearing import smear_selection
-        
         smear = smear_selection(self.data_slit)
         self.assertEqual(smear.__class__.__name__, 'SlitSmearer')
 
@@ -152,14 +151,14 @@ class smear_testdata(unittest.TestCase):
         # We should improve that and have a way to get access to the
         # data for a given fit.
         fitter.set_data(self.data_slit,1)
-        fitter._engine.fitArrangeDict[1].dList[0].smearer = smear
-        fitter._engine.fitArrangeDict[1].dList[0].qmax = 0.003
+        fitter._engine.fit_arrange_dict[1].data_list[0].smearer = smear
+        fitter._engine.fit_arrange_dict[1].data_list[0].qmax = 0.003
         
         # Model
         fitter.set_model(Model(self.sphere),1, ['radius','scale'])
-        fitter.select_problem_for_fit(Uid=1,value=1)
+        fitter.select_problem_for_fit(id=1,value=1)
         
-        result1 = fitter.fit()
+        result1, = fitter.fit()
         
         # Replace this with proper test once we know what the
         # result should be 

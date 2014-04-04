@@ -3,11 +3,11 @@
     @author G.alina
 """
 import unittest
+import math
 
 from sans.fit.AbstractFitEngine import Model
-import math
 from sans.fit.Fitting import Fit
-from DataLoader.loader import Loader
+from sans.dataloader.loader import Loader
 
 class TestSingleFit(unittest.TestCase):
     """ test single fitting """
@@ -20,7 +20,8 @@ class TestSingleFit(unittest.TestCase):
         self.model.setParam("scale", 1.0)
         self.model.setParam("radius",18)
         self.model.setParam("length", 397)
-        self.model.setParam("contrast",3e-006 )
+        self.model.setParam("sldCyl",3e-006 )
+        self.model.setParam("sldSolv",0.0 )
         self.model.setParam("background", 0.0)
         #select parameters to fit
         self.pars1 =['length','radius','scale']
@@ -30,14 +31,14 @@ class TestSingleFit(unittest.TestCase):
         fitter = Fit(name)
         fitter.set_data(self.data,1)
         fitter.set_model(self.model,1,self.pars1)
-        fitter.select_problem_for_fit(Uid=1,value=1)
+        fitter.select_problem_for_fit(id=1,value=1)
         return  fitter.fit()
        
 
     def test_scipy(self):
         """ Simple cylinder model fit (scipy)  """
         
-        result1 = self._fit("scipy")
+        result1, = self._fit("scipy")
         
         self.assert_(result1)
         self.assertTrue(len(result1.pvec)>0 or len(result1.pvec)==0 )
@@ -51,7 +52,8 @@ class TestSingleFit(unittest.TestCase):
         
     def test_park(self):
         """ Simple cylinder model fit (park)  """
-        result1 = self._fit("park")
+        #raise NotImplementedError()
+        result1, = self._fit("park")
         
         self.assert_(result1)
         self.assertTrue(len(result1.pvec)>0 or len(result1.pvec)==0 )
@@ -80,7 +82,7 @@ class TestSimultaneousFit(unittest.TestCase):
         self.model1.set(scale= 1.0)
         self.model1.set(radius=18)
         self.model1.set(length=396)
-        self.model1.set(contrast=3e-006 )
+        self.model1.set(sldCyl=3e-006, sldSolv=0.0)
         self.model1.set(background=0.0)
         
         cyl2  = CylinderModel()
@@ -89,7 +91,7 @@ class TestSimultaneousFit(unittest.TestCase):
         self.model2.set(scale= 1.0)
         self.model2.set(radius=37)
         self.model2.set(length='C1.length')
-        self.model2.set(contrast=3e-006 )
+        self.model2.set(sldCyl=3e-006, sldSolv=0.0)
         self.model2.set(background=0.0)
        
     def _fit(self, name="park"):
@@ -100,15 +102,15 @@ class TestSimultaneousFit(unittest.TestCase):
         
         fitter.set_data(self.data2,2)
         fitter.set_model(self.model2, 2, ['radius','scale'])
-        fitter.select_problem_for_fit(Uid=1,value=1)
-        fitter.select_problem_for_fit(Uid=2,value=1)
+        fitter.select_problem_for_fit(id=1,value=1)
+        fitter.select_problem_for_fit(id=2,value=1)
         return fitter.fit()
     
     
     def test_park2(self):
         """ Simultaneous cylinder model fit (park)  """
-        
-        result1= self._fit('park')
+        #raise NotImplementedError()
+        result1,= self._fit('park')
         self.assert_(result1)
         self.assertTrue(len(result1.pvec)>=0  )
         self.assertTrue(len(result1.stderr)>= 0)

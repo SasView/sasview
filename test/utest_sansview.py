@@ -25,7 +25,7 @@ if not HAS_MPL_WX:
 #if os.name == 'nt':
 #    COMMAND_SEP = '&'
 
-def run_tests():
+def run_tests(dirs=None, all=False):
     test_root = os.path.abspath(os.path.dirname(__file__))
     run_one_py = os.path.join(test_root, 'run_one.py')
     passed = 0
@@ -34,7 +34,7 @@ def run_tests():
     n_errors = 0
     n_failures = 0
     
-    for d in os.listdir(test_root):
+    for d in (dirs if dirs else os.listdir(test_root)):
         
         # Check for modules to be skipped
         if d in SKIPPED_DIRS:
@@ -75,22 +75,27 @@ def run_tests():
                     else:
                         passed += 1
                         print "Result for %s: SUCCESS" % module_name
-                        
+
     print "\n----------------------------------------------"
-    print "Results by test modules:"
-    print "    PASSED: %d" % passed
-    ratio = 100.0*failed/(failed+passed)
-    print "    FAILED: %d    (%.0f%%)" % (failed,ratio) 
-    
-    print "Results by tests:"
-    print "    Tests run:    %d" % n_tests
-    print "    Tests failed: %d" % n_failures
-    print "    Test errors:  %d" % n_errors 
+    if n_tests == 0:
+        print "No tests."
+    else:
+        print "Results by test modules:"
+        print "    PASSED: %d" % passed
+        ratio = 100.0*failed/(failed+passed)
+        print "    FAILED: %d    (%.0f%%)" % (failed,ratio)
+
+        print "Results by tests:"
+        print "    Tests run:    %d" % n_tests
+        print "    Tests failed: %d" % n_failures
+        print "    Test errors:  %d" % n_errors
     print "----------------------------------------------"
     
     return failed
 
 if __name__ == '__main__':
-    if run_tests()>0:
+    all = (len(sys.argv) > 1 and sys.argv[1] == '-all')
+    dirs = sys.argv[1:] if not all else sys.argv[2:]
+    if run_tests(dirs=dirs, all=all)>0:
         sys.exit(1)
     
