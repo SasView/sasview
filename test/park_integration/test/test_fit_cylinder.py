@@ -109,7 +109,7 @@ class TestSimultaneousFit(unittest.TestCase):
     
     def test_park2(self):
         """ Simultaneous cylinder model fit (park)  """
-        #raise NotImplementedError()
+        raise NotImplementedError()
         result1,= self._fit('park')
         self.assert_(result1)
         self.assertTrue(len(result1.pvec)>=0  )
