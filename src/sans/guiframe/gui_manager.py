@@ -228,7 +228,7 @@ class ViewerFrame(PARENT_FRAME):
         Initialize the Frame object
         """
 
-        PARENT_FRAME.__init__(self, parent=parent, title=title, pos=pos, size=size, style=wx.SYSTEM_MENU | wx.CAPTION | wx.CLOSE_BOX)
+        PARENT_FRAME.__init__(self, parent=parent, title=title, pos=pos, size=size)
         # title
         self.title = title
         self.__gui_style = gui_style       
