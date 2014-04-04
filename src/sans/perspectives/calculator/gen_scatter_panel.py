@@ -1830,7 +1830,15 @@ class SasGenWindow(widget.CHILD_FRAME):
         Build toolbar
         """
         tsize = (20, 20)
-        tb = self.CreateToolBar(wx.TB_HORIZONTAL | wx.TB_FLAT)
+        # The legacy code doesn't work well for wx 3.0
+        # but the old code produces better results with wx 2.8
+        if wx.VERSION_STRING >= '3.0.0.0':
+            tb = wx.ToolBar(self, style=wx.TB_HORIZONTAL | wx.TB_FLAT)
+            sizer = wx.BoxSizer(wx.VERTICAL)
+            sizer.Add(tb, 0, wx.EXPAND)
+            self.SetSizer(sizer)
+        else:
+            tb = self.CreateToolBar(wx.TB_HORIZONTAL | wx.TB_FLAT)
         open_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR, 
                                             tsize)
         save_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_TOOLBAR,
