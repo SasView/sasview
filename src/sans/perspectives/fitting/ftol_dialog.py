@@ -14,7 +14,6 @@ Dialog to set ftol for Scipy
 ################################################################################
 import wx
 import sys
-from sans.guiframe.events import StatusEvent
 # default ftol
 F_TOL = 1.49012e-08
 SANS_F_TOL = 5e-05
@@ -36,94 +35,66 @@ class ChangeFtol(wx.Dialog):
     def __init__(self, parent, base, id=-1, title="FTolerance"):
         wx.Dialog.__init__(self, parent, id, title,
                            size=(PANEL_WIDTH, PANEL_HEIGHT))
-        # parent
-        self.parent = base
-        # default ftol
-        self.ftol = SANS_F_TOL
         # font size
         self.SetWindowVariant(variant=FONT_VARIANT)
         # build layout
         panel = wx.Panel(self, -1)
         vbox = wx.BoxSizer(wx.VERTICAL)
-        wx.StaticBox(panel, -1, 'FTol selection (Leastsq)', (5, 6),
-                      (PANEL_WIDTH * 0.9, PANEL_HEIGHT * 0.7))
-        default_bt = wx.RadioButton(panel, -1, 'SansView Default (5e-05)',
-                                    (15, 30),
-                                    style=wx.RB_GROUP)
-        default_bt.SetValue(True)
-        default_bt.Bind(wx.EVT_RADIOBUTTON, self.OnFtolSelection)
-        sci_default_bt = wx.RadioButton(panel, -1,
-                                    'Scipy Default (1.49012e-08)', (15, 55))
-        sci_default_bt.SetValue(False)
-        sci_default_bt.Bind(wx.EVT_RADIOBUTTON, self.OnFtolSelection)
-        high_bt = wx.RadioButton(panel, -1, '1e-06', (15, 80))
-        high_bt.SetValue(False)
-        high_bt.Bind(wx.EVT_RADIOBUTTON, self.OnFtolSelection)
-        mid_bt = wx.RadioButton(panel, -1, '1e-05', (15, 105))
-        mid_bt.SetValue(False)
-        mid_bt.Bind(wx.EVT_RADIOBUTTON, self.OnFtolSelection)
-        low_bt = wx.RadioButton(panel, -1, '1e-04', (15, 130))
-        low_bt.SetValue(False)
-        low_bt.Bind(wx.EVT_RADIOBUTTON, self.OnFtolSelection)
+        wx.StaticBox(panel, -1, 'FTol selection (Leastsq)', (5, 6), (PANEL_WIDTH * 0.9, PANEL_HEIGHT * 0.7))
+        self.default_bt = wx.RadioButton(panel, -1, 'SansView Default (5e-05)', (15, 30), style=wx.RB_GROUP)
+        self.default_bt.SetValue(True)
+        self.default_bt.Bind(wx.EVT_RADIOBUTTON, self.OnFtolSelection)
+        self.sci_default_bt = wx.RadioButton(panel, -1, 'Scipy Default (1.49012e-08)', (15, 55))
+        self.sci_default_bt.SetValue(False)
+        self.sci_default_bt.Bind(wx.EVT_RADIOBUTTON, self.OnFtolSelection)
+        self.high_bt = wx.RadioButton(panel, -1, '1e-06', (15, 80))
+        self.high_bt.SetValue(False)
+        self.high_bt.Bind(wx.EVT_RADIOBUTTON, self.OnFtolSelection)
+        self.mid_bt = wx.RadioButton(panel, -1, '1e-05', (15, 105))
+        self.mid_bt.SetValue(False)
+        self.mid_bt.Bind(wx.EVT_RADIOBUTTON, self.OnFtolSelection)
+        self.low_bt = wx.RadioButton(panel, -1, '1e-04', (15, 130))
+        self.low_bt.SetValue(False)
+        self.low_bt.Bind(wx.EVT_RADIOBUTTON, self.OnFtolSelection)
         self.custom_bt = wx.RadioButton(panel, -1, 'Custom', (15, 155))
         self.custom_bt.SetValue(False)
         self.custom_bt.Bind(wx.EVT_RADIOBUTTON, self.OnFtolSelection)
         self.custombox = wx.TextCtrl(panel, -1, '', (95, 155))
         self.custombox.Disable()
+        
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        okButton = wx.Button(self, -1, 'Set', size=(70, 30))
+        okButton = wx.Button(self, wx.ID_OK, 'Set', size=(70, 30))
+        closeButton = wx.Button(self,wx.ID_CANCEL, 'Cancel', size=(70, 30))
         hbox.Add(okButton, 1, wx.RIGHT, 5)
-        okButton.Bind(wx.EVT_BUTTON, self.OnClose)
-        vbox.Add(panel)
+        hbox.Add(closeButton, 1, wx.RIGHT, 5)
+        vbox.Add(panel, 1, wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, 10)
         vbox.Add(hbox, 1, wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, 10)
-        # set sizer
+        
         self.SetSizer(vbox)
 
     def OnFtolSelection(self, event=None):
         """
-        Changes the ftol on selection of the radio button
+           Changes the ftol on selection of the radio button
         """
-        event.Skip()
-        # event object and selection
-        button = event.GetEventObject()
-        selection = button.GetLabel()
-        # get float value
-        if selection.count('SansView') > 0:
-            ftol = SANS_F_TOL
-            self.custombox.Disable()
-        elif selection.count('Scipy') > 0:
-            ftol = F_TOL
-            self.custombox.Disable()
-        elif selection == 'Custom':
-            ftol = F_TOL
-            self.custombox.Enable(True)
-        else:
-            ftol = float(selection)
-            self.custombox.Disable()
-        self.ftol = ftol
+        self.custombox.Enable(self.custom_bt.GetValue())
         
-    def OnClose(self, event):
+    def get_ftol(self):
         """
-        Close event
+            Get the ftol value
         """
-        # clear event
-        event.Skip()
-        flag = True
-        # I case of the custom ftol
+        if self.default_bt.GetValue():
+            return SANS_F_TOL
+        elif self.sci_default_bt.GetValue():
+            return F_TOL
+        elif self.low_bt.GetValue():
+            return 1.0e-4
+        elif self.mid_bt.GetValue():
+            return 1.0e-5
+        elif self.high_bt.GetValue():
+            return 1.0e-6
         if self.custom_bt.GetValue():
             try:
-                ftol = float(self.custombox.GetValue())
-                self.ftol = ftol
+                return float(self.custombox.GetValue())
             except:
-                flag = False
-        if flag:
-            # set ftol in fitting
-            self.parent.set_ftol(self.ftol)
-            msg = "The ftol (LeastSq) is set to %s." % self.ftol
-        else:
-            msg = "Error in the selection... No changes in ftol."
-        # post event for info
-        wx.PostEvent(self.parent.parent,
-                    StatusEvent(status=msg, info='warning'))
-    
-        self.Destroy()
+                return None
+        return SANS_F_TOL

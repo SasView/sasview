@@ -803,12 +803,21 @@ class Plugin(PluginBase):
         """
         Dialog to select ftol for Scipy
         """
-        #if event != None:
-        #    event.Skip()
         from ftol_dialog import ChangeFtol
-        panel = ChangeFtol(self.parent, self)
-        panel.ShowModal()
-                  
+        dialog = ChangeFtol(self.parent, self)
+        result = dialog.ShowModal()
+        if result == wx.ID_OK:
+            value = dialog.get_ftol()
+            if value is not None:
+                self.set_ftol(value)
+                msg = "The ftol (LeastSq) is set to %s." % value
+            else:
+                msg = "Error in the selection... No change in ftol."
+            # post event for info
+            wx.PostEvent(self.parent,
+                         StatusEvent(status=msg, info='warning'))
+        dialog.Destroy()
+
     def stop_fit(self, uid):
         """
         Stop the fit engine
