@@ -146,14 +146,20 @@ def fitmc(fitness, x0, bounds, localfit, n, handler):
     handler accepts updates to the current best set of fit parameters.
     See `park.fitresult.FitHandler` for details.
     """
+    # Generate random number within bounds.  If bounds are indefinite, use [0,1]
+    # If bounds are semi-definite, use [low,low+1] or [high-1,high], depending
+    # on which limit is unbounded.
     lo,hi = bounds
+    inf_lo = numpy.isinf(lo)
+    inf_hi = numpy.isinf(hi)
     delta = hi-lo
-    delta[numpy.isinf(delta)] = 1
-    lo[numpy.isinf(lo)] = hi-1
-    lo[numpy.isinf(lo)] = 0
+    delta[inf_lo|inf_hi] = 1.0
+    lo[inf_lo] = hi[inf_lo] - 1.0
+    lo[inf_lo&inf_hi] = 0.0
     P = numpy.random.rand(n,len(x0))*delta+lo
     #print "Population",P
     P[0] = x0
+
     pmap.pmapreduce(MapMC(localfit,fitness),
                     CollectMC(n,handler),
                     P)
