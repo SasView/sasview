@@ -192,7 +192,7 @@ class cansasConstants:
                                                },
                                      "timestamp" : {
                                                     "variable" : META_DATA,
-                                                    "storeas" : "content",
+                                                    "storeas" : "timestamp",
                                                     }
                                      },
                      "children" : {

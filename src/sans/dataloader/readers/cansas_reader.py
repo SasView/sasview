@@ -16,6 +16,7 @@ import logging
 import numpy
 import os
 import sys
+import datetime
 from sans.dataloader.data_info import Data1D
 from sans.dataloader.data_info import Collimation
 from sans.dataloader.data_info import TransmissionSpectrum
@@ -427,7 +428,16 @@ class Reader():
                     node_value, unit = self._unit_conversion(\
                                 cs_values.current_level, attr, data1d, \
                                 tagname, node_value, cs_values.ns_optional)
-                    
+                # If the value is a timestamp, convert to a datetime object
+                elif cs_values.ns_datatype == "timestamp":
+                    if node_value is None or node_value.isspace():
+                        pass
+                    else:
+                        try:
+                            node_value = \
+                                datetime.datetime.fromtimestamp(node_value)
+                        except ValueError:
+                            node_value = None
                 # If appending to a dictionary (meta_data | run_name)
                 # make sure the key is unique
                 if cs_values.ns_variable == "{0}.meta_data[\"{2}\"] = \"{1}\"":
@@ -515,7 +525,8 @@ class Reader():
         
         main_node = doc.createElement("SASroot")
         
-        doc = self.setProcessingInstructions(doc, datainfo.meta_data[PREPROCESS])
+        doc = self.setProcessingInstructions(doc, \
+                                        datainfo.meta_data.get(PREPROCESS, {}))
         main_node.setAttribute("version", self.cansas_version)
         main_node.setAttribute("xmlns", ns)
         main_node.setAttribute("xmlns:xsi",
@@ -531,6 +542,10 @@ class Reader():
         main_node.appendChild(entry_node)
         
         write_node(doc, entry_node, "Title", datainfo.title)
+        if datainfo.run == None or datainfo.run == []:
+            RUN_NAME_DEFAULT = "None"
+            datainfo.run.append(RUN_NAME_DEFAULT)
+            datainfo.run_name[RUN_NAME_DEFAULT] = RUN_NAME_DEFAULT
         for item in datainfo.run:
             runname = {}
             if item in datainfo.run_name and \
@@ -566,6 +581,9 @@ class Reader():
         for i in range(len(datainfo.trans_spectrum)):
             spectrum = datainfo.trans_spectrum[i]
             node = doc.createElement("SAStransmission_spectrum")
+            node.setAttribute("name", spectrum.name)
+            if isinstance(spectrum.timestamp, datetime.datetime):
+                node.setAttribute("timestamp", spectrum.timestamp)
             entry_node.appendChild(node)
             for i in range(len(spectrum.wavelength)):
                 pt = doc.createElement("Tdata")
@@ -631,6 +649,8 @@ class Reader():
         if datainfo.source.name is not None:
             source.setAttribute("name", str(datainfo.source.name))
         instr.appendChild(source)
+        if datainfo.source.radiation == None or datainfo.source.radiation == '':
+            datainfo.source.radiation = "neutron"
         write_node(doc, source, "radiation", datainfo.source.radiation)
         
         size = doc.createElement("beam_size")
@@ -662,6 +682,9 @@ class Reader():
                    {"unit": datainfo.source.wavelength_spread_unit})
         
         #   Collimation
+        if datainfo.collimation == [] or datainfo.collimation == None:
+            coll = Collimation()
+            datainfo.collimation.append(coll)
         for item in datainfo.collimation:
             coll = doc.createElement("SAScollimation")
             if item.name is not None:
@@ -695,6 +718,11 @@ class Reader():
                            {"unit": apert.distance_unit})
 
         #   Detectors
+        if datainfo.detector == None or datainfo.detector == []:
+            det = Detector()
+            det.name = ""
+            datainfo.detector.append(det)
+                
         for item in datainfo.detector:
             det = doc.createElement("SASdetector")
             written = write_node(doc, det, "name", item.name)
@@ -806,5 +834,4 @@ class Reader():
             pi = minidomObject.createProcessingInstruction(item, dic[item])
             minidomObject.insertBefore(pi, xmlroot)
         return minidomObject
-    
     
