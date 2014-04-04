@@ -156,12 +156,12 @@ def simplex(f, x0=None, bounds=None, radius=0.05,
         lo,hi = [numpy.asarray(v) for v in bounds]
 
         # Keep the initial simplex inside the bounds
-        x0[x0<lo] = lo
-        x0[x0>hi] = hi
+        x0[x0<lo] = lo[x0<lo]
+        x0[x0>hi] = hi[x0>hi]
         bounded = ~numpy.isinf(lo) & ~numpy.isinf(hi)
         val[bounded] = x0[bounded] + (hi[bounded]-lo[bounded])*radius
-        val[val<lo] = lo
-        val[val>hi] = hi
+        val[val<lo] = lo[val<lo]
+        val[val>hi] = hi[val>hi]
         
         # If the initial point was at or beyond an upper bound, then bounds
         # projection will put x0 and x0+j*radius at the same point.  We
