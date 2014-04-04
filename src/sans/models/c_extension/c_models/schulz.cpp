@@ -29,8 +29,6 @@ Schulz :: Schulz() {
 }
 
 /**
- * Function to evaluate 1D scattering function
-/**
  * Function to evaluate 1D Schulz function.
  * The function is normalized to the 'scale' parameter.
  *

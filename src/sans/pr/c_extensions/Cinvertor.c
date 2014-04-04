@@ -508,7 +508,6 @@ static PyObject * residuals(Cinvertor *self, PyObject *args) {
 	double residual, diff;
 	// Regularization factor
 	double regterm = 0.0;
-	double tmp = 0.0;
 	// Number of slices in regularization term estimate
 	int nslice = 25;
 
@@ -528,7 +527,6 @@ static PyObject * residuals(Cinvertor *self, PyObject *args) {
     for(i=0; i<self->params.npoints; i++) {
     	diff = self->params.y[i] - iq(pars, self->params.d_max, npars, self->params.x[i]);
     	residual = diff*diff / (self->params.err[i]*self->params.err[i]);
-    	tmp = residual;
 
     	// regularization term
     	residual += self->params.alpha * regterm;
@@ -538,9 +536,7 @@ static PyObject * residuals(Cinvertor *self, PyObject *args) {
     	    	"Cinvertor.residuals: error setting residual.");
     		return NULL;
     	};
-
     }
-
 	return residuals;
 }
 
@@ -563,7 +559,6 @@ static PyObject * pr_residuals(Cinvertor *self, PyObject *args) {
 	double residual, diff;
 	// Regularization factor
 	double regterm = 0.0;
-	double tmp = 0.0;
 	// Number of slices in regularization term estimate
 	int nslice = 25;
 
@@ -583,7 +578,6 @@ static PyObject * pr_residuals(Cinvertor *self, PyObject *args) {
     for(i=0; i<self->params.npoints; i++) {
     	diff = self->params.y[i] - pr(pars, self->params.d_max, npars, self->params.x[i]);
     	residual = diff*diff / (self->params.err[i]*self->params.err[i]);
-    	tmp = residual;
 
     	// regularization term
     	residual += self->params.alpha * regterm;
@@ -593,9 +587,7 @@ static PyObject * pr_residuals(Cinvertor *self, PyObject *args) {
     	    	"Cinvertor.residuals: error setting residual.");
     		return NULL;
     	};
-
     }
-
 	return residuals;
 }
 
