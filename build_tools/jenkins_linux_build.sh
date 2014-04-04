@@ -16,6 +16,7 @@ rm -rf build
 
 export PYTHONPATH=$PYTHONPATH:$WORKSPACE/sasview-install:$WORKSPACE/utils
 
+$PYTHON check_packages.py
 $PYTHON setup.py bdist_egg
 
 cd $WORKSPACE/dist
