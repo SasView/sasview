@@ -167,18 +167,19 @@ Cylinder-based
 - CappedCylinderModel_
 - CoreShellCylinderModel_
 - EllipticalCylinderModel_
-- FlexibleCylinderModel
-- FlexCylEllipXModel
-- CoreShellBicelleModel
-- BarBellModel
-- StackedDisksModel
-- PringleModel
+- FlexibleCylinderModel_
+- FlexCylEllipXModel_
+- CoreShellBicelleModel_
+- BarBellModel_
+- StackedDisksModel_
+- PringleModel_
 
 Ellipsoid-based
 ---------------
 
 - EllipsoidModel
 - CoreShellEllipsoidModel
+- CoreShellEllipsoidXTModel
 - TriaxialEllipsoidModel
 
 Lamellae
@@ -614,7 +615,7 @@ For information about polarised and magnetic scattering, click here_.
 This model is a trivial extension of the CoreShell function to a larger number of shells. See the CoreShell function
 for a diagram and documentation.
 
-The returned value is scaled to units of [|cm^-1|\ |sr^-1|, absolute scale.
+The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 Be careful! The SLDs and scale can be highly correlated. Hold as many of these parameters fixed as possible.
 
@@ -1342,7 +1343,7 @@ of the geometry and restrictions on parameter values.
 
 *2.1.16.1. Definition*
 
-The returned value is scaled to units of [|cm^-1|\ |sr^-1|, absolute scale.
+The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 The Capped Cylinder geometry is defined as
 
@@ -1751,18 +1752,18 @@ W-R Chen, P. D. Butler and L. J. Magid, *Incorporating Intermicellar Interaction
 
 **2.1.21 CoreShellBicelleModel**
 
-This model provides the form factor for a circular cylinder with a
-core-shell scattering length density profile. The form factor is
-normalized by the particle volume. This model is a more general case
-of core-shell cylinder model (seeabove and reference below) in that
-the parameters of the shell are separated into a face-shell and a rim-
-shell so that users can set different values of the thicknesses and
-slds.
+This model provides the form factor for a circular cylinder with a core-shell scattering length density profile. The
+form factor is normalized by the particle volume.
 
+This model is a more general case of core-shell cylinder model (see above and reference below) in that the parameters
+of the shell are separated into a face-shell and a rim-shell so that users can set different values of the thicknesses
+and SLDs.
 
+.. image:: img/image240.PNG
 
-The returned value is scaled to units of |cm^-1| and the parameters of
-the core-shell cylinder model are the following:
+*(Graphic from DOI: 10.1039/C0NP00002G)*
+
+The returned value is scaled to units of |cm^-1| and the parameters of the CoreShellBicelleModel are the following
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -1781,32 +1782,26 @@ axis_theta      degree    90
 axis_phi        degree    0.0
 ==============  ========  =============
 
-The output of the 1D scattering intensity function for randomly
-oriented cylinders is then given by the equation above.
+The output of the 1D scattering intensity function for randomly oriented cylinders is then given by the equation above.
 
-The *axis_theta* and axis *_phi* parameters are not used for the 1D
-output. Our implementation of the scattering kernel and the 1D
-scattering intensity use the c-library from NIST.
+The *axis_theta* and *axis_phi* parameters are not used for the 1D output. Our implementation of the scattering kernel
+and the 1D scattering intensity use the c-library from NIST.
 
-
-
-
+.. image:: img/cscylbicelle_pic.jpg
 
 *Figure. 1D plot using the default values (w/200 data point).*
 
+.. image:: img/image061.JPG
 
+*Figure. Definition of the angles for the oriented CoreShellBicelleModel.*
 
-Figure. Definition of the angles for the oriented Core-Shell Cylinder
-Bicelle Model.
+.. image:: img/image062.JPG
 
-
-
-Figure. Examples of the angles for oriented pp against the detector
-plane.
+*Figure. Examples of the angles for oriented pp against the detector plane.*
 
 REFERENCE
-Feigin, L. A, and D. I. Svergun, "Structure Analysis by Small-Angle
-X-Ray and Neutron Scattering", Plenum Press, New York, (1987).
+L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum Press,
+New York, (1987)
 
 
 
@@ -1814,69 +1809,51 @@ X-Ray and Neutron Scattering", Plenum Press, New York, (1987).
 
 **2.1.22. BarBellModel**
 
-Calculates the scattering from a barbell-shaped cylinder (This model
-simply becomes the DumBellModel when the length of the cylinder, L, is
-set to zero). That is, a sphereocylinder with spherical end caps that
-have a radius larger than that of the cylinder and the center of the
-end cap radius lies outside of the cylinder All dimensions of the
-barbell are considered to be monodisperse. See the diagram for the
-details of the geometry and restrictions on parameter values.
+Calculates the scattering from a barbell-shaped cylinder (This model simply becomes the DumBellModel when the length of
+the cylinder, *L*, is set to zero). That is, a sphereocylinder with spherical end caps that have a radius larger than
+that of the cylinder and the center of the end cap radius lies outside of the cylinder. All dimensions of the BarBell
+are considered to be monodisperse. See the diagram for the details of the geometry and restrictions on parameter values.
 
-*1.1. Definition*
+*2.1.22.1. Definition*
 
-The returned value is scaled to units of [|cm^-1|\ |sr^-1|, absolute scale.
+The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 The barbell geometry is defined as
 
+.. image:: img/image105.JPG
+
+where *r* is the radius of the cylinder. All other parameters are as defined in the diagram.
+
+Since the end cap radius
+*R* >= *r* and by definition for this geometry *h* < 0, *h* is then defined by *r* and *R* as
+
+*h* = -1 \* sqrt(*R*\ :sup:`2` - *r*\ :sup:`2`)
+
+The scattered intensity *I(q)* is calculated as
+
+.. image:: img/image106.PNG
+
+where the amplitude *A(q)* is given as
+
+.. image:: img/image107.PNG
+
+The < > brackets denote an average of the structure over all orientations. <*A* :sup:`2`\ *(q)*> is then the form
+factor, *P(q)*. The scale factor is equivalent to the volume fraction of cylinders, each of volume, *V*. Contrast is
+the difference of scattering length densities of the cylinder and the surrounding solvent.
+
+The volume of the barbell is
+
+.. image:: img/image108.JPG
 
 
-r is the radius of the cylinder. All other parameters are as defined
-in the diagram. Since the end cap radius R >= r and by definition for
-this geometry h > 0, h is then defined by r and R as
+and its radius of gyration is
 
-h = sqrt(R^2 - r^2).
+.. image:: img/image109.JPG
 
-The scattering intensity I(q) is calculated as:
+**The requirement that** *R* >= *r* **is not enforced in the model!** It is up to you to restrict this during analysis.
 
-
-
-where the amplitude A(q) is given as:
-
-
-
-
-
-
-
-The < > brackets denote an average of the structure over all
-orientations. <A^2(q)> is then the form factor, P(q). The scale factor
-is equivalent to the volume fraction of cylinders, each of volume, V.
-Contrast is the difference of scattering length densities of the
-cylinder and the surrounding solvent.
-
-The volume of the barbell is:
-
-
-
-and its radius of gyration:
-
-
-
-The necessary conditions of R >= r is not enforced in the model. It is
-up to you to restrict this during analysis.
-
-REFERENCES
-
-H. Kaya, J. Appl. Cryst. (2004) 37, 223-230.
-
-H. Kaya and N-R deSouza, J. Appl. Cryst. (2004) 37, 508-509. (addenda
-and errata)
-
-TEST DATASET
-
-This example dataset is produced by running the Macro PlotBarbell(),
-using 200 data points, *qmin* = 0.001 -1, *qmax* = 0.7 -1 and the above
-default values.
+This example dataset is produced by running the Macro PlotBarbell(), using 200 data points, *qmin* = 0.001 |Ang^-1|,
+*qmax* = 0.7 |Ang^-1| and the following default values
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -1890,26 +1867,28 @@ sld_solv        |Ang^-2|  6.3e-006
 background      |cm^-1|   0
 ==============  ========  =============
 
-
+.. image:: img/image110.JPG
 
 *Figure. 1D plot using the default values (w/256 data point).*
 
-For 2D data: The 2D scattering intensity is calculated similar to the
-2D cylinder model. At the theta = 45 deg and phi =0 deg with default
-values for other parameters,
+For 2D data: The 2D scattering intensity is calculated similar to the 2D cylinder model. For example, for
+|theta| = 45 deg and |phi| = 0 deg with default values for other parameters
 
-
+.. image:: img/image111.JPG
 
 *Figure. 2D plot (w/(256X265) data points).*
 
+.. image:: img/image061.JPG
 
+*Figure. Examples of the angles for oriented pp against the detector plane.*
 
-
-
-Figure. Examples of the angles for oriented pp against the detector
-plane.
+.. image:: img/image062.JPG
 
 Figure. Definition of the angles for oriented 2D barbells.
+
+REFERENCE
+H. Kaya, *J. Appl. Cryst.*, 37 (2004) 37 223-230
+H. Kaya and N-R deSouza, *J. Appl. Cryst.*, 37 (2004) 508-509 (addenda and errata)
 
 
 
@@ -1917,63 +1896,50 @@ Figure. Definition of the angles for oriented 2D barbells.
 
 **2.1.23. StackedDisksModel**
 
-This model provides the form factor, *P(q)*, for stacked discs
-(tactoids) with a core/layer structure where the form factor is
-normalized by the volume of the cylinder. Assuming the next neighbor
-distance (d-spacing) in a stack of parallel discs obeys a Gaussian
-distribution, a structure factor S(q) proposed by Kratky and Porod in
-1949 is used in this function. Note that the resolution smearing
-calculation uses 76 Gauss quadrature points to properly smear the
-model since the function is HIGHLY oscillatory, especially around the
-q-values that correspond to the repeat distance of the layers.
+This model provides the form factor, *P(q)*, for stacked discs (tactoids) with a core/layer structure where the form
+factor is normalized by the volume of the cylinder. Assuming the next neighbor distance (d-spacing) in a stack of
+parallel discs obeys a Gaussian distribution, a structure factor *S(q)* proposed by Kratky and Porod in 1949 is used
+in this function.
 
-The 2D scattering intensity is the same as 1D, regardless of the
-orientation of the *q* vector which is defined as .
+Note that the resolution smearing calculation uses 76 Gauss quadrature points to properly smear the model since the
+function is HIGHLY oscillatory, especially around the *q*-values that correspond to the repeat distance of the layers.
 
+The 2D scattering intensity is the same as 1D, regardless of the orientation of the *q* vector which is defined as
 
+.. image:: img/image008.PNG
 
+The returned value is in units of |cm^-1| |sr^-1|, on absolute scale.
 
+*2.1.23.1 Definition*
 
+.. image:: img/image079.GIF
 
+The scattering intensity I(q) is
 
-The returned value is in units of [|cm^-1| |sr^-1|, on absolute scale.
+.. image:: img/image081.PNG
 
-The scattering intensity I(q) is:
+where the contrast
 
+.. image:: img/image082.PNG
 
+and *N* is the number of discs per unit volume, |alpha| is the angle between the axis of the disc and *q*, and *Vt*
+and *Vc* are the total volume and the core volume of a single disc, respectively.
 
-where the contrast,
+.. image:: img/image083.PNG
 
+where *d* = thickness of the layer (*layer_thick*), 2\ *h* = core thickness (*core_thick*), and *R* = radius of the
+disc (*radius*).
 
+.. image:: img/image084.PNG
 
-N is the number of discs per unit volume, ais the angle between the
-axis of the disc and q, and Vt and Vc are the total volume and the
-core volume of a single disc, respectively.
+where *n* = the total number of the disc stacked (*n_stacking*), *D* = the next neighbor center-to-center distance
+(*d-spacing*), and |sigma|\ D= the Gaussian standard deviation of the d-spacing (*sigma_d*).
 
+To provide easy access to the orientation of the stacked disks, we define the axis of the cylinder using two angles
+|theta| and |phi|. These angles are defined on Figure 2 of CylinderModel.
 
-
-
-
-
-
-where d = thickness of the layer (layer_thick), 2h= core thickness
-(core_thick), and R = radius of the disc (radius).
-
-
-
-where n = the total number of the disc stacked (n_stacking), D=the
-next neighbor center to cent distance (d-spacing), and sD= the
-Gaussian standard deviation of the d-spacing (sigma_d).
-
-To provide easy access to the orientation of the stackeddisks, we
-define the axis of the cylinder using two angles and . Similarly to
-the case of the cylinder, those angles are defined on Figure 2 of
-CylinderModel.
-
-For P*S: The 2nd virial coefficient of the solid cylinder is calculate
-based on the (radius) and length = n_stacking*(core_thick
-+2*layer_thick) values, and used as the effective radius toward S(Q)
-when P(Q)*S(Q) is applied.
+NB: The 2nd virial coefficient of the cylinder is calculated based on the *radius* and *length* = *n_stacking* \*
+(*core_thick* + 2 \* *layer_thick*) values, and used as the effective radius for *S(Q)* when *P(Q)* \* *S(Q)* is applied.
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -1990,32 +1956,25 @@ sigma_d         |Ang|     0
 solvent_sld     |Ang^-2|  5e-06
 ==============  ========  =============
 
-
+.. image:: img/image085.JPG
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
+.. image:: img/image086.JPG
 
+*Figure. Examples of the angles for oriented stackeddisks against the detector plane.*
 
-Figure. Examples of the angles for oriented stackeddisks against the
-detector plane.
+.. image:: img/image062.JPG
 
+*Figure. Examples of the angles for oriented pp against the detector plane.*
 
-
-Figure. Examples of the angles for oriented pp against the detector
-plane.
-
-Our model uses the form factor calculations implemented in a c-library
-provided by the NIST Center for Neutron Research (Kline, 2006):
+Our model uses the form factor calculations implemented in a c-library provided by the NIST Center for Neutron Research
+(Kline, 2006)
 
 REFERENCE
-
-Guinier, A. and Fournet, G., "Small-Angle Scattering of X-Rays", John
-Wiley and Sons, New York, 1955.
-
-Kratky, O. and Porod, G., J. Colloid Science, 4, 35, 1949.
-
-Higgins, J.S. and Benoit, H.C., "Polymers and Neutron Scattering",
-Clarendon, Oxford, 1994.
+A. Guinier and G. Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Sons, New York, 1955
+O. Kratky and G. Porod, *J. Colloid Science*, 4, (1949) 35
+J. S. Higgins and H. C. Benoit, *Polymers and Neutron Scattering*, Clarendon, Oxford, 1994
 
 
 
@@ -2023,25 +1982,23 @@ Clarendon, Oxford, 1994.
 
 **2.1.24. PringleModel**
 
-This model provides the form factor, *P(q)*, for a 'pringle' or
-'saddle-shaped' object (a hyperbolic paraboloid).
+This model provides the form factor, *P(q)*, for a 'pringle' or 'saddle-shaped' object (a hyperbolic paraboloid).
 
+.. image:: img/image241.PNG
 
+*(Graphic from Matt Henderson, matt@matthen.com)*
 
 The returned value is in units of |cm^-1|, on absolute scale.
 
-The form factor calculated is:
+The form factor calculated is
 
-
+.. image:: img/pringle_eqn_1.jpg
 
 where
 
+.. image:: img/pringle_eqn_2.jpg
 
-
-
-
-The parameters of the model and a plot comparing the pringle model
-with the equivalent cylinder are shown below.
+The parameters of the model and a plot comparing the pringle model with the equivalent cylinder are shown below.
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -2056,12 +2013,11 @@ sld_solvent     |Ang^-2|  6.3e-06
 thickness       |Ang|     10
 ==============  ========  =============
 
-
+.. image:: img/pringle-vs-cylinder.png
 
 *Figure. 1D plot using the default values (w/150 data point).*
 
 REFERENCE
-
 S. Alexandru Rautu, Private Communication.
 
 
@@ -2247,9 +2203,71 @@ Berr, S. J. Phys. Chem., 1987, 91, 4760.
 
 
 
+.. _CoreShellEllipsoidXTModel:
+
+**2.1.27. CoreShellEllipsoidXTModel**
+
+An alternative version of *P(q)* for the core-shell ellipsoid (see CoreShellEllipsoidModel), having as parameters the
+core axial ratio *X* and a shell thickness, which are more often what we would like to determine.
+
+This model is also better behaved when polydispersity is applied than the four independent radii in
+CoreShellEllipsoidModel.
+
+*2.1.27.1 Definition*
+
+.. image:: img/image125.gif
+
+The geometric parameters of this model are
+
+  *equat_core* = equatorial core radius = *Rminor_core*
+  *X_core* = *polar_core* / *equat_core* = *Rmajor_core* / *Rminor_core*
+  *T_shell* = *equat_outer* - *equat_core* = *Rminor_outer* - *Rminor_core*
+  *XpolarShell* = *Tpolar_shell* / *T_shell* = (*Rmajor_outer* - *Rmajor_core*)/(*Rminor_outer* - *Rminor_core*)
+
+In terms of the original radii
+
+  *polar_core* = *equat_core* \* *X_core*
+  *equat_shell* = *equat_core* + *T_shell*
+  *polar_shell* = *equat_core* \* *X_core* + *T_shell* \* *XpolarShell*
+
+  (where we note that "shell" perhaps confusingly, relates to the outer radius)
+
+When *X_core* < 1 the core is oblate; when *X_core* > 1  it is prolate. *X_core* = 1 is a spherical core.
+
+For a fixed shell thickness *XpolarShell* = 1, to scale the shell thickness pro-rata with the radius
+*XpolarShell* = *X_core*.
+
+When including an *S(q)*, the radius in *S(q)* is calculated to be that of a sphere with the same 2nd virial
+coefficient of the **outer** surface of the ellipsoid. This may have some undesirable effects if the aspect ratio of
+the ellipsoid is large (ie, if *X* << 1 or *X* >> 1), when the *S(q)* - which assumes spheres - will not in any case
+be valid.
+
+If SANS data are in absolute units, and the SLDs are correct, then *scale* should be the total volume fraction of the
+"outer particle". When *S(q)* is introduced this moves to the *S(q)* volume fraction, and *scale* should then be 1.0,
+or contain some other units conversion factor (for example, if you have SAXS data).
+
+==============  ========  =============
+Parameter name  Units     Default value
+==============  ========  =============
+background      |cm^-1|   0.001
+equat_core      |Ang|     20
+scale           None      0.05
+sld_core        |Ang^-2|  2.0e-6
+sld_shell       |Ang^-2|  1.0e-6
+sld_solv        |Ang^-2|  6.3e-6
+T_shell         |Ang|     30
+X_core          None      3.0
+XpolarShell     None      1.0
+==============  ========  =============
+
+REFERENCE
+R. K. Heenan, Private communication
+
+
+
 .. _TriaxialEllipsoidalModel:
 
-**2.1.27. TriaxialEllipsoidModel***
+**2.1.28. TriaxialEllipsoidModel**
 
 This model provides the form factor, *P(q)*, for an ellipsoid (below)
 where all three axes are of different lengths, i.e., Ra =< Rb =< Rc
@@ -2331,7 +2349,7 @@ and Neutron Scattering, Plenum, New York, 1987.
 
 .. _LamellarModel:
 
-**2.1.28. LamellarModel**
+**2.1.29. LamellarModel**
 
 This model provides the scattering intensity, I( *q*), for a lyotropic
 lamellar phase where a uniform SLD and random distribution in solution
@@ -2384,7 +2402,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.
 
 .. _LamellarFFHGModel:
 
-**2.1.29. LamellarFFHGModel**
+**2.1.30. LamellarFFHGModel**
 
 This model provides the scattering intensity, I( *q*), for a lyotropic
 lamellar phase where a random distribution in solution are assumed.
@@ -2441,7 +2459,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.
 
 .. _LamellarPSModel:
 
-**2.1.30. LamellarPSModel**
+**2.1.31. LamellarPSModel**
 
 This model provides the scattering intensity ( *form factor* \*
 *structure factor*), I( *q*), for a lyotropic lamellar phase where a
@@ -2511,7 +2529,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.
 
 .. _LamellarPSHGModel:
 
-**2.1.31. LamellarPSHGModel**
+**2.1.32. LamellarPSHGModel**
 
 This model provides the scattering intensity ( *form factor* \*
 *structure factor*), I( *q*), for a lyotropic lamellar phase where a
@@ -2592,7 +2610,7 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088.
 
 .. _LamellarPCrystalModel:
 
-**2.1.32. LamellarPCrystalModel**
+**2.1.33. LamellarPCrystalModel**
 
 Lamella ParaCrystal Model: Calculates the scattering from a stack of
 repeating lamellar structures. The stacks of lamellae (infinite in
@@ -2660,7 +2678,7 @@ Phys. Chem. B, 103 (1999) 9888-9897.
 
 .. _SCCrystalModel:
 
-**2.1.33. SCCrystalModel**
+**2.1.34. SCCrystalModel**
 
 Calculates the scattering from a simple cubic lattice with
 paracrystalline distortion. Thermal vibrations are considered to be
@@ -2668,7 +2686,7 @@ negligible, and the size of the paracrystal is infinitely large.
 Paracrystalline distortion is assumed to be isotropic and
 characterized by a Gaussian distribution.
 
-The returned value is scaled to units of [|cm^-1|\ |sr^-1|, absolute scale.
+The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 The scattering intensity I(q) is calculated as
 
@@ -2768,7 +2786,7 @@ incorrectness of the 2D model computation.
 
 .. _FCCrystalModel:
 
-**2.1.34. FCCrystalModel**
+**2.1.35. FCCrystalModel**
 
 Calculates the scattering from a face-centered cubic lattice with
 paracrystalline distortion. Thermal vibrations are considered to be
@@ -2776,7 +2794,7 @@ negligible, and the size of the paracrystal is infinitely large.
 Paracrystalline distortion is assumed to be isotropic and
 characterized by a Gaussian distribution.
 
-The returned value is scaled to units of [|cm^-1|\ |sr^-1|, absolute scale.
+The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 The scattering intensity I(q) is calculated as:
 
@@ -2867,14 +2885,14 @@ incorrectness of the 2D model computation.
 
 .. _BCCrystalModel:
 
-**2.1.35. BCCrystalModel**
+**2.1.36. BCCrystalModel**
 
 Calculates the scattering from a body-centered cubic lattice with
 paracrystalline distortion. Thermal vibrations are considered to be
 negligible, and the size of the paracrystal is infinitely large.
 Paracrystalline distortion is assumed to be isotropic and
 characterized by a Gaussian distribution.The returned value is scaled
-to units of [|cm^-1|\ |sr^-1|, absolute scale.
+to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 The scattering intensity I(q) is calculated as:
 
@@ -2976,7 +2994,7 @@ incorrectness of the 2D model computation.
 
 .. _ParallelepipedModel:
 
-**2.1.36. ParallelepipedModel**
+**2.1.37. ParallelepipedModel**
 
 This model provides the form factor, *P(q)*, for a rectangular
 cylinder (below) where the form factor is normalized by the volume of
@@ -3066,7 +3084,7 @@ Equations (1), (13-14). (in German)
 
 .. _CSParallelepipedModel:
 
-**2.1.37. CSParallelepipedModel**
+**2.1.38. CSParallelepipedModel**
 
 Calculates the form factor for a rectangular solid with a core-shell
 structure. The thickness and the scattering length density of the
@@ -3146,7 +3164,7 @@ plane.
 TEST DATASET
 
 This example dataset is produced by running the Macro
-Plot_CSParallelepiped(), using 100 data points, *qmin* = 0.001 -1, *qmax*
+Plot_CSParallelepiped(), using 100 data points, *qmin* = 0.001 |Ang^-1|, *qmax*
 = 0.7 -1 and the below default values.
 
 ==============  ========  =============
@@ -3253,7 +3271,7 @@ between the scattering inhomogeneities (such as in lamellar,
 cylindrical, or spherical morphologies or for bicontinuous
 structures).
 
-The returned value is scaled to units of [|cm^-1|\ |sr^-1|, absolute scale.
+The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 The scattering intensity I(q) is calculated by:
 
@@ -3326,7 +3344,7 @@ Reference: None.
 Calculate an empirical functional form for SANS data characterized by
 a low-Q signal and a high-Q signal
 
-The returned value is scaled to units of [|cm^-1|\ |sr^-1|, absolute scale.
+The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 The scattering intensity I(q) is calculated by:
 
@@ -3959,7 +3977,7 @@ model could find use for aggregates of coated particles, or aggregates
 of vesicles.The polydispersity computation of radius and thickness is
 provided.
 
-The returned value is scaled to units of [|cm^-1|\ |sr^-1|, absolute scale.
+The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 See each of these individual models for full documentation.
 
@@ -4040,7 +4058,7 @@ network. It is modeled as a sum of a low-q exponential decay plus a
 lorentzian at higher q-values. It is generally applicable to gel
 structures.
 
-The returned value is scaled to units of [|cm^-1|\ |sr^-1|, absolute scale.
+The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 The scattering intensity I(q) is calculated as (eqn 5 from the
 reference):
@@ -4239,7 +4257,7 @@ This is an empirical model that can be used to determine the size and
 dimensionality of scattering objects.
 
 The returned value is P(Q) as written in equation (1), plus the
-incoherent background term. The result is in the units of [|cm^-1|\ |sr^-1|,
+incoherent background term. The result is in the units of |cm^-1|\ |sr^-1|,
 absolute scale.
 
 A Guinier-Porod empirical model can be used to fit SAS data from
@@ -4488,7 +4506,7 @@ scattering from a polydisperse polymer chain ina good solvent. The
 polymer is polydisperse with a Schulz-Zimm polydispersity of the
 molecular weight distribution.
 
-The returned value is scaled to units of [|cm^-1|\ |sr^-1|, absolute scale.
+The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 
 
@@ -4511,7 +4529,7 @@ For 2D plot, the wave transfer is defined as .
 TEST DATASET
 
 This example dataset is produced by running the Poly_GaussCoil, using
-200 data points, *qmin* = 0.001 -1, *qmax* = 0.7 -1 and the default values
+200 data points, *qmin* = 0.001 |Ang^-1|, *qmax* = 0.7 -1 and the default values
 below.
 
 Parameter name
@@ -4565,10 +4583,10 @@ Publications (1996).
 
 Calculates the scattering from polymers with excluded volume effects.
 
-The returned value is scaled to units of [|cm^-1|\ |sr^-1|, absolute scale.
+The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 The returned value is P(Q) as written in equation (2), plus the
-incoherent background term. The result is in the units of [|cm^-1|\ |sr^-1|,
+incoherent background term. The result is in the units of |cm^-1|\ |sr^-1|,
 absolute scale.
 
 A model describing polymer chain conformations with excluded volume
@@ -4823,7 +4841,7 @@ vd(=Spec. vol. of d)
 Calculate an empirical functional form for SANS data characterized by
 a two Lorentzian functions.
 
-The returned value is scaled to units of [|cm^-1|\ |sr^-1|, absolute scale.
+The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 The scattering intensity I(q) is calculated by:
 
@@ -4901,7 +4919,7 @@ Background(=B)
 Calculate an empirical functional form for SANS data characterized by
 two power laws.
 
-The returned value is scaled to units of [|cm^-1|\ |sr^-1|, absolute scale.
+The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 
 
@@ -4962,7 +4980,7 @@ background
 
 *3.25. UnifiedPower(Law and)Rg(Model)*
 
-The returned value is scaled to units of [|cm^-1|\ |sr^-1|, absolute scale.
+The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
 Note that the level 0 is an extra function that is the inverse
 function; I (q) = scale/q + background.
