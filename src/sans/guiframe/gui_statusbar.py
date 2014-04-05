@@ -21,6 +21,10 @@ if sys.platform.count("win32") > 0:
 else:
     FONT_VARIANT = 1
 
+GREEN = wx.Colour(95, 190, 95)
+YELLOW = wx.Colour(247, 214, 49)
+RED = wx.Colour(234, 89, 78)
+
 class ConsolePanel(wx.Panel):
     """
     """
@@ -128,23 +132,20 @@ class StatusBar(wxStatusB):
         
         # Create status bar icon reflecting the type of status
         # for the last message
-        self.bitmap_bt_warning = \
-            wx.BitmapButton(self, -1,
-                            size=(width, height),
-                            style=wx.NO_BORDER)
+        self.bitmap_bt_warning = wx.Button(self, wx.NewId(), "", 
+                                 size=(width, height), style=wx.NO_BORDER)
+        self.bitmap_bt_warning.SetBackgroundColour(GREEN)
 
         # Create the button used to show the console dialog
-        self.bitmap_bt_console = wx.Button(self, wx.NewId(), "Console", 
+        self.console_button = wx.Button(self, wx.NewId(), "Console", 
                                  size=(console_btn_width, 10),
                                  style=wx.BU_EXACTFIT)
-        font = self.bitmap_bt_console.GetFont()
-        font = font.Smaller()
-        self.bitmap_bt_console.SetFont(font)
-
-        console_hint = "History of status bar messages"
-        self.bitmap_bt_console.SetToolTipString(console_hint)
-        self.bitmap_bt_console.Bind(wx.EVT_BUTTON, self._onMonitor,
-                                    id=self.bitmap_bt_console.GetId())
+        font = self.console_button.GetFont()
+        font.SetPixelSize(wx.Size(0,10))
+        self.console_button.SetFont(font)
+        self.console_button.SetToolTipString("History of status bar messages")
+        self.console_button.Bind(wx.EVT_BUTTON, self._onMonitor,
+                                id=self.console_button.GetId())
         
         self.reposition()
         ## Current progress value of the bar 
@@ -186,7 +187,7 @@ class StatusBar(wxStatusB):
         rect = self.GetFieldRect(ICON_POSITION)
         self.bitmap_bt_warning.SetPosition((rect.x, rect.y))
         rect = self.GetFieldRect(CONSOLE_POSITION)
-        self.bitmap_bt_console.SetPosition((rect.x, rect.y))
+        self.console_button.SetPosition((rect.x, rect.y))
         self.sizeChanged = False
         
     def OnIdle(self, event):
@@ -211,8 +212,7 @@ class StatusBar(wxStatusB):
         """
         wxStatusB.SetStatusText(self, text, number)
         self.list_msg.append(text)
-        icon_bmp = wx.ArtProvider.GetBitmap(wx.ART_INFORMATION, wx.ART_TOOLBAR)
-        self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
+        self.bitmap_bt_warning.SetBackgroundColour(GREEN)
 
         if self.frame is not None :
             self.frame.set_message(status=text, event=event)
@@ -295,18 +295,11 @@ class StatusBar(wxStatusB):
         
         msg = event.info.lower()
         if msg == "warning":
-            icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_WARNING, wx.ART_TOOLBAR,
-                                                 size = (height,height))
-            self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
+            self.bitmap_bt_warning.SetBackgroundColour(YELLOw)
         elif msg == "error":
-            icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_ERROR, wx.ART_TOOLBAR,
-                                                 size = (height,height))
-            self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
+            self.bitmap_bt_warning.SetBackgroundColour(RED)
         else:
-            icon_bmp =  wx.ArtProvider.GetBitmap(wx.ART_INFORMATION,
-                                                 wx.ART_TOOLBAR,
-                                                 size = (height,height))
-            self.bitmap_bt_warning.SetBitmapLabel(icon_bmp)
+            self.bitmap_bt_warning.SetBackgroundColour(GREEN)
     
     def set_dialog(self, event):
         """
