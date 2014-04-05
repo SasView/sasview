@@ -1112,11 +1112,7 @@ class PlotPanel(wx.Panel):
 
     @property
     def is_zoomed(self):
-        if hasattr(self.toolbar, "wx_ids"):
-            back = self.toolbar.wx_ids['Back']
-        else: # CRUFT
-            back = self.toolbar._NTB2_BACK
-        toolbar_zoomed = self.toolbar.GetToolEnabled(back)
+        toolbar_zoomed = self.toolbar.GetToolEnabled(self.toolbar.wx_ids['Back'])
         return self._is_zoomed or toolbar_zoomed
 
     @is_zoomed.setter

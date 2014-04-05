@@ -23,7 +23,10 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
     """
     def __init__(self, canvas, parent=None):
         NavigationToolbar2WxAgg.__init__(self, canvas)
-        
+
+    # CRUFT: mpl 1.1 uses save rather than save_figure
+    try: save_figure = NavigationToolbar2WxAgg.save
+    except AttributeError: pass
     def _init_toolbar(self):
         self._parent = self.canvas.GetParent()
         _NTB2_HOME         = wx.NewId()
@@ -34,6 +37,13 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
         _NTB2_SAVE         = wx.NewId()
         _NTB2_PRINT        = wx.NewId()
         _NTB2_RESET        = wx.NewId()
+
+        # for mpl 1.2+ compatibility
+        self.wx_ids = {}
+        self.wx_ids['Back'] = self._NTB2_BACK
+        self.wx_ids['Forward'] = self._NTB2_FORWARD
+        self.wx_ids['Pan'] = self._NTB2_PAN
+        self.wx_ids['Zoom'] = self._NTB2_ZOOM
 
         self.SetToolBitmapSize(wx.Size(24,24))
 
@@ -71,12 +81,12 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
         bind(self, wx.EVT_TOOL, self.back, id=self._NTB2_BACK)
         bind(self, wx.EVT_TOOL, self.zoom, id=self._NTB2_ZOOM)
         bind(self, wx.EVT_TOOL, self.pan, id=self._NTB2_PAN)
-        bind(self, wx.EVT_TOOL, self.save, id=_NTB2_SAVE)
+        bind(self, wx.EVT_TOOL, self.save_figure, id=_NTB2_SAVE)
         bind(self, wx.EVT_TOOL, self.on_print, id=_NTB2_PRINT)
         bind(self, wx.EVT_TOOL, self.on_reset, id=_NTB2_RESET)
 
         self.Realize()
-        
+
     def on_menu(self, event):
         """
             Plot menu
@@ -85,7 +95,7 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
             self._parent.onToolContextMenu(event=event)
         except:
             logging.error("Plot toolbar could not show menu")
-        
+
     def on_reset(self, event):
         """
             Reset plot
@@ -94,7 +104,7 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
             self._parent.onResetGraph(event=event)
         except:
             logging.error("Plot toolbar could not reset plot")
-        
+
     def on_print(self, event):
         """
             Print
