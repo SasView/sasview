@@ -18,15 +18,12 @@ import sys
 F_TOL = 1.49012e-08
 SANS_F_TOL = 5e-05
 
+PANEL_HEIGHT = 265
+FONT_VARIANT = 0
 if sys.platform.count("win32") > 0:
     PANEL_WIDTH = 270
-    PANEL_HEIGHT = 265
-    FONT_VARIANT = 0
 else:
     PANEL_WIDTH = 285
-    PANEL_HEIGHT = 265
-    FONT_VARIANT = 1
-    
     
 class ChangeFtol(wx.Dialog):
     """

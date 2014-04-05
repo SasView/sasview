@@ -134,6 +134,7 @@ class StatusBar(wxStatusB):
         # for the last message
         self.status_color = wx.StaticText(self, id=wx.NewId(), label="   ")
         self.status_color.SetBackgroundColour(GREEN)
+        self.status_color.SetForegroundColour(GREEN)
 
         # Create the button used to show the console dialog
         self.console_button = wx.Button(self, wx.NewId(), "Console", 
@@ -212,6 +213,7 @@ class StatusBar(wxStatusB):
         wxStatusB.SetStatusText(self, text, number)
         self.list_msg.append(text)
         self.status_color.SetBackgroundColour(GREEN)
+        self.status_color.SetForegroundColour(GREEN)
 
         if self.frame is not None :
             self.frame.set_message(status=text, event=event)
@@ -295,10 +297,13 @@ class StatusBar(wxStatusB):
         msg = event.info.lower()
         if msg == "warning":
             self.status_color.SetBackgroundColour(YELLOW)
+            self.status_color.SetForegroundColour(YELLOW)
         elif msg == "error":
             self.status_color.SetBackgroundColour(RED)
+            self.status_color.SetForegroundColour(RED)
         else:
             self.status_color.SetBackgroundColour(GREEN)
+            self.status_color.SetForegroundColour(GREEN)
     
     def set_dialog(self, event):
         """
