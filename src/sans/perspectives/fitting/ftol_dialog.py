@@ -18,19 +18,20 @@ import sys
 F_TOL = 1.49012e-08
 SANS_F_TOL = 5e-05
 
-PANEL_HEIGHT = 265
+PANEL_WIDTH = 270
 FONT_VARIANT = 0
 if sys.platform.count("win32") > 0:
-    PANEL_WIDTH = 270
+    PANEL_HEIGHT = 265
 else:
-    PANEL_WIDTH = 285
+    PANEL_HEIGHT = 255
     
 class ChangeFtol(wx.Dialog):
     """
     Dialog to select ftol
     """
     def __init__(self, parent, base, id=-1, title="FTolerance"):
-        wx.Dialog.__init__(self, parent, id, title)
+        wx.Dialog.__init__(self, parent, id, title,
+                           size=(PANEL_WIDTH, PANEL_HEIGHT))
         # font size
         self.SetWindowVariant(variant=FONT_VARIANT)
         # build layout
