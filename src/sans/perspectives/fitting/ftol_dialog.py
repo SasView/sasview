@@ -23,7 +23,7 @@ FONT_VARIANT = 0
 if sys.platform.count("win32") > 0:
     PANEL_HEIGHT = 265
 else:
-    PANEL_HEIGHT = 255
+    PANEL_HEIGHT = 245
     
 class ChangeFtol(wx.Dialog):
     """
