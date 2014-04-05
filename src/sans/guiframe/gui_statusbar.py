@@ -141,7 +141,8 @@ class StatusBar(wxStatusB):
                                  size=(console_btn_width, 10),
                                  style=wx.BU_EXACTFIT)
         font = self.console_button.GetFont()
-        font.SetPixelSize(wx.Size(0,10))
+        _, pixel_h = font.GetPixelSize()
+        font.SetPixelSize(wx.Size(0,int(pixel_h*0.9)))
         self.console_button.SetFont(font)
         self.console_button.SetToolTipString("History of status bar messages")
         self.console_button.Bind(wx.EVT_BUTTON, self._onMonitor,
