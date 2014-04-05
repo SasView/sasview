@@ -145,4 +145,40 @@ class XMLreader():
             name = self._create_unique_key(dictionary, name, i)
         return name
     
+    def create_tree(self, root):
+        """
+        Create an element tree for processing from an XML string
+        
+        :param root: XML string 
+        """
+        return etree.ElementTree(root)
+    
+    def create_element(self, name):
+        """
+        Create an XML element for writing to file
+        
+        :param name: The name of the element to be created
+        """
+        return etree.Element(name)
+    
+    def write_text(self, elem, text):
+        """
+        Write text to an etree Element
+        
+        :param elem: etree.Element object
+        :param text: text to write to the element
+        """
+        elem.text = text
+        return elem
+    
+    def write_attribute(self, elem, attr_name, attr_value):
+        """
+        Write attributes to an Element
+        
+        :param elem: etree.Element object
+        :param attr_name: attribute name to write
+        :param attr_value: attribute value to set
+        """
+        attr = elem.attrib
+        attr[attr_name] = attr_value
         
