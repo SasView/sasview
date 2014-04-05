@@ -1,0 +1,97 @@
+"""
+Functions for building sphinx docs.
+
+For more information on the invocation of sphinx see:
+http://sphinx-doc.org/invocation.html
+"""
+import subprocess
+import os
+import sys
+import fnmatch
+import shutil
+
+from distutils.dir_util import copy_tree
+from distutils.util import get_platform
+
+platform = '.%s-%s'%(get_platform(),sys.version[:3])
+
+CURRENT_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+SASVIEW_SRC = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "src")
+SASVIEW_BUILD = os.path.abspath(os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "build", "lib"+platform))
+
+SPHINX_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
+SPHINX_SOURCE = os.path.join(CURRENT_SCRIPT_DIR, "source")
+SPHINX_SOURCE_API = os.path.join(SPHINX_SOURCE, "dev","api")
+
+def _remove_dir(dir_path):
+    """Removes the given directory."""
+    if os.path.isdir(dir_path):
+        print "Removing \"%s\"... " % dir_path
+        shutil.rmtree(dir_path)
+
+def clean():
+    """
+    Clean the sphinx build directory.
+    """
+    print "=== Cleaning Sphinx Build ==="
+    _remove_dir(SPHINX_BUILD)
+
+def retrieve_user_docs():
+    """
+    Copies across the contents of any docs/ directories in src/, and puts them
+    in an appropriately named directory of docs/sphinx-docs/source/. For
+    example:
+
+    sans/../[MODULE]/docs/A.rst
+    sans/../[MODULE]/docs/B.rst
+
+    gets copied to a new location:
+
+    docs/sphinx-docs/source/user/[MODULE]/A.rst
+    docs/sphinx-docs/source/user/[MODULE]/B.rst
+
+    so that Sphinx may pick it up when generating the documentation.
+    """
+    print "=== Retrieve User Docs ==="
+
+    # Copy documentation files from their "source" to their "destination".
+    for root, dirnames, _ in os.walk(SASVIEW_SRC):
+        for dirname in fnmatch.filter(dirnames, 'docs'):
+
+            docs = os.path.abspath(os.path.join(root, dirname))
+            print "Found docs folder at \"%s\"." % docs
+
+            dest_dir_name = os.path.basename(os.path.dirname(docs))
+            dest_dir = os.path.join(SPHINX_SOURCE, "user", dest_dir_name)
+
+            copy_tree(docs, dest_dir, update=1)
+
+def apidoc():
+    """
+    Runs sphinx-apidoc to generate .rst files from the docstrings in .py files
+    in the SasView build directory.
+    """
+    print "=== Generate API Rest Files ==="
+
+    # Clean directory before generating a new version.
+    _remove_dir(SPHINX_SOURCE_API)
+
+    subprocess.call(["sphinx-apidoc",
+                     "-o", SPHINX_SOURCE_API, # Output dir.
+                     "-d", "8", # Max depth of TOC.
+                     SASVIEW_BUILD])
+
+def build():
+    """
+    Runs sphinx-build.  Reads in all .rst files and spits out the final html.
+    """
+    print "=== Build HTML from Rest Files ==="
+    subprocess.call(["sphinx-build",
+                     "-b", "html", # Builder name.
+                     "-d", os.path.join(SPHINX_BUILD, "doctrees"), # Cache directory (doctrees).
+                     SPHINX_SOURCE,
+                     os.path.join(SPHINX_BUILD, "html")])
+
+if __name__ == "__main__":
+    call()
