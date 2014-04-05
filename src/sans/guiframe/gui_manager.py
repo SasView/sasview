@@ -998,10 +998,9 @@ class ViewerFrame(PARENT_FRAME):
         frame.SetSize((self._window_width, self._window_height))
         size_t_bar = 70
         if not IS_WIN:
-            x_pos, _ = frame.GetPositionTuple()
             if IS_LINUX:
                 size_t_bar = 115
-            frame.SetPosition((x_pos, mac_pos_y + size_t_bar))
+            frame.SetPosition((0, mac_pos_y + size_t_bar))
         frame.Show(True)
         #add data panel 
         win = MDIFrame(self, None, 'None', (100, 200))
@@ -1009,18 +1008,16 @@ class ViewerFrame(PARENT_FRAME):
         win.set_panel(data_panel)
         self.panels["data_panel"] = data_panel
         self._data_panel = data_panel
-        w, h = self._get_panels_size(self._data_panel)
-        win.SetSize((w, h))
+        d_panel_width, h = self._get_panels_size(self._data_panel)
+        win.SetSize((d_panel_width, h))
         style = self.__gui_style & GUIFRAME.MANAGER_ON
         if style != GUIFRAME.MANAGER_ON:
             flag = False
         else:
             flag = True
         if not IS_WIN:
-            x_pos, _ = win.GetPositionTuple()
-            win.SetPosition((x_pos, mac_pos_y + size_t_bar))
+            win.SetPosition((0, mac_pos_y + size_t_bar))
         win.Show(flag)
-        d_panel_width = w
         # Add the panels to the AUI manager
         for panel_class in panels:
             frame = panel_class.get_frame()
@@ -1045,7 +1042,7 @@ class ViewerFrame(PARENT_FRAME):
                 frame.Show(False)
             if not IS_WIN:
                 x_pos, _ = frame.GetPositionTuple()
-                frame.SetPosition((x_pos, mac_pos_y + size_t_bar))
+                frame.SetPosition((d_panel_width + 1, mac_pos_y + size_t_bar))
 
         if not IS_WIN:
             win_height = mac_pos_y
@@ -1653,7 +1650,6 @@ class ViewerFrame(PARENT_FRAME):
         """
         panel_id = str(evt.GetId())
         self.on_set_plot_focus(self.panels[panel_id])
-        self.show_panel(evt.GetId(), 'on')      
         wx.CallLater(5*TIME_FACTOR, self.set_schedule(True))
         self.set_plot_unfocus()
  
@@ -1779,16 +1775,6 @@ class ViewerFrame(PARENT_FRAME):
             self.load_state(path)
 
         self._default_save_location = os.path.dirname(path)
-        
-    def show_panel(self, uid, show=None):
-        """
-        Shows the panel with the given id
-        
-        :param uid: unique ID number of the panel to show
-        
-        """
-        #Not implemeted
-        return
         
     def load_state(self, path, is_project=False):   
         """
@@ -3409,15 +3395,14 @@ class ViewApp(wx.App):
         # Note that on Linux, the timeout appears to occur immediately in which
         # case the splash screen disappears upon entering the event loop.
         s_screen = wx.SplashScreen(bitmap=bm,
-                         splashStyle=(wx.SPLASH_TIMEOUT|
-                                              wx.SPLASH_CENTRE_ON_SCREEN),
-                                 style=(wx.SIMPLE_BORDER|
-                                        wx.FRAME_NO_TASKBAR|
-                                        wx.FRAME_FLOAT_ON_PARENT),
-                                        
-                        milliseconds=SS_MAX_DISPLAY_TIME,
-                        parent=parent,
-                        id=wx.ID_ANY)
+                                   splashStyle=(wx.SPLASH_TIMEOUT|
+                                                wx.SPLASH_CENTRE_ON_SCREEN),
+                                   style=(wx.SIMPLE_BORDER|
+                                          wx.FRAME_NO_TASKBAR|
+                                          wx.FRAME_FLOAT_ON_PARENT),
+                                   milliseconds=SS_MAX_DISPLAY_TIME,
+                                   parent=parent,
+                                   id=wx.ID_ANY)
         from sans.guiframe.gui_statusbar import SPageStatusbar
         statusBar = SPageStatusbar(s_screen)
         s_screen.SetStatusBar(statusBar)
