@@ -34,6 +34,7 @@
 
 .. |bigdelta| unicode:: U+0394
 .. |biggamma| unicode:: U+0393
+.. |bigpsi| unicode:: U+03A8
 
 .. |drho| replace:: |bigdelta|\ |rho|
 
@@ -163,9 +164,9 @@ Cylinder-based
 
 - CylinderModel_ (including magnetic 2D version)
 - HollowCylinderModel_
-- CappedCylinderModel
-- CoreShellCylinderModel
-- EllipticalCylinderModel
+- CappedCylinderModel_
+- CoreShellCylinderModel_
+- EllipticalCylinderModel_
 - FlexibleCylinderModel
 - FlexCylEllipXModel
 - CoreShellBicelleModel
@@ -1239,15 +1240,15 @@ The output of the 1D scattering intensity function for randomly oriented cylinde
 The *cyl_theta* and *cyl_phi* parameter are not used for the 1D output. Our implementation of the scattering kernel
 and the 1D scattering intensity use the c-library from NIST.
 
-*2.1.14.1. Validation of the CylinderModel*
+*2.1.14.2. Validation of the CylinderModel*
 
 Validation of our code was done by comparing the output of the 1D model to the output of the software provided by the
 NIST (Kline, 2006). Figure 3 shows a comparison of the 1D output of our model and the output of the NIST software.
 
 .. image:: img/image065.JPG
 
-Figure 3: Comparison of the SasView scattering intensity for a cylinder with the output of the NIST SANS analysis
-software. The parameters were set to: *Scale* = 1.0, *Radius* = 20 |Ang|, *Length* = 400 |Ang|,
+*Figure 3: Comparison of the SasView scattering intensity for a cylinder with the output of the NIST SANS analysis*
+*software.* The parameters were set to: *Scale* = 1.0, *Radius* = 20 |Ang|, *Length* = 400 |Ang|,
 *Contrast* = 3e-6 |Ang^-2|, and *Background* = 0.01 |cm^-1|.
 
 In general, averaging over a distribution of orientations is done by evaluating the following
@@ -1261,9 +1262,9 @@ distribution *p(*\ |theta|,\ |phi|\ *)* = 1.0. Figure 4 shows the result of such
 
 .. image:: img/image066.JPG
 
-Figure 4: Comparison of the intensity for uniformly distributed cylinders calculated from our 2D model and the intensity
-from the NIST SANS analysis software. The parameters used were: *Scale* = 1.0, *Radius* = 20 |Ang|, *Length* = 400 |Ang|,
-*Contrast* = 3e-6 |Ang^-2|, and *Background* = 0.0 |cm^-1|.
+*Figure 4: Comparison of the intensity for uniformly distributed cylinders calculated from our 2D model and the*
+*intensity from the NIST SANS analysis software.* The parameters used were: *Scale* = 1.0, *Radius* = 20 |Ang|,
+*Length* = 400 |Ang|, *Contrast* = 3e-6 |Ang^-2|, and *Background* = 0.0 |cm^-1|.
 
 
 
@@ -1279,6 +1280,8 @@ form factor is normalized by the volume of the tube
 where the averaging < > is applied only for the 1D calculation.
 
 The inside and outside of the hollow cylinder are assumed have the same SLD.
+
+*2.1.15.1 Definition*
 
 The 1D scattering intensity is calculated in the following way (Guinier, 1955)
 
@@ -1316,18 +1319,15 @@ Our model uses the form factor calculations implemented in a c-library provided 
 
 .. image:: img/image061.JPG
 
+*Figure. Definition of the angles for the oriented HollowCylinderModel.*
 
-Figure. Definition of the angles for the oriented HollowCylinderModel.
+.. image:: img/image062.JPG
 
-
-
-Figure. Examples of the angles for oriented pp against the detector
-plane.
+*Figure. Examples of the angles for oriented pp against the detector plane.*
 
 REFERENCE
-
-Feigin, L. A, and D. I. Svergun, "Structure Analysis by Small-Angle
-X-Ray and Neutron Scattering", Plenum Press, New York, (1987).
+L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum Press,
+New York, (1987)
 
 
 
@@ -1335,68 +1335,48 @@ X-Ray and Neutron Scattering", Plenum Press, New York, (1987).
 
 **2.1.16 CappedCylinderModel**
 
-Calculates the scattering from a cylinder with spherical section end-
-caps(This model simply becomes the ConvexLensModel when the length of
-the cylinder L = 0. That is, a sphereocylinder with end caps that have
-a radius larger than that of the cylinder and the center of the end
-cap radius lies within the cylinder. See the diagram for the details
+Calculates the scattering from a cylinder with spherical section end-caps. This model simply becomes the ConvexLensModel
+when the length of the cylinder *L* = 0, that is, a sphereocylinder with end caps that have a radius larger than that
+of the cylinder and the center of the end cap radius lies within the cylinder. See the diagram for the details
 of the geometry and restrictions on parameter values.
 
-
-
-*1.1. Definition*
+*2.1.16.1. Definition*
 
 The returned value is scaled to units of [|cm^-1|\ |sr^-1|, absolute scale.
 
-The Capped Cylinder geometry is defined as:
+The Capped Cylinder geometry is defined as
 
+.. image:: img/image112.JPG
 
+where *r* is the radius of the cylinder. All other parameters are as defined in the diagram. Since the end cap radius
+*R* >= *r* and by definition for this geometry *h* < 0, *h* is then defined by *r* and *R* as
 
-r is the radius of the cylinder. All other parameters are as defined
-in the diagram. Since the end cap radius R >= r and by definition for
-this geometry h < 0, h is then defined by r and R as:
+*h* = -1 \* sqrt(*R*\ :sup:`2` - *r*\ :sup:`2`)
 
-h = -1*sqrt(R^2 - r^2).
+The scattered intensity *I(q)* is calculated as
 
-The scattering intensity I(q) is calculated as:
+.. image:: img/image113.JPG
 
+where the amplitude *A(q)* is given as
 
+.. image:: img/image114.JPG
 
-where the amplitude A(q) is given as:
+The < > brackets denote an average of the structure over all orientations. <\ *A*\ :sup:`2`\ *(q)*> is then the form
+factor, *P(q)*. The scale factor is equivalent to the volume fraction of cylinders, each of volume, *V*. Contrast is the
+difference of scattering length densities of the cylinder and the surrounding solvent.
 
+The volume of the Capped Cylinder is (with *h* as a positive value here)
 
+.. image:: img/image115.JPG
 
-The < > brackets denote an average of the structure over all
-orientations. <A^2(q)> is then the form factor, P(q). The scale factor
-is equivalent to the volume fraction of cylinders, each of volume, V.
-Contrast is the difference of scattering length densities of the
-cylinder and the surrounding solvent.
+and its radius of gyration
 
-The volume of the Capped Cylinder is:
+.. image:: img/image116.JPG
 
-(with h as a positive value here)
+**The requirement that** *R* >= *r* **is not enforced in the model! It is up to you to restrict this during analysis.**
 
-
-
-and its radius of gyration:
-
-
-
-The necessary conditions of R >= r is not enforced in the model. It is
-up to you to restrict this during analysis.
-
-REFERENCES
-
-H. Kaya, J. Appl. Cryst. (2004) 37, 223-230.
-
-H. Kaya and N-R deSouza, J. Appl. Cryst. (2004) 37, 508-509. (addenda
-and errata)
-
-TEST DATASET
-
-This example dataset is produced by running the Macro
-CappedCylinder(), using 200 data points, *qmin* = 0.001 -1, *qmax* = 0.7
--1 and the above default values.
+This following example dataset is produced by running the MacroCappedCylinder(), using 200 data points,
+*qmin* = 0.001 |Ang^-1|, *qmax* = 0.7 |Ang^-1| and the default values
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -1410,73 +1390,66 @@ sld_solv        |Ang^-2|  6.3e-006
 background      |cm^-1|   0
 ==============  ========  =============
 
-
-
+.. image:: img/image117.JPG
 
 *Figure. 1D plot using the default values (w/256 data point).*
 
-For 2D data: The 2D scattering intensity is calculated similar to the
-2D cylinder model. At the theta = 45 deg and phi =0 deg with default
-values for other parameters,
+For 2D data: The 2D scattering intensity is calculated similar to the 2D cylinder model. For example, for
+|theta| = 45 deg and |phi| =0 deg with default values for other parameters
 
-
+.. image:: img/image118.JPG
 
 *Figure. 2D plot (w/(256X265) data points).*
 
+.. image:: img/image061.JPG
 
+*Figure. Definition of the angles for oriented 2D cylinders.*
 
-Figure. Definition of the angles for oriented 2D cylinders.
+.. image:: img/image062.jpg
 
+*Figure. Examples of the angles for oriented pp against the detector plane.*
 
-
-Figure. Examples of the angles for oriented pp against the detector
-plane.
+REFERENCE
+H. Kaya, *J. Appl. Cryst.*, 37 (2004) 223-230
+H. Kaya and N-R deSouza, *J. Appl. Cryst.*, 37 (2004) 508-509 (addenda and errata)
 
 
 
 .. _CoreShellCylinderModel:
 
-**2.1.17. CoreShellCylinderModel***
+**2.1.17. CoreShellCylinderModel**
 
-This model provides the form factor for a circular cylinder with a
-core-shell scattering length density profile. The form factor is
-normalized by the particle volume.
+This model provides the form factor for a circular cylinder with a core-shell scattering length density profile. The
+form factor is normalized by the particle volume.
 
-*1.1. Definition*
+*2.1.17.1. Definition*
 
-The output of the 2D scattering intensity function for oriented core-
-shell cylinders is given by (Kline, 2006):
+The output of the 2D scattering intensity function for oriented core-shell cylinders is given by (Kline, 2006)
 
+.. image:: img/image067.PNG
 
+where
 
+.. image:: img/image068.PNG
 
+.. image:: img/image239.PNG
 
+and |alpha| is the angle between the axis of the cylinder and the *q*\ -vector, *Vs* is the volume of the outer shell
+(i.e. the total volume, including the shell), *Vc* is the volume of the core, *L* is the length of the core, *r* is the
+radius of the core, *t* is the thickness of the shell, |rho|\ :sub:`c` is the scattering length density of the core,
+|rho|\ :sub:`s` is the scattering length density of the shell, |rho|\ :sub:`solv` is the scattering length density of
+the solvent, and *bkg* is the background level. The outer radius of the shell is given by *r+t* and the total length of
+the outer shell is given by *L+2t*. *J1* is the first order Bessel function.
 
+.. image:: img/image069.JPG
 
-where is the angle between the axis of the cylinder and the q-vector,
-*Vs* is the volume of the outer shell (i.e. the total volume,
-including the shell), *Vc* is the volume of the core, *L* is the
-length of the core, *r* is the radius of the core, *t* is the
-thickness of the shell, *c* is the scattering length density of the
-core, *s* is the scattering length density of the shell, solv is the
-scattering length density of the solvent, and *bkg* is the background
-level. The outer radius of the shell is given by *r+t* and the total
-length of the outer shell is given by *L+2t*. J1 is the first order
-Bessel function.
+To provide easy access to the orientation of the core-shell cylinder, we define the axis of the cylinder using two
+angles |theta| and |phi|\ . As for the case of the cylinder, those angles are defined in Figure 2 of the CylinderModel.
 
+NB: The 2nd virial coefficient of the cylinder is calculated based on the radius and 2 length values, and used as the
+effective radius for *S(Q)* when *P(Q)* \* *S(Q)* is applied.
 
-
-To provide easy access to the orientation of the core-shell cylinder,
-we define the axis of the cylinder using two angles and . Similarly to
-the case of the cylinder, those angles are defined on Figure 2 in
-Cylinder Model.
-
-For P*S: The 2nd virial coefficient of the solid cylinder is calculate
-based on the (radius+thickness) and 2(length +thickness) values, and
-used as the effective radius toward S(Q) when P(Q)*S(Q) is applied.
-
-The returned value is scaled to units of |cm^-1| and the parameters of
-the core-shell cylinder model are the following:
+The returned value is scaled to units of |cm^-1| and the parameters of the core-shell cylinder model are the following
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -1493,57 +1466,41 @@ axis_theta      degree    90
 axis_phi        degree    0.0
 ==============  ========  =============
 
-The output of the 1D scattering intensity function for randomly
-oriented cylinders is then given by the equation above.
+The output of the 1D scattering intensity function for randomly oriented cylinders is then given by the equation above.
 
-The *axis_theta* and axis *_phi* parameters are not used for the 1D
-output. Our implementation of the scattering kernel and the 1D
-scattering intensity use the c-library from NIST.
+The *axis_theta* and *axis_phi* parameters are not used for the 1D output. Our implementation of the scattering kernel
+and the 1D scattering intensity use the c-library from NIST.
 
-*2.1. Validation of the core-shell cylinder model*
+*2.1.17.2. Validation of the CoreShellCylinderModel*
 
-Validation of our code was done by comparing the output of the 1D
-model to the output of the software provided by the NIST (Kline,
-2006). Figure 8 shows a comparison of the 1D output of our model and
-the output of the NIST software.
+Validation of our code was done by comparing the output of the 1D model to the output of the software provided by the
+NIST (Kline, 2006). Figure 1 shows a comparison of the 1D output of our model and the output of the NIST software.
 
-Averaging over a distribution of orientation is done by evaluating the
-equation above. Since we have no other software to compare the
-implementation of the intensity for fully oriented core-shell
-cylinders, we can compare the result of averaging our 2D output using
-a uniform distribution *p(,* *)* = 1.0. Figure 9 shows the result of
-such a cross-check.
+.. image:: img/image070.JPG
 
+*Figure 1: Comparison of the SasView scattering intensity for a core-shell cylinder with the output of the NIST SANS*
+*analysis software.* The parameters were set to: *Scale* = 1.0, *Radius* = 20 |Ang|, *Thickness* = 10 |Ang|,
+*Length* = 400 |Ang|, *Core_sld* = 1e-6 |Ang^-2|, *Shell_sld* = 4e-6 |Ang^-2|, *Solvent_sld* = 1e-6 |Ang^-2|,
+and *Background* = 0.01 |cm^-1|.
 
+Averaging over a distribution of orientation is done by evaluating the equation above. Since we have no other software
+to compare the implementation of the intensity for fully oriented cylinders, we can compare the result of averaging our
+2D output using a uniform distribution *p(*\ |theta|,\ |phi|\ *)* = 1.0. Figure 2 shows the result of such a cross-check.
 
+.. image:: img/image071.JPG
 
+*Figure 2: Comparison of the intensity for uniformly distributed core-shell cylinders calculated from our 2D model and*
+*the intensity from the NIST SANS analysis software.* The parameters used were: *Scale* = 1.0, *Radius* = 20 |Ang|,
+*Thickness* = 10 |Ang|, *Length* =400 |Ang|, *Core_sld* = 1e-6 |Ang^-2|, *Shell_sld* = 4e-6 |Ang^-2|,
+*Solvent_sld* = 1e-6 |Ang^-2|, and *Background* = 0.0 |cm^-1|.
 
-Figure 8: Comparison of the SasView scattering intensity for a core-
-shell cylinder with the output of the NIST SANS analysis software. The
-parameters were set to: Scale=1.0, Radius=20 , Thickness=10 ,
-Length=400 , Core_sld=1e-6 -2, Shell_sld=4e-6 -2, Solvent_sld=1e-6 -2,
-and Background=0.01 |cm^-1|.
+.. image:: img/image061.JPG
 
+*Figure. Definition of the angles for oriented core-shell cylinders.*
 
+.. image:: img/image062.JPG
 
-
-
-
-
-Figure 9: Comparison of the intensity for uniformly distributed core-
-shell cylinders calculated from our 2D model and the intensity from
-the NIST SANS analysis software. The parameters used were: Scale=1.0,
-Radius=20 , Thickness=10 , Length=400 , Core_sld=1e-6 -2,
-Shell_sld=4e-6 -2, Solvent_sld=1e-6 -2, and Background=0.0 |cm^-1|.
-
-
-
-Figure. Definition of the angles for oriented core-shell cylinders.
-
-
-
-Figure. Examples of the angles for oriented pp against the detector
-plane.
+*Figure. Examples of the angles for oriented pp against the detector plane.*
 
 2013/11/26 - Description reviewed by Heenan, R.
 
@@ -1553,67 +1510,53 @@ plane.
 
 **2.1.18 EllipticalCylinderModel**
 
-This function calculates the scattering from an oriented elliptical
-cylinder.
+This function calculates the scattering from an elliptical cylinder.
 
-*For 2D (orientated system):*
+*2.1.18.1 Definition for 2D (orientated system)*
 
-The angles theta and phi define the orientation of the axis of the
-cylinder. The angle psi is defined as the orientation of the major
-axis of the ellipse with respect to the vector Q. A gaussian
-poydispersity can be added to any of the orientation angles, and also
-for the minor radius and the ratio of the ellipse radii.
+The angles |theta| and |phi| define the orientation of the axis of the cylinder. The angle |bigpsi| is defined as the
+orientation of the major axis of the ellipse with respect to the vector *Q*\ . A gaussian polydispersity can be added
+to any of the orientation angles, and also for the minor radius and the ratio of the ellipse radii.
 
+.. image:: img/image098.gif
 
+*Figure.* *a* = *r_minor* and |nu|\ :sub:`n` = *r_ratio* (i.e., *r_major* / *r_minor*).
 
-*Figure. a= r_minor and * *n= r_ratio (i.e., r_major/r_minor).*
+The function calculated is
 
-The function calculated is:
+.. image:: img/image099.PNG
 
+with the functions
 
+.. image:: img/image100.PNG
 
-with the functions:
+and the angle |bigpsi| is defined as the orientation of the major axis of the ellipse with respect to the vector *q*\ .
 
+*2.1.18.2 Definition for 1D (no preferred orientation)*
 
+The form factor is averaged over all possible orientation before normalized by the particle volume
 
-
-
-
-
-and the angle psi is defined as the orientation of the major axis of
-the ellipse with respect to the vector Q.
-
-*For 1D (no preferred orientation):*
-
-The form factor is averaged over all possible orientation before
-normalized by the particle volume: P(q) = scale*<f^2>/V .
+*P(q)* = *scale* \* <*F*\ :sup:`2`> / *V*
 
 The returned value is scaled to units of |cm^-1|.
 
-To provide easy access to the orientation of the elliptical, we define
-the axis of the cylinder using two angles , andY. Similarly to the
-case of the cylinder, those angles, and , are defined on Figure 2 of
-CylinderModel. The angle Y is the rotational angle around its own
-long_c axis against the q plane. For example, Y = 0 when the r_minor
-axis is parallel to the x-axis of the detector.
+To provide easy access to the orientation of the elliptical cylinder, we define the axis of the cylinder using two
+angles |theta|, |phi| and |bigpsi|. As for the case of the cylinder, the angles |theta| and |phi| are defined on
+Figure 2 of CylinderModel. The angle |bigpsi| is the rotational angle around its own long_c axis against the *q* plane.
+For example, |bigpsi| = 0 when the *r_minor* axis is parallel to the *x*\ -axis of the detector.
 
-All angle parameters are valid and given only for 2D calculation
-(Oriented system).
+All angle parameters are valid and given only for 2D calculation; ie, an oriented system.
 
+.. image:: img/image101.JPG
 
+*Figure. Definition of angles for 2D*
 
-*Figure. Definition of angels for 2D*.
+.. image:: img/image062.JPG
 
+*Figure. Examples of the angles for oriented elliptical cylinders against the detector plane.*
 
-
-Figure. Examples of the angles for oriented elliptical cylinders
-
-against the detector plane.
-
-*For P*S*: The 2nd virial coefficient of the solid cylinder is
-calculate based on the averaged radius (=sqrt(r_minor^2*r_ratio)) and
-length values, and used as the effective radius toward S(Q) when
-P(Q)*S(Q) is applied.
+NB: The 2nd virial coefficient of the cylinder is calculated based on the averaged radius (= sqrt(*r_minor*\ :sup:`2` \* *r_ratio*))
+and length values, and used as the effective radius for *S(Q)* when *P(Q)* \* *S(Q)* is applied.
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -1627,37 +1570,31 @@ sldSolv         |Ang^-2|  1e-06
 background      |cm^-1|   0
 ==============  ========  =============
 
-
+.. image:: img/image102.JPG
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
-*Validation of the elliptical cylinder 2D model*
+*2.1.18.3 Validation of the EllipticalCylinderModel*
 
-Validation of our code was done by comparing the output of the 1D
-calculation to the angular average of the output of 2 D calculation
-over all possible angles. The Figure below shows the comparison where
-the solid dot refers to averaged 2D while the line represents the
-result of 1D calculation (for 2D averaging, 76, 180, 76 points are
-taken for the angles of theta, phi, and psi respectively).
+Validation of our code was done by comparing the output of the 1D calculation to the angular average of the output of
+the 2D calculation over all possible angles. The figure below shows the comparison where the solid dot refers to
+averaged 2D values while the line represents the result of the 1D calculation (for the 2D averaging, values of 76, 180,
+and 76 degrees are taken for the angles of |theta|, |phi|, and |bigpsi| respectively).
 
-
+.. image:: img/image103.GIF
 
 *Figure. Comparison between 1D and averaged 2D.*
 
+In the 2D average, more binning in the angle |phi| is necessary to get the proper result. The following figure shows
+the results of the averaging by varying the number of angular bins.
 
-
-In the 2D average, more binning in the angle phi is necessary to get
-the proper result. The following figure shows the results of the
-averaging by varying the number of bin over angles.
-
-
+.. image:: img/image104.GIF
 
 *Figure. The intensities averaged from 2D over different numbers of bins and angles.*
 
 REFERENCE
-
-L. A. Feigin and D. I. Svergun Structure Analysis by Small-Angle X-Ray
-and Neutron Scattering, Plenum, New York, (1987).
+L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum,
+New York, (1987)
 
 
 
@@ -1665,23 +1602,29 @@ and Neutron Scattering, Plenum, New York, (1987).
 
 **2.1.19. FlexibleCylinderModel**
 
-This model provides the form factor, *P(q)*, for a flexible cylinder
-where the form factor is normalized by the volume of the cylinder:
-Inter-cylinder interactions are NOT included. P(q) =
-scale*<f^2>/V+background where the averaging < > is applied over all
-orientation for 1D. The 2D scattering intensity is the same as 1D,
-regardless of the orientation of the *q* vector which is defined as .
+This model provides the form factor, *P(q)*, for a flexible cylinder where the form factor is normalized by the volume
+of the cylinder. **Inter-cylinder interactions are NOT provided for.**
 
+*P(q)* = *scale* \* <*F*\ :sup:`2`> / *V* + *background*
 
+where the averaging < > is applied over all orientations for 1D.
 
-The chain of contour length, L, (the total length) can be described a
-chain of some number of locally stiff segments of length lp. The
-persistence length,lp, is the length along the cylinder over which the
-flexible cylinder can be considered a rigid rod. The Kuhn length (b =
-2*lp) is also used to describe the stiffness of a chain. The returned
-value is in units of |cm^-1|, on absolute scale. In the parameters, the
-sldCyl and sldSolv represent SLD (chain/cylinder) and SLD (solvent)
-respectively.
+The 2D scattering intensity is the same as 1D, regardless of the orientation of the *q* vector which is defined as
+
+.. image:: img/image040.gif
+
+*2.1.19.1. Definition*
+
+.. image:: img/image075.JPG
+
+The chain of contour length, *L*, (the total length) can be described as a chain of some number of locally stiff
+segments of length *l*\ :sub:`p`\ , the persistence length (the length along the cylinder over which the flexible
+cylinder can be considered a rigid rod). The Kuhn length (*b* = 2 \* *l* :sub:`p`) is also used to describe the
+stiffness of a chain.
+
+The returned value is in units of |cm^-1|, on absolute scale.
+
+In the parameters, the sldCyl and sldSolv represent the SLD of the chain/cylinder and solvent respectively.
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -1695,30 +1638,26 @@ background      |cm^-1|   0.01
 kuhn_length     |Ang|     100
 ==============  ========  =============
 
-
+.. image:: img/image076.JPG
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
-Our model uses the form factor calculations implemented in a c-library
-provided by the NIST Center for Neutron Research (Kline, 2006):
+Our model uses the form factor calculations implemented in a c-library provided by the NIST Center for Neutron Research
+(Kline, 2006).
 
-From the reference, "Method 3 With Excluded Volume" is used. The model
-is a parametrization of simulations of a discrete representation of
-the worm-like chain model of Kratky and Porod applied in the
-pseudocontinuous limit. See equations (13,26-27) in the original
-reference for the details.
+From the reference
+
+  "Method 3 With Excluded Volume" is used. The model is a parametrization of simulations of a discrete representation
+  of the worm-like chain model of Kratky and Porod applied in the pseudocontinuous limit. See equations (13,26-27) in
+  the original reference for the details.
 
 REFERENCE
+J. S. Pedersen and P. Schurtenberger. *Scattering functions of semiflexible polymers with and without excluded volume*
+*effects*. *Macromolecules*, 29 (1996) 7602-7612
 
-Pedersen, J. S. and P. Schurtenberger (1996). Scattering functions of
-semiflexible polymers with and without excluded volume effects.
-Macromolecules 29: 7602-7612.
-
-Correction of the formula can be found in:
-
-Wei-Ren Chen, Paul D. Butler, and Linda J. Magid, "Incorporating
-Intermicellar Interactions in the Fitting of SANS Data from Cationic
-Wormlike Micelles" Langmuir, August 2006.
+Correction of the formula can be found in
+W-R Chen, P. D. Butler and L. J. Magid, *Incorporating Intermicellar Interactions in the Fitting of SANS Data from*
+*Cationic Wormlike Micelles*. *Langmuir*, 22(15) 2006 6539–6548
 
 
 
@@ -1726,84 +1665,60 @@ Wormlike Micelles" Langmuir, August 2006.
 
 **2.1.20 FlexCylEllipXModel**
 
-*Flexible Cylinder with Elliptical Cross-Section:* Calculates the
-form factor for a flexible cylinder with an elliptical cross section
-and a uniform scattering length density. The non-negligible diameter
-of the cylinder is included by accounting for excluded volume
-interactions within the walk of a single cylinder. The form factor is
-normalized by the particle volume such that P(q) = scale\*<f^2>/Vol +
-bkg, where < > is an average over all possible orientations of the
-flexible cylinder.
+This model calculates the form factor for a flexible cylinder with an elliptical cross section and a uniform scattering
+length density. The non-negligible diameter of the cylinder is included by accounting for excluded volume interactions
+within the walk of a single cylinder. The form factor is normalized by the particle volume such that
 
-*1.1. Definition*
+*P(q)* = *scale* \* <*F*\ :sup:`2`> / *V* + *background*
 
-The function calculated is from the reference given below. From that
-paper, "Method 3 With Excluded Volume" is used. The model is a
-parameterization of simulations of a discrete representation of the
-worm-like chain model of Kratky and Porod applied in the pseudo-
-continuous limit. See equations (13, 26-27) in the original reference
-for the details.
+where < > is an average over all possible orientations of the flexible cylinder.
 
-NB: there are several typos in the original reference that have been
-corrected by WRC. Details of the corrections are in the reference
-below.
+*2.1.20.1. Definition*
 
-- Equation (13): the term (1-w(QR)) should swap position with w(QR)
+The function calculated is from the reference given below. From that paper, "Method 3 With Excluded Volume" is used.
+The model is a parameterization of simulations of a discrete representation of the worm-like chain model of Kratky and
+Porod applied in the pseudo-continuous limit. See equations (13, 26-27) in the original reference for the details.
 
-- Equations (23) and (24) are incorrect. WRC has entered these into Mathematica and solved analytically. The results were converted to code.
+NB: there are several typos in the original reference that have been corrected by WRC. Details of the corrections are
+in the reference below. Most notably
+
+- Equation (13): the term (1 - w(QR)) should swap position with w(QR)
+
+- Equations (23) and (24) are incorrect; WRC has entered these into Mathematica and solved analytically. The results
+  were then converted to code.
 
 - Equation (27) should be q0 = max(a3/sqrt(RgSquare),3) instead of max(a3*b/sqrt(RgSquare),3)
 
 - The scattering function is negative for a range of parameter values and q-values that are experimentally accessible. A correction function has been added to give the proper behavior.
 
+.. image:: img/image077.JPG
 
+The chain of contour length, *L*, (the total length) can be described as a chain of some number of locally stiff
+segments of length *l*\ :sub:`p`\ , the persistence length (the length along the cylinder over which the flexible
+cylinder can be considered a rigid rod). The Kuhn length (*b* = 2 \* *l* :sub:`p`) is also used to describe the
+stiffness of a chain.
 
-The chain of contour length, L, (the total length) can be described a
-chain of some number of locally stiff segments of length lp. The
-persistence length, lp, is the length along the cylinder over which
-the flexible cylinder can be considered a rigid rod. The Kuhn length
-(b) used in the model is also used to describe the stiffness of a
-chain, and is simply b = 2*lp.
-
-The cross section of the cylinder is elliptical, with minor radius a.
-The major radius is larger, so of course, the axis ratio (parameter 4)
-must be greater than one. Simple constraints should be applied during
-curve fitting to maintain this inequality.
+The cross section of the cylinder is elliptical, with minor radius *a*\ . The major radius is larger, so of course,
+**the axis ratio (parameter 4) must be greater than one.** Simple constraints should be applied during curve fitting to
+maintain this inequality.
 
 The returned value is in units of |cm^-1|, on absolute scale.
 
-The sldCyl = SLD (chain), sldSolv = SLD (solvent). The scale, and the
-contrast are both multiplicative factors in the model and are
-perfectly correlated. One or both of these parameters must be held
-fixed during model fitting.
+In the parameters, *sldCyl* and *sldSolv* represent the SLD of the chain/cylinder and solvent respectively. The
+*scale*, and the contrast are both multiplicative factors in the model and are perfectly correlated. One or both of
+these parameters must be held fixed during model fitting.
 
-If the scale is set equal to the particle volume fraction, f, the
-returned value is the scattered intensity per unit volume, I(q) =
-f*P(q). However, no inter-particle interference effects are included
-in this calculation.
+If the scale is set equal to the particle volume fraction, |phi|, the returned value is the scattered intensity per
+unit volume, *I(q)* = |phi| \* *P(q)*.
 
-For 2D data: The 2D scattering intensity is calculated in the same way
-as 1D, where the *q* vector is defined as .
+**No inter-cylinder interference effects are included in this calculation.**
 
-REFERENCE
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-Pedersen, J. S. and P. Schurtenberger (1996). Scattering functions of
-semiflexible polymers with and without excluded volume effects.
-Macromolecules 29: 7602-7612.
+.. image:: img/image008.PNG
 
-Corrections are in:
-
-Wei-Ren Chen, Paul D. Butler, and Linda J. Magid, "Incorporating
-Intermicellar Interactions in the Fitting of SANS Data from Cationic
-Wormlike Micelles" Langmuir, August 2006.
-
-
-
-TEST DATASET
-
-This example dataset is produced by running the Macro
-FlexCylEllipXModel, using 200 data points, *qmin* = 0.001 -1, *qmax* = 0.7
--1 and the default values below.
+This example dataset is produced by running the Macro FlexCylEllipXModel, using 200 data points, *qmin* = 0.001 |Ang^-1|,
+*qmax* = 0.7 |Ang^-1| and the default values below
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -1818,9 +1733,17 @@ sldCyl          |Ang^-2|  1e-6
 sldSolv         |Ang^-2|  6.3e-6
 ==============  ========  =============
 
-
+.. image:: img/image078.JPG
 
 *Figure. 1D plot using the default values (w/200 data points).*
+
+REFERENCE
+J. S. Pedersen and P. Schurtenberger. *Scattering functions of semiflexible polymers with and without excluded volume*
+*effects*. *Macromolecules*, 29 (1996) 7602-7612
+
+Correction of the formula can be found in
+W-R Chen, P. D. Butler and L. J. Magid, *Incorporating Intermicellar Interactions in the Fitting of SANS Data from*
+*Cationic Wormlike Micelles*. *Langmuir*, 22(15) 2006 6539–6548
 
 
 
@@ -2238,7 +2161,7 @@ Figure 5: Comparison of the SasView scattering intensity for an
 ellipsoid with the output of the NIST SANS analysis software. The
 parameters were set to: Scale=1.0, Radius_a=20 , Radius_b=400 ,
 
-Contrast=3e-6 -2, and Background=0.01 |cm^-1|.
+Contrast=3e-6 |Ang^-2|, and Background=0.01 |cm^-1|.
 
 
 
@@ -2247,7 +2170,7 @@ Contrast=3e-6 -2, and Background=0.01 |cm^-1|.
 Figure 6: Comparison of the intensity for uniformly distributed
 ellipsoids calculated from our 2D model and the intensity from the
 NIST SANS analysis software. The parameters used were: Scale=1.0,
-Radius_a=20 , Radius_b=400 , Contrast=3e-6 -2, and Background=0.0 cm
+Radius_a=20 , Radius_b=400 , Contrast=3e-6 |Ang^-2|, and Background=0.0 cm
 -1.
 
 
