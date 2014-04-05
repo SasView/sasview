@@ -132,10 +132,8 @@ class StatusBar(wxStatusB):
         
         # Create status bar icon reflecting the type of status
         # for the last message
-        self.bitmap_bt_warning = wx.Button(self, wx.NewId(), "", 
-                                 size=(width, height), style=wx.NO_BORDER)
-        self.bitmap_bt_warning.SetBackgroundColour(GREEN)
-        self.bitmap_bt_warning.SetForegroundColour(GREEN)
+        self.status_color = wx.StaticText(self, id=wx.NewId(), label="   ")
+        self.status_color.SetBackgroundColour(GREEN)
 
         # Create the button used to show the console dialog
         self.console_button = wx.Button(self, wx.NewId(), "Console", 
@@ -186,7 +184,7 @@ class StatusBar(wxStatusB):
         rect = self.GetFieldRect(GAUGE_POSITION)
         self.gauge.SetPosition((rect.x, rect.y))
         rect = self.GetFieldRect(ICON_POSITION)
-        self.bitmap_bt_warning.SetPosition((rect.x, rect.y))
+        self.status_color.SetPosition((rect.x, rect.y))
         rect = self.GetFieldRect(CONSOLE_POSITION)
         self.console_button.SetPosition((rect.x, rect.y))
         self.sizeChanged = False
@@ -213,8 +211,7 @@ class StatusBar(wxStatusB):
         """
         wxStatusB.SetStatusText(self, text, number)
         self.list_msg.append(text)
-        self.bitmap_bt_warning.SetBackgroundColour(GREEN)
-        self.bitmap_bt_warning.SetForegroundColour(GREEN)
+        self.status_color.SetBackgroundColour(GREEN)
 
         if self.frame is not None :
             self.frame.set_message(status=text, event=event)
@@ -297,14 +294,11 @@ class StatusBar(wxStatusB):
         
         msg = event.info.lower()
         if msg == "warning":
-            self.bitmap_bt_warning.SetBackgroundColour(YELLOW)
-            self.bitmap_bt_warning.SetForegroundColour(YELLOW)
+            self.status_color.SetBackgroundColour(YELLOW)
         elif msg == "error":
-            self.bitmap_bt_warning.SetBackgroundColour(RED)
-            self.bitmap_bt_warning.SetForegroundColour(RED)
+            self.status_color.SetBackgroundColour(RED)
         else:
-            self.bitmap_bt_warning.SetBackgroundColour(GREEN)
-            self.bitmap_bt_warning.SetForegroundColour(GREEN)
+            self.status_color.SetBackgroundColour(GREEN)
     
     def set_dialog(self, event):
         """
