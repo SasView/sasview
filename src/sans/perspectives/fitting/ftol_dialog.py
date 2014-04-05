@@ -30,8 +30,7 @@ class ChangeFtol(wx.Dialog):
     Dialog to select ftol
     """
     def __init__(self, parent, base, id=-1, title="FTolerance"):
-        wx.Dialog.__init__(self, parent, id, title,
-                           size=(PANEL_WIDTH, PANEL_HEIGHT))
+        wx.Dialog.__init__(self, parent, id, title)
         # font size
         self.SetWindowVariant(variant=FONT_VARIANT)
         # build layout
