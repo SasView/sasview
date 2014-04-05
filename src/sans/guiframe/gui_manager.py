@@ -1010,21 +1010,15 @@ class ViewerFrame(PARENT_FRAME):
         self._data_panel = data_panel
         d_panel_width, h = self._get_panels_size(self._data_panel)
         win.SetSize((d_panel_width, h))
-        style = self.__gui_style & GUIFRAME.MANAGER_ON
-        if style != GUIFRAME.MANAGER_ON:
-            flag = False
-        else:
-            flag = True
+        is_visible = self.__gui_style & GUIFRAME.MANAGER_ON == GUIFRAME.MANAGER_ON
         if not IS_WIN:
             win.SetPosition((0, mac_pos_y + size_t_bar))
-        win.Show(flag)
+        win.Show(is_visible)
         # Add the panels to the AUI manager
         for panel_class in panels:
             frame = panel_class.get_frame()
             id = wx.NewId()
-            # Check whether we need to put this panel
-            # in the center pane
-            
+            # Check whether we need to put this panel in the center pane
             if hasattr(panel_class, "CENTER_PANE") and panel_class.CENTER_PANE:
                 w, h = self._get_panels_size(panel_class)
                 if panel_class.CENTER_PANE:
@@ -1034,14 +1028,13 @@ class ViewerFrame(PARENT_FRAME):
                     frame.SetSize((w, h))
                     frame.Show(False)
             elif panel_class == self._data_panel:
-                panel_class.frame.Show(flag)
+                panel_class.frame.Show(is_visible)
                 continue
             else:
                 self.panels[str(id)] = panel_class
                 frame.SetSize((w, h))
                 frame.Show(False)
             if not IS_WIN:
-                x_pos, _ = frame.GetPositionTuple()
                 frame.SetPosition((d_panel_width + 1, mac_pos_y + size_t_bar))
 
         if not IS_WIN:
