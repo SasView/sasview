@@ -138,7 +138,7 @@ class StatusBar(wxStatusB):
 
         # Create the button used to show the console dialog
         self.console_button = wx.Button(self, wx.NewId(), "Console", 
-                                 size=(console_btn_width, 10))
+                                 size=(console_btn_width, -1))
         font = self.console_button.GetFont()
         _, pixel_h = font.GetPixelSize()
         font.SetPixelSize(wx.Size(0,int(pixel_h*0.9)))
