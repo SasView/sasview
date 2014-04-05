@@ -37,6 +37,9 @@ double CappedCylinder(double dp[], double q);
 double Barbell(double dp[], double q);
 double PolyCoreBicelle(double dp[], double q);
 double CSParallelepiped(double dp[], double q);
+double RectangularPrism(double dp[], double q);
+double RectangularHollowPrismInfThinWalls(double dp[], double q);
+double RectangularHollowPrism(double dp[], double q);
 
 /* internal functions */
 double CylKernel(double qq, double rr,double h, double theta);

@@ -676,6 +676,24 @@ class ModelManagerBase:
         self.shape_indep_list.append(PringlesModel)
         self.model_name_list.append(PringlesModel.__name__)
 
+        from sans.models.RectangularPrismModel import RectangularPrismModel
+        self.model_dictionary[RectangularPrismModel.__name__] = RectangularPrismModel
+        self.shape_list.append(RectangularPrismModel)
+        self.multiplication_factor.append(RectangularPrismModel)
+        self.model_name_list.append(RectangularPrismModel.__name__)
+
+        from sans.models.RectangularHollowPrismInfThinWallsModel import RectangularHollowPrismInfThinWallsModel
+        self.model_dictionary[RectangularHollowPrismInfThinWallsModel.__name__] = RectangularHollowPrismInfThinWallsModel
+        self.shape_list.append(RectangularHollowPrismInfThinWallsModel)
+        self.multiplication_factor.append(RectangularHollowPrismInfThinWallsModel)
+        self.model_name_list.append(RectangularHollowPrismInfThinWallsModel.__name__)
+
+        from sans.models.RectangularHollowPrismModel import RectangularHollowPrismModel
+        self.model_dictionary[RectangularHollowPrismModel.__name__] = RectangularHollowPrismModel
+        self.shape_list.append(RectangularHollowPrismModel)
+        self.multiplication_factor.append(RectangularHollowPrismModel)
+        self.model_name_list.append(RectangularHollowPrismModel.__name__)
+
         #from sans.models.FractalO_Z import FractalO_Z
         #self.model_dictionary[FractalO_Z.__name__] = FractalO_Z
         #self.shape_indep_list.append(FractalO_Z)

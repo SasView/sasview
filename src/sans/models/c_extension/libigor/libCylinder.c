@@ -3309,3 +3309,308 @@ CSParallelepiped(double dp[], double q)
 	return answer;
 }
 
+
+/*
+ * Massive rectangular prism (a <= b <=c) 
+ * using eqns. (12)+(16) from Nayuk & Huber, Z. Phys. Chem. 226, 837 (2012).
+ * It is totally equivalent to the Parallelepiped model in this library,
+ * but instead of using as input the a, b, and c sides of the prism,
+ * it uses a and the ratios (b/a) and (c/a).
+ * This allows to keep the shape when using the polydispersity.
+ */
+
+double
+RectangularPrism(double dp[], double q)
+{
+    int i, j;
+    double scale, aa, bb, cc, delrho, bkg;		
+    int nordi=76;			        //order of integration
+    int nordj=76;
+    double Pi;
+    double sumi, sumj;
+    double v1a, v1b, v2a, v2b;		// upper and lower integration limits
+    double answer;
+    double theta, phi, arg, termA, termB, termC, AP, ahalf, bhalf, chalf;
+    double vol, sldp, sld;
+
+    Pi = 4.0*atan(1.0);
+
+    scale = dp[0];	
+    aa = dp[1];          // parameter short_side
+    bb = aa * dp[2];     // parameter b/a ratio
+    cc = aa * dp[3];     // parameter c/a ratio
+    sldp = dp[4];        // scattering length density of the object
+    sld = dp[5];         // scattering length density of the solvent
+    delrho = sldp - sld;
+    bkg = dp[6];
+
+    vol = aa*bb*cc;
+    ahalf = 0.5 * aa;
+    bhalf = 0.5 * bb;
+    chalf = 0.5 * cc;
+
+   //Integration limits to use in Gaussian quadrature
+    v1a = 0.;
+    v1b = Pi/2.;  //theta integration limits
+    v2a = 0.;
+    v2b = Pi/2.;  //phi integration limits
+
+    sumi = 0.0;
+    for(i=0;i<nordi;i++) {
+
+	    theta = ( Gauss76Z[i]*(v1b-v1a) + v1a + v1b )/2.0;	//z values for gaussian quadrature
+
+	    arg = q*chalf*cos(theta);
+	    if (fabs(arg) > 1.e-16) {termC = sin(arg) / arg;} else {termC = 1.0;}  
+
+	    sumj = 0.0;
+	    for(j=0;j<nordj;j++) {
+
+                phi = ( Gauss76Z[j]*(v2b-v2a) + v2a + v2b )/2.0; //z values for gaussian quadrature
+
+	        // Amplitude AP from eqn. (12), rewritten to avoid round-off effects when arg=0
+
+	        arg = q*ahalf*sin(theta)*sin(phi); 
+	        if (fabs(arg) > 1.e-16) {termA = sin(arg) / arg;} else {termA = 1.0;}
+	       
+	        arg = q*bhalf*sin(theta)*cos(phi); 
+	        if (fabs(arg) > 1.e-16) {termB = sin(arg) / arg;} else {termB = 1.0;}	  
+               
+	        AP = termA * termB * termC;  
+
+	        sumj += Gauss76Wt[j] * (AP*AP);
+
+	    }
+
+	    sumj = (v2b-v2a) * sumj / 2.0;
+	    sumi += Gauss76Wt[i] * sumj * sin(theta);
+
+    }
+
+    answer = (v1b-v1a)/2.0*sumi;
+
+    // Normalize by Pi (Eqn. 16). 
+    // The term (ABC)^2 does not appear because it was introduced before from the defs of termA, termB, termC
+    // The factor 2 appears because the theta integral has been defined between 0 and pi/2, instead of 0 to pi
+    answer = 2.0 * answer / Pi; //Form factor P(q)
+
+    // Multiply by contrast^2
+    answer *= delrho*delrho;
+
+    //normalize by volume
+    answer *= vol;
+	
+    //convert to [cm-1]
+    answer *= 1.0e8;
+
+    //Scale
+    answer *= scale;
+
+    // add in the background
+    answer += bkg;
+
+    return answer;
+}
+
+
+/*
+ * Hollow rectangular prism (a <= b <=c) with infinitely thin walls
+ * using eqn. (7-11) from Nayuk & Huber, Z. Phys. Chem. 226, 837 (2012)
+ */
+
+double
+RectangularHollowPrismInfThinWalls(double dp[], double q)
+{
+    int i,j;
+    double scale,aa,bb,cc,delrho,bkg;
+    int nordi=76;
+    int nordj=76;
+    double Pi;
+    double sumi, sumj;
+    double v1a, v1b, v2a, v2b;		//upper and lower integration limits
+    double answer;
+    double theta, phi, termAL_theta, termAT_theta, AL, AT, ahalf, bhalf, chalf, vol;
+    double sldp, sld ;
+
+    Pi = 4.0*atan(1.0);
+
+    scale = dp[0];		  //make local copies in case memory moves
+    aa = dp[1];
+    bb = aa * dp[2];
+    cc = aa * dp[3];
+    sldp = dp[4];        // scattering length density of the object
+    sld = dp[5];         // scattering length density of the solvent
+    delrho = sldp - sld;
+    bkg = dp[6];
+
+    ahalf = 0.5 * aa;
+    bhalf = 0.5 * bb;
+    chalf = 0.5 * cc;
+
+    //Integration limits to use in Gaussian quadrature
+    v1a = 0.;
+    v1b = Pi/2;   //theta integration limits
+    v2a = 0.;
+    v2b = Pi/2.;  //phi integration limits
+
+    sumi = 0.0;
+    for(i=0;i<nordi;i++) {
+
+        theta = ( Gauss76Z[i]*(v1b-v1a) + v1a + v1b )/2.0;	//z values for gaussian quadrature
+
+        // To check potential problems if denominator goes to zero here !!!
+        termAL_theta = 8.0*cos(q*chalf*cos(theta)) / (q*q*sin(theta)*sin(theta));
+        termAT_theta = 8.0*sin(q*chalf*cos(theta)) / (q*q*sin(theta)*cos(theta));
+
+        sumj = 0.0;
+        for(j=0;j<nordj;j++) {
+
+            phi = ( Gauss76Z[j]*(v2b-v2a) + v2a + v2b )/2.0;	//z values for gaussian quadrature
+
+            // Amplitude AL from eqn. (7c)
+            AL = termAL_theta * sin(q*ahalf*sin(theta)*sin(phi)) * sin(q*bhalf*sin(theta)*cos(phi)) / (sin(phi)*cos(phi));
+
+            // Amplitude AT from eqn. (9)
+            AT = termAT_theta * (  (cos(q*ahalf*sin(theta)*sin(phi))*sin(q*bhalf*sin(theta)*cos(phi))/cos(phi)) + (cos(q*bhalf*sin(theta)*cos(phi))*sin(q*ahalf*sin(theta)*sin(phi))/sin(phi)) );
+
+            sumj += Gauss76Wt[j] * (AL+AT)*(AL+AT);
+
+        }
+
+        sumj = (v2b-v2a) * sumj / 2.0;
+        sumi += Gauss76Wt[i] * sumj * sin(theta);
+
+    }
+
+    answer = (v1b-v1a)/2.0*sumi;
+
+    // Normalize as in Eqn. (11). The factor 2 is due to the different theta integration limit (pi/2 instead of pi)
+    vol = 2.0*aa*bb+2.0*aa*cc+2.0*bb*cc;
+    answer = 2.0 * answer / Pi / vol / vol;
+
+    // Multiply by contrast^2
+    answer *= delrho*delrho;
+
+    //normalize by volume
+    answer *= vol;
+
+    //convert to [cm-1]
+    answer *= 1.0e8;
+
+    //Scale
+    answer *= scale;
+
+    // add in the background
+    answer += bkg;
+
+    return answer;
+}
+
+
+/*
+ * Hollow rectangular prism (a <= b <=c)
+ * using eqn. (13-15) from Nayuk & Huber, Z. Phys. Chem. 226, 837 (2012)
+ */
+ 
+double
+RectangularHollowPrism(double dp[], double q)
+{
+    int i, j;
+    double scale, aa, bb, cc, thickness, delrho, bkg;
+    int nordi=76;
+    int nordj=76;
+    double Pi;
+    double sumi, sumj;
+    double v1a, v1b, v2a, v2b;		//upper and lower integration limits
+    double answer;
+    double theta, phi, arg, termA1, termB1, termC1, termA2, termB2, termC2, AP1, AP2, AP, ahalf, bhalf, chalf, vol;
+    double sldp, sld ;
+
+    Pi = 4.0*atan(1.0);
+
+    scale = dp[0];
+    aa = dp[1];
+    bb = aa * dp[2];
+    cc = aa * dp[3];
+    thickness = dp[4];
+    sldp = dp[5];        // scattering length density of the object
+    sld = dp[6];         // scattering length density of the solvent
+    delrho = sldp - sld;
+    bkg = dp[7];
+
+    ahalf = 0.5 * aa;
+    bhalf = 0.5 * bb;
+    chalf = 0.5 * cc;
+
+    //Integration limits to use in Gaussian quadrature
+    v1a = 0.;
+    v1b = Pi/2;    //theta integration limits
+    v2a = 0.;
+    v2b = Pi/2.;   //phi integration limits
+
+    sumi = 0.0;
+    for(i=0;i<nordi;i++) {
+
+        theta = ( Gauss76Z[i]*(v1b-v1a) + v1a + v1b )/2.0;	//z values for gaussian quadrature
+
+	    arg = q*chalf*cos(theta);
+	    if (fabs(arg) > 1.e-16) {termC1 = sin(arg) / arg;} else {termC1 = 1.0;}
+	    arg = q*(chalf-thickness)*cos(theta);
+	    if (fabs(arg) > 1.e-16) {termC2 = sin(arg) / arg;} else {termC2 = 1.0;}
+
+	    sumj = 0.0;
+	    for(j=0;j<nordj;j++) {
+
+            phi = ( Gauss76Z[j]*(v2b-v2a) + v2a + v2b )/2.0;	//z values for gaussian quadrature
+
+            // Amplitude AP from eqn. (13), rewritten to avoid round-off effects when arg=0
+
+	        arg = q*ahalf*sin(theta)*sin(phi);
+	        if (fabs(arg) > 1.e-16) {termA1 = sin(arg) / arg;} else {termA1 = 1.0;}
+	        arg = q*(ahalf-thickness)*sin(theta)*sin(phi);
+	        if (fabs(arg) > 1.e-16) {termA2 = sin(arg) / arg;} else {termA2 = 1.0;}
+
+	        arg = q*bhalf*sin(theta)*cos(phi);
+	        if (fabs(arg) > 1.e-16) {termB1 = sin(arg) / arg;} else {termB1 = 1.0;}
+	        arg = q*(bhalf-thickness)*sin(theta)*cos(phi);
+	        if (fabs(arg) > 1.e-16) {termB2 = sin(arg) / arg;} else {termB2 = 1.0;}
+
+            AP1 = (aa*bb*cc) * termA1 * termB1 * termC1;
+            AP2 = 8 * (ahalf-thickness) * (bhalf-thickness) * (chalf-thickness) * termA2 * termB2 * termC2;
+            AP = AP1 - AP2;
+
+            sumj += Gauss76Wt[j] * (AP*AP);
+
+	    }
+
+	    sumj = (v2b-v2a) * sumj / 2.0;
+	    sumi += Gauss76Wt[i] * sumj * sin(theta);
+
+    }
+
+    answer = (v1b-v1a)/2.0*sumi;
+
+    // Normalize as in Eqn. (15).
+    // The factor 2 is due to the different theta integration limit (pi/2 instead of pi)
+    vol = (aa*bb*cc-((aa-2*thickness)*(bb-2*thickness)*(cc-2*thickness)));
+    answer = 2.0 * answer / Pi / vol / vol;
+
+    // Multiply by contrast^2
+    answer *= delrho*delrho;
+
+    //normalize by volume
+    answer *= vol;
+
+    //convert to [cm-1]
+    answer *= 1.0e8;
+
+    //Scale
+    answer *= scale;
+
+    // add in the background
+    answer += bkg;
+
+    return answer;
+}
+
+
