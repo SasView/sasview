@@ -7,7 +7,10 @@ or c modules.
 
 Usage:
 
-./run.py [args]
+./run.py [(module|script) args...]
+
+Without arguments run.py runs sasview.  With arguments, run.py will run
+the given module or script.
 """
 
 import os
@@ -121,9 +124,6 @@ def prepare():
     #from sans.models import SphereModel
 
 if __name__ == "__main__":
-    # start sasview
-    #import multiprocessing
-    #multiprocessing.freeze_support()
     prepare()
-    from sans.sansview.sansview import SasView
-    SasView()
+    from sans.sansview.sansview import run
+    run()

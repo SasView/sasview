@@ -35,12 +35,7 @@ from welcome_panel import WelcomePanel
 import local_config
 PLUGIN_MODEL_DIR = 'plugin_models'
 APP_NAME = 'SasView'
-def run():
-    sys.path.append(os.path.join("..","..",".."))
-    from multiprocessing import freeze_support
-    freeze_support()
-    sasview = SasView()
-        
+
 class SasViewApp(gui_manager.ViewApp):
     """
     """
@@ -112,14 +107,23 @@ class SasView():
         # delete unused model folder    
         self.gui.clean_plugin_models(PLUGIN_MODEL_DIR)
         # Start the main loop
-        self.gui.MainLoop()  
-       
+        self.gui.MainLoop()
 
 
-if __name__ == "__main__": 
+def run():
     from multiprocessing import freeze_support
     freeze_support()
-    #Process(target=SasView).start()
-    sasview = SasView()
+    if len(sys.argv) > 1:
+        thing_to_run = sys.argv[1]
+        sys.argv = sys.argv[1:]
+        import runpy
+        if os.path.exists(thing_to_run):
+            runpy.run_path(thing_to_run)
+        else:
+            runpy.run_module(thing_to_run)
+    else:
+        SasView()
 
-   
+if __name__ == "__main__":
+    run()
+

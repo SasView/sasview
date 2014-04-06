@@ -1,20 +1,140 @@
-
-
 """
 ScipyFitting module contains FitArrange , ScipyFit,
 Parameter classes.All listed classes work together to perform a 
 simple fit with scipy optimizer.
 """
+import sys
+import copy
 
 import numpy 
-import sys
-
 
 from sans.fit.AbstractFitEngine import FitEngine
-from sans.fit.AbstractFitEngine import SansAssembly
-from sans.fit.AbstractFitEngine import FitAbort
-from sans.fit.AbstractFitEngine import Model
-from sans.fit.AbstractFitEngine import FResult 
+from sans.fit.AbstractFitEngine import FResult
+
+class SansAssembly:
+    """
+    Sans Assembly class a class wrapper to be call in optimizer.leastsq method
+    """
+    def __init__(self, paramlist, model=None, data=None, fitresult=None,
+                 handler=None, curr_thread=None, msg_q=None):
+        """
+        :param Model: the model wrapper fro sans -model
+        :param Data: the data wrapper for sans data
+
+        """
+        self.model = model
+        self.data = data
+        self.paramlist = paramlist
+        self.msg_q = msg_q
+        self.curr_thread = curr_thread
+        self.handler = handler
+        self.fitresult = fitresult
+        self.res = []
+        self.true_res = []
+        self.func_name = "Functor"
+        self.theory = None
+
+    def chisq(self):
+        """
+        Calculates chi^2
+
+        :param params: list of parameter values
+
+        :return: chi^2
+
+        """
+        total = 0
+        for item in self.true_res:
+            total += item * item
+        if len(self.true_res) == 0:
+            return None
+        return total / len(self.true_res)
+
+    def __call__(self, params):
+        """
+            Compute residuals
+            :param params: value of parameters to fit
+        """
+        #import thread
+        self.model.set_params(self.paramlist, params)
+        #print "params", params
+        self.true_res, theory = self.data.residuals(self.model.eval)
+        self.theory = copy.deepcopy(theory)
+        # check parameters range
+        if self.check_param_range():
+            # if the param value is outside of the bound
+            # just silent return res = inf
+            return self.res
+        self.res = self.true_res
+
+        if self.fitresult is not None:
+            self.fitresult.set_model(model=self.model)
+            self.fitresult.residuals = self.true_res
+            self.fitresult.iterations += 1
+            self.fitresult.theory = theory
+
+            #fitness = self.chisq(params=params)
+            fitness = self.chisq()
+            self.fitresult.pvec = params
+            self.fitresult.set_fitness(fitness=fitness)
+            if self.msg_q is not None:
+                self.msg_q.put(self.fitresult)
+
+            if self.handler is not None:
+                self.handler.set_result(result=self.fitresult)
+                self.handler.update_fit()
+
+            if self.curr_thread != None:
+                try:
+                    self.curr_thread.isquit()
+                except:
+                    #msg = "Fitting: Terminated...       Note: Forcing to stop "
+                    #msg += "fitting may cause a 'Functor error message' "
+                    #msg += "being recorded in the log file....."
+                    #self.handler.stop(msg)
+                    raise
+
+        return self.res
+
+    def check_param_range(self):
+        """
+        Check the lower and upper bound of the parameter value
+        and set res to the inf if the value is outside of the
+        range
+        :limitation: the initial values must be within range.
+        """
+
+        #time.sleep(0.01)
+        is_outofbound = False
+        # loop through the fit parameters
+        model = self.model.model
+        for p in self.paramlist:
+            value = model.getParam(p)
+            low,high = model.details[p][1:3]
+            if low is not None and numpy.isfinite(low):
+                if p.value == 0:
+                    # This value works on Scipy
+                    # Do not change numbers below
+                    value = _SMALLVALUE
+                # For leastsq, it needs a bit step back from the boundary
+                val = low - value * _SMALLVALUE
+                if value < val:
+                    self.res *= 1e+6
+                    is_outofbound = True
+                    break
+            if high is not None and numpy.isfinite(high):
+                # This value works on Scipy
+                # Do not change numbers below
+                if value == 0:
+                    value = _SMALLVALUE
+                # For leastsq, it needs a bit step back from the boundary
+                val = high + value * _SMALLVALUE
+                if value > val:
+                    self.res *= 1e+6
+                    is_outofbound = True
+                    break
+
+        return is_outofbound
 
 class ScipyFit(FitEngine):
     """ 
@@ -49,8 +169,6 @@ class ScipyFit(FitEngine):
         with Uid as keys
         """
         FitEngine.__init__(self)
-        self.fit_arrange_dict = {}
-        self.param_list = []
         self.curr_thread = None
     #def fit(self, *args, **kw):
     #    return profile(self._fit, *args, **kw)
@@ -67,10 +185,8 @@ class ScipyFit(FitEngine):
         if len(fitproblem) > 1 : 
             msg = "Scipy can't fit more than a single fit problem at a time."
             raise RuntimeError, msg
-            return
-        elif len(fitproblem) == 0 : 
+        elif len(fitproblem) == 0 :
             raise RuntimeError, "No Assembly scheduled for Scipy fitting."
-            return
         model = fitproblem[0].get_model()
         if reset_flag:
             # reset the initial value; useful for batch
@@ -86,29 +202,29 @@ class ScipyFit(FitEngine):
         ftol = ftol
         
         # Check the initial value if it is within range
-        self._check_param_range(model)
+        _check_param_range(model.model, self.param_list)
         
         result = FResult(model=model, data=data, param_list=self.param_list)
         result.pars = fitproblem[0].pars
         result.fitter_id = self.fitter_id
         if handler is not None:
             handler.set_result(result=result)
+        functor = SansAssembly(paramlist=self.param_list,
+                               model=model,
+                               data=data,
+                               handler=handler,
+                               fitresult=result,
+                               curr_thread=curr_thread,
+                               msg_q=msg_q)
         try:
             # This import must be here; otherwise it will be confused when more
             # than one thread exist.
             from scipy import optimize
             
-            functor = SansAssembly(paramlist=self.param_list, 
-                                   model=model, 
-                                   data=data,
-                                    handler=handler,
-                                    fitresult=result,
-                                     curr_thread=curr_thread,
-                                     msg_q=msg_q)
             out, cov_x, _, mesg, success = optimize.leastsq(functor,
                                             model.get_params(self.param_list),
-                                                    ftol=ftol,
-                                                    full_output=1)
+                                            ftol=ftol,
+                                            full_output=1)
         except:
             if hasattr(sys, 'last_type') and sys.last_type == KeyboardInterrupt:
                 if handler is not None:
@@ -141,60 +257,37 @@ class ScipyFit(FitEngine):
         return [result]
 
         
-    def _check_param_range(self, model):
-        """
-        Check parameter range and set the initial value inside 
-        if it is out of range.
-        
-        : model: park model object
-        """
-        is_outofbound = False
-        # loop through parameterset
-        for p in model.parameterset:        
-            param_name = p.get_name()
-            # proceed only if the parameter name is in the list of fitting
-            if param_name in self.param_list:
-                # if the range was defined, check the range
-                if numpy.isfinite(p.range[0]):
-                    if p.value <= p.range[0]: 
-                        # 10 % backing up from the border if not zero
-                        # for Scipy engine to work properly.
-                        shift = self._get_zero_shift(p.range[0])
-                        new_value = p.range[0] + shift
-                        p.value =  new_value
-                        is_outofbound = True
-                if numpy.isfinite(p.range[1]):
-                    if p.value >= p.range[1]:
-                        shift = self._get_zero_shift(p.range[1])
-                        # 10 % backing up from the border if not zero
-                        # for Scipy engine to work properly.
-                        new_value = p.range[1] - shift
-                        # Check one more time if the new value goes below
-                        # the low bound, If so, re-evaluate the value 
-                        # with the mean of the range.
-                        if numpy.isfinite(p.range[0]):
-                            if new_value < p.range[0]:
-                                new_value = (p.range[0] + p.range[1]) / 2.0
-                        # Todo: 
-                        # Need to think about when both min and max are same.
-                        p.value =  new_value
-                        is_outofbound = True
-                        
-        return is_outofbound
-    
-    def _get_zero_shift(self, range):
-        """
-        Get 10% shift of the param value = 0 based on the range value
-        
-        : param range: min or max value of the bounds
-        """
-        if range == 0:
-            shift = 0.1
-        else:
-            shift = 0.1 * range
-            
-        return shift
-    
+def _check_param_range(model, param_list):
+    """
+    Check parameter range and set the initial value inside
+    if it is out of range.
+
+    : model: park model object
+    """
+    # loop through parameterset
+    for p in param_list:
+        value = model.getParam(p)
+        low,high = model.details[p][1:3]
+        # if the range was defined, check the range
+        if low is not None and value <= low:
+            value = low + _get_zero_shift(low)
+        if high is not None and value > high:
+            value = high - _get_zero_shift(high)
+            # Check one more time if the new value goes below
+            # the low bound, If so, re-evaluate the value
+            # with the mean of the range.
+            if low is not None and value < low:
+                value = 0.5 * (low+high)
+        model.setParam(p, value)
+
+def _get_zero_shift(limit):
+    """
+    Get 10% shift of the param value = 0 based on the range value
+
+    : param range: min or max value of the bounds
+    """
+    return 0.1 (limit if limit != 0.0 else 1.0)
+
     
 #def profile(fn, *args, **kw):
 #    import cProfile, pstats, os

@@ -7,8 +7,8 @@ class Load:
     """
     This class is loading values from given file or value giving by the user
     """
-    
     def __init__(self, x=None, y=None, dx=None, dy=None):
+        raise NotImplementedError("a code search shows that this code is not active, and you are not seeing this message")
         # variable to store loaded values
         self.x = x
         self.y = y

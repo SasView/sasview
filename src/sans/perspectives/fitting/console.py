@@ -4,8 +4,7 @@
 from sans.guiframe.events import StatusEvent 
 import time
 import wx
-import park
-from park.fitresult import FitHandler
+from sans.fit import FitHandler
 
 class ConsoleUpdate(FitHandler):
     """

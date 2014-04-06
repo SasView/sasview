@@ -807,8 +807,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             msg = " Parameter values are pasted from the clipboad..."
             infor = "warning"
         else:
-            msg = "Error was occured "
-            msg += ": No valid parameter values to paste from the clipboard..."
+            msg = "Error occured: "
+            msg += "No valid parameter values to paste from the clipboard..."
             infor = "error"
             wx.PostEvent(self._manager.parent,
                     StatusEvent(status=msg, info=infor))
@@ -2148,12 +2148,12 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.qmax_x = tempmax
                 else:
                     tcrtl.SetBackgroundColour("pink")
-                    msg = "Model Error:wrong value entered: %s" % sys.exc_value
+                    msg = "Model Error: wrong value entered: %s" % sys.exc_value
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
                     return
             except:
                 tcrtl.SetBackgroundColour("pink")
-                msg = "Model Error:wrong value entered: %s" % sys.exc_value
+                msg = "Model Error: wrong value entered: %s" % sys.exc_value
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
                 return
             #Check if # of points for theory model are valid(>0).
@@ -2164,11 +2164,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.num_points = temp_npts
                         #is_modified = True
                 else:
-                    msg = "Cannot Plot :No npts in that Qrange!!!  "
+                    msg = "Cannot plot: No points in Q range!!!  "
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
         else:
             tcrtl.SetBackgroundColour("pink")
-            msg = "Model Error:wrong value entered!!!"
+            msg = "Model Error: wrong value entered!!!"
             wx.PostEvent(self.parent, StatusEvent(status=msg))
         self.save_current_state()
         event = PageInfoEvent(page=self)
@@ -2205,12 +2205,12 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.theory_qmax_x = tempmax
                 else:
                     tcrtl.SetBackgroundColour("pink")
-                    msg = "Model Error:wrong value entered: %s" % sys.exc_value
+                    msg = "Model Error: wrong value entered: %s" % sys.exc_value
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                     return
             except:
                 tcrtl.SetBackgroundColour("pink")
-                msg = "Model Error:wrong value entered: %s" % sys.exc_value
+                msg = "Model Error: wrong value entered: %s" % sys.exc_value
                 wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 return
             #Check if # of points for theory model are valid(>0).
@@ -2221,11 +2221,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.num_points = temp_npts
                         is_modified = True
                 else:
-                    msg = "Cannot Plot :No npts in that Qrange!!!  "
+                    msg = "Cannot Plot: No points in Q range!!!  "
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         else:
             tcrtl.SetBackgroundColour("pink")
-            msg = "Model Error:wrong value entered!!!"
+            msg = "Model Error: wrong value entered!!!"
             wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         self.save_current_state()
         event = PageInfoEvent(page=self)
@@ -2396,8 +2396,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.qmin.Refresh()
                 self.qmax.SetBackgroundColour("pink")
                 self.qmax.Refresh()
-                msg = "Npts of Data Error :"
-                msg += "No or too little npts of %s." % data.name
+                msg = "Data Error: "
+                msg += "Too few points in %s." % data.name
                 wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 self.fitrange = False
                 flag = False
@@ -2431,8 +2431,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.qmin.Refresh()
                 self.qmax.SetBackgroundColour("pink")
                 self.qmax.Refresh()
-                msg = "Npts of Data Error :"
-                msg += "No or too little npts of %s." % data.name
+                msg = "Data Error: "
+                msg += "Too few points in %s." % data.name
                 wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 self.fitrange = False
                 flag = False
@@ -2483,7 +2483,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                             item[2].SetBackgroundColour(wx.WHITE)
                                            
                         except:
-                            msg = "Wrong Fit parameter range entered "
+                            msg = "Wrong fit parameter range entered"
                             wx.PostEvent(self._manager.parent,
                                          StatusEvent(status=msg))
                             raise ValueError, msg

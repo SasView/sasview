@@ -23,7 +23,154 @@ from park.fit import Fitter
 from park.formatnum import format_uncertainty
 from sans.fit.AbstractFitEngine import FitEngine
 from sans.fit.AbstractFitEngine import FResult
-  
+
+class SansParameter(park.Parameter):
+    """
+    SANS model parameters for use in the PARK fitting service.
+    The parameter attribute value is redirected to the underlying
+    parameter value in the SANS model.
+    """
+    def __init__(self, name, model, data):
+        """
+            :param name: the name of the model parameter
+            :param model: the sans model to wrap as a park model
+        """
+        park.Parameter.__init__(self, name)
+        self._model, self._name = model, name
+        self.data = data
+        self.model = model
+        #set the value for the parameter of the given name
+        self.set(model.getParam(name))
+
+    def _getvalue(self):
+        """
+        override the _getvalue of park parameter
+
+        :return value the parameter associates with self.name
+
+        """
+        return self._model.getParam(self.name)
+
+    def _setvalue(self, value):
+        """
+        override the _setvalue pf park parameter
+
+        :param value: the value to set on a given parameter
+
+        """
+        self._model.setParam(self.name, value)
+
+    value = property(_getvalue, _setvalue)
+
+    def _getrange(self):
+        """
+        Override _getrange of park parameter
+        return the range of parameter
+        """
+        #if not  self.name in self._model.getDispParamList():
+        lo, hi = self._model.details[self.name][1:3]
+        if lo is None: lo = -numpy.inf
+        if hi is None: hi = numpy.inf
+        if lo > hi:
+            raise ValueError, "wrong fit range for parameters"
+
+        return lo, hi
+
+    def get_name(self):
+        """
+        """
+        return self._getname()
+
+    def _setrange(self, r):
+        """
+        override _setrange of park parameter
+
+        :param r: the value of the range to set
+
+        """
+        self._model.details[self.name][1:3] = r
+    range = property(_getrange, _setrange)
+
+
+class Model(park.Model):
+    """
+    PARK wrapper for SANS models.
+    """
+    def __init__(self, sans_model, sans_data=None, **kw):
+        """
+        :param sans_model: the sans model to wrap using park interface
+
+        """
+        park.Model.__init__(self, **kw)
+        self.model = sans_model
+        self.name = sans_model.name
+        self.data = sans_data
+        #list of parameters names
+        self.sansp = sans_model.getParamList()
+        #list of park parameter
+        self.parkp = [SansParameter(p, sans_model, sans_data) for p in self.sansp]
+        #list of parameter set
+        self.parameterset = park.ParameterSet(sans_model.name, pars=self.parkp)
+        self.pars = []
+
+    def get_params(self, fitparams):
+        """
+        return a list of value of paramter to fit
+
+        :param fitparams: list of paramaters name to fit
+
+        """
+        list_params = []
+        self.pars = []
+        self.pars = fitparams
+        for item in fitparams:
+            for element in self.parkp:
+                if element.name == str(item):
+                    list_params.append(element.value)
+        return list_params
+
+    def set_params(self, paramlist, params):
+        """
+        Set value for parameters to fit
+
+        :param params: list of value for parameters to fit
+
+        """
+        try:
+            for i in range(len(self.parkp)):
+                for j in range(len(paramlist)):
+                    if self.parkp[i].name == paramlist[j]:
+                        self.parkp[i].value = params[j]
+                        self.model.setParam(self.parkp[i].name, params[j])
+        except:
+            raise
+
+    def eval(self, x):
+        """
+            Override eval method of park model.
+
+            :param x: the x value used to compute a function
+        """
+        try:
+            return self.model.evalDistribution(x)
+        except:
+            raise
+
+    def eval_derivs(self, x, pars=[]):
+        """
+        Evaluate the model and derivatives wrt pars at x.
+
+        pars is a list of the names of the parameters for which derivatives
+        are desired.
+
+        This method needs to be specialized in the model to evaluate the
+        model function.  Alternatively, the model can implement is own
+        version of residuals which calculates the residuals directly
+        instead of calling eval.
+        """
+        return []
+
+
 class SansFitResult(fitresult.FitResult):
     def __init__(self, *args, **kwrds):
         fitresult.FitResult.__init__(self, *args, **kwrds)
@@ -382,7 +529,7 @@ class ParkFit(FitEngine):
   
     def fit(self, msg_q=None, 
             q=None, handler=None, curr_thread=None, 
-                                        ftol=1.49012e-8, reset_flag=False):
+            ftol=1.49012e-8, reset_flag=False):
         """
         Performs fit with park.fit module.It can  perform fit with one model
         and a set of data, more than two fit of  one model and sets of data or 

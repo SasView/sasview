@@ -110,6 +110,7 @@ class Plugin(PluginBase):
         self._extensions = '.fitv'
         self.scipy_id = wx.NewId()
         self.park_id = wx.NewId()
+        self.bumps_id = wx.NewId()
         self.menu1 = None
         self.new_model_frame = None
         
@@ -197,8 +198,14 @@ class Plugin(PluginBase):
                                    park_help)
         wx.EVT_MENU(owner, self.park_id, self._onset_engine_park)
         
+        bumps_help = "Bumps: fitting and uncertainty analysis. More in Help window...."
+        self.menu1.AppendCheckItem(self.bumps_id, "Bumps fit",
+                                   bumps_help)
+        wx.EVT_MENU(owner, self.bumps_id, self._onset_engine_bumps)
+        
         self.menu1.FindItemById(self.scipy_id).Check(True)
         self.menu1.FindItemById(self.park_id).Check(False)
+        self.menu1.FindItemById(self.bumps_id).Check(False)
         self.menu1.AppendSeparator()
         self.id_tol = wx.NewId()
         ftol_help = "Change the current FTolerance (=%s) " % str(self.ftol)
@@ -206,6 +213,13 @@ class Plugin(PluginBase):
         self.menu1.Append(self.id_tol, "Change FTolerance",
                                    ftol_help)
         wx.EVT_MENU(owner, self.id_tol, self.show_ftol_dialog)
+
+        self.id_bumps_options = wx.NewId()
+        bopts_help = "Bumps fitting options"
+        self.menu1.Append(self.id_bumps_options, 'Bumps &Options', bopts_help)
+        wx.EVT_MENU(owner, self.id_bumps_options, self.on_bumps_options)
+        self.bumps_options_menu = self.menu1.FindItemById(self.id_bumps_options)
+        self.bumps_options_menu.Enable(True)
         self.menu1.AppendSeparator()
         
         self.id_reset_flag = wx.NewId()
@@ -818,6 +832,10 @@ class Plugin(PluginBase):
                          StatusEvent(status=msg, info='warning'))
         dialog.Destroy()
 
+    def on_bumps_options(self, event=None):
+        from bumps.gui.fit_dialog import OpenFitOptions
+        OpenFitOptions()
+
     def stop_fit(self, uid):
         """
         Stop the fit engine
@@ -958,7 +976,7 @@ class Plugin(PluginBase):
                 fitproblem_count += 1
         self._gui_engine = self._return_engine_type()
         self.fitproblem_count = fitproblem_count
-        if self._fit_engine == "park":
+        if self._fit_engine in ("park","bumps"):
             engineType = "Simultaneous Fit"
         else:
             engineType = "Single Fit"
@@ -1681,6 +1699,12 @@ class Plugin(PluginBase):
         """
         self._on_change_engine('scipy')
        
+    def _onset_engine_bumps(self, event):
+        """ 
+        set engine to bumps
+        """
+        self._on_change_engine('bumps')
+       
     def _on_slicer_event(self, event):
         """
         Receive a panel as event and send it to guiframe
@@ -1732,9 +1756,15 @@ class Plugin(PluginBase):
         if engine == "park":
             self.menu1.FindItemById(self.park_id).Check(True)
             self.menu1.FindItemById(self.scipy_id).Check(False)
-        else:
+            self.menu1.FindItemById(self.bumps_id).Check(False)
+        elif engine == "scipy":
             self.menu1.FindItemById(self.park_id).Check(False)
             self.menu1.FindItemById(self.scipy_id).Check(True)
+            self.menu1.FindItemById(self.bumps_id).Check(False)
+        else:
+            self.menu1.FindItemById(self.park_id).Check(False)
+            self.menu1.FindItemById(self.scipy_id).Check(False)
+            self.menu1.FindItemById(self.bumps_id).Check(True)
         ## post a message to status bar
         msg = "Engine set to: %s" % self._fit_engine
         wx.PostEvent(self.parent,

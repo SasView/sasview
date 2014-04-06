@@ -2,145 +2,108 @@
 import  copy
 #import logging
 import sys
-import numpy
 import math
-import park
+import numpy
+
 from sans.dataloader.data_info import Data1D
 from sans.dataloader.data_info import Data2D
-_SMALLVALUE = 1.0e-10    
-    
-class SansParameter(park.Parameter):
+_SMALLVALUE = 1.0e-10
+
+# Note: duplicated from park
+class FitHandler(object):
     """
-    SANS model parameters for use in the PARK fitting service.
-    The parameter attribute value is redirected to the underlying
-    parameter value in the SANS model.
+    Abstract interface for fit thread handler.
+
+    The methods in this class are called by the optimizer as the fit
+    progresses.
+
+    Note that it is up to the optimizer to call the fit handler correctly,
+    reporting all status changes and maintaining the 'done' flag.
     """
-    def __init__(self, name, model, data):
+    done = False
+    """True when the fit job is complete"""
+    result = None
+    """The current best result of the fit"""
+
+    def improvement(self):
         """
-            :param name: the name of the model parameter
-            :param model: the sans model to wrap as a park model
+        Called when a result is observed which is better than previous
+        results from the fit.
+
+        result is a FitResult object, with parameters, #calls and fitness.
         """
-        park.Parameter.__init__(self, name)
-        self._model, self._name = model, name
-        self.data = data
-        self.model = model
-        #set the value for the parameter of the given name
-        self.set(model.getParam(name))
-         
-    def _getvalue(self):
+    def error(self, msg):
         """
-        override the _getvalue of park parameter
-        
-        :return value the parameter associates with self.name
-        
+        Model had an error; print traceback
         """
-        return self._model.getParam(self.name)
-    
-    def _setvalue(self, value):
+    def progress(self, current, expected):
         """
-        override the _setvalue pf park parameter
-        
-        :param value: the value to set on a given parameter
-        
+        Called each cycle of the fit, reporting the current and the
+        expected amount of work.   The meaning of these values is
+        optimizer dependent, but they can be converted into a percent
+        complete using (100*current)//expected.
+
+        Progress is updated each iteration of the fit, whatever that
+        means for the particular optimization algorithm.  It is called
+        after any calls to improvement for the iteration so that the
+        update handler can control I/O bandwidth by suppressing
+        intermediate improvements until the fit is complete.
         """
-        self._model.setParam(self.name, value)
-        
-    value = property(_getvalue, _setvalue)
-    
-    def _getrange(self):
+    def finalize(self):
         """
-        Override _getrange of park parameter
-        return the range of parameter
+        Fit is complete; best results are reported
         """
-        #if not  self.name in self._model.getDispParamList():
-        lo, hi = self._model.details[self.name][1:3]
-        if lo is None: lo = -numpy.inf
-        if hi is None: hi = numpy.inf
-        if lo > hi:
-            raise ValueError, "wrong fit range for parameters"
-        
-        return lo, hi
-    
-    def get_name(self):
+    def abort(self):
         """
+        Fit was aborted.
         """
-        return self._getname()
-    
-    def _setrange(self, r):
-        """
-        override _setrange of park parameter
-        
-        :param r: the value of the range to set
-        
-        """
-        self._model.details[self.name][1:3] = r
-    range = property(_getrange, _setrange)
-    
-    
-class Model(park.Model):
+
+class Model:
     """
-    PARK wrapper for SANS models.
+    Fit wrapper for SANS models.
     """
     def __init__(self, sans_model, sans_data=None, **kw):
         """
         :param sans_model: the sans model to wrap using park interface
-        
+
         """
-        park.Model.__init__(self, **kw)
         self.model = sans_model
         self.name = sans_model.name
         self.data = sans_data
-        #list of parameters names
-        self.sansp = sans_model.getParamList()
-        #list of park parameter
-        self.parkp = [SansParameter(p, sans_model, sans_data) for p in self.sansp]
-        #list of parameter set
-        self.parameterset = park.ParameterSet(sans_model.name, pars=self.parkp)
-        self.pars = []
-  
+
     def get_params(self, fitparams):
         """
         return a list of value of paramter to fit
-        
+
         :param fitparams: list of paramaters name to fit
-        
+
         """
-        list_params = []
-        self.pars = []
-        self.pars = fitparams
-        for item in fitparams:
-            for element in self.parkp:
-                if element.name == str(item):
-                    list_params.append(element.value)
-        return list_params
-    
+        return [self.model.getParam(k) for k in fitparams]
+
     def set_params(self, paramlist, params):
         """
         Set value for parameters to fit
-        
+
         :param params: list of value for parameters to fit
-        
+
         """
-        try:
-            for i in range(len(self.parkp)):
-                for j in range(len(paramlist)):
-                    if self.parkp[i].name == paramlist[j]:
-                        self.parkp[i].value = params[j]
-                        self.model.setParam(self.parkp[i].name, params[j])
-        except:
-            raise
-  
+        for k,v in zip(paramlist, params):
+            self.model.setParam(k,v)
+
+    def set(self, **kw):
+        self.set_params(*zip(*kw.items()))
+
     def eval(self, x):
         """
             Override eval method of park model.
-        
+
             :param x: the x value used to compute a function
         """
         try:
             return self.model.evalDistribution(x)
         except:
             raise
-        
+
     def eval_derivs(self, x, pars=[]):
         """
         Evaluate the model and derivatives wrt pars at x.
@@ -153,9 +116,11 @@ class Model(park.Model):
         version of residuals which calculates the residuals directly
         instead of calling eval.
         """
-        return []
+        raise NotImplementedError('no derivatives available')
 
-    
+    def __call__(self, x):
+        return self.eval(x)
+
 class FitData1D(Data1D):
     """
         Wrapper class  for SANS data
@@ -184,6 +149,7 @@ class FitData1D(Data1D):
                 
         """
         Data1D.__init__(self, x=x, y=y, dx=dx, dy=dy)
+        self.num_points = len(x)
         self.sans_data = data
         self.smearer = smearer
         self._first_unsmeared_bin = None
@@ -297,6 +263,7 @@ class FitData2D(Data2D):
             or with vectors.
         """
         self.res_err_image = []
+        self.num_points = data.size
         self.idx = []
         self.qmin = None
         self.qmax = None
@@ -408,138 +375,7 @@ class FitAbort(Exception):
     #print"Creating fit abort Exception"
 
 
-class SansAssembly:
-    """
-    Sans Assembly class a class wrapper to be call in optimizer.leastsq method
-    """
-    def __init__(self, paramlist, model=None, data=None, fitresult=None,
-                 handler=None, curr_thread=None, msg_q=None):
-        """
-        :param Model: the model wrapper fro sans -model
-        :param Data: the data wrapper for sans data
-        
-        """
-        self.model = model
-        self.data = data
-        self.paramlist = paramlist
-        self.msg_q = msg_q
-        self.curr_thread = curr_thread
-        self.handler = handler
-        self.fitresult = fitresult
-        self.res = []
-        self.true_res = []
-        self.func_name = "Functor"
-        self.theory = None
-        
-    def chisq(self):
-        """
-        Calculates chi^2
-        
-        :param params: list of parameter values
-        
-        :return: chi^2
-        
-        """
-        total = 0
-        for item in self.true_res:
-            total += item * item
-        if len(self.true_res) == 0:
-            return None
-        return total / len(self.true_res)
-    
-    def __call__(self, params):
-        """
-            Compute residuals
-            :param params: value of parameters to fit
-        """
-        #import thread
-        self.model.set_params(self.paramlist, params)
-        #print "params", params
-        self.true_res, theory = self.data.residuals(self.model.eval)
-        self.theory = copy.deepcopy(theory)
-        # check parameters range
-        if self.check_param_range():
-            # if the param value is outside of the bound
-            # just silent return res = inf
-            return self.res
-        self.res = self.true_res
-        
-        if self.fitresult is not None:
-            self.fitresult.set_model(model=self.model)
-            self.fitresult.residuals = self.true_res
-            self.fitresult.iterations += 1
-            self.fitresult.theory = theory
-           
-            #fitness = self.chisq(params=params)
-            fitness = self.chisq()
-            self.fitresult.pvec = params
-            self.fitresult.set_fitness(fitness=fitness)
-            if self.msg_q is not None:
-                self.msg_q.put(self.fitresult)
-                
-            if self.handler is not None:
-                self.handler.set_result(result=self.fitresult)
-                self.handler.update_fit()
 
-            if self.curr_thread != None:
-                try:
-                    self.curr_thread.isquit()
-                except:
-                    #msg = "Fitting: Terminated...       Note: Forcing to stop "
-                    #msg += "fitting may cause a 'Functor error message' "
-                    #msg += "being recorded in the log file....."
-                    #self.handler.stop(msg)
-                    raise
-         
-        return self.res
-    
-    def check_param_range(self):
-        """
-        Check the lower and upper bound of the parameter value
-        and set res to the inf if the value is outside of the
-        range
-        :limitation: the initial values must be within range.
-        """
-
-        #time.sleep(0.01)
-        is_outofbound = False
-        # loop through the fit parameters
-        for p in self.model.parameterset:
-            param_name = p.get_name()
-            if param_name in self.paramlist:
-                
-                # if the range was defined, check the range
-                if numpy.isfinite(p.range[0]):
-                    if p.value == 0:
-                        # This value works on Scipy
-                        # Do not change numbers below
-                        value = _SMALLVALUE
-                    else:
-                        value = p.value
-                    # For leastsq, it needs a bit step back from the boundary
-                    val = p.range[0] - value * _SMALLVALUE
-                    if p.value < val:
-                        self.res *= 1e+6
-                        
-                        is_outofbound = True
-                        break
-                if numpy.isfinite(p.range[1]):
-                    # This value works on Scipy
-                    # Do not change numbers below
-                    if p.value == 0:
-                        value = _SMALLVALUE
-                    else:
-                        value = p.value
-                    # For leastsq, it needs a bit step back from the boundary
-                    val = p.range[1] + value * _SMALLVALUE
-                    if p.value > val:
-                        self.res *= 1e+6
-                        is_outofbound = True
-                        break
-
-        return is_outofbound
-    
-    
 class FitEngine:
     def __init__(self):
         """
@@ -753,11 +589,6 @@ class FitArrange:
         return self.selected
     
     
-IS_MAC = True
-if sys.platform.count("win32") > 0:
-    IS_MAC = False
-
-
 class FResult(object):
     """
     Storing fit result
@@ -776,7 +607,6 @@ class FResult(object):
         self.residuals = []
         self.index = []
         self.parameters = None
-        self.is_mac = IS_MAC
         self.model = model
         self.data = data
         self.theory = []
@@ -802,20 +632,14 @@ class FResult(object):
         """
         if self.pvec == None and self.model is None and self.param_list is None:
             return "No results"
-        n = len(self.model.parameterset)
-        
-        result_param = zip(xrange(n), self.model.parameterset)
-        msg1 = ["[Iteration #: %s ]" % self.iterations]
-        msg3 = ["=== goodness of fit: %s ===" % (str(self.fitness))]
-        if not self.is_mac:
-            msg2 = ["P%-3d  %s......|.....%s" % \
-                (p[0], p[1], p[1].value)\
-                  for p in result_param if p[1].name in self.param_list]
-            msg = msg1 + msg3 + msg2
-        else:
-            msg = msg1 + msg3
-        msg = "\n".join(msg)
-        return msg
+
+        pars = enumerate(self.model.model.getParamList())
+        msg1 = "[Iteration #: %s ]" % self.iterations
+        msg3 = "=== goodness of fit: %s ===" % (str(self.fitness))
+        msg2 = ["P%-3d  %s......|.....%s" % (i, v, self.model.model.getParam(v))
+                for i,v in pars if v in self.param_list]
+        msg = [msg1, msg3] + msg2
+        return "\n".join(msg)
     
     def print_summary(self):
         """
