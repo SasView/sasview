@@ -189,6 +189,11 @@ html_static_path = ['_static']
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'SasViewdoc'
 
+# Turn off permalinks, which are a nice feature for the docs when viewed in a
+# browser, but which look weird (and cannot be "right-click->copy url") in
+# the SasView help.
+html_add_permalinks = ""
+
 
 # -- Options for LaTeX output --------------------------------------------------
 
