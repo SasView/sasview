@@ -297,6 +297,7 @@ class ViewerFrame(PARENT_FRAME):
         self._default_save_location = DEFAULT_OPEN_FOLDER       
         # Welcome panel
         self.defaultPanel = None
+        self.welcome_panel_class = None
         #panel on focus
         self.panel_on_focus = None
         #control_panel on focus
@@ -757,6 +758,11 @@ class ViewerFrame(PARENT_FRAME):
         """
         # set tool bar
         self._setup_tool_bar()
+
+        # Create the menu bar. To be filled later.
+        # WX 3.0 needs us to create the menu bar first.
+        self._menubar = wx.MenuBar()
+        self.SetMenuBar(self._menubar)
         # Set up the layout
         self._setup_layout()
         
@@ -769,7 +775,7 @@ class ViewerFrame(PARENT_FRAME):
             msg = "%s Cannot load file %s\n" %(str(APPLICATION_NAME), 
                                              str(self._input_file))
             msg += str(sys.exc_value) + '\n'
-            print msg
+            logging.error(msg)
         if self._data_panel is not None and len(self.plugins) > 0:
             self._data_panel.fill_cbox_analysis(self.plugins)
         self.post_init()
@@ -931,20 +937,7 @@ class ViewerFrame(PARENT_FRAME):
             pass  
 
         return plugins
-    
-    def set_welcome_panel(self, panel_class):
-        """
-        Sets the default panel as the given welcome panel 
-        
-        :param panel_class: class of the welcome panel to be instantiated
-        
-        """
-        win = MDIFrame(self, None, 'None', (100, 200))
-        self.defaultPanel = panel_class(win, -1, style=wx.RAISED_BORDER)
-        win.set_panel(self.defaultPanel)
-        self.defaultPanel.set_frame(win)
-        win.Show(False)
-        
+
     def _get_panels_size(self, p):
         """
         find the proper size of the current panel
@@ -985,23 +978,27 @@ class ViewerFrame(PARENT_FRAME):
             if hasattr(item, "get_panels"):
                 ps = item.get_panels(self)
                 panels.extend(ps)
-       
-        # Show a default panel with some help information
-        # It also sets the size of the application windows
-        #TODO: Use this for splash screen
-        #if self.defaultPanel is None:
-        #    self.defaultPanel = DefaultPanel(self, -1, style=wx.RAISED_BORDER)
-        # add a blank default panel always present 
+        
+        # Set up welcome panel
+        #TODO: this needs serious simplification
+        if self.welcome_panel_class is not None:
+            welcome_panel = MDIFrame(self, None, 'None', (100, 200))
+            self.defaultPanel = self.welcome_panel_class(welcome_panel, -1, style=wx.RAISED_BORDER)
+            welcome_panel.set_panel(self.defaultPanel)
+            self.defaultPanel.set_frame(welcome_panel)
+            welcome_panel.Show(False)
+        
         self.panels["default"] = self.defaultPanel
-        w, h = self._get_panels_size(self.defaultPanel)
-        frame = self.defaultPanel.get_frame()
-        frame.SetSize((self._window_width, self._window_height))
         size_t_bar = 70
-        if not IS_WIN:
-            if IS_LINUX:
-                size_t_bar = 115
-            frame.SetPosition((0, mac_pos_y + size_t_bar))
-        frame.Show(True)
+        if IS_LINUX:
+            size_t_bar = 115
+        if self.defaultPanel is not None:
+            w, h = self._get_panels_size(self.defaultPanel)
+            frame = self.defaultPanel.get_frame()
+            frame.SetSize((self._window_width, self._window_height))
+            if not IS_WIN:
+                frame.SetPosition((0, mac_pos_y + size_t_bar))
+            frame.Show(True)
         #add data panel 
         win = MDIFrame(self, None, 'None', (100, 200))
         data_panel = DataPanel(parent=win,  id=-1)
@@ -1218,7 +1215,6 @@ class ViewerFrame(PARENT_FRAME):
         Set up the application menus
         """
         # Menu
-        self._menubar = wx.MenuBar()
         self._add_menu_file()
         self._add_menu_edit()
         self._add_menu_view()
@@ -1228,7 +1224,6 @@ class ViewerFrame(PARENT_FRAME):
         self._add_current_plugin_menu()
         #self._add_menu_window()
         self._add_help_menu()
-        self.SetMenuBar(self._menubar)
         
     def _setup_tool_bar(self):
         """
@@ -1237,7 +1232,7 @@ class ViewerFrame(PARENT_FRAME):
         self._toolbar = GUIToolBar(self)
         # The legacy code doesn't work well for wx 3.0
         # but the old code produces better results with wx 2.8
-        if wx.VERSION_STRING >= '3.0.0.0':
+        if not IS_WIN and wx.VERSION_STRING >= '3.0.0.0':
             sizer = wx.BoxSizer(wx.VERTICAL)
             sizer.Add(self._toolbar, 0, wx.EXPAND)
             self.SetSizer(sizer)
@@ -1678,7 +1673,7 @@ class ViewerFrame(PARENT_FRAME):
         try:
             caption = self.panels[ID].window_caption
         except:
-            print "delete_panel: No such plot id as %s" % ID
+            logging.error("delete_panel: No such plot id as %s" % ID)
             return
         if ID in self.panels.keys():
             self.panel_on_focus = None
@@ -1716,10 +1711,7 @@ class ViewerFrame(PARENT_FRAME):
             log_msg = "File Loader cannot "
             log_msg += "load: %s\n" % str(basename)
             log_msg += "Try Data opening...."
-            logging.info(log_msg)
-            print log_msg
-            #self.load_complete(output=output, error_message=error_message,
-            #       message=log_msg, path=path)    
+            logging.error(log_msg)
             return
         
         #reading a state file
@@ -1798,13 +1790,13 @@ class ViewerFrame(PARENT_FRAME):
             log_msg = "Data Loader cannot "
             log_msg += "load: %s\n" % str(path)
             log_msg += "Try File opening ...."
-            print log_msg
+            logging.error(log_msg)
             return
         log_msg = ''
         output = {}
         error_message = ""
         try:
-            print "Loading Data...:\n" + str(path) + "\n"
+            logging.info("Loading Data...:\n" + str(path) + "\n")
             temp =  self.loader.load(path)
             if temp.__class__.__name__ == "list":
                 for item in temp:
@@ -1819,7 +1811,7 @@ class ViewerFrame(PARENT_FRAME):
             error_message = "Error while loading"
             error_message += " Data from cmd:\n %s\n" % str(path)
             error_message += str(sys.exc_value) + "\n"
-            print error_message
+            logging.error(error_message)
  
     def load_folder(self, path):
         """
@@ -1840,7 +1832,7 @@ class ViewerFrame(PARENT_FRAME):
             error_message = "Error while loading"
             error_message += " Data folder from cmd:\n %s\n" % str(path)
             error_message += str(sys.exc_value) + "\n"
-            print error_message 
+            logging.error(error_message)
             
     def _on_open_state_application(self, event):
         """
@@ -2129,7 +2121,7 @@ class ViewerFrame(PARENT_FRAME):
                     self.put_icon(dialog)  
                     dialog.Show(True) 
                 except:
-                    print "Error in _onTutorial: %s" % sys.exc_value
+                    logging.error("Error in _onTutorial: %s" % sys.exc_value)
                     try:
                         #in case when the pdf default set other than acrobat
                         import ho.pisa as pisa
@@ -3301,7 +3293,7 @@ class ViewApp(wx.App):
         :param panel_class: class of the welcome panel to be instantiated
         
         """
-        self.frame.set_welcome_panel(panel_class)
+        self.frame.welcome_panel_class = panel_class
         
     def add_perspective(self, perspective):
         """
@@ -3417,17 +3409,13 @@ class MDIFrame(CHILD_FRAME):
     """
     Frame for panels
     """
-    def __init__(self, parent, panel, title="Untitled",
-                size=(300,200), *args, **kwds):
+    def __init__(self, parent, panel, title="Untitled", size=(300,200)):
         """
         comment
         :param parent: parent panel/container
         """
-        kwds['size']= size
-        kwds['title']= title
-        kwds['style'] = MDI_STYLE
         # Initialize the Frame object
-        CHILD_FRAME.__init__(self, parent, *args, **kwds)
+        CHILD_FRAME.__init__(self, parent=parent, id=wx.ID_ANY, title=title, size=size)
         self.parent = parent
         self.name = "Untitled"
         self.batch_on = self.parent.batch_on
