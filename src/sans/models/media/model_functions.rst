@@ -2026,38 +2026,36 @@ S. Alexandru Rautu, Private Communication.
 
 **2.1.25. EllipsoidModel**
 
-This model provides the form factor for an ellipsoid (ellipsoid of
-revolution) with uniform scattering length density. The form factor is
-normalized by the particle volume.
+This model provides the form factor for an ellipsoid (ellipsoid of revolution) with uniform scattering length density.
+The form factor is normalized by the particle volume.
 
-*1.1. Definition*
+*2.1.25.1. Definition*
 
-The output of the 2D scattering intensity function for oriented
-ellipsoids is given by (Feigin, 1987):
+The output of the 2D scattering intensity function for oriented ellipsoids is given by (Feigin, 1987)
 
+.. image:: img/image059.PNG
 
+where
 
+.. image:: img/image119.PNG
 
+and
 
+.. image:: img/image120.PNG
 
+|alpha| is the angle between the axis of the ellipsoid and the *q*\ -vector, *V* is the volume of the ellipsoid, *Ra*
+is the radius along the rotational axis of the ellipsoid, *Rb* is the radius perpendicular to the rotational axis of
+the ellipsoid and |bigdelta|\ |rho| (contrast) is the scattering length density difference between the scatterer and
+the solvent.
 
-where is the angle between the axis of the ellipsoid and the q-vector,
-V is the volume of the ellipsoid, Ra is the radius along the rotation
-axis of the ellipsoid, Rb is the radius perpendicular to the rotation
-axis of the ellipsoid and * (contrast) is the scattering length
-density difference between the scatterer and the solvent.
+To provide easy access to the orientation of the ellipsoid, we define the rotation axis of the ellipsoid using two
+angles |theta| and |phi|\ . These angles are defined on Figure 2 of the CylinderModel_. For the ellipsoid, |theta|
+is the angle between the rotational axis and the *z*\ -axis.
 
-To provide easy access to the orientation of the ellipsoid, we define
-the rotation axis of the ellipsoid using two angles and . Similarly to
-the case of the cylinder, those angles are defined on Figure 2. For
-the ellipsoid, is the angle between the rotation axis and the z-axis.
+NB: The 2nd virial coefficient of the solid ellipsoid is calculated based on the *radius_a* and *radius_b* values, and
+used as the effective radius for *S(Q)* when *P(Q)* \* *S(Q)* is applied.
 
-For P*S: The 2nd virial coefficient of the solid ellipsoid is
-calculate based on the radius_a and radius_b values, and used as the
-effective radius toward S(Q) when P(Q)*S(Q) is applied.
-
-The returned value is scaled to units of |cm^-1| and the parameters of
-the ellipsoid model are the following:
+The returned value is scaled to units of |cm^-1| and the parameters of the EllipsoidModel are the following
 
 ================  ========  =============
 Parameter name    Units     Default value
@@ -2072,62 +2070,51 @@ axis_theta        degree    90
 axis_phi          degree    0.0
 ================  ========  =============
 
+The output of the 1D scattering intensity function for randomly oriented ellipsoids is then given by the equation
+above.
 
+.. image:: img/image121.JPG
 
-The output of the 1D scattering intensity function for randomly
-oriented ellipsoids is then given by the equation above.
+The *axis_theta* and *axis_phi* parameters are not used for the 1D output. Our implementation of the scattering
+kernel and the 1D scattering intensity use the c-library from NIST.
 
-The *axis_theta* and axis *_phi* parameters are not used for the 1D
-output. Our implementation of the scattering kernel and the 1D
-scattering intensity use the c-library from NIST.
+.. image:: img/image122.JPG
 
+*Figure. The angles for oriented ellipsoid.*
 
+*2.1.25.1. Validation of the EllipsoidModel*
 
-Figure. The angles for oriented ellipsoid
+Validation of our code was done by comparing the output of the 1D model to the output of the software provided by the
+NIST (Kline, 2006). Figure 1 below shows a comparison of the 1D output of our model and the output of the NIST
+software.
 
-*2.1. Validation of the ellipsoid model*
+.. image:: img/image123.JPG
 
-Validation of our code was done by comparing the output of the 1D
-model to the output of the software provided by the NIST (Kline,
-2006). Figure 5 shows a comparison of the 1D output of our model and
-the output of the NIST software.
+*Figure 1: Comparison of the SasView scattering intensity for an ellipsoid with the output of the NIST SANS analysis*
+*software.* The parameters were set to: *Scale* = 1.0, *Radius_a* = 20, *Radius_b* = 400, *Contrast* = 3e-6 |Ang^-2|,
+and *Background* = 0.01 |cm^-1|.
 
-Averaging over a distribution of orientation is done by evaluating the
-equation above. Since we have no other software to compare the
-implementation of the intensity for fully oriented ellipsoids, we can
-compare the result of averaging our 2D output using a uniform
-distribution *p(,* *)* = 1.0. Figure 6 shows the result of such a
+Averaging over a distribution of orientation is done by evaluating the equation above. Since we have no other software
+to compare the implementation of the intensity for fully oriented ellipsoids, we can compare the result of averaging
+our 2D output using a uniform distribution *p(*\ |theta|,\ |phi|\ *)* = 1.0. Figure 2 shows the result of such a
 cross-check.
 
+.. image:: img/image124.JPG
 
+*Figure 2: Comparison of the intensity for uniformly distributed ellipsoids calculated from our 2D model and the*
+*intensity from the NIST SANS analysis software.* The parameters used were: *Scale* = 1.0, *Radius_a* = 20,
+*Radius_b* = 400, *Contrast* = 3e-6 |Ang^-2|, and *Background* = 0.0 |cm^-1|.
 
-The discrepancy above q=0.3 -1 is due to the way the form factors are
-calculated in the c-library provided by NIST. A numerical integration
-has to be performed to obtain P(q) for randomly oriented particles.
-The NIST software performs that integration with a 76-point Gaussian
-quadrature rule, which will become imprecise at high q where the
-amplitude varies quickly as a function of q. The SasView result shown
-has been obtained by summing over 501 equidistant points in . Our
-result was found to be stable over the range of q shown for a number
-of points higher than 500.
+The discrepancy above *q* = 0.3 |cm^-1| is due to the way the form factors are calculated in the c-library provided by
+NIST. A numerical integration has to be performed to obtain *P(q)* for randomly oriented particles. The NIST software
+performs that integration with a 76-point Gaussian quadrature rule, which will become imprecise at high q where the
+amplitude varies quickly as a function of *q*. The SasView result shown has been obtained by summing over 501
+equidistant points in . Our result was found to be stable over the range of *q* shown for a number of points higher
+than 500.
 
-* *
-
-Figure 5: Comparison of the SasView scattering intensity for an
-ellipsoid with the output of the NIST SANS analysis software. The
-parameters were set to: Scale=1.0, Radius_a=20 , Radius_b=400 ,
-
-Contrast=3e-6 |Ang^-2|, and Background=0.01 |cm^-1|.
-
-
-
-
-
-Figure 6: Comparison of the intensity for uniformly distributed
-ellipsoids calculated from our 2D model and the intensity from the
-NIST SANS analysis software. The parameters used were: Scale=1.0,
-Radius_a=20 , Radius_b=400 , Contrast=3e-6 |Ang^-2|, and Background=0.0 cm
--1.
+REFERENCE
+L. A. Feigin and D. I. Svergun. *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum,
+New York, 1987.
 
 
 
