@@ -763,17 +763,19 @@ class ViewerFrame(PARENT_FRAME):
         # WX 3.0 needs us to create the menu bar first.
         self._menubar = wx.MenuBar()
         self.SetMenuBar(self._menubar)
-        # Set up the layout
-        self._setup_layout()
-        
-        # Set up the menu
         self._add_menu_file()
         self._add_menu_edit()
         self._add_menu_view()
         self._add_menu_application()
         self._add_menu_tool()
+        # Set up the layout
+        self._setup_layout()
+        
+        # Set up the menu
         self._add_current_plugin_menu()
         self._add_help_menu()
+        # Append item from plugin under menu file if necessary
+        self._populate_file_menu()
         
         try:
             self.load_from_cmd(self._input_file)
@@ -1490,8 +1492,6 @@ class ViewerFrame(PARENT_FRAME):
         
         # File menu
         self._file_menu = wx.Menu()
-        #append item from plugin under menu file if necessary
-        self._populate_file_menu()
         style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
         if OPEN_SAVE_MENU:
             id = wx.NewId()
