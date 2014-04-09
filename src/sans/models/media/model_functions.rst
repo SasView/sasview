@@ -177,9 +177,9 @@ Cylinder-based
 Ellipsoid-based
 ---------------
 
-- EllipsoidModel
-- CoreShellEllipsoidModel
-- CoreShellEllipsoidXTModel
+- EllipsoidModel_
+- CoreShellEllipsoidModel_
+- CoreShellEllipsoidXTModel_
 - TriaxialEllipsoidModel
 
 Lamellae
@@ -2122,38 +2122,33 @@ New York, 1987.
 
 **2.1.26. CoreShellEllipsoidModel**
 
-This model provides the form factor, *P(q)*, for a core shell
-ellipsoid (below) where the form factor is normalized by the volume of
-the cylinder. P(q) = scale*<f^2>/V+background where the volume V=
-4pi/3*rmaj*rmin2 and the averaging < > is applied over all orientation
-for 1D.
+This model provides the form factor, *P(q)*, for a core shell ellipsoid (below) where the form factor is normalized by
+the volume of the cylinder.
 
+*P(q)* = *scale* \* <*f*\ :sup:`2`> / *V* + *background*
 
+where the volume *V* = (4/3)\ |pi| (*r*\ :sub:`maj` *r*\ :sub:`min`\ :sup:`2`) and the averaging < > is applied over
+all orientations for 1D.
+
+.. image:: img/image125.GIF
 
 The returned value is in units of |cm^-1|, on absolute scale.
 
-The form factor calculated is:
+*2.1.26.1. Definition*
 
+The form factor calculated is
 
+.. image:: img/image126.PNG
 
+To provide easy access to the orientation of the core-shell ellipsoid, we define the axis of the solid ellipsoid using
+two angles |theta| and |phi|\ . These angles are defined on Figure 2 of the CylinderModel_. The contrast is defined as
+SLD(core) - SLD(shell) and SLD(shell) - SLD(solvent).
 
+In the parameters, *equat_core* = equatorial core radius, *polar_core* = polar core radius, *equat_shell* =
+*r*\ :sub:`min` (or equatorial outer radius), and *polar_shell* = = *r*\ :sub:`maj` (or polar outer radius).
 
-
-
-To provide easy access to the orientation of the coreshell ellipsoid,
-we define the axis of the solid ellipsoid using two angles , .
-Similarly to the case of the cylinder, those angles, and , are defined
-on Figure 2 of CylinderModel.
-
-The contrast is defined as SLD(core) SLD(shell) or SLD(shell solvent).
-In the parameters, equat_core = equatorial core radius, polar_core =
-polar core radius, equat_shell = rmin (or equatorial outer radius),
-and polar_shell = = rmaj (or polar outer radius).
-
-For P*S: The 2nd virial coefficient of the solid ellipsoid is
-calculate based on the radius_a (= polar_shell) and radius_b (=
-equat_shell) values, and used as the effective radius toward S(Q) when
-P(Q)*S(Q) is applied.
+NB: The 2nd virial coefficient of the solid ellipsoid is calculated based on the *radius_a* (= *polar_shell*) and
+*radius_b* (= *equat_shell*) values, and used as the effective radius for *S(Q)* when *P(Q)* \* *S(Q)* is applied.
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -2169,24 +2164,20 @@ sld_core        |Ang^-2|  2e-06
 sld_shell       |Ang^-2|  1e-06
 ==============  ========  =============
 
-
+.. image:: img/image127.JPG
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
+.. image:: img/image122.JPG
 
+*Figure. The angles for oriented CoreShellEllipsoid.*
 
-
-
-Figure. The angles for oriented coreshellellipsoid .
-
-Our model uses the form factor calculations implemented in a c-library
-provided by the NIST Center for Neutron Research (Kline, 2006):
+Our model uses the form factor calculations implemented in a c-library provided by the NIST Center for Neutron Research
+(Kline, 2006).
 
 REFERENCE
-
-Kotlarchyk, M.; Chen, S.-H. J. Chem. Phys., 1983, 79, 2461.
-
-Berr, S. J. Phys. Chem., 1987, 91, 4760.
+M. Kotlarchyk, S.-H. Chen, *J. Chem. Phys.*, 79 (1983) 2461
+S. J. Berr, *Phys. Chem.*, 91 (1987) 4760
 
 
 
@@ -2200,7 +2191,7 @@ core axial ratio *X* and a shell thickness, which are more often what we would l
 This model is also better behaved when polydispersity is applied than the four independent radii in
 CoreShellEllipsoidModel.
 
-*2.1.27.1 Definition*
+*2.1.27.1. Definition*
 
 .. image:: img/image125.gif
 
@@ -2256,40 +2247,36 @@ R. K. Heenan, Private communication
 
 **2.1.28. TriaxialEllipsoidModel**
 
-This model provides the form factor, *P(q)*, for an ellipsoid (below)
-where all three axes are of different lengths, i.e., Ra =< Rb =< Rc
-(Note that users should maintains this inequality for the all
-calculations). P(q) = scale*<f^2>/V+background where the volume V=
-4pi/3*Ra*Rb*Rc, and the averaging < > is applied over all orientation
-for 1D.
+This model provides the form factor, *P(q)*, for an ellipsoid (below) where all three axes are of different lengths,
+i.e., *Ra* =< *Rb* =< *Rc*\ . **Users should maintain this inequality for all calculations**.
 
+*P(q)* = *scale* \* <*f*\ :sup:`2`> / *V* + *background*
 
+where the volume *V* = (4/3)\ |pi| (*Ra* *Rb* *Rc*), and the averaging < > is applied over all orientations for 1D.
 
-
+.. image:: img/image128.JPG
 
 The returned value is in units of |cm^-1|, on absolute scale.
 
-The form factor calculated is:
+*2.1.28.1. Definition*
 
+The form factor calculated is
 
+.. image:: img/image129.PNG
 
-To provide easy access to the orientation of the triaxial ellipsoid,
-we define the axis of the cylinder using the angles , andY. Similarly
-to the case of the cylinder, those angles, and , are defined on Figure
-2 of CylinderModel. The angle Y is the rotational angle around its own
-semi_axisC axis against the q plane. For example, Y = 0 when the
-semi_axisA axis is parallel to the x-axis of the detector.
+To provide easy access to the orientation of the triaxial ellipsoid, we define the axis of the cylinder using the
+angles |theta|, |phi| and |bigpsi|. These angles are defined on Figure 2 of the CylinderModel_. The angle |bigpsi| is
+the rotational angle around its own *semi_axisC* axis against the *q* plane. For example, |bigpsi| = 0 when the
+*semi_axisA* axis is parallel to the *x*-axis of the detector.
 
-The radius of gyration for this system is Rg2 = (Ra2*Rb2*Rc2)/5. The
-contrast is defined as SLD(ellipsoid) SLD(solvent). In the parameters,
-semi_axisA = Ra (or minor equatorial radius), semi_axisB = Rb (or
-major equatorial radius), and semi_axisC = Rc (or polar radius of the
-ellipsoid).
+The radius of gyration for this system is *Rg*\ :sup:`2` = (*Ra*\ :sup:`2` *Rb*\ :sup:`2` *Rc*\ :sup:`2`)/5.
 
-For P*S: The 2nd virial coefficient of the solid ellipsoid is
-calculate based on the radius_a (=semi_axisC) and radius_b
-(=sqrt(semi_axisA* semi_axisB)) values, and used as the effective
-radius toward S(Q) when P(Q)*S(Q) is applied.
+The contrast is defined as SLD(ellipsoid) - SLD(solvent). In the parameters, *semi_axisA* = *Ra* (or minor equatorial
+radius), *semi_axisB* = *Rb* (or major equatorial radius), and *semi_axisC* = *Rc* (or polar radius of the ellipsoid).
+
+NB: The 2nd virial coefficient of the triaxial solid ellipsoid is calculated based on the
+*radius_a* (= *semi_axisC*\ ) and *radius_b* (= sqrt(*semi_axisA* \* *semi_axisB*)) values, and used as the effective
+radius for *S(Q)* when *P(Q)* \* *S(Q)* is applied.
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -2303,34 +2290,31 @@ sldEll          |Ang^-2|  1.0e-06
 sldSolv         |Ang^-2|  6.3e-06
 ==============  ========  =============
 
-
+.. image:: img/image130.JPG
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
-*Validation of the triaxialellipsoid 2D model*
+*2.1.28.2.Validation of the TriaxialEllipsoidModel*
 
-Validation of our code was done by comparing the output of the 1D
-calculation to the angular average of the output of 2 D calculation
-over all possible angles. The Figure below shows the comparison where
-the solid dot refers to averaged 2D while the line represents the
-result of 1D calculation (for 2D averaging, 76, 180, 76 points are
-taken for the angles of theta, phi, and psi respectively).
+Validation of our code was done by comparing the output of the 1D calculation to the angular average of the output of
+2D calculation over all possible angles. The Figure below shows the comparison where the solid dot refers to averaged
+2D while the line represents the result of 1D calculation (for 2D averaging, 76, 180, and 76 points are taken for the
+angles of |theta|, |phi|, and |psi| respectively).
 
-
+.. image:: img/image131.GIF
 
 *Figure. Comparison between 1D and averaged 2D.*
 
+.. image:: img/image132.JPG
 
+*Figure. The angles for oriented ellipsoid.*
 
-Figure. The angles for oriented ellipsoid.
-
-Our model uses the form factor calculations implemented in a c-library
-provided by the NIST Center for Neutron Research (Kline, 2006):
+Our model uses the form factor calculations implemented in a c-library provided by the NIST Center for Neutron Research
+(Kline, 2006)
 
 REFERENCE
-
-L. A. Feigin and D. I. Svergun Structure Analysis by Small-Angle X-Ray
-and Neutron Scattering, Plenum, New York, 1987.
+L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum,
+New York, 1987.
 
 
 
