@@ -766,10 +766,10 @@ class ViewerFrame(PARENT_FRAME):
         self._add_menu_file()
         self._add_menu_edit()
         self._add_menu_view()
-        self._add_menu_application()
         self._add_menu_tool()
         # Set up the layout
         self._setup_layout()
+        self._add_menu_application()
         
         # Set up the menu
         self._add_current_plugin_menu()
