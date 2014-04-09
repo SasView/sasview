@@ -1016,7 +1016,9 @@ class ViewerFrame(PARENT_FRAME):
         d_panel_width, h = self._get_panels_size(self._data_panel)
         win.SetSize((d_panel_width, h))
         is_visible = self.__gui_style & GUIFRAME.MANAGER_ON == GUIFRAME.MANAGER_ON
-        if not IS_WIN:
+        if IS_WIN:
+            win.SetPosition((0, 0))
+        else:
             win.SetPosition((0, mac_pos_y + size_t_bar))
         win.Show(is_visible)
         # Add the panels to the AUI manager
@@ -1039,7 +1041,9 @@ class ViewerFrame(PARENT_FRAME):
                 self.panels[str(id)] = panel_class
                 frame.SetSize((w, h))
                 frame.Show(False)
-            if not IS_WIN:
+            if IS_WIN:
+                frame.SetPosition((d_panel_width + 1, 0))
+            else:
                 frame.SetPosition((d_panel_width + 1, mac_pos_y + size_t_bar))
 
         if not IS_WIN:
