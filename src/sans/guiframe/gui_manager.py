@@ -767,7 +767,13 @@ class ViewerFrame(PARENT_FRAME):
         self._setup_layout()
         
         # Set up the menu
-        self._setup_menus()
+        self._add_menu_file()
+        self._add_menu_edit()
+        self._add_menu_view()
+        self._add_menu_application()
+        self._add_menu_tool()
+        self._add_current_plugin_menu()
+        self._add_help_menu()
         
         try:
             self.load_from_cmd(self._input_file)
@@ -1209,21 +1215,6 @@ class ViewerFrame(PARENT_FRAME):
             captions.append(self.plot_panels[Id].window_caption)
         
         return captions
-          
-    def _setup_menus(self):
-        """
-        Set up the application menus
-        """
-        # Menu
-        self._add_menu_file()
-        self._add_menu_edit()
-        self._add_menu_view()
-        #self._add_menu_data()
-        self._add_menu_application()
-        self._add_menu_tool()
-        self._add_current_plugin_menu()
-        #self._add_menu_window()
-        self._add_help_menu()
         
     def _setup_tool_bar(self):
         """
@@ -1292,7 +1283,8 @@ class ViewerFrame(PARENT_FRAME):
         Look for plug-in menus
         Add available plug-in sub-menus. 
         """
-        if (self._menubar is None) or (self._current_perspective is None):
+        if self._menubar is None or self._current_perspective is None \
+            or self._menubar.GetMenuCount()==0:
             return
         #replace or add a new menu for the current plugin
        
