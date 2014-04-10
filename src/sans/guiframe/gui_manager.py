@@ -22,7 +22,6 @@ import warnings
 import re
 warnings.simplefilter("ignore")
 import logging
-#import urllib2
 import httplib
 
 from sans.guiframe.events import EVT_CATEGORY
@@ -262,7 +261,6 @@ class ViewerFrame(PARENT_FRAME):
         self._file_menu = None
         self._data_menu = None
         self._view_menu = None
-        self._window_menu = None
         self._data_panel_menu = None
         self._help_menu = None
         self._tool_menu = None
@@ -762,7 +760,8 @@ class ViewerFrame(PARENT_FRAME):
         # Create the menu bar. To be filled later.
         # WX 3.0 needs us to create the menu bar first.
         self._menubar = wx.MenuBar()
-        self.SetMenuBar(self._menubar)
+        if wx.VERSION_STRING >= '3.0.0.0':
+            self.SetMenuBar(self._menubar)
         self._add_menu_file()
         self._add_menu_edit()
         self._add_menu_view()
@@ -776,6 +775,8 @@ class ViewerFrame(PARENT_FRAME):
         self._add_help_menu()
         # Append item from plugin under menu file if necessary
         self._populate_file_menu()
+        if not wx.VERSION_STRING >= '3.0.0.0':
+            self.SetMenuBar(self._menubar)
         
         try:
             self.load_from_cmd(self._input_file)
@@ -2884,13 +2885,6 @@ class ViewerFrame(PARENT_FRAME):
                 if pos != wx.NOT_FOUND:
                     data_panel.cb_plotpanel.SetString(pos, caption)
                     data_panel.cb_plotpanel.SetStringSelection(caption)
-        # update window Show menu
-        if self._window_menu != None:
-            for item in self._window_menu.GetMenuItems():
-                pos = self._window_menu.FindItem(old_caption)
-                if self._window_menu.GetLabel(pos) == str(old_caption):
-                    self._window_menu.SetLabel(pos, caption)
-                break
         # New Caption
         pane_info.SetTitle(caption)
         return caption

@@ -416,8 +416,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
         
 
     def remove_data_by_id(self, id):
-        """'
-        remove data from plot
+        """
+            Remove data from plot
         """
         if id in self.plots.keys():
             data =  self.plots[id]
@@ -429,27 +429,13 @@ class ModelPanel1D(PlotPanel, PanelBase):
                 data = data_list[id]
             if id in theory_list.keys():
                 data = theory_list[id]
-            # Update Graph menu and help string        
-            #h_id = self.parent._window_menu.FindItem(self.window_caption)
-            if data != None:
-                if data.__class__.__name__ == 'list':
-                    label = data[0].label
-                else:
-                    label = data.label
-            else:
-                label = '???'
-            #helpString = self.parent._window_menu.GetHelpString(h_id) 
-            d_string = (' ' + str(label) +';')
-            #new_tip = helpString.replace(d_string, '')
-            #self.parent._window_menu.SetHelpString(h_id, new_tip)  
-
+                
             del self.plots[id]
             self.graph.render(self)
             self.subplot.figure.canvas.draw_idle()    
             if len(self.graph.plottables) == 0:
                 #onRemove: graph is empty must be the panel must be destroyed
                 self.parent.delete_panel(self.uid)
-            
         
     def plot_data(self, data):
         """
@@ -479,7 +465,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
             try:
                 self._onEVT_FUNC_PROPERTY()
             except Exception, exc:
-                msg=" Encountered singular points..."
                 wx.PostEvent(self.parent, StatusEvent(status=\
                     "Plotting Error: %s"% str(exc), info="error"))
             if self.is_zoomed:
@@ -497,18 +482,11 @@ class ModelPanel1D(PlotPanel, PanelBase):
                     # MAC: forcing to plot 2D avg
                     self.canvas._onDrawIdle()
             except Exception,exc:
-                msg=" Encountered singular points..."
                 wx.PostEvent(self.parent, StatusEvent(status=\
                     "Plotting Error: %s"% str(exc), info="error"))
             self.toolbar.update()
             self.is_zoomed = False
-            # Update Graph menu and help string        
-            #pos = self.parent._window_menu.FindItem(self.window_caption)
-            helpString = 'Show/Hide Graph: '
-            for plot in  self.plots.itervalues():
-                helpString += (' ' + str(plot.label) +';')
-            #self.parent._window_menu.SetHelpString(pos, helpString)  
-                
+            
     def draw_plot(self):
         """
         Draw plot
@@ -849,17 +827,8 @@ class ModelPanel1D(PlotPanel, PanelBase):
             self.appearance_selected_plot.symbol = \
                         self.get_symbol_label()[info[2]] 
             self.appearance_selected_plot.label = str(info[3])
-
-            #pos = self.parent._window_menu.FindItem(self.window_caption)
-            #helpString = 'Show/Hide Graph: '
-            #for plot in  self.plots.itervalues():
-            #    helpString += (' ' + str(plot.label) + ';')
-            #    self.parent._window_menu.SetHelpString(pos, helpString)
-            #    self._is_changed_legend_label = True
-                
         self.appD.Destroy()
         self._check_zoom_plot()
-
 
     def modifyGraphAppearance(self, event):
         """
@@ -877,7 +846,6 @@ class ModelPanel1D(PlotPanel, PanelBase):
                                   self.xcolor, self.ycolor, 
                                   self.is_xtick, self.is_ytick)
         self.graphApp.Bind(wx.EVT_CLOSE, self.on_graphApp_close)
-    
 
     def on_graphApp_close(self, event):
         """
