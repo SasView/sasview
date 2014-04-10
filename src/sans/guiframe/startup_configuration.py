@@ -47,14 +47,10 @@ try:
                        'DEFAULT_OPEN_FOLDER':CURRENT.DEFAULT_OPEN_FOLDER}
 except:
     CURRENT_STRINGS = DEFAULT_STRINGS
-FONT_VARIANT = 0    
-if sys.platform.count("win32") > 0:
-    PANEL_WIDTH = 265 
-    PANEL_HEIGHT = 235
-else:
-    PANEL_WIDTH = 285
-    PANEL_HEIGHT = 215
-    
+FONT_VARIANT = 0
+PANEL_WIDTH = 285
+PANEL_HEIGHT = 215
+
 """
 Dialog to set Appication startup configuration
 """
