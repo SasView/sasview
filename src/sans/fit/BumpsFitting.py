@@ -1,7 +1,7 @@
 """
 BumpsFitting module runs the bumps optimizer.
 """
-import sys
+import time
 
 import numpy
 
@@ -24,14 +24,12 @@ class SasProblem(object):
         self.model = model
         self.data = data
         self.param_list = param_list
-        self.msg_q = msg_q
-        self.curr_thread = curr_thread
-        self.handler = handler
-        self.fitresult = fitresult
-        self.res = []
-        self.func_name = "Functor"
+        self.res = None
         self.theory = None
-        self.name = "Fill in proper name!"
+
+    @property
+    def name(self):
+        return self.model.name
 
     @property
     def dof(self):
@@ -118,18 +116,60 @@ class SasProblem(object):
         #import thread
         #print "params", params
         self.res, self.theory = self.data.residuals(self.model.evalDistribution)
+        return self.res
 
-        # TODO: this belongs in monitor not residuals calculation
-        if False: # self.fitresult is not None:
+BOUNDS_PENALTY = 1e6 # cost for going out of bounds on unbounded fitters
+class MonitoredSasProblem(SasProblem):
+    """
+    SAS problem definition for optimizers which do not have monitoring or bounds.
+    """
+    def __init__(self, param_list, model=None, data=None, fitresult=None,
+                 handler=None, curr_thread=None, msg_q=None, update_rate=1):
+        """
+        :param Model: the model wrapper fro sans -model
+        :param Data: the data wrapper for sans data
+        """
+        SasProblem.__init__(self, param_list, model, data)
+        self.msg_q = msg_q
+        self.curr_thread = curr_thread
+        self.handler = handler
+        self.fitresult = fitresult
+        #self.last_update = time.time()
+        #self.func_name = "Functor"
+        #self.name = "Fill in proper name!"
+
+    def residuals(self, p):
+        """
+        Cost function for scipy.optimize.leastsq, which does not have a monitor
+        built into the algorithm, and instead relies on a monitor built into
+        the cost function.
+        """
+        # Note: technically, unbounded fitters and unmonitored fitters are
+        self.setp(x)
+
+        # Compute penalty for being out of bounds which increases the farther
+        # you get out of bounds.  This allows derivative following algorithms
+        # to point back toward the feasible region.
+        penalty = self.bounds_penalty()
+        if penalty > 0:
+            self.theory = numpy.ones(self.data.num_points)
+            self.res = self.theory*(penalty/self.data.num_points) + BOUNDS_PENALTY
+            return self.res
+
+        # If no penalty, then we are not out of bounds and we can use the
+        # normal residual calculation
+        SasProblem.residuals(self, p)
+
+        # send update to the application
+        if True:
             #self.fitresult.set_model(model=self.model)
+            # copy residuals into fit results
             self.fitresult.residuals = self.res+0
             self.fitresult.iterations += 1
             self.fitresult.theory = self.theory+0
 
-            #fitness = self.chisq(params=params)
-            fitness = self.chisq()
-            self.fitresult.p = params
-            self.fitresult.set_fitness(fitness=fitness)
+            self.fitresult.p = numpy.array(p) # force copy, and coversion to array
+            self.fitresult.set_fitness(fitness=self.chisq())
             if self.msg_q is not None:
                 self.msg_q.put(self.fitresult)
 
@@ -148,47 +188,12 @@ class SasProblem(object):
                     raise
 
         return self.res
-    __call__ = residuals
 
-    def _DEAD_check_param_range(self):
-        """
-        Check the lower and upper bound of the parameter value
-        and set res to the inf if the value is outside of the
-        range
-        :limitation: the initial values must be within range.
-        """
-
-        #time.sleep(0.01)
-        is_outofbound = False
-        # loop through the fit parameters
-        model = self.model
-        for p in self.param_list:
-            value = model.getParam(p)
-            low,high = model.details[p][1:3]
-            if low is not None and numpy.isfinite(low):
-                if p.value == 0:
-                    # This value works on Scipy
-                    # Do not change numbers below
-                    value = _SMALLVALUE
-                # For leastsq, it needs a bit step back from the boundary
-                val = low - value * _SMALLVALUE
-                if value < val:
-                    self.res *= 1e+6
-                    is_outofbound = True
-                    break
-            if high is not None and numpy.isfinite(high):
-                # This value works on Scipy
-                # Do not change numbers below
-                if value == 0:
-                    value = _SMALLVALUE
-                # For leastsq, it needs a bit step back from the boundary
-                val = high + value * _SMALLVALUE
-                if value > val:
-                    self.res *= 1e+6
-                    is_outofbound = True
-                    break
-
-        return is_outofbound
+    def bounds_penalty(self):
+        from numpy import sum, where
+        p, bounds = self.getp(), self.bounds()
+        return (sum(where(p<bounds[:,0], bounds[:,0]-p, 0)**2)
+              + sum(where(p>bounds[:,1], bounds[:,1]-p, 0)**2) )
 
 class BumpsFit(FitEngine):
     """
@@ -222,9 +227,7 @@ class BumpsFit(FitEngine):
             for name in fitproblem[0].pars:
                 ind = fitproblem[0].pars.index(name)
                 model.setParam(name, fitproblem[0].vals[ind])
-        listdata = fitproblem[0].get_data()
-        # Concatenate dList set (contains one or more data)before fitting
-        data = listdata
+        data = fitproblem[0].get_data()
 
         self.curr_thread = curr_thread
 
@@ -234,24 +237,29 @@ class BumpsFit(FitEngine):
         result.index = data.idx
         if handler is not None:
             handler.set_result(result=result)
-        problem = SasProblem(param_list=self.param_list,
-                              model=model.model,
-                              data=data,
-                              handler=handler,
-                              fitresult=result,
-                              curr_thread=curr_thread,
-                              msg_q=msg_q)
-        try:
-            run_bumps(problem, result, ftol)
-            #run_scipy(problem, result, ftol)
-        except:
-            if hasattr(sys, 'last_type') and sys.last_type == KeyboardInterrupt:
-                if handler is not None:
-                    msg = "Fitting: Terminated!!!"
-                    handler.stop(msg)
-                    raise KeyboardInterrupt, msg
-            else:
-                raise
+
+        if True: # bumps
+            def abort_test():
+                try: curr_thread.isquit()
+                except KeyboardInterrupt:
+                    if handler is not None:
+                        handler.stop("Fitting: Terminated!!!")
+                    return True
+                return False
+
+            problem = SasProblem(param_list=self.param_list,
+                                 model=model.model,
+                                 data=data)
+            run_bumps(problem, result, ftol, abort_test)
+        else:
+            problem = SasProblem(param_list=self.param_list,
+                                 model=model.model,
+                                 data=data,
+                                 handler=handler,
+                                 fitresult=result,
+                                 curr_thread=curr_thread,
+                                 msg_q=msg_q)
+            run_levenburg_marquardt(problem, result, ftol)
 
         if handler is not None:
             handler.set_result(result=result)
@@ -263,13 +271,13 @@ class BumpsFit(FitEngine):
         #    result.fitness = None
         return [result]
 
-def run_bumps(problem, result, ftol):
+def run_bumps(problem, result, ftol, abort_test):
     fitopts = fitters.FIT_OPTIONS[fitters.FIT_DEFAULT]
     fitclass = fitopts.fitclass
     options = fitopts.options.copy()
     options['ftol'] = ftol
     fitdriver = fitters.FitDriver(fitclass, problem=problem,
-                                  abort_test=lambda: False, **options)
+                                  abort_test=abort_test, **options)
     mapper = SerialMapper 
     fitdriver.mapper = mapper.start_mapper(problem, None)
     try:
@@ -288,7 +296,7 @@ def run_bumps(problem, result, ftol):
     result.success = True
     result.theory = problem.theory
 
-def run_scipy(model, result, ftol):
+def run_levenburg_marquardt(model, result, ftol):
     # This import must be here; otherwise it will be confused when more
     # than one thread exist.
     from scipy import optimize

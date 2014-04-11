@@ -286,7 +286,7 @@ def _get_zero_shift(limit):
 
     : param range: min or max value of the bounds
     """
-    return 0.1 (limit if limit != 0.0 else 1.0)
+    return 0.1 * (limit if limit != 0.0 else 1.0)
 
     
 #def profile(fn, *args, **kw):
