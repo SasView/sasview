@@ -58,6 +58,10 @@ class FitHandler(object):
         Fit was aborted.
         """
 
+    # TODO: not sure how these are used, but they are needed for running the fit
+    def update_fit(self, last=False): pass
+    def set_result(self, result=None): self.result = result
+
 class Model:
     """
     Fit wrapper for SANS models.
@@ -216,7 +220,13 @@ class FitData1D(Data1D):
             Return the range of data.x to fit
         """
         return self.qmin, self.qmax
-        
+
+    def size(self):
+        """
+        Number of measurement points in data set after masking, etc.
+        """
+        return len(self.x)
+
     def residuals(self, fn):
         """
             Compute residuals.
@@ -258,12 +268,9 @@ class FitData2D(Data2D):
     """
     def __init__(self, sans_data2d, data=None, err_data=None):
         Data2D.__init__(self, data=data, err_data=err_data)
-        """
-            Data can be initital with a data (sans plottable)
-            or with vectors.
-        """
+        # Data can be initialized with a sans plottable or with vectors.
         self.res_err_image = []
-        self.num_points = data.size
+        self.num_points = 0 # will be set by set_data
         self.idx = []
         self.qmin = None
         self.qmax = None
@@ -305,6 +312,7 @@ class FitData2D(Data2D):
                             (self.radius <= self.qmax))
         self.idx = (self.idx) & (self.mask)
         self.idx = (self.idx) & (numpy.isfinite(self.data))
+        self.num_points = numpy.sum(self.idx)
 
     def set_smearer(self, smearer):
         """
@@ -338,7 +346,13 @@ class FitData2D(Data2D):
         return the range of data.x to fit
         """
         return self.qmin, self.qmax
-     
+
+    def size(self):
+        """
+        Number of measurement points in data set after masking, etc.
+        """
+        return numpy.sum(self.idx)
+
     def residuals(self, fn):
         """
         return the residuals
@@ -409,15 +423,15 @@ class FitEngine:
         if model == None:
             raise ValueError, "AbstractFitEngine: Need to set model to fit"
         
-        new_model = model
         if not issubclass(model.__class__, Model):
-            new_model = Model(model, data)
-        
+            model = Model(model, data)
+
+        sasmodel = model.model
         if len(constraints) > 0:
             for constraint in constraints:
                 name, value = constraint
                 try:
-                    new_model.parameterset[str(name)].set(str(value))
+                    model.parameterset[str(name)].set(str(value))
                 except:
                     msg = "Fit Engine: Error occurs when setting the constraint"
                     msg += " %s for parameter %s " % (value, name)
@@ -426,30 +440,30 @@ class FitEngine:
         if len(pars) > 0:
             temp = []
             for item in pars:
-                if item in new_model.model.getParamList():
+                if item in sasmodel.getParamList():
                     temp.append(item)
                     self.param_list.append(item)
                 else:
                     
                     msg = "wrong parameter %s used " % str(item)
-                    msg += "to set model %s. Choose " % str(new_model.model.name)
+                    msg += "to set model %s. Choose " % str(sasmodel.name)
                     msg += "parameter name within %s" % \
-                                str(new_model.model.getParamList())
+                                str(sasmodel.getParamList())
                     raise ValueError, msg
               
             #A fitArrange is already created but contains data_list only at id
             if self.fit_arrange_dict.has_key(id):
-                self.fit_arrange_dict[id].set_model(new_model)
+                self.fit_arrange_dict[id].set_model(model)
                 self.fit_arrange_dict[id].pars = pars
             else:
             #no fitArrange object has been create with this id
                 fitproblem = FitArrange()
-                fitproblem.set_model(new_model)
+                fitproblem.set_model(model)
                 fitproblem.pars = pars
                 self.fit_arrange_dict[id] = fitproblem
                 vals = []
                 for name in pars:
-                    vals.append(new_model.model.getParam(name))
+                    vals.append(sasmodel.getParam(name))
                 self.fit_arrange_dict[id].vals = vals
         else:
             raise ValueError, "park_integration:missing parameters"
@@ -633,10 +647,11 @@ class FResult(object):
         if self.pvec == None and self.model is None and self.param_list is None:
             return "No results"
 
-        pars = enumerate(self.model.model.getParamList())
+        sasmodel = self.model.model
+        pars = enumerate(sasmodel.getParamList())
         msg1 = "[Iteration #: %s ]" % self.iterations
         msg3 = "=== goodness of fit: %s ===" % (str(self.fitness))
-        msg2 = ["P%-3d  %s......|.....%s" % (i, v, self.model.model.getParam(v))
+        msg2 = ["P%-3d  %s......|.....%s" % (i, v, sasmodel.getParam(v))
                 for i,v in pars if v in self.param_list]
         msg = [msg1, msg3] + msg2
         return "\n".join(msg)
@@ -644,4 +659,4 @@ class FResult(object):
     def print_summary(self):
         """
         """
-        print self
+        print str(self)

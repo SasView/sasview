@@ -83,6 +83,9 @@ def prepare():
     try: import periodictable
     except: addpath(joinpath(root, '..','periodictable'))
 
+    try: import bumps
+    except: addpath(joinpath(root, '..','bumps'))
+
     # select wx version
     #addpath(os.path.join(root, '..','wxPython-src-3.0.0.0','wxPython'))
 

@@ -48,7 +48,7 @@ class SansAssembly:
             total += item * item
         if len(self.true_res) == 0:
             return None
-        return total / len(self.true_res)
+        return total / (len(self.true_res) - len(self.paramlist))
 
     def __call__(self, params):
         """
@@ -204,7 +204,7 @@ class ScipyFit(FitEngine):
         # Check the initial value if it is within range
         _check_param_range(model.model, self.param_list)
         
-        result = FResult(model=model, data=data, param_list=self.param_list)
+        result = FResult(model=model.model, data=data, param_list=self.param_list)
         result.pars = fitproblem[0].pars
         result.fitter_id = self.fitter_id
         if handler is not None:

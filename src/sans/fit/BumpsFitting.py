@@ -2,7 +2,6 @@
 BumpsFitting module runs the bumps optimizer.
 """
 import sys
-import copy
 
 import numpy
 
@@ -12,11 +11,11 @@ from bumps.mapper import SerialMapper
 from sans.fit.AbstractFitEngine import FitEngine
 from sans.fit.AbstractFitEngine import FResult
 
-class SansAssembly(object):
+class SasProblem(object):
     """
-    Sans Assembly class a class wrapper to be call in optimizer.leastsq method
+    Wrap the SAS model in a form that can be understood by bumps.
     """
-    def __init__(self, paramlist, model=None, data=None, fitresult=None,
+    def __init__(self, param_list, model=None, data=None, fitresult=None,
                  handler=None, curr_thread=None, msg_q=None):
         """
         :param Model: the model wrapper fro sans -model
@@ -24,7 +23,7 @@ class SansAssembly(object):
         """
         self.model = model
         self.data = data
-        self.paramlist = paramlist
+        self.param_list = param_list
         self.msg_q = msg_q
         self.curr_thread = curr_thread
         self.handler = handler
@@ -36,43 +35,68 @@ class SansAssembly(object):
 
     @property
     def dof(self):
-        return self.data.num_points - len(self.paramlist)
+        return self.data.num_points - len(self.param_list)
 
     def summarize(self):
-        return "summarize"
+        """
+        Return a stylized list of parameter names and values with range bars
+        suitable for printing.
+        """
+        output = []
+        bounds = self.bounds()
+        for i,p in enumerate(self.getp()):
+            name = self.param_list[i]
+            low,high = bounds[:,i]
+            range = ",".join((("[%g"%low if numpy.isfinite(low) else "(-inf"),
+                              ("%g]"%high if numpy.isfinite(high) else "inf)")))
+            if not numpy.isfinite(p):
+                bar = "*invalid* "
+            else:
+                bar = ['.']*10
+                if numpy.isfinite(high-low):
+                    position = int(9.999999999 * float(p-low)/float(high-low))
+                    if position < 0: bar[0] = '<'
+                    elif position > 9: bar[9] = '>'
+                    else: bar[position] = '|'
+                bar = "".join(bar)
+            output.append("%40s %s %10g in %s"%(name,bar,p,range))
+        return "\n".join(output)
 
-    def nllf(self, pvec=None):
-        residuals = self.residuals(pvec)
+    def nllf(self, p=None):
+        residuals = self.residuals(p)
         return 0.5*numpy.sum(residuals**2)
 
-    def setp(self, params):
-        self.model.set_params(self.paramlist, params)
+    def setp(self, p):
+        for k,v in zip(self.param_list, p):
+            self.model.setParam(k,v)
+        #self.model.set_params(self.param_list, params)
 
     def getp(self):
-        return numpy.asarray(self.model.get_params(self.paramlist))
+        return numpy.array([self.model.getParam(k) for k in self.param_list])
+        #return numpy.asarray(self.model.get_params(self.param_list))
 
     def bounds(self):
-        return numpy.array([self._getrange(p) for p in self.paramlist]).T
+        return numpy.array([self._getrange(p) for p in self.param_list]).T
 
     def labels(self):
-        return self.paramlist
+        return self.param_list
 
     def _getrange(self, p):
         """
         Override _getrange of park parameter
         return the range of parameter
         """
-        lo, hi = self.model.model.details[p][1:3]
+        lo, hi = self.model.details[p][1:3]
         if lo is None: lo = -numpy.inf
         if hi is None: hi = numpy.inf
         return lo, hi
 
     def randomize(self, n):
-        pvec = self.getp()
+        p = self.getp()
         # since randn is symmetric and random, doesn't matter
         # point value is negative.
         # TODO: throw in bounds checking!
-        return numpy.random.randn(n, len(self.paramlist))*pvec + pvec
+        return numpy.random.randn(n, len(self.param_list))*p + p
 
     def chisq(self):
         """
@@ -83,12 +107,7 @@ class SansAssembly(object):
         :return: chi^2
 
         """
-        total = 0
-        for item in self.res:
-            total += item * item
-        if len(self.res) == 0:
-            return None
-        return total / len(self.res)
+        return numpy.sum(self.res**2)/self.dof
 
     def residuals(self, params=None):
         """
@@ -98,17 +117,18 @@ class SansAssembly(object):
         if params is not None: self.setp(params)
         #import thread
         #print "params", params
-        self.res, self.theory = self.data.residuals(self.model.eval)
+        self.res, self.theory = self.data.residuals(self.model.evalDistribution)
 
+        # TODO: this belongs in monitor not residuals calculation
         if self.fitresult is not None:
-            self.fitresult.set_model(model=self.model)
+            #self.fitresult.set_model(model=self.model)
             self.fitresult.residuals = self.res+0
             self.fitresult.iterations += 1
             self.fitresult.theory = self.theory+0
 
             #fitness = self.chisq(params=params)
             fitness = self.chisq()
-            self.fitresult.pvec = params
+            self.fitresult.p = params
             self.fitresult.set_fitness(fitness=fitness)
             if self.msg_q is not None:
                 self.msg_q.put(self.fitresult)
@@ -130,7 +150,7 @@ class SansAssembly(object):
         return self.res
     __call__ = residuals
 
-    def check_param_range(self):
+    def _DEAD_check_param_range(self):
         """
         Check the lower and upper bound of the parameter value
         and set res to the inf if the value is outside of the
@@ -141,8 +161,8 @@ class SansAssembly(object):
         #time.sleep(0.01)
         is_outofbound = False
         # loop through the fit parameters
-        model = self.model.model
-        for p in self.paramlist:
+        model = self.model
+        for p in self.param_list:
             value = model.getParam(p)
             low,high = model.details[p][1:3]
             if low is not None and numpy.isfinite(low):
@@ -195,20 +215,18 @@ class BumpsFit(FitEngine):
             msg = "Bumps can't fit more than a single fit problem at a time."
             raise RuntimeError, msg
         elif len(fitproblem) == 0 :
-            raise RuntimeError, "No Assembly scheduled for Scipy fitting."
+            raise RuntimeError, "No problem scheduled for fitting."
         model = fitproblem[0].get_model()
         if reset_flag:
             # reset the initial value; useful for batch
             for name in fitproblem[0].pars:
                 ind = fitproblem[0].pars.index(name)
                 model.setParam(name, fitproblem[0].vals[ind])
-        listdata = []
         listdata = fitproblem[0].get_data()
         # Concatenate dList set (contains one or more data)before fitting
         data = listdata
 
         self.curr_thread = curr_thread
-        ftol = ftol
 
         result = FResult(model=model, data=data, param_list=self.param_list)
         result.pars = fitproblem[0].pars
@@ -216,15 +234,16 @@ class BumpsFit(FitEngine):
         result.index = data.idx
         if handler is not None:
             handler.set_result(result=result)
-        functor = SansAssembly(paramlist=self.param_list,
-                               model=model,
-                               data=data,
-                               handler=handler,
-                               fitresult=result,
-                               curr_thread=curr_thread,
-                               msg_q=msg_q)
+        problem = SasProblem(param_list=self.param_list,
+                              model=model.model,
+                              data=data,
+                              handler=handler,
+                              fitresult=result,
+                              curr_thread=curr_thread,
+                              msg_q=msg_q)
         try:
-            run_bumps(functor, result)
+            #run_bumps(problem, result, ftol)
+            run_scipy(problem, result, ftol)
         except:
             if hasattr(sys, 'last_type') and sys.last_type == KeyboardInterrupt:
                 if handler is not None:
@@ -244,10 +263,13 @@ class BumpsFit(FitEngine):
         #    result.fitness = None
         return [result]
 
-def run_bumps(problem, result):
+def run_bumps(problem, result, ftol):
     fitopts = fitters.FIT_OPTIONS[fitters.FIT_DEFAULT]
-    fitdriver = fitters.FitDriver(fitopts.fitclass, problem=problem, 
-        abort_test=lambda: False, **fitopts.options)
+    fitclass = fitopts.fitclass
+    options = fitopts.options.copy()
+    options['ftol'] = ftol
+    fitdriver = fitters.FitDriver(fitclass, problem=problem,
+                                  abort_test=lambda: False, **options)
     mapper = SerialMapper 
     fitdriver.mapper = mapper.start_mapper(problem, None)
     try:
@@ -255,31 +277,33 @@ def run_bumps(problem, result):
     except:
         import traceback; traceback.print_exc()
         raise
-    mapper.stop_mapper(fitdriver.mapper)
-    fitdriver.show()
-    #fitdriver.plot()
-    result.fitness = fbest * 2. / len(result.pars) 
-    result.stderr  = numpy.ones(len(result.pars))
-    result.pvec = best 
+    finally:
+        mapper.stop_mapper(fitdriver.mapper)
+    #print "best,fbest",best,fbest,problem.dof
+    result.fitness = 2*fbest/problem.dof
+    #print "fitness",result.fitness
+    result.stderr  = fitdriver.stderr()
+    result.pvec = best
+    # TODO: track success better
     result.success = True
     result.theory = problem.theory
 
-def run_scipy(model, result):
+def run_scipy(model, result, ftol):
     # This import must be here; otherwise it will be confused when more
     # than one thread exist.
     from scipy import optimize
 
-    out, cov_x, _, mesg, success = optimize.leastsq(functor,
-                                                    model.get_params(self.param_list),
+    out, cov_x, _, mesg, success = optimize.leastsq(model.residuals,
+                                                    model.getp(),
                                                     ftol=ftol,
                                                     full_output=1)
     if cov_x is not None and numpy.isfinite(cov_x).all():
         stderr = numpy.sqrt(numpy.diag(cov_x))
     else:
         stderr = []
-    result.fitness = functor.chisqr()
+    result.fitness = model.chisq()
     result.stderr  = stderr
     result.pvec = out
     result.success = success
-    result.theory = functor.theory
+    result.theory = model.theory
 

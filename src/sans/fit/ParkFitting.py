@@ -92,7 +92,7 @@ class SansParameter(park.Parameter):
     range = property(_getrange, _setrange)
 
 
-class Model(park.Model):
+class ParkModel(park.Model):
     """
     PARK wrapper for SANS models.
     """
@@ -390,7 +390,7 @@ class MyAssembly(Assembly):
         #print "fitpars", fitpars
         return fitpars
     
-    def all_results(self, result):
+    def extend_results_with_calculated_parameters(self, result):
         """
         Extend result from the fit with the calculated parameters.
         """
@@ -438,12 +438,12 @@ class MyAssembly(Assembly):
                 m.degrees_of_freedom = N-k if N>k else 1
                 # dividing residuals by N in order to be consistent with Scipy
                 m.chisq = numpy.sum(m.residuals**2/N) 
-                resid.append(m.weight*m.residuals/math.sqrt(N))
+                resid.append(m.weight*m.residuals)
         self.residuals = numpy.hstack(resid)
         N = len(self.residuals)
         self.degrees_of_freedom = N-k if N>k else 1
         self.chisq = numpy.sum(self.residuals**2)
-        return self.chisq
+        return self.chisq/self.degrees_of_freedom
     
 class ParkFit(FitEngine):
     """ 
@@ -504,7 +504,8 @@ class ParkFit(FitEngine):
             raise RuntimeError, "No Assembly scheduled for Park fitting."
             return
         for item in fitproblems:
-            parkmodel = item.get_model()
+            model = item.get_model()
+            parkmodel = ParkModel(model.model, model.data)
             if reset_flag:
                 # reset the initial value; useful for batch
                 for name in item.pars:
@@ -553,7 +554,8 @@ class ParkFit(FitEngine):
         self.create_assembly(curr_thread=curr_thread, reset_flag=reset_flag)
         localfit = SansFitSimplex()
         localfit.ftol = ftol
-        
+        localfit.xtol = 1e-6
+
         # See `park.fitresult.FitHandler` for details.
         fitter = SansFitMC(localfit=localfit, start_points=1)
         if handler == None:
@@ -562,7 +564,7 @@ class ParkFit(FitEngine):
         result_list = []
         try:
             result = fit.fit(self.problem, fitter=fitter, handler=handler)
-            self.problem.all_results(result)
+            self.problem.extend_results_with_calculated_parameters(result)
             
         except LinAlgError:
             raise ValueError, "SVD did not converge"
@@ -591,6 +593,8 @@ class ParkFit(FitEngine):
                         if len(name_split) > 2:
                             name += '.' + name_split[2].strip()
                         small_result.param_list.append(name)
+                # normalize chisq by degrees of freedom
+                small_result.fitness /= len(small_result.residuals)-len(small_result.pvec)
             result_list.append(small_result)    
         if q != None:
             q.put(result_list)
