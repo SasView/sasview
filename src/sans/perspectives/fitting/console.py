@@ -86,7 +86,7 @@ class ConsoleUpdate(FitHandler):
         """
         Print result object
         """
-        msg = " \n %s \n" % self.result.__str__()
+        msg = " \n %s \n" % str(self.result)
         wx.PostEvent(self.parent, StatusEvent(status=msg))
                      
     def error(self, msg):
@@ -135,7 +135,7 @@ class ConsoleUpdate(FitHandler):
         self.update_duration = t1
         self.fit_duration += self.elapsed_time
         str_time = time.strftime("%a, %d %b %Y %H:%M:%S ", time.localtime(t1))
-        UPDATE_INTERVAL = 0.5
+        UPDATE_INTERVAL = 5.0
         u_flag = False
         if self.fit_duration >= UPDATE_INTERVAL:
             self.fit_duration = 0
@@ -170,7 +170,7 @@ class ConsoleUpdate(FitHandler):
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                               type="progress"))
      
-    def starting_fit(self):
+    def _DEAD_starting_fit(self):
         """
         """
         wx.PostEvent(self.parent, StatusEvent(status="Starting the Fit...",

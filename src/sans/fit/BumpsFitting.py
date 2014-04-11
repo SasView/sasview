@@ -11,6 +11,18 @@ from bumps.mapper import SerialMapper
 from sans.fit.AbstractFitEngine import FitEngine
 from sans.fit.AbstractFitEngine import FResult
 
+class BumpsMonitor(object):
+    def __init__(self, handler, max_step=0):
+        self.handler = handler
+        self.max_step = max_step
+    def config_history(self, history):
+        history.requires(time=1, value=2, point=1, step=1)
+    def __call__(self, history):
+        self.handler.progress(history.step[0], self.max_step)
+        if len(history.step)>1 and history.step[1] > history.step[0]:
+            self.handler.improvement()
+        self.handler.update_fit()
+
 class SasProblem(object):
     """
     Wrap the SAS model in a form that can be understood by bumps.
@@ -239,18 +251,11 @@ class BumpsFit(FitEngine):
             handler.set_result(result=result)
 
         if True: # bumps
-            def abort_test():
-                try: curr_thread.isquit()
-                except KeyboardInterrupt:
-                    if handler is not None:
-                        handler.stop("Fitting: Terminated!!!")
-                    return True
-                return False
-
             problem = SasProblem(param_list=self.param_list,
                                  model=model.model,
                                  data=data)
-            run_bumps(problem, result, ftol, abort_test)
+            run_bumps(problem, result, ftol,
+                      handler, curr_thread, msg_q)
         else:
             problem = SasProblem(param_list=self.param_list,
                                  model=model.model,
@@ -262,7 +267,6 @@ class BumpsFit(FitEngine):
             run_levenburg_marquardt(problem, result, ftol)
 
         if handler is not None:
-            handler.set_result(result=result)
             handler.update_fit(last=True)
         if q is not None:
             q.put(result)
@@ -271,10 +275,22 @@ class BumpsFit(FitEngine):
         #    result.fitness = None
         return [result]
 
-def run_bumps(problem, result, ftol, abort_test):
+def run_bumps(problem, result, ftol, handler, curr_thread, msg_q):
+    def abort_test():
+        if curr_thread is None: return False
+        try: curr_thread.isquit()
+        except KeyboardInterrupt:
+            if handler is not None:
+                handler.stop("Fitting: Terminated!!!")
+            return True
+        return False
+
     fitopts = fitters.FIT_OPTIONS[fitters.FIT_DEFAULT]
     fitclass = fitopts.fitclass
     options = fitopts.options.copy()
+    max_steps = fitopts.options.get('steps', 0) + fitopts.options.get('burn', 0)
+    if 'monitors' not in options:
+        options['monitors'] = [BumpsMonitor(handler, max_steps)]
     options['ftol'] = ftol
     fitdriver = fitters.FitDriver(fitclass, problem=problem,
                                   abort_test=abort_test, **options)
@@ -296,22 +312,22 @@ def run_bumps(problem, result, ftol, abort_test):
     result.success = True
     result.theory = problem.theory
 
-def run_levenburg_marquardt(model, result, ftol):
+def run_levenburg_marquardt(problem, result, ftol):
     # This import must be here; otherwise it will be confused when more
     # than one thread exist.
     from scipy import optimize
 
-    out, cov_x, _, mesg, success = optimize.leastsq(model.residuals,
-                                                    model.getp(),
+    out, cov_x, _, mesg, success = optimize.leastsq(problem.residuals,
+                                                    problem.getp(),
                                                     ftol=ftol,
                                                     full_output=1)
     if cov_x is not None and numpy.isfinite(cov_x).all():
         stderr = numpy.sqrt(numpy.diag(cov_x))
     else:
         stderr = []
-    result.fitness = model.chisq()
+    result.fitness = problem.chisq()
     result.stderr  = stderr
     result.pvec = out
     result.success = success
-    result.theory = model.theory
+    result.theory = problem.theory
 
