@@ -180,7 +180,7 @@ Ellipsoid-based
 - EllipsoidModel_
 - CoreShellEllipsoidModel_
 - CoreShellEllipsoidXTModel_
-- TriaxialEllipsoidModel
+- TriaxialEllipsoidModel_
 
 Lamellae
 --------
@@ -201,8 +201,8 @@ Paracrystals
 Parallelpipeds
 --------------
 
-- ParallelepipedModel (including magnetic 2D version)
-- CSParallelepipedModel
+- ParallelepipedModel_ (including magnetic 2D version)
+- CSParallelepipedModel_
 
 .. _Shape-independent:
 
@@ -354,6 +354,7 @@ Our model uses the form factor calculations implemented in a c-library provided 
 Research (Kline, 2006).
 
 REFERENCE
+
 A. Guinier and G. Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Sons, New York, (1955)
 
 *2.1.1.2. Validation of the SphereModel*
@@ -418,6 +419,7 @@ Research (Kline, 2006).
 See the reference for details.
 
 REFERENCE
+
 N. W. Ashcroft and D. C. Langreth, *Physical Review*, 156 (1967) 685-692
 [Errata found in *Phys. Rev.* 166 (1968) 934]
 
@@ -480,6 +482,7 @@ background      |cm^-1|   0.001
 *Figure. 1D plot using the default values (w/200 data point).*
 
 REFERENCE
+
 M. Stieger, J. S. Pedersen, P. Lindner, W. Richtering, *Langmuir*, 20 (2004) 7283-7292
 
 
@@ -536,6 +539,7 @@ background      |cm^-1|   0
 *Figure. 1D plot using the values of /2000 data points.*
 
 REFERENCE
+
 K. Larson-Smith, A. Jackson, and D.C. Pozzo, *Small angle scattering model for Pickering emulsions and raspberry*
 *particles*, *Journal of Colloid and Interface Science*, 343(1) (2010) 36-41
 
@@ -586,6 +590,7 @@ Our model uses the form factor calculations implemented in a c-library provided 
 Research (Kline, 2006).
 
 REFERENCE
+
 A. Guinier and G. Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Sons, New York, (1955)
 
 *2.1.5.2. Validation of the core-shell sphere model*
@@ -665,7 +670,8 @@ The scattering length density profile for the default sld values (w/ 4 shells).
 *Figure: SLD profile against the radius of the sphere for default SLDs.*
 
 REFERENCE
-See the CoreShell documentation.
+
+See the CoreShellModel_ documentation.
 
 
 
@@ -718,6 +724,7 @@ background      |cm^-1|   0.0
 .. image:: img/secongm_fig1.JPG
 
 REFERENCE
+
 S. King, P. Griffiths, J. Hone, and T. Cosgrove, *SANS from Adsorbed Polymer Layers*,
 *Macromol. Symp.*, 190 (2002) 33-42
 
@@ -765,6 +772,7 @@ Our model uses the form factor calculations implemented in a c-library provided 
 Research (Kline, 2006).
 
 REFERENCE
+
 B. Cabane, *Small Angle Scattering Methods*, in *Surfactant Solutions: New Methods of Investigation*, Ch.2,
 Surfactant Science Series Vol. 22, Ed. R. Zana and M. Dekker, New York, (1987).
 
@@ -883,6 +891,7 @@ NB: *rad_core* represents the core radius (*R1*) and *thick_shell1* (*R2* - *R1*
 *Figure. SLD profile from the default values.*
 
 REFERENCE
+
 L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*,
 Plenum Press, New York, (1987).
 
@@ -942,6 +951,7 @@ Our model uses the form factor calculations implemented in a c-library
 provided by the NIST Center for Neutron Research (Kline, 2006).
 
 REFERENCE
+
 A. Guinier and G. Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Sons, New York, (1955)
 
 
@@ -1070,6 +1080,7 @@ NB: *rad_core0* represents the core radius (*R1*).
 *Figure. SLD profile from the default values.*
 
 REFERENCE
+
 L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*,
 Plenum Press, New York, (1987)
 
@@ -1115,6 +1126,7 @@ NB: *num_pearls* must be an integer.
 .. image:: img/linearpearl_plot.jpg
 
 REFERENCE
+
 A. V. Dobrynin, M. Rubinstein and S. P. Obukhov, *Macromol.*, 29 (1996) 2974-2979
 
 
@@ -1179,6 +1191,7 @@ NB: *num_pearls* must be an integer.
 .. image:: img/pearl_plot.jpg
 
 REFERENCE
+
 R. Schweins and K. Huber, *Particle Scattering Factor of Pearl Necklace Chains*, *Macromol. Symp.* 211 (2004) 25-42 2004
 
 
@@ -1327,6 +1340,7 @@ Our model uses the form factor calculations implemented in a c-library provided 
 *Figure. Examples of the angles for oriented pp against the detector plane.*
 
 REFERENCE
+
 L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum Press,
 New York, (1987)
 
@@ -1411,7 +1425,9 @@ For 2D data: The 2D scattering intensity is calculated similar to the 2D cylinde
 *Figure. Examples of the angles for oriented pp against the detector plane.*
 
 REFERENCE
+
 H. Kaya, *J. Appl. Cryst.*, 37 (2004) 223-230
+
 H. Kaya and N-R deSouza, *J. Appl. Cryst.*, 37 (2004) 508-509 (addenda and errata)
 
 
@@ -1594,6 +1610,7 @@ the results of the averaging by varying the number of angular bins.
 *Figure. The intensities averaged from 2D over different numbers of bins and angles.*
 
 REFERENCE
+
 L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum,
 New York, (1987)
 
@@ -1653,10 +1670,12 @@ From the reference
   the original reference for the details.
 
 REFERENCE
+
 J. S. Pedersen and P. Schurtenberger. *Scattering functions of semiflexible polymers with and without excluded volume*
 *effects*. *Macromolecules*, 29 (1996) 7602-7612
 
 Correction of the formula can be found in
+
 W-R Chen, P. D. Butler and L. J. Magid, *Incorporating Intermicellar Interactions in the Fitting of SANS Data from*
 *Cationic Wormlike Micelles*. *Langmuir*, 22(15) 2006 6539–6548
 
@@ -1739,10 +1758,12 @@ sldSolv         |Ang^-2|  6.3e-6
 *Figure. 1D plot using the default values (w/200 data points).*
 
 REFERENCE
+
 J. S. Pedersen and P. Schurtenberger. *Scattering functions of semiflexible polymers with and without excluded volume*
 *effects*. *Macromolecules*, 29 (1996) 7602-7612
 
 Correction of the formula can be found in
+
 W-R Chen, P. D. Butler and L. J. Magid, *Incorporating Intermicellar Interactions in the Fitting of SANS Data from*
 *Cationic Wormlike Micelles*. *Langmuir*, 22(15) 2006 6539–6548
 
@@ -1800,6 +1821,7 @@ and the 1D scattering intensity use the c-library from NIST.
 *Figure. Examples of the angles for oriented pp against the detector plane.*
 
 REFERENCE
+
 L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum Press,
 New York, (1987)
 
@@ -1887,7 +1909,9 @@ For 2D data: The 2D scattering intensity is calculated similar to the 2D cylinde
 Figure. Definition of the angles for oriented 2D barbells.
 
 REFERENCE
+
 H. Kaya, *J. Appl. Cryst.*, 37 (2004) 37 223-230
+
 H. Kaya and N-R deSouza, *J. Appl. Cryst.*, 37 (2004) 508-509 (addenda and errata)
 
 
@@ -1972,8 +1996,11 @@ Our model uses the form factor calculations implemented in a c-library provided 
 (Kline, 2006)
 
 REFERENCE
+
 A. Guinier and G. Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Sons, New York, 1955
+
 O. Kratky and G. Porod, *J. Colloid Science*, 4, (1949) 35
+
 J. S. Higgins and H. C. Benoit, *Polymers and Neutron Scattering*, Clarendon, Oxford, 1994
 
 
@@ -2018,6 +2045,7 @@ thickness       |Ang|     10
 *Figure. 1D plot using the default values (w/150 data point).*
 
 REFERENCE
+
 S. Alexandru Rautu, Private Communication.
 
 
@@ -2113,6 +2141,7 @@ equidistant points in . Our result was found to be stable over the range of *q* 
 than 500.
 
 REFERENCE
+
 L. A. Feigin and D. I. Svergun. *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum,
 New York, 1987.
 
@@ -2176,7 +2205,9 @@ Our model uses the form factor calculations implemented in a c-library provided 
 (Kline, 2006).
 
 REFERENCE
+
 M. Kotlarchyk, S.-H. Chen, *J. Chem. Phys.*, 79 (1983) 2461
+
 S. J. Berr, *Phys. Chem.*, 91 (1987) 4760
 
 
@@ -2239,11 +2270,12 @@ XpolarShell     None      1.0
 ==============  ========  =============
 
 REFERENCE
+
 R. K. Heenan, Private communication
 
 
 
-.. _TriaxialEllipsoidalModel:
+.. _TriaxialEllipsoidModel:
 
 **2.1.28. TriaxialEllipsoidModel**
 
@@ -2313,6 +2345,7 @@ Our model uses the form factor calculations implemented in a c-library provided 
 (Kline, 2006)
 
 REFERENCE
+
 L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum,
 New York, 1987.
 
@@ -2365,9 +2398,9 @@ provided by the NIST Center for Neutron Research (Kline, 2006):
 
 REFERENCE
 
-Nallet, Laversanne, and Roux, J. Phys. II France, 3, (1993) 487-502.
+F. Nallet, R. Laversanne, and D. Roux, J. Phys. II France, 3, (1993) 487-502
 
-also in J. Phys. Chem. B, 105, (2001) 11081-11088.
+also in J. Phys. Chem. B, 105, (2001) 11081-11088
 
 
 
@@ -2422,9 +2455,9 @@ provided by the NIST Center for Neutron Research (Kline, 2006):
 
 REFERENCE
 
-Nallet, Laversanne, and Roux, J. Phys. II France, 3, (1993) 487-502.
+F. Nallet, R. Laversanne, and D. Roux, J. Phys. II France, 3, (1993) 487-502
 
-also in J. Phys. Chem. B, 105, (2001) 11081-11088.
+also in J. Phys. Chem. B, 105, (2001) 11081-11088
 
 
 
@@ -2492,9 +2525,9 @@ provided by the NIST Center for Neutron Research (Kline, 2006):
 
 REFERENCE
 
-Nallet, Laversanne, and Roux, J. Phys. II France, 3, (1993) 487-502.
+F. Nallet, R. Laversanne, and D. Roux, J. Phys. II France, 3, (1993) 487-502
 
-also in J. Phys. Chem. B, 105, (2001) 11081-11088.
+also in J. Phys. Chem. B, 105, (2001) 11081-11088
 
 
 
@@ -2573,9 +2606,9 @@ provided by the NIST Center for Neutron Research (Kline, 2006):
 
 REFERENCE
 
-Nallet, Laversanne, and Roux, J. Phys. II France, 3, (1993) 487-502.
+F. Nallet, R. Laversanne, and D. Roux, J. Phys. II France, 3, (1993) 487-502
 
-also in J. Phys. Chem. B, 105, (2001) 11081-11088.
+also in J. Phys. Chem. B, 105, (2001) 11081-11088
 
 
 
@@ -2642,8 +2675,7 @@ See the reference for details.
 
 REFERENCE
 
-M. Bergstrom, J. S. Pedersen, P. Schurtenberger, S. U. Egelhaaf, J.
-Phys. Chem. B, 103 (1999) 9888-9897.
+M. Bergstrom, J. S. Pedersen, P. Schurtenberger, S. U. Egelhaaf, *J. Phys. Chem. B*, 103 (1999) 9888-9897
 
 
 
@@ -2704,12 +2736,12 @@ calculation is SLOW. Go get some coffee. Fitting of any experimental
 data must be resolution smeared for any meaningful fit. This makes a
 triple integral. Very, very slow. Go get lunch.
 
-REFERENCES
+REFERENCE
 
-Hideki Matsuoka et. al. Physical Review B, 36 (1987) 1754-1765.
+Hideki Matsuoka et. al. *Physical Review B*, 36 (1987) 1754-1765
 (Original Paper)
 
-Hideki Matsuoka et. al. Physical Review B, 41 (1990) 3854 -3856.
+Hideki Matsuoka et. al. *Physical Review B*, 41 (1990) 3854 -3856
 (Corrections to FCC and BCC lattice structure calculation)
 
 ==============  ========  =============
@@ -2724,7 +2756,7 @@ sld_Sph         |Ang^-2|  3e-06
 d_factor        None      0.06
 ==============  ========  =============
 
-TEST DATASET
+
 
 This example dataset is produced using 200 data points, *qmin* = 0.01
 -1, *qmax* = 0.1 -1 and the above default values.
@@ -2814,12 +2846,12 @@ calculation is SLOW. Go get some coffee. Fitting of any experimental
 data must be resolution smeared for any meaningful fit. This makes a
 triple integral. Very, very slow. Go get lunch.
 
-REFERENCES
+REFERENCE
 
-Hideki Matsuoka et. al. Physical Review B, 36 (1987) 1754-1765.
+Hideki Matsuoka et. al. *Physical Review B*, 36 (1987) 1754-1765
 (Original Paper)
 
-Hideki Matsuoka et. al. Physical Review B, 41 (1990) 3854 -3856.
+Hideki Matsuoka et. al. *Physical Review B*, 41 (1990) 3854 -3856
 (Corrections to FCC and BCC lattice structure calculation)
 
 ==============  ========  =============
@@ -2833,8 +2865,6 @@ radius          |Ang|     40
 sld_Sph         |Ang^-2|  3e-06
 d_factor        None      0.06
 ==============  ========  =============
-
-TEST DATASET
 
 This example dataset is produced using 200 data points, *qmin* = 0.01
 -1, *qmax* = 0.1 -1 and the above default values.
@@ -2912,12 +2942,12 @@ calculation is SLOW. Go get some coffee. Fitting of any experimental
 data must be resolution smeared for any meaningful fit. This makes a
 triple integral. Very, very slow. Go get lunch.
 
-REFERENCES
+REFERENCE
 
-Hideki Matsuoka et. al. Physical Review B, 36 (1987) 1754-1765.
+Hideki Matsuoka et. al. *Physical Review B*, 36 (1987) 1754-1765
 (Original Paper)
 
-Hideki Matsuoka et. al. Physical Review B, 41 (1990) 3854 -3856.
+Hideki Matsuoka et. al. *Physical Review B*, 41 (1990) 3854 -3856
 (Corrections to FCC and BCC lattice structure calculation)
 
 ==============  ========  =============
@@ -2932,7 +2962,7 @@ sld_Sph         |Ang^-2|  3e-006
 d_factor        None      0.06
 ==============  ========  =============
 
-TEST DATASET
+
 
 This example dataset is produced using 200 data points, *qmin* = 0.001
 -1, *qmax* = 0.1 -1 and the above default values.
@@ -2967,52 +2997,46 @@ incorrectness of the 2D model computation.
 
 **2.1.37. ParallelepipedModel**
 
-This model provides the form factor, *P(q)*, for a rectangular
-cylinder (below) where the form factor is normalized by the volume of
-the cylinder. P(q) = scale*<f^2>/V+background where the volume V= ABC
-and the averaging < > is applied over all orientation for 1D.
+This model provides the form factor, *P(q)*, for a rectangular cylinder (below) where the form factor is normalized by
+the volume of the cylinder.
+
+*P(q)* = *scale* \* <*f*\ :sup:`2`> / *V* + *background*
+
+where the volume *V* = *A B C* and the averaging < > is applied over all orientations for 1D.
 
 For information about polarised and magnetic scattering, click here_.
 
+.. image:: img/image087.JPG
 
+*2.1.37.1. Definition*
 
+**The edge of the solid must satisfy the condition that** *A* < *B*. Then, assuming *a* = *A* / *B* < 1,
+*b* = *B* / *B* = 1, and *c* = *C* / *B* > 1, the form factor is
 
+.. image:: img/image088.PNG
 
-The side of the solid must be satisfied the condition of A<B
+and the contrast is defined as
 
-By this definition, assuming
+.. image:: img/image089.PNG
 
-a = A/B<1; b=B/B=1; c=C/B>1, the form factor,
+The scattering intensity per unit volume is returned in units of |cm^-1|; ie, *I(q)* = |phi| *P(q)*\ .
 
+NB: The 2nd virial coefficient of the parallelpiped is calculated based on the the averaged effective radius
+(= sqrt(*short_a* \* *short_b* / |pi|)) and length(= *long_c*) values, and used as the effective radius for
+*S(Q)* when *P(Q)* \* *S(Q)* is applied.
 
+To provide easy access to the orientation of the parallelepiped, we define the axis of the cylinder using three angles
+|theta|, |phi| and |bigpsi|. These angles are defined on Figure 2 of the CylinderModel_. The angle |bigpsi| is the
+rotational angle around the *long_c* axis against the *q* plane. For example, |bigpsi| = 0 when the *short_b* axis is
+parallel to the *x*-axis of the detector.
 
-The contrast is defined as
-
-
-
-The scattering intensity per unit volume is returned in the unit of
-|cm^-1|; I(q) = fP(q).
-
-For P*S: The 2nd virial coefficient of the solid cylinder is calculate
-based on the averaged effective radius (= sqrt(short_a*short_b/pi))
-and length( = long_c) values, and used as the effective radius toward
-S(Q) when P(Q)*S(Q) is applied.
-
-To provide easy access to the orientation of the parallelepiped, we
-define the axis of the cylinder using two angles , andY. Similarly to
-the case of the cylinder, those angles, and , are defined on Figure 2
-of CylinderModel. The angle Y is the rotational angle around its own
-long_c axis against the q plane. For example, Y = 0 when the short_b
-axis is parallel to the x-axis of the detector.
-
-
+.. image:: img/image090.JPG
 
 *Figure. Definition of angles for 2D*.
 
+.. image:: img/image091.JPG
 
-
-Figure. Examples of the angles for oriented pp against the detector
-plane.
+*Figure. Examples of the angles for oriented pp against the detector plane.*
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -3025,30 +3049,27 @@ short_b         |Ang|     75
 scale           None      1
 ==============  ========  =============
 
-
+.. image:: img/image092.JPG
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
-*Validation of the parallelepiped 2D model*
+*2.1.37.2. Validation of the parallelepiped 2D model*
 
-Validation of our code was done by comparing the output of the 1D
-calculation to the angular average of the output of 2 D calculation
-over all possible angles. The Figure below shows the comparison where
-the solid dot refers to averaged 2D while the line represents the
-result of 1D calculation (for the averaging, 76, 180, 76 points are
-taken over the angles of theta, phi, and psi respectively).
+Validation of our code was done by comparing the output of the 1D calculation to the angular average of the output of
+a 2D calculation over all possible angles. The Figure below shows the comparison where the solid dot refers to averaged
+2D while the line represents the result of the 1D calculation (for the averaging, 76, 180, 76 points are taken for the
+angles of |theta|, |phi|, and |psi| respectively).
 
-
+.. image:: img/image093.GIF
 
 *Figure. Comparison between 1D and averaged 2D.*
 
-Our model uses the form factor calculations implemented in a c-library
-provided by the NIST Center for Neutron Research (Kline, 2006):
+Our model uses the form factor calculations implemented in a c-library provided by the NIST Center for Neutron Research
+(Kline, 2006).
 
 REFERENCE
 
-Mittelbach and Porod, Acta Physica Austriaca 14 (1961) 185-211.
-
+P. Mittelbach and G. Porod, *Acta Physica Austriaca*, 14 (1961) 185-211
 Equations (1), (13-14). (in German)
 
 
@@ -3057,86 +3078,73 @@ Equations (1), (13-14). (in German)
 
 **2.1.38. CSParallelepipedModel**
 
-Calculates the form factor for a rectangular solid with a core-shell
-structure. The thickness and the scattering length density of the
-shell or "rim" can be different on all three (pairs) of faces. The
-form factor is normalized by the particle volume such that P(q) =
-scale*<f^2>/Vol + bkg, where < > is an average over all possible
-orientations of the rectangular solid. An instrument resolution
-smeared version is also provided.
+Calculates the form factor for a rectangular solid with a core-shell structure. **The thickness and the scattering**
+**length density of the shell or "rim" can be different on all three (pairs) of faces.**
 
-The function calculated is the form factor of the rectangular solid
-below. The core of the solid is defined by the dimensions ABC such
-that A < B < C.
+The form factor is normalized by the particle volume *V* such that
 
+*P(q)* = *scale* \* <*f*\ :sup:`2`> / *V* + *background*
 
+where < > is an average over all possible orientations of the rectangular solid.
 
-There are rectangular "slabs" of thickness tA that add to the A
-dimension (on the BC faces). There are similar slabs on the AC (=tB)
-and AB (=tC) faces. The projection in the AB plane is then:
+An instrument resolution smeared version of the model is also provided.
 
+*2.1.38.1. Definition*
 
+The function calculated is the form factor of the rectangular solid below. The core of the solid is defined by the
+dimensions *A*, *B*, *C* such that *A* < *B* < *C*.
 
-The volume of the solid is:
+.. image:: img/image087.JPG
 
+There are rectangular "slabs" of thickness *tA* that add to the *A* dimension (on the *BC* faces). There are similar
+slabs on the *AC* (= *tB*) and *AB* (= *tC*) faces. The projection in the *AB* plane is then
 
+.. image:: img/image094.JPG
 
-meaning that there are "gaps" at the corners of the solid.
+The volume of the solid is
 
-The intensity calculated follows the parallelepiped model, with the
-core-shell intensity being calculated as the square of the sum of the
-amplitudes of the core and shell, in the same manner as a core-shell
-sphere.
+.. image:: img/image095.PNG
 
-For the calculation of the form factor to be valid, the sides of the
-solid MUST be chosen such that A < B < C. If this inequality in not
-satisfied, the model will not report an error, and the calculation
-will not be correct.
+**meaning that there are "gaps" at the corners of the solid.**
 
-FITTING NOTES:
+The intensity calculated follows the ParallelepipedModel_, with the core-shell intensity being calculated as the
+square of the sum of the amplitudes of the core and shell, in the same manner as a CoreShellModel_.
 
-If the scale is set equal to the particle volume fraction, f, the
-returned value is the scattered intensity per unit volume, I(q) =
-f*P(q). However, no interparticle interference effects are included in
-this calculation.
+**For the calculation of the form factor to be valid, the sides of the solid MUST be chosen such that** *A* < *B* < *C*.
+**If this inequality is not satisfied, the model will not report an error, and the calculation will not be correct.**
 
-There are many parameters in this model. Hold as many fixed as
-possible with known values, or you will certainly end up at a solution
-that is unphysical.
+FITTING NOTES
+If the scale is set equal to the particle volume fraction, |phi|, the returned value is the scattered intensity per
+unit volume; ie, *I(q)* = |phi| *P(q)*\ . However, **no interparticle interference effects are included in this**
+**calculation.**
 
-Constraints must be applied during fitting to ensure that the
-inequality A < B < C is not violated. The calculation will not report
-an error, but the results will not be correct.
+There are many parameters in this model. Hold as many fixed as possible with known values, or you will certainly end
+up at a solution that is unphysical.
+
+Constraints must be applied during fitting to ensure that the inequality *A* < *B* < *C* is not violated. The
+calculation will not report an error, but the results will not be correct.
 
 The returned value is in units of |cm^-1|, on absolute scale.
 
-For P*S: The 2nd virial coefficient of this CSPP is calculate based on
-the averaged effective radius (=
-sqrt((short_a+2*rim_a)*(short_b+2*rim_b)/pi)) and length( =
-long_c+2*rim_c) values, and used as the effective radius toward S(Q)
-when P(Q)*S(Q) is applied.
+NB: The 2nd virial coefficient of the CSParallelpiped is calculated based on the the averaged effective radius
+(= sqrt((*short_a* + 2 *rim_a*) \* (*short_b* + 2 *rim_b*) / |pi|)) and length(= *long_c* + 2 *rim_c*) values, and
+used as the effective radius for *S(Q)* when *P(Q)* \* *S(Q)* is applied.
 
-To provide easy access to the orientation of the CSparallelepiped, we
-define the axis of the cylinder using two angles , andY. Similarly to
-the case of the cylinder, those angles, and , are defined on Figure 2
-of CylinderModel. The angle Y is the rotational angle around its own
-long_c axis against the q plane. For example, Y = 0 when the short_b
-axis is parallel to the x-axis of the detector.
+To provide easy access to the orientation of the parallelepiped, we define the axis of the cylinder using three angles
+|theta|, |phi| and |bigpsi|. These angles are defined on Figure 2 of the CylinderModel_. The angle |bigpsi| is the
+rotational angle around the *long_c* axis against the *q* plane. For example, |bigpsi| = 0 when the *short_b* axis is
+parallel to the *x*-axis of the detector.
 
-
+.. image:: img/image090.JPG
 
 *Figure. Definition of angles for 2D*.
 
+.. image:: img/image091.JPG
 
+*Figure. Examples of the angles for oriented cspp against the detector plane.*
 
-Figure. Examples of the angles for oriented cspp against the detector
-plane.
-
-TEST DATASET
-
-This example dataset is produced by running the Macro
-Plot_CSParallelepiped(), using 100 data points, *qmin* = 0.001 |Ang^-1|, *qmax*
-= 0.7 -1 and the below default values.
+This example dataset was produced by running the Macro Plot_CSParallelepiped(), using 100 data points,
+*qmin* = 0.001 |Ang^-1|, *qmax* = 0.7 |Ang^-1| and the default values
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -3156,25 +3164,21 @@ midB            |Ang|     75
 scale           None      1
 ==============  ========  =============
 
-
+.. image:: img/image096.JPG
 
 *Figure. 1D plot using the default values (w/256 data points).*
 
+.. image:: img/image097.JPG
 
+*Figure. 2D plot using the default values (w/(256X265) data points).*
 
-
-
-*Figure. 2D plot using the default values (w/(256X265) data
-points).*
-
-Our model uses the form factor calculations implemented in a c-library
-provided by the NIST Center for Neutron Research (Kline, 2006):
+Our model uses the form factor calculations implemented in a c-library provided by the NIST Center for Neutron Research
+(Kline, 2006).
 
 REFERENCE
 
-see: Mittelbach and Porod, Acta Physica Austriaca 14 (1961) 185-211.
-
-Equations (1), (13-14). (yes, it's in German)
+P. Mittelbach and G. Porod, *Acta Physica Austriaca*, 14 (1961) 185-211
+Equations (1), (13-14). (in German)
 
 
 
@@ -3229,8 +3233,9 @@ background
 
 
 
-Reference: Roe, R.-J., "Methods of X-Ray and Neutron Scattering in
-Polymer Science", Oxford University Press, New York (2000).
+REFERENCE
+
+R. J. Roe, *Methods of X-Ray and Neutron Scattering in Polymer Science*, Oxford University Press, New York (2000).
 
 *3.2. BroadPeak Model*
 
@@ -3306,7 +3311,9 @@ Background (=B)
 
 
 
-Reference: None.
+REFERENCE
+
+*None*
 
 2013/09/09 - Description reviewed by King, S. and Parker, P.
 
@@ -3379,8 +3386,8 @@ Background (=B)
 
 REFERENCE
 
-B. Hammouda, D.L. Ho and S.R. Kline, Insight into Clustering in
-Poly(ethylene oxide) Solutions, Macromolecules 37, 6932-6937 (2004).
+B. Hammouda, D.L. Ho and S.R. Kline, *Insight into Clustering in Poly(ethylene oxide) Solutions*,
+*Macromolecules*, 37 (2004) 6932-6937
 
 2013/09/09 - Description reviewed by King, S. and Parker, P.
 
@@ -3486,14 +3493,10 @@ background
 
 REFERENCE
 
-Debye, Anderson, Brumberger, "Scattering by an Inhomogeneous Solid.
-II. The Correlation Function and its Application", J. Appl. Phys. 28
-(6), 679 (1957).
+Debye, Bueche, *Scattering by an Inhomogeneous Solid*, *J. Appl. Phys.*, 20 (1949) 518
 
-
-
-Debye, Bueche, "Scattering by an Inhomogeneous Solid", J. Appl. Phys.
-20, 518 (1949).
+Debye, Anderson, Brumberger, *Scattering by an Inhomogeneous Solid. II. The Correlation Function and its Application*,
+*J. Appl. Phys.*, 28(6), (1957) 679
 
 2013/09/09 - Description reviewed by King, S. and Parker, P.
 
@@ -3592,7 +3595,7 @@ background
 
 REFERENCE
 
-Teubner, M; Strey, R. J. Chem. Phys., 87, 3195 (1987).
+Teubner, M; Strey, R. J. Chem. Phys., 87, 3195 (1987)
 
 
 
@@ -4094,7 +4097,7 @@ background
 
 
 
-REFERENCE:
+REFERENCE
 
 G. Evmenenko, E. Theunissen, K. Mortensen, H. Reynaers, Polymer 42
 (2001) 2907-2913.
@@ -4179,9 +4182,7 @@ Borue, V. Y., Erukhimovich, I. Y. Macromolecules 21, 3240 (1988).
 Joanny, J.-F., Leibler, L. Journal de Physique 51, 545 (1990).
 
 Moussaid, A., Schosseler, F., Munch, J.-P., Candau, S. J. Journal de
-Physique II France
-
-3, 573 (1993).
+Physique II France, 3, 573 (1993).
 
 Raphal, E., Joanny, J.-F., Europhysics Letters 11, 179 (1990).
 
@@ -4374,7 +4375,9 @@ deviation of B. The fwhm is 2.354*B.
 
 Parameters I0, B, qpk, and BGD can all be adjusted during fitting.
 
-REFERENCE: None
+REFERENCE
+
+*None*
 
 For 2D plot, the wave transfer is defined as .
 
@@ -4431,7 +4434,9 @@ width-half-maximum) of B.
 
 The parameters I0, B, qpk, and BGD can all be adjusted during fitting.
 
-REFERENCE: None
+REFERENCE
+
+*None*
 
 For 2D plot, the wave transfer is defined as .
 
@@ -4497,7 +4502,7 @@ The polydispersion in rg is provided.
 
 For 2D plot, the wave transfer is defined as .
 
-TEST DATASET
+
 
 This example dataset is produced by running the Poly_GaussCoil, using
 200 data points, *qmin* = 0.001 |Ang^-1|, *qmax* = 0.7 -1 and the default values
@@ -4541,14 +4546,11 @@ background
 
 
 
-Reference:
+REFERENCE
 
 Glatter & Kratky - pg.404.
 
-J.S. Higgins, and H.C. Benoit, Polymers and Neutron Scattering, Oxford
-Science
-
-Publications (1996).
+J.S. Higgins, and H.C. Benoit, Polymers and Neutron Scattering, Oxford Science Publications (1996).
 
 *3.21. PolymerExclVolume (Model)*
 
@@ -4618,12 +4620,11 @@ REFERENCE
 
 Benoit, H., Comptes Rendus (1957). 245, 2244-2247.
 
-Hammouda, B., SANS from Homogeneous Polymer Mixtures A Unified
-Overview, Advances in Polym. Sci. (1993), 106, 87-133.
+Hammouda, B., SANS from Homogeneous Polymer Mixtures A Unified Overview, Advances in Polym. Sci. (1993), 106, 87-133.
 
 For 2D plot, the wave transfer is defined as .
 
-TEST DATASET
+
 
 This example dataset is produced, using 200 data points, *qmin* = 0.001
 -1, *qmax* = 0.2 -1 and the default values below.
@@ -4883,7 +4884,9 @@ Background(=B)
 
 
 
-*REFERENCE: None*
+REFERENCE
+
+*None*
 
 *3.24. TwoPowerLaw(Model)*
 
@@ -5257,6 +5260,7 @@ where is the ensemble average radius of gyration squared of an arm.
 
 
 REFERENCE
+
 H. Benoit, J. Polymer Science., 11, 596-599 (1953)
 
 
@@ -5298,6 +5302,7 @@ volfraction     None      0.2
 *Figure. 1D plot using the default values (in linear scale).*
 
 REFERENCE
+
 J. K. Percus, J. Yevick, *J. Phys. Rev.*, 110, (1958) 1
 
 
@@ -5340,6 +5345,7 @@ wellwidth       diameters  1.2
 *Figure. 1D plot using the default values (in linear scale).*
 
 REFERENCE
+
 R. V. Sharma, K. C. Sharma, *Physica*, 89A (1977) 213
 
 
@@ -5380,7 +5386,9 @@ dielectconst    None      71.1
 *Figure. 1D plot using the default values (in linear scale).*
 
 REFERENCE
+
 J. B. Hayter and J. Penfold, *Molecular Physics*, 42 (1981) 109-118
+
 J. P. Hansen and J. B. Hayter, *Molecular Physics*, 46 (1982) 651-656
 
 
@@ -5435,6 +5443,7 @@ stickiness      K         0.2
 *Figure. 1D plot using the default values (in linear scale).*
 
 REFERENCE
+
 S. V. G. Menon, C. Manohar, and K. S. Rao, *J. Chem. Phys.*, 95(12) (1991) 9186-9190
 
 
