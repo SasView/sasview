@@ -120,7 +120,7 @@ class SasProblem(object):
         self.res, self.theory = self.data.residuals(self.model.evalDistribution)
 
         # TODO: this belongs in monitor not residuals calculation
-        if self.fitresult is not None:
+        if False: # self.fitresult is not None:
             #self.fitresult.set_model(model=self.model)
             self.fitresult.residuals = self.res+0
             self.fitresult.iterations += 1
@@ -242,8 +242,8 @@ class BumpsFit(FitEngine):
                               curr_thread=curr_thread,
                               msg_q=msg_q)
         try:
-            #run_bumps(problem, result, ftol)
-            run_scipy(problem, result, ftol)
+            run_bumps(problem, result, ftol)
+            #run_scipy(problem, result, ftol)
         except:
             if hasattr(sys, 'last_type') and sys.last_type == KeyboardInterrupt:
                 if handler is not None:
