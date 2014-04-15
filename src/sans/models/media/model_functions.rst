@@ -185,15 +185,15 @@ Ellipsoid-based
 Lamellae
 --------
 
-- LamellarModel
-- LamellarFFHGModel
-- LamellarPSModel
-- LamellarPSHGModel
+- LamellarModel_
+- LamellarFFHGModel_
+- LamellarPSModel_
+- LamellarPSHGModel_
 
 Paracrystals
 ------------
 
-- LamellarPCrystalModel
+- LamellarPCrystalModel_
 - SCCrystalModel
 - FCCrystalModel
 - BCCrystalModel
@@ -2355,29 +2355,27 @@ New York, 1987.
 
 **2.1.29. LamellarModel**
 
-This model provides the scattering intensity, I( *q*), for a lyotropic
-lamellar phase where a uniform SLD and random distribution in solution
-are assumed. The ploydispersion in the bilayer thickness can be
-applied from the GUI.
+This model provides the scattering intensity, *I(q)*, for a lyotropic lamellar phase where a uniform SLD and random
+distribution in solution are assumed. Polydispersity in the bilayer thickness can be applied from the GUI.
 
-The scattering intensity I(q) is:
+*2.1.29.1. Definition*
 
+The scattering intensity *I(q)* is
 
+.. image:: img/image133.PNG
 
-The form factor is,
+The form factor is
 
+.. image:: img/image134.PNG
 
+where |delta| = bilayer thickness.
 
-where d = bilayer thickness.
+The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-The 2D scattering intensity is calculated in the same way as 1D, where
-the *q* vector is defined as .
+.. image:: img/image040.GIF
 
-
-
-The returned value is in units of |cm^-1|, on absolute scale. In the
-parameters, sld_bi = SLD of the bilayer, sld_sol = SLD of the solvent,
-and bi_thick = the thickness of the bilayer.
+The returned value is in units of |cm^-1|, on absolute scale. In the parameters, *sld_bi* = SLD of the bilayer,
+*sld_sol* = SLD of the solvent, and *bi_thick* = thickness of the bilayer.
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -2389,12 +2387,12 @@ sld_sol         |Ang^-2|  6e-06
 scale           None      1
 ==============  ========  =============
 
-
+.. image:: img/image135.JPG
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
-Our model uses the form factor calculations implemented in a c-library
-provided by the NIST Center for Neutron Research (Kline, 2006):
+Our model uses the form factor calculations implemented in a c-library provided by the NIST Center for Neutron Research
+(Kline, 2006).
 
 REFERENCE
 
@@ -2408,31 +2406,28 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088
 
 **2.1.30. LamellarFFHGModel**
 
-This model provides the scattering intensity, I( *q*), for a lyotropic
-lamellar phase where a random distribution in solution are assumed.
-The SLD of the head region is taken to be different from the SLD of
-the tail region.
+This model provides the scattering intensity, *I(q)*, for a lyotropic lamellar phase where a random distribution in
+solution are assumed. The SLD of the head region is taken to be different from the SLD of the tail region.
 
-The scattering intensity I(q) is:
+*2.1.31.1. Definition*
 
+The scattering intensity *I(q)* is
 
+.. image:: img/image136.PNG
 
-The form factor is,
+The form factor is
 
+.. image:: img/image137.JPG
 
+where |delta|\ T = tail length (or *t_length*), |delta|\ H = head thickness (or *h_thickness*),
+|bigdelta|\ |rho|\ H = SLD(headgroup) - SLD(solvent), and |bigdelta|\ |rho|\ T = SLD(tail) - SLD(headgroup).
 
-where dT = tail length (or t_length), dH = heasd thickness (or
-h_thickness) , DrH = SLD (headgroup) - SLD(solvent), and DrT = SLD
-(tail) - SLD(headgroup).
+The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-The 2D scattering intensity is calculated in the same way as 1D, where
-the *q* vector is defined as .
+.. image:: img/image040.GIF
 
-
-
-The returned value is in units of |cm^-1|, on absolute scale. In the
-parameters, sld_tail = SLD of the tail group, and sld_head = SLD of
-the head group.
+The returned value is in units of |cm^-1|, on absolute scale. In the parameters, *sld_tail* = SLD of the tail group,
+and *sld_head* = SLD of the head group.
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -2446,12 +2441,12 @@ t_length        |Ang|     15
 sld_tail        |Ang^-2|  0
 ==============  ========  =============
 
-
+.. image:: img/image138.JPG
 
 *Figure. 1D plot using the default values (w/1000 data point).*
 
-Our model uses the form factor calculations implemented in a c-library
-provided by the NIST Center for Neutron Research (Kline, 2006):
+Our model uses the form factor calculations implemented in a c-library provided by the NIST Center for Neutron Research
+(Kline, 2006).
 
 REFERENCE
 
@@ -2465,42 +2460,37 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088
 
 **2.1.31. LamellarPSModel**
 
-This model provides the scattering intensity ( *form factor* \*
-*structure factor*), I( *q*), for a lyotropic lamellar phase where a
-random distribution in solution are assumed.
+This model provides the scattering intensity, *I(q)* = *P(q)* \* *S(q)*, for a lyotropic lamellar phase where a random
+distribution in solution are assumed.
 
-The scattering intensity I(q) is:
+*2.1.31.1. Definition*
 
+The scattering intensity *I(q)* is
 
+.. image:: img/image139.PNG
 
 The form factor is
 
+.. image:: img/image134.PNG
 
+and the structure factor is
 
-and the structure is
-
-
+.. image:: img/image140.PNG
 
 where
 
+.. image:: img/image141.PNG
 
+Here *d* = (repeat) spacing, |delta| = bilayer thickness, the contrast |bigdelta|\ |rho| = SLD(headgroup) - SLD(solvent),
+K = smectic bending elasticity, B = compression modulus, and N = number of lamellar plates (*n_plates*).
 
+NB: **When the Caille parameter is greater than approximately 0.8 to 1.0, the assumptions of the model are incorrect.**
+And due to a complication of the model function, users are responsible for making sure that all the assumptions are
+handled accurately (see the original reference below for more details).
 
+The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
-
-
-Here d= (repeat) spacing, d = bilayer thickness, the contrast Dr = SLD
-(headgroup) - SLD(solvent), K=smectic bending elasticity,
-B=compression modulus, and N = number of lamellar plates (n_plates).
-
-NB: When the Caille parameter is greater than approximately 0.8 to
-1.0, the assumptions of the model are incorrect. And due to the
-complication of the model function, users are responsible to make sure
-that all the assumptions are handled accurately: see the original
-reference (below) for more details.
-
-The 2D scattering intensity is calculated in the same way as 1D, where
-the *q* vector is defined as .
+.. image:: img/image040.GIF
 
 The returned value is in units of |cm^-1|, on absolute scale.
 
@@ -2516,12 +2506,12 @@ spacing         |Ang|     400
 caille          |Ang^-2|  0.1
 ==============  ========  =============
 
-
+.. image:: img/image142.JPG
 
 *Figure. 1D plot using the default values (w/6000 data point).*
 
-Our model uses the form factor calculations implemented in a c-library
-provided by the NIST Center for Neutron Research (Kline, 2006):
+Our model uses the form factor calculations implemented in a c-library provided by the NIST Center for Neutron Research
+(Kline, 2006).
 
 REFERENCE
 
@@ -2535,51 +2525,43 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088
 
 **2.1.32. LamellarPSHGModel**
 
-This model provides the scattering intensity ( *form factor* \*
-*structure factor*), I( *q*), for a lyotropic lamellar phase where a
-random distribution in solution are assumed. The SLD of the head
-region is taken to be different from the SLD of the tail region.
+This model provides the scattering intensity, *I(q)* = *P(q)* \* *S(q)*, for a lyotropic lamellar phase where a random
+distribution in solution are assumed. The SLD of the head region is taken to be different from the SLD of the tail
+region.
 
-The scattering intensity I(q) is:
+*2.1.32.1. Definition*
 
+The scattering intensity *I(q)* is
 
+.. image:: img/image139.PNG
 
-The form factor is,
+The form factor is
 
-
+.. image:: img/image143.PNG
 
 The structure factor is
 
-
+.. image:: img/image140.PNG
 
 where
 
+.. image:: img/image141.PNG
 
+where |delta|\ T = tail length (or *t_length*), |delta|\ H = head thickness (or *h_thickness*),
+|bigdelta|\ |rho|\ H = SLD(headgroup) - SLD(solvent), and |bigdelta|\ |rho|\ T = SLD(tail) - SLD(headgroup).
+Here *d* = (repeat) spacing, *K* = smectic bending elasticity, *B* = compression modulus, and N = number of lamellar
+plates (*n_plates*).
 
+NB: **When the Caille parameter is greater than approximately 0.8 to 1.0, the assumptions of the model are incorrect.**
+And due to a complication of the model function, users are responsible for making sure that all the assumptions are
+handled accurately (see the original reference below for more details).
 
+The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
+.. image:: img/image040.GIF
 
-
-where dT = tail length (or t_length), dH = heasd thickness (or
-h_thickness) , DrH = SLD (headgroup) - SLD(solvent), and DrT = SLD
-(tail) - SLD(headgroup). Here d= (repeat) spacing, K=smectic bending
-elasticity, B=compression modulus, and N = number of lamellar plates
-(n_plates).
-
-NB: When the Caille parameter is greater than approximately 0.8 to
-1.0, the assumptions of the model are incorrect. And due to the
-complication of the model function, users are responsible to make sure
-that all the assumptions are handled accurately: see the original
-reference (below) for more details.
-
-The 2D scattering intensity is calculated in the same way as 1D, where
-the *q* vector is defined as .
-
-
-
-The returned value is in units of |cm^-1|, on absolute scale. In the
-parameters, sld_tail = SLD of the tail group, sld_head = SLD of the
-head group, and sld_solvent = SLD of the solvent.
+The returned value is in units of |cm^-1|, on absolute scale. In the parameters, *sld_tail* = SLD of the tail group,
+*sld_head* = SLD of the head group, and *sld_solvent* = SLD of the solvent.
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -2596,13 +2578,12 @@ spacing         |Ang|     40
 caille          |Ang^-2|  0.001
 ==============  ========  =============
 
-
-
+.. image:: img/image144.JPG
 
 *Figure. 1D plot using the default values (w/6000 data point).*
 
-Our model uses the form factor calculations implemented in a c-library
-provided by the NIST Center for Neutron Research (Kline, 2006):
+Our model uses the form factor calculations implemented in a c-library provided by the NIST Center for Neutron Research
+(Kline, 2006).
 
 REFERENCE
 
@@ -2616,39 +2597,34 @@ also in J. Phys. Chem. B, 105, (2001) 11081-11088
 
 **2.1.33. LamellarPCrystalModel**
 
-Lamella ParaCrystal Model: Calculates the scattering from a stack of
-repeating lamellar structures. The stacks of lamellae (infinite in
-lateral dimension) are treated as a paracrystal to account for the
-repeating spacing. The repeat distance is further characterized by a
-Gaussian polydispersity. This model can be used for large
-multilamellar vesicles.
+This model calculates the scattering from a stack of repeating lamellar structures. The stacks of lamellae (infinite
+in lateral dimension) are treated as a paracrystal to account for the repeating spacing. The repeat distance is further
+characterized by a Gaussian polydispersity. **This model can be used for large multilamellar vesicles.**
 
-The scattering intensity I(q) is calculated as:
+*2.1.33.1. Definition*
 
+The scattering intensity *I(q)* is calculated as
 
+.. image:: img/image145.JPG
 
-The form factor of the bilayer is approximated as the cross section of
-an infinite, planar bilayer of thickness t.
+The form factor of the bilayer is approximated as the cross section of an infinite, planar bilayer of thickness *t*
 
+.. image:: img/image146.JPG
 
+Here, the scale factor is used instead of the mass per area of the bilayer (*G*). The scale factor is the volume
+fraction of the material in the bilayer, *not* the total excluded volume of the paracrystal. *ZN(q)* describes the
+interference effects for aggregates consisting of more than one bilayer. The equations used are (3-5) from the
+Bergstrom reference below.
 
-Here, the scale factor is used instead of the mass per area of the
-bilayer (G). The scale factor is the volume fraction of the material
-in the bilayer, not the total excluded volume of the paracrystal.
-ZN(q) describes the interference effects for aggregates consisting of
-more than one bilayer. The equations used are (3-5) from the Bergstrom
-reference below.
+Non-integer numbers of stacks are calculated as a linear combination of the lower and higher values
 
-Non-integer numbers of stacks are calculated as a linear combination
-of the lower and higher values:
+.. image:: img/image147.JPG
 
+The 2D scattering intensity is the same as 1D, regardless of the orientation of the *q* vector which is defined as
 
+.. image:: img/image040.GIF
 
-The 2D scattering intensity is the same as 1D, regardless of the
-orientation of the *q* vector which is defined as .
-
-The parameters of the model are the following (Nlayers= no. of layers,
-pd_spacing= polydispersity of spacing):
+The parameters of the model are *Nlayers* = no. of layers, and *pd_spacing* = polydispersity of spacing.
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -2663,15 +2639,12 @@ spacing         |Ang|     250
 thickness       |Ang|     33
 ==============  ========  =============
 
+.. image:: img/image148.JPG
 
+*Figure. 1D plot using the default values above (w/20000 data point).*
 
-*Figure. 1D plot using the default values above (w/20000 data
-point).*
-
-Our model uses the form factor calculations implemented in a c-library
-provided by the NIST Center for Neutron Research (Kline, 2006).
-
-See the reference for details.
+Our model uses the form factor calculations implemented in a c-library provided by the NIST Center for Neutron Research
+(Kline, 2006).
 
 REFERENCE
 
