@@ -194,9 +194,9 @@ Paracrystals
 ------------
 
 - LamellarPCrystalModel_
-- SCCrystalModel
-- FCCrystalModel
-- BCCrystalModel
+- SCCrystalModel_
+- FCCrystalModel_
+- BCCrystalModel_
 
 Parallelpipeds
 --------------
@@ -2612,9 +2612,9 @@ The form factor of the bilayer is approximated as the cross section of an infini
 .. image:: img/image146.JPG
 
 Here, the scale factor is used instead of the mass per area of the bilayer (*G*). The scale factor is the volume
-fraction of the material in the bilayer, *not* the total excluded volume of the paracrystal. *ZN(q)* describes the
-interference effects for aggregates consisting of more than one bilayer. The equations used are (3-5) from the
-Bergstrom reference below.
+fraction of the material in the bilayer, *not* the total excluded volume of the paracrystal. *Z*\ :sub:`N`\ *(q)*
+describes the interference effects for aggregates consisting of more than one bilayer. The equations used are (3-5)
+from the Bergstrom reference below.
 
 Non-integer numbers of stacks are calculated as a linear combination of the lower and higher values
 
@@ -2656,66 +2656,53 @@ M. Bergstrom, J. S. Pedersen, P. Schurtenberger, S. U. Egelhaaf, *J. Phys. Chem.
 
 **2.1.34. SCCrystalModel**
 
-Calculates the scattering from a simple cubic lattice with
-paracrystalline distortion. Thermal vibrations are considered to be
-negligible, and the size of the paracrystal is infinitely large.
-Paracrystalline distortion is assumed to be isotropic and
-characterized by a Gaussian distribution.
+Calculates the scattering from a **simple cubic lattice** with paracrystalline distortion. Thermal vibrations are
+considered to be negligible, and the size of the paracrystal is infinitely large. Paracrystalline distortion is assumed
+to be isotropic and characterized by a Gaussian distribution.
 
 The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
+*2.1.34.1. Definition*
+
 The scattering intensity I(q) is calculated as
 
+.. image:: img/image149.JPG
 
+where *scale* is the volume fraction of spheres, *Vp* is the volume of the primary particle, *V(lattice)* is a volume
+correction for the crystal structure, *P(q)* is the form factor of the sphere (normalized), and *Z(q)* is the
+paracrystalline structure factor for a simple cubic structure.
 
-where scale is the volume fraction of spheres, Vp is the volume of the
-primary particle, V(lattice) is a volume correction for the crystal
-structure, P(q) is the form factor of the sphere (normalized) and Z(q)
-is the paracrystalline structure factor for a simple cubic structure.
-Equation (16) of the 1987 reference is used to calculate Z(q), using
-equations (13)-(15) from the 1987 paper for Z1, Z2, and Z3.
+Equation (16) of the 1987 reference is used to calculate *Z(q)*, using equations (13)-(15) from the 1987 paper for
+*Z1*\ , *Z2*\ , and *Z3*\ .
 
-The lattice correction (the occupied volume of the lattice) for a
-simple cubic structure of particles of radius R and nearest neighbor
-separation D is:
+The lattice correction (the occupied volume of the lattice) for a simple cubic structure of particles of radius *R*
+and nearest neighbor separation *D* is
 
+.. image:: img/image150.JPG
 
+The distortion factor (one standard deviation) of the paracrystal is included in the calculation of *Z(q)*
 
-The distortion factor (one standard deviation) of the paracrystal is
-included in the calculation of Z(q):
+.. image:: img/image151.JPG
 
+where *g* is a fractional distortion based on the nearest neighbor distance.
 
+The simple cubic lattice is
 
-where g is a fractional distortion based on the nearest neighbor
-distance.
+.. image:: img/image152.JPG
 
-The simple cubic lattice is:
+For a crystal, diffraction peaks appear at reduced *q*\ -values given by
 
+.. image:: img/image153.JPG
 
+where for a simple cubic lattice any *h*\ , *k*\ , *l* are allowed and none are forbidden. Thus the peak positions
+correspond to (just the first 5)
 
-For a crystal, diffraction peaks appear at reduced q-values givn by:
+.. image:: img/image154.JPG
 
-
-
-where for a simple cubic lattice any h, k, l are allowed and none are
-forbidden. Thus the peak positions correspond to (just the first 5):
-
-
-
-NB: The calculation of Z(q) is a double numerical integral that must
-be carried out with a high density of points to properly capture the
-sharp peaks of the paracrystalline scattering. So be warned that the
-calculation is SLOW. Go get some coffee. Fitting of any experimental
-data must be resolution smeared for any meaningful fit. This makes a
-triple integral. Very, very slow. Go get lunch.
-
-REFERENCE
-
-Hideki Matsuoka et. al. *Physical Review B*, 36 (1987) 1754-1765
-(Original Paper)
-
-Hideki Matsuoka et. al. *Physical Review B*, 41 (1990) 3854 -3856
-(Corrections to FCC and BCC lattice structure calculation)
+**NB: The calculation of** *Z(q)* **is a double numerical integral that must be carried out with a high density of**
+**points to properly capture the sharp peaks of the paracrystalline scattering.** So be warned that the calculation is
+SLOW. Go get some coffee. Fitting of any experimental data must be resolution smeared for any meaningful fit. This
+makes a triple integral. Very, very slow. Go get lunch!
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -2729,34 +2716,30 @@ sld_Sph         |Ang^-2|  3e-06
 d_factor        None      0.06
 ==============  ========  =============
 
+This example dataset is produced using 200 data points, *qmin* = 0.01 |Ang^-1|, *qmax* = 0.1 |Ang^-1| and the above
+default values.
 
+.. image:: img/image155.JPG
 
-This example dataset is produced using 200 data points, *qmin* = 0.01
--1, *qmax* = 0.1 -1 and the above default values.
+*Figure. 1D plot in the linear scale using the default values (w/200 data point).*
 
+The 2D (Anisotropic model) is based on the reference below where *I(q)* is approximated for 1d scattering. Thus the
+scattering pattern for 2D may not be accurate. Note that we are not responsible for any incorrectness of the 2D model
+computation.
 
+.. image:: img/image156.JPG
 
-*Figure. 1D plot in the linear scale using the default values (w/200
-data point).*
-
-The 2D (Anisotropic model) is based on the reference (above) which
-I(q) is approximated for 1d scattering. Thus the scattering pattern
-for 2D may not be accurate. Note that we are not responsible for any
-incorrectness of the 2D model computation.
-
-
-
-
-
-
-
-
-
-
-
-* *
+.. image:: img/image157.JPG
 
 *Figure. 2D plot using the default values (w/200X200 pixels).*
+
+REFERENCE
+
+Hideki Matsuoka et. al. *Physical Review B*, 36 (1987) 1754-1765
+(Original Paper)
+
+Hideki Matsuoka et. al. *Physical Review B*, 41 (1990) 3854 -3856
+(Corrections to FCC and BCC lattice structure calculation)
 
 
 
@@ -2764,68 +2747,53 @@ incorrectness of the 2D model computation.
 
 **2.1.35. FCCrystalModel**
 
-Calculates the scattering from a face-centered cubic lattice with
-paracrystalline distortion. Thermal vibrations are considered to be
-negligible, and the size of the paracrystal is infinitely large.
-Paracrystalline distortion is assumed to be isotropic and
-characterized by a Gaussian distribution.
+Calculates the scattering from a **face-centered cubic lattice** with paracrystalline distortion. Thermal vibrations
+are considered to be negligible, and the size of the paracrystal is infinitely large. Paracrystalline distortion is
+assumed to be isotropic and characterized by a Gaussian distribution.
 
 The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
 
-The scattering intensity I(q) is calculated as:
+*2.1.35.1. Definition*
 
+The scattering intensity *I(q)* is calculated as
 
+.. image:: img/image158.JPG
 
-where scale is the volume fraction of spheres, Vp is the volume of the
-primary particle, V(lattice) is a volume correction for the crystal
-structure, P(q) is the form factor of the sphere (normalized) and Z(q)
-is the paracrystalline structure factor for a face-centered cubic
-structure. Equation (1) of the 1990 reference is used to calculate
-Z(q), using equations (23)-(25) from the 1987 paper for Z1, Z2, and
-Z3.
+where *scale* is the volume fraction of spheres, *Vp* is the volume of the primary particle, *V(lattice)* is a volume
+correction for the crystal structure, *P(q)* is the form factor of the sphere (normalized), and *Z(q)* is the
+paracrystalline structure factor for a face-centered cubic structure.
 
-The lattice correction (the occupied volume of the lattice) for a
-face-centered cubic structure of particles of radius R and nearest
-neighbor separation D is:
+Equation (1) of the 1990 reference is used to calculate *Z(q)*, using equations (23)-(25) from the 1987 paper for
+*Z1*\ , *Z2*\ , and *Z3*\ .
 
+The lattice correction (the occupied volume of the lattice) for a face-centered cubic structure of particles of radius
+*R* and nearest neighbor separation *D* is
 
+.. image:: img/image159.JPG
 
-The distortion factor (one standard deviation) of the paracrystal is
-included in the calculation of Z(q):
+The distortion factor (one standard deviation) of the paracrystal is included in the calculation of *Z(q)*
 
+.. image:: img/image160.JPG
 
+where *g* is a fractional distortion based on the nearest neighbor distance.
 
-where g is a fractional distortion based on the nearest neighbor
-distance.
+The face-centered cubic lattice is
 
-The face-centered cubic lattice is:
+.. image:: img/image161.JPG
 
+For a crystal, diffraction peaks appear at reduced q-values given by
 
+.. image:: img/image162.JPG
 
-For a crystal, diffraction peaks appear at reduced q-values givn by:
+where for a face-centered cubic lattice *h*\ , *k*\ , *l* all odd or all even are allowed and reflections where
+*h*\ , *k*\ , *l* are mixed odd/even are forbidden. Thus the peak positions correspond to (just the first 5)
 
+.. image:: img/image163.JPG
 
-
-where for a face-centered cubic lattice h, k, l all odd or all even
-are allowed and reflections where h, k, l are mixed odd/even are
-forbidden. Thus the peak positions correspond to (just the first 5):
-
-
-
-NB: The calculation of Z(q) is a double numerical integral that must
-be carried out with a high density of points to properly capture the
-sharp peaks of the paracrystalline scattering. So be warned that the
-calculation is SLOW. Go get some coffee. Fitting of any experimental
-data must be resolution smeared for any meaningful fit. This makes a
-triple integral. Very, very slow. Go get lunch.
-
-REFERENCE
-
-Hideki Matsuoka et. al. *Physical Review B*, 36 (1987) 1754-1765
-(Original Paper)
-
-Hideki Matsuoka et. al. *Physical Review B*, 41 (1990) 3854 -3856
-(Corrections to FCC and BCC lattice structure calculation)
+**NB: The calculation of** *Z(q)* **is a double numerical integral that must be carried out with a high density of**
+**points to properly capture the sharp peaks of the paracrystalline scattering.** So be warned that the calculation is
+SLOW. Go get some coffee. Fitting of any experimental data must be resolution smeared for any meaningful fit. This
+makes a triple integral. Very, very slow. Go get lunch!
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -2839,81 +2807,22 @@ sld_Sph         |Ang^-2|  3e-06
 d_factor        None      0.06
 ==============  ========  =============
 
-This example dataset is produced using 200 data points, *qmin* = 0.01
--1, *qmax* = 0.1 -1 and the above default values.
+This example dataset is produced using 200 data points, *qmin* = 0.01 |Ang^-1|, *qmax* = 0.1 |Ang^-1| and the above
+default values.
 
+.. image:: img/image164.JPG
 
+*Figure. 1D plot in the linear scale using the default values (w/200 data point).*
 
-*Figure. 1D plot in the linear scale using the default values (w/200
-data point).*
+The 2D (Anisotropic model) is based on the reference below where *I(q)* is approximated for 1d scattering. Thus the
+scattering pattern for 2D may not be accurate. Note that we are not responsible for any incorrectness of the 2D model
+computation.
 
-The 2D (Anisotropic model) is based on the reference (above) in which
-I(q) is approximated for 1d scattering. Thus the scattering pattern
-for 2D may not be accurate. Note that we are not responsible for any
-incorrectness of the 2D model computation.
+.. image:: img/image165.GIF
 
+.. image:: img/image166.JPG
 
 *Figure. 2D plot using the default values (w/200X200 pixels).*
-
-
-
-.. _BCCrystalModel:
-
-**2.1.36. BCCrystalModel**
-
-Calculates the scattering from a body-centered cubic lattice with
-paracrystalline distortion. Thermal vibrations are considered to be
-negligible, and the size of the paracrystal is infinitely large.
-Paracrystalline distortion is assumed to be isotropic and
-characterized by a Gaussian distribution.The returned value is scaled
-to units of |cm^-1|\ |sr^-1|, absolute scale.
-
-The scattering intensity I(q) is calculated as:
-
-
-
-where scale is the volume fraction of spheres, Vp is the volume of the
-primary particle, V(lattice) is a volume correction for the crystal
-structure, P(q) is the form factor of the sphere (normalized) and Z(q)
-is the paracrystalline structure factor for a body-centered cubic
-structure. Equation (1) of the 1990 reference is used to calculate
-Z(q), using equations (29)-(31) from the 1987 paper for Z1, Z2, and
-Z3.
-
-The lattice correction (the occupied volume of the lattice) for a
-body-centered cubic structure of particles of radius R and nearest
-neighbor separation D is:
-
-
-
-The distortion factor (one standard deviation) of the paracrystal is
-included in the calculation of Z(q):
-
-
-
-where g is a fractional distortion based on the nearest neighbor
-distance.
-
-The body-centered cubic lattice is:
-
-
-
-For a crystal, diffraction peaks appear at reduced q-values givn by:
-
-
-
-where for a body-centered cubic lattice, only reflections where
-(h+k+l) = even are allowed and reflections where (h+k+l) = odd are
-forbidden. Thus the peak positions correspond to (just the first 5):
-
-
-
-NB: The calculation of Z(q) is a double numerical integral that must
-be carried out with a high density of points to properly capture the
-sharp peaks of the paracrystalline scattering. So be warned that the
-calculation is SLOW. Go get some coffee. Fitting of any experimental
-data must be resolution smeared for any meaningful fit. This makes a
-triple integral. Very, very slow. Go get lunch.
 
 REFERENCE
 
@@ -2922,6 +2831,60 @@ Hideki Matsuoka et. al. *Physical Review B*, 36 (1987) 1754-1765
 
 Hideki Matsuoka et. al. *Physical Review B*, 41 (1990) 3854 -3856
 (Corrections to FCC and BCC lattice structure calculation)
+
+
+
+.. _BCCrystalModel:
+
+**2.1.36. BCCrystalModel**
+
+Calculates the scattering from a **body-centered cubic lattice** with paracrystalline distortion. Thermal vibrations
+are considered to be negligible, and the size of the paracrystal is infinitely large. Paracrystalline distortion is
+assumed to be isotropic and characterized by a Gaussian distribution.
+
+The returned value is scaled to units of |cm^-1|\ |sr^-1|, absolute scale.
+
+*2.1.36.1. Definition**
+
+The scattering intensity *I(q)* is calculated as
+
+.. image:: img/image167.JPG
+
+where *scale* is the volume fraction of spheres, *Vp* is the volume of the primary particle, *V(lattice)* is a volume
+correction for the crystal structure, *P(q)* is the form factor of the sphere (normalized), and *Z(q)* is the
+paracrystalline structure factor for a body-centered cubic structure.
+
+Equation (1) of the 1990 reference is used to calculate *Z(q)*, using equations (29)-(31) from the 1987 paper for
+*Z1*\ , *Z2*\ , and *Z3*\ .
+
+The lattice correction (the occupied volume of the lattice) for a body-centered cubic structure of particles of radius
+*R* and nearest neighbor separation *D* is
+
+.. image:: img/image159.JPG
+
+The distortion factor (one standard deviation) of the paracrystal is included in the calculation of *Z(q)*
+
+.. image:: img/image160.JPG
+
+where *g* is a fractional distortion based on the nearest neighbor distance.
+
+The body-centered cubic lattice is
+
+.. image:: img/image168.JPG
+
+For a crystal, diffraction peaks appear at reduced q-values given by
+
+.. image:: img/image162.JPG
+
+where for a body-centered cubic lattice, only reflections where (\ *h* + *k* + *l*\ ) = even are allowed and
+reflections where (\ *h* + *k* + *l*\ ) = odd are forbidden. Thus the peak positions correspond to (just the first 5)
+
+.. image:: img/image169.JPG
+
+**NB: The calculation of** *Z(q)* **is a double numerical integral that must be carried out with a high density of**
+**points to properly capture the sharp peaks of the paracrystalline scattering.** So be warned that the calculation is
+SLOW. Go get some coffee. Fitting of any experimental data must be resolution smeared for any meaningful fit. This
+makes a triple integral. Very, very slow. Go get lunch!
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -2935,34 +2898,30 @@ sld_Sph         |Ang^-2|  3e-006
 d_factor        None      0.06
 ==============  ========  =============
 
+This example dataset is produced using 200 data points, *qmin* = 0.001 |Ang^-1|, *qmax* = 0.1 |Ang^-1| and the above
+default values.
 
+.. image:: img/image170.JPG
 
-This example dataset is produced using 200 data points, *qmin* = 0.001
--1, *qmax* = 0.1 -1 and the above default values.
+*Figure. 1D plot in the linear scale using the default values (w/200 data point).*
 
+The 2D (Anisotropic model) is based on the reference below where *I(q)* is approximated for 1d scattering. Thus the
+scattering pattern for 2D may not be accurate. Note that we are not responsible for any incorrectness of the 2D model
+computation.
 
+.. image:: img/image165.GIF
 
-*Figure. 1D plot in the linear scale using the default values (w/200
-data point).*
-
-The 2D (Anisotropic model) is based on the reference (1987) in which
-I(q) is approximated for 1d scattering. Thus the scattering pattern
-for 2D may not be accurate. Note that we are not responsible for any
-incorrectness of the 2D model computation.
-
-
-
-
-
-
-
-
-
-
-
-
+.. image:: img/image171.JPG
 
 *Figure. 2D plot using the default values (w/200X200 pixels).*
+
+REFERENCE
+
+Hideki Matsuoka et. al. *Physical Review B*, 36 (1987) 1754-1765
+(Original Paper)
+
+Hideki Matsuoka et. al. *Physical Review B*, 41 (1990) 3854 -3856
+(Corrections to FCC and BCC lattice structure calculation)
 
 
 
