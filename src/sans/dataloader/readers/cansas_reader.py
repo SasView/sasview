@@ -24,11 +24,11 @@ from sans.dataloader.data_info import Detector
 from sans.dataloader.data_info import Process
 from sans.dataloader.data_info import Aperture
 import sans.dataloader.readers.xml_reader as xml_reader
-import xml.dom.minidom
 from sans.dataloader.readers.cansas_constants import cansasConstants
 
 _ZERO = 1e-16
 PREPROCESS = "xmlpreprocess"
+ENCODING = "encoding"
 HAS_CONVERTER = True
 try:
     from sans.data_util.nxsunit import Converter
@@ -82,6 +82,8 @@ def get_float(location, node):
     return value, attr
 
 
+# This is called by sans.perspectives.fitting.pagestate.py
+# Do not remove
 def write_node(doc, parent, name, value, attr={}):
     """
     :param doc: document DOM
@@ -112,6 +114,7 @@ class Reader():
     ##CanSAS version - defaults to version 1.0
     cansas_version = "1.0"
     ##Data reader
+    # TODO: make the reader extend the XMLreader class?
     reader = xml_reader.XMLreader()
     errors = []
     
@@ -134,9 +137,10 @@ class Reader():
         Checks to see if the xml file is a CanSAS file
         """
         if self.reader.validateXML():
-            xmlns = self.reader.xmlroot.keys()
+            name = "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"
+            value = self.reader.xmlroot.get(name)
             if (CANSAS_NS.get(self.cansas_version).get("ns") == \
-                    self.reader.xmlroot.get(xmlns[1]).rsplit(" ")[0]):
+                    value.rsplit(" ")[0]):
                 return True
         return False
     
@@ -183,7 +187,7 @@ class Reader():
                 
                 # Link a schema to the XML file.
                 self.reader.setSchema(schema_path)
-            
+                
                 # Try to load the file, but raise an error if unable to.
                 # Check the file matches the XML schema
                 try:
@@ -214,7 +218,7 @@ class Reader():
                             data1d.filename = name
                             data1d.meta_data["loader"] = "CanSAS 1D"
                             
-                            # Get all preprocessing events
+                            # Get all preprocessing events and encoding
                             self.reader.setProcessingInstructions()
                             data1d.meta_data[PREPROCESS] = \
                                     self.reader.processingInstructions
@@ -520,28 +524,45 @@ class Reader():
         if not issubclass(datainfo.__class__, Data1D):
             raise RuntimeError, "The cansas writer expects a Data1D instance"
         
-        ns = CANSAS_NS.get(self.cansas_version).get("ns")
-        doc = xml.dom.minidom.Document()
+        # Get PIs and create root element
+        pis = self.reader.return_processing_instructions()
+        doc = self.reader.create_tree(pis[0])
+        i = 1
+        for i in range(1,len(pis) - 1):
+            doc = self.reader.append(pis[i], doc)
         
-        main_node = doc.createElement("SASroot")
+        # Define namespaces and create SASroot object
+        xsi = "http://www.w3.org/2001/XMLSchema-instance"
+        version = self.cansas_version
+        ns = CANSAS_NS.get(version).get("ns")
+        if version == "1.1":
+            url = "http://www.cansas.org/formats/1.1/"
+        else:
+            url = "http://svn.smallangles.net/svn/canSAS/1dwg/trunk/"
+        schemaLocation = "{0} {1}cansas1d.xsd".format(ns, url)
+        attrib = {"{" + xsi + "}schemaLocation" : schemaLocation,
+                  "version" : version}
+        nsmap = {'xsi' : xsi, None: ns}
         
-        doc = self.setProcessingInstructions(doc, \
-                                        datainfo.meta_data.get(PREPROCESS, {}))
-        main_node.setAttribute("version", self.cansas_version)
-        main_node.setAttribute("xmlns", ns)
-        main_node.setAttribute("xmlns:xsi",
-                               "http://www.w3.org/2001/XMLSchema-instance")
-        if self.cansas_version == "1.0":
-            main_node.setAttribute("xsi:schemaLocation", "cansas1d/1.0 http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd")
-        elif self.cansas_version == "1.1":
-            main_node.setAttribute("xsi:schemaLocation", "urn:cansas1d:1.1 http://www.cansas.org/formats/1.1/cansas1d.xsd")
+        main_node = self.reader.create_element("{" + ns + "}SASroot", \
+                                               attrib = attrib, \
+                                               nsmap = nsmap)
         
-        doc.appendChild(main_node)
+        # Create ElementTree, append SASroot and apply processing instructions
+        base_string = self.reader.toString(doc) + \
+                    self.reader.toString(main_node)
+        base_element = self.reader.create_element_from_string(base_string)
+        doc = self.reader.create_tree(base_element)
         
-        entry_node = doc.createElement("SASentry")
-        main_node.appendChild(entry_node)
+        # Create SASentry Element
+        entry_node = self.reader.create_element("SASentry")
+        root = doc.getroot()
+        root.append(entry_node)
         
-        write_node(doc, entry_node, "Title", datainfo.title)
+        # Add Title to SASentry
+        self.write_node(entry_node, "Title", datainfo.title)
+        
+        # Add Run to SASentry
         if datainfo.run == None or datainfo.run == []:
             RUN_NAME_DEFAULT = "None"
             datainfo.run.append(RUN_NAME_DEFAULT)
@@ -551,133 +572,143 @@ class Reader():
             if item in datainfo.run_name and \
             len(str(datainfo.run_name[item])) > 1:
                 runname = {'name': datainfo.run_name[item]}
-            write_node(doc, entry_node, "Run", item, runname)
+            self.write_node(entry_node, "Run", item, runname)
         
         # Data info
-        node = doc.createElement("SASdata")
-        entry_node.appendChild(node)
+        node = self.reader.create_element("SASdata")
+        self.reader.append(node, entry_node)
         
         for i in range(len(datainfo.x)):
-            pt = doc.createElement("Idata")
-            node.appendChild(pt)
-            write_node(doc, pt, "Q", datainfo.x[i], {'unit': datainfo.x_unit})
+            pt = self.reader.create_element("Idata")
+            node.append(pt)
+            self.write_node(pt, "Q", datainfo.x[i], {'unit': datainfo.x_unit})
             if len(datainfo.y) >= i:
-                write_node(doc, pt, "I", datainfo.y[i],
+                self.write_node(pt, "I", datainfo.y[i],
                             {'unit': datainfo.y_unit})
             if datainfo.dy != None and len(datainfo.dy) > i:
-                write_node(doc, pt, "Idev", datainfo.dy[i],
+                self.write_node(pt, "Idev", datainfo.dy[i],
                             {'unit': datainfo.y_unit})
             if datainfo.dx != None and len(datainfo.dx) > i:
-                write_node(doc, pt, "Qdev", datainfo.dx[i],
+                self.write_node(pt, "Qdev", datainfo.dx[i],
                             {'unit': datainfo.x_unit})
             if datainfo.dxw != None and len(datainfo.dxw) > i:
-                write_node(doc, pt, "dQw", datainfo.dxw[i],
+                self.write_node(pt, "dQw", datainfo.dxw[i],
                             {'unit': datainfo.x_unit})
             if datainfo.dxl != None and len(datainfo.dxl) > i:
-                write_node(doc, pt, "dQl", datainfo.dxl[i],
+                self.write_node(pt, "dQl", datainfo.dxl[i],
                             {'unit': datainfo.x_unit})
 
         # Transmission Spectrum Info
         for i in range(len(datainfo.trans_spectrum)):
             spectrum = datainfo.trans_spectrum[i]
-            node = doc.createElement("SAStransmission_spectrum")
-            node.setAttribute("name", spectrum.name)
+            node = self.reader.create_element("SAStransmission_spectrum",
+                                              {"name" : spectrum.name})
+            self.reader.append(node, entry_node)
             if isinstance(spectrum.timestamp, datetime.datetime):
                 node.setAttribute("timestamp", spectrum.timestamp)
-            entry_node.appendChild(node)
             for i in range(len(spectrum.wavelength)):
-                pt = doc.createElement("Tdata")
-                node.appendChild(pt)
-                write_node(doc, pt, "Lambda", spectrum.wavelength[i], 
+                pt = self.reader.create_element("Tdata")
+                node.append(pt)
+                self.write_node(pt, "Lambda", spectrum.wavelength[i], 
                            {'unit': spectrum.wavelength_unit})
-                write_node(doc, pt, "T", spectrum.transmission[i], 
+                self.write_node(pt, "T", spectrum.transmission[i], 
                            {'unit': spectrum.transmission_unit})
                 if spectrum.transmission_deviation != None \
                 and len(spectrum.transmission_deviation) >= i:
-                    write_node(doc, pt, "Tdev", \
+                    self.write_node(pt, "Tdev", \
                                spectrum.transmission_deviation[i], \
                                {'unit': spectrum.transmission_deviation_unit})
 
         # Sample info
-        sample = doc.createElement("SASsample")
+        sample = self.reader.create_element("SASsample")
         if datainfo.sample.name is not None:
-            sample.setAttribute("name", str(datainfo.sample.name))
-        entry_node.appendChild(sample)
-        write_node(doc, sample, "ID", str(datainfo.sample.ID))
-        write_node(doc, sample, "thickness", datainfo.sample.thickness,
+            self.reader.write_attribute(sample, 
+                                        "name", 
+                                        str(datainfo.sample.name))
+        self.reader.append(sample, entry_node)
+        self.write_node(sample, "ID", str(datainfo.sample.ID))
+        self.write_node(sample, "thickness", datainfo.sample.thickness,
                    {"unit": datainfo.sample.thickness_unit})
-        write_node(doc, sample, "transmission", datainfo.sample.transmission)
-        write_node(doc, sample, "temperature", datainfo.sample.temperature,
+        self.write_node(sample, "transmission", datainfo.sample.transmission)
+        self.write_node(sample, "temperature", datainfo.sample.temperature,
                    {"unit": datainfo.sample.temperature_unit})
         
-        pos = doc.createElement("position")
-        written = write_node(doc, pos, "x", datainfo.sample.position.x,
-                             {"unit": datainfo.sample.position_unit})
-        written = written | write_node(doc, pos, "y",
-                                       datainfo.sample.position.y,
+        pos = self.reader.create_element("position")
+        written = self.write_node(pos, 
+                                  "x", 
+                                  datainfo.sample.position.x,
+                                  {"unit": datainfo.sample.position_unit})
+        written = written | self.write_node(pos, 
+                                            "y", 
+                                            datainfo.sample.position.y,
                                        {"unit": datainfo.sample.position_unit})
-        written = written | write_node(doc, pos, "z",
-                                       datainfo.sample.position.z,
+        written = written | self.write_node(pos, 
+                                            "z",
+                                            datainfo.sample.position.z,
                                        {"unit": datainfo.sample.position_unit})
         if written == True:
-            sample.appendChild(pos)
+            self.reader.append(pos, sample)
         
-        ori = doc.createElement("orientation")
-        written = write_node(doc, ori, "roll",
-                             datainfo.sample.orientation.x,
-                             {"unit": datainfo.sample.orientation_unit})
-        written = written | write_node(doc, ori, "pitch",
+        ori = self.reader.create_element("orientation")
+        written = self.write_node(ori, "roll",
+                                  datainfo.sample.orientation.x,
+                                  {"unit": datainfo.sample.orientation_unit})
+        written = written | self.write_node(ori, "pitch",
                                        datainfo.sample.orientation.y,
                                     {"unit": datainfo.sample.orientation_unit})
-        written = written | write_node(doc, ori, "yaw",
+        written = written | self.write_node(ori, "yaw",
                                        datainfo.sample.orientation.z,
                                     {"unit": datainfo.sample.orientation_unit})
         if written == True:
-            sample.appendChild(ori)
+            self.reader.append(ori, sample)
         
         for item in datainfo.sample.details:
-            write_node(doc, sample, "details", item)
+            self.write_node(sample, "details", item)
         
         # Instrument info
-        instr = doc.createElement("SASinstrument")
-        entry_node.appendChild(instr)
+        instr = self.reader.create_element("SASinstrument")
+        self.reader.append(instr, entry_node)
         
-        write_node(doc, instr, "name", datainfo.instrument)
+        self.write_node(instr, "name", datainfo.instrument)
         
         #   Source
-        source = doc.createElement("SASsource")
+        source = self.reader.create_element("SASsource")
         if datainfo.source.name is not None:
-            source.setAttribute("name", str(datainfo.source.name))
-        instr.appendChild(source)
+            self.reader.write_attribute(source,
+                                        "name",
+                                        str(datainfo.source.name))
+        self.reader.append(source, instr)
         if datainfo.source.radiation == None or datainfo.source.radiation == '':
             datainfo.source.radiation = "neutron"
-        write_node(doc, source, "radiation", datainfo.source.radiation)
+        self.write_node(source, "radiation", datainfo.source.radiation)
         
-        size = doc.createElement("beam_size")
+        size = self.reader.create_element("beam_size")
         if datainfo.source.beam_size_name is not None:
-            size.setAttribute("name", str(datainfo.source.beam_size_name))
-        written = write_node(doc, size, "x", datainfo.source.beam_size.x,
+            self.reader.write_attribute(size,
+                                        "name",
+                                        str(datainfo.source.beam_size_name))
+        written = self.write_node(size, "x", datainfo.source.beam_size.x,
                              {"unit": datainfo.source.beam_size_unit})
-        written = written | write_node(doc, size, "y",
+        written = written | self.write_node(size, "y",
                                        datainfo.source.beam_size.y,
                                        {"unit": datainfo.source.beam_size_unit})
-        written = written | write_node(doc, size, "z",
+        written = written | self.write_node(size, "z",
                                        datainfo.source.beam_size.z,
                                        {"unit": datainfo.source.beam_size_unit})
         if written == True:
-            source.appendChild(size)
+            self.reader.append(size, source)
             
-        write_node(doc, source, "beam_shape", datainfo.source.beam_shape)
-        write_node(doc, source, "wavelength",
+        self.write_node(source, "beam_shape", datainfo.source.beam_shape)
+        self.write_node(source, "wavelength",
                    datainfo.source.wavelength,
                    {"unit": datainfo.source.wavelength_unit})
-        write_node(doc, source, "wavelength_min",
+        self.write_node(source, "wavelength_min",
                    datainfo.source.wavelength_min,
                    {"unit": datainfo.source.wavelength_min_unit})
-        write_node(doc, source, "wavelength_max",
+        self.write_node(source, "wavelength_max",
                    datainfo.source.wavelength_max,
                    {"unit": datainfo.source.wavelength_max_unit})
-        write_node(doc, source, "wavelength_spread",
+        self.write_node(source, "wavelength_spread",
                    datainfo.source.wavelength_spread,
                    {"unit": datainfo.source.wavelength_spread_unit})
         
@@ -686,35 +717,37 @@ class Reader():
             coll = Collimation()
             datainfo.collimation.append(coll)
         for item in datainfo.collimation:
-            coll = doc.createElement("SAScollimation")
+            coll = self.reader.create_element("SAScollimation")
             if item.name is not None:
-                coll.setAttribute("name", str(item.name))
-            instr.appendChild(coll)
+                self.reader.write_attribute(coll, "name", str(item.name))
+            self.reader.append(coll, instr)
             
-            write_node(doc, coll, "length", item.length,
+            self.write_node(coll, "length", item.length,
                        {"unit": item.length_unit})
             
             for apert in item.aperture:
-                ap = doc.createElement("aperture")
+                ap = self.reader.create_element("aperture")
                 if apert.name is not None:
-                    ap.setAttribute("name", str(apert.name))
+                    self.reader.write_attribute(ap, "name", str(apert.name))
                 if apert.type is not None:
-                    ap.setAttribute("type", str(apert.type))
-                coll.appendChild(ap)
+                    self.reader.write_attribute(ap, "type", str(apert.type))
+                self.reader.append(ap, coll)
                 
-                size = doc.createElement("size")
+                size = self.reader.create_element("size")
                 if apert.size_name is not None:
-                    size.setAttribute("name", str(apert.size_name))
-                written = write_node(doc, size, "x", apert.size.x,
+                    self.reader.write_attribute(size, 
+                                                "name", 
+                                                str(apert.size_name))
+                written = self.write_node(size, "x", apert.size.x,
                                      {"unit": apert.size_unit})
-                written = written | write_node(doc, size, "y", apert.size.y,
+                written = written | self.write_node(size, "y", apert.size.y,
                                                {"unit": apert.size_unit})
-                written = written | write_node(doc, size, "z", apert.size.z,
+                written = written | self.write_node(size, "z", apert.size.z,
                                                {"unit": apert.size_unit})
                 if written == True:
-                    ap.appendChild(size)
+                    self.reader.append(size, ap)
                 
-                write_node(doc, ap, "distance", apert.distance,
+                self.write_node(ap, "distance", apert.distance,
                            {"unit": apert.distance_unit})
 
         #   Detectors
@@ -724,93 +757,108 @@ class Reader():
             datainfo.detector.append(det)
                 
         for item in datainfo.detector:
-            det = doc.createElement("SASdetector")
-            written = write_node(doc, det, "name", item.name)
-            written = written | write_node(doc, det, "SDD", item.distance,
+            det = self.reader.create_element("SASdetector")
+            written = self.write_node(det, "name", item.name)
+            written = written | self.write_node(det, "SDD", item.distance,
                                            {"unit": item.distance_unit})
             if written == True:
-                instr.appendChild(det)
+                self.reader.append(det, instr)
             
-            off = doc.createElement("offset")
-            written = write_node(doc, off, "x", item.offset.x,
+            off = self.reader.create_element("offset")
+            written = self.write_node(off, "x", item.offset.x,
                                  {"unit": item.offset_unit})
-            written = written | write_node(doc, off, "y", item.offset.y,
+            written = written | self.write_node(off, "y", item.offset.y,
                                            {"unit": item.offset_unit})
-            written = written | write_node(doc, off, "z", item.offset.z,
+            written = written | self.write_node(off, "z", item.offset.z,
                                            {"unit": item.offset_unit})
             if written == True:
-                det.appendChild(off)
+                self.reader.append(off, det)
                 
-            ori = doc.createElement("orientation")
-            written = write_node(doc, ori, "roll", item.orientation.x,
+            ori = self.reader.create_element("orientation")
+            written = self.write_node(ori, "roll", item.orientation.x,
                                  {"unit": item.orientation_unit})
-            written = written | write_node(doc, ori, "pitch",
+            written = written | self.write_node(ori, "pitch",
                                            item.orientation.y,
                                            {"unit": item.orientation_unit})
-            written = written | write_node(doc, ori, "yaw",
+            written = written | self.write_node(ori, "yaw",
                                            item.orientation.z,
                                            {"unit": item.orientation_unit})
             if written == True:
-                det.appendChild(ori)
+                self.reader.append(ori, det)
             
-            center = doc.createElement("beam_center")
-            written = write_node(doc, center, "x", item.beam_center.x,
+            center = self.reader.create_element("beam_center")
+            written = self.write_node(center, "x", item.beam_center.x,
                                  {"unit": item.beam_center_unit})
-            written = written | write_node(doc, center, "y",
+            written = written | self.write_node(center, "y",
                                            item.beam_center.y,
                                            {"unit": item.beam_center_unit})
-            written = written | write_node(doc, center, "z",
+            written = written | self.write_node(center, "z",
                                            item.beam_center.z,
                                            {"unit": item.beam_center_unit})
             if written == True:
-                det.appendChild(center)
+                self.reader.append(center, det)
                 
-            pix = doc.createElement("pixel_size")
-            written = write_node(doc, pix, "x", item.pixel_size.x,
+            pix = self.reader.create_element("pixel_size")
+            written = self.write_node(pix, "x", item.pixel_size.x,
                                  {"unit": item.pixel_size_unit})
-            written = written | write_node(doc, pix, "y", item.pixel_size.y,
+            written = written | self.write_node(pix, "y", item.pixel_size.y,
                                            {"unit": item.pixel_size_unit})
-            written = written | write_node(doc, pix, "z", item.pixel_size.z,
+            written = written | self.write_node(pix, "z", item.pixel_size.z,
                                            {"unit": item.pixel_size_unit})
-            if written == True:
-                det.appendChild(pix)
-            written = written | write_node(doc, det, "slit_length",
+            written = written | self.write_node(det, "slit_length",
                                            item.slit_length,
                                            {"unit": item.slit_length_unit})
+            if written == True:
+                self.reader.append(pix, det)
             
         # Processes info
         for item in datainfo.process:
-            node = doc.createElement("SASprocess")
-            entry_node.appendChild(node)
+            node = self.reader.create_element("SASprocess")
+            self.reader.append(node, entry_node)
 
-            write_node(doc, node, "name", item.name)
-            write_node(doc, node, "date", item.date)
-            write_node(doc, node, "description", item.description)
+            self.write_node(node, "name", item.name)
+            self.write_node(node, "date", item.date)
+            self.write_node(node, "description", item.description)
             for term in item.term:
                 value = term['value']
                 del term['value']
-                write_node(doc, node, "term", value, term)
+                self.write_node(node, "term", value, term)
             for note in item.notes:
-                write_node(doc, node, "SASprocessnote", note)
+                self.write_node(node, "SASprocessnote", note)
             if len(item.notes) == 0:
-                write_node(doc, node, "SASprocessnote", "")
+                self.write_node(node, "SASprocessnote", "")
                 
         # Note info
         if len(datainfo.notes) == 0:
-            node = doc.createElement("SASnote")
-            entry_node.appendChild(node)
-            if node.hasChildNodes():
-                for child in node.childNodes:
-                    node.removeChild(child)
+            node = self.reader.create_element("SASnote")
+            self.reader.append(node, entry_node)
         else:
             for item in datainfo.notes:
-                node = doc.createElement("SASnote")
-                entry_node.appendChild(node)
-                node.appendChild(doc.createTextNode(item))
+                node = self.reader.create_element("SASnote")
+                self.reader.write_text(node, item)
+                self.reader.append(node, entry_node)
                 
+        
         # Return the document, and the SASentry node associated with
         # the data we just wrote
         return doc, entry_node
+    
+    
+    def write_node(self, parent, name, value, attr={}):
+        """
+        :param doc: document DOM
+        :param parent: parent node
+        :param name: tag of the element
+        :param value: value of the child text node
+        :param attr: attribute dictionary
+        
+        :return: True if something was appended, otherwise False
+        """
+        if value is not None:
+            parent = self.reader.ebuilder(parent, name, value, attr)
+            return True
+        return False
+    
             
     def write(self, filename, datainfo):
         """
@@ -823,15 +871,9 @@ class Reader():
         doc, _ = self._to_xml_doc(datainfo)
         # Write the file
         fd = open(filename, 'w')
-        fd.write(doc.toprettyxml())
+        if self.reader.encoding == None:
+            self.reader.encoding = "UTF-8"
+        doc.write(fd, encoding=self.reader.encoding,
+                  pretty_print=True, xml_declaration=True)
         fd.close()
-    
-    ## Once I convert the writer to lxml from minidom
-    ## This can be moved into xml_reader
-    def setProcessingInstructions(self, minidomObject, dic):
-        xmlroot = minidomObject.firstChild
-        for item in dic:
-            pi = minidomObject.createProcessingInstruction(item, dic[item])
-            minidomObject.insertBefore(pi, xmlroot)
-        return minidomObject
     

@@ -1,5 +1,7 @@
 """
-    Generic XML reader
+    Generic XML read and write utility
+    
+    Usage: Either extend xml_reader or add as a class variable.
 """
 ############################################################################
 #This software was developed by the University of Tennessee as part of the
@@ -13,6 +15,7 @@
 #############################################################################
 
 from lxml import etree
+from lxml.builder import E
 parser = etree.ETCompatXMLParser(remove_comments=True, remove_pis=False)
 
 class XMLreader():
@@ -22,6 +25,7 @@ class XMLreader():
     xmlroot = None
     schema = None
     schemadoc = None
+    encoding = None
     processingInstructions = None
     
     def __init__(self, xml = None, schema = None, root = None):
@@ -103,31 +107,66 @@ class XMLreader():
         self.setXMLFile(self.xml)
         self.setSchema(self.schema)
         
-    def toString(self, etreeElement):
+    def toString(self, elem, pp=False, encoding=None):
         """
-        Converts and etree element into a string
+        Converts an etree element into a string
         """
-        return etree.tostring(etreeElement)
+        return etree.tostring(elem, pretty_print = pp, encoding = encoding)
+    
+    def break_processing_instructions(self, string, dic):
+        """
+        Method to break a processing instruction string apart and add to a dict
+        
+        :param string: A processing instruction as a string
+        :param dic: The dictionary to save the PIs to
+        """
+        pi_string = string.replace("<?", "").replace("?>", "")
+        split = pi_string.split(" ", 1)
+        pi_name = split[0]
+        attr = split[1]
+        new_pi_name = self._create_unique_key(dic, pi_name)
+        dic[new_pi_name] = attr
+        return dic
     
     def setProcessingInstructions(self):
         """
         Take out all processing instructions and create a dictionary from them
+        If there is a default encoding, the value is also saved
         """
         dic = {}
         pi = self.xmlroot.getprevious()
         while pi is not None:
-            attr = {}
-            pi_name = ""
             pi_string = self.toString(pi)
+            if "?>\n<?" in pi_string:
+                pi_string = pi_string.split("?>\n<?")
             if isinstance(pi_string, str):
-                pi_string = pi_string.replace("<?", "").replace("?>", "")
-                split = pi_string.split(" ", 1)
-                pi_name = split[0]
-                attr = split[1]
-            new_pi_name = self._create_unique_key(dic, pi_name)
-            dic[new_pi_name] = attr
+                dic = self.break_processing_instructions(pi_string, dic)
+            elif isinstance(pi_string, list):
+                for item in pi_string:
+                    dic = self.break_processing_instructions(item, dic)
             pi = pi.getprevious()
+        if 'xml' in dic:
+            self.setEncoding(dic['xml'])
+            del dic['xml']
         self.processingInstructions = dic
+        
+    def setEncoding(self, attr_str):
+        """
+        Find the encoding in the xml declaration and save it as a string
+        
+        :param attr_str: All attributes as a string
+            e.g. "foo1="bar1" foo2="bar2" foo3="bar3" ... foo_n="bar_n""
+        """
+        attr_str = attr_str.replace(" = ", "=")
+        attr_list = attr_str.split( )
+        for item in attr_list:
+            name_value = item.split("\"=")
+            name = name_value[0].lower()
+            value = name_value[1]
+            if name == "encoding":
+                self.encoding = value
+                return
+        self.encoding = None
         
     def _create_unique_key(self, dictionary, name, i = 0):
         """
@@ -147,19 +186,27 @@ class XMLreader():
     
     def create_tree(self, root):
         """
-        Create an element tree for processing from an XML string
+        Create an element tree for processing from an etree element
         
-        :param root: XML string 
+        :param root: etree Element(s) 
         """
         return etree.ElementTree(root)
     
-    def create_element(self, name):
+    def create_element_from_string(self, s):
+        """
+        Create an element from an XML string
+        
+        :param s: A string of xml
+        """
+        return etree.fromstring(s)
+    
+    def create_element(self, name, attrib={}, nsmap=None):
         """
         Create an XML element for writing to file
         
         :param name: The name of the element to be created
         """
-        return etree.Element(name)
+        return etree.Element(name, attrib, nsmap)
     
     def write_text(self, elem, text):
         """
@@ -181,4 +228,33 @@ class XMLreader():
         """
         attr = elem.attrib
         attr[attr_name] = attr_value
+        
+    def return_processing_instructions(self):
+        """
+        Get all processing instructions saved when loading the document
+        
+        :param tree: etree.ElementTree object to write PIs to
+        """
+        pi_list = []
+        for key in self.processingInstructions:
+            value = self.processingInstructions.get(key)
+            pi = etree.ProcessingInstruction(key, value)
+            pi_list.append(pi)
+        return pi_list
+    
+    def append(self, element, tree):
+        """
+        Append an etree Element to an ElementTree.
+        
+        :param element: etree Element to append
+        :param tree: ElementTree object to append to
+        """
+        tree = tree.append(element)
+        return tree
+    
+    def ebuilder(self, parent, elementname, text=None, attrib={}):
+        text = str(text)
+        elem = E(elementname, attrib, text)
+        parent = parent.append(elem)
+        return parent
         
