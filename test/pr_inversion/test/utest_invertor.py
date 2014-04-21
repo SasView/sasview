@@ -417,7 +417,7 @@ class TestBasicComponent(unittest.TestCase):
         # Save
         self.invertor.to_file("test_output.txt")
     
-    def test_load(self):
+        # Load
         self.invertor.from_file("test_output.txt")
         self.assertEqual(self.invertor.d_max, 160.0)
         self.assertEqual(self.invertor.alpha, 0.0007)
