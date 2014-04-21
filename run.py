@@ -51,10 +51,12 @@ def import_package(modname, path):
     mod.__path__ = [abspath(path)]
     return mod
 
-def import_dll(modname):
+def import_dll(modname, build_path):
     """Import a DLL from the build directory"""
+    import sysconfig
+    ext = sysconfig.get_config_var('SO')
     # build_path comes from context
-    path = glob(joinpath(build_path, *modname.split('.'))+'.*')[0]
+    path = joinpath(build_path, *modname.split('.'))+ext
     #print "importing", modname, "from", path
     return imp.load_dynamic(modname, path)
 
@@ -112,7 +114,7 @@ def prepare():
     import sans.pr
     sans.pr.core = import_package('sans.pr.core',
                                   joinpath(build_path, 'sans', 'pr', 'core'))
-    #import_dll('park._modeling')
+    #import_dll('park._modeling', build_path)
 
     #park = import_package('park',os.path.join(build_path,'park'))
 
