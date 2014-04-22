@@ -1,5 +1,7 @@
 .. model_functions.rst
 
+.. NB: This document does not have M Gonzalez's model descriptions in it.
+
 .. This is a port of the original SasView model_functions.html to ReSTructured text
 .. S King, Apr 2014
 .. with thanks to A Jackson & P Kienzle for advice!
@@ -31,25 +33,23 @@
 .. |chi| unicode:: U+03C7
 .. |psi| unicode:: U+03C8
 .. |omega| unicode:: U+03C9
-
 .. |bigdelta| unicode:: U+0394
 .. |biggamma| unicode:: U+0393
 .. |bigpsi| unicode:: U+03A8
-
 .. |drho| replace:: |bigdelta|\ |rho|
-
 .. |Ang| unicode:: U+212B
 .. |Ang^-1| replace:: |Ang|\ :sup:`-1`
 .. |Ang^2| replace:: |Ang|\ :sup:`2`
 .. |Ang^-2| replace:: |Ang|\ :sup:`-2`
 .. |Ang^3| replace:: |Ang|\ :sup:`3`
+.. |Ang^-3| replace:: |Ang|\ :sup:`-3`
+.. |Ang^-4| replace:: |Ang|\ :sup:`-4`
 .. |cm^-1| replace:: cm\ :sup:`-1`
 .. |cm^2| replace:: cm\ :sup:`2`
 .. |cm^-2| replace:: cm\ :sup:`-2`
 .. |cm^3| replace:: cm\ :sup:`3`
 .. |cm^-3| replace:: cm\ :sup:`-3`
 .. |sr^-1| replace:: sr\ :sup:`-1`
-
 .. |P0| replace:: P\ :sub:`0`\
 .. |A2| replace:: A\ :sub:`2`\
 
@@ -1216,7 +1216,7 @@ where
 .. image:: img/image060.PNG
 
 and |alpha| is the angle between the axis of the cylinder and the *q*-vector, *V* is the volume of the cylinder,
-*L* is the length of the cylinder, *r* is the radius of the cylinder, and |bigdelta|\ |rho| (contrast) is the
+*L* is the length of the cylinder, *r* is the radius of the cylinder, and |drho| (contrast) is the
 scattering length density difference between the scatterer and the solvent. *J1* is the first order Bessel function.
 
 To provide easy access to the orientation of the cylinder, we define the axis of the cylinder using two angles |theta|
@@ -2073,7 +2073,7 @@ and
 
 |alpha| is the angle between the axis of the ellipsoid and the *q*\ -vector, *V* is the volume of the ellipsoid, *Ra*
 is the radius along the rotational axis of the ellipsoid, *Rb* is the radius perpendicular to the rotational axis of
-the ellipsoid and |bigdelta|\ |rho| (contrast) is the scattering length density difference between the scatterer and
+the ellipsoid and |drho| (contrast) is the scattering length density difference between the scatterer and
 the solvent.
 
 To provide easy access to the orientation of the ellipsoid, we define the rotation axis of the ellipsoid using two
@@ -2420,7 +2420,7 @@ The form factor is
 .. image:: img/image137.JPG
 
 where |delta|\ T = tail length (or *t_length*), |delta|\ H = head thickness (or *h_thickness*),
-|bigdelta|\ |rho|\ H = SLD(headgroup) - SLD(solvent), and |bigdelta|\ |rho|\ T = SLD(tail) - SLD(solvent).
+|drho|\ H = SLD(headgroup) - SLD(solvent), and |drho|\ T = SLD(tail) - SLD(solvent).
 
 The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
@@ -2483,7 +2483,7 @@ where
 
 .. image:: img/image141.PNG
 
-Here *d* = (repeat) spacing, |delta| = bilayer thickness, the contrast |bigdelta|\ |rho| = SLD(headgroup) - SLD(solvent),
+Here *d* = (repeat) spacing, |delta| = bilayer thickness, the contrast |drho| = SLD(headgroup) - SLD(solvent),
 K = smectic bending elasticity, B = compression modulus, and N = number of lamellar plates (*n_plates*).
 
 NB: **When the Caille parameter is greater than approximately 0.8 to 1.0, the assumptions of the model are incorrect.**
@@ -2550,7 +2550,7 @@ where
 .. image:: img/image141.PNG
 
 where |delta|\ T = tail length (or *t_length*), |delta|\ H = head thickness (or *h_thickness*),
-|bigdelta|\ |rho|\ H = SLD(headgroup) - SLD(solvent), and |bigdelta|\ |rho|\ T = SLD(tail) - SLD(headgroup).
+|drho|\ H = SLD(headgroup) - SLD(solvent), and |drho|\ T = SLD(tail) - SLD(headgroup).
 Here *d* = (repeat) spacing, *K* = smectic bending elasticity, *B* = compression modulus, and N = number of lamellar
 plates (*n_plates*).
 
@@ -3123,7 +3123,7 @@ The following are models used for shape-independent SANS analysis.
 
 .. _Debye:
 
-**2.2.1. Debye (Model)**
+**2.2.1. Debye (Gaussian Coil Model)**
 
 The Debye model is a form factor for a linear polymer chain. In addition
 to the radius of gyration, Rg, a scale factor "scale", and a constant
@@ -3137,13 +3137,10 @@ For 2D plot, the wave transfer is defined as
 
 ==============  ========  =============
 Parameter name  Units     Default value
-
 ==============  ========  =============
-| scale None 1.0 
-
-| rg   Ã…    50.0
-
-| background              | cm-1 0.0 
+scale           None      1.0
+rg              |Ang|     50.0
+background      |cm^-1|   0.0
 ==============  ========  =============
 
 .. image:: img/image173.JPG
@@ -3159,7 +3156,7 @@ Polymer Science", Oxford University Press, New York (2000).
 
 .. _BroadPeakModel:
 
-**2.2.2. BroadPeak Model**
+**2.2.2. BroadPeakModel**
 
 Calculate an empirical functional form for SANS data characterized by a
 broad scattering peak. Many SANS spectra are characterized by a broad
@@ -3182,23 +3179,17 @@ For 2D plot, the wave transfer is defined as
 
 .. image:: img/image040.GIF
 
-==============  ========  =============
-Parameter name  Units     Default value
-==============  ========  =============
-| scale\_l (= C)          |      10  
-
-| scale\_p (=A)           |      1e-05
-
-| length\_l (=x)          | Ã…    50  
-
-| q\_peak (= Q0)          | Ã…-1  0.1 
-
-| exponent\_p (=n)        |      2   
-
-| exponent\_l (=m)        |      3   
-
-| Background (=B)         | cm-1 0.1 
-==============  ========  =============
+===============  ========  =============
+Parameter name   Units     Default value
+===============  ========  =============
+scale_l    (=C)  None      10
+scale_p    (=A)  None      1e-05
+length_l   (=x)  |Ang|     50
+q_peak    (=Q0)  |Ang^-1|  0.1
+exponent_p (=n)  None      2
+exponent_l (=m)  None      3
+Background (=B)  |cm^-1|   0.1
+===============  ========  =============
 
 .. image:: img/image175.JPG
 
@@ -3214,7 +3205,7 @@ None.
 
 .. _CorrLength:
 
-**2.2.3. CorrLength (CorrelationLengthModel)**
+**2.2.3. CorrLength (Correlation Length Model)**
 
 Calculate an empirical functional form for SANS data characterized by a
 low-Q signal and a high-Q signal
@@ -3238,21 +3229,16 @@ For 2D plot, the wave transfer is defined as
 
 .. image:: img/image040.GIF
 
-==============  ========  =============
-Parameter name  Units     Default value
-==============  ========  =============
-| scale\_l (= C)          |      10  
-
-| scale\_p (=A)           |      1e-06
-
-| length\_l (=x)          | Ã…    50  
-
-| exponent\_p (=n)        |      2   
-
-| exponent\_l (=m)        |      3   
-
-| Background (=B)         | cm-1 0.1 
-==============  ========  =============
+===============  ========  =============
+Parameter name   Units     Default value
+===============  ========  =============
+scale_l    (=C)  None      10
+scale_p    (=A)  None      1e-06
+length_l   (=x)  |Ang|     50
+exponent_p (=n)  None      2
+exponent_l (=m)  None      3
+Background (=B)  |cm^-1|   0.1
+===============  ========  =============
 
 .. image:: img/image177.JPG
 
@@ -3269,7 +3255,7 @@ Poly(ethylene oxide) Solutions, Macromolecules 37, 6932-6937 (2004).
 
 .. _Lorentz:
 
-**2.2.4. (Ornstein-Zernicke) Lorentz (Model)**
+**2.2.4. Lorentz (Ornstein-Zernicke Model)**
 
 The Ornstein-Zernicke model is defined by:
 
@@ -3284,11 +3270,9 @@ For 2D plot, the wave transfer is defined as
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| scale None 1.0 
-
-| length Ã…    50.0
-
-| background              | cm-1 0.0 
+scale           None      1.0
+length          |Ang|     50.0
+background      |cm^-1|   0.0
 ==============  ========  =============
 
 .. image:: img/image179.JPG
@@ -3299,7 +3283,7 @@ Parameter name  Units     Default value
 
 .. _DABModel:
 
-**2.2.5. DAB (Debye-Anderson-Brumberger) Model**
+**2.2.5. DABModel (Debye-Anderson-Brumberger Model)**
 
 Calculates the scattering from a randomly distributed, two-phase system
 based on the Debye-Anderson-Brumberger (DAB) model for such systems. The
@@ -3320,11 +3304,9 @@ For 2D plot, the wave transfer is defined as
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| scale None 1.0 
-
-| length Ã…    50.0
-
-| background              | cm-1 0.0 
+scale           None      1.0
+length          |Ang|     50.0
+background      |cm^-1|   0.0
 ==============  ========  =============
 
 .. image:: img/image181.JPG
@@ -3346,7 +3328,7 @@ Debye, Bueche, "Scattering by an Inhomogeneous Solid", J. Appl. Phys.
 
 .. _AbsolutePower_Law:
 
-**2.2.6.  Absolute Power\_Law**
+**2.2.6. AbsolutePower_Law**
 
 This model describes a power law with background.
 
@@ -3357,11 +3339,9 @@ Note the minus sign in front of the exponent.
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| Scale None 1.0 
-
-| m    None 4   
-
-| Background              | cm-1 0.0 
+Scale           None      1.0
+m               None      4
+Background      |cm^-1|   0.0
 ==============  ========  =============
 
 .. image:: img/image183.JPG
@@ -3386,13 +3366,10 @@ For 2D plot, the wave transfer is defined as
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| scale None 0.1 
-
-| c1   None -30.0
-
-| c2   None 5000.0
-
-| background              | cm-1 0.0 
+scale           None      0.1
+c1              None      -30.0
+c2              None      5000.0
+background      |cm^-1|   0.0
 ==============  ========  =============
 
 .. image:: img/image185.JPG
@@ -3410,7 +3387,7 @@ Schubert, K-V., Strey, R., Kline, S. R. and E. W. Kaler, J. Chem. Phys.,
 
 .. _FractalModel:
 
-**2.2.8.  FractalModel**
+**2.2.8. FractalModel**
 
 Calculates the scattering from fractal-like aggregates built from
 spherical building blocks following the Texiera reference. The value
@@ -3433,19 +3410,13 @@ For 2D plot, the wave transfer is defined as
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| scale None 0.05
-
-| radius Ã…    5.0 
-
-| fractal\_dim            | None 2   
-
-| corr\_length            | Ã…    100.0
-
-| block\_sld              | Ã…-2  2e-6
-
-| solvent\_sld            | Ã…-2  6e-6
-
-| background              | cm-1 0.0 
+scale           None      0.05
+radius          |Ang|     5.0
+fractal_dim     None      2
+corr_length     |Ang|     100.0
+block_sld       |Ang^-2|  2e-6
+solvent_sld     |Ang^-2|  6e-6
+background      |cm^-1|   0.0
 ==============  ========  =============
 
 .. image:: img/image187.JPG
@@ -3472,20 +3443,16 @@ dimension, Î¾ is the correlation (or cutt-off)  length, *Ï�solvent* is the
 scattering length density of the solvent, and *Ï�particle* is the
 scattering length density of particles.
 
-Note:  The mass fractal dimension is valid for 1<mass\_dim<6.
+Note:  The mass fractal dimension is valid for 1<mass_dim<6.
 
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| scale None 1   
-
-| radius Ã…    10.0
-
-| mass\_dim               | None 1.9 
-
-| co\_length              | Ã…    100.0
-
-| background              |      0.0 
+scale           None      1
+radius          |Ang|     10.0
+mass_dim        None      1.9
+co_length       |Ang|     100.0
+background      |cm^-1|   0.0
 ==============  ========  =============
 
 .. image:: img/mass_fractal_fig1.JPG
@@ -3514,21 +3481,17 @@ dimension, Î¾ is the correlation (or cutt-off)  length, *Ï�solvent* is the
 scattering length density of the solvent, and *Ï�particle* is the
 scattering length density of particles.
 
- Note:  The surface fractal dimension is valid for 1<surface\_dim<3.
+ Note:  The surface fractal dimension is valid for 1<surface_dim<3.
  Also it is valid in a limited q range (see the reference for details).
 
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| scale None 1   
-
-| radius Ã…    10.0
-
-| surface\_dim            | None 2.0 
-
-| co\_length              | Ã…    500.0
-
-| background              |      0.0 
+scale           None      1
+radius          |Ang|     10.0
+surface_dim     None      2.0
+co_length       |Ang|     500.0
+background      |cm^-1|   0.0
 ==============  ========  =============
 
 .. image:: img/surface_fractal_fig1.JPG
@@ -3544,7 +3507,7 @@ D. Mildner, and P. Hall,  J. Phys. D.: Appl. Phys.,  19, 1535-1545 
 
 .. _MassSurfaceFractal:
 
-**2.2.11. MassSurfaceFractal**
+**2.2.11. MassSurfaceFractal (Model)**
 
 A number of natural and commercial processes form high-surface area
 materials as a result of the vapour-phase aggregation of primary
@@ -3571,22 +3534,17 @@ scattering length density of the solvent, and *Ï�p* is the scattering
 length density of particles.
 
  Note:  The surface and mass fractal dimensions are valid for
-0<surface\_dim<6, 0<mass\_dim<6, and (surface\_mass+mass\_dim)<6. 
+0<surface_dim<6, 0<mass_dim<6, and (surface_mass+mass_dim)<6. 
 
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| scale None 1   
-
-| primary\_rg             | Ã…    4000.0
-
-|   cluster\_rg           |   Ã…   86.7
-
-| surface\_dim            | None 2.3 
-
-|   mass\_dim             |  None  1.8
-
-| background              |      0.0 
+scale           None      1
+primary_rg      |Ang|     4000.0
+cluster_rg      |Ang|     86.7
+surface_dim     None      2.3
+mass_dim        None      1.8
+background      |cm^-1|   0.0
 ==============  ========  =============
 
 .. image:: img/masssurface_fractal_fig1.JPG
@@ -3603,7 +3561,7 @@ Hurd, Schaefer, Martin, Phys. Rev. A, 35, 2361-2364 (1987), Equation(2).
 
 .. _FractalCoreShell:
 
-**2.2.12.  FractalCoreShell(Model)**
+**2.2.12. FractalCoreShell (Model)**
 
 Calculates the scattering from a fractal structure with a primary
 building block of core-shell spheres.
@@ -3619,7 +3577,7 @@ while the fractal structure factor S(q);
 
 .. image:: img/fractcore_eq3.gif
 
-where Df = frac\_dim, Î¾ = cor\_length, rc = (core) radius, and scale
+where Df = frac_dim, Î¾ = cor_length, rc = (core) radius, and scale
 = volfraction.
 
 The fractal structure is as documented in the fractal model. This model
@@ -3638,23 +3596,15 @@ For 2D plot, the wave transfer is defined as
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| volfraction             |      0.05
-
-| frac\_dim               |      2   
-
-| thickness               | Ã…    5.0 
-
-| raidus  Ã…   20.0
-
-| cor\_length             | Ã…    100.0
-
-| core\_sld               | Ã…-2  3.5e-6
-
-| shell\_sld              | Ã…-2  1e-6
-
-| solvent\_sld            | Ã…-2  6.35e-6
-
-| background              | cm-1 0.0 
+volfraction     None      0.05
+frac_dim        None      2
+thickness       |Ang|     5.0
+radius          |Ang|     20.0
+cor_length      |Ang|     100.0
+core_sld        |Ang^-2|  3.5e-6
+shell_sld       |Ang^-2|  1e-6
+solvent_sld     |Ang^-2|  6.35e-6
+background      |cm^-1|   0.0
 ==============  ========  =============
 
 .. image:: img/image188.JPG
@@ -3669,7 +3619,7 @@ See the PolyCore and Fractal documentation.\
 
 .. _GaussLorentzGel:
 
-**2.2.13.  GaussLorentzGel(Model)**
+**2.2.13. GaussLorentzGel(Model)**
 
 Calculates the scattering from a gel structure, typically a physical
 network. It is modeled as a sum of a low-q exponential decay plus a
@@ -3698,23 +3648,15 @@ For 2D plot, the wave transfer is defined as
 
 .. image:: img/image040.GIF
 
-==============  ========  =============
-Parameter name  Units     Default value
-==============  ========  =============
-| dyn\_colength(=Dynamic  | Ã…    20.0
-| correlation length)     |          
-
-| scale\_g(=Gauss scale   |      100 
-| factor)          
-
-| scale\_l(=Lorentzian    |      50  
-| scale factor)           |          
-
-| stat\_colength(=Static  | Ã…    100.0
-| correlation Z)          |          
-
-| background              | cm-1 0.0 
-==============  ========  =============
+===================================  ========  =============
+Parameter name                       Units     Default value
+===================================  ========  =============
+dyn_colength (=dynamic corr length)  |Ang|     20.0
+scale_g       (=Gauss scale factor)  None      100
+scale_l  (=Lorentzian scale factor)  None      50
+stat_colength (=static corr length)  |Ang|     100.0
+background                           |cm^-1|   0.0
+===================================  ========  =============
 
 .. image:: img/image190.JPG
 
@@ -3729,7 +3671,7 @@ G. Evmenenko, E. Theunissen, K. Mortensen, H. Reynaers, Polymer 42
 
 .. _BEPolyelectrolyte:
 
-**2.2.14.  BEPolyelectrolyte Model**
+**2.2.14. BEPolyelectrolyte (Model)**
 
 Calculates the structure factor of a polyelectrolyte solution with the
 RPA expression derived by Borue and Erukhimovich. The value returned is
@@ -3749,22 +3691,17 @@ For 2D plot, the wave transfer is defined as
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| K    Barns = 10-24 cm2       | 10  
-
-| Lb   Ã…    7.1 
-
-| h    Ã…-3  12  
-
-| b    Ã…    10  
-
-| Cs   Mol/L 0   
-
-| alpha None 0.05
-
-| Ca   Mol/L 0.7 
-
-| background              | cm-1 0.0 
+K               barns     10
+Lb              |Ang|     7.1
+h               |Ang^-3|  12
+b               |Ang|     10
+Cs              mol/L     0
+alpha           None      0.05
+Ca              mol/L     0.7
+background      |cm^-1|   0.0
 ==============  ========  =============
+
+NB: 1 barn = 10\ :sup:`-24` |cm^2|
 
 REFERENCE
 
@@ -3796,9 +3733,8 @@ For 2D plot, the wave transfer is defined as
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| scale cm-1 1.0 
-
-| Rg   Ã…    0.1 
+scale           |cm^-1|   1.0
+Rg              |Ang|     0.1
 ==============  ========  =============
 
 
@@ -3862,21 +3798,15 @@ For 2D plot, the wave transfer is defined as
 
 .. image:: img/image008.PNG
 
-==============  ========  =============
-Parameter name  Units     Default value
-==============  ========  =============
-| Scale(=Guinier scale,   | cm-1 1.0 
-| G)            
-
-| rg   Ã…    100 
-
-| dim(=Dimensional        |      1   
-| Variable, s)            |          
-
-| m(=Porod exponent)      |      3   
-
-| background              |      0.1 
-==============  ========  =============
+==============================  ========  =============
+Parameter name                  Units     Default value
+==============================  ========  =============
+scale      (=Guinier scale, G)  |cm^-1|   1.0
+rg                              |Ang|     100
+dim (=dimensional variable, s)  None      1
+m            (=Porod exponent)  None      3
+background                      |cm^-1|   0.1
+==============================  ========  =============
 
 .. image:: img/image196.JPG
 
@@ -3906,9 +3836,8 @@ For 2D plot, the wave transfer is defined as
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| scale Ã…-4  0.1 
-
-| background              | cm-1 0   
+scale           |Ang^-4|  0.1
+background      |cm^-1|   0
 ==============  ========  =============
 
 
@@ -3924,7 +3853,7 @@ Model describes a Gaussian shaped peak including a flat background,
 with the peak having height of I0 centered at qpk having standard
 deviation of B.  The fwhm is 2.354\*B.  
 
-Parameters I0, B, qpk, and BGD can all be adjusted during fitting.
+Parameters I0, B, qpk, and BGD can all be adjusted during fitting. **NB: These don't match the table!**
 
 REFERENCE
 
@@ -3937,13 +3866,10 @@ For 2D plot, the wave transfer is defined as
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| scale cm-1 100 
-
-| q0   Ã…    0.05
-
-| B         0.005
-
-| background              |      1   
+scale           |cm^-1|   100
+q0              |Ang^-1|  0.05
+B               |Ang^-1|  0.005
+background      |cm^-1|   1
 ==============  ========  =============
 
 .. image:: img/image199.JPG
@@ -3963,7 +3889,7 @@ Model describes a Lorentzian shaped peak including a flat background,
 with the peak having height of I0 centered at qpk having a hwhm
 (half-width-half-maximum) of B. 
 
-The parameters I0, B, qpk, and BGD can all be adjusted during fitting.
+The parameters I0, B, qpk, and BGD can all be adjusted during fitting. **NB: These don't match the table!**
 
 REFERENCE
 
@@ -3976,13 +3902,10 @@ For 2D plot, the wave transfer is defined as
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| scale cm-1 100 
-
-| q0   Ã…    0.05
-
-| B         0.005
-
-| background              |      1   
+scale           |cm^-1|   100
+q0              |Ang^-1|  0.05
+B               |Ang^-1|  0.005
+background      |cm^-1|     1
 ==============  ========  =============
 
 .. image:: img/image201.JPG
@@ -4022,20 +3945,16 @@ For 2D plot, the wave transfer is defined as
 
 TEST DATASET
 
- This example dataset is produced by running the Poly\_GaussCoil, using
-200 data points, qmin = 0.001 Ã…-1,  qmax = 0.7 Ã…-1   and the default
-values below.
+This example dataset is produced by running the Poly_GaussCoil, using 200 data points, *qmin* = 0.001 |Ang^-1|\ ,
+qmax = 0.7 |Ang^-1| and the default values below.
 
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| Scale None 1.0 
-
-| rg   Ã…    60.0
-
-| poly\_m Mw/Mn 2   
-
-| background              | cm-1 0.001
+scale           None      1.0
+rg              |Ang|     60.0
+poly_m (Mw/Mn)  None      2
+background      |cm^-1|   0.001
 ==============  ========  =============
 
 .. image:: img/image205.JPG
@@ -4129,20 +4048,17 @@ For 2D plot, the wave transfer is defined as
 
 TEST DATASET
 
- This example dataset is produced, using 200 data points, qmin = 0.001
-Ã…-1,  qmax = 0.2 Ã…-1   and the default values below.
+This example dataset is produced, using 200 data points, qmin = 0.001 |Ang^-1|\ ,  qmax = 0.2 |Ang^-1|  and the
+default values below.
 
-==============  ========  =============
-Parameter name  Units     Default value
-==============  ========  =============
-| Scale None 1.0 
-
-| rg   Ã…    60.0
-
-| m(=Porod exponent)      |      3   
-
-| background              | cm-1 0.0 
-==============  ========  =============
+===================  ========  =============
+Parameter name       Units     Default value
+===================  ========  =============
+scale                None      1.0
+rg                   |Ang|     60.0
+m (=Porod exponent)  None      3
+background           |cm^-1|   0.0
+===================  ========  =============
 
 .. image:: img/image214.JPG
 
@@ -4209,45 +4125,30 @@ A.Z. Akcasu, R. Klein and B. Hammouda, Macromolecules 26, 4136 (1993)
 
 Fitting parameters for Case0 Model
 
-==============  ========  =============
-Parameter name  Units     Default value
-==============  ========  =============
-| background              | cm-1 0.0 
-
-| scale      1   
-
-| bc(=Seg. Length bc)     |      5   
-
-| bd(=Seg. Length bd)     |      5   
-
-| Kcd(Chi Param. Kcd)     |      -0.0004
-==============  ========  =============
+=======================  ========  =============
+Parameter name           Units     Default value
+=======================  ========  =============
+background               |cm^-1|   0.0
+scale                    None      1
+bc (=segment Length_bc)  **unit**  5
+bd (=segment length_bd)  **unit**  5
+Kcd (=chi_cd)            **unit**  -0.0004
+=======================  ========  =============
 
 Fixed parameters for Case0 Model
 
-==============  ========  =============
-Parameter name  Units     Default value
-==============  ========  =============
-| Lc(= Scatter.           |      1e-12
-| Length\_c)              |          
-
-| Ld(= Scatter.           |      0   
-| Length\_d)              |          
-
-| Nc(=Deg.Polym.c)        |      1000
-
-| Nd(=Deg.Polym.d)        |      1000
-
-| Phic(=Vol. fraction of  |      0.25
-| c)            
-
-| Phid(=Vol. fraction of  |      0.25
-| d)            
-
-| vc(=Spec. vol. of c)    |      100 
-
-| vd(=Spec. vol. of d)    |      100 
-==============  ========  =============
+=======================  ========  =============
+Parameter name           Units     Default value
+=======================  ========  =============
+Lc (=scatter. length_c)  **unit**  1e-12
+Ld (=scatter. length_d)  **unit**  0
+Nc    (=degree polym_c)  None      1000
+Nd    (=degree polym_d)  None      1000
+Phic (=vol. fraction_c)  None      0.25
+Phid (=vol. fraction_d)  None      0.25
+vc (=specific volume_c)  **unit**  100
+vd (=specific volume_d)  **unit**  100
+=======================  ========  =============
 
 .. image:: img/image215.JPG
 
@@ -4258,7 +4159,7 @@ Parameter name  Units     Default value
 
 .. _TwoLorentzian:
 
-**2.2.23. TwoLorentzian(Model)**
+**2.2.23. TwoLorentzian (Model)**
 
 Calculate an empirical functional form for SANS data characterized by a
 two Lorentzian functions.
@@ -4284,25 +4185,17 @@ For 2D plot, the wave transfer is defined as
 
 **Default input parameter values**
 
-==============  ========  =============
-Parameter name  Units     Default value
-==============  ========  =============
-| scale\_1(=A)            |      10  
-
-| scale\_2(=C)            |      1   
-
-| 1ength\_1 (=Correlation | Ã…    100 
-| length1)                |          
-
-| 1ength\_2(=Correlation  | Ã…    10  
-| length2)                |          
-
-| exponent\_1(=n)         |      3   
-
-| exponent\_2(=m)         |      2   
-
-| Background(=B)          | cm-1 0.1 
-==============  ========  =============
+===============================  ========  =============
+Parameter name                   Units     Default value
+===============================  ========  =============
+scale_1 (=A)                     None      10
+scale_2 (=C)                     None      1
+1ength_1 (=correlation length1)  |Ang|     100
+1ength_2 (=correlation length2)  |Ang|     10
+exponent_1 (=n)                  None      3
+exponent_2 (=m)                  None      2
+background (=B)                  |cm^-1|   0.1
+===============================  ========  =============
 
 .. image:: img/image217.JPG
 
@@ -4316,7 +4209,7 @@ None
 
 .. _TwoPowerLaw:
 
-**2.2.24. TwoPowerLaw(Model)**
+**2.2.24. TwoPowerLaw (Model)**
 
 Calculate an empirical functional form for SANS data characterized by
 two power laws.
@@ -4341,15 +4234,11 @@ For 2D plot, the wave transfer is defined as
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| coef\_A      1.0 
-
-| qc   Ã…-1  0.04
-
-| power\_1(=m1)           |      4   
-
-| power\_2(=m2)           |      4   
-
-| background              | cm-1 0.0 
+coef_A          None      1.0
+qc              |Ang^-1|  0.04
+power_1 (=m1)   None      4
+power_2 (=m2)   None      4
+background      |cm^-1|   0.0
 ==============  ========  =============
 
 .. image:: img/image219.JPG
@@ -4360,7 +4249,7 @@ Parameter name  Units     Default value
 
 .. _UnifiedPowerRg:
 
-**2.2.25. UnifiedPower(Law and)Rg(Model)**
+**2.2.25. UnifiedPowerRg (Beaucage Model)**
 
 The returned value is scaled to units of |cm^-1|, absolute scale. 
 
@@ -4396,25 +4285,16 @@ For 2D plot, the wave transfer is defined as
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| scale      1.0 
-
-| Rg2  Ã…    21  
-
-| power2      2   
-
-| G2   cm-1sr-1                | 3   
-
-| B2   cm-1sr-1                | 0.0006
-
-| Rg1  Ã…    15.8
-
-| power1      4   
-
-| G1   cm-1sr-1                | 400 
-
-| B1   cm-1sr-1                | 4.5e-006                |
-
-| background              | cm-1 0.0 
+scale           None      1.0
+Rg2             |Ang|     21
+power2          None      2
+G2              |cm^-1|   3
+B2              |cm^-1|   0.0006
+Rg1             |Ang|     15.8
+power1          None      4
+G1              |cm^-1|   400
+B1              |cm^-1|   4.5e-6                |
+background      |cm^-1|   0.0
 ==============  ========  =============
 
 .. image:: img/image221.JPG
@@ -4439,15 +4319,14 @@ This is a linear function that calculates:
 
 where A and B are the coefficients of the first and second order terms.
 
-**Note:** For 2D plot, *I(q)*= I(qx)\*I(qy)  which is defined differently
+**Note:** For 2D plot, *I(q)* = *I(qx)* / *I(qy)*  which is defined differently
 from other shape independent models.
 
 ==============  ========  =============
 Parameter name  Units     Default value
 ==============  ========  =============
-| A    cm-1 1.0 
-
-| B    Ã…    1.0 
+A               |cm^-1|   1.0
+B               |Ang|     1.0
 ==============  ========  =============
 
 
@@ -4485,10 +4364,10 @@ http://www.ncnr.nist.gov/resources/reflcalc.html
 
     Same as the ReflectivityModel except that the it is more
 customizable. More interfacial functions are supplied. The number of
-points (npts\_inter) for each interface can be choosen.     The constant
+points (npts_inter) for each interface can be choosen.     The constant
 (A below but 'nu' as a parameter name of the model) for exp, erf, or
 power-law is an input. The SLD at the interface between layers,
-*rinter\_i*, is calculated with a function chosen by a user, where the
+*rinter_i*, is calculated with a function chosen by a user, where the
 functions are:
 
 1) Erf;
@@ -4536,21 +4415,16 @@ with significant hydrogen bonding D has been reported to be ~2.6 to 2.8.
 
 **Default input parameter values**
 
-==============  ========  =============
-Parameter name  Units     Default value
-==============  ========  =============
-| Background              | cm-1 0.01
-
-| Guinier scale           | cm-1 1.7 
-
-| Lorentzian scale        | cm-1 3.5 
-
-| Radius of gyration      | Ã…    104 
-
-| Fractal exponent        |      2   
-
-| Correlation length      | Ã…    16  
-==============  ========  =============
+==================  ========  =============
+Parameter name      Units     Default value
+==================  ========  =============
+Background          |cm^-1|   0.01
+Guinier scale       |cm^-1|   1.7
+Lorentzian scale    |cm^-1|   3.5
+Radius of gyration  |Ang|     104
+Fractal exponent    None      2
+Correlation length  |Ang|     16
+==================  ========  =============
 
 .. image:: img/image235.GIF
 
