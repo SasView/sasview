@@ -33,8 +33,9 @@
 .. |chi| unicode:: U+03C7
 .. |psi| unicode:: U+03C8
 .. |omega| unicode:: U+03C9
-.. |bigdelta| unicode:: U+0394
 .. |biggamma| unicode:: U+0393
+.. |bigdelta| unicode:: U+0394
+.. |bigzeta| unicode:: U+039E
 .. |bigpsi| unicode:: U+03A8
 .. |drho| replace:: |bigdelta|\ |rho|
 .. |Ang| unicode:: U+212B
@@ -60,6 +61,10 @@
 
 
 .. Actual document starts here...
+
+This is xi, |xi|
+
+This is zeta, |zeta|
 
 SasView Model Functions
 =======================
@@ -210,19 +215,19 @@ Parallelpipeds
 -------------------------------
 
 - AbsolutePower_Law_
-- BEPolyelectrolyte
-- BroadPeakModel
-- CorrLength
-- DABModel
-- Debye
-- FractalModel
-- FractalCoreShell
-- GaussLorentzGel
-- Guinier
-- GuinierPorod
-- Lorentz
-- MassFractalModel
-- MassSurfaceFractal
+- BEPolyelectrolyte_
+- BroadPeakModel_
+- CorrLength_
+- DABModel_
+- Debye_
+- FractalModel_
+- FractalCoreShell_
+- GaussLorentzGel_
+- Guinier_
+- GuinierPorod_
+- Lorentz_
+- MassFractalModel_
+- MassSurfaceFractal_
 - PeakGaussModel
 - PeakLorentzModel
 - Poly_GaussCoil
@@ -230,8 +235,8 @@ Parallelpipeds
 - PorodModel
 - RPA10Model
 - StarPolymer
-- SurfaceFractalModel
-- Teubner Strey
+- SurfaceFractalModel_
+- TeubnerStrey_
 - TwoLorentzian
 - TwoPowerLaw
 - UnifiedPowerRg
@@ -274,31 +279,31 @@ Parallelpipeds
 -------------
 
 *Small-Angle Scattering of X-Rays*
-A. Guinier and G. Fournet
+A Guinier and G Fournet
 John Wiley & Sons, New York (1955)
 
-P. Stckel, R. May, I. Strell, Z. Cejka, W. Hoppe, H. Heumann, W. Zillig and H. Crespi
+P Stckel, R May, I Strell, Z Cejka, W Hoppe, H Heumann, W Zillig and H Crespi
 *Eur. J. Biochem.*, 112, (1980), 411-417
 
-G. Porod
+G Porod
 in *Small Angle X-ray Scattering*
-(editors) O. Glatter and O. Kratky
+(editors) O Glatter and O Kratky
 Academic Press (1982)
 
 *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*
-L.A. Feigin and D. I. Svergun
+L.A Feigin and D I Svergun
 Plenum Press, New York (1987)
 
-S. Hansen
+S Hansen
 *J. Appl. Cryst.* 23, (1990), 344-346
 
-S.J. Henderson
+S J Henderson
 *Biophys. J.* 70, (1996), 1618-1627
 
-B.C. McAlister and B.P. Grady, B.P
+B C McAlister and B P Grady
 *J. Appl. Cryst.* 31, (1998), 594-599
 
-S.R. Kline
+S R Kline
 *J Appl. Cryst.* 39(6), (2006), 895
 
 **Also see the references at the end of the each model function descriptions.**
@@ -355,7 +360,7 @@ Research (Kline, 2006).
 
 REFERENCE
 
-A. Guinier and G. Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Sons, New York, (1955)
+A Guinier and G. Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Sons, New York, (1955)
 
 *2.1.1.2. Validation of the SphereModel*
 
@@ -367,7 +372,7 @@ NIST (Kline, 2006). Figure 1 shows a comparison of the output of our model and t
 Figure 1: Comparison of the DANSE scattering intensity for a sphere with the output of the NIST SANS analysis software.
 The parameters were set to: Scale=1.0, Radius=60 |Ang|, Contrast=1e-6 |Ang^-2|, and Background=0.01 |cm^-1|.
 
-*2013/09/09 and 2014/01/06 - Description reviewed by S. King and P. Parker.*
+*2013/09/09 and 2014/01/06 - Description reviewed by S King and P Parker.*
 
 
 
@@ -420,7 +425,7 @@ See the reference for details.
 
 REFERENCE
 
-N. W. Ashcroft and D. C. Langreth, *Physical Review*, 156 (1967) 685-692
+N W Ashcroft and D C Langreth, *Physical Review*, 156 (1967) 685-692
 [Errata found in *Phys. Rev.* 166 (1968) 934]
 
 
@@ -483,7 +488,7 @@ background      |cm^-1|   0.001
 
 REFERENCE
 
-M. Stieger, J. S. Pedersen, P. Lindner, W. Richtering, *Langmuir*, 20 (2004) 7283-7292
+M Stieger, J. S Pedersen, P Lindner, W Richtering, *Langmuir*, 20 (2004) 7283-7292
 
 
 
@@ -540,7 +545,7 @@ background      |cm^-1|   0
 
 REFERENCE
 
-K. Larson-Smith, A. Jackson, and D.C. Pozzo, *Small angle scattering model for Pickering emulsions and raspberry*
+K Larson-Smith, A Jackson, and D C Pozzo, *Small angle scattering model for Pickering emulsions and raspberry*
 *particles*, *Journal of Colloid and Interface Science*, 343(1) (2010) 36-41
 
 
@@ -591,7 +596,7 @@ Research (Kline, 2006).
 
 REFERENCE
 
-A. Guinier and G. Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Sons, New York, (1955)
+A Guinier and G Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Sons, New York, (1955)
 
 *2.1.5.2. Validation of the core-shell sphere model*
 
@@ -725,7 +730,7 @@ background      |cm^-1|   0.0
 
 REFERENCE
 
-S. King, P. Griffiths, J. Hone, and T. Cosgrove, *SANS from Adsorbed Polymer Layers*,
+S King, P Griffiths, J. Hone, and T Cosgrove, *SANS from Adsorbed Polymer Layers*,
 *Macromol. Symp.*, 190 (2002) 33-42
 
 
@@ -773,8 +778,8 @@ Research (Kline, 2006).
 
 REFERENCE
 
-B. Cabane, *Small Angle Scattering Methods*, in *Surfactant Solutions: New Methods of Investigation*, Ch.2,
-Surfactant Science Series Vol. 22, Ed. R. Zana and M. Dekker, New York, (1987).
+B Cabane, *Small Angle Scattering Methods*, in *Surfactant Solutions: New Methods of Investigation*, Ch.2,
+Surfactant Science Series Vol. 22, Ed. R Zana and M Dekker, New York, (1987).
 
 
 
@@ -892,7 +897,7 @@ NB: *rad_core* represents the core radius (*R1*) and *thick_shell1* (*R2* - *R1*
 
 REFERENCE
 
-L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*,
+L A Feigin and D I Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*,
 Plenum Press, New York, (1987).
 
 
@@ -952,7 +957,7 @@ provided by the NIST Center for Neutron Research (Kline, 2006).
 
 REFERENCE
 
-A. Guinier and G. Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Sons, New York, (1955)
+A Guinier and G. Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Sons, New York, (1955)
 
 
 
@@ -1081,7 +1086,7 @@ NB: *rad_core0* represents the core radius (*R1*).
 
 REFERENCE
 
-L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*,
+L A Feigin and D I Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*,
 Plenum Press, New York, (1987)
 
 
@@ -1127,7 +1132,7 @@ NB: *num_pearls* must be an integer.
 
 REFERENCE
 
-A. V. Dobrynin, M. Rubinstein and S. P. Obukhov, *Macromol.*, 29 (1996) 2974-2979
+A V Dobrynin, M Rubinstein and S P Obukhov, *Macromol.*, 29 (1996) 2974-2979
 
 
 
@@ -1192,7 +1197,7 @@ NB: *num_pearls* must be an integer.
 
 REFERENCE
 
-R. Schweins and K. Huber, *Particle Scattering Factor of Pearl Necklace Chains*, *Macromol. Symp.* 211 (2004) 25-42 2004
+R Schweins and K Huber, *Particle Scattering Factor of Pearl Necklace Chains*, *Macromol. Symp.* 211 (2004) 25-42 2004
 
 
 
@@ -1341,7 +1346,7 @@ Our model uses the form factor calculations implemented in a c-library provided 
 
 REFERENCE
 
-L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum Press,
+L A Feigin and D I Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum Press,
 New York, (1987)
 
 
@@ -1426,9 +1431,9 @@ For 2D data: The 2D scattering intensity is calculated similar to the 2D cylinde
 
 REFERENCE
 
-H. Kaya, *J. Appl. Cryst.*, 37 (2004) 223-230
+H Kaya, *J. Appl. Cryst.*, 37 (2004) 223-230
 
-H. Kaya and N-R deSouza, *J. Appl. Cryst.*, 37 (2004) 508-509 (addenda and errata)
+H Kaya and N-R deSouza, *J. Appl. Cryst.*, 37 (2004) 508-509 (addenda and errata)
 
 
 
@@ -1611,7 +1616,7 @@ the results of the averaging by varying the number of angular bins.
 
 REFERENCE
 
-L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum,
+L A Feigin and D I Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum,
 New York, (1987)
 
 
@@ -1671,12 +1676,12 @@ From the reference
 
 REFERENCE
 
-J. S. Pedersen and P. Schurtenberger. *Scattering functions of semiflexible polymers with and without excluded volume*
+J S Pedersen and P Schurtenberger. *Scattering functions of semiflexible polymers with and without excluded volume*
 *effects*. *Macromolecules*, 29 (1996) 7602-7612
 
 Correction of the formula can be found in
 
-W-R Chen, P. D. Butler and L. J. Magid, *Incorporating Intermicellar Interactions in the Fitting of SANS Data from*
+W R Chen, P D Butler and L J Magid, *Incorporating Intermicellar Interactions in the Fitting of SANS Data from*
 *Cationic Wormlike Micelles*. *Langmuir*, 22(15) 2006 6539â€“6548
 
 
@@ -1759,12 +1764,12 @@ sldSolv         |Ang^-2|  6.3e-6
 
 REFERENCE
 
-J. S. Pedersen and P. Schurtenberger. *Scattering functions of semiflexible polymers with and without excluded volume*
+J S Pedersen and P Schurtenberger. *Scattering functions of semiflexible polymers with and without excluded volume*
 *effects*. *Macromolecules*, 29 (1996) 7602-7612
 
 Correction of the formula can be found in
 
-W-R Chen, P. D. Butler and L. J. Magid, *Incorporating Intermicellar Interactions in the Fitting of SANS Data from*
+W R Chen, P D Butler and L J Magid, *Incorporating Intermicellar Interactions in the Fitting of SANS Data from*
 *Cationic Wormlike Micelles*. *Langmuir*, 22(15) 2006 6539â€“6548
 
 
@@ -1822,7 +1827,7 @@ and the 1D scattering intensity use the c-library from NIST.
 
 REFERENCE
 
-L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum Press,
+L A Feigin and D I Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum Press,
 New York, (1987)
 
 
@@ -1910,9 +1915,9 @@ Figure. Definition of the angles for oriented 2D barbells.
 
 REFERENCE
 
-H. Kaya, *J. Appl. Cryst.*, 37 (2004) 37 223-230
+H Kaya, *J. Appl. Cryst.*, 37 (2004) 37 223-230
 
-H. Kaya and N-R deSouza, *J. Appl. Cryst.*, 37 (2004) 508-509 (addenda and errata)
+H Kaya and N R deSouza, *J. Appl. Cryst.*, 37 (2004) 508-509 (addenda and errata)
 
 
 
@@ -1997,11 +2002,11 @@ Our model uses the form factor calculations implemented in a c-library provided 
 
 REFERENCE
 
-A. Guinier and G. Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Sons, New York, 1955
+A Guinier and G Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Sons, New York, 1955
 
-O. Kratky and G. Porod, *J. Colloid Science*, 4, (1949) 35
+O Kratky and G Porod, *J. Colloid Science*, 4, (1949) 35
 
-J. S. Higgins and H. C. Benoit, *Polymers and Neutron Scattering*, Clarendon, Oxford, 1994
+J S Higgins and H C Benoit, *Polymers and Neutron Scattering*, Clarendon, Oxford, 1994
 
 
 
@@ -2046,7 +2051,7 @@ thickness       |Ang|     10
 
 REFERENCE
 
-S. Alexandru Rautu, Private Communication.
+S Alexandru Rautu, Private Communication.
 
 
 
@@ -2142,7 +2147,7 @@ than 500.
 
 REFERENCE
 
-L. A. Feigin and D. I. Svergun. *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum,
+L A Feigin and D I Svergun. *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum,
 New York, 1987.
 
 
@@ -2206,9 +2211,9 @@ Our model uses the form factor calculations implemented in a c-library provided 
 
 REFERENCE
 
-M. Kotlarchyk, S.-H. Chen, *J. Chem. Phys.*, 79 (1983) 2461
+M Kotlarchyk, S H Chen, *J. Chem. Phys.*, 79 (1983) 2461
 
-S. J. Berr, *Phys. Chem.*, 91 (1987) 4760
+S J Berr, *Phys. Chem.*, 91 (1987) 4760
 
 
 
@@ -2271,7 +2276,7 @@ XpolarShell     None      1.0
 
 REFERENCE
 
-R. K. Heenan, Private communication
+R K Heenan, Private communication
 
 
 
@@ -2346,7 +2351,7 @@ Our model uses the form factor calculations implemented in a c-library provided 
 
 REFERENCE
 
-L. A. Feigin and D. I. Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum,
+L A Feigin and D I Svergun, *Structure Analysis by Small-Angle X-Ray and Neutron Scattering*, Plenum,
 New York, 1987.
 
 
@@ -2396,7 +2401,7 @@ Our model uses the form factor calculations implemented in a c-library provided 
 
 REFERENCE
 
-F. Nallet, R. Laversanne, and D. Roux, J. Phys. II France, 3, (1993) 487-502
+F Nallet, R Laversanne, and D Roux, J. Phys. II France, 3, (1993) 487-502
 
 also in J. Phys. Chem. B, 105, (2001) 11081-11088
 
@@ -2450,11 +2455,11 @@ Our model uses the form factor calculations implemented in a c-library provided 
 
 REFERENCE
 
-F. Nallet, R. Laversanne, and D. Roux, J. Phys. II France, 3, (1993) 487-502
+F Nallet, R Laversanne, and D Roux, J. Phys. II France, 3, (1993) 487-502
 
 also in J. Phys. Chem. B, 105, (2001) 11081-11088
 
-*2014/04/17 - Description reviewed by S. King and P. Butler.*
+*2014/04/17 - Description reviewed by S King and P Butler.*
 
 
 
@@ -2517,7 +2522,7 @@ Our model uses the form factor calculations implemented in a c-library provided 
 
 REFERENCE
 
-F. Nallet, R. Laversanne, and D. Roux, J. Phys. II France, 3, (1993) 487-502
+F Nallet, R Laversanne, and D Roux, J. Phys. II France, 3, (1993) 487-502
 
 also in J. Phys. Chem. B, 105, (2001) 11081-11088
 
@@ -2589,7 +2594,7 @@ Our model uses the form factor calculations implemented in a c-library provided 
 
 REFERENCE
 
-F. Nallet, R. Laversanne, and D. Roux, J. Phys. II France, 3, (1993) 487-502
+F Nallet, R Laversanne, and D Roux, J. Phys. II France, 3, (1993) 487-502
 
 also in J. Phys. Chem. B, 105, (2001) 11081-11088
 
@@ -2650,7 +2655,7 @@ Our model uses the form factor calculations implemented in a c-library provided 
 
 REFERENCE
 
-M. Bergstrom, J. S. Pedersen, P. Schurtenberger, S. U. Egelhaaf, *J. Phys. Chem. B*, 103 (1999) 9888-9897
+M Bergstrom, J S Pedersen, P Schurtenberger, S U Egelhaaf, *J. Phys. Chem. B*, 103 (1999) 9888-9897
 
 
 
@@ -3003,7 +3008,7 @@ Our model uses the form factor calculations implemented in a c-library provided 
 
 REFERENCE
 
-P. Mittelbach and G. Porod, *Acta Physica Austriaca*, 14 (1961) 185-211
+P Mittelbach and G Porod, *Acta Physica Austriaca*, 14 (1961) 185-211
 Equations (1), (13-14). (in German)
 
 
@@ -3111,7 +3116,7 @@ Our model uses the form factor calculations implemented in a c-library provided 
 
 REFERENCE
 
-P. Mittelbach and G. Porod, *Acta Physica Austriaca*, 14 (1961) 185-211
+P Mittelbach and G Porod, *Acta Physica Austriaca*, 14 (1961) 185-211
 Equations (1), (13-14). (in German)
 
 
@@ -3125,13 +3130,13 @@ The following are models used for shape-independent SANS analysis.
 
 **2.2.1. Debye (Gaussian Coil Model)**
 
-The Debye model is a form factor for a linear polymer chain. In addition
-to the radius of gyration, Rg, a scale factor "scale", and a constant
-background term are included in the calculation.
+The Debye model is a form factor for a linear polymer chain. In addition to the radius of gyration, *Rg*, a scale factor
+*scale*, and a constant background term are included in the calculation. **NB: No size polydispersity is included in**
+**this model, use the** Poly_GaussCoil_ **Model instead**
 
 .. image:: img/image172.PNG
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -3149,8 +3154,7 @@ background      |cm^-1|   0.0
 
 REFERENCE
 
-Roe, R.-J., "Methods of X-Ray and Neutron Scattering in
-Polymer Science", Oxford University Press, New York (2000).
+R J Roe, *Methods of X-Ray and Neutron Scattering in Polymer Science*, Oxford University Press, New York (2000)
 
 
 
@@ -3158,38 +3162,38 @@ Polymer Science", Oxford University Press, New York (2000).
 
 **2.2.2. BroadPeakModel**
 
-Calculate an empirical functional form for SANS data characterized by a
-broad scattering peak. Many SANS spectra are characterized by a broad
-peak even though they are from amorphous soft materials. The d-spacing
-corresponding to the broad peak is a characteristic distance between the
-scattering inhomogeneities (such as in lamellar, cylindrical, or
-spherical morphologies or for bicontinuous structures).
+This model calculates an empirical functional form for SANS data characterized by a broad scattering peak. Many SANS
+spectra are characterized by a broad peak even though they are from amorphous soft materials. For example, soft systems
+that show a SANS peak include copolymers, polyelectrolytes, multiphase systems, layered structures, etc.
+
+The d-spacing corresponding to the broad peak is a characteristic distance between the scattering inhomogeneities (such
+as in lamellar, cylindrical, or spherical morphologies, or for bicontinuous structures).
 
 The returned value is scaled to units of |cm^-1|, absolute scale.
 
-The scattering intensity *I(q)* is calculated by: 
+*2.2.2.1. Definition*
+
+The scattering intensity *I(q)* is calculated as
 
 .. image:: img/image174.JPG
 
-Here the peak position is related to the d-spacing as Q0 = 2pi/d0. Soft
-systems that show a SANS peak include copolymers, polyelectrolytes,
-multiphase systems, layered structures, etc.
+Here the peak position is related to the d-spacing as *Q0* = 2|pi| / *d0*.
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
-===============  ========  =============
-Parameter name   Units     Default value
-===============  ========  =============
-scale_l    (=C)  None      10
-scale_p    (=A)  None      1e-05
-length_l   (=x)  |Ang|     50
-q_peak    (=Q0)  |Ang^-1|  0.1
-exponent_p (=n)  None      2
-exponent_l (=m)  None      3
-Background (=B)  |cm^-1|   0.1
-===============  ========  =============
+==================  ========  =============
+Parameter name      Units     Default value
+==================  ========  =============
+scale_l    (=C)     None      10
+scale_p    (=A)     None      1e-05
+length_l (= |xi| )  |Ang|     50
+q_peak    (=Q0)     |Ang^-1|  0.1
+exponent_p (=n)     None      2
+exponent_l (=m)     None      3
+Background (=B)     |cm^-1|   0.1
+==================  ========  =============
 
 .. image:: img/image175.JPG
 
@@ -3199,7 +3203,7 @@ REFERENCE
 
 None.
 
-*2013/09/09 - Description reviewed by King, S. and Parker, P.*
+*2013/09/09 - Description reviewed by King, S and Parker, P.*
 
 
 
@@ -3207,38 +3211,37 @@ None.
 
 **2.2.3. CorrLength (Correlation Length Model)**
 
-Calculate an empirical functional form for SANS data characterized by a
-low-Q signal and a high-Q signal
+Calculates an empirical functional form for SANS data characterized by a low-Q signal and a high-Q signal.
 
 The returned value is scaled to units of |cm^-1|, absolute scale.
 
-The scattering intensity *I(q)* is calculated by: 
+*2.2.3. Definition*
+
+The scattering intensity *I(q)* is calculated as
 
 .. image:: img/image176.JPG
 
-The first term describes Porod scattering from clusters (exponent = n)
-and the second term is a Lorentzian function describing scattering from
-polymer chains (exponent = m). This second term characterizes the
-polymer/solvent interactions and therefore the thermodynamics. The two
-multiplicative factors A and C, the incoherent background B and the two
-exponents n and m are used as fitting parameters. The final parameter
-(xi) is a correlation length for the polymer chains. Note that when m =
-2, this functional form becomes the familiar Lorentzian function. 
+The first term describes Porod scattering from clusters (exponent = n) and the second term is a Lorentzian function
+describing scattering from polymer chains (exponent = *m*). This second term characterizes the polymer/solvent
+interactions and therefore the thermodynamics. The two multiplicative factors *A* and *C*, the incoherent
+background *B* and the two exponents *n* and *m* are used as fitting parameters. The final parameter |xi| is a
+correlation length for the polymer chains. Note that when *m*\ =2 this functional form becomes the familiar Lorentzian
+function. 
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
-===============  ========  =============
-Parameter name   Units     Default value
-===============  ========  =============
-scale_l    (=C)  None      10
-scale_p    (=A)  None      1e-06
-length_l   (=x)  |Ang|     50
-exponent_p (=n)  None      2
-exponent_l (=m)  None      3
-Background (=B)  |cm^-1|   0.1
-===============  ========  =============
+====================  ========  =============
+Parameter name        Units     Default value
+====================  ========  =============
+scale_l    (=C)       None      10
+scale_p    (=A)       None      1e-06
+length_l   (= |xi| )  |Ang|     50
+exponent_p (=n)       None      2
+exponent_l (=m)       None      3
+Background (=B)       |cm^-1|   0.1
+====================  ========  =============
 
 .. image:: img/image177.JPG
 
@@ -3246,10 +3249,10 @@ Background (=B)  |cm^-1|   0.1
 
 REFERENCE
 
-B. Hammouda, D.L. Ho and S.R. Kline, Insight into Clustering in
-Poly(ethylene oxide) Solutions, Macromolecules 37, 6932-6937 (2004).
+B Hammouda, D L Ho and S R Kline, *Insight into Clustering in Poly(ethylene oxide) Solutions*, *Macromolecules*, 37
+(2004) 6932-6937
 
-*2013/09/09 - Description reviewed by King, S. and Parker, P.*
+*2013/09/09 - Description reviewed by King, S and Parker, P.*
 
 
 
@@ -3257,13 +3260,15 @@ Poly(ethylene oxide) Solutions, Macromolecules 37, 6932-6937 (2004).
 
 **2.2.4. Lorentz (Ornstein-Zernicke Model)**
 
-The Ornstein-Zernicke model is defined by:
+*2.2.4.1. Definition*
+
+The Ornstein-Zernicke model is defined by
 
 .. image:: img/image178.PNG
 
-The parameter L is referred to as the screening length.
+The parameter *L* is the screening length.
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -3277,7 +3282,11 @@ background      |cm^-1|   0.0
 
 .. image:: img/image179.JPG
 
-** Figure. 1D plot using the default values (w/200 data point).**
+* Figure. 1D plot using the default values (w/200 data point).*
+
+REFERENCE
+
+None.
 
 
 
@@ -3285,19 +3294,20 @@ background      |cm^-1|   0.0
 
 **2.2.5. DABModel (Debye-Anderson-Brumberger Model)**
 
-Calculates the scattering from a randomly distributed, two-phase system
-based on the Debye-Anderson-Brumberger (DAB) model for such systems. The
-two-phase system is characterized by a single length scale, the
-correlation length, which is a measure of the average spacing between
-regions of phase 1 and phase 2. The model also assumes smooth interfaces
-between the phases and hence exhibits Porod behavior (I ~ Q-4) at large
-Q (Q\*correlation length >> 1).
+Calculates the scattering from a randomly distributed, two-phase system based on the Debye-Anderson-Brumberger (DAB)
+model for such systems. The two-phase system is characterized by a single length scale, the correlation length, which
+is a measure of the average spacing between regions of phase 1 and phase 2. **The model also assumes smooth interfaces**
+**between the phases** and hence exhibits Porod behavior (I ~ *q*\ :sup:`-4`) at large *q* (*QL* >> 1).
+
+The DAB model is ostensibly a development of the earlier Debye-Bueche model.
+
+*2.2.5.1. Definition*
 
 .. image:: img/image180.PNG
 
-The parameter L is referred to as the correlation length.
+The parameter *L* is the correlation length.
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -3311,18 +3321,16 @@ background      |cm^-1|   0.0
 
 .. image:: img/image181.JPG
 
-** Figure. 1D plot using the default values (w/200 data point).**
+* Figure. 1D plot using the default values (w/200 data point).*
 
 REFERENCE
 
-Debye, Anderson, Brumberger, "Scattering by an Inhomogeneous Solid. II.
-The Correlation Function and its Application", J. Appl. Phys. 28 (6),
-679 (1957).
+P Debye, H R Anderson, H Brumberger, *Scattering by an Inhomogeneous Solid. II. The Correlation Function*
+*and its Application*, *J. Appl. Phys.*, 28(6) (1957) 679
 
-Debye, Bueche, "Scattering by an Inhomogeneous Solid", J. Appl. Phys.
-20, 518 (1949).
+P Debye, A M Bueche, *Scattering by an Inhomogeneous Solid*, *J. Appl. Phys.*, 20 (1949) 518
 
-*2013/09/09 - Description reviewed by King, S. and Parker, P.*
+*2013/09/09 - Description reviewed by King, S and Parker, P.*
 
 
 
@@ -3330,11 +3338,11 @@ Debye, Bueche, "Scattering by an Inhomogeneous Solid", J. Appl. Phys.
 
 **2.2.6. AbsolutePower_Law**
 
-This model describes a power law with background.
+This model describes a simple power law with background.
 
 .. image:: img/image182.PNG
 
-Note the minus sign in front of the exponent.
+Note the minus sign in front of the exponent. The parameter *m* should therefore be entered as a **positive** number.
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -3348,18 +3356,24 @@ Background      |cm^-1|   0.0
 
 *Figure. 1D plot using the default values (w/200 data point).*
 
+REFERENCE
+
+None.
 
 
-.. _Teubner Strey:
 
-**2.2.7. Teubner Strey (Model)**
+.. _TeubnerStrey:
 
-This function calculates the scattered intensity of a two-component
-system using the Teubner-Strey model.
+**2.2.7. TeubnerStrey (Model)**
+
+This function calculates the scattered intensity of a two-component system using the Teubner-Strey model. Unlike the
+DABModel_ this function generates a peak.
+
+*2.2.7.1. Definition*
 
 .. image:: img/image184.PNG
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -3378,10 +3392,9 @@ background      |cm^-1|   0.0
 
 REFERENCE
 
-Teubner, M; Strey, R. J. Chem. Phys., 87, 3195 (1987).
+M Teubner, R Strey, *J. Chem. Phys.*, 87 (1987) 3195
 
-Schubert, K-V., Strey, R., Kline, S. R. and E. W. Kaler, J. Chem. Phys.,
-101, 5343 (1994).
+K V Schubert, R Strey, S R Kline and E W Kaler, *J. Chem. Phys.*, 101 (1994) 5343
 
 
 
@@ -3389,21 +3402,22 @@ Schubert, K-V., Strey, R., Kline, S. R. and E. W. Kaler, J. Chem. Phys.,
 
 **2.2.8. FractalModel**
 
-Calculates the scattering from fractal-like aggregates built from
-spherical building blocks following the Texiera reference. The value
-returned is in cm-1.
+Calculates the scattering from fractal-like aggregates built from spherical building blocks following the Texiera
+reference.
+
+The value returned is in |cm^-1|\ .
+
+*2.2.8.1. Definition*
 
 .. image:: img/image186.PNG
 
-The scale parameter is the volume fraction of the building blocks, R0 is
-the radius of the building block, Df is the fractal dimension, Î¾ is the
-correlation length, *Ï�solvent* is the scattering length density of the
-solvent, and *Ï�block* is the scattering length density of the building
-blocks.
+The *scale* parameter is the volume fraction of the building blocks, *R0* is the radius of the building block, *Df* is
+the fractal dimension, |xi| is the correlation length, |rho|\ *solvent* is the scattering length density of the
+solvent, and |rho|\ *block* is the scattering length density of the building blocks.
 
-**The polydispersion in radius is provided.**
+**Polydispersity on the radius is provided for.**
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -3425,7 +3439,7 @@ background      |cm^-1|   0.0
 
 REFERENCE
 
-J. Teixeira, (1988) J. Appl. Cryst., vol. 21, p781-785
+J Teixeira, *J. Appl. Cryst.*, 21 (1988) 781-785
 
 
 
@@ -3433,17 +3447,18 @@ J. Teixeira, (1988) J. Appl. Cryst., vol. 21, p781-785
 
 **2.2.9. MassFractalModel**
 
-Calculates the scattering from fractal-like aggregates based on the
-Mildner reference (below). 
+Calculates the scattering from fractal-like aggregates based on the Mildner reference.
+
+*2.2.9.1. Definition*
 
 .. image:: img/mass_fractal_eq1.JPG
 
-The R is the radius of the building block, Dm is the mass fractal
-dimension, Î¾ is the correlation (or cutt-off)  length, *Ï�solvent* is the
-scattering length density of the solvent, and *Ï�particle* is the
-scattering length density of particles.
+where *R* is the radius of the building block, *Dm* is the **mass** fractal dimension, |zeta| is the cut-off length,
+|rho|\ *solvent* is the scattering length density of the solvent, and |rho|\ *particle* is the scattering length
+density of particles.
 
-Note:  The mass fractal dimension is valid for 1<mass_dim<6.
+Note:  The mass fractal dimension *Dm* is only valid if 1 < mass_dim < 6. It is also only valid over a limited
+*q* range (see the reference for details).
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -3457,14 +3472,14 @@ background      |cm^-1|   0.0
 
 .. image:: img/mass_fractal_fig1.JPG
 
-*Figure. 1D plot*
+*Figure. 1D plot using default values.*
 
 REFERENCE
 
-D. Mildner, and P. Hall,  J. Phys. D.: Appl. Phys.,  19, 1535-1545 
-(1986), Equation(9).
+D Mildner and P Hall, *J. Phys. D: Appl. Phys.*,  19 (1986) 1535-1545
+Equation(9)
 
-*2013/09/09 - Description reviewed by King, S. and Parker, P.*
+*2013/09/09 - Description reviewed by King, S and Parker, P.*
 
 
 
@@ -3472,17 +3487,18 @@ D. Mildner, and P. Hall,  J. Phys. D.: Appl. Phys.,  19, 1535-1545 
 
 **2.2.10. SurfaceFractalModel**
 
-Calculates the scattering  based on the Mildner reference (below). 
+Calculates the scattering from fractal-like aggregates based on the Mildner reference.
+
+*2.2.10.1. Definition*
 
 .. image:: img/surface_fractal_eq1.GIF 
 
-The R is the radius of the building block, Ds is the surface fractal
-dimension, Î¾ is the correlation (or cutt-off)  length, *Ï�solvent* is the
-scattering length density of the solvent, and *Ï�particle* is the
-scattering length density of particles.
+where *R* is the radius of the building block, *Ds* is the **surface** fractal dimension, |zeta| is the cut-off length,
+|rho|\ *solvent* is the scattering length density of the solvent, and |rho|\ *particle* is the scattering length
+density of particles.
 
- Note:  The surface fractal dimension is valid for 1<surface_dim<3.
- Also it is valid in a limited q range (see the reference for details).
+Note:  The surface fractal dimension *Ds* is only valid if 1 < surface_dim < 3. It is also only valid over a limited
+*q* range (see the reference for details).
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -3496,12 +3512,12 @@ background      |cm^-1|   0.0
 
 .. image:: img/surface_fractal_fig1.JPG
 
-*Figure. 1D plot*
+*Figure. 1D plot using default values.*
 
 REFERENCE
 
-D. Mildner, and P. Hall,  J. Phys. D.: Appl. Phys.,  19, 1535-1545 
-(1986), Equation(13).
+D Mildner and P Hall, *J. Phys. D: Appl. Phys.*,  19 (1986) 1535-1545
+Equation(13)
 
 
 
@@ -3509,32 +3525,27 @@ D. Mildner, and P. Hall,  J. Phys. D.: Appl. Phys.,  19, 1535-1545 
 
 **2.2.11. MassSurfaceFractal (Model)**
 
-A number of natural and commercial processes form high-surface area
-materials as a result of the vapour-phase aggregation of primary
-particles. Examples of such materials include soots, aerosols, and
-fume or pyrogenic silicas. These are all characterised by cluster mass
-distributions (sometimes also cluster size distributions) and internal
-surfaces that are fractal in nature.   The scattering from such
-materials displays two distinct breaks in log-log representation,
-corresponding to the radius-of-gyration of the primary particles, rg,
-and the radius-of-gyration of the clusters (aggregates), Rg. Between
-these boundaries the scattering follows a power law related to the mass
-fractal dimension, Dm, whilst above the high-Q boundary the scattering
-follows a power law related to the surface fractal dimension of the
-primary particles, Ds.
+A number of natural and commercial processes form high-surface area materials as a result of the vapour-phase
+aggregation of primary particles. Examples of such materials include soots, aerosols, and fume or pyrogenic silicas.
+These are all characterised by cluster mass distributions (sometimes also cluster size distributions) and internal
+surfaces that are fractal in nature. The scattering from such materials displays two distinct breaks in log-log
+representation, corresponding to the radius-of-gyration of the primary particles, *rg*, and the radius-of-gyration of
+the clusters (aggregates), *Rg*. Between these boundaries the scattering follows a power law related to the mass
+fractal dimension, *Dm*, whilst above the high-Q boundary the scattering follows a power law related to the surface
+fractal dimension of the primary particles, *Ds*.
 
-The scattered intensity *I(q)* is then calculated using a modified
-Ornstein-Zernicke equation:
+*2.2.11.1. Definition*
+
+The scattered intensity *I(q)* is  calculated using a modified Ornstein-Zernicke equation
 
 .. image:: img/masssurface_fractal_eq1.JPG 
 
-The Rg is for the cluster, rg is for the primary, Ds is the surface
-fractal dimension, Dm is the mass fractal dimension, *Ï�solvent* is the
-scattering length density of the solvent, and *Ï�p* is the scattering
-length density of particles.
+where *Rg* is the size of the cluster, *rg* is the size of the primary particle, *Ds* is the surface fractal dimension,
+*Dm* is the mass fractal dimension, |rho|\ *solvent* is the scattering length density of the solvent, and |rho|\ *p* is
+the scattering length density of particles.
 
- Note:  The surface and mass fractal dimensions are valid for
-0<surface_dim<6, 0<mass_dim<6, and (surface_mass+mass_dim)<6. 
+Note:  The surface (*Ds*) and mass (*Dm*) fractal dimensions are only valid if 0 < *surface_dim* < 6,
+0 < *mass_dim* < 6, and (*surface_dim*+*mass_dim*) < 6. 
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -3549,13 +3560,15 @@ background      |cm^-1|   0.0
 
 .. image:: img/masssurface_fractal_fig1.JPG
 
-*Figure. 1D plot*
+*Figure. 1D plot using default values.*
 
 REFERENCE
 
-P. Schmidt, J Appl. Cryst., 24, 414-435  (1991), Equation(19).
+P Schmidt, *J Appl. Cryst.*, 24 (1991) 414-435
+Equation(19)
 
-Hurd, Schaefer, Martin, Phys. Rev. A, 35, 2361-2364 (1987), Equation(2).
+A J Hurd, D W Schaefer, J E Martin, *Phys. Rev. A*, 35 (1987) 2361-2364
+Equation(2)
 
 
 
@@ -3563,33 +3576,29 @@ Hurd, Schaefer, Martin, Phys. Rev. A, 35, 2361-2364 (1987), Equation(2).
 
 **2.2.12. FractalCoreShell (Model)**
 
-Calculates the scattering from a fractal structure with a primary
-building block of core-shell spheres.
-
-.. image:: img/fractcore_eq1.GIF
-
-The formfactor P(q) is `CoreShellModel <#CoreShellModel>`__ with bkg
-= 0,
-
-.. image:: img/image013.PNG
-
-while the fractal structure factor S(q);
-
-.. image:: img/fractcore_eq3.gif
-
-where Df = frac_dim, Î¾ = cor_length, rc = (core) radius, and scale
-= volfraction.
-
-The fractal structure is as documented in the fractal model. This model
-could find use for aggregates of coated particles, or aggregates of
-vesicles. The polydispersity computation of radius and thickness is
-provided.
+Calculates the scattering from a fractal structure with a primary building block of core-shell spheres, as opposed to
+just homogeneous spheres in the FractalModel_. This model could find use for aggregates of coated particles, or
+aggregates of vesicles.
 
 The returned value is scaled to units of |cm^-1|, absolute scale.
 
-See each of these individual models for full documentation. 
+*2.2.12.1. Definition*
 
-For 2D plot, the wave transfer is defined as
+.. image:: img/fractcore_eq1.GIF
+
+The form factor *P(q)* is that from CoreShellModel_ with *bkg* = 0
+
+.. image:: img/image013.PNG
+
+while the fractal structure factor S(q) is
+
+.. image:: img/fractcore_eq3.gif
+
+where *Df* = frac_dim, |xi| = cor_length, *rc* = (core) radius, and *scale* = volume fraction.
+
+The fractal structure is as documented in the FractalModel_. Polydispersity of radius and thickness is provided for.
+
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -3613,7 +3622,7 @@ background      |cm^-1|   0.0
 
 REFERENCE
 
-See the PolyCore and Fractal documentation.\
+See the CoreShellModel_ and FractalModel_ descriptions.
 
 
 
@@ -3621,30 +3630,26 @@ See the PolyCore and Fractal documentation.\
 
 **2.2.13. GaussLorentzGel(Model)**
 
-Calculates the scattering from a gel structure, typically a physical
-network. It is modeled as a sum of a low-q exponential decay plus a
-lorentzian at higher q-values. It is generally applicable to gel
-structures.
+Calculates the scattering from a gel structure, but typically a physical rather than chemical network. It is modeled as
+a sum of a low-*q* exponential decay plus a lorentzian at higher *q*-values.
 
 The returned value is scaled to units of |cm^-1|, absolute scale.
 
-The scattering intensity *I(q)* is calculated as (eqn 5 from the
-reference):
+*2.2.13.1. Definition*
+
+The scattering intensity *I(q)* is calculated as (eqn 5 from the reference)
 
 .. image:: img/image189.JPG
 
-Uppercase Zeta is the static correlations in the gel, which can be
-attributed to the "frozen-in" crosslinks of some gels. Lowercase zeta is
-the dynamic correlation length, which can be attributed to the
-fluctuating polymer chain between crosslinks. IG(0) and IL(0) are the
-scaling factors for each of these structures. Your physical system may
-be different, so think about the interpretation of these parameters.
+|bigzeta| is the length scale of the static correlations in the gel, which can be attributed to the "frozen-in"
+crosslinks. |xi| is the dynamic correlation length, which can be attributed to the fluctuating polymer chains between
+crosslinks. *I*\ :sub:`G`\ *(0)* and *I*\ :sub:`L`\ *(0)* are the scaling factors for each of these structures. **Think carefully about how**
+**these map to your particular system!**
 
-Note that the peaked structure at higher q values (from Figure 2 of the
-reference below) is not reproduced by the model. Peaks can be introduced
-into the model by summing this model with the PeakGauss Model function.
+NB: The peaked structure at higher *q* values (Figure 2 from the reference) is not reproduced by the model. Peaks can
+be introduced into the model by summing this model with the PeakGaussModel_ function.
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -3664,8 +3669,7 @@ background                           |cm^-1|   0.0
 
 REFERENCE
 
-G. Evmenenko, E. Theunissen, K. Mortensen, H. Reynaers, Polymer 42
-(2001) 2907-2913.
+G Evmenenko, E Theunissen, K Mortensen, H Reynaers, *Polymer*, 42 (2001) 2907-2913
 
 
 
@@ -3673,18 +3677,19 @@ G. Evmenenko, E. Theunissen, K. Mortensen, H. Reynaers, Polymer 42
 
 **2.2.14. BEPolyelectrolyte (Model)**
 
-Calculates the structure factor of a polyelectrolyte solution with the
-RPA expression derived by Borue and Erukhimovich. The value returned is
-in cm-1.
+Calculates the structure factor of a polyelectrolyte solution with the RPA expression derived by Borue and Erukhimovich.
+
+The value returned is in |cm^-1|.
+
+*2.2.14.1. Definition*
 
 .. image:: img/image191.PNG
 
-K is a contrast factor of the polymer, Lb is the Bjerrum length, h is
-the virial parameter, b is the monomer length, Cs is the concentration
-of monovalent salt, Î± is the ionization degree, Ca is the polymer molar
-concentration, and background is the incoherent background.
+where *K* is the contrast factor for the polymer, *Lb* is the Bjerrum length, *h* is the virial parameter, *b* is the
+monomer length, *Cs* is the concentration of monovalent salt, |alpha| is the ionization degree, *Ca* is the polymer
+molar concentration, and *background* is the incoherent background.
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -3705,14 +3710,13 @@ NB: 1 barn = 10\ :sup:`-24` |cm^2|
 
 REFERENCE
 
-Borue, V. Y., Erukhimovich, I. Y. Macromolecules 21, 3240 (1988).
+V Y Borue, I Y Erukhimovich, *Macromolecules*, 21 (1988) 3240
 
-Joanny, J.-F., Leibler, L. Journal de Physique 51, 545 (1990).
+J F Joanny, L Leibler, *Journal de Physique*, 51 (1990) 545
 
-Moussaid, A., Schosseler, F., Munch, J.-P., Candau, S. J. Journal de
-Physique II France 3, 573 (1993).
+A Moussaid, F Schosseler, J P Munch, S Candau, *J. Journal de Physique II France*, 3 (1993) 573
 
-RaphaÃ«l, E., Joanny, J.-F., Europhysics Letters 11, 179 (1990).
+E Raphael, J F Joanny, *Europhysics Letters*, 11 (1990) 179
 
 
 
@@ -3720,13 +3724,13 @@ RaphaÃ«l, E., Joanny, J.-F., Europhysics Letters 11, 179 (1990).
 
 **2.2.15. Guinier (Model)**
 
-A Guinier analysis is done by linearizing the data at low q by plotting
-it as log(I) versus Q2. The Guinier radius Rg can be obtained by fitting
-the following model:
+This model fits the Guinier function
 
 .. image:: img/image192.PNG
 
-For 2D plot, the wave transfer is defined as
+to the data directly without any need for linearisation (*cf*. Ln *I(q)* vs *q*\ :sup:`2`).
+
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -3737,36 +3741,34 @@ scale           |cm^-1|   1.0
 Rg              |Ang|     0.1
 ==============  ========  =============
 
+REFERENCE
+
+A Guinier and G Fournet, *Small-Angle Scattering of X-Rays*, John Wiley & Sons, New York (1955)
+
 
 
 .. _GuinierPorod:
 
 **2.2.16. GuinierPorod (Model)**
 
-Calculates the scattering for a generalized Guinier/power law object.
-This is an empirical model that can be used to determine the size and
-dimensionality of scattering objects.
+Calculates the scattering for a generalized Guinier/power law object. This is an empirical model that can be used to
+determine the size and dimensionality of scattering objects, including asymmetric objects such as rods or platelets, and
+shapes intermediate between spheres and rods or between rods and platelets.
 
-The returned value is P(Q) as written in equation (1), plus the
-incoherent background term. The result is in the units of |cm^-1|,
-absolute scale.
+The result is in the units of |cm^-1|, absolute scale.
 
-A Guinier-Porod empirical model can be used to fit SAS data from
-asymmetric objects such as rods or platelets. It also applies to
-intermediate shapes between spheres and rod or between rods and
-platelets. The following functional form is used: 
+*2.2.16.1 Definition*
 
-.. image:: img/image193.JPG   (1)
+The following functional form is used
 
-This is based on the generalized Guinier law for such elongated objects
-[2]. For 3D globular objects (such as spheres), s = 0 and one recovers
-the standard Guinier formula. For 2D symmetry (such as for rods) s = 1
-and for 1D symmetry (such as for lamellae or platelets) s = 2. A
-dimensionality parameter 3-s is defined, and is 3 for spherical objects,
-2 for rods, and 1 for plates.
+.. image:: img/image193.JPG
 
-Enforcing the continuity of the Guinier and Porod functions and their
-derivatives yields: 
+This is based on the generalized Guinier law for such elongated objects (see the Glatter reference below). For 3D
+globular objects (such as spheres), *s* = 0 and one recovers the standard Guinier_ formula. For 2D symmetry (such as
+for rods) *s* = 1, and for 1D symmetry (such as for lamellae or platelets) *s* = 2. A dimensionality parameter (3-*s*)
+is thus defined, and is 3 for spherical objects, 2 for rods, and 1 for plates.
+
+Enforcing the continuity of the Guinier and Porod functions and their derivatives yields
 
 .. image:: img/image194.JPG
 
@@ -3774,27 +3776,15 @@ and
 
 .. image:: img/image195.JPG
 
-Note that the radius of gyration for a sphere of radius R is given by Rg
-= R sqrt(3/5) ,
+Note that
 
- that for the cross section of an randomly oriented cylinder of radius R
-is given by  Rg = R / sqrt(2).
+ the radius of gyration for a sphere of radius *R* is given by *Rg* = *R* sqrt(3/5)
 
-The cross section of a randomly oriented lamella of thickness T is given
-by Rg = T / sqrt(12).
+ the cross-sectional radius of gyration for a randomly oriented cylinder of radius *R* is given by *Rg* = *R* / sqrt(2)
 
-The intensity given by Eq. 1 is the calculated result, and is plotted
-below for the default parameter values.
+ the cross-sectional radius of gyration of a randomly oriented lamella of thickness *T* is given by *Rg* = *T* / sqrt(12)
 
-REFERENCE
-
-[1] Guinier, A.; Fournet, G. "Small-Angle Scattering of X-Rays", John
-Wiley and Sons, New York, (1955).
-
-[2] Glatter, O.; Kratky, O., Small-Angle X-Ray Scattering, Academic
-Press (1982). Check out Chapter 4 on Data Treatment, pages 155-156. 
-
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image008.PNG
 
@@ -3811,6 +3801,13 @@ background                      |cm^-1|   0.1
 .. image:: img/image196.JPG
 
 *Figure. 1D plot using the default values (w/500 data points).*
+
+REFERENCE
+
+A Guinier, G Fournet, *Small-Angle Scattering of X-Rays*, John Wiley and Sons, New York, (1955)
+
+O Glatter, O Kratky, *Small-Angle X-Ray Scattering*, Academic Press (1982)
+Check out Chapter 4 on Data Treatment, pages 155-156.
 
 
 
@@ -3829,7 +3826,7 @@ and Î”Ï� is the contrast factor.
 
 The background term is added for data analysis.
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -3859,7 +3856,7 @@ REFERENCE
 
 None
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -3895,7 +3892,7 @@ REFERENCE
 
 None
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -3939,13 +3936,13 @@ The scattering intensity *I(q)* is calculated as:
 
 The polydispersion in rg is provided.
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
 TEST DATASET
 
-This example dataset is produced by running the Poly_GaussCoil, using 200 data points, *qmin* = 0.001 |Ang^-1|\ ,
+This example dataset is produced by running the Poly_GaussCoil, using 200 data points, *qmin* = 0.001 |Ang^-1| ,
 qmax = 0.7 |Ang^-1| and the default values below.
 
 ==============  ========  =============
@@ -3963,10 +3960,9 @@ background      |cm^-1|   0.001
 
 REFERENCE
 
-Glatter & Kratky - pg.404.
+Glatter & Kratky - p404
 
-J.S. Higgins, and H.C. Benoit, Polymers and Neutron Scattering, Oxford
-Science Publications (1996).
+J S Higgins, and H C Benoit, Polymers and Neutron Scattering, Oxford Science Publications (1996)
 
 
 
@@ -4037,18 +4033,17 @@ below for the default parameter values.
 
 REFERENCE
 
-Benoit, H., Comptes Rendus (1957). 245, 2244-2247.
+H Benoit, *Comptes Rendus*, 245 (1957) 2244-2247
 
-Hammouda, B., SANS from Homogeneous Polymer Mixtures ­ A Unified
-Overview, Advances in Polym. Sci. (1993), 106, 87-133.
+B Hammouda, *SANS from Homogeneous Polymer Mixtures ­ A Unified Overview*, *Advances in Polym. Sci.*, 106 (1993) 87-133
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
 TEST DATASET
 
-This example dataset is produced, using 200 data points, qmin = 0.001 |Ang^-1|\ ,  qmax = 0.2 |Ang^-1|  and the
+This example dataset is produced, using 200 data points, qmin = 0.001 |Ang^-1| ,  qmax = 0.2 |Ang^-1|  and the
 default values below.
 
 ===================  ========  =============
@@ -4121,7 +4116,7 @@ polymer mixture is in the homogeneous mixed-phase region.
 
 REFERENCE
 
-A.Z. Akcasu, R. Klein and B. Hammouda, Macromolecules 26, 4136 (1993)
+A Z Akcasu, R Klein and B Hammouda, *Macromolecules*, 26 (1993) 4136
 
 Fitting parameters for Case0 Model
 
@@ -4179,7 +4174,7 @@ standard deviation of the function.
 
 The background term is added for data analysis.
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -4225,7 +4220,7 @@ scaling A, sets the overall intensity of the lower Q power law region.
 The scaling of the second power law region is scaled to match the first.
 Be sure to enter the power law exponents as positive values.
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -4257,7 +4252,7 @@ Note that the level 0 is an extra function that is the inverse function;
 I (q) = scale/q + background.
 
 Otherwise, program incorporates the empirical multiple level unified
-Exponential/Power-law fit method developed by G. Beaucage. Four
+Exponential/Power-law fit method developed by G Beaucage. Four
 functions are included so that One, Two, Three, or Four levels can be
 used.
 
@@ -4276,7 +4271,7 @@ equation), set Rg,i as the Guinier radius, Pi = 2, and Bi = 2 Gi / Rg,i 
 See the listed references for further information on choosing the
 parameters.
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -4303,9 +4298,9 @@ background      |cm^-1|   0.0
 
 REFERENCE
 
-G. Beaucage (1995).  J. Appl. Cryst., vol. 28, p717-728.
+G Beaucage (1995).  J. Appl. Cryst., vol. 28, p717-728.
 
-G. Beaucage (1996).  J. Appl. Cryst., vol. 29, p134-146.
+G Beaucage (1996).  J. Appl. Cryst., vol. 29, p134-146.
 
 
 
@@ -4433,11 +4428,9 @@ qmin=0.001, and qmax=0.3).*
 
 REFERENCE
 
-Mitsuhiro Shibayama, Toyoichi Tanaka, Charles C. Han, J. Chem. Phys.
-1992, 97 (9), 6829-6841.
+Mitsuhiro Shibayama, Toyoichi Tanaka, Charles C Han, J. Chem. Phys. 1992, 97 (9), 6829-6841
 
-Simon Mallam, Ferenc Horkay, Anne-Marie Hecht, Adrian R. Rennie, Erik
-Geissler, Macromolecules 1991, 24, 543-548.
+Simon Mallam, Ferenc Horkay, Anne-Marie Hecht, Adrian R Rennie, Erik Geissler, Macromolecules 1991, 24, 543-548
 
 
 
@@ -4457,7 +4450,7 @@ where is the ensemble average radius of gyration squared of an arm.
 
 REFERENCE
 
-H. Benoit,   J. Polymer Science.,  11, 596-599  (1953)
+H Benoit,   J. Polymer Science.,  11, 596-599  (1953)
 
 
 
@@ -4496,7 +4489,7 @@ volfraction     None      0.2
 
 REFERENCE
 
-J. K. Percus, J. Yevick, *J. Phys. Rev.*, 110, (1958) 1
+J K Percus, J Yevick, *J. Phys. Rev.*, 110, (1958) 1
 
 
 
@@ -4520,7 +4513,7 @@ The interaction potential is:
 
 where *r* is the distance from the center of the sphere of a radius *R*.
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -4539,7 +4532,7 @@ wellwidth       diameters  1.2
 
 REFERENCE
 
-R. V. Sharma, K. C. Sharma, *Physica*, 89A (1977) 213
+R V Sharma, K C Sharma, *Physica*, 89A (1977) 213
 
 
 
@@ -4559,7 +4552,7 @@ The salt concentration is used to compute the ionic strength of the solution whi
 screening length. At present there is no provision for entering the ionic strength directly nor for use of any
 multivalent salts. The counterions are also assumed to be monovalent.
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.gif
 
@@ -4580,9 +4573,9 @@ dielectconst    None      71.1
 
 REFERENCE
 
-J. B. Hayter and J. Penfold, *Molecular Physics*, 42 (1981) 109-118
+J B Hayter and J Penfold, *Molecular Physics*, 42 (1981) 109-118
 
-J. P. Hansen and J. B. Hayter, *Molecular Physics*, 46 (1982) 651-656
+J P Hansen and J B Hayter, *Molecular Physics*, 46 (1982) 651-656
 
 
 .. _StickyHSStructure:
@@ -4618,7 +4611,7 @@ this case errors are reported to the command window and the *S(q)* is set to -1 
 plot). Use tight bounds to keep the parameters to values that you know are physical (test them) and keep nudging them
 until the optimization does not hit the constraints.
 
-For 2D plot, the wave transfer is defined as
+For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
@@ -4637,7 +4630,7 @@ stickiness      K         0.2
 
 REFERENCE
 
-S. V. G. Menon, C. Manohar, and K. S. Rao, *J. Chem. Phys.*, 95(12) (1991) 9186-9190
+S V G Menon, C Manohar, and K S Rao, *J. Chem. Phys.*, 95(12) (1991) 9186-9190
 
 
 
