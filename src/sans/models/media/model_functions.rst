@@ -1,10 +1,24 @@
 .. model_functions.rst
 
-.. NB: This document does not have M Gonzalez's model descriptions in it.
-
 .. This is a port of the original SasView model_functions.html to ReSTructured text
-.. S King, Apr 2014
-.. with thanks to A Jackson & P Kienzle for advice!
+.. by S King, ISIS, during and after SasView CodeCamp-II in April 2014.
+
+.. Thanks are due to A Jackson & P Kienzle for advice on RST!
+
+.. The CoreShellEllipsoidXTModel was ported and documented by R K Heenan, ISIS, Apr 2014
+.. The RectangularPrism models were coded and documented by M A Gonzalez, ILL, Apr 2014
+
+.. To do:
+.. Remove the 'This is xi' & 'This is zeta' lines before release!
+.. Add example parameters/plots for the CoreShellEllipsoidXTModel
+.. Add example parameters/plots for the RectangularPrism models
+.. Check the content against the NIST Igor Help File
+.. Wordsmith the content for consistency of style, etc
+
+
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
 
 
 .. Set up some substitutions to make life easier...
@@ -66,6 +80,8 @@ This is xi, |xi|
 
 This is zeta, |zeta|
 
+
+
 SasView Model Functions
 =======================
 
@@ -94,8 +110,8 @@ Contents
 ---------------
 
 Many of our models use the form factor calculations implemented in a c-library provided by the NIST Center for Neutron
-Research and thus some content and figures in this document are originated from or shared with the NIST Igor analysis
-package.
+Research and thus some content and figures in this document are originated from or shared with the NIST SANS Igor-based
+analysis package.
 
 This software provides form factors for various particle shapes. After giving a mathematical definition of each model,
 we show the list of parameters available to the user. Validation plots for each model are also presented.
@@ -120,7 +136,7 @@ by the particle volume fraction
 .. image:: img/image003.PNG
 
 Our so-called 1D scattering intensity functions provide *P(q)* for the case where the scatterer is randomly oriented. In
-that case, the scattering intensity only depends on the length of *q* . The intensity measured on the plane of the SANS
+that case, the scattering intensity only depends on the length of *q* . The intensity measured on the plane of the SAS
 detector will have an azimuthal symmetry around *q*\ =0 .
 
 Our so-called 2D scattering intensity functions provide *P(q,* |phi| *)* for an oriented system as a function of a
@@ -208,11 +224,16 @@ Parallelpipeds
 
 - ParallelepipedModel_ (including magnetic 2D version)
 - CSParallelepipedModel_
+- RectangularPrismModel_
+- RectangularHollowPrismModel_
+- RectangularHollowPrismInfThinWallsModel_
 
 .. _Shape-independent:
 
 2.2 Shape-Independent Functions
 -------------------------------
+
+(In alphabetical order)
 
 - AbsolutePower_Law_
 - BEPolyelectrolyte_
@@ -223,27 +244,27 @@ Parallelpipeds
 - FractalModel_
 - FractalCoreShell_
 - GaussLorentzGel_
+- GelFitModel_
 - Guinier_
 - GuinierPorod_
+- LineModel_
 - Lorentz_
 - MassFractalModel_
 - MassSurfaceFractal_
-- PeakGaussModel
-- PeakLorentzModel
-- Poly_GaussCoil
-- PolyExclVolume
-- PorodModel
-- RPA10Model
-- StarPolymer
+- PeakGaussModel_
+- PeakLorentzModel_
+- Poly_GaussCoil_
+- PolyExclVolume_
+- PorodModel_
+- RPA10Model_
+- StarPolymer_
 - SurfaceFractalModel_
 - TeubnerStrey_
-- TwoLorentzian
-- TwoPowerLaw
-- UnifiedPowerRg
-- LineModel
-- ReflectivityModel
-- ReflectivityIIModel
-- GelFitModel
+- TwoLorentzian_
+- TwoPowerLaw_
+- UnifiedPowerRg_
+- ReflectivityModel_
+- ReflectivityIIModel_
 
 .. _Structure-factor:
 
@@ -1389,7 +1410,7 @@ The volume of the Capped Cylinder is (with *h* as a positive value here)
 
 .. image:: img/image115.JPG
 
-and its radius of gyration
+and its radius-of-gyration
 
 .. image:: img/image116.JPG
 
@@ -1873,7 +1894,7 @@ The volume of the barbell is
 .. image:: img/image108.JPG
 
 
-and its radius of gyration is
+and its radius-of-gyration is
 
 .. image:: img/image109.JPG
 
@@ -2256,7 +2277,7 @@ coefficient of the **outer** surface of the ellipsoid. This may have some undesi
 the ellipsoid is large (ie, if *X* << 1 or *X* >> 1), when the *S(q)* - which assumes spheres - will not in any case
 be valid.
 
-If SANS data are in absolute units, and the SLDs are correct, then *scale* should be the total volume fraction of the
+If SAS data are in absolute units, and the SLDs are correct, then *scale* should be the total volume fraction of the
 "outer particle". When *S(q)* is introduced this moves to the *S(q)* volume fraction, and *scale* should then be 1.0,
 or contain some other units conversion factor (for example, if you have SAXS data).
 
@@ -2306,7 +2327,7 @@ angles |theta|, |phi| and |bigpsi|. These angles are defined on Figure 2 of the 
 the rotational angle around its own *semi_axisC* axis against the *q* plane. For example, |bigpsi| = 0 when the
 *semi_axisA* axis is parallel to the *x*-axis of the detector.
 
-The radius of gyration for this system is *Rg*\ :sup:`2` = (*Ra*\ :sup:`2` *Rb*\ :sup:`2` *Rc*\ :sup:`2`)/5.
+The radius-of-gyration for this system is *Rg*\ :sup:`2` = (*Ra*\ :sup:`2` *Rb*\ :sup:`2` *Rc*\ :sup:`2`)/5.
 
 The contrast is defined as SLD(ellipsoid) - SLD(solvent). In the parameters, *semi_axisA* = *Ra* (or minor equatorial
 radius), *semi_axisB* = *Rb* (or major equatorial radius), and *semi_axisC* = *Rc* (or polar radius of the ellipsoid).
@@ -2937,7 +2958,7 @@ Hideki Matsuoka et. al. *Physical Review B*, 41 (1990) 3854 -3856
 **2.1.37. ParallelepipedModel**
 
 This model provides the form factor, *P(q)*, for a rectangular cylinder (below) where the form factor is normalized by
-the volume of the cylinder.
+the volume of the cylinder. If you need to apply polydispersity, see the RectangularPrismModel_.
 
 *P(q)* = *scale* \* <*f*\ :sup:`2`> / *V* + *background*
 
@@ -3121,18 +3142,250 @@ Equations (1), (13-14). (in German)
 
 
 
+.. _RectangularPrismModel:
+
+**2.1.39. RectangularPrismModel**
+
+This model provides the form factor, *P(q)*, for a rectangular prism.
+
+Note that this model is almost totally equivalent to the existing ParallelepipedModel_. The only difference is that the
+way the relevant parameters are defined here (*a*, *b/a*, *c/a* instead of *a*, *b*, *c*) allows to use polydispersity
+with this model while keeping the shape of the prism (e.g. setting *b/a* = 1 and *c/a* = 1 and applying polydispersity
+to *a* will generate a distribution of cubes of different sizes).
+
+*2.1.39.1. Definition*
+
+The 1D scattering intensity for this model was calculated by Mittelbach and Porod (Mittelbach, 1961), but the
+implementation here is closer to the equations given by Nayuk and Huber (Nayuk, 2012).
+
+The scattering from a massive parallelepiped with an orientation with respect to the scattering vector given by |theta|
+and |phi| is given by
+
+.. math::
+  A_P\,(q) =  \frac{\sin \bigl( q \frac{C}{2} \cos\theta \bigr)}{q \frac{C}{2} \cos\theta} \, \times \,
+  \frac{\sin \bigl( q \frac{A}{2} \sin\theta \sin\phi \bigr)}{q \frac{A}{2} \sin\theta \sin\phi} \, \times \,
+  \frac{\sin \bigl( q \frac{B}{2} \sin\theta \cos\phi \bigr)}{q \frac{B}{2} \sin\theta \cos\phi}
+
+where *A*, *B* and *C* are the sides of the parallelepiped and must fulfill :math:`A \le B \le C`, |theta| is the angle
+between the *z* axis and the longest axis of the parallelepiped *C*, and |phi| is the angle between the scattering
+vector (lying in the *xy* plane) and the *y* axis.
+
+The normalized form factor in 1D is obtained averaging over all possible orientations
+
+.. math::
+  P(q) =  \frac{2}{\pi} \times \, \int_0^{\frac{\pi}{2}} \, \int_0^{\frac{\pi}{2}} A_P^2(q) \, \sin\theta \, d\theta \, d\phi
+
+The 1D scattering intensity is then calculated as
+
+.. math::
+  I(q) = \mbox{scale} \times V \times (\rho_{\mbox{pipe}} - \rho_{\mbox{solvent}})^2 \times P(q)
+
+where *V* is the volume of the rectangular prism, :math:`\rho_{\mbox{pipe}}` is the scattering length of the
+parallelepiped, :math:`\rho_{\mbox{solvent}}` is the scattering length of the solvent, and (if the data are in absolute
+units) *scale* represents the volume fraction (which is unitless).
+
+**The 2D scattering intensity is not computed by this model.**
+
+The returned value is scaled to units of |cm^-1| and the parameters of the RectangularPrismModel are the following
+
+==============  ========  =============
+Parameter name  Units     Default value
+==============  ========  =============
+scale           None      1
+short_side      |Ang|     35
+b2a_ratio       None      1
+c2a_ratio       None      1
+sldPipe         |Ang^-2|  6.3e-6
+sldSolv         |Ang^-2|  1.0e-6
+background      |cm^-1|   0
+==============  ========  =============
+
+*2.1.39.2. Validation of the RectangularPrismModel*
+
+Validation of the code was conducted by comparing the output of the 1D model to the output of the existing
+parallelepiped model.
+
+REFERENCES
+
+P Mittelbach and G Porod, *Acta Physica Austriaca*, 14 (1961) 185-211
+
+R Nayuk and K Huber, *Z. Phys. Chem.*, 226 (2012) 837-854
+
+
+
+.. _RectangularHollowPrismModel:
+
+**2.1.40. RectangularHollowPrismModel**
+
+This model provides the form factor, *P(q)*, for a hollow rectangular parallelepiped with a wall thickness |bigdelta|.
+
+*2.1.40.1. Definition*
+
+The 1D scattering intensity for this model is calculated by forming the difference of the amplitudes of two massive
+parallelepipeds differing in their outermost dimensions in each direction by the same length increment 2 |bigdelta|
+(Nayuk, 2012).
+
+As in the case of the massive parallelepiped, the scattering amplitude is computed for a particular orientation of the
+parallelepiped with respect to the scattering vector and then averaged over all possible orientations, giving
+
+.. math::
+  P(q) =  \frac{1}{V^2} \frac{2}{\pi} \times \, \int_0^{\frac{\pi}{2}} \, \int_0^{\frac{\pi}{2}} A_{P\Delta}^2(q) \,
+  \sin\theta \, d\theta \, d\phi
+
+where |theta| is the angle between the *z* axis and the longest axis of the parallelepiped, |phi| is the angle between
+the scattering vector (lying in the *xy* plane) and the *y* axis, and
+
+.. math::
+  A_{P\Delta}\,(q) =  A \, B \, C \, \times
+                      \frac{\sin \bigl( q \frac{C}{2} \cos\theta \bigr)}{q \frac{C}{2} \cos\theta} \,
+                      \frac{\sin \bigl( q \frac{A}{2} \sin\theta \sin\phi \bigr)}{q \frac{A}{2} \sin\theta \sin\phi} \,
+                      \frac{\sin \bigl( q \frac{B}{2} \sin\theta \cos\phi \bigr)}{q \frac{B}{2} \sin\theta \cos\phi} -
+                      8 \, \bigl( \frac{A}{2} - \Delta \bigr) \, \bigl( \frac{B}{2} - \Delta \bigr) \,
+                      \bigl( \frac{C}{2} - \Delta \bigr) \, \times
+                      \frac{\sin \bigl[ q \bigl(\frac{C}{2}-\Delta\bigr) \cos\theta \bigr]}
+                      {q \bigl(\frac{C}{2}-\Delta\bigr) \cos\theta} \,
+                      \frac{\sin \bigl[ q \bigl(\frac{A}{2}-\Delta\bigr) \sin\theta \sin\phi \bigr]}
+                      {q \bigl(\frac{A}{2}-\Delta\bigr) \sin\theta \sin\phi} \,
+                      \frac{\sin \bigl[ q \bigl(\frac{B}{2}-\Delta\bigr) \sin\theta \cos\phi \bigr]}
+                      {q \bigl(\frac{B}{2}-\Delta\bigr) \sin\theta \cos\phi} \,
+
+where *A*, *B* and *C* are the external sides of the parallelepiped fulfilling :math:`A \le B \le C`, and the volume *V*
+of the parallelepiped is
+
+.. math::
+  V = A B C \, - \, (A - 2\Delta) (B - 2\Delta) (C - 2\Delta)
+
+The 1D scattering intensity is then calculated as
+
+.. math::
+  I(q) = \mbox{scale} \times V \times (\rho_{\mbox{pipe}} - \rho_{\mbox{solvent}})^2 \times P(q)
+
+where :math:`\rho_{\mbox{pipe}}` is the scattering length of the parallelepiped, :math:`\rho_{\mbox{solvent}}` is the
+scattering length of the solvent, and (if the data are in absolute units) *scale* represents the volume fraction (which
+is unitless).
+
+**The 2D scattering intensity is not computed by this model.**
+
+The returned value is scaled to units of |cm^-1| and the parameters of the RectangularHollowPrismModel are the
+following
+
+==============  ========  =============
+Parameter name  Units     Default value
+==============  ========  =============
+scale           None      1
+short_side      |Ang|     35
+b2a_ratio       None      1
+c2a_ratio       None      1
+thickness       |Ang|     1
+sldPipe         |Ang^-2|  6.3e-6
+sldSolv         |Ang^-2|  1.0e-6
+background      |cm^-1|   0
+==============  ========  =============
+
+*2.1.40.2. Validation of the RectangularHollowPrismModel*
+
+Validation of the code was conducted by qualitatively comparing the output of the 1D model to the curves shown in
+(Nayuk, 2012).
+
+REFERENCES
+
+R Nayuk and K Huber, *Z. Phys. Chem.*, 226 (2012) 837-854
+
+
+
+.. _RectangularHollowPrismInfThinWallsModel:
+
+**2.1.41. RectangularHollowPrismInfThinWallsModel**
+
+This model provides the form factor, *P(q)*, for a hollow rectangular prism with infinitely thin walls.
+
+*2.1.41.1. Definition*
+
+The 1D scattering intensity for this model is calculated according to the equations given by Nayuk and Huber
+(Nayuk, 2012).
+
+Assuming a hollow parallelepiped with infinitely thin walls, edge lengths :math:`A \le B \le C` and presenting an
+orientation with respect to the scattering vector given by |theta| and |phi|, where |theta| is the angle between the
+*z* axis and the longest axis of the parallelepiped *C*, and |phi| is the angle between the scattering vector
+(lying in the *xy* plane) and the *y* axis, the form factor is given by
+
+.. math::
+  P(q) =  \frac{1}{V^2} \frac{2}{\pi} \times \, \int_0^{\frac{\pi}{2}} \, \int_0^{\frac{\pi}{2}} [A_L(q)+A_T(q)]^2
+  \, \sin\theta \, d\theta \, d\phi
+
+where
+
+.. math::
+  V = 2AB + 2AC + 2BC
+
+.. math::
+  A_L\,(q) =  8 \times \frac{ \sin \bigl( q \frac{A}{2} \sin\phi \sin\theta \bigr)
+                              \sin \bigl( q \frac{B}{2} \cos\phi \sin\theta \bigr)
+                              \cos \bigl( q \frac{C}{2} \cos\theta \bigr) }
+                            {q^2 \, \sin^2\theta \, \sin\phi \cos\phi}
+
+.. math::
+  A_T\,(q) =  A_F\,(q) \times \frac{2 \, \sin \bigl( q \frac{C}{2} \cos\theta \bigr)}{q \, \cos\theta}
+
+and
+
+.. math::
+  A_F\,(q) =  4 \frac{ \cos \bigl( q \frac{A}{2} \sin\phi \sin\theta \bigr)
+                       \sin \bigl( q \frac{B}{2} \cos\phi \sin\theta \bigr) }
+                     {q \, \cos\phi \, \sin\theta} +
+              4 \frac{ \sin \bigl( q \frac{A}{2} \sin\phi \sin\theta \bigr)
+                       \cos \bigl( q \frac{B}{2} \cos\phi \sin\theta \bigr) }
+                     {q \, \sin\phi \, \sin\theta}
+
+The 1D scattering intensity is then calculated as
+
+.. math::
+  I(q) = \mbox{scale} \times V \times (\rho_{\mbox{pipe}} - \rho_{\mbox{solvent}})^2 \times P(q)
+
+where *V* is the volume of the rectangular prism, :math:`\rho_{\mbox{pipe}}` is the scattering length of the
+parallelepiped, :math:`\rho_{\mbox{solvent}}` is the scattering length of the solvent, and (if the data are in absolute
+units) *scale* represents the volume fraction (which is unitless).
+
+**The 2D scattering intensity is not computed by this model.**
+
+The returned value is scaled to units of |cm^-1| and the parameters of the RectangularHollowPrismInfThinWallModel
+are the following
+
+==============  ========  =============
+Parameter name  Units     Default value
+==============  ========  =============
+scale           None      1
+short_side      |Ang|     35
+b2a_ratio       None      1
+c2a_ratio       None      1
+sldPipe         |Ang^-2|  6.3e-6
+sldSolv         |Ang^-2|  1.0e-6
+background      |cm^-1|   0
+==============  ========  =============
+
+*2.1.41.2. Validation of the RectangularHollowPrismInfThinWallsModel*
+
+Validation of the code was conducted  by qualitatively comparing the output of the 1D model to the curves shown in
+(Nayuk, 2012).
+
+REFERENCES
+
+R Nayuk and K Huber, *Z. Phys. Chem.*, 226 (2012) 837-854
+
+
+
 2.2 Shape-independent Functions
 -------------------------------
 
-The following are models used for shape-independent SANS analysis.
+The following are models used for shape-independent SAS analysis.
 
 .. _Debye:
 
 **2.2.1. Debye (Gaussian Coil Model)**
 
-The Debye model is a form factor for a linear polymer chain. In addition to the radius of gyration, *Rg*, a scale factor
-*scale*, and a constant background term are included in the calculation. **NB: No size polydispersity is included in**
-**this model, use the** Poly_GaussCoil_ **Model instead**
+The Debye model is a form factor for a linear polymer chain obeying Gaussian statistics (ie, it is in the theta state).
+In addition to the radius-of-gyration, *Rg*, a scale factor *scale*, and a constant background term are included in the
+calculation. **NB: No size polydispersity is included in this model, use the** Poly_GaussCoil_ **Model instead**
 
 .. image:: img/image172.PNG
 
@@ -3162,9 +3415,9 @@ R J Roe, *Methods of X-Ray and Neutron Scattering in Polymer Science*, Oxford Un
 
 **2.2.2. BroadPeakModel**
 
-This model calculates an empirical functional form for SANS data characterized by a broad scattering peak. Many SANS
+This model calculates an empirical functional form for SAS data characterized by a broad scattering peak. Many SAS
 spectra are characterized by a broad peak even though they are from amorphous soft materials. For example, soft systems
-that show a SANS peak include copolymers, polyelectrolytes, multiphase systems, layered structures, etc.
+that show a SAS peak include copolymers, polyelectrolytes, multiphase systems, layered structures, etc.
 
 The d-spacing corresponding to the broad peak is a characteristic distance between the scattering inhomogeneities (such
 as in lamellar, cylindrical, or spherical morphologies, or for bicontinuous structures).
@@ -3211,7 +3464,7 @@ None.
 
 **2.2.3. CorrLength (Correlation Length Model)**
 
-Calculates an empirical functional form for SANS data characterized by a low-Q signal and a high-Q signal.
+Calculates an empirical functional form for SAS data characterized by a low-Q signal and a high-Q signal.
 
 The returned value is scaled to units of |cm^-1|, absolute scale.
 
@@ -3633,6 +3886,8 @@ See the CoreShellModel_ and FractalModel_ descriptions.
 Calculates the scattering from a gel structure, but typically a physical rather than chemical network. It is modeled as
 a sum of a low-*q* exponential decay plus a lorentzian at higher *q*-values.
 
+Also see the GelFitModel_.
+
 The returned value is scaled to units of |cm^-1|, absolute scale.
 
 *2.2.13.1. Definition*
@@ -3778,11 +4033,11 @@ and
 
 Note that
 
- the radius of gyration for a sphere of radius *R* is given by *Rg* = *R* sqrt(3/5)
+ the radius-of-gyration for a sphere of radius *R* is given by *Rg* = *R* sqrt(3/5)
 
- the cross-sectional radius of gyration for a randomly oriented cylinder of radius *R* is given by *Rg* = *R* / sqrt(2)
+ the cross-sectional radius-of-gyration for a randomly oriented cylinder of radius *R* is given by *Rg* = *R* / sqrt(2)
 
- the cross-sectional radius of gyration of a randomly oriented lamella of thickness *T* is given by *Rg* = *T* / sqrt(12)
+ the cross-sectional radius-of-gyration of a randomly oriented lamella of thickness *T* is given by *Rg* = *T* / sqrt(12)
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
@@ -3815,16 +4070,14 @@ Check out Chapter 4 on Data Treatment, pages 155-156.
 
 **2.2.17. PorodModel**
 
-A Porod analysis is done by linearizing the data at high q by plotting
-it as log(I) versus log(Q). In the high q region we can fit the
-following model:
+This model fits the Porod function
 
 .. image:: img/image197.PNG
 
-C is the scale factor and  Sv is the specific surface area of the sample
-and Î”Ï� is the contrast factor.
+to the data directly without any need for linearisation (*cf*. Log *I(q)* vs Log *q*).
 
-The background term is added for data analysis.
+Here *C* is the scale factor and *Sv* is the specific surface area (ie, surface area / volume) of the sample, and
+|drho| is the contrast factor.
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
@@ -3837,24 +4090,22 @@ scale           |Ang^-4|  0.1
 background      |cm^-1|   0
 ==============  ========  =============
 
+REFERENCE
+
+None.
+
 
 
 .. _PeakGaussModel:
 
 **2.2.18. PeakGaussModel**
 
-Model describes a Gaussian shaped peak including a flat background,
+This model describes a Gaussian shaped peak on a flat background
 
 .. image:: img/image198.PNG
 
-with the peak having height of I0 centered at qpk having standard
-deviation of B.  The fwhm is 2.354\*B.  
-
-Parameters I0, B, qpk, and BGD can all be adjusted during fitting. **NB: These don't match the table!**
-
-REFERENCE
-
-None
+with the peak having height of *I0* centered at *q0* and having a standard deviation of *B*.  The FWHM (full-width
+half-maximum) is 2.354 B.  
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
@@ -3873,24 +4124,21 @@ background      |cm^-1|   1
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
+REFERENCE
+
+None.
+
 
 
 .. _PeakLorentzModel:
 
 **2.2.19. PeakLorentzModel**
 
-Model describes a Lorentzian shaped peak including a flat background,
+This model describes a Lorentzian shaped peak on a flat background
 
 .. image:: img/image200.PNG
 
-with the peak having height of I0 centered at qpk having a hwhm
-(half-width-half-maximum) of B. 
-
-The parameters I0, B, qpk, and BGD can all be adjusted during fitting. **NB: These don't match the table!**
-
-REFERENCE
-
-None
+with the peak having height of *I0* centered at *q0* and having a HWHM (half-width half-maximum) of B. 
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
@@ -3909,41 +4157,42 @@ background      |cm^-1|     1
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
+REFERENCE
+
+None.
+
 
 
 .. _Poly_GaussCoil:
 
 **2.2.20. Poly_GaussCoil (Model)**
 
-Polydisperse Gaussian Coil: Calculate an empirical functional form for
-scattering from a polydisperse polymer chain ina good solvent. The
-polymer is polydisperse with a Schulz-Zimm polydispersity of the
-molecular weight distribution. 
+This model calculates an empirical functional form for the scattering from a **polydisperse** polymer chain in the
+theta state assuming a Schulz-Zimm type molecular weight distribution. Polydispersity on the radius-of-gyration is also
+provided for.
 
 The returned value is scaled to units of |cm^-1|, absolute scale.
 
+*2.2.20.1. Definition*
+
+The scattering intensity *I(q)* is calculated as
+
 .. image:: img/image202.PNG
 
-where the dimensionless chain dimension is:
+where the dimensionless chain dimension is
 
 .. image:: img/image203.PNG
 
-and the polydispersion is
+and the polydispersity is
 
 .. image:: img/image204.PNG
-
-The scattering intensity *I(q)* is calculated as:
-
-The polydispersion in rg is provided.
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
-TEST DATASET
-
-This example dataset is produced by running the Poly_GaussCoil, using 200 data points, *qmin* = 0.001 |Ang^-1| ,
-qmax = 0.7 |Ang^-1| and the default values below.
+This example dataset is produced using 200 data points, using 200 data points,
+*qmin* = 0.001 |Ang^-1|, *qmax* = 0.7 |Ang^-1| and the default values
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -3960,7 +4209,8 @@ background      |cm^-1|   0.001
 
 REFERENCE
 
-Glatter & Kratky - p404
+O Glatter and O Kratky (editors), *Small Angle X-ray Scattering*, Academic Press, (1982)
+Page 404
 
 J S Higgins, and H C Benoit, Polymers and Neutron Scattering, Oxford Science Publications (1996)
 
@@ -3970,81 +4220,60 @@ J S Higgins, and H C Benoit, Polymers and Neutron Scattering, Oxford Science Pub
 
 **2.2.21. PolymerExclVolume (Model)**
 
-Calculates the scattering from polymers with excluded volume effects.
+This model describes the scattering from polymer chains subject to excluded volume effects, and has been used as a
+template for describing mass fractals.
 
 The returned value is scaled to units of |cm^-1|, absolute scale.
 
-The returned value is P(Q) as written in equation (2), plus the
-incoherent background term. The result is in the units of |cm^-1|,
-absolute scale.
+*2.2.21.1 Definition*
 
-A model describing polymer chain conformations with excluded volume was
-introduced to describe the conformation of polymer chains, and has been
-used as a template for describing mass fractals. The form factor for
-that model (Benoit, 1957) was originally presented in the following
-integral form:
+The form factor  was originally presented in the following integral form (Benoit, 1957)
 
-.. image:: img/image206.JPG     (1)
+.. image:: img/image206.JPG
 
-Here n is the excluded volume parameter which is related to the Porod
-exponent m as n = 1/m, a is the polymer chain statistical segment length
-and n is the degree of polymerization. This integral was later put into
-an almost analytical form (Hammouda, 1993) as follows:
+where |nu| is the excluded volume parameter (which is related to the Porod exponent *m* as |nu| = 1 / *m*), *a* is the
+statistical segment length of the polymer chain, and *n* is the degree of polymerization. This integral was later put
+into an almost analytical form as follows (Hammouda, 1993)
 
-.. image:: img/image207.JPG    (2)
+.. image:: img/image207.JPG
 
-Here, g(x,U) is the incomplete gamma function which is a built-in
-function in computer libraries.
+where |gamma|\ *(x,U)* is the incomplete gamma function
 
 .. image:: img/image208.JPG
 
-The variable U is given in terms of the scattering variable Q as:
+and the variable *U* is given in terms of the scattering vector *Q* as
 
 .. image:: img/image209.JPG
 
-The radius of gyration squared has been defined as:
+The square of the radius-of-gyration is defined as
 
 .. image:: img/image210.JPG
 
-Note that this model describing polymer chains with excluded volume
-applies only in the mass fractal range ( 5/3 <= m <= 3) and does not
-apply to surface fractals ( 3 < m <= 4). It does not reproduce the rigid
-rod limit (m = 1) because it assumes chain flexibility from the outset. 
-It may cover a portion of the semiflexible chain range ( 1 < m < 5/3).
+Note that this model applies only in the mass fractal range (ie, 5/3 <= *m* <= 3) and **does not** apply to surface
+fractals (3 < *m* <= 4). It also does not reproduce the rigid rod limit (*m* = 1) because it assumes chain flexibility
+from the outset. It may cover a portion of the semi-flexible chain range (1 < *m* < 5/3).
 
-The low-Q expansion yields the Guinier form and the high-Q expansion
-yields the Porod form which is given by:
+A low-*Q* expansion yields the Guinier form and a high-*Q* expansion yields the Porod form which is given by
 
 .. image:: img/image211.JPG
 
-Here G(x) = g(x,inf) is the gamma function. The asymptotic limit is
-dominated by the first term:
+Here |biggamma|\ *(x)* = |gamma|\ *(x,inf)* is the gamma function.
+
+The asymptotic limit is dominated by the first term
 
 .. image:: img/image212.JPG
 
-The special case when n = 0.5 (or m = 1/n = 2) corresponds to Gaussian
-chains for which the form factor is given by the familiar Debye
-function.
+The special case when |nu| = 0.5 (or *m* = 1/|nu| = 2) corresponds to Gaussian chains for which the form factor is given
+by the familiar Debye_ function.
 
 .. image:: img/image213.JPG
-
-The form factor given by Eq. 2 is the calculated result, and is plotted
-below for the default parameter values.
-
-REFERENCE
-
-H Benoit, *Comptes Rendus*, 245 (1957) 2244-2247
-
-B Hammouda, *SANS from Homogeneous Polymer Mixtures ­ A Unified Overview*, *Advances in Polym. Sci.*, 106 (1993) 87-133
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
 
-TEST DATASET
-
-This example dataset is produced, using 200 data points, qmin = 0.001 |Ang^-1| ,  qmax = 0.2 |Ang^-1|  and the
-default values below.
+This example dataset is produced using 200 data points, *qmin* = 0.001 |Ang^-1|, *qmax* = 0.2 |Ang^-1| and the default
+values
 
 ===================  ========  =============
 Parameter name       Units     Default value
@@ -4059,66 +4288,60 @@ background           |cm^-1|   0.0
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
+REFERENCE
+
+H Benoit, *Comptes Rendus*, 245 (1957) 2244-2247
+
+B Hammouda, *SANS from Homogeneous Polymer Mixtures ­ A Unified Overview*, *Advances in Polym. Sci.*, 106 (1993) 87-133
+
 
 
 .. _RPA10Model:
 
 **2.2.22. RPA10Model**
 
-Calculates the macroscopic scattering intensity (units of cm^-1) for a
-multicomponent homogeneous mixture of polymers using the Random Phase
-Approximation. This general formalism contains 10 specific cases:
+Calculates the macroscopic scattering intensity (units of |cm^-1|) for a multicomponent homogeneous mixture of polymers
+using the Random Phase Approximation. This general formalism contains 10 specific cases
 
-Case 0: C/D Binary mixture of homopolymers
+Case 0: C/D binary mixture of homopolymers
 
-Case 1: C-D Diblock copolymer
+Case 1: C-D diblock copolymer
 
-Case 2: B/C/D Ternary mixture of homopolymers
+Case 2: B/C/D ternary mixture of homopolymers
 
-Case 3: C/C-D Mixture of a homopolymer B and a diblock copolymer C-D
+Case 3: C/C-D mixture of a homopolymer B and a diblock copolymer C-D
 
-Case 4: B-C-D Triblock copolymer
+Case 4: B-C-D triblock copolymer
 
-Case 5: A/B/C/D Quaternary mixture of homopolymers
+Case 5: A/B/C/D quaternary mixture of homopolymers
 
-Case 6: A/B/C-D Mixture of two homopolymers A/B and a diblock C-D
+Case 6: A/B/C-D mixture of two homopolymers A/B and a diblock C-D
 
-Case 7: A/B-C-D Mixture of a homopolymer A and a triblock B-C-D
+Case 7: A/B-C-D mixture of a homopolymer A and a triblock B-C-D
 
-Case 8: A-B/C-D Mixture of two diblock copolymers A-B and C-D
+Case 8: A-B/C-D mixture of two diblock copolymers A-B and C-D
 
-Case 9: A-B-C-D Four-block copolymer
+Case 9: A-B-C-D tetra-block copolymer
 
-Note: the case numbers are different from the IGOR/NIST SANS package.
+**NB: these case numbers are different from those in the NIST SANS package!**
 
-Only one case can be used at any one time.  Plotting a different case
-will overwrite the original parameter waves.
+Only one case can be used at any one time.
 
-The returned value is scaled to units of [cm-1].
+The returned value is scaled to units of |cm^-1|, absolute scale.
 
-Component D is assumed to be the "background" component (all contrasts
-are calculated with respect to component D).
+The RPA (mean field) formalism only applies only when the multicomponent polymer mixture is in the homogeneous
+mixed-phase region.
 
-Scattering contrast for a C/D blend= {SLD (component C) - SLD (component
-D)}2
+**Component D is assumed to be the "background" component (ie, all contrasts are calculated with respect to**
+**component D).** So the scattering contrast for a C/D blend = [SLD(component C) - SLD(component D)]\ :sup:`2`.
 
-Depending on what case is used, the number of fitting parameters varies.
-These represent the segment lengths (ba, bb, etc) and the Chi parameters
-(Kab, Kac, etc). The last one of these is a scaling factor to be held
-constant equal to unity.
+Depending on which case is being used, the number of fitting parameters - the segment lengths (ba, bb, etc) and |chi|
+parameters (Kab, Kac, etc) - vary. The *scale* parameter should be held equal to unity.
 
-The input parameters are the degree of polymerization, the volume
-fractions for each component the specific volumes and the neutron
-scattering length densities.
+The input parameters are the degrees of polymerization, the volume fractions, the specific volumes, and the neutron
+scattering length densities for each component.
 
-This RPA (mean field) formalism applies only when the multicomponent
-polymer mixture is in the homogeneous mixed-phase region.
-
-REFERENCE
-
-A Z Akcasu, R Klein and B Hammouda, *Macromolecules*, 26 (1993) 4136
-
-Fitting parameters for Case0 Model
+Fitting parameters for a Case 0 Model
 
 =======================  ========  =============
 Parameter name           Units     Default value
@@ -4130,7 +4353,7 @@ bd (=segment length_bd)  **unit**  5
 Kcd (=chi_cd)            **unit**  -0.0004
 =======================  ========  =============
 
-Fixed parameters for Case0 Model
+Fixed parameters for a Case 0 Model
 
 =======================  ========  =============
 Parameter name           Units     Default value
@@ -4149,6 +4372,9 @@ vd (=specific volume_d)  **unit**  100
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
+REFERENCE
+
+A Z Akcasu, R Klein and B Hammouda, *Macromolecules*, 26 (1993) 4136
 
 
 
@@ -4156,29 +4382,23 @@ vd (=specific volume_d)  **unit**  100
 
 **2.2.23. TwoLorentzian (Model)**
 
-Calculate an empirical functional form for SANS data characterized by a
-two Lorentzian functions.
+This model calculates an empirical functional form for SAS data characterized by two Lorentzian-type functions.
 
 The returned value is scaled to units of |cm^-1|, absolute scale.
 
-The scattering intensity *I(q)* is calculated by: 
+*2.2.23.1. Definition*
+
+The scattering intensity *I(q)* is calculated as
 
 .. image:: img/image216.JPG 
 
-A = Lorentzian scale #1
-
-C = Lorentzian scale #2 
-
-where scale is the peak height centered at q0, and B refers to the
-standard deviation of the function.
-
-The background term is added for data analysis.
+where *A* = Lorentzian scale factor #1, *C* = Lorentzian scale #2, |xi|\ :sub:`1` and |xi|\ :sub:`2` are the
+corresponding correlation lengths, and *n* and *m* are the respective power law exponents (set *n* = *m* = 2 for
+Ornstein-Zernicke behaviour).
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
-
-**Default input parameter values**
 
 ===============================  ========  =============
 Parameter name                   Units     Default value
@@ -4198,7 +4418,7 @@ background (=B)                  |cm^-1|   0.1
 
 REFERENCE
 
-None
+None.
 
 
 
@@ -4206,25 +4426,25 @@ None
 
 **2.2.24. TwoPowerLaw (Model)**
 
-Calculate an empirical functional form for SANS data characterized by
-two power laws.
+This model calculates an empirical functional form for SAS data characterized by two power laws.
 
 The returned value is scaled to units of |cm^-1|, absolute scale.
 
-The scattering intensity *I(q)* is calculated by:
+*2.2.24.1. Definition*
+
+The scattering intensity *I(q)* is calculated as
 
 .. image:: img/image218.JPG
 
-qc is the location of the crossover from one slope to the other. The
-scaling A, sets the overall intensity of the lower Q power law region.
-The scaling of the second power law region is scaled to match the first.
-Be sure to enter the power law exponents as positive values.
+where *qc* is the location of the crossover from one slope to the other. The scaling *coef_A* sets the overall
+intensity of the lower *q* power law region. The scaling of the second power law region is then automatically scaled to
+match the first.
+
+**NB: Be sure to enter the power law exponents as positive values!**
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
-
-**Default input parameter values**
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -4240,42 +4460,43 @@ background      |cm^-1|   0.0
 
 *Figure. 1D plot using the default values (w/500 data points).*
 
+REFERENCE
+
+None.
+
 
 
 .. _UnifiedPowerRg:
 
 **2.2.25. UnifiedPowerRg (Beaucage Model)**
 
+This model deploys the empirical multiple level unified Exponential/Power-law fit method developed by G Beaucage. Four
+functions are included so that 1, 2, 3, or 4 levels can be used. In addition a 0 level has been added which simply
+calculates
+
+*I(q)* = *scale* / *q* + *background*
+
 The returned value is scaled to units of |cm^-1|, absolute scale. 
 
-Note that the level 0 is an extra function that is the inverse function;
-I (q) = scale/q + background.
+The Beaucage method is able to reasonably approximate the scattering from many different types of particles, including
+fractal clusters, random coils (Debye equation), ellipsoidal particles, etc. 
 
-Otherwise, program incorporates the empirical multiple level unified
-Exponential/Power-law fit method developed by G Beaucage. Four
-functions are included so that One, Two, Three, or Four levels can be
-used.
+*2.2.25.1 Definition*
 
-The empirical expressions are able to reasonably approximate the
-scattering from many different types of particles, including fractal
-clusters, random coils (Debye equation), ellipsoidal particles, etc. 
 The empirical fit function is 
 
 .. image:: img/image220.JPG
 
-For each level, the four parameters Gi, Rg,i, Bi and Pi must be chosen. 
+For each level, the four parameters *Gi*, *Rg,i*, *Bi* and *Pi* must be chosen. 
 
-For example, to approximate the scattering from random coils (Debye
-equation), set Rg,i as the Guinier radius, Pi = 2, and Bi = 2 Gi / Rg,i 
+For example, to approximate the scattering from random coils (Debye_ equation), set *Rg,i* as the Guinier radius,
+*Pi* = 2, and *Bi* = 2 *Gi* / *Rg,i* 
 
-See the listed references for further information on choosing the
-parameters.
+See the references for further information on choosing the parameters.
 
 For 2D data: The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
 .. image:: img/image040.GIF
-
-**Default input parameter values**
 
 ==============  ========  =============
 Parameter name  Units     Default value
@@ -4298,9 +4519,9 @@ background      |cm^-1|   0.0
 
 REFERENCE
 
-G Beaucage (1995).  J. Appl. Cryst., vol. 28, p717-728.
+G Beaucage, *J. Appl. Cryst.*, 28 (1995) 717-728
 
-G Beaucage (1996).  J. Appl. Cryst., vol. 29, p134-146.
+G Beaucage, *J. Appl. Cryst.*, 29 (1996) 134-146
 
 
 
@@ -4308,123 +4529,66 @@ G Beaucage (1996).  J. Appl. Cryst., vol. 29, p134-146.
 
 **2.2.26. LineModel**
 
-This is a linear function that calculates:
+This calculates the simple linear function
 
 .. image:: img/image222.PNG
 
-where A and B are the coefficients of the first and second order terms.
+**NB: For 2D plots,** *I(q)* = *I(qx)*\ *\ *I(qy)*, **which is a different definition to other shape independent models.**
 
-**Note:** For 2D plot, *I(q)* = *I(qx)* / *I(qy)*  which is defined differently
-from other shape independent models.
+==============  ==============  =============
+Parameter name  Units           Default value
+==============  ==============  =============
+A               |cm^-1|         1.0
+B               |Ang|\ |cm^-1|  1.0
+==============  ==============  =============
 
-==============  ========  =============
-Parameter name  Units     Default value
-==============  ========  =============
-A               |cm^-1|   1.0
-B               |Ang|     1.0
-==============  ========  =============
+REFERENCE
 
-
-
-.. _ReflectivityModel:
-
-**2.2.27. ReflectivityModel**
-
-This model calculates the reflectivity and uses the Parrett algorithm.
-Up to nine film layers are supported between Bottom(substrate) and
-Medium(Superstrate where the neutron enters the first top film). Each
-layers are composed of [ ½ of the interface(from the previous layer or
-substrate) + flat portion + ½ of the interface(to the next layer or
-medium)]. Only two simple interfacial functions are selectable, error
-function and linear function. The each interfacial thickness is
-equivalent to (- 2.5 sigma to +2.5 sigma for the error function,
-sigma=roughness).
-
-Note: This model was contributed by an interested user.
-
-.. image:: img/image231.BMP
-
-*Figure. Comparison (using the SLD profile below) with NISTweb calculation (circles)*
-http://www.ncnr.nist.gov/resources/reflcalc.html
-
-.. image:: img/image232.GIF
-
-*Figure. SLD profile used for the calculation(above).*
-
-
-
-.. _ReflectivityIIModel:
-
-**2.2.28. ReflectivityIIModel**
-
-    Same as the ReflectivityModel except that the it is more
-customizable. More interfacial functions are supplied. The number of
-points (npts_inter) for each interface can be choosen.     The constant
-(A below but 'nu' as a parameter name of the model) for exp, erf, or
-power-law is an input. The SLD at the interface between layers,
-*rinter_i*, is calculated with a function chosen by a user, where the
-functions are:
-
-1) Erf;
-
-.. image:: img/image051.GIF
-
-2) Power-Law;
-
-.. image:: img/image050.GIF
-
-3) Exp;
-
-.. image:: img/image049.GIF
-
-    Note: This model was implemented by an interested user.
+None.
 
 
 
 .. _GelFitModel:
 
-**2.2.29. GelFitModel**
+**2.2.27. GelFitModel**
 
-    Unlike a concentrated polymer solution, the fine-scale polymer
-distribution in a gel involves at least two characteristic length
-scales, a shorter correlation length (a1) to describe the rapid
-fluctuations in the position of the polymer chains that ensure
-thermodynamic equilibrium, and a longer distance (denoted here as a2)
-needed to account for the static accumulations of polymer pinned down by
-junction points or clusters of such points. The letter is derived from a
-simple Guinier function.
+*This model was implemented by an interested user!*
 
-The scattered intensity *I(q)* is then calculated as:
+Unlike a concentrated polymer solution, the fine-scale polymer distribution in a gel involves at least two
+characteristic length scales, a shorter correlation length (*a1*) to describe the rapid fluctuations in the position
+of the polymer chains that ensure thermodynamic equilibrium, and a longer distance (denoted here as *a2*) needed to
+account for the static accumulations of polymer pinned down by junction points or clusters of such points. The latter
+is derived from a simple Guinier function.
+
+Also see the GaussLorentzGel_ Model.
+
+*2.2.27.1. Definition*
+
+The scattered intensity *I(q)* is calculated as
 
 .. image:: img/image233.GIF
 
-Where:
+where
 
 .. image:: img/image234.GIF
 
-    Note the first term reduces to the Ornstein-Zernicke equation when
-D=2; ie, when the Flory exponent is 0.5 (theta conditions).   In gels
-with significant hydrogen bonding D has been reported to be ~2.6 to 2.8.
+Note that the first term reduces to the Ornstein-Zernicke equation when *D* = 2; ie, when the Flory exponent is 0.5
+(theta conditions). In gels with significant hydrogen bonding *D* has been reported to be ~2.6 to 2.8.
 
-    Note: This model was implemented by an interested user.
-
-**Default input parameter values**
-
-==================  ========  =============
-Parameter name      Units     Default value
-==================  ========  =============
-Background          |cm^-1|   0.01
-Guinier scale       |cm^-1|   1.7
-Lorentzian scale    |cm^-1|   3.5
-Radius of gyration  |Ang|     104
-Fractal exponent    None      2
-Correlation length  |Ang|     16
-==================  ========  =============
+============================  ========  =============
+Parameter name                Units     Default value
+============================  ========  =============
+Background                    |cm^-1|   0.01
+Guinier scale    (= *I(0)G*)  |cm^-1|   1.7
+Lorentzian scale (= *I(0)L*)  |cm^-1|   3.5
+Radius of gyration  (= *Rg*)  |Ang|     104
+Fractal exponent     (= *D*)  None      2
+Correlation length  (= *a1*)  |Ang|     16
+============================  ========  =============
 
 .. image:: img/image235.GIF
 
-*Figure. 1D plot using the default values (w/300 data points,
-qmin=0.001, and qmax=0.3).*
+*Figure. 1D plot using the default values (w/300 data points).*
 
 REFERENCE
 
@@ -4436,17 +4600,25 @@ Simon Mallam, Ferenc Horkay, Anne-Marie Hecht, Adrian R Rennie, Erik Geissler, M
 
 .. _StarPolymer:
 
-**2.2.30. Star Polymer with Gaussian Statistics**
+**2.2.28. Star Polymer with Gaussian Statistics**
+
+This model is also known as the Benoit Star model.
+
+*2.2.28.1. Definition*
 
 For a star with *f* arms:
 
 .. image:: img/star1.PNG
 
+where
+
 .. image:: img/star2.PNG
+
+and
 
 .. image:: img/star3.PNG
 
-where is the ensemble average radius of gyration squared of an arm.
+is the square of the ensemble average radius-of-gyration of an arm.
 
 REFERENCE
 
@@ -4454,10 +4626,76 @@ H Benoit,   J. Polymer Science.,  11, 596-599  (1953)
 
 
 
+.. _ReflectivityModel:
+
+**2.2.29. ReflectivityModel**
+
+*This model was contributed by an interested user!*
+
+This model calculates **reflectivity** using the Parrett algorithm.
+
+Up to nine film layers are supported between Bottom(substrate) and Medium(Superstrate) where the neutron enters the
+first top film. Each of the layers are composed of
+
+[½ of the interface (from the previous layer or substrate) + flat portion + ½ of the interface (to the next layer or medium)]
+
+Two simple functions are provided to describe the interfacial density distribution; a linear function and an error
+function. The interfacial thickness is equivalent to (-2.5 |sigma| to +2.5 |sigma| for the error function, where
+|sigma| = roughness).
+
+Also see ReflectivityIIModel_.
+
+.. image:: img/image231.BMP
+
+*Figure. Comparison (using the SLD profile below) with the NIST web calculation (circles)*
+http://www.ncnr.nist.gov/resources/reflcalc.html
+
+.. image:: img/image232.GIF
+
+*Figure. SLD profile used for the calculation (above).*
+
+REFERENCE
+
+None.
+
+
+
+.. _ReflectivityIIModel:
+
+**2.2.30. ReflectivityIIModel**
+
+*This model was contributed by an interested user!*
+
+This **reflectivity** model is a more flexible version of ReflectivityModel_. More interfacial density
+functions are supported, and the number of points (*npts_inter*) for each interface can be chosen.
+
+The SLD at the interface between layers, |rho|\ *inter_i*, is calculated with a function chosen by a user, where the
+available functions are
+
+1) Erf
+
+.. image:: img/image051.GIF
+
+2) Power-Law
+
+.. image:: img/image050.GIF
+
+3) Exp
+
+.. image:: img/image049.GIF
+
+The constant *A* in the expressions above (but the parameter *nu* in the model!) is an input.
+
+REFERENCE
+
+None.
+
+
+
 2.3 Structure-factor Functions
 ------------------------------
 
-The information in this section is originated from NIST SANS IgorPro package.
+The information in this section originated from NIST SANS package.
 
 .. _HardSphereStructure:
 
