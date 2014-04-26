@@ -171,8 +171,12 @@ class BasicPage(ScrolledPanel, PanelBase):
         ## list of orientation parameters
         self.orientation_params = []
         self.orientation_params_disp = []
-        if self.model != None:
-            self.disp_list = self.model.getDispParamList()
+#       Self.model should ALWAYS be None here.  It was set to none above in 
+#       this long init setting.  no obvious function call in between setting
+#       and this - commenting out on 4/8/2014 by PDB.  Remove once clear 
+#       it is pointless.
+#        if self.model != None:
+#            self.disp_list = self.model.getDispParamList()
         self.temp_multi_functional = False
         ##enable model 2D draw
         self.enable2D = False
@@ -480,6 +484,14 @@ class BasicPage(ScrolledPanel, PanelBase):
         """
         set some page important information at once
         """
+#       THIS METHOD/FUNCTION NO LONGE APPEARS TO BE CALLED.  Started up program 
+#       and started new fit window and PR and Invariant and a fit in fitting
+#       but never entered this routine which should be an initialization
+#       routine.  Leave for a while but probably something to clean up at 
+#       some point?
+#
+#       PDB April 13 2014
+#
         ##window_name
         self.window_name = page_info.window_name
         ##window_caption
@@ -625,10 +637,24 @@ class BasicPage(ScrolledPanel, PanelBase):
         if self.model_list_box is None:
             return
         if len(self.model_list_box) > 0:
-            self._populate_box(self.formfactorbox,
-                               self.model_list_box["Shapes"])
-       
-        if len(self.model_list_box) > 0:
+        ## This is obsolete code since form factor box is no longer static.
+        ## It is now set dynamically through _show_combox and _show_combos_helper
+        ## These are called for first time by formfactor_combo_init
+        ## itself called from fitpanel only.  If we find that I'm wrong and
+        ## we DO need to initialize somehow here - do it by a call to 
+        ## formfactor_combo_init 
+        ## self.formfator_combo_init()
+        ## BUT NOT HERE -- make it last line of this 
+        ## method so that structure box is populated before _show_comboox_helper
+        ## is called.  Otherwise wx will complain mightily:-)
+        ##
+        ## Also change the name to initiatlize_structurebox along with changes
+        ## to other combobox methods (_populate_listbox --> _populate_categorybox
+        ## etc )
+        ##
+        ##     PDB 4/26/2014
+#            self._populate_box(self.formfactorbox,
+#                               self.model_list_box["Shapes"])
             self._populate_box(self.structurebox,
                                 self.model_list_box["Structure Factors"])
             self.structurebox.Insert("None", 0, None)
@@ -643,6 +669,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.text2.Show()
                 self.structurebox.Enable()
                 self.text2.Enable()
+
                 
     def set_dispers_sizer(self):
         """
@@ -1835,124 +1862,131 @@ class BasicPage(ScrolledPanel, PanelBase):
                               [min_state, min_value],
                               [max_state, max_value], unit])
            
-    def _set_model_sizer_selection(self, model):
-        """
-        Display the sizer according to the type of the current model
-        """
-        if model == None:
-            return
-        if hasattr(model, "s_model"):
-            
-            class_name = model.s_model.__class__
-            name = model.s_model.name
-            flag = (name != "NoStructure")
-            if flag and \
-                (class_name in self.model_list_box["Structure Factors"]):
-                self.structurebox.Show()
-                self.text2.Show()
-                self.structurebox.Enable()
-                self.text2.Enable()
-                items = self.structurebox.GetItems()
-                self.sizer1.Layout()
-                
-                for i in range(len(items)):
-                    if items[i] == str(name):
-                        self.structurebox.SetSelection(i)
-                        break
-                    
-        if hasattr(model, "p_model"):
-            class_name = model.p_model.__class__
-            name = model.p_model.name
-            self.formfactorbox.Clear()
-            
-            for k, list in self.model_list_box.iteritems():
-                if k in["P(Q)*S(Q)", "Shapes"] and \
-                    class_name in self.model_list_box["Shapes"]:
-                    self.shape_rbutton.SetValue(True)
-                    ## fill the form factor list with new model
-                    self._populate_box(self.formfactorbox,
-                                       self.model_list_box["Shapes"])
-                    items = self.formfactorbox.GetItems()
-                    ## set comboxbox to the selected item
-                    for i in range(len(items)):
-                        if items[i] == str(name):
-                            self.formfactorbox.SetSelection(i)
-                            break
-                    return
-                elif k == "Shape-Independent":
-                    self.shape_indep_rbutton.SetValue(True)
-                elif k == "Structure Factors":
-                    self.struct_rbutton.SetValue(True)
-                elif k == "Multi-Functions":
-                    continue
-                else:
-                    self.plugin_rbutton.SetValue(True)
-               
-                if class_name in list:
-                    ## fill the form factor list with new model
-                    self._populate_box(self.formfactorbox, list)
-                    items = self.formfactorbox.GetItems()
-                    ## set comboxbox to the selected item
-                    for i in range(len(items)):
-                        if items[i] == str(name):
-                            self.formfactorbox.SetSelection(i)
-                            break
-                    break
-        else:
+#    The following funcion seems to be superseded with fillsizer and 
+#    init combo box.  certainly it seems not to know about categories and uses 
+#    only shapes and shape independent -- tested after commenting out and does
+#    not seem to cause problem.  Leave commented out for now but delete in
+#    a code cleanup once clear it really is no longer used.
+#    PDB  8 April 2014
+
+#    def _set_model_sizer_selection(self, model):
+#        """
+#        Display the sizer according to the type of the current model
+#        """
+#        if model == None:
+#            return
+#        if hasattr(model, "s_model"):
+#            
+#            class_name = model.s_model.__class__
+#            name = model.s_model.name
+#            flag = (name != "NoStructure")
+#            if flag and \
+#                (class_name in self.model_list_box["Structure Factors"]):
+#                self.structurebox.Show()
+#                self.text2.Show()
+#                self.structurebox.Enable()
+#               self.text2.Enable()
+ #               items = self.structurebox.GetItems()
+ #               self.sizer1.Layout()
+ #               
+ #               for i in range(len(items)):
+ #                   if items[i] == str(name):
+ #                       self.structurebox.SetSelection(i)
+ #                       break
+ #                   
+ #       if hasattr(model, "p_model"):
+ #           class_name = model.p_model.__class__
+ #           name = model.p_model.name
+ #           self.formfactorbox.Clear()
+ #           
+ #           for k, list in self.model_list_box.iteritems():
+ #               if k in["P(Q)*S(Q)", "Shapes"] and \
+ #                   class_name in self.model_list_box["Shapes"]:
+ #                   self.shape_rbutton.SetValue(True)
+ #                   ## fill the form factor list with new model
+ #                   self._populate_box(self.formfactorbox,
+ #                                      self.model_list_box["Shapes"])
+ #                   items = self.formfactorbox.GetItems()
+ #                   ## set comboxbox to the selected item
+ #                   for i in range(len(items)):
+ #                       if items[i] == str(name):
+ #                           self.formfactorbox.SetSelection(i)
+ #                           break
+ #                   return
+ #               elif k == "Shape-Independent":
+ #                   self.shape_indep_rbutton.SetValue(True)
+ #               elif k == "Structure Factors":
+ #                   self.struct_rbutton.SetValue(True)
+ #               elif k == "Multi-Functions":
+ #                   continue
+ #               else:
+ #                   self.plugin_rbutton.SetValue(True)
+ #              
+ #               if class_name in list:
+ #                   ## fill the form factor list with new model
+ #                   self._populate_box(self.formfactorbox, list)
+ #                   items = self.formfactorbox.GetItems()
+ #                   ## set comboxbox to the selected item
+ #                   for i in range(len(items)):
+ #                       if items[i] == str(name):
+ #                           self.formfactorbox.SetSelection(i)
+ #                           break
+ #                   break
+ #       else:
             ## Select the model from the menu
-            class_name = model.__class__
-            name = model.name
-            self.formfactorbox.Clear()
-            items = self.formfactorbox.GetItems()
-    
-            for k, list in self.model_list_box.iteritems():
-                if k in["P(Q)*S(Q)", "Shapes"] and \
-                    class_name in self.model_list_box["Shapes"]:
-                    if class_name in self.model_list_box["P(Q)*S(Q)"]:
-                        self.structurebox.Show()
-                        self.text2.Show()
-                        self.structurebox.Enable()
-                        self.structurebox.SetSelection(0)
-                        self.text2.Enable()
-                    else:
-                        self.structurebox.Hide()
-                        self.text2.Hide()
-                        self.structurebox.Disable()
-                        self.structurebox.SetSelection(0)
-                        self.text2.Disable()
-                        
-                    self.shape_rbutton.SetValue(True)
+#            class_name = model.__class__
+#            name = model.name
+#            self.formfactorbox.Clear()
+#            items = self.formfactorbox.GetItems()
+#    
+#            for k, list in self.model_list_box.iteritems():
+#                if k in["P(Q)*S(Q)", "Shapes"] and \
+#                    class_name in self.model_list_box["Shapes"]:
+#                    if class_name in self.model_list_box["P(Q)*S(Q)"]:
+#                        self.structurebox.Show()
+#                        self.text2.Show()
+#                       self.structurebox.Enable()
+#                       self.structurebox.SetSelection(0)
+#                       self.text2.Enable()
+#                   else:
+#                        self.structurebox.Hide()
+#                        self.text2.Hide()
+#                        self.structurebox.Disable()
+#                        self.structurebox.SetSelection(0)
+#                        self.text2.Disable()
+#                        
+#                    self.shape_rbutton.SetValue(True)
                     ## fill the form factor list with new model
-                    self._populate_box(self.formfactorbox,
-                                       self.model_list_box["Shapes"])
-                    items = self.formfactorbox.GetItems()
-                    ## set comboxbox to the selected item
-                    for i in range(len(items)):
-                        if items[i] == str(name):
-                            self.formfactorbox.SetSelection(i)
-                            break
-                    return
-                elif k == "Shape-Independent":
-                    self.shape_indep_rbutton.SetValue(True)
-                elif k == "Structure Factors":
-                    self.struct_rbutton.SetValue(True)
-                elif k == "Multi-Functions":
-                    continue
-                else:
-                    self.plugin_rbutton.SetValue(True)
-                if class_name in list:
-                    self.structurebox.SetSelection(0)
-                    self.structurebox.Disable()
-                    self.text2.Disable()
+#                    self._populate_box(self.formfactorbox,
+#                                       self.model_list_box["Shapes"])
+#                    items = self.formfactorbox.GetItems()
+#                    ## set comboxbox to the selected item
+#                    for i in range(len(items)):
+#                        if items[i] == str(name):
+#                            self.formfactorbox.SetSelection(i)
+#                            break
+#                    return
+#                elif k == "Shape-Independent":
+#                    self.shape_indep_rbutton.SetValue(True)
+#                elif k == "Structure Factors":
+#                    self.struct_rbutton.SetValue(True)
+#                elif k == "Multi-Functions":
+#                    continue
+#                else:
+#                    self.plugin_rbutton.SetValue(True)
+#                if class_name in list:
+#                    self.structurebox.SetSelection(0)
+#                    self.structurebox.Disable()
+#                    self.text2.Disable()
                     ## fill the form factor list with new model
-                    self._populate_box(self.formfactorbox, list)
-                    items = self.formfactorbox.GetItems()
+#                    self._populate_box(self.formfactorbox, list)
+#                    items = self.formfactorbox.GetItems()
                     ## set comboxbox to the selected item
-                    for i in range(len(items)):
-                        if items[i] == str(name):
-                            self.formfactorbox.SetSelection(i)
-                            break
-                    break
+#                    for i in range(len(items)):
+#                        if items[i] == str(name):
+#                            self.formfactorbox.SetSelection(i)
+#                            break
+#                    break
                 
     def _draw_model(self, update_chisqr=True, source='model'):
         """
