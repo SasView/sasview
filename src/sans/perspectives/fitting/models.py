@@ -468,6 +468,12 @@ class ModelManagerBase:
 #        self.shape_list.append(CoreShellEllipsoidModel)
         self.multiplication_factor.append(CoreShellEllipsoidModel)
         self.model_name_list.append(CoreShellEllipsoidModel.__name__)
+
+        from sans.models.CoreShellEllipsoidXTModel import CoreShellEllipsoidXTModel
+        self.model_dictionary[CoreShellEllipsoidXTModel.__name__] = CoreShellEllipsoidXTModel
+#        self.shape_list.append(CoreShellEllipsoidXTModel)
+        self.multiplication_factor.append(CoreShellEllipsoidXTModel)
+        self.model_name_list.append(CoreShellEllipsoidXTModel.__name__)
          
         from sans.models.TriaxialEllipsoidModel import TriaxialEllipsoidModel
         self.model_dictionary[TriaxialEllipsoidModel.__name__] = TriaxialEllipsoidModel
