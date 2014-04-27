@@ -356,9 +356,6 @@ class CategoryManager(wx.Frame):
             for (model, enabled) in self.master_category_dict[category]:
                 self.by_model_dict[model].append(category)
                 self.model_enabled_dict[model] = enabled
-        print self.master_category_dict
-        print self.by_model_dict
-        print self.model_enabled_dict
 
     def _regenerate_master_dict(self):
         """
