@@ -51,7 +51,7 @@ clean:
 
 stubs:
 	rm -rf source/api
-	python call-sphinx-api.py
+	sphinx-apidoc -o source/api -d 8 ../../src
 	
 html: stubs
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
