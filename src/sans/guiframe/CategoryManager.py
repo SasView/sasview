@@ -183,6 +183,20 @@ class CategoryManager(wx.Frame):
         """
         Expands lists on the GUI
         """
+        ## This method loops through all the models in the category by model
+        ## list and for each one converts the dictionary item to a string
+        ## which has of course two terms: the model and the category (in that
+        ## order).  The text string however directly reads the quotes, brackets,
+        ## and encoding term (u in our case) and does not understand them
+        ## as dictionary and list separators.  Thus we then have to strip those
+        ## out.  Also note the text control box, cat_list, has already been made into
+        ## a two column list with a check box.
+        ##
+        ## This works but is ugly to me (should not have to manually strip).
+        ## had to add the u stripping for the json encoding
+        ##
+        ## - PDB April 26, 2014
+        ##
         self.cat_list.DeleteAllItems()
         model_name_list = [model for model in self.by_model_dict]
         model_name_list.sort()
@@ -191,6 +205,7 @@ class CategoryManager(wx.Frame):
             index = self.cat_list.InsertStringItem(sys.maxint, model)
             self.cat_list.SetStringItem(index, 1, \
                                             str(self.by_model_dict[model]).\
+                                            replace("u'","").\
                                             replace("'","").\
                                             replace("[","").\
                                             replace("]",""))

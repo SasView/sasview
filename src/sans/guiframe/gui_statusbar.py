@@ -132,7 +132,7 @@ class StatusBar(wxStatusB):
         
         # Create status bar icon reflecting the type of status
         # for the last message
-        self.status_color = wx.StaticText(self, id=wx.NewId(), label="   ")
+        self.status_color = wx.StaticText(self, id=wx.NewId(), label="   ", size=wx.Size(15,15))
         self.status_color.SetBackgroundColour(GREEN)
         self.status_color.SetForegroundColour(GREEN)
 

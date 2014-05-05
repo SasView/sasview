@@ -89,7 +89,7 @@ class cansas_reader(unittest.TestCase):
         self.assertTrue(data.detector[0].distance == 575.0)
         self.assertTrue(data.detector[1].distance == 4145.02)
         self.assertTrue(data.process[0].name == "Mantid generated CanSAS1D XML")
-        self.assertTrue(data.meta_data["xmlpreprocess"]["xml-stylesheet"] != None)
+        self.assertTrue(data.meta_data["xmlpreprocess"] != None)
         
     
     def _check_data_1_1(self, data):
@@ -101,7 +101,10 @@ class cansas_reader(unittest.TestCase):
         filename = "isis_1_1_write_test.xml"
         xmlreader = XMLreader(self.isis_1_1, self.schema_1_1)
         valid = xmlreader.validateXML()
+        xmlreader.setProcessingInstructions()
         self.assertTrue(valid)
+        fo = open(self.isis_1_1)
+        str = fo.read()
         reader_generic = Loader()
         dataloader = reader_generic.load(self.isis_1_1)
         reader_cansas = Reader()
@@ -112,12 +115,13 @@ class cansas_reader(unittest.TestCase):
             self._check_data(cansasreader[i])
             self._check_data_1_1(cansasreader[i])
             reader_generic.save(filename, dataloader[i], None)
-            reader2 = Reader()
-            return_data = reader2.read(filename)
-            data_new = return_data
+            fo = open(filename)
+            str = fo.read()
+            reader2 = Loader()
+            return_data = reader2.load(filename)
             written_data = return_data[0]
             self._check_data(written_data)
-            
+    
     
     def test_double_trans_spectra(self):
         xmlreader = XMLreader(self.isis_1_1_doubletrans, self.schema_1_1)
@@ -168,6 +172,7 @@ class cansas_reader(unittest.TestCase):
         reader4 = XMLreader(self.cansas1d_slit, self.schema_1_0)
         self.assertTrue(reader4.validateXML())
         
+    
     def test_save_cansas_v1_0(self):
         filename = "isis_1_0_write_test.xml"
         xmlreader = XMLreader(self.isis_1_0, self.schema_1_0)
@@ -183,8 +188,10 @@ class cansas_reader(unittest.TestCase):
             reader_generic.save(filename, dataloader[i], None)
             reader2 = Reader()
             return_data = reader2.read(filename)
-            data_new = return_data
             written_data = return_data[0]
+            xmlwrite = XMLreader(filename, self.schema_1_0)
+            valid = xmlreader.validateXML()
+            self.assertTrue(valid)
             self._check_data(written_data)
         
         
@@ -229,5 +236,6 @@ class cansas_reader(unittest.TestCase):
             pi = pi.getprevious()
         return dict
         
+
 if __name__ == '__main__':
     unittest.main()    

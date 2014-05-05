@@ -48,8 +48,13 @@ if sys.platform == 'win32':
     print "Windows Specific Packages:"
     for package_name,test_vals in win_required_package_list.iteritems():
         try:
-            i = __import__(test_vals['import_name'],fromlist=[''])
-            print "%s Version Installed: %s"% (package_name,getattr(i,test_vals['test']))
+            if package_name == "pywin":
+                import win32api
+                fixed_file_info = win32api.GetFileVersionInfo(win32api.__file__,'\\')
+                print "%s Version Installed: %s"% (package_name,fixed_file_info['FileVersionLS'] >> 16)
+            else:
+                i = __import__(test_vals['import_name'],fromlist=[''])
+                print "%s Version Installed: %s"% (package_name,getattr(i,test_vals['test']))
         except:
             print '%s NOT INSTALLED'% package_name
 

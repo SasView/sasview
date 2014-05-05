@@ -47,16 +47,10 @@ try:
                        'DEFAULT_OPEN_FOLDER':CURRENT.DEFAULT_OPEN_FOLDER}
 except:
     CURRENT_STRINGS = DEFAULT_STRINGS
-    
-if sys.platform.count("win32") > 0:
-    PANEL_WIDTH = 265 
-    PANEL_HEIGHT = 235
-    FONT_VARIANT = 0
-else:
-    PANEL_WIDTH = 285
-    PANEL_HEIGHT = 255
-    FONT_VARIANT = 1
-    
+FONT_VARIANT = 0
+PANEL_WIDTH = 285
+PANEL_HEIGHT = 215
+
 """
 Dialog to set Appication startup configuration
 """
@@ -76,33 +70,35 @@ class StartupConfiguration(wx.Dialog):
         self.current_string = copy.deepcopy(CURRENT_STRINGS)
         self.return_string = copy.deepcopy(DEFAULT_STRINGS)
         # build layout
-        panel = wx.Panel(self, -1)
         vbox = wx.BoxSizer(wx.VERTICAL)
-        wx.StaticBox(panel, -1, 'Set View-Configuration', (5, 5),
-                      (PANEL_WIDTH*0.94, PANEL_HEIGHT*0.7))
-        default_bt = wx.RadioButton(panel, -1, 'Default View', (15, 30), 
+        title_text = wx.StaticText(self, id=wx.NewId(), label='Set interface configuration')
+
+        default_bt = wx.RadioButton(self, -1, 'Default View', (15, 30), 
                                     style=wx.RB_GROUP)
         default_bt.Bind(wx.EVT_RADIOBUTTON, self.OnDefault)
         default_bt.SetValue(True)
-        current_bt = wx.RadioButton(panel, -1, 'Current View', (15, 55))
+        current_bt = wx.RadioButton(self, -1, 'Current View', (15, 55))
         current_bt.SetValue(False)
         current_bt.Bind(wx.EVT_RADIOBUTTON, self.OnCurrent)
         msg = "\nThis new configuration will take effect when\n"
         msg += "running this application next time."
-        note_txt = wx.StaticText(panel, -1, msg, (15, 75))
+        note_txt = wx.StaticText(self, -1, msg, (15, 75))
         note_txt.SetForegroundColour("black")
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
         
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
         okButton = wx.Button(self, wx.ID_OK, 'Set', size=(70, 25))
         closeButton = wx.Button(self,wx.ID_CANCEL, 'Cancel', size=(70, 25))
         hbox.Add(closeButton, 1, wx.RIGHT, 5)
         hbox.Add(okButton, 1, wx.RIGHT, 5)
-        vbox.Add(panel, 1, wx.ALIGN_CENTER | wx.BOTTOM, 5)
-        vbox.Add(hbox, 1, wx.ALIGN_CENTER | wx.BOTTOM, 5)
-        # set sizer
+
+        vbox.Add(title_text, 0, wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, 10)
+        vbox.Add(default_bt, 0, wx.LEFT, 20)
+        vbox.Add(current_bt, 0, wx.LEFT, 20)
+        vbox.Add(note_txt, 0, wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, 10)
+        vbox.Add(hbox, 0, wx.ALIGN_CENTER | wx.TOP | wx.BOTTOM, 10)
+
         self.SetSizer(vbox)
-        #pos = self.parent.GetPosition()
-        #self.SetPosition(pos)
+
         
     def OnDefault(self, event=None):
         """

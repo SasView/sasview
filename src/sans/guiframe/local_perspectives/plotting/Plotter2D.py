@@ -240,11 +240,6 @@ class ModelPanel2D(ModelPanel1D):
                                    fontproperties=self.title_font,
                                    color=self.title_color)
             self.subplot.figure.canvas.draw_idle()    
-        # Update Graph menu and help string        
-        #pos = self.parent._window_menu.FindItem(self.window_caption)
-        helpString = 'Show/Hide Graph: '
-        helpString += (' ' + str(data.label) +';')
-        #self.parent._window_menu.SetHelpString(pos, helpString)
         ## store default value of zmin and zmax 
         self.default_zmin_ctl = self.zmin_2D
         self.default_zmax_ctl = self.zmax_2D
@@ -456,14 +451,6 @@ class ModelPanel2D(ModelPanel1D):
                 else:
                     raise
         dial.Destroy()
-        
-        # Update Graph menu and help string 
-        if self.title_label != None:     
-            #pos = self.parent._window_menu.FindItem(self.window_caption)
-            helpString = 'Show/Hide Graph: '
-            helpString += (' ' + str(self.title_label) +';')
-            #self.parent._window_menu.SetHelpString(pos, helpString)
-
         
     def _onEditDetector(self, event):
         """

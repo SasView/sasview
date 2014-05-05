@@ -8,7 +8,6 @@ import imp
 from os.path import abspath, dirname, split as splitpath, join as joinpath
 
 run_py = joinpath(dirname(dirname(abspath(__file__))), 'run.py')
-#print run_py
 run = imp.load_source('sasview_run', run_py)
 run.prepare()
 #print "\n".join(sys.path)

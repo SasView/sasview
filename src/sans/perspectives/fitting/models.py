@@ -46,7 +46,7 @@ def _check_plugin(model, name):
     :return model: model if valid model or None if not valid
     
     """
-    #Check is the plugin is of type Model1DPlugin
+    #Check if the plugin is of type Model1DPlugin
     if not issubclass(model, Model1DPlugin):
         msg = "Plugin %s must be of type Model1DPlugin \n" % str(name)
         log(msg)
@@ -242,21 +242,21 @@ class ModelManagerBase:
     """
     ## external dict for models
     model_combobox = ModelList()
-    ## Dictionary of form models
+    ## Dictionary of form factor models
     form_factor_dict = {}
-    ## dictionary of other
+    ## dictionary of structure factor models
     struct_factor_dict = {}
-    ##list of form factors
-    shape_list = []
-    ## independent shape model list
-    shape_indep_list = []
+    ##list of shape models -- this is superseded by categories 
+#    shape_list = []
+    ## shape independent model list-- this is superseded by categories
+#    shape_indep_list = []
     ##list of structure factors
     struct_list = []
-    ##list of model allowing multiplication
+    ##list of model allowing multiplication by a structure factor
     multiplication_factor = []
-    ##list of multifunctional shapes
+    ##list of multifunctional shapes (i.e. that have user defined number of levels
     multi_func_list = []
-    ## list of added models
+    ## list of added models -- currently python models found in the plugin dir.
     plugins = []
     ## Event owner (guiframe)
     event_owner = None
@@ -289,212 +289,236 @@ class ModelManagerBase:
         
         """
 
+        ## NOTE: as of April 26, 2014, as part of first pass on fixing categories,
+        ## all the appends to shape_list or shape_independent_list are 
+        ## commented out.  They should be possible to remove.  They are in 
+        ## fact a "category" of model whereas the other list are actually 
+        ## "attributes" of a model.  In other words is it a structure factor
+        ## that can be used against a form factor, is it a form factor that is
+        ## knows how to be multiplied by a structure factor, does it have user
+        ## defined number of parameters, etc.
+        ##
+        ## We hope this whole list will be superseded by the new C models
+        ## structure where each model will provide a method to interrogate it
+        ## about its "attributes" -- then this long list becomes a loop reading
+        ## each model in the category list to populate the "attribute"lists.  
+        ## We should also refactor the whole category vs attribute list 
+        ## structure when doing this as now the attribute lists think they are
+        ## also category lists.
+        ##
+        ##   -PDB  April 26, 2014
 
         # regular model names only
         self.model_name_list = []
         from sans.models.SphereModel import SphereModel
         self.model_dictionary[SphereModel.__name__] = SphereModel
-        self.shape_list.append(SphereModel)
+#        self.shape_list.append(SphereModel)
         self.multiplication_factor.append(SphereModel)
         self.model_name_list.append(SphereModel.__name__)
         
         from sans.models.BinaryHSModel import BinaryHSModel
         self.model_dictionary[BinaryHSModel.__name__] = BinaryHSModel
-        self.shape_list.append(BinaryHSModel)
+#        self.shape_list.append(BinaryHSModel)
         self.model_name_list.append(BinaryHSModel.__name__)
                         
         from sans.models.FuzzySphereModel import FuzzySphereModel
         self.model_dictionary[FuzzySphereModel.__name__] = FuzzySphereModel
-        self.shape_list.append(FuzzySphereModel)
+#        self.shape_list.append(FuzzySphereModel)
         self.multiplication_factor.append(FuzzySphereModel)
         self.model_name_list.append(FuzzySphereModel.__name__)
                         
         from sans.models.RaspBerryModel import RaspBerryModel
         self.model_dictionary[RaspBerryModel.__name__] = RaspBerryModel
-        self.shape_list.append(RaspBerryModel)
+#        self.shape_list.append(RaspBerryModel)
         self.model_name_list.append(RaspBerryModel.__name__)
                 
         from sans.models.CoreShellModel import CoreShellModel
         self.model_dictionary[CoreShellModel.__name__] = CoreShellModel
-        self.shape_list.append(CoreShellModel)
+#        self.shape_list.append(CoreShellModel)
         self.multiplication_factor.append(CoreShellModel)
         self.model_name_list.append(CoreShellModel.__name__)
         
         from sans.models.Core2ndMomentModel import Core2ndMomentModel
         self.model_dictionary[Core2ndMomentModel.__name__] = Core2ndMomentModel
-        self.shape_list.append(Core2ndMomentModel)
+#        self.shape_list.append(Core2ndMomentModel)
         self.model_name_list.append(Core2ndMomentModel.__name__)
         
         from sans.models.CoreMultiShellModel import CoreMultiShellModel
         self.model_dictionary[CoreMultiShellModel.__name__] = CoreMultiShellModel
-        self.shape_list.append(CoreMultiShellModel)
+#        self.shape_list.append(CoreMultiShellModel)
         self.multiplication_factor.append(CoreMultiShellModel)
         self.multi_func_list.append(CoreMultiShellModel)
 
         from sans.models.VesicleModel import VesicleModel
         self.model_dictionary[VesicleModel.__name__] = VesicleModel
-        self.shape_list.append(VesicleModel)
+#        self.shape_list.append(VesicleModel)
         self.multiplication_factor.append(VesicleModel)
         self.model_name_list.append(VesicleModel.__name__)
         
         from sans.models.MultiShellModel import MultiShellModel
         self.model_dictionary[MultiShellModel.__name__] = MultiShellModel
-        self.shape_list.append(MultiShellModel)
+#        self.shape_list.append(MultiShellModel)
         self.multiplication_factor.append(MultiShellModel)
         self.model_name_list.append(MultiShellModel.__name__)
         
         from sans.models.OnionExpShellModel import OnionExpShellModel
         self.model_dictionary[OnionExpShellModel.__name__] = OnionExpShellModel
-        self.shape_list.append(OnionExpShellModel)
+#        self.shape_list.append(OnionExpShellModel)
         self.multiplication_factor.append(OnionExpShellModel)
         self.multi_func_list.append(OnionExpShellModel)
                          
         from sans.models.SphericalSLDModel import SphericalSLDModel
         self.model_dictionary[SphericalSLDModel.__name__] = SphericalSLDModel
-        self.shape_list.append(SphericalSLDModel)
+#        self.shape_list.append(SphericalSLDModel)
         self.multiplication_factor.append(SphericalSLDModel)
         self.multi_func_list.append(SphericalSLDModel)
 
         
         from sans.models.LinearPearlsModel import LinearPearlsModel
         self.model_dictionary[LinearPearlsModel.__name__] = LinearPearlsModel
-        self.shape_list.append(LinearPearlsModel)
+#        self.shape_list.append(LinearPearlsModel)
         self.model_name_list.append(LinearPearlsModel.__name__)
           
         from sans.models.PearlNecklaceModel import PearlNecklaceModel
         self.model_dictionary[PearlNecklaceModel.__name__] = PearlNecklaceModel
-        self.shape_list.append(PearlNecklaceModel)
+#        self.shape_list.append(PearlNecklaceModel)
         self.model_name_list.append(PearlNecklaceModel.__name__)
         #self.multiplication_factor.append(PearlNecklaceModel)
         
         from sans.models.CylinderModel import CylinderModel
         self.model_dictionary[CylinderModel.__name__] = CylinderModel
-        self.shape_list.append(CylinderModel)
+#        self.shape_list.append(CylinderModel)
         self.multiplication_factor.append(CylinderModel)
         self.model_name_list.append(CylinderModel.__name__)
         
         from sans.models.CoreShellCylinderModel import CoreShellCylinderModel
         self.model_dictionary[CoreShellCylinderModel.__name__] = CoreShellCylinderModel
-        self.shape_list.append(CoreShellCylinderModel)
+#        self.shape_list.append(CoreShellCylinderModel)
         self.multiplication_factor.append(CoreShellCylinderModel)
         self.model_name_list.append(CoreShellCylinderModel.__name__)
         
         from sans.models.CoreShellBicelleModel import CoreShellBicelleModel
         self.model_dictionary[CoreShellBicelleModel.__name__] = CoreShellBicelleModel
-        self.shape_list.append(CoreShellBicelleModel)
+#        self.shape_list.append(CoreShellBicelleModel)
         self.multiplication_factor.append(CoreShellBicelleModel)
         self.model_name_list.append(CoreShellBicelleModel.__name__)
                 
         from sans.models.HollowCylinderModel import HollowCylinderModel
         self.model_dictionary[HollowCylinderModel.__name__] = HollowCylinderModel
-        self.shape_list.append(HollowCylinderModel)
+#        self.shape_list.append(HollowCylinderModel)
         self.multiplication_factor.append(HollowCylinderModel)
         self.model_name_list.append(HollowCylinderModel.__name__)
               
         from sans.models.FlexibleCylinderModel import FlexibleCylinderModel
         self.model_dictionary[FlexibleCylinderModel.__name__] = FlexibleCylinderModel
-        self.shape_list.append(FlexibleCylinderModel)
+#        self.shape_list.append(FlexibleCylinderModel)
         self.model_name_list.append(FlexibleCylinderModel.__name__)
 
         from sans.models.FlexCylEllipXModel import FlexCylEllipXModel
         self.model_dictionary[FlexCylEllipXModel.__name__] = FlexCylEllipXModel
-        self.shape_list.append(FlexCylEllipXModel)
+#        self.shape_list.append(FlexCylEllipXModel)
         self.model_name_list.append(FlexCylEllipXModel.__name__)
         
         from sans.models.StackedDisksModel import StackedDisksModel
         self.model_dictionary[StackedDisksModel.__name__] = StackedDisksModel
-        self.shape_list.append(StackedDisksModel)
+#        self.shape_list.append(StackedDisksModel)
         self.multiplication_factor.append(StackedDisksModel)
         self.model_name_list.append(StackedDisksModel.__name__)
         
         from sans.models.ParallelepipedModel import ParallelepipedModel
         self.model_dictionary[ParallelepipedModel.__name__] = ParallelepipedModel
-        self.shape_list.append(ParallelepipedModel)
+#        self.shape_list.append(ParallelepipedModel)
         self.multiplication_factor.append(ParallelepipedModel)
         self.model_name_list.append(ParallelepipedModel.__name__)
         
         from sans.models.CSParallelepipedModel import CSParallelepipedModel
         self.model_dictionary[CSParallelepipedModel.__name__] = CSParallelepipedModel
-        self.shape_list.append(CSParallelepipedModel)
+#        self.shape_list.append(CSParallelepipedModel)
         self.multiplication_factor.append(CSParallelepipedModel)
         self.model_name_list.append(CSParallelepipedModel.__name__)
         
         from sans.models.EllipticalCylinderModel import EllipticalCylinderModel
         self.model_dictionary[EllipticalCylinderModel.__name__] = EllipticalCylinderModel
-        self.shape_list.append(EllipticalCylinderModel)
+#        self.shape_list.append(EllipticalCylinderModel)
         self.multiplication_factor.append(EllipticalCylinderModel)
         self.model_name_list.append(EllipticalCylinderModel.__name__)
         
         from sans.models.BarBellModel import BarBellModel
         self.model_dictionary[BarBellModel.__name__] = BarBellModel
-        self.shape_list.append(BarBellModel)
+#        self.shape_list.append(BarBellModel)
         self.model_name_list.append(BarBellModel.__name__)
         # not implemeted yet!
         #self.multiplication_factor.append(BarBellModel)
         
         from sans.models.CappedCylinderModel import CappedCylinderModel
         self.model_dictionary[CappedCylinderModel.__name__] = CappedCylinderModel
-        self.shape_list.append(CappedCylinderModel)
+ #       self.shape_list.append(CappedCylinderModel)
         self.model_name_list.append(CappedCylinderModel.__name__)
         # not implemeted yet!
         #self.multiplication_factor.append(CappedCylinderModel)
         
         from sans.models.EllipsoidModel import EllipsoidModel
         self.model_dictionary[EllipsoidModel.__name__] = EllipsoidModel
-        self.shape_list.append(EllipsoidModel)
+#        self.shape_list.append(EllipsoidModel)
         self.multiplication_factor.append(EllipsoidModel)
         self.model_name_list.append(EllipsoidModel.__name__)
       
         from sans.models.CoreShellEllipsoidModel import CoreShellEllipsoidModel
         self.model_dictionary[CoreShellEllipsoidModel.__name__] = CoreShellEllipsoidModel
-        self.shape_list.append(CoreShellEllipsoidModel)
+#        self.shape_list.append(CoreShellEllipsoidModel)
         self.multiplication_factor.append(CoreShellEllipsoidModel)
         self.model_name_list.append(CoreShellEllipsoidModel.__name__)
+
+        from sans.models.CoreShellEllipsoidXTModel import CoreShellEllipsoidXTModel
+        self.model_dictionary[CoreShellEllipsoidXTModel.__name__] = CoreShellEllipsoidXTModel
+#        self.shape_list.append(CoreShellEllipsoidXTModel)
+        self.multiplication_factor.append(CoreShellEllipsoidXTModel)
+        self.model_name_list.append(CoreShellEllipsoidXTModel.__name__)
          
         from sans.models.TriaxialEllipsoidModel import TriaxialEllipsoidModel
         self.model_dictionary[TriaxialEllipsoidModel.__name__] = TriaxialEllipsoidModel
-        self.shape_list.append(TriaxialEllipsoidModel)
+#        self.shape_list.append(TriaxialEllipsoidModel)
         self.multiplication_factor.append(TriaxialEllipsoidModel)
         self.model_name_list.append(TriaxialEllipsoidModel.__name__)
         
         from sans.models.LamellarModel import LamellarModel
         self.model_dictionary[LamellarModel.__name__] = LamellarModel
-        self.shape_list.append(LamellarModel)
+#        self.shape_list.append(LamellarModel)
         self.model_name_list.append(LamellarModel.__name__)
         
         from sans.models.LamellarFFHGModel import LamellarFFHGModel
         self.model_dictionary[LamellarFFHGModel.__name__] = LamellarFFHGModel
-        self.shape_list.append(LamellarFFHGModel)
+#        self.shape_list.append(LamellarFFHGModel)
         self.model_name_list.append(LamellarFFHGModel.__name__)
         
         from sans.models.LamellarPSModel import LamellarPSModel
         self.model_dictionary[LamellarPSModel.__name__] = LamellarPSModel
-        self.shape_list.append(LamellarPSModel)
+#        self.shape_list.append(LamellarPSModel)
         self.model_name_list.append(LamellarPSModel.__name__)
      
         from sans.models.LamellarPSHGModel import LamellarPSHGModel
         self.model_dictionary[LamellarPSHGModel.__name__] = LamellarPSHGModel
-        self.shape_list.append(LamellarPSHGModel)
+#        self.shape_list.append(LamellarPSHGModel)
         self.model_name_list.append(LamellarPSHGModel.__name__)
         
         from sans.models.LamellarPCrystalModel import LamellarPCrystalModel
         self.model_dictionary[LamellarPCrystalModel.__name__] = LamellarPCrystalModel
-        self.shape_list.append(LamellarPCrystalModel)
+#        self.shape_list.append(LamellarPCrystalModel)
         self.model_name_list.append(LamellarPCrystalModel.__name__)
         
         from sans.models.SCCrystalModel import SCCrystalModel
         self.model_dictionary[SCCrystalModel.__name__] = SCCrystalModel
-        self.shape_list.append(SCCrystalModel)
+#        self.shape_list.append(SCCrystalModel)
         self.model_name_list.append(SCCrystalModel.__name__)
         
         from sans.models.FCCrystalModel import FCCrystalModel
         self.model_dictionary[FCCrystalModel.__name__] = FCCrystalModel
-        self.shape_list.append(FCCrystalModel)
+#        self.shape_list.append(FCCrystalModel)
         self.model_name_list.append(FCCrystalModel.__name__)
         
         from sans.models.BCCrystalModel import BCCrystalModel
         self.model_dictionary[BCCrystalModel.__name__] = BCCrystalModel
-        self.shape_list.append(BCCrystalModel)
+#        self.shape_list.append(BCCrystalModel)
         self.model_name_list.append(BCCrystalModel.__name__)
       
         ## Structure factor
@@ -522,175 +546,175 @@ class ModelManagerBase:
         ##shape-independent models
         from sans.models.PowerLawAbsModel import PowerLawAbsModel
         self.model_dictionary[PowerLawAbsModel.__name__] = PowerLawAbsModel
-        self.shape_indep_list.append(PowerLawAbsModel)
+#        self.shape_indep_list.append(PowerLawAbsModel)
         self.model_name_list.append(PowerLawAbsModel.__name__)
         
         from sans.models.BEPolyelectrolyte import BEPolyelectrolyte
         self.model_dictionary[BEPolyelectrolyte.__name__] = BEPolyelectrolyte
-        self.shape_indep_list.append(BEPolyelectrolyte)
+#        self.shape_indep_list.append(BEPolyelectrolyte)
         self.model_name_list.append(BEPolyelectrolyte.__name__)
         self.form_factor_dict[str(wx.NewId())] =  [SphereModel]
         
         from sans.models.BroadPeakModel import BroadPeakModel
         self.model_dictionary[BroadPeakModel.__name__] = BroadPeakModel
-        self.shape_indep_list.append(BroadPeakModel)
+#        self.shape_indep_list.append(BroadPeakModel)
         self.model_name_list.append(BroadPeakModel.__name__)
         
         from sans.models.CorrLengthModel import CorrLengthModel
         self.model_dictionary[CorrLengthModel.__name__] = CorrLengthModel
-        self.shape_indep_list.append(CorrLengthModel)
+#        self.shape_indep_list.append(CorrLengthModel)
         self.model_name_list.append(CorrLengthModel.__name__)
         
         from sans.models.DABModel import DABModel
         self.model_dictionary[DABModel.__name__] = DABModel
-        self.shape_indep_list.append(DABModel)
+#        self.shape_indep_list.append(DABModel)
         self.model_name_list.append(DABModel.__name__)
         
         from sans.models.DebyeModel import DebyeModel
         self.model_dictionary[DebyeModel.__name__] = DebyeModel
-        self.shape_indep_list.append(DebyeModel)
+#        self.shape_indep_list.append(DebyeModel)
         self.model_name_list.append(DebyeModel.__name__)
         
         from sans.models.FractalModel import FractalModel
         self.model_dictionary[FractalModel.__name__] = FractalModel
-        self.shape_indep_list.append(FractalModel)
+#        self.shape_indep_list.append(FractalModel)
         self.model_name_list.append(FractalModel.__name__)
         
         from sans.models.FractalCoreShellModel import FractalCoreShellModel
         self.model_dictionary[FractalCoreShellModel.__name__] = FractalCoreShellModel
-        self.shape_indep_list.append(FractalCoreShellModel)
+#        self.shape_indep_list.append(FractalCoreShellModel)
         self.model_name_list.append(FractalCoreShellModel.__name__)
         
         from sans.models.GaussLorentzGelModel import GaussLorentzGelModel
         self.model_dictionary[GaussLorentzGelModel.__name__] = GaussLorentzGelModel
-        self.shape_indep_list.append(GaussLorentzGelModel)
+#        self.shape_indep_list.append(GaussLorentzGelModel)
         self.model_name_list.append(GaussLorentzGelModel.__name__)
                 
         from sans.models.GuinierModel import GuinierModel
         self.model_dictionary[GuinierModel.__name__] = GuinierModel
-        self.shape_indep_list.append(GuinierModel)
+#        self.shape_indep_list.append(GuinierModel)
         self.model_name_list.append(GuinierModel.__name__)
         
         from sans.models.GuinierPorodModel import GuinierPorodModel
         self.model_dictionary[GuinierPorodModel.__name__] = GuinierPorodModel
-        self.shape_indep_list.append(GuinierPorodModel)
+#        self.shape_indep_list.append(GuinierPorodModel)
         self.model_name_list.append(GuinierPorodModel.__name__)
 
         from sans.models.LorentzModel import LorentzModel
         self.model_dictionary[LorentzModel.__name__] = LorentzModel
-        self.shape_indep_list.append(LorentzModel)
+#        self.shape_indep_list.append(LorentzModel)
         self.model_name_list.append(LorentzModel.__name__)
 
         from sans.models.MassFractalModel import MassFractalModel
         self.model_dictionary[MassFractalModel.__name__] = MassFractalModel
-        self.shape_indep_list.append(MassFractalModel)
+#        self.shape_indep_list.append(MassFractalModel)
         self.model_name_list.append(MassFractalModel.__name__)
         
         from sans.models.MassSurfaceFractal import MassSurfaceFractal
         self.model_dictionary[MassSurfaceFractal.__name__] = MassSurfaceFractal
-        self.shape_indep_list.append(MassSurfaceFractal)
+#        self.shape_indep_list.append(MassSurfaceFractal)
         self.model_name_list.append(MassSurfaceFractal.__name__)
         
         from sans.models.PeakGaussModel import PeakGaussModel
         self.model_dictionary[PeakGaussModel.__name__] = PeakGaussModel
-        self.shape_indep_list.append(PeakGaussModel)
+#        self.shape_indep_list.append(PeakGaussModel)
         self.model_name_list.append(PeakGaussModel.__name__)
         
         from sans.models.PeakLorentzModel import PeakLorentzModel
         self.model_dictionary[PeakLorentzModel.__name__] = PeakLorentzModel
-        self.shape_indep_list.append(PeakLorentzModel)
+#        self.shape_indep_list.append(PeakLorentzModel)
         self.model_name_list.append(PeakLorentzModel.__name__)
         
         from sans.models.Poly_GaussCoil import Poly_GaussCoil
         self.model_dictionary[Poly_GaussCoil.__name__] = Poly_GaussCoil
-        self.shape_indep_list.append(Poly_GaussCoil)
+#        self.shape_indep_list.append(Poly_GaussCoil)
         self.model_name_list.append(Poly_GaussCoil.__name__)
         
         from sans.models.PolymerExclVolume import PolymerExclVolume
         self.model_dictionary[PolymerExclVolume.__name__] = PolymerExclVolume
-        self.shape_indep_list.append(PolymerExclVolume)
+#        self.shape_indep_list.append(PolymerExclVolume)
         self.model_name_list.append(PolymerExclVolume.__name__)
         
         from sans.models.PorodModel import PorodModel
         self.model_dictionary[PorodModel.__name__] = PorodModel
-        self.shape_indep_list.append(PorodModel)
+#        self.shape_indep_list.append(PorodModel)
         self.model_name_list.append(PorodModel.__name__)
         
         from sans.models.RPA10Model import RPA10Model
         self.model_dictionary[RPA10Model.__name__] = RPA10Model
-        self.shape_indep_list.append(RPA10Model)
+#        self.shape_indep_list.append(RPA10Model)
         self.multi_func_list.append(RPA10Model)
 
         from sans.models.StarPolymer import StarPolymer
         self.model_dictionary[StarPolymer.__name__] = StarPolymer
-        self.shape_indep_list.append(StarPolymer)
+#        self.shape_indep_list.append(StarPolymer)
         self.model_name_list.append(StarPolymer.__name__)
 
         from sans.models.SurfaceFractalModel import SurfaceFractalModel
         self.model_dictionary[SurfaceFractalModel.__name__] = SurfaceFractalModel
-        self.shape_indep_list.append(SurfaceFractalModel)
+#        self.shape_indep_list.append(SurfaceFractalModel)
         self.model_name_list.append(SurfaceFractalModel.__name__)
         
         from sans.models.TeubnerStreyModel import TeubnerStreyModel
         self.model_dictionary[TeubnerStreyModel.__name__] = TeubnerStreyModel
-        self.shape_indep_list.append(TeubnerStreyModel)
+#        self.shape_indep_list.append(TeubnerStreyModel)
         self.model_name_list.append(TeubnerStreyModel.__name__)
 
         from sans.models.TwoLorentzianModel import TwoLorentzianModel
         self.model_dictionary[TwoLorentzianModel.__name__] = TwoLorentzianModel
-        self.shape_indep_list.append(TwoLorentzianModel)
+#        self.shape_indep_list.append(TwoLorentzianModel)
         self.model_name_list.append(TwoLorentzianModel.__name__)
         
         from sans.models.TwoPowerLawModel import TwoPowerLawModel
         self.model_dictionary[TwoPowerLawModel.__name__] = TwoPowerLawModel
-        self.shape_indep_list.append(TwoPowerLawModel)
+#        self.shape_indep_list.append(TwoPowerLawModel)
         self.model_name_list.append(TwoPowerLawModel.__name__)
         
         from sans.models.UnifiedPowerRgModel import UnifiedPowerRgModel
         self.model_dictionary[UnifiedPowerRgModel.__name__] = UnifiedPowerRgModel
-        self.shape_indep_list.append(UnifiedPowerRgModel)
+#        self.shape_indep_list.append(UnifiedPowerRgModel)
         self.multi_func_list.append(UnifiedPowerRgModel)
 
         from sans.models.LineModel import LineModel
         self.model_dictionary[LineModel.__name__] = LineModel
-        self.shape_indep_list.append(LineModel)
+#        self.shape_indep_list.append(LineModel)
         self.model_name_list.append(LineModel.__name__)
         
         from sans.models.ReflectivityModel import ReflectivityModel
         self.model_dictionary[ReflectivityModel.__name__] = ReflectivityModel
-        self.shape_indep_list.append(ReflectivityModel)
+#        self.shape_indep_list.append(ReflectivityModel)
         self.multi_func_list.append(ReflectivityModel)
         
         from sans.models.ReflectivityIIModel import ReflectivityIIModel
         self.model_dictionary[ReflectivityIIModel.__name__] = ReflectivityIIModel
-        self.shape_indep_list.append(ReflectivityIIModel)
+#        self.shape_indep_list.append(ReflectivityIIModel)
         self.multi_func_list.append(ReflectivityIIModel)
         
         from sans.models.GelFitModel import GelFitModel
         self.model_dictionary[GelFitModel.__name__] = GelFitModel
-        self.shape_indep_list.append(GelFitModel)
+#        self.shape_indep_list.append(GelFitModel)
         self.model_name_list.append(GelFitModel.__name__)
 
         from sans.models.PringlesModel import PringlesModel
         self.model_dictionary[PringlesModel.__name__] = PringlesModel
-        self.shape_indep_list.append(PringlesModel)
+#        self.shape_indep_list.append(PringlesModel)
         self.model_name_list.append(PringlesModel.__name__)
 
         from sans.models.RectangularPrismModel import RectangularPrismModel
         self.model_dictionary[RectangularPrismModel.__name__] = RectangularPrismModel
-        self.shape_list.append(RectangularPrismModel)
+#        self.shape_list.append(RectangularPrismModel)
         self.multiplication_factor.append(RectangularPrismModel)
         self.model_name_list.append(RectangularPrismModel.__name__)
 
         from sans.models.RectangularHollowPrismInfThinWallsModel import RectangularHollowPrismInfThinWallsModel
         self.model_dictionary[RectangularHollowPrismInfThinWallsModel.__name__] = RectangularHollowPrismInfThinWallsModel
-        self.shape_list.append(RectangularHollowPrismInfThinWallsModel)
+#        self.shape_list.append(RectangularHollowPrismInfThinWallsModel)
         self.multiplication_factor.append(RectangularHollowPrismInfThinWallsModel)
         self.model_name_list.append(RectangularHollowPrismInfThinWallsModel.__name__)
 
         from sans.models.RectangularHollowPrismModel import RectangularHollowPrismModel
         self.model_dictionary[RectangularHollowPrismModel.__name__] = RectangularHollowPrismModel
-        self.shape_list.append(RectangularHollowPrismModel)
+#        self.shape_list.append(RectangularHollowPrismModel)
         self.multiplication_factor.append(RectangularHollowPrismModel)
         self.model_name_list.append(RectangularHollowPrismModel.__name__)
 
@@ -760,138 +784,148 @@ class ModelManagerBase:
         self.model_combobox.reset_list("Customized Models", self.plugins)
         return self.model_combobox.get_list()
        
-    def populate_menu(self, modelmenu, event_owner):
-        """
-        Populate a menu with our models
-        
-        :param id: first menu event ID to use when binding the menu events
-        :param modelmenu: wx.Menu object to populate
-        :param event_owner: wx object to bind the menu events to
-        
-        :return: the next free event ID following the new menu events
-        
-        """
+##   I believe the next four methods are for the old form factor GUI
+##   where the dropdown showed a list of categories which then rolled out
+##   in a second dropdown to the side. Some testing shows they indeed no longer
+##   seem to be called.  If no problems are found during testing of release we
+##   can remove this huge chunck of stuff.
+##
+##   -PDB  April 26, 2014
+
+#   def populate_menu(self, modelmenu, event_owner):
+#       """
+#       Populate a menu with our models
+#       
+#       :param id: first menu event ID to use when binding the menu events
+#       :param modelmenu: wx.Menu object to populate
+#       :param event_owner: wx object to bind the menu events to
+#       
+#       :return: the next free event ID following the new menu events
+#       
+#       """
+# 
         ## Fill model lists
-        self._getModelList()
+#        self._getModelList()
         ## store reference to model menu of guiframe
-        self.modelmenu = modelmenu
+#        self.modelmenu = modelmenu
         ## guiframe reference
-        self.event_owner = event_owner
+#        self.event_owner = event_owner
         
-        shape_submenu = wx.Menu()
-        shape_indep_submenu = wx.Menu()
-        structure_factor = wx.Menu()
-        added_models = wx.Menu()
-        multip_models = wx.Menu()
+#        shape_submenu = wx.Menu()
+#        shape_indep_submenu = wx.Menu()
+#        structure_factor = wx.Menu()
+#        added_models = wx.Menu()
+#        multip_models = wx.Menu()
         ## create menu with shape
-        self._fill_simple_menu(menuinfo=["Shapes",
-                                         shape_submenu,
-                                         " simple shape"],
-                         list1=self.shape_list)
+#        self._fill_simple_menu(menuinfo=["Shapes",
+#                                         shape_submenu,
+#                                         " simple shape"],
+#                         list1=self.shape_list)
         
-        self._fill_simple_menu(menuinfo=["Shape-Independent",
-                                         shape_indep_submenu,
-                                         "List of shape-independent models"],
-                         list1=self.shape_indep_list)
+#        self._fill_simple_menu(menuinfo=["Shape-Independent",
+#                                         shape_indep_submenu,
+#                                         "List of shape-independent models"],
+#                         list1=self.shape_indep_list)
         
-        self._fill_simple_menu(menuinfo=["Structure Factors",
-                                         structure_factor,
-                                         "List of Structure factors models"],
-                                list1=self.struct_list)
+#        self._fill_simple_menu(menuinfo=["Structure Factors",
+#                                         structure_factor,
+#                                         "List of Structure factors models"],
+#                                list1=self.struct_list)
         
-        self._fill_plugin_menu(menuinfo=["Customized Models", added_models,
-                                            "List of additional models"],
-                                 list1=self.plugins)
+#        self._fill_plugin_menu(menuinfo=["Customized Models", added_models,
+#                                            "List of additional models"],
+#                                 list1=self.plugins)
         
-        self._fill_menu(menuinfo=["P(Q)*S(Q)", multip_models,
-                                  "mulplication of 2 models"],
-                                   list1=self.multiplication_factor,
-                                   list2=self.struct_list)
-        return 0
+#        self._fill_menu(menuinfo=["P(Q)*S(Q)", multip_models,
+#                                  "mulplication of 2 models"],
+#                                   list1=self.multiplication_factor,
+#                                   list2=self.struct_list)
+#        return 0
     
-    def _fill_plugin_menu(self, menuinfo, list1):
-        """
-        fill the plugin menu with costumized models
-        """
-        if len(list1) == 0:
-            id = wx.NewId()
-            msg = "No model available check plugins.log for errors to fix problem"
-            menuinfo[1].Append(int(id), "Empty", msg)
-        self._fill_simple_menu(menuinfo, list1)
+#    def _fill_plugin_menu(self, menuinfo, list1):
+#        """
+#        fill the plugin menu with costumized models
+#        """
+#        print ("got to fill plugin menu")
+#        if len(list1) == 0:
+#            id = wx.NewId()
+#            msg = "No model available check plugins.log for errors to fix problem"
+#            menuinfo[1].Append(int(id), "Empty", msg)
+#        self._fill_simple_menu(menuinfo, list1)
         
-    def _fill_simple_menu(self, menuinfo, list1):
-        """
-        Fill the menu with list item
-        
-        :param modelmenu: the menu to fill
-        :param menuinfo: submenu item for the first column of this modelmenu
-                         with info.Should be a list :
-                         [name(string) , menu(wx.menu), help(string)]
-        :param list1: contains item (form factor )to fill modelmenu second column
-        
-        """
-        if len(list1) > 0:
-            self.model_combobox.set_list(menuinfo[0], list1)
+#   def _fill_simple_menu(self, menuinfo, list1):
+#       """
+#       Fill the menu with list item
+#       
+#       :param modelmenu: the menu to fill
+#       :param menuinfo: submenu item for the first column of this modelmenu
+#                        with info.Should be a list :
+#                        [name(string) , menu(wx.menu), help(string)]
+#       :param list1: contains item (form factor )to fill modelmenu second column
+#       
+#       """
+#       if len(list1) > 0:
+#           self.model_combobox.set_list(menuinfo[0], list1)
             
-            for item in list1:
-                try:
-                    id = wx.NewId()
-                    struct_factor = item()
-                    struct_name = struct_factor.__class__.__name__
-                    if hasattr(struct_factor, "name"):
-                        struct_name = struct_factor.name
-                        
-                    menuinfo[1].Append(int(id), struct_name, struct_name)
-                    if not  item in self.struct_factor_dict.itervalues():
-                        self.struct_factor_dict[str(id)] = item
-                    wx.EVT_MENU(self.event_owner, int(id), self._on_model)
-                except:
-                    msg = "Error Occured: %s" % sys.exc_value
-                    wx.PostEvent(self.event_owner, StatusEvent(status=msg))
-                
-        id = wx.NewId()
-        self.modelmenu.AppendMenu(id, menuinfo[0], menuinfo[1], menuinfo[2])
-        
-    def _fill_menu(self, menuinfo, list1, list2):
-        """
-        Fill the menu with list item
-        
-        :param menuinfo: submenu item for the first column of this modelmenu
-                         with info.Should be a list :
-                         [name(string) , menu(wx.menu), help(string)]
-        :param list1: contains item (form factor )to fill modelmenu second column
-        :param list2: contains item (Structure factor )to fill modelmenu
-                third column
-                
-        """
-        if len(list1) > 0:
-            self.model_combobox.set_list(menuinfo[0], list1)
-            
-            for item in list1:
-                form_factor = item()
-                form_name = form_factor.__class__.__name__
-                if hasattr(form_factor, "name"):
-                    form_name = form_factor.name
-                ### store form factor to return to other users
-                newmenu = wx.Menu()
-                if len(list2) > 0:
-                    for model  in list2:
-                        id = wx.NewId()
-                        struct_factor = model()
-                        name = struct_factor.__class__.__name__
-                        if hasattr(struct_factor, "name"):
-                            name = struct_factor.name
-                        newmenu.Append(id, name, name)
-                        wx.EVT_MENU(self.event_owner, int(id), self._on_model)
-                        ## save form_fact and struct_fact
-                        self.form_factor_dict[int(id)] = [form_factor,
-                                                          struct_factor]
-                        
-                form_id = wx.NewId()
-                menuinfo[1].AppendMenu(int(form_id), form_name,
-                                       newmenu, menuinfo[2])
-        id = wx.NewId()
-        self.modelmenu.AppendMenu(id, menuinfo[0], menuinfo[1], menuinfo[2])
+#            for item in list1:
+#                try:
+#                    id = wx.NewId()
+#                    struct_factor = item()
+#                    struct_name = struct_factor.__class__.__name__
+#                    if hasattr(struct_factor, "name"):
+#                        struct_name = struct_factor.name
+#                        
+#                    menuinfo[1].Append(int(id), struct_name, struct_name)
+#                    if not  item in self.struct_factor_dict.itervalues():
+#                        self.struct_factor_dict[str(id)] = item
+#                    wx.EVT_MENU(self.event_owner, int(id), self._on_model)
+#                except:
+#                    msg = "Error Occured: %s" % sys.exc_value
+#                    wx.PostEvent(self.event_owner, StatusEvent(status=msg))
+#                
+#        id = wx.NewId()
+#        self.modelmenu.AppendMenu(id, menuinfo[0], menuinfo[1], menuinfo[2])
+#        
+#    def _fill_menu(self, menuinfo, list1, list2):
+#        """
+#        Fill the menu with list item
+#        
+#        :param menuinfo: submenu item for the first column of this modelmenu
+#                         with info.Should be a list :
+#                         [name(string) , menu(wx.menu), help(string)]
+#        :param list1: contains item (form factor )to fill modelmenu second column
+#        :param list2: contains item (Structure factor )to fill modelmenu
+#                third column
+#                
+#        """
+#        if len(list1) > 0:
+#            self.model_combobox.set_list(menuinfo[0], list1)
+#            
+#            for item in list1:
+#                form_factor = item()
+#                form_name = form_factor.__class__.__name__
+#                if hasattr(form_factor, "name"):
+#                    form_name = form_factor.name
+#                ### store form factor to return to other users
+#                newmenu = wx.Menu()
+#                if len(list2) > 0:
+#                    for model  in list2:
+#                        id = wx.NewId()
+#                        struct_factor = model()
+#                        name = struct_factor.__class__.__name__
+#                        if hasattr(struct_factor, "name"):
+#                            name = struct_factor.name
+#                        newmenu.Append(id, name, name)
+#                        wx.EVT_MENU(self.event_owner, int(id), self._on_model)
+#                        ## save form_fact and struct_fact
+#                        self.form_factor_dict[int(id)] = [form_factor,
+#                                                          struct_factor]
+#                        
+#                form_id = wx.NewId()
+#                menuinfo[1].AppendMenu(int(form_id), form_name,
+#                                       newmenu, menuinfo[2])
+#        id = wx.NewId()
+#        self.modelmenu.AppendMenu(id, menuinfo[0], menuinfo[1], menuinfo[2])
         
     def _on_model(self, evt):
         """
@@ -931,9 +965,17 @@ class ModelManagerBase:
         return dictionary of models for fitpanel use
         
         """
-        self.model_combobox.set_list("Shapes", self.shape_list)
-        self.model_combobox.set_list("Shape-Independent",
-                                     self.shape_indep_list)
+        ## Model_list now only contains attribute lists not category list.
+        ## Eventually this should be in one master list -- read in category
+        ## list then pull those models that exist and get attributes then add
+        ## to list ..and if model does not exist remove from list as now
+        ## and update json file.
+        ##
+        ## -PDB   April 26, 2014
+        
+#        self.model_combobox.set_list("Shapes", self.shape_list)
+#        self.model_combobox.set_list("Shape-Independent",
+#                                     self.shape_indep_list)
         self.model_combobox.set_list("Structure Factors", self.struct_list)
         self.model_combobox.set_list("Customized Models", self.plugins)
         self.model_combobox.set_list("P(Q)*S(Q)", self.multiplication_factor)

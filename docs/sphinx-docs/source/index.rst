@@ -3,12 +3,20 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-SasView Documentation
+SasView documentation
 =====================
 
+Contents:
+
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   User Documentation <user/user>
 
-   Developer Documentation <dev/dev>
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
