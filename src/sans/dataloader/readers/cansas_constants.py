@@ -2,18 +2,22 @@
 Information relating to the CanSAS data format. These constants are used in
 the cansas_reader.py file to read in any version of the cansas format.
 """
-class cansasConstants:
+class CansasConstants:
+    """
+    The base class to define where all of the data is to be saved by
+    cansas_reader.py.
+    """
     
-    ns = ''
+    names = ''
     format = ''
     
     
     def __init__(self):
-        self.ns = self.CANSAS_NS
+        self.names = self.CANSAS_NS
         self.format = self.CANSAS_FORMAT
     
     
-    def _iterate_namespace(self, namespace):
+    def iterate_namespace(self, namespace):
         """
         Method to iterate through a cansas constants tree based on a list of
         names
@@ -22,32 +26,37 @@ class cansasConstants:
             cansas_constants
         """
         # The current level to look through in cansas_constants.
-        return_me = currentLevel()
+        return_me = CurrentLevel()
         return_me.current_level = self.CANSAS_FORMAT.get("SASentry")
         # Defaults for variable and datatype
         return_me.ns_variable = "{0}.meta_data[\"{2}\"] = \"{1}\""
         return_me.ns_datatype = "content"
         return_me.ns_optional = True
         for name in namespace:
-            if name != "SASentry":
-                return_me.current_level = \
-                        return_me.current_level.get("children").get(name, "")
-                if return_me.current_level == "":
+            try:
+                if name != "SASentry":
                     return_me.current_level = \
-                            return_me.current_level.get("<any>", "")
-                cl_variable = return_me.current_level.get("variable", "")
-                cl_datatype = return_me.current_level.get("storeas", "")
-                cl_units_optional = \
-                            return_me.current_level.get("units_required", "")
-                # Where are how to store the variable for the given namespace
-                # CANSAS_CONSTANTS tree is hierarchical, so is no value, inherit
-                return_me.ns_variable = cl_variable if cl_variable != "" else \
-                                    return_me.ns_variable
-                return_me.ns_datatype = cl_datatype if cl_datatype != "" else \
-                                    return_me.ns_datatype
-                return_me.ns_optional = cl_units_optional if \
-                                    cl_units_optional != return_me.ns_optional \
-                                    else return_me.ns_optional
+                            return_me.current_level.get("children").get(name, "")
+                    if return_me.current_level == "":
+                        return_me.current_level = \
+                                return_me.current_level.get("<any>", "")
+                    cl_variable = return_me.current_level.get("variable", "")
+                    cl_datatype = return_me.current_level.get("storeas", "")
+                    cl_units_optional = \
+                                return_me.current_level.get("units_required", "")
+                    # Where are how to store the variable for the given namespace
+                    # CANSAS_CONSTANTS tree is hierarchical, so is no value, inherit
+                    return_me.ns_variable = cl_variable if cl_variable != "" else \
+                                        return_me.ns_variable
+                    return_me.ns_datatype = cl_datatype if cl_datatype != "" else \
+                                        return_me.ns_datatype
+                    return_me.ns_optional = cl_units_optional if \
+                                        cl_units_optional != return_me.ns_optional \
+                                        else return_me.ns_optional
+            except AttributeError:
+                return_me.ns_variable = "{0}.meta_data[\"{2}\"] = \"{1}\""
+                return_me.ns_datatype = "content"
+                return_me.ns_optional = True
         return return_me    
     
     
@@ -453,10 +462,12 @@ class cansasConstants:
                                            }
                            }
     SASINSTR_SRC = {
-                    "attributes" : {"name" : {"variable" : "{0}.source.name = \"{1}\""}},
+                    "attributes" : {"name" : {"variable" : \
+                                              "{0}.source.name = \"{1}\""}},
                     "variable" : None,
                     "children" : {
-                                  "radiation" : {"variable" : "{0}.source.radiation = \"{1}\""},
+                                  "radiation" : {"variable" : \
+                                            "{0}.source.radiation = \"{1}\""},
                                   "beam_size" : SASINSTR_SRC_BEAMSIZE,
                                   "beam_shape" : {"variable" : \
                                             "{0}.source.beam_shape = \"{1}\""},
@@ -646,7 +657,8 @@ class cansasConstants:
                         "variable" : "{0}.pixel_size.x = {1}",
                         "unit" : "pixel_size_unit",
                         "attributes" : {
-                                        "unit" : "{0}.pixel_size_unit = \"{1}\"",
+                                        "unit" : \
+                                            "{0}.pixel_size_unit = \"{1}\"",
                                         "storeas" : "content"
                                         }
                         }
@@ -654,7 +666,8 @@ class cansasConstants:
                         "variable" : "{0}.pixel_size.y = {1}",
                         "unit" : "pixel_size_unit",
                         "attributes" : {
-                                        "unit" : "{0}.pixel_size_unit = \"{1}\"",
+                                        "unit" : \
+                                            "{0}.pixel_size_unit = \"{1}\"",
                                         "storeas" : "content"
                                         }
                         }
@@ -662,7 +675,8 @@ class cansasConstants:
                         "variable" : "{0}.pixel_size.z = {1}",
                         "unit" : "pixel_size_unit",
                         "attributes" : {
-                                        "unit" : "{0}.pixel_size_unit = \"{1}\"",
+                                        "unit" : \
+                                            "{0}.pixel_size_unit = \"{1}\"",
                                         "storeas" : "content"
                                         }
                         }
@@ -739,7 +753,10 @@ class cansasConstants:
                                    }
                      }
    
-class currentLevel:
+class CurrentLevel:
+    """
+    A helper class to hold information on where you are in the constants tree
+    """
      
     current_level = ''
     ns_variable = ''
@@ -747,7 +764,7 @@ class currentLevel:
     ns_optional = True
      
     def __init__(self):
-        self.current_level = ''
+        self.current_level = {}
         self.ns_variable = ''
         self.ns_datatype = "content"
         self.ns_optional = True

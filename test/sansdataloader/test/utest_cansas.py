@@ -4,25 +4,26 @@
 import warnings
 warnings.simplefilter("ignore")
 
-import unittest
-import numpy
 import sans.dataloader.readers.cansas_reader as cansas
 from sans.dataloader.loader import Loader
 from sans.dataloader.data_info import Data1D
 from sans.dataloader.readers.xml_reader import XMLreader
 from sans.dataloader.readers.cansas_reader import Reader
-from sans.dataloader.readers.cansas_constants import cansasConstants
+from sans.dataloader.readers.cansas_constants import CansasConstants
 
 import os
 import sys
 import urllib2
 import StringIO
+import pylint as pylint
+import unittest
+import numpy
 
 from lxml import etree
 from xml.dom import minidom
  
-CANSAS_FORMAT = cansasConstants.CANSAS_FORMAT
-CANSAS_NS = cansasConstants.CANSAS_NS
+CANSAS_FORMAT = CansasConstants.CANSAS_FORMAT
+CANSAS_NS = CansasConstants.CANSAS_NS
     
 class cansas_reader(unittest.TestCase):
     
@@ -71,7 +72,7 @@ class cansas_reader(unittest.TestCase):
         
     def test_real_xml(self):
         reader = XMLreader(self.xml_valid, self.schema_1_0)
-        valid = reader.validateXML()
+        valid = reader.validate_xml()
         if valid:
             self.assertTrue(valid)
         else:
@@ -100,8 +101,8 @@ class cansas_reader(unittest.TestCase):
     def test_cansas_xml(self):
         filename = "isis_1_1_write_test.xml"
         xmlreader = XMLreader(self.isis_1_1, self.schema_1_1)
-        valid = xmlreader.validateXML()
-        xmlreader.setProcessingInstructions()
+        valid = xmlreader.validate_xml()
+        xmlreader.set_processing_instructions()
         self.assertTrue(valid)
         fo = open(self.isis_1_1)
         str = fo.read()
@@ -125,7 +126,7 @@ class cansas_reader(unittest.TestCase):
     
     def test_double_trans_spectra(self):
         xmlreader = XMLreader(self.isis_1_1_doubletrans, self.schema_1_1)
-        self.assertTrue(xmlreader.validateXML())
+        self.assertTrue(xmlreader.validate_xml())
         reader = Loader()
         data = reader.load(self.isis_1_1_doubletrans)
         for item in data:
@@ -145,38 +146,38 @@ class cansas_reader(unittest.TestCase):
     def test_load_cansas_file(self):
         valid = []
         reader1 = XMLreader(self.xml_valid, self.schema_1_0)
-        self.assertTrue(reader1.validateXML())
+        self.assertTrue(reader1.validate_xml())
         reader2 = XMLreader(self.xml_invalid, self.schema_1_0)
-        self.assertFalse(reader2.validateXML())
+        self.assertFalse(reader2.validate_xml())
         reader3 = XMLreader(self.xml_valid, self.schema_1_1)
-        self.assertFalse(reader3.validateXML())
+        self.assertFalse(reader3.validate_xml())
         reader4 = XMLreader(self.xml_invalid, self.schema_1_1)
-        self.assertFalse(reader4.validateXML())
+        self.assertFalse(reader4.validate_xml())
         reader5 = XMLreader(self.isis_1_0, self.schema_1_0)
-        self.assertTrue(reader5.validateXML())
+        self.assertTrue(reader5.validate_xml())
         reader6 = XMLreader(self.isis_1_1, self.schema_1_1)
-        self.assertTrue(reader6.validateXML())
+        self.assertTrue(reader6.validate_xml())
         reader7 = XMLreader(self.isis_1_1, self.schema_1_0)
-        self.assertFalse(reader7.validateXML())
+        self.assertFalse(reader7.validate_xml())
         
        
     def test_old_cansas_files(self):
         reader1 = XMLreader(self.cansas1d, self.schema_1_0)
-        self.assertTrue(reader1.validateXML())
+        self.assertTrue(reader1.validate_xml())
         file_loader = Loader()
         file1 = file_loader.load(self.cansas1d)
         reader2 = XMLreader(self.cansas1d_units, self.schema_1_0)
-        self.assertTrue(reader2.validateXML())
+        self.assertTrue(reader2.validate_xml())
         reader3 = XMLreader(self.cansas1d_badunits, self.schema_1_0)
-        self.assertTrue(reader3.validateXML())
+        self.assertTrue(reader3.validate_xml())
         reader4 = XMLreader(self.cansas1d_slit, self.schema_1_0)
-        self.assertTrue(reader4.validateXML())
+        self.assertTrue(reader4.validate_xml())
         
     
     def test_save_cansas_v1_0(self):
         filename = "isis_1_0_write_test.xml"
         xmlreader = XMLreader(self.isis_1_0, self.schema_1_0)
-        valid = xmlreader.validateXML()
+        valid = xmlreader.validate_xml()
         self.assertTrue(valid)
         reader_generic = Loader()
         dataloader = reader_generic.load(self.isis_1_0)
@@ -190,38 +191,38 @@ class cansas_reader(unittest.TestCase):
             return_data = reader2.read(filename)
             written_data = return_data[0]
             xmlwrite = XMLreader(filename, self.schema_1_0)
-            valid = xmlreader.validateXML()
+            valid = xmlreader.validate_xml()
             self.assertTrue(valid)
             self._check_data(written_data)
         
         
     def test_processing_instructions(self):
         reader = XMLreader(self.isis_1_1, self.schema_1_1)
-        valid = reader.validateXML()
+        valid = reader.validate_xml()
         if valid:
             ## find the processing instructions and make into a dictionary
-            dic = self.getProcessingInstructions(reader)
+            dic = self.get_processing_instructions(reader)
             self.assertTrue(dic == {'xml-stylesheet': 'type="text/xsl" href="cansas1d.xsl" '})
             
             xml = "<test><a><b><c></c></b></a></test>"
             xmldoc = minidom.parseString(xml)
             
             ## take the processing instructions and put them back in
-            xmldoc = self.setProcessingInstructions(xmldoc, dic)
+            xmldoc = self.set_processing_instructions(xmldoc, dic)
             xml_output = xmldoc.toprettyxml()
             
     
-    def setProcessingInstructions(self, minidomObject, dic):
-        xmlroot = minidomObject.firstChild
+    def set_processing_instructions(self, minidom_object, dic):
+        xmlroot = minidom_object.firstChild
         for item in dic:
-            pi = minidomObject.createProcessingInstruction(item, dic[item])
-            minidomObject.insertBefore(pi, xmlroot)
-        return minidomObject
+            pi = minidom_object.createProcessingInstruction(item, dic[item])
+            minidom_object.insertBefore(pi, xmlroot)
+        return minidom_object
     
     
-    def getProcessingInstructions(self, XMLreaderObject):
+    def get_processing_instructions(self, xml_reader_object):
         dict = {}
-        pi = XMLreaderObject.xmlroot.getprevious()
+        pi = xml_reader_object.xmlroot.getprevious()
         i = 0
         while pi is not None:
             attr = {}
