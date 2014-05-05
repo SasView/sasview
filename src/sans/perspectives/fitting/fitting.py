@@ -135,7 +135,7 @@ class Plugin(PluginBase):
         """
         self.page_finder[page_id] = FitProblemDictionary()
         
-    def _DEAD_delete_fit_problem(self, page_id):
+    def delete_fit_problem(self, page_id):
         """
         Given an ID create a fitproblem container
         """

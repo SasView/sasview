@@ -170,7 +170,7 @@ class ConsoleUpdate(FitHandler):
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                               type="progress"))
      
-    def _DEAD_starting_fit(self):
+    def starting_fit(self):
         """
         """
         wx.PostEvent(self.parent, StatusEvent(status="Starting the Fit...",
