@@ -224,10 +224,8 @@ class Plugin(PluginBase):
         self.bumps_options_menu.Enable(True)
 
         self.id_result_panel = wx.NewId()
-        self.menu1.AppendItem(self.id_result_panel, "Fit Results",
-                              "Show fit results panel")
-        wx.EVT_MENU(owner, self.id_result_panel,
-                    lambda ev: self.result_frame.Show(not self.result_frame.IsShown()))
+        self.menu1.Append(self.id_result_panel, "Fit Results", "Show fit results panel")
+        wx.EVT_MENU(owner, self.id_result_panel, lambda ev: self.result_frame.Show())
         self.menu1.AppendSeparator()
         
         self.id_reset_flag = wx.NewId()
