@@ -15,13 +15,37 @@ class BumpsMonitor(object):
     def __init__(self, handler, max_step=0):
         self.handler = handler
         self.max_step = max_step
+
     def config_history(self, history):
         history.requires(time=1, value=2, point=1, step=1)
+
     def __call__(self, history):
         self.handler.progress(history.step[0], self.max_step)
         if len(history.step)>1 and history.step[1] > history.step[0]:
             self.handler.improvement()
         self.handler.update_fit()
+
+class ConvergenceMonitor(object):
+    """
+    ConvergenceMonitor contains population summary statistics to show progress
+    of the fit.  This is a list [ (best, 0%, 25%, 50%, 75%, 100%) ] or
+    just a list [ (best, ) ] if population size is 1.
+    """
+    def __init__(self):
+        self.convergence = []
+
+    def config_history(self, history):
+        history.requires(value=1, population_values=1)
+
+    def __call__(self, history):
+        best = history.value[0]
+        try:
+            p = history.population_values[0]
+            n,p = len(p), numpy.sort(p)
+            QI,Qmid, = int(0.2*n),int(0.5*n)
+            self.convergence.append((best, p[0],p[QI],p[Qmid],p[-1-QI],p[-1]))
+        except:
+            self.convergence.append((best, ))
 
 class SasProblem(object):
     """
@@ -256,7 +280,7 @@ class BumpsFit(FitEngine):
                                  data=data)
             run_bumps(problem, result, ftol,
                       handler, curr_thread, msg_q)
-        else:
+        else: # scipy levenburg marquardt
             problem = SasProblem(param_list=self.param_list,
                                  model=model.model,
                                  data=data,
@@ -291,6 +315,7 @@ def run_bumps(problem, result, ftol, handler, curr_thread, msg_q):
     max_steps = fitopts.options.get('steps', 0) + fitopts.options.get('burn', 0)
     if 'monitors' not in options:
         options['monitors'] = [BumpsMonitor(handler, max_steps)]
+    options['monitors'] += [ ConvergenceMonitor() ]
     options['ftol'] = ftol
     fitdriver = fitters.FitDriver(fitclass, problem=problem,
                                   abort_test=abort_test, **options)
@@ -311,6 +336,12 @@ def run_bumps(problem, result, ftol, handler, curr_thread, msg_q):
     # TODO: track success better
     result.success = True
     result.theory = problem.theory
+    # For the convergence plot
+    pop = numpy.asarray(options['monitors'][-1].convergence)
+    result.convergence = 2*pop/problem.dof
+    # Bumps uncertainty state
+    try: result.uncertainty_state = fitdriver.fitter.state
+    except AttributeError: pass
 
 def run_levenburg_marquardt(problem, result, ftol):
     # This import must be here; otherwise it will be confused when more

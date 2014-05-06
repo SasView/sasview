@@ -35,6 +35,8 @@ from sans.fit.Fitting import Fit
 from .console import ConsoleUpdate
 from .fitproblem import FitProblemDictionary
 from .fitpanel import FitPanel
+from .resultpanel import ResultPanel, PlotResultEvent
+
 from .fit_thread import FitThread
 from .pagestate import Reader
 from .fitpage import Chi2UpdateEvent
@@ -220,6 +222,12 @@ class Plugin(PluginBase):
         wx.EVT_MENU(owner, self.id_bumps_options, self.on_bumps_options)
         self.bumps_options_menu = self.menu1.FindItemById(self.id_bumps_options)
         self.bumps_options_menu.Enable(True)
+
+        self.id_result_panel = wx.NewId()
+        self.menu1.AppendItem(self.id_result_panel, "Fit Results",
+                              "Show fit results panel")
+        wx.EVT_MENU(owner, self.id_result_panel,
+                    lambda ev: self.result_frame.Show(not self.result_frame.IsShown()))
         self.menu1.AppendSeparator()
         
         self.id_reset_flag = wx.NewId()
@@ -524,6 +532,10 @@ class Plugin(PluginBase):
         # List of windows used for the perspective
         self.perspective = []
         self.perspective.append(self.fit_panel.window_name)
+
+        self.result_frame = MDIFrame(self.parent, None, ResultPanel.window_caption, (220, 200))
+        self.result_panel = ResultPanel(parent=self.result_frame, manager=self)
+        self.perspective.append(self.result_panel.window_name)
        
         #index number to create random model name
         self.index_model = 0
@@ -538,6 +550,7 @@ class Plugin(PluginBase):
         loader.associate_file_reader(".fitv", self.state_reader)
         #Send the fitting panel to guiframe
         self.mypanels.append(self.fit_panel)
+        self.mypanels.append(self.result_panel)
         return self.mypanels
     
     def clear_panel(self):
@@ -1588,6 +1601,7 @@ class Plugin(PluginBase):
         msg += "Duration time: %s s.\n" % str(elapsed)
         wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                                       type="stop"))
+        wx.PostEvent(self.result_panel, PlotResultEvent(result=result))
         # reset fit_engine if changed by simul_fit
         if self._fit_engine != self._gui_engine:
             self._on_change_engine(self._gui_engine)
