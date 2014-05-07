@@ -1350,9 +1350,8 @@ class ViewerFrame(PARENT_FRAME):
             
         if config._do_aboutbox:
             self._help_menu.AppendSeparator()
-            id = wx.NewId()
-            self._help_menu.Append(id, '&About', 'Software information')
-            wx.EVT_MENU(self, id, self._onAbout)
+            self._help_menu.Append(wx.ID_ABOUT, '&About', 'Software information')
+            wx.EVT_MENU(self, wx.ID_ABOUT, self._onAbout)
         
         # Checking for updates
         id = wx.NewId()
