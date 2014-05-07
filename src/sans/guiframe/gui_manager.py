@@ -775,6 +775,8 @@ class ViewerFrame(PARENT_FRAME):
         self._add_help_menu()
         # Append item from plugin under menu file if necessary
         self._populate_file_menu()
+
+
         if not wx.VERSION_STRING >= '3.0.0.0':
             self.SetMenuBar(self._menubar)
         
@@ -1490,13 +1492,6 @@ class ViewerFrame(PARENT_FRAME):
                     wx.EVT_MENU(self, id, m_handler)
                 self._file_menu.AppendSeparator()
                 
-    def _add_menu_file(self):
-        """
-        add menu file
-        """
-        
-        # File menu
-        self._file_menu = wx.Menu()
         style1 = self.__gui_style & GUIFRAME.MULTIPLE_APPLICATIONS
         if OPEN_SAVE_MENU:
             id = wx.NewId()
@@ -1526,10 +1521,16 @@ class ViewerFrame(PARENT_FRAME):
                         'Save state of the current active analysis panel')
             wx.EVT_MENU(self, id, self._on_save_application)
             self._file_menu.AppendSeparator()
-       
         id = wx.NewId()
         self._file_menu.Append(id, '&Quit', 'Exit') 
         wx.EVT_MENU(self, id, self.Close)
+        
+    def _add_menu_file(self):
+        """
+        add menu file
+        """
+        # File menu
+        self._file_menu = wx.Menu()
         # Add sub menus
         self._menubar.Append(self._file_menu, '&File')
         
