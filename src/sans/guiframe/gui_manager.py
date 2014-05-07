@@ -1520,10 +1520,11 @@ class ViewerFrame(PARENT_FRAME):
                                                       '&Save Analysis',
                         'Save state of the current active analysis panel')
             wx.EVT_MENU(self, id, self._on_save_application)
+        if not sys.platform =='darwin':
             self._file_menu.AppendSeparator()
-        id = wx.NewId()
-        self._file_menu.Append(id, '&Quit', 'Exit') 
-        wx.EVT_MENU(self, id, self.Close)
+            id = wx.NewId()
+            self._file_menu.Append(id, '&Quit', 'Exit') 
+            wx.EVT_MENU(self, id, self.Close)
         
     def _add_menu_file(self):
         """
