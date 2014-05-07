@@ -14,6 +14,7 @@ an example.
 
 __all__ = ['Parameter', 'ParameterSet']
 
+import math
 import numpy
 import expression        
 
@@ -161,14 +162,14 @@ class Parameter(object):
         E.g.,  "       Gold .....|.... 5.2043 in [2,7]"
         """
         range = ['.']*10
-        lo,hi = p.range
-        portion = (p.value-lo)/(hi-lo)
+        lo,hi = self.range
+        portion = (self.value-lo)/(hi-lo)
         if portion < 0: portion = 0.
         elif portion >= 1: portion = 0.99999999
         bar = math.floor(portion*len(range))
         range[bar] = '|'
         range = "".join(range)
-        return "%25s %s %g in [%g,%g]"  % (p.name,range,p.value,lo,hi)
+        return "%25s %s %g in [%g,%g]"  % (self.name,range,self.value,lo,hi)
 
     def isfitted(self): return self.status == 'fitted'
     def iscomputed(self): return self.status == 'computed'
@@ -272,17 +273,19 @@ class ParameterSet(list):
         if len(parts) == 1: return self
         for p in self:
             if parts[1] == p.name:
-                if len(pars) == 2:
+                if len(parts) == 2:
                     return p
                 elif isinstance(p, ParameterSet):
                     return p._byname(parts[1:])
+                else:
+                    raise
         return None
 
     def byname(self, name):
         """Lookup parameter from dotted path"""
         parts = name.split('.')
         if parts[0] == self.name:
-            p =  _byname(self, name.split('.'))
+            p =  self._byname(name.split('.'))
             if p: return p
         raise KeyError("parameter %s not in parameter set"%name)
     

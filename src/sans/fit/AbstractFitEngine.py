@@ -427,16 +427,8 @@ class FitEngine:
             model = Model(model, data)
 
         sasmodel = model.model
-        if len(constraints) > 0:
-            for constraint in constraints:
-                name, value = constraint
-                try:
-                    model.parameterset[str(name)].set(str(value))
-                except:
-                    msg = "Fit Engine: Error occurs when setting the constraint"
-                    msg += " %s for parameter %s " % (value, name)
-                    raise ValueError, msg
-                
+        model.constraints = constraints
+
         if len(pars) > 0:
             temp = []
             for item in pars:
@@ -609,7 +601,6 @@ class FResult(object):
     """
     def __init__(self, model=None, param_list=None, data=None):
         self.calls = None
-        self.pars = []
         self.fitness = None
         self.chisqr = None
         self.pvec = []
@@ -620,7 +611,6 @@ class FResult(object):
         self.stderr = None
         self.residuals = []
         self.index = []
-        self.parameters = None
         self.model = model
         self.data = data
         self.theory = []

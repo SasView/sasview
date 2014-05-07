@@ -377,7 +377,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         """
         box_description = wx.StaticBox(self, -1,"Easy Setup ")
         boxsizer = wx.StaticBoxSizer(box_description, wx.HORIZONTAL)     
-        sizer_constraint = wx.BoxSizer(wx.HORIZONTAL|wx.LEFT|wx.RIGHT|wx.EXPAND)
+        sizer_constraint = wx.BoxSizer(wx.HORIZONTAL)
         self.model_cbox_left = wx.ComboBox(self, -1, style=wx.CB_READONLY)
         self.model_cbox_left.Clear()
         self.model_cbox_right = wx.ComboBox(self, -1, style=wx.CB_READONLY)

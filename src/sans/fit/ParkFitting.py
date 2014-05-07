@@ -121,7 +121,6 @@ class ParkModel(park.Model):
 
         """
         list_params = []
-        self.pars = []
         self.pars = fitparams
         for item in fitparams:
             for element in self.parkp:
@@ -500,9 +499,8 @@ class ParkFit(FitEngine):
         for fproblem in self.fit_arrange_dict.itervalues():
             if fproblem.get_to_fit() == 1:
                 fitproblems.append(fproblem)
-        if len(fitproblems) == 0: 
+        if len(fitproblems) == 0:
             raise RuntimeError, "No Assembly scheduled for Park fitting."
-            return
         for item in fitproblems:
             model = item.get_model()
             parkmodel = ParkModel(model.model, model.data)
@@ -511,11 +509,15 @@ class ParkFit(FitEngine):
                 for name in item.pars:
                     ind = item.pars.index(name)
                     parkmodel.model.setParam(name, item.vals[ind])
+
+            # set the constraints into the model
+            for p,v in model.constraints:
+                parkmodel.parameterset[str(p)].set(str(v))
             
             for p in parkmodel.parameterset:
                 ## does not allow status change for constraint parameters
                 if p.status != 'computed':
-                    if p.get_name()in item.pars:
+                    if p.get_name() in item.pars:
                         ## make parameters selected for 
                         #fit will be between boundaries
                         p.set(p.range)         
@@ -582,8 +584,8 @@ class ParkFit(FitEngine):
             small_result.residuals = m.residuals
             if result is not None:
                 for p in result.parameters:
-                    if p.data.name == small_result.data.name and \
-                            p.model.name == small_result.model.name:
+                    #if p.data.name == small_result.data.name and
+                    if p.model.name == small_result.model.name:
                         small_result.index = m.data.idx
                         small_result.fitness = result.fitness
                         small_result.pvec.append(p.value)

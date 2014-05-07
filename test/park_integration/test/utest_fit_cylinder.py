@@ -99,7 +99,7 @@ class TestSimultaneousFit(unittest.TestCase):
         fitter = Fit(name)
         fitter.set_data(self.data1,1)
         fitter.set_model(self.model1, 1, ['length','radius','scale'])
-        
+
         fitter.set_data(self.data2,2)
         fitter.set_model(self.model2, 2, ['radius','scale'])
         fitter.select_problem_for_fit(id=1,value=1)
@@ -109,29 +109,26 @@ class TestSimultaneousFit(unittest.TestCase):
     
     def test_park2(self):
         """ Simultaneous cylinder model fit (park)  """
-        raise NotImplementedError()
-        result1,= self._fit('park')
+        result1, result2 = self._fit('park')
         self.assert_(result1)
-        self.assertTrue(len(result1.pvec)>=0  )
-        self.assertTrue(len(result1.stderr)>= 0)
-      
-        for par in result1.parameters:
-            if par.name=='C1.length':
-                print par.name, par.value
-                self.assertTrue( math.fabs(par.value-400.0)/3.0 < par.stderr )
-            elif par.name=='C1.radius':
-                print par.name, par.value
-                self.assertTrue( math.fabs(par.value-20.0)/3.0 < par.stderr )
-            elif par.name=='C2.radius':
-                print par.name, par.value
-                self.assertTrue( math.fabs(par.value-40.0)/3.0 < par.stderr )
-            elif par.name=='C1.scale':
-                print par.name, par.value
-                self.assertTrue( math.fabs(par.value-1.0)/3.0 < par.stderr )
-            elif par.name=='C2.scale':
-                print par.name, par.value
-                self.assertTrue( math.fabs(par.value-1.0)/3.0 < par.stderr )
-            
+        self.assertTrue(len(result1.pvec)>0)
+        self.assertTrue(len(result1.stderr)>0)
+
+        for n, v, dv in zip(result1.param_list, result1.pvec, result1.stderr):
+            print "M1.%s = %s +/- %s"%(n,v,dv)
+            if n == "length":
+                self.assertTrue( math.fabs(v-400.0)/3.0 < dv )
+            elif n=='radius':
+                self.assertTrue( math.fabs(v-20.0)/3.0 < dv )
+            elif n=='scale':
+                self.assertTrue( math.fabs(v-1.0)/3.0 < dv )
+        for n, v, dv in zip(result2.param_list, result2.pvec, result2.stderr):
+            print "M2.%s = %s +/- %s"%(n,v,dv)
+            if n=='radius':
+                self.assertTrue( math.fabs(v-40.0)/3.0 < dv )
+            elif n=='scale':
+                self.assertTrue( math.fabs(v-1.0)/3.0 < dv )
+
 
 if __name__ == '__main__':
     unittest.main()        

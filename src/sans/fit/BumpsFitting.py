@@ -181,7 +181,7 @@ class MonitoredSasProblem(SasProblem):
         the cost function.
         """
         # Note: technically, unbounded fitters and unmonitored fitters are
-        self.setp(x)
+        self.setp(p)
 
         # Compute penalty for being out of bounds which increases the farther
         # you get out of bounds.  This allows derivative following algorithms
