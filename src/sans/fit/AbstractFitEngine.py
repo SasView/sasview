@@ -420,46 +420,32 @@ class FitEngine:
         :note: pars must contains only name of existing model's parameters
         
         """
-        if model == None:
-            raise ValueError, "AbstractFitEngine: Need to set model to fit"
-        
+        if not pars:
+            raise ValueError("no fitting parameters")
+
+        if model is None:
+            raise ValueError("no model to fit")
+
         if not issubclass(model.__class__, Model):
             model = Model(model, data)
 
         sasmodel = model.model
-        model.constraints = constraints
+        available_parameters = sasmodel.getParamList()
+        for p in pars:
+            if p not in available_parameters:
+                raise ValueError("parameter %s not available in model %s; use one of [%s] instead"
+                                 %(p, sasmodel.name, ", ".join(available_parameters)))
 
-        if len(pars) > 0:
-            temp = []
-            for item in pars:
-                if item in sasmodel.getParamList():
-                    temp.append(item)
-                    self.param_list.append(item)
-                else:
-                    
-                    msg = "wrong parameter %s used " % str(item)
-                    msg += "to set model %s. Choose " % str(sasmodel.name)
-                    msg += "parameter name within %s" % \
-                                str(sasmodel.getParamList())
-                    raise ValueError, msg
-              
-            #A fitArrange is already created but contains data_list only at id
-            if self.fit_arrange_dict.has_key(id):
-                self.fit_arrange_dict[id].set_model(model)
-                self.fit_arrange_dict[id].pars = pars
-            else:
-            #no fitArrange object has been create with this id
-                fitproblem = FitArrange()
-                fitproblem.set_model(model)
-                fitproblem.pars = pars
-                self.fit_arrange_dict[id] = fitproblem
-                vals = []
-                for name in pars:
-                    vals.append(sasmodel.getParam(name))
-                self.fit_arrange_dict[id].vals = vals
-        else:
-            raise ValueError, "park_integration:missing parameters"
-    
+        if id not in self.fit_arrange_dict:
+            self.fit_arrange_dict[id] = FitArrange()
+
+        self.fit_arrange_dict[id].set_model(model)
+        self.fit_arrange_dict[id].pars = pars
+        self.fit_arrange_dict[id].vals = [sasmodel.getParam(name) for name in pars]
+        self.fit_arrange_dict[id].constraints = constraints
+
+        self.param_list.extend(pars)
+
     def set_data(self, data, id, smearer=None, qmin=None, qmax=None):
         """
         Receives plottable, creates a list of data to fit,set data
@@ -541,7 +527,7 @@ class FitArrange:
         self.pars = []
         self.vals = []
         self.selected = 0
-        
+
     def set_model(self, model):
         """
         set_model save a copy of the model
@@ -593,8 +579,7 @@ class FitArrange:
         return self.selected value
         """
         return self.selected
-    
-    
+
 class FResult(object):
     """
     Storing fit result

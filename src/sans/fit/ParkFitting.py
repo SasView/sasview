@@ -36,11 +36,16 @@ class SansParameter(park.Parameter):
             :param model: the sans model to wrap as a park model
         """
         park.Parameter.__init__(self, name)
-        self._model, self._name = model, name
+        #self._model, self._name = model, name
         self.data = data
         self.model = model
         #set the value for the parameter of the given name
         self.set(model.getParam(name))
+
+        # TODO: model is missing parameter ranges for dispersion parameters
+        if name not in model.details:
+            #print "setting details for",name
+            model.details[name] = ["", None, None]
 
     def _getvalue(self):
         """
@@ -49,7 +54,7 @@ class SansParameter(park.Parameter):
         :return value the parameter associates with self.name
 
         """
-        return self._model.getParam(self.name)
+        return self.model.getParam(self.name)
 
     def _setvalue(self, value):
         """
@@ -58,7 +63,7 @@ class SansParameter(park.Parameter):
         :param value: the value to set on a given parameter
 
         """
-        self._model.setParam(self.name, value)
+        self.model.setParam(self.name, value)
 
     value = property(_getvalue, _setvalue)
 
@@ -68,7 +73,7 @@ class SansParameter(park.Parameter):
         return the range of parameter
         """
         #if not  self.name in self._model.getDispParamList():
-        lo, hi = self._model.details[self.name][1:3]
+        lo, hi = self.model.details[self.name][1:3]
         if lo is None: lo = -numpy.inf
         if hi is None: hi = numpy.inf
         if lo > hi:
@@ -88,7 +93,7 @@ class SansParameter(park.Parameter):
         :param r: the value of the range to set
 
         """
-        self._model.details[self.name][1:3] = r
+        self.model.details[self.name][1:3] = r
     range = property(_getrange, _setrange)
 
 
@@ -504,6 +509,7 @@ class ParkFit(FitEngine):
         for item in fitproblems:
             model = item.get_model()
             parkmodel = ParkModel(model.model, model.data)
+            parkmodel.pars = item.pars
             if reset_flag:
                 # reset the initial value; useful for batch
                 for name in item.pars:
@@ -511,7 +517,7 @@ class ParkFit(FitEngine):
                     parkmodel.model.setParam(name, item.vals[ind])
 
             # set the constraints into the model
-            for p,v in model.constraints:
+            for p,v in item.constraints:
                 parkmodel.parameterset[str(p)].set(str(v))
             
             for p in parkmodel.parameterset:
@@ -570,6 +576,9 @@ class ParkFit(FitEngine):
             
         except LinAlgError:
             raise ValueError, "SVD did not converge"
+
+        if result is None:
+            raise RuntimeError("park did not return a fit result")
     
         for m in self.problem.parts:
             residuals, theory = m.fitness.residuals()
@@ -577,26 +586,28 @@ class ParkFit(FitEngine):
             small_result.fitter_id = self.fitter_id
             small_result.theory = theory
             small_result.residuals = residuals
-            small_result.pvec = []
-            small_result.cov = []
-            small_result.stderr = []
-            small_result.param_list = []
-            small_result.residuals = m.residuals
-            if result is not None:
-                for p in result.parameters:
-                    #if p.data.name == small_result.data.name and
-                    if p.model.name == small_result.model.name:
-                        small_result.index = m.data.idx
-                        small_result.fitness = result.fitness
-                        small_result.pvec.append(p.value)
-                        small_result.stderr.append(p.stderr)
-                        name_split = p.name.split('.')
-                        name = name_split[1].strip()
-                        if len(name_split) > 2:
-                            name += '.' + name_split[2].strip()
-                        small_result.param_list.append(name)
-                # normalize chisq by degrees of freedom
-                small_result.fitness /= len(small_result.residuals)-len(small_result.pvec)
+            small_result.index = m.data.idx
+            small_result.fitness = result.fitness
+
+            # Extract the parameters that are part of this model; make sure
+            # they match the fitted parameters for this model, and place them
+            # in the same order as they occur in the model.
+            pars = {}
+            for p in result.parameters:
+                #if p.data.name == small_result.data.name and
+                if p.model.name == small_result.model.name:
+                    model_name, par_name = p.name.split('.', 1)
+                    pars[par_name] = (p.value, p.stderr)
+            #assert len(pars.keys()) == len(m.model.pars)
+            v,dv = zip(*[pars[p] for p in m.model.pars])
+            small_result.pvec = v
+            small_result.stderr = dv
+            small_result.param_list = m.model.pars
+
+            # normalize chisq by degrees of freedom
+            dof = len(small_result.residuals)-len(small_result.pvec)
+            small_result.fitness = numpy.sum(residuals**2)/dof
+
             result_list.append(small_result)    
         if q != None:
             q.put(result_list)

@@ -205,7 +205,6 @@ class ScipyFit(FitEngine):
         _check_param_range(model.model, self.param_list)
         
         result = FResult(model=model.model, data=data, param_list=self.param_list)
-        result.pars = fitproblem[0].pars
         result.fitter_id = self.fitter_id
         if handler is not None:
             handler.set_result(result=result)
@@ -267,7 +266,7 @@ def _check_param_range(model, param_list):
     # loop through parameterset
     for p in param_list:
         value = model.getParam(p)
-        low,high = model.details[p][1:3]
+        low,high = model.details.setdefault(p,["",None,None])[1:3]
         # if the range was defined, check the range
         if low is not None and value <= low:
             value = low + _get_zero_shift(low)

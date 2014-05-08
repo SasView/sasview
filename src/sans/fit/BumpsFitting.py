@@ -120,7 +120,7 @@ class SasProblem(object):
         Override _getrange of park parameter
         return the range of parameter
         """
-        lo, hi = self.model.details[p][1:3]
+        lo, hi = self.model.details.get(p,["",None,None])[1:3]
         if lo is None: lo = -numpy.inf
         if hi is None: hi = numpy.inf
         return lo, hi
