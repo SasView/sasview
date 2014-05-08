@@ -11,7 +11,7 @@ run_py = joinpath(dirname(dirname(abspath(__file__))), 'run.py')
 run = imp.load_source('sasview_run', run_py)
 run.prepare()
 #print "\n".join(sys.path)
-test_path,test_file = splitpath(sys.argv[1])
+test_path,test_file = splitpath(abspath(sys.argv[1]))
 print "=== testing:",sys.argv[1]
 #print test_path, test_file
 sys.argv = [sys.argv[0]]

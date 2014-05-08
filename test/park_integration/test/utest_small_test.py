@@ -26,7 +26,9 @@ class testFitModule(unittest.TestCase):
         fitter.set_model(model,1,pars1, constraints=())
         fitter.select_problem_for_fit(id=1,value=1)
         result1, = fitter.fit()
-        
+        #print result1
+        #print result1.__dict__
+
         self.assert_(result1)
         self.assertTrue(len(result1.pvec)>0 or len(result1.pvec)==0 )
         self.assertTrue(len(result1.stderr)> 0 or len(result1.stderr)==0)

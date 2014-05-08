@@ -29,7 +29,7 @@ class testFitModule(unittest.TestCase):
             fitter.set_model(model,1,pars1)
         except ValueError,exc:
             #print "ValueError was correctly raised: "+str(msg)
-            assert str(exc).startswith('wrong parameter')
+            assert str(exc).startswith('parameter param1')
         else:
             raise AssertionError("No error raised for scipy fitting with wrong parameters name to fit")
 
@@ -53,7 +53,7 @@ class testFitModule(unittest.TestCase):
 
         # The target values were generated from the following statements
         p,s,fx = result1.pvec, result1.stderr, result1.fitness
-        #print "p0,p1,s0,s1,fx_ = %g, %g, %g, %g, %g"%(p[0],p[1],s[0],s[1],fx)
+        #print "p0,p1,s0,s1,fx = %g, %g, %g, %g, %g"%(p[0],p[1],s[0],s[1],fx)
         p0,p1,s0,s1,fx_ = 3.68353, 2.61004, 0.336186, 0.105244, 1.20189
 
         if isdream:
@@ -64,7 +64,7 @@ class testFitModule(unittest.TestCase):
         else:
             self.assertTrue( abs(p[0]-p0) <= 1e-5 )
             self.assertTrue( abs(p[1]-p1) <= 1e-5 )
-            self.assertTrue( abs(fx-fx_) <= 1e-2 )
+            self.assertTrue( abs(fx-fx_) <= 1e-5 )
 
     def fit_bumps(self, alg, **opts):
         #Importing the Fit module
