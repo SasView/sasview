@@ -371,7 +371,8 @@ class Reader(XMLreader):
                 # Get the element name and set the current names level
                 tagname = node.tag.replace(base_ns, "")
                 tagname_original = tagname
-                if tagname == "fitting_plug_in":
+                if tagname == "fitting_plug_in" or tagname == "pr_inversion" or\
+                    tagname == "invariant":
                     continue
                 names.append(tagname)
                 attr = node.attrib
@@ -516,7 +517,11 @@ class Reader(XMLreader):
                     save_data1d.aperture.append(data1d)
                 else:
                     save_data1d = data1d
-                if tagname_original != "fitting_plug_in":
+                if tagname_original == "fitting_plug_in" or \
+                    tagname_original == "invariant" or \
+                    tagname_original == "pr_inversion":
+                    pass
+                else:
                     data1d = save_data1d
                     # Remove tagname from names to restore original base
                     names.remove(tagname_original)

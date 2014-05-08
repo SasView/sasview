@@ -253,6 +253,7 @@ class InvariantState(object):
         : param doc: XML document object [optional]
         : param entry_node: XML node within the XML document at which we will append the data [optional]
         """
+        # TODO: Get this to work
         from xml.dom.minidom import getDOMImplementation
         import time
         timestamp = time.time()
@@ -272,7 +273,7 @@ class InvariantState(object):
                 newdoc.documentElement.appendChild(top_element)
             else:
                 entry_node.appendChild(top_element)
-            
+                
         attr = newdoc.createAttribute("version")
         attr.nodeValue = '1.0'
         top_element.setAttributeNode(attr)
@@ -351,7 +352,7 @@ class InvariantState(object):
             fd.close()
             return None
         else:
-            return newdoc.toprettyxml()
+            return newdoc
         
     def fromXML(self, file=None, node=None):
         """
@@ -741,7 +742,7 @@ class Reader(CansasReader):
                 
                 for entry in entry_list:
                     
-                    sas_entry = self._parse_entry(entry)
+                    sas_entry, _ = self._parse_entry(entry)
                     invstate = self._parse_state(entry)
                     
                     #invstate could be None when .svs file is loaded
@@ -808,6 +809,6 @@ class Reader(CansasReader):
         doc, sasentry = self._to_xml_doc(datainfo)
         # Add the invariant information to the XML document
         if state is not None:
-            state.toXML(datainfo.name,doc=doc, entry_node=sasentry)
+            doc = state.toXML(datainfo.name,doc=doc, entry_node=sasentry)
         return doc
 
