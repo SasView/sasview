@@ -862,12 +862,10 @@ class Reader(XMLreader):
         frm = inspect.stack()[1]
         mod_name = frm[1].replace("\\", ".").replace(".pyc", "")
         mod_name = mod_name.replace(".py", "")
-        mod = mod_name.split("src.")
-        if len(mod) == 1:
-            mod_name = mod[0]
-        else:
-            mod_name = mod[1]
-        if mod_name != "sans.dataloader.readers.cansas_reader":
+        mod = mod_name.split(".")
+        last_value = len(mod) - 1
+        mod_name = mod[last_value]
+        if mod_name != "cansas_reader":
             string = self.to_string(doc, pp=False)
             doc = parseString(string)
             node_name = entry_node.tag
