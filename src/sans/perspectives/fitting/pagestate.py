@@ -19,6 +19,7 @@ import numpy
 import string
 
 import xml.dom.minidom
+from xml.dom.minidom import parseString
 from lxml import etree
 
 import sans.dataloader
@@ -671,12 +672,23 @@ class PageState(object):
         else:
             # We are appending to an existing document
             newdoc = doc
-            top_element = newdoc.createElement(FITTING_NODE_NAME)
+            try:
+                top_element = newdoc.createElement(FITTING_NODE_NAME)
+            except:
+                string = etree.tostring(doc, pretty_print=True)
+                newdoc = parseString(string)
+                top_element = newdoc.createElement(FITTING_NODE_NAME)
             if entry_node is None:
                 newdoc.documentElement.appendChild(top_element)
             else:
-                entry_node.appendChild(top_element)
-            
+                try:
+                    entry_node.appendChild(top_element)
+                except:
+                    node_name = entry_node.tag
+                    node_list = newdoc.getElementsByTagName(node_name)
+                    entry_node = node_list.item(0)
+                    entry_node.appendChild(top_element)
+                    
         attr = newdoc.createAttribute("version")
         attr.nodeValue = '1.0'
         top_element.setAttributeNode(attr)
@@ -749,7 +761,7 @@ class PageState(object):
                  
         for item in list_of_state_parameters:
             element = newdoc.createElement(item[0])
-            com = "self._toXML_helper(list=self.%s,"
+            com = "self._toXML_helper(thelist=self.%s,"
             com += " element=element, newdoc=newdoc)"
             exec com % item[1]
             inputs.appendChild(element)
@@ -761,7 +773,7 @@ class PageState(object):
             fd.close()
             return None
         else:
-            return newdoc.toprettyxml()
+            return newdoc
         
     def _fromXML_helper(self, node, list):
         """
@@ -1251,12 +1263,13 @@ class Reader(CansasReader):
                 # Create an empty state
                 state = PageState()
                 state.fromXML(node=nodes[0])
+                
         except:
             logging.info("XML document does not contain fitting information.\n %s" % sys.exc_value)
             
         return state
       
-    def _parse_entry(self, dom):
+    def _parse_save_state_entry(self, dom):
         """
         Parse a SASentry
         
@@ -1267,7 +1280,24 @@ class Reader(CansasReader):
         """
         node = dom.xpath('ns:data_class', namespaces={'ns': CANSAS_NS})
         if not node or node[0].text.lstrip().rstrip() != "Data2D":
-            return CansasReader._parse_entry(self, dom)
+            return_value, _ = self._parse_entry(dom)
+            numpy.trim_zeros(return_value.x)
+            numpy.trim_zeros(return_value.y)
+            numpy.trim_zeros(return_value.dy)
+            size_dx = return_value.dx.size
+            size_dxl = return_value.dxl.size
+            size_dxw = return_value.dxw.size
+            if size_dxl == 0 and size_dxw == 0:
+                return_value.dxl = None
+                return_value.dxw = None
+                numpy.trim_zeros(return_value.dx)
+            elif size_dx == 0:
+                return_value.dx = None
+                size_dx = size_dxl
+                numpy.trim_zeros(return_value.dxl)
+                numpy.trim_zeros(return_value.dxw)
+                            
+            return return_value, _
         
         #Parse 2D
         data_info = Data2D()
@@ -1538,7 +1568,7 @@ class Reader(CansasReader):
                                             namespaces={'ns': CANSAS_NS})
                     for entry in entry_list:
                         try:
-                            sas_entry = self._parse_entry(entry)
+                            sas_entry, _ = self._parse_save_state_entry(entry)
                         except:
                             raise
                         fitstate = self._parse_state(entry)
@@ -1607,15 +1637,16 @@ class Reader(CansasReader):
         """
         # Sanity check
         if self.cansas == True:
-            
             # Add fitting information to the XML document
             doc = self.write_toXML(datainfo, fitstate)
             # Write the XML document
-            fd = open(filename, 'w')
-            fd.write(doc.toprettyxml())
-            fd.close()
         else:
-            fitstate.toXML(file=filename)
+            doc = fitstate.toXML(file=filename)
+        
+        # Save the document no matter the type
+        fd = open(filename, 'w')
+        fd.write(doc.toprettyxml())
+        fd.close()
         
     def write_toXML(self, datainfo=None, state=None):
         """
@@ -1637,7 +1668,7 @@ class Reader(CansasReader):
             if state.data.run_name == None or state.data.run_name == {}:
                 state.data.run = [str(state.data.name)]
                 state.data.run_name[0] = state.data.name
-   
+            
             if issubclass(state.data.__class__,
                           sans.dataloader.data_info.Data1D):
                 data = state.data
@@ -1647,8 +1678,8 @@ class Reader(CansasReader):
                 doc, sasentry = self._data2d_to_xml_doc(data)
             
         if state is not None:
-            state.toXML(doc=doc, file=data.filename, entry_node=sasentry)
-            
+            doc = state.toXML(doc=doc, file=data.filename, entry_node=sasentry)
+        
         return doc
     
 # Simple html report templet

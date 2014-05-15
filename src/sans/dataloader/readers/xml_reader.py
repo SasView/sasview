@@ -16,9 +16,17 @@
 
 from lxml import etree
 from lxml.builder import E
-parser = etree.ETCompatXMLParser(remove_comments=True, remove_pis=False)
+
+PARSER = etree.ETCompatXMLParser(remove_comments=True, remove_pis=False)
 
 class XMLreader():
+    """
+    Generic XML read and write class. Mostly helper functions.
+    Makes reading/writing XML a bit easier than calling lxml libraries directly.
+    
+    :Dependencies:
+        This class requires lxml 2.3 or higher.
+    """
     
     xml = None
     xmldoc = None
@@ -26,19 +34,19 @@ class XMLreader():
     schema = None
     schemadoc = None
     encoding = None
-    processingInstructions = None
+    processing_instructions = None
     
     def __init__(self, xml = None, schema = None, root = None):
         self.xml = xml
         self.schema = schema
-        self.processingInstructions = {}
+        self.processing_instructions = {}
         if xml is not None:
-            self.setXMLFile(xml, root)
+            self.set_xml_file(xml, root)
         else:
             self.xmldoc = None
             self.xmlroot = None
         if schema is not None:
-            self.setSchema(schema)
+            self.set_schema(schema)
         else:
             self.schemadoc = None
     
@@ -46,68 +54,68 @@ class XMLreader():
         """
         Read in an XML file into memory and return an lxml dictionary
         """
-        if self.validateXML():
-            self.xmldoc = etree.parse(self.xml, parser = parser)
+        if self.validate_xml():
+            self.xmldoc = etree.parse(self.xml, parser = PARSER)
         else:
-            raise etree.ValidationError(self, self.findInvalidXML())
+            raise etree.XMLSchemaValidateError(self, self.find_invalid_xml())
         return self.xmldoc
     
-    def setXMLFile(self, xml, root = None):
+    def set_xml_file(self, xml, root = None):
         """
         Set the XML file and parse
         """
         try:
             self.xml = xml
-            self.xmldoc = etree.parse(self.xml, parser = parser)
+            self.xmldoc = etree.parse(self.xml, parser = PARSER)
             self.xmlroot = self.xmldoc.getroot()
         except Exception:
             self.xml = None
             self.xmldoc = None
             self.xmlroot = None
     
-    def setSchema(self, schema):
+    def set_schema(self, schema):
         """
         Set the schema file and parse
         """
         try:
             self.schema = schema
-            self.schemadoc = etree.parse(self.schema, parser = parser)
+            self.schemadoc = etree.parse(self.schema, parser = PARSER)
         except Exception:
             self.schema = None
             self.schemadoc = None
     
-    def validateXML(self):
+    def validate_xml(self):
         """
         Checks to see if the XML file meets the schema
         """
         valid = True
         if self.schema is not None:
-            self.parseSchemaAndDoc()
-            schemaCheck = etree.XMLSchema(self.schemadoc)
-            valid = schemaCheck.validate(self.xmldoc)
+            self.parse_schema_and_doc()
+            schema_check = etree.XMLSchema(self.schemadoc)
+            valid = schema_check.validate(self.xmldoc)
         return valid
     
-    def findInvalidXML(self):
+    def find_invalid_xml(self):
         """
         Finds the first offending element that should not be present in XML file
         """
-        firstError = ""
-        self.parseSchemaAndDoc()
+        first_error = ""
+        self.parse_schema_and_doc()
         schema = etree.XMLSchema(self.schemadoc)
         try:
-            firstError = schema.assertValid(self.xmldoc)
+            first_error = schema.assertValid(self.xmldoc)
         except etree.DocumentInvalid as e:
-            firstError = str(e)
-        return firstError
+            first_error = str(e)
+        return first_error
     
-    def parseSchemaAndDoc(self):
+    def parse_schema_and_doc(self):
         """
         Creates a dictionary of the parsed schema and xml files.
         """
-        self.setXMLFile(self.xml)
-        self.setSchema(self.schema)
+        self.set_xml_file(self.xml)
+        self.set_schema(self.schema)
         
-    def toString(self, elem, pp=False, encoding=None):
+    def to_string(self, elem, pp=False, encoding=None):
         """
         Converts an etree element into a string
         """
@@ -128,15 +136,15 @@ class XMLreader():
         dic[new_pi_name] = attr
         return dic
     
-    def setProcessingInstructions(self):
+    def set_processing_instructions(self):
         """
         Take out all processing instructions and create a dictionary from them
         If there is a default encoding, the value is also saved
         """
         dic = {}
-        pi = self.xmlroot.getprevious()
-        while pi is not None:
-            pi_string = self.toString(pi)
+        proc_instr = self.xmlroot.getprevious()
+        while proc_instr is not None:
+            pi_string = self.to_string(proc_instr)
             if "?>\n<?" in pi_string:
                 pi_string = pi_string.split("?>\n<?")
             if isinstance(pi_string, str):
@@ -144,13 +152,13 @@ class XMLreader():
             elif isinstance(pi_string, list):
                 for item in pi_string:
                     dic = self.break_processing_instructions(item, dic)
-            pi = pi.getprevious()
+            proc_instr = proc_instr.getprevious()
         if 'xml' in dic:
-            self.setEncoding(dic['xml'])
+            self.set_encoding(dic['xml'])
             del dic['xml']
-        self.processingInstructions = dic
+        self.processing_instructions = dic
         
-    def setEncoding(self, attr_str):
+    def set_encoding(self, attr_str):
         """
         Find the encoding in the xml declaration and save it as a string
         
@@ -168,20 +176,20 @@ class XMLreader():
                 return
         self.encoding = None
         
-    def _create_unique_key(self, dictionary, name, i = 0):
+    def _create_unique_key(self, dictionary, name, numb = 0):
         """
         Create a unique key value for any dictionary to prevent overwriting
         Recurses until a unique key value is found.
         
         :param dictionary: A dictionary with any number of entries
         :param name: The index of the item to be added to dictionary
-        :param i: The number to be appended to the name, starts at 0
+        :param numb: The number to be appended to the name, starts at 0
         """
         if dictionary.get(name) is not None:
-            i += 1
+            numb += 1
             name = name.split("_")[0]
-            name += "_{0}".format(i)
-            name = self._create_unique_key(dictionary, name, i)
+            name += "_{0}".format(numb)
+            name = self._create_unique_key(dictionary, name, numb)
         return name
     
     def create_tree(self, root):
@@ -192,20 +200,22 @@ class XMLreader():
         """
         return etree.ElementTree(root)
     
-    def create_element_from_string(self, s):
+    def create_element_from_string(self, xml_string):
         """
         Create an element from an XML string
         
-        :param s: A string of xml
+        :param xml_string: A string of xml
         """
-        return etree.fromstring(s)
+        return etree.fromstring(xml_string)
     
-    def create_element(self, name, attrib={}, nsmap=None):
+    def create_element(self, name, attrib=None, nsmap=None):
         """
         Create an XML element for writing to file
         
         :param name: The name of the element to be created
         """
+        if attrib == None:
+            attrib = {}
         return etree.Element(name, attrib, nsmap)
     
     def write_text(self, elem, text):
@@ -236,10 +246,11 @@ class XMLreader():
         :param tree: etree.ElementTree object to write PIs to
         """
         pi_list = []
-        for key in self.processingInstructions:
-            value = self.processingInstructions.get(key)
-            pi = etree.ProcessingInstruction(key, value)
-            pi_list.append(pi)
+        if self.processing_instructions is not None:
+            for key in self.processing_instructions:
+                value = self.processing_instructions.get(key)
+                pi_item = etree.ProcessingInstruction(key, value)
+                pi_list.append(pi_item)
         return pi_list
     
     def append(self, element, tree):
@@ -252,8 +263,18 @@ class XMLreader():
         tree = tree.append(element)
         return tree
     
-    def ebuilder(self, parent, elementname, text=None, attrib={}):
+    def ebuilder(self, parent, elementname, text=None, attrib=None):
+        """
+        Use lxml E builder class with arbitrary inputs.
+        
+        :param parnet: The parent element to append a child to
+        :param elementname: The name of the child in string form
+        :param text: The element text
+        :param attrib: A dictionary of attribute names to attribute values
+        """
         text = str(text)
+        if attrib == None:
+            attrib = {}
         elem = E(elementname, attrib, text)
         parent = parent.append(elem)
         return parent

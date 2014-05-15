@@ -147,6 +147,7 @@ class InversionState(object):
             we will append the data [optional]
         
         """
+        #TODO: Get this to work
         from xml.dom.minidom import getDOMImplementation
 
         # Check whether we have to write a standalone XML file
@@ -220,7 +221,7 @@ class InversionState(object):
             fd.close()
             return None
         else:
-            return newdoc.toprettyxml()
+            return newdoc
 
     def fromXML(self, file=None, node=None):
         """
@@ -469,7 +470,7 @@ class Reader(CansasReader):
                                         namespaces={'ns': CANSAS_NS})
 
                 for entry in entry_list:
-                    sas_entry = self._parse_entry(entry)
+                    sas_entry, _ = self._parse_entry(entry)
                     prstate = self._parse_prstate(entry)
                     #prstate could be None when .svs file is loaded
                     #in this case, skip appending to output
@@ -503,7 +504,7 @@ class Reader(CansasReader):
         """
         # Sanity check
         if self.cansas == True:
-            doc =self.write_toXML(datainfo, prstate)        
+            doc = self.write_toXML(datainfo, prstate)        
             # Write the XML document
             fd = open(filename, 'w')
             fd.write(doc.toprettyxml())
@@ -526,10 +527,10 @@ class Reader(CansasReader):
     
         # Create basic XML document
         doc, sasentry = self._to_xml_doc(datainfo)
-    
+        
         # Add the invariant information to the XML document
         if state is not None:
-            state.toXML(doc=doc, entry_node=sasentry)
+            doc = state.toXML(doc=doc, entry_node=sasentry)
             
         return doc 
     

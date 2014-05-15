@@ -217,8 +217,9 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             new_doc = self._manager.state_reader.write_toXML(data, state)
             if new_doc is not None:
                 if doc is not None and hasattr(doc, "firstChild"):
-                    child = new_doc.firstChild.firstChild
-                    doc.firstChild.appendChild(child)  
+                    child = new_doc.getElementsByTagName("SASentry")
+                    for item in child:
+                        doc.firstChild.appendChild(item)
                 else:
                     doc = new_doc
         return doc   
