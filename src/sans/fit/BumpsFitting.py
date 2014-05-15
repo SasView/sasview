@@ -1,8 +1,6 @@
 """
 BumpsFitting module runs the bumps optimizer.
 """
-import time
-
 import numpy
 
 from bumps import fitters
@@ -10,8 +8,9 @@ from bumps.mapper import SerialMapper
 from bumps import parameter
 from bumps.fitproblem import FitProblem
 
-from sans.fit.AbstractFitEngine import FitEngine
-from sans.fit.AbstractFitEngine import FResult
+from .AbstractFitEngine import FitEngine
+from .AbstractFitEngine import FResult
+from .expression import compile_constraints
 
 class BumpsMonitor(object):
     def __init__(self, handler, max_step=0):
@@ -51,16 +50,24 @@ class ConvergenceMonitor(object):
             self.convergence.append((best, best,best,best,best,best))
 
 
+# Note: currently using bumps parameters for each parameter object so that
+# a SasFitness can be used directly in bumps with the usual semantics.
+# The disadvantage of this technique is that we need to copy every parameter
+# back into the model each time the function is evaluated.  We could instead
+# define reference parameters for each sans parameter, but then we would not
+# be able to express constraints using python expressions in the usual way
+# from bumps, and would instead need to use string expressions.
 class SasFitness(object):
     """
     Wrap SAS model as a bumps fitness object
     """
-    def __init__(self, name, model, data, fitted=[], **kw):
-        self.name = name
-        self.model = model
+    def __init__(self, model, data, fitted=[], constraints={}, **kw):
+        self.name = model.name
+        self.model = model.model
         self.data = data
         self._define_pars()
         self._init_pars(kw)
+        self.constraints = dict(constraints)
         self.set_fitted(fitted)
         self._dirty = True
 
@@ -72,6 +79,7 @@ class SasFitness(object):
             bounds = self.model.details.get(k,["",None,None])[1:3]
             self._pars[k] = parameter.Parameter(value=value, bounds=bounds,
                                                 fixed=True, name=name)
+        #print parameter.summarize(self._pars.values())
 
     def _init_pars(self, kw):
         for k,v in kw.items():
@@ -101,7 +109,7 @@ class SasFitness(object):
         Flag a set of parameters as fitted parameters.
         """
         for k,p in self._pars.items():
-            p.fixed = (k not in param_list)
+            p.fixed = (k not in param_list or k in self.constraints)
         self.fitted_pars = [self._pars[k] for k in param_list]
         self.fitted_par_names = param_list
 
@@ -111,6 +119,7 @@ class SasFitness(object):
 
     def update(self):
         for k,v in self._pars.items():
+            #print "updating",k,v,v.value
             self.model.setParam(k,v.value)
         self._dirty = True
 
@@ -153,13 +162,33 @@ class BumpsFit(FitEngine):
             q=None, handler=None, curr_thread=None,
             ftol=1.49012e-8, reset_flag=False):
         # Build collection of bumps fitness calculators
-        models = [ SasFitness(name="M%d"%(i+1),
-                              model=M.get_model().model,
+        models = [ SasFitness(model=M.get_model(),
                               data=M.get_data(),
+                              constraints=M.constraints,
                               fitted=M.pars)
                    for i,M in enumerate(self.fit_arrange_dict.values())
                    if M.get_to_fit() == 1 ]
         problem = FitProblem(models)
+
+
+        # Build constraint expressions
+        exprs = {}
+        for M in models:
+            exprs.update((".".join((M.name,k)),v) for k,v in M.constraints.items())
+        if exprs:
+            symtab = dict((".".join((M.name,k)),p)
+                          for M in models
+                          for k,p in M.parameters().items())
+            constraints = compile_constraints(symtab,exprs)
+        else:
+            constraints = lambda: 0
+
+        # Override model update so that parameter constraints are applied
+        problem._model_update = problem.model_update
+        def model_update():
+            constraints()
+            problem._model_update()
+        problem.model_update = model_update
 
         # Run the fit
         result = run_bumps(problem, handler, curr_thread)

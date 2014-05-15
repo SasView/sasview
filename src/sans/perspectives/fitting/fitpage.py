@@ -660,7 +660,7 @@ class FitPage(BasicPage):
         self.sizer4_4.Add(model_disp, (iy, ix), (1, 1),
                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         
-        if self.engine_type == "park":
+        if self.engine_type in ("park","bumps"):
             self.text_disp_max.Show(True)
             self.text_disp_min.Show(True)
 
@@ -737,7 +737,7 @@ class FitPage(BasicPage):
                         self.sizer4_4.Add(ctl4, (iy, ix), (1, 1),
                                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
-                        if self.engine_type == "park":
+                        if self.engine_type in ("park","bumps"):
                             ctl3.Show(True)
                             ctl4.Show(True)
                                                               
@@ -1004,10 +1004,10 @@ class FitPage(BasicPage):
             wx.CallAfter(self.set_fitbutton)
             return
 
-        if len(self._manager.fit_thread_list) > 0 and\
-                    self._manager._fit_engine != "park" and\
-                    self._manager.sim_page != None and \
-                    self._manager.sim_page.uid == self.uid:
+        if (len(self._manager.fit_thread_list) > 0
+                and self._manager._fit_engine not in ("park","bumps")
+                and self._manager.sim_page != None
+                and self._manager.sim_page.uid == self.uid):
             msg = "The FitEnging will be set to 'ParkMC'\n"
             msg += " to fit with more than one data set..."
             wx.MessageBox(msg, 'Info')
@@ -2107,7 +2107,7 @@ class FitPage(BasicPage):
         #Check if chi2 is finite
         if chisqr != None and numpy.isfinite(chisqr):
             #format chi2
-            if self.engine_type == "park":
+            if self.engine_type in ("park","bumps"):
                 npt_fit = float(self.get_npts2fit())
             chi2 = format_number(chisqr, True)
             self.tcChi.SetValue(chi2)

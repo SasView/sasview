@@ -151,7 +151,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
 
         ## making sure all parameters content a constraint
         ## validity of the constraint expression is own by fit engine
-        if self.parent._manager._fit_engine != "park" and flag:
+        if self.parent._manager._fit_engine not in ("park","bumps") and flag:
             msg = "The FitEnging will be set to 'Park' fit engine\n"
             msg += " for the simultaneous fit..."
             #wx.MessageBox(msg, 'Info')

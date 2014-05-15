@@ -9,6 +9,7 @@ from sans.fit.AbstractFitEngine import Model
 from sans.fit.Fitting import Fit
 from sans.dataloader.loader import Loader
 
+#@unittest.skip("")
 class TestSingleFit(unittest.TestCase):
     """ test single fitting """
     def setUp(self):
@@ -32,39 +33,32 @@ class TestSingleFit(unittest.TestCase):
         fitter.set_data(self.data,1)
         fitter.set_model(self.model,1,self.pars1)
         fitter.select_problem_for_fit(id=1,value=1)
-        return  fitter.fit()
-       
+        result1, = fitter.fit()
+
+        self.assert_(result1)
+        self.assertTrue(len(result1.pvec)>0 or len(result1.pvec)==0 )
+        self.assertTrue(len(result1.stderr)> 0 or len(result1.stderr)==0)
+
+        self.assertTrue( math.fabs(result1.pvec[0]-400.0)/3.0 < result1.stderr[0] )
+        self.assertTrue( math.fabs(result1.pvec[1]-20.0)/3.0  < result1.stderr[1] )
+        self.assertTrue( math.fabs(result1.pvec[2]-1.0)/3.0   < result1.stderr[2] )
+        self.assertTrue( result1.fitness < 1.0 )
+
 
     def test_scipy(self):
         """ Simple cylinder model fit (scipy)  """
-        
-        result1, = self._fit("scipy")
-        
-        self.assert_(result1)
-        self.assertTrue(len(result1.pvec)>0 or len(result1.pvec)==0 )
-        self.assertTrue(len(result1.stderr)> 0 or len(result1.stderr)==0)
-        
-        self.assertTrue( math.fabs(result1.pvec[0]-400.0)/3.0 < result1.stderr[0] )
-        self.assertTrue( math.fabs(result1.pvec[1]-20.0)/3.0  < result1.stderr[1] )
-        self.assertTrue( math.fabs(result1.pvec[2]-1.0)/3.0   < result1.stderr[2] )
-        self.assertTrue( result1.fitness < 1.0 )
-        
-        
+        self._fit("scipy")
+
+
     def test_park(self):
         """ Simple cylinder model fit (park)  """
-        #raise NotImplementedError()
-        result1, = self._fit("park")
-        
-        self.assert_(result1)
-        self.assertTrue(len(result1.pvec)>0 or len(result1.pvec)==0 )
-        self.assertTrue(len(result1.stderr)> 0 or len(result1.stderr)==0)
-       
-        self.assertTrue( math.fabs(result1.pvec[0]-400.0)/3.0 < result1.stderr[0] )
-        self.assertTrue( math.fabs(result1.pvec[1]-20.0)/3.0  < result1.stderr[1] )
-        self.assertTrue( math.fabs(result1.pvec[2]-1.0)/3.0   < result1.stderr[2] )
-        self.assertTrue( result1.fitness < 1.0 )
-        
-        
+        self._fit("park")
+
+    def test_bumps(self):
+        """ Simple cylinder model fit (park)  """
+        self._fit("bumps")
+
+
         
 class TestSimultaneousFit(unittest.TestCase):
     """ test simultaneous fitting """
@@ -81,21 +75,26 @@ class TestSimultaneousFit(unittest.TestCase):
         self.model1 = Model(cyl1)
         self.model1.set(scale= 1.0)
         self.model1.set(radius=18)
-        self.model1.set(length=396)
+        self.model1.set(length=200)
         self.model1.set(sldCyl=3e-006, sldSolv=0.0)
         self.model1.set(background=0.0)
-        
+
         cyl2  = CylinderModel()
         cyl2.name = "C2"
         self.model2 = Model(cyl2)
         self.model2.set(scale= 1.0)
         self.model2.set(radius=37)
-        self.model2.set(length='C1.length')
+        self.model2.set(length=300)
         self.model2.set(sldCyl=3e-006, sldSolv=0.0)
         self.model2.set(background=0.0)
-       
 
-    def test_park2(self):
+
+    def test_constrained_bumps(self):
+        """ Simultaneous cylinder model fit (park)  """
+        self._run_fit(Fit('bumps'))
+
+    #@unittest.skip("")
+    def test_constrained_park(self):
         """ Simultaneous cylinder model fit (park)  """
         self._run_fit(Fit('park'))
 
@@ -106,7 +105,7 @@ class TestSimultaneousFit(unittest.TestCase):
         self.assertTrue(len(result1.stderr)>0)
 
         for n, v, dv in zip(result1.param_list, result1.pvec, result1.stderr):
-            print "M1.%s = %s +/- %s"%(n,v,dv)
+            print "%s M1.%s = %s +/- %s"%(fitter._engine.__class__.__name__,n,v,dv)
             if n == "length":
                 self.assertTrue( math.fabs(v-400.0)/3.0 < dv )
             elif n=='radius':
@@ -114,7 +113,7 @@ class TestSimultaneousFit(unittest.TestCase):
             elif n=='scale':
                 self.assertTrue( math.fabs(v-1.0)/3.0 < dv )
         for n, v, dv in zip(result2.param_list, result2.pvec, result2.stderr):
-            print "M2.%s = %s +/- %s"%(n,v,dv)
+            print "%s M2.%s = %s +/- %s"%(fitter._engine.__class__.__name__,n,v,dv)
             if n=='radius':
                 self.assertTrue( math.fabs(v-40.0)/3.0 < dv )
             elif n=='scale':
@@ -126,7 +125,8 @@ class TestSimultaneousFit(unittest.TestCase):
         fitter.set_model(self.model1, 1, ['length','radius','scale'])
 
         fitter.set_data(self.data2,2)
-        fitter.set_model(self.model2, 2, ['radius','scale'])
+        fitter.set_model(self.model2, 2, ['radius','scale'],
+                         constraints=[("length","C1.length")])
         fitter.select_problem_for_fit(id=1,value=1)
         fitter.select_problem_for_fit(id=2,value=1)
         return fitter.fit()

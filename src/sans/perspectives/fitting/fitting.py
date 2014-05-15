@@ -998,7 +998,8 @@ class Plugin(PluginBase):
         if self.sim_page is not None and self.sim_page.uid == uid:
             #simulatanous fit only one engine need to be created
             ## if simultaneous fit change automatically the engine to park
-            self._on_change_engine(engine='park')
+            if self._fit_engine not in ("park","bumps"):
+                self._on_change_engine(engine='park')
             sim_fitter = Fit(self._fit_engine)
             sim_fitter.fitter_id = self.sim_page.uid
             fitter_list.append(sim_fitter)
@@ -1006,7 +1007,7 @@ class Plugin(PluginBase):
             batch_on = self.sim_page.batch_on
             
         self.fitproblem_count = fitproblem_count
-        if self._fit_engine == "park":
+        if self._fit_engine in ("park","bumps"):
             engineType = "Simultaneous Fit"
         else:
             engineType = "Single Fit"
