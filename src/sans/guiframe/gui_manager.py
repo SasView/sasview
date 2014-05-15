@@ -1947,7 +1947,7 @@ class ViewerFrame(PARENT_FRAME):
                 temp = panel.save_project(doc)
                 if temp is not None:
                     doc = temp
-              
+            
             # Write the XML document
             extens = APPLICATION_STATE_EXTENSION
             fName = os.path.splitext(path)[0] + extens
@@ -1961,7 +1961,7 @@ class ViewerFrame(PARENT_FRAME):
                 logging.error(msg)
         except:
             msg = "Error occurred while saving: "
-            msg += "To save, at leat one application panel "
+            msg += "To save, at least one application panel "
             msg += "should have a data set.."
             wx.PostEvent(self, StatusEvent(status=msg))    
                     

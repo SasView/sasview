@@ -534,7 +534,6 @@ class Reader(XMLreader):
         
         :param datainfo: Data1D object
         """
-        
         if not issubclass(datainfo.__class__, Data1D):
             raise RuntimeError, "The cansas writer expects a Data1D instance"
         
@@ -857,18 +856,24 @@ class Reader(XMLreader):
                 
         
         # Return the document, and the SASentry node associated with
-        # the data we just wrote
-        
+        #      the data we just wrote
+        # If the calling function was not the cansas reader, return a minidom
+        #      object rather than an lxml object.
         frm = inspect.stack()[1]
-        mod = inspect.getmodule(frm[0])
-        mod_name = mod.__name__
+        mod_name = frm[1].replace("\\", ".").replace(".pyc", "")
+        mod_name = mod_name.replace(".py", "")
+        mod = mod_name.split("src.")
+        if len(mod) == 1:
+            mod_name = mod[0]
+        else:
+            mod_name = mod[1]
         if mod_name != "sans.dataloader.readers.cansas_reader":
-            string = self.to_string(doc, pp=True)
+            string = self.to_string(doc, pp=False)
             doc = parseString(string)
             node_name = entry_node.tag
             node_list = doc.getElementsByTagName(node_name)
             entry_node = node_list.item(0)
-        
+            
         return doc, entry_node
     
     
@@ -947,9 +952,10 @@ class Reader(XMLreader):
                             exec "storage.%s = %g" % (variable,
                                            conv(value, units=local_unit))
                         except:
+                            exc_type, exc_value, exc_traceback = sys.exc_info()
                             err_mess = "CanSAS reader: could not convert"
                             err_mess += " %s unit [%s]; expecting [%s]\n  %s" \
-                                % (variable, units, local_unit, sys.exc_value)
+                                % (variable, units, local_unit, exc_value)
                             self.errors.append(err_mess)
                             if optional:
                                 logging.info(err_mess)
