@@ -4,6 +4,7 @@
 """
 import unittest
 import math
+
 import numpy
 from sans.fit.AbstractFitEngine import Model
 from sans.fit.Fitting import Fit
@@ -61,7 +62,7 @@ class testFitModule(unittest.TestCase):
         """
             Cylinder fit with dispersion
         """
-        alg = 'amoeba'
+        alg = 'lm'
         from bumps import fitters
         fitters.FIT_DEFAULT = alg
         #fitters.FIT_OPTIONS[alg].options.update(opts)
@@ -102,12 +103,15 @@ class testFitModule(unittest.TestCase):
         fitter.set_data(out,1)
         fitter.set_model(model,1,pars1)
         fitter.select_problem_for_fit(id=1,value=1)
+        #import time; T0 = time.time()
         result1, = fitter.fit()
+        #print "time",time.time()-T0,fitter._engine.__class__.__name__
         
         self.assert_(result1)
         self.assertTrue(len(result1.pvec)>0)
         self.assertTrue(len(result1.stderr)>0)
 
+        #print [z for z in zip(result1.param_list,result1.pvec,result1.stderr)]
         self.assertTrue( math.fabs(result1.pvec[0]-399.8)/3.0 < result1.stderr[0] )
         self.assertTrue( math.fabs(result1.pvec[1]-17.5)/3.0  < result1.stderr[1] )
         self.assertTrue( math.fabs(result1.pvec[2]-11.1)/3.0   < result1.stderr[2] )

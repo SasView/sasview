@@ -17,19 +17,20 @@ class FitThread(CalcThread):
     """Thread performing the fit """
     
     def __init__(self, 
-                  fn,
-                  page_id,
-                   handler,
-                    batch_outputs,
-                    batch_inputs=None,             
-                  pars=None,
+                 fn,
+                 page_id,
+                 handler,
+                 batch_outputs,
+                 batch_inputs=None,
+                 pars=None,
                  completefn = None,
                  updatefn   = None,
                  yieldtime  = 0.03,
                  worktime   = 0.03,
                  ftol       = None,
                  reset_flag = False):
-        CalcThread.__init__(self,completefn,
+        CalcThread.__init__(self,
+                 completefn,
                  updatefn,
                  yieldtime,
                  worktime)
@@ -79,14 +80,14 @@ class FitThread(CalcThread):
                 list_fit_function.append('fit')
                 list_map_get_attr.append(map_getattr)
             #from multiprocessing import Pool
-            inputs = zip(list_map_get_attr,self.fitter, list_fit_function,
-                          list_q, list_q, list_handler,list_curr_thread,list_ftol,
+            inputs = zip(list_map_get_attr, self.fitter, list_fit_function,
+                         list_q, list_q, list_handler,list_curr_thread,list_ftol,
                          list_reset_flag)
             result =  map(map_apply, inputs)
     
             self.complete(result=result,
                           batch_inputs=self.batch_inputs,
-                           batch_outputs=self.batch_outputs,
+                          batch_outputs=self.batch_outputs,
                           page_id=self.page_id,
                           pars = self.pars,
                           elapsed=time.time()-self.starttime)

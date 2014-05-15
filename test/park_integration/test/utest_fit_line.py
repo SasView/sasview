@@ -88,6 +88,9 @@ class testFitModule(unittest.TestCase):
     def test_bumps_newton(self):
         self.fit_bumps('newton')
 
+    def test_bumps_lm(self):
+        self.fit_bumps('lm')
+
     def test_scipy(self):
         #print "fitting scipy"
         self.fit_single('scipy')

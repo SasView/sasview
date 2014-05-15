@@ -7,6 +7,8 @@ import numpy
 
 from bumps import fitters
 from bumps.mapper import SerialMapper
+from bumps import parameter
+from bumps.fitproblem import FitProblem
 
 from sans.fit.AbstractFitEngine import FitEngine
 from sans.fit.AbstractFitEngine import FResult
@@ -20,6 +22,7 @@ class BumpsMonitor(object):
         history.requires(time=1, value=2, point=1, step=1)
 
     def __call__(self, history):
+        if self.handler is None: return
         self.handler.progress(history.step[0], self.max_step)
         if len(history.step)>1 and history.step[1] > history.step[0]:
             self.handler.improvement()
@@ -45,191 +48,94 @@ class ConvergenceMonitor(object):
             QI,Qmid, = int(0.2*n),int(0.5*n)
             self.convergence.append((best, p[0],p[QI],p[Qmid],p[-1-QI],p[-1]))
         except:
-            self.convergence.append((best, ))
+            self.convergence.append((best, best,best,best,best,best))
 
-class SasProblem(object):
+
+class SasFitness(object):
     """
-    Wrap the SAS model in a form that can be understood by bumps.
+    Wrap SAS model as a bumps fitness object
     """
-    def __init__(self, param_list, model=None, data=None, fitresult=None,
-                 handler=None, curr_thread=None, msg_q=None):
-        """
-        :param Model: the model wrapper fro sans -model
-        :param Data: the data wrapper for sans data
-        """
+    def __init__(self, name, model, data, fitted=[], **kw):
+        self.name = name
         self.model = model
         self.data = data
-        self.param_list = param_list
-        self.res = None
-        self.theory = None
+        self._define_pars()
+        self._init_pars(kw)
+        self.set_fitted(fitted)
+        self._dirty = True
 
-    @property
-    def name(self):
-        return self.model.name
+    def _define_pars(self):
+        self._pars = {}
+        for k in self.model.getParamList():
+            name = ".".join((self.name,k))
+            value = self.model.getParam(k)
+            bounds = self.model.details.get(k,["",None,None])[1:3]
+            self._pars[k] = parameter.Parameter(value=value, bounds=bounds,
+                                                fixed=True, name=name)
 
-    @property
-    def dof(self):
-        return self.data.num_points - len(self.param_list)
-
-    def summarize(self):
-        """
-        Return a stylized list of parameter names and values with range bars
-        suitable for printing.
-        """
-        output = []
-        bounds = self.bounds()
-        for i,p in enumerate(self.getp()):
-            name = self.param_list[i]
-            low,high = bounds[:,i]
-            range = ",".join((("[%g"%low if numpy.isfinite(low) else "(-inf"),
-                              ("%g]"%high if numpy.isfinite(high) else "inf)")))
-            if not numpy.isfinite(p):
-                bar = "*invalid* "
+    def _init_pars(self, kw):
+        for k,v in kw.items():
+            # dispersion parameters initialized with _field instead of .field
+            if k.endswith('_width'): k = k[:-6]+'.width'
+            elif k.endswith('_npts'): k = k[:-5]+'.npts'
+            elif k.endswith('_nsigmas'): k = k[:-7]+'.nsigmas'
+            elif k.endswith('_type'): k = k[:-5]+'.type'
+            if k not in self._pars:
+                formatted_pars = ", ".join(sorted(self._pars.keys()))
+                raise KeyError("invalid parameter %r for %s--use one of: %s"
+                               %(k, self.model, formatted_pars))
+            if '.' in k and not k.endswith('.width'):
+                self.model.setParam(k, v)
+            elif isinstance(v, parameter.BaseParameter):
+                self._pars[k] = v
+            elif isinstance(v, (tuple,list)):
+                low, high = v
+                self._pars[k].value = (low+high)/2
+                self._pars[k].range(low,high)
             else:
-                bar = ['.']*10
-                if numpy.isfinite(high-low):
-                    position = int(9.999999999 * float(p-low)/float(high-low))
-                    if position < 0: bar[0] = '<'
-                    elif position > 9: bar[9] = '>'
-                    else: bar[position] = '|'
-                bar = "".join(bar)
-            output.append("%40s %s %10g in %s"%(name,bar,p,range))
-        return "\n".join(output)
+                self._pars[k].value = v
+        self.update()
 
-    def nllf(self, p=None):
-        residuals = self.residuals(p)
-        return 0.5*numpy.sum(residuals**2)
-
-    def setp(self, p):
-        for k,v in zip(self.param_list, p):
-            self.model.setParam(k,v)
-        #self.model.set_params(self.param_list, params)
-
-    def getp(self):
-        return numpy.array([self.model.getParam(k) for k in self.param_list])
-        #return numpy.asarray(self.model.get_params(self.param_list))
-
-    def bounds(self):
-        return numpy.array([self._getrange(p) for p in self.param_list]).T
-
-    def labels(self):
-        return self.param_list
-
-    def _getrange(self, p):
+    def set_fitted(self, param_list):
         """
-        Override _getrange of park parameter
-        return the range of parameter
+        Flag a set of parameters as fitted parameters.
         """
-        lo, hi = self.model.details.get(p,["",None,None])[1:3]
-        if lo is None: lo = -numpy.inf
-        if hi is None: hi = numpy.inf
-        return lo, hi
+        for k,p in self._pars.items():
+            p.fixed = (k not in param_list)
+        self.fitted_pars = [self._pars[k] for k in param_list]
+        self.fitted_par_names = param_list
 
-    def randomize(self, n):
-        p = self.getp()
-        # since randn is symmetric and random, doesn't matter
-        # point value is negative.
-        # TODO: throw in bounds checking!
-        return numpy.random.randn(n, len(self.param_list))*p + p
+    # ===== Fitness interface ====
+    def parameters(self):
+        return self._pars
 
-    def chisq(self):
-        """
-        Calculates chi^2
+    def update(self):
+        for k,v in self._pars.items():
+            self.model.setParam(k,v.value)
+        self._dirty = True
 
-        :param params: list of parameter values
+    def _recalculate(self):
+        if self._dirty:
+            self._residuals, self._theory = self.data.residuals(self.model.evalDistribution)
+            self._dirty = False
 
-        :return: chi^2
+    def numpoints(self):
+        return numpy.sum(self.data.idx) # number of fitted points
 
-        """
-        return numpy.sum(self.res**2)/self.dof
+    def nllf(self):
+        return 0.5*numpy.sum(self.residuals()**2)
 
-    def residuals(self, params=None):
-        """
-        Compute residuals
-        :param params: value of parameters to fit
-        """
-        if params is not None: self.setp(params)
-        #import thread
-        #print "params", params
-        self.res, self.theory = self.data.residuals(self.model.evalDistribution)
-        return self.res
+    def theory(self):
+        self._recalculate()
+        return self._theory
 
-BOUNDS_PENALTY = 1e6 # cost for going out of bounds on unbounded fitters
-class MonitoredSasProblem(SasProblem):
-    """
-    SAS problem definition for optimizers which do not have monitoring or bounds.
-    """
-    def __init__(self, param_list, model=None, data=None, fitresult=None,
-                 handler=None, curr_thread=None, msg_q=None, update_rate=1):
-        """
-        :param Model: the model wrapper fro sans -model
-        :param Data: the data wrapper for sans data
-        """
-        SasProblem.__init__(self, param_list, model, data)
-        self.msg_q = msg_q
-        self.curr_thread = curr_thread
-        self.handler = handler
-        self.fitresult = fitresult
-        #self.last_update = time.time()
-        #self.func_name = "Functor"
-        #self.name = "Fill in proper name!"
+    def residuals(self):
+        self._recalculate()
+        return self._residuals
 
-    def residuals(self, p):
-        """
-        Cost function for scipy.optimize.leastsq, which does not have a monitor
-        built into the algorithm, and instead relies on a monitor built into
-        the cost function.
-        """
-        # Note: technically, unbounded fitters and unmonitored fitters are
-        self.setp(p)
-
-        # Compute penalty for being out of bounds which increases the farther
-        # you get out of bounds.  This allows derivative following algorithms
-        # to point back toward the feasible region.
-        penalty = self.bounds_penalty()
-        if penalty > 0:
-            self.theory = numpy.ones(self.data.num_points)
-            self.res = self.theory*(penalty/self.data.num_points) + BOUNDS_PENALTY
-            return self.res
-
-        # If no penalty, then we are not out of bounds and we can use the
-        # normal residual calculation
-        SasProblem.residuals(self, p)
-
-        # send update to the application
-        if True:
-            #self.fitresult.set_model(model=self.model)
-            # copy residuals into fit results
-            self.fitresult.residuals = self.res+0
-            self.fitresult.iterations += 1
-            self.fitresult.theory = self.theory+0
-
-            self.fitresult.p = numpy.array(p) # force copy, and coversion to array
-            self.fitresult.set_fitness(fitness=self.chisq())
-            if self.msg_q is not None:
-                self.msg_q.put(self.fitresult)
-
-            if self.handler is not None:
-                self.handler.set_result(result=self.fitresult)
-                self.handler.update_fit()
-
-            if self.curr_thread != None:
-                try:
-                    self.curr_thread.isquit()
-                except:
-                    #msg = "Fitting: Terminated...       Note: Forcing to stop "
-                    #msg += "fitting may cause a 'Functor error message' "
-                    #msg += "being recorded in the log file....."
-                    #self.handler.stop(msg)
-                    raise
-
-        return self.res
-
-    def bounds_penalty(self):
-        from numpy import sum, where
-        p, bounds = self.getp(), self.bounds()
-        return (sum(where(p<bounds[:,0], bounds[:,0]-p, 0)**2)
-              + sum(where(p>bounds[:,1], bounds[:,1]-p, 0)**2) )
+    # Not implementing the data methods for now:
+    #
+    #     resynth_data/restore_data/save/plot
 
 class BumpsFit(FitEngine):
     """
@@ -246,60 +152,48 @@ class BumpsFit(FitEngine):
     def fit(self, msg_q=None,
             q=None, handler=None, curr_thread=None,
             ftol=1.49012e-8, reset_flag=False):
-        """
-        """
-        fitproblem = []
-        for fproblem in self.fit_arrange_dict.itervalues():
-            if fproblem.get_to_fit() == 1:
-                fitproblem.append(fproblem)
-        if len(fitproblem) > 1 :
-            msg = "Bumps can't fit more than a single fit problem at a time."
-            raise RuntimeError, msg
-        elif len(fitproblem) == 0 :
-            raise RuntimeError, "No problem scheduled for fitting."
-        model = fitproblem[0].get_model()
-        if reset_flag:
-            # reset the initial value; useful for batch
-            for name in fitproblem[0].pars:
-                ind = fitproblem[0].pars.index(name)
-                model.setParam(name, fitproblem[0].vals[ind])
-        data = fitproblem[0].get_data()
+        # Build collection of bumps fitness calculators
+        models = [ SasFitness(name="M%d"%(i+1),
+                              model=M.get_model().model,
+                              data=M.get_data(),
+                              fitted=M.pars)
+                   for i,M in enumerate(self.fit_arrange_dict.values())
+                   if M.get_to_fit() == 1 ]
+        problem = FitProblem(models)
 
-        self.curr_thread = curr_thread
-
-        result = FResult(model=model, data=data, param_list=self.param_list)
-        result.pars = fitproblem[0].pars
-        result.fitter_id = self.fitter_id
-        result.index = data.idx
-        if handler is not None:
-            handler.set_result(result=result)
-
-        if True: # bumps
-            problem = SasProblem(param_list=self.param_list,
-                                 model=model.model,
-                                 data=data)
-            run_bumps(problem, result, ftol,
-                      handler, curr_thread, msg_q)
-        else: # scipy levenburg marquardt
-            problem = SasProblem(param_list=self.param_list,
-                                 model=model.model,
-                                 data=data,
-                                 handler=handler,
-                                 fitresult=result,
-                                 curr_thread=curr_thread,
-                                 msg_q=msg_q)
-            run_levenburg_marquardt(problem, result, ftol)
-
+        # Run the fit
+        result = run_bumps(problem, handler, curr_thread)
         if handler is not None:
             handler.update_fit(last=True)
-        if q is not None:
-            q.put(result)
-            return q
-        #if success < 1 or success > 5:
-        #    result.fitness = None
-        return [result]
 
-def run_bumps(problem, result, ftol, handler, curr_thread, msg_q):
+        # TODO: shouldn't reference internal parameters
+        varying = problem._parameters
+        # collect the results
+        all_results = []
+        for M in problem.models:
+            fitness = M.fitness
+            fitted_index = [varying.index(p) for p in fitness.fitted_pars]
+            R = FResult(model=fitness.model, data=fitness.data,
+                        param_list=fitness.fitted_par_names)
+            R.theory = fitness.theory()
+            R.residuals = fitness.residuals()
+            R.fitter_id = self.fitter_id
+            R.stderr = result['stderr'][fitted_index]
+            R.pvec = result['value'][fitted_index]
+            R.success = result['success']
+            R.fitness = numpy.sum(R.residuals**2)/(fitness.numpoints() - len(fitted_index))
+            R.convergence = result['convergence']
+            if result['uncertainty'] is not None:
+                R.uncertainty_state = result['uncertainty']
+            all_results.append(R)
+
+        if q is not None:
+            q.put(all_results)
+            return q
+        else:
+            return all_results
+
+def run_bumps(problem, handler, curr_thread):
     def abort_test():
         if curr_thread is None: return False
         try: curr_thread.isquit()
@@ -312,15 +206,16 @@ def run_bumps(problem, result, ftol, handler, curr_thread, msg_q):
     fitopts = fitters.FIT_OPTIONS[fitters.FIT_DEFAULT]
     fitclass = fitopts.fitclass
     options = fitopts.options.copy()
-    max_steps = fitopts.options.get('steps', 0) + fitopts.options.get('burn', 0)
-    if 'monitors' not in options:
-        options['monitors'] = [BumpsMonitor(handler, max_steps)]
-    options['monitors'] += [ ConvergenceMonitor() ]
-    options['ftol'] = ftol
+    max_step = fitopts.options.get('steps', 0) + fitopts.options.get('burn', 0)
+    options['monitors'] = [
+        BumpsMonitor(handler, max_step),
+        ConvergenceMonitor(),
+        ]
     fitdriver = fitters.FitDriver(fitclass, problem=problem,
                                   abort_test=abort_test, **options)
     mapper = SerialMapper 
     fitdriver.mapper = mapper.start_mapper(problem, None)
+    import time; T0 = time.time()
     try:
         best, fbest = fitdriver.fit()
     except:
@@ -328,37 +223,16 @@ def run_bumps(problem, result, ftol, handler, curr_thread, msg_q):
         raise
     finally:
         mapper.stop_mapper(fitdriver.mapper)
-    #print "best,fbest",best,fbest,problem.dof
-    result.fitness = 2*fbest/problem.dof
-    #print "fitness",result.fitness
-    result.stderr  = fitdriver.stderr()
-    result.pvec = best
-    # TODO: track success better
-    result.success = True
-    result.theory = problem.theory
-    # For the convergence plot
-    pop = numpy.asarray(options['monitors'][-1].convergence)
-    result.convergence = 2*pop/problem.dof
-    # Bumps uncertainty state
-    try: result.uncertainty_state = fitdriver.fitter.state
-    except AttributeError: pass
 
-def run_levenburg_marquardt(problem, result, ftol):
-    # This import must be here; otherwise it will be confused when more
-    # than one thread exist.
-    from scipy import optimize
 
-    out, cov_x, _, mesg, success = optimize.leastsq(problem.residuals,
-                                                    problem.getp(),
-                                                    ftol=ftol,
-                                                    full_output=1)
-    if cov_x is not None and numpy.isfinite(cov_x).all():
-        stderr = numpy.sqrt(numpy.diag(cov_x))
-    else:
-        stderr = []
-    result.fitness = problem.chisq()
-    result.stderr  = stderr
-    result.pvec = out
-    result.success = success
-    result.theory = problem.theory
+    convergence_list = options['monitors'][-1].convergence
+    convergence = (2*numpy.asarray(convergence_list)/problem.dof
+                   if convergence_list else numpy.empty((0,1),'d'))
+    return {
+        'value': best,
+        'stderr': fitdriver.stderr(),
+        'success': True, # better success reporting in bumps
+        'convergence': convergence,
+        'uncertainty': getattr(fitdriver.fitter, 'state', None),
+        }
 

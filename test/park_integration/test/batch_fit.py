@@ -1,5 +1,3 @@
-
-
 import copy
 import time
 import unittest
@@ -12,8 +10,6 @@ from sans.models.qsmearing import smear_selection
 NPTS = 1
 
 
-
-    
 def classMapper(classInstance, classFunc, *args):
     """
     Take an instance of a class and a function name as a string.
@@ -25,8 +21,7 @@ def mapapply(arguments):
     return apply(arguments[0], arguments[1:])
 
 
-
-class BatchScipyFit:
+class BatchFit:
     """
     test fit module
     """
@@ -66,7 +61,7 @@ class BatchScipyFit:
             model.setParam('cyl_phi.width', 10)
             model.setParam('cyl_phi.npts', 3)
             model.setParam('cyl_theta.nsigmas', 10)
-            """ for 2 data cyl_theta = 60.0 [deg] cyl_phi= 60.0 [deg]"""
+            # for 2 data cyl_theta = 60.0 [deg] cyl_phi= 60.0 [deg]
             fitter.set_model(model, i, self.param_to_fit, 
                              self.list_of_constraints)
             #smear data
@@ -81,7 +76,7 @@ class BatchScipyFit:
             self.list_of_function.append('fit')
             self.list_of_mapper.append(classMapper)
                    
-    def reset_value(self):
+    def reset_value(self, engine='scipy'):
         """
         Initialize inputs for the map function
         """
@@ -90,8 +85,7 @@ class BatchScipyFit:
         self.param_to_fit = ['scale', 'length', 'radius']
         self.list_of_constraints = []
         self.list_of_mapper = []
-        engine ="scipy"
-        
+
         path = "testdata_line3.txt"
         self._reset_helper(path=path, engine=engine, npts=NPTS)
         path = "testdata_line.txt"
@@ -110,13 +104,16 @@ class BatchScipyFit:
         self._reset_helper(path=path, engine=engine, npts=NPTS)
         
       
-    def test_map_fit(self):
+    def test_map_fit(self, n=0):
         """
-        """ 
-        results =  map(classMapper,self.list_of_fitter, self.list_of_function)
-        print len(results)
-        for result in results:
-            print result.fitness, result.stderr, result.pvec
+        """
+        if n > 0:
+            self._test_process_map_fit(n=n)
+        else:
+            results =  map(classMapper,self.list_of_fitter, self.list_of_function)
+            print len(results)
+            for result in results:
+                print result.fitness, result.stderr, result.pvec
         
     def test_process_map_fit(self, n=1):
         """
@@ -141,30 +138,31 @@ class testBatch(unittest.TestCase):
     fitting
     """  
     def setUp(self):
-        self.test = BatchScipyFit(qmin=None, qmax=None)
+        self.test = BatchFit(qmin=None, qmax=None)
        
     
-    def __test_fit1(self):
+    def test_fit1(self):
         """test fit with python built in map function---- full range of each data"""
         self.test.test_map_fit()
         
-    def __test_fit2(self):
+    def test_fit2(self):
         """test fit with python built in map function---- common range for all data"""
         self.test.set_range(qmin=0.013, qmax=0.05)
         self.test.reset_value()
         self.test.test_map_fit()
+        raise Exception("fail")
         
     def test_fit3(self):
         """test fit with data full range using 1 processor and map"""
         self.test.set_range(qmin=None, qmax=None)
         self.test.reset_value()
-        self.test.test_process_map_fit(n=2)
+        self.test.test_map_fit(n=1)
         
     def test_fit4(self):
         """test fit with a common fixed range for data using 1 processor and map"""
         self.test.set_range(qmin=-1, qmax=10)
         self.test.reset_value()
-        self.test.test_process_map_fit(n=1)
+        self.test.test_map_fit(n=3)
         
             
 if __name__ == '__main__':

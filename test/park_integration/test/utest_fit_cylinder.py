@@ -94,22 +94,13 @@ class TestSimultaneousFit(unittest.TestCase):
         self.model2.set(sldCyl=3e-006, sldSolv=0.0)
         self.model2.set(background=0.0)
        
-    def _fit(self, name="park"):
-        """ return fit result """
-        fitter = Fit(name)
-        fitter.set_data(self.data1,1)
-        fitter.set_model(self.model1, 1, ['length','radius','scale'])
 
-        fitter.set_data(self.data2,2)
-        fitter.set_model(self.model2, 2, ['radius','scale'])
-        fitter.select_problem_for_fit(id=1,value=1)
-        fitter.select_problem_for_fit(id=2,value=1)
-        return fitter.fit()
-    
-    
     def test_park2(self):
         """ Simultaneous cylinder model fit (park)  """
-        result1, result2 = self._fit('park')
+        self._run_fit(Fit('park'))
+
+    def _run_fit(self, fitter):
+        result1, result2 = self._fit(fitter)
         self.assert_(result1)
         self.assertTrue(len(result1.pvec)>0)
         self.assertTrue(len(result1.stderr)>0)
@@ -128,6 +119,17 @@ class TestSimultaneousFit(unittest.TestCase):
                 self.assertTrue( math.fabs(v-40.0)/3.0 < dv )
             elif n=='scale':
                 self.assertTrue( math.fabs(v-1.0)/3.0 < dv )
+
+    def _fit(self, fitter):
+        """ return fit result """
+        fitter.set_data(self.data1,1)
+        fitter.set_model(self.model1, 1, ['length','radius','scale'])
+
+        fitter.set_data(self.data2,2)
+        fitter.set_model(self.model2, 2, ['radius','scale'])
+        fitter.select_problem_for_fit(id=1,value=1)
+        fitter.select_problem_for_fit(id=2,value=1)
+        return fitter.fit()
 
 
 if __name__ == '__main__':

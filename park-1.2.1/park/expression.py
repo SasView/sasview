@@ -159,7 +159,7 @@ def eval_expressions():
     %s
 """%("\n    ".join(exprs),"\n    ".join(code))
 
-    #print "Function:",function
+    #print "Function:",functiondef
     exec functiondef in globals,locals
     retfn = locals['eval_expressions']
 
@@ -184,6 +184,7 @@ def test():
 
     # Check symbol rename
     assert substitute(expr,{'a.b.x':'Q'}) == 'Q + sin(4*pi*a.c) + Q/a.b'
+    assert substitute(expr,{'a.b':'Q'}) == 'a.b.x + sin(4*pi*a.c) + a.b.x/Q'
 
 
     # Check dependency builder
@@ -248,7 +249,7 @@ def test():
     # Verify that we capture invalid expressions
     for expr in ['G4.cage', 'M0.cage', 'M1.G1 + *2', 
                  'piddle',
-                 'import sys; print "p0wned"',
+                 '5; import sys; print "p0wned"',
                  '__import__("sys").argv']:
         try:
             p6 = Parameter('broken',expression=expr)
