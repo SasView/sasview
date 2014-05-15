@@ -3,27 +3,30 @@ Release Notes
 
 SasView 3.0.0
 
-    - The GUI look and feel has been refactored to be more familiar for windows
-      users by using MDI frames.
-    - BETA:  Magnet contrast supporting full polarization Analysis has been implemented
-      for some spherical and cylindrical models.
-    - BETA Two new tools have been added
-       * A generic scattering calculator which takes an atomic,magnetic or SLD
-         distributions in space and generates the appropriate 2D scattering
-         pattern.  In some cases the orientationally averaged (powder) 1D
-         can also be computed.  Supported formats include: SLD or text; PDB;
-         and OMF magnetic moment distribution file.
-       * An image viewer/converter: for data in image format, this reader
-         reads in an image file and will attempt to convert the image pixels
-         to data.  Supported types include TIFF, TIF, PNG, BMP, JPG
-    - Redefined angles of angular parameters for anisotropic models
-    - Several new models have been added
-    - Data loader now supports ILL DAT data files and reads the full meta 
+    - The GUI look and feel has been refactored to be more familiar for Windows
+      users by using MDI frames. Graph windows are also now free-floating
+    - Four new models have been added: CoreShellEllipsoidXTModel,
+      RectangularPrismModel, RectangularHollowPrismModel and 
+      RectangularHollowPrismInfThinWallsModel
+    - The data loader now supports ILL DAT data files and reads the full meta 
       information from canSAS file formats
-    - A number of minor feature additions such as log distribution of point 
-      when using a model to simulate data and the addition of a Kratky plot
-      to the linear plots
-    - a number of bug fixes
+    - Redefined angles of angular parameters for anisotropic models
+    - A number of minor features have been added such as permitting a log 
+      distribution of points when using a model to simulate data, and the 
+      addition of a Kratky plot option to the linear plots
+    - a number of bugs have also been fixed      
+    - BETA: Magnetic contrast supporting full polarization analysis has been 
+            implemented for some spherical and cylindrical models
+    - BETA: Two new tools have been added:
+            * A generic scattering calculator which takes an atomic, magnetic or 
+              SLD distribution in space and generates the appropriate 2D 
+              scattering pattern. In some cases the orientationally averaged 
+              (powder) 1D scattering can also be computed. Supported formats 
+              include: SLD or text, PDB, and OMF magnetic moment distribution 
+              file.
+            * An image viewer/converter for data in image format; this reads in 
+              an image file and will attempt to convert the image pixels to 
+              data. Supported formats include: TIFF, TIF, PNG, BMP, JPG
 
     - New in Version 2.2.1
       - Minor patch to support CanSAS XML v1.1 file format
