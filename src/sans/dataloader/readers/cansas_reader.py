@@ -859,13 +859,12 @@ class Reader(XMLreader):
         #      the data we just wrote
         # If the calling function was not the cansas reader, return a minidom
         #      object rather than an lxml object.        
-        
         frm = inspect.stack()[1]
         mod_name = frm[1].replace("\\", "/").replace(".pyc", "")
         mod_name = mod_name.replace(".py", "")
-        mod = mod_name.split("/readers/")
+        mod = mod_name.split("sans/")
         mod_name = mod[1]
-        if mod_name != "cansas_reader":
+        if mod_name != "dataloader/readers/cansas_reader":
             string = self.to_string(doc, pp=False)
             doc = parseString(string)
             node_name = entry_node.tag
