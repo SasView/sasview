@@ -110,8 +110,8 @@ class SasFitness(object):
         """
         for k,p in self._pars.items():
             p.fixed = (k not in param_list or k in self.constraints)
-        self.fitted_pars = [self._pars[k] for k in param_list]
-        self.fitted_par_names = param_list
+        self.fitted_pars = [self._pars[k] for k in param_list if k not in self.constraints]
+        self.fitted_par_names = [k for k in param_list if k not in self.constraints]
 
     # ===== Fitness interface ====
     def parameters(self):
