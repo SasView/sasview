@@ -5,7 +5,7 @@ SasView 3.0.0
 
     - The GUI look and feel has been refactored to be more familiar for Windows
       users by using MDI frames. Graph windows are also now free-floating
-    - Five new models have been added: Pringle, CoreShellEllipsoidXTModel,
+    - Five new models have been added: PringlesModel, CoreShellEllipsoidXTModel,
       RectangularPrismModel, RectangularHollowPrismModel and 
       RectangularHollowPrismInfThinWallsModel
     - The data loader now supports ILL DAT data files and reads the full meta 
