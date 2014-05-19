@@ -125,7 +125,7 @@ class TestSimultaneousFit(unittest.TestCase):
         fitter.set_model(self.model1, 1, ['length','radius','scale'])
 
         fitter.set_data(self.data2,2)
-        fitter.set_model(self.model2, 2, ['radius','scale'],
+        fitter.set_model(self.model2, 2, ['length','radius','scale'],
                          constraints=[("length","C1.length")])
         fitter.select_problem_for_fit(id=1,value=1)
         fitter.select_problem_for_fit(id=2,value=1)

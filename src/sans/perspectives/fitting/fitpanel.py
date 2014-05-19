@@ -63,7 +63,7 @@ class FitPanel(nb, PanelBase):
         #page of simultaneous fit
         self.sim_page = None
         self.batch_page = None
-        self.fit_engine_type = "scipy"
+        self.fit_engine_type = "bumps"
         ## get the state of a page
         self.Bind(basepage.EVT_PAGE_INFO, self._onGetstate)
         self.Bind(basepage.EVT_PREVIOUS_STATE, self._onUndo)

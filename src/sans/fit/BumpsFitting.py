@@ -195,7 +195,7 @@ class BumpsFit(FitEngine):
         if handler is not None:
             handler.update_fit(last=True)
 
-        # TODO: shouldn't reference internal parameters
+        # TODO: shouldn't reference internal parameters of fit problem
         varying = problem._parameters
         # collect the results
         all_results = []
@@ -207,6 +207,7 @@ class BumpsFit(FitEngine):
             R.theory = fitness.theory()
             R.residuals = fitness.residuals()
             R.fitter_id = self.fitter_id
+            # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
             R.stderr = result['stderr'][fitted_index]
             R.pvec = result['value'][fitted_index]
             R.success = result['success']

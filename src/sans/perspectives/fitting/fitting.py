@@ -44,6 +44,11 @@ from sans.perspectives.calculator.model_editor import TextDialog
 from sans.perspectives.calculator.model_editor import EditorWindow
 from sans.guiframe.gui_manager import MDIFrame
 
+# TODO: remove globals from interface to bumps options!
+# Default bumps to use the levenberg-marquardt optimizer
+import bumps.fitters
+bumps.fitters.FIT_DEFAULT = 'lm'
+
 MAX_NBR_DATA = 4
 SANS_F_TOL = 5e-05
 
@@ -79,8 +84,6 @@ class Plugin(PluginBase):
         self.plot_panel = None
         # Start with a good default
         self.elapsed = 0.022
-        # the type of optimizer selected, park or scipy
-        self.fitter = None
         self.fit_panel = None
         #let fit ready
         self.fitproblem_count = None
@@ -89,7 +92,7 @@ class Plugin(PluginBase):
         ## dictionary of page closed and id
         self.closed_page_dict = {}
         ## Fit engine
-        self._fit_engine = 'scipy'
+        self._fit_engine = 'bumps'
         self._gui_engine = None
         ## Relative error desired in the sum of squares (float); scipy only
         self.ftol = SANS_F_TOL
@@ -205,9 +208,9 @@ class Plugin(PluginBase):
                                    bumps_help)
         wx.EVT_MENU(owner, self.bumps_id, self._onset_engine_bumps)
         
-        self.menu1.FindItemById(self.scipy_id).Check(True)
-        self.menu1.FindItemById(self.park_id).Check(False)
-        self.menu1.FindItemById(self.bumps_id).Check(False)
+        self.menu1.FindItemById(self.scipy_id).Check(self._fit_engine=="scipy")
+        self.menu1.FindItemById(self.park_id).Check(self._fit_engine=="park")
+        self.menu1.FindItemById(self.bumps_id).Check(self._fit_engine=="bumps")
         self.menu1.AppendSeparator()
         self.id_tol = wx.NewId()
         ftol_help = "Change the current FTolerance (=%s) " % str(self.ftol)
@@ -985,7 +988,10 @@ class Plugin(PluginBase):
         for value in self.page_finder.values():
             if value.get_scheduled() == 1:
                 fitproblem_count += 1
-        self._gui_engine = self._return_engine_type()
+        # Remember the user selected fit engine before the fit.  Simultaneous
+        # fitting may change the selected engine, so it needs to be restored
+        # when the fit is complete.
+        self._gui_engine = self._fit_engine
         self.fitproblem_count = fitproblem_count
         if self._fit_engine in ("park","bumps"):
             engineType = "Simultaneous Fit"
@@ -1750,12 +1756,6 @@ class Plugin(PluginBase):
                             break
                 break
     
-    def _return_engine_type(self):
-        """
-        return the current type of engine
-        """
-        return self._fit_engine
-     
     def _on_change_engine(self, engine='park'):
         """
         Allow to select the type of engine to perform fit
