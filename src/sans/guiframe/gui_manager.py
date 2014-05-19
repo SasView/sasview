@@ -1957,8 +1957,10 @@ class ViewerFrame(PARENT_FRAME):
                 fd.close()
                 wx.PostEvent(self, StatusEvent(status="Completed Saving."))
             else:
-                msg = "%s cannot read %s\n" % (str(APPLICATION_NAME), str(path))
+                msg = "No perspective windows are loaded. "
+                msg += "No data was saved to %s\n" % (str(path))
                 logging.error(msg)
+                wx.PostEvent(self,StatusEvent(status=msg))
         except:
             msg = "Error occurred while saving: "
             msg += "To save, at least one application panel "

@@ -5,12 +5,12 @@ SasView 3.0.0
 
     - The GUI look and feel has been refactored to be more familiar for Windows
       users by using MDI frames. Graph windows are also now free-floating
-    - Four new models have been added: CoreShellEllipsoidXTModel,
+    - Five new models have been added: PringlesModel, CoreShellEllipsoidXTModel,
       RectangularPrismModel, RectangularHollowPrismModel and 
       RectangularHollowPrismInfThinWallsModel
     - The data loader now supports ILL DAT data files and reads the full meta 
       information from canSAS file formats
-    - Redefined angles of angular parameters for anisotropic models
+    - Redefined convention for specifying angular parameters for anisotropic models
     - A number of minor features have been added such as permitting a log 
       distribution of points when using a model to simulate data, and the 
       addition of a Kratky plot option to the linear plots
