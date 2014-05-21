@@ -168,6 +168,8 @@ class BumpsFit(FitEngine):
                               fitted=M.pars)
                    for i,M in enumerate(self.fit_arrange_dict.values())
                    if M.get_to_fit() == 1 ]
+        if len(models) == 0:
+            raise RuntimeError("Nothing to fit")
         problem = FitProblem(models)
 
 
@@ -245,7 +247,7 @@ def run_bumps(problem, handler, curr_thread):
                                   abort_test=abort_test, **options)
     mapper = SerialMapper 
     fitdriver.mapper = mapper.start_mapper(problem, None)
-    import time; T0 = time.time()
+    #import time; T0 = time.time()
     try:
         best, fbest = fitdriver.fit()
     except:

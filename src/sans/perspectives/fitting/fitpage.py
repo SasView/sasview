@@ -2067,21 +2067,6 @@ class FitPage(BasicPage):
         """
         return self.tcChi.GetValue()
         
-    def get_param_list(self):
-        """
-        :return self.param_toFit: list containing  references to TextCtrl
-            checked.Theses TextCtrl will allow reference to parameters to fit.
-        
-        :raise: if return an empty list of parameter fit will nnote work
-            properly so raise ValueError,"missing parameter to fit"
-        """
-        if self.param_toFit != []:
-            return self.param_toFit
-        else:
-            msg = "missing parameters to fit"
-            wx.MessageBox(msg, 'warning')
-            return False
-      
     def onsetValues(self, chisqr, p_name, out, cov):
         """
         Build the panel from the fit result

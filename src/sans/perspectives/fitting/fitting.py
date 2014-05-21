@@ -85,8 +85,6 @@ class Plugin(PluginBase):
         # Start with a good default
         self.elapsed = 0.022
         self.fit_panel = None
-        #let fit ready
-        self.fitproblem_count = None
         #Flag to let the plug-in know that it is running stand alone
         self.standalone = True
         ## dictionary of page closed and id
@@ -982,114 +980,94 @@ class Plugin(PluginBase):
         corresponding panels.
         :param uid: id related to the panel currently calling this fit function.
         """
-        flag = True
-        ##  count the number of fitproblem schedule to fit
-        fitproblem_count = 0
-        for value in self.page_finder.values():
-            if value.get_scheduled() == 1:
-                fitproblem_count += 1
+        if uid is None: raise RuntimeError("no page to fit") # Should never happen
+
         # Remember the user selected fit engine before the fit.  Simultaneous
         # fitting may change the selected engine, so it needs to be restored
         # when the fit is complete.
         self._gui_engine = self._fit_engine
-        self.fitproblem_count = fitproblem_count
-        if self._fit_engine in ("park","bumps"):
-            engineType = "Simultaneous Fit"
+
+        sim_page_uid = getattr(self.sim_page, 'uid', None)
+        batch_page_uid = getattr(self.batch_page, 'uid', None)
+
+        if uid == sim_page_uid:
+            fit_type = 'simultaneous'
+        elif uid == batch_page_uid:
+            fit_type = 'combined_batch'
         else:
-            engineType = "Single Fit"
+            fit_type = 'single'
+
+        # if constrained fit, don't use scipy leastsq directly
+        if fit_type == 'simultaneous':
+            if self._fit_engine not in ("park","bumps"):
+                self._on_change_engine(engine='bumps')
+
+
         fitter_list = []
         sim_fitter = None
-        is_single_fit = True
-        batch_on = False
-        if self.sim_page is not None and self.sim_page.uid == uid:
+        if fit_type == 'simultaneous':
             #simulatanous fit only one engine need to be created
-            ## if simultaneous fit change automatically the engine to park
-            if self._fit_engine not in ("park","bumps"):
-                self._on_change_engine(engine='park')
             sim_fitter = Fit(self._fit_engine)
             sim_fitter.fitter_id = self.sim_page.uid
             fitter_list.append(sim_fitter)
-            is_single_fit = False
-            batch_on = self.sim_page.batch_on
-            
-        self.fitproblem_count = fitproblem_count
-        if self._fit_engine in ("park","bumps"):
-            engineType = "Simultaneous Fit"
-        else:
-            engineType = "Single Fit"
-        
+
         self.current_pg = None
         list_page_id = []
         fit_id = 0
-        batch_inputs = {}
-        batch_outputs = {}
-        for page_id, value in self.page_finder.iteritems():
+        for page_id, page_info in self.page_finder.iteritems():
             # For simulfit (uid give with None), do for-loop
             # if uid is specified (singlefit), do it only on the page.
-            if engineType == "Single Fit":
-                #combine more than 1 batch page on single mode
-                if self.batch_page is None or self.batch_page.uid != uid:
-                    if page_id != uid:
-                        continue
+            if page_id in (sim_page_uid, batch_page_uid): continue
+            if fit_type == "single" and page_id != uid: continue
+
             try:
-                if value.get_scheduled() == 1:
-                    value.nbr_residuals_computed = 0
-                    #Get list of parameters name to fit
-                    pars = []
-                    templist = []
+                if page_info.get_scheduled() == 1:
+                    page_info.nbr_residuals_computed = 0
                     page = self.fit_panel.get_page_by_id(page_id)
                     self.set_fit_weight(uid=page.uid,
                                      flag=page.get_weight_flag(),
                                      is2d=page._is_2D())
-                    templist = page.get_param_list()
-                    flag = page._update_paramv_on_fit()
-                    if not flag:
+                    if not page.param_toFit:
+                        msg = "No fitting parameters for %s"%page.window_caption
+                        wx.PostEvent(page.parent.parent,
+                                     StatusEvent(status=msg, info="error",
+                                                 type="stop"))
+                        return False
+                    if not page._update_paramv_on_fit():
                         msg = "Fitting range or parameter values are"
                         msg += " invalid in %s" % \
                                     page.window_caption
                         wx.PostEvent(page.parent.parent,
                                      StatusEvent(status=msg, info="error",
                                      type="stop"))
-                        return flag
-                    for element in templist:
-                        name = str(element[1])
-                        pars.append(name)
-                    fitproblem_list = value.values()
+                        return False
+
+                    pars = [str(element[1]) for element in page.param_toFit]
+                    fitproblem_list = page_info.values()
                     for fitproblem in  fitproblem_list:
                         if sim_fitter is None:
                             fitter = Fit(self._fit_engine)
                             fitter.fitter_id = page_id
-                            self._fit_helper(fitproblem=fitproblem,
-                                             pars=pars,
-                                             fitter=fitter,
-                                             fit_id=fit_id,
-                                             batch_inputs=batch_inputs,
-                                             batch_outputs=batch_outputs)
                             fitter_list.append(fitter)
                         else:
                             fitter = sim_fitter
-                            self._fit_helper(fitproblem=fitproblem,
+                        self._add_problem_to_fit(fitproblem=fitproblem,
                                              pars=pars,
                                              fitter=fitter,
-                                             fit_id=fit_id,
-                                             batch_inputs=batch_inputs,
-                                             batch_outputs=batch_outputs)
+                                             fit_id=fit_id)
                         fit_id += 1
                     list_page_id.append(page_id)
-                    current_page_id = page_id
-                    value.clear_model_param()
+                    page_info.clear_model_param()
             except KeyboardInterrupt:
-                flag = True
                 msg = "Fitting terminated"
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                                       type="stop"))
-                return flag
+                return True
             except:
-                flag = False
-                msg = "%s error: %s" % (engineType, sys.exc_value)
+                msg = "Fitting error: %s" % str(sys.exc_value)
                 wx.PostEvent(self.parent, StatusEvent(status=msg, info="error",
                                                       type="stop"))
-                return flag
+                return False
         ## If a thread is already started, stop it
         #if self.calc_fit!= None and self.calc_fit.isrunning():
         #    self.calc_fit.stop()
@@ -1101,23 +1079,12 @@ class Plugin(PluginBase):
                                 manager=self,
                                 improvement_delta=0.1)
         self._mac_sleep(0.2)
-        ## perform single fit
-        try:
-            page = self.fit_panel.get_page_by_id(uid)
-            batch_on = page.batch_on
-        except:
-            try:
-                #if the id cannot be found then  we deal with a self.sim_page
-                #or a self.batch_page
-                if self.sim_page is not None and uid == self.sim_page.uid:
-                    batch_on = self.sim_page.batch_on
-                if self.batch_page is not None and uid == self.batch_page.uid:
-                    batch_on = self.batch_page.batch_on
-            except:
-                batch_on = False
 
         # batch fit
-        if batch_on:
+        batch_inputs = {}
+        batch_outputs = {}
+        page = self.fit_panel.get_page_by_id(uid)
+        if page.batch_on:
             calc_fit = FitThread(handler=handler,
                                  fn=fitter_list,
                                  pars=pars,
@@ -1128,9 +1095,6 @@ class Plugin(PluginBase):
                                  ftol=self.ftol,
                                  reset_flag=self.batch_reset_flag)
         else:
-            # single fit: not batch and not simul fit
-            if not is_single_fit:
-                current_page_id = self.sim_page.uid
             ## Perform more than 1 fit at the time
             calc_fit = FitThread(handler=handler,
                                     fn=fitter_list,
@@ -1140,23 +1104,15 @@ class Plugin(PluginBase):
                                     updatefn=handler.update_fit,
                                     completefn=self._fit_completed,
                                     ftol=self.ftol)
-        self.fit_thread_list[current_page_id] = calc_fit
+        #self.fit_thread_list[current_page_id] = calc_fit
+        self.fit_thread_list[uid] = calc_fit
         calc_fit.queue()
+        calc_fit.ready(2.5)
         msg = "Fitting is in progress..."
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="progress"))
         
-        self.ready_fit(calc_fit=calc_fit)
-        return flag
-    
-    def ready_fit(self, calc_fit):
-        """
-        Ready for another fit
-        """
-        if self.fitproblem_count != None and self.fitproblem_count > 1:
-            calc_fit.ready(2.5)
-        else:
-            time.sleep(0.4)
-            
+        return True
+
     def remove_plot(self, uid, fid=None, theory=False):
         """
         remove model plot when a fit page is closed
@@ -1296,8 +1252,7 @@ class Plugin(PluginBase):
             if uid in self.page_finder.keys():
                 self.page_finder[uid].schedule_tofit(value)
                 
-    def _fit_helper(self, fitproblem, pars, fitter, fit_id,
-                    batch_inputs, batch_outputs):
+    def _add_problem_to_fit(self, fitproblem, pars, fitter, fit_id):
         """
         Create and set fit engine with series of data and model
         :param pars: list of fittable parameters

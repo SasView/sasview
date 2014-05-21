@@ -137,7 +137,13 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 self.sizer2.Layout()
                 self.Layout()
                 break
-        self._onAdd_constraint(None)
+
+        ## some model or parameters can be constrained
+        self._show_constraint()
+        self.sizer3.Layout()
+        self.Layout()
+        self.Refresh()
+        #self._onAdd_constraint(None)
              
     def onFit(self, event):
         """

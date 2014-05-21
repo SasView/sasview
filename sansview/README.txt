@@ -164,7 +164,9 @@ SasView 3.0.0
 	             Look in the 'For Developers' section and particularly the wiki at
 	             www.sasview.org/trac/wiki.
     *** Note 2:  If you have EXE or ZIP SasView installer, you won't need any of
-                 the following.
+                 the following.  However it is highly recommended that any
+                 previous versions be un-installed prior to installing the
+                 new version.
 
     2.1- System Requirements:
         - Python version >= 2.5 and < 3.0 should be running on the system
@@ -217,9 +219,16 @@ SasView 3.0.0
         - polydispersity on multiple parameters included in a simultaneous/
           constrained fit will likely not be correct
         - Save project does not store the state of all the windows
+        - Loading projects can be very slow
+        - Save Project only works once a data set has been associated with
+          a model.  Error is reported on status bar.
 
     3.2- Windows:
-        - None
+        - If installed to same directory as old version without first removing
+          the old version, the old desktop icon will remain but point to the
+          new exe version. Likewise all the start menu folders and items will
+          have the old name even though pointing to the new version.  Usually
+          safest to uninstall old version prior to installing new version anyway.
 		
     3.3- MAC:
         - multiprocessing does not currently work on MAC OS
