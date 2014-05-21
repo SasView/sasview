@@ -110,8 +110,10 @@ class SasFitness(object):
         """
         for k,p in self._pars.items():
             p.fixed = (k not in param_list or k in self.constraints)
-        self.fitted_pars = [self._pars[k] for k in param_list if k not in self.constraints]
         self.fitted_par_names = [k for k in param_list if k not in self.constraints]
+        self.computed_par_names = [k for k in param_list if k in self.constraints]
+        self.fitted_pars = [self._pars[k] for k in self.fitted_par_names]
+        self.computed_pars = [self._pars[k] for k in self.computed_par_names]
 
     # ===== Fitness interface ====
     def parameters(self):
@@ -162,12 +164,12 @@ class BumpsFit(FitEngine):
             q=None, handler=None, curr_thread=None,
             ftol=1.49012e-8, reset_flag=False):
         # Build collection of bumps fitness calculators
-        models = [ SasFitness(model=M.get_model(),
-                              data=M.get_data(),
-                              constraints=M.constraints,
-                              fitted=M.pars)
-                   for i,M in enumerate(self.fit_arrange_dict.values())
-                   if M.get_to_fit() == 1 ]
+        models = [SasFitness(model=M.get_model(),
+                             data=M.get_data(),
+                             constraints=M.constraints,
+                             fitted=M.pars)
+                  for M in self.fit_arrange_dict.values()
+                  if M.get_to_fit()]
         if len(models) == 0:
             raise RuntimeError("Nothing to fit")
         problem = FitProblem(models)
@@ -176,12 +178,12 @@ class BumpsFit(FitEngine):
         # Build constraint expressions
         exprs = {}
         for M in models:
-            exprs.update((".".join((M.name,k)),v) for k,v in M.constraints.items())
+            exprs.update((".".join((M.name, k)), v) for k, v in M.constraints.items())
         if exprs:
-            symtab = dict((".".join((M.name,k)),p)
+            symtab = dict((".".join((M.name, k)), p)
                           for M in models
                           for k,p in M.parameters().items())
-            constraints = compile_constraints(symtab,exprs)
+            constraints = compile_constraints(symtab, exprs)
         else:
             constraints = lambda: 0
 
@@ -205,13 +207,15 @@ class BumpsFit(FitEngine):
             fitness = M.fitness
             fitted_index = [varying.index(p) for p in fitness.fitted_pars]
             R = FResult(model=fitness.model, data=fitness.data,
-                        param_list=fitness.fitted_par_names)
+                        param_list=fitness.fitted_par_names+fitness.computed_par_names)
             R.theory = fitness.theory()
             R.residuals = fitness.residuals()
             R.fitter_id = self.fitter_id
             # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
-            R.stderr = result['stderr'][fitted_index]
-            R.pvec = result['value'][fitted_index]
+            R.stderr = numpy.hstack((result['stderr'][fitted_index],
+                                     numpy.NaN*numpy.ones(len(fitness.computed_pars))))
+            R.pvec = numpy.hstack((result['value'][fitted_index],
+                                  [p.value for p in fitness.computed_pars]))
             R.success = result['success']
             R.fitness = numpy.sum(R.residuals**2)/(fitness.numpoints() - len(fitted_index))
             R.convergence = result['convergence']

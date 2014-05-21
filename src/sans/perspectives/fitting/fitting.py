@@ -1083,7 +1083,12 @@ class Plugin(PluginBase):
         # batch fit
         batch_inputs = {}
         batch_outputs = {}
-        page = self.fit_panel.get_page_by_id(uid)
+        if fit_type == "simultaneous":
+            page = self.sim_page
+        elif fit_type == "combined_batch":
+            page = self.batch_page
+        else:
+            page = self.fit_panel.get_page_by_id(uid)
         if page.batch_on:
             calc_fit = FitThread(handler=handler,
                                  fn=fitter_list,

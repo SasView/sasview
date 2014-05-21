@@ -95,7 +95,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.npts = None
         self.num_points = None
         ## default fitengine type
-        self.engine_type = 'scipy'
+        self.engine_type = 'bumps'
         ## smear default
         self.current_smearer = None
         ## 2D smear accuracy default
@@ -2985,7 +2985,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             # set relative text ctrs.
             self.qmin.SetValue(str(self.qmin_x))
             self.qmax.SetValue(str(self.qmax_x))
-            self.set_npts2fit()
+            self.show_npts2fit()
             # At this point, some button and variables satatus (disabled?)
             # should be checked such as color that should be reset to
             # white in case that it was pink.
@@ -3873,7 +3873,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         Found all parameters current check and add them to list of parameters
         to fit if implemented
         """
-    def set_npts2fit(self):
+    def show_npts2fit(self):
         """
         setValue Npts for fitting if implemented
         """

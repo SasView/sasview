@@ -138,11 +138,6 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 self.Layout()
                 break
 
-        ## some model or parameters can be constrained
-        self._show_constraint()
-        self.sizer3.Layout()
-        self.Layout()
-        self.Refresh()
         #self._onAdd_constraint(None)
              
     def onFit(self, event):
@@ -819,8 +814,9 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                         return False
                         
                     for fid in self.page_finder[id].iterkeys():
-                        self.page_finder[id].set_model_param(param,
-                                                        constraint, fid=fid)
+                        # wrap in param/constraint in str() to remove unicode
+                        self.page_finder[id].set_model_param(str(param),
+                                                        str(constraint), fid=fid)
                     break
         return True
     

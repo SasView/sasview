@@ -395,8 +395,6 @@ class FitEngine:
         """
         Base class for scipy and park fit engine
         """
-        #List of parameter names to fit
-        self.param_list = []
         #Dictionnary of fitArrange element (fit problems)
         self.fit_arrange_dict = {}
         self.fitter_id = None
@@ -443,8 +441,6 @@ class FitEngine:
         self.fit_arrange_dict[id].pars = pars
         self.fit_arrange_dict[id].vals = [sasmodel.getParam(name) for name in pars]
         self.fit_arrange_dict[id].constraints = constraints
-
-        self.param_list.extend(pars)
 
     def set_data(self, data, id, smearer=None, qmin=None, qmax=None):
         """

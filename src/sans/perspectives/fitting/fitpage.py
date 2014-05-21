@@ -660,9 +660,8 @@ class FitPage(BasicPage):
         self.sizer4_4.Add(model_disp, (iy, ix), (1, 1),
                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         
-        if self.engine_type in ("park","bumps"):
-            self.text_disp_max.Show(True)
-            self.text_disp_min.Show(True)
+        self.text_disp_max.Show(True)
+        self.text_disp_min.Show(True)
 
         for item in self.model.dispersion.keys():
             if not self.magnetic_on:
@@ -737,9 +736,8 @@ class FitPage(BasicPage):
                         self.sizer4_4.Add(ctl4, (iy, ix), (1, 1),
                                           wx.EXPAND | wx.ADJUST_MINSIZE, 0)
 
-                        if self.engine_type in ("park","bumps"):
-                            ctl3.Show(True)
-                            ctl4.Show(True)
+                        ctl3.Show(True)
+                        ctl4.Show(True)
                                                               
                     elif p == "npts":
                         ix = 6
@@ -1267,7 +1265,7 @@ class FitPage(BasicPage):
 
         if check_float(tcrtl):
             flag = self._onparamEnter_helper()
-            self.set_npts2fit()
+            self.show_npts2fit()
             if self.fitrange:
                 temp_smearer = None
                 if not self.disable_smearer.GetValue():
@@ -1467,7 +1465,7 @@ class FitPage(BasicPage):
                 else:
                     #self.data.mask = index_data
                     #self.Npts_fit.SetValue(str(len(self.data.mask)))
-                    self.set_npts2fit()
+                    self.show_npts2fit()
             else:
                 index_data = ((self.qmin_x <= self.data.x) & \
                               (self.data.x <= self.qmax_x))
@@ -1765,11 +1763,11 @@ class FitPage(BasicPage):
             event.Skip()
             # try re draw the model plot if it exists
             self._draw_model()
-            self.set_npts2fit()
+            self.show_npts2fit()
         elif self.model == None:
             self.panel.MakeModal(False)
             event.Skip()
-            self.set_npts2fit()
+            self.show_npts2fit()
             msg = "No model is found on updating MASK in the model plot... "
             wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         else:
@@ -2055,7 +2053,7 @@ class FitPage(BasicPage):
                     npts2fit += 1
         return npts2fit
 
-    def set_npts2fit(self):
+    def show_npts2fit(self):
         """
         setValue Npts for fitting
         """
@@ -2092,8 +2090,6 @@ class FitPage(BasicPage):
         #Check if chi2 is finite
         if chisqr != None and numpy.isfinite(chisqr):
             #format chi2
-            if self.engine_type in ("park","bumps"):
-                npt_fit = float(self.get_npts2fit())
             chi2 = format_number(chisqr, True)
             self.tcChi.SetValue(chi2)
             self.tcChi.Refresh()
