@@ -74,9 +74,9 @@ def prepare():
     build_path = joinpath(root, 'build','lib.'+platform)
 
     # Make sure that we have a private version of mplconfig
-    mplconfig = joinpath(abspath(dirname(__file__)), '.mplconfig')
-    os.environ['MPLCONFIGDIR'] = mplconfig
-    if not os.path.exists(mplconfig): os.mkdir(mplconfig)
+    #mplconfig = joinpath(abspath(dirname(__file__)), '.mplconfig')
+    #os.environ['MPLCONFIGDIR'] = mplconfig
+    #if not os.path.exists(mplconfig): os.mkdir(mplconfig)
     #import matplotlib
     #matplotlib.use('Agg')
     #print matplotlib.__file__
