@@ -14,7 +14,8 @@ SasView 3.0.0
     - A number of minor features have been added such as permitting a log 
       distribution of points when using a model to simulate data, and the 
       addition of a Kratky plot option to the linear plots
-    - a number of bugs have also been fixed      
+    - A number of bugs have also been fixed
+    - Save Project and Save Analysis now work more reliably
     - BETA: Magnetic contrast supporting full polarization analysis has been 
             implemented for some spherical and cylindrical models
     - BETA: Two new tools have been added:
@@ -30,6 +31,14 @@ SasView 3.0.0
 
     - New in Version 2.2.1
       - Minor patch to support CanSAS XML v1.1 file format
+      - Added DataInfo for data in the DataExplorer and plots
+      - Added Maximize/Restore button in the title bar of the graphs
+      - Added a hide button in the toolbar of the graph panel
+      - The 'x' button now deletes a graph
+      - Edit SUM Model from the menubar can now generate and save more than one sum model
+      - Reports can now be saved in pdf format on WIN and MAC
+      - Made significant improvements to the batch/grid panel and fixed several bugs
+      - Fixed a number of other minor bugs
 
     - New in Version 2.2.0
       - Application name changed to SasView
