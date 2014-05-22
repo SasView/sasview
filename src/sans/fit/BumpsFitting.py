@@ -61,15 +61,22 @@ class SasFitness(object):
     """
     Wrap SAS model as a bumps fitness object
     """
-    def __init__(self, model, data, fitted=[], constraints={}, **kw):
+    def __init__(self, model, data, fitted=[], constraints={},
+                 initial_values=None, **kw):
         self.name = model.name
         self.model = model.model
         self.data = data
         self._define_pars()
         self._init_pars(kw)
+        if initial_values is not None:
+            self._reset_pars(fitted, initial_values)
         self.constraints = dict(constraints)
         self.set_fitted(fitted)
-        self._dirty = True
+        self.update()
+
+    def _reset_pars(self, names, values):
+        for k,v in zip(names, values):
+            self._pars[k].value = v
 
     def _define_pars(self):
         self._pars = {}
@@ -102,7 +109,6 @@ class SasFitness(object):
                 self._pars[k].range(low,high)
             else:
                 self._pars[k].value = v
-        self.update()
 
     def set_fitted(self, param_list):
         """
@@ -167,7 +173,8 @@ class BumpsFit(FitEngine):
         models = [SasFitness(model=M.get_model(),
                              data=M.get_data(),
                              constraints=M.constraints,
-                             fitted=M.pars)
+                             fitted=M.pars,
+                             initial_values=M.vals if reset_flag else None)
                   for M in self.fit_arrange_dict.values()
                   if M.get_to_fit()]
         if len(models) == 0:
@@ -210,6 +217,7 @@ class BumpsFit(FitEngine):
                         param_list=fitness.fitted_par_names+fitness.computed_par_names)
             R.theory = fitness.theory()
             R.residuals = fitness.residuals()
+            R.index = fitness.data.idx
             R.fitter_id = self.fitter_id
             # TODO: should scale stderr by sqrt(chisq/DOF) if dy is unknown
             R.stderr = numpy.hstack((result['stderr'][fitted_index],
