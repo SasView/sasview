@@ -16,7 +16,6 @@ the given module or script.
 import os
 import sys
 import imp
-from glob import glob
 from contextlib import contextmanager
 from os.path import abspath, dirname, join as joinpath
 
