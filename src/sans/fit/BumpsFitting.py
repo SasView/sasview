@@ -1,6 +1,8 @@
 """
 BumpsFitting module runs the bumps optimizer.
 """
+from datetime import timedelta, datetime
+
 import numpy
 
 from bumps import fitters
@@ -12,16 +14,49 @@ from .AbstractFitEngine import FitEngine
 from .AbstractFitEngine import FResult
 from .expression import compile_constraints
 
+class Progress(object):
+    def __init__(self, history, max_step, pars, dof):
+        remaining_time = int(history.time[0]*(float(max_step)/history.step[0]-1))
+        # Depending on the time remaining, either display the expected
+        # time of completion, or the amount of time remaining.  Use precision
+        # appropriate for the duration.
+        if remaining_time >= 1800:
+            completion_time = datetime.now() + timedelta(seconds=remaining_time)
+            if remaining_time >= 36000:
+                time = completion_time.strftime('%Y-%m-%d %H:%M')
+            else:
+                time = completion_time.strftime('%H:%M')
+        else:
+            if remaining_time >= 3600:
+                time = '%dh %dm'%(remaining_time//3600, (remaining_time%3600)//60)
+            elif remaining_time >= 60:
+                time = '%dm %ds'%(remaining_time//60, remaining_time%60)
+            else:
+                time = '%ds'%remaining_time
+        chisq = "%.3g"%(2*history.value[0]/dof)
+        step = "%d of %d"%(history.step[0], max_step)
+        header = "=== Steps: %s  chisq: %s  ETA: %s\n"%(step, chisq, time)
+        parameters = ["%15s: %-10.3g%s"%(k,v,("\n" if i%3==2 else " | "))
+                      for i,(k,v) in enumerate(zip(pars,history.point[0]))]
+        self.msg = "".join([header]+parameters)
+
+    def __str__(self):
+        return self.msg
+
+
 class BumpsMonitor(object):
-    def __init__(self, handler, max_step=0):
+    def __init__(self, handler, max_step, pars, dof):
         self.handler = handler
         self.max_step = max_step
+        self.pars = pars
+        self.dof = dof
 
     def config_history(self, history):
         history.requires(time=1, value=2, point=1, step=1)
 
     def __call__(self, history):
         if self.handler is None: return
+        self.handler.set_result(Progress(history, self.max_step, self.pars, self.dof))
         self.handler.progress(history.step[0], self.max_step)
         if len(history.step)>1 and history.step[1] > history.step[0]:
             self.handler.improvement()
@@ -251,8 +286,9 @@ def run_bumps(problem, handler, curr_thread):
     fitclass = fitopts.fitclass
     options = fitopts.options.copy()
     max_step = fitopts.options.get('steps', 0) + fitopts.options.get('burn', 0)
+    pars = [p.name for p in problem._parameters]
     options['monitors'] = [
-        BumpsMonitor(handler, max_step),
+        BumpsMonitor(handler, max_step, pars, problem.dof),
         ConvergenceMonitor(),
         ]
     fitdriver = fitters.FitDriver(fitclass, problem=problem,
