@@ -1,12 +1,13 @@
 """
 BumpsFitting module runs the bumps optimizer.
 """
+import os
 from datetime import timedelta, datetime
 
 import numpy
 
 from bumps import fitters
-from bumps.mapper import SerialMapper
+from bumps.mapper import SerialMapper, MPMapper
 from bumps import parameter
 from bumps.fitproblem import FitProblem
 
@@ -293,7 +294,8 @@ def run_bumps(problem, handler, curr_thread):
         ]
     fitdriver = fitters.FitDriver(fitclass, problem=problem,
                                   abort_test=abort_test, **options)
-    mapper = SerialMapper 
+    omp_threads = int(os.environ.get('OMP_NUM_THREADS','0'))
+    mapper = MPMapper if omp_threads == 1 else SerialMapper       
     fitdriver.mapper = mapper.start_mapper(problem, None)
     #import time; T0 = time.time()
     try:
