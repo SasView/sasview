@@ -190,6 +190,33 @@ class SasFitness(object):
     #
     #     resynth_data/restore_data/save/plot
 
+class ParameterExpressions(object):
+    def __init__(self, models):
+        self.models = models
+        self._setup()
+
+    def _setup(self):
+        exprs = {}
+        for M in self.models:
+            exprs.update((".".join((M.name, k)), v) for k, v in M.constraints.items())
+        if exprs:
+            symtab = dict((".".join((M.name, k)), p)
+                          for M in self.models
+                          for k,p in M.parameters().items())
+            self.update = compile_constraints(symtab, exprs)
+        else:
+            self.update = lambda: 0
+
+    def __call__(self):
+        self.update()
+
+    def __getstate__(self):
+        return self.models
+
+    def __setstate__(self, state):
+        self.models = state
+        self._setup()
+
 class BumpsFit(FitEngine):
     """
     Fit a model using bumps.
@@ -217,25 +244,12 @@ class BumpsFit(FitEngine):
             raise RuntimeError("Nothing to fit")
         problem = FitProblem(models)
 
-
-        # Build constraint expressions
-        exprs = {}
-        for M in models:
-            exprs.update((".".join((M.name, k)), v) for k, v in M.constraints.items())
-        if exprs:
-            symtab = dict((".".join((M.name, k)), p)
-                          for M in models
-                          for k,p in M.parameters().items())
-            constraints = compile_constraints(symtab, exprs)
-        else:
-            constraints = lambda: 0
-
-        # Override model update so that parameter constraints are applied
-        problem._model_update = problem.model_update
-        def model_update():
-            constraints()
-            problem._model_update()
-        problem.model_update = model_update
+        # TODO: need better handling of parameter expressions and bounds constraints
+        # so that they are applied during polydispersity calculations.  This
+        # will remove the immediate need for the setp_hook in bumps, though
+        # bumps may still need something similar, such as a sane class structure
+        # which allows a subclass to override setp.
+        problem.setp_hook = ParameterExpressions(models)
 
         # Run the fit
         result = run_bumps(problem, handler, curr_thread)
