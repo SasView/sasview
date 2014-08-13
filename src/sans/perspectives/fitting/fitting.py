@@ -1958,6 +1958,14 @@ class Plugin(PluginBase):
             ## If a thread is already started, stop it
             if (self.calc_2D is not None) and self.calc_2D.isrunning():
                 self.calc_2D.stop()
+                ## stop just raises a flag to tell the thread to kill
+                ## itself -- see the fix in Calc1D implemented to fix
+                ## an actual problem.  Seems the fix should also go here
+                ## and may be the cause of other noted instabilities
+                ##
+                ##    -PDB August 12, 2014 
+                while self.calc_2D.isrunning():
+                    time.sleep(0.1)
             self.calc_2D = Calc2D(model=model,
                                     data=data,
                                     page_id=page_id,
@@ -1995,6 +2003,22 @@ class Plugin(PluginBase):
             ## If a thread is already started, stop it
             if (self.calc_1D is not None) and self.calc_1D.isrunning():
                 self.calc_1D.stop()
+                ## stop just raises the flag -- the thread is supposed to 
+                ## then kill itself but cannot.  Paul Kienzle came up with
+                ## this fix to prevent threads from stepping on each other
+                ## which was causing a simple custom model to crash Sasview.
+                ## We still don't know why the fit sometimes lauched a second
+                ## thread -- something which should also be investigated.
+                ## The thread approach was implemented in order to be able
+                ## to lauch a computation in a separate thread from the GUI so
+                ## that the GUI can still respond to user input including
+                ## a request to stop the computation.
+                ## It seems thus that the whole thread approach used here
+                ## May need rethinking  
+                ##
+                ##    -PDB August 12, 2014                  
+                while self.calc_1D.isrunning():
+                    time.sleep(0.1)
             self.calc_1D = Calc1D(data=data,
                                   model=model,
                                   page_id=page_id, 
