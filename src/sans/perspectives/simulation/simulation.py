@@ -212,6 +212,15 @@ class Plugin:
         # If a computation thread is running, stop it
         if self.calc_thread_1D != None and self.calc_thread_1D.isrunning():
             self.calc_thread_1D.stop()
+            ## stop just raises the flag -- the thread is supposed to 
+            ## then kill itself but cannot.  Paul Kienzle came up with
+            ## this fix to prevent threads from stepping on each other
+            ## in Calc1D of fitting.py which was causing a simple custom model
+            ## to crash Sasview.  See rest of notes under Calc1D.
+            ##
+            ##    -PDB August 13, 2014                  
+            while self.calc_thread_1D.isrunning():
+                time.sleep(0.1)
             
         # Create a computation thread
         self.calc_thread_1D = Calc1D(self.x, self.volCanvas, 
