@@ -59,12 +59,13 @@ class ResultPanel(Notebook, PanelBase):
             self.get_panel(ConvergenceView).update(best, pop)
         if hasattr(result, 'uncertainty_state'):
             from bumps.gui.uncertainty_view import UncertaintyView, CorrelationView, TraceView
-            from bumps.dream.stats import format_vars
+            from bumps.dream.stats import var_stats,format_vars
+            stats = var_stats(result.uncertainty_state.draw())
+            msg = format_vars(stats)
             self.get_panel(CorrelationView).update(result.uncertainty_state)
-            self.get_panel(UncertaintyView).update(result.uncertainty_state)
+            self.get_panel(UncertaintyView).update((result.uncertainty_state,stats))
             self.get_panel(TraceView).update(result.uncertainty_state)
             # TODO: stats should be stored in result rather than computed in bumps UncertaintyView
-            msg = format_vars(self.get_panel(UncertaintyView).stats)
             wx.PostEvent(self.frame.parent,
                          StatusEvent(status=msg, info="info"))
             print
