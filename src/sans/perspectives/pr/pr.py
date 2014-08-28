@@ -723,6 +723,15 @@ class Plugin(PluginBase):
         # If a thread is already started, stop it
         if self.calc_thread != None and self.calc_thread.isrunning():
             self.calc_thread.stop()
+            ## stop just raises the flag -- the thread is supposed to 
+            ## then kill itself but cannot.  Paul Kienzle came up with
+            ## this fix to prevent threads from stepping on each other
+            ## in Calc1D of fitting.py which was causing a simple custom model
+            ## to crash Sasview.  See rest of notes under Calc1D.
+            ##
+            ##    -PDB August 13, 2014                  
+            while self.calc_thread.isrunning():
+                time.sleep(0.1)
                 
         pr = self.pr.clone()
         self.calc_thread = CalcPr(pr, self.nfunc,
@@ -1142,6 +1151,16 @@ class Plugin(PluginBase):
         if self.estimation_thread != None and \
             self.estimation_thread.isrunning():
             self.estimation_thread.stop()
+            ## stop just raises the flag -- the thread is supposed to 
+            ## then kill itself but cannot.  Paul Kienzle came up with
+            ## this fix to prevent threads from stepping on each other
+            ## in Calc1D of fitting.py which was causing a simple custom model
+            ## to crash Sasview.  See rest of notes under Calc1D.
+            ##
+            ##    -PDB August 13, 2014                  
+            while self.estimation_thread.isrunning():
+                time.sleep(0.1)
+                
                 
         pr = self.pr.clone()
         self.estimation_thread = EstimatePr(pr, self.nfunc,
@@ -1160,7 +1179,16 @@ class Plugin(PluginBase):
         # If a thread is already started, stop it
         if self.estimation_thread != None and self.estimation_thread.isrunning():
             self.estimation_thread.stop()
-                
+            ## stop just raises the flag -- the thread is supposed to 
+            ## then kill itself but cannot.  Paul Kienzle came up with
+            ## this fix to prevent threads from stepping on each other
+            ## in Calc1D of fitting.py which was causing a simple custom model
+            ## to crash Sasview.  See rest of notes under Calc1D.
+            ##
+            ##    -PDB August 13, 2014                  
+            while self.estimation_thread.isrunning():
+                time.sleep(0.1)
+                                
         pr = self.pr.clone()
         # Skip the slit settings for the estimation
         # It slows down the application and it doesn't change the estimates
