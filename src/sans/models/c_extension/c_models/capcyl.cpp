@@ -177,8 +177,7 @@ static double capcyl_analytical_2D_scaled(CapCylParameters *pars, double q, doub
     // undefined value from CylKernel
   alpha = acos( cos_val );
 
-  // Call the IGOR library function to get the kernel
-  answer = capcyl2d_kernel(dp, q, alpha)/sin(alpha);
+  answer = capcyl2d_kernel(dp, q, alpha);
 
 
   return answer;
