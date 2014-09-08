@@ -35,12 +35,7 @@ from welcome_panel import WelcomePanel
 import local_config
 PLUGIN_MODEL_DIR = 'plugin_models'
 APP_NAME = 'SasView'
-def run():
-    sys.path.append(os.path.join("..","..",".."))
-    from multiprocessing import freeze_support
-    freeze_support()
-    sasview = SasView()
-        
+
 class SasViewApp(gui_manager.ViewApp):
     """
     """
@@ -62,7 +57,7 @@ class SasView():
         # Note: py2exe can't find dynamically loaded
         # modules. We load the fitting module here
         # to ensure a complete Windows executable build.
-        
+
         # Fitting perspective
         try:
             import sans.perspectives.fitting as module    
@@ -71,8 +66,8 @@ class SasView():
         except Exception as inst:
             logging.error("Fitting problems: " + str(inst))
             logging.error("%s: could not find Fitting plug-in module"% APP_NAME) 
-            logging.error(sys.exc_value)  
-            
+            logging.error(sys.exc_value)
+
         # P(r) perspective
         try:
             import sans.perspectives.pr as module    
@@ -112,14 +107,28 @@ class SasView():
         # delete unused model folder    
         self.gui.clean_plugin_models(PLUGIN_MODEL_DIR)
         # Start the main loop
-        self.gui.MainLoop()  
-       
+        self.gui.MainLoop()
 
 
-if __name__ == "__main__": 
+def run():
     from multiprocessing import freeze_support
     freeze_support()
-    #Process(target=SasView).start()
-    sasview = SasView()
+    if len(sys.argv) > 1:
+        ## Run sasview as an interactive python interpreter
+        #if sys.argv[1] == "-i":
+        #    sys.argv = ["ipython", "--pylab"]
+        #    from IPython import start_ipython
+        #    sys.exit(start_ipython())
+        thing_to_run = sys.argv[1]
+        sys.argv = sys.argv[1:]
+        import runpy
+        if os.path.exists(thing_to_run):
+            runpy.run_path(thing_to_run, run_name="__main__")
+        else:
+            runpy.run_module(thing_to_run, run_name="__main__")
+    else:
+        SasView()
 
-   
+if __name__ == "__main__":
+    run()
+

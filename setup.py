@@ -68,7 +68,7 @@ if sys.version_info >= (2, 6):
     is_64bits = sys.maxsize > 2**32
     
     
-enable_openmp = True                    
+enable_openmp = True
 
 if sys.platform =='darwin':
     if not is_64bits:
@@ -346,7 +346,8 @@ packages.append("sans.sansview")
 #required = ['lxml>=2.2.2', 'numpy>=1.4.1', 'matplotlib>=0.99.1.1', 
 #            'wxPython>=2.8.11', 'pil',
 #            'periodictable>=1.3.0', 'scipy>=0.7.2']
-required = ['lxml','periodictable>=1.3.1','pyparsing<2.0.0']
+required = ['lxml', 'periodictable>=1.3.1', 'pyparsing<2.0.0'
+        'bumps', 'numdifftools']
 
 if os.name=='nt':
     required.extend(['html5lib', 'reportlab'])

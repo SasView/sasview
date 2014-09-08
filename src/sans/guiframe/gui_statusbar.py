@@ -210,7 +210,7 @@ class StatusBar(wxStatusB):
     def SetStatusText(self, text="", number=MSG_POSITION, event=None):
         """
         """
-        wxStatusB.SetStatusText(self, text, number)
+        wxStatusB.SetStatusText(self, text.split('\n',1)[0], number)
         self.list_msg.append(text)
         self.status_color.SetBackgroundColour(GREEN)
         self.status_color.SetForegroundColour(GREEN)

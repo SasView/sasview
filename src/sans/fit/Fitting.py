@@ -7,7 +7,13 @@ a park fit or a scipy fit.
 #from scipy import optimize
 from sans.fit.ScipyFitting import ScipyFit
 from sans.fit.ParkFitting import ParkFit
+from sans.fit.BumpsFitting import BumpsFit
 
+ENGINES={
+    'scipy': ScipyFit,
+    'park': ParkFit,
+    'bumps': BumpsFit,
+}
 
 class Fit(object):
     """ 
@@ -25,13 +31,13 @@ class Fit(object):
         chisqr1, out1, cov1=engine.fit(pars,qmin,qmax)
         
     """  
-    def __init__(self, engine='scipy'):
+    def __init__(self, engine='scipy', *args, **kw):
         """
         """
         #self._engine will contain an instance of ScipyFit or ParkFit
         self._engine = None
         self.fitter_id = None
-        self.set_engine(engine)
+        self.set_engine(engine, *args, **kw)
           
     def __setattr__(self, name, value):
         """
@@ -48,7 +54,7 @@ class Fit(object):
         else:
             self.__dict__[name] = value
                 
-    def set_engine(self, word):
+    def set_engine(self, word, *args, **kw):
         """
         Select the type of Fit 
         
@@ -58,12 +64,10 @@ class Fit(object):
              a valueError is raised 
              
         """
-        if word == "scipy":
-            self._engine = ScipyFit()
-        elif word == "park":
-            self._engine = ParkFit()
-        else:
-            raise ValueError, "enter the keyword scipy or park"
+        try:
+            self._engine = ENGINES[word](*args, **kw)
+        except KeyError, exc:
+            raise KeyError("fit engine should be one of scipy, park or bumps")
 
     def fit(self, msg_q=None, q=None, handler=None, 
                         curr_thread=None, 

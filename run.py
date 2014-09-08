@@ -7,13 +7,15 @@ or c modules.
 
 Usage:
 
-./run.py [args]
+./run.py [(module|script) args...]
+
+Without arguments run.py runs sasview.  With arguments, run.py will run
+the given module or script.
 """
 
 import os
 import sys
 import imp
-from glob import glob
 from contextlib import contextmanager
 from os.path import abspath, dirname, join as joinpath
 
@@ -48,10 +50,12 @@ def import_package(modname, path):
     mod.__path__ = [abspath(path)]
     return mod
 
-def import_dll(modname):
+def import_dll(modname, build_path):
     """Import a DLL from the build directory"""
+    import sysconfig
+    ext = sysconfig.get_config_var('SO')
     # build_path comes from context
-    path = glob(joinpath(build_path, *modname.split('.'))+'.*')[0]
+    path = joinpath(build_path, *modname.split('.'))+ext
     #print "importing", modname, "from", path
     return imp.load_dynamic(modname, path)
 
@@ -69,9 +73,9 @@ def prepare():
     build_path = joinpath(root, 'build','lib.'+platform)
 
     # Make sure that we have a private version of mplconfig
-    mplconfig = joinpath(abspath(dirname(__file__)), '.mplconfig')
-    os.environ['MPLCONFIGDIR'] = mplconfig
-    if not os.path.exists(mplconfig): os.mkdir(mplconfig)
+    #mplconfig = joinpath(abspath(dirname(__file__)), '.mplconfig')
+    #os.environ['MPLCONFIGDIR'] = mplconfig
+    #if not os.path.exists(mplconfig): os.mkdir(mplconfig)
     #import matplotlib
     #matplotlib.use('Agg')
     #print matplotlib.__file__
@@ -79,6 +83,9 @@ def prepare():
     # add periodictable to the path
     try: import periodictable
     except: addpath(joinpath(root, '..','periodictable'))
+
+    try: import bumps
+    except: addpath(joinpath(root, '..','bumps'))
 
     # select wx version
     #addpath(os.path.join(root, '..','wxPython-src-3.0.0.0','wxPython'))
@@ -106,7 +113,7 @@ def prepare():
     import sans.pr
     sans.pr.core = import_package('sans.pr.core',
                                   joinpath(build_path, 'sans', 'pr', 'core'))
-    #import_dll('park._modeling')
+    #import_dll('park._modeling', build_path)
 
     #park = import_package('park',os.path.join(build_path,'park'))
 
@@ -121,9 +128,6 @@ def prepare():
     #from sans.models import SphereModel
 
 if __name__ == "__main__":
-    # start sasview
-    #import multiprocessing
-    #multiprocessing.freeze_support()
     prepare()
-    from sans.sansview.sansview import SasView
-    SasView()
+    from sans.sansview.sansview import run
+    run()

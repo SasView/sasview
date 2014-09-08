@@ -66,6 +66,7 @@ class ConsoleUpdate(FitHandler):
         If quiet is true, only print out final summary, not progress and
         improvements.
         """
+        #import traceback; traceback.print_stack()
         self.progress_time = time.time()
         self.progress_percent = 0
         self.improvement_time = self.progress_time
@@ -227,6 +228,7 @@ class FitResult(object):
                 p.stderr = None
 
     def __str__(self):
+        #import traceback; traceback.print_stack()
         if self.parameters == None: return "No results"
         L = ["P%-3d %s"%(n+1,p.summarize()) for n,p in enumerate(self.parameters)]
         L.append("=== goodness of fit: %g"%(self.fitness))

@@ -4,8 +4,7 @@
 from sans.guiframe.events import StatusEvent 
 import time
 import wx
-import park
-from park.fitresult import FitHandler
+from sans.fit import FitHandler
 
 class ConsoleUpdate(FitHandler):
     """
@@ -87,7 +86,7 @@ class ConsoleUpdate(FitHandler):
         """
         Print result object
         """
-        msg = " \n %s \n" % self.result.__str__()
+        msg = " \n %s \n" % str(self.result)
         wx.PostEvent(self.parent, StatusEvent(status=msg))
                      
     def error(self, msg):
@@ -128,23 +127,20 @@ class ConsoleUpdate(FitHandler):
             self.update_fit()
             
         
-    def update_fit(self, msg="", last=False):
+    def update_fit(self, last=False):
         """
         """
         t1 = time.time()
         self.elapsed_time =  t1 - self.update_duration
         self.update_duration = t1
         self.fit_duration += self.elapsed_time
-        str_time = time.strftime("%a, %d %b %Y %H:%M:%S ", time.localtime(t1))
-        UPDATE_INTERVAL = 0.5
+        str_time = time.strftime("%Y-%m-%d %H:%M:%S ", time.localtime(t1))
+        UPDATE_INTERVAL = 5.0
         u_flag = False
         if self.fit_duration >= UPDATE_INTERVAL:
             self.fit_duration = 0
             u_flag = True
-        if not last:
-            msg += "Fit Updates ... %s \n" % str_time    
-        else:
-            msg += "Final updates ........."
+        msg = str_time
         if u_flag or last:
             if self.result is not None:
                 data_name, model_name = None, None
@@ -163,9 +159,6 @@ class ConsoleUpdate(FitHandler):
                                                      #str(model_name))
                 msg +=  str(self.result)
                 msg += "\n"
-                if not last:
-                    msg += "About %s s elapsed......... \n" % \
-                                            str (UPDATE_INTERVAL)
             else:
                 msg += "No result available\n"
             wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",

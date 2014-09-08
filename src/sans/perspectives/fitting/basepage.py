@@ -95,7 +95,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.npts = None
         self.num_points = None
         ## default fitengine type
-        self.engine_type = 'scipy'
+        self.engine_type = 'bumps'
         ## smear default
         self.current_smearer = None
         ## 2D smear accuracy default
@@ -834,8 +834,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             msg = " Parameter values are pasted from the clipboad..."
             infor = "warning"
         else:
-            msg = "Error was occured "
-            msg += ": No valid parameter values to paste from the clipboard..."
+            msg = "Error occured: "
+            msg += "No valid parameter values to paste from the clipboard..."
             infor = "error"
             wx.PostEvent(self._manager.parent,
                     StatusEvent(status=msg, info=infor))
@@ -2182,12 +2182,12 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.qmax_x = tempmax
                 else:
                     tcrtl.SetBackgroundColour("pink")
-                    msg = "Model Error:wrong value entered: %s" % sys.exc_value
+                    msg = "Model Error: wrong value entered: %s" % sys.exc_value
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
                     return
             except:
                 tcrtl.SetBackgroundColour("pink")
-                msg = "Model Error:wrong value entered: %s" % sys.exc_value
+                msg = "Model Error: wrong value entered: %s" % sys.exc_value
                 wx.PostEvent(self.parent, StatusEvent(status=msg))
                 return
             #Check if # of points for theory model are valid(>0).
@@ -2198,11 +2198,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.num_points = temp_npts
                         #is_modified = True
                 else:
-                    msg = "Cannot Plot :No npts in that Qrange!!!  "
+                    msg = "Cannot plot: No points in Q range!!!  "
                     wx.PostEvent(self.parent, StatusEvent(status=msg))
         else:
             tcrtl.SetBackgroundColour("pink")
-            msg = "Model Error:wrong value entered!!!"
+            msg = "Model Error: wrong value entered!!!"
             wx.PostEvent(self.parent, StatusEvent(status=msg))
         self.save_current_state()
         event = PageInfoEvent(page=self)
@@ -2239,12 +2239,12 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.theory_qmax_x = tempmax
                 else:
                     tcrtl.SetBackgroundColour("pink")
-                    msg = "Model Error:wrong value entered: %s" % sys.exc_value
+                    msg = "Model Error: wrong value entered: %s" % sys.exc_value
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                     return
             except:
                 tcrtl.SetBackgroundColour("pink")
-                msg = "Model Error:wrong value entered: %s" % sys.exc_value
+                msg = "Model Error: wrong value entered: %s" % sys.exc_value
                 wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 return
             #Check if # of points for theory model are valid(>0).
@@ -2255,11 +2255,11 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.num_points = temp_npts
                         is_modified = True
                 else:
-                    msg = "Cannot Plot :No npts in that Qrange!!!  "
+                    msg = "Cannot Plot: No points in Q range!!!  "
                     wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         else:
             tcrtl.SetBackgroundColour("pink")
-            msg = "Model Error:wrong value entered!!!"
+            msg = "Model Error: wrong value entered!!!"
             wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
         self.save_current_state()
         event = PageInfoEvent(page=self)
@@ -2430,8 +2430,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.qmin.Refresh()
                 self.qmax.SetBackgroundColour("pink")
                 self.qmax.Refresh()
-                msg = "Npts of Data Error :"
-                msg += "No or too little npts of %s." % data.name
+                msg = "Data Error: "
+                msg += "Too few points in %s." % data.name
                 wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 self.fitrange = False
                 flag = False
@@ -2465,8 +2465,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                 self.qmin.Refresh()
                 self.qmax.SetBackgroundColour("pink")
                 self.qmax.Refresh()
-                msg = "Npts of Data Error :"
-                msg += "No or too little npts of %s." % data.name
+                msg = "Data Error: "
+                msg += "Too few points in %s." % data.name
                 wx.PostEvent(self._manager.parent, StatusEvent(status=msg))
                 self.fitrange = False
                 flag = False
@@ -2517,7 +2517,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                             item[2].SetBackgroundColour(wx.WHITE)
                                            
                         except:
-                            msg = "Wrong Fit parameter range entered "
+                            msg = "Wrong fit parameter range entered"
                             wx.PostEvent(self._manager.parent,
                                          StatusEvent(status=msg))
                             raise ValueError, msg
@@ -2985,7 +2985,7 @@ class BasicPage(ScrolledPanel, PanelBase):
             # set relative text ctrs.
             self.qmin.SetValue(str(self.qmin_x))
             self.qmax.SetValue(str(self.qmax_x))
-            self.set_npts2fit()
+            self.show_npts2fit()
             # At this point, some button and variables satatus (disabled?)
             # should be checked such as color that should be reset to
             # white in case that it was pink.
@@ -3873,7 +3873,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         Found all parameters current check and add them to list of parameters
         to fit if implemented
         """
-    def set_npts2fit(self):
+    def show_npts2fit(self):
         """
         setValue Npts for fitting if implemented
         """

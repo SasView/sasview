@@ -23,7 +23,158 @@ from park.fit import Fitter
 from park.formatnum import format_uncertainty
 from sans.fit.AbstractFitEngine import FitEngine
 from sans.fit.AbstractFitEngine import FResult
-  
+
+class SansParameter(park.Parameter):
+    """
+    SANS model parameters for use in the PARK fitting service.
+    The parameter attribute value is redirected to the underlying
+    parameter value in the SANS model.
+    """
+    def __init__(self, name, model, data):
+        """
+            :param name: the name of the model parameter
+            :param model: the sans model to wrap as a park model
+        """
+        park.Parameter.__init__(self, name)
+        #self._model, self._name = model, name
+        self.data = data
+        self.model = model
+        #set the value for the parameter of the given name
+        self.set(model.getParam(name))
+
+        # TODO: model is missing parameter ranges for dispersion parameters
+        if name not in model.details:
+            #print "setting details for",name
+            model.details[name] = ["", None, None]
+
+    def _getvalue(self):
+        """
+        override the _getvalue of park parameter
+
+        :return value the parameter associates with self.name
+
+        """
+        return self.model.getParam(self.name)
+
+    def _setvalue(self, value):
+        """
+        override the _setvalue pf park parameter
+
+        :param value: the value to set on a given parameter
+
+        """
+        self.model.setParam(self.name, value)
+
+    value = property(_getvalue, _setvalue)
+
+    def _getrange(self):
+        """
+        Override _getrange of park parameter
+        return the range of parameter
+        """
+        #if not  self.name in self._model.getDispParamList():
+        lo, hi = self.model.details[self.name][1:3]
+        if lo is None: lo = -numpy.inf
+        if hi is None: hi = numpy.inf
+        if lo > hi:
+            raise ValueError, "wrong fit range for parameters"
+
+        return lo, hi
+
+    def get_name(self):
+        """
+        """
+        return self._getname()
+
+    def _setrange(self, r):
+        """
+        override _setrange of park parameter
+
+        :param r: the value of the range to set
+
+        """
+        self.model.details[self.name][1:3] = r
+    range = property(_getrange, _setrange)
+
+
+class ParkModel(park.Model):
+    """
+    PARK wrapper for SANS models.
+    """
+    def __init__(self, sans_model, sans_data=None, **kw):
+        """
+        :param sans_model: the sans model to wrap using park interface
+
+        """
+        park.Model.__init__(self, **kw)
+        self.model = sans_model
+        self.name = sans_model.name
+        self.data = sans_data
+        #list of parameters names
+        self.sansp = sans_model.getParamList()
+        #list of park parameter
+        self.parkp = [SansParameter(p, sans_model, sans_data) for p in self.sansp]
+        #list of parameter set
+        self.parameterset = park.ParameterSet(sans_model.name, pars=self.parkp)
+        self.pars = []
+
+    def get_params(self, fitparams):
+        """
+        return a list of value of paramter to fit
+
+        :param fitparams: list of paramaters name to fit
+
+        """
+        list_params = []
+        self.pars = fitparams
+        for item in fitparams:
+            for element in self.parkp:
+                if element.name == str(item):
+                    list_params.append(element.value)
+        return list_params
+
+    def set_params(self, paramlist, params):
+        """
+        Set value for parameters to fit
+
+        :param params: list of value for parameters to fit
+
+        """
+        try:
+            for i in range(len(self.parkp)):
+                for j in range(len(paramlist)):
+                    if self.parkp[i].name == paramlist[j]:
+                        self.parkp[i].value = params[j]
+                        self.model.setParam(self.parkp[i].name, params[j])
+        except:
+            raise
+
+    def eval(self, x):
+        """
+            Override eval method of park model.
+
+            :param x: the x value used to compute a function
+        """
+        try:
+            return self.model.evalDistribution(x)
+        except:
+            raise
+
+    def eval_derivs(self, x, pars=[]):
+        """
+        Evaluate the model and derivatives wrt pars at x.
+
+        pars is a list of the names of the parameters for which derivatives
+        are desired.
+
+        This method needs to be specialized in the model to evaluate the
+        model function.  Alternatively, the model can implement is own
+        version of residuals which calculates the residuals directly
+        instead of calling eval.
+        """
+        return []
+
+
 class SansFitResult(fitresult.FitResult):
     def __init__(self, *args, **kwrds):
         fitresult.FitResult.__init__(self, *args, **kwrds)
@@ -243,7 +394,7 @@ class MyAssembly(Assembly):
         #print "fitpars", fitpars
         return fitpars
     
-    def all_results(self, result):
+    def extend_results_with_calculated_parameters(self, result):
         """
         Extend result from the fit with the calculated parameters.
         """
@@ -291,12 +442,12 @@ class MyAssembly(Assembly):
                 m.degrees_of_freedom = N-k if N>k else 1
                 # dividing residuals by N in order to be consistent with Scipy
                 m.chisq = numpy.sum(m.residuals**2/N) 
-                resid.append(m.weight*m.residuals/math.sqrt(N))
+                resid.append(m.weight*m.residuals)
         self.residuals = numpy.hstack(resid)
         N = len(self.residuals)
         self.degrees_of_freedom = N-k if N>k else 1
         self.chisq = numpy.sum(self.residuals**2)
-        return self.chisq
+        return self.chisq/self.degrees_of_freedom
     
 class ParkFit(FitEngine):
     """ 
@@ -353,21 +504,26 @@ class ParkFit(FitEngine):
         for fproblem in self.fit_arrange_dict.itervalues():
             if fproblem.get_to_fit() == 1:
                 fitproblems.append(fproblem)
-        if len(fitproblems) == 0: 
+        if len(fitproblems) == 0:
             raise RuntimeError, "No Assembly scheduled for Park fitting."
-            return
         for item in fitproblems:
-            parkmodel = item.get_model()
+            model = item.get_model()
+            parkmodel = ParkModel(model.model, model.data)
+            parkmodel.pars = item.pars
             if reset_flag:
                 # reset the initial value; useful for batch
                 for name in item.pars:
                     ind = item.pars.index(name)
                     parkmodel.model.setParam(name, item.vals[ind])
+
+            # set the constraints into the model
+            for p,v in item.constraints:
+                parkmodel.parameterset[str(p)].set(str(v))
             
             for p in parkmodel.parameterset:
                 ## does not allow status change for constraint parameters
                 if p.status != 'computed':
-                    if p.get_name()in item.pars:
+                    if p.get_name() in item.pars:
                         ## make parameters selected for 
                         #fit will be between boundaries
                         p.set(p.range)         
@@ -382,7 +538,7 @@ class ParkFit(FitEngine):
   
     def fit(self, msg_q=None, 
             q=None, handler=None, curr_thread=None, 
-                                        ftol=1.49012e-8, reset_flag=False):
+            ftol=1.49012e-8, reset_flag=False):
         """
         Performs fit with park.fit module.It can  perform fit with one model
         and a set of data, more than two fit of  one model and sets of data or 
@@ -406,7 +562,8 @@ class ParkFit(FitEngine):
         self.create_assembly(curr_thread=curr_thread, reset_flag=reset_flag)
         localfit = SansFitSimplex()
         localfit.ftol = ftol
-        
+        localfit.xtol = 1e-6
+
         # See `park.fitresult.FitHandler` for details.
         fitter = SansFitMC(localfit=localfit, start_points=1)
         if handler == None:
@@ -415,10 +572,13 @@ class ParkFit(FitEngine):
         result_list = []
         try:
             result = fit.fit(self.problem, fitter=fitter, handler=handler)
-            self.problem.all_results(result)
+            self.problem.extend_results_with_calculated_parameters(result)
             
         except LinAlgError:
             raise ValueError, "SVD did not converge"
+
+        if result is None:
+            raise RuntimeError("park did not return a fit result")
     
         for m in self.problem.parts:
             residuals, theory = m.fitness.residuals()
@@ -426,24 +586,28 @@ class ParkFit(FitEngine):
             small_result.fitter_id = self.fitter_id
             small_result.theory = theory
             small_result.residuals = residuals
-            small_result.pvec = []
-            small_result.cov = []
-            small_result.stderr = []
-            small_result.param_list = []
-            small_result.residuals = m.residuals
-            if result is not None:
-                for p in result.parameters:
-                    if p.data.name == small_result.data.name and \
-                            p.model.name == small_result.model.name:
-                        small_result.index = m.data.idx
-                        small_result.fitness = result.fitness
-                        small_result.pvec.append(p.value)
-                        small_result.stderr.append(p.stderr)
-                        name_split = p.name.split('.')
-                        name = name_split[1].strip()
-                        if len(name_split) > 2:
-                            name += '.' + name_split[2].strip()
-                        small_result.param_list.append(name)
+            small_result.index = m.data.idx
+            small_result.fitness = result.fitness
+
+            # Extract the parameters that are part of this model; make sure
+            # they match the fitted parameters for this model, and place them
+            # in the same order as they occur in the model.
+            pars = {}
+            for p in result.parameters:
+                #if p.data.name == small_result.data.name and
+                if p.model.name == small_result.model.name:
+                    model_name, par_name = p.name.split('.', 1)
+                    pars[par_name] = (p.value, p.stderr)
+            #assert len(pars.keys()) == len(m.model.pars)
+            v,dv = zip(*[pars[p] for p in m.model.pars])
+            small_result.pvec = v
+            small_result.stderr = dv
+            small_result.param_list = m.model.pars
+
+            # normalize chisq by degrees of freedom
+            dof = len(small_result.residuals)-len(small_result.pvec)
+            small_result.fitness = numpy.sum(residuals**2)/dof
+
             result_list.append(small_result)    
         if q != None:
             q.put(result_list)

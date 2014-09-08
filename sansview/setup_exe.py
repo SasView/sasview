@@ -318,6 +318,7 @@ packages.extend([
 'reportlab.pdfgen',
 'reportlab.platypus',
 ])
+packages.append('IPython')
 includes = ['site']
 
 # Exclude packages that are not needed but are often found on build systems

@@ -47,10 +47,10 @@ class testFitModule(unittest.TestCase):
         self.assertTrue(len(result1.pvec)>=0 )
         self.assertTrue(len(result1.stderr)>= 0)
 
-        print "results",list(zip(result1.pvec, result1.stderr))
-        self.assertTrue( math.fabs(result1.pvec[0]-605)/3.0 <= result1.stderr[0] )
-        self.assertTrue( math.fabs(result1.pvec[1]-20.0)/3.0  <= result1.stderr[1] )
-        self.assertTrue( math.fabs(result1.pvec[2]-1)/3.0 <= result1.stderr[2] )
+        #print "results",list(zip(result1.pvec, result1.stderr))
+        self.assertTrue( math.fabs(result1.pvec[0]-612)/3.0 <= result1.stderr[0] )
+        self.assertTrue( math.fabs(result1.pvec[1]-20.3)/3.0  <= result1.stderr[1] )
+        self.assertTrue( math.fabs(result1.pvec[2]-25)/3.0 <= result1.stderr[2] )
         
         self.assertTrue( result1.fitness/len(data.x) < 1.0 )
         

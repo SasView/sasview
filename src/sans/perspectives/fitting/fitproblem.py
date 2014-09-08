@@ -453,7 +453,7 @@ class FitProblemDictionary(FitProblemComponent, dict):
         """
         return self.itervalues()
     
-    def  set_result(self, result, fid):
+    def set_result(self, result, fid):
         """
         """
         if fid in self.iterkeys():

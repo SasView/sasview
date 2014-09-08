@@ -137,7 +137,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                 self.sizer2.Layout()
                 self.Layout()
                 break
-        self._onAdd_constraint(None)
+
+        #self._onAdd_constraint(None)
              
     def onFit(self, event):
         """
@@ -151,7 +152,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
 
         ## making sure all parameters content a constraint
         ## validity of the constraint expression is own by fit engine
-        if self.parent._manager._fit_engine != "park" and flag:
+        if self.parent._manager._fit_engine not in ("park","bumps") and flag:
             msg = "The FitEnging will be set to 'Park' fit engine\n"
             msg += " for the simultaneous fit..."
             #wx.MessageBox(msg, 'Info')
@@ -377,7 +378,7 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         """
         box_description = wx.StaticBox(self, -1,"Easy Setup ")
         boxsizer = wx.StaticBoxSizer(box_description, wx.HORIZONTAL)     
-        sizer_constraint = wx.BoxSizer(wx.HORIZONTAL|wx.LEFT|wx.RIGHT|wx.EXPAND)
+        sizer_constraint = wx.BoxSizer(wx.HORIZONTAL)
         self.model_cbox_left = wx.ComboBox(self, -1, style=wx.CB_READONLY)
         self.model_cbox_left.Clear()
         self.model_cbox_right = wx.ComboBox(self, -1, style=wx.CB_READONLY)
@@ -813,8 +814,9 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
                         return False
                         
                     for fid in self.page_finder[id].iterkeys():
-                        self.page_finder[id].set_model_param(param,
-                                                        constraint, fid=fid)
+                        # wrap in param/constraint in str() to remove unicode
+                        self.page_finder[id].set_model_param(str(param),
+                                                        str(constraint), fid=fid)
                     break
         return True
     
