@@ -11,6 +11,8 @@ import numpy
 from sans.fit.AbstractFitEngine import FitEngine
 from sans.fit.AbstractFitEngine import FResult
 
+_SMALLVALUE = 1.0e-10
+
 class SansAssembly:
     """
     Sans Assembly class a class wrapper to be call in optimizer.leastsq method
@@ -188,6 +190,7 @@ class ScipyFit(FitEngine):
         elif len(fitproblem) == 0 :
             raise RuntimeError, "No Assembly scheduled for Scipy fitting."
         model = fitproblem[0].get_model()
+        pars = fitproblem[0].pars
         if reset_flag:
             # reset the initial value; useful for batch
             for name in fitproblem[0].pars:
@@ -202,13 +205,13 @@ class ScipyFit(FitEngine):
         ftol = ftol
         
         # Check the initial value if it is within range
-        _check_param_range(model.model, self.param_list)
+        _check_param_range(model.model, pars)
         
-        result = FResult(model=model.model, data=data, param_list=self.param_list)
+        result = FResult(model=model.model, data=data, param_list=pars)
         result.fitter_id = self.fitter_id
         if handler is not None:
             handler.set_result(result=result)
-        functor = SansAssembly(paramlist=self.param_list,
+        functor = SansAssembly(paramlist=pars,
                                model=model,
                                data=data,
                                handler=handler,
@@ -221,7 +224,7 @@ class ScipyFit(FitEngine):
             from scipy import optimize
             
             out, cov_x, _, mesg, success = optimize.leastsq(functor,
-                                            model.get_params(self.param_list),
+                                            model.get_params(pars),
                                             ftol=ftol,
                                             full_output=1)
         except:
@@ -256,7 +259,7 @@ class ScipyFit(FitEngine):
         return [result]
 
         
-def _check_param_range(model, param_list):
+def _check_param_range(model, pars):
     """
     Check parameter range and set the initial value inside
     if it is out of range.
@@ -264,7 +267,7 @@ def _check_param_range(model, param_list):
     : model: park model object
     """
     # loop through parameterset
-    for p in param_list:
+    for p in pars:
         value = model.getParam(p)
         low,high = model.details.setdefault(p,["",None,None])[1:3]
         # if the range was defined, check the range
