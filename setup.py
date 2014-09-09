@@ -302,7 +302,9 @@ geni_sources = [os.path.join(gen_dir, "sld2i_module.cpp")]
 if os.name=='nt':
     smearer_sources.append(os.path.join(igordir, "winFuncs.c"))
     geni_sources.append(os.path.join(igordir, "winFuncs.c"))
-ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
+no_ext = []
+#ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
+no_ext.extend( [ Extension("sans.models.sans_extension.c_models",
                                 sources=model_sources,                 
                                 include_dirs=[igordir, includedir, 
                                               c_model_dir, numpy_incl_path, cephes_dir],
@@ -346,8 +348,7 @@ packages.append("sans.sansview")
 #required = ['lxml>=2.2.2', 'numpy>=1.4.1', 'matplotlib>=0.99.1.1', 
 #            'wxPython>=2.8.11', 'pil',
 #            'periodictable>=1.3.0', 'scipy>=0.7.2']
-required = ['lxml', 'periodictable>=1.3.1', 'pyparsing<2.0.0'
-        'bumps', 'numdifftools']
+required = ['lxml', 'periodictable>=1.3.1', 'pyparsing<2.0.0', 'bumps'] #, 'numdifftools']
 
 if os.name=='nt':
     required.extend(['html5lib', 'reportlab'])
