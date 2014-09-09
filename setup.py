@@ -348,7 +348,7 @@ packages.append("sans.sansview")
 #required = ['lxml>=2.2.2', 'numpy>=1.4.1', 'matplotlib>=0.99.1.1', 
 #            'wxPython>=2.8.11', 'pil',
 #            'periodictable>=1.3.0', 'scipy>=0.7.2']
-required = ['lxml', 'periodictable>=1.3.1', 'pyparsing<2.0.0', 'bumps'] #, 'numdifftools']
+required = ['lxml', 'periodictable>=1.3.1', 'pyparsing<2.0.0'] #, 'bumps', 'numdifftools']
 
 if os.name=='nt':
     required.extend(['html5lib', 'reportlab'])
