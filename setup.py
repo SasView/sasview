@@ -345,10 +345,22 @@ package_data['sans.sansview'] = ['images/*', 'media/*', 'test/*',
                                  'default_categories.json']
 packages.append("sans.sansview")
 
-#required = ['lxml>=2.2.2', 'numpy>=1.4.1', 'matplotlib>=0.99.1.1', 
-#            'wxPython>=2.8.11', 'pil',
-#            'periodictable>=1.3.0', 'scipy>=0.7.2']
-required = ['lxml', 'periodictable>=1.3.1', 'pyparsing<2.0.0'] #, 'bumps', 'numdifftools']
+required = [
+    'bumps>=0.7.5', 'periodictable>=1.3.1', 'pyparsing<2.0.0', 
+
+    # 'lxml>=2.2.2',
+    'lxml', 
+
+    ## numdifftools is an optional dependency for bumps, giving better
+    ## errorbars for amoeba and differential evolution.  It is suppressed
+    ## because it forces scipy>=0.8, which the SNS does not yet support.
+    # 'numdifftools',
+
+    ## The following dependecies won't install automatically, so assume them
+    ## The numbers should be bumped up for matplotlib and wxPython as well.
+    # 'numpy>=1.4.1', 'scipy>=0.7.2', 'matplotlib>=0.99.1.1',
+    # 'wxPython>=2.8.11', 'pil',
+    ]
 
 if os.name=='nt':
     required.extend(['html5lib', 'reportlab'])
