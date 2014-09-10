@@ -302,42 +302,43 @@ geni_sources = [os.path.join(gen_dir, "sld2i_module.cpp")]
 if os.name=='nt':
     smearer_sources.append(os.path.join(igordir, "winFuncs.c"))
     geni_sources.append(os.path.join(igordir, "winFuncs.c"))
-no_ext = []
-#ext_modules.extend( [ Extension("sans.models.sans_extension.c_models",
-no_ext.extend( [ Extension("sans.models.sans_extension.c_models",
-                                sources=model_sources,                 
-                                include_dirs=[igordir, includedir, 
-                                              c_model_dir, numpy_incl_path, cephes_dir],
-                                ),       
-                    # Smearer extension
-                    Extension("sans.models.sans_extension.smearer",
-                              sources = smearer_sources,
-                              include_dirs=[igordir, 
-                                            smear_dir, numpy_incl_path],
-                              ),
+
+c_models = [ 
+    Extension("sans.models.sans_extension.c_models",
+        sources=model_sources,                 
+        include_dirs=[
+            igordir, includedir, c_model_dir, numpy_incl_path, cephes_dir
+        ],
+    ),
+
+    # Smearer extension
+    Extension("sans.models.sans_extension.smearer",
+        sources = smearer_sources,
+        include_dirs=[igordir,  smear_dir, numpy_incl_path],
+    ),
                     
-                    Extension("sans.models.sans_extension.smearer2d_helper",
-                              sources = [os.path.join(smear_dir, 
-                                                "smearer2d_helper_module.cpp"),
-                                         os.path.join(smear_dir, 
-                                                "smearer2d_helper.cpp"),],
-                              include_dirs=[smear_dir, numpy_incl_path],
-                              ),
+    Extension("sans.models.sans_extension.smearer2d_helper",
+        sources = [
+            os.path.join(smear_dir, "smearer2d_helper_module.cpp"),
+            os.path.join(smear_dir, "smearer2d_helper.cpp"),
+        ],
+        include_dirs=[smear_dir, numpy_incl_path],
+    ),
                     
-                    Extension("sans.models.sans_extension.sld2i",
-                              sources = [os.path.join(gen_dir, 
-                                                "sld2i_module.cpp"),
-                                         os.path.join(gen_dir, 
-                                                "sld2i.cpp"),
-                                         os.path.join(c_model_dir, 
-                                                "libfunc.c"),
-                                         os.path.join(c_model_dir, 
-                                                "librefl.c"),],
-                              include_dirs=[gen_dir, includedir, 
-                                            c_model_dir, numpy_incl_path],
-                              )
-                    ] )
-        
+    Extension("sans.models.sans_extension.sld2i",
+        sources = [
+            os.path.join(gen_dir, "sld2i_module.cpp"),
+            os.path.join(gen_dir, "sld2i.cpp"),
+            os.path.join(c_model_dir, "libfunc.c"),
+            os.path.join(c_model_dir, "librefl.c"),
+        ],
+        include_dirs=[gen_dir, includedir,  c_model_dir, numpy_incl_path],
+    ),
+]
+
+# Comment out the following to avoid rebuilding all the models
+ext_modules.extend(c_models)
+
 # SasView
 
 package_dir["sans.sansview"] = "sansview"
