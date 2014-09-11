@@ -11,6 +11,10 @@ fi
 
 export SASVIEW_INSTALL=sasview-install
 
+if [ -z "$EASY_INSTALL" ]; then
+	EASY_INSTALL=`which easy_install`
+fi
+
 
 # Set up build environmentRun tests #######################################
 cd $WORKSPACE
@@ -20,9 +24,11 @@ if [ ! -d "utils" ]; then
     mkdir utils
 fi
 export PYTHONPATH=$PYTHONPATH:$WORKSPACE/utils
-easy_install -d $WORKSPACE/utils unittest-xml-reporting
-easy_install -d $WORKSPACE/utils lxml
-easy_install -d $WORKSPACE/utils pyparsing==1.5.5
+"$EASY_INSTALL" -d "$WORKSPACE/utils" unittest-xml-reporting
+"$EASY_INSTALL" -d "$WORKSPACE/utils" lxml
+"$EASY_INSTALL" -d "$WORKSPACE/utils" pyparsing==1.5.5
+"$EASY_INSTALL" -d "$WORKSPACE/utils" bumps==0.7.5
+"$EASY_INSTALL" -d "$WORKSPACE/utils" periodictable==1.3.0
 python deps.py
 
 #  Set up working directories
