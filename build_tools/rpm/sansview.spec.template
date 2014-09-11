@@ -20,7 +20,7 @@ SasView data analysis
 mkdir -p $RPM_BUILD_ROOT/opt/sasview
 mkdir -p $RPM_BUILD_ROOT/usr/local/bin
 export PYTHONPATH=$RPM_BUILD_ROOT/opt/sasview
-easy_install -d $RPM_BUILD_ROOT/opt/sasview ../SOURCES/sasview*.egg
+easy_install -N -d $RPM_BUILD_ROOT/opt/sasview ../SOURCES/sasview*.egg
 cd $RPM_BUILD_ROOT/usr/local/bin
 ln -sf /opt/sasview/sasview sasview
 
