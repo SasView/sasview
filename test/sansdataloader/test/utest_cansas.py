@@ -1,6 +1,7 @@
 """
     Unit tests for the new recursive cansas reader
 """
+import logging
 import warnings
 warnings.simplefilter("ignore")
 
@@ -50,6 +51,14 @@ class cansas_reader(unittest.TestCase):
             name += "_{0}".format(i)
             name = self.get_number_of_entries(dictionary, name, i)
         return name
+    
+    
+    def test_invalid_xml(self):
+        """
+        Should fail gracefully and send a message to logging.info()
+        """
+        invalid = StringIO.StringIO('<a><c></b></a>')
+        reader = XMLreader(invalid)
        
 
     def test_xml_validate(self):
@@ -202,7 +211,8 @@ class cansas_reader(unittest.TestCase):
         if valid:
             ## find the processing instructions and make into a dictionary
             dic = self.get_processing_instructions(reader)
-            self.assertTrue(dic == {'xml-stylesheet': 'type="text/xsl" href="cansas1d.xsl" '})
+            self.assertTrue(dic == {'xml-stylesheet': \
+                                    'type="text/xsl" href="cansas1d.xsl" '})
             
             xml = "<test><a><b><c></c></b></a></test>"
             xmldoc = minidom.parseString(xml)

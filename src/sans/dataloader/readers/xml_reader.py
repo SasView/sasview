@@ -14,6 +14,7 @@
 #copyright 2008,2009 University of Tennessee
 #############################################################################
 
+import logging
 from lxml import etree
 from lxml.builder import E
 
@@ -36,12 +37,12 @@ class XMLreader():
     encoding = None
     processing_instructions = None
     
-    def __init__(self, xml = None, schema = None, root = None):
+    def __init__(self, xml = None, schema = None):
         self.xml = xml
         self.schema = schema
         self.processing_instructions = {}
         if xml is not None:
-            self.set_xml_file(xml, root)
+            self.set_xml_file(xml)
         else:
             self.xmldoc = None
             self.xmlroot = None
@@ -60,7 +61,7 @@ class XMLreader():
             raise etree.XMLSchemaValidateError(self, self.find_invalid_xml())
         return self.xmldoc
     
-    def set_xml_file(self, xml, root = None):
+    def set_xml_file(self, xml):
         """
         Set the XML file and parse
         """
@@ -68,6 +69,8 @@ class XMLreader():
             self.xml = xml
             self.xmldoc = etree.parse(self.xml, parser = PARSER)
             self.xmlroot = self.xmldoc.getroot()
+        except etree.XMLSyntaxError as xml_error:
+            logging.info(xml_error)
         except Exception:
             self.xml = None
             self.xmldoc = None
@@ -80,6 +83,8 @@ class XMLreader():
         try:
             self.schema = schema
             self.schemadoc = etree.parse(self.schema, parser = PARSER)
+        except etree.XMLSyntaxError as xml_error:
+            logging.info(xml_error)
         except Exception:
             self.schema = None
             self.schemadoc = None
@@ -104,8 +109,8 @@ class XMLreader():
         schema = etree.XMLSchema(self.schemadoc)
         try:
             first_error = schema.assertValid(self.xmldoc)
-        except etree.DocumentInvalid as e:
-            first_error = str(e)
+        except etree.DocumentInvalid as err:
+            first_error = str(err)
         return first_error
     
     def parse_schema_and_doc(self):
@@ -115,11 +120,12 @@ class XMLreader():
         self.set_xml_file(self.xml)
         self.set_schema(self.schema)
         
-    def to_string(self, elem, pp=False, encoding=None):
+    def to_string(self, elem, pretty_print=False, encoding=None):
         """
         Converts an etree element into a string
         """
-        return etree.tostring(elem, pretty_print = pp, encoding = encoding)
+        return etree.tostring(elem, pretty_print = pretty_print, \
+                              encoding = encoding)
     
     def break_processing_instructions(self, string, dic):
         """
