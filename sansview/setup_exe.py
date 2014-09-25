@@ -21,6 +21,7 @@ if os.path.abspath(os.path.dirname(__file__)) != os.path.abspath(os.getcwd()):
     raise RuntimeError("Must run setup_exe from the sansview directory")
 from distutils.util import get_platform
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.abspath(os.path.join(root, '..', 'sasview-install')))
 platform = '%s-%s'%(get_platform(),sys.version[:3])
 build_path = os.path.join(root, 'build','lib.'+platform)
 sys.path.insert(0, build_path)
@@ -305,19 +306,22 @@ if py26MSdll_x86 != None:
 
 # packages
 #
-packages = ['matplotlib', 'scipy', 'pytz', 'encodings', 'comtypes', 'win32com', 'ho.pisa']
+packages = [
+    'matplotlib', 'scipy', 'pytz', 'encodings', 'comtypes',
+    'win32com', 'ho.pisa', 'bumps', 'numdifftools',
+    ]
 packages.extend([
-'reportlab',
-'reportlab.graphics.charts',
-'reportlab.graphics.samples',
-'reportlab.graphics.widgets',
-'reportlab.graphics.barcode',
-'reportlab.graphics',
-'reportlab.lib',
-'reportlab.pdfbase',
-'reportlab.pdfgen',
-'reportlab.platypus',
-])
+    'reportlab',
+    'reportlab.graphics.charts',
+    'reportlab.graphics.samples',
+    'reportlab.graphics.widgets',
+    'reportlab.graphics.barcode',
+    'reportlab.graphics',
+    'reportlab.lib',
+    'reportlab.pdfbase',
+    'reportlab.pdfgen',
+    'reportlab.platypus',
+    ])
 #packages.append('IPython')
 includes = ['site']
 

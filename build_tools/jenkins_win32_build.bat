@@ -15,6 +15,11 @@ MD sansview-install
 RD /S /Q dist
 RD /S /Q build
 
+%PYTHON% -m pip install -t ../sansview-install --no-deps bumps=0.7.5.1
+%PYTHON% -m pip install -t ../sansview-install --no-deps numdifftools=0.6.0
+%PYTHON% -m pip install -t ../sansview-install --no-deps periodictable=1.3.0
+%PYTHON% -m pip install -t ../sansview-install --no-deps pyparsing=1.5.5
+
 %PYTHON% setup.py build -cmingw32
 %PYTHON% setup.py bdist_egg --skip-build
 cd dist
