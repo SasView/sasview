@@ -21,7 +21,6 @@ if os.path.abspath(os.path.dirname(__file__)) != os.path.abspath(os.getcwd()):
     raise RuntimeError("Must run setup_exe from the sansview directory")
 from distutils.util import get_platform
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.abspath(os.path.join(root, 'sasview-install')))
 platform = '%s-%s'%(get_platform(),sys.version[:3])
 build_path = os.path.join(root, 'build','lib.'+platform)
 sys.path.insert(0, build_path)
