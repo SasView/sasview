@@ -307,7 +307,7 @@ if py26MSdll_x86 != None:
 #
 packages = [
     'matplotlib', 'scipy', 'pytz', 'encodings', 'comtypes',
-    'win32com', 'ho.pisa', 'bumps', 'numdifftools',
+    'win32com', 'ho.pisa', 'bumps',
     ]
 packages.extend([
     'reportlab',
