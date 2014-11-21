@@ -14,7 +14,7 @@ mkdir sasview-install
 rm -rf dist
 rm -rf build
 
-"$EASY_INSTALL" -d "$WORKSPACE/utils" bumps==0.7.5.2
+"$EASY_INSTALL" -d "$WORKSPACE/utils" bumps==0.7.5.3
 "$EASY_INSTALL" -d "$WORKSPACE/utils" periodictable==1.3.0
 
 export PYTHONPATH=$WORKSPACE/sasview-install:$WORKSPACE/utils:$PYTHONPATH

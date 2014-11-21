@@ -27,7 +27,7 @@ export PYTHONPATH=$PYTHONPATH:$WORKSPACE/utils
 "$EASY_INSTALL" -d "$WORKSPACE/utils" unittest-xml-reporting
 "$EASY_INSTALL" -d "$WORKSPACE/utils" lxml
 "$EASY_INSTALL" -d "$WORKSPACE/utils" pyparsing==1.5.5
-"$EASY_INSTALL" -d "$WORKSPACE/utils" bumps==0.7.5.2
+"$EASY_INSTALL" -d "$WORKSPACE/utils" bumps==0.7.5.3
 "$EASY_INSTALL" -d "$WORKSPACE/utils" periodictable==1.3.0
 python deps.py
 
