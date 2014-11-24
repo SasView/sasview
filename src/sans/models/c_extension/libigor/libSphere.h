@@ -33,6 +33,7 @@ double BCC_ParaCrystal(double dp[], double q);
 double FCC_ParaCrystal(double dp[], double q);
 double SC_ParaCrystal(double dp[], double q);
 double FuzzySpheres(double dp[], double q);
+double MicelleSphericalCore(double dp[], double q);
 
 //function prototypes
 double F_func(double qr);

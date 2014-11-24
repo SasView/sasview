@@ -2329,4 +2329,84 @@ FuzzySpheres(double dp[], double q)
     return(inten);	//scale, and add in the background
 }
 
+// Micelle with spherical core 
+// J.S. Pedersen, J. Appl. Cryst. 33, 637 (2000)
+
+double
+MicelleSphericalCore(double dp[], double q)
+{
+	double x, pi;
+	double ndensity, v_core, v_corona, rho_solv, rho_core, rho_corona;      // local names of input params
+	double radius_core, radius_gyr, d_penetration, n_aggreg, bkg, scale;    // local names of input params
+	double beta_core, beta_corona, qr, qrg, qrg2, qrdrg, bes_core, bes_corona; 
+	double term1, term2, term3, term4, debye_chain, chain_ampl, i_micelle;
+
+	x = q;
+	
+	scale = dp[0];
+	ndensity = dp[1];      // number density [1/cm^3]
+	v_core = dp[2];        // volume block in core [A^3]
+	v_corona = dp[3];      // volume block in corona [A^3]
+	rho_solv = dp[4];      // sld of solvent [1/A^2]
+	rho_core = dp[5];      // sld of core [1/A^2]
+	rho_corona = dp[6];    // sld of corona [1/A^2]
+	radius_core = dp[7];   // radius of core [A]
+	radius_gyr = dp[8];    // radius of gyration of chains in corona [A]
+	d_penetration = dp[9]; // close to unity, mimics non-penetration of gaussian chains
+	n_aggreg = dp[10];     // aggregation number of the micelle
+	bkg = dp[11];          // background
+	
+	beta_core = v_core * (rho_core - rho_solv);
+	beta_corona = v_corona * (rho_corona - rho_solv);
+	
+	
+        // Self-correlation term of the core
+
+	qr = x*radius_core;
+	if(qr == 0){bes_core = 1.0;} else {bes_core = 3.0*(sin(qr)-qr*cos(qr))/(qr*qr*qr);}
+	
+        term1 = n_aggreg * n_aggreg * beta_core * beta_core * bes_core * bes_core;
+
+        // Self-correlation term of the chains
+
+	qrg = x*radius_gyr;
+	qrg2 = qrg*qrg;
+	if(qrg2 == 0){debye_chain = 1.0;} else {debye_chain = 2.0*(exp(-qrg2)-1+qrg2)/(qrg2*qrg2);}
+	
+        term2 = n_aggreg * beta_corona * beta_corona * debye_chain;
+
+        // Interference cross-term between core and chains
+
+	if(qrg2 == 0){chain_ampl = 1.0;} else {chain_ampl = (1-exp(-qrg2))/qrg2;}
+
+	qrdrg = x * (radius_core + d_penetration * radius_gyr);
+	if(qrdrg == 0){bes_corona = 1.0;} else {bes_corona = sin(qrdrg)/qrdrg;}
+
+        term3 = 2 * n_aggreg * n_aggreg * beta_core * beta_corona * bes_core * chain_ampl * bes_corona;
+
+        // Interference cross-term between chains
+
+        term4 = n_aggreg * (n_aggreg - 1.0) * beta_corona * beta_corona * chain_ampl * chain_ampl * bes_corona * bes_corona;
+
+        // I(q)_micelle : Sum of 4 terms computed above
+	
+	i_micelle = term1 + term2 + term3 + term4 ; 
+
+	// rescale from [A^2] to [cm^2]
+	
+	i_micelle *= 1.0e-16;
+
+	// "normalize" by number density --> intensity in [cm-1]
+	
+	i_micelle *= ndensity;
+	
+	//scale if desired
+	i_micelle *= scale;
+
+	// add in the background
+	i_micelle += bkg;
+	
+	return(i_micelle);
+	
+}
 
