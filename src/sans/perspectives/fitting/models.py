@@ -718,12 +718,6 @@ class ModelManagerBase:
         self.multiplication_factor.append(RectangularHollowPrismModel)
         self.model_name_list.append(RectangularHollowPrismModel.__name__)
 
-        from sans.models.MySphereModel import MySphereModel
-        self.model_dictionary[MySphereModel.__name__] = MySphereModel
-#        self.shape_list.append(MySphereModel)
-        self.multiplication_factor.append(MySphereModel)
-        self.model_name_list.append(MySphereModel.__name__)
-
         from sans.models.MicelleSphCoreModel import MicelleSphCoreModel
         self.model_dictionary[MicelleSphCoreModel.__name__] = MicelleSphCoreModel
 #        self.shape_list.append(MicelleSphCoreModel)
