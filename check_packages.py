@@ -19,6 +19,7 @@ common_required_package_list = {
     'wx':{'version':'2.8.12.1','import_name':'wx','test':'__version__'},
     'matplotlib':{'version':'1.1.0','import_name':'matplotlib','test':'__version__'},
     'pisa':{'version':'3.0.28','import_name':'ho.pisa','test':'__version__'},
+    'sphinx':{'version':'1.2.1','import_name':'sphinx','test':'__version__'},
 }
 win_required_package_list = {
     'comtypes':{'version':'0.6.2','import_name':'comtypes','test':'__version__'},
