@@ -16,6 +16,23 @@ logging.basicConfig(level=logging.INFO,
                     filename=os.path.join(os.path.expanduser("~"),
                                           'sasview.log'))
 
+# Allow the dynamic selection of wxPython via an evironment variable, when devs
+# who have multiple versions of the module installed want to pick between them.
+# This variable does not have to be set of course, and through normal usage will
+# probably not be, but this can make things a little easier when upgrading to a
+# new version of wx.
+WX_ENV_VAR = "SASVIEW_WX_VERSION"
+if WX_ENV_VAR in os.environ:
+    logging.info("You have set the %s environment variable to %s." % (WX_ENV_VAR, os.environ[WX_ENV_VAR]))
+    import wxversion
+    if wxversion.checkInstalled(os.environ[WX_ENV_VAR]):
+        logging.info("Version %s of wxPython is installed, so using that version." % os.environ[WX_ENV_VAR])
+        wxversion.select(os.environ[WX_ENV_VAR])
+    else:
+        logging.error("Version %s of wxPython is not installed, so using default version." % os.environ[WX_ENV_VAR])
+else:
+    logging.info("You have not set the %s environment variable, so using default version of wxPython." % os.environ[WX_ENV_VAR])
+
 import wx
 import sys
 # The below will make sure that sasview application uses the matplotlib font 
