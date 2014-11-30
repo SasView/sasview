@@ -67,8 +67,7 @@ is_64bits = False
 if sys.version_info >= (2, 6):
     is_64bits = sys.maxsize > 2**32
     
-    
-enable_openmp = True
+enable_openmp = False if "--disable-open-mp" in sys.argv else True
 
 if sys.platform =='darwin':
     if not is_64bits:
