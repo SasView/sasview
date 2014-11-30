@@ -66,11 +66,18 @@ def prepare():
     # Debug numpy warnings
     #import numpy; numpy.seterr(all='raise')
 
+    # Notify the help menu that the Sphinx documentation is in a different 
+    # place than it otherwise would be.
+
+    
+
     # find the directories for the source and build
     from distutils.util import get_platform
     root = abspath(dirname(__file__))
     platform = '%s-%s'%(get_platform(),sys.version[:3])
     build_path = joinpath(root, 'build','lib.'+platform)
+
+    os.environ['SASVIEW_DOC_PATH'] = joinpath(build_path, "doc")
 
     # Make sure that we have a private version of mplconfig
     #mplconfig = joinpath(abspath(dirname(__file__)), '.mplconfig')

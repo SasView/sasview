@@ -1329,6 +1329,7 @@ class ViewerFrame(PARENT_FRAME):
         # Help menu
         self._help_menu = wx.Menu()
         style = self.__gui_style & GUIFRAME.WELCOME_PANEL_ON
+
         if style == GUIFRAME.WELCOME_PANEL_ON or custom_config != None:
             # add the welcome panel menu item
             if config.WELCOME_PANEL_ON and self.defaultPanel is not None:
@@ -1336,12 +1337,23 @@ class ViewerFrame(PARENT_FRAME):
                 self._help_menu.Append(id, '&Welcome', '')
                 self._help_menu.AppendSeparator()
                 wx.EVT_MENU(self, id, self.show_welcome_panel)
+
         # Look for help item in plug-ins 
         for item in self.plugins:
             if hasattr(item, "help"):
                 id = wx.NewId()
                 self._help_menu.Append(id,'&%s Help' % item.sub_menu, '')
                 wx.EVT_MENU(self, id, item.help)
+
+        # Only show new Sphinx docs link if version of wx supports displaying
+        # it correctly.
+        show_sphinx_docs = float(wx.__version__[:3]) >= 2.9
+        if show_sphinx_docs:
+            self._help_menu.AppendSeparator()
+            id = wx.NewId()
+            self._help_menu.Append(id, '&Sphinx Documentation', '')
+            wx.EVT_MENU(self, id, self._onSphinxDocs)
+
         if config._do_tutorial and (IS_WIN or sys.platform =='darwin'):
             self._help_menu.AppendSeparator()
             id = wx.NewId()
@@ -2147,7 +2159,28 @@ class ViewerFrame(PARENT_FRAME):
                         msg += "Please install it first..."
                         wx.MessageBox(msg, 'Error')
 
-                      
+    def _onSphinxDocs(self, evt):
+        """
+        Pop up a Sphinx Documentation dialog.
+        
+        :param evt: menu event
+        """
+        # Running SasView "in-place" using run.py means the docs will be in a
+        # different place than they would otherwise.
+        SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
+        if SPHINX_DOC_ENV in os.environ:
+            docs_path = os.path.join(os.environ[SPHINX_DOC_ENV], "index.html")
+        else:
+            docs_path = os.path.join(PATH_APP, "..", "..", "doc", "index.html")
+
+        if os.path.exists(docs_path):
+            from documentation_window import DocumentationWindow
+
+            sphinx_doc_viewer = DocumentationWindow(None, -1, docs_path)
+            sphinx_doc_viewer.Show()
+        else:
+            logging.error("Could not find Sphinx documentation at '%' -- has it been built?" % docs_path)
+
     def set_manager(self, manager):
         """
         Sets the application manager for this frame
