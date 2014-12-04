@@ -102,8 +102,9 @@ class FitThread(CalcThread):
             if self.handler is not None:
                 self.handler.stop(msg=msg)
         except:
+            import traceback
             if self.handler is not None:
-                self.handler.error(msg=str(sys.exc_value))
+                self.handler.error(msg=traceback.format_exc())
            
         
     
