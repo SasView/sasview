@@ -241,9 +241,9 @@ double CappedCylinderModel :: operator()(double q) {
 				dp[3] = weights_rad_cap[k].value;
 
 				//Un-normalize SphereForm by volume
-				hDist = -1.0*sqrt(fabs(dp[3]*dp[3]-dp[1]*dp[1]));
+				hDist = sqrt(fabs(dp[3]*dp[3]-dp[1]*dp[1]));
 				vol_i = pi*dp[1]*dp[1]*dp[2]+2.0*pi/3.0*((dp[3]-hDist)*(dp[3]-hDist)*
-								(2.0*(dp[3]+hDist)));
+								(2.0*dp[3]+hDist));
 				result =  CappedCylinder(dp, q) * vol_i;
 				// This FIXES a singualrity the kernel in libigor.
 				if ( result == INFINITY || result == NAN){
@@ -329,7 +329,7 @@ double CappedCylinderModel :: operator()(double qx, double qy) {
 					for(size_t m=0; m< weights_phi.size(); m++) {
 						dp.phi = weights_phi[m].value;
 						//Un-normalize Form by volume
-						hDist = -1.0*sqrt(fabs(dp.rad_cap*dp.rad_cap-dp.rad_cyl*dp.rad_cyl));
+						hDist = sqrt(fabs(dp.rad_cap*dp.rad_cap-dp.rad_cyl*dp.rad_cyl));
 						vol_i = pi*dp.rad_cyl*dp.rad_cyl*dp.len_cyl+2.0*pi/3.0*((dp.rad_cap-hDist)*(dp.rad_cap-hDist)*
 										(2*dp.rad_cap+hDist));
 
