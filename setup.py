@@ -346,7 +346,7 @@ package_data['sans.sansview'] = ['images/*', 'media/*', 'test/*',
 packages.append("sans.sansview")
 
 required = [
-    'bumps>=0.7.5.3', 'periodictable>=1.3.1', 'pyparsing<2.0.0',
+    'bumps>=0.7.5.4', 'periodictable>=1.3.1', 'pyparsing<2.0.0',
 
     # 'lxml>=2.2.2',
     'lxml', 
