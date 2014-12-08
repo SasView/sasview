@@ -31,7 +31,7 @@ if WX_ENV_VAR in os.environ:
     else:
         logging.error("Version %s of wxPython is not installed, so using default version." % os.environ[WX_ENV_VAR])
 else:
-    logging.info("You have not set the %s environment variable, so using default version of wxPython." % os.environ[WX_ENV_VAR])
+    logging.info("You have not set the %s environment variable, so using default version of wxPython." % WX_ENV_VAR)
 
 import wx
 import sys
