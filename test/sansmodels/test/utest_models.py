@@ -55,7 +55,7 @@ class TestCyl(unittest.TestCase):
         """ Time profiling """
         self.comp.run(2.0)
         t0 = time.clock()
-        self.assertTrue(time.clock()-t0<1e-5)
+        self.assertTrue(time.clock()-t0<1e-4)
      
     def test2D(self):
         """ Test 2D model of a cylinder """ 
