@@ -20,6 +20,8 @@ from distutils.util import get_platform
 platform = '.%s-%s'%(get_platform(),sys.version[:3])
 build_lib = os.path.abspath('../../../build/lib'+platform)
 sys.path.insert(0, build_lib)
+print "-- path --"
+print "\n".join(sys.path)
 
 # -- General configuration -----------------------------------------------------
 
