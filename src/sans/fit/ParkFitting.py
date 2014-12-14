@@ -464,8 +464,8 @@ class ParkFit(FitEngine):
     Set model parameter "M1"= model.name add {model.parameter.name:value}.
     
     ..note::
-       Set_param() if used must always preceded set_model() for the fit to be performed.
-      ``engine.set_param( model,"M1", {'A':2,'B':4})``
+
+       Set_param() if used must always preceded set_model() for the fit to be performed. ``engine.set_param( model,"M1", {'A':2,'B':4})``
     
     Add model with a dictionnary of FitArrangeList{} where Uid is a key
     and model
@@ -476,6 +476,7 @@ class ParkFit(FitEngine):
     chisqr1, out1, cov1=engine.fit({model.parameter.name:value},qmin,qmax)
     
     ..note::
+
         {model.parameter.name:value} is ignored in fit function since 
         the user should make sure to call set_param himself.
         
