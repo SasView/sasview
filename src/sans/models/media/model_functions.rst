@@ -76,12 +76,6 @@
 
 .. Actual document starts here...
 
-This is xi, |xi|
-
-This is zeta, |zeta|
-
-
-
 SasView Model Functions
 =======================
 
