@@ -81,7 +81,15 @@ release = '3.0.0'
 exclude_patterns = ["*sans.perspectives.simulation.rst",
                     "*sans.pr.c_extensions.rst",
                     "*sans.realspace.rst",
-                    "*sans.simulation.rst"]
+                    "*sans.simulation.rst",
+                    "*park.fitmc.rst",
+                    "*park.fitservice.rst",
+                    "*park.parksnob.rst",
+                    "*park.rangemap.rst",
+                    "*sans.sansview.setup_exe.rst",
+                    "*sans.sansview.setup_mac.rst",
+                    "*sans.guiframe.custom_pstats.rst", # pstats not in standard library on Ubuntu out of the box
+                    ]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
