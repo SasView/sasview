@@ -11,12 +11,20 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
+import sys, os, collections
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../../src'))
+from distutils.util import get_platform
+platform = '.%s-%s'%(get_platform(),sys.version[:3])
+build_lib = os.path.abspath('../../../build/lib'+platform)
+sys.path.insert(0, build_lib)
+print "-- path --"
+print "\n".join(sys.path)
+import sans.sansview
+from sans.sansview import __version__ as sasview_version
+print "version:",sasview_version
 
 # -- General configuration -----------------------------------------------------
 
@@ -25,7 +33,11 @@ sys.path.insert(0, os.path.abspath('../../src'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.mathjax', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.todo',
+              'sphinx.ext.coverage',
+              'sphinx.ext.mathjax',
+              'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -64,7 +76,15 @@ release = '3.0.0'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = []
+#
+# PGP 2014/04/03: We have some code which doesn't get carried over to
+# the build directory.  Exclude the appropriate *.rst files here so
+# that we don't get various "ImportError: No module named ___" when
+# running Sphinx.
+exclude_patterns = ["*sans.perspectives.simulation.rst",
+                    "*sans.pr.c_extensions.rst",
+                    "*sans.realspace.rst",
+                    "*sans.simulation.rst",]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -168,6 +188,11 @@ html_static_path = ['_static']
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'SasViewdoc'
+
+# Turn off permalinks, which are a nice feature for the docs when viewed in a
+# browser, but which look weird (and cannot be "right-click->copy url") in
+# the SasView help.
+html_add_permalinks = ""
 
 
 # -- Options for LaTeX output --------------------------------------------------

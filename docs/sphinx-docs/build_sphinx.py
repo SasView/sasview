@@ -99,4 +99,7 @@ def build():
     copy_tree(html, SASVIEW_DOCS)
 
 if __name__ == "__main__":
-    call()
+    clean()
+    retrieve_user_docs()
+    apidoc()
+    build()
