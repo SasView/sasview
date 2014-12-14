@@ -20,8 +20,6 @@ from distutils.util import get_platform
 platform = '.%s-%s'%(get_platform(),sys.version[:3])
 build_lib = os.path.abspath('../../../build/lib'+platform)
 sys.path.insert(0, build_lib)
-sys.path.insert(0, os.path.join(build_lib, "sans"))
-sys.path.insert(0, os.path.join(build_lib, "park"))
 print "-- path --"
 print "\n".join(sys.path)
 
