@@ -36,6 +36,7 @@ def clean():
     Clean the sphinx build directory.
     """
     print "=== Cleaning Sphinx Build ==="
+    _remove_dir(SASVIEW_DOCS)
     _remove_dir(SPHINX_BUILD)
 
 def retrieve_user_docs():

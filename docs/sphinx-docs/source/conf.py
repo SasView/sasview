@@ -81,8 +81,7 @@ release = '3.0.0'
 exclude_patterns = ["*sans.perspectives.simulation.rst",
                     "*sans.pr.c_extensions.rst",
                     "*sans.realspace.rst",
-                    "*sans.simulation.rst",
-                    "*/source/api/*"]
+                    "*sans.simulation.rst"]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
