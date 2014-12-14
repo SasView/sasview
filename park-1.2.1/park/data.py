@@ -62,7 +62,6 @@ class Data1D(object):
     Data representation for 1-D fitting.
 
     Attributes
-    ==========
     
     filename
         The source of the data.  This may be the empty string if the
@@ -93,7 +92,6 @@ class Data1D(object):
         computed by a call to residuals.
 
     Notes on calc_x
-    ===============   
     
     The contribution of Q to a resolution of width dQo at point Qo is::
 

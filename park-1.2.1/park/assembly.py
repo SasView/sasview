@@ -159,6 +159,7 @@ class Fitness(object):
         User convenience function.  This allows a user with an assembly
         of models in a script to for example set the fit range for
         parameter 'a' of the model::
+
             assembly[0].set(a=[5,6])
 
         Raises KeyError if the parameter is not in parameterset.
@@ -303,8 +304,8 @@ class Assembly(object):
         Add a model to the end of set.
 
         :param fitness: the fitting model
-        The fitting model can be an instance of `park.assembly.Fitness`,
-        or a tuple of (`park.model.Model`,`park.data.Data1D`)
+            The fitting model can be an instance of `park.assembly.Fitness`,
+            or a tuple of (`park.model.Model`,`park.data.Data1D`)
         :param weight: model weighting (usually 1.0)
         :param isfitted: whether model should be fit (equivalent to weight 0.)
         """
