@@ -3744,7 +3744,7 @@ Calculates the scattering from fractal-like aggregates based on the Mildner refe
 
 *2.2.10.1. Definition*
 
-.. image:: img/surface_fractal_eq1.GIF 
+.. image:: img/surface_fractal_eq1.gif
 
 where *R* is the radius of the building block, *Ds* is the **surface** fractal dimension, |zeta| is the cut-off length,
 |rho|\ *solvent* is the scattering length density of the solvent, and |rho|\ *particle* is the scattering length
@@ -3791,7 +3791,7 @@ fractal dimension of the primary particles, *Ds*.
 
 The scattered intensity *I(q)* is  calculated using a modified Ornstein-Zernicke equation
 
-.. image:: img/masssurface_fractal_eq1.JPG 
+.. image:: img/masssurface_fractal_eq1.jpg
 
 where *Rg* is the size of the cluster, *rg* is the size of the primary particle, *Ds* is the surface fractal dimension,
 *Dm* is the mass fractal dimension, |rho|\ *solvent* is the scattering length density of the solvent, and |rho|\ *p* is
@@ -4390,7 +4390,7 @@ The returned value is scaled to units of |cm^-1|, absolute scale.
 
 The scattering intensity *I(q)* is calculated as
 
-.. image:: img/image216.JPG 
+.. image:: img/image216.jpg 
 
 where *A* = Lorentzian scale factor #1, *C* = Lorentzian scale #2, |xi|\ :sub:`1` and |xi|\ :sub:`2` are the
 corresponding correlation lengths, and *n* and *m* are the respective power law exponents (set *n* = *m* = 2 for
