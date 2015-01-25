@@ -724,14 +724,17 @@ class Plugin(PluginBase):
         if self.calc_thread != None and self.calc_thread.isrunning():
             self.calc_thread.stop()
             ## stop just raises the flag -- the thread is supposed to 
-            ## then kill itself but cannot.  Paul Kienzle came up with
-            ## this fix to prevent threads from stepping on each other
-            ## in Calc1D of fitting.py which was causing a simple custom model
-            ## to crash Sasview.  See rest of notes under Calc1D.
+            ## then kill itself. In August 2014 it was shown that this is
+            ## incorrectly handled by fitting.py and a fix implemented. 
+            ## It is not clear whether it is properly used here, but the
+            ## "fix" of waiting for the previous thread to end breaks the
+            ## pr perspective completely as it causes an infinite loop.
+            ## Thus it is likely the threading is bing properly handled.
+            ## While the "fix" is no longer implemented the comment is
+            ## left here till somebody ascertains that in fact the threads
+            ## are being properly handled.
             ##
-            ##    -PDB August 13, 2014                  
-            while self.calc_thread.isrunning():
-                time.sleep(0.1)
+            ##    -PDB January 25, 2015                  
                 
         pr = self.pr.clone()
         self.calc_thread = CalcPr(pr, self.nfunc,
@@ -1152,14 +1155,17 @@ class Plugin(PluginBase):
             self.estimation_thread.isrunning():
             self.estimation_thread.stop()
             ## stop just raises the flag -- the thread is supposed to 
-            ## then kill itself but cannot.  Paul Kienzle came up with
-            ## this fix to prevent threads from stepping on each other
-            ## in Calc1D of fitting.py which was causing a simple custom model
-            ## to crash Sasview.  See rest of notes under Calc1D.
+            ## then kill itself. In August 2014 it was shown that this is
+            ## incorrectly handled by fitting.py and a fix implemented. 
+            ## It is not clear whether it is properly used here, but the
+            ## "fix" of waiting for the previous thread to end breaks the
+            ## pr perspective completely as it causes an infinite loop.
+            ## Thus it is likely the threading is bing properly handled.
+            ## While the "fix" is no longer implemented the comment is
+            ## left here till somebody ascertains that in fact the threads
+            ## are being properly handled.
             ##
-            ##    -PDB August 13, 2014                  
-            while self.estimation_thread.isrunning():
-                time.sleep(0.1)
+            ##    -PDB January 25, 2015                  
                 
                 
         pr = self.pr.clone()
@@ -1180,14 +1186,17 @@ class Plugin(PluginBase):
         if self.estimation_thread != None and self.estimation_thread.isrunning():
             self.estimation_thread.stop()
             ## stop just raises the flag -- the thread is supposed to 
-            ## then kill itself but cannot.  Paul Kienzle came up with
-            ## this fix to prevent threads from stepping on each other
-            ## in Calc1D of fitting.py which was causing a simple custom model
-            ## to crash Sasview.  See rest of notes under Calc1D.
+            ## then kill itself. In August 2014 it was shown that this is
+            ## incorrectly handled by fitting.py and a fix implemented. 
+            ## It is not clear whether it is properly used here, but the
+            ## "fix" of waiting for the previous thread to end breaks the
+            ## pr perspective completely as it causes an infinite loop.
+            ## Thus it is likely the threading is bing properly handled.
+            ## While the "fix" is no longer implemented the comment is
+            ## left here till somebody ascertains that in fact the threads
+            ## are being properly handled.
             ##
-            ##    -PDB August 13, 2014                  
-            while self.estimation_thread.isrunning():
-                time.sleep(0.1)
+            ##    -PDB January 25, 2015                  
                                 
         pr = self.pr.clone()
         # Skip the slit settings for the estimation
