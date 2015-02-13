@@ -80,11 +80,11 @@ class Plugin(PluginBase):
         sld_help = "Computes the Scattering Length Density."
         slit_length_help = "Computes the slit length from the beam profile."
         resolution_help = "Approximately estimates the "
-        resolution_help += "resolution of Q in 2D based on the SANS "
+        resolution_help += "resolution of Q in 2D based on the SAS "
         resolution_help += "instrumental parameter values."
         mass_volume_help = "Based on the chemical formula, "
         mass_volume_help += "compute the mass density or the molar volume."
-        gensans_help = "Generic SANS"
+        gensas_help = "Generic SAS"
         pyconsole_help = "Python Console."
         imageviewer_help = "Load an image file and display the image."
         #data_editor_help = "Meta Data Editor"
@@ -97,10 +97,10 @@ class Plugin(PluginBase):
                         self.on_calculate_slit_size),
                 ("Kiessig Thickness Calculator", 
                         kiessig_help, self.on_calculate_kiessig),
-                          ("SANS Resolution Estimator", 
+                          ("SAS Resolution Estimator", 
                         resolution_help, self.on_calculate_resoltuion),
                 ("Generic Scattering Calculator", 
-                        gensans_help, self.on_gen_model),
+                        gensas_help, self.on_gen_model),
                 ("Python Shell/Editor", pyconsole_help, self.on_python_console),
                 ("Image Viewer", imageviewer_help, self.on_image_viewer),]
               

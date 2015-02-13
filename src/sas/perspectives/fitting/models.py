@@ -158,7 +158,7 @@ def _findModels(dir):
     #always recompile the folder plugin
     dir = find_plugins_dir()
     if not os.path.isdir(dir):
-        msg = "SansView couldn't locate Model plugin folder."
+        msg = "SasView couldn't locate Model plugin folder."
         msg += """ "%s" does not exist""" % dir
         logging.warning(msg)
         return plugins

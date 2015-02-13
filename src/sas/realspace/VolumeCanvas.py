@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """ Volume Canvas
 
-    Simulation canvas for real-space simulation of SANS scattering intensity.
+    Simulation canvas for real-space simulation of SAS scattering intensity.
     The user can create an arrangement of basic shapes and estimate I(q) and
     I(q_x, q_y). Error estimates on the simulation are also available. 
     

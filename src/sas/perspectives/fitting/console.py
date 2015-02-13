@@ -146,12 +146,12 @@ class ConsoleUpdate(FitHandler):
                 data_name, model_name = None, None
                 d_flag = (hasattr(self.result, "data") and \
                     self.result.data is not None and \
-                    hasattr(self.result.data, "sans_data") and 
-                    self.result.data.sans_data is not None)
+                    hasattr(self.result.data, "sas_data") and 
+                    self.result.data.sas_data is not None)
                 m_flag = (hasattr(self.result, "model") and \
                           self.result.model is not None)
                 if d_flag:
-                    data_name = self.result.data.sans_data.name
+                    data_name = self.result.data.sas_data.name
                 if m_flag:
                     model_name = str(self.result.model.name)
                 if m_flag and d_flag:

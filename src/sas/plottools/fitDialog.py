@@ -429,7 +429,7 @@ class LinearFit(wx.Dialog):
                 if (self.xLabel.lower() == "log10(x)"):
                     tempdy = numpy.asarray(tempdy)
                     tempdy[tempdy == 0] = 1
-                    chisqr, out, cov = fittings.sansfit(self.model,
+                    chisqr, out, cov = fittings.sasfit(self.model,
                                                         [self.cstA, self.cstB],
                                                         tempx, tempy,
                                                         tempdy,
@@ -438,7 +438,7 @@ class LinearFit(wx.Dialog):
                 else:
                     tempdy = numpy.asarray(tempdy)
                     tempdy[tempdy == 0] = 1
-                    chisqr, out, cov = fittings.sansfit(self.model,
+                    chisqr, out, cov = fittings.sasfit(self.model,
                                                         [self.cstA, self.cstB],
                                                         tempx, tempy, tempdy,
                                                         xminView, xmaxView)

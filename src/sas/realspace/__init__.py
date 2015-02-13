@@ -1,10 +1,10 @@
 """
-    Real-Space Modeling for SANS
+    Real-Space Modeling for SAS
 """ 
-## \mainpage Real-Space Modeling for SANS
+## \mainpage Real-Space Modeling for SAS
 #
 # \section intro_sec Introduction
-# This module provides SANS scattering intensity simulation 
+# This module provides SAS scattering intensity simulation 
 # based on real-space modeling.
 #
 # Documentation can be found here: 

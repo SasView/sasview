@@ -20,7 +20,7 @@ Package name: pr_inversion 0.2
 	Version 0.1.0
 
 	- Release date: 5/28/2008
-	- Provide python module sans.pr
+	- Provide python module sas.pr
 
 2- Downloading and Installing
 
@@ -28,7 +28,7 @@ Package name: pr_inversion 0.2
 		- Python version >= 2.4 should be running on the system
 
 	2.2- Installing:
-		- Get the code from svn://danse.us/sans/releases/pr_inversion-0.1.0
+		- Get the code from svn://danse.us/sas/releases/pr_inversion-0.1.0
 		- The following modules are required:
 			* matplotlib
 			* numpy

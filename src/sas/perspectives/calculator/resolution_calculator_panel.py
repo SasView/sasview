@@ -57,7 +57,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
     Provides the Resolution calculator GUI.
     """
     ## Internal nickname for the window, used by the AUI manager
-    window_name = "SANS Resolution Estimator"
+    window_name = "SAS Resolution Estimator"
     ## Name to appear on the window title bar
     window_caption = ""
     ## Flag to tell the AUI manager to put this panel in the center pane
@@ -1396,7 +1396,7 @@ class ResolutionWindow(widget.CHILD_FRAME):
     Resolution Window
     """
     def __init__(self, parent = None, manager=None, 
-                 title = "SANS Resolution Estimator",
+                 title = "SAS Resolution Estimator",
                  size=(PANEL_WIDTH * 2, PANEL_HEIGHT), *args, **kwds):
         kwds['title'] = title
         kwds['size'] = size

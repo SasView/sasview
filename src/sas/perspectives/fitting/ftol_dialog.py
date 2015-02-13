@@ -16,7 +16,7 @@ import wx
 import sys
 # default ftol
 F_TOL = 1.49012e-08
-SANS_F_TOL = 5e-05
+SAS_F_TOL = 5e-05
 
 PANEL_WIDTH = 270
 FONT_VARIANT = 0
@@ -37,7 +37,7 @@ class ChangeFtol(wx.Dialog):
         # build layout
         vbox = wx.BoxSizer(wx.VERTICAL)
         title_text = wx.StaticText(self, id=wx.NewId(), label='FTol selection (Leastsq)')
-        self.default_bt = wx.RadioButton(self, -1, 'SansView Default (5e-05)', (15, 30), style=wx.RB_GROUP)
+        self.default_bt = wx.RadioButton(self, -1, 'SasView Default (5e-05)', (15, 30), style=wx.RB_GROUP)
         self.default_bt.SetValue(True)
         self.default_bt.Bind(wx.EVT_RADIOBUTTON, self.OnFtolSelection)
         self.sci_default_bt = wx.RadioButton(self, -1, 'Scipy Default (1.49012e-08)', (15, 55))
@@ -87,7 +87,7 @@ class ChangeFtol(wx.Dialog):
             Get the ftol value
         """
         if self.default_bt.GetValue():
-            return SANS_F_TOL
+            return SAS_F_TOL
         elif self.sci_default_bt.GetValue():
             return F_TOL
         elif self.low_bt.GetValue():
@@ -101,4 +101,4 @@ class ChangeFtol(wx.Dialog):
                 return float(self.custombox.GetValue())
             except:
                 return None
-        return SANS_F_TOL
+        return SAS_F_TOL

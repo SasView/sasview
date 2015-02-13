@@ -1,5 +1,5 @@
 """
- Installation script for SANS models
+ Installation script for SAS models
 
   - To compile and install:
       python setup.py install
@@ -26,7 +26,7 @@ def get_c_files(path):
     return clist
 
 # Top package name
-#pck_top = "sansModeling"
+#pck_top = "sasModeling"
 pck_top = "sas.simulation"
 pck_dir = os.path.join("src","sas", "simulation")
 # The temp directory that the compiled files will be put in
@@ -97,9 +97,9 @@ for module in mod_list:
         include_dirs=incl_dirs) )
 
 setup(
-    name="sansrealspace_modeling",
+    name="sasrealspace_modeling",
     version = "0.2",
-    description = "Python module for SANS simulation",
+    description = "Python module for SAS simulation",
     author = "University of Tennessee",
     url = "http://danse.us/trac/sas",
     package_dir = pck_dirs,

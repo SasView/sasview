@@ -1,9 +1,9 @@
 if __name__ == "__main__":
 
-    from sansModeling.iqPy import iqPy
-    #from sansModeling.analmodelpy import analmodelpy as analmodelpymodule
-    from sansModeling.geoshapespy import geoshapespy
-    from sansModeling.pointsmodelpy import pointsmodelpy
+    from sasModeling.iqPy import iqPy
+    #from sasModeling.analmodelpy import analmodelpy as analmodelpymodule
+    from sasModeling.geoshapespy import geoshapespy
+    from sasModeling.pointsmodelpy import pointsmodelpy
 
 #    print "copyright information:"
 #    print "   ", pointsmodelpy.copyright()

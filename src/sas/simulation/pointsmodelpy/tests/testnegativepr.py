@@ -1,7 +1,7 @@
 if __name__ == "__main__":
-  from sansModeling.pointsmodelpy import pointsmodelpy
-  from sansModeling.iqPy import iqPy
-  from sansModeling.geoshapespy import geoshapespy
+  from sasModeling.pointsmodelpy import pointsmodelpy
+  from sasModeling.iqPy import iqPy
+  from sasModeling.geoshapespy import geoshapespy
 
   a = geoshapespy.new_sphere(10)
   lm = pointsmodelpy.new_loresmodel(0.0005)

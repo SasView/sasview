@@ -1,7 +1,7 @@
 def test_lores2d(phi):
-  from sansModeling.pointsmodelpy import pointsmodelpy 
-  from sansModeling.iqPy import iqPy
-  from sansModeling.geoshapespy import geoshapespy
+  from sasModeling.pointsmodelpy import pointsmodelpy 
+  from sasModeling.iqPy import iqPy
+  from sasModeling.geoshapespy import geoshapespy
 
   #lores model is to hold several geometric objects
   lm = pointsmodelpy.new_loresmodel(0.1)
@@ -14,7 +14,7 @@ def test_lores2d(phi):
   #add single geometry shape to lores model
   pointsmodelpy.lores_add(lm,c,3.0)
 
-  #retrieve the points from lores model for sans calculation
+  #retrieve the points from lores model for sas calculation
   vp = pointsmodelpy.new_point3dvec()
   pointsmodelpy.get_lorespoints(lm,vp)
 
@@ -29,9 +29,9 @@ def get2d():
   from math import pi
   from Numeric import arange,zeros
   from enthought.util.numerix import Float,zeros
-  from sansModeling.file2array import readfile2array
-  from sansModeling.pointsmodelpy import pointsmodelpy
-  from sansModeling.geoshapespy import geoshapespy
+  from sasModeling.file2array import readfile2array
+  from sasModeling.pointsmodelpy import pointsmodelpy
+  from sasModeling.geoshapespy import geoshapespy
 
   lm = pointsmodelpy.new_loresmodel(0.1)
   sph = geoshapespy.new_sphere(20)
@@ -69,9 +69,9 @@ def get2d_2():
   from math import pi
   from Numeric import arange,zeros
   from enthought.util.numerix import Float,zeros
-  from sansModeling.file2array import readfile2array
-  from sansModeling.pointsmodelpy import pointsmodelpy
-  from sansModeling.geoshapespy import geoshapespy
+  from sasModeling.file2array import readfile2array
+  from sasModeling.pointsmodelpy import pointsmodelpy
+  from sasModeling.geoshapespy import geoshapespy
 
   lm = pointsmodelpy.new_loresmodel(0.1)
   cyn = geoshapespy.new_cylinder(5,20)

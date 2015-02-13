@@ -599,7 +599,7 @@ class DataOperPanel(wx.ScrolledWindow):
         # send data to data manager
         self.output.name = name
         self.output.run = "Data Operation"
-        self.output.instrument = "SansView"
+        self.output.instrument = "SasView"
         self.output.id = str(name) + str(time.time())
         data = {self.output.id :self.output}
         self.parent.parent.add_data(data)

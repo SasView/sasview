@@ -358,7 +358,7 @@ class Reader(CansasReader):
     
     ## Wildcards
     type = ["P(r) files (*.prv)|*.prv",
-            "SANSView files (*.svs)|*.svs"]
+            "SASView files (*.svs)|*.svs"]
     ## List of allowed extensions
     ext = ['.prv', '.PRV', '.svs', '.SVS']  
     

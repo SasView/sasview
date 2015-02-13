@@ -15,7 +15,7 @@ PROJ_CXX_INCLUDES += ../../iqPy/libiqPy    \
 		     ../libanalmodelpy    \
 		     ../../geoshapespy/libgeoshapespy
 
-PROJECT = SANSsimulation
+PROJECT = SASsimulation
 PACKAGE = tests
 
 PROJ_CLEAN += $(PROJ_CPPTESTS)

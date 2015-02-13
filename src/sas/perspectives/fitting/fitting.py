@@ -32,14 +32,14 @@ from sas.guiframe.gui_style import GUIFRAME_ID
 from sas.guiframe.plugin_base import PluginBase 
 from sas.guiframe.data_processor import BatchCell
 from sas.fit.Fitting import Fit
-from sas import ConsoleUpdate
-from sas import FitProblemDictionary
-from sas import FitPanel
-from sas import ResultPanel, PlotResultEvent
+from sas.perspectives.fitting.console import ConsoleUpdate
+from sas.perspectives.fitting.fitproblem import FitProblemDictionary
+from sas.perspectives.fitting.fitpanel import FitPanel
+from sas.perspectives.fitting.resultpanel import ResultPanel, PlotResultEvent
 
-from sas import FitThread
-from sas import Reader
-from sas import Chi2UpdateEvent
+from sas.perspectives.fitting.fit_thread import FitThread
+from sas.perspectives.fitting.pagestate import Reader
+from sas.perspectives.fitting.fitpage import Chi2UpdateEvent
 from sas.perspectives.calculator.model_editor import TextDialog
 from sas.perspectives.calculator.model_editor import EditorWindow
 from sas.guiframe.gui_manager import MDIFrame

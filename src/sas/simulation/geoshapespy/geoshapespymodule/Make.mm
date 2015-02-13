@@ -11,7 +11,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-PROJECT = SANSsimulation
+PROJECT = SASsimulation
 PACKAGE = geoshapespymodule
 MODULE = geoshapespy
 

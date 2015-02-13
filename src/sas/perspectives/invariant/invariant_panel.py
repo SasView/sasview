@@ -13,11 +13,11 @@ from sas.guiframe.utils import format_number
 from sas.guiframe.utils import check_float
 from sas.guiframe.events import StatusEvent
 from sas.guiframe.events import AppendBookmarkEvent
-from sas import InvariantDetailsPanel
-from sas import InvariantContainer
-from sas import OutputTextCtrl
-from sas import InvTextCtrl
-from sas import InvariantState as IState
+from sas.perspectives.invariant.invariant_details import InvariantDetailsPanel
+from sas.perspectives.invariant.invariant_details import InvariantContainer
+from sas.perspectives.invariant.invariant_widgets import OutputTextCtrl
+from sas.perspectives.invariant.invariant_widgets import InvTextCtrl
+from sas.perspectives.invariant.invariant_state import InvariantState as IState
 from sas.guiframe.panel_base import PanelBase
 # The minimum q-value to be used when extrapolating
 Q_MINIMUM  = 1e-5
@@ -765,7 +765,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         
         : param event: report button event
         """
-        from sas import ReportDialog
+        from sas.perspectives.invariant.report_dialog import ReportDialog
 
         self.state.set_report_string()
         report_html_str = self.state.report_str
@@ -1913,7 +1913,7 @@ class InvariantWindow(wx.Frame):
         from sas.dataloader.loader import  Loader
         self.loader = Loader()
         import invariant
-        path = "C:/ECLPS/workspace/trunk/sansdataloader/test/ascii_test_3.txt"
+        path = "C:/ECLPS/workspace/trunk/sasdataloader/test/ascii_test_3.txt"
         data = self.loader.load(path)
         self.panel = InvariantPanel(self)
 

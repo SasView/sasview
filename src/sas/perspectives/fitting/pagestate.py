@@ -972,7 +972,7 @@ class Reader(CansasReader):
     
     ## Wildcards
     type = ["Fitting files (*.fitv)|*.fitv"
-            "SANSView file (*.svs)|*.svs"]
+            "SASView file (*.svs)|*.svs"]
     ## List of allowed extensions
     ext = ['.fitv', '.FITV', '.svs', 'SVS']
     

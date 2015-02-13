@@ -26,7 +26,7 @@ class Parameter:
         return self.model.getParam(self.name)
     
     
-def sansfit(model, pars, x, y, err_y , qmin=None, qmax=None):
+def sasfit(model, pars, x, y, err_y , qmin=None, qmax=None):
     """
     Fit function
     
@@ -89,7 +89,7 @@ def calcCommandline(event):
     cstA = Parameter(line, 'A', event.cstA)
     cstB = Parameter(line, 'B', event.cstB)
     y = line.run()
-    chisqr, out, cov = sansfit(line, [cstA, cstB], event.x, y, 0)
+    chisqr, out, cov = sasfit(line, [cstA, cstB], event.x, y, 0)
     # print "Output parameters:", out
     print "The right answer is [70.0, 1.0]"
     print chisqr, out, cov

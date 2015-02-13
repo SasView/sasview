@@ -607,7 +607,7 @@ class FitPage(BasicPage):
         ## fill a sizer with the combobox to select dispersion type
         model_disp = wx.StaticText(self, -1, 'Function')
         CHECK_STATE = self.cb1.GetValue()
-import sas.models.dispersion_models
+        import sas.models.dispersion_models
         self.polydisp = sas.models.dispersion_models.models
 
         ix = 0
@@ -2174,7 +2174,7 @@ import sas.models.dispersion_models
         Set weight in fit problem
         """
         # compute weight for the current data
-        from sas import get_weight
+        from sas.perspectives.fitting.utils import get_weight
         flag_weight = self.get_weight_flag()
         if is_2D == None:
             is_2D = self._is_2D()

@@ -21,9 +21,9 @@ from sas.guiframe.dataFitting import Data1D
 from sas.guiframe.events import NewPlotEvent
 from sas.guiframe.events import StatusEvent
 from sas.guiframe.gui_style import GUIFRAME_ID
-from sas import Reader as reader
+from sas.perspectives.invariant.invariant_state import Reader as reader
 from sas.dataloader.loader import Loader
-from sas import InvariantPanel
+from sas.perspectives.invariant.invariant_panel import InvariantPanel
 from sas.guiframe.plugin_base import PluginBase
 
 class Plugin(PluginBase):

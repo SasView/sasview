@@ -28,7 +28,7 @@ from sas.dataloader.data_info import Source
 from sas.guiframe.panel_base import PanelBase
 from sas.guiframe.utils import format_number
 from sas.guiframe.events import StatusEvent  
-from sas.calculator import sans_gen 
+from sas.calculator import sas_gen 
 from sas.perspectives.calculator.calculator_widgets import OutputTextCtrl
 from sas.perspectives.calculator.calculator_widgets import InputTextCtrl
 from wx.lib.scrolledpanel import ScrolledPanel
@@ -115,9 +115,9 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         Provides the sas gen calculator GUI.
     """
     ## Internal nickname for the window, used by the AUI manager
-    window_name = "Generic SANS Calculator"
+    window_name = "Generic SAS Calculator"
     ## Name to appear on the window title bar
-    window_caption = "Generic SANS "
+    window_caption = "Generic SAS "
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
     
@@ -132,14 +132,14 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         #thread to read data 
         self.reader = None
         self.ext = None
-        self.id = 'GenSANS'
+        self.id = 'GenSAS'
         self.file_name = ''
         self.time_text = None
         self.orient_combo = None
-        self.omfreader = sans_gen.OMFReader()
-        self.sldreader = sans_gen.SLDReader()
-        self.pdbreader = sans_gen.PDBReader()
-        self.model = sans_gen.GenSAS()
+        self.omfreader = sas_gen.OMFReader()
+        self.sldreader = sas_gen.SLDReader()
+        self.pdbreader = sas_gen.PDBReader()
+        self.model = sas_gen.GenSAS()
         self.param_dic = self.model.params
         self.parameters = []
         self.data = None
@@ -450,8 +450,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         Making default sld-data
         """
         sld_n_default = 6.97e-06
-        omfdata = sans_gen.OMFData()
-        omf2sld = sans_gen.OMF2SLD()
+        omfdata = sas_gen.OMFData()
+        omf2sld = sas_gen.OMF2SLD()
         omf2sld.set_data(omfdata, self.default_shape)
         self.sld_data = omf2sld.output
         self.sld_data.is_data = False
@@ -537,7 +537,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             self.ext = None
             if self.parent.parent is None:
                 return 
-            msg = "Generic SANS Calculator: %s" % (sys.exc_value)
+            msg = "Generic SAS Calculator: %s" % (sys.exc_value)
             wx.PostEvent(self.parent.parent,
                           StatusEvent(status=msg, type='stop'))
             self.SetFocus()
@@ -571,7 +571,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             self.orient_combo.SetSelection(0)
             self.is_avg = False
             if self.ext in self.omfreader.ext:
-                gen = sans_gen.OMF2SLD()
+                gen = sas_gen.OMF2SLD()
                 gen.set_data(data)
                 #omf_data = data
                 self.sld_data = gen.get_magsld()
@@ -590,7 +590,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             if self.parent.parent is None:
                 raise
             msg = "Loading Error: This file format is not supported "
-            msg += "for GenSANS." 
+            msg += "for GenSAS." 
             wx.PostEvent(self.parent.parent,
                           StatusEvent(status=msg, type='stop', info='Error'))
             self.SetFocus()
@@ -683,7 +683,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         panel.dimension = 3   
         graph_title = self._sld_plot_helper(ax, output, has_arrow)
         # Use y, z axes (in mpl 3d) as z, y axes 
-        # that consistent with our SANS detector coords.
+        # that consistent with our SAS detector coords.
         ax.set_xlabel('x ($\A%s$)'% output.pos_unit)
         ax.set_ylabel('z ($\A%s$)'% output.pos_unit)
         ax.set_zlabel('y ($\A%s$)'% output.pos_unit)
@@ -1209,7 +1209,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         self.SetupScrolling()  
         # Object that receive status event
         self.parent = parent
-        self.sld_data = sans_gen.MagSLD([0], [0], [0]) 
+        self.sld_data = sas_gen.MagSLD([0], [0], [0]) 
         self.sld_ctl = None
         self.default_shape = 'rectangular'
         self._do_layout()
@@ -1276,7 +1276,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
     def _get_other_val(self):  
         """
         """
-        omfdata = sans_gen.OMFData()
+        omfdata = sas_gen.OMFData()
         sets = {}
         try:
             for lst in self.stepsize:
@@ -1297,7 +1297,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
             for key in sets.keys():
                 exec "omfdata.%s = sets['%s']"% (key, key)            
 
-            omf2sld = sans_gen.OMF2SLD()
+            omf2sld = sas_gen.OMF2SLD()
             omf2sld.set_data(omfdata, self.default_shape)
             self.sld_data = omf2sld.output
             self.sld_data.is_data = False
@@ -1627,7 +1627,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         self.sld_data = self.get_sld_val()
         self.parent.set_main_panel_sld_data(self.sld_data)
         
-        reader = sans_gen.SLDReader() 
+        reader = sas_gen.SLDReader() 
         extension = '*.sld'
         path = None
         data= None
@@ -1809,7 +1809,7 @@ class SasGenWindow(widget.CHILD_FRAME):
         self.omfpanel = OmfPanel(parent=self)
         self.panel = SasGenPanel(parent=self)
         self.data = None
-        self.omfdata = sans_gen.OMFData()
+        self.omfdata = sas_gen.OMFData()
         self.sld_data = None
         self._default_save_location = os.getcwd() 
         
@@ -2116,10 +2116,10 @@ class SasGenWindow(widget.CHILD_FRAME):
 import sas.perspectives.calculator as calmedia
 
         media = calmedia.get_data_path(media='media')
-        path = os.path.join(media,"gen_sans_help.html") 
+        path = os.path.join(media,"gen_sas_help.html") 
         name = "Generic Scattering Calculator"
         frame = HelpWindow(self, -1, 
-                           title=' Help: GenSANS',  
+                           title=' Help: GenSAS',  
                            pageToOpen=path, size=(865, 450))   
         try: 
             frame.splitter.DetachWindow(frame.lpanel)

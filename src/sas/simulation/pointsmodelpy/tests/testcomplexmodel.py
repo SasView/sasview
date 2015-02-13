@@ -1,6 +1,6 @@
-from sansModeling.pointsmodelpy import pointsmodelpy
-from sansModeling.iqPy import iqPy
-from sansModeling.geoshapespy import geoshapespy
+from sasModeling.pointsmodelpy import pointsmodelpy
+from sasModeling.iqPy import iqPy
+from sasModeling.geoshapespy import geoshapespy
 
 #First testing: a normal case, a lores model holds a sphere
 #and a pdbmodel holds one pdb file. and merged into a complex

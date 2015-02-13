@@ -2014,7 +2014,7 @@ class BasicPage(ScrolledPanel, PanelBase):
                 if not self.disable_smearer.GetValue():
                     temp_smear = self.current_smearer
             # compute weight for the current data
-            from sas import get_weight
+            from sas.perspectives.fitting.utils import get_weight
             flag = self.get_weight_flag()
             weight = get_weight(data=self.data, is2d=self._is_2D(), flag=flag)
             toggle_mode_on = self.model_view.IsEnabled()
@@ -3135,7 +3135,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         Button event for PD help
         """
         from help_panel import  HelpWindow
-import sas.models as models
+        import sas.models as models
         
         # Get models help model_function path
         path = models.get_data_path(media='media')
@@ -3172,7 +3172,7 @@ import sas.models as models
         """
         Get the string copies of the param names and values in the tap
         """
-        content = 'sansview_parameter_values:'
+        content = 'sasview_parameter_values:'
         # Do it if params exist
         if  self.parameters != []:
             
@@ -3401,7 +3401,7 @@ import sas.models as models
         context = {}
         # put the text into dictionary
         lines = text.split(':')
-        if lines[0] != 'sansview_parameter_values':
+        if lines[0] != 'sasview_parameter_values':
             self._copy_info(False)
             return False
         for line in lines[1:-1]:

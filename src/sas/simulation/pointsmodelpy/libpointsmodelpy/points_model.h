@@ -1,4 +1,4 @@
-/** \file points_model.h child class of SANSmodel*/
+/** \file points_model.h child class of SASmodel*/
 
 #ifndef POINTSMODEL_H
 #define POINTSMODEL_H
@@ -8,11 +8,11 @@
 #include <string>
 #include "Point3D.h"
 #include "iq.h"
-#include "sans_model.h"
+#include "sas_model.h"
 
 using namespace std;
 
-class PointsModel : public SANSModel{
+class PointsModel : public SASModel{
  public:
   PointsModel();
   virtual ~PointsModel();

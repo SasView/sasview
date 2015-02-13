@@ -13,7 +13,7 @@
 
 if __name__ == "__main__":
 
-	from SANSsimulation import iqPy
+	from SASsimulation import iqPy
 	iqPy.new_iq(10,0.01,0.4)
 
 	print "pass."

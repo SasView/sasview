@@ -113,7 +113,7 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
         hint_msg = "This tool is to approximately estimate "
         hint_msg += "the thickness of a layer"
         hint_msg += " or the diameter of particles\n "
-        hint_msg += "from the Kiessig fringe width in SANS/NR data."
+        hint_msg += "from the Kiessig fringe width in SAS/NR data."
         hint_msg += ""
         self.hint_txt = wx.StaticText(self, -1, hint_msg)
         self.hint_sizer.AddMany([(self.hint_txt, 0, wx.LEFT, 15)])

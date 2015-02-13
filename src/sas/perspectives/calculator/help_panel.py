@@ -54,7 +54,7 @@ class HelpWindow(wx.Frame):
                                      size=(500,-1))
         if pageToOpen != None:
             path = os.path.dirname(pageToOpen)
-            self.path = os.path.join(path, "gen_sans_help.html")
+            self.path = os.path.join(path, "gen_sas_help.html")
         else:
             self.path = calculator.get_data_path(media='media')
        
@@ -79,7 +79,7 @@ class HelpWindow(wx.Frame):
             target ="showframe">Kiessig Thickness Calculator</a><br></li>
             <li><a href ="resolution_calculator_help.html" 
             target ="showframe">Resolution Estimator</a><br></li>
-            <li><a href ="gen_sans_help.html" 
+            <li><a href ="gen_sas_help.html" 
             target ="showframe">Generic Scattering Calculator</a><br></li>
             <li><a href ="pycrust_help.html" 
             target ="showframe">Python Shell</a><br></li>

@@ -7,7 +7,7 @@ import sys
 ## *****************************************************************************
 Please select the 'Compile' from the menubar after the modification and saving.
 Note that we recommend to save the file as a different file name.
-Otherwise, it could be removed in the future on re-installation of the SansView.
+Otherwise, it could be removed in the future on re-installation of the SasView.
 ## *****************************************************************************
 """
 

@@ -1,14 +1,14 @@
 """
-    P(r) inversion for SANS
+    P(r) inversion for SAS
 """
-## \mainpage P(r) inversion for SANS
+## \mainpage P(r) inversion for SAS
 #
 # \section intro_sec Introduction
 # This module provides calculations to transform scattering intensity data 
 # I(q) into distance distribution function P(r). A description of the 
 # technique can be found elsewhere [1-5]. The module is useable as a 
 # standalone application but its functionality is meant to be presented 
-# to end-users through the user interface developed as part of the SANS 
+# to end-users through the user interface developed as part of the SAS 
 # flagship application. 
 #
 # Procedure: We will follow the procedure of Moore [1].

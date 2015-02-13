@@ -81,7 +81,7 @@ class HelpWindow(wx.Frame):
         self.lhelp = html.HtmlWindow(lpanel, -1, style=wx.NO_BORDER)
         self.rhelp = html.HtmlWindow(rpanel, -1, style=wx.NO_BORDER, 
                                      size=(500, -1))
-import sas.perspectives.invariant as invariant
+        import sas.perspectives.invariant as invariant
         path = invariant.get_data_path(media='media')
         self.path = os.path.join(path,"invariant_help.html")
      

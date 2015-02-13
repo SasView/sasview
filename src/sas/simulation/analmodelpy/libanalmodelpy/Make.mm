@@ -54,7 +54,7 @@ endif
 
 EXPORT_HEADERS = \
     analytical_model.h  \
-    sans_model.h
+    sas_model.h
 
 EXPORT_LIBS = $(PROJ_SAR)
 EXPORT_BINS = $(PROJ_DLL)

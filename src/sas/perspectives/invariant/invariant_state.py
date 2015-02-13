@@ -105,7 +105,7 @@ class InvariantState(object):
         #plot image
         self.wximbmp = None
         # report_html strings
-import sas.perspectives.invariant as invariant
+        import sas.perspectives.invariant as invariant
         path = invariant.get_data_path(media='media')
         path_report_html = os.path.join(path,"report_template.html")
         html_template = open(path_report_html,"r")
@@ -642,7 +642,7 @@ class Reader(CansasReader):
     
     ## Wildcards
     type = ["Invariant file (*.inv)|*.inv",
-            "SANSView file (*.svs)|*.svs"]
+            "SASView file (*.svs)|*.svs"]
     ## List of allowed extensions
     ext = ['.inv', '.INV', '.svs', 'SVS']  
     

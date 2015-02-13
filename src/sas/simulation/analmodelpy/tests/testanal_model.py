@@ -13,9 +13,9 @@
 
 if __name__ == "__main__":
 
-    from SANSsimulation import analmodelpy as analmodelpymodule
-    from SANSsimulation import iqPy
-    from SANSsimulation import geoshapespy
+    from SASsimulation import analmodelpy as analmodelpymodule
+    from SASsimulation import iqPy
+    from SASsimulation import geoshapespy
 
     print "copyright information:"
     print "   ", analmodelpymodule.copyright()

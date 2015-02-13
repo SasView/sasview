@@ -68,7 +68,7 @@ def get_app_dir():
     # that can be passed by sasview.py.
     logging.info(sys.executable)
     logging.info(str(sys.argv))
-    from sas import sansview as sasview
+    from sas import sasview as sasview
     app_path = os.path.dirname(sasview.__file__)
     logging.info("Using application path: %s", app_path)
     return app_path
@@ -112,7 +112,7 @@ if config is None:
     config = _find_local_config('local_config', os.getcwd())
     if config is None:
         # Didn't find local config, load the default 
-import sas.guiframe.config as config
+        import sas.guiframe.config as config
         logging.info("using default local_config")        
     else:
         logging.info("found local_config in %s" % os.getcwd())  
@@ -2115,7 +2115,7 @@ class ViewerFrame(PARENT_FRAME):
         
         """
         if config._do_aboutbox:
-import sas.guiframe.aboutbox as AboutBox
+            import sas.guiframe.aboutbox as AboutBox
             dialog = AboutBox.DialogAbout(None, -1, "")
             dialog.ShowModal()   
                      

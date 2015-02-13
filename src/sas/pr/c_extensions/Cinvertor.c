@@ -1113,7 +1113,7 @@ void addCinvertor(PyObject *module) {
     PyModule_AddObject(module, "Cinvertor", (PyObject *)&CinvertorType);
 
     d = PyModule_GetDict(module);
-    CinvertorError = PyErr_NewException("sans.pr.invertor.Cinvertor.InvertorError", PyExc_RuntimeError, NULL);
+    CinvertorError = PyErr_NewException("sas.pr.invertor.Cinvertor.InvertorError", PyExc_RuntimeError, NULL);
     PyDict_SetItemString(d, "CinvertorError", CinvertorError);
 }
 

@@ -13,7 +13,7 @@
 
 if __name__ == "__main__":
 
-    from SANSsimulation import geoshapespy
+    from SASsimulation import geoshapespy
 
     print
     print "module information:"
