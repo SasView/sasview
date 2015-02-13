@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #if defined(_MSC_VER)
-#include "winFuncs.h"
+#include "../libigor/winFuncs.h"
 #endif
 
 complex cassign(real, imag)
