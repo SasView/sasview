@@ -644,7 +644,7 @@ class FitProblem(FitProblemComponent):
         :param flag: flag to transform error of data.
         :param is2d: flag to distinguish 1D to 2D Data
         """
-        from sas import get_weight
+        from sas.perspectives.fitting.utils import get_weight
         # send original data for weighting
         self.weight = get_weight(data=self.original_data, is2d=is2d, flag=flag)
         if is2d:

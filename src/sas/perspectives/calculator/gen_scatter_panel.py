@@ -2113,7 +2113,7 @@ class SasGenWindow(widget.CHILD_FRAME):
         """
         from sas.perspectives.calculator.help_panel import  HelpWindow
         # Get models help model_function path
-import sas.perspectives.calculator as calmedia
+        import sas.perspectives.calculator as calmedia
 
         media = calmedia.get_data_path(media='media')
         path = os.path.join(media,"gen_sas_help.html") 
