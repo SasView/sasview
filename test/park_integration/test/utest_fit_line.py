@@ -5,11 +5,11 @@
 import unittest
 import math
 
-from sans.fit.AbstractFitEngine import Model, FitHandler
-from sans.dataloader.loader import Loader
-from sans.fit.Fitting import Fit
-from sans.models.LineModel import LineModel
-from sans.models.Constant import Constant
+from sas.fit.AbstractFitEngine import Model, FitHandler
+from sas.dataloader.loader import Loader
+from sas.fit.Fitting import Fit
+from sas.models.LineModel import LineModel
+from sas.models.Constant import Constant
 
 class testFitModule(unittest.TestCase):
     """ test fitting """

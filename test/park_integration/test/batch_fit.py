@@ -1,11 +1,11 @@
 import copy
 import time
 import unittest
-from sans.dataloader.loader import Loader
-from sans.fit.Fitting import Fit
-from sans.models.CylinderModel import CylinderModel
-import sans.models.dispersion_models 
-from sans.models.qsmearing import smear_selection
+from sas.dataloader.loader import Loader
+from sas.fit.Fitting import Fit
+from sas.models.CylinderModel import CylinderModel
+import sas.models.dispersion_models 
+from sas.models.qsmearing import smear_selection
 
 NPTS = 1
 
@@ -32,7 +32,7 @@ class BatchFit:
         self.param_to_fit = ['scale', 'length', 'radius']
         self.list_of_constraints = []
         self.list_of_mapper = []
-        self.polydisp = sans.models.dispersion_models.models
+        self.polydisp = sas.models.dispersion_models.models
         self.qmin = qmin
         self.qmax = qmin
         self.reset_value()

@@ -5,12 +5,12 @@ import logging
 import warnings
 warnings.simplefilter("ignore")
 
-import sans.dataloader.readers.cansas_reader as cansas
-from sans.dataloader.loader import Loader
-from sans.dataloader.data_info import Data1D
-from sans.dataloader.readers.xml_reader import XMLreader
-from sans.dataloader.readers.cansas_reader import Reader
-from sans.dataloader.readers.cansas_constants import CansasConstants
+import sas.dataloader.readers.cansas_reader as cansas
+from sas.dataloader.loader import Loader
+from sas.dataloader.data_info import Data1D
+from sas.dataloader.readers.xml_reader import XMLreader
+from sas.dataloader.readers.cansas_reader import Reader
+from sas.dataloader.readers.cansas_constants import CansasConstants
 
 import os
 import sys

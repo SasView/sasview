@@ -4,8 +4,8 @@
 
 import unittest, math, numpy
 from utest_invertor import load
-from sans.pr.invertor import Invertor
-from sans.pr.distance_explorer import DistExplorer
+from sas.pr.invertor import Invertor
+from sas.pr.distance_explorer import DistExplorer
         
 class TestExplorer(unittest.TestCase):
             

@@ -1,4 +1,4 @@
-from sans.pr.core.pr_inversion import Cinvertor
+from sas.pr.core.pr_inversion import Cinvertor
 import numpy
 
 c = Cinvertor()

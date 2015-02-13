@@ -8,7 +8,7 @@
 
 
 import unittest, math, numpy
-from sans.pr.invertor import Invertor
+from sas.pr.invertor import Invertor
         
 class TestFiguresOfMerit(unittest.TestCase):
             

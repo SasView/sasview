@@ -18,7 +18,7 @@ class testTextCtrl(unittest.TestCase):
         Create an Sld calculator
         """
         self.app = wx.App()
-        from sans.perspectives.calculator.sld_panel import SldWindow
+        from sas.perspectives.calculator.sld_panel import SldWindow
         self.sld_frame = SldWindow()
        
     def testCompoundTextCtrl(self):

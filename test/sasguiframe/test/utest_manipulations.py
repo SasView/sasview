@@ -5,9 +5,9 @@
 
 import unittest
 import numpy, math
-from sans.dataloader.loader import  Loader
-from sans.guiframe.dataFitting import Data1D, Data2D
-from sans.guiframe.dataFitting import Data1D as Theory1D
+from sas.dataloader.loader import  Loader
+from sas.guiframe.dataFitting import Data1D, Data2D
+from sas.guiframe.dataFitting import Data1D as Theory1D
  
 import os.path
 

@@ -5,13 +5,13 @@
 import unittest
 import math
 
-from sans.guiframe.dataFitting import Data1D 
-from sans.fit.AbstractFitEngine import Model,FitData1D
-from sans.fit.Fitting import Fit
-from sans.dataloader.loader import Loader
-from sans.models.MultiplicationModel import MultiplicationModel
-from sans.models.CylinderModel import CylinderModel
-from sans.models.SquareWellStructure import SquareWellStructure
+from sas.guiframe.dataFitting import Data1D 
+from sas.fit.AbstractFitEngine import Model,FitData1D
+from sas.fit.Fitting import Fit
+from sas.dataloader.loader import Loader
+from sas.models.MultiplicationModel import MultiplicationModel
+from sas.models.CylinderModel import CylinderModel
+from sas.models.SquareWellStructure import SquareWellStructure
 
 class testFitModule(unittest.TestCase):
     """ test fitting """

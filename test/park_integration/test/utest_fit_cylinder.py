@@ -5,9 +5,9 @@
 import unittest
 import math
 
-from sans.fit.AbstractFitEngine import Model
-from sans.fit.Fitting import Fit
-from sans.dataloader.loader import Loader
+from sas.fit.AbstractFitEngine import Model
+from sas.fit.Fitting import Fit
+from sas.dataloader.loader import Loader
 
 #@unittest.skip("")
 class TestSingleFit(unittest.TestCase):
@@ -16,7 +16,7 @@ class TestSingleFit(unittest.TestCase):
         """ initialize data"""
         self.data = Loader().load("cyl_400_20.txt")
         # Create model that fitting engine understands
-        from sans.models.CylinderModel import CylinderModel
+        from sas.models.CylinderModel import CylinderModel
         self.model  = CylinderModel()
         self.model.setParam("scale", 1.0)
         self.model.setParam("radius",18)
@@ -69,7 +69,7 @@ class TestSimultaneousFit(unittest.TestCase):
         self.data2=Loader().load("cyl_400_40.txt")
     
         # Receives the type of model for the fitting
-        from sans.models.CylinderModel import CylinderModel
+        from sas.models.CylinderModel import CylinderModel
         cyl1  = CylinderModel()
         cyl1.name = "C1"
         self.model1 = Model(cyl1)

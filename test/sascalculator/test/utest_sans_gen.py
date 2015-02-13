@@ -1,23 +1,23 @@
 """
-Unit tests for the sans_gen
+Unit tests for the sas_gen
 """
 import warnings
 warnings.simplefilter("ignore")
 
 import unittest
-from sans.calculator import sans_gen
-from sans.models.SphereModel import SphereModel
+from sas.calculator import sas_gen
+from sas.models.SphereModel import SphereModel
 
 import numpy
  
 import os.path
 
-class sans_gen_test(unittest.TestCase):
+class sas_gen_test(unittest.TestCase):
     
     def setUp(self):
-        self.sldloader = sans_gen.SLDReader()
-        self.pdbloader = sans_gen.PDBReader()
-        self.omfloader = sans_gen.OMFReader() 
+        self.sldloader = sas_gen.SLDReader()
+        self.pdbloader = sas_gen.PDBReader()
+        self.omfloader = sas_gen.OMFReader() 
         self.comp = SphereModel()
         
     def test_sldreader(self):
@@ -43,7 +43,7 @@ class sans_gen_test(unittest.TestCase):
         Test .omf file loaded 
         """
         f = self.omfloader.read("A_Raw_Example-1.omf")
-        output = sans_gen.OMF2SLD()
+        output = sas_gen.OMF2SLD()
         output.set_data(f)
         self.assertEqual(f.mx[0], 0)
         self.assertEqual(f.my[0], 0)
@@ -56,7 +56,7 @@ class sans_gen_test(unittest.TestCase):
     def test_slda_and_run(self): # Works when sld reader uses loadtxt
         sld_data = self.sldloader.read("sphere697_r30.sld")
         # Generic computation  
-        model = sans_gen.GenSAS()
+        model = sas_gen.GenSAS()
         model.setParam('background', 0.0)
         model.setParam('scale', 1.0)
         model.setParam('Up_frac_in', 0.5)

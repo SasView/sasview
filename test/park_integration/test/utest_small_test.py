@@ -3,8 +3,8 @@
 """
 import unittest
 import math
-from sans.fit.Fitting import Fit
-from sans.dataloader.loader import Loader
+from sas.fit.Fitting import Fit
+from sas.dataloader.loader import Loader
 
 class testFitModule(unittest.TestCase):
     """ test fitting """
@@ -15,7 +15,7 @@ class testFitModule(unittest.TestCase):
        
         fitter = Fit('scipy')
         # Receives the type of model for the fitting
-        from sans.models.CylinderModel import CylinderModel
+        from sas.models.CylinderModel import CylinderModel
         model  = CylinderModel()
         model.setParam('sldCyl', 1)
         model.setParam('sldSolv', 0)

@@ -6,12 +6,12 @@ import unittest
 import math
 
 import numpy
-from sans.fit.AbstractFitEngine import Model
-from sans.fit.Fitting import Fit
-from sans.dataloader.loader import Loader
-from sans.models.qsmearing import smear_selection
-from sans.models.CylinderModel import CylinderModel
-from sans.models.SphereModel import SphereModel
+from sas.fit.AbstractFitEngine import Model
+from sas.fit.Fitting import Fit
+from sas.dataloader.loader import Loader
+from sas.models.qsmearing import smear_selection
+from sas.models.CylinderModel import CylinderModel
+from sas.models.SphereModel import SphereModel
 
 class testFitModule(unittest.TestCase):
     """ test fitting """
@@ -156,7 +156,7 @@ class smear_testdata(unittest.TestCase):
         fitter._engine.fit_arrange_dict[1].data_list[0].smearer = smear
 
         # Model: maybe there's a better way to do this.
-        # Ideally we should have to create a new model from our sans model.
+        # Ideally we should have to create a new model from our sas model.
         fitter.set_model(Model(self.sphere),1, ['radius','scale', 'background'])
         
         # Why do we have to do this...?

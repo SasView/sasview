@@ -3,7 +3,7 @@
 """
 
 import unittest
-from sans.dataloader.loader import  Loader, Registry
+from sas.dataloader.loader import  Loader, Registry
 class testLoader(unittest.TestCase):
     
     def setUp(self):
