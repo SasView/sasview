@@ -3,17 +3,17 @@
 """
 import time
 import os
-from sans.guiframe.gui_style import GUIFRAME
-import sans.sansview
+from sas.guiframe.gui_style import GUIFRAME
+import sas.sasview
 import logging
 
 # Version of the application
 __appname__ = "SasView"
-__version__ = sans.sansview.__version__
-__build__ = sans.sansview.__build__
+__version__ = sas.sasview.__version__
+__build__ = sas.sasview.__build__
 __download_page__ = 'http://sourceforge.net/projects/sasview/files/'
 __update_URL__ = ['svn.code.sf.net', 
-                  '/p/sasview/code/trunk/sansview.latestversion']
+                  '/p/sasview/code/trunk/sasview.latestversion']
 
 
 # Debug message flag

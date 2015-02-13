@@ -1,5 +1,5 @@
 """
- Installation script for SANS models
+ Installation script for SAS models
 """
 
 import sys
@@ -13,7 +13,7 @@ from distutils.core import Extension, setup
 from distutils.command.build_ext import build_ext
 
 # Manage version number ######################################
-sys.path.append(os.path.join("src", "sans"))
+sys.path.append(os.path.join("src", "sas"))
 import models
 VERSION = models.__version__
 print "Building models v%s" % VERSION
@@ -65,7 +65,7 @@ if not os.path.isdir(wrapper_dir):
 sys.path.append(os.path.join("src", "python_wrapper"))
 from wrapping import generate_wrappers
 generate_wrappers(header_dir=includedir, 
-                  output_dir=os.path.join("src", "sans", "models"), 
+                  output_dir=os.path.join("src", "sas", "models"), 
                   c_wrapper_dir=wrapper_dir)
 
 IGNORED_FILES = [".svn"]
@@ -107,39 +107,39 @@ if os.name=='nt':
     smearer_sources.append(os.path.join(igordir, "winFuncs.c"))
 
 dist = setup(
-    name="sansmodels",
+    name="sasmodels",
     version = VERSION,
-    description = "Python module for SANS scattering models",
-    author = "SANS/DANSE",
+    description = "Python module for SAS scattering models",
+    author = "SAS/DANSE",
     author_email = "sansdanse@gmail.gov",
     url = "http://sansviewproject.svn.sourceforge.net",
     
-    # Place this module under the sans package
-    #ext_package = "sans",
+    # Place this module under the sas package
+    #ext_package = "sas",
     
     # Use the pure python modules
-    package_dir = {"sans":os.path.join("src", "sans"),
-                   "sans.models":os.path.join("src", "sans", "models"),
-                   "sans.models.sans_extension":os.path.join("src", "sans", "models", "sans_extension"),
+    package_dir = {"sas":os.path.join("src", "sas"),
+                   "sas.models":os.path.join("src", "sas", "models"),
+                   "sas.models.sas_extension":os.path.join("src", "sas", "models", "sas_extension"),
                   },
-    package_data={'sans.models': [os.path.join('media', "*")]},
-    packages = ["sans","sans.models",
-                "sans.models.sans_extension",],
+    package_data={'sas.models': [os.path.join('media', "*")]},
+    packages = ["sas","sas.models",
+                "sas.models.sas_extension",],
     
     ext_modules = [ 
                    
-        Extension("sans.models.sans_extension.c_models",
+        Extension("sas.models.sas_extension.c_models",
                     sources=model_sources,                 
                     include_dirs=[igordir, includedir, c_model_dir, numpy_incl_path],   
                     ),
 
         # Smearer extension
-        Extension("sans.models.sans_extension.smearer",
+        Extension("sas.models.sas_extension.smearer",
                    sources = smearer_sources,
                    include_dirs=[igordir, smear_dir, numpy_incl_path],
                    ),
                    
-        Extension("sans.models.sans_extension.smearer2d_helper",
+        Extension("sas.models.sas_extension.smearer2d_helper",
                   sources = [os.path.join(smear_dir, 
                                           "smearer2d_helper_module.cpp"),
                              os.path.join(smear_dir, "smearer2d_helper.cpp"),],

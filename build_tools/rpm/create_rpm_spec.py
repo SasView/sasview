@@ -28,8 +28,8 @@ def replaceToken(line, key, value): #pylint: disable-msg=R0201
     
     return newline
 
-input=open("sansview.spec.template",'r')
-output=open("sansview.spec",'w')
+input=open("sasview.spec.template",'r')
+output=open("sasview.spec",'w')
 
 buf = input.read()
 lines = buf.split('\n')

@@ -33,7 +33,7 @@ Root: HKCR;	Subkey: ".dat\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noer
 Root: HKCR;	Subkey: ".tif\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCR;	Subkey: ".abs\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCR;	Subkey: ".d1d\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".sans\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCR;	Subkey: ".sas\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCR;	Subkey: ".nxs\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCR; Subkey: "applications\SasView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SasView.exe""  ""%1"""; 	 Flags: uninsdeletevalue noerror
 Root: HKCU;	Subkey: "Software\Classes\.xml\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
@@ -43,7 +43,7 @@ Root: HKCU;	Subkey: "Software\Classes\.dat\OpenWithList\SasView.exe";	 Flags: un
 Root: HKCU;	Subkey: "Software\Classes\.tif\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCU;	Subkey: "Software\Classes\.abs\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCU;	Subkey: "Software\Classes\.d1d\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.sans\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCU;	Subkey: "Software\Classes\.sas\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCU;	Subkey: "Software\Classes\.nxs\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCU; Subkey: "Software\Classes\applications\SasView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SasView.exe""  ""%1"""; 	 Flags: uninsdeletevalue noerror
 Root: HKCR;	Subkey: ".svs";	ValueType: string;	ValueName: "";	ValueData: "{app}\SasView.exe";	 Flags: uninsdeletevalue  noerror
@@ -53,9 +53,9 @@ Root: HKCR;	Subkey: ".prv";	ValueType: string;	ValueName: "";	ValueData: "{app}\
 Root: HKCR; Subkey: "{app}\SasView.exe";	ValueType: string; ValueName: "";	ValueData: "{app}\SasView File";	 Flags: uninsdeletekey  noerror 	
 Root: HKCR; Subkey: "{app}\SasView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SasView.exe""  ""%1""";	 Flags: uninsdeletevalue noerror 	
 Root: HKCR; Subkey: "{app}\images\ball.ico";	ValueType: string; ValueName: "";	ValueData: "{app}\SasView.exe,0";	 Flags: uninsdeletevalue noerror 	
-Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment";	ValueType: expandsz; ValueName: "SANSVIEWPATH";	ValueData: "{app}";	 Flags: uninsdeletevalue noerror
+Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment";	ValueType: expandsz; ValueName: "SASVIEWPATH";	ValueData: "{app}";	 Flags: uninsdeletevalue noerror
 ; Write to PATH (below) is disabled; need more tests
-;Root: HKCU; Subkey: "Environment";	ValueType: expandsz; ValueName: "PATH";	ValueData: "%SANSVIEWPATH%;{olddata}";	 Check: NeedsAddPath()
+;Root: HKCU; Subkey: "Environment";	ValueType: expandsz; ValueName: "PATH";	ValueData: "%SASVIEWPATH%;{olddata}";	 Check: NeedsAddPath()
 
 
 [Languages]
@@ -113,7 +113,7 @@ var
 begin
   RegQueryStringValue(HKEY_CURRENT_USER,'Environment','PATH', oldpath)
   oldpath := oldpath + ';';
-  newpath := '%SANSVIEWPATH%';
+  newpath := '%SASVIEWPATH%';
   i := 0;
   while (Pos(';', oldpath) > 0) do begin
     SetArrayLength(pathArr, i+1);

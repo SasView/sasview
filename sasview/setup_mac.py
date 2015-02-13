@@ -12,7 +12,7 @@ NOTES:
 """
 from setuptools import setup
 import periodictable.xsf
-import sans.dataloader.readers 
+import sas.dataloader.readers 
 import os
 import string
 import local_config
@@ -28,19 +28,19 @@ RESOURCES_FILES = []
 #Periodictable data file
 DATA_FILES = periodictable.data_files()
 #invariant and calculator help doc
-import sans.perspectives.fitting as fitting
+import sas.perspectives.fitting as fitting
 DATA_FILES += fitting.data_files()
-import sans.perspectives.calculator as calculator
+import sas.perspectives.calculator as calculator
 DATA_FILES += calculator.data_files()
-import sans.perspectives.invariant as invariant
+import sas.perspectives.invariant as invariant
 DATA_FILES += invariant.data_files()
-import sans.models as models
+import sas.models as models
 DATA_FILES += models.data_files()
-import sans.guiframe as guiframe
+import sas.guiframe as guiframe
 DATA_FILES += guiframe.data_files()
 
 #CANSAxml reader data files
-RESOURCES_FILES.append(os.path.join(sans.dataloader.readers.get_data_path(),'defaults.xml'))
+RESOURCES_FILES.append(os.path.join(sas.dataloader.readers.get_data_path(),'defaults.xml'))
 
 # Locate libxml2 library
 lib_locs = ['/usr/local/lib', '/usr/lib']
@@ -52,7 +52,7 @@ for item in lib_locs:
 if libxml_path == None:
     raise RuntimeError, "Could not find libxml2 on the system"
 
-APP = ['sansview.py']
+APP = ['sasview.py']
 DATA_FILES += ['images','test','media', 'custom_config.py', 'local_config.py',
                'default_categories.json']
 if os.path.isfile("BUILD_NUMBER"):
@@ -66,7 +66,7 @@ def find_extension():
     try:
         list = []
         EXCEPTION_LIST = ['*', '.', '']
-        from sans.dataloader.loader import Loader
+        from sas.dataloader.loader import Loader
         wild_cards = Loader().get_wildcards()
         for item in wild_cards:
             #['All (*.*)|*.*']
@@ -99,7 +99,7 @@ plist = dict(CFBundleDocumentTypes=[dict(CFBundleTypeExtensions=EXTENSIONS_LIST,
                                    CFBundleTypeName="sasview file",
                                    CFBundleTypeRole="Shell" )],)
 
-APP = ['sansview.py']
+APP = ['sasview.py']
 DATA_FILES += ['images','test','media']
 
 EXCLUDES = ['PyQt4', 'sip', 'QtGui']

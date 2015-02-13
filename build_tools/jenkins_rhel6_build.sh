@@ -53,7 +53,7 @@ easy_install -d ../$SASVIEW_INSTALL sasview*.egg
 
 #  Run tests
 cd $WORKSPACE/test
-python utest_sansview.py
+python utest_sasview.py
 
 
 # Build RPM ###############################################################
@@ -65,9 +65,9 @@ rm -rf $WORKSPACE/dist/*.rpm
 
 cd ${WORKSPACE}/build_tools/rpm
 python create_rpm_spec.py ${SVN_REVISION}
-cp sansview.spec ${HOME}/rpmbuild/SPECS
+cp sasview.spec ${HOME}/rpmbuild/SPECS
 
 cd ${HOME}/rpmbuild/SPECS
-rpmbuild -bb sansview.spec --clean
+rpmbuild -bb sasview.spec --clean
 cp ${HOME}/rpmbuild/RPMS/x86_64/* ${WORKSPACE}/dist
 

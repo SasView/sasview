@@ -13,4 +13,4 @@ export PYTHONPATH=$WORKSPACE/sasview-install:$WORKSPACE/utils:$PYTHONPATH
 cd $WORKSPACE
 rm -f test/*.txt
 
-$PYLINT --rcfile "$WORKSPACE/build_tools/pylint.rc" -f parseable sasview-install/sasview.egg/sans sansview > test/sansview.txt || exit 0
+$PYLINT --rcfile "$WORKSPACE/build_tools/pylint.rc" -f parseable sasview-install/sasview.egg/sas sasview > test/sasview.txt || exit 0

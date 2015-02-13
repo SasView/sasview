@@ -1,10 +1,10 @@
 
-graft src/sans/models/libigor
-graft src/sans/models/c_smearer
-graft src/sans/models/c_models
-graft src/sans/models/c_extensions
-recursive-include sans *.h
-recursive-include sans *.hh
+graft src/sas/models/libigor
+graft src/sas/models/c_smearer
+graft src/sas/models/c_models
+graft src/sas/models/c_extensions
+recursive-include sas *.h
+recursive-include sas *.hh
 include README.txt
 include license.txt
 include release_notes.txt

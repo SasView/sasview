@@ -9,7 +9,7 @@ import os.path
 import os, sys
 import local_config as config
 from wx.lib.scrolledpanel import ScrolledPanel
-from sans.guiframe.panel_base import PanelBase
+from sas.guiframe.panel_base import PanelBase
 #Font size width 
 if sys.platform.count("win32")>0:
     FONT_VARIANT = 0

@@ -14,14 +14,14 @@ def get_svn_revision():
     except:
         return __revision__
 
-# Get the version number from the sansview module
+# Get the version number from the sasview module
 # Check to see if we are dealing with a release
 try:
-    import sans.sansview
-    __version__ = sans.sansview.__version__
-    __revision__ = sans.sansview.__build__
+    import sas.sasview
+    __version__ = sas.sasview.__version__
+    __revision__ = sas.sasview.__build__
 except:
-    print "Could not load sansview module"
+    print "Could not load sasview module"
 
 # Get actual revision number if possible
 try:

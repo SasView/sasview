@@ -1,6 +1,6 @@
 """
     Test application that uses plottools
-    This application uses most of the functionality required by the SANS group
+    This application uses most of the functionality required by the SAS group
     and should be treated as a test-case representative of that use.
     
     The following is a checklist of functionality to look for while testing:
@@ -36,14 +36,14 @@
      
 """
 import wx
-from sans.plottools.PlotPanel import PlotPanel
-from sans.plottools.plottables import Data1D, Theory1D, Data2D
+from sas.plottools.PlotPanel import PlotPanel
+from sas.plottools.plottables import Data1D, Theory1D, Data2D
 import  sys,os
 import numpy
 import random, math
 
 
-class SANSplotpanel(PlotPanel):
+class SASplotpanel(PlotPanel):
     
     def __init__(self, parent, id = -1, color = None,\
         dpi = None, **kwargs):
@@ -135,7 +135,7 @@ class ViewerFrame(wx.Frame):
         wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, wx.Size(950,850))
         
         # Panel for 1D plot
-        self.plotpanel    = SANSplotpanel(self, -1, style=wx.RAISED_BORDER)
+        self.plotpanel    = SASplotpanel(self, -1, style=wx.RAISED_BORDER)
 
         # Set up the menu
         self._setup_menus()
@@ -199,7 +199,7 @@ class ViewerFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             mypath = os.path.basename(path)
-            from sans.dataloader.loader import  Loader
+            from sas.dataloader.loader import  Loader
            
             #Instantiate a loader 
             L=Loader()

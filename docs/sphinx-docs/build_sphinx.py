@@ -45,8 +45,8 @@ def retrieve_user_docs():
     in an appropriately named directory of docs/sphinx-docs/source/. For
     example:
 
-        sans/../[MODULE]/media/dir/A.rst
-        sans/../[MODULE]/media/B.rst
+        sas/../[MODULE]/media/dir/A.rst
+        sas/../[MODULE]/media/B.rst
 
     gets copied to a new location:
 

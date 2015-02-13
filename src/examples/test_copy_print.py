@@ -25,8 +25,8 @@ The following is a checklist of functionality to look for while testing:
 """
 
 import wx
-from sans.plottools.PlotPanel import PlotPanel
-from sans.plottools.plottables import Graph, Data1D, Theory1D
+from sas.plottools.PlotPanel import PlotPanel
+from sas.plottools.plottables import Graph, Data1D, Theory1D
 import  sys
 sys.platform = 'win95'
 import numpy

@@ -18,7 +18,7 @@ import platform
 
 # put the build directory at the front of the path
 if os.path.abspath(os.path.dirname(__file__)) != os.path.abspath(os.getcwd()):
-    raise RuntimeError("Must run setup_exe from the sansview directory")
+    raise RuntimeError("Must run setup_exe from the sasview directory")
 from distutils.util import get_platform
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 platform = '%s-%s'%(get_platform(),sys.version[:3])
@@ -238,28 +238,28 @@ import periodictable
 import logging
 data_files += periodictable.data_files()
 
-import sans.perspectives.fitting as fitting
+import sas.perspectives.fitting as fitting
 data_files += fitting.data_files()
 
-import sans.perspectives.calculator as calculator
+import sas.perspectives.calculator as calculator
 data_files += calculator.data_files()
 
-import sans.perspectives.invariant as invariant
+import sas.perspectives.invariant as invariant
 data_files += invariant.data_files()
 
-import sans.guiframe as guiframe
+import sas.guiframe as guiframe
 data_files += guiframe.data_files()
 
-import sans.models as models
+import sas.models as models
 data_files += models.data_files()
 
 for f in matplotlibdata:
     dirname = os.path.join('mpl-data', f[len(matplotlibdatadir)+1:])
     data_files.append((os.path.split(dirname)[0], [f]))
 
-# Copy the settings file for the sans.dataloader file extension associations
-import sans.dataloader.readers
-f = os.path.join(sans.dataloader.readers.get_data_path(),'defaults.xml')
+# Copy the settings file for the sas.dataloader file extension associations
+import sas.dataloader.readers
+f = os.path.join(sas.dataloader.readers.get_data_path(),'defaults.xml')
 if os.path.isfile(f):
     data_files.append(('.', [f]))
 f = 'custom_config.py'
@@ -344,7 +344,7 @@ dll_excludes = [
 
 target_wx_client = Target(
     description = 'SasView',
-    script = 'sansview.py',
+    script = 'sasview.py',
     icon_resources = [(1, os.path.join(images_dir, "ball.ico"))],
     other_resources = [(24,1,manifest)],
     dest_base = "SasView"
@@ -356,7 +356,7 @@ if is_64bits:
 import installer_generator as gen
 gen.generate_installer()
 #initialize category stuff
-#from sans.guiframe.CategoryInstaller import CategoryInstaller
+#from sas.guiframe.CategoryInstaller import CategoryInstaller
 #CategoryInstaller.check_install()
 
 setup(

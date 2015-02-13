@@ -11,13 +11,13 @@
 import os
 f = open("CMakeLists.txt", "w")
 
-cmakelist = """# CMakeLists for SANS models
+cmakelist = """# CMakeLists for SAS models
 cmake_minimum_required (VERSION 2.6)
-project (SansModels)
+project (SasModels)
 
 # Version number
-set (SansModels_VERSION_MAJOR 1)
-set (SansModels_VERSION_MAJOR 0)
+set (SasModels_VERSION_MAJOR 1)
+set (SasModels_VERSION_MAJOR 0)
 
 set (SRC_FILES
 """

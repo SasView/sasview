@@ -1,10 +1,10 @@
-# CMakeLists for SANS models
+# CMakeLists for SAS models
 cmake_minimum_required (VERSION 2.6)
-project (SansModels)
+project (SasModels)
 
 # Version number
-set (SansModels_VERSION_MAJOR 1)
-set (SansModels_VERSION_MAJOR 0)
+set (SasModels_VERSION_MAJOR 1)
+set (SasModels_VERSION_MAJOR 0)
 
 set (SRC_FILES
     src/c_models/barbell.cpp
@@ -122,7 +122,7 @@ set ( INC_FILES
     include/vesicle.h
     src/libigor/GaussWeights.h
     src/libigor/libCylinder.h
-    src/libigor/libSANSAnalysis.h
+    src/libigor/libSASAnalysis.h
     src/libigor/libSphere.h
     src/libigor/libStructureFactor.h
     src/libigor/libTwoPhase.h
