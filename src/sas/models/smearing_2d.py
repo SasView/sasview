@@ -18,7 +18,7 @@ PHI_BIN ={'Xhigh':20, 'High':12, 'Med':6, 'Low':4}
 
 class Smearer2D:
     """
-    Gaussian Q smearing class for SANS 2d data
+    Gaussian Q smearing class for SAS 2d data
     """
      
     def __init__(self, data=None, model=None, index=None, 
@@ -151,7 +151,7 @@ class Smearer2D:
         #len_datay = len(self.qy_data)
         if self._engine == 'c' and self.coords == 'polar':
             try:
-import sas.models.sas_extension.smearer2d_helper as smearer2dc
+                import sas.models.sas_extension.smearer2d_helper as smearer2dc
                 smearc = smearer2dc.new_Smearer_helper(self.qx_data, 
                                               self.qy_data,
                                               self.dqx_data, self.dqy_data,

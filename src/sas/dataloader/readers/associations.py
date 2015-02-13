@@ -21,7 +21,7 @@ from lxml import etree
 from lxml import _elementpath
 
 ## Format version for the XML settings file
-VERSION = 'sansloader/1.0'
+VERSION = 'sasloader/1.0'
 
 
 def read_associations(loader, settings='defaults.xml'):
@@ -53,7 +53,7 @@ def read_associations(loader, settings='defaults.xml'):
         root = tree.getroot()
         
         # Read in the file extension associations
-        entry_list = root.xpath('/ns:SansLoader/ns:FileType',
+        entry_list = root.xpath('/ns:SasLoader/ns:FileType',
                                  namespaces={'ns': VERSION})
 
         # For each FileType entry, get the associated reader and extension

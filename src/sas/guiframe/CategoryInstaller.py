@@ -32,7 +32,7 @@ class CategoryInstaller:
         """
         returns the dir where installed_models.txt should be
         """
-import sas.dataloader.readers
+        import sas.dataloader.readers
         return sas.dataloader.readers.get_data_path()
 
     @staticmethod
@@ -40,7 +40,7 @@ import sas.dataloader.readers
         """
         returns the dir where models.py should be
         """
-import sas.perspectives.fitting.models
+        import sas.perspectives.fitting.models
         return sas.perspectives.fitting.models.get_model_python_path()
     
     @staticmethod
@@ -51,11 +51,11 @@ import sas.perspectives.fitting.models
         # The default categories file is usually found with the code, except
         # when deploying using py2app (it will be in Contents/Resources), or
         # py2exe (it will be in the exec dir).
-import sas.sansview
+        import sas.sasview
         cat_file = "default_categories.json"
         
         possible_cat_file_paths = [
-            os.path.join(os.path.split(sas.sansview.__file__)[0], cat_file),           # Source
+            os.path.join(os.path.split(sas.sasview.__file__)[0], cat_file),           # Source
             os.path.join(os.path.dirname(sys.executable), '..', 'Resources', cat_file), # Mac
             os.path.join(os.path.dirname(sys.executable), cat_file)                     # Windows
         ]
@@ -69,7 +69,7 @@ import sas.sansview
     @staticmethod
     def _get_home_dir():
         """
-        returns the users sansview config dir
+        returns the users sasview config dir
         """
         return os.path.join(os.path.expanduser("~"), ".sasview")
 

@@ -2,7 +2,7 @@
     Wrapper for the Disperser class extension
 """
 from sas.models.BaseComponent import BaseComponent
-from sans_extension.c_models import Disperser
+from sas_extension.c_models import Disperser
     
 class DisperseModel(Disperser, BaseComponent):
     """ 

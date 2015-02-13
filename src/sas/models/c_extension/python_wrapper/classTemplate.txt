@@ -22,7 +22,7 @@
  *
  */
 #define NO_IMPORT_ARRAY
-#define PY_ARRAY_UNIQUE_SYMBOL PyArray_API_sans
+#define PY_ARRAY_UNIQUE_SYMBOL PyArray_API_sas
  
 extern "C" {
 #include <Python.h>

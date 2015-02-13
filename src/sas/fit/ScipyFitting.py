@@ -13,9 +13,9 @@ from sas.fit.AbstractFitEngine import FResult
 
 _SMALLVALUE = 1.0e-10
 
-class SansAssembly:
+class SasAssembly:
     """
-    Sans Assembly class a class wrapper to be call in optimizer.leastsq method
+    Sas Assembly class a class wrapper to be call in optimizer.leastsq method
     """
     def __init__(self, paramlist, model=None, data=None, fitresult=None,
                  handler=None, curr_thread=None, msg_q=None):
@@ -211,7 +211,7 @@ class ScipyFit(FitEngine):
         result.fitter_id = self.fitter_id
         if handler is not None:
             handler.set_result(result=result)
-        functor = SansAssembly(paramlist=pars,
+        functor = SasAssembly(paramlist=pars,
                                model=model,
                                data=data,
                                handler=handler,

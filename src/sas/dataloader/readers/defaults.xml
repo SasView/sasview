@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<SansLoader version="1.0"
-    xmlns="sansloader/1.0"
+<SasLoader version="1.0"
+    xmlns="sasloader/1.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     >
 	
@@ -17,5 +17,5 @@
 	<FileType extension='.sans' reader='danse_reader'/>
 	<FileType extension='.nxs' reader='nexus_reader'/>
     
-</SansLoader>
+</SasLoader>
 

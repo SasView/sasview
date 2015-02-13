@@ -1,5 +1,5 @@
 """
-    1D Modeling for SANS
+    1D Modeling for SAS
 """
 #from sas.models import *
 

@@ -33,7 +33,7 @@ def smear_selection(data1D, model = None):
     :param data1D: Data1D object
     :param model: sas.model instance
     """
-    # Sanity check. If we are not dealing with a SANS Data1D
+    # Sanity check. If we are not dealing with a SAS Data1D
     # object, just return None
     if  data1D.__class__.__name__ not in ['Data1D', 'Theory1D']:
         if data1D == None:
@@ -342,7 +342,7 @@ class _SlitSmearer(_BaseSmearer):
 
 class SlitSmearer(_SlitSmearer):
     """
-    Adaptor for slit smearing class and SANS data
+    Adaptor for slit smearing class and SAS data
     """
     def __init__(self, data1D, model = None):
         """
@@ -460,7 +460,7 @@ class _QSmearer(_BaseSmearer):
     
 class QSmearer(_QSmearer):
     """
-    Adaptor for Gaussian Q smearing class and SANS data
+    Adaptor for Gaussian Q smearing class and SAS data
     """
     def __init__(self, data1D, model = None):
         """

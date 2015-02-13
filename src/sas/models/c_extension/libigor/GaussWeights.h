@@ -2,7 +2,7 @@
 #define GAUSSWEIGHTS_H
 /*
  *  GaussWeights.h
- *  SANSAnalysis
+ *  SASAnalysis
  *
  *  Created by Andrew Jackson on 4/23/07.
  *  Copyright 2007 __MyCompanyName__. All rights reserved.

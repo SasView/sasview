@@ -100,7 +100,7 @@ class TestPlugin(PluginBase):
                  "Tool-tip help text", 
                  "self._on_context_do_something"]]   
 
-class SansView():
+class SasView():
     
     def __init__(self):
         """
@@ -123,4 +123,4 @@ class SansView():
 if __name__ == "__main__": 
     from multiprocessing import freeze_support
     freeze_support()
-    sansview = SansView()
+    sasview = SasView()

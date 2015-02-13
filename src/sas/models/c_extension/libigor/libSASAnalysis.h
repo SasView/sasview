@@ -1,6 +1,6 @@
 /*
- *  libSANSAnalysis.h
- *  SANSAnalysis
+ *  libSASAnalysis.h
+ *  SASAnalysis
  *
  *  Created by Andrew Jackson on 4/24/07.
  *  Copyright 2007 __MyCompanyName__. All rights reserved.

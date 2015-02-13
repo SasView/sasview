@@ -18,11 +18,11 @@ class WrapperGenerator:
         // [PYTHONCLASS] = my_model
         
         where my_model must be replaced by the name of the
-        class that you want to import from sans.models.
+        class that you want to import from sas.models.
         (example: [PYTHONCLASS] = MyModel
-          will create a class MyModel in sans.models.MyModel.
+          will create a class MyModel in sas.models.MyModel.
           It will also create a class CMyModel in 
-          sans_extension.c_models.)
+          sas_extension.c_models.)
           
         Also in comments, each parameter of the params 
         dictionary must be declared with a default value

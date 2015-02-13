@@ -1,5 +1,5 @@
 """
-SANS generic computation and sld file readers
+SAS generic computation and sld file readers
 """
 from sas.models.BaseComponent import BaseComponent
 import sas.models.sas_extension.sld2i as mod

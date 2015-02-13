@@ -10,7 +10,7 @@ __version__ = '0.0.0'
 __build__ = '1'
 __download_page__ = 'http://sourceforge.net/projects/sasview/files/'
 __update_URL__ = ['svn.code.sf.net', 
-                  '/p/sasview/code/trunk/sansview.latestversion']
+                  '/p/sasview/code/trunk/sasview.latestversion']
 
 
 # Debug message flag
@@ -59,13 +59,13 @@ _corner_image = "images/angles_flat.png"
 _welcome_image = "images/SVwelcome.png"
 _copyright = "(c) 2008, University of Tennessee"
 #edit the lists below of file state your plugin can read
-#for sansview this how you can edit these lists
+#for sasview this how you can edit these lists
 #PLUGIN_STATE_EXTENSIONS = ['.prv','.fitv', '.inv']
 #APPLICATION_STATE_EXTENSION = '.svs'
 #PLUGINS_WLIST = ['P(r) files (*.prv)|*.prv',
 #                  'Fitting files (*.fitv)|*.fitv',
 #                  'Invariant files (*.inv)|*.inv']
-#APPLICATION_WLIST = 'SansView files (*.svs)|*.svs'
+#APPLICATION_WLIST = 'SasView files (*.svs)|*.svs'
 APPLICATION_WLIST = ''
 APPLICATION_STATE_EXTENSION = None
 PLUGINS_WLIST = []

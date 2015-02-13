@@ -21,7 +21,7 @@ dispersion object.
 The ArrayDispersion class takes in numpy arrays only.
 
 Usage:
-These classes can be used to set the dispersion model of a SANS model
+These classes can be used to set the dispersion model of a SAS model
 parameter:
 
     cyl = CylinderModel()
@@ -42,7 +42,7 @@ parameter through the dispersion dictionary:
 
     
 """
-import sans_extension.c_models as c_models 
+import sas_extension.c_models as c_models 
 
 
 

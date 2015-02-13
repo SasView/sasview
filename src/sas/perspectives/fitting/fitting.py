@@ -50,7 +50,7 @@ import bumps.fitters
 bumps.fitters.FIT_DEFAULT = 'lm'
 
 MAX_NBR_DATA = 4
-SANS_F_TOL = 5e-05
+SAS_F_TOL = 5e-05
 
 (PageInfoEvent, EVT_PAGE_INFO) = wx.lib.newevent.NewEvent()
 
@@ -93,7 +93,7 @@ class Plugin(PluginBase):
         self._fit_engine = 'bumps'
         self._gui_engine = None
         ## Relative error desired in the sum of squares (float); scipy only
-        self.ftol = SANS_F_TOL
+        self.ftol = SAS_F_TOL
         self.batch_reset_flag = True
         #List of selected data
         self.selected_data_list = []
@@ -290,7 +290,7 @@ class Plugin(PluginBase):
                 msg += "custom model... \n"
                 msg += "Please manually remove the files (.py, .pyc) "
                 msg += "in the 'plugin_models' folder \n"
-                msg += "inside of the SansView application, "
+                msg += "inside of the SasView application, "
                 msg += "and try it again."
                 wx.MessageBox(msg, 'Info')
                 #wx.PostEvent(self.parent, StatusEvent(status=msg, type='stop',
@@ -816,7 +816,7 @@ class Plugin(PluginBase):
             f_tol = float(ftol)
         except:
             # default
-            f_tol = SANS_F_TOL
+            f_tol = SAS_F_TOL
             
         self.ftol = f_tol
         # update ftol menu help strings
@@ -1372,8 +1372,8 @@ class Plugin(PluginBase):
                 correct_result = False
                 if model is not None and hasattr(model, "model"):
                     model = model.model
-                if data is not None and hasattr(data, "sans_data"):
-                    data = data.sans_data
+                if data is not None and hasattr(data, "sas_data"):
+                    data = data.sas_data
                 
                 is_data2d = issubclass(data.__class__, Data2D)
                 #check consistency of arrays

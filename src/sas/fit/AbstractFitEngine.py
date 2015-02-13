@@ -64,16 +64,16 @@ class FitHandler(object):
 
 class Model:
     """
-    Fit wrapper for SANS models.
+    Fit wrapper for SAS models.
     """
-    def __init__(self, sans_model, sans_data=None, **kw):
+    def __init__(self, sas_model, sas_data=None, **kw):
         """
-        :param sans_model: the sas model to wrap using park interface
+        :param sas_model: the sas model to wrap using park interface
 
         """
-        self.model = sans_model
-        self.name = sans_model.name
-        self.data = sans_data
+        self.model = sas_model
+        self.name = sas_model.name
+        self.data = sas_data
 
     def get_params(self, fitparams):
         """
@@ -127,7 +127,7 @@ class Model:
 
 class FitData1D(Data1D):
     """
-        Wrapper class  for SANS data
+        Wrapper class  for SAS data
         FitData1D inherits from DataLoader.data_info.Data1D. Implements
         a way to get residuals from data.
     """
@@ -154,7 +154,7 @@ class FitData1D(Data1D):
         """
         Data1D.__init__(self, x=x, y=y, dx=dx, dy=dy)
         self.num_points = len(x)
-        self.sans_data = data
+        self.sas_data = data
         self.smearer = smearer
         self._first_unsmeared_bin = None
         self._last_unsmeared_bin = None
@@ -264,9 +264,9 @@ class FitData1D(Data1D):
     
 class FitData2D(Data2D):
     """
-        Wrapper class  for SANS data
+        Wrapper class  for SAS data
     """
-    def __init__(self, sans_data2d, data=None, err_data=None):
+    def __init__(self, sas_data2d, data=None, err_data=None):
         Data2D.__init__(self, data=data, err_data=err_data)
         # Data can be initialized with a sas plottable or with vectors.
         self.res_err_image = []
@@ -277,21 +277,21 @@ class FitData2D(Data2D):
         self.smearer = None
         self.radius = 0
         self.res_err_data = []
-        self.sans_data = sans_data2d
-        self.set_data(sans_data2d)
+        self.sas_data = sas_data2d
+        self.set_data(sas_data2d)
 
-    def set_data(self, sans_data2d, qmin=None, qmax=None):
+    def set_data(self, sas_data2d, qmin=None, qmax=None):
         """
             Determine the correct qx_data and qy_data within range to fit
         """
-        self.data = sans_data2d.data
-        self.err_data = sans_data2d.err_data
-        self.qx_data = sans_data2d.qx_data
-        self.qy_data = sans_data2d.qy_data
-        self.mask = sans_data2d.mask
+        self.data = sas_data2d.data
+        self.err_data = sas_data2d.err_data
+        self.qx_data = sas_data2d.qx_data
+        self.qy_data = sas_data2d.qy_data
+        self.mask = sas_data2d.mask
 
-        x_max = max(math.fabs(sans_data2d.xmin), math.fabs(sans_data2d.xmax))
-        y_max = max(math.fabs(sans_data2d.ymin), math.fabs(sans_data2d.ymax))
+        x_max = max(math.fabs(sas_data2d.xmin), math.fabs(sas_data2d.xmax))
+        y_max = max(math.fabs(sas_data2d.ymin), math.fabs(sas_data2d.ymax))
         
         ## fitting range
         if qmin == None:
@@ -452,12 +452,12 @@ class FitEngine:
         :param id: unique key corresponding to a fitArrange object with data
         """
         if data.__class__.__name__ == 'Data2D':
-            fitdata = FitData2D(sans_data2d=data, data=data.data,
+            fitdata = FitData2D(sas_data2d=data, data=data.data,
                                  err_data=data.err_data)
         else:
             fitdata = FitData1D(x=data.x, y=data.y,
                                  dx=data.dx, dy=data.dy, smearer=smearer)
-        fitdata.sans_data = data
+        fitdata.sas_data = data
        
         fitdata.set_fit_range(qmin=qmin, qmax=qmax)
         #A fitArrange is already created but contains model only at id

@@ -2,7 +2,7 @@
 
 
 """
-ParkFitting module contains SansParameter,Model,Data
+ParkFitting module contains SasParameter,Model,Data
 FitArrange, ParkFit,Parameter classes.All listed classes work together
 to perform a simple fit with park optimizer.
 """
@@ -24,11 +24,11 @@ from park.formatnum import format_uncertainty
 from sas.fit.AbstractFitEngine import FitEngine
 from sas.fit.AbstractFitEngine import FResult
 
-class SansParameter(park.Parameter):
+class SasParameter(park.Parameter):
     """
-    SANS model parameters for use in the PARK fitting service.
+    SAS model parameters for use in the PARK fitting service.
     The parameter attribute value is redirected to the underlying
-    parameter value in the SANS model.
+    parameter value in the SAS model.
     """
     def __init__(self, name, model, data):
         """
@@ -99,23 +99,23 @@ class SansParameter(park.Parameter):
 
 class ParkModel(park.Model):
     """
-    PARK wrapper for SANS models.
+    PARK wrapper for SAS models.
     """
-    def __init__(self, sans_model, sans_data=None, **kw):
+    def __init__(self, sas_model, sas_data=None, **kw):
         """
-        :param sans_model: the sas model to wrap using park interface
+        :param sas_model: the sas model to wrap using park interface
 
         """
         park.Model.__init__(self, **kw)
-        self.model = sans_model
-        self.name = sans_model.name
-        self.data = sans_data
+        self.model = sas_model
+        self.name = sas_model.name
+        self.data = sas_data
         #list of parameters names
-        self.sansp = sans_model.getParamList()
+        self.sasp = sas_model.getParamList()
         #list of park parameter
-        self.parkp = [SansParameter(p, sans_model, sans_data) for p in self.sansp]
+        self.parkp = [SasParameter(p, sas_model, sas_data) for p in self.sasp]
         #list of parameter set
-        self.parameterset = park.ParameterSet(sans_model.name, pars=self.parkp)
+        self.parameterset = park.ParameterSet(sas_model.name, pars=self.parkp)
         self.pars = []
 
     def get_params(self, fitparams):
@@ -175,13 +175,13 @@ class ParkModel(park.Model):
         return []
 
 
-class SansFitResult(fitresult.FitResult):
+class SasFitResult(fitresult.FitResult):
     def __init__(self, *args, **kwrds):
         fitresult.FitResult.__init__(self, *args, **kwrds)
         self.theory = None
         self.inputs = []
         
-class SansFitSimplex(FitSimplex):
+class SasFitSimplex(FitSimplex):
     """
     Local minimizer using Nelder-Mead simplex algorithm.
 
@@ -215,15 +215,15 @@ class SansFitSimplex(FitSimplex):
         #print "simplex returned",result.x,result.fx
         # Need to make our own copy of the fit results so that the
         # values don't get stomped on by the next fit iteration.
-        fitpars = [SansFitParameter(pars[i].name,pars[i].range,v, pars[i].model, pars[i].data)
+        fitpars = [SasFitParameter(pars[i].name,pars[i].range,v, pars[i].model, pars[i].data)
                    for i,v in enumerate(result.x)]
-        res = SansFitResult(fitpars, result.calls, result.fx)
+        res = SasFitResult(fitpars, result.calls, result.fx)
         res.inputs = [(pars[i].model, pars[i].data) for i,v in enumerate(result.x)]
         # Compute the parameter uncertainties from the jacobian
         res.calc_cov(fitness)
         return res
       
-class SansFitter(Fitter):
+class SasFitter(Fitter):
     """
     """
     def fit(self, fitness, handler):
@@ -242,7 +242,7 @@ class SansFitter(Fitter):
         # values don't get stomped on by the next fit iteration.
         handler.done = False
         self.handler = handler
-        fitpars = [SansFitParameter(pars[i].name, pars[i].range, v,
+        fitpars = [SasFitParameter(pars[i].name, pars[i].range, v,
                                      pars[i].model, pars[i].data)
                    for i,v in enumerate(x0)]
         handler.result = fitresult.FitResult(fitpars, 0, numpy.NaN)
@@ -251,13 +251,13 @@ class SansFitter(Fitter):
         # This function may return before the fit is complete.
         self._fit(fitness, x0, bounds)
         
-class SansFitMC(SansFitter):
+class SasFitMC(SasFitter):
     """
     Monte Carlo optimizer.
 
     This implements `park.fit.Fitter`.
     """
-    localfit = SansFitSimplex()
+    localfit = SasFitSimplex()
     start_points = 10
     def __init__(self, localfit, start_points=10):
         self.localfit = localfit
@@ -275,7 +275,7 @@ class SansFitMC(SansFitter):
         except:
             raise ValueError, "Fit did not converge.\n"
         
-class SansPart(Part):
+class SasPart(Part):
     """
     Part of a fitting assembly.  Part holds the model itself and
     associated data.  The part can be initialized with a fitness
@@ -317,7 +317,7 @@ class SansPart(Part):
        
         self.model, self.data = fitness[0], fitness[1]
 
-class SansFitParameter(FitParameter):
+class SasFitParameter(FitParameter):
     """
     Fit result for an individual parameter.
     """
@@ -362,7 +362,7 @@ class MyAssembly(Assembly):
         """Build an assembly from a list of models."""
         self.parts = []
         for m in models:
-            self.parts.append(SansPart(m))
+            self.parts.append(SasPart(m))
         self.curr_thread = curr_thread
         self.chisq = None
         self._cancel = False
@@ -389,7 +389,7 @@ class MyAssembly(Assembly):
         self._fitparameters.sort(lambda a,b: cmp(a.path,b.path))
         # Convert to fitparameter a object
         
-        fitpars = [SansFitParameter(p.path,p.range,p.value, p.model, p.data)
+        fitpars = [SasFitParameter(p.path,p.range,p.value, p.model, p.data)
                    for p in self._fitparameters]
         #print "fitpars", fitpars
         return fitpars
@@ -398,7 +398,7 @@ class MyAssembly(Assembly):
         """
         Extend result from the fit with the calculated parameters.
         """
-        calcpars = [SansFitParameter(p.path,p.range,p.value, p.model, p.data)
+        calcpars = [SasFitParameter(p.path,p.range,p.value, p.model, p.data)
                     for p in self.parameterset.computed]
         result.parameters += calcpars
         result.theory = self.theory
@@ -492,7 +492,7 @@ class ParkFit(FitEngine):
         
     def create_assembly(self, curr_thread, reset_flag=False):
         """
-        Extract sansmodel and sansdata from 
+        Extract sasmodel and sasdata from 
         self.FitArrangelist ={Uid:FitArrange}
         Create parkmodel and park data ,form a list couple of parkmodel 
         and parkdata
@@ -561,12 +561,12 @@ class ParkFit(FitEngine):
         
         """
         self.create_assembly(curr_thread=curr_thread, reset_flag=reset_flag)
-        localfit = SansFitSimplex()
+        localfit = SasFitSimplex()
         localfit.ftol = ftol
         localfit.xtol = 1e-6
 
         # See `park.fitresult.FitHandler` for details.
-        fitter = SansFitMC(localfit=localfit, start_points=1)
+        fitter = SasFitMC(localfit=localfit, start_points=1)
         if handler == None:
             handler = fitresult.ConsoleUpdate(improvement_delta=0.1)
         
@@ -583,7 +583,7 @@ class ParkFit(FitEngine):
     
         for m in self.problem.parts:
             residuals, theory = m.fitness.residuals()
-            small_result = FResult(model=m.model, data=m.data.sans_data)
+            small_result = FResult(model=m.model, data=m.data.sas_data)
             small_result.fitter_id = self.fitter_id
             small_result.theory = theory
             small_result.residuals = residuals

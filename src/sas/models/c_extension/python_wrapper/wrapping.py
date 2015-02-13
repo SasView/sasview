@@ -23,12 +23,12 @@ def generate_wrappers(header_dir, output_dir='.', c_wrapper_dir='.'):
     print "Total number of model  wrappers created is %s" % nModels
 
 def write_c_models(model_list):
-    # simultaneously generates 'sansmodels/installed_models.txt'
-    # and 'sansmodels/src/c_models/c_models.cpp'
+    # simultaneously generates 'sasmodels/installed_models.txt'
+    # and 'sasmodels/src/c_models/c_models.cpp'
     
 
-    template_file = open(os.path.join("src", "sans", "models","c_extension","c_models","c_models.cpp.template"),"r")
-    write_file = open(os.path.join("src", "sans",  "models","c_extension","c_models","c_models.cpp"),"w")
+    template_file = open(os.path.join("src", "sas", "models","c_extension","c_models","c_models.cpp.template"),"r")
+    write_file = open(os.path.join("src", "sas",  "models","c_extension","c_models","c_models.cpp"),"w")
     buf = template_file.read()
     lines = buf.split('\n')
     
@@ -62,7 +62,7 @@ def write_c_models(model_list):
 
 if __name__ == '__main__':
     header_dir = os.path.join('..', 'include')
-    generate_wrappers(header_dir, output_dir="../sans/models/", c_wrapper_dir='.')
+    generate_wrappers(header_dir, output_dir="../sas/models/", c_wrapper_dir='.')
 
 
 

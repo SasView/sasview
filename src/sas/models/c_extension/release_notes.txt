@@ -1,7 +1,7 @@
 Release Notes
 =============
 
-SANS Models version 0.4.3
+SAS Models version 0.4.3
 
 Package name: sans.models 
 

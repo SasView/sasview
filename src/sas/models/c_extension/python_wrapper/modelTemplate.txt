@@ -23,8 +23,8 @@ Provide functionality for a C extension model
    AND RE-RUN THE GENERATOR SCRIPT
 """
 
-from sans.models.BaseComponent import BaseComponent
-from sans.models.sans_extension.c_models import [CPYTHONCLASS]
+from sas.models.BaseComponent import BaseComponent
+from sas.models.sas_extension.c_models import [CPYTHONCLASS]
 
 def create_[PYTHONCLASS]():
     """

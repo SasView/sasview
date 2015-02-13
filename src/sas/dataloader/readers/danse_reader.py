@@ -34,9 +34,9 @@ class Reader:
     ## File type
     type_name = "DANSE"
     ## Wildcards
-    type = ["DANSE files (*.sas)|*.sas"]
+    type = ["DANSE files (*.sans)|*.sans"]
     ## Extension
-    ext  = ['.sas', '.SANS']
+    ext  = ['.sans', '.SANS']
         
     def read(self, filename=None):
         """

@@ -3,7 +3,7 @@
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = sansmodeling
+PROJECT_NAME           = sasmodeling
 PROJECT_NUMBER         = 
 OUTPUT_DIRECTORY       = ../doc
 CREATE_SUBDIRS         = NO
@@ -113,10 +113,10 @@ FILE_PATTERNS          = *.c \
 RECURSIVE              = YES
 EXCLUDE                = build \
                          dist \
-                         sans/models/test \
+                         sas/models/test \
                          libigor \
                          igor_wrapper \
-                         sans/models/prototypes
+                         sas/models/prototypes
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
 EXAMPLE_PATH           = 

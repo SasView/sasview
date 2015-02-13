@@ -11,9 +11,9 @@ from bumps.mapper import SerialMapper, MPMapper
 from bumps import parameter
 from bumps.fitproblem import FitProblem
 
-from sas import FitEngine
-from sas import FResult
-from sas import compile_constraints
+from sas.fit.AbstractFitEngine import FitEngine
+from sas.fit.AbstractFitEngine import FResult
+from sas.fit.expression import compile_constraints
 
 class Progress(object):
     def __init__(self, history, max_step, pars, dof):
@@ -90,7 +90,7 @@ class ConvergenceMonitor(object):
 # a SasFitness can be used directly in bumps with the usual semantics.
 # The disadvantage of this technique is that we need to copy every parameter
 # back into the model each time the function is evaluated.  We could instead
-# define reference parameters for each sans parameter, but then we would not
+# define reference parameters for each sas parameter, but then we would not
 # be able to express constraints using python expressions in the usual way
 # from bumps, and would instead need to use string expressions.
 class SasFitness(object):

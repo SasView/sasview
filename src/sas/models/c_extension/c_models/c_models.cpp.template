@@ -1,12 +1,12 @@
 /** c_models
  *
- * Module containing all SANS model extensions
+ * Module containing all SAS model extensions
  *
  * @author   M.Doucet / UTK
  */
 #include <Python.h>
 #include <parameters.hh>
-#define PY_ARRAY_UNIQUE_SYMBOL PyArray_API_sans
+#define PY_ARRAY_UNIQUE_SYMBOL PyArray_API_sas
 #include "arrayobject.h"
 
 // [TAG_1]
@@ -190,7 +190,7 @@ initc_models(void)
   PyObject* m;
 
   m = Py_InitModule3("c_models", module_methods,
-      "C extension module for SANS scattering models.");
+      "C extension module for SAS scattering models.");
   import_array();
 
   // [TAG_2]
