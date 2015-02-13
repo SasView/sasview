@@ -104,3 +104,5 @@ if __name__ == "__main__":
     retrieve_user_docs()
     apidoc()
     build()
+	
+	print "=== Done ==="
