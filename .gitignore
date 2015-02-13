@@ -13,7 +13,7 @@
 .pydevproject
 build
 dist
-sansview.egg-info
+sasview.egg-info
 sasview.egg-info
 .mplconfig
 doctrees
@@ -27,7 +27,7 @@ docs/sphinx-docs
 
 *.pyc
 
-src/sans/models/*.py
+src/sas/models/*.py
 
-src/sans/models/c_extension/c_models/c_models.cpp
-src/sans/models/c_extension/python_wrapper/generated/
+src/sas/models/c_extension/c_models/c_models.cpp
+src/sas/models/c_extension/python_wrapper/generated/
