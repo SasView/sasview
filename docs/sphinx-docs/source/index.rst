@@ -9,6 +9,8 @@ SasView Documentation
 .. toctree::
    :maxdepth: 1
 
+   Model Documentation <user/models/model_functions>
+   
    User Documentation <user/user>
 
    Developer Documentation <dev/dev>
