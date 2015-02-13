@@ -67,7 +67,7 @@ is_64bits = False
 if sys.version_info >= (2, 6):
     is_64bits = sys.maxsize > 2**32
     
-enable_openmp = False if "--disable-open-mp" in sys.argv else True
+enable_openmp = True
 
 if sys.platform =='darwin':
     if not is_64bits:
@@ -103,7 +103,22 @@ if sys.platform =='darwin':
     except:
         print "PROBLEM determining Darwin version"
 
+class DisableOpenMPCommand(Command):
+    description = "The version of MinGW that comes with Anaconda does not come with OpenMP :( "\
+                  "This commands means we can turn off compiling with OpenMP for this or any "\
+                  "other reason."
+    user_options = []
 
+    def initialize_options(self):
+        self.cwd = None
+
+    def finalize_options(self):
+        self.cwd = os.getcwd()
+        global enable_openmp
+        enable_openmp = False
+
+    def run(self):
+        pass
 
 class build_ext_subclass( build_ext ):
     def build_extensions(self):
@@ -385,5 +400,6 @@ setup(
                                        ]
                     },
     cmdclass = {'build_ext': build_ext_subclass,
-                'docs': BuildSphinxCommand}
+                'docs': BuildSphinxCommand,
+                'disable_openmp': DisableOpenMPCommand}
     )   

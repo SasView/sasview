@@ -1,0 +1,33 @@
+# It is actually possible to list all the old svn ignore properties:
+#
+# svn pg -R svn:ignore .
+#
+# But there's a whole load of useless stuff in there that is no longer used.
+# Instead I did a clean build including the docs, ran the tests, and then ran
+# sasview for a bit and then did a git status to see what extra stuff was being
+# generated.
+#
+# Feel free to add more stuff to this as and when it becomes an issue. 
+
+.project
+.pydevproject
+build
+dist
+sansview.egg-info
+sasview.egg-info
+.mplconfig
+doctrees
+html
+build
+
+docs/sphinx-docs
+
+**/test/logs
+**/build
+
+*.pyc
+
+src/sans/models/*.py
+
+src/sans/models/c_extension/c_models/c_models.cpp
+src/sans/models/c_extension/python_wrapper/generated/
