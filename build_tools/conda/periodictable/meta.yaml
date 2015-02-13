@@ -1,0 +1,25 @@
+about: {home: 'http://www.reflectometry.org/danse/elements.html', license: public
+    domain, summary: Extensible periodic table of the elements}
+build:
+  entry_points: []
+  features: []
+  string: ''
+  track_features: []
+package: {name: periodictable, version: 1.4.1}
+requirements:
+  build: [python, setuptools, pyparsing, numpy]
+  conflicts: []
+  run: [python, pyparsing, numpy]
+source:
+  fn: periodictable-1.4.1.tar.gz
+  git_rev: ''
+  md5: 7246b63cc0b6b1be6e86b6616f9e866e
+  patches: []
+  path: ''
+  svn_rev: ''
+  url: https://pypi.python.org/packages/source/p/periodictable/periodictable-1.4.1.tar.gz
+test:
+  commands: []
+  files: []
+  imports: [periodictable]
+  requires: []
