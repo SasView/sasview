@@ -1,0 +1,26 @@
+about: {home: 'http://www.reflectometry.org/danse/software.html', license: UNKNOWN,
+  summary: Data fitting with bayesian uncertainty analysis}
+build:
+  entry_points: []
+  features: []
+  string: ''
+  track_features: []
+package: {name: bumps, version: 0.7.5.3}
+requirements:
+  build: [python, setuptools, six]
+  conflicts: []
+  run: [python, six]
+source:
+  fn: bumps-0.7.5.3.tar.gz
+  git_rev: ''
+  md5: f17b41412c3c8ad6432a42e42cb926d5
+  patches: []
+  path: ''
+  svn_rev: ''
+  url: https://pypi.python.org/packages/source/b/bumps/bumps-0.7.5.3.tar.gz
+test:
+  commands: []
+  files: []
+  imports: [bumps, bumps.dream, bumps.gui, bumps.gui.resources, bumps.mystic, bumps.mystic.examples,
+    bumps.mystic.optimizer]
+  requires: []
