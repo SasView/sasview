@@ -64,8 +64,10 @@ def retrieve_user_docs():
             docs = os.path.abspath(os.path.join(root, dirname))
             print "Found docs folder at \"%s\"." % docs
 
-            dest_dir_name = os.path.basename(os.path.dirname(docs))
-            dest_dir = os.path.join(SPHINX_SOURCE, "user", dest_dir_name)
+            dest_dir_part = os.path.dirname(os.path.relpath(docs, SASVIEW_SRC))
+            if os.sep in dest_dir_part:
+                dest_dir_part = dest_dir_part[dest_dir_part.index(os.sep) + 1:]
+            dest_dir = os.path.join(SPHINX_SOURCE, "user", dest_dir_part)
 
             copy_tree(docs, dest_dir)
 
