@@ -11,7 +11,7 @@ User Documentation
    
    Plotting Data/Models <guiframe/graph_help>
    
-   Fitting Perspective <fitting/fitting_help>
+   Fitting Perspective <fit/fitting_help>
    
    P(r) Inversion Perspective <invariant/pr_help>
    
@@ -32,6 +32,6 @@ User Documentation
    
    Generic Scattering Calculator Tool <calculator/sas_calculator_help>
    
-   Python Shell Tool
+   Python Shell Tool <perspectives/calculator/python_shell_help>
    
-   Image Viewer Tool
+   Image Viewer Tool <perspectives/calculator/image_viewer_help>
