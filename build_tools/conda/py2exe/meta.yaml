@@ -3,9 +3,9 @@ package:
   version: !!str 0.6.9
 
 source:
-  fn: showfiles.php?group_id=15583
-  url: http://sourceforge.net/project/showfiles.php?group_id=15583
-  #md5: 
+  fn: py2exe-0.6.9.zip
+  url: http://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.zip
+  md5: 788df97c3ceb11368c3a938e5acef0b2
 #  patches:
    # List any patch files here
    # - fix.patch
