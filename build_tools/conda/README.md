@@ -34,4 +34,16 @@ If you're lucky this is all you will need to ever do to create a new recipe, but
 
 == Building a Conda Package and Uploading to Binstar ==
 
-...
+{{{
+conda build bumps\
+}}}
+
+{{{
+TEST END: bumps-0.7.5.4-py27_0
+# If you want to upload this package to binstar.org later, type:
+#
+# $ binstar upload C:\TempAnaconda\conda-bld\win-32\bumps-0.7.5.4-py27_0.tar.bz2
+#
+# To have conda build upload to binstar automatically, use
+# $ conda config --set binstar_upload yes
+}}}
