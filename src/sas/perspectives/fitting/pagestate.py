@@ -471,7 +471,7 @@ class PageState(object):
         """
         Get the values (strings) from __str__ for report
         """
-        # Dictionary of teh report strings
+        # Dictionary of the report strings
         repo_time = ""
         model_name = ""
         title = ""
@@ -507,8 +507,16 @@ class PageState(object):
                     param_string += value + ','
             if name == "value":
                 param_string += value + ','
+	    if name == "selected":
+		if value == u' False':
+		    fixed_parameter = True
+		else:
+		    fixed_parameter = False
             if name == "error value":
-                param_string += value + ','
+	        if fixed_parameter:
+		    param_string += '(fixed),'
+		else:
+                    param_string += value + ','
             if name == "parameter unit":
                 param_string += value + ':'
             if name == "Value of Chisqr ":
