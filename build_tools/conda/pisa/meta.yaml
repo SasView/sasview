@@ -1,25 +1,27 @@
 package:
-  name: periodictable
-  version: !!str 1.4.1
+  name: pisa
+  version: !!str 3.0.9
 
 source:
-  fn: periodictable-1.4.1.tar.gz
-  url: https://pypi.python.org/packages/source/p/periodictable/periodictable-1.4.1.tar.gz
-  md5: 7246b63cc0b6b1be6e86b6616f9e866e
+  fn: pisa-3.0.9.tar.gz
+  url: https://pypi.python.org/packages/source/p/pisa/pisa-3.0.9.tar.gz
+  md5: 91f77889f48da9b6b4877037c7e44dd2
 #  patches:
    # List any patch files here
    # - fix.patch
 
-# build:
+build:
   #preserve_egg_dir: True
-  #entry_points:
+  entry_points:
     # Put any entry points (scripts to be generated automatically) here. The
     # syntax is module:function.  For example
     #
-    # - periodictable = periodictable:main
+    # - pisa = pisa:main
     #
-    # Would create an entry point called periodictable that calls periodictable.main()
+    # Would create an entry point called pisa that calls pisa.main()
 
+    - pisa = sx.pisa3:command
+    - xhtml2pdf = sx.pisa3:command
 
   # If this is a new build for the same version, increment the build
   # number. If you do not include this key, it defaults to 0.
@@ -29,23 +31,26 @@ requirements:
   build:
     - python
     - setuptools
-    - pyparsing
-    - numpy
 
   run:
     - python
-    - pyparsing
-    - numpy
 
 test:
   # Python imports
   imports:
-    - periodictable
+    - ho
+    - ho.pisa
+    - pisa
+    - sx
+    - sx.pisa3
+    - sx.w3c
 
-  #commands:
+  commands:
     # You can put test commands to be run here.  Use this to test that the
     # entry points work.
 
+    - pisa --help
+    - xhtml2pdf --help
 
   # You can also put a file called run_test.py in the recipe that will be run
   # at test time.
@@ -55,9 +60,9 @@ test:
     # - nose
 
 about:
-  home: http://www.reflectometry.org/danse/elements.html
-  license: public domain
-  summary: 'Extensible periodic table of the elements'
+  home: http://www.xhtml2pdf.com
+  license:  Apache Software License
+  summary: 'PDF generator using HTML and CSS'
 
 # See
 # http://docs.continuum.io/conda/build.html for
