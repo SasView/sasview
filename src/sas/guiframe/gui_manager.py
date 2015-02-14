@@ -1342,7 +1342,7 @@ class ViewerFrame(PARENT_FRAME):
 
         self._help_menu.AppendSeparator()
         id = wx.NewId()
-        self._help_menu.Append(id, '& Documentation', '')
+        self._help_menu.Append(id, '&Documentation', '')
         wx.EVT_MENU(self, id, self._onSphinxDocs)
 
         if config._do_tutorial and (IS_WIN or sys.platform =='darwin'):
