@@ -1,11 +1,11 @@
 package:
-  name: bumps
-  version: !!str 0.7.5.4
+  name: pypdf2
+  version: !!str 1.24
 
 source:
-  fn: bumps-0.7.5.4.tar.gz
-  url: https://pypi.python.org/packages/source/b/bumps/bumps-0.7.5.4.tar.gz
-  md5: a47c035fbb18afa5ca53067506a5ff1c
+  fn: PyPDF2-1.24.tar.gz
+  url: https://pypi.python.org/packages/source/P/PyPDF2/PyPDF2-1.24.tar.gz
+  md5: 87cbb41c24bd98e6f70a37bb4a97446c
 #  patches:
    # List any patch files here
    # - fix.patch
@@ -16,9 +16,9 @@ source:
     # Put any entry points (scripts to be generated automatically) here. The
     # syntax is module:function.  For example
     #
-    # - bumps = bumps:main
+    # - pypdf2 = pypdf2:main
     #
-    # Would create an entry point called bumps that calls bumps.main()
+    # Would create an entry point called pypdf2 that calls pypdf2.main()
 
 
   # If this is a new build for the same version, increment the build
@@ -28,23 +28,14 @@ source:
 requirements:
   build:
     - python
-    - setuptools
-    - six
 
   run:
     - python
-    - six
 
 test:
   # Python imports
   imports:
-    - bumps
-    - bumps.dream
-    - bumps.gui
-    - bumps.gui.resources
-    - bumps.mystic
-    - bumps.mystic.examples
-    - bumps.mystic.optimizer
+    - PyPDF2
 
   #commands:
     # You can put test commands to be run here.  Use this to test that the
@@ -54,15 +45,14 @@ test:
   # You can also put a file called run_test.py in the recipe that will be run
   # at test time.
 
-  requires:
-   - numpy
-   - scipy
-   - matplotlib
+  # requires:
+    # Put any additional test requirements here.  For example
+    # - nose
 
 about:
-  home: http://www.reflectometry.org/danse/software.html
-  license: UNKNOWN
-  summary: 'Data fitting with bayesian uncertainty analysis'
+  home: http://mstamy2.github.com/PyPDF2
+  license:  BSD License
+  summary: 'PDF toolkit'
 
 # See
 # http://docs.continuum.io/conda/build.html for

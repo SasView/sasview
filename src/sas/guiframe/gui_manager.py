@@ -23,6 +23,8 @@ import re
 warnings.simplefilter("ignore")
 import logging
 import httplib
+import webbrowser
+
 
 from sas.guiframe.events import EVT_CATEGORY
 from sas.guiframe.events import EVT_STATUS
@@ -1324,7 +1326,8 @@ class ViewerFrame(PARENT_FRAME):
                   
     def _add_help_menu(self):
         """
-        add help menu
+        add help menu to menu bar.  Includes welcome page, about page,
+        tutorial PDF and documentation pages. 
         """
         # Help menu
         self._help_menu = wx.Menu()
@@ -1335,24 +1338,12 @@ class ViewerFrame(PARENT_FRAME):
             if config.WELCOME_PANEL_ON and self.defaultPanel is not None:
                 id = wx.NewId()
                 self._help_menu.Append(id, '&Welcome', '')
-                self._help_menu.AppendSeparator()
                 wx.EVT_MENU(self, id, self.show_welcome_panel)
 
-        # Look for help item in plug-ins 
-        for item in self.plugins:
-            if hasattr(item, "help"):
-                id = wx.NewId()
-                self._help_menu.Append(id,'&%s Help' % item.sub_menu, '')
-                wx.EVT_MENU(self, id, item.help)
-
-        # Only show new Sphinx docs link if version of wx supports displaying
-        # it correctly.
-        show_sphinx_docs = float(wx.__version__[:3]) >= 2.9
-        if show_sphinx_docs:
-            self._help_menu.AppendSeparator()
-            id = wx.NewId()
-            self._help_menu.Append(id, '&Sphinx Documentation', '')
-            wx.EVT_MENU(self, id, self._onSphinxDocs)
+        self._help_menu.AppendSeparator()
+        id = wx.NewId()
+        self._help_menu.Append(id, '&Documentation', '')
+        wx.EVT_MENU(self, id, self._onSphinxDocs)
 
         if config._do_tutorial and (IS_WIN or sys.platform =='darwin'):
             self._help_menu.AppendSeparator()
@@ -2161,25 +2152,35 @@ class ViewerFrame(PARENT_FRAME):
 
     def _onSphinxDocs(self, evt):
         """
-        Pop up a Sphinx Documentation dialog.
+        Bring up Sphinx Documentation.  If Wx 2.9 or higher is installed 
+        with proper HTML support then Pop up a Sphinx Documentation dialog
+        locally.  If not pop up a new tab in the default system browser 
+        calling the documentation website.
         
         :param evt: menu event
         """
         # Running SasView "in-place" using run.py means the docs will be in a
         # different place than they would otherwise.
-        SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
-        if SPHINX_DOC_ENV in os.environ:
-            docs_path = os.path.join(os.environ[SPHINX_DOC_ENV], "index.html")
-        else:
-            docs_path = os.path.join(PATH_APP, "..", "..", "doc", "index.html")
 
-        if os.path.exists(docs_path):
-            from documentation_window import DocumentationWindow
+        show_sphinx_docs = float(wx.__version__[:3]) >= 2.9
+        if show_sphinx_docs:
+            SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
+            if SPHINX_DOC_ENV in os.environ:
+                docs_path = os.path.join(os.environ[SPHINX_DOC_ENV], "index.html")
+            else:
+                docs_path = os.path.join(PATH_APP, "..", "..", "doc", "index.html")
 
-            sphinx_doc_viewer = DocumentationWindow(None, -1, docs_path)
-            sphinx_doc_viewer.Show()
+            if os.path.exists(docs_path):
+                from documentation_window import DocumentationWindow
+
+                sphinx_doc_viewer = DocumentationWindow(None, -1, docs_path)
+                sphinx_doc_viewer.Show()
+            else:
+                logging.error("Could not find Sphinx documentation at '%' -- has it been built?" % docs_path)
         else:
-            logging.error("Could not find Sphinx documentation at '%' -- has it been built?" % docs_path)
+            #For red hat and maybe others who do not have Wx 3.0
+            #just send to webpage of documentation
+            webbrowser.open_new_tab('http://www.sasview.org/sasview')
 
     def set_manager(self, manager):
         """

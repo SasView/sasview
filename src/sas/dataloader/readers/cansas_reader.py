@@ -306,57 +306,45 @@ class Reader(XMLreader):
         value_unit = ''
         if 'unit' in attr and new_current_level.get('unit') is not None:
             try:
+                local_unit = attr['unit']
                 if isinstance(node_value, float) is False:
                     exec("node_value = float({0})".format(node_value))
                 default_unit = None
                 unitname = new_current_level.get("unit")
                 exec "default_unit = data1d.{0}".format(unitname)
-                local_unit = attr['unit']
-                if local_unit.lower() != default_unit.lower() and \
-                    local_unit is not None and local_unit.lower() != "none" \
-                        and default_unit is not None:
+                if local_unit is not None and default_unit is not None and \
+                        local_unit.lower() != default_unit.lower() \
+                        and local_unit.lower() != "none":
                     if HAS_CONVERTER == True:
-                        try:
-                            ## Check local units - bad units raise KeyError
-                            Converter(local_unit)
-                            data_conv_q = Converter(attr['unit'])
-                            value_unit = default_unit
-                            i_string = "node_value = data_conv_q"
-                            i_string += "(node_value, units=data1d.{0})"
-                            exec i_string.format(unitname)
-                        except KeyError:
-                            err_msg = "CanSAS reader: could not convert "
-                            err_msg += "{0} unit {1}; "
-                            err_msg = err_msg.format(tagname, local_unit)
-                            intermediate = "err_msg += " + \
-                                        "\"expecting [{1}]  {2}\"" + \
-                                        ".format(data1d.{0}, " + \
-                                        "sys.exc_info()[1])"
-                            exec intermediate.format(unitname, "{0}", "{1}")
-                            self.errors.append(err_msg)
-                            raise ValueError(err_msg)
-                        except:
-                            err_msg = \
-                                "CanSAS reader: could not convert the units"
-                            self.errors.append(err_msg)
-                            return
+                        ## Check local units - bad units raise KeyError
+                        data_conv_q = Converter(local_unit)
+                        value_unit = default_unit
+                        i_string = "node_value = data_conv_q"
+                        i_string += "(node_value, units=data1d.{0})"
+                        exec i_string.format(unitname)
                     else:
                         value_unit = local_unit
-                        err_msg = "CanSAS reader: unrecognized %s unit [%s];"\
-                        % (node_value, default_unit)
-                        err_msg += " expecting [%s]" % local_unit
+                        err_msg = "Unit converter is not available.\n"
                         self.errors.append(err_msg)
-                        raise ValueError, err_msg
                 else:
                     value_unit = local_unit
-            except:
-                err_msg = "CanSAS reader: could not convert "
-                err_msg += "Q unit [%s]; " % attr['unit']
-                intermediate = "err_msg += \"expecting [%s]\n  %s\" % " + \
-                            "(data1d.{0}, sys.exc_info()[1])"
-                exec intermediate.format(unitname)
+            except KeyError:
+                err_msg = "CanSAS reader: unexpected "
+                err_msg += "\"{0}\" unit [{1}]; "
+                err_msg = err_msg.format(tagname, local_unit)
+                intermediate = "err_msg += " + \
+                            "\"expecting [{1}]\"" + \
+                            ".format(data1d.{0})"
+                exec intermediate.format(unitname, "{0}", "{1}")
                 self.errors.append(err_msg)
-                raise ValueError, err_msg
+                value_unit = local_unit
+            except:
+                print sys.exc_info()
+                err_msg = "CanSAS reader: unknown error converting "
+                err_msg += "\"{0}\" unit [{1}]"
+                err_msg = err_msg.format(tagname, local_unit)
+                self.errors.append(err_msg)
+                value_unit = local_unit
         elif 'unit' in attr:
             value_unit = attr['unit']
         node_value = "float({0})".format(node_value)
@@ -487,7 +475,7 @@ class Reader(XMLreader):
                     node_value, unit = self._get_node_value(node, cs_values, \
                                                         data1d, tagname)
                     cansas_attrib = \
-                    cs_values.current_level.get("attributes").get(key)
+                        cs_values.current_level.get("attributes").get(key)
                     attrib_variable = cansas_attrib.get("variable")
                     if key == 'unit' and unit != '':
                         attrib_value = unit

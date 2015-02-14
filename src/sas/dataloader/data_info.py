@@ -337,9 +337,9 @@ class Sample:
     thickness_unit = 'mm'
     ## Transmission [float] [fraction]
     transmission = None
-    ## Temperature [float] [C]
+    ## Temperature [float] [No Default]
     temperature = None
-    temperature_unit = 'C'
+    temperature_unit = None
     ## Position [Vector] [mm]
     position = None
     position_unit = 'mm'

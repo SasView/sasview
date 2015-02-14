@@ -314,7 +314,9 @@ class StatusBar(wxStatusB):
         msg = event.info.lower()
         if msg == "error":
             e_msg = "Error(s) Occurred:\n"
-            e_msg += event.status
+            e_msg += "\t" + event.status + "\n\n"
+            e_msg += "Further information might be available in "
+            e_msg += "the Console log (bottom right corner)."
             wx.MessageBox(e_msg, style=wx.ICON_ERROR)
 
     def set_message(self, event):
