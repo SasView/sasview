@@ -1,0 +1,66 @@
+package:
+  name: pytools
+  version: !!str 2014.3.5
+
+source:
+  fn: pytools-2014.3.5.tar.gz
+  url: https://pypi.python.org/packages/source/p/pytools/pytools-2014.3.5.tar.gz
+  md5: 7f8e9d6a88090a601e96a9ee095d3512
+#  patches:
+   # List any patch files here
+   # - fix.patch
+
+# build:
+  #preserve_egg_dir: True
+  #entry_points:
+    # Put any entry points (scripts to be generated automatically) here. The
+    # syntax is module:function.  For example
+    #
+    # - pytools = pytools:main
+    #
+    # Would create an entry point called pytools that calls pytools.main()
+
+
+  # If this is a new build for the same version, increment the build
+  # number. If you do not include this key, it defaults to 0.
+  # number: 1
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - decorator >=3.2.0
+    - appdirs >=1.4.0
+    - six
+
+  run:
+    - python
+    - decorator >=3.2.0
+    - appdirs >=1.4.0
+    - six
+
+test:
+  # Python imports
+  imports:
+    - pytools
+
+  #commands:
+    # You can put test commands to be run here.  Use this to test that the
+    # entry points work.
+
+
+  # You can also put a file called run_test.py in the recipe that will be run
+  # at test time.
+
+  # requires:
+    # Put any additional test requirements here.  For example
+    # - nose
+
+about:
+  home: http://pypi.python.org/pypi/pytools
+  license:  MIT License
+  summary: 'A collection of tools for Python'
+
+# See
+# http://docs.continuum.io/conda/build.html for
+# more information about meta.yaml
