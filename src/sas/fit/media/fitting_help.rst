@@ -105,7 +105,7 @@ Batch Fitting
 .. _Save_Grid_ 
 .. _Open_Batch_Results_ 
 .. _Plot_ 
-.. _View_Column/Cell(s)_ 
+.. _View_Column_Cell_ 
 
 .. _Batch_Fit:
 
@@ -252,7 +252,7 @@ with valid entries for plotting to work. The dY-bar is optional (see Figure 5).
 
 Figure 5: Plotting
 
-.. _View_Column/Cell(s):
+.. _View_Column_Cell:
 
 View Column/Cell(s)
 -------------------
@@ -374,7 +374,7 @@ Custom Model Editor
 
 Description_ 
 New_ 
-Sum|Multi(p1,p2)_ 
+Sum_Multi_p1_p2_ 
 Advanced_ 
 Delete_ 
 
@@ -401,7 +401,7 @@ can be viewed and further modified by the 'Advanced' option below.
 
 .. image:: new_model.bmp
 
-.. _Sum|Multi(p1,p2):
+.. _Sum_Multi_p1_p2:
 
 Sum|Multi(p1,p2)
 ----------------
@@ -762,7 +762,7 @@ points so that it costs more in time.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Polarisation/Magnetic_Scattering:
+.. _Polarisation_Magnetic_Scattering:
 
 Polarisation/Magnetic Scattering
 --------------------------------
@@ -852,12 +852,12 @@ between 0 and 1.
 Key Combinations
 ----------------
 
-Copy&Paste_
+Copy_Paste_
 Bookmark_
 Graph_Context_Menu_
-FTolerance(SciPy)_
+FTolerance_
 
-.. _Copy&Paste:
+.. _Copy_Paste:
 
 Copy & Paste
 ------------
@@ -892,7 +892,7 @@ To get the graph context menu to print, copy, save data, (2D)average, etc.:
 *Locate the mouse point on the plot to highlight and *(Mouse) Right Click* 
 to bring up the full menu.
 
-.. _FTolerance(SciPy): 
+.. _FTolerance: 
 
 FTolerance (SciPy)
 ------------------
@@ -916,10 +916,10 @@ may cause for the fitting to terminate with higher chisq.
 Status Bar Help
 ---------------
 
-Message/Warning/Hint_ 
+Message_Warning_Hint_ 
 Console_ 
 
-.. _Message/Warning/Hint:
+.. _Message_Warning_Hint:
 
 Message/Warning/Hint
 --------------------
