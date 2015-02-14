@@ -344,12 +344,13 @@ class cansas_reader(unittest.TestCase):
         self.data = data[0]
         self.assertEqual(self.data.filename, filename)
         # The followed should not have been loaded
-        self.assertEqual(self.data.sample.thickness, None)
+        self.assertEqual(self.data.sample.thickness, 0.00103)
         # This one should
         self.assertEqual(self.data.sample.transmission, 0.327)
         
         self.assertEqual(self.data.meta_data['loader'], "CanSAS 1D")
-        self.assertEqual(len(self.data.errors), 1)
+        print self.data.errors
+        self.assertEqual(len(self.data.errors), 2)
         
         
     def test_slits(self):

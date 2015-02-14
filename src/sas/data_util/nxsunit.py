@@ -127,7 +127,9 @@ def _build_all_units():
     # Note: temperature needs an offset as well as a scale
     temperature = _build_metric_units('kelvin','K')
     temperature.update(_build_metric_units('Kelvin','K'))
-
+    temperature.update(_build_metric_units('Celcius', 'C'))
+    temperature.update(_build_metric_units('celcius', 'C'))
+    
     charge = _build_metric_units('coulomb','C')
     charge.update({'microAmp*hour':0.0036})
 
@@ -145,7 +147,6 @@ def _build_all_units():
 class Converter(object):
     """
     Unit converter for NeXus style units.
-
     """
     # Define the units, using both American and European spelling.
     scalemap = None
