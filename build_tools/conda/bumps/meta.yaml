@@ -54,9 +54,10 @@ test:
   # You can also put a file called run_test.py in the recipe that will be run
   # at test time.
 
-  # requires:
-    # Put any additional test requirements here.  For example
-    # - nose
+  requires:
+   - numpy
+   - scipy
+   - matplotlib
 
 about:
   home: http://www.reflectometry.org/danse/software.html
