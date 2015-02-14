@@ -1,23 +1,64 @@
-about: {home: 'http://github.com/xmlrunner/unittest-xml-reporting/tree/master/', license: BSD
-    License, summary: unittest-based test runner with Ant/JUnit like XML reporting.}
-build:
-  features:
-    - I dunno.  The ability to actually work would be nice feature of this recipe.
-package: {name: unittest-xml-reporting, version: 1.10.0}
+package:
+  name: unittest-xml-reporting
+  version: !!str 1.10.0
+
+source:
+  fn: unittest-xml-reporting-1.10.0.tar.gz
+  url: https://pypi.python.org/packages/source/u/unittest-xml-reporting/unittest-xml-reporting-1.10.0.tar.gz
+  md5: f0d04be2b9bff5b744677b576c326620
+#  patches:
+   # List any patch files here
+   # - fix.patch
+
+# build:
+  #preserve_egg_dir: True
+  #entry_points:
+    # Put any entry points (scripts to be generated automatically) here. The
+    # syntax is module:function.  For example
+    #
+    # - unittest-xml-reporting = unittest-xml-reporting:main
+    #
+    # Would create an entry point called unittest-xml-reporting that calls unittest-xml-reporting.main()
+
+
+  # If this is a new build for the same version, increment the build
+  # number. If you do not include this key, it defaults to 0.
+  # number: 1
+
 requirements:
   build:
     - python
     - setuptools
-    - six
+    - six >=1.4.0
+
   run:
     - python
-    - six
-source:
-  fn: unittest-xml-reporting-1.10.0.tar.gz
-  md5: f0d04be2b9bff5b744677b576c326620
-  url: https://pypi.python.org/packages/source/u/unittest-xml-reporting/unittest-xml-reporting-1.10.0.tar.gz
+    - six >=1.4.0
+
 test:
+  # Python imports
   imports:
     - xmlrunner
     - xmlrunner.extra
     - xmlrunner.tests
+
+  #commands:
+    # You can put test commands to be run here.  Use this to test that the
+    # entry points work.
+
+
+  # You can also put a file called run_test.py in the recipe that will be run
+  # at test time.
+
+  # requires:
+    # Put any additional test requirements here.  For example
+    # - nose
+
+about:
+  home: http://github.com/xmlrunner/unittest-xml-reporting/tree/master/
+  license:  BSD License
+  summary: 'unittest-based test runner with Ant/JUnit like XML reporting.'
+
+# See
+# http://docs.continuum.io/conda/build.html for
+# more information about meta.yaml
