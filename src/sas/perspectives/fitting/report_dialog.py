@@ -1,6 +1,6 @@
 """
 Dialog report panel to show and summarize the results of 
-the invariant calculation.
+the fitting calculation.
 """
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
