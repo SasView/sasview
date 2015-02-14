@@ -2,7 +2,7 @@
 
 Here we store the recipes for building conda packages of the dependencies of SasView.  These are dependencies that unforunately do not come pre-bundled with Anaconda.
 
-# Creating a Recipe
+## Creating a Recipe
 
 An easy way to get started with a recipe is to use the skeleton command that comes with conda, which looks for all the information it needs on PyPi (of course, this will only work if the module exists on PyPi...):
 
@@ -20,7 +20,7 @@ If you run `conda skeleton` from this directory, then the recipes will go into t
 
 If you're lucky this is all you will need to ever do to create a new recipe, but you may need to go in and tinker with the meta.yaml file from time to time.
 
-'''Issues'''
+## Issues
 
 * Sometimes downloading the package from PyPi is problematic.  You may see something like the following:
 
