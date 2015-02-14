@@ -335,6 +335,7 @@ c_models = [
         sources = [
             os.path.join(smear_dir, "smearer2d_helper_module.cpp"),
             os.path.join(smear_dir, "smearer2d_helper.cpp"),
+            os.path.join(igordir, "winFuncs.c"),
         ],
         include_dirs=[smear_dir, numpy_incl_path],
     ),
@@ -345,6 +346,7 @@ c_models = [
             os.path.join(gen_dir, "sld2i.cpp"),
             os.path.join(c_model_dir, "libfunc.c"),
             os.path.join(c_model_dir, "librefl.c"),
+            os.path.join(igordir, "winFuncs.c"),
         ],
         include_dirs=[gen_dir, includedir,  c_model_dir, numpy_incl_path],
     ),

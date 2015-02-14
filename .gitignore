@@ -31,3 +31,6 @@ src/sas/models/*.py
 
 src/sas/models/c_extension/c_models/c_models.cpp
 src/sas/models/c_extension/python_wrapper/generated/
+src/sas/models/media/.idea/
+
+default_categories.json

@@ -1,0 +1,72 @@
+package:
+  name: pyopencl
+  version: !!str 2015.1
+
+source:
+  fn: pyopencl-2015.1.tar.gz
+  url: https://pypi.python.org/packages/source/p/pyopencl/pyopencl-2015.1.tar.gz
+  md5: c7b9dd0bb113ad852dae6fdadd417899
+#  patches:
+   # List any patch files here
+   # - fix.patch
+
+# build:
+  #preserve_egg_dir: True
+  #entry_points:
+    # Put any entry points (scripts to be generated automatically) here. The
+    # syntax is module:function.  For example
+    #
+    # - pyopencl = pyopencl:main
+    #
+    # Would create an entry point called pyopencl that calls pyopencl.main()
+
+
+  # If this is a new build for the same version, increment the build
+  # number. If you do not include this key, it defaults to 0.
+  # number: 1
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - numpy
+    - pytools >=2014.2
+    - pytest >=2
+    - decorator >=3.2.0
+    - appdirs >=1.4.0
+
+  run:
+    - python
+    - numpy
+    - pytools >=2014.2
+    - pytest >=2
+    - decorator >=3.2.0
+    - appdirs >=1.4.0
+
+test:
+  # Python imports
+  imports:
+    - pyopencl
+    - pyopencl.characterize
+    - pyopencl.compyte
+
+  #commands:
+    # You can put test commands to be run here.  Use this to test that the
+    # entry points work.
+
+
+  # You can also put a file called run_test.py in the recipe that will be run
+  # at test time.
+
+  # requires:
+    # Put any additional test requirements here.  For example
+    # - nose
+
+about:
+  home: http://mathema.tician.de/software/pyopencl
+  license:  MIT License
+  summary: 'Python wrapper for OpenCL'
+
+# See
+# http://docs.continuum.io/conda/build.html for
+# more information about meta.yaml

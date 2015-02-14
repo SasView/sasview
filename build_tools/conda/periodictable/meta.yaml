@@ -1,0 +1,64 @@
+package:
+  name: periodictable
+  version: !!str 1.4.1
+
+source:
+  fn: periodictable-1.4.1.tar.gz
+  url: https://pypi.python.org/packages/source/p/periodictable/periodictable-1.4.1.tar.gz
+  md5: 7246b63cc0b6b1be6e86b6616f9e866e
+#  patches:
+   # List any patch files here
+   # - fix.patch
+
+# build:
+  #preserve_egg_dir: True
+  #entry_points:
+    # Put any entry points (scripts to be generated automatically) here. The
+    # syntax is module:function.  For example
+    #
+    # - periodictable = periodictable:main
+    #
+    # Would create an entry point called periodictable that calls periodictable.main()
+
+
+  # If this is a new build for the same version, increment the build
+  # number. If you do not include this key, it defaults to 0.
+  # number: 1
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - pyparsing
+    - numpy
+
+  run:
+    - python
+    - pyparsing
+    - numpy
+
+test:
+  # Python imports
+  imports:
+    - periodictable
+
+  #commands:
+    # You can put test commands to be run here.  Use this to test that the
+    # entry points work.
+
+
+  # You can also put a file called run_test.py in the recipe that will be run
+  # at test time.
+
+  # requires:
+    # Put any additional test requirements here.  For example
+    # - nose
+
+about:
+  home: http://www.reflectometry.org/danse/elements.html
+  license: public domain
+  summary: 'Extensible periodic table of the elements'
+
+# See
+# http://docs.continuum.io/conda/build.html for
+# more information about meta.yaml

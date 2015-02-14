@@ -1,0 +1,73 @@
+package:
+  name: xhtml2pdf
+  version: !!str 0.0.6
+
+source:
+  fn: xhtml2pdf-0.0.6.tar.gz
+  url: https://pypi.python.org/packages/source/x/xhtml2pdf/xhtml2pdf-0.0.6.tar.gz
+  md5: dee3703f768efcba26eab81a4207c2c8
+#  patches:
+   # List any patch files here
+   # - fix.patch
+
+build:
+  #preserve_egg_dir: True
+  entry_points:
+    # Put any entry points (scripts to be generated automatically) here. The
+    # syntax is module:function.  For example
+    #
+    # - xhtml2pdf = xhtml2pdf:main
+    #
+    # Would create an entry point called xhtml2pdf that calls xhtml2pdf.main()
+
+    - pisa = xhtml2pdf.pisa:command
+    - xhtml2pdf = xhtml2pdf.pisa:command
+
+  # If this is a new build for the same version, increment the build
+  # number. If you do not include this key, it defaults to 0.
+  # number: 1
+
+requirements:
+  build:
+    - python
+    - setuptools
+    - html5lib
+    - pypdf2
+    - pillow
+    - reportlab >=2.2
+
+  run:
+    - python
+    - html5lib
+    - pypdf2
+    - pillow
+    - reportlab >=2.2
+
+test:
+  # Python imports
+  imports:
+    - xhtml2pdf
+    - xhtml2pdf.w3c
+
+  commands:
+    # You can put test commands to be run here.  Use this to test that the
+    # entry points work.
+
+    - pisa --help
+    - xhtml2pdf --help
+
+  # You can also put a file called run_test.py in the recipe that will be run
+  # at test time.
+
+  # requires:
+    # Put any additional test requirements here.  For example
+    # - nose
+
+about:
+  home: http://www.xhtml2pdf.com
+  license:  Apache Software License
+  summary: 'PDF generator using HTML and CSS'
+
+# See
+# http://docs.continuum.io/conda/build.html for
+# more information about meta.yaml
