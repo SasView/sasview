@@ -1,4 +1,4 @@
-..invariant_help.rst
+.. invariant_help.rst
 
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
@@ -6,16 +6,21 @@
 Invariant Calculation Perspective
 =================================
 
-1. Scattering Invariant_
-2. Volume Fraction_
-3. Specific Surface Area_
-4. Definitions_
-5. Reference_
-6. How to Use_
+Scattering_Invariant_
+
+Volume_Fraction_
+
+Specific_Surface_Area_
+
+Definitions_
+
+Reference_
+
+How_to_Use_
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Scattering Invariant:
+.. _Scattering_Invariant:
 
 Scattering Invariant
 --------------------
@@ -76,7 +81,7 @@ Power law can also be used.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Volume Fraction:
+.. _Volume_Fraction:
 
 Volume Fraction
 ---------------
@@ -93,7 +98,7 @@ where 0 =\< *A*  =\<1/4 in order for these values to be physically valid.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Specific Surface Area:
+.. _Specific_Surface_Area:
 
 Specific Surface Area
 ---------------------
@@ -105,7 +110,7 @@ constant *Cp*  is given by users.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Definitions
+.. _Definitions:
 
 Definitions
 -----------
@@ -114,7 +119,7 @@ Q: the magnitude of neutron (or X-ray) momentum transfer vector.
 
 I(Q): the scattering intensity as a function of the momentum transfer Q.
 
-Invariant total is the sum of the invariant calculated from data’s q range and 
+Invariant total is the sum of the invariant calculated from datas q range and
 the invariant resulting from extrapolation at low q range and at high q range 
 if considered.
 
@@ -128,11 +133,11 @@ References
 Chapter 2 in O. Glatter and O. Kratky, "Small Angle X-Ray Scattering", Academic 
 Press, New York, 1982
 
-http://physchem.kfunigraz.ac.at/sm/ <http://physchem.kfunigraz.ac.at/sm/>_
+http://physchem.kfunigraz.ac.at/sm/
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _How to Use
+.. _How_to_Use:
 
 How to Use
 ----------
@@ -148,11 +153,11 @@ Customized Input box.
 
 3. If you want to calculate the volume fraction and the specific surface 
 area, type the optional inputs in the customized input box, and then press 
-‘Compute’ button.
+'Compute' button.
 
 4. The invariant can also be calculated including the outside of the data Q 
 range:  To include the lower Q and/or the higher Q range, check in the enable 
-extrapolation check box in ‘Extrapolation ‘box. If the power low is chosen, 
+extrapolation check box in 'Extrapolation' box. If the power low is chosen,
 the power (exponent) can be either held or fitted by checking the 
 corresponding radio button.  The Npts that is being used for the extrapolation 
 can be specified.
@@ -161,7 +166,7 @@ can be specified.
 will be warn in red at the top of the panel, which means that your data is not 
 proper to calculate the invariant.
 
-6. The details of the calculation is available by clicking the ‘Details’ 
+6. The details of the calculation is available by clicking the 'Details'
 button in the middle of the panel.
 
 .. image:: image005.gif

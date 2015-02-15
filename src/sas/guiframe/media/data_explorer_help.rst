@@ -1,4 +1,4 @@
-.. _data_explorer_help.rst
+.. data_explorer_help.rst
 
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
@@ -6,15 +6,23 @@
 Loading Data
 ============
 
-1. Introduction_ 
-2. Load Data_
-3. Handy Menu_
-4. Activate Data_
-5. Remove Data_
-6. Append Plot to Graph_
-7. Create New Plot_
-8. Freeze Theory_
-9. Send Data to Applications_
+Introduction_
+
+Load_Data_
+
+Handy_Menu_
+
+Activate_Data_
+
+Remove_Data_
+
+Append_Plot_to_Graph_
+
+Create_New_Plot_
+
+Freeze_Theory_
+
+Send_Data_to_Applications_
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -22,6 +30,7 @@ Loading Data
 
 Introduction
 ------------
+
 *Data Explorer* is a panel that allows the user more interactions with data. 
 Some functionalities provided by the Data Explorer are also available through 
 the context menu of plot panels or other menus of the applications.Under menu 
@@ -34,7 +43,7 @@ shown data go first to the Data Explorer for the user to handle them later.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Load Data:
+.. _Load_Data:
 
 Load Data
 ---------
@@ -47,7 +56,7 @@ title if exists.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Handy Menu:
+.. _Handy_Menu:
 
 Handy Menu
 ----------
@@ -56,11 +65,11 @@ For a quick Data-info/Save/Plot/3d-plot(2d only)/Edit-mask(2d only),
 high-light the data/theory, right-click, and select a proper item from the 
 context menu.
 
-.. _ image:: hand_menu.png
+.. image:: hand_menu.png
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Activate Data:
+.. _Activate_Data:
 
 Activate Data
 -------------
@@ -74,7 +83,7 @@ select multiple data simultaneously.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Remove Data:
+.. _Remove_Data:
 
 Remove Data
 -----------
@@ -85,7 +94,7 @@ Remove data button remove all reference of this data into the application.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Append Plot to Graph:
+.. _Append_Plot_to_Graph:
 
 Append Plot to Graph
 --------------------
@@ -99,7 +108,7 @@ only be performed on 1D data and plot panels currently containing 1D data.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Create New Plot:
+.. _Create_New_Plot:
 
 Create New Plot
 ---------------
@@ -109,7 +118,7 @@ will be plotted.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Freeze Theory:
+.. _Freeze_Theory:
 
 Freeze Theory
 -------------
@@ -119,7 +128,7 @@ only be performed when theory labels are selected.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Send to application:
+.. _Send_Data_to_Applications:
 
 Send to Application
 -------------------

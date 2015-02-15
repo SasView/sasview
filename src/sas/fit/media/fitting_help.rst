@@ -14,17 +14,29 @@ Fitting Perspective
 ===================
 
 Load_a_File_
+
 Single_Fit_
+
 Simultaneous_Fitting_
+
 Batch_Fitting_
+
 Model_Selection_
+
 Model_Category_Manager_
+
 Model_Functions_
+
 Custom_Model_Editor_
+
 Polydispersity_Distributions_
+
 Smearing_Computation_
-Polarisation/Magnetic_Scattering_
+
+Polarisation_Magnetic_Scattering_
+
 Key_Combinations_
+
 Status_Bar_Help_
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
@@ -99,13 +111,19 @@ the FitPage to recalculate.
 Batch Fitting
 -------------
 
-.. _Batch_Fit_
-.. _Batch_Window_
-.. _Edit_Grid_ 
-.. _Save_Grid_ 
-.. _Open_Batch_Results_ 
-.. _Plot_ 
-.. _View_Column_Cell_ 
+Batch_Fit_
+
+Batch_Window_
+
+Edit_Grid_
+
+Save_Grid_
+
+Open_Batch_Results_
+
+Plot_
+
+View_Column_Cell_
 
 .. _Batch_Fit:
 
@@ -116,7 +134,7 @@ Create a *Batch Page* by selecting the *Batch* radio button on the DataExplorer
 (see figure below) and for a new control page select 'New FitPage' in the 
 Fitting menubar.
 
-.. image:: batch_button_area.bmp
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/batch_button_area.bmp
 
 Figure 1: MenuBar: 
 
@@ -153,7 +171,7 @@ fit is finished.
 Once closed, it can be opened anytime from the "View" menubar item (see 
 Figure 2).
 
-.. image:: restore_batch_window.bmp
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/restore_batch_window.bmp
 
 Figure 2: Edit Menu: 
 
@@ -178,7 +196,7 @@ label(see Figure 3).
 *Note:*  A column always needs to be selected in order to remove or insert a 
 column in the grid.
 
-.. image:: edit_menu.bmp
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/edit_menu.bmp
 
 Figure 3: Edit Menu:
 
@@ -190,9 +208,9 @@ To save the current page on the batch window, select the *'File'*  menubar
 item(see Figure 4), then choose the *'Save as'*  menu item to save it as a 
 .csv file.
 
- *Note:* The grid doesn't save the data array, fits, and the array residuals. 
- As a result, the 'View (fit) Results' functionality will be lost when 
- reloading the saved file.
+*Note:* The grid doesn't save the data array, fits, and the array residuals.
+As a result, the 'View (fit) Results' functionality will be lost when
+reloading the saved file.
 
 Warning! To ensure accuracy of saved fit results, it is recommended to save 
 the current grid before modifying it .
@@ -207,7 +225,7 @@ the *'File'*  menu in the Grid Window(see Figure 4). All columns in the file
 will be displayed but insertion will not available. Insertion will be 
 available only when at least one column will be removed from the grid.
 
-.. image:: file_menu.bmp
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/file_menu.bmp
 
 Figure 4: MenuBar:
 
@@ -225,8 +243,8 @@ on *Add*  button, the grid will automatically fill the axis label, but
 different labels and units can be entered in the correct controls before 
 clicking on the plot button.
 
- *X/Y -Axis Selection Range* can be edited manually. These text controls 
- allow the following types of expression (operation can be + - * /, or pow)
+*X/Y -Axis Selection Range* can be edited manually. These text controls
+allow the following types of expression (operation can be + - * /, or pow)
  
 1) if the current axis label range is a function of 1 or more columns, write 
 this type of expression
@@ -248,7 +266,7 @@ Example : radius [2 : 5] , radius [10 : 25]
 Note: Both text controls ( X and Y-axis Selection Ranges) need to be filled 
 with valid entries for plotting to work. The dY-bar is optional (see Figure 5).
 
-.. image::plot_button.bmp
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/plot_button.bmp
 
 Figure 5: Plotting
 
@@ -270,7 +288,7 @@ Alternatively, just click the column letter (eg. B) to choose all the
 available data sets, then simply click the 'View Fits' button to plot the 
 data and fits. 
 
-.. image::view_button.bmp
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/view_button.bmp
 
 Figure 6: View Fits
 
@@ -279,8 +297,10 @@ Figure 6: View Fits
 ..  _Model_Selection:
 
 Model_Type_ 
-Change_Model_Parameters_ 
-Write_your_Own_Model_ 
+
+Change_Model_Parameters_
+
+Write_your_Own_Model_
 
 .. _Model_Type:
 
@@ -344,15 +364,15 @@ category, select a category name and click the 'Remove Selected' button
 3) To apply the changes made, hit the OK button. Otherwise, click the 'Cancel' 
 button (Fig. 2).
 
-.. image:: cat_fig0.bmp
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/cat_fig0.bmp
 
 Fig.1
 
-.. image:: cat_fig1.bmp
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/cat_fig1.bmp
 
 Fig.2
 
-.. image:: cat_fig2.bmp
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/cat_fig2.bmp
 
 Fig.3
 
@@ -373,10 +393,14 @@ Custom Model Editor
 -------------------
 
 Description_ 
-New_ 
-Sum_Multi_p1_p2_ 
-Advanced_ 
-Delete_ 
+
+New_
+
+Sum_Multi_p1_p2_
+
+Advanced_
+
+Delete_
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -389,7 +413,7 @@ This menu (Fitting/Edit Custom Model in the menu bar) interface is to provide
 you an easy way to write your own custom models. The changes in a model 
 function are effective after it is re-selected from the combo-box menu.
 
-.. image:: edit_model_menu.bmp
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/edit_model_menu.bmp
 
 .. _New:
 
@@ -399,7 +423,7 @@ New
 This option is used to make a new model. A model code generated by this option 
 can be viewed and further modified by the 'Advanced' option below.
 
-.. image:: new_model.bmp
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/new_model.bmp
 
 .. _Sum_Multi_p1_p2:
 
@@ -412,7 +436,7 @@ details button in the application. Then select the p1 or p2 model for the
 sum/multi model, select an operator as necessary and click the Apply button 
 for activation. Hit the 'Close' button when it's done.
 
-.. image:: sum_model.bmp
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sum_model.bmp
 
 .. _Advanced:
 
@@ -421,7 +445,7 @@ Advanced
 
 The menu option shows all the files in the plugin_models folder. You can edit, 
 modify, and save it. It is recommended to modify only the lines with arrow 
-(--`-----). In the end of edit, 'Compile' and 'Run' from the menu bar to 
+(-------). In the end of edit, 'Compile' and 'Run' from the menu bar to
 activate or to see the model working properly.
 
 .. _Delete:
@@ -469,7 +493,7 @@ The following five distribution functions are provided
 Rectangular Distribution
 ------------------------
 
-.. image:: img/pd_image001.png
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/pd_image001.png
 
 The xmean is the mean of the distribution, w is the half-width, and Norm is a 
 normalization factor which is determined during the numerical calculation. 
@@ -477,13 +501,13 @@ Note that the Sigma and the half width *w*  are different.
 
 The standard deviation is
 
-.. image:: img/pd_image002.png
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/pd_image002.png
 
 The PD (polydispersity) is
 
-.. image:: img/pd_image003.png
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/pd_image003.png
 
-.. image:: img/pd_image004.jpg
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/pd_image004.jpg
 
 .. _Array_Distribution:
 
@@ -512,23 +536,23 @@ given in the control panel, for example ‘radius = 60’, will be ignored.
 Gaussian Distribution
 ---------------------
 
-.. image:: img/pd_image005.png
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/pd_image005.png
 
 The xmean is the mean of the distribution and Norm is a normalization factor 
 which is determined during the numerical calculation.
 
 The PD (polydispersity) is
 
-.. image:: img/pd_image003.png
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/pd_image003.png
 
-.. image:: img/pd_image006.jpg
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/pd_image006.jpg
 
 .. _Lognormal_Distribution:
 
 Lognormal Distribution
 ----------------------
 
-.. image:: img/pd_image007.png
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/pd_image007.png
 
 The /mu/=ln(xmed), xmed is the median value of the distribution, and Norm is a 
 normalization factor which will be determined during the numerical calculation. 
@@ -537,16 +561,16 @@ for example, “radius = 60”.
 
 The PD (polydispersity) is given by /sigma/
 
-.. image:: img/pd_image008.png
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/pd_image008.png
 
 For the angular distribution
 
-.. image:: img/pd_image009.png
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/pd_image009.png
 
 The mean value is given by xmean=exp(/mu/+p2/2). The peak value is given by 
 xpeak=exp(/mu/-p2).
 
-.. image:: img/pd_image010.jpg
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/pd_image010.jpg
 
 This distribution function spreads more and the peak shifts to the left as the 
 p increases, requiring higher values of Nsigmas and Npts.
@@ -556,22 +580,22 @@ p increases, requiring higher values of Nsigmas and Npts.
 Schulz Distribution
 -------------------
 
-.. image:: img/pd_image011.png
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/pd_image011.png
 
-The xmeanis the mean of the distribution and Norm is a normalization factor 
+The xmean is the mean of the distribution and Norm is a normalization factor
 which is determined during the numerical calculation.
 
 The z = 1/p2– 1.
 
 The PD (polydispersity) is
 
-.. image:: img/pd_image012.png
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/pd_image012.png
 
 Note that the higher PD (polydispersity) might need higher values of Npts and 
 Nsigmas. For example, at PD = 0.7 and radisus = 60 A, Npts >= 160, and 
 Nsigmas >= 15 at least.
 
-.. image:: img/pd_image013.jpg
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/pd_image013.jpg
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -581,8 +605,10 @@ Smearing Computation
 --------------------
 
 Slit_Smearing_ 
-Pinhole_Smearing_ 
-2D_Smearing_ 
+
+Pinhole_Smearing_
+
+2D_Smearing_
 
 .. _Slit_Smearing:
 
@@ -591,37 +617,37 @@ Slit Smearing
 
 The sit smeared scattering intensity for SAS is defined by
 
-.. image:: img/sm_image002.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image002.gif
 
 where Norm =
 
-.. image:: img/sm_image003.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image003.gif
 
 Equation 1
 
-The functions .. image:: img/sm_image004.gif and .. image:: img/sm_image005.gif
+The functions .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image004.gif and .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image005.gif
 refer to the slit width weighting function and the slit height weighting 
 determined at the q point, respectively. Here, we assumes that the weighting 
 function is described by a rectangular function, i.e.,
 
-.. image:: img/sm_image006.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image006.gif
 
 Equation 2
 
 and
 
-.. image:: img/sm_image007.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image007.gif
 
 Equation 3
 
-so that .. image:: img/sm_image008.gif .. image::img/sm_image009.gif for 
-.. image:: img/sm_image010.gif and u.
+so that .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image008.gif .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image009.gif for
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image010.gif and u.
 
-The .. image::img/sm_image011.gif and .. image::img/sm_image012.gif stand for 
+The .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image011.gif and .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image012.gif stand for
 the slit height (FWHM/2) and the slit width (FWHM/2) in the q space. Now the 
 integral of Equation 1 is simplified to
 
-.. image:: img/sm_image013.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image013.gif
 
 Equation 4
 
@@ -631,38 +657,39 @@ Numerical Implementation of Equation 4
 Case 1
 ------
 
-For .. image:: img/sm_image012.gif = 0 and .. image:: img/sm_image011.gif = 
+For .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image012.gif = 0 and .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image011.gif = 
 constant.
 
-.. image:: img/sm_image016.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image016.gif
 
 For discrete q values, at the q values from the data points and at the q 
-values extended up to qN= qi + .. image:: img/sm_image011.gif the smeared 
+values extended up to qN= qi + .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image011.gif the smeared 
 intensity can be calculated approximately
 
-.. image:: img/sm_image017.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image017.gif
 
 Equation 5
 
-.. image:: img/sm_image018.gif = 0 for *Is* in *j* < *i* or *j* > N-1*.
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image018.gif = 0 for *Is* in *j* < *i* or *j* > N-1*.
 
 Case 2
 ------
 
-For .. image:: img/sm_image012.gif = constant and 
-.. image:: img/sm_image011.gif = 0.
+For .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image012.gif = constant and 
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image011.gif = 0.
 
 Similarly to Case 1, we get
 
-.. image:: img/sm_image019.gif for qp= qi-.. image:: img/sm_image012.gif 
-and qN= qi+.. image:: img/sm_image012.gif. .. image:: img/sm_image018.gif = 0 
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image019.gif for qp= qi- .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image012.gif
+
+and qN= qi+ .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image012.gif. .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image018.gif = 0
 for *Is* in *j* < *p* or *j* > *N-1*.
 
 Case 3
 ------
 
-For .. image:: img/sm_image011.gif = constant and 
-.. image:: img/sm_image011.gif = constant.
+For .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image011.gif = constant and 
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image011.gif = constant.
 
 In this case, the best way is to perform the integration, Equation 1, 
 numerically for both slit height and width. However, the numerical integration 
@@ -673,15 +700,15 @@ alternative way which is correct for slit width << slit hight, is used in
 SasView. This method is a mixed method that combines method 1 with the 
 numerical integration for the slit width.
 
-.. image:: img/sm_image020.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image020.gif
 
 Equation 7
 
-for qp= qi-.. image:: img/sm_image012.gif and 
-qN= qi+.. image:: img/sm_image012.gif. .. image:: img/sm_image018.gif = 0 for 
+for qp= qi- .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image012.gif and
+qN= qi+ .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image012.gif. .. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image018.gif = 0 for
 *Is* in *j* < *p* or *j* > *N-1*.
 
-.. Pinhole_Smearing:
+.. _Pinhole_Smearing:
 
 Pinhole Smearing
 ----------------
@@ -690,7 +717,7 @@ The pinhole smearing computation is done similar to the case above except
 that the weight function used is the Gaussian function, so that the Equation 6 
 for this case becomes
 
-.. image:: img/sm_image021.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image021.gif
 
 Equation 8
 
@@ -709,7 +736,7 @@ weighting matrix, and considered on *Is* computation.
 The 2D smearing computation is done similar to the 1D pinhole smearing above 
 except that the weight function used was the 2D elliptical Gaussian function
 
-.. image:: img/sm_image022.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image022.gif
 
 Equation 9
 
@@ -720,14 +747,14 @@ so that x’0= x0cos/theta/+y0sin/theta/ and y’0= -x0sin/theta/+y0cos/theta/.
 Note that the rotation angle is zero for x-y symmetric elliptical Gaussian 
 distribution. The A is a normalization factor.
 
-.. image:: img/sm_image023.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image023.gif
 
 Now we consider a numerical integration where each bins in /theta/ and R are 
 *evenly* (this is to simplify the equation below) distributed by /delta//theta/ 
 and /delta/R, respectively, and it is assumed that I(x’, y’) is constant 
 within the bins which in turn becomes
 
-.. image:: img/sm_image024.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image024.gif
 
 Equation 10
 
@@ -735,23 +762,23 @@ Since we have found the weighting factor on each bin points, it is convenient
 to transform x’-y’ back to x-y coordinate (rotating it by -/theta/ around z 
 axis). Then, for the polar symmetric smear
 
-.. image:: img/sm_image025.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image025.gif
 
 Equation 11
 
 where
 
-.. image:: img/sm_image026.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image026.gif
 
 while for the x-y symmetric smear
 
-.. image:: img/sm_image027.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image027.gif
 
 Equation 12
 
 where
 
-.. image:: img/sm_image028.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sm_image028.gif
 
 Here, the current version of the SasView uses Equation 11 for 2D smearing 
 assuming that all the Gaussian weighting functions are aligned in the polar 
@@ -781,11 +808,11 @@ depends on the spin states of the neutrons as follows. For magnetic scattering,
 only the magnetization component, *M*perp, perpendicular to the scattering 
 vector *Q* contributes to the the magnetic scattering length.
 
-... image:: img/mag_vector.bmp
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/mag_vector.bmp
 
 The magnetic scattering length density is then
 
-.. image:: img/dm_eq.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/dm_eq.gif
 
 where /gamma/ = -1.913 the gyromagnetic ratio, /mu/B is the Bohr magneton, r0 
 is the classical radius of electron, and */sigma/* is the Pauli spin. For 
@@ -798,7 +825,7 @@ out-coming states then are + and - states for both incident states
 Non-spin flips: (+ +) and (- -)
 Spin flips:     (+ -) and (- +)
 
-.. image:: img/M_angles_pic.bmp
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/M_angles_pic.bmp
 
 Now, let's assume that the angles of the *Q*  vector and the spin-axis (x') 
 against x-axis are /phi/ and /theta/up, respectively (See Figure above). Then, 
@@ -806,33 +833,33 @@ depending upon the polarisation (spin) state of neutrons, the scattering length
 densities, including the nuclear scattering length density (/beta/N) are given 
 as, for non-spin-flips
 
-.. image:: img/sld1.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sld1.gif
 
 for spin-flips
 
-.. image:: img/sld2.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/sld2.gif
 
 where
 
-.. image:: img/mxp.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/mxp.gif
 
-.. image:: img/myp.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/myp.gif
 
-.. image:: img/mzp.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/mzp.gif
 
-.. image:: img/mqx.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/mqx.gif
 
-.. image:: img/mqy.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/mqy.gif
 
 Here, the M0x, M0y and M0z are the x, y and z components of the magnetization 
 vector given in the xyz lab frame. The angles of the magnetization, /theta/M 
 and /phi/M as defined in the Figure (above)
 
-.. image:: img/m0x_eq.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/m0x_eq.gif
 
-.. image:: img/m0y_eq.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/m0y_eq.gif
 
-.. image:: img/m0z_eq.gif
+.. image:: docs/sphinx-docs/source/user/perspectives/fitting/m0z_eq.gif
 
 The user input parameters are M0_sld = DMM0, Up_theta = /theta/up, 
 M_theta = /theta/M, and M_phi = /phi/M. The 'Up_frac_i' and 'Up_frac_f' are 
@@ -842,7 +869,7 @@ the ratio
 
 neutrons before the sample and at the analyzer, respectively.
 
-*Note: The values of the 'Up_frac_i' and 'Up_frac_f' must be in the range 
+*Note:* The values of the 'Up_frac_i' and 'Up_frac_f' must be in the range
 between 0 and 1.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
@@ -853,8 +880,11 @@ Key Combinations
 ----------------
 
 Copy_Paste_
+
 Bookmark_
+
 Graph_Context_Menu_
+
 FTolerance_
 
 .. _Copy_Paste:
@@ -917,7 +947,8 @@ Status Bar Help
 ---------------
 
 Message_Warning_Hint_ 
-Console_ 
+
+Console_
 
 .. _Message_Warning_Hint:
 
