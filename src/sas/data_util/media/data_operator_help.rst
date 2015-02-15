@@ -1,4 +1,4 @@
-..data_operator_help.rst
+.. data_operator_help.rst
 
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
@@ -36,4 +36,4 @@ How To
 Note: Any errors and warnings will be displayed at the bottom of the SasView
 window.
 
-.. image:: image:: docs/sphinx-docs/source/user/calculator/media/data_oper_pic.png
+.. image:: data_oper_pic.png
