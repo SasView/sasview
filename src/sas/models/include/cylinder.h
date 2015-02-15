@@ -33,11 +33,11 @@ public:
   Parameter scale;
 
   /// Radius of the cylinder [A]
-  //  [DEFAULT]=radius=20.0 [A]
+  //  [DEFAULT]=radius=20.0 [A] 0.0 1e10
   Parameter radius;
 
   /// Length of the cylinder [A]
-  //  [DEFAULT]=length=400.0 [A]
+  //  [DEFAULT]=length=400.0 [A] 0.0 1e10
   Parameter length;
 
   /// Contrast [1/A^(2)]
