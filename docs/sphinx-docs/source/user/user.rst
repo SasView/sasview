@@ -3,14 +3,14 @@ User Documentation
 
 .. toctree::
    :maxdepth: 1
-
+   
    Model Documentation <models/model_functions>
    
+   Data Formats <guiframe/data_formats_help>
    
    Loading Data <guiframe/data_explorer_help>
    
    Plotting Data/Models <guiframe/graph_help>
-   
    
    Fitting Perspective <perspectives/fitting/fitting_help>
    
@@ -18,7 +18,6 @@ User Documentation
    
    Invariant Calculation Perspective <perspectives/invariant/invariant_help>
    
-  
    Data Operations Tool <perspectives/calculator/data_operator_help>
       
    Density/Volume Calculator Tool <perspectives/calculator/density_calculator_help>
@@ -34,6 +33,5 @@ User Documentation
    Slit Size Calculator Tool <perspectives/calculator/slit_calculator_help>
    
    SANS Resolution Estimator Tool <perspectives/calculator/resolution_calculator_help>
-   
    
    Python Shell Tool <perspectives/calculator/python_shell_help>
