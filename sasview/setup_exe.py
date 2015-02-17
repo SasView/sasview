@@ -279,17 +279,17 @@ if os.path.isfile("BUILD_NUMBER"):
 
 # Copying the images directory to the distribution directory.
 for f in findall(images_dir):
-    if os.path.split(f)[0].count('.svn')==0:
+    if not ".svn" in f
         data_files.append(("images", [f]))
 
 # Copying the HTML help docs
 for f in findall(media_dir):
-    if os.path.split(f)[0].count('.svn')==0:
+    if not ".svn" in f
         data_files.append(("media", [f]))
 
 # Copying the sample data user data
 for f in findall(test_dir):
-    if os.path.split(f)[0].count('.svn')==0:
+    if not ".svn" in f
         data_files.append(("test", [f]))
         
 if py26MSdll != None:
