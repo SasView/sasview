@@ -45,7 +45,7 @@ def load_error(error=None):
     message += "Make sure the content of your file is properly formatted.\n\n"
     
     if error is not None:
-        message += "When contacting the DANSE team,"
+        message += "When contacting the SasView team,"
         message += " mention the following:\n%s" % str(error)
     
     dial = wx.MessageDialog(None, message, 

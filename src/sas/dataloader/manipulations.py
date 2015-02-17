@@ -581,7 +581,7 @@ class Ring(object):
     in anti-clockwise starting from the x- axis on the left-hand side
     """
     #Todo: remove center.
-    def __init__(self, r_min=0, r_max=0, center_x=0, center_y=0, nbins=20):
+    def __init__(self, r_min=0, r_max=0, center_x=0, center_y=0, nbins=36):
         # Minimum radius
         self.r_min = r_min
         # Maximum radius
@@ -592,6 +592,7 @@ class Ring(object):
         self.center_y = center_y
         # Number of angular bins
         self.nbins_phi = nbins
+
         
     def __call__(self, data2D):
         """
@@ -621,7 +622,10 @@ class Ring(object):
         phi_counts = numpy.zeros(self.nbins_phi)
         phi_values = numpy.zeros(self.nbins_phi)
         phi_err    = numpy.zeros(self.nbins_phi)
-        
+	
+	# Shift to apply to calculated phi values in order to center first bin at zero
+	phi_shift = Pi / self.nbins_phi
+
         for npt in range(len(data)):
             frac = 0
             # q-value at the point (npt)
@@ -636,11 +640,11 @@ class Ring(object):
             if frac == 0:
                 continue
             # binning           
-            i_phi = int(math.floor((self.nbins_phi) * phi_value / (2 * Pi)))
+            i_phi = int(math.floor((self.nbins_phi) * (phi_value+phi_shift) / (2 * Pi)))
             
             # Take care of the edge case at phi = 2pi.
-            if i_phi == self.nbins_phi:
-                i_phi =  self.nbins_phi - 1
+            if i_phi >= self.nbins_phi:
+                i_phi =  0
             phi_bins[i_phi] += frac * data[npt]
             
             if err_data == None or err_data[npt] == 0.0:
@@ -654,7 +658,7 @@ class Ring(object):
         for i in range(self.nbins_phi):
             phi_bins[i] = phi_bins[i] / phi_counts[i]
             phi_err[i] = math.sqrt(phi_err[i]) / phi_counts[i]
-            phi_values[i] = 2.0 * math.pi / self.nbins_phi * (1.0 * i + 0.5)
+            phi_values[i] = 2.0 * math.pi / self.nbins_phi * (1.0 * i)
             
         idx = (numpy.isfinite(phi_bins))
 
