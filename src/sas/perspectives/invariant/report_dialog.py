@@ -17,6 +17,7 @@ import wx
 import sys
 import os
 import wx.html as html
+import logging
 ISPDF = False
 if sys.platform == "win32":
     _STATICBOX_WIDTH = 450
@@ -245,20 +246,22 @@ class ReportDialog(wx.Dialog):
     
     def HTML2PDF(self, data, filename):
         """
-        Create a PDF file from html source string. 
+        Create a PDF file from html source string.
+        Returns True is the file creation was successful. 
         
         : data: html string
         : filename: name of file to be saved
         """
-        import ho.pisa as pisa
-        f = file(filename, "wb")
-        # pisa requires some extra packages, see their web-site
-        pdf = pisa.CreatePDF(data, f)
-        # close the file here otherwise it will be open until quitting
-        #the application.
-        f.close()
-
-        return not pdf.err
-
-        
-        
+        try:
+            from xhtml2pdf import pisa
+            # open output file for writing (truncated binary)
+            resultFile = open(filename, "w+b")
+            # convert HTML to PDF
+            pisaStatus = pisa.CreatePDF(data, dest=resultFile)
+            # close output file
+            resultFile.close()
+            self.Update()
+            return pisaStatus.err
+        except:
+            logging.error("Error creating pdf: %s" % sys.exc_value)
+        return False
