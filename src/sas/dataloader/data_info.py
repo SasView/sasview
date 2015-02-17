@@ -1066,7 +1066,7 @@ class SESANSData1D(plottable_sesans1D, DataInfo):
         return clone
     
     
-    class Data2D(plottable_2D, DataInfo):
+class Data2D(plottable_2D, DataInfo):
     """
     2D data class
     """
