@@ -47,3 +47,7 @@ TEST END: bumps-0.7.5.4-py27_0
 # To have conda build upload to binstar automatically, use
 # $ conda config --set binstar_upload yes
 ```
+
+# Useful Links
+
+* http://conda.pydata.org/docs/build.html
