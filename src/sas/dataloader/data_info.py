@@ -26,6 +26,57 @@ import numpy
 import math
 
 
+class plottable_sesans1D:
+    """
+    SESANS is a place holder for 1D SESANS plottables.
+    
+    #TODO: This was directly copied from the plottables_1D.
+    #TODO: The class has not been updated from there.
+    """
+    # The presence of these should be mutually
+    # exclusive with the presence of Qdev (dx)
+    x = None
+    y = None
+    dx = None
+    dy = None
+    ## Slit smearing length
+    dxl = None
+    ## Slit smearing width
+    dxw = None
+    
+    # Units
+    _xaxis = ''
+    _xunit = ''
+    _yaxis = ''
+    _yunit = ''
+    
+    def __init__(self, x, y, dx=None, dy=None, dxl=None, dxw=None):
+        self.x = numpy.asarray(x)
+        self.y = numpy.asarray(y)
+        if dx is not None:
+            self.dx = numpy.asarray(dx)
+        if dy is not None:
+            self.dy = numpy.asarray(dy)
+        if dxl is not None:
+            self.dxl = numpy.asarray(dxl)
+        if dxw is not None: 
+            self.dxw = numpy.asarray(dxw)
+
+    def xaxis(self, label, unit):
+        """
+        set the x axis label and unit
+        """
+        self._xaxis = label
+        self._xunit = unit
+        
+    def yaxis(self, label, unit):
+        """
+        set the y axis label and unit
+        """
+        self._yaxis = label
+        self._yunit = unit
+
+
 class plottable_1D:
     """
     Data1D is a place holder for 1D plottables.
@@ -939,7 +990,83 @@ class Data1D(plottable_1D, DataInfo):
         return result
         
         
-class Data2D(plottable_2D, DataInfo):
+class SESANSData1D(plottable_sesans1D, DataInfo):
+    """
+    SESANS 1D data class
+    """
+    x_unit = '1/A'
+    y_unit = '1/cm'
+    
+    def __init__(self, x, y, dx=None, dy=None):
+        DataInfo.__init__(self)
+        plottable_sesans1D.__init__(self, x, y, dx, dy)
+        
+    def __str__(self):
+        """
+        Nice printout
+        """
+        _str =  "%s\n" % DataInfo.__str__(self)
+    
+        _str += "Data:\n"
+        _str += "   Type:         %s\n" % self.__class__.__name__
+        _str += "   X-axis:       %s\t[%s]\n" % (self._xaxis, self._xunit)
+        _str += "   Y-axis:       %s\t[%s]\n" % (self._yaxis, self._yunit)
+        _str += "   Length:       %g\n" % len(self.x)
+
+        return _str
+
+    def is_slit_smeared(self):
+        """
+        Check whether the data has slit smearing information
+        
+        :return: True is slit smearing info is present, False otherwise
+        
+        """
+        def _check(v):
+            if (v.__class__ == list or v.__class__ == numpy.ndarray) \
+                and len(v) > 0 and min(v) > 0:
+                return True
+            
+            return False
+        
+        return _check(self.dxl) or _check(self.dxw)
+        
+    def clone_without_data(self, length=0, clone=None):
+        """
+        Clone the current object, without copying the data (which
+        will be filled out by a subsequent operation).
+        The data arrays will be initialized to zero.
+        
+        :param length: length of the data array to be initialized
+        :param clone: if provided, the data will be copied to clone
+        """
+        from copy import deepcopy
+        
+        if clone is None or not issubclass(clone.__class__, Data1D):
+            x  = numpy.zeros(length)
+            dx = numpy.zeros(length)
+            y  = numpy.zeros(length)
+            dy = numpy.zeros(length)
+            clone = Data1D(x, y, dx=dx, dy=dy)
+        
+        clone.title          = self.title
+        clone.run            = self.run
+        clone.filename       = self.filename
+        clone.instrument     = self.instrument
+        clone.notes          = deepcopy(self.notes)
+        clone.process        = deepcopy(self.process)
+        clone.detector       = deepcopy(self.detector)
+        clone.sample         = deepcopy(self.sample)
+        clone.source         = deepcopy(self.source)
+        clone.collimation    = deepcopy(self.collimation)
+        clone.trans_spectrum = deepcopy(self.trans_spectrum)
+        clone.meta_data      = deepcopy(self.meta_data)
+        clone.errors         = deepcopy(self.errors)
+        
+        return clone
+    
+    
+    class Data2D(plottable_2D, DataInfo):
     """
     2D data class
     """
