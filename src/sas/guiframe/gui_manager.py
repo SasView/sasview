@@ -2161,9 +2161,8 @@ class ViewerFrame(PARENT_FRAME):
         # different place than they would otherwise.
         from documentation_window import DocumentationWindow
         
-        sphinx_doc_viewer = DocumentationWindow(self, -1, "index.html")
-#        sphinx_doc_viewer.Show()
-
+        sphinx_doc_viewer = DocumentationWindow(self, -1, "index.html", \
+                                                "General Help")
 
     def set_manager(self, manager):
         """
