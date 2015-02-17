@@ -1,11 +1,11 @@
 package:
-  name: bumps
-  version: !!str 0.7.5.4
+  name: pyopencl
+  version: !!str 2015.1
 
 source:
-  fn: bumps-0.7.5.4.tar.gz
-  url: https://pypi.python.org/packages/source/b/bumps/bumps-0.7.5.4.tar.gz
-  md5: a47c035fbb18afa5ca53067506a5ff1c
+  fn: pyopencl-2015.1.tar.gz
+  url: https://pypi.python.org/packages/source/p/pyopencl/pyopencl-2015.1.tar.gz
+  md5: c7b9dd0bb113ad852dae6fdadd417899
 #  patches:
    # List any patch files here
    # - fix.patch
@@ -16,9 +16,9 @@ source:
     # Put any entry points (scripts to be generated automatically) here. The
     # syntax is module:function.  For example
     #
-    # - bumps = bumps:main
+    # - pyopencl = pyopencl:main
     #
-    # Would create an entry point called bumps that calls bumps.main()
+    # Would create an entry point called pyopencl that calls pyopencl.main()
 
 
   # If this is a new build for the same version, increment the build
@@ -29,22 +29,26 @@ requirements:
   build:
     - python
     - setuptools
-    - six
+    - numpy
+    - pytools >=2014.2
+    - pytest >=2
+    - decorator >=3.2.0
+    - appdirs >=1.4.0
 
   run:
     - python
-    - six
+    - numpy
+    - pytools >=2014.2
+    - pytest >=2
+    - decorator >=3.2.0
+    - appdirs >=1.4.0
 
 test:
   # Python imports
   imports:
-    - bumps
-    - bumps.dream
-    - bumps.gui
-    - bumps.gui.resources
-    - bumps.mystic
-    - bumps.mystic.examples
-    - bumps.mystic.optimizer
+    - pyopencl
+    - pyopencl.characterize
+    - pyopencl.compyte
 
   #commands:
     # You can put test commands to be run here.  Use this to test that the
@@ -54,15 +58,14 @@ test:
   # You can also put a file called run_test.py in the recipe that will be run
   # at test time.
 
-  requires:
-   - numpy
-   - scipy
-   - matplotlib
+  # requires:
+    # Put any additional test requirements here.  For example
+    # - nose
 
 about:
-  home: http://www.reflectometry.org/danse/software.html
-  license: UNKNOWN
-  summary: 'Data fitting with bayesian uncertainty analysis'
+  home: http://mathema.tician.de/software/pyopencl
+  license:  MIT License
+  summary: 'Python wrapper for OpenCL'
 
 # See
 # http://docs.continuum.io/conda/build.html for

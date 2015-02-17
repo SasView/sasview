@@ -306,7 +306,7 @@ if py26MSdll_x86 != None:
 # packages
 #
 packages = [
-    'matplotlib', 'scipy', 'pytz', 'encodings', 'comtypes',
+    'matplotlib', 'scipy', 'encodings', 'comtypes',
     'win32com', 'ho.pisa', 'bumps',
     ]
 packages.extend([
@@ -325,7 +325,7 @@ packages.extend([
 includes = ['site']
 
 # Exclude packages that are not needed but are often found on build systems
-excludes = ['Tkinter', 'PyQt4', '_ssl', '_tkagg', 'sip']
+excludes = ['Tkinter', 'PyQt4', '_ssl', '_tkagg', 'sip', 'pytz']
 
 
 dll_excludes = [

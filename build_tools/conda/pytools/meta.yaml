@@ -1,11 +1,11 @@
 package:
-  name: bumps
-  version: !!str 0.7.5.4
+  name: pytools
+  version: !!str 2014.3.5
 
 source:
-  fn: bumps-0.7.5.4.tar.gz
-  url: https://pypi.python.org/packages/source/b/bumps/bumps-0.7.5.4.tar.gz
-  md5: a47c035fbb18afa5ca53067506a5ff1c
+  fn: pytools-2014.3.5.tar.gz
+  url: https://pypi.python.org/packages/source/p/pytools/pytools-2014.3.5.tar.gz
+  md5: 7f8e9d6a88090a601e96a9ee095d3512
 #  patches:
    # List any patch files here
    # - fix.patch
@@ -16,9 +16,9 @@ source:
     # Put any entry points (scripts to be generated automatically) here. The
     # syntax is module:function.  For example
     #
-    # - bumps = bumps:main
+    # - pytools = pytools:main
     #
-    # Would create an entry point called bumps that calls bumps.main()
+    # Would create an entry point called pytools that calls pytools.main()
 
 
   # If this is a new build for the same version, increment the build
@@ -29,22 +29,20 @@ requirements:
   build:
     - python
     - setuptools
+    - decorator >=3.2.0
+    - appdirs >=1.4.0
     - six
 
   run:
     - python
+    - decorator >=3.2.0
+    - appdirs >=1.4.0
     - six
 
 test:
   # Python imports
   imports:
-    - bumps
-    - bumps.dream
-    - bumps.gui
-    - bumps.gui.resources
-    - bumps.mystic
-    - bumps.mystic.examples
-    - bumps.mystic.optimizer
+    - pytools
 
   #commands:
     # You can put test commands to be run here.  Use this to test that the
@@ -54,15 +52,14 @@ test:
   # You can also put a file called run_test.py in the recipe that will be run
   # at test time.
 
-  requires:
-   - numpy
-   - scipy
-   - matplotlib
+  # requires:
+    # Put any additional test requirements here.  For example
+    # - nose
 
 about:
-  home: http://www.reflectometry.org/danse/software.html
-  license: UNKNOWN
-  summary: 'Data fitting with bayesian uncertainty analysis'
+  home: http://pypi.python.org/pypi/pytools
+  license:  MIT License
+  summary: 'A collection of tools for Python'
 
 # See
 # http://docs.continuum.io/conda/build.html for

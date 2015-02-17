@@ -170,6 +170,19 @@ class Plugin(PluginBase):
             return [os.path.join(os.path.abspath(path),
                                   file) for file in os.listdir(path)]
    
+    def _process_data_and_errors(self, item, p_file, output, message):
+        """
+        Check to see if data set loaded with any errors. If so, append to
+            error message to be sure user knows the issue.
+        """
+        data_error = False
+        for error_data in item.errors:
+            data_error = True
+            message += "\tError: {0}\n".format(error_data)
+        data = self.parent.create_gui_data(item, p_file)
+        output[data.id] = data
+        return output, message, data_error
+   
     def get_data(self, path, format=None):
         """
         """
@@ -177,11 +190,12 @@ class Plugin(PluginBase):
         log_msg = ''
         output = {}
         any_error = False
+        data_error = False
         error_message = ""
         for p_file in path:
             info = "info"
             basename  = os.path.basename(p_file)
-            root, extension = os.path.splitext(basename)
+            _, extension = os.path.splitext(basename)
             if extension.lower() in EXTENSIONS:
                 any_error = True
                 log_msg = "Data Loader cannot "
@@ -193,36 +207,46 @@ class Plugin(PluginBase):
                 continue
         
             try:
+                message = "Loading Data... " + str(p_file) + "\n"
+                self.load_update(output=output, message=message, info=info)
                 temp =  self.loader.load(p_file, format)
                 if temp.__class__.__name__ == "list":
                     for item in temp:
-                        data = self.parent.create_gui_data(item, p_file)
-                        output[data.id] = data
+                        output, error_message, data_error = \
+                            self._process_data_and_errors(item, 
+                                                          p_file, 
+                                                          output, 
+                                                          error_message)
                 else:
-                    data = self.parent.create_gui_data(temp, p_file)
-                    output[data.id] = data
-                message = "Loading Data..." + str(p_file) + "\n"
-                self.load_update(output=output, message=message, info=info)
+                    output, error_message, data_error = \
+                            self._process_data_and_errors(temp, 
+                                                          p_file, 
+                                                          output, 
+                                                          error_message)
             except:
                 any_error = True
-                if error_message == "":
-                     error = "Error: " + str(sys.exc_value) + "\n"
-                     error += "while loading Data: \n%s\n" % str(p_file)
-                     error_message = "The data file you selected could not be loaded.\n"
-                     error_message += "Make sure the content of your file"
-                     error_message += " is properly formatted.\n\n"
-                     error_message += "When contacting the DANSE team, mention the"
-                     error_message += " following:\n%s" % str(error)
-                else:
-                     error_message += "%s\n"% str(p_file)
-                info = "error"
-                self.load_update(output=output, message=error_message, 
+        if any_error or error_message != "":
+            if error_message == "":
+                error = "Error: " + str(sys.exc_value) + "\n"
+                error += "while loading Data: \n%s\n" % str(p_file)
+                error_message = "The data file you selected could not be loaded.\n"
+                error_message += "Make sure the content of your file"
+                error_message += " is properly formatted.\n\n"
+                error_message += "When contacting the DANSE team, mention the"
+                error_message += " following:\n%s" % str(error)
+            elif data_error:
+                base_message = "Errors occurred while loading {0}\n".format(p_file)
+                base_message += "The data file loaded but with errors.\n"
+                error_message = base_message + error_message
+            else:
+                error_message += "%s\n"% str(p_file)
+            info = "error"
+            self.load_update(output=output, message=error_message, 
                                   info=info)
                 
-        message = "Loading Data Complete! "
+        else:
+            message = "Loading Data Complete! "
         message += log_msg
-        if error_message != "":
-            info = 'error'
         self.load_complete(output=output, error_message=error_message,
                        message=message, path=path, info=info)
             

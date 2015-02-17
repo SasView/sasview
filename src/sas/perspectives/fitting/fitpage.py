@@ -1491,6 +1491,7 @@ class FitPage(BasicPage):
         hide the error text control shown
         after fitting
         """
+
         if self.is_mac:
             return
         if hasattr(self, "text2_3"):
@@ -1499,7 +1500,7 @@ class FitPage(BasicPage):
         if len(self.parameters) > 0:
             for item in self.parameters:
                 if item[0].IsShown():
-                    #Skip t ifhe angle parameters if 1D data
+                    #Skip the angle parameters if 1D data
                     if self.data.__class__.__name__ != "Data2D" and \
                             not self.enable2D:
                         if item in self.orientation_params:
@@ -1518,7 +1519,7 @@ class FitPage(BasicPage):
         if len(self.fittable_param) > 0:
             for item in self.fittable_param:
                 if item[0].IsShown():
-                    #Skip t ifhe angle parameters if 1D data
+                    #Skip the angle parameters if 1D data
                     if self.data.__class__.__name__ != "Data2D" and \
                             not self.enable2D:
                         if item in self.orientation_params:
@@ -2075,6 +2076,7 @@ class FitPage(BasicPage):
         :param cov: Covariance matrix
    
         """
+	
         # make sure stop button to fit button all the time
         self._on_fit_complete()
         if out == None or not numpy.isfinite(chisqr):
@@ -2111,8 +2113,10 @@ class FitPage(BasicPage):
       
         i = 0
         #Set the panel when fit result are list
+
         for item in self.param_toFit:
             if len(item) > 5 and item != None:
+
                 if item[0].IsShown():
                     ## reset error value to initial state
                     if not self.is_mac:
@@ -2143,6 +2147,15 @@ class FitPage(BasicPage):
                                 if not self.is_mac:
                                     item[3].Show(True)
                                     item[4].Show(True)
+ 				    item[4].SetForegroundColour(wx.BLACK)
+                                item[4].SetValue(val_err)
+                                has_error = True
+			    else:
+			        val_err = 'NaN'
+                                if not self.is_mac:
+                                    item[3].Show(True)
+                                    item[4].Show(True)
+				    item[4].SetForegroundColour(wx.RED)
                                 item[4].SetValue(val_err)
                                 has_error = True
                 i += 1
@@ -2830,7 +2843,8 @@ class FitPage(BasicPage):
         self.model = model
            
         keys = self.model.getParamList()
-        #list of dispersion paramaters
+	
+        #list of dispersion parameters
         self.disp_list = self.model.getDispParamList()
 
         def custom_compare(a, b):
@@ -2924,6 +2938,7 @@ class FitPage(BasicPage):
         
         CHECK_STATE = self.cb1.GetValue()
         for item in keys:
+	    
             if not item in self.disp_list and not item in \
                     self.model.orientation_params:
                 
@@ -2997,13 +3012,16 @@ class FitPage(BasicPage):
                               wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                     if not self.is_mac:
                         ctl2.Hide()
-                    
+
                     ix += 1
                     ctl3 = self.ModelTextCtrl(self, -1,
                                               size=(_BOX_WIDTH / 1.9, 20),
                                               style=wx.TE_PROCESS_ENTER,
                                 text_enter_callback=self._onparamRangeEnter)
-         
+                    min_bound = self.model.details[item][1]
+                    if min_bound is not None:
+                        ctl3.SetValue(format_number(min_bound, True))
+
                     sizer.Add(ctl3, (iy, ix), (1, 1),
                               wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             
@@ -3012,6 +3030,9 @@ class FitPage(BasicPage):
                                               size=(_BOX_WIDTH / 1.9, 20),
                                               style=wx.TE_PROCESS_ENTER,
                                 text_enter_callback=self._onparamRangeEnter)
+                    max_bound = self.model.details[item][2]
+                    if max_bound is not None:
+                        ctl4.SetValue(format_number(max_bound, True))
                     sizer.Add(ctl4, (iy, ix), (1, 1),
                               wx.EXPAND | wx.FIXED_MINSIZE, 0)
     

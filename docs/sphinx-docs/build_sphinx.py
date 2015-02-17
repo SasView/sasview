@@ -9,6 +9,7 @@ import os
 import sys
 import fnmatch
 import shutil
+import imp
 
 from distutils.dir_util import copy_tree
 from distutils.util import get_platform
@@ -16,6 +17,9 @@ from distutils.util import get_platform
 platform = '.%s-%s'%(get_platform(),sys.version[:3])
 
 CURRENT_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+run = imp.load_source('run', os.path.join(CURRENT_SCRIPT_DIR, '..', '..', 'run.py'))
+run.prepare()
 
 SASVIEW_SRC = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "src")
 SASVIEW_BUILD = os.path.abspath(os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "build", "lib"+platform))
@@ -107,4 +111,4 @@ if __name__ == "__main__":
     apidoc()
     build()
 	
-print "=== Done ==="
+    print "=== Done ==="

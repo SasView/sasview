@@ -8,9 +8,6 @@ from setuptools import setup, Extension
 from distutils.command.build_ext import build_ext
 from distutils.core import Command
 
-sys.path.append("docs/sphinx-docs")
-import build_sphinx
-
 try:
     from numpy.distutils.misc_util import get_numpy_include_dirs
     NUMPY_INC = get_numpy_include_dirs()[0]
@@ -157,7 +154,10 @@ class BuildSphinxCommand(Command):
     def finalize_options(self):
         self.cwd = os.getcwd()
 
-    def run(self):        
+    def run(self):
+        sys.path.append("docs/sphinx-docs")
+        import build_sphinx
+
         build_sphinx.clean()
         build_sphinx.retrieve_user_docs()
         build_sphinx.apidoc()
