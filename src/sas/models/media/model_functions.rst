@@ -86,8 +86,11 @@ Contents
 2. Model_ Functions
 
  2.1 Shape-based_ Functions
+ 
  2.2 Shape-independent_ Functions
+ 
  2.3 Structure-factor_ Functions
+ 
  2.4 Customised_ Functions
 
 3. References_
