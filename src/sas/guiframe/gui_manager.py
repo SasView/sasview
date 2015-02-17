@@ -23,7 +23,6 @@ import re
 warnings.simplefilter("ignore")
 import logging
 import httplib
-import webbrowser
 
 
 from sas.guiframe.events import EVT_CATEGORY
@@ -2152,35 +2151,19 @@ class ViewerFrame(PARENT_FRAME):
 
     def _onSphinxDocs(self, evt):
         """
-        Bring up Sphinx Documentation.  If Wx 2.9 or higher is installed 
-        with proper HTML support then Pop up a Sphinx Documentation dialog
-        locally.  If not pop up a new tab in the default system browser 
-        calling the documentation website.
+        Bring up Sphinx Documentation at top level whenever the menu item
+        'documentation' is clicked. Calls DocumentationWindow with the top
+        level path of "index.html"
         
         :param evt: menu event
         """
         # Running SasView "in-place" using run.py means the docs will be in a
         # different place than they would otherwise.
+        from documentation_window import DocumentationWindow
+        
+        sphinx_doc_viewer = DocumentationWindow(self, -1, "index.html")
+#        sphinx_doc_viewer.Show()
 
-        show_sphinx_docs = float(wx.__version__[:3]) >= 2.9
-        if show_sphinx_docs:
-            SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
-            if SPHINX_DOC_ENV in os.environ:
-                docs_path = os.path.join(os.environ[SPHINX_DOC_ENV], "index.html")
-            else:
-                docs_path = os.path.join(PATH_APP, "..", "..", "doc", "index.html")
-
-            if os.path.exists(docs_path):
-                from documentation_window import DocumentationWindow
-
-                sphinx_doc_viewer = DocumentationWindow(None, -1, docs_path)
-                sphinx_doc_viewer.Show()
-            else:
-                logging.error("Could not find Sphinx documentation at '%' -- has it been built?" % docs_path)
-        else:
-            #For red hat and maybe others who do not have Wx 3.0
-            #just send to webpage of documentation
-            webbrowser.open_new_tab('http://www.sasview.org/sasview')
 
     def set_manager(self, manager):
         """
