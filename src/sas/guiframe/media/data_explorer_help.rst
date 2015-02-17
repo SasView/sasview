@@ -32,14 +32,15 @@ Introduction
 ------------
 
 *Data Explorer* is a panel that allows the user more interactions with data. 
-Some functionalities provided by the Data Explorer are also available through 
-the context menu of plot panels or other menus of the applications.Under menu 
-*View*  of the menubar, Data explorer can be toggled between Show and Hide by 
-clicking the menu *Show/Hide Data Explorer* .
+Some functionalities provided by the *Data Explorer* are also available through 
+the context menu of plot panels or other menus within the application.
 
-*IMPORTANT!*  When Data explorer is hidden, all the data loaded will be sent 
-directly to the current active application, if possible. When data Explorer is 
-shown data go first to the Data Explorer for the user to handle them later.
+Under *View* in the menu bar, *Data Explorer* can be toggled between Show and 
+Hide by clicking *Show/Hide Data Explorer*.
+
+NOTE! When *Data Explorer* is hidden, all data loaded will be sent directly 
+to the current active application, if possible. When *Data Explorer* is 
+shown, data go first to the *Data Explorer*.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -48,11 +49,10 @@ shown data go first to the Data Explorer for the user to handle them later.
 Load Data
 ---------
 
-To Load data, click the button *Load Data* , then select one or more (holding 
-Ctrl key) files to load into the application. In the list, the *Data*  will be 
-displayed as the name of each selected file. Expending this data by clicking 
-the *+*  symbol will display available information about the data such as data 
-title if exists.
+To load data, click the button *Load Data*, then select one or more (by holding 
+the Ctrl key) files to load into the application. The name of each selected 
+file will be listed. Clicking the *+*  symbol will display any available 
+metadata.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -61,9 +61,9 @@ title if exists.
 Handy Menu
 ----------
 
-For a quick Data-info/Save/Plot/3d-plot(2d only)/Edit-mask(2d only), 
-high-light the data/theory, right-click, and select a proper item from the 
-context menu.
+Right-clicking on a loaded dataset (or model calculation, what SasView calls a 
+theory) brings up a *Handy Menu* from which it is possible to access Data Info, 
+Save the data/theory, or Plot the data/theory.
 
 .. image:: hand_menu.png
 
@@ -74,12 +74,13 @@ context menu.
 Activate Data
 -------------
 
-To interact with data, check a data label and click on a button. Checking Data 
-make them active for the button operation. Unchecking Data labels will 
-deactivate them.
+To interact with data it must be activated. This is accomplished by checking 
+the box next to the data label. A green tick will appear.
 
-There is a combo box labeled *Selection Options*  that allows to activate or 
-select multiple data simultaneously.
+Unchecking/unticking the box deactivates a data set.
+
+There is also a combo box labeled *Selection Options* from which you can 
+activate or deactivate multiple data sets.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -88,9 +89,11 @@ select multiple data simultaneously.
 Remove Data
 -----------
 
-Remove data button remove all reference of this data into the application.
+WARNING! *Remove Data* will stop any data operations currently using the 
+selected data sets.
 
-*WARNING!* Remove data will stop any jobs currently using the selected data.
+
+*Remove Data* removes all reference to selected data from the application.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -99,11 +102,14 @@ Remove data button remove all reference of this data into the application.
 Append Plot to Graph
 --------------------
 
-Click on the button *Append To*  to append selected Data to a plot panel on 
-focus. Next to this button is a combo box containing available panels names. 
-Selecting a name from this combo box will set the corresponding lot panel on 
-focus. If not plot panel is available, the combo box and button will be 
-disable. 2D Data cannot be appended to any plot panels . This operation can 
+Click on the button *Append To* to add selected data to a plot panel. Next to 
+the button is a combo box containing the names of available plot panels. 
+Selecting a name from this combo box will move that plot into focus.
+ 
+If a plot panel is not available, the combo box and button will be 
+disabled.
+
+2D Data cannot be appended to any plot panels. This operation can 
 only be performed on 1D data and plot panels currently containing 1D data.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
@@ -113,8 +119,8 @@ only be performed on 1D data and plot panels currently containing 1D data.
 Create New Plot
 ---------------
 
-Click on *New Plot*  button to create a new plot panel where selected data 
-will be plotted.
+Click on the *New Plot* button to create a new plot panel where the currently 
+selected data will be plotted.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -123,8 +129,9 @@ will be plotted.
 Freeze Theory
 -------------
 
-*Freeze Theory*  button generate Data from selected theory. This operation can 
-only be performed when theory labels are selected.
+The *Freeze Theory* button generates data from the selected theory.
+
+NOTE! This operation can only be performed when theory labels are selected.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -133,7 +140,12 @@ only be performed when theory labels are selected.
 Send to Application
 -------------------
 
-Click on the button *Send To*  to send Data to the current active control 
-page. One of the single/batch mode can be selected only for Fitting. The batch 
-mode provides serial (batch) fitting with one model, i.e., fitting one data by 
-another data. Note that only the Fitting allows more that one data to be sent.
+Click on the button *Send To* button to send the currently selected data to 
+a perspective (for *Fitting*, *P(r) Inversion*, or *Invariant* calculation).
+ 
+The *Single*/*Batch* mode radio buttons only apply to the *Fitting* perspective.
+
+*Batch mode* provides serial (batch) fitting with one model function, that is, 
+fitting one data set followed by another. If several data sets need to be 
+fitted at the same time, use *Simultaneous* fitting under the *Fitting* 
+option on the menu bar.
