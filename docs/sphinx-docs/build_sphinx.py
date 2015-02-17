@@ -28,6 +28,9 @@ SASVIEW_DOCS = os.path.join(SASVIEW_BUILD, "doc")
 SPHINX_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
 SPHINX_SOURCE = os.path.join(CURRENT_SCRIPT_DIR, "source")
 SPHINX_SOURCE_API = os.path.join(SPHINX_SOURCE, "dev", "api")
+SPHINX_SOURCE_GUIFRAME = os.path.join(SPHINX_SOURCE, "user", "guiframe")
+SPHINX_SOURCE_MODELS = os.path.join(SPHINX_SOURCE, "user", "models")
+SPHINX_SOURCE_PERSPECTIVES = os.path.join(SPHINX_SOURCE, "user", "perspectives")
 
 def _remove_dir(dir_path):
     """Removes the given directory."""
@@ -42,6 +45,9 @@ def clean():
     print "=== Cleaning Sphinx Build ==="
     _remove_dir(SASVIEW_DOCS)
     _remove_dir(SPHINX_BUILD)
+    _remove_dir(SPHINX_SOURCE_GUIFRAME)
+    _remove_dir(SPHINX_SOURCE_MODELS)
+    _remove_dir(SPHINX_SOURCE_PERSPECTIVES)
 
 def retrieve_user_docs():
     """
