@@ -29,17 +29,22 @@ Numbers can be separated by spaces or commas.
 SasView recognises the following file extensions:
 
     .TXT
+    
     .ASC
+    
     .DAT
+    
     .XML (in canSAS format v1.0 and 1.1)
 
 If using CSV output from, for example, a spreadsheet, ensure that it is not 
 using commas as delimiters for thousands.
 
 For a description of the NIST 1D format see:
+
 http://danse.chem.utk.edu/trac/wiki/NCNROutput1D_IQ
 
 For a description of the ISIS 1D format see:
+
 http://www.isis.stfc.ac.uk/instruments/loq/software/colette-ascii-file-format-descriptions9808.pdf
 
 NB: SasView does not at present load data where the Q and I(Q) data are in 
@@ -59,6 +64,7 @@ Most of the header lines can be removed except the last line, and only the
 first three columns (Qx, Qy, and I(Qx,Qy)) are actually required.
 
 For a description of the NIST 2D format see:
+
 http://danse.chem.utk.edu/trac/wiki/NCNROutput1D_2DQxQy 
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
