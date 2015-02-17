@@ -2128,12 +2128,13 @@ class ViewerFrame(PARENT_FRAME):
                 except:
                     logging.error("Error in _onTutorial: %s" % sys.exc_value)
                     try:
-                        #in case when the pdf default set other than acrobat
-                        import ho.pisa as pisa
+                        # Try an alternate method
+                        logging.error("Could not open the tutorial pdf, trying xhtml2pdf")
+                        from xhtml2pdf import pisa
                         pisa.startViewer(path)
                     except:
+                        logging.error("Could not open the tutorial pdf with xhtml2pdf")
                         msg = "This feature requires 'PDF Viewer'\n"
-                        msg += "Please install it first (Free)..."
                         wx.MessageBox(msg, 'Error')
             else:
                 try:
@@ -2141,12 +2142,13 @@ class ViewerFrame(PARENT_FRAME):
                     os.system(command)
                 except:
                     try:
-                        #in case when the pdf default set other than preview
-                        import ho.pisa as pisa
+                        # Try an alternate method
+                        logging.error("Could not open the tutorial pdf, trying xhtml2pdf")
+                        from xhtml2pdf import pisa
                         pisa.startViewer(path)
                     except:
-                        msg = "This feature requires 'Preview' Application\n"
-                        msg += "Please install it first..."
+                        logging.error("Could not open the tutorial pdf with xhtml2pdf")
+                        msg = "This feature requires the 'Preview' application\n"
                         wx.MessageBox(msg, 'Error')
 
     def _onSphinxDocs(self, evt):
