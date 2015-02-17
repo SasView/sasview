@@ -9,6 +9,18 @@
 .. |sigma| unicode:: U+03C3
 .. |phi| unicode:: U+03C6
 .. |theta| unicode:: U+03B8
+.. |chi| unicode:: U+03C7
+
+.. |inlineimage004| image:: sm_image004.gif
+.. |inlineimage005| image:: sm_image005.gif
+.. |inlineimage008| image:: sm_image008.gif
+.. |inlineimage009| image:: sm_image009.gif
+.. |inlineimage010| image:: sm_image010.gif
+.. |inlineimage011| image:: sm_image011.gif
+.. |inlineimage012| image:: sm_image012.gif
+.. |inlineimage018| image:: sm_image018.gif
+.. |inlineimage019| image:: sm_image019.gif
+
 
 Fitting Perspective
 ===================
@@ -60,7 +72,7 @@ Single Fit
 
 One of two fit-engines can be chosen from the Fitting menu bar. The Simple Fit-
 engine uses Scipy's leasqr and the Complex Fit-Engine is a custom optimizer 
-that provides a better chance to find the global minimum of the chi2 but that 
+that provides a better chance to find the global minimum of the |chi| 2 but that
 requires longer computation time. In order to set a data to a control panel 
 (FitPage), see the "DataLoader Help". Once a data set to the FiPage, select a 
 model from the combo box. The default parameters of the model will be display. 
@@ -531,7 +543,7 @@ Example of an array in the file
 41        0.9
 
 We use only these array values in the computation, therefore the mean value 
-given in the control panel, for example ‘radius = 60’, will be ignored.
+given in the control panel, for example â€˜radius = 60â€™, will be ignored.
 
 .. _Gaussian_Distribution:
 
@@ -559,7 +571,7 @@ Lognormal Distribution
 The /mu/=ln(xmed), xmed is the median value of the distribution, and Norm is a 
 normalization factor which will be determined during the numerical calculation. 
 The median value is the value given in the size parameter in the control panel, 
-for example, “radius = 60”.
+for example, â€œradius = 60â€�.
 
 The PD (polydispersity) is given by /sigma/
 
@@ -587,7 +599,7 @@ Schulz Distribution
 The xmean is the mean of the distribution and Norm is a normalization factor
 which is determined during the numerical calculation.
 
-The z = 1/p2– 1.
+The z = 1/p2â€“ 1.
 
 The PD (polydispersity) is
 
@@ -627,7 +639,7 @@ where Norm =
 
 Equation 1
 
-The functions .. image:: sm_image004.gif and .. image:: sm_image005.gif
+The functions |inlineimage004| and |inlineimage005|
 refer to the slit width weighting function and the slit height weighting 
 determined at the q point, respectively. Here, we assumes that the weighting 
 function is described by a rectangular function, i.e.,
@@ -642,10 +654,9 @@ and
 
 Equation 3
 
-so that .. image:: sm_image008.gif .. image:: sm_image009.gif for
-.. image:: sm_image010.gif and u.
+so that |inlineimage008| |inlineimage009| for |inlineimage010| and u.
 
-The .. image:: sm_image011.gif and .. image:: sm_image012.gif stand for
+The |inlineimage011| and |inlineimage012| stand for
 the slit height (FWHM/2) and the slit width (FWHM/2) in the q space. Now the 
 integral of Equation 1 is simplified to
 
@@ -659,39 +670,35 @@ Numerical Implementation of Equation 4
 Case 1
 ------
 
-For .. image:: sm_image012.gif = 0 and .. image:: sm_image011.gif = 
-constant.
+For |inlineimage012| = 0 and |inlineimage011| = constant.
 
 .. image:: sm_image016.gif
 
 For discrete q values, at the q values from the data points and at the q 
-values extended up to qN= qi + .. image:: sm_image011.gif the smeared 
+values extended up to qN= qi + |inlineimage011| the smeared 
 intensity can be calculated approximately
 
 .. image:: sm_image017.gif
 
 Equation 5
 
-.. image:: sm_image018.gif = 0 for *Is* in *j* < *i* or *j* > N-1*.
+|inlineimage018| = 0 for *Is* in *j* < *i* or *j* > N-1*.
 
 Case 2
 ------
 
-For .. image:: sm_image012.gif = constant and 
-.. image:: sm_image011.gif = 0.
+For |inlineimage012| = constant and |inlineimage011| = 0.
 
 Similarly to Case 1, we get
 
-.. image:: sm_image019.gif for qp= qi- .. image:: sm_image012.gif
-
-and qN= qi+ .. image:: sm_image012.gif. .. image:: sm_image018.gif = 0
+|inlineimage019| for qp= qi- |inlineimage012| and qN= qi+ |inlineimage012|. |inlineimage018| = 0
 for *Is* in *j* < *p* or *j* > *N-1*.
 
 Case 3
 ------
 
-For .. image:: sm_image011.gif = constant and 
-.. image:: sm_image011.gif = constant.
+For |inlineimage011| = constant and 
+|inlineimage011| = constant.
 
 In this case, the best way is to perform the integration, Equation 1, 
 numerically for both slit height and width. However, the numerical integration 
@@ -706,8 +713,8 @@ numerical integration for the slit width.
 
 Equation 7
 
-for qp= qi- .. image:: sm_image012.gif and
-qN= qi+ .. image:: sm_image012.gif. .. image:: sm_image018.gif = 0 for
+for qp= qi- |inlineimage012| and
+qN= qi+ |inlineimage012|. |inlineimage018| = 0 for
 *Is* in *j* < *p* or *j* > *N-1*.
 
 .. _Pinhole_Smearing:
@@ -744,7 +751,7 @@ Equation 9
 
 In Equation 9, x0 = qcos/theta/ and y0 = qsin/theta/, and the primed axes 
 are in the coordinate rotated by an angle /theta/ around the z-axis (below) 
-so that x’0= x0cos/theta/+y0sin/theta/ and y’0= -x0sin/theta/+y0cos/theta/.
+so that xâ€™0= x0cos/theta/+y0sin/theta/ and yâ€™0= -x0sin/theta/+y0cos/theta/.
 
 Note that the rotation angle is zero for x-y symmetric elliptical Gaussian 
 distribution. The A is a normalization factor.
@@ -753,7 +760,7 @@ distribution. The A is a normalization factor.
 
 Now we consider a numerical integration where each bins in /theta/ and R are 
 *evenly* (this is to simplify the equation below) distributed by /delta//theta/ 
-and /delta/R, respectively, and it is assumed that I(x’, y’) is constant 
+and /delta/R, respectively, and it is assumed that I(xâ€™, yâ€™) is constant 
 within the bins which in turn becomes
 
 .. image:: sm_image024.gif
@@ -761,7 +768,7 @@ within the bins which in turn becomes
 Equation 10
 
 Since we have found the weighting factor on each bin points, it is convenient 
-to transform x’-y’ back to x-y coordinate (rotating it by -/theta/ around z 
+to transform xâ€™-yâ€™ back to x-y coordinate (rotating it by -/theta/ around z 
 axis). Then, for the polar symmetric smear
 
 .. image:: sm_image025.gif
@@ -939,7 +946,7 @@ Then, set up the value in the dialog panel.
 
 If this operation is successful, the new ftol value will be displayed in the 
 info line at the bottom of the SV window.Note that increasing the ftol value 
-may cause for the fitting to terminate with higher chisq.
+may cause for the fitting to terminate with higher |chi| sq.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 

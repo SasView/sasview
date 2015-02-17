@@ -10,7 +10,7 @@ Graph_Menu_
 
 2D_Data_Averaging_
 
-Key_Combinations_
+Key_Sequences_
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -19,7 +19,7 @@ Key_Combinations_
 Graph Menu
 ----------
 
-Introduction_
+Invoking_the_Graph_Menu_
 
 Reset_Graph_
 
@@ -35,7 +35,7 @@ Drag_Plot_
 
 Zoom_In_Out_
 
-Remove_Data_
+Remove_Data_from_Plot_
 
 Change_Scale_
 
@@ -43,7 +43,7 @@ Linear_Fit_
 
 Other_Graph_Modifications_
 
-.. _Introduction:
+.. _Invoking_the_Graph_Menu:
 
 Introduction
 ------------
@@ -117,10 +117,10 @@ region of the plot.
 To disable zoom mode, unselect the same button on the toolbar. After zoom in
 a region, select *left arrow*  or *right arrow*  button on the toolbar to set
 the graph the the previous size. If a mouse wheel button is available,
-*zoom in/out*  by scrolling the mouse wheel (see Key_Combinations_ help for
+*zoom in/out*  by scrolling the mouse wheel (see Key_Sequences_ help for
 details).
 
-.. _Remove_Data:
+.. _Remove_Data_from_Plot:
 
 Remove Data from Plot
 ---------------------
@@ -181,7 +181,7 @@ provided.
 2D Data Averaging
 -----------------
 
-Description_
+Principle_
 
 How_to_Average_
 
@@ -203,10 +203,10 @@ Box_Averaging_in_Qy_
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Description: 
+.. Principle: 
 
-Description
------------
+Principle
+---------
 
 This feature allows you to perform different types of averages on your data, 
 and allows you to see what regions of the detector will contribute to the 
@@ -313,14 +313,14 @@ on the y-axis.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
-.. _Key_Combinations:
+.. _Key_Sequences:
 
-Key Combination
----------------
+Key Sequences
+-------------
 
 Floating_Panel_
 
-Graph_Context_Menu_
+Context_Menu_
 
 Zoom_
 
@@ -337,7 +337,7 @@ Press the *Ctrl(Cmd on MAC) key*  on dragging and placing a panel. Or if you
 want to make all plot panels float, select 'Float' from Graph/Preperences in 
 the menu bar. Otherwise choose 'Dock'.
 
-.. _Graph_Context_Menu:
+.. _Context_Menu:
 
 Graph Context Menu
 ------------------
