@@ -3012,13 +3012,16 @@ class FitPage(BasicPage):
                               wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                     if not self.is_mac:
                         ctl2.Hide()
-                    
+
                     ix += 1
                     ctl3 = self.ModelTextCtrl(self, -1,
                                               size=(_BOX_WIDTH / 1.9, 20),
                                               style=wx.TE_PROCESS_ENTER,
                                 text_enter_callback=self._onparamRangeEnter)
-         
+                    min_bound = self.model.details[item][1]
+                    if min_bound is not None:
+                        ctl3.SetValue(format_number(min_bound, True))
+
                     sizer.Add(ctl3, (iy, ix), (1, 1),
                               wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             
@@ -3027,6 +3030,9 @@ class FitPage(BasicPage):
                                               size=(_BOX_WIDTH / 1.9, 20),
                                               style=wx.TE_PROCESS_ENTER,
                                 text_enter_callback=self._onparamRangeEnter)
+                    max_bound = self.model.details[item][2]
+                    if max_bound is not None:
+                        ctl4.SetValue(format_number(max_bound, True))
                     sizer.Add(ctl4, (iy, ix), (1, 1),
                               wx.EXPAND | wx.FIXED_MINSIZE, 0)
     
