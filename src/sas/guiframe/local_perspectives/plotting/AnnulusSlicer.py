@@ -34,7 +34,7 @@ class AnnulusInteractor(_BaseInteractor):
         self.connect = self.base.connect
     
         ## Number of points on the plot
-        self.nbins = 20
+        self.nbins = 36
         #Cursor position of Rings (Left(-1) or Right(1))
         self.xmaxd = self.base.data2D.xmax
         self.xmind = self.base.data2D.xmin
@@ -130,9 +130,9 @@ class AnnulusInteractor(_BaseInteractor):
         rmax = max(math.fabs(self.inner_circle.get_radius()),
                    math.fabs(self.outer_circle.get_radius()))
         #if the user does not specify the numbers of points to plot 
-        # the default number will be nbins= 20
+        # the default number will be nbins= 36
         if nbins == None:
-            self.nbins = 20
+            self.nbins = 36
         else:
             self.nbins = nbins
         ## create the data1D Q average of data2D    
