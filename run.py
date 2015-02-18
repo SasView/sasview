@@ -104,6 +104,9 @@ def prepare():
     addpath(joinpath(root, 'src'))
     addpath(joinpath(root, 'park-1.2.1'))
 
+    # sasmodels on the path
+    addpath(joinpath(root, '../sasmodels/'))
+
     # Import the sasview package from root/sasview as sas.sasview.  It would
     # be better to just store the package in src/sas/sasview.
     import sas

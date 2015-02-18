@@ -607,8 +607,10 @@ class FitPage(BasicPage):
         ## fill a sizer with the combobox to select dispersion type
         model_disp = wx.StaticText(self, -1, 'Function')
         CHECK_STATE = self.cb1.GetValue()
-        import sas.models.dispersion_models
-        self.polydisp = sas.models.dispersion_models.models
+        #import sas.models.dispersion_models
+        #self.polydisp = sas.models.dispersion_models.models
+        import sasmodels.weights
+        self.polydisp = sasmodels.weights.models
 
         ix = 0
         iy = 0

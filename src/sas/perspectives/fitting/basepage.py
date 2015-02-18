@@ -1195,7 +1195,8 @@ class BasicPage(ScrolledPanel, PanelBase):
                         self.disp_cb_dict[item].SetValue(\
                                                     state.disp_cb_dict[item])
                         # Create the dispersion objects
-                        from sas.models.dispersion_models import ArrayDispersion
+                        #from sas.models.dispersion_models import ArrayDispersion
+                        from sasmodels.weights import ArrayDispersion
                         disp_model = ArrayDispersion()
                         if hasattr(state, "values") and \
                                  self.disp_cb_dict[item].GetValue() == True:
@@ -1462,7 +1463,8 @@ class BasicPage(ScrolledPanel, PanelBase):
             # it will be sent as a string here, then converted to model object.
             if disp.__class__.__name__ == 'str':
                 disp_model = None
-                com_str = "from sas.models.dispersion_models "
+                #com_str = "from sas.models.dispersion_models "
+                com_str = "from sasmodels.weights "
                 com_str += "import %s as disp_func \ndisp_model = disp_func()"
                 exec com_str % disp
             else:
@@ -2654,7 +2656,8 @@ class BasicPage(ScrolledPanel, PanelBase):
         self.values = {}
         self.weights = {}
       
-        from sas.models.dispersion_models import GaussianDispersion
+        #from sas.models.dispersion_models import GaussianDispersion
+        from sasmodels.weights import GaussianDispersion
         if len(self.disp_cb_dict) == 0:
             self.save_current_state()
             self.sizer4_4.Clear(True)

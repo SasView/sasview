@@ -19,6 +19,8 @@ from sas.guiframe.events import StatusEvent
 from sas.models.pluginmodel import Model1DPlugin
 from sas.models.BaseComponent import BaseComponent
 from sas.guiframe.CategoryInstaller import CategoryInstaller
+
+from sasmodels.sasview_model import make_class
    
 PLUGIN_DIR = 'plugin_models'
 
@@ -309,9 +311,11 @@ class ModelManagerBase:
         ##   -PDB  April 26, 2014
 
         # regular model names only
+        self.model_name_list = []
         try:
-            self.model_name_list = []
-            from sas.models.SphereModel import SphereModel
+            # from sas.models.SphereModel import SphereModel
+            from sasmodels.models import sphere
+            SphereModel = make_class(sphere, dtype='single')
             self.model_dictionary[SphereModel.__name__] = SphereModel
             #        self.shape_list.append(SphereModel)
             self.multiplication_factor.append(SphereModel)
