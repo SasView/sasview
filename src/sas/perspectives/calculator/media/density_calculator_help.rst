@@ -9,7 +9,7 @@ Density/Volume Calculator Tool
 Description
 -----------
 
-This tool is to calculate the mass density from the molar volume or vice 
+This tool calculates the mass density from the molar volume or vice 
 versa. To calculate the mass density, the chemical formula and molar volume 
 should be provided.
 
@@ -18,16 +18,16 @@ should be provided.
 How To
 ------
 
-1. Molecular Formula: The chemical formula of ONE molecule or ONE atom. For 
-mixtures, the ratio of the each molecules should be used; for example, 
-(H2O)0.5(D2O)0.5.
+1) Enter the empirical formula of a molecule. For mixtures, the ratio of each 
+   of the molecules should be used, for example, (H2O)0.5(D2O)0.5.
 
-2. Select input (molar volume or mass density) from combobox. Then type in the 
-input value.
+2) Use the input combo box to choose between molar volume or mass density and 
+   then type in an input value.
 
-3. Click the 'Calculate' button to perform the calculation.
-
-4. Outputs also include the molar mass (weight) that depends only on the 
-chemical formula
+3) Click the 'Calculate' button to perform the calculation.
 
 .. image:: density_tutor.gif
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note::  This help document was last changed by Steve King, 18Feb2015

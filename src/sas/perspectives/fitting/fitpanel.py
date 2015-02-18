@@ -370,13 +370,15 @@ class FitPanel(nb, PanelBase):
         else:
         """
         from fitpage import FitPage
-        panel = FitPage(parent=self)
+        from batchfitpage import BatchFitPage
         if self.batch_on:
+            panel = BatchFitPage(parent=self)
             self.batch_page_index += 1
             caption = "BatchPage" + str(self.batch_page_index)
             panel.set_index_model(self.batch_page_index)
         else:
             #Increment index of fit page
+            panel = FitPage(parent=self)
             self.fit_page_index += 1
             caption = "FitPage" + str(self.fit_page_index)
             panel.set_index_model(self.fit_page_index)
@@ -466,7 +468,7 @@ class FitPanel(nb, PanelBase):
                     break
         if data_1d_list and data_2d_list:
             # need to warning the user that this batch is a special case
-            from sas import BatchDataDialog
+            from sas.perspectives.fitting.fitting_widgets import BatchDataDialog
             dlg = BatchDataDialog(self)
             if dlg.ShowModal() == wx.ID_OK:
                 data_type = dlg.get_data()

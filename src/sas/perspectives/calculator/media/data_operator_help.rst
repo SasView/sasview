@@ -8,32 +8,48 @@ Data Operations Tool
 
 Description
 -----------
-This dialog panel provides arithmetic operations between two data sets (the 
-last data set could be a number).
 
-When data1 and data2 are selected, their x (or qx and qy for 2D) value(s)
-must match with each other.
+This tool permits arithmetic operations between two data sets. Alternatively, 
+the last data set can be a number.
+
+*NOTE! When* Data1 *and* Data2 *are both data, their Q (or Qx and Qy for 2D) 
+value(s) must match with each other UNLESS using the 'append' operator.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 How To
 ------
-1. Type the data name resulted from an operation.
 
-2) Select a data/theory in the drop down menus. When data2 is set to number, 
-   type a number in the text control box.
+1) Enure you have loaded data into the *Data Explorer* (see :ref:`Load_Data`).
 
-3) Select an arithmetic operator symbol; + (for addition), - (for subtraction), 
-   * (for multiplication), / (for division), and | (for combination of two data
-   sets).
+2) Select *Data Operation* from the *Tool* menu on the SasView toolbar.
 
-   If two data sets do not match, the operation will fail and the background color
-   of the combo box items will turn to red (WIN only).
+3) Select a dataset/theory in the drop-down menu *Data1*. A mini-plot of the
+   data will appear underneath.
 
-4) If the operation is successful, hit the Apply button to make the new data.
-   Then the data name will be shown up in the data box in the data explorer.
+4) Select a dataset/theory in the drop-down menu *Data2* or select *Number* 
+   and enter a number in the box that appears alongside.
 
-Note: Any errors and warnings will be displayed at the bottom of the SasView
-window.
+5) Select an arithmetic operator symbol from the *Operator* drop-down. The 
+   available operators are:
+   
+*  + (for addition)
+*  - (for subtraction), 
+*  * (for multiplication)
+*  / (for division)
+*  | (for combination of two data sets)
+
+   If two data sets do not match, the operation will fail and the background 
+   color of the combo box items will turn to red (WIN only).
+
+6) If the operation is successful, hit the Apply button to make the new dataset.
+   The new dataset will appear in the *Data Explorer*.
+
+*NOTE! Any errors and warnings will be displayed at the bottom of the SasView
+window.*
 
 .. image:: data_oper_pic.png
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note::  This help document was last changed by Steve King, 18Feb2015 
