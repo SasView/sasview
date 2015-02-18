@@ -285,8 +285,9 @@ a File* (if 1D data) or *Save as a file(DAT)* (if 2D data). A save dialog will
 appear.
 
 1D data can be saved in either ASCII text (.TXT) or CanSAS/SASXML (.XML) 
-formats (see 1D_Formats_). 2D data can only be saved in the NIST 2D format 
-(.DAT) (see 2D_Formats_).
+formats (see :ref:`1D_Formats`).
+
+2D data can only be saved in the NIST 2D format (.DAT) (see :ref:`2D_Formats`).
 
 .. _Linear_Fit:
 
