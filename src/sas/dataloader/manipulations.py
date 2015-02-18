@@ -622,9 +622,9 @@ class Ring(object):
         phi_counts = numpy.zeros(self.nbins_phi)
         phi_values = numpy.zeros(self.nbins_phi)
         phi_err    = numpy.zeros(self.nbins_phi)
-	
-	# Shift to apply to calculated phi values in order to center first bin at zero
-	phi_shift = Pi / self.nbins_phi
+    
+        # Shift to apply to calculated phi values in order to center first bin at zero
+        phi_shift = Pi / self.nbins_phi
 
         for npt in range(len(data)):
             frac = 0
