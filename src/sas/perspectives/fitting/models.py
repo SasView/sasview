@@ -312,703 +312,715 @@ class ModelManagerBase:
 
         # regular model names only
         self.model_name_list = []
-        try:
-            # from sas.models.SphereModel import SphereModel
-            from sasmodels.models import sphere
-            SphereModel = make_class(sphere, dtype='single')
-            self.model_dictionary[SphereModel.__name__] = SphereModel
-            #        self.shape_list.append(SphereModel)
-            self.multiplication_factor.append(SphereModel)
-            self.model_name_list.append(SphereModel.__name__)
-        except:
-            pass
 
-        try:
-            from sas.models.BinaryHSModel import BinaryHSModel
-            self.model_dictionary[BinaryHSModel.__name__] = BinaryHSModel
-            #        self.shape_list.append(BinaryHSModel)
-            self.model_name_list.append(BinaryHSModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.FuzzySphereModel import FuzzySphereModel
-            self.model_dictionary[FuzzySphereModel.__name__] = FuzzySphereModel
-            #        self.shape_list.append(FuzzySphereModel)
-            self.multiplication_factor.append(FuzzySphereModel)
-            self.model_name_list.append(FuzzySphereModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.RaspBerryModel import RaspBerryModel
-            self.model_dictionary[RaspBerryModel.__name__] = RaspBerryModel
-            #        self.shape_list.append(RaspBerryModel)
-            self.model_name_list.append(RaspBerryModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.CoreShellModel import CoreShellModel
-
-            self.model_dictionary[CoreShellModel.__name__] = CoreShellModel
-            #        self.shape_list.append(CoreShellModel)
-            self.multiplication_factor.append(CoreShellModel)
-            self.model_name_list.append(CoreShellModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.Core2ndMomentModel import Core2ndMomentModel
-            self.model_dictionary[Core2ndMomentModel.__name__] = Core2ndMomentModel
-            #        self.shape_list.append(Core2ndMomentModel)
-            self.model_name_list.append(Core2ndMomentModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.CoreMultiShellModel import CoreMultiShellModel
-            self.model_dictionary[CoreMultiShellModel.__name__] = CoreMultiShellModel
-            #        self.shape_list.append(CoreMultiShellModel)
-            self.multiplication_factor.append(CoreMultiShellModel)
-            self.multi_func_list.append(CoreMultiShellModel)
-        except:
-            pass
-
-        try:
-            from sas.models.VesicleModel import VesicleModel
-            self.model_dictionary[VesicleModel.__name__] = VesicleModel
-            #        self.shape_list.append(VesicleModel)
-            self.multiplication_factor.append(VesicleModel)
-            self.model_name_list.append(VesicleModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.MultiShellModel import MultiShellModel
-            self.model_dictionary[MultiShellModel.__name__] = MultiShellModel
-            #        self.shape_list.append(MultiShellModel)
-            self.multiplication_factor.append(MultiShellModel)
-            self.model_name_list.append(MultiShellModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.OnionExpShellModel import OnionExpShellModel
-            self.model_dictionary[OnionExpShellModel.__name__] = OnionExpShellModel
-            #        self.shape_list.append(OnionExpShellModel)
-            self.multiplication_factor.append(OnionExpShellModel)
-            self.multi_func_list.append(OnionExpShellModel)
-        except:
-            pass
-
-        try:
-            from sas.models.SphericalSLDModel import SphericalSLDModel
-
-            self.model_dictionary[SphericalSLDModel.__name__] = SphericalSLDModel
-            #        self.shape_list.append(SphericalSLDModel)
-            self.multiplication_factor.append(SphericalSLDModel)
-            self.multi_func_list.append(SphericalSLDModel)
-        except:
-            pass
-
-        try:
-            from sas.models.LinearPearlsModel import LinearPearlsModel
-
-            self.model_dictionary[LinearPearlsModel.__name__] = LinearPearlsModel
-            #        self.shape_list.append(LinearPearlsModel)
-            self.model_name_list.append(LinearPearlsModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.PearlNecklaceModel import PearlNecklaceModel
-
-            self.model_dictionary[PearlNecklaceModel.__name__] = PearlNecklaceModel
-            #        self.shape_list.append(PearlNecklaceModel)
-            self.model_name_list.append(PearlNecklaceModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.CylinderModel import CylinderModel
-
-            self.model_dictionary[CylinderModel.__name__] = CylinderModel
-            #        self.shape_list.append(CylinderModel)
-            self.multiplication_factor.append(CylinderModel)
-            self.model_name_list.append(CylinderModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.CoreShellCylinderModel import CoreShellCylinderModel
-
-            self.model_dictionary[CoreShellCylinderModel.__name__] = CoreShellCylinderModel
-            #        self.shape_list.append(CoreShellCylinderModel)
-            self.multiplication_factor.append(CoreShellCylinderModel)
-            self.model_name_list.append(CoreShellCylinderModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.CoreShellBicelleModel import CoreShellBicelleModel
-
-            self.model_dictionary[CoreShellBicelleModel.__name__] = CoreShellBicelleModel
-            #        self.shape_list.append(CoreShellBicelleModel)
-            self.multiplication_factor.append(CoreShellBicelleModel)
-            self.model_name_list.append(CoreShellBicelleModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.HollowCylinderModel import HollowCylinderModel
-
-            self.model_dictionary[HollowCylinderModel.__name__] = HollowCylinderModel
-            #        self.shape_list.append(HollowCylinderModel)
-            self.multiplication_factor.append(HollowCylinderModel)
-            self.model_name_list.append(HollowCylinderModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.FlexibleCylinderModel import FlexibleCylinderModel
-
-            self.model_dictionary[FlexibleCylinderModel.__name__] = FlexibleCylinderModel
-            #        self.shape_list.append(FlexibleCylinderModel)
-            self.model_name_list.append(FlexibleCylinderModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.FlexCylEllipXModel import FlexCylEllipXModel
-
-            self.model_dictionary[FlexCylEllipXModel.__name__] = FlexCylEllipXModel
-            #        self.shape_list.append(FlexCylEllipXModel)
-            self.model_name_list.append(FlexCylEllipXModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.StackedDisksModel import StackedDisksModel
-
-            self.model_dictionary[StackedDisksModel.__name__] = StackedDisksModel
-            #        self.shape_list.append(StackedDisksModel)
-            self.multiplication_factor.append(StackedDisksModel)
-            self.model_name_list.append(StackedDisksModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.ParallelepipedModel import ParallelepipedModel
-
-            self.model_dictionary[ParallelepipedModel.__name__] = ParallelepipedModel
-            #        self.shape_list.append(ParallelepipedModel)
-            self.multiplication_factor.append(ParallelepipedModel)
-            self.model_name_list.append(ParallelepipedModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.CSParallelepipedModel import CSParallelepipedModel
-
-            self.model_dictionary[CSParallelepipedModel.__name__] = CSParallelepipedModel
-            #        self.shape_list.append(CSParallelepipedModel)
-            self.multiplication_factor.append(CSParallelepipedModel)
-            self.model_name_list.append(CSParallelepipedModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.EllipticalCylinderModel import EllipticalCylinderModel
-
-            self.model_dictionary[EllipticalCylinderModel.__name__] = EllipticalCylinderModel
-            #        self.shape_list.append(EllipticalCylinderModel)
-            self.multiplication_factor.append(EllipticalCylinderModel)
-            self.model_name_list.append(EllipticalCylinderModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.CappedCylinderModel import CappedCylinderModel
-
-            self.model_dictionary[CappedCylinderModel.__name__] = CappedCylinderModel
-            #       self.shape_list.append(CappedCylinderModel)
-            self.model_name_list.append(CappedCylinderModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.EllipsoidModel import EllipsoidModel
-
-            self.model_dictionary[EllipsoidModel.__name__] = EllipsoidModel
-            #        self.shape_list.append(EllipsoidModel)
-            self.multiplication_factor.append(EllipsoidModel)
-            self.model_name_list.append(EllipsoidModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.CoreShellEllipsoidModel import CoreShellEllipsoidModel
-
-            self.model_dictionary[CoreShellEllipsoidModel.__name__] = CoreShellEllipsoidModel
-            #        self.shape_list.append(CoreShellEllipsoidModel)
-            self.multiplication_factor.append(CoreShellEllipsoidModel)
-            self.model_name_list.append(CoreShellEllipsoidModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.CoreShellEllipsoidXTModel import CoreShellEllipsoidXTModel
-
-            self.model_dictionary[CoreShellEllipsoidXTModel.__name__] = CoreShellEllipsoidXTModel
-            #        self.shape_list.append(CoreShellEllipsoidXTModel)
-            self.multiplication_factor.append(CoreShellEllipsoidXTModel)
-            self.model_name_list.append(CoreShellEllipsoidXTModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.TriaxialEllipsoidModel import TriaxialEllipsoidModel
-
-            self.model_dictionary[TriaxialEllipsoidModel.__name__] = TriaxialEllipsoidModel
-            #        self.shape_list.append(TriaxialEllipsoidModel)
-            self.multiplication_factor.append(TriaxialEllipsoidModel)
-            self.model_name_list.append(TriaxialEllipsoidModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.LamellarModel import LamellarModel
-
-            self.model_dictionary[LamellarModel.__name__] = LamellarModel
-            #        self.shape_list.append(LamellarModel)
-            self.model_name_list.append(LamellarModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.LamellarFFHGModel import LamellarFFHGModel
-
-            self.model_dictionary[LamellarFFHGModel.__name__] = LamellarFFHGModel
-            #        self.shape_list.append(LamellarFFHGModel)
-            self.model_name_list.append(LamellarFFHGModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.LamellarPSModel import LamellarPSModel
-
-            self.model_dictionary[LamellarPSModel.__name__] = LamellarPSModel
-            #        self.shape_list.append(LamellarPSModel)
-            self.model_name_list.append(LamellarPSModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.LamellarPSHGModel import LamellarPSHGModel
-
-            self.model_dictionary[LamellarPSHGModel.__name__] = LamellarPSHGModel
-            #        self.shape_list.append(LamellarPSHGModel)
-            self.model_name_list.append(LamellarPSHGModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.LamellarPCrystalModel import LamellarPCrystalModel
-
-            self.model_dictionary[LamellarPCrystalModel.__name__] = LamellarPCrystalModel
-            #        self.shape_list.append(LamellarPCrystalModel)
-            self.model_name_list.append(LamellarPCrystalModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.SCCrystalModel import SCCrystalModel
-
-            self.model_dictionary[SCCrystalModel.__name__] = SCCrystalModel
-            #        self.shape_list.append(SCCrystalModel)
-            self.model_name_list.append(SCCrystalModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.FCCrystalModel import FCCrystalModel
-
-            self.model_dictionary[FCCrystalModel.__name__] = FCCrystalModel
-            #        self.shape_list.append(FCCrystalModel)
-            self.model_name_list.append(FCCrystalModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.BCCrystalModel import BCCrystalModel
-
-            self.model_dictionary[BCCrystalModel.__name__] = BCCrystalModel
-            #        self.shape_list.append(BCCrystalModel)
-            self.model_name_list.append(BCCrystalModel.__name__)
-        except:
-            pass
-
-
-        ## Structure factor
-        try:
-            from sas.models.SquareWellStructure import SquareWellStructure
-
-            self.model_dictionary[SquareWellStructure.__name__] = SquareWellStructure
-            self.struct_list.append(SquareWellStructure)
-            self.model_name_list.append(SquareWellStructure.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.HardsphereStructure import HardsphereStructure
-
-            self.model_dictionary[HardsphereStructure.__name__] = HardsphereStructure
-            self.struct_list.append(HardsphereStructure)
-            self.model_name_list.append(HardsphereStructure.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.StickyHSStructure import StickyHSStructure
-
-            self.model_dictionary[StickyHSStructure.__name__] = StickyHSStructure
-            self.struct_list.append(StickyHSStructure)
-            self.model_name_list.append(StickyHSStructure.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.HayterMSAStructure import HayterMSAStructure
-
-            self.model_dictionary[HayterMSAStructure.__name__] = HayterMSAStructure
-            self.struct_list.append(HayterMSAStructure)
-            self.model_name_list.append(HayterMSAStructure.__name__)
-        except:
-            pass
-
-
-
-        ##shape-independent models
-        try:
-            from sas.models.PowerLawAbsModel import PowerLawAbsModel
-
-            self.model_dictionary[PowerLawAbsModel.__name__] = PowerLawAbsModel
-            #        self.shape_indep_list.append(PowerLawAbsModel)
-            self.model_name_list.append(PowerLawAbsModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.BEPolyelectrolyte import BEPolyelectrolyte
-
-            self.model_dictionary[BEPolyelectrolyte.__name__] = BEPolyelectrolyte
-            #        self.shape_indep_list.append(BEPolyelectrolyte)
-            self.model_name_list.append(BEPolyelectrolyte.__name__)
-            self.form_factor_dict[str(wx.NewId())] =  [SphereModel]
-        except:
-            pass
-
-        try:
-            from sas.models.BroadPeakModel import BroadPeakModel
-
-            self.model_dictionary[BroadPeakModel.__name__] = BroadPeakModel
-            #        self.shape_indep_list.append(BroadPeakModel)
-            self.model_name_list.append(BroadPeakModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.CorrLengthModel import CorrLengthModel
-
-            self.model_dictionary[CorrLengthModel.__name__] = CorrLengthModel
-            #        self.shape_indep_list.append(CorrLengthModel)
-            self.model_name_list.append(CorrLengthModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.DABModel import DABModel
-
-            self.model_dictionary[DABModel.__name__] = DABModel
-            #        self.shape_indep_list.append(DABModel)
-            self.model_name_list.append(DABModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.DebyeModel import DebyeModel
-
-            self.model_dictionary[DebyeModel.__name__] = DebyeModel
-            #        self.shape_indep_list.append(DebyeModel)
-            self.model_name_list.append(DebyeModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.FractalModel import FractalModel
-
-            self.model_dictionary[FractalModel.__name__] = FractalModel
-            #        self.shape_indep_list.append(FractalModel)
-            self.model_name_list.append(FractalModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.FractalCoreShellModel import FractalCoreShellModel
-
-            self.model_dictionary[FractalCoreShellModel.__name__] = FractalCoreShellModel
-            #        self.shape_indep_list.append(FractalCoreShellModel)
-            self.model_name_list.append(FractalCoreShellModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.GaussLorentzGelModel import GaussLorentzGelModel
-
-            self.model_dictionary[GaussLorentzGelModel.__name__] = GaussLorentzGelModel
-            #        self.shape_indep_list.append(GaussLorentzGelModel)
-            self.model_name_list.append(GaussLorentzGelModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.GuinierModel import GuinierModel
-
-            self.model_dictionary[GuinierModel.__name__] = GuinierModel
-            #        self.shape_indep_list.append(GuinierModel)
-            self.model_name_list.append(GuinierModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.GuinierPorodModel import GuinierPorodModel
-
-            self.model_dictionary[GuinierPorodModel.__name__] = GuinierPorodModel
-            #        self.shape_indep_list.append(GuinierPorodModel)
-            self.model_name_list.append(GuinierPorodModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.LorentzModel import LorentzModel
-
-            self.model_dictionary[LorentzModel.__name__] = LorentzModel
-            #        self.shape_indep_list.append(LorentzModel)
-            self.model_name_list.append(LorentzModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.MassFractalModel import MassFractalModel
-
-            self.model_dictionary[MassFractalModel.__name__] = MassFractalModel
-            #        self.shape_indep_list.append(MassFractalModel)
-            self.model_name_list.append(MassFractalModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.MassSurfaceFractal import MassSurfaceFractal
-
-            self.model_dictionary[MassSurfaceFractal.__name__] = MassSurfaceFractal
-            #        self.shape_indep_list.append(MassSurfaceFractal)
-            self.model_name_list.append(MassSurfaceFractal.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.PeakGaussModel import PeakGaussModel
-
-            self.model_dictionary[PeakGaussModel.__name__] = PeakGaussModel
-            #        self.shape_indep_list.append(PeakGaussModel)
-            self.model_name_list.append(PeakGaussModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.PeakLorentzModel import PeakLorentzModel
-
-            self.model_dictionary[PeakLorentzModel.__name__] = PeakLorentzModel
-            #        self.shape_indep_list.append(PeakLorentzModel)
-            self.model_name_list.append(PeakLorentzModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.Poly_GaussCoil import Poly_GaussCoil
-
-            self.model_dictionary[Poly_GaussCoil.__name__] = Poly_GaussCoil
-            #        self.shape_indep_list.append(Poly_GaussCoil)
-            self.model_name_list.append(Poly_GaussCoil.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.PolymerExclVolume import PolymerExclVolume
-
-            self.model_dictionary[PolymerExclVolume.__name__] = PolymerExclVolume
-            #        self.shape_indep_list.append(PolymerExclVolume)
-            self.model_name_list.append(PolymerExclVolume.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.PorodModel import PorodModel
-
-            self.model_dictionary[PorodModel.__name__] = PorodModel
-            #        self.shape_indep_list.append(PorodModel)
-            self.model_name_list.append(PorodModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.RPA10Model import RPA10Model
-
-            self.model_dictionary[RPA10Model.__name__] = RPA10Model
-            #        self.shape_indep_list.append(RPA10Model)
-            self.multi_func_list.append(RPA10Model)
-        except:
-            pass
-
-        try:
-            from sas.models.StarPolymer import StarPolymer
-
-            self.model_dictionary[StarPolymer.__name__] = StarPolymer
-            #        self.shape_indep_list.append(StarPolymer)
-            self.model_name_list.append(StarPolymer.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.SurfaceFractalModel import SurfaceFractalModel
-
-            self.model_dictionary[SurfaceFractalModel.__name__] = SurfaceFractalModel
-            #        self.shape_indep_list.append(SurfaceFractalModel)
-            self.model_name_list.append(SurfaceFractalModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.TeubnerStreyModel import TeubnerStreyModel
-
-            self.model_dictionary[TeubnerStreyModel.__name__] = TeubnerStreyModel
-            #        self.shape_indep_list.append(TeubnerStreyModel)
-            self.model_name_list.append(TeubnerStreyModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.TwoLorentzianModel import TwoLorentzianModel
-
-            self.model_dictionary[TwoLorentzianModel.__name__] = TwoLorentzianModel
-            #        self.shape_indep_list.append(TwoLorentzianModel)
-            self.model_name_list.append(TwoLorentzianModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.TwoPowerLawModel import TwoPowerLawModel
-
-            self.model_dictionary[TwoPowerLawModel.__name__] = TwoPowerLawModel
-            #        self.shape_indep_list.append(TwoPowerLawModel)
-            self.model_name_list.append(TwoPowerLawModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.UnifiedPowerRgModel import UnifiedPowerRgModel
-
-            self.model_dictionary[UnifiedPowerRgModel.__name__] = UnifiedPowerRgModel
-            #        self.shape_indep_list.append(UnifiedPowerRgModel)
-            self.multi_func_list.append(UnifiedPowerRgModel)
-        except:
-            pass
-
-        try:
-            from sas.models.LineModel import LineModel
-
-            self.model_dictionary[LineModel.__name__] = LineModel
-            #        self.shape_indep_list.append(LineModel)
-            self.model_name_list.append(LineModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.ReflectivityModel import ReflectivityModel
-
-            self.model_dictionary[ReflectivityModel.__name__] = ReflectivityModel
-            #        self.shape_indep_list.append(ReflectivityModel)
-            self.multi_func_list.append(ReflectivityModel)
-        except:
-            pass
-
-        try:
-            from sas.models.ReflectivityIIModel import ReflectivityIIModel
-
-            self.model_dictionary[ReflectivityIIModel.__name__] = ReflectivityIIModel
-            #        self.shape_indep_list.append(ReflectivityIIModel)
-            self.multi_func_list.append(ReflectivityIIModel)
-        except:
-            pass
-
-        try:
-            from sas.models.GelFitModel import GelFitModel
-
-            self.model_dictionary[GelFitModel.__name__] = GelFitModel
-            #        self.shape_indep_list.append(GelFitModel)
-            self.model_name_list.append(GelFitModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.PringlesModel import PringlesModel
-
-            self.model_dictionary[PringlesModel.__name__] = PringlesModel
-            #        self.shape_indep_list.append(PringlesModel)
-            self.model_name_list.append(PringlesModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.RectangularPrismModel import RectangularPrismModel
-
-            self.model_dictionary[RectangularPrismModel.__name__] = RectangularPrismModel
-            #        self.shape_list.append(RectangularPrismModel)
-            self.multiplication_factor.append(RectangularPrismModel)
-            self.model_name_list.append(RectangularPrismModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.RectangularHollowPrismInfThinWallsModel import RectangularHollowPrismInfThinWallsModel
-
-            self.model_dictionary[RectangularHollowPrismInfThinWallsModel.__name__] = RectangularHollowPrismInfThinWallsModel
-            #        self.shape_list.append(RectangularHollowPrismInfThinWallsModel)
-            self.multiplication_factor.append(RectangularHollowPrismInfThinWallsModel)
-            self.model_name_list.append(RectangularHollowPrismInfThinWallsModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.RectangularHollowPrismModel import RectangularHollowPrismModel
-
-            self.model_dictionary[RectangularHollowPrismModel.__name__] = RectangularHollowPrismModel
-            #        self.shape_list.append(RectangularHollowPrismModel)
-            self.multiplication_factor.append(RectangularHollowPrismModel)
-            self.model_name_list.append(RectangularHollowPrismModel.__name__)
-        except:
-            pass
-
-        try:
-            from sas.models.MicelleSphCoreModel import MicelleSphCoreModel
-
-            self.model_dictionary[MicelleSphCoreModel.__name__] = MicelleSphCoreModel
-            #        self.shape_list.append(MicelleSphCoreModel)
-            self.multiplication_factor.append(MicelleSphCoreModel)
-            self.model_name_list.append(MicelleSphCoreModel.__name__)
-        except:
-            pass
+        #Build list automagically
+        import pkgutil
+        from importlib import import_module
+        import sasmodels.models
+        for importer,modname,ispkg in pkgutil.iter_modules(sasmodels.models.__path__):
+            if not ispkg:
+                #do sasview stuff
+                module = import_module('.'+modname,'sasmodels.models')
+                self.model_dictionary[module.oldname] = make_class(module, dtype='single',namestyle='oldname')
+                self.model_name_list.append(module.oldname)
+
+        # try:
+        #     # from sas.models.SphereModel import SphereModel
+        #     from sasmodels.models import sphere
+        #     SphereModel = make_class(sphere, dtype='single',namestyle='oldname')
+        #     self.model_dictionary[SphereModel.__name__] = SphereModel
+        #     #        self.shape_list.append(SphereModel)
+        #     self.multiplication_factor.append(SphereModel)
+        #     self.model_name_list.append(SphereModel.__name__)
+        # except:
+        #     pass
+
+        # try:
+        #     from sas.models.BinaryHSModel import BinaryHSModel
+        #     self.model_dictionary[BinaryHSModel.__name__] = BinaryHSModel
+        #     #        self.shape_list.append(BinaryHSModel)
+        #     self.model_name_list.append(BinaryHSModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.FuzzySphereModel import FuzzySphereModel
+        #     self.model_dictionary[FuzzySphereModel.__name__] = FuzzySphereModel
+        #     #        self.shape_list.append(FuzzySphereModel)
+        #     self.multiplication_factor.append(FuzzySphereModel)
+        #     self.model_name_list.append(FuzzySphereModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.RaspBerryModel import RaspBerryModel
+        #     self.model_dictionary[RaspBerryModel.__name__] = RaspBerryModel
+        #     #        self.shape_list.append(RaspBerryModel)
+        #     self.model_name_list.append(RaspBerryModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.CoreShellModel import CoreShellModel
+        #
+        #     self.model_dictionary[CoreShellModel.__name__] = CoreShellModel
+        #     #        self.shape_list.append(CoreShellModel)
+        #     self.multiplication_factor.append(CoreShellModel)
+        #     self.model_name_list.append(CoreShellModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.Core2ndMomentModel import Core2ndMomentModel
+        #     self.model_dictionary[Core2ndMomentModel.__name__] = Core2ndMomentModel
+        #     #        self.shape_list.append(Core2ndMomentModel)
+        #     self.model_name_list.append(Core2ndMomentModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.CoreMultiShellModel import CoreMultiShellModel
+        #     self.model_dictionary[CoreMultiShellModel.__name__] = CoreMultiShellModel
+        #     #        self.shape_list.append(CoreMultiShellModel)
+        #     self.multiplication_factor.append(CoreMultiShellModel)
+        #     self.multi_func_list.append(CoreMultiShellModel)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.VesicleModel import VesicleModel
+        #     self.model_dictionary[VesicleModel.__name__] = VesicleModel
+        #     #        self.shape_list.append(VesicleModel)
+        #     self.multiplication_factor.append(VesicleModel)
+        #     self.model_name_list.append(VesicleModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.MultiShellModel import MultiShellModel
+        #     self.model_dictionary[MultiShellModel.__name__] = MultiShellModel
+        #     #        self.shape_list.append(MultiShellModel)
+        #     self.multiplication_factor.append(MultiShellModel)
+        #     self.model_name_list.append(MultiShellModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.OnionExpShellModel import OnionExpShellModel
+        #     self.model_dictionary[OnionExpShellModel.__name__] = OnionExpShellModel
+        #     #        self.shape_list.append(OnionExpShellModel)
+        #     self.multiplication_factor.append(OnionExpShellModel)
+        #     self.multi_func_list.append(OnionExpShellModel)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.SphericalSLDModel import SphericalSLDModel
+        #
+        #     self.model_dictionary[SphericalSLDModel.__name__] = SphericalSLDModel
+        #     #        self.shape_list.append(SphericalSLDModel)
+        #     self.multiplication_factor.append(SphericalSLDModel)
+        #     self.multi_func_list.append(SphericalSLDModel)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.LinearPearlsModel import LinearPearlsModel
+        #
+        #     self.model_dictionary[LinearPearlsModel.__name__] = LinearPearlsModel
+        #     #        self.shape_list.append(LinearPearlsModel)
+        #     self.model_name_list.append(LinearPearlsModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.PearlNecklaceModel import PearlNecklaceModel
+        #
+        #     self.model_dictionary[PearlNecklaceModel.__name__] = PearlNecklaceModel
+        #     #        self.shape_list.append(PearlNecklaceModel)
+        #     self.model_name_list.append(PearlNecklaceModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.CylinderModel import CylinderModel
+        #
+        #     self.model_dictionary[CylinderModel.__name__] = CylinderModel
+        #     #        self.shape_list.append(CylinderModel)
+        #     self.multiplication_factor.append(CylinderModel)
+        #     self.model_name_list.append(CylinderModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.CoreShellCylinderModel import CoreShellCylinderModel
+        #
+        #     self.model_dictionary[CoreShellCylinderModel.__name__] = CoreShellCylinderModel
+        #     #        self.shape_list.append(CoreShellCylinderModel)
+        #     self.multiplication_factor.append(CoreShellCylinderModel)
+        #     self.model_name_list.append(CoreShellCylinderModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.CoreShellBicelleModel import CoreShellBicelleModel
+        #
+        #     self.model_dictionary[CoreShellBicelleModel.__name__] = CoreShellBicelleModel
+        #     #        self.shape_list.append(CoreShellBicelleModel)
+        #     self.multiplication_factor.append(CoreShellBicelleModel)
+        #     self.model_name_list.append(CoreShellBicelleModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.HollowCylinderModel import HollowCylinderModel
+        #
+        #     self.model_dictionary[HollowCylinderModel.__name__] = HollowCylinderModel
+        #     #        self.shape_list.append(HollowCylinderModel)
+        #     self.multiplication_factor.append(HollowCylinderModel)
+        #     self.model_name_list.append(HollowCylinderModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.FlexibleCylinderModel import FlexibleCylinderModel
+        #
+        #     self.model_dictionary[FlexibleCylinderModel.__name__] = FlexibleCylinderModel
+        #     #        self.shape_list.append(FlexibleCylinderModel)
+        #     self.model_name_list.append(FlexibleCylinderModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.FlexCylEllipXModel import FlexCylEllipXModel
+        #
+        #     self.model_dictionary[FlexCylEllipXModel.__name__] = FlexCylEllipXModel
+        #     #        self.shape_list.append(FlexCylEllipXModel)
+        #     self.model_name_list.append(FlexCylEllipXModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.StackedDisksModel import StackedDisksModel
+        #
+        #     self.model_dictionary[StackedDisksModel.__name__] = StackedDisksModel
+        #     #        self.shape_list.append(StackedDisksModel)
+        #     self.multiplication_factor.append(StackedDisksModel)
+        #     self.model_name_list.append(StackedDisksModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.ParallelepipedModel import ParallelepipedModel
+        #
+        #     self.model_dictionary[ParallelepipedModel.__name__] = ParallelepipedModel
+        #     #        self.shape_list.append(ParallelepipedModel)
+        #     self.multiplication_factor.append(ParallelepipedModel)
+        #     self.model_name_list.append(ParallelepipedModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.CSParallelepipedModel import CSParallelepipedModel
+        #
+        #     self.model_dictionary[CSParallelepipedModel.__name__] = CSParallelepipedModel
+        #     #        self.shape_list.append(CSParallelepipedModel)
+        #     self.multiplication_factor.append(CSParallelepipedModel)
+        #     self.model_name_list.append(CSParallelepipedModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.EllipticalCylinderModel import EllipticalCylinderModel
+        #
+        #     self.model_dictionary[EllipticalCylinderModel.__name__] = EllipticalCylinderModel
+        #     #        self.shape_list.append(EllipticalCylinderModel)
+        #     self.multiplication_factor.append(EllipticalCylinderModel)
+        #     self.model_name_list.append(EllipticalCylinderModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.CappedCylinderModel import CappedCylinderModel
+        #
+        #     self.model_dictionary[CappedCylinderModel.__name__] = CappedCylinderModel
+        #     #       self.shape_list.append(CappedCylinderModel)
+        #     self.model_name_list.append(CappedCylinderModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.EllipsoidModel import EllipsoidModel
+        #
+        #     self.model_dictionary[EllipsoidModel.__name__] = EllipsoidModel
+        #     #        self.shape_list.append(EllipsoidModel)
+        #     self.multiplication_factor.append(EllipsoidModel)
+        #     self.model_name_list.append(EllipsoidModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.CoreShellEllipsoidModel import CoreShellEllipsoidModel
+        #
+        #     self.model_dictionary[CoreShellEllipsoidModel.__name__] = CoreShellEllipsoidModel
+        #     #        self.shape_list.append(CoreShellEllipsoidModel)
+        #     self.multiplication_factor.append(CoreShellEllipsoidModel)
+        #     self.model_name_list.append(CoreShellEllipsoidModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.CoreShellEllipsoidXTModel import CoreShellEllipsoidXTModel
+        #
+        #     self.model_dictionary[CoreShellEllipsoidXTModel.__name__] = CoreShellEllipsoidXTModel
+        #     #        self.shape_list.append(CoreShellEllipsoidXTModel)
+        #     self.multiplication_factor.append(CoreShellEllipsoidXTModel)
+        #     self.model_name_list.append(CoreShellEllipsoidXTModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.TriaxialEllipsoidModel import TriaxialEllipsoidModel
+        #
+        #     self.model_dictionary[TriaxialEllipsoidModel.__name__] = TriaxialEllipsoidModel
+        #     #        self.shape_list.append(TriaxialEllipsoidModel)
+        #     self.multiplication_factor.append(TriaxialEllipsoidModel)
+        #     self.model_name_list.append(TriaxialEllipsoidModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.LamellarModel import LamellarModel
+        #
+        #     self.model_dictionary[LamellarModel.__name__] = LamellarModel
+        #     #        self.shape_list.append(LamellarModel)
+        #     self.model_name_list.append(LamellarModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.LamellarFFHGModel import LamellarFFHGModel
+        #
+        #     self.model_dictionary[LamellarFFHGModel.__name__] = LamellarFFHGModel
+        #     #        self.shape_list.append(LamellarFFHGModel)
+        #     self.model_name_list.append(LamellarFFHGModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.LamellarPSModel import LamellarPSModel
+        #
+        #     self.model_dictionary[LamellarPSModel.__name__] = LamellarPSModel
+        #     #        self.shape_list.append(LamellarPSModel)
+        #     self.model_name_list.append(LamellarPSModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.LamellarPSHGModel import LamellarPSHGModel
+        #
+        #     self.model_dictionary[LamellarPSHGModel.__name__] = LamellarPSHGModel
+        #     #        self.shape_list.append(LamellarPSHGModel)
+        #     self.model_name_list.append(LamellarPSHGModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.LamellarPCrystalModel import LamellarPCrystalModel
+        #
+        #     self.model_dictionary[LamellarPCrystalModel.__name__] = LamellarPCrystalModel
+        #     #        self.shape_list.append(LamellarPCrystalModel)
+        #     self.model_name_list.append(LamellarPCrystalModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.SCCrystalModel import SCCrystalModel
+        #
+        #     self.model_dictionary[SCCrystalModel.__name__] = SCCrystalModel
+        #     #        self.shape_list.append(SCCrystalModel)
+        #     self.model_name_list.append(SCCrystalModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.FCCrystalModel import FCCrystalModel
+        #
+        #     self.model_dictionary[FCCrystalModel.__name__] = FCCrystalModel
+        #     #        self.shape_list.append(FCCrystalModel)
+        #     self.model_name_list.append(FCCrystalModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.BCCrystalModel import BCCrystalModel
+        #
+        #     self.model_dictionary[BCCrystalModel.__name__] = BCCrystalModel
+        #     #        self.shape_list.append(BCCrystalModel)
+        #     self.model_name_list.append(BCCrystalModel.__name__)
+        # except:
+        #     pass
+        #
+        #
+        # ## Structure factor
+        # try:
+        #     from sas.models.SquareWellStructure import SquareWellStructure
+        #
+        #     self.model_dictionary[SquareWellStructure.__name__] = SquareWellStructure
+        #     self.struct_list.append(SquareWellStructure)
+        #     self.model_name_list.append(SquareWellStructure.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.HardsphereStructure import HardsphereStructure
+        #
+        #     self.model_dictionary[HardsphereStructure.__name__] = HardsphereStructure
+        #     self.struct_list.append(HardsphereStructure)
+        #     self.model_name_list.append(HardsphereStructure.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.StickyHSStructure import StickyHSStructure
+        #
+        #     self.model_dictionary[StickyHSStructure.__name__] = StickyHSStructure
+        #     self.struct_list.append(StickyHSStructure)
+        #     self.model_name_list.append(StickyHSStructure.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.HayterMSAStructure import HayterMSAStructure
+        #
+        #     self.model_dictionary[HayterMSAStructure.__name__] = HayterMSAStructure
+        #     self.struct_list.append(HayterMSAStructure)
+        #     self.model_name_list.append(HayterMSAStructure.__name__)
+        # except:
+        #     pass
+        #
+        #
+        #
+        # ##shape-independent models
+        # try:
+        #     from sas.models.PowerLawAbsModel import PowerLawAbsModel
+        #
+        #     self.model_dictionary[PowerLawAbsModel.__name__] = PowerLawAbsModel
+        #     #        self.shape_indep_list.append(PowerLawAbsModel)
+        #     self.model_name_list.append(PowerLawAbsModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.BEPolyelectrolyte import BEPolyelectrolyte
+        #
+        #     self.model_dictionary[BEPolyelectrolyte.__name__] = BEPolyelectrolyte
+        #     #        self.shape_indep_list.append(BEPolyelectrolyte)
+        #     self.model_name_list.append(BEPolyelectrolyte.__name__)
+        #     self.form_factor_dict[str(wx.NewId())] =  [SphereModel]
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.BroadPeakModel import BroadPeakModel
+        #
+        #     self.model_dictionary[BroadPeakModel.__name__] = BroadPeakModel
+        #     #        self.shape_indep_list.append(BroadPeakModel)
+        #     self.model_name_list.append(BroadPeakModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.CorrLengthModel import CorrLengthModel
+        #
+        #     self.model_dictionary[CorrLengthModel.__name__] = CorrLengthModel
+        #     #        self.shape_indep_list.append(CorrLengthModel)
+        #     self.model_name_list.append(CorrLengthModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.DABModel import DABModel
+        #
+        #     self.model_dictionary[DABModel.__name__] = DABModel
+        #     #        self.shape_indep_list.append(DABModel)
+        #     self.model_name_list.append(DABModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.DebyeModel import DebyeModel
+        #
+        #     self.model_dictionary[DebyeModel.__name__] = DebyeModel
+        #     #        self.shape_indep_list.append(DebyeModel)
+        #     self.model_name_list.append(DebyeModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.FractalModel import FractalModel
+        #
+        #     self.model_dictionary[FractalModel.__name__] = FractalModel
+        #     #        self.shape_indep_list.append(FractalModel)
+        #     self.model_name_list.append(FractalModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.FractalCoreShellModel import FractalCoreShellModel
+        #
+        #     self.model_dictionary[FractalCoreShellModel.__name__] = FractalCoreShellModel
+        #     #        self.shape_indep_list.append(FractalCoreShellModel)
+        #     self.model_name_list.append(FractalCoreShellModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.GaussLorentzGelModel import GaussLorentzGelModel
+        #
+        #     self.model_dictionary[GaussLorentzGelModel.__name__] = GaussLorentzGelModel
+        #     #        self.shape_indep_list.append(GaussLorentzGelModel)
+        #     self.model_name_list.append(GaussLorentzGelModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.GuinierModel import GuinierModel
+        #
+        #     self.model_dictionary[GuinierModel.__name__] = GuinierModel
+        #     #        self.shape_indep_list.append(GuinierModel)
+        #     self.model_name_list.append(GuinierModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.GuinierPorodModel import GuinierPorodModel
+        #
+        #     self.model_dictionary[GuinierPorodModel.__name__] = GuinierPorodModel
+        #     #        self.shape_indep_list.append(GuinierPorodModel)
+        #     self.model_name_list.append(GuinierPorodModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.LorentzModel import LorentzModel
+        #
+        #     self.model_dictionary[LorentzModel.__name__] = LorentzModel
+        #     #        self.shape_indep_list.append(LorentzModel)
+        #     self.model_name_list.append(LorentzModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.MassFractalModel import MassFractalModel
+        #
+        #     self.model_dictionary[MassFractalModel.__name__] = MassFractalModel
+        #     #        self.shape_indep_list.append(MassFractalModel)
+        #     self.model_name_list.append(MassFractalModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.MassSurfaceFractal import MassSurfaceFractal
+        #
+        #     self.model_dictionary[MassSurfaceFractal.__name__] = MassSurfaceFractal
+        #     #        self.shape_indep_list.append(MassSurfaceFractal)
+        #     self.model_name_list.append(MassSurfaceFractal.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.PeakGaussModel import PeakGaussModel
+        #
+        #     self.model_dictionary[PeakGaussModel.__name__] = PeakGaussModel
+        #     #        self.shape_indep_list.append(PeakGaussModel)
+        #     self.model_name_list.append(PeakGaussModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.PeakLorentzModel import PeakLorentzModel
+        #
+        #     self.model_dictionary[PeakLorentzModel.__name__] = PeakLorentzModel
+        #     #        self.shape_indep_list.append(PeakLorentzModel)
+        #     self.model_name_list.append(PeakLorentzModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.Poly_GaussCoil import Poly_GaussCoil
+        #
+        #     self.model_dictionary[Poly_GaussCoil.__name__] = Poly_GaussCoil
+        #     #        self.shape_indep_list.append(Poly_GaussCoil)
+        #     self.model_name_list.append(Poly_GaussCoil.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.PolymerExclVolume import PolymerExclVolume
+        #
+        #     self.model_dictionary[PolymerExclVolume.__name__] = PolymerExclVolume
+        #     #        self.shape_indep_list.append(PolymerExclVolume)
+        #     self.model_name_list.append(PolymerExclVolume.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.PorodModel import PorodModel
+        #
+        #     self.model_dictionary[PorodModel.__name__] = PorodModel
+        #     #        self.shape_indep_list.append(PorodModel)
+        #     self.model_name_list.append(PorodModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.RPA10Model import RPA10Model
+        #
+        #     self.model_dictionary[RPA10Model.__name__] = RPA10Model
+        #     #        self.shape_indep_list.append(RPA10Model)
+        #     self.multi_func_list.append(RPA10Model)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.StarPolymer import StarPolymer
+        #
+        #     self.model_dictionary[StarPolymer.__name__] = StarPolymer
+        #     #        self.shape_indep_list.append(StarPolymer)
+        #     self.model_name_list.append(StarPolymer.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.SurfaceFractalModel import SurfaceFractalModel
+        #
+        #     self.model_dictionary[SurfaceFractalModel.__name__] = SurfaceFractalModel
+        #     #        self.shape_indep_list.append(SurfaceFractalModel)
+        #     self.model_name_list.append(SurfaceFractalModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.TeubnerStreyModel import TeubnerStreyModel
+        #
+        #     self.model_dictionary[TeubnerStreyModel.__name__] = TeubnerStreyModel
+        #     #        self.shape_indep_list.append(TeubnerStreyModel)
+        #     self.model_name_list.append(TeubnerStreyModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.TwoLorentzianModel import TwoLorentzianModel
+        #
+        #     self.model_dictionary[TwoLorentzianModel.__name__] = TwoLorentzianModel
+        #     #        self.shape_indep_list.append(TwoLorentzianModel)
+        #     self.model_name_list.append(TwoLorentzianModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.TwoPowerLawModel import TwoPowerLawModel
+        #
+        #     self.model_dictionary[TwoPowerLawModel.__name__] = TwoPowerLawModel
+        #     #        self.shape_indep_list.append(TwoPowerLawModel)
+        #     self.model_name_list.append(TwoPowerLawModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.UnifiedPowerRgModel import UnifiedPowerRgModel
+        #
+        #     self.model_dictionary[UnifiedPowerRgModel.__name__] = UnifiedPowerRgModel
+        #     #        self.shape_indep_list.append(UnifiedPowerRgModel)
+        #     self.multi_func_list.append(UnifiedPowerRgModel)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.LineModel import LineModel
+        #
+        #     self.model_dictionary[LineModel.__name__] = LineModel
+        #     #        self.shape_indep_list.append(LineModel)
+        #     self.model_name_list.append(LineModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.ReflectivityModel import ReflectivityModel
+        #
+        #     self.model_dictionary[ReflectivityModel.__name__] = ReflectivityModel
+        #     #        self.shape_indep_list.append(ReflectivityModel)
+        #     self.multi_func_list.append(ReflectivityModel)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.ReflectivityIIModel import ReflectivityIIModel
+        #
+        #     self.model_dictionary[ReflectivityIIModel.__name__] = ReflectivityIIModel
+        #     #        self.shape_indep_list.append(ReflectivityIIModel)
+        #     self.multi_func_list.append(ReflectivityIIModel)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.GelFitModel import GelFitModel
+        #
+        #     self.model_dictionary[GelFitModel.__name__] = GelFitModel
+        #     #        self.shape_indep_list.append(GelFitModel)
+        #     self.model_name_list.append(GelFitModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.PringlesModel import PringlesModel
+        #
+        #     self.model_dictionary[PringlesModel.__name__] = PringlesModel
+        #     #        self.shape_indep_list.append(PringlesModel)
+        #     self.model_name_list.append(PringlesModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.RectangularPrismModel import RectangularPrismModel
+        #
+        #     self.model_dictionary[RectangularPrismModel.__name__] = RectangularPrismModel
+        #     #        self.shape_list.append(RectangularPrismModel)
+        #     self.multiplication_factor.append(RectangularPrismModel)
+        #     self.model_name_list.append(RectangularPrismModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.RectangularHollowPrismInfThinWallsModel import RectangularHollowPrismInfThinWallsModel
+        #
+        #     self.model_dictionary[RectangularHollowPrismInfThinWallsModel.__name__] = RectangularHollowPrismInfThinWallsModel
+        #     #        self.shape_list.append(RectangularHollowPrismInfThinWallsModel)
+        #     self.multiplication_factor.append(RectangularHollowPrismInfThinWallsModel)
+        #     self.model_name_list.append(RectangularHollowPrismInfThinWallsModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.RectangularHollowPrismModel import RectangularHollowPrismModel
+        #
+        #     self.model_dictionary[RectangularHollowPrismModel.__name__] = RectangularHollowPrismModel
+        #     #        self.shape_list.append(RectangularHollowPrismModel)
+        #     self.multiplication_factor.append(RectangularHollowPrismModel)
+        #     self.model_name_list.append(RectangularHollowPrismModel.__name__)
+        # except:
+        #     pass
+        #
+        # try:
+        #     from sas.models.MicelleSphCoreModel import MicelleSphCoreModel
+        #
+        #     self.model_dictionary[MicelleSphCoreModel.__name__] = MicelleSphCoreModel
+        #     #        self.shape_list.append(MicelleSphCoreModel)
+        #     self.multiplication_factor.append(MicelleSphCoreModel)
+        #     self.model_name_list.append(MicelleSphCoreModel.__name__)
+        # except:
+        #     pass
 
 
 
