@@ -56,16 +56,19 @@ class Plugin(PluginBase):
         """
         Show a general help dialog. 
         """
-        from help_panel import  HelpWindow
-        frame = HelpWindow(None, -1) 
-        if hasattr(frame, "IsIconized"):
-            if not frame.IsIconized():
-                try:
-                    icon = self.parent.GetIcon()
-                    frame.SetIcon(icon)
-                except:
-                    pass  
-        frame.Show(True)
+#        from documentation_window import DocumentationWindow     
+#        _sphinx_doc_viewer = DocumentationWindow(self, -1, "/user/guiframe/ \
+#            data_explorer_help.html", "DataLoader Help")
+#        from help_panel import  HelpWindow
+#        frame = HelpWindow(None, -1) 
+#        if hasattr(frame, "IsIconized"):
+#            if not frame.IsIconized():
+#                try:
+#                    icon = self.parent.GetIcon()
+#                    frame.SetIcon(icon)
+#                except:
+#                    pass  
+#        frame.Show(True)
         
     def populate_file_menu(self):
         """
