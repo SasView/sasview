@@ -2962,30 +2962,26 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def _on_mag_help(self, event):    
         """
-        Magnetic angles help panel
+        Bring up Magnetic Angle definition bmp image whenever the ? button 
+        is clicked. Calls DocumentationWindow with the path of the location 
+        within the documentation tree (after /doc/ ....". When using old 
+        versions of Wx When (i.e. before 2.9 and therefore not part of release
+        versions distributed via installer) it brings up an image viewer
+        box which allows the user to click through the rest of the images in 
+        the directory.  Not ideal but probably better than alternative which
+        would bring up the entire discussion of how magnetic models work? 
+        Specially since it is not likely to be accessed.  The normal release
+        versions bring up the normal image box.
+        
+        :param evt: Triggers on clicking ? in Magnetic Angles? box
         """
-        from sas.perspectives.fitting.help_panel import  HelpWindow
-        # Get models help model_function path
-        #import sas.perspectives.fitting as fitmedia
-        from sas.models import get_data_path
-
-        media = get_data_path(media='media')
-        path = os.path.join(media, "mag_pic.html") 
-        name = "Polar/Magnetic Angles"
-        frame = HelpWindow(None, -1,  
-                           title=' Help: Polarization/Magnetization Angles',  
-                           pageToOpen=path, size=(865, 450))   
-        try: 
-            frame.splitter.DetachWindow(frame.lpanel)
-            # Display only the right side one
-            frame.lpanel.Hide() 
-            frame.Show(True)
-        except:
-            frame.Destroy() 
-            msg = 'Display Error\n'
-            info = "Info"
-            wx.MessageBox(msg, info)
-
+        
+        from sas.guiframe.documentation_window import DocumentationWindow
+        
+        _TreeLocation = "_images/M_angles_pic.bmp"
+        _doc_viewer = DocumentationWindow(self, -1, \
+             _TreeLocation,"Magnetic Angle Defintions")
+ 
     def _on_mag_on(self, event):    
         """
         Magnetic Parameters ON/OFF
@@ -3017,9 +3013,13 @@ class BasicPage(ScrolledPanel, PanelBase):
             
     def on_pd_help_clicked(self, event):
         """
-        Bring up Polydispersit Documentation whenever the ? button is clicked. 
+        Bring up Polydispersity Documentation whenever the ? button is clicked. 
         Calls DocumentationWindow with the path of the location within the
-        documentation tree (after /doc/ ...."
+        documentation tree (after /doc/ ....".  Note that when using old 
+        versions of Wx (before 2.9) and thus not the release version of 
+        istallers, the help comes up at the top level of the file as 
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
         
         :param evt: Triggers on clicking ? in polydispersity box
         """
