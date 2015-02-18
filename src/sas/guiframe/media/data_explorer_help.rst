@@ -38,9 +38,9 @@ the context menu of plot panels or other menus within the application.
 Under *View* in the menu bar, *Data Explorer* can be toggled between Show and 
 Hide by clicking *Show/Hide Data Explorer*.
 
-NOTE! When *Data Explorer* is hidden, all data loaded will be sent directly 
-to the current active application, if possible. When *Data Explorer* is 
-shown, data go first to the *Data Explorer*.
+*NOTE! When* Data Explorer *is hidden, all data loaded will be sent directly 
+to the current active application, if possible. When* Data Explorer *is 
+shown, data go first to the* Data Explorer.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -51,8 +51,9 @@ Load Data
 
 To load data, click the button *Load Data*, then select one or more (by holding 
 the Ctrl key) files to load into the application. The name of each selected 
-file will be listed. Clicking the *+*  symbol will display any available 
-metadata.
+file will be listed.
+
+Clicking the *+*  symbol will display any available metadata.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -62,7 +63,7 @@ Handy Menu
 ----------
 
 Right-clicking on a loaded dataset (or model calculation, what SasView calls a 
-theory) brings up a *Handy Menu* from which it is possible to access Data Info, 
+theory) brings up a *Handy Menu* from which it is possible to access Datainfo, 
 Save the data/theory, or Plot the data/theory.
 
 .. image:: hand_menu.png
@@ -89,9 +90,8 @@ activate or deactivate multiple data sets.
 Remove Data
 -----------
 
-WARNING! *Remove Data* will stop any data operations currently using the 
-selected data sets.
-
+*WARNING!* Remove Data *will stop any data operations currently using the 
+selected data sets.*
 
 *Remove Data* removes all reference to selected data from the application.
 
@@ -102,6 +102,9 @@ selected data sets.
 Append Plot to Graph
 --------------------
 
+This operation can only be performed on 1D data and plot panels currently 
+containing 1D data.
+
 Click on the button *Append To* to add selected data to a plot panel. Next to 
 the button is a combo box containing the names of available plot panels. 
 Selecting a name from this combo box will move that plot into focus.
@@ -109,8 +112,7 @@ Selecting a name from this combo box will move that plot into focus.
 If a plot panel is not available, the combo box and button will be 
 disabled.
 
-2D Data cannot be appended to any plot panels. This operation can 
-only be performed on 1D data and plot panels currently containing 1D data.
+2D Data cannot be appended to any plot panels.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -131,7 +133,7 @@ Freeze Theory
 
 The *Freeze Theory* button generates data from the selected theory.
 
-NOTE! This operation can only be performed when theory labels are selected.
+*NOTE! This operation can only be performed when theory labels are selected.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
@@ -149,3 +151,7 @@ The *Single*/*Batch* mode radio buttons only apply to the *Fitting* perspective.
 fitting one data set followed by another. If several data sets need to be 
 fitted at the same time, use *Simultaneous* fitting under the *Fitting* 
 option on the menu bar.
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note::  This help document was last changed by Steve King, 18Feb2015
