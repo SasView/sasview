@@ -2147,7 +2147,9 @@ class BasicPage(ScrolledPanel, PanelBase):
             model = models()
             name = model.__class__.__name__
             if models.__name__ != "NoStructure":
-                if hasattr(model, "name"):
+                if hasattr(model, "oldname"):
+                    name = model.oldname
+                elif hasattr(model, "name"):
                     name = model.name
                 mlist.append((name, models))
                 
