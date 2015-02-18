@@ -11,6 +11,7 @@
 
 .project
 .pydevproject
+.idea
 build
 dist
 sasview.egg-info
