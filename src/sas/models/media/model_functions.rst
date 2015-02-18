@@ -2443,7 +2443,7 @@ The form factor is
 .. image:: img/image137.jpg
 
 where |delta|\ T = tail length (or *t_length*), |delta|\ H = head thickness (or *h_thickness*),
-|drho|\ H = SLD(headgroup) - SLD(solvent), and |drho|\ T = SLD(tail) - SLD(solvent).
+|drho|\ H = SLD(headgroup) - SLD(solvent), and |drho|\ T = SLD(tail) - SLD(solvent). The total thickness is 2(H+T).
 
 The 2D scattering intensity is calculated in the same way as 1D, where the *q* vector is defined as
 
