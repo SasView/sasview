@@ -11,7 +11,7 @@ else:
 
    
 class DocumentationWindow(Frame):
-    def __init__(self, parent, id, path, title='Help', size=(850, 540)):
+    def __init__(self, parent, id, path, title, size=(850, 540)):
         Frame.__init__(self, parent, id, title, size=size)
 
         SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
@@ -37,5 +37,6 @@ class DocumentationWindow(Frame):
             #does not deal with issue of math in docs of course. 
 
             webbrowser.open_new_tab("file:///" + docs_path + "/" + path)
+            print ("file:///" + docs_path + "/" + path)
 
  
