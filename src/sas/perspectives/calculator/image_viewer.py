@@ -15,6 +15,8 @@ from sas.perspectives.calculator.calculator_widgets import InputTextCtrl
 from sas.dataloader.data_info import Data2D
 from sas.dataloader.data_info import Detector
 from sas.dataloader.manipulations import reader2D_converter
+from sas.guiframe.documentation_window import DocumentationWindow
+
 _BOX_WIDTH = 60
 IS_WIN = True
 if sys.platform.count("win32") > 0:
@@ -137,28 +139,19 @@ class ImageFrame(PlotFrame):
         self.panel.ShowModal()
 
     def on_help(self, event):    
+        """       
+        Bring up Image Viewer Documentation from the image viewer window 
+        whenever the help menu item "how to" is clicked. Calls 
+        DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  
+        
+        :param evt: Triggers on clicking "how to" in help menu
         """
-        Image Viewer help panel
-        """
-        from sas.perspectives.calculator.help_panel import  HelpWindow
-        # Get models help model_function path
-        import sas.perspectives.calculator as calmedia
-
-        media = calmedia.get_data_path(media='media')
-        path = os.path.join(media,"load_image_help.html") 
-        name = "Image Viewer"
-        frame = HelpWindow(self, -1, title=' Help: Image Viewer',  
-                           pageToOpen=path, size=(640, 450))   
-        try: 
-            frame.splitter.DetachWindow(frame.lpanel)
-            # Display only the right side one
-            frame.lpanel.Hide() 
-            frame.Show(True)
-        except:
-            frame.Destroy() 
-            msg = 'Display Error\n'
-            info = "Info"
-            wx.MessageBox(msg, info)
+                
+        _TreeLocation = "user/perspectives/calculator/image_viewer_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, \
+             _TreeLocation,"Image Viewer Help")
+        
             
 class SetDialog(wx.Dialog):
     """
