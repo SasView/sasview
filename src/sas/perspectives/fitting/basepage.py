@@ -3042,7 +3042,19 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def on_model_help_clicked(self, event):
         """
-        on 'More details' button
+        Function called when 'Details' button is pressed next to model
+        of interest.  As of Feb 2015 this function follows two paths:
+        For regular models that ship with the release, it calls the Sphinx
+        generated html documentation.  For plugin models it still uses the
+        old pop up window reading the description provided in the model.
+        
+        This will presumably be deprecated when the sas mdels team decides
+        on how to discover new models and grab their documentation from the
+        file.
+        
+        PDB 18 Feb 2015
+        
+        :param evt: on Details Button pressed event
         """
         from sas.perspectives.fitting.help_panel import  HelpWindow
         from sas.models import get_data_path
@@ -3051,11 +3063,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         path = get_data_path(media='media')
         model_path = os.path.join(path, "model_functions.html")
         if self.model == None:
-            name = 'FuncHelp'
+            name = 'index.html'
         else:
             name = self.formfactorbox.GetValue()
         frame = HelpWindow(None, -1, pageToOpen=model_path)
-        # If model name exists and model is not a custom model
+        #If model name exists and model is not a custom model
         #mod_cat = self.categorybox.GetStringSelection()
         if frame.rhelp.HasAnchor(name):
             frame.Show(True)
@@ -3130,17 +3142,19 @@ class BasicPage(ScrolledPanel, PanelBase):
             
     def on_pd_help_clicked(self, event):
         """
-        Button event for PD help
-        """
-        from help_panel import  HelpWindow
-        import sas.models as models
+        Bring up Polydispersit Documentation whenever the ? button is clicked. 
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ...."
         
-        # Get models help model_function path
-        path = models.get_data_path(media='media')
-        pd_path = os.path.join(path, "pd_help.html")
-
-        frame = HelpWindow(None, -1, pageToOpen=pd_path)
-        frame.Show(True)
+        :param evt: Triggers on clicking ? in polydispersity box
+        """
+        
+        from sas.guiframe.documentation_window import DocumentationWindow
+        
+        _TreeLocation = "user/perspectives/fitting/fitting_help.html"
+        _TreeLocation += "#polydispersity-distributions"
+        _doc_viewer = DocumentationWindow(self, -1, \
+             _TreeLocation,"Polydispersity Help")
         
     def on_left_down(self, event):
         """
