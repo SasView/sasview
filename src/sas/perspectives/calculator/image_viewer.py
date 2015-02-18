@@ -58,7 +58,6 @@ class ImageView:
                 is_png = extension.lower() == '.png'
                 plot_frame = ImageFrame(parent, -1, basename, img)
                 plot_frame.Show(False)
-                #plot_frame.im_show(img)
                 ax = plot_frame.plotpanel
                 if not is_png:
                     ax.subplot.set_ylim(ax.subplot.get_ylim()[::-1])
@@ -72,39 +71,22 @@ class ImageView:
                     parent.put_icon(plot_frame)
             except:
                 print "parent", parent
-                raise
                 err_msg += "Failed to load '%s'.\n"% basename
         if err_msg:
             if parent is not None:
                 wx.PostEvent(parent, StatusEvent(status=err_msg, info="error"))
             else:
                 print err_msg
-
         
     def choose_data_file(self, location=None):
         """
         Open a file dialog to allow loading a file
         """
-        parent = self.parent
         path = None
         if location == None:
             location = os.getcwd()
-        wlist = ''
-        elist = ["All images (*.png, *.bmp, *.gif, *.jpg, *.tif, *.tiff) | \
-                *.png; *.bmp; *.gif; *.jpg; *.tif; *.tiff", 
-                "PNG files (*.PNG, *.png) | *.png", 
-                "BMP files (*.BMP, *.bmp) | *.bmp", 
-                "GIF files (*.GIF, *.gif) | *.gif",
-                "JPG files (*.JPG, *.jpg) | *.jpg",
-                "TIF files (*.TIF, *.tif) | *.tif",
-                "TIFF files (*.TIFF, *.tiff) | *.tiff"]
-        if not IS_WIN:
-            del elist[0]
-        elist.append("All files (*.*) | *.*")
-        wlist = '|'.join(elist)        
-        style = wx.OPEN|wx.FD_MULTIPLE
-        dlg = wx.FileDialog(parent, "Image Viewer: Choose a image file", 
-                            location, "", wlist, style=style)
+        dlg = wx.FileDialog(self.parent, "Image Viewer: Choose a image file", 
+                            location, "", "", style=wx.FD_OPEN|wx.FD_MULTIPLE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPaths()
         else:
