@@ -195,11 +195,15 @@ class data_info_tests(unittest.TestCase):
         from sas.dataloader.manipulations import SectorPhi
         import math
         
+        nbins = 19
+        phi_min = math.pi / (nbins + 1)
+        phi_max = math.pi * 2 - phi_min
+        
         r = SectorPhi(r_min=.005,
                       r_max=.01,
-                      phi_min=0.15707963,
-                      phi_max=math.pi*2.-0.15707963,
-                      nbins=19)
+                      phi_min=phi_min,
+                      phi_max=phi_max,
+                      nbins=nbins)
         o = r(self.data)
 
         answer = Loader().load('ring_testdata.txt')
