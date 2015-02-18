@@ -831,14 +831,12 @@ class BasicPage(ScrolledPanel, PanelBase):
             msg = " Parameter values are copied to the clipboard..."
             infor = 'warning'
         elif flag:
-            msg = " Parameter values are pasted from the clipboad..."
+            msg = " Parameter values are pasted from the clipboard..."
             infor = "warning"
         else:
-            msg = "Error occured: "
+            msg = "Error occurred: "
             msg += "No valid parameter values to paste from the clipboard..."
-            infor = "error"
-            wx.PostEvent(self._manager.parent,
-                    StatusEvent(status=msg, info=infor))
+            infor = "warning"
         # inform msg to wx
         wx.PostEvent(self._manager.parent,
                     StatusEvent(status=msg, info=infor))

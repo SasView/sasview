@@ -773,7 +773,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         report_img = self.state.image
         report_list = [report_html_str, report_text_str, report_img]
         dialog = ReportDialog(report_list, None, -1, "")
-        dialog.ShowModal()
+        dialog.Show()
         
     def get_state_by_num(self, state_num=None):
         """
