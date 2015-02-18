@@ -33,11 +33,11 @@ How To
 5) Select an arithmetic operator symbol from the *Operator* drop-down. The 
    available operators are:
    
-*  + (for addition)
-*  - (for subtraction), 
-*  * (for multiplication)
-*  / (for division)
-*  | (for combination of two data sets)
+*   \+ (for addition)
+*   \- (for subtraction) 
+*   \* (for multiplication)
+*   \/ (for division)
+*   \| (for combination of two data sets)
 
    If two data sets do not match, the operation will fail and the background 
    color of the combo box items will turn to red (WIN only).
