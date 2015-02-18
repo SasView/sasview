@@ -9,7 +9,6 @@ from sas.fit.AbstractFitEngine import Model
 from sas.fit.Fitting import Fit
 from sas.dataloader.loader import Loader
 
-#@unittest.skip("")
 class TestSingleFit(unittest.TestCase):
     """ test single fitting """
     def setUp(self):

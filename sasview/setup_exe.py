@@ -332,7 +332,7 @@ packages.extend([
     'reportlab.platypus',
     ])
 #packages.append('IPython')
-includes = ['site']
+includes = ['site','lxml._elementpath', 'lxml.etree']
 
 # Exclude packages that are not needed but are often found on build systems
 excludes = ['Tkinter', 'PyQt4', '_ssl', '_tkagg', 'sip', 'pytz']
