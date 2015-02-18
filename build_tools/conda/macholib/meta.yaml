@@ -1,25 +1,28 @@
 package:
-  name: pyopencl
-  version: !!str 2015.1
+  name: macholib
+  version: !!str 1.7
 
 source:
-  fn: pyopencl-2015.1.tar.gz
-  url: https://pypi.python.org/packages/source/p/pyopencl/pyopencl-2015.1.tar.gz
-  md5: c7b9dd0bb113ad852dae6fdadd417899
+  fn: macholib-1.7.tar.gz
+  url: https://pypi.python.org/packages/source/m/macholib/macholib-1.7.tar.gz
+  md5: cf03a55323d5b7ca59be530ba0b01032
 #  patches:
    # List any patch files here
    # - fix.patch
 
-# build:
+build:
   #preserve_egg_dir: True
-  #entry_points:
+  entry_points:
     # Put any entry points (scripts to be generated automatically) here. The
     # syntax is module:function.  For example
     #
-    # - pyopencl = pyopencl:main
+    # - macholib = macholib:main
     #
-    # Would create an entry point called pyopencl that calls pyopencl.main()
+    # Would create an entry point called macholib that calls macholib.main()
 
+    - macho_find = macholib.macho_find:main
+    - macho_standalone = macholib.macho_standalone:main
+    - macho_dump = macholib.macho_dump:main
 
   # If this is a new build for the same version, increment the build
   # number. If you do not include this key, it defaults to 0.
@@ -29,32 +32,20 @@ requirements:
   build:
     - python
     - setuptools
-    - numpy
-    - pytools >=2014.2
-    - pytest >=2
-    - decorator >=3.2.0
-    - appdirs >=1.4.0
+    - altgraph >=0.12
 
   run:
     - python
-    - setuptools
-    - numpy
-    - pytools >=2014.2
-    - pytest >=2
-    - decorator >=3.2.0
-    - appdirs >=1.4.0
+    - altgraph >=0.12
 
 test:
   # Python imports
   imports:
-    - pyopencl
-    - pyopencl.characterize
-    - pyopencl.compyte
+    - macholib
 
-  #commands:
+  commands:
     # You can put test commands to be run here.  Use this to test that the
     # entry points work.
-
 
   # You can also put a file called run_test.py in the recipe that will be run
   # at test time.
@@ -64,9 +55,9 @@ test:
     # - nose
 
 about:
-  home: http://mathema.tician.de/software/pyopencl
+  home: http://bitbucket.org/ronaldoussoren/macholib
   license:  MIT License
-  summary: 'Python wrapper for OpenCL'
+  summary: 'Mach-O header analysis and editing'
 
 # See
 # http://docs.continuum.io/conda/build.html for

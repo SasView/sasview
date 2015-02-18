@@ -104,15 +104,17 @@ class data_info_tests(unittest.TestCase):
         """
         r = Ring(r_min=.005, r_max=.01, 
                  center_x=self.data.detector[0].beam_center.x, 
-                 center_y=self.data.detector[0].beam_center.y)
-        r.nbins_phi = 20
+                 center_y=self.data.detector[0].beam_center.y,
+                 nbins = 20)
+        ##r.nbins_phi = 20
         
         o = r(self.data)
         answer = Loader().load('ring_testdata.txt')
-        for i in range(r.nbins_phi):
-            self.assertAlmostEqual(o.x[i], answer.x[i], 4)
-            self.assertAlmostEqual(o.y[i], answer.y[i], 4)
-            self.assertAlmostEqual(o.dy[i], answer.dy[i], 4)
+        
+        for i in range(r.nbins_phi - 1):
+            self.assertAlmostEqual(o.x[i + 1], answer.x[i], 4)
+            self.assertAlmostEqual(o.y[i + 1], answer.y[i], 4)
+            self.assertAlmostEqual(o.dy[i + 1], answer.dy[i], 4)
             
     def test_circularavg(self):
         """
@@ -193,8 +195,15 @@ class data_info_tests(unittest.TestCase):
         from sas.dataloader.manipulations import SectorPhi
         import math
         
-        r = SectorPhi(r_min=.005, r_max=.01, phi_min=0, phi_max=math.pi*2.0)
-        r.nbins_phi = 20
+        nbins = 19
+        phi_min = math.pi / (nbins + 1)
+        phi_max = math.pi * 2 - phi_min
+        
+        r = SectorPhi(r_min=.005,
+                      r_max=.01,
+                      phi_min=phi_min,
+                      phi_max=phi_max,
+                      nbins=nbins)
         o = r(self.data)
 
         answer = Loader().load('ring_testdata.txt')

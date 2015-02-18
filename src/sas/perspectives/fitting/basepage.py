@@ -1860,131 +1860,6 @@ class BasicPage(ScrolledPanel, PanelBase):
                               [min_state, min_value],
                               [max_state, max_value], unit])
            
-#    The following funcion seems to be superseded with fillsizer and 
-#    init combo box.  certainly it seems not to know about categories and uses 
-#    only shapes and shape independent -- tested after commenting out and does
-#    not seem to cause problem.  Leave commented out for now but delete in
-#    a code cleanup once clear it really is no longer used.
-#    PDB  8 April 2014
-
-#    def _set_model_sizer_selection(self, model):
-#        """
-#        Display the sizer according to the type of the current model
-#        """
-#        if model == None:
-#            return
-#        if hasattr(model, "s_model"):
-#            
-#            class_name = model.s_model.__class__
-#            name = model.s_model.name
-#            flag = (name != "NoStructure")
-#            if flag and \
-#                (class_name in self.model_list_box["Structure Factors"]):
-#                self.structurebox.Show()
-#                self.text2.Show()
-#                self.structurebox.Enable()
-#               self.text2.Enable()
- #               items = self.structurebox.GetItems()
- #               self.sizer1.Layout()
- #               
- #               for i in range(len(items)):
- #                   if items[i] == str(name):
- #                       self.structurebox.SetSelection(i)
- #                       break
- #                   
- #       if hasattr(model, "p_model"):
- #           class_name = model.p_model.__class__
- #           name = model.p_model.name
- #           self.formfactorbox.Clear()
- #           
- #           for k, list in self.model_list_box.iteritems():
- #               if k in["P(Q)*S(Q)", "Shapes"] and \
- #                   class_name in self.model_list_box["Shapes"]:
- #                   self.shape_rbutton.SetValue(True)
- #                   ## fill the form factor list with new model
- #                   self._populate_box(self.formfactorbox,
- #                                      self.model_list_box["Shapes"])
- #                   items = self.formfactorbox.GetItems()
- #                   ## set comboxbox to the selected item
- #                   for i in range(len(items)):
- #                       if items[i] == str(name):
- #                           self.formfactorbox.SetSelection(i)
- #                           break
- #                   return
- #               elif k == "Shape-Independent":
- #                   self.shape_indep_rbutton.SetValue(True)
- #               elif k == "Structure Factors":
- #                   self.struct_rbutton.SetValue(True)
- #               elif k == "Multi-Functions":
- #                   continue
- #               else:
- #                   self.plugin_rbutton.SetValue(True)
- #              
- #               if class_name in list:
- #                   ## fill the form factor list with new model
- #                   self._populate_box(self.formfactorbox, list)
- #                   items = self.formfactorbox.GetItems()
- #                   ## set comboxbox to the selected item
- #                   for i in range(len(items)):
- #                       if items[i] == str(name):
- #                           self.formfactorbox.SetSelection(i)
- #                           break
- #                   break
- #       else:
-            ## Select the model from the menu
-#            class_name = model.__class__
-#            name = model.name
-#            self.formfactorbox.Clear()
-#            items = self.formfactorbox.GetItems()
-#    
-#            for k, list in self.model_list_box.iteritems():
-#                if k in["P(Q)*S(Q)", "Shapes"] and \
-#                    class_name in self.model_list_box["Shapes"]:
-#                    if class_name in self.model_list_box["P(Q)*S(Q)"]:
-#                        self.structurebox.Show()
-#                        self.text2.Show()
-#                       self.structurebox.Enable()
-#                       self.structurebox.SetSelection(0)
-#                       self.text2.Enable()
-#                   else:
-#                        self.structurebox.Hide()
-#                        self.text2.Hide()
-#                        self.structurebox.Disable()
-#                        self.structurebox.SetSelection(0)
-#                        self.text2.Disable()
-#                        
-#                    self.shape_rbutton.SetValue(True)
-                    ## fill the form factor list with new model
-#                    self._populate_box(self.formfactorbox,
-#                                       self.model_list_box["Shapes"])
-#                    items = self.formfactorbox.GetItems()
-#                    ## set comboxbox to the selected item
-#                    for i in range(len(items)):
-#                        if items[i] == str(name):
-#                            self.formfactorbox.SetSelection(i)
-#                            break
-#                    return
-#                elif k == "Shape-Independent":
-#                    self.shape_indep_rbutton.SetValue(True)
-#                elif k == "Structure Factors":
-#                    self.struct_rbutton.SetValue(True)
-#                elif k == "Multi-Functions":
-#                    continue
-#                else:
-#                    self.plugin_rbutton.SetValue(True)
-#                if class_name in list:
-#                    self.structurebox.SetSelection(0)
-#                    self.structurebox.Disable()
-#                    self.text2.Disable()
-                    ## fill the form factor list with new model
-#                    self._populate_box(self.formfactorbox, list)
-#                    items = self.formfactorbox.GetItems()
-                    ## set comboxbox to the selected item
-#                    for i in range(len(items)):
-#                        if items[i] == str(name):
-#                            self.formfactorbox.SetSelection(i)
-#                            break
-#                    break
                 
     def _draw_model(self, update_chisqr=True, source='model'):
         """
@@ -3042,7 +2917,19 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def on_model_help_clicked(self, event):
         """
-        on 'More details' button
+        Function called when 'Details' button is pressed next to model
+        of interest.  As of Feb 2015 this function follows two paths:
+        For regular models that ship with the release, it calls the Sphinx
+        generated html documentation.  For plugin models it still uses the
+        old pop up window reading the description provided in the model.
+        
+        This will presumably be deprecated when the sas mdels team decides
+        on how to discover new models and grab their documentation from the
+        file.
+        
+        PDB 18 Feb 2015
+        
+        :param evt: on Details Button pressed event
         """
         from sas.perspectives.fitting.help_panel import  HelpWindow
         from sas.models import get_data_path
@@ -3051,11 +2938,11 @@ class BasicPage(ScrolledPanel, PanelBase):
         path = get_data_path(media='media')
         model_path = os.path.join(path, "model_functions.html")
         if self.model == None:
-            name = 'FuncHelp'
+            name = 'index.html'
         else:
             name = self.formfactorbox.GetValue()
         frame = HelpWindow(None, -1, pageToOpen=model_path)
-        # If model name exists and model is not a custom model
+        #If model name exists and model is not a custom model
         #mod_cat = self.categorybox.GetStringSelection()
         if frame.rhelp.HasAnchor(name):
             frame.Show(True)
@@ -3075,30 +2962,26 @@ class BasicPage(ScrolledPanel, PanelBase):
 
     def _on_mag_help(self, event):    
         """
-        Magnetic angles help panel
+        Bring up Magnetic Angle definition bmp image whenever the ? button 
+        is clicked. Calls DocumentationWindow with the path of the location 
+        within the documentation tree (after /doc/ ....". When using old 
+        versions of Wx When (i.e. before 2.9 and therefore not part of release
+        versions distributed via installer) it brings up an image viewer
+        box which allows the user to click through the rest of the images in 
+        the directory.  Not ideal but probably better than alternative which
+        would bring up the entire discussion of how magnetic models work? 
+        Specially since it is not likely to be accessed.  The normal release
+        versions bring up the normal image box.
+        
+        :param evt: Triggers on clicking ? in Magnetic Angles? box
         """
-        from sas.perspectives.fitting.help_panel import  HelpWindow
-        # Get models help model_function path
-        #import sas.perspectives.fitting as fitmedia
-        from sas.models import get_data_path
-
-        media = get_data_path(media='media')
-        path = os.path.join(media, "mag_pic.html") 
-        name = "Polar/Magnetic Angles"
-        frame = HelpWindow(None, -1,  
-                           title=' Help: Polarization/Magnetization Angles',  
-                           pageToOpen=path, size=(865, 450))   
-        try: 
-            frame.splitter.DetachWindow(frame.lpanel)
-            # Display only the right side one
-            frame.lpanel.Hide() 
-            frame.Show(True)
-        except:
-            frame.Destroy() 
-            msg = 'Display Error\n'
-            info = "Info"
-            wx.MessageBox(msg, info)
-
+        
+        from sas.guiframe.documentation_window import DocumentationWindow
+        
+        _TreeLocation = "_images/M_angles_pic.bmp"
+        _doc_viewer = DocumentationWindow(self, -1, \
+             _TreeLocation,"Magnetic Angle Defintions")
+ 
     def _on_mag_on(self, event):    
         """
         Magnetic Parameters ON/OFF
@@ -3130,17 +3013,23 @@ class BasicPage(ScrolledPanel, PanelBase):
             
     def on_pd_help_clicked(self, event):
         """
-        Button event for PD help
-        """
-        from help_panel import  HelpWindow
-        import sas.models as models
+        Bring up Polydispersity Documentation whenever the ? button is clicked. 
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old 
+        versions of Wx (before 2.9) and thus not the release version of 
+        istallers, the help comes up at the top level of the file as 
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
         
-        # Get models help model_function path
-        path = models.get_data_path(media='media')
-        pd_path = os.path.join(path, "pd_help.html")
-
-        frame = HelpWindow(None, -1, pageToOpen=pd_path)
-        frame.Show(True)
+        :param evt: Triggers on clicking ? in polydispersity box
+        """
+        
+        from sas.guiframe.documentation_window import DocumentationWindow
+        
+        _TreeLocation = "user/perspectives/fitting/fitting_help.html"
+        _TreeLocation += "#polydispersity-distributions"
+        _doc_viewer = DocumentationWindow(self, -1, \
+             _TreeLocation,"Polydispersity Help")
         
     def on_left_down(self, event):
         """

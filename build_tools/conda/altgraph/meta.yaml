@@ -1,11 +1,11 @@
 package:
-  name: pyopencl
-  version: !!str 2015.1
+  name: altgraph
+  version: !!str 0.12
 
 source:
-  fn: pyopencl-2015.1.tar.gz
-  url: https://pypi.python.org/packages/source/p/pyopencl/pyopencl-2015.1.tar.gz
-  md5: c7b9dd0bb113ad852dae6fdadd417899
+  fn: altgraph-0.12.tar.gz
+  url: https://pypi.python.org/packages/source/a/altgraph/altgraph-0.12.tar.gz
+  md5: 916dca277fb2b747d5b1ec05b54a0825
 #  patches:
    # List any patch files here
    # - fix.patch
@@ -16,9 +16,9 @@ source:
     # Put any entry points (scripts to be generated automatically) here. The
     # syntax is module:function.  For example
     #
-    # - pyopencl = pyopencl:main
+    # - altgraph = altgraph:main
     #
-    # Would create an entry point called pyopencl that calls pyopencl.main()
+    # Would create an entry point called altgraph that calls altgraph.main()
 
 
   # If this is a new build for the same version, increment the build
@@ -29,27 +29,15 @@ requirements:
   build:
     - python
     - setuptools
-    - numpy
-    - pytools >=2014.2
-    - pytest >=2
-    - decorator >=3.2.0
-    - appdirs >=1.4.0
 
   run:
     - python
     - setuptools
-    - numpy
-    - pytools >=2014.2
-    - pytest >=2
-    - decorator >=3.2.0
-    - appdirs >=1.4.0
 
 test:
   # Python imports
   imports:
-    - pyopencl
-    - pyopencl.characterize
-    - pyopencl.compyte
+    - altgraph
 
   #commands:
     # You can put test commands to be run here.  Use this to test that the
@@ -64,9 +52,9 @@ test:
     # - nose
 
 about:
-  home: http://mathema.tician.de/software/pyopencl
+  home: http://packages.python.org/altgraph
   license:  MIT License
-  summary: 'Python wrapper for OpenCL'
+  summary: 'Python graph (network) package'
 
 # See
 # http://docs.continuum.io/conda/build.html for

@@ -114,7 +114,7 @@ class SasAssembly:
             value = model.getParam(p)
             low,high = model.details[p][1:3]
             if low is not None and numpy.isfinite(low):
-                if p.value == 0:
+                if value == 0:
                     # This value works on Scipy
                     # Do not change numbers below
                     value = _SMALLVALUE

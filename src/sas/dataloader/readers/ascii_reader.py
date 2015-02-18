@@ -66,21 +66,14 @@ class Reader:
                 except:
                     raise  RuntimeError, "ascii_reader: cannot open %s" % path
                 buff = input_f.read()
-                lines = buff.split('\n')
-                
-                #Jae could not find python universal line spliter:
-                #keep the below for now
-                # some ascii data has \r line separator,
-                # try it when the data is on only one long line
-                if len(lines) < 2 :
-                    lines = buff.split('\r')
+                lines = buff.splitlines()
                  
                 x  = numpy.zeros(0)
                 y  = numpy.zeros(0)
                 dy = numpy.zeros(0)
                 dx = numpy.zeros(0)
                 
-               #temp. space to sort data
+                #temp. space to sort data
                 tx  = numpy.zeros(0)
                 ty  = numpy.zeros(0)
                 tdy = numpy.zeros(0)
@@ -219,7 +212,7 @@ class Reader:
                             except:
                                 pass
                             
-                        x = numpy.append(x, _x) 
+                        x = numpy.append(x, _x)
                         y = numpy.append(y, _y)
                         
                         if has_error_dy == True:
@@ -293,7 +286,6 @@ class Reader:
                             i1 = i + 1
                         i += 1
                     except:
-
                         # It is data and meet non - number, then stop reading
                         if is_data == True:
                             break

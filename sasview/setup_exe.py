@@ -279,19 +279,29 @@ if os.path.isfile("BUILD_NUMBER"):
 
 # Copying the images directory to the distribution directory.
 for f in findall(images_dir):
-    if os.path.split(f)[0].count('.svn')==0:
+    if not ".svn" in f:
         data_files.append(("images", [f]))
 
 # Copying the HTML help docs
 for f in findall(media_dir):
-    if os.path.split(f)[0].count('.svn')==0:
+    if not ".svn" in f:
         data_files.append(("media", [f]))
 
 # Copying the sample data user data
 for f in findall(test_dir):
-    if os.path.split(f)[0].count('.svn')==0:
+    if not ".svn" in f:
         data_files.append(("test", [f]))
-        
+
+# See if the documentation has been built, and if so include it.
+doc_path = os.path.join(build_path, "doc")
+if os.path.exists(doc_path):
+    for dirpath, dirnames, filenames in os.walk(doc_path):
+        for filename in filenames:
+            sub_dir = os.path.join("doc", os.path.relpath(dirpath, doc_path))
+            data_files.append((sub_dir, [os.path.join(dirpath, filename)]))
+else:
+    raise Exception("You must first build the documentation before creating an installer.")
+
 if py26MSdll != None:
     # install the MSVC 9 runtime dll's into the application folder
     data_files.append(("Microsoft.VC90.CRT", py26MSdll))
@@ -322,7 +332,7 @@ packages.extend([
     'reportlab.platypus',
     ])
 #packages.append('IPython')
-includes = ['site']
+includes = ['site','lxml._elementpath', 'lxml.etree']
 
 # Exclude packages that are not needed but are often found on build systems
 excludes = ['Tkinter', 'PyQt4', '_ssl', '_tkagg', 'sip', 'pytz']

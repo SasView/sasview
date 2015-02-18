@@ -8,20 +8,24 @@ if wx_supports_html2:
     import wx.html2 as html
 else:
     import wx.html as html
+from gui_manager import get_app_dir
 
-   
+PATH_APP = get_app_dir() 
+
 class DocumentationWindow(Frame):
-    def __init__(self, parent, id, path, title='Help', size=(850, 540)):
+    def __init__(self, parent, id, path, title, size=(850, 540)):
         Frame.__init__(self, parent, id, title, size=size)
 
         SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
         if SPHINX_DOC_ENV in os.environ:
             docs_path = os.path.join(os.environ[SPHINX_DOC_ENV])
         else:
-            docs_path = os.path.join(PATH_APP, "..", "..", "doc")
+            # For the installer, docs are in a top-level directory.  We're not
+            # bothering to worry about docs when running using the old
+            # (non - run.py) way.
+            docs_path = os.path.join(PATH_APP, "doc")
 
-        if (not os.path.exists(docs_path)):
-            print "logging"
+        if not os.path.exists(docs_path):
             logging.error("Could not find Sphinx documentation at %s \
             -- has it been built?", docs_path)
 
@@ -37,5 +41,6 @@ class DocumentationWindow(Frame):
             #does not deal with issue of math in docs of course. 
 
             webbrowser.open_new_tab("file:///" + docs_path + "/" + path)
+            print ("file:///" + docs_path + "/" + path)
 
  
