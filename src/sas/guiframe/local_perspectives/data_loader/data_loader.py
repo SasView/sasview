@@ -232,7 +232,7 @@ class Plugin(PluginBase):
                 error_message = "The data file you selected could not be loaded.\n"
                 error_message += "Make sure the content of your file"
                 error_message += " is properly formatted.\n\n"
-                error_message += "When contacting the DANSE team, mention the"
+                error_message += "When contacting the SasView team, mention the"
                 error_message += " following:\n%s" % str(error)
             elif data_error:
                 base_message = "Errors occurred while loading {0}\n".format(p_file)

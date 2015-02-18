@@ -16,21 +16,17 @@ The readers are tried in order they appear when reading a file.
 import os
 import sys
 import logging
-from lxml import etree
-# Py2exe compatibility: import _elementpath to ensure that py2exe finds it
-from lxml import _elementpath
+import json
 
-## Format version for the XML settings file
-VERSION = 'sasloader/1.0'
+FILE_NAME = 'defaults.json'
 
-
-def read_associations(loader, settings='defaults.xml'):
+def read_associations(loader, settings=FILE_NAME):
     """
     Read the specified settings file to associate
     default readers to file extension.
     
     :param loader: Loader object
-    :param settings: path to the XML settings file [string]
+    :param settings: path to the json settings file [string]
     """
     reader_dir = os.path.dirname(__file__)
     path = os.path.join(reader_dir, settings)
@@ -46,20 +42,16 @@ def read_associations(loader, settings='defaults.xml'):
     if not os.path.isfile(path):
         path = "./%s" % settings
     if os.path.isfile(path):
-        tree = etree.parse(path, parser=etree.ETCompatXMLParser())
-        
-        # Check the format version number
-        # Specifying the namespace will take care of the file format version
-        root = tree.getroot()
+        with open(path) as fh:
+            json_tree = json.load(fh)
         
         # Read in the file extension associations
-        entry_list = root.xpath('/ns:SasLoader/ns:FileType',
-                                 namespaces={'ns': VERSION})
+        entry_list = json_tree['SasLoader']['FileType']
 
         # For each FileType entry, get the associated reader and extension
         for entry in entry_list:
-            reader = entry.get('reader')
-            ext = entry.get('extension')
+            reader = entry['-reader']
+            ext = entry['-extension']
             
             if reader is not None and ext is not None:
                 # Associate the extension with a particular reader

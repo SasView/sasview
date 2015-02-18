@@ -25,6 +25,7 @@ Provide functionality for a C extension model
 
 from sas.models.BaseComponent import BaseComponent
 from sas.models.sas_extension.c_models import [CPYTHONCLASS]
+from numpy import inf
 
 def create_[PYTHONCLASS]():
     """

@@ -30,20 +30,18 @@ Root: HKCR;	Subkey: ".xml\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noer
 Root: HKCR;	Subkey: ".txt\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCR;	Subkey: ".asc\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCR;	Subkey: ".dat\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".tif\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCR;	Subkey: ".abs\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCR;	Subkey: ".d1d\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCR;	Subkey: ".sas\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCR;	Subkey: ".sans\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCR;	Subkey: ".nxs\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCR; Subkey: "applications\SasView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SasView.exe""  ""%1"""; 	 Flags: uninsdeletevalue noerror
 Root: HKCU;	Subkey: "Software\Classes\.xml\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCU;	Subkey: "Software\Classes\.txt\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCU;	Subkey: "Software\Classes\.asc\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCU;	Subkey: "Software\Classes\.dat\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.tif\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCU;	Subkey: "Software\Classes\.abs\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCU;	Subkey: "Software\Classes\.d1d\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
-Root: HKCU;	Subkey: "Software\Classes\.sas\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
+Root: HKCU;	Subkey: "Software\Classes\.sans\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCU;	Subkey: "Software\Classes\.nxs\OpenWithList\SasView.exe";	 Flags: uninsdeletekey noerror
 Root: HKCU; Subkey: "Software\Classes\applications\SasView.exe\shell\open\command";	ValueType: string; ValueName: "";	ValueData: """{app}\SasView.exe""  ""%1"""; 	 Flags: uninsdeletevalue noerror
 Root: HKCR;	Subkey: ".svs";	ValueType: string;	ValueName: "";	ValueData: "{app}\SasView.exe";	 Flags: uninsdeletevalue  noerror

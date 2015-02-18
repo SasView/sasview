@@ -636,7 +636,7 @@ class PageState(object):
         images = self.set_plot_state(figs, canvases)
         report_list = [report_str, text_str, images]
         dialog = ReportDialog(report_list, None, -1, "")
-        dialog.ShowModal()
+        dialog.Show()
         
     def _toXML_helper(self, thelist, element, newdoc):
         """

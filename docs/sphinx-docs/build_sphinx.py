@@ -9,6 +9,7 @@ import os
 import sys
 import fnmatch
 import shutil
+import imp
 
 from distutils.dir_util import copy_tree
 from distutils.util import get_platform
@@ -17,6 +18,9 @@ platform = '.%s-%s'%(get_platform(),sys.version[:3])
 
 CURRENT_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
+run = imp.load_source('run', os.path.join(CURRENT_SCRIPT_DIR, '..', '..', 'run.py'))
+run.prepare()
+
 SASVIEW_SRC = os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "src")
 SASVIEW_BUILD = os.path.abspath(os.path.join(CURRENT_SCRIPT_DIR, "..", "..", "build", "lib"+platform))
 SASVIEW_DOCS = os.path.join(SASVIEW_BUILD, "doc")
@@ -24,6 +28,9 @@ SASVIEW_DOCS = os.path.join(SASVIEW_BUILD, "doc")
 SPHINX_BUILD = os.path.join(CURRENT_SCRIPT_DIR, "build")
 SPHINX_SOURCE = os.path.join(CURRENT_SCRIPT_DIR, "source")
 SPHINX_SOURCE_API = os.path.join(SPHINX_SOURCE, "dev", "api")
+SPHINX_SOURCE_GUIFRAME = os.path.join(SPHINX_SOURCE, "user", "guiframe")
+SPHINX_SOURCE_MODELS = os.path.join(SPHINX_SOURCE, "user", "models")
+SPHINX_SOURCE_PERSPECTIVES = os.path.join(SPHINX_SOURCE, "user", "perspectives")
 
 def _remove_dir(dir_path):
     """Removes the given directory."""
@@ -38,6 +45,9 @@ def clean():
     print "=== Cleaning Sphinx Build ==="
     _remove_dir(SASVIEW_DOCS)
     _remove_dir(SPHINX_BUILD)
+    _remove_dir(SPHINX_SOURCE_GUIFRAME)
+    _remove_dir(SPHINX_SOURCE_MODELS)
+    _remove_dir(SPHINX_SOURCE_PERSPECTIVES)
 
 def retrieve_user_docs():
     """

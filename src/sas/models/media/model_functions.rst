@@ -81,13 +81,16 @@ SasView Model Functions
 
 Contents
 --------
-1. Introduction_
+1. Background_
 
 2. Model_ Functions
 
  2.1 Shape-based_ Functions
+ 
  2.2 Shape-independent_ Functions
+ 
  2.3 Structure-factor_ Functions
+ 
  2.4 Customised_ Functions
 
 3. References_
@@ -98,9 +101,9 @@ Contents
 
 
 
-.. _Introduction:
+.. _Background:
 
-1. Introduction
+1. Background
 ---------------
 
 Many of our models use the form factor calculations implemented in a c-library provided by the NIST Center for Neutron

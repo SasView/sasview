@@ -1,0 +1,177 @@
+<html>
+<head>
+</head>
+
+
+<body>
+<h4> Batch Fit </h4>
+
+<ul>
+<li><a href="#fitpage">Batch Fit</a></li>
+<li><a href="#batchwindow">Batch Window</a></li>
+</ul>
+
+<h5><font color="blue"><a name="fitpage">Batch Fit</a></font></h5>
+<p>
+Create <b>Batch Page </b> by selecting <b>Batch </b> radio button on 
+Data Explorer<font color="blue"><a href="#batch_button">(see figure below)</a></font>
+and for a new control page select 'New FitPage' in the 'Fitting' menubar.<br />
+</p>
+<br /><img src="batch_button_area.bmp" /><br /><br />
+<a name="figure1"><u>Figure 1: MenuBar</u></a><br />
+<br />
+Load Data to Data Explorer if not loaded. <br/>
+Select one or more data sets by checking the check boxes, and then make sure 
+that "Fitting" is selected in the dropdown menu next to the "Send To" button.
+Once ready, click the 'Send To' button to set data to a BatchPage. If already an empty batch page exists, it will be set there.
+Otherwise it will create a new Batch Page.
+Set up the model and the parameter values as same as a single fitting <font color="blue"><a href="single_fit_help.html">(see single fit help)</a></font>.
+The use 'Fit' button to perform the fitting.
+<br />Unlike a single fit, the results of the fittings will not return to the BatchPage'. Instead, a Grid window will be provided once the fitting is completed. 
+The Grid window is also accessible from the 'View' menu <font color="blue"><a href="#figure2">(see Figure 2)</a></font>. 
+<br /> Note that only one model is used for all the data. 
+The initial parameter values given in the control page will be used all the data fittings. If one wants the FitEngine to use the initial values 
+from the results of the previous data fitting (if any), choose the 'Chain Fitting' in the Fitting menubar, which will speed up the fitting 
+especially when you have lots of, and similar, data sets.
+</p>
+
+<h5><font color="blue"><a name="batchwindow">Batch Window</a></font></h5>
+<p>
+Batch Window provides an easy way to view the fit results, i.e., plot data, fits, and residuals.
+Batch window will be automatically shown after a batch fit is finished. <br />
+Once closed, 
+it can be opened anytime from the "View" menubar item <font color="blue"><a href="#figure2">(see Figure 2)</a></font>.<br />
+</p>
+<br /><br /><img src="restore_batch_window.bmp" /><br /><br />
+<a name="#figure2"><u>Figure 2: Edit Menu</u></a><br />
+<br />
+  <ul>
+	<li> <a href="#edit_grid"> Edit Grid </a></li>
+	<li><a href="#save_grid"> Save Grid </a></li>
+	<li><a href="#load_batch"> Open Batch Results </a></li>
+	<li><a href="#plot"> Plot </a></li>
+	<li><a href="#view"> View Column/Cell(s) </a></li>
+   </ul>
+
+
+
+<h5><font color="blue"><a name="edit_grid"> Edit Grid </a></font></h5>
+<p>
+Once a batch fit is completed, all fitted and fixed model parameters are displayed to the current sheet of
+the batch window except the errors of the parameters. To view the errors, 
+click on a given column then under <b> Edit </b> menubar item, and insert the desired parameter by selecting 
+a menu item with the appropriated label. Empty column can be inserted in the same way.
+A column value can be customized by editing an existing empty column.<br />
+To Remove column from the grid, select it, choose edit menu, and click the <b> 'remove' </b>  menu item.
+Any removed column should reinserted whenever needed.<br />
+All above options are also available when right clicking on a given column label 
+<font color="blue"><a href="#figure3">(see Figure 3)</a></font>.
+<b>Note:</b> A column always needs to be selected in order to remove or insert a column in the grid.<br /><br />
+
+<img src="edit_menu.bmp" /><br /><br />
+<a name="figure3"><u>Figure 3: Edit Menu</u></a><br />
+</p>
+
+
+<h5><font color="blue"><a name="save_grid"> Save Grid </a></font></h5>
+<p>
+To save the current page on the batch window, select the <b> 'File' </b> menubar item 
+<font color="blue"><a href="#figure4">(see Figure 4)</a></font>, then choose the <b> 'Save as' </b>
+menu item to save it as a .csv file. <br />
+<b>Note: </b> The grid doesn't save the data array, fits, and the array residuals. As a result, the 'View (fit) Results' functionality 
+will be lost  when reloading the saved file.<br />
+
+<font color="red">Warning! To ensure accuracy of saved fit results, It is recommended to save the current grid 
+before modifying it . </font>
+</p>
+
+
+<h5><font color="blue"><a name="load_batch"> Open Batch Results </a></font></h5>
+<p>
+Any <b> csv </b> file can be opened in the grid by selecting the <b> 'Open' </b> 
+under the <b> 'File' </b> menu in the Grid Window <font color="blue"><a href="#figure4">(see Figure 4)</a></font>. 
+All columns in the file will be displayed but insertion will not available. 
+Insertion will be available only when at least one column will be
+removed from the grid.
+
+<br /><img src="file_menu.bmp" /><br /><br />
+<a name="figure4"><u>Figure 4: MenuBar</u></a><br />
+</p>
+
+
+<h5><font color="blue"><a name="plot"> Plot </a></font></h5>
+<p>
+To <b> plot </b> a column versus another,
+select one column at the time, click the <b> 'Add' </b> button next to the text control
+ of X/Y -axis <b> Selection Range </b>
+to plot the value of this column on the X/Y axis. Alternatively, all available range can be selected by clicking the column letter (eg. B).
+Repeat the same procedure the next axis. Finally, click the <b> 'Plot' </b> button. 
+When clicking on <b> Add </b> button, the grid
+will automatically fill the axis label, but  different labels and units can be 
+entered  in the correct controls before clicking 
+on the plot button.<br />
+<b>X/Y -Axis Selection Range </b> can be edited manually. These text controls 
+allows the following types of expression:<br />
+
+operation can be <font color="#00CC33"><b>+</b></font>,<font color="#00CC33">
+<b> -</b></font>, <font color="#00CC33"><b>*</b></font>, 
+<font color="#00CC33"><b>/</b></font>, or <font color="#00CC33">pow</font>.<br /> <br />
+
+1) if the current axis label range is a function of 1 or more columns,
+ write this type of expression: <br />
+constant1  * <font color="#CC9933">column_name1</font>
+<font color="blue">[minimum row index :  maximum  row index]</font> 
+<font color="#00CC33">operator</font>  constant2 <font color="#00CC33">
+<b>*</b></font> <font color="#CC9933">column_name2</font>
+<font color="blue">[minimum row index :  maximum  row index]</font> <br />
+Example : <font color="#CC9933">radius</font>[2 : 5]<font color="#00CC33"><big><
+b> -</b></big></font> 3 <font color="#00CC33"><b>*</b></font>
+ <font color="#CC9933">scale</font>[2 : 5] <br /><br />
+
+2) if only some values of a given column are need but the range between 
+the first row and the last row used is not continuous,<br />write
+the following expression in the text control: <br />
+<font color="#CC9933">column_name1</font>
+<font color="blue">[minimum row index1 :  maximum  row index1]</font>
+<font color="#00CC33"><big><b> , </b></big></font> 
+<font color="#CC9933">column_name1</font>
+<font color="blue">[minimum row index2 :  maximum  row index2]</font> <br />
+Example : <font color="#CC9933">radius </font><font color="blue"> [2 : 5] </font>
+<font color="#00CC33"><big><b> , </b></big></font><font color="#CC9933">radius </font>
+ <font color="blue">[10 : 25] </font><br /><br />
+
+
+<b>Note: </b>Both text controls ( X and Y-axis Selection Ranges) need to be filled 
+with valid entries for plotting to work (the dY-bar is optional) 
+<font color="blue"><a href="#figure5">(see Figure 5)</a></font>.
+
+<br /><br /><img src="plot_button.bmp" /><br /><br />
+<a name="figure5"><u>Figure 5: Plotting</u></a><br />
+
+</p>
+
+
+<h5><font color="blue"><a name="view"> View Column/Cell(s) </a></font></h5>
+<p>
+Select 1 or more cells from the same column, click the <b> 'View Fits' </b>
+button  to display available curves. <br />
+
+For example, select the cells of the <b> 'Chi2' </b> column, then click the <b> 'View Fits' </b> 
+button. The plots generates will represent the <b>residuals </b> plots. <br />
+ 
+
+If you select any cells of the <b> 'Data' </b> column and click the
+<b> 'View Fits' </b> button. It generates both
+<b> data and fits</b> in the graph <font color="blue"><a href="#figure6">(see Figure 6)</a></font>. <br />
+
+<b>Alternatively, just click the column letter (eg. B) 
+to choose all the available Data sets, then simply click the 'View Fits' button to plot the data and fits. 
+</b>
+<br />
+<br /><br /><img src="view_button.bmp" /><br /><br />
+<a name="figure6"><u>Figure 6: View Fits</u></a><br /><br />
+</p>
+
+
+</body>
+</html>

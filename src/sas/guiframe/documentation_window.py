@@ -1,21 +1,41 @@
+import os
+import logging
 import wx
 from wx import Frame
-
+import webbrowser
 wx_supports_html2 = float(wx.__version__[:3]) >= 2.9
 if wx_supports_html2:
     import wx.html2 as html
 else:
     import wx.html as html
 
+   
 class DocumentationWindow(Frame):
     def __init__(self, parent, id, path, title='Help', size=(850, 540)):
         Frame.__init__(self, parent, id, title, size=size)
 
-        if wx_supports_html2:
+        SPHINX_DOC_ENV = "SASVIEW_DOC_PATH"
+        if SPHINX_DOC_ENV in os.environ:
+            docs_path = os.path.join(os.environ[SPHINX_DOC_ENV])
+        else:
+            docs_path = os.path.join(PATH_APP, "..", "..", "doc")
+
+        if (not os.path.exists(docs_path)):
+            print "logging"
+            logging.error("Could not find Sphinx documentation at %s \
+            -- has it been built?", docs_path)
+
+        elif wx_supports_html2:
             # Complete HTML/CSS support!
             self.view = html.WebView.New(self)
-            self.view.LoadURL("file://" + path)
-        else:
-            # This ain't gonna be pretty...
-            self.view = html.HtmlWindow(self, -1, style=wx.NO_BORDER)
-            self.view.LoadPage(path)
+            self.view.LoadURL("file://" + docs_path + '\\' + path)
+            self.Show()
+        else: 
+            #For cases that do not build against current version dependency
+            # Wx 3.0 we provide a webbrowser call - this is particularly for 
+            #Red hat used at SNS for which Wx 3.0 is not available.  This
+            #does not deal with issue of math in docs of course. 
+
+            webbrowser.open_new_tab("file:///" + docs_path + "/" + path)
+
+ 

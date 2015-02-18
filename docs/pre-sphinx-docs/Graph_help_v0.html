@@ -1,0 +1,122 @@
+<html>
+<body>
+
+<h4>Graph Menu</h4>
+<ul>
+<li><a href="#intro">Introduction</a></li>
+<li><a href="#reset">Reset Graph</a></li>
+<li><a href="#hide">Hide/Show/Delete Graph</a></li>
+<li><a href="#info">Data Info</a></li>
+<li><a href="#save">Save plot Image</a></li>
+<li><a href="#savedata">Save Data</a></li>
+<li><a href="#drag">Drag plot</a></li>
+<li><a href="#zoom">Zoom In/Out</a></li>
+<li><a href="#remove">Remove Data</a></li>
+<li><a href="#scale">Change Scale</a></li>
+<li><a href="#linearfit">Linear Fit</a></li>
+<li><a href="#modify">Other Graph Modifications</a></li>
+</ul>
+
+<h5><a name="intro">Introduction</a></h5>
+<p> 
+	Locating the pointer and right-clicking on a data/theory plot will bring a context menu.
+	On the menu, select a menu item. 
+</p>
+
+<h5><a name="reset">Reset Graph</a></h5>
+<p>
+	To reset the graph's axis range, right click on the plot and the context menu pops-up.
+	Select <b>Reset Graph</b> and the plot will take its initial range. 
+	Also the 'home' icon in tool bar will do the same.
+</p>
+
+<h5><a name="hide">Hide/Show/Delete Graph</a></h5>
+<p>
+	To Hide, click the Hide (bar) button in the tool bar.<br>
+	To Show, select the the 'Show' menuitem in the 'Graph' menu in the menu bar.<br>
+	To Delete, click the 'x' button in the title bar.<br>
+	Note: If a residuals graph (in Fitting) is hidden, it will not show up after computation.
+</p>
+
+<h5><a name="save"> Save Plot Image</a></h5>
+<p>
+	Right click on plot. Context menu will pop-up select save image [file name].A dialog
+	window opens and write a the name of the file to save and click on <b>Save Image.</b>
+</p>
+
+<h5><a name="info"> Data Info</a></h5>
+<p>
+	From the context menu, select 'Data Info' to see the data information dialog panel.
+</p>
+
+<h5><a name="savedata"> Save Data</a></h5>
+<p>
+	From the context menu, select 'Save points as a file' for 1D, or 'Save as a file(DAT)'
+	for 2D. Note that two formats, txt and xml, are available in 1D saving.
+</p>
+
+
+<h5><a name="drag"> Drag Plot</a></h5>
+<p>
+Select the <b>crossed arrows</b>  button on the plot panel <b>toolbar </b> to drag the plot.
+To disable dragging mode, unselect the same button on the toolbar.
+</p>
+
+<h5><a name="remove">Remove data from plot</a></h5>
+<p>
+	Highlight the plot and the context menu appears.Select <b>remove [file name]</b>.
+	The plot selected will disappear.
+</p>
+
+<h5><a name="zoom">Zoom In/Out</a></h5>
+<p>
+ Select the <b>rectangle</b>  button on the plot panel <b>toolbar </b> to zoom in
+ a region of the plot.
+</p>
+<p>
+To disable zoom mode, unselect the same button on the toolbar. 
+After zoom in a region, select <b>left arrow</b> or <b>right arrow</b>button on the toolbar
+to set the graph the the previous size.
+If a mouse wheel button is available, <b>zoom in/out</b> by scrolling the mouse wheel
+ ( see 'Key combination' help for details).
+</p>
+<h5><a name="scale">Change Scale</a></h5>
+<p>
+	If the loaded data is a 1-D data.Changing scale or Data Representation will work as
+	followed:<b>right click</b> on the plot window.
+	A context menu pops-up  and select <b>Change Scale</b>. A dialog window titled<b>
+	select the scale of the graph</b> will pop-up then change the <b>x</b>, the <b>y</b>
+	and the <b>view </b> values as wish.
+	The 'view' option includes the axis scale short-cuts such as Linear, Guinier, Cross-sectional (XC)
+	Guinier, and Porod plot scale.  For a proper data set, these axis scales can be used to estimate 
+	Rg, Rod diameter, or Backgroud of neutron scattering data respectively (via 'Linear Fit'; see below).
+	<br>
+	For a 2D image, <b>Right click</b> on the image to pop-up the context
+	menu. Select <Toggle linear/Log scale> to switch from linear to log scale. The scale 
+	selected is printed on the statusbar.
+	
+</p>
+
+<h5><a name="linearfit">Linear Fit</a></h5>
+<p>
+	Linear fit is to perform a line model fitting keeping the scale of the plot. 
+	Highlight data to fit. 
+	From the context menu
+	select <b> Linear Fit</b>.A dialog window appears.
+	Change model initial parameters, data limits
+	and hit <b> fit</b> button. 
+	New parameters values are displayed and the line with the new 
+	parameters is added to the plot.
+	Especially for Guinier, XC Guinier, and Porod plot scale, this 'Linear Fit' will provides Rg, 
+	Rod diameter, and background, respectively.  The following figure shows an example for the Guinier scale. 
+	</p>
+	<br>
+	<img src="guinier_fit.png" /><br>
+	<br>
+
+<h5><a name="modify">Other Graph Modifications</a></h5>
+<p>
+	Some custom modifications of the symbols, text, axis, etc of the graph are provided
+</p>
+</body>
+</html>
