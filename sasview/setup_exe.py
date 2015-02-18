@@ -291,7 +291,17 @@ for f in findall(media_dir):
 for f in findall(test_dir):
     if not ".svn" in f:
         data_files.append(("test", [f]))
-        
+
+# See if the documentation has been built, and if so include it.
+doc_path = os.path.join(build_path, "doc")
+if os.path.exists(doc_path):
+    for dirpath, dirnames, filenames in os.walk(doc_path):
+        for filename in filenames:
+            sub_dir = os.path.join("doc", os.path.relpath(dirpath, doc_path))
+            data_files.append((sub_dir, [os.path.join(dirpath, filename)]))
+else:
+    raise Exception("You must first build the documentation before creating an installer.")
+
 if py26MSdll != None:
     # install the MSVC 9 runtime dll's into the application folder
     data_files.append(("Microsoft.VC90.CRT", py26MSdll))
