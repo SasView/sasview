@@ -9,7 +9,6 @@
 .. The RectangularPrism models were coded and documented by M A Gonzalez, ILL, Apr 2014
 
 .. To do:
-.. Remove the 'This is xi' & 'This is zeta' lines before release!
 .. Add example parameters/plots for the CoreShellEllipsoidXTModel
 .. Add example parameters/plots for the RectangularPrism models
 .. Check the content against the NIST Igor Help File
@@ -19,6 +18,8 @@
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+
+.. note::  The contents of this document are awaiting proof reading. Feb2015
 
 
 .. Set up some substitutions to make life easier...
