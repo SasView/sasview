@@ -25,22 +25,21 @@ class DocumentationWindow(Frame):
             # (non - run.py) way.
             docs_path = os.path.join(PATH_APP, "doc")
 
+        file_path = "file:///" + docs_path + "/" + path
+
         if not os.path.exists(docs_path):
             logging.error("Could not find Sphinx documentation at %s \
             -- has it been built?", docs_path)
-
         elif wx_supports_html2:
             # Complete HTML/CSS support!
             self.view = html.WebView.New(self)
-            self.view.LoadURL("file://" + docs_path + '\\' + path)
+            self.view.LoadURL(file_path)
             self.Show()
         else: 
             #For cases that do not build against current version dependency
             # Wx 3.0 we provide a webbrowser call - this is particularly for 
             #Red hat used at SNS for which Wx 3.0 is not available.  This
             #does not deal with issue of math in docs of course. 
-
-            webbrowser.open_new_tab("file:///" + docs_path + "/" + path)
-            print ("file:///" + docs_path + "/" + path)
+            webbrowser.open_new_tab(file_path)
 
  
