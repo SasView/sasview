@@ -9,6 +9,7 @@ pip install bumps comtypes periodictable
 cat >> ~vagrant/.bashrc <<EOF
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
+export LC_CTYPE=en_US.UTF-8
 sasview-compile() {
 cd /vagrant
 sh ./build_tools/jenkins_linux_build.sh
