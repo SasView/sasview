@@ -1350,6 +1350,11 @@ class ViewerFrame(PARENT_FRAME):
             self._help_menu.Append(id, '&Tutorial', 'Software tutorial')
             wx.EVT_MENU(self, id, self._onTutorial)
             
+        if config._do_acknowledge:
+            self._help_menu.AppendSeparator()
+            self._help_menu.Append(id, '&Acknowledge', 'Acknowledging SasView')
+            wx.EVT_MENU(self, id, self._onAcknowledge)
+        
         if config._do_aboutbox:
             self._help_menu.AppendSeparator()
             self._help_menu.Append(wx.ID_ABOUT, '&About', 'Software information')
@@ -2097,6 +2102,18 @@ class ViewerFrame(PARENT_FRAME):
                 msg += " Please try again later."
                 self.SetStatusText(msg)
                     
+    def _onAcknowledge(self, evt):
+        """
+        Pop up the acknowledge dialog
+        
+        :param evt: menu event
+        
+        """
+        if config._do_acknowledge:
+            import sas.guiframe.acknowledgebox as AcknowledgeBox
+            dialog = AcknowledgeBox.DialogAcknowledge(None, -1, "")
+            dialog.ShowModal()
+                     
     def _onAbout(self, evt):
         """
         Pop up the about dialog
