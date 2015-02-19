@@ -28,11 +28,10 @@ How To
 
 1) Select *Image Viewer* from the *Tool* menu on the SasView toolbar.
 
-2) Select a file and then click *Open*.
+2) Select a file and then click *Open*. If the loading is successful the image 
+   will be displayed.
 
 .. image:: load_image.bmp
-
-   If the loading is successful the image will be displayed.
 
 3) To save, print, or copy the image, or to apply a grid overlay, right-click 
    anywhere in the plot.
