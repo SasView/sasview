@@ -1,15 +1,21 @@
 This software was originally developed by the University of Tennessee 
 as part of the Distributed Data Analysis of Neutron Scattering 
 Experiments (DANSE) project funded by the US National Science Foundation
-and is currently being developed as an open source project hosted at SourceForge
-and managed by a consortium of scattering facilities.  Participating facilities
-include: The University of Maryland, The European Spallation Source, ISIS, The Institut Laue Langevin, 
-The National Institute of Standards and Technology Center for Neutron Research 
-and the Oak Ridge National Laboratory Neutron Sciences Directorate.
+and is currently being developed as an open source project hosted on GitHub
+and managed by a consortium of scattering facilities.
+
+Participating facilities include: the University of Tennessee, the University 
+of Maryland, the European Spallation Source, the National Institute of 
+Standards & Technology Center for Neutron Research, the Oak Ridge National 
+Laboratory Neutron Sciences Directorate, the ISIS Neutron & Muon Source, the 
+Institut Laue Langevin, the Diamond Light Source, and Delft University of 
+Technology.
 
 If you use this application to do scientific research that leads to publication, 
-we ask that you acknowledge the use of the software with the following sentence:
+we kindly ask that you acknowledge the use of the software with the following 
+sentence:
 
-"This work benefited from the use of the SasView application, originally developed under NSF award DMR-0520547." 
+*"This work benefited from the use of the SasView application, originally 
+developed under NSF award DMR-0520547."*
 
-copyright 2009-2011, UTK, UMD, NIST, ORNL, ISIS, ESS, and ILL
+(C) 2009-2015 UTK, UMD, ESS, NIST, ORNL, ISIS, ILL, DLS, DUT
