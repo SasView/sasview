@@ -16,7 +16,7 @@ class SlicerPanel(wx.Panel, PanelBase):
     """
     #TODO: show units
     #TODO: order parameters properly
-     ## Internal name for the AUI manager
+    ## Internal name for the AUI manager
     window_name = "Slicer panel"
     ## Title to appear on top of the window
     window_caption = "Slicer Panel"
@@ -75,7 +75,8 @@ class SlicerPanel(wx.Panel, PanelBase):
             self.bck.Add(title, (0, 0), (1, 2), 
                          flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
         else:
-            title = wx.StaticText(self, -1, "Slicer Parameters", 
+            title_text = str(type) + "Parameters"
+            title = wx.StaticText(self, -1, title_text, 
                                   style=wx.ALIGN_LEFT)
             self.bck.Add(title, (0, 0), (1, 2), 
                          flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
@@ -124,8 +125,9 @@ class SlicerPanel(wx.Panel, PanelBase):
         
     def onSetFocus(self, evt):
         """
-        Hightlight the textcrtl
+        Highlight the txtcrtl
         """
+        evt.Skip()
         # Get a handle to the TextCtrl
         widget = evt.GetEventObject()
         # Select the whole control, after this event resolves
@@ -146,7 +148,8 @@ class SlicerPanel(wx.Panel, PanelBase):
     def onTextEnter(self, evt): 
         """
         Parameters have changed
-        """ 
+        """
+        evt.Skip()
         params = {}
         has_error = False
         for item in self.parameters:

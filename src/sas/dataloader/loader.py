@@ -362,7 +362,6 @@ class Loader(object):
         :param format: specified format to use (optional)
         :return: DataInfo object
         """
-        print self.__registry.extensions
         return self.__registry.load(file, format)
     
     def save(self, file, data, format):

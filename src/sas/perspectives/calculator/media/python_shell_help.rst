@@ -22,7 +22,7 @@ However, some functionality may not work.
 
 PyCrust has its own Help.
 
-*NOTE! Help() and Credits() do not work on Macs.*
+*NOTE! The Help() and Credits() calls do not work on Macs.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
