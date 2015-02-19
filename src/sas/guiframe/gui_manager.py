@@ -1352,9 +1352,10 @@ class ViewerFrame(PARENT_FRAME):
             
         if config._do_acknowledge:
             self._help_menu.AppendSeparator()
+            id = wx.NewId()
             self._help_menu.Append(id, '&Acknowledge', 'Acknowledging SasView')
             wx.EVT_MENU(self, id, self._onAcknowledge)
-        
+        `
         if config._do_aboutbox:
             self._help_menu.AppendSeparator()
             self._help_menu.Append(wx.ID_ABOUT, '&About', 'Software information')
