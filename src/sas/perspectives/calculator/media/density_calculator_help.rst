@@ -18,13 +18,15 @@ should be provided.
 How To
 ------
 
-1) Enter the empirical formula of a molecule. For mixtures, the ratio of each 
+1) Select *Density/Volume Calculator* from the *Tool* menu on the SasView toolbar.
+
+2) Enter the empirical formula of a molecule. For mixtures, the ratio of each 
    of the molecules should be used, for example, (H2O)0.5(D2O)0.5.
 
-2) Use the input combo box to choose between molar volume or mass density and 
+3) Use the input combo box to choose between molar volume or mass density and 
    then type in an input value.
 
-3) Click the 'Calculate' button to perform the calculation.
+4) Click the 'Calculate' button to perform the calculation.
 
 .. image:: density_tutor.gif
 

@@ -3,58 +3,70 @@
 .. This is a port of the original SasView html help file to ReSTructured text
 .. by S King, ISIS, during SasView CodeCamp-III in Feb 2015.
 
+.. |pi| unicode:: U+03C0
+.. |lambda| unicode:: U+03BB
+.. |Ang| unicode:: U+212B
+
 Q Resolution Estimator
 ======================
 
 Description
 -----------
 
-This tool is to approximately estimate the resolution of Q based on the SAS 
-instrumental parameter values assuming that the detector is flat and vertical 
-to the incident beam direction.
+This tool is approximately estimates the resolution of Q from SAS instrumental 
+parameter values assuming that the detector is flat and normal to the 
+incident beam.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 How To
 ------
 
-1. Select the source and source type (Monochromatic or TOF). Note that the 
-computational difference between the sources is only the gravitational 
-contribution due to the mass.
+1) Select *SAS Resolution Esimator* from the *Tool* menu on the SasView toolbar.
 
-2. Change the default values of the instrumental parameters as desired.
+2) Select the source (Neutron or Photon) and source type (Monochromatic or TOF).
 
-3. The input formats of wavelength and its spread (=FWHM/wavelength) depend on 
-the source type.For monochromatic wave, the inputs are just one values as shown 
-with the defaults.For TOF, the min and max values should be separated by "-" 
-to describe the wavelength band range. Optionally, the input of the wavelength 
-(NOT of the wavelength spread) could be extended by adding "; --" where the -- 
-is the number of the bins for the numerical integration. Otherwise, the 
-default value "10" bins will be used. The same number of bins will be used 
-for the corresponding wavelength spread in either cases.
+   *NOTE! The computational difference between the sources is only the 
+   gravitational contribution due to the mass of the particles.*
 
-4. For TOF, the default wavelength spectrum is flat. The custom spectrum file 
-(with 2 column text: wavelength(A) vs. intensity) can also be loaded by 
-selecting "Add new" in the combobox.
+3) Change the default values of the instrumental parameters as required. Be 
+   careful to note that distances are specified in cm!
 
-5. Once set all the input values, click the compute button. Depending on 
-computation loads the calculation time will vary.
+4) Enter values for the source wavelength(s) and its spread (= FWHM / wavelength).
+   
+   For monochromatic sources, the inputs are just one value. For TOF sources, 
+   the minimum and maximum values should be separated by a '-' to specify a 
+   range.
+   
+   Optionally, the wavelength (BUT NOT of the wavelength spread) can be extended 
+   by adding '; nn' where the 'nn' specifies the number of the bins for the 
+   numerical integration. The default value is nn = 10. The same number of bins 
+   will be used for the corresponding wavelength spread.
 
-6. 1D and 2D dQ will be displayed in the text-box at the bottom of the panel. 
-Two dimensional resolution weight distribution (2D elliptical Gaussian 
-function) will also be displayed in the plot panel even if the Q inputs are 
-outside of the detector limit. The red lines indicate the limits of the 
-detector (if a green lines appear (for TOF), it indicates the limits of the 
-maximum q range for the largest wavelength due to the size of the detector). 
-Note that the effect from the beam block is ignored, so in the small q region 
-near the beam block 
+5) For TOF, the default wavelength spectrum is flat. A custom spectral 
+   distribution file (2-column text: wavelength (|Ang|\) vs Intensity) can also 
+   be loaded by selecting *Add new* in the combo box.
 
-[ie., q<2*pi*(beam block diameter) / (sample to detector distance) / lamda_min] 
+6) When ready, click the *Compute* button. Depending on the computation the 
+   calculation time will vary.
 
-the variance is slightly under estimated.
+7) 1D and 2D dQ values will be displayed at the bottom of the panel, and a 2D 
+   resolution weight distribution (a 2D elliptical Gaussian function) will also 
+   be displayed in the plot panel even if the Q inputs are outside of the 
+   detector limit (the red lines indicate the limits of the detector).
+   
+   TOF only: green lines indicate the limits of the maximum Q range accessible 
+   for the longest wavelength due to the size of the detector.
+    
+   Note that the effect from the beam block/stop is ignored, so in the small Q 
+   region near the beam block/stop 
 
-7. The summary can be accessed by clicking the 'light-bulb' icon at the bottom 
-of the SasView main window.
+   [ie., Q < 2*|pi|\*(beam block diameter) / (sample-to-detector distance) / |lambda|\_min] 
+
+   the variance is slightly under estimated.
+
+8) A summary of the calculation is written to the SasView *Console* at the 
+   bottom of the main SasView window.
 
 .. image:: resolution_tutor.gif
 
@@ -67,24 +79,29 @@ The scattering wave transfer vector is by definition
 
 .. image:: q.gif
 
-In the limit of the small angle, the variance of q in the first order 
-approximation is
+In the small-angle limit, the variance of Q is to a first-order 
+approximation
 
 .. image:: sigma_q.gif
 
-In summary, the geometric and gravitational contributions depending on the 
-shape of each factors can be expressed as shown the table.
+The geometric and gravitational contributions can then be summarised as
 
 .. image:: sigma_table.gif
 
-Finally, we use a Gaussian function to describe the 2D weighting distribution 
-of the uncertainty in q.
+Finally, a Gaussian function is used to describe the 2D weighting distribution 
+of the uncertainty in Q.
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 References
 ----------
-D.F.R. Mildner and J.M. Carpenter, J. Appl. Cryst. 17, 249-256 (1984)
 
-D.F.R. Mildner, J.M. Carpenter and D.L. Worcester, J. Appl. Cryst. 19, 311-319 
-(1986)
+D.F.R. Mildner and J.M. Carpenter 
+*J. Appl. Cryst.* 17 (1984) 249-256
+
+D.F.R. Mildner, J.M. Carpenter and D.L. Worcester 
+*J. Appl. Cryst.* 19 (1986) 311-319
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note::  This help document was last changed by Steve King, 19Feb2015
