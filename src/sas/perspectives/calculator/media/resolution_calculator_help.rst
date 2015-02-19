@@ -22,7 +22,7 @@ incident beam.
 How To
 ------
 
-1) Select *SAS Resolution Esimator* from the *Tool* menu on the SasView toolbar.
+1) Select *SAS Resolution Estimator* from the *Tool* menu on the SasView toolbar.
 
 2) Select the source (Neutron or Photon) and source type (Monochromatic or TOF).
 
@@ -32,7 +32,7 @@ How To
 3) Change the default values of the instrumental parameters as required. Be 
    careful to note that distances are specified in cm!
 
-4) Enter values for the source wavelength(s) and its spread (= FWHM / wavelength).
+4) Enter values for the source wavelength(s), |lambda|\ , and its spread (= FWHM/|lambda|\ ).
    
    For monochromatic sources, the inputs are just one value. For TOF sources, 
    the minimum and maximum values should be separated by a '-' to specify a 
@@ -61,7 +61,7 @@ How To
    Note that the effect from the beam block/stop is ignored, so in the small Q 
    region near the beam block/stop 
 
-   [ie., Q < 2*|pi|\*(beam block diameter) / (sample-to-detector distance) / |lambda|\_min] 
+   [ie., Q < 2. |pi|\ .(beam block diameter) / (sample-to-detector distance) / |lambda|\_min] 
 
    the variance is slightly under estimated.
 

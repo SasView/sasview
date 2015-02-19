@@ -13,7 +13,7 @@ Description
 
 The neutron scattering length density is defined as
 
-SLD = (b_c1 + b_c2 + ... + b_cn) / Vm
+  SLD = (b_c1 + b_c2 + ... + b_cn) / Vm
 
 where 
 
@@ -30,6 +30,8 @@ compound and its mass density and click "Calculate".
 
 Entering a wavelength value is optional (a default value of 6.0 |Ang| will 
 be used).
+
+TIPS!
 
 *  Formula strings consist of atoms and the number of them, such as "CaCO3+6H2O".
 
@@ -51,3 +53,8 @@ be used).
 
 *  Type "C[13]6 H[2]12 O[18]6" for C(13)6H(2)12O(18)6 (6 Carbon-13 atoms, 12 
    deuterium atoms, and 6 Oxygen-18 atoms).
+   
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note::  This help document was last changed by Steve King, 19Feb2015
+
