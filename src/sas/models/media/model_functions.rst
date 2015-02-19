@@ -9,7 +9,6 @@
 .. The RectangularPrism models were coded and documented by M A Gonzalez, ILL, Apr 2014
 
 .. To do:
-.. Remove the 'This is xi' & 'This is zeta' lines before release!
 .. Add example parameters/plots for the CoreShellEllipsoidXTModel
 .. Add example parameters/plots for the RectangularPrism models
 .. Check the content against the NIST Igor Help File
@@ -19,6 +18,8 @@
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
+
+.. note::  The contents of this document are awaiting proof reading. Feb2015
 
 
 .. Set up some substitutions to make life easier...
@@ -168,6 +169,7 @@ Sphere-based
 - FuzzySphereModel_
 - RaspBerryModel_
 - CoreShellModel_ (including magnetic 2D version)
+- MicelleSphCoreModel_
 - CoreMultiShellModel_ (including magnetic 2D version)
 - Core2ndMomentModel_
 - MultiShellModel_
@@ -3368,6 +3370,28 @@ Validation of the code was conducted  by qualitatively comparing the output of t
 REFERENCES
 
 R Nayuk and K Huber, *Z. Phys. Chem.*, 226 (2012) 837-854
+
+
+
+.. _MicelleSphCoreModel:
+
+**2.1.42. MicelleSphCoreModel**
+
+This model provides the form factor, *P(q)*, for a micelle with a spherical core 
+and Gaussian polymer chains attached to the surface.
+
+*2.1.42.1. Definition*
+
+The 1D scattering intensity for this model is calculated according to the equations given by Pedersen
+(Pedersen, 2000).
+
+*2.1.42.2. Validation of the MicelleSphCoreModel*
+
+This model has not yet been validated. Feb2015
+
+REFERENCES
+
+J Pedersen, *J. Appl. Cryst.*, 33 (2000) 637-640
 
 
 

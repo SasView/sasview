@@ -90,7 +90,8 @@ def register_readers(registry_function):
     import red2d_reader
     #import tiff_reader
     import nexus_reader
-
+    import sesans_reader
+    registry_function(sesans_reader)
     registry_function(abs_reader)
     registry_function(ascii_reader)
     registry_function(cansas_reader)

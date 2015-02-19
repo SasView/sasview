@@ -15,6 +15,8 @@ from sas.perspectives.calculator.calculator_widgets import InputTextCtrl
 from sas.dataloader.data_info import Data2D
 from sas.dataloader.data_info import Detector
 from sas.dataloader.manipulations import reader2D_converter
+from sas.guiframe.documentation_window import DocumentationWindow
+
 _BOX_WIDTH = 60
 IS_WIN = True
 if sys.platform.count("win32") > 0:
@@ -58,7 +60,6 @@ class ImageView:
                 is_png = extension.lower() == '.png'
                 plot_frame = ImageFrame(parent, -1, basename, img)
                 plot_frame.Show(False)
-                #plot_frame.im_show(img)
                 ax = plot_frame.plotpanel
                 if not is_png:
                     ax.subplot.set_ylim(ax.subplot.get_ylim()[::-1])
@@ -72,39 +73,22 @@ class ImageView:
                     parent.put_icon(plot_frame)
             except:
                 print "parent", parent
-                raise
                 err_msg += "Failed to load '%s'.\n"% basename
         if err_msg:
             if parent is not None:
                 wx.PostEvent(parent, StatusEvent(status=err_msg, info="error"))
             else:
                 print err_msg
-
         
     def choose_data_file(self, location=None):
         """
         Open a file dialog to allow loading a file
         """
-        parent = self.parent
         path = None
         if location == None:
             location = os.getcwd()
-        wlist = ''
-        elist = ["All images (*.png, *.bmp, *.gif, *.jpg, *.tif, *.tiff) | \
-                *.png; *.bmp; *.gif; *.jpg; *.tif; *.tiff", 
-                "PNG files (*.PNG, *.png) | *.png", 
-                "BMP files (*.BMP, *.bmp) | *.bmp", 
-                "GIF files (*.GIF, *.gif) | *.gif",
-                "JPG files (*.JPG, *.jpg) | *.jpg",
-                "TIF files (*.TIF, *.tif) | *.tif",
-                "TIFF files (*.TIFF, *.tiff) | *.tiff"]
-        if not IS_WIN:
-            del elist[0]
-        elist.append("All files (*.*) | *.*")
-        wlist = '|'.join(elist)        
-        style = wx.OPEN|wx.FD_MULTIPLE
-        dlg = wx.FileDialog(parent, "Image Viewer: Choose a image file", 
-                            location, "", wlist, style=style)
+        dlg = wx.FileDialog(self.parent, "Image Viewer: Choose a image file", 
+                            location, "", "", style=wx.FD_OPEN|wx.FD_MULTIPLE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPaths()
         else:
@@ -155,28 +139,19 @@ class ImageFrame(PlotFrame):
         self.panel.ShowModal()
 
     def on_help(self, event):    
+        """       
+        Bring up Image Viewer Documentation from the image viewer window 
+        whenever the help menu item "how to" is clicked. Calls 
+        DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  
+        
+        :param evt: Triggers on clicking "how to" in help menu
         """
-        Image Viewer help panel
-        """
-        from sas.perspectives.calculator.help_panel import  HelpWindow
-        # Get models help model_function path
-        import sas.perspectives.calculator as calmedia
-
-        media = calmedia.get_data_path(media='media')
-        path = os.path.join(media,"load_image_help.html") 
-        name = "Image Viewer"
-        frame = HelpWindow(self, -1, title=' Help: Image Viewer',  
-                           pageToOpen=path, size=(640, 450))   
-        try: 
-            frame.splitter.DetachWindow(frame.lpanel)
-            # Display only the right side one
-            frame.lpanel.Hide() 
-            frame.Show(True)
-        except:
-            frame.Destroy() 
-            msg = 'Display Error\n'
-            info = "Info"
-            wx.MessageBox(msg, info)
+                
+        _TreeLocation = "user/perspectives/calculator/image_viewer_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, \
+             _TreeLocation,"Image Viewer Help")
+        
             
 class SetDialog(wx.Dialog):
     """
