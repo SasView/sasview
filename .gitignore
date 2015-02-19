@@ -11,6 +11,7 @@
 
 .project
 .pydevproject
+.vagrant
 build
 dist
 sasview.egg-info
@@ -19,7 +20,7 @@ sasview.egg-info
 doctrees
 html
 build
-
+sasview-install
 docs/sphinx-docs
 
 **/test/logs
