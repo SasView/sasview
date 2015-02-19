@@ -18,7 +18,6 @@ should be provided.
 How To
 ------
 
-
 1) Select *Density/Volume Calculator* from the *Tool* menu on the SasView toolbar.
 
 2) Enter the empirical formula of a molecule. For mixtures, the ratio of each 
