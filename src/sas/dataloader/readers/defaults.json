@@ -6,6 +6,10 @@
             "-reader":"cansas_reader"
          },
          {
+            "-extension":".ses",
+            "-reader":"sesans_reader"
+         },
+         {
             "-extension":".txt",
             "-reader":"ascii_reader"
          },

@@ -25,6 +25,8 @@ from sas.dataloader.data_info import Detector
 from sas.dataloader.data_info import Source
 from sas.perspectives.fitting.pagestate import PageState
 from sas.guiframe.CategoryInstaller import CategoryInstaller
+from sas.guiframe.documentation_window import DocumentationWindow
+
 
 (PageInfoEvent, EVT_PAGE_INFO) = wx.lib.newevent.NewEvent()
 (PreviousStateEvent, EVT_PREVIOUS_STATE) = wx.lib.newevent.NewEvent()
@@ -2915,57 +2917,72 @@ class BasicPage(ScrolledPanel, PanelBase):
         # return the list of graphs
         return graphs, canvases
 
-    def on_model_help_clicked(self, event):
+    def on_function_help_clicked(self, event):
         """
-        Function called when 'Details' button is pressed next to model
-        of interest.  As of Feb 2015 this function follows two paths:
-        For regular models that ship with the release, it calls the Sphinx
-        generated html documentation.  For plugin models it still uses the
-        old pop up window reading the description provided in the model.
+        Function called when 'Help' button is pressed next to model
+        of interest.  This calls DocumentationWindow from 
+        documentation_window.py. It will load the top level of the model
+        help documenation sphinx generated html if no model is presented.
+        If a model IS present then if documention for that model exists
+        it will load to that  point otherwise again it will go to the top.
+        For Wx2.8 and below is used (i.e. non-released through installer)
+        a browser is loaded and the top of the model documentation only is
+        accessible because webbrowser module does not pass anything after
+        the # to the browser.
         
-        This will presumably be deprecated when the sas mdels team decides
-        on how to discover new models and grab their documentation from the
-        file.
-        
-        PDB 18 Feb 2015
-        
-        :param evt: on Details Button pressed event
+        :param evt: on Help Button pressed event
         """
-        from sas.perspectives.fitting.help_panel import  HelpWindow
-        from sas.models import get_data_path
-        
-        # Get models help model_function path
-        path = get_data_path(media='media')
-        model_path = os.path.join(path, "model_functions.html")
+
         if self.model == None:
             name = 'index.html'
         else:
             name = self.formfactorbox.GetValue()
-        frame = HelpWindow(None, -1, pageToOpen=model_path)
-        #If model name exists and model is not a custom model
-        #mod_cat = self.categorybox.GetStringSelection()
-        if frame.rhelp.HasAnchor(name):
-            frame.Show(True)
-            frame.rhelp.ScrollToAnchor(name)
+
+        if self.model != None:  
+            _docspath='user/models/model_functions.html#' + name
+            _doc_viewer = DocumentationWindow(self, -1, _docspath, name + "Help")
         else:
-            if self.model != None:
-                frame.Destroy()
-                msg = 'Model description:\n'
-                if str(self.model.description).rstrip().lstrip() == '':
-                    msg += "Sorry, no information is available for this model."
-                else:
-                    msg += self.model.description + '\n'
-                info = "Info"
-                wx.MessageBox(msg, info)
+            _doc_viewer = DocumentationWindow(self, -1, "index.html", \
+                                                "General Help")
+
+
+    def on_model_help_clicked(self, event):
+        """
+        Function called when 'Description' button is pressed next to model
+        of interest.  This calls the Description embedded in the model. This
+        should work with either Wx2.8 and lower or higher. If no model is
+        selected it will give the message that a model must be chosen first
+        in the box that would normally contain the description.  If a badly
+        behaved model is encountered which has no description then it will
+        give the message that none is available.
+        
+        :param evt: on Description Button pressed event
+        """
+
+        if self.model == None:
+            name = 'index.html'
+        else:
+            name = self.formfactorbox.GetValue()
+
+        msg = 'Model description:\n'
+        info = "Info"
+        if self.model != None:
+#                frame.Destroy()
+            if str(self.model.description).rstrip().lstrip() == '':
+                msg += "Sorry, no information is available for this model."
             else:
-                frame.Show(True)
+                msg += self.model.description + '\n'
+            wx.MessageBox(msg, info)
+        else:
+            msg += "You must select a model to get information on this"
+            wx.MessageBox(msg, info)
 
     def _on_mag_help(self, event):    
         """
         Bring up Magnetic Angle definition bmp image whenever the ? button 
         is clicked. Calls DocumentationWindow with the path of the location 
         within the documentation tree (after /doc/ ....". When using old 
-        versions of Wx When (i.e. before 2.9 and therefore not part of release
+        versions of Wx (i.e. before 2.9 and therefore not part of release
         versions distributed via installer) it brings up an image viewer
         box which allows the user to click through the rest of the images in 
         the directory.  Not ideal but probably better than alternative which
@@ -2975,8 +2992,6 @@ class BasicPage(ScrolledPanel, PanelBase):
         
         :param evt: Triggers on clicking ? in Magnetic Angles? box
         """
-        
-        from sas.guiframe.documentation_window import DocumentationWindow
         
         _TreeLocation = "_images/M_angles_pic.bmp"
         _doc_viewer = DocumentationWindow(self, -1, \
@@ -3023,9 +3038,7 @@ class BasicPage(ScrolledPanel, PanelBase):
         
         :param evt: Triggers on clicking ? in polydispersity box
         """
-        
-        from sas.guiframe.documentation_window import DocumentationWindow
-        
+                
         _TreeLocation = "user/perspectives/fitting/fitting_help.html"
         _TreeLocation += "#polydispersity-distributions"
         _doc_viewer = DocumentationWindow(self, -1, \
@@ -3591,9 +3604,13 @@ class BasicPage(ScrolledPanel, PanelBase):
         sizer_cat = wx.BoxSizer(wx.HORIZONTAL)
         self.mbox_description.SetForegroundColour(wx.RED)
         id = wx.NewId()
-        self.model_help = wx.Button(self, id, 'Details', size=(80, 23))
+        self.model_func = wx.Button(self, id, 'Help', size=(80, 23))
+        self.model_func.Bind(wx.EVT_BUTTON, self.on_function_help_clicked, id=id)
+        self.model_func.SetToolTipString("Full Model Function Help")
+        id = wx.NewId()
+        self.model_help = wx.Button(self, id, 'Description', size=(80, 23))
         self.model_help.Bind(wx.EVT_BUTTON, self.on_model_help_clicked, id=id)
-        self.model_help.SetToolTipString("Model Function Help")
+        self.model_help.SetToolTipString("Short Model Function Description")
         id = wx.NewId()
         self.model_view = wx.Button(self, id, "Show 2D", size=(80, 23))
         self.model_view.Bind(wx.EVT_BUTTON, self._onModel2D, id=id)
@@ -3635,15 +3652,18 @@ class BasicPage(ScrolledPanel, PanelBase):
         #self.shape_rbutton.SetValue(True)
       
         sizer_radiobutton = wx.GridSizer(2, 2, 5, 5)
+        
 
         #sizer_radiobutton.Add(self.shape_rbutton)
         #sizer_radiobutton.Add(self.shape_indep_rbutton)
         sizer_radiobutton.Add((5,5))
-        sizer_radiobutton.Add(self.model_view, 1, wx.RIGHT, 15)
+        sizer_radiobutton.Add(self.model_view, 1, wx.RIGHT, 5)
         #sizer_radiobutton.Add(self.plugin_rbutton)
         #sizer_radiobutton.Add(self.struct_rbutton)
-        sizer_radiobutton.Add((5,5))
-        sizer_radiobutton.Add(self.model_help, 1, wx.RIGHT, 15)
+#        sizer_radiobutton.Add((5,5))
+        sizer_radiobutton.Add(self.model_help, 1, wx.RIGHT|wx.LEFT, 5)
+#        sizer_radiobutton.Add((5,5))
+        sizer_radiobutton.Add(self.model_func, 1, wx.RIGHT, 5)
         sizer_cat.Add(sizer_cat_box, 1, wx.LEFT, 2.5)
         sizer_cat.Add(sizer_radiobutton)
         sizer_selection = wx.BoxSizer(wx.HORIZONTAL)
