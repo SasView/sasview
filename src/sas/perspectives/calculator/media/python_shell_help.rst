@@ -9,27 +9,30 @@ Python Shell Tool
 Description 
 -----------
 
-This is a Python shell (PyCrust) provided with WxPython. An editing notebook 
-will show up when a Python file is loaded from the 'New' or 'Open' menu. 
+This is a Python shell/editor (PyCrust) provided with WxPython. An editing 
+notebook will show up when a Python file is created/loaded with the *New* or 
+*Open* options on the menu. 
 
-The 'Run' menu is added for the editor to be able to compile and run the Python 
-code.
+*Run* enables the editor to compile and run the Python code.
 
-For the details about the Python, visit the website 
-http://docs.python.org/tutorial/
+For the details about the Python, visit the website http://docs.python.org/tutorial/
 
-The numpy, scipy, matplotlib, etc, libraries are shipped with SasView. However, 
-some functionalities of those packages may or may not work.
+The NumPy, SciPy, and Matplotlib, etc, libraries are shipped with SasView. 
+However, some functionality may not work.
 
-PyCrust includes its own Help menu in the shell window.
+PyCrust has its own Help.
 
-Note: Help() and Credits() do not work on Macs.
+*NOTE! Help() and Credits() do not work on Macs.*
 
 .. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 Example
 -------
 
-An example from the matplotlib gallery:
+An example calling the Matplotlib plotting gallery:
 
-.. image:: pycrust_example.bmp
+.. image:: pycrust_example.png
+
+.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+
+.. note::  This help document was last changed by Steve King, 19Feb2015
