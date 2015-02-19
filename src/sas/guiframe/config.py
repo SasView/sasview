@@ -25,7 +25,20 @@ __EVT_DEBUG_FILENAME__ = "debug.log"
 
 # About box info
 _do_aboutbox = True
+_do_acknowledge = True
 _do_tutorial = True
+_acknowledgement_preamble =\
+'''If you found this software useful to your work please remember to acknowledge 
+its use in your publications as suggested below and reference the SasView website: 
+http://www.sasview.org/index.html. Please also consider letting us know by sending us the 
+reference to your work. This will help us to ensure the long term support and 
+development of the software.
+'''
+_acknowledgement_publications = \
+'''This work originally developed as part of the DANSE project funded by the NSF
+under grant DMR-0520547, and currently maintained by NIST, UMD, ORNL, ISIS, ESS 
+and ILL.
+'''
 _acknowledgement =  \
 '''This software was developed by the University of Tennessee as part of the
 Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
