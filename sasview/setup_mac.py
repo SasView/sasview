@@ -70,7 +70,7 @@ if os.path.exists(doc_path):
     for dirpath, dirnames, filenames in os.walk(doc_path):
         for filename in filenames:
             sub_dir = os.path.join("doc", os.path.relpath(dirpath, doc_path))
-            data_files.append((sub_dir, [os.path.join(dirpath, filename)]))
+            DATA_FILES.append((sub_dir, [os.path.join(dirpath, filename)]))
 else:
     raise Exception("You must first build the documentation before creating an installer.")
     
