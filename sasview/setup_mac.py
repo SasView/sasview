@@ -20,6 +20,12 @@ import pytz
 import sys
 import platform
 
+from distutils.util import get_platform
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+platform = '%s-%s'%(get_platform(),sys.version[:3])
+build_path = os.path.join(root, 'build','lib.'+platform)
+sys.path.insert(0, build_path)
+
 ICON = local_config.SetupIconFile_mac
 EXTENSIONS_LIST = []
 DATA_FILES = []
@@ -57,6 +63,16 @@ DATA_FILES += ['images','test','media', 'custom_config.py', 'local_config.py',
                'default_categories.json']
 if os.path.isfile("BUILD_NUMBER"):
     DATA_FILES.append("BUILD_NUMBER")
+
+# See if the documentation has been built, and if so include it.
+doc_path = os.path.join(build_path, "doc")
+if os.path.exists(doc_path):
+    for dirpath, dirnames, filenames in os.walk(doc_path):
+        for filename in filenames:
+            sub_dir = os.path.join("doc", os.path.relpath(dirpath, doc_path))
+            data_files.append((sub_dir, [os.path.join(dirpath, filename)]))
+else:
+    raise Exception("You must first build the documentation before creating an installer.")
     
 # locate file extensions
 def find_extension():
