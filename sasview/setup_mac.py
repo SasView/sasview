@@ -46,7 +46,7 @@ import sas.guiframe as guiframe
 DATA_FILES += guiframe.data_files()
 
 #CANSAxml reader data files
-RESOURCES_FILES.append(os.path.join(sas.dataloader.readers.get_data_path(),'defaults.xml'))
+RESOURCES_FILES.append(os.path.join(sas.dataloader.readers.get_data_path(),'defaults.json'))
 
 # Locate libxml2 library
 lib_locs = ['/usr/local/lib', '/usr/lib']
