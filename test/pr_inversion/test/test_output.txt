@@ -2,7 +2,7 @@
 #nfunc=10
 #alpha=0.0007
 #chi2=836.797
-#elapsed=0.00100017
+#elapsed=0.00199986
 #qmin=None
 #qmax=None
 #slit_height=0
