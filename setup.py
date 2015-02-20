@@ -206,7 +206,7 @@ ext_modules.append( Extension("sas.pr.core.pr_inversion",
                               include_dirs=[numpy_incl_path],
                               ) )
         
-# sas.fit (park integration)
+# sas.fit
 package_dir["sas.fit"] = os.path.join("src", "sas", "fit")
 packages.append("sas.fit")
 
@@ -236,18 +236,6 @@ packages.append("sas.data_util")
 # Plottools
 package_dir["sas.plottools"] = os.path.join("src", "sas", "plottools")
 packages.append("sas.plottools")
-
-# Park 1.2.1
-package_dir["park"]="park-1.2.1/park"
-packages.extend(["park"])
-package_data["park"] = ['park-1.2.1/*.txt', 'park-1.2.1/park.epydoc']
-ext_modules.append( Extension("park._modeling",
-                              sources = [ os.path.join("park-1.2.1", 
-                                                "park", "lib", "modeling.cc"),
-                                         os.path.join("park-1.2.1", 
-                                                "park", "lib", "resolution.c"),
-                                         ],
-                              ) )
 
 # sas models
 includedir  = os.path.join("src", "sas", "models", "include")
