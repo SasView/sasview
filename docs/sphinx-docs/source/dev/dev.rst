@@ -7,7 +7,7 @@ Contents
 .. toctree::
    :maxdepth: 1
 
-   SasView and Park API <api/modules>
+   SasView API <api/modules>
 
 Indices and Search
 ------------------
