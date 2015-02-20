@@ -152,12 +152,6 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
 
         ## making sure all parameters content a constraint
         ## validity of the constraint expression is own by fit engine
-        if self.parent._manager._fit_engine not in ("park","bumps") and flag:
-            msg = "The FitEnging will be set to 'Park' fit engine\n"
-            msg += " for the simultaneous fit..."
-            #wx.MessageBox(msg, 'Info')
-            wx.PostEvent(self._manager.parent, StatusEvent(status=\
-                            "Fitting: %s" % msg, info="info"))
         if not self.batch_on and self.show_constraint.GetValue():
             if not self._set_constraint():
                 return
@@ -688,10 +682,8 @@ class SimultaneousFitPage(ScrolledPanel, PanelBase):
         if self.batch_on:
             text = " Fit in Parallel all Data set and model selected.\n"
         else:
-            text = "     Note: Park fitting engine will be used automatically. \n"
-            text += "     This page requires at least one FitPage with a data \n"
-            text += "       and a model set for fitting."
-            #text+= "automatically for more than 2 combinations checked"
+            text = " This page requires at least one FitPage with a data\n"
+            text = " and a model for fitting."
         text_hint = wx.StaticText(self, -1, text)
         
         sizer_button.Add(text_hint, wx.RIGHT|wx.EXPAND, 10)

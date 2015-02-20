@@ -12,6 +12,7 @@ Dialog to set ftol for Scipy
 #
 #copyright 2009, University of Tennessee
 ################################################################################
+_ = """
 import wx
 import sys
 # default ftol
@@ -102,3 +103,4 @@ class ChangeFtol(wx.Dialog):
             except:
                 return None
         return SAS_F_TOL
+"""

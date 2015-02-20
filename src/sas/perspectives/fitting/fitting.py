@@ -44,13 +44,7 @@ from sas.perspectives.calculator.model_editor import TextDialog
 from sas.perspectives.calculator.model_editor import EditorWindow
 from sas.guiframe.gui_manager import MDIFrame
 
-# TODO: remove globals from interface to bumps options!
-# Default bumps to use the levenberg-marquardt optimizer
-import bumps.fitters
-bumps.fitters.FIT_DEFAULT = 'lm'
-
 MAX_NBR_DATA = 4
-SAS_F_TOL = 5e-05
 
 (PageInfoEvent, EVT_PAGE_INFO) = wx.lib.newevent.NewEvent()
 
@@ -92,8 +86,7 @@ class Plugin(PluginBase):
         ## Fit engine
         self._fit_engine = 'bumps'
         self._gui_engine = None
-        ## Relative error desired in the sum of squares (float); scipy only
-        self.ftol = SAS_F_TOL
+        ## Relative error desired in the sum of squares (float)
         self.batch_reset_flag = True
         #List of selected data
         self.selected_data_list = []
@@ -111,9 +104,6 @@ class Plugin(PluginBase):
         #Create a reader for fit page's state
         self.state_reader = None
         self._extensions = '.fitv'
-        self.scipy_id = wx.NewId()
-        self.park_id = wx.NewId()
-        self.bumps_id = wx.NewId()
         self.menu1 = None
         self.new_model_frame = None
         
@@ -190,36 +180,11 @@ class Plugin(PluginBase):
         self.batch_menu = self.menu1.FindItemById(self.id_batchfit)
         self.batch_menu.Enable(False)
         self.menu1.AppendSeparator()
-        #Set park engine
-        scipy_help = "Scipy Engine: Perform Simple fit. More in Help window...."
-        self.menu1.AppendCheckItem(self.scipy_id, "Simple FitEngine [LeastSq]",
-                                   scipy_help)
-        wx.EVT_MENU(owner, self.scipy_id, self._onset_engine_scipy)
-        
-        park_help = "Park Engine: Perform Complex fit. More in Help window...."
-        self.menu1.AppendCheckItem(self.park_id, "Complex FitEngine [ParkMC]",
-                                   park_help)
-        wx.EVT_MENU(owner, self.park_id, self._onset_engine_park)
-        
-        bumps_help = "Bumps: fitting and uncertainty analysis. More in Help window...."
-        self.menu1.AppendCheckItem(self.bumps_id, "Bumps fit",
-                                   bumps_help)
-        wx.EVT_MENU(owner, self.bumps_id, self._onset_engine_bumps)
-        
-        self.menu1.FindItemById(self.scipy_id).Check(self._fit_engine=="scipy")
-        self.menu1.FindItemById(self.park_id).Check(self._fit_engine=="park")
-        self.menu1.FindItemById(self.bumps_id).Check(self._fit_engine=="bumps")
-        self.menu1.AppendSeparator()
-        self.id_tol = wx.NewId()
-        ftol_help = "Change the current FTolerance (=%s) " % str(self.ftol)
-        ftol_help += "of Simple FitEngine..."
-        self.menu1.Append(self.id_tol, "Change FTolerance",
-                                   ftol_help)
-        wx.EVT_MENU(owner, self.id_tol, self.show_ftol_dialog)
 
+        self.menu1.AppendSeparator()
         self.id_bumps_options = wx.NewId()
-        bopts_help = "Bumps fitting options"
-        self.menu1.Append(self.id_bumps_options, 'Bumps &Options', bopts_help)
+        bopts_help = "Fitting options"
+        self.menu1.Append(self.id_bumps_options, 'Fit &Options', bopts_help)
         wx.EVT_MENU(owner, self.id_bumps_options, self.on_bumps_options)
         self.bumps_options_menu = self.menu1.FindItemById(self.id_bumps_options)
         self.bumps_options_menu.Enable(True)
@@ -775,9 +740,6 @@ class Plugin(PluginBase):
                             has to reset
         :param value: can be a string in this case.
         :param names: the paramter name
-         
-        :note: expecting park used for fit.
-         
         """
         sim_page_id = self.sim_page.uid
         for uid, value in self.page_finder.iteritems():
@@ -807,43 +769,6 @@ class Plugin(PluginBase):
                 param_name = param_names[1]
             return model_name, param_name
    
-    def set_ftol(self, ftol=None):
-        """
-        Set ftol: Relative error desired in the sum of chi squares.
-        """
-        # check if it is flaot
-        try:
-            f_tol = float(ftol)
-        except:
-            # default
-            f_tol = SAS_F_TOL
-            
-        self.ftol = f_tol
-        # update ftol menu help strings
-        ftol_help = "Change the current FTolerance (=%s) " % str(self.ftol)
-        ftol_help += "of Simple FitEngine..."
-        if self.menu1 != None:
-            self.menu1.SetHelpString(self.id_tol, ftol_help)
-        
-    def show_ftol_dialog(self, event=None):
-        """
-        Dialog to select ftol for Scipy
-        """
-        from ftol_dialog import ChangeFtol
-        dialog = ChangeFtol(self.parent, self)
-        result = dialog.ShowModal()
-        if result == wx.ID_OK:
-            value = dialog.get_ftol()
-            if value is not None:
-                self.set_ftol(value)
-                msg = "The ftol (LeastSq) is set to %s." % value
-            else:
-                msg = "Error in the selection... No change in ftol."
-            # post event for info
-            wx.PostEvent(self.parent,
-                         StatusEvent(status=msg, info='warning'))
-        dialog.Destroy()
-
     def on_bumps_options(self, event=None):
         from bumps.gui.fit_dialog import OpenFitOptions
         OpenFitOptions()
@@ -982,11 +907,6 @@ class Plugin(PluginBase):
         """
         if uid is None: raise RuntimeError("no page to fit") # Should never happen
 
-        # Remember the user selected fit engine before the fit.  Simultaneous
-        # fitting may change the selected engine, so it needs to be restored
-        # when the fit is complete.
-        self._gui_engine = self._fit_engine
-
         sim_page_uid = getattr(self.sim_page, 'uid', None)
         batch_page_uid = getattr(self.batch_page, 'uid', None)
 
@@ -996,12 +916,6 @@ class Plugin(PluginBase):
             fit_type = 'combined_batch'
         else:
             fit_type = 'single'
-
-        # if constrained fit, don't use scipy leastsq directly
-        if fit_type == 'simultaneous':
-            if self._fit_engine not in ("park","bumps"):
-                self._on_change_engine(engine='bumps')
-
 
         fitter_list = []
         sim_fitter = None
@@ -1074,7 +988,7 @@ class Plugin(PluginBase):
         msg = "Fitting is in progress..."
         wx.PostEvent(self.parent, StatusEvent(status=msg, type="progress"))
         
-        #Handler used for park engine displayed message
+        #Handler used for fit engine displayed message
         handler = ConsoleUpdate(parent=self.parent,
                                 manager=self,
                                 improvement_delta=0.1)
@@ -1097,7 +1011,6 @@ class Plugin(PluginBase):
                                  batch_outputs=batch_outputs,
                                  page_id=list_page_id,
                                  completefn=self._batch_fit_complete,
-                                 ftol=self.ftol,
                                  reset_flag=self.batch_reset_flag)
         else:
             ## Perform more than 1 fit at the time
@@ -1107,8 +1020,7 @@ class Plugin(PluginBase):
                                     batch_outputs=batch_outputs,
                                     page_id=list_page_id,
                                     updatefn=handler.update_fit,
-                                    completefn=self._fit_completed,
-                                    ftol=self.ftol)
+                                    completefn=self._fit_completed)
         #self.fit_thread_list[current_page_id] = calc_fit
         self.fit_thread_list[uid] = calc_fit
         calc_fit.queue()
@@ -1567,9 +1479,6 @@ class Plugin(PluginBase):
         wx.PostEvent(self.parent, StatusEvent(status=msg, info="info",
                                                       type="stop"))
         wx.PostEvent(self.result_panel, PlotResultEvent(result=result))
-        # reset fit_engine if changed by simul_fit
-        if self._fit_engine != self._gui_engine:
-            self._on_change_engine(self._gui_engine)
         self._update_fit_button(page_id)
         result = result[0]
         self.fit_thread_list = {}
@@ -1666,24 +1575,7 @@ class Plugin(PluginBase):
         wx.PostEvent(self.parent,
                      StatusEvent(status=msg))
 
-    def _onset_engine_park(self, event):
-        """ 
-        set engine to park
-        """
-        self._on_change_engine('park')
-       
-    def _onset_engine_scipy(self, event):
-        """ 
-        set engine to scipy
-        """
-        self._on_change_engine('scipy')
-       
-    def _onset_engine_bumps(self, event):
-        """ 
-        set engine to bumps
-        """
-        self._on_change_engine('bumps')
-       
+
     def _on_slicer_event(self, event):
         """
         Receive a panel as event and send it to guiframe
@@ -1704,7 +1596,6 @@ class Plugin(PluginBase):
         Clear the boxslicer when close the panel associate with this slicer
         """
         name = event.GetEventObject().frame.GetTitle()
-        print "name", name
         for panel in self.slicer_panels:
             if panel.window_caption == name:
                 
@@ -1716,35 +1607,6 @@ class Plugin(PluginBase):
                             break
                 break
     
-    def _on_change_engine(self, engine='park'):
-        """
-        Allow to select the type of engine to perform fit
-        
-        :param engine: the key work of the engine
-        
-        """
-        ## saving fit engine name
-        self._fit_engine = engine
-        ## change menu item state
-        if engine == "park":
-            self.menu1.FindItemById(self.park_id).Check(True)
-            self.menu1.FindItemById(self.scipy_id).Check(False)
-            self.menu1.FindItemById(self.bumps_id).Check(False)
-        elif engine == "scipy":
-            self.menu1.FindItemById(self.park_id).Check(False)
-            self.menu1.FindItemById(self.scipy_id).Check(True)
-            self.menu1.FindItemById(self.bumps_id).Check(False)
-        else:
-            self.menu1.FindItemById(self.park_id).Check(False)
-            self.menu1.FindItemById(self.scipy_id).Check(False)
-            self.menu1.FindItemById(self.bumps_id).Check(True)
-        ## post a message to status bar
-        msg = "Engine set to: %s" % self._fit_engine
-        wx.PostEvent(self.parent,
-                     StatusEvent(status=msg))
-        ## send the current engine type to fitpanel
-        self.fit_panel._on_engine_change(name=self._fit_engine)
-
     def _on_model_panel(self, evt):
         """
         react to model selection on any combo box or model menu.plot the model  

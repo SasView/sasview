@@ -1,17 +1,10 @@
 """
-Class Fit contains ScipyFit and ParkFit methods declaration
-allows to create instance of type ScipyFit or ParkFit to perform either
-a park fit or a scipy fit.
+Class Fit contains fitting engine methods declaration
 """
 
-#from scipy import optimize
-from sas.fit.ScipyFitting import ScipyFit
-from sas.fit.ParkFitting import ParkFit
 from sas.fit.BumpsFitting import BumpsFit
 
 ENGINES={
-    'scipy': ScipyFit,
-    'park': ParkFit,
     'bumps': BumpsFit,
 }
 
@@ -22,7 +15,7 @@ class Fit(object):
     
         from sas.fit.Fitting import Fit
         fitter= Fit()
-        fitter.fit_engine('scipy') or fitter.fit_engine('park')
+        fitter.fit_engine('bumps')
         engine = fitter.returnEngine()
         engine.set_data(data,id)
         engine.set_param( model,model.name, pars)
@@ -31,10 +24,9 @@ class Fit(object):
         chisqr1, out1, cov1=engine.fit(pars,qmin,qmax)
         
     """  
-    def __init__(self, engine='scipy', *args, **kw):
+    def __init__(self, engine='bumps', *args, **kw):
         """
         """
-        #self._engine will contain an instance of ScipyFit or ParkFit
         self._engine = None
         self.fitter_id = None
         self.set_engine(engine, *args, **kw)
@@ -60,21 +52,21 @@ class Fit(object):
         
         :param word: the keyword to select the fit type 
         
-        :raise: if the user does not enter 'scipy' or 'park',
-             a valueError is raised 
-             
+        :raise: KeyError if the user does not enter an available engine
+
         """
         try:
             self._engine = ENGINES[word](*args, **kw)
         except KeyError, exc:
-            raise KeyError("fit engine should be one of scipy, park or bumps")
+            raise KeyError("fit engine should be bumps")
+            #raise KeyError("fit engine should be one of "+", ".join(sorted(ENGINES.keys())))
 
     def fit(self, msg_q=None, q=None, handler=None, 
                         curr_thread=None, 
                         ftol=1.49012e-8,
                         reset_flag=False):
         """Perform the fit """
-        return self._engine.fit(msg_q=msg_q, 
+        return self._engine.fit(msg_q=msg_q,
                                 q=q, handler=handler, curr_thread=curr_thread,
                                 ftol=ftol, reset_flag=reset_flag)
      

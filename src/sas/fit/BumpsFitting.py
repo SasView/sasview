@@ -9,7 +9,11 @@ import numpy
 from bumps import fitters
 from bumps.mapper import SerialMapper, MPMapper
 from bumps import parameter
+
+# TODO: remove globals from interface to bumps options!
+# Default bumps to use the levenberg-marquardt optimizer
 from bumps.fitproblem import FitProblem
+fitters.FIT_DEFAULT = 'lm'
 
 from sas.fit.AbstractFitEngine import FitEngine
 from sas.fit.AbstractFitEngine import FResult

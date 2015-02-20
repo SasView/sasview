@@ -41,7 +41,7 @@ class BatchFit:
         self.qmin = qmin
         self.qmax = qmax
         
-    def _reset_helper(self, path=None, engine="scipy", npts=NPTS):
+    def _reset_helper(self, path=None, engine="bumps", npts=NPTS):
         """
         Set value to fitter engine and prepare inputs for map function
         """
@@ -76,7 +76,7 @@ class BatchFit:
             self.list_of_function.append('fit')
             self.list_of_mapper.append(classMapper)
                    
-    def reset_value(self, engine='scipy'):
+    def reset_value(self, engine='bumps'):
         """
         Initialize inputs for the map function
         """

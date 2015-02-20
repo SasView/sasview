@@ -109,19 +109,6 @@ class FitPanel(nb, PanelBase):
                                                             info="warning"))
         return doc
     
-    def _on_engine_change(self, name='scipy'):
-        """
-        """
-        for panel in self.opened_pages.values():
-            self.set_engine_helper(panel=panel, name=name)
-            
-    def set_engine_helper(self, panel, name='scipy'):
-        """
-        """
-        self.fit_engine_type = name
-        if panel not in[self.batch_page, self.sim_page]:
-            panel._on_engine_change(name=self.fit_engine_type)
-                
     def update_model_list(self):
         """
         """
@@ -392,7 +379,6 @@ class FitPanel(nb, PanelBase):
         panel.window_name = caption
         self.AddPage(panel, caption, select=True)
         self.opened_pages[panel.uid] = panel
-        self.set_engine_helper(panel=panel)
         self._manager.create_fit_problem(panel.uid)
         self._manager.page_finder[panel.uid].add_data(panel.get_data())
         self.enable_close_button()

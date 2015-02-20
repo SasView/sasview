@@ -6,6 +6,8 @@ ParkFitting module contains SasParameter,Model,Data
 FitArrange, ParkFit,Parameter classes.All listed classes work together
 to perform a simple fit with park optimizer.
 """
+
+_ = '''
 #import time
 import numpy
 import math
@@ -614,4 +616,5 @@ class ParkFit(FitEngine):
             q.put(result_list)
             return q
         return result_list
-       
+
+'''

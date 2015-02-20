@@ -16,14 +16,14 @@ from sas.models.SphereModel import SphereModel
 class testFitModule(unittest.TestCase):
     """ test fitting """
     
-    def test_scipy(self):
-        """ Simple cylinder model fit (scipy)  """
+    def test_without_resolution(self):
+        """ Simple cylinder model fit  """
         
         out=Loader().load("cyl_400_20.txt")
         # This data file has not error, add them
         #out.dy = out.y
         
-        fitter = Fit('scipy')
+        fitter = Fit('bumps')
         fitter.set_data(out,1)
         
         # Receives the type of model for the fitting
@@ -52,13 +52,7 @@ class testFitModule(unittest.TestCase):
         self.assertTrue( math.fabs(result1.pvec[2]-1)/3.0   < result1.stderr[2] )
         self.assertTrue( result1.fitness < 1.0 )
 
-    def test_park_dispersion(self):
-        """
-            Cylinder fit with dispersion
-        """
-        self._dispersion(fitter = Fit('park'))
-
-    def test_bumps_dispersion(self):
+    def test_dispersion(self):
         """
             Cylinder fit with dispersion
         """
@@ -68,12 +62,6 @@ class testFitModule(unittest.TestCase):
         #fitters.FIT_OPTIONS[alg].options.update(opts)
         fitters.FIT_OPTIONS[alg].options.update(monitors=[])
         self._dispersion(fitter = Fit('bumps'))
-
-    def test_scipy_dispersion(self):
-        """
-            Cylinder fit with dispersion
-        """
-        self._dispersion(fitter = Fit('scipy'))
 
     def _dispersion(self, fitter):
         # Load data
@@ -147,7 +135,7 @@ class smear_testdata(unittest.TestCase):
         self.assertEqual(smear.__class__.__name__, 'QSmearer')
 
         # Fit
-        fitter = Fit('scipy')
+        fitter = Fit('bumps')
         
         # Data: right now this is the only way to set the smearer object
         # We should improve that and have a way to get access to the
@@ -178,7 +166,7 @@ class smear_testdata(unittest.TestCase):
         smear = smear_selection(self.data_slit)
         self.assertEqual(smear.__class__.__name__, 'SlitSmearer')
 
-        fitter = Fit('scipy')
+        fitter = Fit('bumps')
         
         # Data: right now this is the only way to set the smearer object
         # We should improve that and have a way to get access to the

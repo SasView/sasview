@@ -1002,14 +1002,6 @@ class FitPage(BasicPage):
             wx.CallAfter(self.set_fitbutton)
             return
 
-        if (len(self._manager.fit_thread_list) > 0
-                and self._manager._fit_engine not in ("park","bumps")
-                and self._manager.sim_page != None
-                and self._manager.sim_page.uid == self.uid):
-            msg = "The FitEnging will be set to 'ParkMC'\n"
-            msg += " to fit with more than one data set..."
-            wx.MessageBox(msg, 'Info')
-            
         if self.data is None:
             msg = "Please get Data first..."
             wx.MessageBox(msg, 'Info')
@@ -2033,7 +2025,7 @@ class FitPage(BasicPage):
         """
         return numbers of data points within qrange
         
-        :Note: This is for Park where chi2 is not normalized by Npts of fit
+        :Note: This is to normalize chisq by Npts of fit
         
         """
         if self.data is None:
@@ -3229,7 +3221,6 @@ class FitPage(BasicPage):
             return
         # Figuring out key combo: Cmd for copy, Alt for paste
         if event.AltDown() and event.ShiftDown():
-            self._manager.show_ftol_dialog()
             flag = True
         elif event.AltDown() or event.ShiftDown():
             flag = False
@@ -3239,8 +3230,6 @@ class FitPage(BasicPage):
         event.Skip()
         # messages depending on the flag
         if not flag:
-            msg = " Could not open ftol dialog;"
-            msg += " Check if the Scipy fit engine is selected in the menubar."
             infor = 'warning'
             # inform msg to wx
             wx.PostEvent(self._manager.parent,

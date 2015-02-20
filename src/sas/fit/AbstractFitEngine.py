@@ -9,7 +9,6 @@ from sas.dataloader.data_info import Data1D
 from sas.dataloader.data_info import Data2D
 _SMALLVALUE = 1.0e-10
 
-# Note: duplicated from park
 class FitHandler(object):
     """
     Abstract interface for fit thread handler.
@@ -68,7 +67,7 @@ class Model:
     """
     def __init__(self, sas_model, sas_data=None, **kw):
         """
-        :param sas_model: the sas model to wrap using park interface
+        :param sas_model: the sas model to wrap for fitting
 
         """
         self.model = sas_model
@@ -99,7 +98,7 @@ class Model:
 
     def eval(self, x):
         """
-            Override eval method of park model.
+            Override eval method of model.
 
             :param x: the x value used to compute a function
         """
@@ -393,7 +392,7 @@ class FitAbort(Exception):
 class FitEngine:
     def __init__(self):
         """
-        Base class for scipy and park fit engine
+        Base class for the fit engine
         """
         #Dictionnary of fitArrange element (fit problems)
         self.fit_arrange_dict = {}

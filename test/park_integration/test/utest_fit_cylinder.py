@@ -26,7 +26,7 @@ class TestSingleFit(unittest.TestCase):
         #select parameters to fit
         self.pars1 =['length','radius','scale']
         
-    def _fit(self, name="scipy"):
+    def _fit(self, name="bumps"):
         """ return fit result """
         fitter = Fit(name)
         fitter.set_data(self.data,1)
@@ -44,17 +44,8 @@ class TestSingleFit(unittest.TestCase):
         self.assertTrue( result1.fitness < 1.0 )
 
 
-    def test_scipy(self):
-        """ Simple cylinder model fit (scipy)  """
-        self._fit("scipy")
-
-
-    def test_park(self):
-        """ Simple cylinder model fit (park)  """
-        self._fit("park")
-
     def test_bumps(self):
-        """ Simple cylinder model fit (park)  """
+        """ Simple cylinder model fit """
         self._fit("bumps")
 
 
@@ -89,14 +80,10 @@ class TestSimultaneousFit(unittest.TestCase):
 
 
     def test_constrained_bumps(self):
-        """ Simultaneous cylinder model fit (park)  """
+        """ Simultaneous cylinder model fit  """
         self._run_fit(Fit('bumps'))
 
     #@unittest.skip("")
-    def test_constrained_park(self):
-        """ Simultaneous cylinder model fit (park)  """
-        self._run_fit(Fit('park'))
-
     def _run_fit(self, fitter):
         result1, result2 = self._fit(fitter)
         self.assert_(result1)
@@ -104,7 +91,7 @@ class TestSimultaneousFit(unittest.TestCase):
         self.assertTrue(len(result1.stderr)>0)
 
         for n, v, dv in zip(result1.param_list, result1.pvec, result1.stderr):
-            print "%s M1.%s = %s +/- %s"%(fitter._engine.__class__.__name__,n,v,dv)
+            #print "%s M1.%s = %s +/- %s"%(fitter._engine.__class__.__name__,n,v,dv)
             if n == "length":
                 self.assertTrue( math.fabs(v-400.0)/3.0 < dv )
             elif n=='radius':
@@ -112,7 +99,7 @@ class TestSimultaneousFit(unittest.TestCase):
             elif n=='scale':
                 self.assertTrue( math.fabs(v-1.0)/3.0 < dv )
         for n, v, dv in zip(result2.param_list, result2.pvec, result2.stderr):
-            print "%s M2.%s = %s +/- %s"%(fitter._engine.__class__.__name__,n,v,dv)
+            #print "%s M2.%s = %s +/- %s"%(fitter._engine.__class__.__name__,n,v,dv)
             if n=='radius':
                 self.assertTrue( math.fabs(v-40.0)/3.0 < dv )
             elif n=='scale':

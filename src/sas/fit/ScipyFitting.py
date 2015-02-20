@@ -3,6 +3,7 @@ ScipyFitting module contains FitArrange , ScipyFit,
 Parameter classes.All listed classes work together to perform a 
 simple fit with scipy optimizer.
 """
+_ = '''
 import sys
 import copy
 
@@ -264,7 +265,7 @@ def _check_param_range(model, pars):
     Check parameter range and set the initial value inside
     if it is out of range.
 
-    : model: park model object
+    : model: model object
     """
     # loop through parameterset
     for p in pars:
@@ -305,4 +306,5 @@ def _get_zero_shift(limit):
 #    os.unlink('profile.out')
 #    return call_result
 
-      
+
+'''

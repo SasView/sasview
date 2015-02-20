@@ -31,7 +31,7 @@ class testFitModule(unittest.TestCase):
             #print "ValueError was correctly raised: "+str(msg)
             assert str(exc).startswith('parameter param1')
         else:
-            raise AssertionError("No error raised for scipy fitting with wrong parameters name to fit")
+            raise AssertionError("No error raised for fitting with wrong parameters name to fit")
 
     def fit_single(self, fitter_name, isdream=False):
         fitter = Fit(fitter_name)
@@ -44,7 +44,6 @@ class testFitModule(unittest.TestCase):
         model1  = LineModel()
         model1.name = "M1"
         model = Model(model1,data)
-        #fit with scipy test
 
         pars1= ['A','B']
         fitter.set_model(model,1,pars1)
@@ -91,15 +90,6 @@ class testFitModule(unittest.TestCase):
     def test_bumps_lm(self):
         self.fit_bumps('lm')
 
-    def test_scipy(self):
-        #print "fitting scipy"
-        self.fit_single('scipy')
-
-    def test_park(self):
-        #print "fitting park"
-        self.fit_single('park')
-
-        
     def test2(self):
         """ fit 2 data and 2 model with no constrainst"""
         #load data
@@ -111,7 +101,7 @@ class testFitModule(unittest.TestCase):
         data2.name = data2.filename
      
         #Importing the Fit module
-        fitter = Fit('scipy')
+        fitter = Fit('bumps')
         # Receives the type of model for the fitting
         model11  = LineModel()
         model11.name= "M1"
@@ -120,7 +110,6 @@ class testFitModule(unittest.TestCase):
       
         model1 = Model(model11,data1)
         model2 = Model(model22,data2)
-        #fit with scipy test
         pars1= ['A','B']
         fitter.set_data(data1,1)
         fitter.set_model(model1,1,pars1)
@@ -128,24 +117,11 @@ class testFitModule(unittest.TestCase):
         fitter.set_data(data2,2)
         fitter.set_model(model2,2,pars1)
         fitter.select_problem_for_fit(id=2,value=0)
-        
-        try: result1, = fitter.fit(handler=FitHandler())
-        except RuntimeError,msg:
-           assert str(msg)=="No Assembly scheduled for Scipy fitting."
-        else: raise AssertionError,"No error raised for scipy fitting with no model"
-        fitter.select_problem_for_fit(id=1,value=1)
-        fitter.select_problem_for_fit(id=2,value=1)
-        try: result1, = fitter.fit(handler=FitHandler())
-        except RuntimeError,msg:
-           assert str(msg)=="Scipy can't fit more than a single fit problem at a time."
-        else: raise AssertionError,"No error raised for scipy fitting with more than 2 models"
 
-        #fit with park test
-        fitter = Fit('park')
-        fitter.set_data(data1,1)
-        fitter.set_model(model1,1,pars1)
-        fitter.set_data(data2,2)
-        fitter.set_model(model2,2,pars1)
+        try: result1, = fitter.fit(handler=FitHandler())
+        except RuntimeError,msg:
+            assert str(msg)=="Nothing to fit"
+        else: raise AssertionError,"No error raised for fitting with no model"
         fitter.select_problem_for_fit(id=1,value=1)
         fitter.select_problem_for_fit(id=2,value=1)
         R1,R2 = fitter.fit(handler=FitHandler())
@@ -155,7 +131,7 @@ class testFitModule(unittest.TestCase):
         self.assertTrue( R1.fitness/(len(data1.x)+len(data2.x)) < 2)
         
         
-    def test3(self):
+    def test_constraints(self):
         """ fit 2 data and 2 model with 1 constrainst"""
         #load data
         l = Loader()
@@ -179,17 +155,16 @@ class testFitModule(unittest.TestCase):
         model1.set(A=4)
         model1.set(B=3)
         # Constraint the constant value to be equal to parameter B (the real value is 2.5)
-        model2.set(value='line.B')
-        #fit with scipy test
+        #model2.set(value='line.B')
         pars1= ['A','B']
         pars2= ['value']
         
         #Importing the Fit module
-        fitter = Fit('park')
+        fitter = Fit('bumps')
         fitter.set_data(data1,1)
         fitter.set_model(model1,1,pars1)
         fitter.set_data(data2,2,smearer=None)
-        fitter.set_model(model2,2,pars2)
+        fitter.set_model(model2,2,pars2,constraints=[("value","line.B")])
         fitter.select_problem_for_fit(id=1,value=1)
         fitter.select_problem_for_fit(id=2,value=1)
         
@@ -215,25 +190,10 @@ class testFitModule(unittest.TestCase):
         model1.setParam("B",1.0)
         model = Model(model1,data1)
       
-        #fit with scipy test
         pars1= ['A','B']
         #Importing the Fit module
-        fitter = Fit('scipy')
-        fitter.set_data(data1,1,qmin=0, qmax=7)
-        fitter.set_model(model,1,pars1)
-        fitter.set_data(data2,1,qmin=1,qmax=10)
-        fitter.select_problem_for_fit(id=1,value=1)
-        
-        result1, = fitter.fit(handler=FitHandler())
-        #print(result1)
-        self.assert_(result1)
 
-        self.assertTrue( math.fabs(result1.pvec[0]-4)/3 <= result1.stderr[0] )
-        self.assertTrue( math.fabs(result1.pvec[1]-2.5)/3 <= result1.stderr[1])
-        self.assertTrue( result1.fitness/len(data1.x) < 2 )
-
-        #fit with park test
-        fitter = Fit('park')
+        fitter = Fit('bumps')
         fitter.set_data(data1,1,qmin=0, qmax=7)
         fitter.set_model(model,1,pars1)
         fitter.set_data(data2,1,qmin=1,qmax=10)
@@ -244,12 +204,6 @@ class testFitModule(unittest.TestCase):
         self.assertTrue( math.fabs(result2.pvec[0]-4)/3 <= result2.stderr[0] )
         self.assertTrue( math.fabs(result2.pvec[1]-2.5)/3 <= result2.stderr[1] )
         self.assertTrue( result2.fitness/len(data1.x) < 2)
-        # compare fit result result for scipy and park
-        self.assertAlmostEquals( result1.pvec[0], result2.pvec[0] )
-        self.assertAlmostEquals( result1.pvec[1],result2.pvec[1] )
-        self.assertAlmostEquals( result1.stderr[0],result2.stderr[0] )
-        self.assertAlmostEquals( result1.stderr[1],result2.stderr[1] )
-        self.assertTrue( result2.fitness/(len(data2.x)+len(data1.x)) < 2 )
 
 
 if __name__ == "__main__":
