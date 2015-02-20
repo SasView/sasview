@@ -1,0 +1,22 @@
+language: python
+python:
+  - "2.7"
+# whitelist
+branches:
+  only:
+    - master
+# command to install dependencies
+virtualenv:
+  system_site_packages: true
+before_install:
+  - 'if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then sudo apt-get update;sudo apt-get install python-numpy python-scipy python-matplotlib; fi'
+
+script:
+  - export PYTHONPATH=$WORKSPACE/sasview-install:$WORKSPACE/utils:$PYTHONPATH
+  - if [ ! -d "utils" ]; then mkdir utils; fi
+  - /bin/sh -xe build_tools/jenkins_linux_build.sh
+  - /bin/sh -xe build_tools/jenkins_linux_test.sh
+  - export LC_ALL=en_US.UTF-8
+  - export LANG=en_US.UTF-8
+  - python setup.py docs
+  - python setup.py bdist_egg --skip-build
