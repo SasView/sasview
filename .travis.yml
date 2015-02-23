@@ -17,6 +17,7 @@ install:
   - pip install pylint
   - pip install unittest-xml-reporting
 script:
+  - export WORKSPACE=/home/travis/build/SasView/sasview/
   - export PYTHONPATH=$WORKSPACE/sasview-install:$WORKSPACE/utils:$PYTHONPATH
   - if [ ! -d "utils" ]; then mkdir utils; fi
   - /bin/sh -xe build_tools/jenkins_linux_build.sh
