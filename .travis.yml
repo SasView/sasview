@@ -14,8 +14,7 @@ before_install:
   - 'if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then sudo apt-get update;sudo apt-get install python-numpy python-scipy python-matplotlib; fi'
 
 install:
-  - pip install pylint
-  - pip install unittest-xml-reporting
+  - pip install -r build_tools/requirements.txt
 script:
   - export WORKSPACE=/home/travis/build/SasView/sasview/
   - export PYTHONPATH=$WORKSPACE/sasview-install:$WORKSPACE/utils:$PYTHONPATH
