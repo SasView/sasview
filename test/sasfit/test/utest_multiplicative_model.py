@@ -5,7 +5,7 @@
 import unittest
 import math
 
-from sas.guiframe.dataFitting import Data1D 
+from sas.dataloader.data_info import Data1D 
 from sas.fit.AbstractFitEngine import Model,FitData1D
 from sas.fit.Fitting import Fit
 from sas.dataloader.loader import Loader
