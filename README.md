@@ -3,3 +3,6 @@
 This project was initiated by the NSF funded DANSE project, DMR-0520547, SANS sub-project at the University of Tennessee Knoxville. Acknowledgement of that original funding would be appreciated in any publications that make use of the software.
 
 [SasView website](http://www.sasview.org)
+
+[![Travis-CI Build Status](https://travis-ci.org/SasView/sasview.svg?branch=master)](https://travis-ci.org/SasView/sasview)
+
