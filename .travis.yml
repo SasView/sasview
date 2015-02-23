@@ -15,6 +15,7 @@ before_install:
 
 install:
   - pip install pylint
+  - pip install unittest-xml-reporting
 script:
   - export PYTHONPATH=$WORKSPACE/sasview-install:$WORKSPACE/utils:$PYTHONPATH
   - if [ ! -d "utils" ]; then mkdir utils; fi
