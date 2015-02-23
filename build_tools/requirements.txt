@@ -1,3 +1,5 @@
+# List of dependencies meant for pip.
+# Commented items are generally easier to install separately.
 pylint
 unittest-xml-reporting==1.10.0
 pyparsing==1.5.5
@@ -7,9 +9,9 @@ lxml==2.3
 PIL==1.1.7
 periodictable==1.3.0
 bumps==0.7.5.4
-numpy==1.6.1
-scipy==0.10.1
-wx==2.8.12.1
-matplotlib==1.1.0
+# numpy==1.6.1
+# scipy==0.10.1
+# wx==2.8.12.1
+# matplotlib==1.1.0
 xhtml2pdf==3.0.33
 sphinx==1.2.1
