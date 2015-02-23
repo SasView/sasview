@@ -13,6 +13,8 @@ virtualenv:
 before_install:
   - 'if [ $TRAVIS_PYTHON_VERSION == "2.7" ]; then sudo apt-get update;sudo apt-get install python-numpy python-scipy python-matplotlib; fi'
 
+install:
+  - pip install pylint
 script:
   - export PYTHONPATH=$WORKSPACE/sasview-install:$WORKSPACE/utils:$PYTHONPATH
   - if [ ! -d "utils" ]; then mkdir utils; fi
