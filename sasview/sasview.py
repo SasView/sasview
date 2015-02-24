@@ -42,8 +42,7 @@ if hasattr(sys, 'frozen'):
     if not os.path.exists(mplconfigdir):
         os.mkdir(mplconfigdir)
     os.environ['MPLCONFIGDIR'] = mplconfigdir
-    if sys.version_info < (2, 7):
-        reload(sys)
+    reload(sys)
     sys.setdefaultencoding("iso-8859-1")
 from sas.guiframe import gui_manager
 from sas.guiframe.gui_style import GUIFRAME
