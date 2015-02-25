@@ -522,15 +522,6 @@ class Plugin(PluginBase):
         """
         self.fit_panel.clear_panel()
         
-    def set_default_perspective(self):
-        """
-        Call back method that True to notify the parent that the current plug-in
-        can be set as default perspective.
-        when returning False, the plug-in is not candidate for an automatic
-        default perspective setting
-        """
-        return True
-    
     def delete_data(self, data):
         """
         delete  the given data from panel
