@@ -4,8 +4,8 @@ __version__ = "0.0.0"
     
 import subprocess
 
-def get_svn_revision():
-    p = subprocess.Popen("svnversion", shell=True, \
+def get_latest_git_commit():
+    p = subprocess.Popen("git rev-parse --short HEAD", shell=True, \
        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (stdout, stderr) = p.communicate()
     try:
@@ -13,7 +13,7 @@ def get_svn_revision():
         return str(rev)
     except:
         return __revision__
-
+    
 # Get the version number from the sasview module
 # Check to see if we are dealing with a release
 try:
@@ -25,7 +25,7 @@ except:
 
 # Get actual revision number if possible
 try:
-    rev = get_svn_revision()
+    rev = get_latest_git_commit()
     if rev is not None:
         __revision__ = rev
 except:
