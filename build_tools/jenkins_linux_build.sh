@@ -23,6 +23,6 @@ $PYTHON check_packages.py
 $PYTHON setup.py bdist_egg
 
 cd $WORKSPACE/dist
-ln -s sasview*.egg sasview.egg || true
-$EASY_INSTALL -N -d ../sasview-install sasview.egg
+# ln -s sasview*.egg sasview.egg || true
+$EASY_INSTALL -N -d ../sasview-install sasview*.egg
 
