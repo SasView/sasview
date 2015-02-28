@@ -4799,10 +4799,10 @@ R V Sharma, K C Sharma, *Physica*, 89A (1977) 213
 
 **2.3.3. HayterMSAStructure Factor**
 
-This calculates the structure factor (the Fourier transform of the pair correlation function *g(r)*) for a system of
-charged, spheroidal objects in a dielectric medium. When combined with an appropriate form factor (such as sphere,
-core+shell, ellipsoid, etc), this allows for inclusion of the interparticle interference effects due to screened coulomb
-repulsion between charged particles.
+This is an implementation of the Rescaled Mean Spherical Approximation which calculates the structure factor (the 
+Fourier transform of the pair correlation function *g(r)*) for a system of charged, spheroidal objects in a
+dielectric medium. When combined with an appropriate form factor (such as sphere,core+shell, ellipsoid, etc), this
+allows for inclusion of the interparticle interference effects due to screened coulomb repulsion between charged particles.
 
 **This routine only works for charged particles**. If the charge is set to zero the routine will self-destruct!
 For non-charged particles use a hard sphere potential.
