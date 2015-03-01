@@ -30,6 +30,7 @@ from sas.perspectives.calculator.calculator_widgets import InputTextCtrl
 from wx.lib.scrolledpanel import ScrolledPanel
 from math import fabs
 from sas.perspectives.calculator import calculator_widgets as widget   
+from sas.guiframe.documentation_window import DocumentationWindow
 
 _BOX_WIDTH = 100
 _Q_DEFAULT = 0.0
@@ -532,16 +533,7 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         """
         Do the layout for the button widgets
         """ 
-        # coordinate selction removed
-        #outerbox_txt = wx.StaticText(self, -1, 'Outer Box')
-        #self.x_y_rb = wx.RadioButton(self, -1,"Cartesian")
-        #self.Bind(wx.EVT_RADIOBUTTON,
-        #          self._on_xy_coordinate, id=self.x_y_rb.GetId())
-        #self.r_phi_rb = wx.RadioButton(self, -1,"Polar")
-        #self.Bind(wx.EVT_RADIOBUTTON,
-        #          self._on_rp_coordinate, id=self.r_phi_rb.GetId())
-        #self.r_phi_rb.SetValue(True)
-        #reset button
+
         id = wx.NewId()
         self.reset_button = wx.Button(self, id, "Reset")
         hint_on_reset = "..."
@@ -553,20 +545,21 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         hint_on_compute = "Compute... Please wait until finished."
         self.compute_button.SetToolTipString(hint_on_compute)
         self.Bind(wx.EVT_BUTTON, self.on_compute, id=id)
+        #help button
+        id = wx.NewId()
+        self.help_button = wx.Button(self, id, "HELP")
+        hint_on_help = "Help on using the Resolution Calculator"
+        self.help_button.SetToolTipString(hint_on_help)
+        self.Bind(wx.EVT_BUTTON, self.on_help, id=id)
         # close button
         self.bt_close = wx.Button(self, wx.ID_CANCEL,'Close')
         self.bt_close.Bind(wx.EVT_BUTTON, self.on_close)
         self.bt_close.SetToolTipString("Close this window.")
-        """
-        self.button_sizer.AddMany([(self.r_phi_rb,  0, wx.LEFT, 15),
-                                   (self.x_y_rb,  0, wx.LEFT, 15),
-                                   (self.reset_button, 0, wx.LEFT, 50),
-                                   (self.compute_button, 0, wx.LEFT, 15),
-                                   (self.bt_close, 0, wx.LEFT, 15)])#370)])
-        """
+
         self.button_sizer.Add((110, -1))
         self.button_sizer.AddMany([(self.reset_button, 0, wx.LEFT, 50),
                                    (self.compute_button, 0, wx.LEFT, 15),
+                                   (self.help_button, 0, wx.LEFT, 15),
                                    (self.bt_close, 0, wx.LEFT, 15)])
         self.compute_button.SetFocus()
         
@@ -696,6 +689,25 @@ class ResolutionCalculatorPanel(ScrolledPanel):
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
         
+
+    def on_help(self, event):    
+        """
+        Bring up the Resolution calculator Documentation whenever
+        the HELP button is clicked. 
+        
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old 
+        versions of Wx (before 2.9) and thus not the release version of 
+        installers, the help comes up at the top level of the file as 
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+    
+    :param evt: Triggers on clicking the help button
+    """
+                
+        _TreeLocation = "user/perspectives/calculator/resolution_calculator_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, \
+             _TreeLocation,"Resolution Calculator Help")
 
     def on_close(self, event):
         """
@@ -1405,7 +1417,7 @@ class ResolutionWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = ResolutionCalculatorPanel(parent=self)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
-        self.SetPosition((25, 150))
+        self.SetPosition((25, 10))
         self.Show(True)
     
     def OnClose(self, event):  
