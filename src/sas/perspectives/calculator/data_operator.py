@@ -618,7 +618,7 @@ class DataOperPanel(wx.ScrolledWindow):
     
     def on_help(self, event):    
         """
-        Bring up the General scattering Calculator Documentation whenever
+        Bring up the Data Operations Panel Documentation whenever
         the HELP button is clicked. 
         
         Calls DocumentationWindow with the path of the location within the
@@ -962,7 +962,7 @@ class DataOperatorWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = DataOperPanel(parent=self)
         wx.EVT_CLOSE(self, self.OnClose)
-        self.SetPosition((25, 150))
+        self.SetPosition((25, 10))
         self.Show()
     
     def OnClose(self, event=None):  
