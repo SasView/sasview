@@ -284,6 +284,7 @@ class SldPanel(wx.Panel, PanelBase):
         self.button_calculate.SetToolTipString("Calculate SLD.")
         self.Bind(wx.EVT_BUTTON, self.calculateSld, id=id)   
         
+        id = wx.NewId()
         self.button_help = wx.Button(self, id, "HELP")
         self.button_help.SetToolTipString("help on SLD calculator.")
         self.Bind(wx.EVT_BUTTON, self.on_help, id=id)   
