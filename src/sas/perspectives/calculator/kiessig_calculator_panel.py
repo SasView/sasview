@@ -16,12 +16,13 @@ from sas.calculator.kiessig_calculator import KiessigThicknessCalculator
 from calculator_widgets import OutputTextCtrl
 from calculator_widgets import InputTextCtrl
 from sas.perspectives.calculator import calculator_widgets as widget   
+from sas.guiframe.documentation_window import DocumentationWindow
 
 _BOX_WIDTH = 77
 #Slit length panel size 
 if sys.platform.count("win32") > 0:
     PANEL_WIDTH = 500
-    PANEL_HEIGHT = 210
+    PANEL_HEIGHT = 230
     FONT_VARIANT = 0
 else:
     PANEL_WIDTH = 560
@@ -122,10 +123,16 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
         """
         Do the layout for the button widgets
         """ 
+        id = wx.NewId()
+        self.bt_help = wx.Button(self, id,'HELP')
+        self.bt_help.Bind(wx.EVT_BUTTON, self.on_help)
+        self.bt_help.SetToolTipString("Help using the Kiessig fringe calculator.")
+
         self.bt_close = wx.Button(self, wx.ID_CANCEL,'Close')
         self.bt_close.Bind(wx.EVT_BUTTON, self.on_close)
         self.bt_close.SetToolTipString("Close this window.")
-        self.button_sizer.AddMany([(self.bt_close, 0, wx.LEFT, 390)])
+        self.button_sizer.AddMany([(self.bt_help, 0, wx.LEFT, 260),
+                                   (self.bt_close, 0, wx.LEFT, 20)])
         
     def _do_layout(self):
         """
@@ -147,6 +154,25 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
+
+    def on_help(self, event):    
+        """
+        Bring up the Kiessig fringe calculator Documentation whenever
+        the HELP button is clicked. 
+        
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old 
+        versions of Wx (before 2.9) and thus not the release version of 
+        installers, the help comes up at the top level of the file as 
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+    
+    :param evt: Triggers on clicking the help button
+    """
+                
+        _TreeLocation = "user/perspectives/calculator/kiessig_calculator_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, \
+             _TreeLocation,"Density/Volume Calculator Help")
 
     def on_close(self, event):
         """
@@ -201,7 +227,7 @@ class KiessigWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = KiessigThicknessCalculatorPanel(parent=self)
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.SetPosition((25, 160))
+        self.SetPosition((25, 10))
         self.Show(True)
         
     def on_close(self, event):

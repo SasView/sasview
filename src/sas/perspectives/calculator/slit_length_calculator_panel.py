@@ -127,8 +127,8 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
         self.button_help.SetToolTipString("Help for slit length calculator.")
         self.Bind(wx.EVT_BUTTON, self.on_help,id=id)   
 
-        self.button_sizer.AddMany([(self.bt_close, 0, wx.LEFT, 280),
-                                   (self.button_help, 0, wx.LEFT, 20)])
+        self.button_sizer.AddMany([(self.button_help, 0, wx.LEFT, 280),
+                                   (self.bt_close, 0, wx.LEFT, 20)])
                
     def _do_layout(self):
         """
