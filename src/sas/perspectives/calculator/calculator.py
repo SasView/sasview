@@ -50,24 +50,6 @@ class Plugin(PluginBase):
         self.py_frame = None
         
         
-    def help(self, evt):
-        """
-        Show a general help dialog. 
-        
-        :TODO: replace the text with a nice image
-            provide more hint on the SLD calculator
-        """
-        from help_panel import  HelpWindow
-        frame = HelpWindow(None, -1) 
-        if hasattr(frame, "IsIconized"):
-            if not frame.IsIconized():
-                try:
-                    icon = self.parent.GetIcon()
-                    frame.SetIcon(icon)
-                except:
-                    pass  
-        frame.Show(True)
-
     def get_tools(self):
         """
         Returns a set of menu entries for tools
