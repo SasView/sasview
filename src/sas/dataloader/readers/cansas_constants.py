@@ -2,26 +2,23 @@
 Information relating to the CanSAS data format. These constants are used in
 the cansas_reader.py file to read in any version of the cansas format.
 """
-class CansasConstants:
+class CansasConstants(object):
     """
     The base class to define where all of the data is to be saved by
     cansas_reader.py.
     """
-    
     names = ''
     format = ''
-    
-    
+
     def __init__(self):
         self.names = self.CANSAS_NS
         self.format = self.CANSAS_FORMAT
-    
-    
+
     def iterate_namespace(self, namespace):
         """
         Method to iterate through a cansas constants tree based on a list of
         names
-        
+
         :param namespace: A list of names that match the tree structure of
             cansas_constants
         """
@@ -45,7 +42,7 @@ class CansasConstants:
                     cl_units_optional = \
                              return_me.current_level.get("units_required", "")
                     # Where are how to store the variable for the given
-                    # namespace CANSAS_CONSTANTS tree is hierarchical, so 
+                    # namespace CANSAS_CONSTANTS tree is hierarchical, so
                     # is no value, inherit
                     return_me.ns_variable = cl_variable if cl_variable != "" \
                         else return_me.ns_variable
@@ -58,31 +55,25 @@ class CansasConstants:
                 return_me.ns_variable = "{0}.meta_data[\"{2}\"] = \"{1}\""
                 return_me.ns_datatype = "content"
                 return_me.ns_optional = True
-        return return_me    
-    
-    
+        return return_me
+
     def get_namespace_map(self):
         """
         Helper method to get the names namespace list
         """
         return self.names
-    
-    
+
     # CANSAS_NS holds the base namespace and default schema file information
-    CANSAS_NS = {
-                 "1.0" : 
-                 {
-                  "ns" : "cansas1d/1.0", 
-                  "schema" : "cansas1d_v1_0.xsd"
-                  },
-                 "1.1" : 
-                 {
-                  "ns" : "urn:cansas1d:1.1", 
-                  "schema" : "cansas1d_v1_1.xsd"
-                  }
+    CANSAS_NS = {"1.0" : {
+                         "ns" : "cansas1d/1.0",
+                         "schema" : "cansas1d_v1_0.xsd"
+                         },
+                 "1.1" : {
+                         "ns" : "urn:cansas1d:1.1",
+                         "schema" : "cansas1d_v1_1.xsd"
+                         }
                  }
-    
-    
+
     # The constants below hold information on where to store the CanSAS data
     # when loaded in using sasview
     META_DATA = "{0}.meta_data[\"{2}\"] = \"{1}\""
@@ -92,82 +83,58 @@ class CansasConstants:
            }
     TITLE = {"variable" : "{0}.title = \"{1}\""}
     SASNOTE = {"variable" : "{0}.notes.append(\'{1}\')"}
-    SASPROCESS_TERM = {
-                       "variable" : None,
-                       "attributes" : 
-                       {
-                        "unit" : {"variable" : None},
-                        "name" : {"variable" : None}
-                        }
+    SASPROCESS_TERM = {"variable" : None,
+                       "attributes" : {
+                                       "unit" : {"variable" : None},
+                                       "name" : {"variable" : None}
+                                       }
                        }
-    SASPROCESS_SASPROCESSNOTE = {
-                                 "variable" : None,
+    SASPROCESS_SASPROCESSNOTE = {"variable" : None,
                                  "children" : {"<any>" : ANY}
                                  }
-    SASPROCESS = {
-                  "variable" : None,
-                  "children" : {
-                                "name" : {"variable" : "{0}.name = \'{1}\'"},
-                               "date" : {"variable" : "{0}.date = \'{1}\'"},
-                               "description" : 
-                               {"variable" : "{0}.description = \'{1}\'"},
-                               "term" : SASPROCESS_TERM,
-                               "SASprocessnote" : SASPROCESS_SASPROCESSNOTE,
-                               "<any>" : ANY
-                               },
-                 }
-    RUN = {
-           "variable" : "{0}.run.append(\"{1}\")",
-           "attributes" : 
-           {"name" : {"variable" : "{0}.run_name[node_value] = \"{1}\""}}
+    SASPROCESS = {"variable" : None,
+                  "children" : {"name" : {"variable" : "{0}.name = \'{1}\'"},
+                                "date" : {"variable" : "{0}.date = \'{1}\'"},
+                                "description" : {"variable" : "{0}.description = \'{1}\'"},
+                                "term" : SASPROCESS_TERM,
+                                "SASprocessnote" : SASPROCESS_SASPROCESSNOTE,
+                                "<any>" : ANY
+                                },
+                  }
+    RUN = {"variable" : "{0}.run.append(\"{1}\")",
+           "attributes" : {"name" : {"variable" : "{0}.run_name[node_value] = \"{1}\""}}
            }
-    SASDATA_IDATA_Q = {
-                       "variable" : "{0}.x = numpy.append({0}.x, {1})",
+    SASDATA_IDATA_Q = {"variable" : "{0}.x = numpy.append({0}.x, {1})",
                        "unit" : "x_unit",
-                       "attributes" : 
-                       {
-                        "unit" : 
-                        {
-                         "variable" : "{0}._xunit = \"{1}\"",
-                         "storeas" : "content"
-                         }
-                        },
+                       "attributes" : {"unit" : {
+                                                 "variable" : "{0}._xunit = \"{1}\"",
+                                                 "storeas" : "content"
+                                                 }
+                                       },
                        }
-    SASDATA_IDATA_I = {
-                       "variable" : "{0}.y = numpy.append({0}.y, {1})",
+    SASDATA_IDATA_I = {"variable" : "{0}.y = numpy.append({0}.y, {1})",
                        "unit" : "y_unit",
-                       "attributes" : 
-                       {
-                        "unit" : 
-                        {
-                         "variable" : "{0}._yunit = \"{1}\"",
-                         "storeas" : "content"
-                         }
-                        },
+                       "attributes" : {"unit" : {
+                                                 "variable" : "{0}._yunit = \"{1}\"",
+                                                 "storeas" : "content"
+                                                 }
+                                       },
                        }
-    SASDATA_IDATA_IDEV = {
-                          "variable" : "{0}.dy = numpy.append({0}.dy, {1})",
+    SASDATA_IDATA_IDEV = {"variable" : "{0}.dy = numpy.append({0}.dy, {1})",
                           "unit" : "y_unit",
-                          "attributes" : 
-                          {
-                           "unit" : 
-                           {
-                            "variable" : META_DATA,
-                            "storeas" : "content"
-                            }
-                           },
+                          "attributes" : {"unit" : {
+                                                    "variable" : META_DATA,
+                                                    "storeas" : "content"
+                                                    }
+                                          },
                           }
-    SASDATA_IDATA_QDEV = {
-                          "variable" : "{0}.dx = numpy.append({0}.dx, {1})",
+    SASDATA_IDATA_QDEV = {"variable" : "{0}.dx = numpy.append({0}.dx, {1})",
                           "unit" : "x_unit",
-                          "attributes" : 
-                          {
-                           "unit" : 
-                           {
-                            "variable" : META_DATA,
-                            "storeas" : "content"
-                            }
-                           },
+                          "attributes" : {"unit" : {
+                                                    "variable" : META_DATA,
+                                                    "storeas" : "content"
+                                                    }
+                                          },
                           }
     SASDATA_IDATA_DQL = {
                          "variable" : "{0}.dxl = numpy.append({0}.dxl, {1})",
