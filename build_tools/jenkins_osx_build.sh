@@ -38,7 +38,7 @@ python setup.py bdist_egg --skip-build
 
 # PYLINT_CODE
 #cd $WORKSPACE
-#/bin/sh -xe build_tools/jenkins_linux_pylint.sh
+/bin/sh -xe build_tools/jenkins_linux_pylint.sh
 
 
 # BUILD APP
