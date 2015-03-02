@@ -25,3 +25,4 @@ script:
   - export LANG=en_US.UTF-8
   - python setup.py docs; echo 0
   - python setup.py bdist_egg --skip-build
+
