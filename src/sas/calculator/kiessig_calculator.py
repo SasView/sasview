@@ -12,23 +12,23 @@ class KiessigThicknessCalculator(object):
     compute thickness from the fringe width of data
     """
     def __init__(self):
-        
+
         # dq value
         self.deltaq = _DQ_DEFAULT
         # thickenss value
         self.thickness = None
         # unit of the thickness
         self.thickness_unit = 'A'
-        
+
     def set_deltaq(self, dq=None):
         """
         Receive deltaQ value
-        
+
         :param dq: q fringe width in 1/A unit
         """
         # set dq
         self.deltaq = dq
-        
+
     def get_deltaq(self):
         """
         return deltaQ value in 1/A unit
@@ -39,7 +39,7 @@ class KiessigThicknessCalculator(object):
     def compute_thickness(self):
         """
         Calculate thickness.
-        
+
         :return: the thickness.
         """
         # check if it is float
@@ -55,7 +55,7 @@ class KiessigThicknessCalculator(object):
             thickness = 2*pi/fabs(dq)
             # return thickness value
             return thickness
-  
+
     def get_thickness_unit(self):
         """
         :return: the thickness unit.
