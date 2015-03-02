@@ -31,3 +31,11 @@ cd dist
 
 cd %WORKSPACE%\test
 %PYTHON% utest_sasview.py
+
+cd %WORKSPACE%\sasview
+python setup_exe.py py2exe
+python installer_generator.py
+"C:\Program Files (x86)\Inno Setup 5\ISCC.exe" installer.iss
+
+cd Output
+xcopy setupSasView.exe %WORKSPACE%\dist
