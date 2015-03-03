@@ -313,6 +313,7 @@ class Reader(XMLreader):
                         and local_unit.lower() != "none":
                     if HAS_CONVERTER == True:
                         ## Check local units - bad units raise KeyError
+                        data_conv_q = Converter(local_unit)
                         value_unit = default_unit
                         i_string = "node_value = data_conv_q"
                         i_string += "(node_value, units=data1d.{0})"
