@@ -464,7 +464,7 @@ class Reader(XMLreader):
         if attr is not None:
             for key in node.keys():
                 try:
-                    _, unit = self._get_node_value(node, cs_values, \
+                    node_value, unit = self._get_node_value(node, cs_values, \
                                                    data1d, tagname)
                     cansas_attrib = \
                         cs_values.current_level.get("attributes").get(key)
