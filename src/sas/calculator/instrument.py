@@ -203,10 +203,10 @@ class Neutron(object):
         """
         spectrum = self.spectrum
         intensity = numpy.interp(self.wavelength,
-                                      spectrum[0],
-                                      spectrum[1],
-                                      0.0,
-                                      0.0)
+                                 spectrum[0],
+                                 spectrum[1],
+                                 0.0,
+                                 0.0)
         self.set_intensity(intensity)
         # min max range of the spectrum
         self.min = min(self.spectrum[0])
@@ -244,10 +244,10 @@ class Neutron(object):
         self.wavelength = wavelength
         validate(wavelength)
         self.intensity = numpy.interp(self.wavelength,
-                                  self.spectrum[0],
-                                  self.spectrum[1],
-                                  0.0,
-                                  0.0)
+                                      self.spectrum[0],
+                                      self.spectrum[1],
+                                      0.0,
+                                      0.0)
 
     def set_mass(self, mass=_MASS):
         """
@@ -345,17 +345,17 @@ class TOF(Neutron):
         get list of the intensity wrt wavelength_list
         """
         out = numpy.interp(self.wavelength_list,
-                                      self.spectrum[0],
-                                      self.spectrum[1],
-                                      0.0,
-                                      0.0)
+                           self.spectrum[0],
+                           self.spectrum[1],
+                           0.0,
+                           0.0)
         return out
 
     def get_wave_list(self):
         """
         Get wavelength and wavelength_spread list
         """
-        return self.wavelength_list, self.wavelengthspread_list
+        return self.wavelength_list, self.wavelength_spread_list
 
     def set_wave_list(self, wavelength=[]):
         """
@@ -371,7 +371,7 @@ class TOF(Neutron):
 
         :param wavelength_spread: list of wavelength spreads
         """
-        self.wavelengthspread_list = wavelength_spread
+        self.wavelength_spread_list = wavelength_spread
 
 
 def validate(value=None):
