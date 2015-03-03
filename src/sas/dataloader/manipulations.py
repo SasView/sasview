@@ -205,7 +205,8 @@ class _Slab(object):
                 continue
 
             #TODO: find better definition of x[i_q] based on q_data
-            x[i_q] += frac * q_value  # min_value + (i_q + 1) * self.bin_width / 2.0
+            # min_value + (i_q + 1) * self.bin_width / 2.0
+            x[i_q] += frac * q_value
             y[i_q] += frac * data[npts]
 
             if err_data == None or err_data[npts] == 0.0:
@@ -572,9 +573,9 @@ class Ring(object):
         """
         Apply the ring to the data set.
         Returns the angular distribution for a given q range
-        
+
         :param data2D: Data2D object
-        
+
         :return: Data1D object
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
@@ -595,7 +596,8 @@ class Ring(object):
         phi_values = numpy.zeros(self.nbins_phi)
         phi_err = numpy.zeros(self.nbins_phi)
 
-        # Shift to apply to calculated phi values in order to center first bin at zero
+        # Shift to apply to calculated phi values in order
+        # to center first bin at zero
         phi_shift = Pi / self.nbins_phi
 
         for npt in range(len(data)):
@@ -611,8 +613,9 @@ class Ring(object):
                 frac = 1
             if frac == 0:
                 continue
-            # binning           
-            i_phi = int(math.floor((self.nbins_phi) * (phi_value + phi_shift) / (2 * Pi)))
+            # binning
+            i_phi = int(math.floor((self.nbins_phi) * \
+                                   (phi_value + phi_shift) / (2 * Pi)))
 
             # Take care of the edge case at phi = 2pi.
             if i_phi >= self.nbins_phi:
@@ -648,7 +651,7 @@ def get_pixel_fraction(qmax, q_00, q_01, q_10, q_11):
     Returns the fraction of the pixel defined by
     the four corners (q_00, q_01, q_10, q_11) that
     has q < qmax.::
-    
+
                 q_01                q_11
         y=1         +--------------+
                     |              |
@@ -656,9 +659,9 @@ def get_pixel_fraction(qmax, q_00, q_01, q_10, q_11):
                     |              |
         y=0         +--------------+
                 q_00                q_10
-        
+
                     x=0            x=1
-    
+
     """
     # y side for x = minx
     x_0 = get_intercept(qmax, q_00, q_01)
@@ -713,8 +716,7 @@ def get_intercept(q, q_0, q_1):
     q-value intercept the pixel, None otherwise.
     The values returned is the fraction ON THE SIDE
     OF THE LOWEST Q. ::
-    
-    
+
             A           B
         +-----------+--------+    <--- pixel size
         0                    1
@@ -722,18 +724,18 @@ def get_intercept(q, q_0, q_1):
         if Q_1 > Q_0, A is returned
         if Q_1 < Q_0, B is returned
         if Q is outside the range of [Q_0, Q_1], None is returned
-         
+
     """
     if q_1 > q_0:
-        if (q > q_0 and q <= q_1):
+        if q > q_0 and q <= q_1:
             return (q - q_0) / (q_1 - q_0)
     else:
-        if (q > q_1 and q <= q_0):
+        if q > q_1 and q <= q_0:
             return (q - q_1) / (q_0 - q_1)
     return None
 
 
-class _Sector:
+class _Sector(object):
     """
     Defines a sector region on a 2D data set.
     The sector is defined by r_min, r_max, phi_min, phi_max,
@@ -741,7 +743,7 @@ class _Sector:
     where phi_min and phi_max are defined by the right
     and left lines wrt central line
     and phi_max could be less than phi_min.
-   
+
     Phi is defined between 0 and 2*pi in anti-clockwise
     starting from the x- axis on the left-hand side
     """
@@ -755,10 +757,10 @@ class _Sector:
     def _agv(self, data2D, run='phi'):
         """
         Perform sector averaging.
-        
+
         :param data2D: Data2D object
         :param run:  define the varying parameter ('phi' , 'q' , or 'q2')
-        
+
         :return: Data1D object
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
@@ -939,14 +941,14 @@ class SectorPhi(_Sector):
     """
     Sector average as a function of phi.
     I(phi) is return and the data is averaged over Q.
-    
+
     A sector is defined by r_min, r_max, phi_min, phi_max.
     The number of bin in phi also has to be defined.
     """
     def __call__(self, data2D):
         """
         Perform sector average and return I(phi).
-        
+
         :param data2D: Data2D object
         :return: Data1D object
         """
@@ -957,7 +959,7 @@ class SectorQ(_Sector):
     """
     Sector average as a function of Q for both symatric wings.
     I(Q) is return and the data is averaged over phi.
-    
+
     A sector is defined by r_min, r_max, phi_min, phi_max.
     r_min, r_max, phi_min, phi_max >0.
     The number of bin in Q also has to be defined.
@@ -965,9 +967,9 @@ class SectorQ(_Sector):
     def __call__(self, data2D):
         """
         Perform sector average and return I(Q).
-        
+
         :param data2D: Data2D object
-        
+
         :return: Data1D object
         """
         return self._agv(data2D, 'q2')
@@ -978,9 +980,9 @@ class Ringcut(object):
     Defines a ring on a 2D data set.
     The ring is defined by r_min, r_max, and
     the position of the center of the ring.
-    
+
     The data returned is the region inside the ring
-    
+
     Phi_min and phi_max should be defined between 0 and 2*pi
     in anti-clockwise starting from the x- axis on the left-hand side
     """
@@ -998,9 +1000,9 @@ class Ringcut(object):
         """
         Apply the ring to the data set.
         Returns the angular distribution for a given q range
-        
+
         :param data2D: Data2D object
-        
+
         :return: index array in the range
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
@@ -1013,8 +1015,7 @@ class Ringcut(object):
 
         # check whether or not the data point is inside ROI
         out = (self.r_min <= q_data) & (self.r_max >= q_data)
-
-        return (out)
+        return out
 
 
 class Boxcut(object):
@@ -1034,7 +1035,7 @@ class Boxcut(object):
     def __call__(self, data2D):
         """
        Find a rectangular 2D region of interest.
-         
+
        :param data2D: Data2D object
        :return: mask, 1d array (len = len(data))
            with Trues where the data points are inside ROI, otherwise False
@@ -1046,9 +1047,9 @@ class Boxcut(object):
     def _find(self, data2D):
         """
         Find a rectangular 2D region of interest.
-        
+
         :param data2D: Data2D object
-        
+
         :return: out, 1d array (length = len(data))
            with Trues where the data points are inside ROI, otherwise Falses
         """
@@ -1062,7 +1063,7 @@ class Boxcut(object):
         outx = (self.x_min <= qx_data) & (self.x_max > qx_data)
         outy = (self.y_min <= qy_data) & (self.y_max > qy_data)
 
-        return (outx & outy)
+        return outx & outy
 
 
 class Sectorcut(object):
@@ -1071,7 +1072,7 @@ class Sectorcut(object):
     The sector is defined by phi_min, phi_max,
     where phi_min and phi_max are defined by the right
     and left lines wrt central line.
-   
+
     Phi_min and phi_max are given in units of radian
     and (phi_max-phi_min) should not be larger than pi
     """
@@ -1082,11 +1083,11 @@ class Sectorcut(object):
     def __call__(self, data2D):
         """
         Find a rectangular 2D region of interest.
-        
+
         :param data2D: Data2D object
-        
+
         :return: mask, 1d array (len = len(data))
-        
+
         with Trues where the data points are inside ROI, otherwise False
         """
         mask = self._find(data2D)
@@ -1096,17 +1097,17 @@ class Sectorcut(object):
     def _find(self, data2D):
         """
         Find a rectangular 2D region of interest.
-        
+
         :param data2D: Data2D object
-        
+
         :return: out, 1d array (length = len(data))
-        
+
         with Trues where the data points are inside ROI, otherwise Falses
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
             raise RuntimeError, "Sectorcut take only plottable_2D objects"
         Pi = math.pi
-        # Get data 
+        # Get data
         qx_data = data2D.qx_data
         qy_data = data2D.qy_data
 
