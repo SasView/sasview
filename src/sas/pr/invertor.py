@@ -106,20 +106,10 @@ class Invertor(Cinvertor):
     background = 0
     ## Information dictionary for application use
     info = {}
-    ## Slit information
-    slit_height = None
-    slit_width = None
-    ## Error
-    err = 0
-    ## Data to invert
-    x = None
-    y = None
 
     def __init__(self):
         Cinvertor.__init__(self)
         self.d_max = 200.0
-        self.q_min = self.set_qmin(-1.0)
-        self.q_max = self.set_qmax(-1.0)
         self.has_bck = False
 
     def __setstate__(self, state):
