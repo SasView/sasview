@@ -2,7 +2,6 @@
 import wx
 import sys
 from copy import deepcopy
-from sas.dataloader.loader import Loader
 from sas.guiframe.utils import check_float
 
 _BOX_WIDTH = 60
@@ -30,7 +29,6 @@ class ApertureDialog(wx.Dialog):
         self._aperture = aperture
         self._reset_aperture = deepcopy(aperture)
         self._notes = ""
-        #self_description = "Edit aperture"
 
         #Attributes for panel
         self.aperture_name_tcl = None
@@ -66,9 +64,7 @@ class ApertureDialog(wx.Dialog):
         """
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.box_aperture = wx.StaticBox(self, -1, str("Aperture"))
-        self.boxsizer_aperture = wx.StaticBoxSizer(self.box_aperture,
-                                                   wx.VERTICAL)
-
+        self.boxsizer_aperture = wx.StaticBoxSizer(self.box_aperture, wx.VERTICAL)
         self.name_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.type_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.distance_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -82,10 +78,9 @@ class ApertureDialog(wx.Dialog):
         """
         #Aperture name [string]
         aperture_name_txt = wx.StaticText(self, -1, 'Aperture Name : ')
-        self.aperture_name_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH * 5, 20),
-                                              style=0)
+        self.aperture_name_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH * 5, 20), style=0)
         self.name_sizer.AddMany([(aperture_name_txt, 0, wx.LEFT | wx.RIGHT, 10),
-                                       (self.aperture_name_tcl, 0, wx.EXPAND)])
+                                 (self.aperture_name_tcl, 0, wx.EXPAND)])
     def _layout_type(self):
         """
         Do the  layout for aperture type  related widgets
@@ -94,7 +89,7 @@ class ApertureDialog(wx.Dialog):
         type_txt = wx.StaticText(self, -1, 'Type: ')
         self.type_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
         self.type_sizer.AddMany([(type_txt, 0, wx.LEFT | wx.RIGHT, 10),
-                                     (self.type_tcl, 0, wx.LEFT, 20)])
+                                 (self.type_tcl, 0, wx.LEFT, 20)])
 
     def _layout_distance(self):
         """
@@ -105,11 +100,10 @@ class ApertureDialog(wx.Dialog):
         self.distance_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                         style=0)
         distance_unit_txt = wx.StaticText(self, -1, 'Unit: ')
-        self.distance_unit_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20),
-                                             style=0)
+        self.distance_unit_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
         self.distance_sizer.AddMany([(distance_txt, 0, wx.LEFT | wx.RIGHT, 10),
                                      (self.distance_tcl, 0, wx.LEFT, 10),
-                                (distance_unit_txt, 0, wx.LEFT | wx.RIGHT, 10),
+                                     (distance_unit_txt, 0, wx.LEFT | wx.RIGHT, 10),
                                      (self.distance_unit_tcl, 0, wx.EXPAND)])
     def _layout_size_name(self):
         """
@@ -117,10 +111,9 @@ class ApertureDialog(wx.Dialog):
         """
         # Size name [string]
         size_name_txt = wx.StaticText(self, -1, 'Size Name : ')
-        self.size_name_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH * 5, 20),
-                                          style=0)
+        self.size_name_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH * 5, 20), style=0)
         self.size_name_sizer.AddMany([(size_name_txt, 0, wx.LEFT | wx.RIGHT, 10),
-                                       (self.size_name_tcl, 0, wx.EXPAND)])
+                                      (self.size_name_tcl, 0, wx.EXPAND)])
 
     def _layout_size(self):
         """
@@ -129,27 +122,22 @@ class ApertureDialog(wx.Dialog):
         #Aperture size [Vector]
         aperture_size_txt = wx.StaticText(self, -1, 'Size:')
         x_aperture_size_txt = wx.StaticText(self, -1, 'x = ')
-        self.x_aperture_size_tcl = wx.TextCtrl(self, -1,
-                                               size=(_BOX_WIDTH, 20), style=0)
+        self.x_aperture_size_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
         y_aperture_size_txt = wx.StaticText(self, -1, 'y = ')
-        self.y_aperture_size_tcl = wx.TextCtrl(self, -1,
-                                                size=(_BOX_WIDTH, 20), style=0)
+        self.y_aperture_size_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
         z_aperture_size_txt = wx.StaticText(self, -1, 'z = ')
-        self.z_aperture_size_tcl = wx.TextCtrl(self, -1,
-                                                size=(_BOX_WIDTH, 20), style=0)
+        self.z_aperture_size_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
         aperture_size_unit_txt = wx.StaticText(self, -1, 'Unit: ')
-        self.aperture_size_unit_tcl = wx.TextCtrl(self, -1,
-                                                size=(_BOX_WIDTH, 20), style=0)
-        self.aperture_size_sizer.AddMany([(aperture_size_txt,
-                                         0, wx.LEFT | wx.RIGHT, 10),
-                                     (x_aperture_size_txt, 0, wx.LEFT, 17),
-                                (self.x_aperture_size_tcl, 0, wx.RIGHT, 10),
-                                     (y_aperture_size_txt, 0, wx.EXPAND),
-                                (self.y_aperture_size_tcl, 0, wx.RIGHT, 10),
-                                     (z_aperture_size_txt, 0, wx.EXPAND),
-                                (self.z_aperture_size_tcl, 0, wx.RIGHT, 10),
-                                     (aperture_size_unit_txt, 0, wx.EXPAND),
-                            (self.aperture_size_unit_tcl, 0, wx.RIGHT, 10)])
+        self.aperture_size_unit_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 20), style=0)
+        self.aperture_size_sizer.AddMany([(aperture_size_txt, 0, wx.LEFT | wx.RIGHT, 10),
+                                          (x_aperture_size_txt, 0, wx.LEFT, 17),
+                                          (self.x_aperture_size_tcl, 0, wx.RIGHT, 10),
+                                          (y_aperture_size_txt, 0, wx.EXPAND),
+                                          (self.y_aperture_size_tcl, 0, wx.RIGHT, 10),
+                                          (z_aperture_size_txt, 0, wx.EXPAND),
+                                          (self.z_aperture_size_tcl, 0, wx.RIGHT, 10),
+                                          (aperture_size_unit_txt, 0, wx.EXPAND),
+                                          (self.aperture_size_unit_tcl, 0, wx.RIGHT, 10)])
 
     def _layout_button(self):
         """
@@ -178,19 +166,18 @@ class ApertureDialog(wx.Dialog):
         self._layout_size_name()
         self._layout_size()
         self._layout_button()
-        self.boxsizer_aperture.AddMany([(self.name_sizer, 0,
-                                          wx.EXPAND | wx.TOP | wx.BOTTOM, 5),
-                                   (self.type_sizer, 0,
-                                     wx.EXPAND | wx.TOP | wx.BOTTOM, 5),
-                                   (self.distance_sizer, 0,
-                                     wx.EXPAND | wx.TOP | wx.BOTTOM, 5),
-                                   (self.size_name_sizer, 0,
-                                    wx.EXPAND | wx.TOP | wx.BOTTOM, 5),
-                                   (self.aperture_size_sizer, 0,
-                                    wx.EXPAND | wx.TOP | wx.BOTTOM, 5)])
+        self.boxsizer_aperture.AddMany([(self.name_sizer, 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 5),
+                                        (self.type_sizer, 0,
+                                         wx.EXPAND | wx.TOP | wx.BOTTOM, 5),
+                                        (self.distance_sizer, 0,
+                                         wx.EXPAND | wx.TOP | wx.BOTTOM, 5),
+                                        (self.size_name_sizer, 0,
+                                         wx.EXPAND | wx.TOP | wx.BOTTOM, 5),
+                                        (self.aperture_size_sizer, 0,
+                                         wx.EXPAND | wx.TOP | wx.BOTTOM, 5)])
         self.main_sizer.AddMany([(self.boxsizer_aperture, 0, wx.ALL, 10),
-                                  (self.button_sizer, 0,
-                                    wx.EXPAND | wx.TOP | wx.BOTTOM, 5)])
+                                 (self.button_sizer, 0,
+                                  wx.EXPAND | wx.TOP | wx.BOTTOM, 5)])
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
 
@@ -228,7 +215,7 @@ class ApertureDialog(wx.Dialog):
         self.distance_tcl.SetValue(str(aperture.distance))
         #distance unit
         self.distance_unit_tcl.SetValue(str(aperture.distance_unit))
-        #Size name 
+        #Size name
         self.size_name_tcl.SetValue(str(aperture.size_name))
         #Aperture size as a vector
         x, y, z = aperture.size.x, aperture.size.y, aperture.size.z
@@ -266,11 +253,11 @@ class ApertureDialog(wx.Dialog):
         """
         Change aperture type
         """
-        #Change type 
-        type = self.type_tcl.GetValue().lstrip().rstrip()
-        self._aperture.type = type
+        #Change type
+        type_value = self.type_tcl.GetValue().lstrip().rstrip()
+        self._aperture.type = type_value
         self._notes += " Change type from"
-        self._notes += " %s to %s \n" % (self._aperture.type, type)
+        self._notes += " %s to %s \n" % (self._aperture.type, type_value)
 
     def on_change_distance(self):
         """
@@ -285,8 +272,7 @@ class ApertureDialog(wx.Dialog):
             if check_float(self.distance_tcl):
                 if self._aperture.distance != float(distance):
                     self._notes += "Change distance from "
-                    self._notes += "%s to %s \n" % (self._aperture.distance,
-                                                  distance)
+                    self._notes += "%s to %s \n" % (self._aperture.distance, distance)
                     self._aperture.distance = float(distance)
             else:
                 self._notes += "Error: Expected a float for distance  "
@@ -318,17 +304,15 @@ class ApertureDialog(wx.Dialog):
             x_aperture_size = None
         else:
             if check_float(self.x_aperture_size_tcl):
-                if self._aperture.size.x != float(x_aperture_size) :
+                if self._aperture.size.x != float(x_aperture_size):
                     self._notes += "Change x of aperture size from "
-                    self._notes += "%s to %s \n" % (self._aperture.size.x,
-                                                   x_aperture_size)
+                    self._notes += "%s to %s \n" % (self._aperture.size.x, x_aperture_size)
                     self._aperture.aperture_size.x = float(x_aperture_size)
             else:
                 self._notes += "Error: Expected a"
                 self._notes += " float for the aperture size 's x "
                 self._notes += "won't changes x aperture size from "
-                self._notes += "%s to %s" % (self._aperture.size.x,
-                                           x_aperture_size)
+                self._notes += "%s to %s" % (self._aperture.size.x, x_aperture_size)
         #Change y coordinate
         y_aperture_size = self.y_aperture_size_tcl.GetValue().lstrip().rstrip()
         if y_aperture_size == "" or y_aperture_size == str(None):
@@ -338,15 +322,13 @@ class ApertureDialog(wx.Dialog):
             if check_float(self.y_aperture_size_tcl):
                 if self._aperture.size.y != float(y_aperture_size):
                     self._notes += "Change y of aperture size from "
-                    self._notes += "%s to %s \n" % (self._aperture.size.y,
-                                                   y_aperture_size)
+                    self._notes += "%s to %s \n" % (self._aperture.size.y, y_aperture_size)
                     self._aperture.size.y = float(y_aperture_size)
             else:
                 self._notes += "Error: Expected a float for the"
                 self._notes += " aperture size's y "
                 self._notes += "won't changes y aperture size from "
-                self._notes += "%s to %s" % (self._aperture.size.y,
-                                            y_aperture_size)
+                self._notes += "%s to %s" % (self._aperture.size.y, y_aperture_size)
         #Change z coordinate
         z_aperture_size = self.z_aperture_size_tcl.GetValue().lstrip().rstrip()
         if z_aperture_size == "" or z_aperture_size == str(None):
@@ -356,14 +338,12 @@ class ApertureDialog(wx.Dialog):
             if check_float(self.z_aperture_size_tcl):
                 if self._aperture.size.z != float(z_aperture_size):
                     self._notes += "Change z of aperture size from "
-                    self._notes += "%s to %s \n" % (self._aperture.size.z,
-                                                   z_aperture_size)
+                    self._notes += "%s to %s \n" % (self._aperture.size.z, z_aperture_size)
                     self._aperture.size.z = float(z_aperture_size)
             else:
                 self._notes += "Error: Expected a float for the offset 's x "
                 self._notes += "won't changes z aperture size from "
-                self._notes += "%s to %s" % (self._aperture.size.z,
-                                            z_aperture_size)
+                self._notes += "%s to %s" % (self._aperture.size.z, z_aperture_size)
         #change the aperture center unit
         unit = self.aperture_size_unit_tcl.GetValue().lstrip().rstrip()
         if self._aperture.size_unit != unit:
@@ -393,18 +373,6 @@ class ApertureDialog(wx.Dialog):
         self.reset_aperture()
         self.set_values()
         if self.manager is not None:
-             self.manager.set_aperture(self._aperture)
+            self.manager.set_aperture(self._aperture)
         if event is not None:
             event.Skip()
-
-if __name__ == "__main__":
-
-    app = wx.App()
-    # Instantiate a loader 
-    loader = Loader()
-    # Load data 
-    from sas.dataloader.data_info import Aperture
-    ap = Aperture()
-    dlg = ApertureDialog(aperture=ap)
-    dlg.ShowModal()
-    app.MainLoop()
