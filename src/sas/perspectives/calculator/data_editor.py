@@ -1,19 +1,15 @@
 
 import wx
 import sys
-import os 
+import os
 from copy import deepcopy
 
 from sas.dataloader.loader import Loader
-#from DataLoader.data_info import DataInfo
-#from DataLoader.data_info import  Detector
-#from DataLoader.data_info import Collimation
 from sas.dataloader.data_info import Data2D
 from detector_editor import DetectorDialog
 from collimation_editor import CollimationDialog
 from console import ConsoleDialog
 
-#from sas.guiframe.utils import check_float
 from sas.guiframe.events import StatusEvent
 
 
@@ -33,29 +29,29 @@ else:
     PANEL_HEIGTH = 400
     FONT_VARIANT = 1
     ON_MAC = True
-    
+
 def load_error(error=None):
     """
         Pop up an error message.
-        
+
         @param error: details error message to be displayed
     """
     message = "You had to try this, didn't you?\n\n"
     message += "The data file you selected could not be loaded.\n"
     message += "Make sure the content of your file is properly formatted.\n\n"
-    
+
     if error is not None:
         message += "When contacting the SasView team,"
         message += " mention the following:\n%s" % str(error)
-    
-    dial = wx.MessageDialog(None, message, 
+
+    dial = wx.MessageDialog(None, message,
                             'Error Loading File', wx.OK | wx.ICON_EXCLAMATION)
-    dial.ShowModal() 
-    
-    
+    dial.ShowModal()
+
+
 class DataEditorPanel(wx.ScrolledWindow):
     """
-    :param data: when not empty the class can 
+    :param data: when not empty the class can
                 same information into a dat object
         and post event containing the changed data object to some other frame
     """
@@ -76,32 +72,32 @@ class DataEditorPanel(wx.ScrolledWindow):
         if data:
             self.complete_loading(data=data)
             self.bt_apply.Enable()
-             
+
     def _define_structure(self):
         """
-        define initial sizer 
+        define initial sizer
         """
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         name_box = wx.StaticBox(self, -1, "Load Data")
         self.name_sizer = wx.StaticBoxSizer(name_box, wx.HORIZONTAL)
-        
+
         self.title_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.run_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.instrument_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        
+
         edit_box = wx.StaticBox(self, -1, "Edit ")
         self.edit_sizer = wx.StaticBoxSizer(edit_box, wx.HORIZONTAL)
-        
+
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
-      
+
     def _layout_name(self):
         """
         Do the layout for data name related widgets
         """
         #data name [string]
-        data_name_txt = wx.StaticText(self, -1, 'Data : ')  
+        data_name_txt = wx.StaticText(self, -1, 'Data : ')
         self.data_cbox = wx.ComboBox(self, -1, style=wx.CB_READONLY)
-        wx.EVT_COMBOBOX(self.data_cbox, -1, self.on_select_data) 
+        wx.EVT_COMBOBOX(self.data_cbox, -1, self.on_select_data)
         hint_data = "Loaded data."
         self.data_cbox.SetToolTipString(hint_data)
         id = wx.NewId()
@@ -112,46 +108,46 @@ class DataEditorPanel(wx.ScrolledWindow):
         self.name_sizer.AddMany([(data_name_txt, 0, wx.LEFT, 15),
                                        (self.data_cbox, 0, wx.LEFT, 10),
                                        (self.browse_button, 0, wx.LEFT, 10)])
-        
+
     def _layout_title(self):
         """
         Do the layout for data title related widgets
         """
         #title name [string]
-        data_title_txt = wx.StaticText(self, -1, 'Title : ')  
-        self.data_title_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH*3/5, -1)) 
+        data_title_txt = wx.StaticText(self, -1, 'Title : ')
+        self.data_title_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH * 3 / 5, -1))
         self.data_title_tcl.Bind(wx.EVT_TEXT_ENTER, self.on_change_title)
         hint_title = "Data's title."
         self.data_title_tcl.SetToolTipString(hint_title)
         self.title_sizer.AddMany([(data_title_txt, 0, wx.LEFT, 15),
                                        (self.data_title_tcl, 0, wx.LEFT, 10)])
-        
+
     def _layout_run(self):
         """
         Do the layout for data run related widgets
         """
-        data_run_txt = wx.StaticText(self, -1, 'Run : ') 
-        data_run_txt.SetToolTipString('') 
-        self.data_run_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH*3/5, -1),
+        data_run_txt = wx.StaticText(self, -1, 'Run : ')
+        data_run_txt.SetToolTipString('')
+        self.data_run_tcl = wx.TextCtrl(self, -1, size=(PANEL_WIDTH * 3 / 5, -1),
                                          style=wx.TE_MULTILINE)
         hint_run = "Data's run."
         self.data_run_tcl.SetToolTipString(hint_run)
         self.run_sizer.AddMany([(data_run_txt, 0, wx.LEFT, 15),
                                        (self.data_run_tcl, 0, wx.LEFT, 10)])
-        
+
     def _layout_instrument(self):
         """
         Do the layout for instrument related widgets
         """
-        instrument_txt = wx.StaticText(self, -1, 'Instrument : ') 
+        instrument_txt = wx.StaticText(self, -1, 'Instrument : ')
         hint_instrument_txt = ''
-        instrument_txt.SetToolTipString(hint_instrument_txt) 
-        self.instrument_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH*5, 20)) 
+        instrument_txt.SetToolTipString(hint_instrument_txt)
+        self.instrument_tcl = wx.TextCtrl(self, -1, size=(_BOX_WIDTH * 5, 20))
         hint_instrument = "Instrument."
         self.instrument_tcl.SetToolTipString(hint_instrument)
         self.instrument_sizer.AddMany([(instrument_txt, 0, wx.LEFT, 15),
                                 (self.instrument_tcl, 0, wx.LEFT, 10)])
-        
+
     def _layout_editor(self):
         """
         Do the layout for sample related widgets
@@ -161,26 +157,26 @@ class DataEditorPanel(wx.ScrolledWindow):
         self.sample_rb = wx.RadioButton(self, -1, "Sample")
         self.source_rb = wx.RadioButton(self, -1, "Source")
         self.collimation_rb = wx.RadioButton(self, -1, "Collimation")
-       
+
         self.bt_edit = wx.Button(self, -1, "Edit")
         self.bt_edit.SetToolTipString("Edit data.")
         self.bt_edit.Bind(wx.EVT_BUTTON, self.on_edit)
         self.edit_sizer.AddMany([(self.detector_rb, 0, wx.ALL, 10),
-                        (self.sample_rb, 0, wx.RIGHT|wx.BOTTOM|wx.TOP, 10),
-                        (self.source_rb, 0, wx.RIGHT|wx.BOTTOM|wx.TOP, 10),
-                    (self.collimation_rb, 0, wx.RIGHT|wx.BOTTOM|wx.TOP, 10),
+                        (self.sample_rb, 0, wx.RIGHT | wx.BOTTOM | wx.TOP, 10),
+                        (self.source_rb, 0, wx.RIGHT | wx.BOTTOM | wx.TOP, 10),
+                    (self.collimation_rb, 0, wx.RIGHT | wx.BOTTOM | wx.TOP, 10),
                     (self.bt_edit, 0,
-                                  wx.RIGHT|wx.BOTTOM|wx.TOP, 10)])
+                                  wx.RIGHT | wx.BOTTOM | wx.TOP, 10)])
         self.reset_radiobox()
-   
-    
+
+
     def _layout_source(self):
         """
             Do the layout for source related widgets
         """
-        source_txt = wx.StaticText(self, -1, 'Source ') 
+        source_txt = wx.StaticText(self, -1, 'Source ')
         hint_source_txt = ''
-        source_txt.SetToolTipString(hint_source_txt) 
+        source_txt.SetToolTipString(hint_source_txt)
         self.bt_edit_source = wx.Button(self, -1, "Edit")
         self.bt_edit_source.SetToolTipString("Edit data's sample.")
         self.bt_edit_source.Bind(wx.EVT_BUTTON, self.edit_source)
@@ -193,42 +189,42 @@ class DataEditorPanel(wx.ScrolledWindow):
             Layout widgets related to data's summary
         """
         self.data_summary = wx.TextCtrl(self, -1,
-                                         style=wx.TE_MULTILINE|wx.HSCROLL,
+                                         style=wx.TE_MULTILINE | wx.HSCROLL,
                                         size=(-1, 200))
         summary = 'No data info available...'
         self.data_summary.SetValue(summary)
         #self.summary_sizer.Add(self.data_summary, 1, wx.EXPAND|wx.ALL, 10)  
-                    
-    def _layout_button(self):  
+
+    def _layout_button(self):
         """
             Do the layout for the button widgets
-        """ 
+        """
         self.bt_summary = wx.Button(self, -1, "View", size=(_BOX_WIDTH, -1))
         self.bt_summary.SetToolTipString("View final changes on data.")
         self.bt_summary.Bind(wx.EVT_BUTTON, self.on_click_view)
-        
+
         self.bt_save = wx.Button(self, -1, "Save As", size=(_BOX_WIDTH, -1))
         self.bt_save.SetToolTipString("Save changes in a file.")
         self.bt_save.Bind(wx.EVT_BUTTON, self.on_click_save)
-        
+
         self.bt_apply = wx.Button(self, -1, "Apply", size=(_BOX_WIDTH, -1))
         self.bt_apply.SetToolTipString("Save changes into the imported data.")
         self.bt_apply.Bind(wx.EVT_BUTTON, self.on_click_apply)
-      
+
         self.bt_reset = wx.Button(self, -1, 'Reset', size=(_BOX_WIDTH, -1))
         self.bt_reset.Bind(wx.EVT_BUTTON, self.on_click_reset)
         self.bt_reset.SetToolTipString("Reset data to its initial state.")
-        
+
         self.bt_close = wx.Button(self, -1, 'Close', size=(_BOX_WIDTH, -1))
         self.bt_close.Bind(wx.EVT_BUTTON, self.on_close)
         self.bt_close.SetToolTipString("Close this panel.")
-        
+
         self.button_sizer.AddMany([(self.bt_save, 0, wx.LEFT, 120),
                                    (self.bt_apply, 0, wx.LEFT, 10),
-                                   (self.bt_reset, 0, wx.LEFT|wx.RIGHT, 10),
+                                   (self.bt_reset, 0, wx.LEFT | wx.RIGHT, 10),
                                    (self.bt_summary, 0, wx.RIGHT, 10),
                                    (self.bt_close, 0, wx.RIGHT, 10)])
-        
+
     def _do_layout(self):
         """
         Draw the current panel
@@ -239,21 +235,21 @@ class DataEditorPanel(wx.ScrolledWindow):
         self._layout_run()
         self._layout_editor()
         self._layout_button()
-        self.main_sizer.AddMany([(self.name_sizer, 0, wx.EXPAND|wx.ALL, 10),
+        self.main_sizer.AddMany([(self.name_sizer, 0, wx.EXPAND | wx.ALL, 10),
                                 (self.title_sizer, 0,
-                                         wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                         wx.EXPAND | wx.TOP | wx.BOTTOM, 5),
                                 (self.run_sizer, 0,
-                                         wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                         wx.EXPAND | wx.TOP | wx.BOTTOM, 5),
                                 (self.instrument_sizer, 0,
-                                         wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                         wx.EXPAND | wx.TOP | wx.BOTTOM, 5),
                                 (self.edit_sizer, 0,
-                                        wx.EXPAND|wx.LEFT|wx.RIGHT|wx.TOP,10),
+                                        wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, 10),
                                 (self.button_sizer, 0,
-                                          wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
+                                          wx.EXPAND | wx.TOP | wx.BOTTOM, 5)])
         self.SetSizer(self.main_sizer)
         self.SetScrollbars(20, 20, 25, 65)
         self.SetAutoLayout(True)
-        
+
     def fill_data_combox(self):
         """
         fill the current combobox with the available data
@@ -265,20 +261,20 @@ class DataEditorPanel(wx.ScrolledWindow):
             name = data.title
             if data.run:
                 name = data.run[0]
-            if name.lstrip().rstrip() =="":
+            if name.lstrip().rstrip() == "":
                 name = data.filename
             pos = self.data_cbox.Append(str(name))
             self.data_cbox.SetClientData(pos, data)
             self.data_cbox.SetSelection(pos)
-            self.data_cbox.SetStringSelection(str(name)) 
-       
+            self.data_cbox.SetStringSelection(str(name))
+
     def reset_panel(self):
         """
         """
         self.enable_data_cbox()
         self.data_title_tcl.SetValue("")
         self.data_run_tcl.SetValue("")
-        
+
     def on_select_data(self, event=None):
         """
         """
@@ -290,19 +286,19 @@ class DataEditorPanel(wx.ScrolledWindow):
         text = ""
         if data.run:
             for item in data.run:
-                text += item+"\n"
+                text += item + "\n"
         self.data_run_tcl.SetValue(str(text))
-            
+
     def get_current_data(self):
         """
         """
-        position = self.data_cbox.GetSelection() 
+        position = self.data_cbox.GetSelection()
         if position == wx.NOT_FOUND:
             return None, None, None
-        data_name = self.data_cbox.GetStringSelection() 
+        data_name = self.data_cbox.GetStringSelection()
         data = self.data_cbox.GetClientData(position)
         return data, data_name, position
-    
+
     def enable_data_cbox(self):
         """
         """
@@ -318,7 +314,7 @@ class DataEditorPanel(wx.ScrolledWindow):
             self.bt_reset.Disable()
             self.bt_save.Disable()
             self.bt_edit.Disable()
-            
+
     def reset_radiobox(self):
         """
         """
@@ -326,69 +322,69 @@ class DataEditorPanel(wx.ScrolledWindow):
         self.source_rb.SetValue(False)
         self.sample_rb.SetValue(False)
         self.collimation_rb.SetValue(False)
-    
+
     def set_sample(self, sample, notes=None):
         """
         set sample for data
         """
         data, _, _ = self.get_current_data()
         if data is None:
-            return 
+            return
         data.sample = sample
         if notes is not None:
             data.process.append(notes)
-    
+
     def set_source(self, source, notes=None):
         """
         set source for data
         """
         data, data_name, position = self.get_current_data()
         if data is None:
-            return 
+            return
         data.source = source
         if notes is not None:
             data.process.append(notes)
-        
+
     def set_detector(self, detector, notes=None):
         """
         set detector for data
         """
         data, data_name, position = self.get_current_data()
         if data is None:
-            return 
+            return
         data.detector = detector
         if notes is not None:
             data.process.append(notes)
-        
+
     def set_collimation(self, collimation, notes=None):
         """
         set collimation for data
         """
         data, data_name, position = self.get_current_data()
         if data is None:
-            return 
+            return
         data.collimation = collimation
         if notes is not None:
             data.process.append(notes)
-                
+
     def edit_collimation(self):
         """
         Edit the selected collimation
         """
         data, data_name, position = self.get_current_data()
         if data is None:
-            return 
+            return
         dlg = CollimationDialog(collimation=data.collimation)
         dlg.set_manager(self)
         dlg.ShowModal()
-            
+
     def edit_detector(self):
         """
         Edit the selected detector
         """
         data, data_name, position = self.get_current_data()
         if data is None:
-            return 
+            return
         dlg = DetectorDialog(detector=data.detector)
         dlg.set_manager(self)
         dlg.ShowModal()
@@ -404,7 +400,7 @@ class DataEditorPanel(wx.ScrolledWindow):
         dlg = SampleDialog(parent=self, sample=data.sample)
         dlg.set_manager(self)
         dlg.ShowModal()
-        
+
     def edit_source(self):
         """
         Open the dialog to edit the saource of the current data
@@ -416,7 +412,7 @@ class DataEditorPanel(wx.ScrolledWindow):
         dlg = SourceDialog(parent=self, source=data.source)
         dlg.set_manager(self)
         dlg.ShowModal()
-        
+
     def choose_data_file(self, location=None):
         """
         Open a file dialog to allow loading a file
@@ -424,19 +420,19 @@ class DataEditorPanel(wx.ScrolledWindow):
         path = None
         if location == None:
             location = os.getcwd()
-        
+
         l = Loader()
         cards = l.get_wildcards()
         wlist = '|'.join(cards)
-        
+
         dlg = wx.FileDialog(self, "Choose a file", location, "", wlist, wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             mypath = os.path.basename(path)
         dlg.Destroy()
         return path
-    
-    
+
+
     def complete_loading(self, data=None, filename=''):
         """
         Complete the loading and compute the slit size
@@ -446,8 +442,8 @@ class DataEditorPanel(wx.ScrolledWindow):
         if data is None:
             msg = "Couldn't load data"
             wx.PostEvent(self.parent.parent, StatusEvent(status=msg,
-                                             info="warning",type='stop'))
-            return 
+                                             info="warning", type='stop'))
+            return
         if not  data.__class__.__name__ == "list":
             self._data.append(data)
             self._reset_data.append(deepcopy(data))
@@ -456,11 +452,11 @@ class DataEditorPanel(wx.ScrolledWindow):
             self._reset_data = deepcopy(data)
         self.set_values()
         if self.parent.parent is None:
-            return 
+            return
         msg = "Load Complete"
         wx.PostEvent(self.parent.parent, StatusEvent(status=msg,
-                                                info="info",type='stop'))
-  
+                                                info="info", type='stop'))
+
     def set_values(self):
         """
         take the aperture values of the current data and display them
@@ -469,19 +465,19 @@ class DataEditorPanel(wx.ScrolledWindow):
         if self._data:
             self.fill_data_combox()
             self.on_select_data(event=None)
-        
+
     def get_data(self):
         """
         return the current data
         """
         return self._data
-    
+
     def get_notes(self):
         """
         return notes
         """
         return self._notes
-    
+
     def on_change_run(self, event=None):
         """
         Change run
@@ -498,7 +494,7 @@ class DataEditorPanel(wx.ScrolledWindow):
             data.run = run
         if event is not None:
             event.Skip()
-                 
+
     def on_change_title(self, event=None):
         """
         Change title
@@ -506,14 +502,14 @@ class DataEditorPanel(wx.ScrolledWindow):
         data, _, _ = self.get_current_data()
         #Change data's name
         title = self.data_title_tcl.GetValue().lstrip().rstrip()
-        
+
         if data.title != title:
             self._notes += "Change data 's "
             self._notes += "title from %s to %s \n" % (data.title, str(title))
             data.title = title
         if event is not None:
             event.Skip()
-            
+
     def on_click_browse(self, event):
         """
         Open a file dialog to allow the user to select a given file.
@@ -521,11 +517,11 @@ class DataEditorPanel(wx.ScrolledWindow):
         """
         path = self.choose_data_file(location=self._default_save_location)
         if path is None:
-            return 
+            return
         if self.parent.parent is not None:
             wx.PostEvent(self.parent.parent, StatusEvent(status="Loading...",
                                         info="info", type="progress"))
-        
+
         self.done = False
         self._default_save_location = path
         try:
@@ -541,9 +537,9 @@ class DataEditorPanel(wx.ScrolledWindow):
         except:
             msg = "Data Editor: %s" % (sys.exc_value)
             load_error(msg)
-            return 
+            return
         event.Skip()
-         
+
     def on_edit(self, event):
         """
         """
@@ -556,9 +552,9 @@ class DataEditorPanel(wx.ScrolledWindow):
         if self.collimation_rb.GetValue():
             self.edit_collimation()
         event.Skip()
-            
+
     def on_click_apply(self, event):
-        """   
+        """
         changes are saved in data object imported to edit
         """
         data, _, _ = self.get_current_data()
@@ -568,7 +564,7 @@ class DataEditorPanel(wx.ScrolledWindow):
         self.on_change_title(event=None)
         #must post event here
         event.Skip()
-        
+
     def on_click_save(self, event):
         """
         Save change into a file
@@ -578,35 +574,35 @@ class DataEditorPanel(wx.ScrolledWindow):
         self.on_change_run(event=None)
         self.on_change_title(event=None)
         path = None
-        wildcard = "CanSAS 1D files(*.xml)|*.xml" 
+        wildcard = "CanSAS 1D files(*.xml)|*.xml"
         dlg = wx.FileDialog(self, "Choose a file",
-                            self._default_save_location, "",wildcard , wx.SAVE)
-       
+                            self._default_save_location, "", wildcard , wx.SAVE)
+
         for data in self._data:
             if issubclass(data.__class__, Data2D):
                 msg = "No conventional writing format for \n\n"
                 msg += "Data2D at this time.\n"
                 dlg = wx.MessageDialog(None, msg, 'Error Loading File',
                                              wx.OK | wx.ICON_EXCLAMATION)
-                dlg.ShowModal()   
+                dlg.ShowModal()
             else:
                 if dlg.ShowModal() == wx.ID_OK:
                     path = dlg.GetPath()
                     mypath = os.path.basename(path)
-                    loader = Loader() 
+                    loader = Loader()
                     format = ".xml"
                     if os.path.splitext(mypath)[1].lower() == format:
-                        loader.save( path, data, format)
+                        loader.save(path, data, format)
                     try:
                         self._default_save_location = os.path.dirname(path)
                     except:
-                        pass    
+                        pass
                     dlg.Destroy()
         event.Skip()
-        
+
     def on_click_view(self, event):
         """
-        Display data info 
+        Display data info
         """
         data, data_name, position = self.get_current_data()
         if data is None:
@@ -616,7 +612,7 @@ class DataEditorPanel(wx.ScrolledWindow):
         dlg = ConsoleDialog(data=data)
         dlg.ShowModal()
         event.Skip()
-    
+
     def on_click_reset(self, event):
         """
         """
@@ -626,14 +622,14 @@ class DataEditorPanel(wx.ScrolledWindow):
         self._data[position] = deepcopy(self._reset_data[position])
         self.set_values()
         event.Skip()
-        
+
     def on_close(self, event):
         """
         leave data as it is and close
         """
         self.parent.Close()
         event.Skip()
-        
+
 class DataEditorWindow(wx.Frame):
     def __init__(self, parent, manager, data=None, *args, **kwds):
         kwds["size"] = (PANEL_WIDTH, PANEL_HEIGTH)
@@ -642,16 +638,15 @@ class DataEditorWindow(wx.Frame):
         self.manager = manager
         self.panel = DataEditorPanel(parent=self, data=data)
         self.Show()
-        
+
     def get_data(self):
         """
             return the current data
         """
         return self.panel.get_data()
-    
+
 if __name__ == "__main__":
-   
-    app  = wx.App()
+
+    app = wx.App()
     window = DataEditorWindow(parent=None, data=[], title="Data Editor")
     app.MainLoop()
- 

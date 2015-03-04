@@ -1,5 +1,5 @@
 """
-Generic Scattering panel. 
+Generic Scattering panel.
 This module relies on guiframe manager.
 """
 
@@ -21,21 +21,21 @@ matplotlib.use('WXAgg')
 #from sas.guiframe.gui_manager import MDIFrame
 from sas.data_util.calcthread import CalcThread
 from sas.guiframe.local_perspectives.plotting.SimplePlot import PlotFrame
-from sas.guiframe.dataFitting import Data2D 
+from sas.guiframe.dataFitting import Data2D
 from sas.guiframe.dataFitting import Data1D
 from sas.dataloader.data_info import Detector
 from sas.dataloader.data_info import Source
 from sas.guiframe.panel_base import PanelBase
 from sas.guiframe.utils import format_number
-from sas.guiframe.events import StatusEvent  
-from sas.calculator import sas_gen 
+from sas.guiframe.events import StatusEvent
+from sas.calculator import sas_gen
 from sas.perspectives.calculator.calculator_widgets import OutputTextCtrl
 from sas.perspectives.calculator.calculator_widgets import InputTextCtrl
 from wx.lib.scrolledpanel import ScrolledPanel
 from sas.perspectives.calculator.load_thread import GenReader
 from sas.plottools.arrow3d import Arrow3D
 from sas.perspectives.calculator import calculator_widgets as widget
-from sas.guiframe.events import NewPlotEvent    
+from sas.guiframe.events import NewPlotEvent
 from sas.guiframe.documentation_window import DocumentationWindow
 
 _BOX_WIDTH = 76
@@ -49,7 +49,7 @@ else:
     PANEL_HEIGHT = 370
     FONT_VARIANT = 1
 _QMAX_DEFAULT = 0.3
-_NPTS_DEFAULT = 50 
+_NPTS_DEFAULT = 50
 _Q1D_MIN = 0.001
 
 def add_icon(parent, frame):
@@ -63,10 +63,10 @@ def add_icon(parent, frame):
                     icon = parent.GetIcon()
                     frame.SetIcon(icon)
                 except:
-                    pass  
+                    pass
 
 def _set_error(panel, item, show_msg=False):
-    """ 
+    """
     Set_error dialog
     """
     if item != None:
@@ -75,8 +75,8 @@ def _set_error(panel, item, show_msg=False):
     if show_msg:
         msg = "Error: wrong (or out of range) value entered."
         if panel.parent.parent != None:
-            wx.PostEvent(panel.parent.parent, 
-                     StatusEvent(status=msg, info='Error' )) 
+            wx.PostEvent(panel.parent.parent,
+                     StatusEvent(status=msg, info='Error'))
             panel.SetFocus()
     return False
 
@@ -87,13 +87,13 @@ class CalcGen(CalcThread):
     Computation
     """
     def __init__(self,
-                 id=-1,
-                 input = None,
-                 completefn = None,
-                 updatefn   = None,
+                 id= -1,
+                 input=None,
+                 completefn=None,
+                 updatefn=None,
                  #elapsed = 0,
-                 yieldtime  = 0.01,
-                 worktime   = 0.01):
+                 yieldtime=0.01,
+                 worktime=0.01):
         """
         """
         CalcThread.__init__(self, completefn,
@@ -101,10 +101,10 @@ class CalcGen(CalcThread):
                  yieldtime,
                  worktime)
         self.starttime = 0
-        self.id = id 
-        self.input = input 
+        self.id = id
+        self.input = input
         self.update_fn = updatefn
-        
+
     def compute(self):
         """
         excuting computation
@@ -112,7 +112,7 @@ class CalcGen(CalcThread):
         #elapsed = time.time() - self.starttime
         self.starttime = time.time()
         self.complete(input=self.input, update=self.update_fn)
-            
+
 class SasGenPanel(ScrolledPanel, PanelBase):
     """
         Provides the sas gen calculator GUI.
@@ -121,9 +121,9 @@ class SasGenPanel(ScrolledPanel, PanelBase):
     window_name = "Generic SAS Calculator"
     ## Name to appear on the window title bar
     window_caption = "Generic SAS "
-    
+
     def __init__(self, parent, *args, **kwds):
-        ScrolledPanel.__init__(self, parent, style=wx.RAISED_BORDER, 
+        ScrolledPanel.__init__(self, parent, style=wx.RAISED_BORDER,
                                *args, **kwds)
         #kwds['style'] = wx.SUNKEN_BORDER
         PanelBase.__init__(self)
@@ -158,7 +158,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self._create_default_sld_data()
         self._create_default_2d_data()
         wx.CallAfter(self._set_sld_data_helper)
-        
+
     def _define_structure(self):
         """
             Define the main sizers building to build this application.
@@ -179,13 +179,13 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.hint_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.qrange_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
-       
+
     def _layout_data_name(self):
         """
             Fill the sizer containing data's name
         """
         data_name_txt = wx.StaticText(self, -1, 'Data: ')
-        self.data_name_tcl = OutputTextCtrl(self, -1, 
+        self.data_name_tcl = OutputTextCtrl(self, -1,
                                             size=(_BOX_WIDTH * 4, -1))
         data_hint = "Loaded data"
         self.data_name_tcl.SetToolTipString(data_hint)
@@ -243,30 +243,30 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             sizer.Add(unit, (iy, ix), (1, 1), \
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             self.parameters.append([p_name, ctl, unit])
-                                  
+
         self.param_sizer.Add(sizer, 0, wx.LEFT, 10)
-    
+
     def _layout_hint(self):
         """
-            Fill the sizer containing hint 
+            Fill the sizer containing hint
         """
         hint_msg = "We support omf, sld or pdb data files only."
-        hint_msg +=  "         "
+        hint_msg += "         "
         if FONT_VARIANT < 1:
-            hint_msg +=  "Very "
+            hint_msg += "Very "
         hint_msg += "SLOW drawing -->"
         hint_txt = wx.StaticText(self, -1, hint_msg)
-        
+
         id = wx.NewId()
         self.draw_button = wx.Button(self, id, "Arrow Draw")
         hint_on_draw = "Draw with arrows. Caution: it is a very slow drawing."
         self.draw_button.SetToolTipString(hint_on_draw)
         self.draw_button.Bind(wx.EVT_BUTTON, self.sld_draw, id=id)
-        
+
         self.draw_button.Enable(False)
         self.hint_sizer.AddMany([(hint_txt, 0, wx.LEFT, 15),
                                  (self.draw_button, 0, wx.LEFT, 7)])
-    
+
     def _layout_shape(self):
         """
         Fill the shape sizer
@@ -275,43 +275,43 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.shape_combo = self._fill_shape_combo()
         self.shape_sizer.AddMany([(label_txt, 0, wx.LEFT, 15),
                                 (self.shape_combo, 0, wx.LEFT, 5)])
-    
+
     def _fill_shape_combo(self):
         """
         Fill up the shape combo box
         """
-        shape_combo = wx.ComboBox(self, -1, size=(150, -1), 
-                                      style=wx.CB_READONLY) 
+        shape_combo = wx.ComboBox(self, -1, size=(150, -1),
+                                      style=wx.CB_READONLY)
         shape_combo.Append('Rectangular')
         shape_combo.Append('Ellipsoid')
         shape_combo.Bind(wx.EVT_COMBOBOX, self._on_shape_select)
         shape_combo.SetSelection(0)
         return shape_combo
-    
+
     def _on_shape_select(self, event):
         """
         On selecting a shape
         """
         event.Skip()
-        label = event.GetEventObject().GetValue().lower() 
+        label = event.GetEventObject().GetValue().lower()
         self.default_shape = label
         self.parent.set_omfpanel_default_shap(self.default_shape)
         self.parent.set_omfpanel_npts()
-        
+
     def _fill_orient_combo(self):
         """
         Fill up the orientation combo box: used only for atomic structure
         """
-        orient_combo = wx.ComboBox(self, -1, size=(150, -1), 
-                                      style=wx.CB_READONLY) 
+        orient_combo = wx.ComboBox(self, -1, size=(150, -1),
+                                      style=wx.CB_READONLY)
         orient_combo.Append('Fixed orientation')
         orient_combo.Append('Debye full avg.')
         #orient_combo.Append('Debye sph. sym.')
-        
+
         orient_combo.Bind(wx.EVT_COMBOBOX, self._on_orient_select)
         orient_combo.SetSelection(0)
         return orient_combo
-    
+
     def _on_orient_select(self, event):
         """
         On selecting a orientation
@@ -324,8 +324,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             is_avg = cb.GetCurrentSelection() == 1
             self.is_avg = is_avg
         self.model.set_is_avg(self.is_avg)
-        self.set_est_time()    
-           
+        self.set_est_time()
+
     def _layout_qrange(self):
         """
         Fill the sizer containing qrange
@@ -358,7 +358,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         ix += 1
         self.qmax_ctl = InputTextCtrl(self, -1, size=(_BOX_WIDTH * 1.5, 20),
                             style=wx.TE_PROCESS_ENTER)
-        self.qmax_ctl.Bind(wx.EVT_TEXT, self._onparamEnter )
+        self.qmax_ctl.Bind(wx.EVT_TEXT, self._onparamEnter)
         self.qmax_ctl.SetValue(format_number(self.qmax_x, True))
         sizer.Add(self.qmax_ctl, (iy, ix), (1, 1), wx.EXPAND)
         ## add unit
@@ -367,26 +367,26 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         sizer.Add(unit, (iy, ix), (1, 1), \
                         wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         self.qrange_sizer.Add(sizer, 0, wx.LEFT, 10)
-    
-    def _layout_button(self):  
+
+    def _layout_button(self):
         """
             Do the layout for the button widgets
-        """ 
+        """
         self.est_time = '*Estimated Computation time :\n  %s'
-        self.time_text = wx.StaticText(self, -1, self.est_time% str('2 sec') )
+        self.time_text = wx.StaticText(self, -1, self.est_time % str('2 sec'))
         self.orient_combo = self._fill_orient_combo()
         self.orient_combo.Show(False)
-        self.bt_compute = wx.Button(self, wx.NewId(),'Compute')
+        self.bt_compute = wx.Button(self, wx.NewId(), 'Compute')
         self.bt_compute.Bind(wx.EVT_BUTTON, self.on_compute)
         self.bt_compute.SetToolTipString("Compute 2D Scattering Pattern.")
-        self.bt_help = wx.Button(self, wx.NewId(),'HELP')
+        self.bt_help = wx.Button(self, wx.NewId(), 'HELP')
         self.bt_help.Bind(wx.EVT_BUTTON, self.on_help)
         self.bt_help.SetToolTipString("Help on Scatter Calculator")
         self.button_sizer.AddMany([(self.time_text , 0, wx.LEFT, 20),
                                    (self.orient_combo , 0, wx.LEFT, 20),
                                    (self.bt_compute, 0, wx.LEFT, 20),
                                    (self.bt_help, 0, wx.LEFT, 5)])
-        
+
     def estimate_ctime(self):
         """
         Calculation time estimation
@@ -400,9 +400,9 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             factor = 6
             n_pixs *= (n_pixs / 200)
         x_in = n_qbins * n_pixs / 100000
-        etime = factor + 0.085973 * x_in 
+        etime = factor + 0.085973 * x_in
         return int(etime)
-        
+
     def set_est_time(self):
         """
         Set text for est. computation time
@@ -416,8 +416,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 unit = 'min'
                 self.time_text.SetForegroundColour('red')
             time_str = str(etime) + ' ' + unit
-            self.time_text.SetLabel(self.est_time% time_str)
-        
+            self.time_text.SetLabel(self.est_time % time_str)
+
     def _do_layout(self):
         """
         Draw window content
@@ -430,26 +430,26 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self._layout_shape()
         self._layout_button()
         self.boxsizer_source.AddMany([(self.data_name_sizer, 0,
-                                        wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                        wx.EXPAND | wx.TOP | wx.BOTTOM, 5),
                                       (self.hint_sizer, 0,
-                                        wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
-                                      (self.shape_sizer, 0, 
-                                        wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
+                                        wx.EXPAND | wx.TOP | wx.BOTTOM, 5),
+                                      (self.shape_sizer, 0,
+                                        wx.EXPAND | wx.TOP | wx.BOTTOM, 5)])
         self.boxsizer_parameters.AddMany([(self.param_sizer, 0,
-                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5),])
+                                     wx.EXPAND | wx.TOP | wx.BOTTOM, 5), ])
         self.boxsizer_qrange.AddMany([(self.qrange_sizer, 0,
-                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5),])
-        self.main_sizer.AddMany([(self.boxsizer_source, 0, 
-                                  wx.EXPAND|wx.ALL, 10),
-                                 (self.boxsizer_parameters, 0, 
-                                  wx.EXPAND|wx.ALL, 10),
-                                 (self.boxsizer_qrange, 0, 
-                                  wx.EXPAND|wx.ALL, 10),
+                                     wx.EXPAND | wx.TOP | wx.BOTTOM, 5), ])
+        self.main_sizer.AddMany([(self.boxsizer_source, 0,
+                                  wx.EXPAND | wx.ALL, 10),
+                                 (self.boxsizer_parameters, 0,
+                                  wx.EXPAND | wx.ALL, 10),
+                                 (self.boxsizer_qrange, 0,
+                                  wx.EXPAND | wx.ALL, 10),
                                  (self.button_sizer, 0,
-                                  wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
+                                  wx.EXPAND | wx.TOP | wx.BOTTOM, 5)])
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
-    
+
     def _create_default_sld_data(self):
         """
         Making default sld-data
@@ -462,8 +462,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.sld_data.is_data = False
         self.sld_data.filename = "Default SLD Profile"
         self.sld_data.set_sldn(sld_n_default)
-        self.data_name_tcl.SetValue(self.sld_data.filename)       
-               
+        self.data_name_tcl.SetValue(self.sld_data.filename)
+
     def choose_data_file(self, location=None):
         """
         Choosing a dtata file
@@ -476,8 +476,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         exts = "*" + self.omfreader.ext[0]
         exts += ", *" + self.sldreader.ext[0]
         exts += ", *" + self.pdbreader.ext[0]
-        all_type = "All GEN files (%s, %s) | %s"% (exts.upper(), exts.lower(), 
-                                               exts.lower().replace(',', ';'))        
+        all_type = "All GEN files (%s, %s) | %s" % (exts.upper(), exts.lower(),
+                                               exts.lower().replace(',', ';'))
         wildcard = [all_type]
         omf_type = self.omfreader.type
         sld_type = self.sldreader.type
@@ -495,9 +495,9 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             filename = os.path.basename(path)
-        dlg.Destroy() 
+        dlg.Destroy()
         return path
-        
+
     def on_load_data(self, event):
         """
         Open a file dialog to allow the user to select a given file.
@@ -507,12 +507,12 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         location = self.parent.get_path()
         path = self.choose_data_file(location=location)
         if path is None:
-            return 
-        
+            return
+
         self.shape_sizer.ShowItems(False)
         self.default_shape = 'rectangular'
         self.parent.set_omfpanel_default_shap(self.default_shape)
-        
+
         self.parent.set_file_location(os.path.dirname(path))
         try:
             #Load data
@@ -530,7 +530,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             self.browse_button.Enable(False)
             self.browse_button.SetLabel("Loading...")
             if self.parent.parent is not None:
-                wx.PostEvent(self.parent.parent, 
+                wx.PostEvent(self.parent.parent,
                                 StatusEvent(status="Loading...",
                                 type="progress"))
             self.reader = GenReader(path=path, loader=loader,
@@ -541,26 +541,26 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         except:
             self.ext = None
             if self.parent.parent is None:
-                return 
+                return
             msg = "Generic SAS Calculator: %s" % (sys.exc_value)
             wx.PostEvent(self.parent.parent,
                           StatusEvent(status=msg, type='stop'))
             self.SetFocus()
-            return 
-        
+            return
+
     def load_update(self):
         """
         print update on the status bar
-        """       
+        """
         if self.parent.parent is None:
-                return 
+                return
         if self.reader.isrunning():
             type = "progress"
         else:
             type = "stop"
         wx.PostEvent(self.parent.parent, StatusEvent(status="",
                                                   type=type))
-            
+
     def complete_loading(self, data=None, filename=''):
         """
         Complete the loading
@@ -595,18 +595,18 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             if self.parent.parent is None:
                 raise
             msg = "Loading Error: This file format is not supported "
-            msg += "for GenSAS." 
+            msg += "for GenSAS."
             wx.PostEvent(self.parent.parent,
                           StatusEvent(status=msg, type='stop', info='Error'))
             self.SetFocus()
-            return 
+            return
         if self.parent.parent is None:
-            return 
-        
+            return
+
         msg = "Load Complete"
         wx.PostEvent(self.parent.parent, StatusEvent(status=msg, type='stop'))
         self.SetFocus()
-        
+
     def _set_sld_data_helper(self, is_draw=False):
         """
         Set sld data helper
@@ -614,13 +614,13 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         #is_avg = self.orient_combo.GetCurrentSelection() == 1
         self.model.set_is_avg(self.is_avg)
         self.model.set_sld_data(self.sld_data)
-        
-        self.draw_button.Enable(self.sld_data!=None)
+
+        self.draw_button.Enable(self.sld_data != None)
         wx.CallAfter(self.parent.set_sld_data, self.sld_data)
         self._update_model_params()
         if is_draw:
             wx.CallAfter(self.sld_draw, None, False)
-    
+
     def _update_model_params(self):
         """
         Update the model parameter values
@@ -629,7 +629,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             param_name = list[0].GetLabelText()
             val = str(self.model.params[param_name])
             list[1].SetValue(val)
-    
+
     def set_volume_ctl_val(self, val):
         """
         Set volume txtctrl value
@@ -640,7 +640,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 list[1].SetValue(val)
                 list[1].Refresh()
                 break
-                            
+
     def _onparamEnter(self, event):
         """
         On param enter
@@ -651,7 +651,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             item.Refresh()
         except:
             pass
-    
+
     def sld_draw(self, event=None, has_arrow=True):
         """
         Draw 3D sld profile
@@ -667,13 +667,13 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             return
 
         self.sld_data = self.parent.get_sld_from_omf()
-        output = self.sld_data  
+        output = self.sld_data
         #frame_size = wx.Size(470, 470)    
         self.plot_frame = PlotFrame(self, -1, 'testView')
         frame = self.plot_frame
         frame.Show(False)
         add_icon(self.parent, frame)
-        panel = frame.plotpanel    
+        panel = frame.plotpanel
         try:
             # mpl >= 1.0.0
             ax = panel.figure.gca(projection='3d')
@@ -685,19 +685,19 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             except:
                 logging.error("PlotPanel could not import Axes3D")
                 raise
-        panel.dimension = 3   
+        panel.dimension = 3
         graph_title = self._sld_plot_helper(ax, output, has_arrow)
         # Use y, z axes (in mpl 3d) as z, y axes 
         # that consistent with our SAS detector coords.
-        ax.set_xlabel('x ($\A%s$)'% output.pos_unit)
-        ax.set_ylabel('z ($\A%s$)'% output.pos_unit)
-        ax.set_zlabel('y ($\A%s$)'% output.pos_unit)
-        panel.subplot.figure.subplots_adjust(left=0.05, right=0.95, 
+        ax.set_xlabel('x ($\A%s$)' % output.pos_unit)
+        ax.set_ylabel('z ($\A%s$)' % output.pos_unit)
+        ax.set_zlabel('y ($\A%s$)' % output.pos_unit)
+        panel.subplot.figure.subplots_adjust(left=0.05, right=0.95,
                                              bottom=0.05, top=0.96)
         if output.pix_type == 'atom':
             ax.legend(loc='upper left', prop={'size':10})
         num_graph = str(self.graph_num)
-        frame.SetTitle('Graph %s: %s'% (num_graph, graph_title))        
+        frame.SetTitle('Graph %s: %s' % (num_graph, graph_title))
         wx.CallAfter(frame.Show, True)
         self.graph_num += 1
 
@@ -709,7 +709,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         :Param has_arrow: whether or not draws M vector [bool]
         """
         # Set the locals
-        color_dic = {'H':'blue', 'D':'purple', 'N': 'orange', 
+        color_dic = {'H':'blue', 'D':'purple', 'N': 'orange',
                      'O':'red', 'C':'green', 'P':'cyan', 'Other':'k'}
         marker = ','
         m_size = 2
@@ -720,19 +720,19 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         pos_z = output.pos_z
         sld_mx = output.sld_mx
         sld_my = output.sld_my
-        sld_mz = output.sld_mz 
-        pix_symbol = output.pix_symbol 
+        sld_mz = output.sld_mz
+        pix_symbol = output.pix_symbol
         if output.pix_type == 'atom':
             marker = 'o'
             m_size = 3.5
         sld_tot = (numpy.fabs(sld_mx) + numpy.fabs(sld_my) + \
                    numpy.fabs(sld_mz) + numpy.fabs(output.sld_n))
-        is_nonzero = sld_tot > 0.0  
-        is_zero = sld_tot == 0.0   
+        is_nonzero = sld_tot > 0.0
+        is_zero = sld_tot == 0.0
         # I. Plot null points
         if is_zero.any():
-            ax.plot(pos_x[is_zero], pos_z[is_zero], pos_y[is_zero], marker, 
-                    c="y", alpha=0.5, markeredgecolor='y', markersize=m_size) 
+            ax.plot(pos_x[is_zero], pos_z[is_zero], pos_y[is_zero], marker,
+                    c="y", alpha=0.5, markeredgecolor='y', markersize=m_size)
             pos_x = pos_x[is_nonzero]
             pos_y = pos_y[is_nonzero]
             pos_z = pos_z[is_nonzero]
@@ -745,11 +745,11 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         for key in color_dic.keys():
             chosen_color = pix_symbol == key
             if numpy.any(chosen_color):
-                other_color = other_color  & (chosen_color != True)
+                other_color = other_color & (chosen_color != True)
                 color = color_dic[key]
-                ax.plot(pos_x[chosen_color], pos_z[chosen_color], 
-                        pos_y[chosen_color], marker, c=color, alpha=0.5, 
-                        markeredgecolor=color, markersize=m_size, label=key) 
+                ax.plot(pos_x[chosen_color], pos_z[chosen_color],
+                        pos_y[chosen_color], marker, c=color, alpha=0.5,
+                        markeredgecolor=color, markersize=m_size, label=key)
         # III. Plot All others        
         if numpy.any(other_color):
             a_name = ''
@@ -763,17 +763,17 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                     if a_name.count(name) == 0:
                         a_name += new_name
             # plot in black
-            ax.plot(pos_x[other_color], pos_z[other_color], pos_y[other_color], 
-                    marker, c="k", alpha=0.5, markeredgecolor="k", 
-                    markersize=m_size, label=a_name) 
+            ax.plot(pos_x[other_color], pos_z[other_color], pos_y[other_color],
+                    marker, c="k", alpha=0.5, markeredgecolor="k",
+                    markersize=m_size, label=a_name)
         # IV. Draws atomic bond with grey lines if any
         if output.has_conect:
             for ind in range(len(output.line_x)):
-                ax.plot(output.line_x[ind], output.line_z[ind], 
-                        output.line_y[ind], '-', lw=0.6, c="grey", alpha=0.3) 
+                ax.plot(output.line_x[ind], output.line_z[ind],
+                        output.line_y[ind], '-', lw=0.6, c="grey", alpha=0.3)
         # V. Draws magnetic vectors
-        if has_arrow and len(pos_x) > 0:     
-            graph_title += " - Magnetic Vector as Arrow -" 
+        if has_arrow and len(pos_x) > 0:
+            graph_title += " - Magnetic Vector as Arrow -"
             panel = self.plot_frame.plotpanel
             def _draw_arrow(input=None, update=None):
                 """
@@ -784,7 +784,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 max_mz = max(numpy.fabs(sld_mz))
                 max_m = max(max_mx, max_my, max_mz)
                 try:
-                    max_step = max(output.xstepsize, output.ystepsize, 
+                    max_step = max(output.xstepsize, output.ystepsize,
                                    output.zstepsize)
                 except:
                     max_step = 0
@@ -806,23 +806,23 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                         y_arrow = numpy.column_stack((pos_y, y2))
                         z_arrow = numpy.column_stack((pos_z, z2))
                         colors = numpy.column_stack((color_x, color_y, color_z))
-                        arrows = Arrow3D(panel, x_arrow, z_arrow, y_arrow, 
-                                        colors, mutation_scale=10, lw=1, 
-                                        arrowstyle="->", alpha = 0.5)
-                        ax.add_artist(arrows) 
+                        arrows = Arrow3D(panel, x_arrow, z_arrow, y_arrow,
+                                        colors, mutation_scale=10, lw=1,
+                                        arrowstyle="->", alpha=0.5)
+                        ax.add_artist(arrows)
                 except:
-                    pass 
+                    pass
                 msg = "Arrow Drawing completed.\n"
                 status_type = 'stop'
-                self._status_info(msg, status_type) 
+                self._status_info(msg, status_type)
             msg = "Arrow Drawing is in progress..."
             status_type = 'progress'
-            self._status_info(msg, status_type) 
+            self._status_info(msg, status_type)
             draw_out = CalcGen(input=ax,
                              completefn=_draw_arrow, updatefn=self._update)
             draw_out.queue()
         return graph_title
- 
+
     def set_input_params(self):
         """
         Set model parameters
@@ -831,7 +831,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             param_name = list[0].GetLabelText()
             param_value = float(list[1].GetValue())
             self.model.setParam(param_name, param_value)
-            
+
     def on_compute(self, event):
         """
         Compute I(qx, qy)
@@ -869,42 +869,42 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             else:
                 self._create_default_2d_data()
                 i_out = numpy.zeros(len(self.data.data))
-                inputs=[self.data.qx_data, self.data.qy_data, i_out]
-                
+                inputs = [self.data.qx_data, self.data.qy_data, i_out]
+
             msg = "Computation is in progress..."
             status_type = 'progress'
             self._status_info(msg, status_type)
-            cal_out = CalcGen(input=inputs, 
-                              completefn=self.complete, 
+            cal_out = CalcGen(input=inputs,
+                              completefn=self.complete,
                               updatefn=self._update)
-            cal_out.queue()              
-            
+            cal_out.queue()
+
         except:
-            msg = "%s."% sys.exc_value
+            msg = "%s." % sys.exc_value
             status_type = 'stop'
             self._status_info(msg, status_type)
             wx.PostEvent(self.parent.parent,
                         StatusEvent(status=msg, info='Error'))
             self.SetFocus()
 
-    def on_help(self, event):    
+    def on_help(self, event):
         """
         Bring up the General scattering Calculator Documentation whenever
-        the HELP button is clicked. 
-        
+        the HELP button is clicked.
+
         Calls DocumentationWindow with the path of the location within the
-        documentation tree (after /doc/ ....".  Note that when using old 
-        versions of Wx (before 2.9) and thus not the release version of 
-        installers, the help comes up at the top level of the file as 
+        documentation tree (after /doc/ ....".  Note that when using old
+        versions of Wx (before 2.9) and thus not the release version of
+        installers, the help comes up at the top level of the file as
         webbrowser does not pass anything past the # to the browser when it is
         running "file:///...."
-    
+
     :param evt: Triggers on clicking the help button
     """
-                
+
         _TreeLocation = "user/perspectives/calculator/sas_calculator_help.html"
         _doc_viewer = DocumentationWindow(self, -1, \
-             _TreeLocation,"General Scattering Calculator Help")
+             _TreeLocation, "General Scattering Calculator Help")
 
     def _check_value(self):
         """
@@ -914,23 +914,23 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.npt_ctl.SetBackgroundColour("white")
         self.qmax_ctl.SetBackgroundColour("white")
         try:
-            npt_val = float(self.npt_ctl.GetValue())  
+            npt_val = float(self.npt_ctl.GetValue())
             if npt_val < 2 or npt_val > 1000:
                 raise
             self.npt_ctl.SetValue(str(int(npt_val)))
             self.set_est_time()
         except:
-            flag =  _set_error(self, self.npt_ctl)
+            flag = _set_error(self, self.npt_ctl)
         try:
-            qmax_val = float(self.qmax_ctl.GetValue()) 
+            qmax_val = float(self.qmax_ctl.GetValue())
             if qmax_val <= 0 or qmax_val > 1000:
                 raise
         except:
-            flag = _set_error(self, self.qmax_ctl)       
+            flag = _set_error(self, self.qmax_ctl)
         for list in self.parameters:
             list[1].SetBackgroundColour("white")
             param_name = list[0].GetLabelText()
-            try: 
+            try:
                 param_val = float(list[1].GetValue())
                 if param_name.count('frac') > 0:
                     if param_val < 0 or param_val > 1:
@@ -938,23 +938,23 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             except:
                 flag = _set_error(self, list[1])
         return flag
-                   
-    def _status_info(self, msg = '', type = "update"):
+
+    def _status_info(self, msg='', type="update"):
         """
         Status msg
         """
         if type == "stop":
             label = "Compute"
             able = True
-        else:   
+        else:
             label = "Wait..."
             able = False
         self.bt_compute.Enable(able)
         self.bt_compute.SetLabel(label)
         self.bt_compute.SetToolTipString(label)
         if self.parent.parent != None:
-            wx.PostEvent(self.parent.parent, 
-                             StatusEvent(status = msg, type = type )) 
+            wx.PostEvent(self.parent.parent,
+                             StatusEvent(status=msg, type=type))
 
     def _update(self, time=None):
         """
@@ -966,8 +966,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         msg = "Please wait. Computing... (Note: Window may look frozen.)"
         wx.PostEvent(self.parent.parent, StatusEvent(status=msg,
                                                   type=type))
-                                
-    def complete(self, input, update=None):   
+
+    def complete(self, input, update=None):
         """
         Gen compute complete function
         :Param input: input list [qx_data, qy_data, i_out]
@@ -979,15 +979,15 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                 if ind % 1 == 0 and update != None:
                     update()
                     time.sleep(0.1)
-                inputi = [input[0][ind:ind+1], [], input[2][ind:ind+1]]
+                inputi = [input[0][ind:ind + 1], [], input[2][ind:ind + 1]]
                 outi = self.model.run(inputi)
                 out = numpy.append(out, outi)
             else:
                 if ind % 50 == 0  and update != None:
                     update()
                     time.sleep(0.001)
-                inputi = [input[0][ind:ind+1], input[1][ind:ind+1], 
-                          input[2][ind:ind+1]]
+                inputi = [input[0][ind:ind + 1], input[1][ind:ind + 1],
+                          input[2][ind:ind + 1]]
                 outi = self.model.runXY(inputi)
                 out = numpy.append(out, outi)
         #print time.time() - s
@@ -996,11 +996,11 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         else:
             #out = self.model.runXY(input)
             self._draw2D(out)
-            
+
         msg = "Gen computation completed.\n"
         status_type = 'stop'
         self._status_info(msg, status_type)
-               
+
     def _create_default_2d_data(self):
         """
         Create 2D data by default
@@ -1096,10 +1096,10 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
         page_id = self.id
         data = self.data
-        
+
         model = self.model
         state = None
-        
+
         new_plot = Data1D(x=data.x, y=y_out)
         new_plot.dx = data.dx
         new_plot.dy = data.dy
@@ -1111,9 +1111,9 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         new_plot.name = model.name + '1d'
         new_plot.title = "Generic model1D "
         new_plot.id = str(page_id) + ': ' + self.file_name \
-                        + ' #%s'% str(self.graph_num) + "_1D"
-        new_plot.group_id = str(page_id) + " Model1D"  +\
-                             ' #%s'% str(self.graph_num) + "_1D"
+                        + ' #%s' % str(self.graph_num) + "_1D"
+        new_plot.group_id = str(page_id) + " Model1D" + \
+                             ' #%s' % str(self.graph_num) + "_1D"
         new_plot.is_data = False
 
         title = new_plot.title
@@ -1121,14 +1121,14 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         _xaxis, _xunit = new_plot.get_xaxis()
         new_plot.xaxis(str(_xaxis), str(_xunit))
         new_plot.yaxis(str(_yaxis), str(_yunit))
-        
+
         if new_plot.is_data:
             data_name = str(new_plot.name)
         else:
             data_name = str(model.__class__.__name__) + '1d'
 
         if len(title) > 1:
-            new_plot.title = "Gen Theory for %s "% model.name + data_name
+            new_plot.title = "Gen Theory for %s " % model.name + data_name
         new_plot.name = new_plot.id
         new_plot.label = new_plot.id
         #theory_data = deepcopy(new_plot)
@@ -1138,10 +1138,10 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                                            state=state)
         title = new_plot.title
         num_graph = str(self.graph_num)
-        wx.CallAfter(self.parent.draw_graph, new_plot, 
-                     title="GEN Graph %s: "% num_graph + new_plot.id )
+        wx.CallAfter(self.parent.draw_graph, new_plot,
+                     title="GEN Graph %s: " % num_graph + new_plot.id)
         self.graph_num += 1
-                
+
     def _draw2D(self, image):
         """
         Complete get the result of modelthread and create model 2D
@@ -1149,19 +1149,19 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         """
         page_id = self.id
         data = self.data
-        
+
         model = self.model
         qmin = 0.0
         state = None
-        
+
         numpy.nan_to_num(image)
         new_plot = Data2D(image=image, err_image=data.err_data)
         new_plot.name = model.name + '2d'
         new_plot.title = "Generic model 2D "
         new_plot.id = str(page_id) + ': ' + self.file_name \
-                        + ' #%s'% str(self.graph_num) + "_2D"
+                        + ' #%s' % str(self.graph_num) + "_2D"
         new_plot.group_id = str(page_id) + " Model2D" \
-                        + ' #%s'% str(self.graph_num) + "_2D"
+                        + ' #%s' % str(self.graph_num) + "_2D"
         new_plot.detector = data.detector
         new_plot.source = data.source
         new_plot.is_data = False
@@ -1179,7 +1179,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         _xaxis, _xunit = data.get_xaxis()
         new_plot.xaxis(str(_xaxis), str(_xunit))
         new_plot.yaxis(str(_yaxis), str(_yunit))
-        
+
         new_plot.is_data = False
         if data.is_data:
             data_name = str(data.name)
@@ -1187,7 +1187,7 @@ class SasGenPanel(ScrolledPanel, PanelBase):
             data_name = str(model.__class__.__name__) + '2d'
 
         if len(title) > 1:
-            new_plot.title = "Gen Theory for %s "% model.name + data_name
+            new_plot.title = "Gen Theory for %s " % model.name + data_name
         new_plot.name = new_plot.id
         new_plot.label = new_plot.id
         #theory_data = deepcopy(new_plot)
@@ -1197,22 +1197,22 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                                            state=state)
         title = new_plot.title
         num_graph = str(self.graph_num)
-        wx.CallAfter(self.parent.draw_graph, new_plot, 
-                     title="GEN Graph %s: "% num_graph + new_plot.id )
+        wx.CallAfter(self.parent.draw_graph, new_plot,
+                     title="GEN Graph %s: " % num_graph + new_plot.id)
         self.graph_num += 1
-         
+
     def set_scale2d(self, scale):
         """
         Set SLD plot scale
         """
         self.scale2d = None
-        
+
     def on_panel_close(self, event):
         """
         On Close SLD panel
         """
         #Not implemented   
-                  
+
 class OmfPanel(ScrolledPanel, PanelBase):
     """
         Provides the sas gen calculator GUI.
@@ -1221,21 +1221,21 @@ class OmfPanel(ScrolledPanel, PanelBase):
     window_name = "SLD Pixel Info"
     ## Name to appear on the window title bar
     window_caption = "SLD Pixel Info "
-    
+
     def __init__(self, parent, *args, **kwds):
-        ScrolledPanel.__init__(self, parent, style=wx.RAISED_BORDER, 
+        ScrolledPanel.__init__(self, parent, style=wx.RAISED_BORDER,
                                *args, **kwds)
         PanelBase.__init__(self)
         #Font size 
         self.SetWindowVariant(variant=FONT_VARIANT)
-        self.SetupScrolling()  
+        self.SetupScrolling()
         # Object that receive status event
         self.parent = parent
-        self.sld_data = sas_gen.MagSLD([0], [0], [0]) 
+        self.sld_data = sas_gen.MagSLD([0], [0], [0])
         self.sld_ctl = None
         self.default_shape = 'rectangular'
         self._do_layout()
-       
+
     def set_slddata(self, slddata):
         """
         Set sld data related items
@@ -1244,7 +1244,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         self._set_slddata_ctr_val(slddata)
         # Make sure that self._set_slddata_ctr_val() is finished
         wx.CallAfter(self._set_omfdata_ctr, slddata)
-    
+
     def get_sld_val(self):
         """
         Set sld_n of slddata on sld input
@@ -1284,18 +1284,18 @@ class OmfPanel(ScrolledPanel, PanelBase):
                     self.sld_data.set_sldn(sld_sets[key])
         self.sld_data.set_sldms(mx, my, mz)
         self._set_slddata_ctr_val(self.sld_data)
-        
+
         return self.sld_data
-    
+
     def get_pix_volumes(self):
         """
         Get the pixel volume
         """
         vol = self.sld_data.vol_pix
-        
+
         return vol
-                
-    def _get_other_val(self):  
+
+    def _get_other_val(self):
         """
         """
         omfdata = sas_gen.OMFData()
@@ -1315,9 +1315,9 @@ class OmfPanel(ScrolledPanel, PanelBase):
                 else:
                     sets[lst[0]] = None
                     return
-                    
+
             for key in sets.keys():
-                exec "omfdata.%s = sets['%s']"% (key, key)            
+                exec "omfdata.%s = sets['%s']" % (key, key)
 
             omf2sld = sas_gen.OMF2SLD()
             omf2sld.set_data(omfdata, self.default_shape)
@@ -1325,7 +1325,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
             self.sld_data.is_data = False
             self.sld_data.filename = "Default SLD Profile"
         except:
-            msg = "OMF Panel: %s"% sys.exc_value
+            msg = "OMF Panel: %s" % sys.exc_value
             infor = 'Error'
             #logging.error(msg)
             if self.parent.parent != None:
@@ -1333,7 +1333,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                 wx.PostEvent(self.parent.parent,
                         StatusEvent(status=msg, info=infor))
                 self.SetFocus()
-                
+
     def _set_slddata_ctr_val(self, slddata):
         """
         Set slddata crl
@@ -1343,12 +1343,12 @@ class OmfPanel(ScrolledPanel, PanelBase):
         except:
             val = 'Unknown'
         self.npix_ctl.SetValue(val)
-        
-    def _set_omfdata_ctr(self, omfdata):    
+
+    def _set_omfdata_ctr(self, omfdata):
         """
         Set the textctr box values
         """
-        
+
         if omfdata == None:
             self._set_none_text()
             return
@@ -1365,8 +1365,8 @@ class OmfPanel(ScrolledPanel, PanelBase):
                 if ctr_list[0] == key:
                     ctr_list[1].SetValue(format_number(step_list[key], True))
                     ctr_list[1].Enable(not omfdata.is_data)
-                    break   
-                
+                    break
+
     def _set_none_text(self):
         """
         Set Unknown in textctrls
@@ -1376,15 +1376,15 @@ class OmfPanel(ScrolledPanel, PanelBase):
             ctr_list[1].SetValue(val)
         for ctr_list in self.stepsize:
             ctr_list[1].SetValue(val)
-                
+
     def _define_structure(self):
         """
         Define the main sizers building to build this application.
         """
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
-        
+
         self.npixels_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.box_sld = wx.StaticBox(self, -1, 
+        self.box_sld = wx.StaticBox(self, -1,
                                     str("Mean SLD"))
         self.box_node = wx.StaticBox(self, -1, str("Nodes"))
         self.boxsizer_sld = wx.StaticBoxSizer(self.box_sld, wx.VERTICAL)
@@ -1397,20 +1397,20 @@ class OmfPanel(ScrolledPanel, PanelBase):
         self.step_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.hint_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
-                
+
     def _layout_npix(self):
         """
         Build No of pixels sizer
         """
-        num_pix_text = wx.StaticText(self, -1, "No. of Pixels: ")  
+        num_pix_text = wx.StaticText(self, -1, "No. of Pixels: ")
         self.npix_ctl = OutputTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                 style=wx.TE_PROCESS_ENTER)
         self._set_slddata_ctr_val(self.sld_data)
-        self._set_omfdata_ctr(self.sld_data) 
+        self._set_omfdata_ctr(self.sld_data)
         self.npixels_sizer.AddMany([(num_pix_text, 0,
-                                          wx.EXPAND|wx.LEFT|wx.TOP, 5),
+                                          wx.EXPAND | wx.LEFT | wx.TOP, 5),
                                      (self.npix_ctl, 0,
-                                     wx.EXPAND|wx.TOP, 5)])
+                                     wx.EXPAND | wx.TOP, 5)])
 
     def _layout_slds(self):
         """
@@ -1450,8 +1450,8 @@ class OmfPanel(ScrolledPanel, PanelBase):
             sizer.Add(unit, (iy, ix), (1, 1), \
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             self.slds.append([key, ctl, unit])
-        self.sld_sizer.Add(sizer, 0, wx.LEFT, 10) 
-               
+        self.sld_sizer.Add(sizer, 0, wx.LEFT, 10)
+
     def _layout_nodes(self):
         """
         Fill the sizer containing data's name
@@ -1475,7 +1475,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
             ix += 1
             ctl = InputTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                 style=wx.TE_PROCESS_ENTER)
-            ctl.Bind(wx.EVT_TEXT, self._onparamEnter )
+            ctl.Bind(wx.EVT_TEXT, self._onparamEnter)
             ctl.SetValue(format_number(value, True))
             ctl.Enable(not is_data)
             sizer.Add(ctl, (iy, ix), (1, 1), wx.EXPAND)
@@ -1486,7 +1486,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             self.nodes.append([key, ctl, unit])
         self.node_sizer.Add(sizer, 0, wx.LEFT, 10)
-            
+
     def _layout_stepsize(self):
         """
         Fill the sizer containing slit size information
@@ -1511,7 +1511,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
             ix += 1
             ctl = InputTextCtrl(self, -1, size=(_BOX_WIDTH, 20),
                                 style=wx.TE_PROCESS_ENTER)
-            ctl.Bind(wx.EVT_TEXT, self._onstepsize )
+            ctl.Bind(wx.EVT_TEXT, self._onstepsize)
             ctl.SetValue(format_number(value, True))
             ctl.Enable(not is_data)
             sizer.Add(ctl, (iy, ix), (1, 1), wx.EXPAND)
@@ -1523,33 +1523,33 @@ class OmfPanel(ScrolledPanel, PanelBase):
                             wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             self.stepsize.append([key, ctl, unit])
         self.step_sizer.Add(sizer, 0, wx.LEFT, 10)
-    
+
     def _layout_hint(self):
         """
-        Fill the sizer containing hint 
+        Fill the sizer containing hint
         """
         hint_msg = "Load an omf or 3d sld profile data file."
         self.hint_txt = wx.StaticText(self, -1, hint_msg)
         self.hint_sizer.AddMany([(self.hint_txt, 0, wx.LEFT, 15)])
-    
-    def _layout_button(self):  
+
+    def _layout_button(self):
         """
         Do the layout for the button widgets
-        """ 
-        self.bt_draw = wx.Button(self, wx.NewId(),'Draw Points')
+        """
+        self.bt_draw = wx.Button(self, wx.NewId(), 'Draw Points')
         self.bt_draw.Bind(wx.EVT_BUTTON, self.on_sld_draw)
         self.bt_draw.SetToolTipString("Draw a scatter plot for sld profile.")
-        self.bt_save = wx.Button(self, wx.NewId(),'Save SLD Data')
+        self.bt_save = wx.Button(self, wx.NewId(), 'Save SLD Data')
         self.bt_save.Bind(wx.EVT_BUTTON, self.on_save)
         self.bt_save.Enable(False)
         self.bt_save.SetToolTipString("Save SLD data.")
         self.button_sizer.AddMany([(self.bt_draw, 0, wx.LEFT, 10),
                                    (self.bt_save, 0, wx.LEFT, 10)])
-        
+
     def _do_layout(self):
         """
         Draw omf panel content, used to define sld s.
-        
+
         """
         self._define_structure()
         self._layout_nodes()
@@ -1559,39 +1559,39 @@ class OmfPanel(ScrolledPanel, PanelBase):
         #self._layout_hint()
         self._layout_button()
         self.boxsizer_node.AddMany([(self.node_sizer, 0,
-                                    wx.EXPAND|wx.TOP, 5),
+                                    wx.EXPAND | wx.TOP, 5),
                                      (self.hint_sizer, 0,
-                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
+                                     wx.EXPAND | wx.TOP | wx.BOTTOM, 5)])
         self.boxsizer_stepsize.AddMany([(self.step_sizer, 0,
-                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5),])
+                                     wx.EXPAND | wx.TOP | wx.BOTTOM, 5), ])
         self.boxsizer_sld.AddMany([(self.sld_sizer, 0,
-                                     wx.EXPAND|wx.BOTTOM, 5),])
-        self.main_sizer.AddMany([(self.npixels_sizer, 0, wx.EXPAND|wx.ALL, 10),
-                        (self.boxsizer_sld, 0, wx.EXPAND|wx.ALL, 10),
-                        (self.boxsizer_node, 0, wx.EXPAND|wx.ALL, 10),
-                        (self.boxsizer_stepsize, 0, wx.EXPAND|wx.ALL, 10),
-                        (self.button_sizer, 0, wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
+                                     wx.EXPAND | wx.BOTTOM, 5), ])
+        self.main_sizer.AddMany([(self.npixels_sizer, 0, wx.EXPAND | wx.ALL, 10),
+                        (self.boxsizer_sld, 0, wx.EXPAND | wx.ALL, 10),
+                        (self.boxsizer_node, 0, wx.EXPAND | wx.ALL, 10),
+                        (self.boxsizer_stepsize, 0, wx.EXPAND | wx.ALL, 10),
+                        (self.button_sizer, 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 5)])
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
-        
+
     def _get_nodes_key_list(self, data):
         """
         Return nodes key list
-        
+
         :Param data: OMFData
         """
-        key_list = {'xnodes' : data.xnodes, 
+        key_list = {'xnodes' : data.xnodes,
                     'ynodes' : data.ynodes,
                     'znodes' : data.znodes}
         return key_list
-        
+
     def _get_slds_key_list(self, data):
         """
         Return nodes key list
-        
+
         :Param data: OMFData
         """
-        key_list = {'Nucl.' : data.sld_n, 
+        key_list = {'Nucl.' : data.sld_n,
                     'Mx' : data.sld_mx,
                     'My' : data.sld_my,
                     'Mz' : data.sld_mz}
@@ -1600,14 +1600,14 @@ class OmfPanel(ScrolledPanel, PanelBase):
     def _get_step_key_list(self, data):
         """
         Return step key list
-        
+
         :Param data: OMFData
         """
-        key_list = {'xstepsize' : data.xstepsize, 
+        key_list = {'xstepsize' : data.xstepsize,
                     'ystepsize' : data.ystepsize,
                     'zstepsize' : data.zstepsize}
-        return key_list        
-    
+        return key_list
+
     def set_sld_ctr(self, sld_data):
         """
         Set sld textctrls
@@ -1617,7 +1617,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                 ctr_list[1].Enable(False)
                 #break   
             return
-        
+
         self.sld_data = sld_data
         sld_list = self._get_slds_key_list(sld_data)
         for ctr_list in self.slds:
@@ -1631,14 +1631,14 @@ class OmfPanel(ScrolledPanel, PanelBase):
                     ctr_list[1].SetValue(format_number(mean_val, True))
                     ctr_list[1].Enable(enable)
                     #ctr_list[2].SetLabel("[" + sld_data.sld_unit + "]")
-                    break   
+                    break
 
     def on_sld_draw(self, event):
         """
         Draw sld profile as scattered plot
         """
         self.parent.sld_draw()
-         
+
     def on_save(self, event):
         """
         Close the window containing this panel
@@ -1649,15 +1649,15 @@ class OmfPanel(ScrolledPanel, PanelBase):
             return
         self.sld_data = self.get_sld_val()
         self.parent.set_main_panel_sld_data(self.sld_data)
-        
-        reader = sas_gen.SLDReader() 
+
+        reader = sas_gen.SLDReader()
         extension = '*.sld'
         path = None
-        data= None
+        data = None
         location = self.parent.get_path()
         dlg = wx.FileDialog(self, "Save sld file",
                             location, "sld_file",
-                             extension, 
+                             extension,
                              wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
@@ -1668,7 +1668,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         try:
             if path is None:
                 return
-            
+
             data = self.parent.get_sld_data()
             fName = os.path.splitext(path)[0] + '.' + extension.split('.')[-1]
             if data != None:
@@ -1692,8 +1692,8 @@ class OmfPanel(ScrolledPanel, PanelBase):
             if self.parent.parent != None:
                 # inform msg to wx
                 wx.PostEvent(self.parent.parent,
-                        StatusEvent(status=msg, info=infor)) 
-                self.SetFocus()   
+                        StatusEvent(status=msg, info=infor))
+                self.SetFocus()
 
     def _onparamEnter(self, event):
         """
@@ -1723,17 +1723,17 @@ class OmfPanel(ScrolledPanel, PanelBase):
                 if nop == None:
                     nop = npts
                 self.display_npts(nop)
-                
+
         ctl.Refresh()
         return flag
-    
+
     def _set_volume_ctr_val(self, npts):
         """
         Set total volume
         """
         total_volume = npts * self.sld_data.vol_pix[0]
         self.parent.set_volume_ctr_val(total_volume)
-                    
+
     def _onstepsize(self, event):
         """
         On stepsize event
@@ -1762,8 +1762,8 @@ class OmfPanel(ScrolledPanel, PanelBase):
             except:
                 pass
         ctl.Refresh()
-  
-         
+
+
     def set_npts_from_slddata(self):
         """
         Set total n. of points form the sld data
@@ -1775,7 +1775,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         except:
             nop = None
         return nop
-    
+
     def display_npts(self, nop):
         """
         Displays Npts ctrl
@@ -1788,7 +1788,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         except:
             # On Init
             pass
-    
+
     def check_inputs(self):
         """
         check if the inputs are valid
@@ -1799,7 +1799,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
         if flag:
             flag = self._check_input_helper(self.stepsize)
         return flag
-    
+
     def _check_input_helper(self, list):
         """
         Check list values
@@ -1819,7 +1819,7 @@ class SasGenWindow(widget.CHILD_FRAME):
     """
     GEN SAS main window
     """
-    def __init__(self, parent=None, manager= None, title="Generic Scattering Calculator",
+    def __init__(self, parent=None, manager=None, title="Generic Scattering Calculator",
                 size=(PANEL_WIDTH * 1.4, PANEL_HEIGHT * 1.65), *args, **kwds):
         """
         Init
@@ -1834,40 +1834,40 @@ class SasGenWindow(widget.CHILD_FRAME):
         self.data = None
         self.omfdata = sas_gen.OMFData()
         self.sld_data = None
-        self._default_save_location = os.getcwd() 
-        
+        self._default_save_location = os.getcwd()
+
         self._mgr = aui.AuiManager(self)
         self._mgr.SetDockSizeConstraint(0.5, 0.5)
         self._plot_title = ''
         self.scale2d = 'log_{10}'
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        
-        
+
+
         self.build_panels()
         self.SetPosition((20, 5))
         self.Show(True)
-        
+
     def build_panels(self):
         """
         """
-        
+
         self.set_sld_data(self.sld_data)
         self._mgr.AddPane(self.panel, aui.AuiPaneInfo().
                               Name(self.panel.window_name).
                               CenterPane().
                               # This is where we set the size of
                               # the application window
-                              BestSize(wx.Size(PANEL_WIDTH, 
+                              BestSize(wx.Size(PANEL_WIDTH,
                                                PANEL_HEIGHT)).
-                              Show()) 
+                              Show())
         self._mgr.AddPane(self.omfpanel, aui.AuiPaneInfo().
                               Name(self.omfpanel.window_name).
                               Caption(self.omfpanel.window_caption).
                               CloseButton(False).
                               Right().
                               Floatable(False).
-                              BestSize(wx.Size(PANEL_WIDTH/2.5, PANEL_HEIGHT)).
-                              Show())  
+                              BestSize(wx.Size(PANEL_WIDTH / 2.5, PANEL_HEIGHT)).
+                              Show())
         self._mgr.Update()
 
     def get_sld_data(self):
@@ -1875,19 +1875,19 @@ class SasGenWindow(widget.CHILD_FRAME):
         Return slddata
         """
         return self.sld_data
-    
+
     def get_sld_from_omf(self):
         """
         """
         self.sld_data = self.omfpanel.get_sld_val()
         return self.sld_data
-    
+
     def set_sld_n(self, sld):
         """
         """
         self.panel.sld_data = sld
         self.panel.model.set_sld_data(sld)
-        
+
     def set_sld_data(self, data):
         """
         Set omfdata
@@ -1895,52 +1895,52 @@ class SasGenWindow(widget.CHILD_FRAME):
         if data == None:
             return
         self.sld_data = data
-        enable = (not data==None)
+        enable = (not data == None)
         self._set_omfpanel_sld_data(self.sld_data)
         self.omfpanel.bt_save.Enable(enable)
         self.set_etime()
-    
+
     def set_omfpanel_npts(self):
         """
         Set Npts in omf panel
         """
         nop = self.omfpanel.set_npts_from_slddata()
         self.omfpanel.display_npts(nop)
-        
+
     def _set_omfpanel_sld_data(self, data):
         """
         Set sld_data in omf panel
         """
-        self.omfpanel.set_slddata(data) 
+        self.omfpanel.set_slddata(data)
         self.omfpanel.set_sld_ctr(data)
-    
+
     def check_omfpanel_inputs(self):
         """
         Check OMF panel inputs
         """
-        return self.omfpanel.check_inputs()  
-       
+        return self.omfpanel.check_inputs()
+
     def set_main_panel_sld_data(self, sld_data):
         """
         """
         self.sld_data = sld_data
-        
+
     def set_file_location(self, path):
         """
         File location
         """
         self._default_save_location = path
-    
+
     def get_path(self):
         """
         File location
         """
         return self._default_save_location
-    
+
     def draw_graph(self, plot, title=''):
         """
         """
-        try: 
+        try:
             wx.PostEvent(self.parent, NewPlotEvent(plot=plot, title=title))
         except:
             # standalone
@@ -1951,27 +1951,27 @@ class SasGenWindow(widget.CHILD_FRAME):
             frame.Show(True)
             frame.SetFocus()
 
-    def set_schedule_full_draw(self, panel=None, func='del'):  
+    def set_schedule_full_draw(self, panel=None, func='del'):
         """
         Send full draw to gui frame
         """
         if self.parent != None:
             self.parent.set_schedule_full_draw(panel, func)
-        
+
     def get_npix(self):
         """
         Get no. of pixels from omf panel
         """
         n_pix = self.omfpanel.npix_ctl.GetValue()
         return n_pix
-    
+
     def get_pix_volumes(self):
         """
         Get a pixel volume
         """
         vol = self.omfpanel.get_pix_volumes()
         return vol
-    
+
     def set_volume_ctr_val(self, val):
         """
         Set volume txtctl value
@@ -1980,53 +1980,53 @@ class SasGenWindow(widget.CHILD_FRAME):
             self.panel.set_volume_ctl_val(str(val))
         except:
             print "self.panel is not initialized yet"
-            
+
     def set_omfpanel_default_shap(self, shape):
         """
         Set default_shape in omfpanel
         """
         self.omfpanel.default_shape = shape
-    
+
     def set_etime(self):
         """
         Sets est. computation time on panel
         """
         self.panel.set_est_time()
-    
+
     def get_sld_data_from_omf(self):
         """
         """
-        data = self.omfpanel.get_sld_val() 
+        data = self.omfpanel.get_sld_val()
         return data
-       
+
     def set_scale2d(self, scale):
         """
         """
         self.scale2d = scale
-            
+
     def on_panel_close(self, event):
         """
         """
         #Not implemented
-          
+
     def on_open_file(self, event):
         """
         On Open
         """
         self.panel.on_load_data(event)
-    
+
     def sld_draw(self):
         """
         sld draw
         """
         self.panel.sld_draw(event=None, has_arrow=False)
-        
+
     def on_save_file(self, event):
         """
         On Close
         """
         self.omfpanel.on_save(event)
-        
+
     def on_close(self, event):
         """
         Close
@@ -2034,7 +2034,7 @@ class SasGenWindow(widget.CHILD_FRAME):
         if self.base != None:
             self.base.gen_frame = None
         self.Destroy()
-        
+
 #    def on_help(self, event):    
 #        """
 #       Gen scatter angle help panel
@@ -2060,10 +2060,10 @@ class SasGenWindow(widget.CHILD_FRAME):
 #            msg = 'Display Error\n'
 #            info = "Info"
 #            wx.MessageBox(msg, info)
-           
-if __name__ == "__main__": 
+
+if __name__ == "__main__":
     app = wx.PySimpleApp()
     widget.CHILD_FRAME = wx.Frame
-    SGframe = SasGenWindow()    
+    SGframe = SasGenWindow()
     SGframe.Show(True)
-    app.MainLoop()     
+    app.MainLoop()

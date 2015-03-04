@@ -10,10 +10,10 @@ from sas.plottools.PlotPanel import PlotPanel
 from sas.plottools.plottables import Graph
 from sas.plottools import transform
 from matplotlib.font_manager import FontProperties
-from sas.guiframe.events import StatusEvent 
+from sas.guiframe.events import StatusEvent
 from sas.perspectives.calculator import calculator_widgets as widget
 from sas.guiframe.documentation_window import DocumentationWindow
-   
+
 #Control panel width 
 if sys.platform.count("win32") > 0:
     PANEL_WIDTH = 790
@@ -27,7 +27,7 @@ else:
     PANEL_HEIGTH = 430
     FONT_VARIANT = 1
     ON_MAC = True
-      
+
 class DataOperPanel(wx.ScrolledWindow):
     """
     """
@@ -61,10 +61,10 @@ class DataOperPanel(wx.ScrolledWindow):
         self.fill_data_combox()
         self.fill_oprator_combox()
         self.Bind(wx.EVT_PAINT, self.set_panel_on_focus)
-             
+
     def _define_structure(self):
         """
-        define initial sizer 
+        define initial sizer
         """
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         title = "Data Operation "
@@ -74,53 +74,53 @@ class DataOperPanel(wx.ScrolledWindow):
         name_box = wx.StaticBox(self, -1, title)
         self.name_sizer = wx.StaticBoxSizer(name_box, wx.HORIZONTAL)
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
-      
+
     def _layout_name(self):
         """
         Do the layout for data name related widgets
         """
         new_data_sizer = wx.BoxSizer(wx.VERTICAL)
-        equal_sizer =  wx.BoxSizer(wx.VERTICAL)
+        equal_sizer = wx.BoxSizer(wx.VERTICAL)
         old_data1_sizer = wx.BoxSizer(wx.VERTICAL)
         operator_sizer = wx.BoxSizer(wx.VERTICAL)
         old_data2_sizer = wx.BoxSizer(wx.VERTICAL)
         data2_hori_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        data_name = wx.StaticText(self, -1, 'Output Data Name')  
-        equal_name = wx.StaticText(self, -1, ' =', size=(50, 25)) 
+        data_name = wx.StaticText(self, -1, 'Output Data Name')
+        equal_name = wx.StaticText(self, -1, ' =', size=(50, 25))
         data1_name = wx.StaticText(self, -1, 'Data1')
         operator_name = wx.StaticText(self, -1, 'Operator')
         data2_name = wx.StaticText(self, -1, 'Data2 (or Number)')
-        self.data_namectr = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 25), style=wx.TE_PROCESS_ENTER) 
+        self.data_namectr = wx.TextCtrl(self, -1, size=(_BOX_WIDTH, 25), style=wx.TE_PROCESS_ENTER)
         self.data_namectr.SetToolTipString("Hit 'Enter' key after typing.")
         self.data_namectr.SetValue(str('MyNewDataName'))
-        self.numberctr = wx.TextCtrl(self, -1, size=(_BOX_WIDTH/3, 25), style=wx.TE_PROCESS_ENTER) 
+        self.numberctr = wx.TextCtrl(self, -1, size=(_BOX_WIDTH / 3, 25), style=wx.TE_PROCESS_ENTER)
         self.numberctr.SetToolTipString("Hit 'Enter' key after typing.")
         self.numberctr.SetValue(str(1.0))
-        self.data1_cbox = wx.ComboBox(self, -1, size=(_BOX_WIDTH, 25), 
+        self.data1_cbox = wx.ComboBox(self, -1, size=(_BOX_WIDTH, 25),
                                       style=wx.CB_READONLY)
-        self.operator_cbox = wx.ComboBox(self, -1, size=(70, 25), 
+        self.operator_cbox = wx.ComboBox(self, -1, size=(70, 25),
                                          style=wx.CB_READONLY)
         operation_tip = "Add: +, Subtract: -, "
         operation_tip += "Multiply: *, Divide: /, "
         operation_tip += "Append(Combine): | "
         self.operator_cbox.SetToolTipString(operation_tip)
-        self.data2_cbox = wx.ComboBox(self, -1, size=(_BOX_WIDTH*2/3, 25),
+        self.data2_cbox = wx.ComboBox(self, -1, size=(_BOX_WIDTH * 2 / 3, 25),
                                        style=wx.CB_READONLY)
 
-        self.out_pic = SmallPanel(self, -1, True, 
-                                    size=(_BOX_WIDTH, _BOX_WIDTH), 
+        self.out_pic = SmallPanel(self, -1, True,
+                                    size=(_BOX_WIDTH, _BOX_WIDTH),
                                     style=wx.NO_BORDER)
-        self.equal_pic = SmallPanel(self, -1, True, '=',  
-                                    size=(50, _BOX_WIDTH), 
+        self.equal_pic = SmallPanel(self, -1, True, '=',
+                                    size=(50, _BOX_WIDTH),
                                     style=wx.NO_BORDER)
-        self.data1_pic = SmallPanel(self, -1, True, 
-                                    size=(_BOX_WIDTH, _BOX_WIDTH), 
+        self.data1_pic = SmallPanel(self, -1, True,
+                                    size=(_BOX_WIDTH, _BOX_WIDTH),
                                     style=wx.NO_BORDER)
         self.operator_pic = SmallPanel(self, -1, True, '+',
-                                    size=(70, _BOX_WIDTH), 
+                                    size=(70, _BOX_WIDTH),
                                     style=wx.NO_BORDER)
-        self.data2_pic = SmallPanel(self, -1, True, 
-                                    size=(_BOX_WIDTH, _BOX_WIDTH), 
+        self.data2_pic = SmallPanel(self, -1, True,
+                                    size=(_BOX_WIDTH, _BOX_WIDTH),
                                     style=wx.NO_BORDER)
         for ax in self.equal_pic.axes:
             ax.set_frame_on(False)
@@ -143,7 +143,7 @@ class DataOperPanel(wx.ScrolledWindow):
         old_data2_sizer.AddMany([(data2_name, 0, wx.LEFT, 3),
                                        (data2_hori_sizer, 0, wx.LEFT, 3),
                                        (self.data2_pic, 0, wx.LEFT, 3)])
-        self.name_sizer.AddMany([(new_data_sizer, 0, wx.LEFT|wx.TOP, 5),
+        self.name_sizer.AddMany([(new_data_sizer, 0, wx.LEFT | wx.TOP, 5),
                                        (equal_sizer, 0, wx.TOP, 5),
                                        (old_data1_sizer, 0, wx.TOP, 5),
                                        (operator_sizer, 0, wx.TOP, 5),
@@ -151,14 +151,14 @@ class DataOperPanel(wx.ScrolledWindow):
         self.data2_cbox.Show(True)
 
         self._show_numctrl(self.numberctr, False)
-        
+
         wx.EVT_TEXT_ENTER(self.data_namectr, -1, self.on_name)
-        wx.EVT_TEXT_ENTER(self.numberctr, -1, self.on_number) 
-        wx.EVT_COMBOBOX(self.data1_cbox, -1, self.on_select_data1) 
-        wx.EVT_COMBOBOX(self.operator_cbox, -1, self.on_select_operator) 
+        wx.EVT_TEXT_ENTER(self.numberctr, -1, self.on_number)
+        wx.EVT_COMBOBOX(self.data1_cbox, -1, self.on_select_data1)
+        wx.EVT_COMBOBOX(self.operator_cbox, -1, self.on_select_operator)
         wx.EVT_COMBOBOX(self.data2_cbox, -1, self.on_select_data2)
-    
-    def _show_numctrl(self, ctrl, enable=True):  
+
+    def _show_numctrl(self, ctrl, enable=True):
         """
         Show/Hide on Win
         Enable/Disable on MAC
@@ -169,12 +169,12 @@ class DataOperPanel(wx.ScrolledWindow):
             if len(children) > 0:
                 ctrl.GetChildren()[0].SetBackGroundColour(self.color)
             if enable:
-                wx.EVT_TEXT_ENTER(self.numberctr, -1, self.on_number) 
+                wx.EVT_TEXT_ENTER(self.numberctr, -1, self.on_number)
         else:
             if not ctrl.IsEnabled():
                 ctrl.Enable(True)
             ctrl.Show(enable)
-            
+
     def on_name(self, event=None):
         """
         On data name typing
@@ -188,7 +188,7 @@ class DataOperPanel(wx.ScrolledWindow):
             self._set_textctrl_color(item, self.color)
         text = item.GetValue().strip()
         self._check_newname(text)
-    
+
     def _check_newname(self, name=None):
         """
         Check name ctr strings
@@ -219,19 +219,19 @@ class DataOperPanel(wx.ScrolledWindow):
             self.send_warnings(msg, 'error')
         self.name_sizer.Layout()
         self.Refresh()
-    
-    def _set_textctrl_color(self, ctrl, color): 
+
+    def _set_textctrl_color(self, ctrl, color):
         """
-        Set TextCtrl color 
+        Set TextCtrl color
         """
         if ON_MAC:
             children = ctrl.GetChildren()
             if len(children) > 0:
-                children[0].SetBackgroundColour(color)  
+                children[0].SetBackgroundColour(color)
         else:
-            ctrl.SetBackgroundColour(color)  
+            ctrl.SetBackgroundColour(color)
         self.name_sizer.Layout()
-                     
+
     def on_number(self, event=None):
         """
         On selecting Number for Data2
@@ -253,14 +253,14 @@ class DataOperPanel(wx.ScrolledWindow):
                     return
             else:
                 self._set_textctrl_color(self.numberctr, self.color)
-        
+
         self.put_text_pic(self.data2_pic, content=str(val))
         self.check_data_inputs()
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
         self.Refresh()
-        
+
     def on_select_data1(self, event=None):
         """
         On select data1
@@ -271,14 +271,14 @@ class DataOperPanel(wx.ScrolledWindow):
         data = item.GetClientData(pos)
         if data == None:
             content = "?"
-            self.put_text_pic(self.data1_pic, content) 
+            self.put_text_pic(self.data1_pic, content)
         else:
             self.data1_pic.add_image(data)
         self.check_data_inputs()
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
-        
+
     def on_select_operator(self, event=None):
         """
         On Select an Operator
@@ -286,12 +286,12 @@ class DataOperPanel(wx.ScrolledWindow):
         self.send_warnings('')
         item = event.GetEventObject()
         text = item.GetValue().strip()
-        self.put_text_pic(self.operator_pic, content=text) 
+        self.put_text_pic(self.operator_pic, content=text)
         self.check_data_inputs()
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
-        
+
     def on_select_data2(self, event=None):
         """
         On Selecting Data2
@@ -299,7 +299,7 @@ class DataOperPanel(wx.ScrolledWindow):
         self.send_warnings('')
         item = event.GetEventObject()
         text = item.GetValue().strip().lower()
-        self._show_numctrl(self.numberctr, text=='number')
+        self._show_numctrl(self.numberctr, text == 'number')
         pos = item.GetCurrentSelection()
         data = item.GetClientData(pos)
         content = "?"
@@ -309,7 +309,7 @@ class DataOperPanel(wx.ScrolledWindow):
                 self.put_text_pic(self.data2_pic, content)
             else:
                 self.data2_pic.add_image(data)
-            self.check_data_inputs() 
+            self.check_data_inputs()
         else:
             content = str(self.numberctr.GetValue().strip())
             try:
@@ -322,21 +322,21 @@ class DataOperPanel(wx.ScrolledWindow):
             item.SetClientData(pos, data)
             if data != None:
                 self.check_data_inputs()
-                
-            self.put_text_pic(self.data2_pic, content)   
-        
+
+            self.put_text_pic(self.data2_pic, content)
+
         if self.output != None:
             self.output.name = str(self.data_namectr.GetValue())
         self.draw_output(self.output)
-        
-    def put_text_pic(self, pic=None, content=''):  
+
+    def put_text_pic(self, pic=None, content=''):
         """
         Put text to the pic
         """
-        pic.set_content(content) 
+        pic.set_content(content)
         pic.add_text()
         pic.draw()
-                  
+
     def check_data_inputs(self):
         """
         Check data1 and data2 whether or not they are ready for operation
@@ -351,7 +351,7 @@ class DataOperPanel(wx.ScrolledWindow):
             return flag
         pos2 = self.data2_cbox.GetCurrentSelection()
         data2 = self.data2_cbox.GetClientData(pos2)
-        
+
         if data2 == None:
             self.output = None
             return flag
@@ -374,7 +374,7 @@ class DataOperPanel(wx.ScrolledWindow):
                     self.output = None
                     return flag
             else:
-                self._set_textctrl_color(self.numberctr, self.color )
+                self._set_textctrl_color(self.numberctr, self.color)
         elif data1.__class__.__name__ != data2.__class__.__name__:
             self._set_textctrl_color(self.data1_cbox, 'pink')
             self._set_textctrl_color(self.data2_cbox, 'pink')
@@ -393,7 +393,7 @@ class DataOperPanel(wx.ScrolledWindow):
             self.output = None
             return flag
         return True
-    
+
     def make_data_out(self, data1, data2):
         """
         Make a temp. data output set
@@ -402,12 +402,12 @@ class DataOperPanel(wx.ScrolledWindow):
         pos = self.operator_cbox.GetCurrentSelection()
         operator = self.operator_cbox.GetClientData(pos)
         try:
-            exec "output = data1 %s data2"% operator
+            exec "output = data1 %s data2" % operator
         except:
             raise
         return output
-    
-    
+
+
     def draw_output(self, output):
         """
         Draw output data(temp)
@@ -415,36 +415,36 @@ class DataOperPanel(wx.ScrolledWindow):
         out = self.out_pic
         if output == None:
             content = "?"
-            self.put_text_pic(out, content) 
+            self.put_text_pic(out, content)
         else:
             out.add_image(output)
         wx.CallAfter(self.name_sizer.Layout)
         self.Layout()
         self.Refresh()
-                    
-    def _layout_button(self):  
+
+    def _layout_button(self):
         """
             Do the layout for the button widgets
-        """ 
-        self.bt_apply = wx.Button(self, -1, "Apply", size=(_BOX_WIDTH/2, -1))
+        """
+        self.bt_apply = wx.Button(self, -1, "Apply", size=(_BOX_WIDTH / 2, -1))
         app_tip = "Generate the Data and send to Data Explorer."
         self.bt_apply.SetToolTipString(app_tip)
         self.bt_apply.Bind(wx.EVT_BUTTON, self.on_click_apply)
-        
+
         self.bt_help = wx.Button(self, -1, "HELP")
         app_tip = "Get help on Data Operations."
         self.bt_help.SetToolTipString(app_tip)
         self.bt_help.Bind(wx.EVT_BUTTON, self.on_help)
-        
-        self.bt_close = wx.Button(self, -1, 'Close', size=(_BOX_WIDTH/2, -1))
+
+        self.bt_close = wx.Button(self, -1, 'Close', size=(_BOX_WIDTH / 2, -1))
         self.bt_close.Bind(wx.EVT_BUTTON, self.on_close)
         self.bt_close.SetToolTipString("Close this panel.")
-        
-        self.button_sizer.AddMany([(PANEL_WIDTH/2, 25),
+
+        self.button_sizer.AddMany([(PANEL_WIDTH / 2, 25),
                                    (self.bt_apply, 0, wx.RIGHT, 10),
                                    (self.bt_help, 0, wx.RIGHT, 10),
                                    (self.bt_close, 0, wx.RIGHT, 10)])
-        
+
     def _do_layout(self):
         """
         Draw the current panel
@@ -452,13 +452,13 @@ class DataOperPanel(wx.ScrolledWindow):
         self._define_structure()
         self._layout_name()
         self._layout_button()
-        self.main_sizer.AddMany([(self.name_sizer, 0, wx.EXPAND|wx.ALL, 10),
+        self.main_sizer.AddMany([(self.name_sizer, 0, wx.EXPAND | wx.ALL, 10),
                                 (self.button_sizer, 0,
-                                          wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
+                                          wx.EXPAND | wx.TOP | wx.BOTTOM, 5)])
         self.SetSizer(self.main_sizer)
         self.SetScrollbars(20, 20, 25, 65)
         self.SetAutoLayout(True)
-    
+
     def set_panel_on_focus(self, event):
         """
         On Focus at this window
@@ -473,18 +473,18 @@ class DataOperPanel(wx.ScrolledWindow):
             # update the list only when it is on the top
             if self.FindFocus() in children:
                 self.fill_data_combox()
-         
+
     def fill_oprator_combox(self):
         """
         fill the current combobox with the operator
-        """   
+        """
         operator_list = [' +', ' -', ' *', " /", " |"]
         for oper in operator_list:
             pos = self.operator_cbox.Append(str(oper))
             self.operator_cbox.SetClientData(pos, str(oper.strip()))
         self.operator_cbox.SetSelection(0)
-        
-        
+
+
     def fill_data_combox(self):
         """
         fill the current combobox with the available data
@@ -544,7 +544,7 @@ class DataOperPanel(wx.ScrolledWindow):
                     pos2 = self.data2_cbox.Append(str(name))
                     self.data2_cbox.SetClientData(pos2, data)
                     if str(current1) == str(name):
-                      pos_pre1 = pos1 
+                      pos_pre1 = pos1
                     if str(current2) == str(name):
                       pos_pre2 = pos2
                 try:
@@ -560,10 +560,10 @@ class DataOperPanel(wx.ScrolledWindow):
                         if str(current2) == str(th_name):
                             pos_pre2 = posth2
                 except:
-                    continue 
+                    continue
         self.data1_cbox.SetSelection(pos_pre1)
         self.data2_cbox.SetSelection(pos_pre2)
-    
+
     def get_datalist(self):
         """
         """
@@ -572,9 +572,9 @@ class DataOperPanel(wx.ScrolledWindow):
             return  data_manager.get_all_data()
         else:
             return {}
-            
+
     def on_click_apply(self, event):
-        """   
+        """
         changes are saved in data object imported to edit
         """
         self.send_warnings('')
@@ -615,25 +615,25 @@ class DataOperPanel(wx.ScrolledWindow):
         self.Refresh()
         #must post event here
         event.Skip()
-    
-    def on_help(self, event):    
+
+    def on_help(self, event):
         """
         Bring up the Data Operations Panel Documentation whenever
-        the HELP button is clicked. 
-        
+        the HELP button is clicked.
+
         Calls DocumentationWindow with the path of the location within the
-        documentation tree (after /doc/ ....".  Note that when using old 
-        versions of Wx (before 2.9) and thus not the release version of 
-        installers, the help comes up at the top level of the file as 
+        documentation tree (after /doc/ ....".  Note that when using old
+        versions of Wx (before 2.9) and thus not the release version of
+        installers, the help comes up at the top level of the file as
         webbrowser does not pass anything past the # to the browser when it is
         running "file:///...."
-    
+
     :param evt: Triggers on clicking the help button
     """
-                
+
         _TreeLocation = "user/perspectives/calculator/data_operator_help.html"
         _doc_viewer = DocumentationWindow(self, -1, \
-             _TreeLocation,"Data Operation Help")
+             _TreeLocation, "Data Operation Help")
 
     def disconnect_panels(self):
         """
@@ -643,31 +643,31 @@ class DataOperPanel(wx.ScrolledWindow):
         self.data1_pic.connect.disconnect()
         self.operator_pic.connect.disconnect()
         self.data2_pic.connect.disconnect()
-    
+
     def on_close(self, event):
         """
         leave data as it is and close
         """
         self.parent.OnClose()
-        
+
     def set_plot_unfocus(self):
         """
         Unfocus on right click
         """
-    
+
     def send_warnings(self, msg='', info='info'):
         """
         Send warning to status bar
         """
         wx.PostEvent(self.parent.parent, StatusEvent(status=msg, info=info))
-          
+
 class SmallPanel(PlotPanel):
     """
     PlotPanel for Quick plot and masking plot
     """
-    def __init__(self, parent, id=-1, is_number=False, content='?', **kwargs):
+    def __init__(self, parent, id= -1, is_number=False, content='?', **kwargs):
         """
-        """ 
+        """
         PlotPanel.__init__(self, parent, id=id, **kwargs)
         self.is_number = is_number
         self.content = content
@@ -681,20 +681,20 @@ class SmallPanel(PlotPanel):
         self.subplot.set_yticks([])
         self.add_text()
         self.figure.subplots_adjust(left=0.1, bottom=0.1)
-        
+
     def set_content(self, content=''):
         """
         Set text content
         """
         self.content = str(content)
-         
+
     def add_toolbar(self):
-        """ 
+        """
         Add toolbar
         """
         # Not implemented
         pass
-    
+
     def on_set_focus(self, event):
         """
         send to the parenet the current panel on focus
@@ -729,7 +729,7 @@ class SmallPanel(PlotPanel):
         self.graph.add(plot)
         #draw        
         self.graph.render(self)
-        
+
         try:
             self.figure.delaxes(self.figure.axes[1])
         except:
@@ -737,8 +737,8 @@ class SmallPanel(PlotPanel):
         self.subplot.figure.canvas.resizing = False
         self.subplot.tick_params(axis='both', labelsize=9)
         # Draw zero axis lines
-        self.subplot.axhline(linewidth = 1, color='r')  
-        self.subplot.axvline(linewidth = 1, color='r')       
+        self.subplot.axhline(linewidth=1, color='r')
+        self.subplot.axvline(linewidth=1, color='r')
 
         self.erase_legend()
         try:
@@ -773,7 +773,7 @@ class SmallPanel(PlotPanel):
         self.textList = []
         self.subplot.set_xlim((0, 1))
         self.subplot.set_ylim((0, 1))
-        
+
         try:
             if self.content != '?':
                 float(label)
@@ -787,37 +787,37 @@ class SmallPanel(PlotPanel):
         if len(label) > 0 and xpos > 0 and ypos > 0:
             new_text = self.subplot.text(str(xpos), str(ypos), str(label),
                                            fontproperties=font)
-            self.textList.append(new_text)  
-        
+            self.textList.append(new_text)
+
     def erase_legend(self):
         """
         Remove Legend
         """
         #for ax in self.axes:
         self.remove_legend(self.subplot)
-                     
+
     def onMouseMotion(self, event):
         """
         Disable dragging 2D image
         """
-    
+
     def onWheel(self, event):
         """
         """
-     
+
     def onLeftDown(self, event):
         """
         Disables LeftDown
         """
-    
+
     def onPick(self, event):
         """
         Remove Legend
         """
         for ax in self.axes:
             self.remove_legend(ax)
-                        
-    
+
+
     def draw(self):
         """
         Draw
@@ -826,15 +826,15 @@ class SmallPanel(PlotPanel):
             pass
         else:
             self.subplot.figure.canvas.resizing = False
-            self.subplot.tick_params(axis='both', labelsize=9)     
+            self.subplot.tick_params(axis='both', labelsize=9)
             self.erase_legend()
-            self.subplot.figure.canvas.draw_idle() 
+            self.subplot.figure.canvas.draw_idle()
             try:
                 self.figure.delaxes(self.figure.axes[1])
             except:
                 pass
-            
-       
+
+
     def onContextMenu(self, event):
         """
         Default context menu for a plot panel
@@ -847,7 +847,7 @@ class SmallPanel(PlotPanel):
             wx.EVT_MENU(self, id, self._onProperties)
         else:
             slicerpop.Append(id, '&Toggle Linear/Log Scale')
-            wx.EVT_MENU(self, id, self.ontogglescale)     
+            wx.EVT_MENU(self, id, self.ontogglescale)
         try:
             # mouse event
             pos_evt = event.GetPosition()
@@ -857,22 +857,22 @@ class SmallPanel(PlotPanel):
             pos_x, pos_y = self.toolbar.GetPositionTuple()
             pos = (pos_x, pos_y + 5)
         self.PopupMenu(slicerpop, pos)
-        
-    def ontogglescale(self, event): 
+
+    def ontogglescale(self, event):
         """
         On toggle 2d scale
         """
-        self._onToggleScale(event)  
+        self._onToggleScale(event)
         try:
             # mpl >= 1.1.0
             self.figure.tight_layout()
         except:
-            self.figure.subplots_adjust(left=0.1, bottom=0.1) 
+            self.figure.subplots_adjust(left=0.1, bottom=0.1)
         try:
             self.figure.delaxes(self.figure.axes[1])
         except:
             pass
-        
+
     def _onProperties(self, event):
         """
         when clicking on Properties on context menu ,
@@ -908,7 +908,7 @@ class SmallPanel(PlotPanel):
                         dial.setValues(self.xLabel, self.yLabel, self.viewModel)
                     self._onEVT_FUNC_PROPERTY()
                 dial.Destroy()
-         
+
     def _onEVT_FUNC_PROPERTY(self, remove_fit=True):
         """
         Receive the x and y transformation from myDialog,
@@ -953,7 +953,7 @@ class SmallPanel(PlotPanel):
         self.set_xscale(_xscale)
         self.set_yscale(_yscale)
         self.draw()
-        
+
 class DataOperatorWindow(widget.CHILD_FRAME):
     def __init__(self, parent, manager, *args, **kwds):
         kwds["size"] = (PANEL_WIDTH, PANEL_HEIGTH)
@@ -964,8 +964,8 @@ class DataOperatorWindow(widget.CHILD_FRAME):
         wx.EVT_CLOSE(self, self.OnClose)
         self.SetPosition((25, 10))
         self.Show()
-    
-    def OnClose(self, event=None):  
+
+    def OnClose(self, event=None):
         """
         On close event
         """
@@ -974,11 +974,11 @@ class DataOperatorWindow(widget.CHILD_FRAME):
         self.panel.disconnect_panels()
         self.Destroy()
 
-        
+
 if __name__ == "__main__":
 
-    app  = wx.App()
+    app = wx.App()
     widget.CHILD_FRAME = wx.Frame
     window = DataOperatorWindow(parent=None, data=[], title="Data Editor")
     app.MainLoop()
- 
+

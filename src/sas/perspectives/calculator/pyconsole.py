@@ -9,7 +9,7 @@ import wx.py.editor as editor
 import wx.py.frame as frame
 import py_compile
 
-if sys.platform.count("win32")>0:
+if sys.platform.count("win32") > 0:
     PANEL_WIDTH = 800
     PANEL_HEIGHT = 700
     FONT_VARIANT = 0
@@ -17,8 +17,8 @@ else:
     PANEL_WIDTH = 830
     PANEL_HEIGHT = 730
     FONT_VARIANT = 1
-ID_COMPILE = wx.NewId() 
-ID_RUN = wx.NewId()  
+ID_COMPILE = wx.NewId()
+ID_RUN = wx.NewId()
 
 def compile_file(path):
     """
@@ -30,7 +30,7 @@ def compile_file(path):
     except:
         type, value, traceback = sys.exc_info()
         return value
-    return None 
+    return None
 
 class PyConsole(editor.EditorNotebookFrame):
     ## Internal nickname for the window, used by the AUI manager
@@ -43,7 +43,7 @@ class PyConsole(editor.EditorNotebookFrame):
                     title='Python Shell/Editor', filename=None,
                     size=(PANEL_WIDTH, PANEL_HEIGHT)):
         self.config = None
-        editor.EditorNotebookFrame.__init__(self, parent=parent, 
+        editor.EditorNotebookFrame.__init__(self, parent=parent,
                                         title=title, size=size,
                                         filename=filename)
         self.parent = parent
@@ -59,7 +59,7 @@ class PyConsole(editor.EditorNotebookFrame):
              dataDir = None
         self.dataDir = dataDir
         self.Centre()
-        
+
         self.Bind(wx.EVT_MENU, self.OnNewFile, id=wx.ID_NEW)
         self.Bind(wx.EVT_MENU, self.OnOpenFile, id=wx.ID_OPEN)
         self.Bind(wx.EVT_MENU, self.OnSaveFile, id=wx.ID_SAVE)
@@ -73,8 +73,8 @@ class PyConsole(editor.EditorNotebookFrame):
             # Delete menu item (open and new) if not python shell
             #self.fileMenu.Delete(wx.ID_NEW)
             self.fileMenu.Delete(wx.ID_OPEN)
-        
-   
+
+
     def _add_menu(self):
         """
         Add menu
@@ -86,7 +86,7 @@ class PyConsole(editor.EditorNotebookFrame):
         self.compileMenu.Append(ID_RUN, 'Run in Shell',
                  'Run the file in the Python Shell')
         self.MenuBar.Insert(3, self.compileMenu, '&Run')
-    
+
     def OnHelp(self, event):
         """
         Show a help dialog.
@@ -95,7 +95,7 @@ class PyConsole(editor.EditorNotebookFrame):
         title = 'Help on key bindings'
         text = wx.py.shell.HELP_TEXT
         dlg = wx.lib.dialogs.ScrolledMessageDialog(self, text, title,
-                                                   size = ((700, 540)))
+                                                   size=((700, 540)))
         fnt = wx.Font(10, wx.TELETYPE, wx.NORMAL, wx.NORMAL)
         dlg.GetChildren()[0].SetFont(fnt)
         dlg.GetChildren()[0].SetInsertionPoint(0)
@@ -107,41 +107,41 @@ class PyConsole(editor.EditorNotebookFrame):
         Set the manager of this window
         """
         self._manager = manager
-        
+
     def OnAbout(self, event):
         """
         On About
         """
         message = ABOUT
         dial = wx.MessageDialog(self, message, 'About',
-                           wx.OK|wx.ICON_INFORMATION)  
+                           wx.OK | wx.ICON_INFORMATION)
         dial.ShowModal()
-        
+
     def OnNewFile(self, event):
         """
-        OnFileOpen  
+        OnFileOpen
         """
         self.OnFileNew(event)
 
     def OnOpenFile(self, event):
         """
-        OnFileOpen  
+        OnFileOpen
         """
         self.OnFileOpen(event)
         self.Show(False)
         self.Show(True)
-        
+
     def OnSaveFile(self, event):
         """
-        OnFileSave overwrite   
+        OnFileSave overwrite
         """
         self.OnFileSave(event)
         self.Show(False)
         self.Show(True)
-        
+
     def OnSaveAsFile(self, event):
         """
-        OnFileSaveAs overwrite   
+        OnFileSaveAs overwrite
         """
         self.OnFileSaveAs(event)
         self.Show(False)
@@ -160,13 +160,13 @@ class PyConsole(editor.EditorNotebookFrame):
             filedir = self.buffer.doc.filedir
         if not filedir:
             filedir = self.dataDir
-        result = editor.openSingle(directory=filedir,  
+        result = editor.openSingle(directory=filedir,
                             wildcard='Python Files (*.py)|*.py')
         if result.path:
             self.bufferCreate(result.path)
         cancel = False
         return cancel
-    
+
     def bufferSaveAs(self):
         """
         Save buffer to a new filename: Bypassing editor bufferSaveAs
@@ -176,7 +176,7 @@ class PyConsole(editor.EditorNotebookFrame):
             filedir = self.buffer.doc.filedir
         if not filedir:
             filedir = self.dataDir
-        result = editor.saveSingle(directory=filedir, 
+        result = editor.saveSingle(directory=filedir,
                                    filename='untitled.py',
                                    wildcard='Python Files (*.py)|*.py')
         if result.path:
@@ -186,7 +186,7 @@ class PyConsole(editor.EditorNotebookFrame):
         else:
             cancel = True
         return cancel
-        
+
     def OnRun(self, event):
         """
         Run
@@ -197,7 +197,7 @@ class PyConsole(editor.EditorNotebookFrame):
             self.editor.setFocus()
             # Why we have to do this (Otherwise problems on Windows)?
             forward_path = self.buffer.doc.filepath.replace('\\', '/')
-            self.shell.Execute("execfile('%s')"% forward_path) 
+            self.shell.Execute("execfile('%s')" % forward_path)
             self.shell.Hide()
             self.shell.Show(True)
             return self.shell.GetText().split(">>>")[-2]
@@ -207,7 +207,7 @@ class PyConsole(editor.EditorNotebookFrame):
             icon = wx.ICON_ERROR
             wx.MessageBox(str(mssg), title, style=icon)
             return 0
-        
+
     def OnCompile(self, event):
         """
         Compile
@@ -220,8 +220,8 @@ class PyConsole(editor.EditorNotebookFrame):
                 self._manager.set_edit_menu_helper(self.parent)
                 # Update custom model list in fitpage combobox
                 wx.CallAfter(self._manager.update_custom_combo)
-    
-    def _check_changed(self):   
+
+    def _check_changed(self):
         """
         If content was changed, suggest to save it first
         """
@@ -229,7 +229,7 @@ class PyConsole(editor.EditorNotebookFrame):
             cancel = self.bufferSuggestSave()
             if cancel:
                 return cancel
-             
+
     def _get_err_msg(self, text=''):
         """
         Get err_msg
@@ -250,7 +250,7 @@ class PyConsole(editor.EditorNotebookFrame):
         if name == None:
             wx.MessageBox(str(mssg), title, style=icon)
             return False
-        mssg = "Compiling '%s'...\n"% name
+        mssg = "Compiling '%s'...\n" % name
         if msg != None:
             mssg += "Error occurred:\n"
             mssg += str(msg) + "\n\n"
@@ -268,15 +268,15 @@ class PyConsole(editor.EditorNotebookFrame):
                 mssg += str(text)
             title = 'Info'
             icon = wx.ICON_INFORMATION
-        dlg = wx.lib.dialogs.ScrolledMessageDialog(self, mssg, title, 
-                                                   size = ((550, 250)))
+        dlg = wx.lib.dialogs.ScrolledMessageDialog(self, mssg, title,
+                                                   size=((550, 250)))
         fnt = wx.Font(10, wx.TELETYPE, wx.NORMAL, wx.NORMAL)
         dlg.GetChildren()[0].SetFont(fnt)
         dlg.GetChildren()[0].SetInsertionPoint(0)
         dlg.ShowModal()
         dlg.Destroy()
         return True
-    
+
     def OnUpdateCompileMenu(self, event):
         """
         Update Compile menu items based on current tap.
@@ -293,7 +293,7 @@ class PyConsole(editor.EditorNotebookFrame):
         except AttributeError:
             # This menu option is not supported in the current context.
             event.Enable(False)
-            
+
     def on_close(self, event):
         """
         Close event
@@ -301,17 +301,17 @@ class PyConsole(editor.EditorNotebookFrame):
         if self.base != None:
             self.base.py_frame = None
         self.Destroy()
-                    
-ABOUT =  "Welcome to Python %s! \n\n"% sys.version.split()[0]
+
+ABOUT = "Welcome to Python %s! \n\n" % sys.version.split()[0]
 ABOUT += "This uses Py Shell/Editor in wx (developed by Patrick K. O'Brien).\n"
 ABOUT += "If this is your first time using Python, \n"
 ABOUT += "you should definitely check out the tutorial "
 ABOUT += "on the Internet at http://www.python.org/doc/tut/."
- 
-        
+
+
 if __name__ == "__main__":
-   
-    app  = wx.App()
+
+    app = wx.App()
     dlg = PyConsole()
     dlg.Show()
     app.MainLoop()
