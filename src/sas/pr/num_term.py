@@ -1,10 +1,11 @@
 import math
 import numpy
 import copy
+import sys
+import logging
 from sas.pr.invertor import Invertor
 
-
-class Num_terms():
+class NTermEstimator(object):
     """
     """
     def __init__(self, invertor):
@@ -176,22 +177,19 @@ def load(path):
                 data_y = numpy.append(data_y, test_y)
                 data_err = numpy.append(data_err, err)
             except:
-                pass
+                logging.error(sys.exc_value)
 
     return data_x, data_y, data_err
 
 
 if __name__ == "__main__":
-    i = Invertor()
+    invert = Invertor()
     x, y, erro = load("test/Cyl_A_D102.txt")
-    i.d_max = 102.0
-    i.nfunc = 10
-    #i.q_max = 0.4
-    #i.q_min = 0.07
-    i.x = x
-    i.y = y
-    i.err = erro
-    #i.out, i.cov = i.lstsq(10)
+    invert.d_max = 102.0
+    invert.nfunc = 10
+    invert.x = x
+    invert.y = y
+    invert.err = erro
     # Testing estimator
-    est = Num_terms(i)
+    est = NTermEstimator(invert)
     print est.num_terms()

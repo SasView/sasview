@@ -106,11 +106,12 @@ class Invertor(Cinvertor):
     background = 0
     ## Information dictionary for application use
     info = {}
+    ## Slit information
+    slit_height = None
+    slit_width = None
 
     def __init__(self):
         Cinvertor.__init__(self)
-        self.slit_height = None
-        self.slit_width = None
         self.err = None
         self.d_max = None
         self.q_min = self.set_qmin(-1.0)
@@ -536,8 +537,8 @@ class Invertor(Cinvertor):
         :return: number of terms, alpha, message
 
         """
-        from num_term import Num_terms
-        estimator = Num_terms(self.clone())
+        from num_term import NTermEstimator
+        estimator = NTermEstimator(self.clone())
         try:
             return estimator.num_terms(isquit_func)
         except:
