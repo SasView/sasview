@@ -1,13 +1,13 @@
-""" 
+"""
 Batch panel
 """
 import wx
 import wx.lib.newevent
 import math
-from sas.guiframe.events import StatusEvent    
-from sas.guiframe.events import NewPlotEvent  
+from sas.guiframe.events import StatusEvent
+from sas.guiframe.events import NewPlotEvent
 
-(Chi2UpdateEvent, EVT_CHI2_UPDATE)   = wx.lib.newevent.NewEvent()
+(Chi2UpdateEvent, EVT_CHI2_UPDATE) = wx.lib.newevent.NewEvent()
 _BOX_WIDTH = 76
 _DATA_BOX_WIDTH = 300
 SMEAR_SIZE_L = 0.00
@@ -23,16 +23,16 @@ class BatchFitPage(FitPage):
     Batch Page
     """
     window_name = "BatchFit"
-    window_caption  = "BatchFit"
+    window_caption = "BatchFit"
 
     def __init__(self, parent, color=None):
-        """ 
+        """
         Initialization of the Panel
         """
         FitPage.__init__(self, parent, color=color)
-        
+
         ## draw sizer
-        
+
     def _fill_data_sizer(self):
         """
         fill sizer 0 with data info
@@ -52,23 +52,23 @@ class BatchFitPage(FitPage):
         text2 = wx.StaticText(self, -1, ' - This panel is not designed to view individual fits. - ')
         text2.SetForegroundColour(wx.RED)
         sizer_data.Add(text2)
-        
+
         combo = wx.BoxSizer(wx.HORIZONTAL)
         self.dataSource = wx.ComboBox(self, -1, style=wx.CB_READONLY)
         wx.EVT_COMBOBOX(self.dataSource, -1, self.on_select_data)
         self.dataSource.SetMinSize((_DATA_BOX_WIDTH, -1))
-        
+
         combo.Add(wx.StaticText(self, -1, 'Name : '))
-        combo.Add((0,5))
+        combo.Add((0, 5))
         combo.Add(self.dataSource)
-        
+
         sizer_data.Add(combo, 0, wx.ALL, 10)
         boxsizer1.Add(sizer_data, 0, wx.ALL, 0)
         self.sizer0.Add(boxsizer1, 0, wx.EXPAND | wx.ALL, 10)
         self.sizer0.Layout()
 
 #    COMMENTED OUT TO USE METHODS INHERITED FROM fitpage.py
-        
+
 #     def _fill_range_sizer(self):
 #         """
 #         Fill the sizer containing the plotting range
@@ -397,29 +397,29 @@ class BatchFitPage(FitPage):
 #                                      data_list=self.data_list,
 #                                       caption=self.window_name)
 #             self._draw_model()
-    
 
-        
+
+
 class BGTextCtrl(wx.TextCtrl):
     """
     Text control used to display outputs.
-    No editing allowed. The background is 
+    No editing allowed. The background is
     grayed out. User can't select text.
     """
     def __init__(self, *args, **kwds):
         wx.TextCtrl.__init__(self, *args, **kwds)
         self.SetEditable(False)
         self.SetBackgroundColour(self.GetParent().parent.GetBackgroundColour())
-        
+
         # Bind to mouse event to avoid text highlighting
         # The event will be skipped once the call-back
         # is called.
         self.Bind(wx.EVT_MOUSE_EVENTS, self._click)
-        
+
     def _click(self, event):
         """
         Prevent further handling of the mouse event
         by not calling Skip().
-        """ 
+        """
         pass
- 
+

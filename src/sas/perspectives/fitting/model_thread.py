@@ -42,7 +42,7 @@ class Calc2D(CalcThread):
         self.starttime = 0
         self.update_chisqr = update_chisqr
         self.source = source
-        
+
     def compute(self):
         """
         Compute the data given a model function
@@ -58,11 +58,11 @@ class Calc2D(CalcThread):
                 newy = math.pow(max(math.fabs(self.data.ymax),
                                    math.fabs(self.data.ymin)), 2)
                 self.qmax = math.sqrt(newx + newy)
-        
+
         if self.data is None:
             msg = "Compute Calc2D receive data = %s.\n" % str(self.data)
             raise ValueError, msg
-            
+
         # Define matrix where data will be plotted
         radius = numpy.sqrt((self.data.qx_data * self.data.qx_data) + \
                     (self.data.qy_data * self.data.qy_data))
@@ -72,7 +72,7 @@ class Calc2D(CalcThread):
         index_model = (self.qmin <= radius) & (radius <= self.qmax)
         index_model = index_model & self.data.mask
         index_model = index_model & numpy.isfinite(self.data.data)
-      
+
         if self.smearer is not None:
             # Set smearer w/ data, model and index.
             fn = self.smearer
@@ -111,7 +111,7 @@ class Calc2D(CalcThread):
                        #qstep=self.qstep,
                        update_chisqr=self.update_chisqr,
                        source=self.source)
-        
+
 
 class Calc1D(CalcThread):
     """
@@ -155,7 +155,7 @@ class Calc1D(CalcThread):
         self.source = source
         self.out = None
         self.index = None
-        
+
     def compute(self):
         """
         Compute model 1d value given qmin , qmax , x value
@@ -163,7 +163,7 @@ class Calc1D(CalcThread):
         self.starttime = time.time()
         output = numpy.zeros((len(self.data.x)))
         index = (self.qmin <= self.data.x) & (self.data.x <= self.qmax)
-     
+
         ##smearer the ouput of the plot
         if self.smearer is not None:
             first_bin, last_bin = self.smearer.get_bin_range(self.qmin,
@@ -173,9 +173,9 @@ class Calc1D(CalcThread):
             output = self.smearer(output, first_bin, last_bin)
         else:
             output[index] = self.model.evalDistribution(self.data.x[index])
-         
+
         elapsed = time.time() - self.starttime
-       
+
         self.complete(x=self.data.x[index], y=output[index],
                       page_id=self.page_id,
                       state=self.state,
@@ -186,7 +186,7 @@ class Calc1D(CalcThread):
                       data=self.data,
                       update_chisqr=self.update_chisqr,
                       source=self.source)
-        
+
     def results(self):
         """
         Send resuts of the computation
@@ -195,44 +195,44 @@ class Calc1D(CalcThread):
 
 """
 Example: ::
-                     
+
     class CalcCommandline:
         def __init__(self, n=20000):
             #print thread.get_ident()
             from sas.models.CylinderModel import CylinderModel
-            
+
             model = CylinderModel()
-            
-             
+
+
             print model.runXY([0.01, 0.02])
-            
+
             qmax = 0.01
             qstep = 0.0001
             self.done = False
-            
+
             x = numpy.arange(-qmax, qmax+qstep*0.01, qstep)
             y = numpy.arange(-qmax, qmax+qstep*0.01, qstep)
-        
-        
+
+
             calc_thread_2D = Calc2D(x, y, None, model.clone(),None,
                                     -qmax, qmax,qstep,
                                             completefn=self.complete,
                                             updatefn=self.update ,
                                             yieldtime=0.0)
-         
+
             calc_thread_2D.queue()
             calc_thread_2D.ready(2.5)
-            
+
             while not self.done:
                 time.sleep(1)
-    
+
         def update(self,output):
             print "update"
-    
+
         def complete(self, image, data, model, elapsed, qmin, qmax,index, qstep ):
             print "complete"
             self.done = True
-    
+
     if __name__ == "__main__":
         CalcCommandline()
 """

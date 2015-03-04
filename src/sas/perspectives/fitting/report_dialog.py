@@ -1,5 +1,5 @@
 """
-Dialog report panel to show and summarize the results of 
+Dialog report panel to show and summarize the results of
 the fitting calculation.
 """
 ################################################################################
@@ -22,11 +22,11 @@ class ReportDialog(BaseReportDialog):
     """
     The report dialog box.
     """
-    
+
     def __init__(self, report_list, *args, **kwds):
         """
         Initialization. The parameters added to Dialog are:
-        
+
         :param report_list: list of html_str, text_str, image
         from invariant_state
         """
@@ -37,7 +37,7 @@ class ReportDialog(BaseReportDialog):
 
         # number of images of plot
         self.nimages = len(self.report_list[2])
-        
+
         if self.report_list[2] != None:
             # put image path in the report string
             if len(self.report_list[2]) == 1:
@@ -57,7 +57,7 @@ class ReportDialog(BaseReportDialog):
             self.report_html = self.report_list[0]
         # layout
         self._setup_layout()
-        
+
     def onSave(self, event=None):
         """
         Save
@@ -65,13 +65,13 @@ class ReportDialog(BaseReportDialog):
         #todo: complete saving fig file and as a txt file
         dlg = wx.FileDialog(self, "Choose a file",
                             wildcard=self.wild_card,
-                            style=wx.SAVE|wx.OVERWRITE_PROMPT|wx.CHANGE_DIR)
+                            style=wx.SAVE | wx.OVERWRITE_PROMPT | wx.CHANGE_DIR)
         dlg.SetFilterIndex(0)  # Set .html files to be default
 
         if dlg.ShowModal() != wx.ID_OK:
             dlg.Destroy()
             return
-        
+
         fName = dlg.GetPath()
         ext_num = dlg.GetFilterIndex()
 
@@ -82,7 +82,7 @@ class ReportDialog(BaseReportDialog):
         if ext_num == (0 + 2 * self.index_offset):
             # TODO: Sort this case out
             ext = '.pdf'
-            
+
             fName = os.path.splitext(fName)[0] + ext
             dlg.Destroy()
             #pic (png) file path/name
@@ -111,7 +111,7 @@ class ReportDialog(BaseReportDialog):
             f.close()
             # write pdf as a pdf file
             pdf = self.HTML2PDF(data=html, filename=fName)
-            
+
             #open pdf
             if pdf:
                 try:
@@ -120,7 +120,7 @@ class ReportDialog(BaseReportDialog):
                 except:
                     try:
                         #Mac
-                        os.system("open %s"% fName)
+                        os.system("open %s" % fName)
                     except:
                         #DO not open
                         pass
@@ -144,11 +144,11 @@ class ReportDialog(BaseReportDialog):
             report = self.report_list[1]
         else:
             return
-        
+
         #file name
         fName = os.path.splitext(fName)[0] + ext
         dlg.Destroy()
-        
+
         #pic (png) file path/name
         for num in range(self.nimages):
             pic_name = os.path.splitext(fName)[0] + img_ext[num]
@@ -171,4 +171,3 @@ class ReportDialog(BaseReportDialog):
         #save png file using pic_fname
         for num in range(self.nimages):
             self.report_list[2][num].savefig(pic_fname[num])
-        

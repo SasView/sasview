@@ -19,7 +19,7 @@ from sas.guiframe.events import StatusEvent
 from sas.models.pluginmodel import Model1DPlugin
 from sas.models.BaseComponent import BaseComponent
 from sas.guiframe.CategoryInstaller import CategoryInstaller
-   
+
 PLUGIN_DIR = 'plugin_models'
 
 def get_model_python_path():
@@ -39,12 +39,12 @@ def log(message):
 def _check_plugin(model, name):
     """
     Do some checking before model adding plugins in the list
-    
+
     :param model: class model to add into the plugin list
     :param name:name of the module plugin
-    
+
     :return model: model if valid model or None if not valid
-    
+
     """
     #Check if the plugin is of type Model1DPlugin
     if not issubclass(model, Model1DPlugin):
@@ -62,7 +62,7 @@ def _check_plugin(model, name):
                                     str(sys.exc_type), sys.exc_value)
         log(msg)
         return None
-   
+
     if hasattr(new_instance, "function"):
         try:
             value = new_instance.function()
@@ -76,19 +76,19 @@ def _check_plugin(model, name):
         log(msg)
         return None
     return model
-  
-  
+
+
 def find_plugins_dir():
     """
         Find path of the plugins directory.
         The plugin directory is located in the user's home directory.
     """
     dir = os.path.join(os.path.expanduser("~"), '.sasview', PLUGIN_DIR)
-    
+
     # If the plugin directory doesn't exist, create it
     if not os.path.isdir(dir):
         os.makedirs(dir)
-        
+
     # Find paths needed
     try:
         # For source
@@ -131,7 +131,7 @@ class ReportProblem:
             print "Problem with", repr(value)
             raise type, value, traceback
         return 1
-    
+
 report_problem = ReportProblem()
 
 
@@ -172,7 +172,7 @@ def _findModels(dir):
             toks = os.path.splitext(os.path.basename(item))
             if toks[1] == '.py' and not toks[0] == '__init__':
                 name = toks[0]
-            
+
                 path = [os.path.abspath(dir)]
                 file = None
                 try:
@@ -193,7 +193,7 @@ def _findModels(dir):
                                     str(sys.exc_type), sys.exc_value)
                     log(msg)
                 finally:
-              
+
                     if not file == None:
                         file.close()
     except:
@@ -212,30 +212,30 @@ class ModelList(object):
         """
         """
         self.mydict = {}
-        
+
     def set_list(self, name, mylist):
         """
         :param name: the type of the list
         :param mylist: the list to add
-        
+
         """
         if name not in self.mydict.keys():
             self.reset_list(name, mylist)
-            
+
     def reset_list(self, name, mylist):
         """
         :param name: the type of the list
         :param mylist: the list to add
         """
         self.mydict[name] = mylist
-            
+
     def get_list(self):
         """
         return all the list stored in a dictionary object
         """
         return self.mydict
-        
-        
+
+
 class ModelManagerBase:
     """
         Base class for the model manager
@@ -261,14 +261,14 @@ class ModelManagerBase:
     ## Event owner (guiframe)
     event_owner = None
     last_time_dir_modified = 0
-    
+
     def __init__(self):
         """
         """
         self.model_dictionary = {}
         self.stored_plugins = {}
         self._getModelList()
-        
+
     def findModels(self):
         """
         find  plugin model in directory of plugin .recompile all file
@@ -279,14 +279,14 @@ class ModelManagerBase:
             return  _findModels(dir)
         logging.info("pluging model : %s\n" % str(temp))
         return temp
-        
+
     def _getModelList(self):
         """
         List of models we want to make available by default
         for this application
-    
+
         :return: the next free event ID following the new menu events
-        
+
         """
 
         ## NOTE: as of April 26, 2014, as part of first pass on fixing categories,
@@ -701,7 +701,7 @@ class ModelManagerBase:
             self.model_dictionary[BEPolyelectrolyte.__name__] = BEPolyelectrolyte
             #        self.shape_indep_list.append(BEPolyelectrolyte)
             self.model_name_list.append(BEPolyelectrolyte.__name__)
-            self.form_factor_dict[str(wx.NewId())] =  [SphereModel]
+            self.form_factor_dict[str(wx.NewId())] = [SphereModel]
         except:
             pass
 
@@ -1012,15 +1012,15 @@ class ModelManagerBase:
         #self.model_dictionary[FractalO_Z.__name__] = FractalO_Z
         #self.shape_indep_list.append(FractalO_Z)
         #self.model_name_list.append(FractalO_Z.__name__)
-    
+
         #Looking for plugins
         self.stored_plugins = self.findModels()
         self.plugins = self.stored_plugins.values()
         for name, plug in self.stored_plugins.iteritems():
             self.model_dictionary[name] = plug
-            
+
         self._get_multifunc_models()
-       
+
         return 0
 
     def is_changed(self):
@@ -1035,9 +1035,9 @@ class ModelManagerBase:
             if  self.last_time_dir_modified != temp:
                 is_modified = True
                 self.last_time_dir_modified = temp
-        
+
         return is_modified
-    
+
     def update(self):
         """
         return a dictionary of model if
@@ -1054,7 +1054,7 @@ class ModelManagerBase:
             return self.model_combobox.get_list()
         else:
             return {}
-    
+
     def pulgins_reset(self):
         """
         return a dictionary of model
@@ -1073,7 +1073,7 @@ class ModelManagerBase:
 
         self.model_combobox.reset_list("Customized Models", self.plugins)
         return self.model_combobox.get_list()
-       
+
 ##   I believe the next four methods are for the old form factor GUI
 ##   where the dropdown showed a list of categories which then rolled out
 ##   in a second dropdown to the side. Some testing shows they indeed no longer
@@ -1100,7 +1100,7 @@ class ModelManagerBase:
 #        self.modelmenu = modelmenu
         ## guiframe reference
 #        self.event_owner = event_owner
-        
+
 #        shape_submenu = wx.Menu()
 #        shape_indep_submenu = wx.Menu()
 #        structure_factor = wx.Menu()
@@ -1111,27 +1111,27 @@ class ModelManagerBase:
 #                                         shape_submenu,
 #                                         " simple shape"],
 #                         list1=self.shape_list)
-        
+
 #        self._fill_simple_menu(menuinfo=["Shape-Independent",
 #                                         shape_indep_submenu,
 #                                         "List of shape-independent models"],
 #                         list1=self.shape_indep_list)
-        
+
 #        self._fill_simple_menu(menuinfo=["Structure Factors",
 #                                         structure_factor,
 #                                         "List of Structure factors models"],
 #                                list1=self.struct_list)
-        
+
 #        self._fill_plugin_menu(menuinfo=["Customized Models", added_models,
 #                                            "List of additional models"],
 #                                 list1=self.plugins)
-        
+
 #        self._fill_menu(menuinfo=["P(Q)*S(Q)", multip_models,
 #                                  "mulplication of 2 models"],
 #                                   list1=self.multiplication_factor,
 #                                   list2=self.struct_list)
 #        return 0
-    
+
 #    def _fill_plugin_menu(self, menuinfo, list1):
 #        """
 #        fill the plugin menu with costumized models
@@ -1142,7 +1142,7 @@ class ModelManagerBase:
 #            msg = "No model available check plugins.log for errors to fix problem"
 #            menuinfo[1].Append(int(id), "Empty", msg)
 #        self._fill_simple_menu(menuinfo, list1)
-        
+
 #   def _fill_simple_menu(self, menuinfo, list1):
 #       """
 #       Fill the menu with list item
@@ -1156,7 +1156,7 @@ class ModelManagerBase:
 #       """
 #       if len(list1) > 0:
 #           self.model_combobox.set_list(menuinfo[0], list1)
-            
+
 #            for item in list1:
 #                try:
 #                    id = wx.NewId()
@@ -1216,13 +1216,13 @@ class ModelManagerBase:
 #                                       newmenu, menuinfo[2])
 #        id = wx.NewId()
 #        self.modelmenu.AppendMenu(id, menuinfo[0], menuinfo[1], menuinfo[2])
-        
+
     def _on_model(self, evt):
         """
         React to a model menu event
-        
+
         :param event: wx menu event
-        
+
         """
         if int(evt.GetId()) in self.form_factor_dict.keys():
             from sas.models.MultiplicationModel import MultiplicationModel
@@ -1231,12 +1231,12 @@ class ModelManagerBase:
             model = MultiplicationModel(model1, model2)
         else:
             model = self.struct_factor_dict[str(evt.GetId())]()
-        
+
         #TODO: investigate why the following two lines were left in the code
         #      even though the ModelEvent class doesn't exist
         #evt = ModelEvent(model=model)
         #wx.PostEvent(self.event_owner, evt)
-        
+
     def _get_multifunc_models(self):
         """
         Get the multifunctional models
@@ -1249,11 +1249,11 @@ class ModelManagerBase:
             except:
                 # pass to other items
                 pass
-                    
+
     def get_model_list(self):
         """
         return dictionary of models for fitpanel use
-        
+
         """
         ## Model_list now only contains attribute lists not category list.
         ## Eventually this should be in one master list -- read in category
@@ -1262,7 +1262,7 @@ class ModelManagerBase:
         ## and update json file.
         ##
         ## -PDB   April 26, 2014
-        
+
 #        self.model_combobox.set_list("Shapes", self.shape_list)
 #        self.model_combobox.set_list("Shape-Independent",
 #                                     self.shape_indep_list)
@@ -1273,7 +1273,7 @@ class ModelManagerBase:
                                      self.multiplication_factor)
         self.model_combobox.set_list("Multi-Functions", self.multi_func_list)
         return self.model_combobox.get_list()
-    
+
     def get_model_name_list(self):
         """
         return regular model name list
@@ -1285,8 +1285,8 @@ class ModelManagerBase:
         return dictionary linking model names to objects
         """
         return self.model_dictionary
-  
-        
+
+
 class ModelManager(object):
     """
     implement model
@@ -1299,31 +1299,31 @@ class ModelManager(object):
     CategoryInstaller.check_install(model_list=cat_model_list)
     def findModels(self):
         return self.__modelmanager.findModels()
-    
+
     def _getModelList(self):
         return self.__modelmanager._getModelList()
-    
+
     def is_changed(self):
         return self.__modelmanager.is_changed()
-    
+
     def update(self):
         return self.__modelmanager.update()
-    
+
     def pulgins_reset(self):
         return self.__modelmanager.pulgins_reset()
-    
+
     def populate_menu(self, modelmenu, event_owner):
         return self.__modelmanager.populate_menu(modelmenu, event_owner)
-    
+
     def _on_model(self, evt):
         return self.__modelmanager._on_model(evt)
-    
+
     def _get_multifunc_models(self):
         return self.__modelmanager._get_multifunc_models()
-    
+
     def get_model_list(self):
         return self.__modelmanager.get_model_list()
-    
+
     def get_model_name_list(self):
         return self.__modelmanager.get_model_name_list()
 
