@@ -19,12 +19,13 @@ from sas.calculator.slit_length_calculator import SlitlengthCalculator
 from calculator_widgets import OutputTextCtrl
 from calculator_widgets import InterActiveOutputTextCtrl
 from sas.perspectives.calculator import calculator_widgets as widget   
+from sas.guiframe.documentation_window import DocumentationWindow
 
 _BOX_WIDTH = 76
 #Slit length panel size 
 if sys.platform.count("win32") > 0:
     PANEL_WIDTH = 500
-    PANEL_HEIGHT = 200
+    PANEL_HEIGHT = 210
     FONT_VARIANT = 0
 else:
     PANEL_WIDTH = 530
@@ -120,8 +121,15 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
         self.bt_close = wx.Button(self, wx.ID_CANCEL,'Close')
         self.bt_close.Bind(wx.EVT_BUTTON, self.on_close)
         self.bt_close.SetToolTipString("Close this window.")
-        self.button_sizer.AddMany([(self.bt_close, 0, wx.LEFT, 390)])
-        
+ 
+        id = wx.NewId()
+        self.button_help = wx.Button(self, id, "HELP")
+        self.button_help.SetToolTipString("Help for slit length calculator.")
+        self.Bind(wx.EVT_BUTTON, self.on_help,id=id)   
+
+        self.button_sizer.AddMany([(self.button_help, 0, wx.LEFT, 280),
+                                   (self.bt_close, 0, wx.LEFT, 20)])
+               
     def _do_layout(self):
         """
             Draw window content
@@ -159,6 +167,25 @@ class SlitLengthCalculatorPanel(wx.Panel, PanelBase):
         dlg.Destroy()
         
         return path
+
+    def on_help(self, event):    
+        """
+        Bring up the slit length calculator Documentation whenever
+        the HELP button is clicked. 
+        
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old 
+        versions of Wx (before 2.9) and thus not the release version of 
+        installers, the help comes up at the top level of the file as 
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+    
+    :param evt: Triggers on clicking the help button
+    """
+                
+        _TreeLocation = "user/perspectives/calculator/slit_calculator_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, \
+             _TreeLocation,"Slit Length Calculator Help")
 
     def on_close(self, event):
         """
@@ -265,7 +292,7 @@ class SlitLengthCalculatorWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = SlitLengthCalculatorPanel(parent=self)
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.SetPosition((25, 150))
+        self.SetPosition((25, 10))
         self.Show(True)
 
     def on_close(self, event):

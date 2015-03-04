@@ -1,7 +1,7 @@
 """
 This software was developed by the University of Tennessee as part of the
 Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-project funded by the US National Science Foundation. 
+project funded by the US National Science Foundation.
 
 See the license text in license.txt
 
@@ -12,16 +12,17 @@ import wx
 import sys
 
 from sas.guiframe.panel_base import PanelBase
-from sas.calculator.kiessig_calculator import KiessigThicknessCalculator 
+from sas.calculator.kiessig_calculator import KiessigThicknessCalculator
 from calculator_widgets import OutputTextCtrl
 from calculator_widgets import InputTextCtrl
-from sas.perspectives.calculator import calculator_widgets as widget   
+from sas.perspectives.calculator import calculator_widgets as widget
+from sas.guiframe.documentation_window import DocumentationWindow
 
 _BOX_WIDTH = 77
-#Slit length panel size 
+#Slit length panel size
 if sys.platform.count("win32") > 0:
     PANEL_WIDTH = 500
-    PANEL_HEIGHT = 210
+    PANEL_HEIGHT = 230
     FONT_VARIANT = 0
 else:
     PANEL_WIDTH = 560
@@ -38,19 +39,19 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
     window_caption = "Kiessig Thickness Calculator"
     ## Flag to tell the AUI manager to put this panel in the center pane
     CENTER_PANE = True
-    
+
     def __init__(self, parent, *args, **kwds):
         wx.Panel.__init__(self, parent, *args, **kwds)
         PanelBase.__init__(self)
-        #Font size 
-        self.SetWindowVariant(variant=FONT_VARIANT)  
+        #Font size
+        self.SetWindowVariant(variant=FONT_VARIANT)
         # Object that receive status event
         self.parent = parent
         self.kiessig = KiessigThicknessCalculator()
         #layout attribute
         self.hint_sizer = None
         self._do_layout()
-       
+
     def _define_structure(self):
         """
         Define the main sizers building to build this application.
@@ -59,12 +60,12 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
         self.box_source = wx.StaticBox(self, -1,
                                 str("Kiessig Thickness Calculator"))
         self.boxsizer_source = wx.StaticBoxSizer(self.box_source,
-                                                    wx.VERTICAL)
+                                                 wx.VERTICAL)
         self.dq_name_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.thickness_size_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.hint_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
-       
+
     def _layout_dq_name(self):
         """
         Fill the sizer containing dq name
@@ -72,8 +73,8 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
         # get the default dq
         dq_value = str(self.kiessig.get_deltaq())
         dq_unit_txt = wx.StaticText(self, -1, '[1/A]')
-        dq_name_txt = wx.StaticText(self, -1, 
-                                'Kiessig Fringe Width (Delta Q): ')
+        dq_name_txt = wx.StaticText(self, -1,
+                                    'Kiessig Fringe Width (Delta Q): ')
         self.dq_name_tcl = InputTextCtrl(self, -1, 
                                          size=(_BOX_WIDTH,-1))
         dq_hint = "Type the Kiessig Fringe Width (Delta Q)"
@@ -87,25 +88,26 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
         self.Bind(wx.EVT_BUTTON, self.on_compute, id=id)
         self.dq_name_sizer.AddMany([(dq_name_txt, 0, wx.LEFT, 15),
                                     (self.dq_name_tcl, 0, wx.LEFT, 15),
-                                    (dq_unit_txt,0, wx.LEFT, 10),
-                                (self.compute_button, 0, wx.LEFT, 30)])
+                                    (dq_unit_txt, 0, wx.LEFT, 10),
+                                    (self.compute_button, 0, wx.LEFT, 30)])
+
     def _layout_thickness_size(self):
         """
         Fill the sizer containing thickness information
         """
         thick_unit = '['+self.kiessig.get_thickness_unit() +']'
-        thickness_size_txt = wx.StaticText(self, -1, 
+        thickness_size_txt = wx.StaticText(self, -1,
                                            'Thickness (or Diameter): ')
-        self.thickness_size_tcl = OutputTextCtrl(self, -1, 
+        self.thickness_size_tcl = OutputTextCtrl(self, -1,
                                                  size=(_BOX_WIDTH,-1))
         thickness_size_hint = " Estimated Size in Real Space"
         self.thickness_size_tcl.SetToolTipString(thickness_size_hint)
         thickness_size_unit_txt = wx.StaticText(self, -1, thick_unit)
-        
+
         self.thickness_size_sizer.AddMany([(thickness_size_txt, 0, wx.LEFT, 15),
-                                    (self.thickness_size_tcl, 0, wx.LEFT, 15),
-                                    (thickness_size_unit_txt, 0, wx.LEFT, 10)])
-    
+                                           (self.thickness_size_tcl, 0, wx.LEFT, 15),
+                                           (thickness_size_unit_txt, 0, wx.LEFT, 10)])
+
     def _layout_hint(self):
         """
         Fill the sizer containing hint 
@@ -117,16 +119,22 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
         hint_msg += ""
         self.hint_txt = wx.StaticText(self, -1, hint_msg)
         self.hint_sizer.AddMany([(self.hint_txt, 0, wx.LEFT, 15)])
-    
+
     def _layout_button(self):  
         """
         Do the layout for the button widgets
         """ 
-        self.bt_close = wx.Button(self, wx.ID_CANCEL,'Close')
+        id = wx.NewId()
+        self.bt_help = wx.Button(self, id, 'HELP')
+        self.bt_help.Bind(wx.EVT_BUTTON, self.on_help)
+        self.bt_help.SetToolTipString("Help using the Kiessig fringe calculator.")
+
+        self.bt_close = wx.Button(self, wx.ID_CANCEL, 'Close')
         self.bt_close.Bind(wx.EVT_BUTTON, self.on_close)
         self.bt_close.SetToolTipString("Close this window.")
-        self.button_sizer.AddMany([(self.bt_close, 0, wx.LEFT, 390)])
-        
+        self.button_sizer.AddMany([(self.bt_help, 0, wx.LEFT, 260),
+                                   (self.bt_close, 0, wx.LEFT, 20)])
+
     def _do_layout(self):
         """
             Draw window content
@@ -137,16 +145,34 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
         self._layout_hint()
         self._layout_button()
         self.boxsizer_source.AddMany([(self.dq_name_sizer, 0,
-                                          wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
-                                   (self.thickness_size_sizer, 0,
-                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
-                                     (self.hint_sizer, 0,
-                                     wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
+                                       wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                      (self.thickness_size_sizer, 0,
+                                       wx.EXPAND|wx.TOP|wx.BOTTOM, 5),
+                                      (self.hint_sizer, 0,
+                                       wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
         self.main_sizer.AddMany([(self.boxsizer_source, 0, wx.ALL, 10),
-                                  (self.button_sizer, 0,
-                                    wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
+                                 (self.button_sizer, 0,
+                                  wx.EXPAND|wx.TOP|wx.BOTTOM, 5)])
         self.SetSizer(self.main_sizer)
         self.SetAutoLayout(True)
+
+    def on_help(self, event):
+        """
+        Bring up the Kiessig fringe calculator Documentation whenever
+        the HELP button is clicked.
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old
+        versions of Wx (before 2.9) and thus not the release version of
+        installers, the help comes up at the top level of the file as
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+
+    :param evt: Triggers on clicking the help button
+    """
+        _TreeLocation = "user/perspectives/calculator/kiessig_calculator_help.html"
+        _doc_viewer = DocumentationWindow(self, -1,
+                                          _TreeLocation,
+                                          "Density/Volume Calculator Help")
 
     def on_close(self, event):
         """
@@ -155,7 +181,7 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
         self.parent.Close()
         if event is not None:
             event.Skip()
-        
+
     def on_compute(self, event):
         """
         Execute the computation of thickness
@@ -170,26 +196,26 @@ class KiessigThicknessCalculatorPanel(wx.Panel, PanelBase):
         thickness = self.format_number(output)
         # set tcl
         self.thickness_size_tcl.SetValue(str(thickness))
-        
+
     def format_number(self, value=None):
         """
-        Return a float in a standardized, human-readable formatted string 
+        Return a float in a standardized, human-readable formatted string
         """
-        try: 
+        try:
             value = float(value)
         except:
             output = None
             return output
 
         output = "%-7.4g" % value
-        return output.lstrip().rstrip()   
+        return output.lstrip().rstrip()
     
     def _onparamEnter(self, event = None):
         """
         On Text_enter_callback, perform compute
         """
         self.on_compute(event)
-             
+
 class KiessigWindow(widget.CHILD_FRAME):
     def __init__(self, parent=None, manager=None, 
                  title="Kiessig Thickness Calculator",
@@ -201,7 +227,7 @@ class KiessigWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = KiessigThicknessCalculatorPanel(parent=self)
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.SetPosition((25, 160))
+        self.SetPosition((25, 10))
         self.Show(True)
         
     def on_close(self, event):
@@ -212,10 +238,9 @@ class KiessigWindow(widget.CHILD_FRAME):
             self.manager.kiessig_frame = None
         self.Destroy()
 
-        
-if __name__ == "__main__": 
+if __name__ == "__main__":
     app = wx.PySimpleApp()
     widget.CHILD_FRAME = wx.Frame
-    frame = KiessigWindow()    
+    frame = KiessigWindow()
     frame.Show(True)
-    app.MainLoop()     
+    app.MainLoop()

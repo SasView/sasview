@@ -1,6 +1,9 @@
+# pylint: disable=invalid-name
 """
 Module to perform P(r) inversion.
 The module contains the Invertor class.
+
+FIXME: The way the Invertor interacts with its C component should be cleaned up
 """
 
 import numpy
@@ -10,6 +13,7 @@ import time
 import copy
 import os
 import re
+import logging
 from numpy.linalg import lstsq
 from scipy import optimize
 from sas.pr.core.pr_inversion import Cinvertor
@@ -19,7 +23,7 @@ def help():
     Provide general online help text
     Future work: extend this function to allow topic selection
     """
-    info_txt  = "The inversion approach is based on Moore, J. Appl. Cryst. "
+    info_txt = "The inversion approach is based on Moore, J. Appl. Cryst. "
     info_txt += "(1980) 13, 168-175.\n\n"
     info_txt += "P(r) is set to be equal to an expansion of base functions "
     info_txt += "of the type "
@@ -46,40 +50,40 @@ def help():
     info_txt += "the regularization term.\n\n"
     info_txt += "   - Maximum distance: the maximum distance between any "
     info_txt += "two points in the system.\n"
-     
+
     return info_txt
-    
+
 
 class Invertor(Cinvertor):
     """
     Invertor class to perform P(r) inversion
-    
+
     The problem is solved by posing the problem as  Ax = b,
     where x is the set of coefficients we are looking for.
-    
+
     Npts is the number of points.
-    
+
     In the following i refers to the ith base function coefficient.
     The matrix has its entries j in its first Npts rows set to ::
 
         A[j][i] = (Fourier transformed base function for point j)
-        
+
     We them choose a number of r-points, n_r, to evaluate the second
     derivative of P(r) at. This is used as our regularization term.
     For a vector r of length n_r, the following n_r rows are set to ::
 
         A[j+Npts][i] = (2nd derivative of P(r), d**2(P(r))/d(r)**2,
         evaluated at r[j])
-        
+
     The vector b has its first Npts entries set to ::
 
         b[j] = (I(q) observed for point j)
-        
+
     The following n_r entries are set to zero.
-    
+
     The result is found by using scipy.linalg.basic.lstsq to invert
     the matrix and find the coefficients x.
-    
+
     Methods inherited from Cinvertor:
 
     * ``get_peaks(pars)``: returns the number of P(r) peaks
@@ -88,7 +92,7 @@ class Invertor(Cinvertor):
     * ``get_pos_err(pars)``: returns the fraction of P(r) that is 1-sigma above zero
     """
     ## Chisqr of the last computation
-    chi2  = 0
+    chi2 = 0
     ## Time elapsed for last computation
     elapsed = 0
     ## Alpha to get the reg term the same size as the signal
@@ -103,10 +107,10 @@ class Invertor(Cinvertor):
     background = 0
     ## Information dictionary for application use
     info = {}
-    
+
     def __init__(self):
         Cinvertor.__init__(self)
-        
+
     def __setstate__(self, state):
         """
         restore the state of invertor for pickle
@@ -116,7 +120,7 @@ class Invertor(Cinvertor):
          self.x, self.y,
          self.err, self.has_bck,
          self.slit_height, self.slit_width) = state
-   
+
     def __reduce_ex__(self, proto):
         """
         Overwrite the __reduce_ex__
@@ -128,9 +132,9 @@ class Invertor(Cinvertor):
                  self.x, self.y,
                  self.err, self.has_bck,
                  self.slit_height, self.slit_width,
-                 )
+                )
         return (Invertor, tuple(), state, None, None)
-    
+
     def __setattr__(self, name, value):
         """
         Set the value of an attribute.
@@ -171,9 +175,9 @@ class Invertor(Cinvertor):
                 return self.set_has_bck(0)
             else:
                 raise ValueError, "Invertor: has_bck can only be True or False"
-            
+
         return Cinvertor.__setattr__(self, name, value)
-    
+
     def __getattr__(self, name):
         """
         Return the value of an attribute
@@ -218,62 +222,62 @@ class Invertor(Cinvertor):
         elif name in self.__dict__:
             return self.__dict__[name]
         return None
-    
+
     def clone(self):
         """
         Return a clone of this instance
         """
         #import copy
-        
+
         invertor = Invertor()
-        invertor.chi2    = self.chi2
+        invertor.chi2 = self.chi2
         invertor.elapsed = self.elapsed
-        invertor.nfunc   = self.nfunc
-        invertor.alpha   = self.alpha
-        invertor.d_max   = self.d_max
-        invertor.q_min   = self.q_min
-        invertor.q_max   = self.q_max
-        
+        invertor.nfunc = self.nfunc
+        invertor.alpha = self.alpha
+        invertor.d_max = self.d_max
+        invertor.q_min = self.q_min
+        invertor.q_max = self.q_max
+
         invertor.x = self.x
         invertor.y = self.y
         invertor.err = self.err
         invertor.has_bck = self.has_bck
         invertor.slit_height = self.slit_height
         invertor.slit_width = self.slit_width
-        
+
         invertor.info = copy.deepcopy(self.info)
-        
+
         return invertor
-    
+
     def invert(self, nfunc=10, nr=20):
         """
         Perform inversion to P(r)
-        
+
         The problem is solved by posing the problem as  Ax = b,
         where x is the set of coefficients we are looking for.
-        
+
         Npts is the number of points.
-        
+
         In the following i refers to the ith base function coefficient.
         The matrix has its entries j in its first Npts rows set to ::
 
             A[i][j] = (Fourier transformed base function for point j)
-            
+
         We them choose a number of r-points, n_r, to evaluate the second
         derivative of P(r) at. This is used as our regularization term.
         For a vector r of length n_r, the following n_r rows are set to ::
 
             A[i+Npts][j] = (2nd derivative of P(r), d**2(P(r))/d(r)**2, evaluated at r[j])
-            
+
         The vector b has its first Npts entries set to ::
 
             b[j] = (I(q) observed for point j)
-            
+
         The following n_r entries are set to zero.
-        
+
         The result is found by using scipy.linalg.basic.lstsq to invert
         the matrix and find the coefficients x.
-        
+
         :param nfunc: number of base functions to use.
         :param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
         :return: c_out, c_cov - the coefficients with covariance matrix
@@ -281,107 +285,105 @@ class Invertor(Cinvertor):
         # Reset the background value before proceeding
         self.background = 0.0
         return self.lstsq(nfunc, nr=nr)
-    
+
     def iq(self, out, q):
         """
         Function to call to evaluate the scattering intensity
-        
+
         :param args: c-parameters, and q
         :return: I(q)
-        
+
         """
         return Cinvertor.iq(self, out, q) + self.background
-    
+
     def invert_optimize(self, nfunc=10, nr=20):
         """
         Slower version of the P(r) inversion that uses scipy.optimize.leastsq.
-        
+
         This probably produce more reliable results, but is much slower.
         The minimization function is set to
         sum_i[ (I_obs(q_i) - I_theo(q_i))/err**2 ] + alpha * reg_term,
         where the reg_term is given by Svergun: it is the integral of
         the square of the first derivative
         of P(r), d(P(r))/dr, integrated over the full range of r.
-        
+
         :param nfunc: number of base functions to use.
         :param nr: number of r points to evaluate the 2nd derivative at
             for the reg. term.
-        
+
         :return: c_out, c_cov - the coefficients with covariance matrix
-        
+
         """
         self.nfunc = nfunc
         # First, check that the current data is valid
         if self.is_valid() <= 0:
             msg = "Invertor.invert: Data array are of different length"
             raise RuntimeError, msg
-        
+
         p = numpy.ones(nfunc)
         t_0 = time.time()
-        out, cov_x, _, _, _ = optimize.leastsq(self.residuals,
-                                                            p, full_output=1)
-        
+        out, cov_x, _, _, _ = optimize.leastsq(self.residuals, p, full_output=1)
+
         # Compute chi^2
         res = self.residuals(out)
         chisqr = 0
         for i in range(len(res)):
             chisqr += res[i]
-        
+
         self.chi2 = chisqr
 
         # Store computation time
         self.elapsed = time.time() - t_0
-        
+
         if cov_x is None:
             cov_x = numpy.ones([nfunc, nfunc])
             cov_x *= math.fabs(chisqr)
         return out, cov_x
-    
+
     def pr_fit(self, nfunc=5):
         """
         This is a direct fit to a given P(r). It assumes that the y data
         is set to some P(r) distribution that we are trying to reproduce
         with a set of base functions.
-        
+
         This method is provided as a test.
         """
         # First, check that the current data is valid
         if self.is_valid() <= 0:
             msg = "Invertor.invert: Data arrays are of different length"
             raise RuntimeError, msg
-        
+
         p = numpy.ones(nfunc)
         t_0 = time.time()
-        out, cov_x, _, _, _ = optimize.leastsq(self.pr_residuals, p,
-                                                            full_output=1)
-        
+        out, cov_x, _, _, _ = optimize.leastsq(self.pr_residuals, p, full_output=1)
+
         # Compute chi^2
         res = self.pr_residuals(out)
         chisqr = 0
         for i in range(len(res)):
             chisqr += res[i]
-        
+
         self.chisqr = chisqr
-        
+
         # Store computation time
         self.elapsed = time.time() - t_0
 
         return out, cov_x
-    
+
     def pr_err(self, c, c_cov, r):
         """
         Returns the value of P(r) for a given r, and base function
         coefficients, with error.
-        
+
         :param c: base function coefficients
         :param c_cov: covariance matrice of the base function coefficients
         :param r: r-value to evaluate P(r) at
-        
+
         :return: P(r)
-        
+
         """
         return self.get_pr_err(c, c_cov, r)
-       
+
     def _accept_q(self, q):
         """
         Check q-value against user-defined range
@@ -391,35 +393,35 @@ class Invertor(Cinvertor):
         if not self.q_max == None and q > self.q_max:
             return False
         return True
-       
+
     def lstsq(self, nfunc=5, nr=20):
         """
         The problem is solved by posing the problem as  Ax = b,
         where x is the set of coefficients we are looking for.
-        
+
         Npts is the number of points.
-        
+
         In the following i refers to the ith base function coefficient.
         The matrix has its entries j in its first Npts rows set to ::
 
             A[i][j] = (Fourier transformed base function for point j)
-            
+
         We them choose a number of r-points, n_r, to evaluate the second
         derivative of P(r) at. This is used as our regularization term.
         For a vector r of length n_r, the following n_r rows are set to ::
 
             A[i+Npts][j] = (2nd derivative of P(r), d**2(P(r))/d(r)**2,
             evaluated at r[j])
-            
+
         The vector b has its first Npts entries set to ::
 
             b[j] = (I(q) observed for point j)
-            
+
         The following n_r entries are set to zero.
-        
+
         The result is found by using scipy.linalg.basic.lstsq to invert
         the matrix and find the coefficients x.
-        
+
         :param nfunc: number of base functions to use.
         :param nr: number of r points to evaluate the 2nd derivative at for the reg. term.
 
@@ -430,16 +432,16 @@ class Invertor(Cinvertor):
         # Note: To make sure an array is contiguous:
         # blah = numpy.ascontiguousarray(blah_original)
         # ... before passing it to C
-        
+
         if self.is_valid() < 0:
             msg = "Invertor: invalid data; incompatible data lengths."
             raise RuntimeError, msg
-        
+
         self.nfunc = nfunc
         # a -- An M x N matrix.
         # b -- An M x nrhs matrix or M vector.
         npts = len(self.x)
-        nq   = nr
+        nq = nr
         sqrt_alpha = math.sqrt(math.fabs(self.alpha))
         if sqrt_alpha < 0.0:
             nq = 0
@@ -452,14 +454,14 @@ class Invertor(Cinvertor):
         a = numpy.zeros([npts + nq, nfunc])
         b = numpy.zeros(npts + nq)
         err = numpy.zeros([nfunc, nfunc])
-        
+
         # Construct the a matrix and b vector that represent the problem
         t_0 = time.time()
         try:
             self._get_matrix(nfunc, nq, a, b)
         except:
             raise RuntimeError, "Invertor: could not invert I(Q)\n  %s" % sys.exc_value
-             
+
         # Perform the inversion (least square fit)
         c, chi2, _, _ = lstsq(a, b)
         # Sanity check
@@ -468,28 +470,28 @@ class Invertor(Cinvertor):
         except:
             chi2 = -1.0
         self.chi2 = chi2
-                
+
         inv_cov = numpy.zeros([nfunc, nfunc])
         # Get the covariance matrix, defined as inv_cov = a_transposed * a
         self._get_invcov_matrix(nfunc, nr, a, inv_cov)
-                    
+
         # Compute the reg term size for the output
         sum_sig, sum_reg = self._get_reg_size(nfunc, nr, a)
-                    
+
         if math.fabs(self.alpha) > 0:
             new_alpha = sum_sig / (sum_reg / self.alpha)
         else:
             new_alpha = 0.0
         self.suggested_alpha = new_alpha
-        
+
         try:
             cov = numpy.linalg.pinv(inv_cov)
             err = math.fabs(chi2 / float(npts - nfunc)) * cov
         except:
             # We were not able to estimate the errors
             # Return an empty error matrix
-            pass
-            
+            logging.error(sys.exc_value)
+
         # Keep a copy of the last output
         if self.has_bck == False:
             self.background = 0
@@ -497,37 +499,37 @@ class Invertor(Cinvertor):
             self.cov = err
         else:
             self.background = c[0]
-            
+
             err_0 = numpy.zeros([nfunc, nfunc])
             c_0 = numpy.zeros(nfunc)
-            
+
             for i in range(nfunc_0):
-                c_0[i] = c[i+1]
+                c_0[i] = c[i + 1]
                 for j in range(nfunc_0):
-                    err_0[i][j] = err[i+1][j+1]
-                    
+                    err_0[i][j] = err[i + 1][j + 1]
+
             self.out = c_0
             self.cov = err_0
-            
+
         # Store computation time
         self.elapsed = time.time() - t_0
-        
+
         return self.out, self.cov
-        
+
     def estimate_numterms(self, isquit_func=None):
         """
         Returns a reasonable guess for the
         number of terms
-        
+
         :param isquit_func:
           reference to thread function to call to check whether the computation needs to
           be stopped.
-        
+
         :return: number of terms, alpha, message
-        
+
         """
-        from num_term import Num_terms
-        estimator = Num_terms(self.clone())
+        from num_term import NTermEstimator
+        estimator = NTermEstimator(self.clone())
         try:
             return estimator.num_terms(isquit_func)
         except:
@@ -535,16 +537,16 @@ class Invertor(Cinvertor):
             # number of terms
             best_alpha, _, _ = self.estimate_alpha(self.nfunc)
             return self.nfunc, best_alpha, "Could not estimate number of terms"
-                    
+
     def estimate_alpha(self, nfunc):
         """
         Returns a reasonable guess for the
         regularization constant alpha
-        
+
         :param nfunc: number of terms to use in the expansion.
-        
+
         :return: alpha, message, elapsed
-        
+
         where alpha is the estimate for alpha,
         message is a message for the user,
         elapsed is the computation time
@@ -552,26 +554,26 @@ class Invertor(Cinvertor):
         #import time
         try:
             pr = self.clone()
-            
+
             # T_0 for computation time
             starttime = time.time()
             elapsed = 0
-            
+
             # If the current alpha is zero, try
             # another value
             if pr.alpha <= 0:
                 pr.alpha = 0.0001
-                 
+
             # Perform inversion to find the largest alpha
             out, _ = pr.invert(nfunc)
             elapsed = time.time() - starttime
             initial_alpha = pr.alpha
             initial_peaks = pr.get_peaks(out)
-    
+
             # Try the inversion with the estimated alpha
             pr.alpha = pr.suggested_alpha
             out, _ = pr.invert(nfunc)
-    
+
             npeaks = pr.get_peaks(out)
             # if more than one peak to start with
             # just return the estimate
@@ -581,7 +583,7 @@ class Invertor(Cinvertor):
                 message = None
                 return pr.suggested_alpha, message, elapsed
             else:
-                
+
                 # Look at smaller values
                 # We assume that for the suggested alpha, we have 1 peak
                 # if not, send a message to change parameters
@@ -589,48 +591,48 @@ class Invertor(Cinvertor):
                 best_alpha = pr.suggested_alpha
                 found = False
                 for i in range(10):
-                    pr.alpha = (0.33)**(i+1) * alpha
+                    pr.alpha = (0.33) ** (i + 1) * alpha
                     out, _ = pr.invert(nfunc)
-                    
+
                     peaks = pr.get_peaks(out)
                     if peaks > 1:
                         found = True
                         break
                     best_alpha = pr.alpha
-                    
+
                 # If we didn't find a turning point for alpha and
                 # the initial alpha already had only one peak,
                 # just return that
                 if not found and initial_peaks == 1 and \
                     initial_alpha < best_alpha:
                     best_alpha = initial_alpha
-                    
+
                 # Check whether the size makes sense
                 message = ''
-                
+
                 if not found:
                     message = None
                 elif best_alpha >= 0.5 * pr.suggested_alpha:
                     # best alpha is too big, return a
                     # reasonable value
-                    message  = "The estimated alpha for your system is too "
+                    message = "The estimated alpha for your system is too "
                     message += "large. "
                     message += "Try increasing your maximum distance."
-                
+
                 return best_alpha, message, elapsed
-    
+
         except:
             message = "Invertor.estimate_alpha: %s" % sys.exc_value
             return 0, message, elapsed
-    
+
     def to_file(self, path, npts=100):
         """
         Save the state to a file that will be readable
         by SliceView.
-        
+
         :param path: path of the file to write
         :param npts: number of P(r) points to be written
-        
+
         """
         file = open(path, 'w')
         file.write("#d_max=%g\n" % self.d_max)
@@ -652,31 +654,31 @@ class Invertor(Cinvertor):
             if len(self.out) == len(self.cov):
                 for i in range(len(self.out)):
                     file.write("#C_%i=%s+-%s\n" % (i, str(self.out[i]),
-                                                    str(self.cov[i][i])))
+                                                   str(self.cov[i][i])))
         file.write("<r>  <Pr>  <dPr>\n")
-        r = numpy.arange(0.0, self.d_max, self.d_max/npts)
-        
+        r = numpy.arange(0.0, self.d_max, self.d_max / npts)
+
         for r_i in r:
             (value, err) = self.pr_err(self.out, self.cov, r_i)
             file.write("%g  %g  %g\n" % (r_i, value, err))
-    
+
         file.close()
-     
+
     def from_file(self, path):
         """
         Load the state of the Invertor from a file,
         to be able to generate P(r) from a set of
         parameters.
-        
+
         :param path: path of the file to load
-        
+
         """
         #import os
         #import re
         if os.path.isfile(path):
             try:
                 fd = open(path, 'r')
-                
+
                 buff = fd.read()
                 lines = buff.split('\n')
                 for line in lines:
@@ -727,7 +729,7 @@ class Invertor(Cinvertor):
                             self.has_bck = True
                         else:
                             self.has_bck = False
-            
+
                     # Now read in the parameters
                     elif line.startswith('#C_'):
                         toks = line.split('=')
@@ -736,9 +738,9 @@ class Invertor(Cinvertor):
                         toks2 = toks[1].split('+-')
                         i = int(m.group(1))
                         self.out[i] = float(toks2[0])
-                        
+
                         self.cov[i][i] = float(toks2[1])
-            
+
             except:
                 msg = "Invertor.from_file: corrupted file\n%s" % sys.exc_value
                 raise RuntimeError, msg

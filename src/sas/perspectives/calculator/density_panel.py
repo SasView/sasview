@@ -10,6 +10,7 @@ from sas.guiframe.utils import check_float
 from sas.guiframe.events import StatusEvent  
 from periodictable import formula as Formula
 from sas.perspectives.calculator import calculator_widgets as widget
+from sas.guiframe.documentation_window import DocumentationWindow
        
 AVOGADRO =  6.02214129e23
 _INPUTS = ['Mass Density', 'Molar Volume']
@@ -204,8 +205,15 @@ class DensityPanel(ScrolledPanel, PanelBase):
         self.button_calculate.SetToolTipString("Calculate.")
         self.Bind(wx.EVT_BUTTON, self.calculate, id=id)   
         
-        sizer_button.Add((250, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        id = wx.NewId()
+        self.button_help = wx.Button(self, id, "HELP")
+        self.button_help.SetToolTipString("Help for density calculator.")
+        self.Bind(wx.EVT_BUTTON, self.on_help, id=id)   
+        
+        sizer_button.Add((150, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         sizer_button.Add(self.button_calculate, 0, 
+                                        wx.RIGHT|wx.ADJUST_MINSIZE, 20)
+        sizer_button.Add(self.button_help, 0, 
                                         wx.RIGHT|wx.ADJUST_MINSIZE, 20)
         sizer3.Add(sizer_button)
         
@@ -351,6 +359,25 @@ class DensityPanel(ScrolledPanel, PanelBase):
         if event is not None:
             event.Skip()
             
+    def on_help(self, event):    
+        """
+        Bring up the density/volume calculator Documentation whenever
+        the HELP button is clicked. 
+        
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old 
+        versions of Wx (before 2.9) and thus not the release version of 
+        installers, the help comes up at the top level of the file as 
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+    
+    :param evt: Triggers on clicking the help button
+    """
+                
+        _TreeLocation = "user/perspectives/calculator/density_calculator_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, \
+             _TreeLocation,"Density/Volume Calculator Help")
+
     def clear_outputs(self):
         """
         Clear the outputs textctrl
@@ -376,7 +403,7 @@ class DensityWindow(widget.CHILD_FRAME):
     """
     def __init__(self, parent=None, title="Density/Volume Calculator",
                   base=None, manager=None, 
-                  size=(PANEL_SIZE, PANEL_SIZE/1.7), *args, **kwds):
+                  size=(PANEL_SIZE*1.05, PANEL_SIZE/1.55), *args, **kwds):
         """
         """
         kwds['title'] = title
@@ -387,7 +414,7 @@ class DensityWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = DensityPanel(self, base=base)
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.SetPosition((25, 160))
+        self.SetPosition((25, 10))
         self.Show(True)
     
     def on_close(self, event):

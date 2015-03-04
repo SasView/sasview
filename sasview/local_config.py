@@ -6,7 +6,6 @@ import os
 from sas.guiframe.gui_style import GUIFRAME
 import sas.sasview
 import logging
-from sas.guiframe.config import _do_acknowledge
 
 # Version of the application
 __appname__ = "SasView"

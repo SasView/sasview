@@ -23,14 +23,13 @@ def get_q(dx, dy, det_dist, wavelength):
     """
     :param dx: x-distance from beam center [mm]
     :param dy: y-distance from beam center [mm]
-    
     :return: q-value at the given position
     """
     # Distance from beam center in the plane of detector
-    plane_dist = math.sqrt(dx*dx + dy*dy)
+    plane_dist = math.sqrt(dx * dx + dy * dy)
     # Half of the scattering angle
-    theta = 0.5 * math.atan(plane_dist/det_dist)
-    return (4.0 * math.pi/wavelength) * math.sin(theta)
+    theta = 0.5 * math.atan(plane_dist / det_dist)
+    return (4.0 * math.pi / wavelength) * math.sin(theta)
 
 
 def get_q_compo(dx, dy, det_dist, wavelength, compo=None):
@@ -44,8 +43,8 @@ def get_q_compo(dx, dy, det_dist, wavelength, compo=None):
         else:
             angle_xy = math.pi
     else:
-        angle_xy = math.atan(dx/dy)
-        
+        angle_xy = math.atan(dx / dy)
+
     if compo == "x":
         out = get_q(dx, dy, det_dist, wavelength) * math.cos(angle_xy)
     elif compo == "y":
@@ -58,7 +57,7 @@ def get_q_compo(dx, dy, det_dist, wavelength, compo=None):
 def flip_phi(phi):
     """
     Correct phi to within the 0 <= to <= 2pi range
-    
+
     :return: phi in >=0 and <=2Pi
     """
     Pi = math.pi
@@ -75,17 +74,13 @@ def reader2D_converter(data2d=None):
     """
     convert old 2d format opened by IhorReader or danse_reader
     to new Data2D format
-    
+
     :param data2d: 2d array of Data2D object
-    
     :return: 1d arrays of Data2D object
-    
+
     """
     if data2d.data == None or data2d.x_bins == None or data2d.y_bins == None:
         raise ValueError, "Can't convert this data: data=None..."
-    
-    from sas.dataloader.data_info import Data2D
-
     new_x = numpy.tile(data2d.x_bins, (len(data2d.y_bins), 1))
     new_y = numpy.tile(data2d.y_bins, (len(data2d.x_bins), 1))
     new_y = new_y.swapaxes(0, 1)
@@ -93,7 +88,7 @@ def reader2D_converter(data2d=None):
     new_data = data2d.data.flatten()
     qx_data = new_x.flatten()
     qy_data = new_y.flatten()
-    q_data = numpy.sqrt(qx_data*qx_data + qy_data*qy_data)
+    q_data = numpy.sqrt(qx_data * qx_data + qy_data * qy_data)
     if data2d.err_data == None or numpy.any(data2d.err_data <= 0):
         new_err_data = numpy.sqrt(numpy.abs(new_data))
     else:
@@ -101,7 +96,8 @@ def reader2D_converter(data2d=None):
     mask = numpy.ones(len(new_data), dtype=bool)
 
     #TODO: make sense of the following two lines...
-    output = Data2D()
+    #from sas.dataloader.data_info import Data2D
+    #output = Data2D()
     output = data2d
     output.data = new_data
     output.err_data = new_err_data
@@ -132,33 +128,31 @@ class _Slab(object):
         # If True, I(|Q|) will be return, otherwise,
         # negative q-values are allowed
         self.fold = False
-        
+
     def __call__(self, data2D):
         return NotImplemented
-        
+
     def _avg(self, data2D, maj):
         """
         Compute average I(Q_maj) for a region of interest.
         The major axis is defined as the axis of Q_maj.
         The minor axis is the axis that we average over.
-         
+
         :param data2D: Data2D object
         :param maj_min: min value on the major axis
-        
         :return: Data1D object
         """
         if len(data2D.detector) != 1:
             msg = "_Slab._avg: invalid number of "
             msg += " detectors: %g" % len(data2D.detector)
             raise RuntimeError, msg
-        
+
         # Get data
         data = data2D.data[numpy.isfinite(data2D.data)]
-        q_data = data2D.q_data[numpy.isfinite(data2D.data)]
         err_data = data2D.err_data[numpy.isfinite(data2D.data)]
         qx_data = data2D.qx_data[numpy.isfinite(data2D.data)]
         qy_data = data2D.qy_data[numpy.isfinite(data2D.data)]
-             
+
         # Build array of Q intervals
         if maj == 'x':
             if self.fold:
@@ -166,17 +160,15 @@ class _Slab(object):
             else:
                 x_min = self.x_min
             nbins = int(math.ceil((self.x_max - x_min) / self.bin_width))
-            qbins = self.bin_width * numpy.arange(nbins) + x_min
         elif maj == 'y':
             if self.fold:
                 y_min = 0
             else:
                 y_min = self.y_min
-            nbins = int(math.ceil((self.y_max - y_min)/self.bin_width))
-            qbins = self.bin_width * numpy.arange(nbins) + y_min
+            nbins = int(math.ceil((self.y_max - y_min) / self.bin_width))
         else:
             raise RuntimeError, "_Slab._avg: unrecognized axis %s" % str(maj)
-                                
+
         x = numpy.zeros(nbins)
         y = numpy.zeros(nbins)
         err_y = numpy.zeros(nbins)
@@ -193,29 +185,30 @@ class _Slab(object):
             if self.y_min <= qy_data[npts] and self.y_max > qy_data[npts]:
                 frac_y = 1
             frac = frac_x * frac_y
-            
+
             if frac == 0:
                 continue
             # binning: find axis of q
             if maj == 'x':
                 q_value = qx_data[npts]
-                min = x_min
+                min_value = x_min
             if maj == 'y':
                 q_value = qy_data[npts]
-                min = y_min 
+                min_value = y_min
             if self.fold and q_value < 0:
                 q_value = -q_value
             # bin
-            i_q = int(math.ceil((q_value - min) / self.bin_width)) - 1
-            
+            i_q = int(math.ceil((q_value - min_value) / self.bin_width)) - 1
+
             # skip outside of max bins
             if i_q < 0 or i_q >= nbins:
                 continue
-            
+
             #TODO: find better definition of x[i_q] based on q_data
-            x[i_q] += frac * q_value  # min + (i_q + 1) * self.bin_width / 2.0
+            # min_value + (i_q + 1) * self.bin_width / 2.0
+            x[i_q] += frac * q_value
             y[i_q] += frac * data[npts]
-            
+
             if err_data == None or err_data[npts] == 0.0:
                 if data[npts] < 0:
                     data[npts] = -data[npts]
@@ -223,25 +216,22 @@ class _Slab(object):
             else:
                 err_y[i_q] += frac * frac * err_data[npts] * err_data[npts]
             y_counts[i_q] += frac
-                
+
         # Average the sums
         for n in range(nbins):
             err_y[n] = math.sqrt(err_y[n])
-          
+
         err_y = err_y / y_counts
         y = y / y_counts
         x = x / y_counts
         idx = (numpy.isfinite(y) & numpy.isfinite(x))
-        
-        if not idx.any(): 
+
+        if not idx.any():
             msg = "Average Error: No points inside ROI to average..."
             raise ValueError, msg
-        #elif len(y[idx])!= nbins:
-        #    msg = "empty bin(s) due to tight binning..."
-        #    print "resulted",nbins- len(y[idx]), msg
         return Data1D(x=x[idx], y=y[idx], dy=err_y[idx])
-        
-        
+
+
 class SlabY(_Slab):
     """
     Compute average I(Qy) for a region of interest
@@ -249,14 +239,13 @@ class SlabY(_Slab):
     def __call__(self, data2D):
         """
         Compute average I(Qy) for a region of interest
-         
+
         :param data2D: Data2D object
-        
         :return: Data1D object
         """
         return self._avg(data2D, 'y')
-        
-        
+
+
 class SlabX(_Slab):
     """
     Compute average I(Qx) for a region of interest
@@ -264,11 +253,8 @@ class SlabX(_Slab):
     def __call__(self, data2D):
         """
         Compute average I(Qx) for a region of interest
-         
         :param data2D: Data2D object
-        
         :return: Data1D object
-        
         """
         return self._avg(data2D, 'x')
 
@@ -290,31 +276,27 @@ class Boxsum(object):
     def __call__(self, data2D):
         """
         Perform the sum in the region of interest
-         
+
         :param data2D: Data2D object
-        
         :return: number of counts, error on number of counts,
             number of points summed
-        
         """
         y, err_y, y_counts = self._sum(data2D)
-        
+
         # Average the sums
         counts = 0 if y_counts == 0 else y
         error = 0 if y_counts == 0 else math.sqrt(err_y)
-        
+
         # Added y_counts to return, SMK & PDB, 04/03/2013
         return counts, error, y_counts
-        
+
     def _sum(self, data2D):
         """
         Perform the sum in the region of interest
-        
+
         :param data2D: Data2D object
-        
         :return: number of counts,
             error on number of counts, number of entries summed
-        
         """
         if len(data2D.detector) != 1:
             msg = "Circular averaging: invalid number "
@@ -322,11 +304,10 @@ class Boxsum(object):
             raise RuntimeError, msg
         # Get data
         data = data2D.data[numpy.isfinite(data2D.data)]
-        q_data = data2D.q_data[numpy.isfinite(data2D.data)]
         err_data = data2D.err_data[numpy.isfinite(data2D.data)]
         qx_data = data2D.qx_data[numpy.isfinite(data2D.data)]
         qy_data = data2D.qy_data[numpy.isfinite(data2D.data)]
-   
+
         y = 0.0
         err_y = 0.0
         y_counts = 0.0
@@ -336,11 +317,11 @@ class Boxsum(object):
             # default frac
             frac_x = 0
             frac_y = 0
-            
+
             # get min and max at each points
             qx = qx_data[npts]
             qy = qy_data[npts]
-            
+
             # get the ROI
             if self.x_min <= qx and self.x_max > qx:
                 frac_x = 1
@@ -367,42 +348,39 @@ class Boxavg(Boxsum):
     """
     def __init__(self, x_min=0.0, x_max=0.0, y_min=0.0, y_max=0.0):
         super(Boxavg, self).__init__(x_min=x_min, x_max=x_max,
-                                      y_min=y_min, y_max=y_max)
+                                     y_min=y_min, y_max=y_max)
 
     def __call__(self, data2D):
         """
         Perform the sum in the region of interest
-         
+
         :param data2D: Data2D object
-        
         :return: average counts, error on average counts
-        
+
         """
         y, err_y, y_counts = self._sum(data2D)
-        
+
         # Average the sums
         counts = 0 if y_counts == 0 else y / y_counts
         error = 0 if y_counts == 0 else math.sqrt(err_y) / y_counts
-        
+
         return counts, error
-        
-        
+
+
 def get_pixel_fraction_square(x, xmin, xmax):
     """
     Return the fraction of the length
     from xmin to x.::
-   
-     
+
            A            B
        +-----------+---------+
        xmin        x         xmax
-     
+
     :param x: x-value
     :param xmin: minimum x for the length considered
     :param xmax: minimum x for the length considered
-    
     :return: (x-xmin)/(xmax-xmin) when xmin < x < xmax
-    
+
     """
     if x <= xmin:
         return 0.0
@@ -415,7 +393,7 @@ def get_pixel_fraction_square(x, xmin, xmax):
 class CircularAverage(object):
     """
     Perform circular averaging on 2D data
-    
+
     The data returned is the distribution of counts
     as a function of Q
     """
@@ -430,20 +408,18 @@ class CircularAverage(object):
     def __call__(self, data2D, ismask=False):
         """
         Perform circular averaging on the data
-        
+
         :param data2D: Data2D object
-        
         :return: Data1D object
         """
         # Get data W/ finite values
         data = data2D.data[numpy.isfinite(data2D.data)]
         q_data = data2D.q_data[numpy.isfinite(data2D.data)]
-        qx_data = data2D.qx_data[numpy.isfinite(data2D.data)]
         err_data = data2D.err_data[numpy.isfinite(data2D.data)]
         mask_data = data2D.mask[numpy.isfinite(data2D.data)]
-        
+
         dq_data = None
-        
+
         # Get the dq for resolution averaging
         if data2D.dqx_data != None and data2D.dqy_data != None:
             # The pinholes and det. pix contribution present
@@ -483,7 +459,7 @@ class CircularAverage(object):
             dqy = dqy_data * dqy_data
             dq_data = numpy.add(dqx, dqy)
             dq_data = numpy.sqrt(dq_data)
-            
+
         #q_data_max = numpy.max(q_data)
         if len(data2D.q_data) == None:
             msg = "Circular averaging: invalid q_data: %g" % data2D.q_data
@@ -491,7 +467,6 @@ class CircularAverage(object):
 
         # Build array of Q intervals
         nbins = int(math.ceil((self.r_max - self.r_min) / self.bin_width))
-        qbins = self.bin_width * numpy.arange(nbins) + self.r_min
 
         x = numpy.zeros(nbins)
         y = numpy.zeros(nbins)
@@ -500,24 +475,24 @@ class CircularAverage(object):
         y_counts = numpy.zeros(nbins)
 
         for npt in range(len(data)):
-            
+
             if ismask and not mask_data[npt]:
                 continue
-            
+
             frac = 0
-            
+
             # q-value at the pixel (j,i)
             q_value = q_data[npt]
             data_n = data[npt]
-            
+
             ## No need to calculate the frac when all data are within range
             if self.r_min >= self.r_max:
                 raise ValueError, "Limit Error: min > max"
-            
+
             if self.r_min <= q_value and q_value <= self.r_max:
                 frac = 1
             if frac == 0:
-                continue 
+                continue
             i_q = int(math.floor((q_value - self.r_min) / self.bin_width))
 
             # Take care of the edge case at phi = 2pi.
@@ -541,7 +516,7 @@ class CircularAverage(object):
             else:
                 err_x = None
             y_counts[i_q] += frac
-        
+
         # Average the sums
         for n in range(nbins):
             if err_y[n] < 0:
@@ -549,13 +524,13 @@ class CircularAverage(object):
             err_y[n] = math.sqrt(err_y[n])
             #if err_x != None:
             #    err_x[n] = math.sqrt(err_x[n])
-            
+
         err_y = err_y / y_counts
         err_y[err_y == 0] = numpy.average(err_y)
         y = y / y_counts
         x = x / y_counts
         idx = (numpy.isfinite(y)) & (numpy.isfinite(x))
-        
+
         if err_x != None:
             d_x = err_x[idx] / y_counts[idx]
         else:
@@ -564,19 +539,19 @@ class CircularAverage(object):
         if not idx.any():
             msg = "Average Error: No points inside ROI to average..."
             raise ValueError, msg
-        
+
         return Data1D(x=x[idx], y=y[idx], dy=err_y[idx], dx=d_x)
-    
+
 
 class Ring(object):
     """
     Defines a ring on a 2D data set.
     The ring is defined by r_min, r_max, and
     the position of the center of the ring.
-    
+
     The data returned is the distribution of counts
     around the ring as a function of phi.
-    
+
     Phi_min and phi_max should be defined between 0 and 2*pi
     in anti-clockwise starting from the x- axis on the left-hand side
     """
@@ -593,37 +568,36 @@ class Ring(object):
         # Number of angular bins
         self.nbins_phi = nbins
 
-        
+
     def __call__(self, data2D):
         """
         Apply the ring to the data set.
         Returns the angular distribution for a given q range
-        
+
         :param data2D: Data2D object
-        
+
         :return: Data1D object
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
             raise RuntimeError, "Ring averaging only take plottable_2D objects"
-        
+
         Pi = math.pi
- 
+
         # Get data
         data = data2D.data[numpy.isfinite(data2D.data)]
         q_data = data2D.q_data[numpy.isfinite(data2D.data)]
         err_data = data2D.err_data[numpy.isfinite(data2D.data)]
         qx_data = data2D.qx_data[numpy.isfinite(data2D.data)]
         qy_data = data2D.qy_data[numpy.isfinite(data2D.data)]
-        
-        q_data_max = numpy.max(q_data)
-        
+
         # Set space for 1d outputs
-        phi_bins   = numpy.zeros(self.nbins_phi)
+        phi_bins = numpy.zeros(self.nbins_phi)
         phi_counts = numpy.zeros(self.nbins_phi)
         phi_values = numpy.zeros(self.nbins_phi)
-        phi_err    = numpy.zeros(self.nbins_phi)
-    
-        # Shift to apply to calculated phi values in order to center first bin at zero
+        phi_err = numpy.zeros(self.nbins_phi)
+
+        # Shift to apply to calculated phi values in order
+        # to center first bin at zero
         phi_shift = Pi / self.nbins_phi
 
         for npt in range(len(data)):
@@ -631,22 +605,23 @@ class Ring(object):
             # q-value at the point (npt)
             q_value = q_data[npt]
             data_n = data[npt]
-                        
+
             # phi-value at the point (npt)
             phi_value = math.atan2(qy_data[npt], qx_data[npt]) + Pi
-            
+
             if self.r_min <= q_value and q_value <= self.r_max:
                 frac = 1
             if frac == 0:
                 continue
-            # binning           
-            i_phi = int(math.floor((self.nbins_phi) * (phi_value+phi_shift) / (2 * Pi)))
-            
+            # binning
+            i_phi = int(math.floor((self.nbins_phi) * \
+                                   (phi_value + phi_shift) / (2 * Pi)))
+
             # Take care of the edge case at phi = 2pi.
             if i_phi >= self.nbins_phi:
-                i_phi =  0
+                i_phi = 0
             phi_bins[i_phi] += frac * data[npt]
-            
+
             if err_data == None or err_data[npt] == 0.0:
                 if data_n < 0:
                     data_n = -data_n
@@ -654,12 +629,12 @@ class Ring(object):
             else:
                 phi_err[i_phi] += frac * frac * err_data[npt] * err_data[npt]
             phi_counts[i_phi] += frac
-                          
+
         for i in range(self.nbins_phi):
             phi_bins[i] = phi_bins[i] / phi_counts[i]
             phi_err[i] = math.sqrt(phi_err[i]) / phi_counts[i]
             phi_values[i] = 2.0 * math.pi / self.nbins_phi * (1.0 * i)
-            
+
         idx = (numpy.isfinite(phi_bins))
 
         if not idx.any():
@@ -669,14 +644,14 @@ class Ring(object):
         #    print "resulted",self.nbins_phi- len(phi_bins[idx])
         #,"empty bin(s) due to tight binning..."
         return Data1D(x=phi_values[idx], y=phi_bins[idx], dy=phi_err[idx])
-    
-    
+
+
 def get_pixel_fraction(qmax, q_00, q_01, q_10, q_11):
     """
     Returns the fraction of the pixel defined by
     the four corners (q_00, q_01, q_10, q_11) that
     has q < qmax.::
-    
+
                 q_01                q_11
         y=1         +--------------+
                     |              |
@@ -684,23 +659,23 @@ def get_pixel_fraction(qmax, q_00, q_01, q_10, q_11):
                     |              |
         y=0         +--------------+
                 q_00                q_10
-        
+
                     x=0            x=1
-    
+
     """
     # y side for x = minx
     x_0 = get_intercept(qmax, q_00, q_01)
     # y side for x = maxx
     x_1 = get_intercept(qmax, q_10, q_11)
-    
+
     # x side for y = miny
     y_0 = get_intercept(qmax, q_00, q_10)
     # x side for y = maxy
     y_1 = get_intercept(qmax, q_01, q_11)
-    
+
     # surface fraction for a 1x1 pixel
     frac_max = 0
-    
+
     if x_0 and x_1:
         frac_max = (x_0 + x_1) / 2.0
     elif y_0 and y_1:
@@ -725,24 +700,23 @@ def get_pixel_fraction(qmax, q_00, q_01, q_10, q_11):
             frac_max = 1.0 - (1.0 - x_1) * (1.0 - y_1) / 2.0
         else:
             frac_max = (1.0 - x_1) * (1.0 - y_1) / 2.0
-            
+
     # If we make it here, there is no intercept between
     # this pixel and the constant-q ring. We only need
     # to know if we have to include it or exclude it.
-    elif (q_00 + q_01 + q_10 + q_11) / 4.0 <  qmax:
+    elif (q_00 + q_01 + q_10 + q_11) / 4.0 < qmax:
         frac_max = 1.0
 
     return frac_max
-             
-             
+
+
 def get_intercept(q, q_0, q_1):
     """
     Returns the fraction of the side at which the
     q-value intercept the pixel, None otherwise.
     The values returned is the fraction ON THE SIDE
     OF THE LOWEST Q. ::
-    
-    
+
             A           B
         +-----------+--------+    <--- pixel size
         0                    1
@@ -750,18 +724,18 @@ def get_intercept(q, q_0, q_1):
         if Q_1 > Q_0, A is returned
         if Q_1 < Q_0, B is returned
         if Q is outside the range of [Q_0, Q_1], None is returned
-         
+
     """
     if q_1 > q_0:
-        if (q > q_0 and q <= q_1):
+        if q > q_0 and q <= q_1:
             return (q - q_0) / (q_1 - q_0)
     else:
-        if (q > q_1 and q <= q_0):
+        if q > q_1 and q <= q_0:
             return (q - q_1) / (q_0 - q_1)
     return None
-     
-     
-class _Sector:
+
+
+class _Sector(object):
     """
     Defines a sector region on a 2D data set.
     The sector is defined by r_min, r_max, phi_min, phi_max,
@@ -769,24 +743,24 @@ class _Sector:
     where phi_min and phi_max are defined by the right
     and left lines wrt central line
     and phi_max could be less than phi_min.
-   
+
     Phi is defined between 0 and 2*pi in anti-clockwise
     starting from the x- axis on the left-hand side
     """
-    def __init__(self, r_min, r_max, phi_min=0, phi_max=2*math.pi, nbins=20):
+    def __init__(self, r_min, r_max, phi_min=0, phi_max=2 * math.pi, nbins=20):
         self.r_min = r_min
         self.r_max = r_max
         self.phi_min = phi_min
         self.phi_max = phi_max
         self.nbins = nbins
-        
+
     def _agv(self, data2D, run='phi'):
         """
         Perform sector averaging.
-        
+
         :param data2D: Data2D object
         :param run:  define the varying parameter ('phi' , 'q' , or 'q2')
-        
+
         :return: Data1D object
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
@@ -800,7 +774,7 @@ class _Sector:
         qx_data = data2D.qx_data[numpy.isfinite(data2D.data)]
         qy_data = data2D.qy_data[numpy.isfinite(data2D.data)]
         dq_data = None
-            
+
         # Get the dq for resolution averaging
         if data2D.dqx_data != None and data2D.dqy_data != None:
             # The pinholes and det. pix contribution present
@@ -839,33 +813,31 @@ class _Sector:
             dqy = dqy_data * dqy_data
             dq_data = numpy.add(dqx, dqy)
             dq_data = numpy.sqrt(dq_data)
-            
+
         #set space for 1d outputs
-        x        = numpy.zeros(self.nbins)
-        y        = numpy.zeros(self.nbins)
-        y_err    = numpy.zeros(self.nbins)
-        x_err    = numpy.zeros(self.nbins)
+        x = numpy.zeros(self.nbins)
+        y = numpy.zeros(self.nbins)
+        y_err = numpy.zeros(self.nbins)
+        x_err = numpy.zeros(self.nbins)
         y_counts = numpy.zeros(self.nbins)
-                      
+
         # Get the min and max into the region: 0 <= phi < 2Pi
         phi_min = flip_phi(self.phi_min)
         phi_max = flip_phi(self.phi_max)
-        
-        q_data_max = numpy.max(q_data)
-                      
+
         for n in range(len(data)):
             frac = 0
-            
+
             # q-value at the pixel (j,i)
             q_value = q_data[n]
             data_n = data[n]
-            
+
             # Is pixel within range?
             is_in = False
-            
+
             # phi-value of the pixel (j,i)
             phi_value = math.atan2(qy_data[n], qx_data[n]) + Pi
-            
+
             ## No need to calculate the frac when all data are within range
             if self.r_min <= q_value and q_value <= self.r_max:
                 frac = 1
@@ -893,7 +865,7 @@ class _Sector:
             else:
                 is_in = is_in or (phi_value >= phi_min  and \
                                     phi_value < phi_max)
-            
+
             if not is_in:
                 frac = 0
             if frac == 0:
@@ -911,7 +883,7 @@ class _Sector:
             # Take care of the edge case at phi = 2pi.
             if i_bin == self.nbins:
                 i_bin = self.nbins - 1
-                
+
             ## Get the total y
             y[i_bin] += frac * data_n
             x[i_bin] += frac * q_value
@@ -921,7 +893,7 @@ class _Sector:
                 y_err[i_bin] += frac * frac * data_n
             else:
                 y_err[i_bin] += frac * frac * err_data[n] * err_data[n]
-                
+
             if dq_data != None:
                 # To be consistent with dq calculation in 1d reduction,
                 # we need just the averages (not quadratures) because
@@ -931,7 +903,7 @@ class _Sector:
             else:
                 x_err = None
             y_counts[i_bin] += frac
-   
+
         # Organize the results
         for i in range(self.nbins):
             y[i] = y[i] / y_counts[i]
@@ -963,31 +935,31 @@ class _Sector:
         #    print "resulted",self.nbins- len(y[idx]),
         #"empty bin(s) due to tight binning..."
         return Data1D(x=x[idx], y=y[idx], dy=y_err[idx], dx=d_x)
-                
-                
+
+
 class SectorPhi(_Sector):
     """
     Sector average as a function of phi.
     I(phi) is return and the data is averaged over Q.
-    
+
     A sector is defined by r_min, r_max, phi_min, phi_max.
     The number of bin in phi also has to be defined.
     """
     def __call__(self, data2D):
         """
         Perform sector average and return I(phi).
-        
+
         :param data2D: Data2D object
         :return: Data1D object
         """
         return self._agv(data2D, 'phi')
-    
-    
+
+
 class SectorQ(_Sector):
     """
     Sector average as a function of Q for both symatric wings.
     I(Q) is return and the data is averaged over phi.
-    
+
     A sector is defined by r_min, r_max, phi_min, phi_max.
     r_min, r_max, phi_min, phi_max >0.
     The number of bin in Q also has to be defined.
@@ -995,9 +967,9 @@ class SectorQ(_Sector):
     def __call__(self, data2D):
         """
         Perform sector average and return I(Q).
-        
+
         :param data2D: Data2D object
-        
+
         :return: Data1D object
         """
         return self._agv(data2D, 'q2')
@@ -1008,9 +980,9 @@ class Ringcut(object):
     Defines a ring on a 2D data set.
     The ring is defined by r_min, r_max, and
     the position of the center of the ring.
-    
+
     The data returned is the region inside the ring
-    
+
     Phi_min and phi_max should be defined between 0 and 2*pi
     in anti-clockwise starting from the x- axis on the left-hand side
     """
@@ -1028,9 +1000,9 @@ class Ringcut(object):
         """
         Apply the ring to the data set.
         Returns the angular distribution for a given q range
-        
+
         :param data2D: Data2D object
-        
+
         :return: index array in the range
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
@@ -1039,14 +1011,12 @@ class Ringcut(object):
         # Get data
         qx_data = data2D.qx_data
         qy_data = data2D.qy_data
-        mask = data2D.mask
         q_data = numpy.sqrt(qx_data * qx_data + qy_data * qy_data)
 
         # check whether or not the data point is inside ROI
         out = (self.r_min <= q_data) & (self.r_max >= q_data)
+        return out
 
-        return (out)
-        
 
 class Boxcut(object):
     """
@@ -1065,21 +1035,21 @@ class Boxcut(object):
     def __call__(self, data2D):
         """
        Find a rectangular 2D region of interest.
-         
+
        :param data2D: Data2D object
        :return: mask, 1d array (len = len(data))
            with Trues where the data points are inside ROI, otherwise False
         """
         mask = self._find(data2D)
-        
+
         return mask
-        
+
     def _find(self, data2D):
         """
         Find a rectangular 2D region of interest.
-        
+
         :param data2D: Data2D object
-        
+
         :return: out, 1d array (length = len(data))
            with Trues where the data points are inside ROI, otherwise Falses
         """
@@ -1088,13 +1058,12 @@ class Boxcut(object):
         # Get qx_ and qy_data
         qx_data = data2D.qx_data
         qy_data = data2D.qy_data
-        mask = data2D.mask
-        
+
         # check whether or not the data point is inside ROI
         outx = (self.x_min <= qx_data) & (self.x_max > qx_data)
         outy = (self.y_min <= qy_data) & (self.y_max > qy_data)
 
-        return (outx & outy)
+        return outx & outy
 
 
 class Sectorcut(object):
@@ -1103,49 +1072,48 @@ class Sectorcut(object):
     The sector is defined by phi_min, phi_max,
     where phi_min and phi_max are defined by the right
     and left lines wrt central line.
-   
+
     Phi_min and phi_max are given in units of radian
     and (phi_max-phi_min) should not be larger than pi
     """
     def __init__(self, phi_min=0, phi_max=math.pi):
         self.phi_min = phi_min
         self.phi_max = phi_max
-              
+
     def __call__(self, data2D):
         """
         Find a rectangular 2D region of interest.
-        
+
         :param data2D: Data2D object
-        
+
         :return: mask, 1d array (len = len(data))
-        
+
         with Trues where the data points are inside ROI, otherwise False
         """
         mask = self._find(data2D)
-        
+
         return mask
-        
+
     def _find(self, data2D):
         """
         Find a rectangular 2D region of interest.
-        
+
         :param data2D: Data2D object
-        
+
         :return: out, 1d array (length = len(data))
-        
+
         with Trues where the data points are inside ROI, otherwise Falses
         """
         if data2D.__class__.__name__ not in ["Data2D", "plottable_2D"]:
             raise RuntimeError, "Sectorcut take only plottable_2D objects"
         Pi = math.pi
-        # Get data 
+        # Get data
         qx_data = data2D.qx_data
         qy_data = data2D.qy_data
-        phi_data = numpy.zeros(len(qx_data))
 
         # get phi from data
         phi_data = numpy.arctan2(qy_data, qx_data)
-        
+
         # Get the min and max into the region: -pi <= phi < Pi
         phi_min_major = flip_phi(self.phi_min + Pi) - Pi
         phi_max_major = flip_phi(self.phi_max + Pi) - Pi
@@ -1154,12 +1122,12 @@ class Sectorcut(object):
             out_major = (phi_min_major <= phi_data) + (phi_max_major > phi_data)
         else:
             out_major = (phi_min_major <= phi_data) & (phi_max_major > phi_data)
-          
+
         # minor sector
         # Get the min and max into the region: -pi <= phi < Pi
         phi_min_minor = flip_phi(self.phi_min) - Pi
         phi_max_minor = flip_phi(self.phi_max) - Pi
-              
+
         # check for minor sector
         if phi_min_minor > phi_max_minor:
             out_minor = (phi_min_minor <= phi_data) + \
@@ -1168,5 +1136,5 @@ class Sectorcut(object):
             out_minor = (phi_min_minor <= phi_data) & \
                             (phi_max_minor >= phi_data)
         out = out_major + out_minor
-        
+
         return out

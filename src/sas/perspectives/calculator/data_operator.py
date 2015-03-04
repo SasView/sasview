@@ -11,7 +11,9 @@ from sas.plottools.plottables import Graph
 from sas.plottools import transform
 from matplotlib.font_manager import FontProperties
 from sas.guiframe.events import StatusEvent 
-from sas.perspectives.calculator import calculator_widgets as widget   
+from sas.perspectives.calculator import calculator_widgets as widget
+from sas.guiframe.documentation_window import DocumentationWindow
+   
 #Control panel width 
 if sys.platform.count("win32") > 0:
     PANEL_WIDTH = 790
@@ -429,12 +431,18 @@ class DataOperPanel(wx.ScrolledWindow):
         self.bt_apply.SetToolTipString(app_tip)
         self.bt_apply.Bind(wx.EVT_BUTTON, self.on_click_apply)
         
+        self.bt_help = wx.Button(self, -1, "HELP")
+        app_tip = "Get help on Data Operations."
+        self.bt_help.SetToolTipString(app_tip)
+        self.bt_help.Bind(wx.EVT_BUTTON, self.on_help)
+        
         self.bt_close = wx.Button(self, -1, 'Close', size=(_BOX_WIDTH/2, -1))
         self.bt_close.Bind(wx.EVT_BUTTON, self.on_close)
         self.bt_close.SetToolTipString("Close this panel.")
         
         self.button_sizer.AddMany([(PANEL_WIDTH/2, 25),
                                    (self.bt_apply, 0, wx.RIGHT, 10),
+                                   (self.bt_help, 0, wx.RIGHT, 10),
                                    (self.bt_close, 0, wx.RIGHT, 10)])
         
     def _do_layout(self):
@@ -608,6 +616,25 @@ class DataOperPanel(wx.ScrolledWindow):
         #must post event here
         event.Skip()
     
+    def on_help(self, event):    
+        """
+        Bring up the Data Operations Panel Documentation whenever
+        the HELP button is clicked. 
+        
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old 
+        versions of Wx (before 2.9) and thus not the release version of 
+        installers, the help comes up at the top level of the file as 
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+    
+    :param evt: Triggers on clicking the help button
+    """
+                
+        _TreeLocation = "user/perspectives/calculator/data_operator_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, \
+             _TreeLocation,"Data Operation Help")
+
     def disconnect_panels(self):
         """
         """
@@ -935,7 +962,7 @@ class DataOperatorWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = DataOperPanel(parent=self)
         wx.EVT_CLOSE(self, self.OnClose)
-        self.SetPosition((25, 150))
+        self.SetPosition((25, 10))
         self.Show()
     
     def OnClose(self, event=None):  

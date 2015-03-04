@@ -9,6 +9,7 @@
 #copyright 2009, University of Tennessee
 ################################################################################
 import os
+import sys
 import logging
 from shutil import copy
 logging.basicConfig(level=logging.INFO,
@@ -16,7 +17,29 @@ logging.basicConfig(level=logging.INFO,
                     filename=os.path.join(os.path.expanduser("~"),
                                           'sasview.log'))
 
-# Allow the dynamic selection of wxPython via an evironment variable, when devs
+class StreamToLogger(object):
+    """
+        File-like stream object that redirects writes to a logger instance.
+    """
+    def __init__(self, logger, log_level=logging.INFO):
+        self.logger = logger
+        self.log_level = log_level
+        self.linebuf = ''
+ 
+    def write(self, buf):
+        # Write the message to stdout so we can see it when running interactively
+        sys.stdout.write(buf)
+        for line in buf.rstrip().splitlines():
+            self.logger.log(self.log_level, line.rstrip())
+
+stderr_logger = logging.getLogger('STDERR')
+sl = StreamToLogger(stderr_logger, logging.ERROR)
+sys.stderr = sl
+
+# Log the python version
+logging.info("Python: %s" % sys.version)
+
+# Allow the dynamic selection of wxPython via an environment variable, when devs
 # who have multiple versions of the module installed want to pick between them.
 # This variable does not have to be set of course, and through normal usage will
 # probably not be, but this can make things a little easier when upgrading to a
@@ -34,7 +57,11 @@ else:
     logging.info("You have not set the %s environment variable, so using default version of wxPython." % WX_ENV_VAR)
 
 import wx
-import sys
+try:
+    logging.info("Wx version: %s" % wx.__version__)
+except:
+    logging.error("Wx version: error reading version")
+    
 # The below will make sure that sasview application uses the matplotlib font 
 # bundled with sasview. 
 if hasattr(sys, 'frozen'):
@@ -42,8 +69,7 @@ if hasattr(sys, 'frozen'):
     if not os.path.exists(mplconfigdir):
         os.mkdir(mplconfigdir)
     os.environ['MPLCONFIGDIR'] = mplconfigdir
-    if sys.version_info < (2, 7):
-        reload(sys)
+    reload(sys)
     sys.setdefaultencoding("iso-8859-1")
 from sas.guiframe import gui_manager
 from sas.guiframe.gui_style import GUIFRAME

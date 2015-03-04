@@ -36,6 +36,7 @@ from sas.perspectives.calculator.load_thread import GenReader
 from sas.plottools.arrow3d import Arrow3D
 from sas.perspectives.calculator import calculator_widgets as widget
 from sas.guiframe.events import NewPlotEvent    
+from sas.guiframe.documentation_window import DocumentationWindow
 
 _BOX_WIDTH = 76
 #Slit length panel size 
@@ -79,6 +80,8 @@ def _set_error(panel, item, show_msg=False):
             panel.SetFocus()
     return False
 
+
+
 class CalcGen(CalcThread):
     """
     Computation
@@ -118,8 +121,6 @@ class SasGenPanel(ScrolledPanel, PanelBase):
     window_name = "Generic SAS Calculator"
     ## Name to appear on the window title bar
     window_caption = "Generic SAS "
-    ## Flag to tell the AUI manager to put this panel in the center pane
-    CENTER_PANE = True
     
     def __init__(self, parent, *args, **kwds):
         ScrolledPanel.__init__(self, parent, style=wx.RAISED_BORDER, 
@@ -191,8 +192,8 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         #control that triggers importing data
         id = wx.NewId()
         self.browse_button = wx.Button(self, id, "Load")
-        hint_on_browse = "Click on this button to load a data in this panel."
-        #self.browse_button.SetToolTipString(hint_on_browse)
+        hint_on_browse = "Click to load data into this panel."
+        self.browse_button.SetToolTipString(hint_on_browse)
         self.Bind(wx.EVT_BUTTON, self.on_load_data, id=id)
         self.data_name_sizer.AddMany([(data_name_txt, 0, wx.LEFT, 15),
                                       (self.data_name_tcl, 0, wx.LEFT, 10),
@@ -378,9 +379,13 @@ class SasGenPanel(ScrolledPanel, PanelBase):
         self.bt_compute = wx.Button(self, wx.NewId(),'Compute')
         self.bt_compute.Bind(wx.EVT_BUTTON, self.on_compute)
         self.bt_compute.SetToolTipString("Compute 2D Scattering Pattern.")
+        self.bt_help = wx.Button(self, wx.NewId(),'HELP')
+        self.bt_help.Bind(wx.EVT_BUTTON, self.on_help)
+        self.bt_help.SetToolTipString("Help on Scatter Calculator")
         self.button_sizer.AddMany([(self.time_text , 0, wx.LEFT, 20),
-                                   (self.orient_combo , 0, wx.LEFT, 40),
-                                   (self.bt_compute, 0, wx.LEFT, 20)])
+                                   (self.orient_combo , 0, wx.LEFT, 20),
+                                   (self.bt_compute, 0, wx.LEFT, 20),
+                                   (self.bt_help, 0, wx.LEFT, 5)])
         
     def estimate_ctime(self):
         """
@@ -882,6 +887,25 @@ class SasGenPanel(ScrolledPanel, PanelBase):
                         StatusEvent(status=msg, info='Error'))
             self.SetFocus()
 
+    def on_help(self, event):    
+        """
+        Bring up the General scattering Calculator Documentation whenever
+        the HELP button is clicked. 
+        
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old 
+        versions of Wx (before 2.9) and thus not the release version of 
+        installers, the help comes up at the top level of the file as 
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+    
+    :param evt: Triggers on clicking the help button
+    """
+                
+        _TreeLocation = "user/perspectives/calculator/sas_calculator_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, \
+             _TreeLocation,"General Scattering Calculator Help")
+
     def _check_value(self):
         """
         Check input values if float
@@ -1197,8 +1221,6 @@ class OmfPanel(ScrolledPanel, PanelBase):
     window_name = "SLD Pixel Info"
     ## Name to appear on the window title bar
     window_caption = "SLD Pixel Info "
-    ## Flag to tell the AUI manager to put this panel in the center pane
-    CENTER_PANE = False
     
     def __init__(self, parent, *args, **kwds):
         ScrolledPanel.__init__(self, parent, style=wx.RAISED_BORDER, 
@@ -1526,7 +1548,8 @@ class OmfPanel(ScrolledPanel, PanelBase):
         
     def _do_layout(self):
         """
-        Draw window content
+        Draw omf panel content, used to define sld s.
+        
         """
         self._define_structure()
         self._layout_nodes()
@@ -1797,7 +1820,7 @@ class SasGenWindow(widget.CHILD_FRAME):
     GEN SAS main window
     """
     def __init__(self, parent=None, manager= None, title="Generic Scattering Calculator",
-                size=(PANEL_WIDTH * 1.3, PANEL_HEIGHT * 1.65), *args, **kwds):
+                size=(PANEL_WIDTH * 1.4, PANEL_HEIGHT * 1.65), *args, **kwds):
         """
         Init
         """
@@ -1819,111 +1842,16 @@ class SasGenWindow(widget.CHILD_FRAME):
         self.scale2d = 'log_{10}'
         self.Bind(wx.EVT_CLOSE, self.on_close)
         
-        self._build_toolbar()
         
         self.build_panels()
-        self.SetPosition((25, 150))
+        self.SetPosition((20, 5))
         self.Show(True)
-    
-    def _build_toolbar(self):
-        """
-        Build toolbar
-        """
-        tsize = (20, 20)
-        # The legacy code doesn't work well for wx 3.0
-        # but the old code produces better results with wx 2.8
-        if wx.VERSION_STRING >= '3.0.0.0':
-            tb = wx.ToolBar(self, style=wx.TB_HORIZONTAL | wx.TB_FLAT)
-            sizer = wx.BoxSizer(wx.VERTICAL)
-            sizer.Add(tb, 0, wx.EXPAND)
-            self.SetSizer(sizer)
-        else:
-            tb = self.CreateToolBar(wx.TB_HORIZONTAL | wx.TB_FLAT)
-        open_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR, 
-                                            tsize)
-        save_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_TOOLBAR,
-                                            tsize)
-        close_bmp = wx.ArtProvider.GetBitmap(wx.ART_QUIT, wx.ART_TOOLBAR, 
-                                            tsize)
-        help_bmp = wx.ArtProvider.GetBitmap(wx.ART_HELP, wx.ART_TOOLBAR, 
-                                           (17, 20))
-        
-        id = wx.NewId()
-        tb.AddLabelTool(id, "Open", open_bmp, shortHelp="Open", 
-                        longHelp="Open sld/omf file")
-        self.Bind(wx.EVT_TOOL, self.on_open_file, id=id)
-
-        id = wx.NewId()
-        tb.AddSimpleTool(id, save_bmp, "Save", "Save as sld file")
-        self.Bind(wx.EVT_TOOL, self.on_save_file, id=id)
-        
-        tb.AddSeparator()
-        id = wx.NewId()
-        tb.AddSimpleTool(id, close_bmp, "Quit", "Quit")
-        self.Bind(wx.EVT_TOOL, self.on_close, id=id)
-        
-        tb.AddSeparator()
-        id = wx.NewId()
-        tb.AddSimpleTool(id, help_bmp, "Help", "Help")
-        self.Bind(wx.EVT_TOOL, self.on_help, id=id)
-
-        tb.Realize()
-        
-    def _build_menubar(self):
-        """
-        Build menubar
-        """
-        tsize = (13, 13)
-        open_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, wx.ART_TOOLBAR, 
-                                            tsize)
-        save_bmp = wx.ArtProvider.GetBitmap(wx.ART_FILE_SAVE_AS, wx.ART_TOOLBAR,
-                                            tsize)
-        quit_bmp = wx.ArtProvider.GetBitmap(wx.ART_QUIT, wx.ART_TOOLBAR, 
-                                           tsize)
-        help_bmp = wx.ArtProvider.GetBitmap(wx.ART_HELP, wx.ART_TOOLBAR, 
-                                           (13, 15))
-        
-        menu_bar = wx.MenuBar()
-        
-        menu = wx.Menu()
-        id = wx.NewId()
-        item = wx.MenuItem(menu, id, "&Open sld/omf file")
-        item.SetBitmap(open_bmp)
-        menu.AppendItem(item)
-        wx.EVT_MENU(self, id, self.on_open_file)
-        
-        id = wx.NewId()
-        item = wx.MenuItem(menu, id, "&Save as sld file")
-        item.SetBitmap(save_bmp)
-        menu.AppendItem(item)
-        wx.EVT_MENU(self, id, self.on_save_file)
-        
-        menu.AppendSeparator()
-        id = wx.NewId()
-        item = wx.MenuItem(menu, id, "&Quit")
-        item.SetBitmap(quit_bmp)
-        menu.AppendItem(item)
-
-        menu_bar.Append(menu, "&File")
-        wx.EVT_MENU(self, id, self.on_close)
-        
-        menu_help = wx.Menu()
-        id = wx.NewId()
-        item = wx.MenuItem(menu_help, id, "&Theory and GUI")
-        item.SetBitmap(help_bmp)
-        menu_help.AppendItem(item)
-        wx.EVT_MENU(self, id, self.on_help)
-        
-        menu_bar.Append(menu_help, "&Help")
-        
-        self.SetMenuBar(menu_bar)
         
     def build_panels(self):
         """
         """
         
         self.set_sld_data(self.sld_data)
-        
         self._mgr.AddPane(self.panel, aui.AuiPaneInfo().
                               Name(self.panel.window_name).
                               CenterPane().
@@ -2107,31 +2035,31 @@ class SasGenWindow(widget.CHILD_FRAME):
             self.base.gen_frame = None
         self.Destroy()
         
-    def on_help(self, event):    
-        """
-        Gen scatter angle help panel
-        """
-        from sas.perspectives.calculator.help_panel import  HelpWindow
-        # Get models help model_function path
-        import sas.perspectives.calculator as calmedia
-
-        media = calmedia.get_data_path(media='media')
-        path = os.path.join(media,"gen_sas_help.html") 
-        name = "Generic Scattering Calculator"
-        frame = HelpWindow(self, -1, 
-                           title=' Help: GenSAS',  
-                           pageToOpen=path, size=(865, 450))   
-        try: 
-            frame.splitter.DetachWindow(frame.lpanel)
-            # Display only the right side one
-            frame.lpanel.Hide() 
-            frame.Show(True)
-            add_icon(self.parent, frame)
-        except:
-            frame.Destroy() 
-            msg = 'Display Error\n'
-            info = "Info"
-            wx.MessageBox(msg, info)
+#    def on_help(self, event):    
+#        """
+#       Gen scatter angle help panel
+#        """
+#        from sas.perspectives.calculator.help_panel import  HelpWindow
+#        # Get models help model_function path
+#        import sas.perspectives.calculator as calmedia
+#
+#        media = calmedia.get_data_path(media='media')
+#        path = os.path.join(media,"gen_sas_help.html") 
+#        name = "Generic Scattering Calculator"
+#        frame = HelpWindow(self, -1, 
+#                           title=' Help: GenSAS',  
+#                           pageToOpen=path, size=(865, 450))   
+#        try: 
+#            frame.splitter.DetachWindow(frame.lpanel)
+#            # Display only the right side one
+#            frame.lpanel.Hide() 
+#            frame.Show(True)
+#            add_icon(self.parent, frame)
+#        except:
+#            frame.Destroy() 
+#            msg = 'Display Error\n'
+#            info = "Info"
+#            wx.MessageBox(msg, info)
            
 if __name__ == "__main__": 
     app = wx.PySimpleApp()

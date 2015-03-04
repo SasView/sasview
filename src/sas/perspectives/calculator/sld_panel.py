@@ -20,6 +20,7 @@ from periodictable.xsf import xray_energy
 from periodictable.xsf import xray_sld_from_atoms
 from periodictable.nsf import neutron_scattering
 from sas.perspectives.calculator import calculator_widgets as widget   
+from sas.guiframe.documentation_window import DocumentationWindow
        
 WAVELENGTH = 6.0
 _BOX_WIDTH = 76
@@ -283,8 +284,14 @@ class SldPanel(wx.Panel, PanelBase):
         self.button_calculate.SetToolTipString("Calculate SLD.")
         self.Bind(wx.EVT_BUTTON, self.calculateSld, id=id)   
         
-        sizer_button.Add((250, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        id = wx.NewId()
+        self.button_help = wx.Button(self, id, "HELP")
+        self.button_help.SetToolTipString("help on SLD calculator.")
+        self.Bind(wx.EVT_BUTTON, self.on_help, id=id)   
+        
+        sizer_button.Add((150, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
         sizer_button.Add(self.button_calculate, 0, wx.RIGHT|wx.ADJUST_MINSIZE, 20)
+        sizer_button.Add(self.button_help, 0, wx.RIGHT|wx.ADJUST_MINSIZE, 20)
         sizer3.Add(sizer_button)
         #---------layout----------------
         vbox  = wx.BoxSizer(wx.VERTICAL)
@@ -294,6 +301,25 @@ class SldPanel(wx.Panel, PanelBase):
         vbox.Fit(self) 
         self.SetSizer(vbox)
         
+    def on_help(self, event):    
+        """
+        Bring up the SLD Documentation whenever
+        the HELP button is clicked. 
+        
+        Calls DocumentationWindow with the path of the location within the
+        documentation tree (after /doc/ ....".  Note that when using old 
+        versions of Wx (before 2.9) and thus not the release version of 
+        installers, the help comes up at the top level of the file as 
+        webbrowser does not pass anything past the # to the browser when it is
+        running "file:///...."
+    
+    :param evt: Triggers on clicking the help button
+    """
+                
+        _TreeLocation = "user/perspectives/calculator/sld_calculator_help.html"
+        _doc_viewer = DocumentationWindow(self, -1, \
+             _TreeLocation,"General Scattering Calculator Help")
+
     def calculate_xray_sld(self, element):
         """
         Get an element and compute the corresponding SLD for a given formula
@@ -455,7 +481,7 @@ class SldWindow(widget.CHILD_FRAME):
         self.manager = manager
         self.panel = SldPanel(self, base=base)
         self.Bind(wx.EVT_CLOSE, self.on_close)
-        self.SetPosition((25, 150))
+        self.SetPosition((20, 10))
         self.Show(True)
     
     def on_close(self, event):
