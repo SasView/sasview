@@ -2,6 +2,8 @@
 """
 Module to perform P(r) inversion.
 The module contains the Invertor class.
+
+FIXME: The way the Invertor interacts with its C component should be cleaned up
 """
 
 import numpy
@@ -109,8 +111,6 @@ class Invertor(Cinvertor):
 
     def __init__(self):
         Cinvertor.__init__(self)
-        self.d_max = 200.0
-        self.has_bck = False
 
     def __setstate__(self, state):
         """
