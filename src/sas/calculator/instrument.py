@@ -84,9 +84,9 @@ class Sample(object):
         Set the sample size
         """
         if len(size) == 0:
-            self.sample_size = 0.0
+            self.size = 0.0
         else:
-            self.sample_size = size
+            self.size = size
             validate(size[0])
 
     def set_thickness(self, thickness=0.0):

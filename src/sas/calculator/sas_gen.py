@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 """
 SAS generic computation and sld file readers
 """
@@ -8,6 +9,8 @@ from periodictable import nsf
 import numpy
 import os
 import copy
+import sys
+import logging
 
 MFACTOR_AM = 2.853E-12
 MFACTOR_MT = 2.3164E-9
@@ -284,7 +287,7 @@ class OMF2SLD(object):
                 z_dir2 *= z_dir2
                 mask = (x_dir2 + y_dir2 + z_dir2) <= 1.0
             except:
-                pass
+                logging.error(sys.exc_value)
         self.output = MagSLD(self.pos_x[mask], self.pos_y[mask],
                              self.pos_z[mask], self.sld_n[mask],
                              self.mx[mask], self.my[mask], self.mz[mask])
@@ -393,7 +396,7 @@ class OMFReader(object):
                     mz = numpy.append(mz, _mz)
                 except:
                     # Skip non-data lines
-                    pass
+                    logging.error(sys.exc_value)
                 #Reading Header; Segment count ignored
                 s_line = line.split(":", 1)
                 if s_line[0].lower().count("oommf") > 0:
@@ -588,7 +591,7 @@ class PDBReader(object):
                         y_lines.append(y_line)
                         z_lines.append(z_line)
                 except:
-                    pass
+                    logging.error(sys.exc_value)
 
             output = MagSLD(pos_x, pos_y, pos_z, sld_n, sld_mx, sld_my, sld_mz)
             output.set_conect_lines(x_line, y_line, z_line)
@@ -682,7 +685,7 @@ class SLDReader(object):
                             vol_pix = None
                     except:
                         # Skip non-data lines
-                        pass
+                        logging.error(sys.exc_value)
             output = MagSLD(pos_x, pos_y, pos_z, sld_n,
                             sld_mx, sld_my, sld_mz)
             output.filename = os.path.basename(path)
@@ -1036,6 +1039,9 @@ class MagSLD(object):
         self.line_z = line_z
 
 def test_load():
+    """
+        Test code
+    """
     from sas.plottools.arrow3d import Arrow3D
     current_dir = os.path.abspath(os.path.curdir)
     print current_dir
@@ -1082,7 +1088,11 @@ def test_load():
                 color="y", alpha=0.5)
     ax.add_artist(a)
     plt.show()
+
 def test():
+    """
+        Test code
+    """
     current_dir = os.path.abspath(os.path.curdir)
     for i in range(3):
         current_dir, _ = os.path.split(current_dir)

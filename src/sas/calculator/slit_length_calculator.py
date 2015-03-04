@@ -56,7 +56,7 @@ class SlitlengthCalculator(object):
         ind = 0.0
 
         # sum 10 or more y values until getting max_y,
-        while (True):
+        while True:
             if ind >= 10 and y_max == max_y:
                 break
             y_sum = y_sum + y[ind]
@@ -71,7 +71,7 @@ class SlitlengthCalculator(object):
         y_half_d = 0.0
         ind = 0.0
         # find indices where it crosses y = y_half.
-        while (True):
+        while True:
             # no need to check when ind == 0
             ind += 1
             # y value and ind just after passed the spot of the half height

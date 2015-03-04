@@ -12,6 +12,8 @@ from math import pi
 from math import sqrt
 import math
 import numpy
+import sys
+import logging
 
 #Plank's constant in cgs unit
 _PLANK_H = 6.62606896E-27
@@ -76,17 +78,13 @@ class ResolutionCalculator(object):
         self.sample2detector_distance = []
         self.detector_pix_size = []
         self.detector_size = []
-        # get all the values of the instrumental parameters
-        #self.intensity = self.get_intensity()
-        #self.wavelength = self.get_wavelength()
-        #self.wavelength_spread = self.get_wavelength_spread()
         self.get_all_instrument_params()
         # max q range for all lambdas
         self.qxrange = []
         self.qyrange = []
 
     def compute_and_plot(self, qx_value, qy_value, qx_min, qx_max,
-                          qy_min, qy_max, coord='cartesian'):
+                         qy_min, qy_max, coord='cartesian'):
         """
         Compute the resolution
         : qx_value: x component of q
@@ -119,8 +117,8 @@ class ResolutionCalculator(object):
                         self.compute(lam, dlam, qx_value, qy_value, coord, tof)
             # make image
             image = self.get_image(qx_value, qy_value, sigma_1, sigma_2,
-                            sigma_r, qx_min, qx_max, qy_min, qy_max,
-                            coord, False)
+                                   sigma_r, qx_min, qx_max, qy_min, qy_max,
+                                   coord, False)
             if qx_min > self.qx_min:
                 qx_min = self.qx_min
             if qx_max < self.qx_max:
@@ -149,8 +147,8 @@ class ResolutionCalculator(object):
             dlam = dlamb_list[ind]
             intens = self.setup_tof(lam, dlam)
             out = self.get_image(qx_value, qy_value, sig1_list[ind],
-                                   sig2_list[ind], sigr_list[ind],
-                                   qx_min, qx_max, qy_min, qy_max, coord)
+                                 sig2_list[ind], sigr_list[ind],
+                                 qx_min, qx_max, qy_min, qy_max, coord)
             # this is the case of q being outside the detector
             #if numpy.all(out==0.0):
             #    continue
@@ -271,20 +269,20 @@ class ResolutionCalculator(object):
 
         # sigma in the radial/x direction
         # for source aperture
-        sigma_1  = self.get_variance(rone, l1_cor, phi, comp1)
+        sigma_1 = self.get_variance(rone, l1_cor, phi, comp1)
         # for sample apperture
         sigma_1 += self.get_variance(rtwo, lp_cor, phi, comp1)
         # for detector pix
         sigma_1 += self.get_variance(rthree, l_two, phi, comp1)
         # for gravity term for 1d
         sigma_1grav1d = self.get_variance_gravity(l_ssa, l_sad, lamb,
-                            lamb_spread, phi, comp1, 'on') / tof_factor
+                                                  lamb_spread, phi, comp1, 'on') / tof_factor
         # for wavelength spread
         # reserve for 1d calculation
         A_value = self._cal_A_value(lamb, l_ssa, l_sad)
         sigma_wave_1, sigma_wave_1_1d = self.get_variance_wave(A_value,
-                                          radius, l_two, lamb_spread,
-                                          phi, 'radial', 'on')
+                                                               radius, l_two, lamb_spread,
+                                                               phi, 'radial', 'on')
         sigma_wave_1 /= tof_factor
         sigma_wave_1_1d /= tof_factor
         # for 1d
@@ -299,7 +297,7 @@ class ResolutionCalculator(object):
         sigma_r = knot * sqrt(sigma_wave_1 / (tof_factor *12))
         # sigma in the phi/y direction
         # for source apperture
-        sigma_2  = self.get_variance(rone, l1_cor, phi, comp2)
+        sigma_2 = self.get_variance(rone, l1_cor, phi, comp2)
 
         # for sample apperture
         sigma_2 += self.get_variance(rtwo, lp_cor, phi, comp2)
@@ -309,13 +307,13 @@ class ResolutionCalculator(object):
 
         # for gravity term for 1d
         sigma_2grav1d = self.get_variance_gravity(l_ssa, l_sad, lamb,
-                                lamb_spread, phi, comp2, 'on') / tof_factor
+                                                  lamb_spread, phi, comp2, 'on') / tof_factor
 
         # for wavelength spread
         # reserve for 1d calculation
         sigma_wave_2, sigma_wave_2_1d = self.get_variance_wave(A_value,
-                                          radius, l_two, lamb_spread,
-                                          phi, 'phi', 'on')
+                                                               radius, l_two, lamb_spread,
+                                                               phi, 'phi', 'on')
         sigma_wave_2 /= tof_factor
         sigma_wave_2_1d /= tof_factor
         # for 1d
@@ -376,7 +374,6 @@ class ResolutionCalculator(object):
         qr_value, phi = self._get_polar_value(qx_value, qy_value)
 
         # Check whether the q value is within the detector range
-        #msg = "Invalid input: Q value out of the detector range..."
         if qx_min < self.qx_min:
             self.qx_min = qx_min
             #raise ValueError, msg
@@ -408,7 +405,7 @@ class ResolutionCalculator(object):
             qc_2 = 0.0
             # Calculate the 2D Gaussian distribution image
             image = self._gaussian2d_polar(q_1, q_2, qc_1, qc_2,
-                                 sigma_1, sigma_2, sigma_r)
+                                           sigma_1, sigma_2, sigma_r)
         else:
             # catesian coordinate
             # qx_center
@@ -451,7 +448,7 @@ class ResolutionCalculator(object):
 
         # Image
         im = plt.imshow(image,
-                extent=[qx_min, qx_max, qy_min, qy_max])
+                        extent=[qx_min, qx_max, qy_min, qy_max])
 
         # bilinear interpolation to make it smoother
         im.set_interpolation('bilinear')
@@ -505,7 +502,7 @@ class ResolutionCalculator(object):
         else:
             raise ValueError, " Improper input..."
         # get them squared
-        sigma  = x_comp * x_comp
+        sigma = x_comp * x_comp
         sigma += y_comp * y_comp
         # normalize by distance
         sigma /= (distance * distance)
@@ -917,7 +914,7 @@ class ResolutionCalculator(object):
         return gaussian
 
     def _gaussian2d_polar(self, x_val, y_val, x0_val, y0_val,
-                        sigma_x, sigma_y, sigma_r):
+                          sigma_x, sigma_y, sigma_r):
         """
         Calculate 2D Gaussian distribution for polar coodinate
         : x_val: x value
@@ -932,7 +929,7 @@ class ResolutionCalculator(object):
         """
         sigma_x = sqrt(sigma_x * sigma_x + sigma_r * sigma_r)
         # call gaussian1d
-        gaussian  = self._gaussian1d(x_val, x0_val, sigma_x)
+        gaussian = self._gaussian1d(x_val, x0_val, sigma_x)
         gaussian *= self._gaussian1d(y_val, y0_val, sigma_y)
 
         # normalizing factor correction
@@ -973,23 +970,6 @@ class ResolutionCalculator(object):
         """
         phi = math.atan2(qy_value, qx_value)
         return phi
-        # default
-        phi = 0
-        # ToDo: This is misterious - sign???
-        #qy_value = -qy_value
-        # Take care of the singular point
-        if qx_value == 0:
-            if qy_value > 0:
-                phi = pi / 2
-            elif qy_value < 0:
-                phi = -pi / 2
-            else:
-                phi = 0
-        else:
-            # the angle
-            phi = math.atan2(qy_value, qx_value)
-
-        return phi
 
     def _get_detector_qxqy_pixels(self):
         """
@@ -1025,7 +1005,7 @@ class ResolutionCalculator(object):
         try:
             detector_offset = self.sample2detector_distance[1]
         except:
-            pass
+            logging.error(sys.exc_value)
 
         # detector size in [no of pix_x,no of pix_y]
         detector_pix_nums_x = self.detector_size[0]
@@ -1042,7 +1022,8 @@ class ResolutionCalculator(object):
 
         # beam center position in pix number (start from 0)
         center_x, center_y = self._get_beamcenter_position(detector_pix_nums_x,
-                                    detector_pix_nums_y, offset_x, offset_y)
+                                                           detector_pix_nums_y,
+                                                           offset_x, offset_y)
         # distance [cm] from the beam center on detector plane
         detector_ind_x = numpy.arange(detector_pix_nums_x)
         detector_ind_y = numpy.arange(detector_pix_nums_y)
@@ -1087,12 +1068,12 @@ class ResolutionCalculator(object):
         # Appr. min and max values of the detector display limits
         # i.e., edges of the last pixels.
         self.qy_min += self._get_qx(-0.5 * pix_y_size,
-                                sample2detector_distance, wavelength)
+                                    sample2detector_distance, wavelength)
         self.qy_max += self._get_qx(0.5 * pix_y_size,
-                                sample2detector_distance, wavelength)
+                                    sample2detector_distance, wavelength)
         #if self.qx_min == self.qx_max:
         self.qx_min += self._get_qx(-0.5 * pix_x_size,
-                                sample2detector_distance, wavelength)
+                                    sample2detector_distance, wavelength)
         self.qx_max += self._get_qx(0.5 * pix_x_size,
                                     sample2detector_distance, wavelength)
 
@@ -1107,11 +1088,11 @@ class ResolutionCalculator(object):
             from sas.dataloader.data_info import Data2D
             output = Data2D()
             inten = numpy.zeros_like(qx_value)
-            output.data    = inten
+            output.data = inten
             output.qx_data = qx_value
             output.qy_data = qy_value
         except:
-            pass
+            logging.error(sys.exc_value)
 
         return output
 
