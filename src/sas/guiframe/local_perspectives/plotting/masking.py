@@ -29,7 +29,7 @@ from sas.plottools.plottables import Graph
 from binder import BindArtist
 from sas.guiframe.dataFitting import Data1D, Data2D
 from boxMask import BoxMask
-from sectorMask import SectorMask
+from sector_mask import SectorMask
 from AnnulusSlicer import CircularMask
 
 from sas.guiframe.events import SlicerEvent
