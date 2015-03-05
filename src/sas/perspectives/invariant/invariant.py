@@ -47,21 +47,6 @@ class Plugin(PluginBase):
         # Log startup
         logging.info("Invariant plug-in started")
 
-    def help(self, evt):
-        """
-        Show a general help dialog.
-        """
-        from help_panel import  HelpWindow
-        frame = HelpWindow(None, -1)
-        if hasattr(frame, "IsIconized"):
-            if not frame.IsIconized():
-                try:
-                    icon = self.parent.GetIcon()
-                    frame.SetIcon(icon)
-                except:
-                    logging.error(sys.exc_value)
-        frame.Show(True)
-
     def get_data(self):
         """
         """

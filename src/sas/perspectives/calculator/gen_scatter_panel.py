@@ -2035,32 +2035,6 @@ class SasGenWindow(widget.CHILD_FRAME):
             self.base.gen_frame = None
         self.Destroy()
 
-#    def on_help(self, event):    
-#        """
-#       Gen scatter angle help panel
-#        """
-#        from sas.perspectives.calculator.help_panel import  HelpWindow
-#        # Get models help model_function path
-#        import sas.perspectives.calculator as calmedia
-#
-#        media = calmedia.get_data_path(media='media')
-#        path = os.path.join(media,"gen_sas_help.html") 
-#        name = "Generic Scattering Calculator"
-#        frame = HelpWindow(self, -1, 
-#                           title=' Help: GenSAS',  
-#                           pageToOpen=path, size=(865, 450))   
-#        try: 
-#            frame.splitter.DetachWindow(frame.lpanel)
-#            # Display only the right side one
-#            frame.lpanel.Hide() 
-#            frame.Show(True)
-#            add_icon(self.parent, frame)
-#        except:
-#            frame.Destroy() 
-#            msg = 'Display Error\n'
-#            info = "Info"
-#            wx.MessageBox(msg, info)
-
 if __name__ == "__main__":
     app = wx.PySimpleApp()
     widget.CHILD_FRAME = wx.Frame

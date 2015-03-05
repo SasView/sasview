@@ -424,21 +424,6 @@ class Plugin(PluginBase):
         else:
             self.batch_page = self.fit_panel.add_sim_page(caption=caption)
 
-    def help(self, evt):
-        """
-        Show a general help dialog.
-        """
-        from help_panel import  HelpWindow
-        frame = HelpWindow(None, -1, 'HelpWindow')
-        if hasattr(frame, "IsIconized"):
-            if not frame.IsIconized():
-                try:
-                    icon = self.parent.GetIcon()
-                    frame.SetIcon(icon)
-                except:
-                    pass
-        frame.Show(True)
-
     def get_context_menu(self, plotpanel=None):
         """
         Get the context menu items available for P(r).them allow fitting option
