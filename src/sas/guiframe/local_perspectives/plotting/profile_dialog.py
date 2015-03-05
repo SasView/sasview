@@ -269,12 +269,6 @@ class SLDplotpanel(PlotPanel):
         #Not implemented
         pass
     
-    def _add_more_tool(self):
-        """
-        Not implemented
-        """
-        pass 
-    
     def onChangeCaption(self, event):
         """
         Not implemented
