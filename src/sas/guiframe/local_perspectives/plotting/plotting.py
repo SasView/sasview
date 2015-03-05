@@ -334,18 +334,4 @@ class Plugin(PluginBase):
                 new_panel = self.create_2d_panel(data, group_id)
             self.create_panel_helper(new_panel, data, group_id, title) 
         return
-       
-    def help(self, evt):
-        """
-        Show a general help dialog. 
-        """
-        from help_panel import  HelpWindow
-        frame = HelpWindow(None, -1) 
-        if hasattr(frame, "IsIconized"):
-            if not frame.IsIconized():
-                try:
-                    icon = self.parent.GetIcon()
-                    frame.SetIcon(icon)
-                except:
-                    pass  
         frame.Show(True)
