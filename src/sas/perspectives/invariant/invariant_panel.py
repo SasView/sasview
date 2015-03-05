@@ -801,12 +801,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         # set the parameters
         for key in comp_state:
             value = comp_state[key]
-            try:
-                exec "self.%s.SetValue(str(%s))" % (key, value)
-            except TypeError:
-                exec "self.%s.SetValue(%s)" % (key, value)
-            except:
-                logging.error(sys.exc_value)
+            self._set_property_value(key, value)
 
         self.compute_invariant(event=None)
 
@@ -814,12 +809,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         for key in current_state:
             # set the inputs and boxes
             value = current_state[key]
-            try:
-                exec 'self.%s.SetValue(str(%s))' % (key, value)
-            except TypeError:
-                exec 'self.%s.SetValue(%s)' % (key, value)
-            except:
-                logging.error(sys.exc_value)
+            self._set_property_value(key, value)
 
         self._enable_high_q_section(event=None)
         self._enable_low_q_section(event=None)
@@ -827,6 +817,17 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         self.state.saved_state = current_state
         self.state.state_num = state_num
 
+    def _set_property_value(self, key, value):
+        """
+            Set a property value
+            :param key: property name
+            :param value: value of the property
+        """
+        try:
+            attr = getattr(self, key)
+            attr.SetValue(str(value))
+        except:
+            logging.error("Invariant state: %s", sys.exc_value)
 
     def get_bookmark_by_num(self, num=None):
         """
@@ -849,23 +850,13 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         # set the parameters
         for key in comp_state:
             value = comp_state[key]
-            try:
-                exec "self.%s.SetValue(str(%s))" % (key, value)
-            except TypeError:
-                exec "self.%s.SetValue(%s)" % (key, value)
-            except:
-                logging.error(sys.exc_value)
+            self._set_property_value(key, value)
 
         self.compute_invariant(event=None)
         # set the input params at the state of pre_state_num
         for key in current_state:
             value = current_state[key]
-            try:
-                exec 'self.%s.SetValue(str(%s))' % (key, value)
-            except TypeError:
-                exec 'self.%s.SetValue(%s)' % (key, value)
-            except:
-                logging.error(sys.exc_value)
+            self._set_property_value(key, value)
         self.state.saved_state = copy.deepcopy(current_state)
 
         self._enable_high_q_section(event=None)
@@ -924,8 +915,8 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         try:
             if value == None or value.lstrip().rstrip() == '':
                 value = 'None'
-            exec 'self.state.%s = %s' % (name, value)
-            exec "self.state.saved_state['%s'] = %s" % (name, value)
+            setattr(self.state, name, str(value))
+            self.state.saved_state[name] = str(value)
 
             # set the count part of radio button clicked
             #False for the saved_state
@@ -936,7 +927,7 @@ class InvariantPanel(ScrolledPanel, PanelBase):
                 elif name == content:
                     name = title
                     value = False
-            exec "self.state.saved_state['%s'] = %s" % (name, value)
+            self.state.saved_state[name] = str(value)
 
             # Instead of changing the future, create a new future.
             max_state_num = len(self.state.state_list) - 1
@@ -1058,28 +1049,21 @@ class InvariantPanel(ScrolledPanel, PanelBase):
             except:
                 logging.error(sys.exc_value)
 
-        # Instead of changing the future, create a new future.
-        #max_state_num = len(self.state.state_list)-1
-        #self.state.saved_state['state_num'] = max_state_num
-
         # try to add new state of the text changes in the state_list
         try:
             if value.strip() == None:
                 value = ''
-            exec "self.state.%s = '%s'" % (name, value)
-            exec "self.state.saved_state['%s'] = '%s'" % (name, value)
-            exec "self.state.input_list['%s'] = '%s'" % (name, value)
+            setattr(self.state, name, str(value))
+            self.state.saved_state[name] = str(value)
+            self.state.input_list[name] = str(value)
             if not self.is_power_out:
                 if name != 'power_low_tcl' and name != 'power_high_tcl':
                     self.state.saved_state['state_num'] += 1
             self.state.state_num = self.state.saved_state['state_num']
-            #copy.deepcopy(self.state.saved_state)
-            self.state.state_list[str(self.state.state_num)] = \
-                                        self.state.clone_state()
+            self.state.state_list[str(self.state.state_num)] = self.state.clone_state()
         except:
             logging.error(sys.exc_value)
 
-        #event.Skip()
         self._set_undo_flag(True)
         self._set_redo_flag(False)
         self._set_bookmark_flag(True)
@@ -1097,12 +1081,10 @@ class InvariantPanel(ScrolledPanel, PanelBase):
         name = str(obj.GetName())
         value = str(obj.GetValue())
         try:
-            exec "self.state.saved_state['%s'] = '%s'" % (name, value)
-            self.state.state_list[str(self.state.state_num)] = \
-                                self.state.clone_state()
+            self.state.saved_state[name] = str(value)
+            self.state.state_list[str(self.state.state_num)] = self.state.clone_state()
         except:
             logging.error(sys.exc_value)
-        #if event != None: event.Skip()
 
     def _get_input_list(self):
         """

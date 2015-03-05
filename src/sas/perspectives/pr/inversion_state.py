@@ -192,8 +192,7 @@ class InversionState(object):
         
         for item in in_list:
             element = newdoc.createElement(item[0])
-            cmd = "element.appendChild(newdoc.createTextNode(str(self.%s)))"
-            exec  cmd % item[1]
+            element.appendChild(newdoc.createTextNode(str(getattr(self, item[1]))))
             inputs.appendChild(element)
               
         # Outputs
@@ -202,8 +201,7 @@ class InversionState(object):
         
         for item in out_list:
             element = newdoc.createElement(item[0])
-            cmd = "element.appendChild(newdoc.createTextNode(str(self.%s)))"
-            exec  cmd % item[1]
+            element.appendChild(newdoc.createTextNode(str(getattr(self, item[1]))))
             outputs.appendChild(element)
                     
         # Save output coefficients and its covariance matrix
@@ -260,10 +258,9 @@ class InversionState(object):
                     input_field = get_content('ns:%s' % item[0], entry)
                     if input_field is not None:
                         try:
-                            cmd = 'self.%s = float(input_field.text.strip())' 
-                            exec  cmd % item[1]
+                            setattr(self, item[1], float(input_field.text.strip()))
                         except:
-                            exec 'self.%s = None' % item[1]
+                            setattr(self, item[1], None)
                 input_field = get_content('ns:estimate_bck', entry)
                 if input_field is not None:
                     try:
@@ -279,10 +276,9 @@ class InversionState(object):
                     input_field = get_content('ns:%s' % item[0], entry)
                     if input_field is not None:
                         try:
-                            cmd = 'self.%s = float(input_field.text.strip())'
-                            exec  cmd % item[1]
+                            setattr(self, item[1], float(input_field.text.strip()))
                         except:
-                            exec 'self.%s = None' % item[1]
+                            setattr(self, item[1], None)
             
                 # Look for coefficients
                 # Format is [value, value, value, value]

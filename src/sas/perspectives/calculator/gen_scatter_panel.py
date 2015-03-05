@@ -1317,7 +1317,7 @@ class OmfPanel(ScrolledPanel, PanelBase):
                     return
 
             for key in sets.keys():
-                exec "omfdata.%s = sets['%s']" % (key, key)
+                setattr(omfdata, key, sets[key])
 
             omf2sld = sas_gen.OMF2SLD()
             omf2sld.set_data(omfdata, self.default_shape)
