@@ -8,21 +8,21 @@ theta_color = 'orange'
 profile_colors = [rho_color, mu_color, P_color, theta_color]
 
 
-class _BaseInteractor:
+class _BaseInteractor(object):
     """
     Share some functions between the interface interactor and various layer
     interactors.
-    
+
     Individual interactors need the following functions:
-    
+
         save(ev)  - save the current state for later restore
         restore() - restore the old state
         move(x,y,ev) - move the interactor to position x,y
         moveend(ev) - end the drag event
         update() - draw the interactors
-        
+
     The following are provided by the base class:
-    
+
         connect_markers(markers) - register callbacks for all markers
         clear_markers() - remove all items in self.markers
         onHilite(ev) - enter/leave event processing
@@ -31,14 +31,14 @@ class _BaseInteractor:
         onRelease(ev) - mouse click ends: calls moveend()
         onDrag(ev) - mouse move: calls move() or restore()
         onKey(ev) - keyboard move: calls move() or restore()
-        
+
     Interactor attributes:
-    
+
         base  - model we are operating on
         axes  - axes holding the interactor
         color - color of the interactor in non-active state
         markers - list of handles for the interactor
-        
+
     """
     def __init__(self, base, axes, color='black'):
         """
@@ -47,7 +47,7 @@ class _BaseInteractor:
         self.axes = axes
         self.color = color
         self.markers = []
-        
+
     def clear_markers(self):
         '''
         Clear old markers and interfaces.
@@ -62,17 +62,17 @@ class _BaseInteractor:
         """
         """
         pass
-    
+
     def restore(self, ev):
         """
         """
         pass
-    
+
     def move(self, x, y, ev):
         """
         """
         pass
-    
+
     def moveend(self, ev):
         """
         """
@@ -107,7 +107,7 @@ class _BaseInteractor:
         ev.artist.set_color(self.color)
         self.base.draw()
         return True
-            
+
     def onClick(self, ev):
         """
         Prepare to move the artist.  Calls save() to preserve the state for
@@ -136,12 +136,12 @@ class _BaseInteractor:
             self.restore()
         self.base.update()
         return True
-    
+
     def onKey(self, ev):
         """
         Respond to keyboard events.  Arrow keys move the widget.  Escape
         restores it to the position before the last click.
-        
+
         Calls move() to update the state.  Calls restore() on escape.
         """
         if ev.key == 'escape':
@@ -172,8 +172,8 @@ class _BaseInteractor:
         ax = self.axes
         px, py = ax.transData.inverse_xy_tup((x, y))
         if nudge:
-            nx, ny = ax.transData.xy_tup((px+0.2, py+0.2))
+            nx, ny = ax.transData.xy_tup((px + 0.2, py + 0.2))
         else:
-            nx, ny = ax.transData.xy_tup((px+1., py+1.))
-        dx, dy = nx-x, ny-y
+            nx, ny = ax.transData.xy_tup((px + 1., py + 1.))
+        dx, dy = nx - x, ny - y
         return dx, dy

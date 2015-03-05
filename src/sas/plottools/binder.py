@@ -2,32 +2,32 @@
 Extension to MPL to support the binding of artists to key/mouse events.
 """
 import sys
+import logging
 
-
-class Selection:
+class Selection(object):
     """
     Store and compare selections.
     """
     # TODO: We need some way to check in prop matches, preferably
     # TODO: without imposing structure on prop.
-        
+
     artist = None
     prop = {}
-    
+
     def __init__(self, artist=None, prop={}):
         self.artist, self.prop = artist, self.prop
-        
+
     def __eq__(self, other):
         return self.artist is other.artist
-    
+
     def __ne__(self, other):
         return self.artist is not other.artist
-    
+
     def __nonzero__(self):
         return self.artist is not None
 
 
-class BindArtist:
+class BindArtist(object):
     """
     """
     # Track keyboard modifiers for events.
@@ -40,12 +40,12 @@ class BindArtist:
     # Track doubleclick
     dclick_threshhold = 0.25
     _last_button, _last_time = None, 0
-    
+
     # Mouse/keyboard events we can bind to
     events = ['enter', 'leave', 'motion', 'click', 'dclick', 'drag', 'release',
-             'scroll', 'key', 'keyup']
+              'scroll', 'key', 'keyup']
     # TODO: Need our own event structure
-    
+
     def __init__(self, figure):
         canvas = figure.canvas
 
@@ -68,18 +68,18 @@ class BindArtist:
                 canvas.mpl_connect('key_press_event', self._onKey),
                 canvas.mpl_connect('key_release_event', self._onKeyRelease),
             ]
-            
+
         self._current = None
         self._actions = {}
         self.canvas = canvas
         self.figure = figure
         self.clearall()
-        
+
     def clear(self, *artists):
         """
         self.clear(h1,h2,...)
             Remove connections for artists h1, h2, ...
-            
+
         Use clearall() to reset all connections.
         """
 
@@ -95,11 +95,11 @@ class BindArtist:
             self._hasclick = Selection()
         if self._haskey.artist in artists:
             self._haskey = Selection()
-        
+
     def clearall(self):
         """
         Clear connections to all artists.
-        
+
         Use clear(h1,h2,...) to reset specific artists.
         """
         # Don't monitor any actions
@@ -120,8 +120,7 @@ class BindArtist:
         try:
             for cid in self._connections: self.canvas.mpl_disconnect(cid)
         except:
-            print "Error disconnection canvas: %s" % sys.exc_value
-            pass
+            logging.error("Error disconnection canvas: %s" % sys.exc_value)
         self._connections = []
 
     def __del__(self):
@@ -129,10 +128,10 @@ class BindArtist:
 
     def __call__(self, trigger, artist, action):
         """Register a callback for an artist to a particular trigger event.
-        
+
         usage:
             self.connect(eventname,artist,action)
-    
+
         where:
             eventname is a string
             artist is the particular graph object to respond to the event
@@ -152,7 +151,7 @@ class BindArtist:
             release: mouse button released for the artist
             key: key pressed when mouse is on the artist
             keyrelease: key released for the artist
-    
+
         The event received by action has a number of attributes:
             name is the event name which was triggered
             artist is the object which triggered the event
@@ -164,7 +163,7 @@ class BindArtist:
                 corresponding key is pressed at the time of the event.
             details is a dictionary of artist specific details, such as the
                 id(s) of the point that were clicked.
-                
+
         When receiving an event, first check the modifier state to be
         sure it applies.  E.g., the callback for 'press' might be:
             if event.button == 1 and event.shift: process Shift-click
@@ -202,14 +201,14 @@ class BindArtist:
         """
         if action not in self.events:
             raise ValueError, "Trigger expects " + ", ".join(self.events)
-        
+
         # Tag the event with modifiers
         for mod in ('alt', 'control', 'shift', 'meta'):
             setattr(ev, mod, getattr(self, mod))
         setattr(ev, 'artist', None)
         setattr(ev, 'action', action)
         setattr(ev, 'prop', {})
-        
+
         # Fallback scheme.  If the event does not return false, pass to parent.
         processed = False
         artist, prop = actor.artist, actor.prop
@@ -248,7 +247,7 @@ class BindArtist:
             if inside:
                 found.artist, found.prop = artist, prop
                 break
-        
+
         # TODO: how to check if prop is equal?
         if found != self._current:
             self.trigger(self._current, 'leave', event)
@@ -256,39 +255,39 @@ class BindArtist:
         self._current = found
 
         return found
-        
+
     def _onMotion(self, event):
         """
         Track enter/leave/motion through registered artists; all
         other artists are invisible.
         """
-        ## Can't kill double-click on motion since Windows produces
-        ## spurious motion events.
-        #self._last_button = None
-        
+        # # Can't kill double-click on motion since Windows produces
+        # # spurious motion events.
+        # self._last_button = None
+
         # Dibs on the motion event for the clicked artist
         if self._hasclick:
             # Make sure the x,y data use the coordinate system of the
             # artist rather than the default axes coordinates.
-            
+
             transform = self._hasclick.artist.get_transform()
-            #x,y = event.xdata,event.ydata
+            # x,y = event.xdata,event.ydata
             x, y = event.x, event.y
             try:
                 if transform.__class__.__name__ == "IdentityTransform":
                     x, y = transform.inverted().transform((x, y))
                 else:
-                    ## For interactive plottable apply transform is not working
-                    ## don't know why maybe marker definition
-                    ##transform ="CompositeGenericTransform" crash
+                    # # For interactive plottable apply transform is not working
+                    # # don't know why maybe marker definition
+                    # #transform ="CompositeGenericTransform" crash
                     pass
             except:
-                ## CRUFT matplotlib-0.91 support
-                ## exception for transform ="CompositeGenericTransform"
-                ## crashes also here
+                # # CRUFT matplotlib-0.91 support
+                # # exception for transform ="CompositeGenericTransform"
+                # # crashes also here
                 x, y = transform.inverse_xy_tup((x, y))
 
-            #event.xdata, event.ydata = x, y
+            # event.xdata, event.ydata = x, y
             self.trigger(self._hasclick, 'drag', event)
         else:
             found = self._find_current(event)
@@ -299,7 +298,7 @@ class BindArtist:
         Process button click
         """
         import time
-        
+
         # Check for double-click
         event_time = time.time()
         if (event.button != self._last_button) or \
@@ -309,7 +308,7 @@ class BindArtist:
             action = 'dclick'
         self._last_button = event.button
         self._last_time = event_time
-        
+
         # If an artist is already dragging, feed any additional button
         # presses to that artist.
         # TODO: do we want to force a single button model on the user?
@@ -319,7 +318,7 @@ class BindArtist:
             found = self._hasclick
         else:
             found = self._find_current(event)
-        #print "button %d pressed"%event.button
+        # print "button %d pressed"%event.button
         # Note: it seems like if "click" returns False then hasclick should
         # not be set.  The problem is that there are two reasons it can
         # return false: because there is no click action for this artist
@@ -354,7 +353,7 @@ class BindArtist:
         """
         self.trigger(self._hasclick, 'release', event)
         self._hasclick = Selection()
-            
+
     def _onKey(self, event):
         """
         Process key click
@@ -376,7 +375,7 @@ class BindArtist:
             found = self._find_current(event)
         self.trigger(found, 'key', event)
         self._haskey = found
-    
+
     def _onKeyRelease(self, event):
         """
         Process key release
@@ -384,7 +383,7 @@ class BindArtist:
         if event.key in ('alt', 'meta', 'control', 'shift'):
             setattr(self, event.key, False)
             return
-        
+
         if self._haskey:
             self.trigger(self._haskey, 'keyup', event)
         self._haskey = Selection()
