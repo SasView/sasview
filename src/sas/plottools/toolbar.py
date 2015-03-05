@@ -8,14 +8,14 @@ import logging
 
 # Event binding code changed after version 2.5
 if wx.VERSION_STRING >= '2.5':
-    def bind(actor,event,action,**kw):
-        actor.Bind(event,action,**kw)
+    def bind(actor, event, action, **kw):
+        actor.Bind(event, action, **kw)
 else:
-    def bind(actor,event,action,id=None):
+    def bind(actor, event, action, id=None):
         if id is not None:
             event(actor, id, action)
         else:
-            event(actor,action)
+            event(actor, action)
 
 class NavigationToolBar(NavigationToolbar2WxAgg):
     """
@@ -27,16 +27,17 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
     # CRUFT: mpl 1.1 uses save rather than save_figure
     try: save_figure = NavigationToolbar2WxAgg.save
     except AttributeError: pass
+    
     def _init_toolbar(self):
         self._parent = self.canvas.GetParent()
-        _NTB2_HOME         = wx.NewId()
-        self._NTB2_BACK    = wx.NewId()
+        _NTB2_HOME = wx.NewId()
+        self._NTB2_BACK = wx.NewId()
         self._NTB2_FORWARD = wx.NewId()
-        self._NTB2_PAN     = wx.NewId()
-        self._NTB2_ZOOM    = wx.NewId()
-        _NTB2_SAVE         = wx.NewId()
-        _NTB2_PRINT        = wx.NewId()
-        _NTB2_RESET        = wx.NewId()
+        self._NTB2_PAN = wx.NewId()
+        self._NTB2_ZOOM = wx.NewId()
+        _NTB2_SAVE = wx.NewId()
+        _NTB2_PRINT = wx.NewId()
+        _NTB2_RESET = wx.NewId()
 
         # for mpl 1.2+ compatibility
         self.wx_ids = {}
@@ -45,7 +46,7 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
         self.wx_ids['Pan'] = self._NTB2_PAN
         self.wx_ids['Zoom'] = self._NTB2_ZOOM
 
-        self.SetToolBitmapSize(wx.Size(24,24))
+        self.SetToolBitmapSize(wx.Size(24, 24))
 
         context_tip = 'Graph Menu: \n'
         context_tip += '    For more menu options, \n'
@@ -54,25 +55,25 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
         self.AddSimpleTool(_NTB2_HOME, context, context_tip, context_tip)
 
         self.InsertSeparator(1)
-        
+
         self.AddSimpleTool(self._NTB2_BACK, _load_bitmap('back.png'),
                            'Back', 'Back navigation view')
         self.AddSimpleTool(self._NTB2_FORWARD, _load_bitmap('forward.png'),
                            'Forward', 'Forward navigation view')
         # todo: get new bitmap
         self.AddCheckTool(self._NTB2_PAN, _load_bitmap('move.png'),
-                           shortHelp='Pan',
-                           longHelp='Pan with left, zoom with right')
+                          shortHelp='Pan',
+                          longHelp='Pan with left, zoom with right')
         self.AddCheckTool(self._NTB2_ZOOM, _load_bitmap('zoom_to_rect.png'),
-                           shortHelp='Zoom', longHelp='Zoom to rectangle')
+                          shortHelp='Zoom', longHelp='Zoom to rectangle')
 
         self.AddSeparator()
         self.AddSimpleTool(_NTB2_SAVE, _load_bitmap('filesave.png'),
                            'Save', 'Save plot contents to file')
-        
+
         print_bmp = wx.ArtProvider.GetBitmap(wx.ART_PRINT, wx.ART_TOOLBAR)
         self.AddSimpleTool(_NTB2_PRINT, print_bmp, 'Print', 'Print plot')
-        
+
         reset_bmp = wx.ArtProvider.GetBitmap(wx.ART_GO_HOME, wx.ART_TOOLBAR)
         self.AddSimpleTool(_NTB2_RESET, reset_bmp, 'Reset', 'Reset graph range')
 
@@ -113,4 +114,3 @@ class NavigationToolBar(NavigationToolbar2WxAgg):
             self.canvas.Printer_Preview(event=event)
         except:
             logging.error("Plot toolbar could not print")
-        

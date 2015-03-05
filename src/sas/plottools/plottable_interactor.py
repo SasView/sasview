@@ -1,7 +1,6 @@
 """
     This module allows more interaction with the plot
 """
-import plottables
 from BaseInteractor import _BaseInteractor
 
 class PointInteractor(_BaseInteractor):
@@ -25,33 +24,31 @@ class PointInteractor(_BaseInteractor):
         self._context_menu = False
         self._dragged = False
         self.connect_markers([self.axes])
-        
+
     def _color(self, c):
         """Return a particular colour"""
         return self.colorlist[c % len(self.colorlist)]
-    
+
     def _symbol(self, s):
         """Return a particular symbol"""
         return self.symbollist[s % len(self.symbollist)]
 
-    def points(self, x, y, dx=None, dy=None, color=0, symbol=0, zorder=1, 
+    def points(self, x, y, dx=None, dy=None, color=0, symbol=0, zorder=1,
                markersize=5, label=None, hide_error=False):
         """
         """
-        #Draw curve
+        # Draw curve
         if self._symbol(symbol) == '-' or self._symbol(symbol) == '--':
             l_width = markersize * 0.4
-            return self.curve(x=x, y=y, color=color, symbol=symbol, 
+            return self.curve(x=x, y=y, color=color, symbol=symbol,
                               label=label, width=l_width)
-            #return
+            # return
         if self._symbol(symbol) == 'vline':
             l_width = markersize * 0.4
-            return self.vline(x=x, y=y, color=color, 
-                                label=label, width=l_width)
+            return self.vline(x=x, y=y, color=color, label=label, width=l_width)
         if self._symbol(symbol) == 'step':
             l_width = markersize * 0.4
-            return self.step(x=x, y=y, color=color, 
-                                label=label, width=l_width)
+            return self.step(x=x, y=y, color=color, label=label, width=l_width)
         if not self.marker == None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
@@ -59,28 +56,28 @@ class PointInteractor(_BaseInteractor):
             markersize = self.markersize
         # Convert tuple (lo,hi) to array [(x-lo),(hi-x)]
         if dx != None and type(dx) == type(()):
-            dx = nx.vstack((x-dx[0], dx[1]-x)).transpose()
+            dx = nx.vstack((x - dx[0], dx[1] - x)).transpose()
         if dy != None and type(dy) == type(()):
-            dy = nx.vstack((y-dy[0], dy[1]-y)).transpose()
-        
+            dy = nx.vstack((y - dy[0], dy[1] - y)).transpose()
+
         if dx == None and dy == None:
-            #zorder = 1
+            # zorder = 1
             self.marker = self.axes.plot(x, y, color=self.color,
                                          marker=self._symbol(symbol),
                                          markersize=markersize,
                                          linestyle='', label=label,
                                          zorder=zorder)[0]
         else:
-            
+
             if hide_error:
-                #zorder = 1
+                # zorder = 1
                 self.marker = self.axes.plot(x, y, color=self.color,
                                              marker=self._symbol(symbol),
                                              markersize=markersize,
                                              linestyle='', label=label,
                                              zorder=1)[0]
             else:
-                #zorder = 2
+                # zorder = 2
                 self.marker = self.axes.errorbar(x, y, yerr=dy,
                                                  xerr=None,
                                                  ecolor=self.color,
@@ -94,11 +91,11 @@ class PointInteractor(_BaseInteractor):
                                                  xlolims=False, xuplims=False,
                                                  label=label,
                                                  zorder=1)[0]
-            
+
         self.connect_markers([self.marker])
         self.update()
-        
-    def curve(self, x, y, dy=None, color=0, symbol=0, zorder=10, 
+
+    def curve(self, x, y, dy=None, color=0, symbol=0, zorder=10,
               label=None, width=2.0):
         """
         """
@@ -108,12 +105,12 @@ class PointInteractor(_BaseInteractor):
         self.marker = self.axes.plot(x, y, color=self.color, lw=width,
                                      marker='', linestyle=self._symbol(symbol),
                                      label=label, zorder=zorder)[0]
-            
+
         self.connect_markers([self.marker])
         self.update()
 
-        
-    def vline(self, x, y, dy=None, color=0, symbol=0, zorder=1, 
+
+    def vline(self, x, y, dy=None, color=0, symbol=0, zorder=1,
               label=None, width=2.0):
         """
         """
@@ -123,31 +120,28 @@ class PointInteractor(_BaseInteractor):
         if min(y) < 0:
             y_min = 0.0
         else:
-            y_min = min(y)*9/10
-        self.marker = self.axes.vlines(x=x, ymin=y_min, ymax=y, 
-                                      color=self.color, 
-                                      linestyle='-', label=label,
-                                      lw=width, zorder=zorder)    
+            y_min = min(y) * 9 / 10
+        self.marker = self.axes.vlines(x=x, ymin=y_min, ymax=y,
+                                       color=self.color,
+                                       linestyle='-', label=label,
+                                       lw=width, zorder=zorder)
         self.connect_markers([self.marker])
         self.update()
 
     def step(self, x, y, dy=None, color=0, symbol=0, zorder=1,
-              label=None, width=2.0):
+             label=None, width=2.0):
         """
         """
         if not self.marker == None:
             self.base.connect.clear([self.marker])
         self.color = self._color(color)
-        if self.markersize != None:
-            markersize = self.markersize
-            
         self.marker = self.axes.step(x, y, color=self.color,
-                                         marker='',
-                                         linestyle='-', label=label,
-                                         lw=width, zorder=zorder)[0]
+                                     marker='',
+                                     linestyle='-', label=label,
+                                     lw=width, zorder=zorder)[0]
         self.connect_markers([self.marker])
         self.update()
-               
+
     def connect_markers(self, markers):
         """
         Connect markers to callbacks
@@ -162,7 +156,7 @@ class PointInteractor(_BaseInteractor):
 
     def clear(self):
         print "plottable_interactor.clear()"
-        
+
     def _on_click(self, evt):
         """
         Called when a mouse button is clicked
@@ -182,7 +176,7 @@ class PointInteractor(_BaseInteractor):
         # the context menu up
         if evt.button == 3:
             self._context_menu = True
-        
+
     def _on_enter(self, evt):
         """
         Called when we are entering the boundaries
@@ -190,7 +184,7 @@ class PointInteractor(_BaseInteractor):
         """
         if not evt.artist.__class__.__name__ == "AxesSubplot":
             self.base.plottable_selected(self.id)
-            
+
             if evt.artist.get_color() == 'y':
                 try:
                     evt.artist.set_color('b')
@@ -211,7 +205,7 @@ class PointInteractor(_BaseInteractor):
                     evt.artist.set_edgecolor('y')
 
             self.axes.figure.canvas.draw_idle()
-        
+
     def _on_leave(self, evt):
         """
         Called when we are leaving the boundaries
@@ -229,7 +223,7 @@ class PointInteractor(_BaseInteractor):
                 if hasattr(evt.artist, "set_edgecolor"):
                     evt.artist.set_edgecolor(self.color)
                 self.axes.figure.canvas.draw_idle()
-    
+
     def update(self):
         """
         Update
