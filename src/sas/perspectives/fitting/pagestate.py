@@ -1,6 +1,7 @@
 """
     Class that holds a fit page state
 """
+#TODO: Refactor code so we don't need to use getattr/setattr
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
@@ -34,55 +35,55 @@ from sas.dataloader.data_info import Aperture
 FITTING_NODE_NAME = 'fitting_plug_in'
 CANSAS_NS = "cansas1d/1.0"
 
-list_of_data_attributes = [["is_data", "is_data", "bool"],
-                      ["group_id", "data_group_id", "string"],
-                      ["data_name", "data_name", "string"],
-                      ["data_id", "data_id", "string"],
-                      ["name", "name", "string"],
-                      ["data_name", "data_name", "string"]]
-list_of_state_attributes = [["engine_type", "engine_type", "string"],
-                       ["qmin", "qmin", "float"],
-                      ["qmax", "qmax", "float"],
-                      ["npts", "npts", "float"],
-                      ["categorycombobox", "categorycombobox", "string"],
-                      ["formfactorcombobox", "formfactorcombobox", "string"],
-                      ["structurecombobox", "structurecombobox", "string"],
-                      ["multi_factor", "multi_factor", "float"],
-                      ["magnetic_on", "magnetic_on", "bool"],
-                      ["enable_smearer", "enable_smearer", "bool"],
-                      ["disable_smearer", "disable_smearer", "bool"],
-                      ["pinhole_smearer", "pinhole_smearer", "bool"],
-                      ["slit_smearer", "slit_smearer", "bool"],
-                      ["enable_disp", "enable_disp", "bool"],
-                      ["disable_disp", "disable_disp", "bool"],
-                      ["dI_noweight", "dI_noweight", "bool"],
-                      ["dI_didata", "dI_didata", "bool"],
-                      ["dI_sqrdata", "dI_sqrdata", "bool"],
-                      ["dI_idata", "dI_idata", "bool"],
-                      ["enable2D", "enable2D", "bool"],
-                      ["cb1", "cb1", "bool"],
-                      ["tcChi", "tcChi", "float"],
-                      ["smearer", "smearer", "float"],
-                      ["smear_type", "smear_type", "string"],
-                      ["dq_l", "dq_l", "string"],
-                      ["dq_r", "dq_r", "string"],
-                      ["dx_max", "dx_max", "float"],
-                      ["dx_min", "dx_min", "float"],
-                      ["dxl", "dxl", "float"],
-                      ["dxw", "dxw", "float"]]
+LIST_OF_DATA_ATTRIBUTES = [["is_data", "is_data", "bool"],
+                           ["group_id", "data_group_id", "string"],
+                           ["data_name", "data_name", "string"],
+                           ["data_id", "data_id", "string"],
+                           ["name", "name", "string"],
+                           ["data_name", "data_name", "string"]]
+LIST_OF_STATE_ATTRIBUTES = [["engine_type", "engine_type", "string"],
+                            ["qmin", "qmin", "float"],
+                            ["qmax", "qmax", "float"],
+                            ["npts", "npts", "float"],
+                            ["categorycombobox", "categorycombobox", "string"],
+                            ["formfactorcombobox", "formfactorcombobox", "string"],
+                            ["structurecombobox", "structurecombobox", "string"],
+                            ["multi_factor", "multi_factor", "float"],
+                            ["magnetic_on", "magnetic_on", "bool"],
+                            ["enable_smearer", "enable_smearer", "bool"],
+                            ["disable_smearer", "disable_smearer", "bool"],
+                            ["pinhole_smearer", "pinhole_smearer", "bool"],
+                            ["slit_smearer", "slit_smearer", "bool"],
+                            ["enable_disp", "enable_disp", "bool"],
+                            ["disable_disp", "disable_disp", "bool"],
+                            ["dI_noweight", "dI_noweight", "bool"],
+                            ["dI_didata", "dI_didata", "bool"],
+                            ["dI_sqrdata", "dI_sqrdata", "bool"],
+                            ["dI_idata", "dI_idata", "bool"],
+                            ["enable2D", "enable2D", "bool"],
+                            ["cb1", "cb1", "bool"],
+                            ["tcChi", "tcChi", "float"],
+                            ["smearer", "smearer", "float"],
+                            ["smear_type", "smear_type", "string"],
+                            ["dq_l", "dq_l", "string"],
+                            ["dq_r", "dq_r", "string"],
+                            ["dx_max", "dx_max", "float"],
+                            ["dx_min", "dx_min", "float"],
+                            ["dxl", "dxl", "float"],
+                            ["dxw", "dxw", "float"]]
 
-list_of_model_attributes = [["values", "values"],
+LIST_OF_MODEL_ATTRIBUTES = [["values", "values"],
                             ["weights", "weights"]]
 
-list_of_obj_dic = [["disp_obj_dict", "_disp_obj_dict", "string"]]
+DISPERSION_LIST = [["disp_obj_dict", "_disp_obj_dict", "string"]]
 
-list_of_state_parameters = [["parameters", "parameters"],
+LIST_OF_STATE_PARAMETERS = [["parameters", "parameters"],
                             ["str_parameters", "str_parameters"],
                             ["orientation_parameters", "orientation_params"],
                             ["dispersity_parameters", "orientation_params_disp"],
                             ["fixed_param", "fixed_param"],
                             ["fittable_param", "fittable_param"]]
-list_of_data_2d_attr = [["xmin", "xmin", "float"],
+LIST_OF_DATA_2D_ATTR = [["xmin", "xmin", "float"],
                         ["xmax", "xmax", "float"],
                         ["ymin", "ymin", "float"],
                         ["ymax", "ymax", "float"],
@@ -92,14 +93,14 @@ list_of_data_2d_attr = [["xmin", "xmin", "float"],
                         ["_yunit", "_yunit", "string"],
                         ["_zaxis", "_zaxis", "string"],
                         ["_zunit", "_zunit", "string"]]
-list_of_data2d_values = [["qx_data", "qx_data", "float"],
-                         ["qy_data", "qy_data", "float"],
-                         ["dqx_data", "dqx_data", "float"],
-                         ["dqy_data", "dqy_data", "float"],
-                         ["data", "data", "float"],
-                         ["q_data", "q_data", "float"],
-                         ["err_data", "err_data", "float"],
-                         ["mask", "mask", "bool"]]
+LIST_OF_DATA_2D_VALUES = [["qx_data", "qx_data", "float"],
+                          ["qy_data", "qy_data", "float"],
+                          ["dqx_data", "dqx_data", "float"],
+                          ["dqy_data", "dqy_data", "float"],
+                          ["data", "data", "float"],
+                          ["q_data", "q_data", "float"],
+                          ["err_data", "err_data", "float"],
+                          ["mask", "mask", "bool"]]
 
 
 def parse_entry_helper(node, item):
@@ -392,16 +393,12 @@ class PageState(object):
             rep += "model name : %s\n" % m_name
         else:
             rep += "model name : None\n"
-        #rep += "model type (form factor) selected: %s\n" % self.shape_rbutton 
         rep += "multi_factor : %s\n" % str(self.multi_factor)
         rep += "magnetic_on : %s\n" % str(self.magnetic_on)
         rep += "model type (Category) selected: %s\n" % self.categorycombobox
-        #rep += "model type (shape independent) selected: %s\n" % self.shape_indep_rbutton
-        #rep += "model type (structure factor) selected: %s\n" % self.struct_rbutton
-        #rep += "model type (plug-in ) selected: %s\n" % self.plugin_rbutton
         rep += "data : %s\n" % str(self.data)
         rep += "Plotting Range: min: %s, max: %s, steps: %s\n" % (str(self.qmin),
-                                                str(self.qmax), str(self.npts))
+                                                                  str(self.qmax), str(self.npts))
         rep += "Dispersion selection : %s\n" % str(self.disp_box)
         rep += "Smearing enable : %s\n" % str(self.enable_smearer)
         rep += "Smearing disable : %s\n" % str(self.disable_smearer)
@@ -452,15 +449,6 @@ class PageState(object):
             rep = self._repr_helper(list=self.str_parameters, rep=rep)
             rep += "number fittable_param(self.fittable_param): %s\n" % len(temp_fittable_param)
             rep = self._repr_helper(list=temp_fittable_param, rep=rep)
-            """
-            if is_2D:
-                rep += "number orientation parameters"
-                rep += "(self.orientation_params): %s\n"%len(self.orientation_params)
-                rep = self._repr_helper( list=self.orientation_params, rep=rep)
-                rep += "number dispersity parameters"
-                rep += "(self.orientation_params_disp): %s\n"%len(self.orientation_params_disp)
-                rep = self._repr_helper( list=self.orientation_params_disp, rep=rep)
-            """
         return rep
 
     def set_report_string(self):
@@ -476,7 +464,6 @@ class PageState(object):
         param_string = ""
         paramval_string = ""
         chi2_string = ""
-        multi_factor_string = ""
         q_range = ""
         strings = self.__repr__()
         lines = strings.split('\n')
@@ -489,7 +476,7 @@ class PageState(object):
             try:
                 value = content[1]
             except:
-                pass
+                logging.error(sys.exc_value)
             if name.count("State created"):
                 repo_time = "" + value
             if name.count("parameter name"):
@@ -503,28 +490,21 @@ class PageState(object):
                     param_string += value + ','
             if name == "value":
                 param_string += value + ','
-	    if name == "selected":
-		if value == u' False':
-		    fixed_parameter = True
-		else:
-		    fixed_parameter = False
+            if name == "selected":
+                if value == u' False':
+                    fixed_parameter = True
+                else:
+                    fixed_parameter = False
             if name == "error value":
-	        if fixed_parameter:
-		    param_string += '(fixed),'
-		else:
+                if fixed_parameter:
+                    param_string += '(fixed),'
+                else:
                     param_string += value + ','
             if name == "parameter unit":
                 param_string += value + ':'
             if name == "Value of Chisqr ":
                 chi2 = ("Chi2/Npts = " + value)
                 chi2_string = CENTRE % chi2
-            if name == "multi_factor ":
-                muti_factor = ("muti_factor = " + value)
-                muti_factor_string = CENTRE % muti_factor
-            if name == "magentic_on ":
-                magentic_on = ("magentic_on = " + value)
-                if string(value) == 'True':
-                    magentic_on_string = CENTRE % magentic_on
             if name == "Title":
                 if len(value.strip()) == 0:
                     continue
@@ -532,13 +512,13 @@ class PageState(object):
                 title_name = HEADER % title
             if name == "data ":
                 try:
-                    file = ("File name:" + content[2])
-                    file_name = CENTRE % file
+                    file_value = ("File name:" + content[2])
+                    file_name = CENTRE % file_value
                     if len(title) == 0:
                         title = content[2] + " [" + repo_time + "]"
                         title_name = HEADER % title
                 except:
-                    pass
+                    logging.error(sys.exc_value)
             if name == "model name ":
                 try:
                     modelname = "Model name:" + content[1]
@@ -553,7 +533,7 @@ class PageState(object):
                     q_name = ("Q Range:    " + q_range)
                     q_range = CENTRE % q_name
                 except:
-                    pass
+                    logging.error(sys.exc_value)
         paramval = ""
         for lines in param_string.split(":"):
             line = lines.split(",")
@@ -724,38 +704,36 @@ class PageState(object):
         if self.data is not None and hasattr(self.data, "id"):
             self.data_id = self.data.id
 
-        for item in list_of_data_attributes:
+        for item in LIST_OF_DATA_ATTRIBUTES:
             element = newdoc.createElement(item[0])
-            exec "element.setAttribute(item[0], str(self.%s))" % (item[1])
+            element.setAttribute(item[0], str(getattr(self, item[1])))
             inputs.appendChild(element)
 
-        for item in list_of_state_attributes:
+        for item in LIST_OF_STATE_ATTRIBUTES:
             element = newdoc.createElement(item[0])
-            exec "element.setAttribute(item[0], str(self.%s))" % (item[1])
+            element.setAttribute(item[0], str(getattr(self, item[1])))
             inputs.appendChild(element)
 
         # For self.values ={ disp_param_name: [vals,...],...}
         # and for self.weights ={ disp_param_name: [weights,...],...}
-        list = {}
-        for item in list_of_model_attributes:
+        value_list = {}
+        for item in LIST_OF_MODEL_ATTRIBUTES:
             element = newdoc.createElement(item[0])
-            exec "list = self.%s" % item[1]
-            for key, value in list.iteritems():
+            value_list = getattr(self, item[1])
+            for key, value in value_list.iteritems():
                 sub_element = newdoc.createElement(key)
                 sub_element.setAttribute('name', str(key))
                 for val in value:
-                    com = "sub_element.appendChild"
-                    com += "(newdoc.createTextNode(str(%s)))"
-                    exec com % val
+                    sub_element.appendChild(newdoc.createTextNode(str(val)))
 
                 element.appendChild(sub_element)
             inputs.appendChild(element)
 
         # Create doc for the dictionary of self._disp_obj_dic
-        for item in list_of_obj_dic:
+        for item in DISPERSION_LIST:
             element = newdoc.createElement(item[0])
-            exec "list = self.%s" % item[1]
-            for key, val in list.iteritems():
+            value_list = getattr(self, item[1])
+            for key, val in value_list.iteritems():
                 value = repr(val)
                 sub_element = newdoc.createElement(key)
                 sub_element.setAttribute('name', str(key))
@@ -763,11 +741,9 @@ class PageState(object):
                 element.appendChild(sub_element)
             inputs.appendChild(element)
 
-        for item in list_of_state_parameters:
+        for item in LIST_OF_STATE_PARAMETERS:
             element = newdoc.createElement(item[0])
-            com = "self._toXML_helper(thelist=self.%s,"
-            com += " element=element, newdoc=newdoc)"
-            exec com % item[1]
+            self._toXML_helper(thelist=getattr(self, item[1]), element=element, newdoc=newdoc)
             inputs.appendChild(element)
 
         # Save the file
@@ -861,37 +837,26 @@ class PageState(object):
 
             # Parse fitting attributes
             entry = get_content('ns:Attributes', node)
-            for item in list_of_data_attributes:
+            for item in LIST_OF_DATA_ATTRIBUTES:
                 node = get_content('ns:%s' % item[0], entry)
-                try:
-                    exec "self.%s = parse_entry_helper(node, item)" % item[0]
-
-                except:
-                    raise
+                setattr(self, item[0], parse_entry_helper(node, item))
 
             if entry is not None:
-
-                for item in list_of_state_attributes:
+                for item in LIST_OF_STATE_ATTRIBUTES:
                     node = get_content('ns:%s' % item[0], entry)
-                    try:
-                        exec "self.%s = parse_entry_helper(node, item)" % \
-                                                                str(item[0])
-                    except:
-                        raise
+                    setattr(self, item[0], parse_entry_helper(node, item))
 
-                for item in list_of_state_parameters:
+                for item in LIST_OF_STATE_PARAMETERS:
                     node = get_content("ns:%s" % item[0], entry)
-                    exec "self._fromXML_helper(node=node, list=self.%s)" % \
-                                                                    item[1]
+                    self._fromXML_helper(node=node, list=getattr(self, item[1]))
 
                 # Recover _disp_obj_dict from xml file
                 self._disp_obj_dict = {}
-                disp_model = None
-                for item in list_of_obj_dic:
+                for item in DISPERSION_LIST:
                     # Get node
                     node = get_content("ns:%s" % item[0], entry)
                     for attr in node:
-                        name = attr.get('name')
+                        name = str(attr.get('name'))
                         val = attr.get('value')
                         value = val.split(" instance")[0]
                         disp_name = value.split("<")[1]
@@ -902,15 +867,16 @@ class PageState(object):
                             com_name = disp_name.split(".")[3]
                             exec com % com_name
                             disp_model = disp()
-                            exec "self.%s['%s'] = com_name" % (item[1], name)
+                            attribute = getattr(self, item[1])
+                            attribute[name] = com_name
                         except:
-                            pass
+                            logging.error(sys.exc_value)
 
                 # get self.values and self.weights dic. if exists
-                for item in list_of_model_attributes:
+                for item in LIST_OF_MODEL_ATTRIBUTES:
                     node = get_content("ns:%s" % item[0], entry)
                     dic = {}
-                    list = []
+                    value_list = []
                     for par in node:
                         name = par.get('name')
                         values = par.text.split('\n')
@@ -918,12 +884,12 @@ class PageState(object):
                         for line in values:
                             try:
                                 val = float(line)
-                                list.append(val)
+                                value_list.append(val)
                             except:
                                 # pass if line is empty (it happens)
-                                pass
-                    dic[name] = numpy.array(list)
-                    exec "self.%s = dic" % item[1]
+                                logging.error(sys.exc_value)
+                    dic[name] = numpy.array(value_list)
+                    setattr(self, item[1], dic)
 
     def set_plot_state(self, figs, canvases):
         """
@@ -951,7 +917,7 @@ class PageState(object):
                 ind = figs.index(fig)
                 canvas = canvases[ind]
 
-            #store the image in wx.FileSystem Object 
+            #store the image in wx.FileSystem Object
             wx.FileSystem.AddHandler(wx.MemoryFSHandler())
 
             # index of the fig
@@ -1025,7 +991,8 @@ class Reader(CansasReader):
         main_node.setAttribute("version", self.version)
         main_node.setAttribute("xmlns", "cansas1d/%s" % self.version)
         main_node.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-        main_node.setAttribute("xsi:schemaLocation", "cansas1d/%s http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd" % self.version)
+        main_node.setAttribute("xsi:schemaLocation",
+                               "cansas1d/%s http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd" % self.version)
 
         doc.appendChild(main_node)
 
@@ -1038,30 +1005,30 @@ class Reader(CansasReader):
         for item in datainfo.run:
             runname = {}
             if datainfo.run_name.has_key(item) and len(str(datainfo.run_name[item])) > 1:
-                runname = {'name': datainfo.run_name[item] }
+                runname = {'name': datainfo.run_name[item]}
             write_node(doc, entry_node, "Run", item, runname)
         # Data info
         new_node = doc.createElement("SASdata")
         entry_node.appendChild(new_node)
-        for item in list_of_data_2d_attr:
+        for item in LIST_OF_DATA_2D_ATTR:
             element = doc.createElement(item[0])
-            exec "element.setAttribute(item[0], str(datainfo.%s))" % (item[1])
+            element.setAttribute(item[0], str(getattr(datainfo, item[1])))
             new_node.appendChild(element)
 
-        for item in list_of_data2d_values:
+        for item in LIST_OF_DATA_2D_VALUES:
             root_node = doc.createElement(item[0])
             new_node.appendChild(root_node)
             temp_list = None
-            exec "temp_list = datainfo.%s" % item[1]
+            temp_list = getattr(datainfo, item[1])
 
             if temp_list is None or len(temp_list) == 0:
                 element = doc.createElement(item[0])
-                exec "element.appendChild(doc.createTextNode(str(%s)))" % temp_list
+                element.appendChild(doc.createTextNode(str(temp_list)))
                 root_node.appendChild(element)
             else:
                 for value in temp_list:
                     element = doc.createElement(item[0])
-                    exec "element.setAttribute(item[0], str(%s))" % value
+                    element.setAttribute(item[0], str(value))
                     root_node.appendChild(element)
 
         # Sample info
@@ -1341,17 +1308,12 @@ class Reader(CansasReader):
         if entry is not None:
             data_info.sample.name = entry.get('name')
 
-        self._store_content('ns:SASsample/ns:ID',
-                     dom, 'ID', data_info.sample)
-        self._store_float('ns:SASsample/ns:thickness',
-                     dom, 'thickness', data_info.sample)
-        self._store_float('ns:SASsample/ns:transmission',
-                     dom, 'transmission', data_info.sample)
-        self._store_float('ns:SASsample/ns:temperature',
-                     dom, 'temperature', data_info.sample)
+        self._store_content('ns:SASsample/ns:ID', dom, 'ID', data_info.sample)
+        self._store_float('ns:SASsample/ns:thickness', dom, 'thickness', data_info.sample)
+        self._store_float('ns:SASsample/ns:transmission', dom, 'transmission', data_info.sample)
+        self._store_float('ns:SASsample/ns:temperature', dom, 'temperature', data_info.sample)
 
-        nodes = dom.xpath('ns:SASsample/ns:details',
-                          namespaces={'ns': CANSAS_NS})
+        nodes = dom.xpath('ns:SASsample/ns:details', namespaces={'ns': CANSAS_NS})
         for item in nodes:
             try:
                 if item.text is not None:
@@ -1364,20 +1326,17 @@ class Reader(CansasReader):
                 logging.error(err_mess)
 
         # Position (as a vector)
-        self._store_float('ns:SASsample/ns:position/ns:x',
-                     dom, 'position.x', data_info.sample)
-        self._store_float('ns:SASsample/ns:position/ns:y',
-                     dom, 'position.y', data_info.sample)
-        self._store_float('ns:SASsample/ns:position/ns:z',
-                     dom, 'position.z', data_info.sample)
+        self._store_float('ns:SASsample/ns:position/ns:x', dom, 'position.x', data_info.sample)
+        self._store_float('ns:SASsample/ns:position/ns:y', dom, 'position.y', data_info.sample)
+        self._store_float('ns:SASsample/ns:position/ns:z', dom, 'position.z', data_info.sample)
 
         # Orientation (as a vector)
         self._store_float('ns:SASsample/ns:orientation/ns:roll',
-                     dom, 'orientation.x', data_info.sample)
+                          dom, 'orientation.x', data_info.sample)
         self._store_float('ns:SASsample/ns:orientation/ns:pitch',
-                     dom, 'orientation.y', data_info.sample)
+                          dom, 'orientation.y', data_info.sample)
         self._store_float('ns:SASsample/ns:orientation/ns:yaw',
-                     dom, 'orientation.z', data_info.sample)
+                          dom, 'orientation.z', data_info.sample)
 
         # Source info ###################
         entry = get_content('ns:SASinstrument/ns:SASsource', dom)
@@ -1385,17 +1344,17 @@ class Reader(CansasReader):
             data_info.source.name = entry.get('name')
 
         self._store_content('ns:SASinstrument/ns:SASsource/ns:radiation',
-                     dom, 'radiation', data_info.source)
+                            dom, 'radiation', data_info.source)
         self._store_content('ns:SASinstrument/ns:SASsource/ns:beam_shape',
-                     dom, 'beam_shape', data_info.source)
+                            dom, 'beam_shape', data_info.source)
         self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength',
-                     dom, 'wavelength', data_info.source)
+                          dom, 'wavelength', data_info.source)
         self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_min',
-                     dom, 'wavelength_min', data_info.source)
+                          dom, 'wavelength_min', data_info.source)
         self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_max',
-                     dom, 'wavelength_max', data_info.source)
+                          dom, 'wavelength_max', data_info.source)
         self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_spread',
-                     dom, 'wavelength_spread', data_info.source)
+                          dom, 'wavelength_spread', data_info.source)
 
         # Beam size (as a vector)
         entry = get_content('ns:SASinstrument/ns:SASsource/ns:beam_size', dom)
@@ -1403,11 +1362,11 @@ class Reader(CansasReader):
             data_info.source.beam_size_name = entry.get('name')
 
         self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:x',
-                     dom, 'beam_size.x', data_info.source)
+                          dom, 'beam_size.x', data_info.source)
         self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:y',
-                     dom, 'beam_size.y', data_info.source)
+                          dom, 'beam_size.y', data_info.source)
         self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:z',
-                     dom, 'beam_size.z', data_info.source)
+                          dom, 'beam_size.z', data_info.source)
 
         # Collimation info ###################
         nodes = dom.xpath('ns:SASinstrument/ns:SAScollimation',
@@ -1521,20 +1480,20 @@ class Reader(CansasReader):
             raise RuntimeError, "CanSAS reader is not compatible with multiple SASdata entries"
 
         for entry in nodes:
-            for item in list_of_data_2d_attr:
+            for item in LIST_OF_DATA_2D_ATTR:
                 #get node
                 node = get_content('ns:%s' % item[0], entry)
-                exec "data_info.%s = parse_entry_helper(node, item)" % item[1]
+                setattr(data_info, item[1], parse_entry_helper(node, item))
 
-            for item in list_of_data2d_values:
+            for item in LIST_OF_DATA_2D_VALUES:
                 field = get_content('ns:%s' % item[0], entry)
-                list = []
+                value_list = []
                 if field is not None:
-                    list = [parse_entry_helper(node, item) for node in field]
-                if len(list) < 2:
-                    exec "data_info.%s = None" % item[0]
+                    value_list = [parse_entry_helper(node, item) for node in field]
+                if len(value_list) < 2:
+                    setattr(data_info, item[0], None)
                 else:
-                    exec "data_info.%s = numpy.array(list)" % item[0]
+                    setattr(data_info, item[0], numpy.array(value_list))
 
         return data_info
 
@@ -1605,7 +1564,7 @@ class Reader(CansasReader):
                     state.file = original_fname + ' [' + time_str + ']'
 
                     if state is not None and state.is_data is not None:
-                        exec 'output[%d].is_data = state.is_data' % ind
+                        output[ind].is_data = state.is_data
 
                     output[ind].filename = state.file
                     state.data = output[ind]
@@ -1624,10 +1583,8 @@ class Reader(CansasReader):
                                    datainfo=output[ind], format=ext)
                     self.state = state
                 return output
-
         except:
             self.call_back(format=ext)
-            #self.state= state
             raise
 
     def write(self, filename, datainfo=None, fitstate=None):
