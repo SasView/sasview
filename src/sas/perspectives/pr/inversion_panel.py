@@ -9,8 +9,8 @@ import os
 import sys
 import logging
 from wx.lib.scrolledpanel import ScrolledPanel
-from sas.guiframe.events import StatusEvent   
-from sas.guiframe.panel_base import PanelBase 
+from sas.guiframe.events import StatusEvent
+from sas.guiframe.panel_base import PanelBase
 from inversion_state import InversionState
 from pr_widgets import PrTextCtrl
 from pr_widgets import DataFileTextCtrl
@@ -27,73 +27,72 @@ class InversionControl(ScrolledPanel, PanelBase):
     window_name = 'pr_control'
     window_caption = "P(r) control panel"
     CENTER_PANE = True
-    
+
     # Figure of merit parameters [default]
-    
+
     ## Oscillation parameters (sin function = 1.1)
     oscillation_max = 1.5
-    
-    def __init__(self, parent, id=-1, plots=None, 
-                 standalone=False, **kwargs):
+
+    def __init__(self, parent, id=-1, plots=None, standalone=False, **kwargs):
         """
         """
         ScrolledPanel.__init__(self, parent, id=id, **kwargs)
         PanelBase.__init__(self, parent)
         self.SetupScrolling()
-        #Set window's font size 
+        #Set window's font size
         self.SetWindowVariant(variant=FONT_VARIANT)
-        
+
         self.plots = plots
         self.radio_buttons = {}
         self.parent = parent.parent
-        
+
         ## Data file TextCtrl
-        self.data_file  = None
-        self.plot_data  = None
-        self.nfunc_ctl  = None
-        self.alpha_ctl  = None
-        self.dmax_ctl   = None
-        self.time_ctl   = None
-        self.chi2_ctl   = None
-        self.osc_ctl    = None
+        self.data_file = None
+        self.plot_data = None
+        self.nfunc_ctl = None
+        self.alpha_ctl = None
+        self.dmax_ctl = None
+        self.time_ctl = None
+        self.chi2_ctl = None
+        self.osc_ctl = None
         self.file_radio = None
         self.plot_radio = None
         self.label_sugg = None
-        self.qmin_ctl   = None
-        self.qmax_ctl   = None
+        self.qmin_ctl = None
+        self.qmax_ctl = None
         self.swidth_ctl = None
         self.sheight_ctl = None
-        
-        self.rg_ctl     = None
-        self.iq0_ctl    = None
-        self.bck_chk    = None
-        self.bck_ctl    = None
-        
+
+        self.rg_ctl = None
+        self.iq0_ctl = None
+        self.bck_chk = None
+        self.bck_ctl = None
+
         # TextCtrl for fraction of positive P(r)
         self.pos_ctl = None
-        
+
         # TextCtrl for fraction of 1 sigma positive P(r)
-        self.pos_err_ctl = None 
-        
+        self.pos_err_ctl = None
+
         ## Estimates
         self.alpha_estimate_ctl = None
         self.nterms_estimate_ctl = None
         ## D_max distance explorator
         self.distance_explorator_ctl = None
         ## Data manager
-        self._manager   = None
+        self._manager = None
         ## Standalone flage
         self.standalone = standalone
         ## Default file location for save
         self._default_save_location = os.getcwd()
         if self.parent is not None:
-            self._default_save_location =\
+            self._default_save_location = \
                         self.parent._default_save_location
-        
+
         # Default width
         self._default_width = 350
         self._do_layout()
-        
+
     def __setattr__(self, name, value):
         """
         Allow direct hooks to text boxes
@@ -114,7 +113,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             self.qmax_ctl.SetValue("%-5.2g" % value)
         elif name == 'elapsed':
             self.time_ctl.SetValue("%-5.2g" % value)
-        elif name =='rg':
+        elif name == 'rg':
             self.rg_ctl.SetValue("%-5.2g" % value)
         elif name == 'iq0':
             self.iq0_ctl.SetValue("%-5.2g" % value)
@@ -146,7 +145,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             self._on_pars_changed(None)
         else:
             wx.Panel.__setattr__(self, name, value)
-        
+
     def __getattr__(self, name):
         """
         Allow direct hooks to text boxes
@@ -181,7 +180,7 @@ class InversionControl(ScrolledPanel, PanelBase):
                 return float(self.qmin_ctl.GetValue())
             except:
                 return 0.0
-        elif name=='q_max':
+        elif name == 'q_max':
             try:
                 return float(self.qmax_ctl.GetValue())
             except:
@@ -196,7 +195,7 @@ class InversionControl(ScrolledPanel, PanelBase):
                 return float(self.rg_ctl.GetValue())
             except:
                 return None
-        elif name=='iq0':
+        elif name == 'iq0':
             try:
                 return float(self.iq0_ctl.GetValue())
             except:
@@ -211,7 +210,7 @@ class InversionControl(ScrolledPanel, PanelBase):
                 return float(self.swidth_ctl.GetValue())
             except:
                 return None
-        elif name=='slit_height':
+        elif name == 'slit_height':
             try:
                 return float(self.sheight_ctl.GetValue())
             except:
@@ -242,7 +241,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             return self.plot_data.GetValue()
         else:
             return wx.Panel.__getattribute__(self, name)
-        
+
     def save_project(self, doc=None):
         """
         return an xml node containing state of the panel
@@ -259,98 +258,96 @@ class InversionControl(ScrolledPanel, PanelBase):
                         doc.firstChild.appendChild(item)
                 else:
                     doc = new_doc
-        return doc   
-    
+        return doc
+
     def on_save(self, evt=None):
         """
         Method used to create a memento of the current state
-            
-        :return: state object 
+
+        :return: state object
         """
         # Ask the user the location of the file to write to.
         path = None
         if self.parent != None:
-            self._default_save_location =\
-             self.parent._default_save_location
+            self._default_save_location = self.parent._default_save_location
         dlg = wx.FileDialog(self, "Choose a file",
-                            self._default_save_location,\
+                            self._default_save_location,
                             self.window_caption, "*.prv", wx.SAVE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self._default_save_location = os.path.dirname(path)
             if self.parent != None:
-                self.parent._default_save_location =\
-                self._default_save_location
+                self.parent._default_save_location = self._default_save_location
         else:
             return None
-        
+
         dlg.Destroy()
-        
+
         state = self.get_state()
-        
+
         # MAC always needs the extension for saving
         extens = ".prv"
         # Make sure the ext included in the file name
         fName = os.path.splitext(path)[0] + extens
         self._manager.save_data(filepath=fName, prstate=state)
-        
+
         return state
-    
+
     def get_data(self):
         """
         """
         return self._manager.get_data()
-    
+
     def get_state(self):
         """
         Get the current state
-        
+
         : return: state object
         """
-        # Construct the state object    
+        # Construct the state object
         state = InversionState()
-        
+
         # Read the panel's parameters
         flag, alpha, dmax, nfunc, qmin, \
         qmax, height, width = self._read_pars()
-        
+
         state.nfunc = nfunc
         state.d_max = dmax
         state.alpha = alpha
-        state.qmin  = qmin
-        state.qmax  = qmax
+        state.qmin = qmin
+        state.qmax = qmax
         state.width = width
         state.height = height
-        
+
         # Data file
         state.file = self.plot_data.GetValue()
-        
+
         # Background evaluation checkbox
         state.estimate_bck = self.bck_chk.IsChecked()
-        
+
         # Estimates
         state.nterms_estimate = self.nterms_estimate
         state.alpha_estimate = self.alpha_estimate
-        
+
         # Read the output values
-        state.chi2    = self.chi2
+        state.chi2 = self.chi2
         state.elapsed = self.elapsed
-        state.osc     = self.oscillation
-        state.pos     = self.pos
+        state.osc = self.oscillation
+        state.pos = self.pos
         state.pos_err = self.pos_err
-        state.rg      = self.rg
-        state.iq0     = self.iq0
-        state.bck     = self.bck
-        
+        state.rg = self.rg
+        state.iq0 = self.iq0
+        state.bck = self.bck
+
         return state
-    
+
     def set_state(self, state):
         """
         Set the state of the panel and inversion problem to
         the state passed as a parameter.
-        Execute the inversion immediately after filling the 
+        Execute the inversion immediately after filling the
         controls.
-        
+
         :param state: InversionState object
         """
         if state.nfunc is not None:
@@ -360,30 +357,30 @@ class InversionControl(ScrolledPanel, PanelBase):
         if state.alpha is not None:
             self.alpha = state.alpha
         if state.qmin is not None:
-            self.q_min  = state.qmin
+            self.q_min = state.qmin
         if state.qmax is not None:
-            self.q_max  = state.qmax
+            self.q_max = state.qmax
         if state.width is not None:
             self.slit_width = state.width
         if state.height is not None:
             self.slit_height = state.height
-        
+
         # Data file
         self.plot_data.SetValue(str(state.file))
-    
+
         # Background evaluation checkbox
         self.bck_chk.SetValue(state.estimate_bck)
-        
+
         # Estimates
         if state.nterms_estimate is not None:
             self.nterms_estimate = state.nterms_estimate
-        if state.alpha_estimate is not None: 
-            self.alpha_estimate = state.alpha_estimate 
-    
-        
+        if state.alpha_estimate is not None:
+            self.alpha_estimate = state.alpha_estimate
+
+
         # Read the output values
         if state.chi2 is not None:
-            self.chi2    = state.chi2
+            self.chi2 = state.chi2
         if state.elapsed is not None:
             self.elapsed = state.elapsed
         if state.osc is not None:
@@ -393,25 +390,25 @@ class InversionControl(ScrolledPanel, PanelBase):
         if state.pos_err is not None:
             self.pos_err = state.pos_err
         if state.rg is not None:
-            self.rg      = state.rg
+            self.rg = state.rg
         if state.iq0 is not None:
-            self.iq0     = state.iq0
+            self.iq0 = state.iq0
         if state.bck is not None:
-            self.bck     = state.bck
+            self.bck = state.bck
 
         # Perform inversion
-        self._on_invert(None)    
-        
+        self._on_invert(None)
+
     def set_manager(self, manager):
         self._manager = manager
-        
+
     def _do_layout(self):
-        vbox = wx.GridBagSizer(0,0)
+        vbox = wx.GridBagSizer(0, 0)
         iy_vb = 0
 
         # ----- I(q) data -----
         databox = wx.StaticBox(self, -1, "I(q) data source")
-        
+
         boxsizer1 = wx.StaticBoxSizer(databox, wx.VERTICAL)
         boxsizer1.SetMinSize((self._default_width, 50))
         pars_sizer = wx.GridBagSizer(5, 5)
@@ -419,13 +416,13 @@ class InversionControl(ScrolledPanel, PanelBase):
         iy = 0
         self.file_radio = wx.StaticText(self, -1, "Name:")
         pars_sizer.Add(self.file_radio, (iy, 0), (1, 1),
-                       wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        
-        self.plot_data = DataFileTextCtrl(self, -1, size=(260,20))
-        
+                       wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+
+        self.plot_data = DataFileTextCtrl(self, -1, size=(260, 20))
+
         pars_sizer.Add(self.plot_data, (iy, 1), (1, 1),
-                       wx.EXPAND|wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 15)
-        
+                       wx.EXPAND | wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 15)
+
         self.bck_chk = wx.CheckBox(self, -1, "Estimate background level")
         hint_msg = "Check box to let the fit estimate "
         hint_msg += "the constant background level."
@@ -433,325 +430,294 @@ class InversionControl(ScrolledPanel, PanelBase):
         self.bck_chk.Bind(wx.EVT_CHECKBOX, self._on_pars_changed)
         iy += 1
         pars_sizer.Add(self.bck_chk, (iy, 0), (1, 2),
-                       wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-        boxsizer1.Add(pars_sizer, 0, wx.EXPAND)  
+                       wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+        boxsizer1.Add(pars_sizer, 0, wx.EXPAND)
         vbox.Add(boxsizer1, (iy_vb, 0), (1, 1),
-                 wx.LEFT|wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE|wx.TOP, 5)
-        
+                 wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE | wx.TOP, 5)
+
         # ----- Add slit parameters -----
         if True:
             sbox = wx.StaticBox(self, -1, "Slit parameters")
             sboxsizer = wx.StaticBoxSizer(sbox, wx.VERTICAL)
             sboxsizer.SetMinSize((self._default_width, 20))
-            
+
             sizer_slit = wx.GridBagSizer(5, 5)
-    
+
             label_sheight = wx.StaticText(self, -1, "Height", size=(40, 20))
             label_swidth = wx.StaticText(self, -1, "Width", size=(40, 20))
-            #label_sunits1 = wx.StaticText(self, -1, "[A^(-1)]")
-            label_sunits2 = wx.StaticText(self, -1, "[A^(-1)]", size=(55,20))
-            self.sheight_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
-                                          size=(60,20))
-            self.swidth_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
-                                         size=(60,20))
+            label_sunits2 = wx.StaticText(self, -1, "[A^(-1)]", size=(55, 20))
+            self.sheight_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60, 20))
+            self.swidth_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60, 20))
             hint_msg = "Enter slit height in units of Q or leave blank."
             self.sheight_ctl.SetToolTipString(hint_msg)
             hint_msg = "Enter slit width in units of Q or leave blank."
             self.swidth_ctl.SetToolTipString(hint_msg)
-            #self.sheight_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
-            #self.swidth_ctl.Bind(wx.EVT_TEXT,  self._on_pars_changed)
-            
+
             iy = 0
-            sizer_slit.Add(label_sheight,    (iy, 0), (1, 1),
-                           wx.LEFT|wx.EXPAND, 5)
-            sizer_slit.Add(self.sheight_ctl, (iy, 1), (1, 1),
-                           wx.LEFT|wx.EXPAND, 5)
-    
-            sizer_slit.Add(label_swidth,     (iy, 2), (1, 1),
-                           wx.LEFT|wx.EXPAND, 5)
-            sizer_slit.Add(self.swidth_ctl,  (iy, 3), (1, 1),
-                           wx.LEFT|wx.EXPAND, 5)
-            sizer_slit.Add(label_sunits2,    (iy, 4), (1, 1),
-                           wx.LEFT|wx.EXPAND, 5)
-            
+            sizer_slit.Add(label_sheight, (iy, 0), (1, 1), wx.LEFT | wx.EXPAND, 5)
+            sizer_slit.Add(self.sheight_ctl, (iy, 1), (1, 1), wx.LEFT | wx.EXPAND, 5)
+            sizer_slit.Add(label_swidth, (iy, 2), (1, 1), wx.LEFT | wx.EXPAND, 5)
+            sizer_slit.Add(self.swidth_ctl, (iy, 3), (1, 1), wx.LEFT | wx.EXPAND, 5)
+            sizer_slit.Add(label_sunits2, (iy, 4), (1, 1), wx.LEFT | wx.EXPAND, 5)
+
             sboxsizer.Add(sizer_slit, wx.TOP, 15)
             iy_vb += 1
             vbox.Add(sboxsizer, (iy_vb, 0), (1, 1),
-                     wx.LEFT|wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
-        
-        
+                     wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
+
         # ----- Q range -----
         qbox = wx.StaticBox(self, -1, "Q range")
         qboxsizer = wx.StaticBoxSizer(qbox, wx.VERTICAL)
         qboxsizer.SetMinSize((self._default_width, 20))
-        
+
         sizer_q = wx.GridBagSizer(5, 5)
 
         label_qmin = wx.StaticText(self, -1, "Q min", size=(40, 20))
         label_qmax = wx.StaticText(self, -1, "Q max", size=(40, 20))
-        #label_qunits1 = wx.StaticText(self, -1, "[A^(-1)]")
         label_qunits2 = wx.StaticText(self, -1, "[A^(-1)]", size=(55, 20))
-        self.qmin_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
-                                   size=(60,20))
-        self.qmax_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
-                                   size=(60,20))
+        self.qmin_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60, 20))
+        self.qmax_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60, 20))
         hint_msg = "Select a lower bound for Q or leave blank."
         self.qmin_ctl.SetToolTipString(hint_msg)
         hint_msg = "Select an upper bound for Q or leave blank."
         self.qmax_ctl.SetToolTipString(hint_msg)
         self.qmin_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
         self.qmax_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
-        
+
         iy = 0
-        sizer_q.Add(label_qmin,    (iy, 0), (1, 1), wx.LEFT|wx.EXPAND, 5)
-        sizer_q.Add(self.qmin_ctl, (iy, 1), (1, 1), wx.LEFT|wx.EXPAND, 5)
-        #sizer_q.Add(label_qunits1, (iy,2), (1,1), wx.LEFT|wx.EXPAND, 15)
-        sizer_q.Add(label_qmax,    (iy, 2), (1, 1), wx.LEFT|wx.EXPAND, 5)
-        sizer_q.Add(self.qmax_ctl, (iy, 3), (1, 1), wx.LEFT|wx.EXPAND, 5)
-        sizer_q.Add(label_qunits2, (iy, 4), (1, 1), wx.LEFT|wx.EXPAND, 5)
+        sizer_q.Add(label_qmin, (iy, 0), (1, 1), wx.LEFT | wx.EXPAND, 5)
+        sizer_q.Add(self.qmin_ctl, (iy, 1), (1, 1), wx.LEFT | wx.EXPAND, 5)
+        sizer_q.Add(label_qmax, (iy, 2), (1, 1), wx.LEFT | wx.EXPAND, 5)
+        sizer_q.Add(self.qmax_ctl, (iy, 3), (1, 1), wx.LEFT | wx.EXPAND, 5)
+        sizer_q.Add(label_qunits2, (iy, 4), (1, 1), wx.LEFT | wx.EXPAND, 5)
         qboxsizer.Add(sizer_q, wx.TOP, 15)
 
         iy_vb += 1
-        vbox.Add(qboxsizer, (iy_vb,0), (1,1),
-                 wx.LEFT|wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
-    
+        vbox.Add(qboxsizer, (iy_vb, 0), (1, 1),
+                 wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
+
         # ----- Parameters -----
         parsbox = wx.StaticBox(self, -1, "Parameters")
         boxsizer2 = wx.StaticBoxSizer(parsbox, wx.VERTICAL)
-        boxsizer2.SetMinSize((self._default_width,50))
-        
-        explanation  = "P(r) is found by fitting a set of base functions"
+        boxsizer2.SetMinSize((self._default_width, 50))
+
+        explanation = "P(r) is found by fitting a set of base functions"
         explanation += " to I(Q). The minimization involves"
         explanation += " a regularization term to ensure a smooth P(r)."
-        explanation += " The regularization constant gives the size of that "  
+        explanation += " The regularization constant gives the size of that "
         explanation += "term. The suggested value is the value above which the"
         explanation += " output P(r) will have only one peak."
-        label_explain = wx.StaticText(self, -1, explanation, size=(280,90))
-        boxsizer2.Add(label_explain,  wx.LEFT|wx.BOTTOM, 5)
-        
-        
-        
+        label_explain = wx.StaticText(self, -1, explanation, size=(280, 90))
+        boxsizer2.Add(label_explain, wx.LEFT | wx.BOTTOM, 5)
+
         label_nfunc = wx.StaticText(self, -1, "Number of terms")
         label_nfunc.SetMinSize((120, 20))
         label_alpha = wx.StaticText(self, -1, "Regularization constant")
-        label_dmax  = wx.StaticText(self, -1, "Max distance [A]")
-        self.label_sugg  = wx.StaticText(self, -1, "Suggested value")
-        #self.label_sugg.Hide()
-        
-        self.nfunc_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
-                                    size=(60,20))
+        label_dmax = wx.StaticText(self, -1, "Max distance [A]")
+        self.label_sugg = wx.StaticText(self, -1, "Suggested value")
+
+        self.nfunc_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60, 20))
         self.nfunc_ctl.SetToolTipString("Number of terms in the expansion.")
-        self.alpha_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
-                                    size=(60,20))
+        self.alpha_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60, 20))
         hint_msg = "Control parameter for the size of the regularization term."
         self.alpha_ctl.SetToolTipString(hint_msg)
-        self.dmax_ctl  = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
-                                    size=(60,20))
+        self.dmax_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER, size=(60, 20))
         hint_msg = "Maximum distance between any two points in the system."
         self.dmax_ctl.SetToolTipString(hint_msg)
-        id = wx.NewId()
-        self.alpha_estimate_ctl  = wx.Button(self, id, "")
-        #self.alpha_estimate_ctl.Hide()
-        self.Bind(wx.EVT_BUTTON, self._on_accept_alpha, id = id)   
+        wx_id = wx.NewId()
+        self.alpha_estimate_ctl = wx.Button(self, wx_id, "")
+        self.Bind(wx.EVT_BUTTON, self._on_accept_alpha, id=wx_id)
         self.alpha_estimate_ctl.Enable(False)
-        #self.alpha_estimate_ctl.SetBackgroundColour('#ffdf85')
-        #self.alpha_estimate_ctl.SetBackgroundColour(self.GetBackgroundColour())
         self.alpha_estimate_ctl.SetToolTipString("Waiting for estimate...")
-        
-        id = wx.NewId()
-        self.nterms_estimate_ctl  = wx.Button(self, id, "")
+
+        wx_id = wx.NewId()
+        self.nterms_estimate_ctl = wx.Button(self, wx_id, "")
         #self.nterms_estimate_ctl.Hide()
-        self.Bind(wx.EVT_BUTTON, self._on_accept_nterms, id = id)   
+        self.Bind(wx.EVT_BUTTON, self._on_accept_nterms, id=wx_id)
         self.nterms_estimate_ctl.Enable(False)
-      
+
         self.nterms_estimate_ctl.SetToolTipString("Waiting for estimate...")
-        
+
         self.nfunc_ctl.Bind(wx.EVT_TEXT, self._read_pars)
         self.alpha_ctl.Bind(wx.EVT_TEXT, self._read_pars)
         self.dmax_ctl.Bind(wx.EVT_TEXT, self._on_pars_changed)
-        
+
         # Distance explorator
-        id = wx.NewId()
-        self.distance_explorator_ctl = wx.Button(self, id, "Explore")
-        self.Bind(wx.EVT_BUTTON, self._on_explore, id = id)           
-        
-        
-        sizer_params = wx.GridBagSizer(5,5)
+        wx_id = wx.NewId()
+        self.distance_explorator_ctl = wx.Button(self, wx_id, "Explore")
+        self.Bind(wx.EVT_BUTTON, self._on_explore, id=wx_id)
+
+
+        sizer_params = wx.GridBagSizer(5, 5)
 
         iy = 0
         sizer_params.Add(self.label_sugg, (iy, 2), (1, 1), wx.LEFT, 15)
         iy += 1
-        sizer_params.Add(label_nfunc,      (iy, 0), (1, 1), wx.LEFT, 15)
-        sizer_params.Add(self.nfunc_ctl,   (iy, 1), (1, 1), wx.RIGHT, 0)
+        sizer_params.Add(label_nfunc, (iy, 0), (1, 1), wx.LEFT, 15)
+        sizer_params.Add(self.nfunc_ctl, (iy, 1), (1, 1), wx.RIGHT, 0)
         sizer_params.Add(self.nterms_estimate_ctl, (iy, 2), (1, 1), wx.LEFT, 15)
         iy += 1
-        sizer_params.Add(label_alpha,      (iy, 0), (1, 1), wx.LEFT, 15)
-        sizer_params.Add(self.alpha_ctl,   (iy, 1), (1, 1), wx.RIGHT, 0)
+        sizer_params.Add(label_alpha, (iy, 0), (1, 1), wx.LEFT, 15)
+        sizer_params.Add(self.alpha_ctl, (iy, 1), (1, 1), wx.RIGHT, 0)
         sizer_params.Add(self.alpha_estimate_ctl, (iy, 2), (1, 1), wx.LEFT, 15)
         iy += 1
         sizer_params.Add(label_dmax, (iy, 0), (1, 1), wx.LEFT, 15)
-        sizer_params.Add(self.dmax_ctl,   (iy, 1), (1, 1), wx.RIGHT, 0)
+        sizer_params.Add(self.dmax_ctl, (iy, 1), (1, 1), wx.RIGHT, 0)
         sizer_params.Add(self.distance_explorator_ctl, (iy, 2),
                          (1, 1), wx.LEFT, 15)
 
         boxsizer2.Add(sizer_params, 0)
-        
+
         iy_vb += 1
         vbox.Add(boxsizer2, (iy_vb, 0), (1, 1),
-                 wx.LEFT|wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
+                 wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
 
 
         # ----- Results -----
         resbox = wx.StaticBox(self, -1, "Outputs")
         ressizer = wx.StaticBoxSizer(resbox, wx.VERTICAL)
         ressizer.SetMinSize((self._default_width, 50))
-        
-        label_rg       = wx.StaticText(self, -1, "Rg")
-        label_rg_unit  = wx.StaticText(self, -1, "[A]")
-        label_iq0      = wx.StaticText(self, -1, "I(Q=0)")
+
+        label_rg = wx.StaticText(self, -1, "Rg")
+        label_rg_unit = wx.StaticText(self, -1, "[A]")
+        label_iq0 = wx.StaticText(self, -1, "I(Q=0)")
         label_iq0_unit = wx.StaticText(self, -1, "[A^(-1)]")
-        label_bck      = wx.StaticText(self, -1, "Background")
+        label_bck = wx.StaticText(self, -1, "Background")
         label_bck_unit = wx.StaticText(self, -1, "[A^(-1)]")
-        self.rg_ctl    = OutputTextCtrl(self, -1, size=(60,20))
+        self.rg_ctl = OutputTextCtrl(self, -1, size=(60, 20))
         hint_msg = "Radius of gyration for the computed P(r)."
         self.rg_ctl.SetToolTipString(hint_msg)
-        self.iq0_ctl   = OutputTextCtrl(self, -1, size=(60, 20))
+        self.iq0_ctl = OutputTextCtrl(self, -1, size=(60, 20))
         hint_msg = "Scattering intensity at Q=0 for the computed P(r)."
         self.iq0_ctl.SetToolTipString(hint_msg)
-        self.bck_ctl   = OutputTextCtrl(self, -1, size=(60, 20))
+        self.bck_ctl = OutputTextCtrl(self, -1, size=(60, 20))
         self.bck_ctl.SetToolTipString("Value of estimated constant background.")
-        
+
         label_time = wx.StaticText(self, -1, "Computation time")
         label_time_unit = wx.StaticText(self, -1, "secs")
-        label_time.SetMinSize((120,20))
+        label_time.SetMinSize((120, 20))
         label_chi2 = wx.StaticText(self, -1, "Chi2/dof")
         label_osc = wx.StaticText(self, -1, "Oscillations")
         label_pos = wx.StaticText(self, -1, "Positive fraction")
         label_pos_err = wx.StaticText(self, -1, "1-sigma positive fraction")
-        
+
         self.time_ctl = OutputTextCtrl(self, -1, size=(60, 20))
         hint_msg = "Computation time for the last inversion, in seconds."
         self.time_ctl.SetToolTipString(hint_msg)
-        
+
         self.chi2_ctl = OutputTextCtrl(self, -1, size=(60, 20))
         self.chi2_ctl.SetToolTipString("Chi^2 over degrees of freedom.")
-        
+
         # Oscillation parameter
         self.osc_ctl = OutputTextCtrl(self, -1, size=(60, 20))
         hint_msg = "Oscillation parameter. P(r) for a sphere has an "
         hint_msg += " oscillation parameter of 1.1."
         self.osc_ctl.SetToolTipString(hint_msg)
-        
+
         # Positive fraction figure of merit
         self.pos_ctl = OutputTextCtrl(self, -1, size=(60, 20))
         hint_msg = "Fraction of P(r) that is positive. "
         hint_msg += "Theoretically, P(r) is defined positive."
         self.pos_ctl.SetToolTipString(hint_msg)
-        
+
         # 1-simga positive fraction figure of merit
         self.pos_err_ctl = OutputTextCtrl(self, -1, size=(60, 20))
-        message  = "Fraction of P(r) that is at least 1 standard deviation"
+        message = "Fraction of P(r) that is at least 1 standard deviation"
         message += " greater than zero.\n"
         message += "This figure of merit tells you about the size of the "
         message += "P(r) errors.\n"
         message += "If it is close to 1 and the other figures of merit are bad,"
         message += " consider changing the maximum distance."
         self.pos_err_ctl.SetToolTipString(message)
-        
+
         sizer_res = wx.GridBagSizer(5, 5)
 
         iy = 0
-        sizer_res.Add(label_rg, (iy, 0), (1, 1), wx.LEFT|wx.EXPAND, 15)
-        sizer_res.Add(self.rg_ctl,   (iy, 1), (1, 1), wx.RIGHT|wx.EXPAND, 15)
-        sizer_res.Add(label_rg_unit,   (iy, 2), (1, 1), wx.RIGHT|wx.EXPAND, 15)
+        sizer_res.Add(label_rg, (iy, 0), (1, 1), wx.LEFT | wx.EXPAND, 15)
+        sizer_res.Add(self.rg_ctl, (iy, 1), (1, 1), wx.RIGHT | wx.EXPAND, 15)
+        sizer_res.Add(label_rg_unit, (iy, 2), (1, 1), wx.RIGHT | wx.EXPAND, 15)
         iy += 1
-        sizer_res.Add(label_iq0, (iy, 0), (1, 1), wx.LEFT|wx.EXPAND, 15)
-        sizer_res.Add(self.iq0_ctl,   (iy, 1), (1, 1), wx.RIGHT|wx.EXPAND, 15)
-        sizer_res.Add(label_iq0_unit, (iy, 2), (1, 1), wx.RIGHT|wx.EXPAND, 15)
+        sizer_res.Add(label_iq0, (iy, 0), (1, 1), wx.LEFT | wx.EXPAND, 15)
+        sizer_res.Add(self.iq0_ctl, (iy, 1), (1, 1), wx.RIGHT | wx.EXPAND, 15)
+        sizer_res.Add(label_iq0_unit, (iy, 2), (1, 1), wx.RIGHT | wx.EXPAND, 15)
         iy += 1
-        sizer_res.Add(label_bck, (iy, 0), (1, 1), wx.LEFT|wx.EXPAND, 15)
-        sizer_res.Add(self.bck_ctl, (iy, 1), (1, 1), wx.RIGHT|wx.EXPAND, 15)
-        sizer_res.Add(label_bck_unit, (iy, 2), (1, 1), wx.RIGHT|wx.EXPAND, 15)
+        sizer_res.Add(label_bck, (iy, 0), (1, 1), wx.LEFT | wx.EXPAND, 15)
+        sizer_res.Add(self.bck_ctl, (iy, 1), (1, 1), wx.RIGHT | wx.EXPAND, 15)
+        sizer_res.Add(label_bck_unit, (iy, 2), (1, 1), wx.RIGHT | wx.EXPAND, 15)
         iy += 1
-        sizer_res.Add(label_time, (iy, 0), (1, 1), wx.LEFT|wx.EXPAND, 15)
-        sizer_res.Add(self.time_ctl,   (iy, 1), (1, 1), wx.RIGHT|wx.EXPAND, 15)
-        sizer_res.Add(label_time_unit, (iy, 2), (1, 1), wx.RIGHT|wx.EXPAND, 15)
+        sizer_res.Add(label_time, (iy, 0), (1, 1), wx.LEFT | wx.EXPAND, 15)
+        sizer_res.Add(self.time_ctl, (iy, 1), (1, 1), wx.RIGHT | wx.EXPAND, 15)
+        sizer_res.Add(label_time_unit, (iy, 2), (1, 1), wx.RIGHT | wx.EXPAND, 15)
         iy += 1
-        sizer_res.Add(label_chi2, (iy, 0), (1, 1), wx.LEFT|wx.EXPAND, 15)
-        sizer_res.Add(self.chi2_ctl,   (iy, 1), (1, 1), wx.RIGHT|wx.EXPAND, 15)
+        sizer_res.Add(label_chi2, (iy, 0), (1, 1), wx.LEFT | wx.EXPAND, 15)
+        sizer_res.Add(self.chi2_ctl, (iy, 1), (1, 1), wx.RIGHT | wx.EXPAND, 15)
         iy += 1
-        sizer_res.Add(label_osc, (iy, 0), (1, 1), wx.LEFT|wx.EXPAND, 15)
-        sizer_res.Add(self.osc_ctl,   (iy, 1), (1, 1), wx.RIGHT|wx.EXPAND, 15)
+        sizer_res.Add(label_osc, (iy, 0), (1, 1), wx.LEFT | wx.EXPAND, 15)
+        sizer_res.Add(self.osc_ctl, (iy, 1), (1, 1), wx.RIGHT | wx.EXPAND, 15)
 
         iy += 1
-        sizer_res.Add(label_pos, (iy, 0), (1, 1), wx.LEFT|wx.EXPAND, 15)
-        sizer_res.Add(self.pos_ctl, (iy, 1), (1, 1), wx.RIGHT|wx.EXPAND, 15)
+        sizer_res.Add(label_pos, (iy, 0), (1, 1), wx.LEFT | wx.EXPAND, 15)
+        sizer_res.Add(self.pos_ctl, (iy, 1), (1, 1), wx.RIGHT | wx.EXPAND, 15)
 
         iy += 1
-        sizer_res.Add(label_pos_err, (iy, 0), (1, 1), wx.LEFT|wx.EXPAND, 15)
-        sizer_res.Add(self.pos_err_ctl,  (iy,1), (1, 1), wx.RIGHT|wx.EXPAND, 15)
+        sizer_res.Add(label_pos_err, (iy, 0), (1, 1), wx.LEFT | wx.EXPAND, 15)
+        sizer_res.Add(self.pos_err_ctl, (iy, 1), (1, 1), wx.RIGHT | wx.EXPAND, 15)
 
         ressizer.Add(sizer_res, 0)
         iy_vb += 1
         vbox.Add(ressizer, (iy_vb, 0), (1, 1),
-                 wx.LEFT|wx.RIGHT|wx.EXPAND|wx.ADJUST_MINSIZE, 5)
+                 wx.LEFT | wx.RIGHT | wx.EXPAND | wx.ADJUST_MINSIZE, 5)
 
         # ----- Buttons -----
-        id = wx.NewId()
-        button_OK = wx.Button(self, id, "Compute")
-        button_OK.SetToolTipString("Perform P(r) inversion.")
-        self.Bind(wx.EVT_BUTTON, self._on_invert, id = id)   
-        
+        wx_id = wx.NewId()
+        button_ok = wx.Button(self, wx_id, "Compute")
+        button_ok.SetToolTipString("Perform P(r) inversion.")
+        self.Bind(wx.EVT_BUTTON, self._on_invert, id=wx_id)
+
         self._set_reset_flag(True)
         self._set_save_flag(True)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        sizer_button.Add(button_OK, 0, wx.LEFT|wx.ADJUST_MINSIZE, 10)
-       
+        sizer_button.Add((20, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        sizer_button.Add(button_ok, 0, wx.LEFT | wx.ADJUST_MINSIZE, 10)
+
         iy_vb += 1
         vbox.Add(sizer_button, (iy_vb, 0), (1, 1),
-                 wx.EXPAND|wx.BOTTOM|wx.TOP|wx.RIGHT, 10)
+                 wx.EXPAND | wx.BOTTOM | wx.TOP | wx.RIGHT, 10)
 
         self.Bind(wx.EVT_TEXT_ENTER, self._on_invert)
 
         self.SetSizer(vbox)
-        
+
     def _on_accept_alpha(self, evt):
         """
-        User has accepted the estimated alpha, 
+        User has accepted the estimated alpha,
         set it as part of the input parameters
         """
         try:
             alpha = self.alpha_estimate_ctl.GetLabel()
-            tmp = float(alpha)
-            self.alpha_ctl.SetValue(alpha)
+            self.alpha_ctl.SetValue(float(alpha))
         except:
             # No estimate or bad estimate, either do nothing
-            #import sys
-            print "InversionControl._on_accept_alpha: %s" % sys.exc_value
-            pass
-    
+            logging.error("InversionControl._on_accept_alpha: %s" % sys.exc_value)
+
     def _on_accept_nterms(self, evt):
         """
-        User has accepted the estimated number of terms, 
+        User has accepted the estimated number of terms,
         set it as part of the input parameters
         """
         try:
             nterms = self.nterms_estimate_ctl.GetLabel()
-            tmp = float(nterms)
-            self.nfunc_ctl.SetValue(nterms)
+            self.nfunc_ctl.SetValue(float(nterms))
         except:
             # No estimate or bad estimate, either do nothing
-            import sys
-            print "InversionControl._on_accept_nterms: %s" % sys.exc_value
-            pass
-        
+            logging.error("InversionControl._on_accept_nterms: %s" % sys.exc_value)
+
     def clear_panel(self):
         """
         """
         self.plot_data.SetValue("")
         self.on_reset(event=None)
-        
+
     def on_reset(self, event=None):
         """
         Resets inversion parameters
@@ -774,40 +740,40 @@ class InversionControl(ScrolledPanel, PanelBase):
         self.nterms_estimate_ctl.Enable(False)
         self.nterms_estimate_ctl.SetLabel("")
         self._on_pars_changed()
-        
+
     def _on_pars_changed(self, evt=None):
         """
         Called when an input parameter has changed
         We will estimate the alpha parameter behind the
-        scenes. 
+        scenes.
         """
         flag, alpha, dmax, nfunc, qmin, qmax, height, width = self._read_pars()
         has_bck = self.bck_chk.IsChecked()
-        
+
         # If the pars are valid, estimate alpha
         if flag:
             self.nterms_estimate_ctl.Enable(False)
             self.alpha_estimate_ctl.Enable(False)
-            
+
             dataset = self.plot_data.GetValue()
             if dataset is not None and dataset.strip() != "":
-                self._manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc, 
-                                                 d_max=dmax,
-                                                 q_min=qmin, q_max=qmax,
-                                                 bck=has_bck, 
-                                                 height=height,
-                                                 width=width)
-        
+                self._manager.estimate_plot_inversion(alpha=alpha, nfunc=nfunc,
+                                                      d_max=dmax,
+                                                      q_min=qmin, q_max=qmax,
+                                                      bck=has_bck,
+                                                      height=height,
+                                                      width=width)
+
     def _read_pars(self, evt=None):
         """
-        """    
+        """
         alpha = 0
         nfunc = 5
-        dmax  = 120
-        qmin  = 0
-        qmax  = 0
+        dmax = 120
+        qmin = 0
+        qmax = 0
         height = 0
-        width  = 0
+        width = 0
         flag = True
         # Read slit height
         try:
@@ -822,11 +788,11 @@ class InversionControl(ScrolledPanel, PanelBase):
             flag = False
             self.sheight_ctl.SetBackgroundColour("pink")
             self.sheight_ctl.Refresh()
-            
+
         # Read slit width
         try:
             width_str = self.swidth_ctl.GetValue()
-            if len(width_str.lstrip().rstrip())==0:
+            if len(width_str.lstrip().rstrip()) == 0:
                 width = 0
             else:
                 width = float(width_str)
@@ -836,7 +802,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             flag = False
             self.swidth_ctl.SetBackgroundColour("pink")
             self.swidth_ctl.Refresh()
-        
+
         # Read alpha
         try:
             alpha = float(self.alpha_ctl.GetValue())
@@ -846,8 +812,8 @@ class InversionControl(ScrolledPanel, PanelBase):
             flag = False
             self.alpha_ctl.SetBackgroundColour("pink")
             self.alpha_ctl.Refresh()
-        
-        # Read d_max    
+
+        # Read d_max
         try:
             dmax = float(self.dmax_ctl.GetValue())
             self.dmax_ctl.SetBackgroundColour(wx.WHITE)
@@ -856,7 +822,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             flag = False
             self.dmax_ctl.SetBackgroundColour("pink")
             self.dmax_ctl.Refresh()
-            
+
         # Read nfunc
         try:
             nfunc = int(self.nfunc_ctl.GetValue())
@@ -872,7 +838,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             flag = False
             self.nfunc_ctl.SetBackgroundColour("pink")
             self.nfunc_ctl.Refresh()
-        
+
         # Read qmin
         try:
             qmin_str = self.qmin_ctl.GetValue()
@@ -886,7 +852,7 @@ class InversionControl(ScrolledPanel, PanelBase):
             flag = False
             self.qmin_ctl.SetBackgroundColour("pink")
             self.qmin_ctl.Refresh()
-        
+
         # Read qmax
         try:
             qmax_str = self.qmax_ctl.GetValue()
@@ -900,9 +866,9 @@ class InversionControl(ScrolledPanel, PanelBase):
             flag = False
             self.qmax_ctl.SetBackgroundColour("pink")
             self.qmax_ctl.Refresh()
-        
+
         return flag, alpha, dmax, nfunc, qmin, qmax, height, width
-    
+
     def _on_explore(self, evt):
         """
         Invoke the d_max exploration dialog
@@ -915,38 +881,38 @@ class InversionControl(ScrolledPanel, PanelBase):
         else:
             message = "No data to analyze. Please load a data set to proceed."
             wx.PostEvent(self._manager.parent, StatusEvent(status=message))
-            
+
     def _on_invert(self, evt):
         """
         Perform inversion
-        
-        :param silent: when True, there will be no output for the user 
-        
+
+        :param silent: when True, there will be no output for the user
+
         """
         # Get the data from the form
         # Push it to the manager
-        
+
         flag, alpha, dmax, nfunc, qmin, qmax, height, width = self._read_pars()
         has_bck = self.bck_chk.IsChecked()
-        
+
         if flag:
             dataset = self.plot_data.GetValue()
-            if dataset==None or len(dataset.strip())==0:
+            if dataset == None or len(dataset.strip()) == 0:
                 message = "No data to invert. Select a data set before"
                 message += " proceeding with P(r) inversion."
                 wx.PostEvent(self._manager.parent, StatusEvent(status=message))
             else:
-                self._manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc, 
-                                                  d_max=dmax,
-                                                  q_min=qmin, q_max=qmax,
-                                                  bck=has_bck,
-                                                  height=height,
-                                                  width=width)
+                self._manager.setup_plot_inversion(alpha=alpha, nfunc=nfunc,
+                                                   d_max=dmax,
+                                                   q_min=qmin, q_max=qmax,
+                                                   bck=has_bck,
+                                                   height=height,
+                                                   width=width)
         else:
             message = "The P(r) form contains invalid values: "
             message += "please submit it again."
             wx.PostEvent(self.parent, StatusEvent(status=message))
-        
+
     def _change_file(self, evt=None, filepath=None, data=None):
         """
         Choose a new input file for I(q)
@@ -959,7 +925,7 @@ class InversionControl(ScrolledPanel, PanelBase):
                 self._on_invert(None)
             except:
                 msg = "InversionControl._change_file: %s" % sys.exc_value
-                logging.error(msg)                    
+                logging.error(msg)
 
 class HelpDialog(wx.Dialog):
     """
@@ -969,33 +935,32 @@ class HelpDialog(wx.Dialog):
         """
         from sas.pr.invertor import help
         wx.Dialog.__init__(self, parent, id, size=(400, 450))
-        self.SetTitle("P(r) help") 
+        self.SetTitle("P(r) help")
         self.SetWindowVariant(variant=FONT_VARIANT)
 
         vbox = wx.BoxSizer(wx.VERTICAL)
 
         explanation = help()
-           
+
         label_explain = wx.StaticText(self, -1, explanation, size=(360, 350))
-            
-        vbox.Add(label_explain, 0, wx.ALL|wx.EXPAND, 15)
+
+        vbox.Add(label_explain, 0, wx.ALL | wx.EXPAND, 15)
 
 
         static_line = wx.StaticLine(self, -1)
         vbox.Add(static_line, 0, wx.EXPAND, 0)
-        
-        button_OK = wx.Button(self, wx.ID_OK, "OK")
-        #button_Cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
-        
+
+        button_ok = wx.Button(self, wx.ID_OK, "OK")
+
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        sizer_button.Add(button_OK, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
-        
-        vbox.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
+        sizer_button.Add((20, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        sizer_button.Add(button_ok, 0, wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
+
+        vbox.Add(sizer_button, 0, wx.EXPAND | wx.BOTTOM | wx.TOP, 10)
 
         self.SetSizer(vbox)
         self.SetAutoLayout(True)
-        
+
         self.Layout()
         self.Centre()
 
@@ -1007,38 +972,38 @@ class PrDistDialog(wx.Dialog):
     def __init__(self, parent, id):
         from sas.pr.invertor import help
         wx.Dialog.__init__(self, parent, id, size=(250, 120))
-        self.SetTitle("P(r) distribution") 
-        
+        self.SetTitle("P(r) distribution")
+
 
         vbox = wx.BoxSizer(wx.VERTICAL)
-        
+
         label_npts = wx.StaticText(self, -1, "Number of points")
         self.npts_ctl = PrTextCtrl(self, -1, size=(100, 20))
-                 
+
         pars_sizer = wx.GridBagSizer(5, 5)
         iy = 0
         pars_sizer.Add(label_npts, (iy, 0), (1, 1), wx.LEFT, 15)
         pars_sizer.Add(self.npts_ctl, (iy, 1), (1, 1), wx.RIGHT, 0)
-        
-        vbox.Add(pars_sizer, 0, wx.ALL|wx.EXPAND, 15)
+
+        vbox.Add(pars_sizer, 0, wx.ALL | wx.EXPAND, 15)
 
         static_line = wx.StaticLine(self, -1)
         vbox.Add(static_line, 0, wx.EXPAND, 0)
-        
-        button_OK = wx.Button(self, wx.ID_OK, "OK")
-        self.Bind(wx.EVT_BUTTON, self._checkValues, button_OK)
-        button_Cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
-        
+
+        button_ok = wx.Button(self, wx.ID_OK, "OK")
+        self.Bind(wx.EVT_BUTTON, self._checkValues, button_ok)
+        button_cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
+
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
-        sizer_button.Add(button_OK, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
-        sizer_button.Add(button_Cancel, 0,
-                         wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)        
-        vbox.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
+        sizer_button.Add((20, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
+        sizer_button.Add(button_ok, 0, wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
+        sizer_button.Add(button_cancel, 0,
+                         wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
+        vbox.Add(sizer_button, 0, wx.EXPAND | wx.BOTTOM | wx.TOP, 10)
 
         self.SetSizer(vbox)
         self.SetAutoLayout(True)
-        
+
         self.Layout()
         self.Centre()
 
@@ -1066,36 +1031,9 @@ class PrDistDialog(wx.Dialog):
         """
         value = int(self.npts_ctl.GetValue())
         return value
-    
+
     def set_content(self, npts):
         """
         Initialize the content of the dialog.
         """
         self.npts_ctl.SetValue("%i" % npts)
-
-##### testing code ############################################################
-"""
-Example: ::
-
-class TestPlot:
-    def __init__(self, text):
-        self.name = text
-    
-class MyApp(wx.App):
-    def OnInit(self):
-        wx.InitAllImageHandlers()
-        dialog = PrDistDialog(None, -1)
-        if dialog.ShowModal() == wx.ID_OK:
-            pass
-        dialog.Destroy()
-        
-        return 1
-
-# end of class MyApp
-
-if __name__ == "__main__":
-    app = MyApp(0)
-    app.MainLoop()
-    
-"""
-##### end of testing code #####################################################    
