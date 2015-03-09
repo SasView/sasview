@@ -3,16 +3,16 @@
 from scipy import optimize
 
 
-class Parameter:
+class Parameter(object):
     """
     Class to handle model parameters
     """
     def __init__(self, model, name, value=None):
-            self.model = model
-            self.name = name
-            if not value == None:
-                self.model.setParam(self.name, value)
-           
+        self.model = model
+        self.name = name
+        if not value == None:
+            self.model.setParam(self.name, value)
+
     def set(self, value):
         """
             Set the value of the parameter
@@ -24,12 +24,12 @@ class Parameter:
             Return the current value of the parameter
         """
         return self.model.getParam(self.name)
-    
-    
-def sasfit(model, pars, x, y, err_y , qmin=None, qmax=None):
+
+
+def sasfit(model, pars, x, y, err_y, qmin=None, qmax=None):
     """
     Fit function
-    
+
     :param model: sas model object
     :param pars: list of parameters
     :param x: vector of x data
@@ -40,7 +40,7 @@ def sasfit(model, pars, x, y, err_y , qmin=None, qmax=None):
         """
         Calculates the vector of residuals for each point
         in y for a given set of input parameters.
-        
+
         :param params: list of parameter values
         :return: vector of residuals
         """
@@ -48,28 +48,28 @@ def sasfit(model, pars, x, y, err_y , qmin=None, qmax=None):
         for p in pars:
             p.set(params[i])
             i += 1
-        
+
         residuals = []
         for j in range(len(x)):
             if x[j] >= qmin and x[j] <= qmax:
                 residuals.append((y[j] - model.runXY(x[j])) / err_y[j])
         return residuals
-        
+
     def chi2(params):
         """
         Calculates chi^2
-        
+
         :param params: list of parameter values
-        
+
         :return: chi^2
-        
+
         """
         sum = 0
         res = f(params)
         for item in res:
             sum += item * item
         return sum
-        
+
     p = [param() for param in pars]
     out, cov_x, info, mesg, success = optimize.leastsq(f, p, full_output=1)
     # Calculate chi squared
@@ -77,12 +77,12 @@ def sasfit(model, pars, x, y, err_y , qmin=None, qmax=None):
         chisqr = chi2(out)
     elif len(pars) == 1:
         chisqr = chi2([out])
-        
+
     return chisqr, out, cov_x
 
 
 def calcCommandline(event):
-    #Testing implementation
+    # Testing implementation
     # Fit a Line model
     from LineModel import LineModel
     line = LineModel()

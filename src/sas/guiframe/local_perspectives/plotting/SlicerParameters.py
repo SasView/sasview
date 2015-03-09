@@ -11,17 +11,17 @@ from sas.guiframe.events import SlicerParameterEvent
 
 class SlicerParameterPanel(wx.Dialog):
     """
-    Panel class to show the slicer parameters 
+    Panel class to show the slicer parameters
     """
     #TODO: show units
     #TODO: order parameters properly
-    
+
     def __init__(self, parent, *args, **kwargs):
-        wx.Dialog.__init__(self, parent, *args, **kwargs)
         """
-        Dialog window that allow to edit parameters slicer 
+        Dialog window that allow to edit parameters slicer
         by entering new values
         """
+        wx.Dialog.__init__(self, parent, *args, **kwargs)
         self.params = {}
         self.parent = parent
         self.type = None
@@ -32,7 +32,7 @@ class SlicerParameterPanel(wx.Dialog):
         label = "Right-click on 2D plot for slicer options"
         title = wx.StaticText(self, -1, label, style=wx.ALIGN_LEFT)
         self.bck.Add(title, (0, 0), (1, 2),
-                     flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
+                     flag=wx.LEFT | wx.ALIGN_CENTER_VERTICAL, border=15)
         # Bindings
         self.parent.Bind(EVT_SLICER, self.onEVT_SLICER)
         self.parent.Bind(EVT_SLICER_PARS, self.onParamChange)
@@ -41,7 +41,7 @@ class SlicerParameterPanel(wx.Dialog):
         """
         Process EVT_SLICER events
         When the slicer changes, update the panel
-        
+
         :param event: EVT_SLICER event
         """
         event.Skip()
@@ -49,23 +49,23 @@ class SlicerParameterPanel(wx.Dialog):
             self.set_slicer(None, None)
         else:
             self.set_slicer(event.type, event.params)
-        
+
     def set_slicer(self, type, params):
         """
         Rebuild the panel
         """
-        self.bck.Clear(True)  
-        self.type = type  
+        self.bck.Clear(True)
+        self.type = type
         if type == None:
             label = "Right-click on 2D plot for slicer options"
             title = wx.StaticText(self, -1, label, style=wx.ALIGN_LEFT)
-            self.bck.Add(title, (0, 0), (1, 2), 
-                         flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
+            self.bck.Add(title, (0, 0), (1, 2),
+                         flag=wx.LEFT | wx.ALIGN_CENTER_VERTICAL, border=15)
         else:
-            title = wx.StaticText(self, -1, 
+            title = wx.StaticText(self, -1,
                                   "Slicer Parameters", style=wx.ALIGN_LEFT)
             self.bck.Add(title, (0, 0), (1, 2),
-                         flag=wx.LEFT|wx.ALIGN_CENTER_VERTICAL, border=15)
+                         flag=wx.LEFT | wx.ALIGN_CENTER_VERTICAL, border=15)
             ix = 0
             iy = 0
             self.parameters = []
@@ -76,8 +76,8 @@ class SlicerParameterPanel(wx.Dialog):
                 ix = 0
                 if not item in ["count", "errors"]:
                     text = wx.StaticText(self, -1, item, style=wx.ALIGN_LEFT)
-                    self.bck.Add(text, (iy, ix), (1, 1), 
-                                 wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                    self.bck.Add(text, (iy, ix), (1, 1),
+                                 wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
                     ctl = wx.TextCtrl(self, -1, size=(80, 20),
                                       style=wx.TE_PROCESS_ENTER)
                     hint_msg = "Modify the value of %s to change" % item
@@ -87,26 +87,26 @@ class SlicerParameterPanel(wx.Dialog):
                     ctl.SetValue(format_number(str(params[item])))
                     self.Bind(wx.EVT_TEXT_ENTER, self.onTextEnter)
                     self.parameters.append([item, ctl])
-                    self.bck.Add(ctl, (iy, ix), (1, 1), 
-                                 wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    self.bck.Add(ctl, (iy, ix), (1, 1),
+                                 wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                     ix = 3
-                    self.bck.Add((20, 20), (iy, ix), (1, 1), 
-                                 wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    self.bck.Add((20, 20), (iy, ix), (1, 1),
+                                 wx.EXPAND | wx.ADJUST_MINSIZE, 0)
                 else:
-                    text = wx.StaticText(self, -1, item + " : ", 
+                    text = wx.StaticText(self, -1, item + " : ",
                                          style=wx.ALIGN_LEFT)
-                    self.bck.Add(text, (iy, ix), (1, 1), 
-                                 wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
-                    ctl = wx.StaticText(self, -1, 
-                                    format_number(str(params[item])), 
-                                    style=wx.ALIGN_LEFT)
+                    self.bck.Add(text, (iy, ix), (1, 1),
+                                 wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
+                    ctl = wx.StaticText(self, -1,
+                                        format_number(str(params[item])),
+                                        style=wx.ALIGN_LEFT)
                     ix = 1
-                    self.bck.Add(ctl, (iy, ix), (1, 1), 
-                                 wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                    self.bck.Add(ctl, (iy, ix), (1, 1),
+                                 wx.EXPAND | wx.ADJUST_MINSIZE, 0)
             iy += 1
             ix = 1
-            self.bck.Add((20, 20), (iy, ix), (1, 1), 
-                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+            self.bck.Add((20, 20), (iy, ix), (1, 1),
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         self.bck.Layout()
         self.bck.Fit(self)
         self.parent.GetSizer().Layout()
@@ -118,22 +118,21 @@ class SlicerParameterPanel(wx.Dialog):
         """
         evt.Skip()
         if evt.type == "UPDATE":
-            for item in self.parameters:              
+            for item in self.parameters:
                 if item[0] in evt.params:
                     item[1].SetValue("%-5.3g" % evt.params[item[0]])
                     item[1].Refresh()
-        
-    def onTextEnter(self, evt): 
+
+    def onTextEnter(self, evt):
         """
         Parameters have changed
-        """ 
+        """
         params = {}
         has_error = False
         for item in self.parameters:
             try:
                 params[item[0]] = float(item[1].GetValue())
-                item[1].SetBackgroundColour(
-                        wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
+                item[1].SetBackgroundColour(wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW))
                 item[1].Refresh()
             except:
                 has_error = True
@@ -145,4 +144,3 @@ class SlicerParameterPanel(wx.Dialog):
             ##parent hier is plotter2D
             event = SlicerParameterEvent(type=self.type, params=params)
             wx.PostEvent(self.parent, event)
-        

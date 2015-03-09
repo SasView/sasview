@@ -44,7 +44,7 @@ distinctiveness rather than a simple colour number.
 import copy
 import numpy
 import sys
-
+import logging
 
 if 'any' not in dir(__builtins__):
     def any(L):
@@ -52,7 +52,7 @@ if 'any' not in dir(__builtins__):
             if cond:
                 return True
         return False
-    
+
     def all(L):
         for cond in L:
             if not cond:
@@ -60,10 +60,10 @@ if 'any' not in dir(__builtins__):
         return True
 
 
-class Graph:
+class Graph(object):
     """
     Generic plottables graph structure.
-    
+
     Plot styles are based on color/symbol lists.  The user gets to select
     the list of colors/symbols/sizes to choose from, not the application
     developer.  The programmer only gets to add/remove lines from the
@@ -76,7 +76,7 @@ class Graph:
     every possible transformation for every application generically, so
     the plottable objects themselves will need to provide the transformations.
     Here are some examples from reflectometry: ::
-    
+
        independent: x -> f(x)
           monitor scaling: y -> M*y
           log:  y -> log(y if y > min else min)
@@ -90,7 +90,7 @@ class Graph:
        reducing: x,y = f(x1,x2,y1,y2)
           spin asymmetry: x -> x1, y -> (y1 - y2)/(y1 + y2)
           vector net: x -> x1, y -> y1*cos(y2*pi/180)
-          
+
     Multiple transformations are possible, such as Q4 spin asymmetry
 
     Axes have further complications in that the units of what are being
@@ -121,7 +121,7 @@ class Graph:
 
     Graphs need to be printable.  A page layout program for entire plots
     would be nice.
-    
+
     """
     def _xaxis_transformed(self, name, units):
         """
@@ -133,7 +133,7 @@ class Graph:
             name = "%s (%s)" % (name, units)
         self.prop["xlabel"] = name
         self.prop["xunit"] = units
-        
+
     def _yaxis_transformed(self, name, units):
         """
         Change the property of the y axis
@@ -144,7 +144,7 @@ class Graph:
             name = "%s (%s)" % (name, units)
         self.prop["ylabel"] = name
         self.prop["yunit"] = units
-        
+
     def xaxis(self, name, units):
         """
         Properties of the x axis.
@@ -166,13 +166,13 @@ class Graph:
         self.prop["yunit"] = units
         self.prop["ylabel_base"] = name
         self.prop["yunit_base"] = units
-        
+
     def title(self, name):
         """
         Graph title
         """
         self.prop["title"] = name
-        
+
     def get(self, key):
         """
         Get the graph properties
@@ -215,24 +215,24 @@ class Graph:
     def changed(self):
         """Detect if any graphed plottables have changed"""
         return any([p.changed() for p in self.plottables])
-    
+
     def get_range(self):
         """
         Return the range of all displayed plottables
         """
-        min = None
-        max = None
+        min_value = None
+        max_value = None
         for p in self.plottables:
             if p.hidden == True:
                 continue
             if not p.x == None:
                 for x_i in p.x:
-                    if min == None or x_i < min:
-                        min = x_i
-                    if max == None or x_i > max:
-                        max = x_i
-        return min, max
-    
+                    if min_value == None or x_i < min_value:
+                        min_value = x_i
+                    if max_value == None or x_i > max_value:
+                        max_value = x_i
+        return min_value, max_value
+
     def replace(self, plottable):
         """Replace an existing plottable from the graph"""
         selected_color = None
@@ -251,7 +251,7 @@ class Graph:
         if plottable in self.plottables:
             del self.plottables[plottable]
             self.color = len(self.plottables)
-            
+
     def reset_scale(self):
         """
         Resets the scale transformation data to the underlying data
@@ -267,7 +267,7 @@ class Graph:
                      "ylabel": "", "yunit": None,
                      "title": ""}
         self.plottables = {}
-    
+
     def _make_labels(self):
         """
         """
@@ -283,7 +283,7 @@ class Graph:
         for c in sets:
             labels.update(c.labels(sets[c]))
         return labels
-    
+
     def get_plottable(self, name):
         """
         Return the plottable with the given
@@ -293,7 +293,7 @@ class Graph:
             if item.name == name:
                 return item
         return None
-    
+
     def returnPlottable(self):
         """
         This method returns a dictionary of plottables contained in graph
@@ -301,8 +301,8 @@ class Graph:
         inside the graph.
         """
         return self.plottables
-    
-    def render(self,plot):
+
+    def render(self, plot):
         """Redraw the graph"""
         plot.connect.clearall()
         plot.clear()
@@ -311,12 +311,12 @@ class Graph:
         for p in self.plottables:
             if p.custom_color is not None:
                 p.render(plot, color=p.custom_color, symbol=0,
-                markersize=p.markersize, label=labels[p])
+                         markersize=p.markersize, label=labels[p])
             else:
                 p.render(plot, color=self.plottables[p], symbol=0,
-                     markersize=p.markersize, label=labels[p])
+                         markersize=p.markersize, label=labels[p])
         plot.render()
-   
+
     def __init__(self, **kw):
         self.reset()
         self.set(**kw)
@@ -327,43 +327,43 @@ class Graph:
 # Transform interface definition
 # No need to inherit from this class, just need to provide
 # the same methods.
-class Transform:
+class Transform(object):
     """
     Define a transform plugin to the plottable architecture.
-    
+
     Transforms operate on axes.  The plottable defines the
     set of transforms available for it, and the axes on which
     they operate.  These transforms can operate on the x axis
     only, the y axis only or on the x and y axes together.
-    
+
     This infrastructure is not able to support transformations
     such as log and polar plots as these require full control
     over the drawing of axes and grids.
-    
+
     A transform has a number of attributes.
-    
+
     name
       user visible name for the transform.  This will
       appear in the context menu for the axis and the transform
       menu for the graph.
-        
+
     type
       operational axis.  This determines whether the
       transform should appear on x,y or z axis context
       menus, or if it should appear in the context menu for
       the graph.
-        
+
     inventory
-      (not implemented) 
+      (not implemented)
       a dictionary of user settable parameter names and
       their associated types.  These should appear as keyword
       arguments to the transform call.  For example, Fresnel
       reflectivity requires the substrate density:
-      ``{ 'rho': type.Value(10e-6/units.angstrom**2) }``       
+      ``{ 'rho': type.Value(10e-6/units.angstrom**2) }``
       Supply reasonable defaults in the callback so that
       limited plotting clients work even though they cannot
       set the inventory.
-        
+
     """
     def __call__(self, plottable, **kwargs):
         """
@@ -374,13 +374,13 @@ class Transform:
         plottables on the axes will be transformed.  The
         plottable should store the underlying data but set
         the standard x,dx,y,dy,z,dz attributes appropriately.
-        
+
         If the call raises a NotImplemented error the dataline
         will not be plotted.  The associated string will usually
         be 'Not a valid transform', though other strings are possible.
         The application may or may not display the message to the
         user, along with an indication of which plottable was at fault.
-        
+
         """
         raise NotImplemented, "Not a valid transform"
 
@@ -427,8 +427,8 @@ class Plottable(object):
     # Fancy name
     name = None
     # Data
-    x  = None
-    y  = None
+    x = None
+    y = None
     dx = None
     dy = None
     # Parameter to allow a plot to be part of the list without being displayed
@@ -437,14 +437,14 @@ class Plottable(object):
     interactive = True
     custom_color = None
     markersize = 5  # default marker size is 'size 5'
-    
+
     def __init__(self):
         self.view = View()
         self._xaxis = ""
         self._xunit = ""
         self._yaxis = ""
         self._yunit = ""
-        
+
     def __setattr__(self, name, value):
         """
         Take care of changes in View when data is changed.
@@ -453,7 +453,7 @@ class Plottable(object):
         object.__setattr__(self, name, value)
         if name in ['x', 'y', 'dx', 'dy']:
             self.reset_view()
-            #print "self.%s has been called" % name
+            # print "self.%s has been called" % name
 
     def set_data(self, x, y, dx=None, dy=None):
         """
@@ -463,14 +463,14 @@ class Plottable(object):
         self.dy = dy
         self.dx = dx
         self.transformView()
-    
+
     def xaxis(self, name, units):
         """
         Set the name and unit of x_axis
-        
+
         :param name: the name of x-axis
         :param units: the units of x_axis
-        
+
         """
         self._xaxis = name
         self._xunit = units
@@ -478,18 +478,18 @@ class Plottable(object):
     def yaxis(self, name, units):
         """
         Set the name and unit of y_axis
-        
+
         :param name: the name of y-axis
         :param units: the units of y_axis
-        
+
         """
         self._yaxis = name
         self._yunit = units
-        
+
     def get_xaxis(self):
         """Return the units and name of x-axis"""
         return self._xaxis, self._xunit
-    
+
     def get_yaxis(self):
         """ Return the units and name of y- axis"""
         return self._yaxis, self._yunit
@@ -499,40 +499,40 @@ class Plottable(object):
         """
         Construct a set of unique labels for a collection of plottables of
         the same type.
-        
+
         Returns a map from plottable to name.
-        
+
         """
         n = len(collection)
-        map = {}
+        label_dict = {}
         if n > 0:
             basename = str(cls).split('.')[-1]
             if n == 1:
-                map[collection[0]] = basename
+                label_dict[collection[0]] = basename
             else:
                 for i in xrange(len(collection)):
-                    map[collection[i]] = "%s %d" % (basename, i)
-        return map
+                    label_dict[collection[i]] = "%s %d" % (basename, i)
+        return label_dict
 
-    ##Use the following if @classmethod doesn't work
+    # #Use the following if @classmethod doesn't work
     # labels = classmethod(labels)
     def setLabel(self, labelx, labely):
         """
         It takes a label of the x and y transformation and set View parameters
-        
+
         :param transx: The label of x transformation is sent by Properties Dialog
         :param transy: The label of y transformation is sent Properties Dialog
-        
+
         """
         self.view.xLabel = labelx
         self.view.yLabel = labely
-    
+
     def set_View(self, x, y):
         """Load View"""
         self.x = x
         self.y = y
         self.reset_view()
-        
+
     def reset_view(self):
         """Reload view with new value to plot"""
         self.view = View(self.x, self.y, self.dx, self.dy)
@@ -540,20 +540,20 @@ class Plottable(object):
         self.view.Yreel = self.view.y
         self.view.DXreel = self.view.dx
         self.view.DYreel = self.view.dy
-        
+
     def render(self, plot):
         """
         The base class makes sure the correct units are being used for
         subsequent plottable.
-        
+
         For now it is assumed that the graphs are commensurate, and if you
-        put a Qx object on a Temperature graph then you had better hope 
+        put a Qx object on a Temperature graph then you had better hope
         that it makes sense.
-        
+
         """
         plot.xaxis(self._xaxis, self._xunit)
         plot.yaxis(self._yaxis, self._yunit)
-        
+
     def is_empty(self):
         """
         Returns True if there is no data stored in the plottable
@@ -562,77 +562,77 @@ class Plottable(object):
             and not self.y == None and len(self.y) == 0:
             return True
         return False
-        
+
     def colors(self):
         """Return the number of colors need to render the object"""
         return 1
-    
+
     def transformView(self):
         """
         It transforms x, y before displaying
         """
         self.view.transform(self.x, self.y, self.dx, self.dy)
-        
+
     def returnValuesOfView(self):
         """
         Return View parameters and it is used by Fit Dialog
         """
         return self.view.returnXview()
-    
+
     def check_data_PlottableX(self):
         """
         Since no transformation is made for log10(x), check that
         no negative values is plot in log scale
         """
         self.view.check_data_logX()
-        
+
     def check_data_PlottableY(self):
         """
-        Since no transformation is made for log10(y), check that 
+        Since no transformation is made for log10(y), check that
         no negative values is plot in log scale
         """
         self.view.check_data_logY()
-        
+
     def transformX(self, transx, transdx):
         """
         Receive pointers to function that transform x and dx
         and set corresponding View pointers
-        
+
         :param transx: pointer to function that transforms x
         :param transdx: pointer to function that transforms dx
-        
+
         """
         self.view.setTransformX(transx, transdx)
-        
+
     def transformY(self, transy, transdy):
         """
         Receive pointers to function that transform y and dy
         and set corresponding View pointers
-        
+
         :param transy: pointer to function that transforms y
         :param transdy: pointer to function that transforms dy
-        
+
         """
         self.view.setTransformY(transy, transdy)
-        
+
     def onReset(self):
         """
         Reset x, y, dx, dy view with its parameters
         """
         self.view.onResetView()
-        
+
     def onFitRange(self, xmin=None, xmax=None):
         """
         It limits View data range to plot from min to max
-        
+
         :param xmin: the minimum value of x to plot.
         :param xmax: the maximum value of x to plot
-        
+
         """
         self.view.onFitRangeView(xmin, xmax)
-    
-    
-class View:
+
+
+class View(object):
     """
     Representation of the data that might include a transformation
     """
@@ -671,13 +671,13 @@ class View:
         :param y: array of y values
         :param dx: array of  errors values on x
         :param dy: array of error values on y
-        
+
         """
         # Sanity check
         # Do the transofrmation only when x and y are empty
         has_err_x = not (dx == None or len(dx) == 0)
         has_err_y = not (dy == None or len(dy) == 0)
-        
+
         if(x != None) and (y != None):
             if not dx == None and not len(dx) == 0 and not len(x) == len(dx):
                 msg = "Plottable.View: Given x and dx are not"
@@ -688,7 +688,7 @@ class View:
                 msg = "Plottable.View: Given y "
                 msg += "and x are not of the same length"
                 raise ValueError, msg
-        
+
             if not dy == None and not len(dy) == 0 and not len(y) == len(dy):
                 msg = "Plottable.View: Given y and dy are not of the same "
                 msg += "length: len(y)=%s, len(dy)=%s" % (len(y), len(dy))
@@ -749,7 +749,7 @@ class View:
             self.Yreel = self.y
             self.DXreel = self.dx
             self.DYreel = self.dy
-                
+
     def onResetView(self):
         """
         Reset x,y,dx and y in their full range  and in the initial scale
@@ -759,35 +759,35 @@ class View:
         self.y = self.Yreel
         self.dx = self.DXreel
         self.dy = self.DYreel
-        
+
     def setTransformX(self, funcx, funcdx):
         """
         Receive pointers to function that transform x and dx
         and set corresponding View pointers
-        
+
         :param transx: pointer to function that transforms x
         :param transdx: pointer to function that transforms dx
         """
         self.funcx = funcx
         self.funcdx = funcdx
-        
+
     def setTransformY(self, funcy, funcdy):
         """
         Receive pointers to function that transform y and dy
         and set corresponding View pointers
-        
+
         :param transx: pointer to function that transforms y
         :param transdx: pointer to function that transforms dy
         """
         self.funcy = funcy
         self.funcdy = funcdy
-   
+
     def returnXview(self):
         """
         Return View  x,y,dx,dy
         """
         return self.x, self.y, self.dx, self.dy
-    
+
     def check_data_logX(self):
         """
         Remove negative value in x vector to avoid plotting negative
@@ -804,25 +804,24 @@ class View:
         if self.xLabel == "log10(x)":
             for i in range(len(self.x)):
                 try:
-                    if (self.x[i] > 0):
+                    if self.x[i] > 0:
                         tempx.append(self.x[i])
                         tempdx.append(self.dx[i])
                         tempy.append(self.y[i])
                         tempdy.append(self.dy[i])
                 except:
-                    print "check_data_logX: skipping point x %g" % self.x[i]
-                    print sys.exc_value
-                    pass 
+                    logging.error("check_data_logX: skipping point x %g", self.x[i])
+                    logging.error(sys.exc_value)
             self.x = tempx
             self.y = tempy
             self.dx = tempdx
             self.dy = tempdy
-        
+
     def check_data_logY(self):
         """
         Remove negative value in y vector
         to avoid plotting negative value of Log10
-        
+
         """
         tempx = []
         tempdx = []
@@ -832,30 +831,30 @@ class View:
             self.dx = numpy.zeros(len(self.x))
         if self.dy == None:
             self.dy = numpy.zeros(len(self.y))
-        if (self.yLabel == "log10(y)"):
+        if self.yLabel == "log10(y)":
             for i in range(len(self.x)):
                 try:
-                    if (self.y[i] > 0):
+                    if self.y[i] > 0:
                         tempx.append(self.x[i])
                         tempdx.append(self.dx[i])
                         tempy.append(self.y[i])
                         tempdy.append(self.dy[i])
                 except:
-                    print "check_data_logY: skipping point %g" % self.y[i]
-                    print sys.exc_value
-                    pass
+                    logging.error("check_data_logY: skipping point %g", self.y[i])
+                    logging.error(sys.exc_value)
+
             self.x = tempx
             self.y = tempy
             self.dx = tempdx
             self.dy = tempdy
-            
+
     def onFitRangeView(self, xmin=None, xmax=None):
         """
         It limits View data range to plot from min to max
-        
+
         :param xmin: the minimum value of x to plot.
         :param xmax: the maximum value of x to plot
-        
+
         """
         tempx = []
         tempdx = []
@@ -865,9 +864,9 @@ class View:
             self.dx = numpy.zeros(len(self.x))
         if self.dy == None:
             self.dy = numpy.zeros(len(self.y))
-        if (xmin != None) and (xmax != None):
+        if xmin != None and xmax != None:
             for i in range(len(self.x)):
-                if (self.x[i] >= xmin) and (self.x[i] <= xmax):
+                if self.x[i] >= xmin and self.x[i] <= xmax:
                     tempx.append(self.x[i])
                     tempdx.append(self.dx[i])
                     tempy.append(self.y[i])
@@ -877,14 +876,14 @@ class View:
             self.dx = tempdx
             self.dy = tempdy
 
-              
+
 class Data2D(Plottable):
     """
     2D data class for image plotting
     """
     def __init__(self, image=None, qx_data=None, qy_data=None,
-                  err_image=None, xmin=None, xmax=None, ymin=None,
-                  ymax=None, zmin=None, zmax=None):
+                 err_image=None, xmin=None, xmax=None, ymin=None,
+                 ymax=None, zmin=None, zmax=None):
         """
         Draw image
         """
@@ -897,10 +896,10 @@ class Data2D(Plottable):
         self.err_data = err_image
         self.source = None
         self.detector = []
-    
-        ## Units for Q-values
+
+        # # Units for Q-values
         self.xy_unit = 'A^{-1}'
-        ## Units for I(Q) values
+        # # Units for I(Q) values
         self.z_unit = 'cm^{-1}'
         self._zaxis = ''
         # x-axis unit and label
@@ -909,84 +908,84 @@ class Data2D(Plottable):
         # y-axis unit and label
         self._yaxis = '\\rm{Q_{y}}'
         self._yunit = 'A^{-1}'
-        
-        ### might remove that later
-        ## Vector of Q-values at the center of each bin in x
+
+        # ## might remove that later
+        # # Vector of Q-values at the center of each bin in x
         self.x_bins = []
-        ## Vector of Q-values at the center of each bin in y
+        # # Vector of Q-values at the center of each bin in y
         self.y_bins = []
-        
-        #x and y boundaries
+
+        # x and y boundaries
         self.xmin = xmin
         self.xmax = xmax
         self.ymin = ymin
         self.ymax = ymax
-        
+
         self.zmin = zmin
         self.zmax = zmax
         self.id = None
-        
+
     def xaxis(self, label, unit):
         """
         set x-axis
-        
+
         :param label: x-axis label
         :param unit: x-axis unit
-        
+
         """
         self._xaxis = label
         self._xunit = unit
-        
+
     def yaxis(self, label, unit):
         """
         set y-axis
-        
+
         :param label: y-axis label
         :param unit: y-axis unit
-        
+
         """
         self._yaxis = label
         self._yunit = unit
-        
+
     def zaxis(self, label, unit):
         """
         set z-axis
-        
+
         :param label: z-axis label
         :param unit: z-axis unit
-        
+
         """
         self._zaxis = label
         self._zunit = unit
-        
+
     def setValues(self, datainfo=None):
         """
         Use datainfo object to initialize data2D
-        
+
         :param datainfo: object
-        
+
         """
         self.image = copy.deepcopy(datainfo.data)
         self.qx_data = copy.deepcopy(datainfo.qx_data)
         self.qy_data = copy.deepcopy(datainfo.qy_data)
         self.err_image = copy.deepcopy(datainfo.err_data)
-        
+
         self.xy_unit = datainfo.Q_unit
         self.z_unit = datainfo.I_unit
         self._zaxis = datainfo._zaxis
-       
+
         self.xaxis(datainfo._xunit, datainfo._xaxis)
         self.yaxis(datainfo._yunit, datainfo._yaxis)
-        #x and y boundaries
+        # x and y boundaries
         self.xmin = datainfo.xmin
         self.xmax = datainfo.xmax
         self.ymin = datainfo.ymin
         self.ymax = datainfo.ymax
-        ## Vector of Q-values at the center of each bin in x
+        # # Vector of Q-values at the center of each bin in x
         self.x_bins = datainfo.x_bins
-        ## Vector of Q-values at the center of each bin in y
+        # # Vector of Q-values at the center of each bin in y
         self.y_bins = datainfo.y_bins
-        
+
     def set_zrange(self, zmin=None, zmax=None):
         """
         """
@@ -995,39 +994,37 @@ class Data2D(Plottable):
             self.zmax = zmax
         else:
             raise "zmin is greater or equal to zmax "
-        
+
     def render(self, plot, **kw):
         """
         Renders the plottable on the graph
-        
+
         """
         plot.image(self.data, self.qx_data, self.qy_data,
                    self.xmin, self.xmax, self.ymin,
                    self.ymax, self.zmin, self.zmax, **kw)
-       
+
     def changed(self):
         """
         """
         return False
-    
+
     @classmethod
     def labels(cls, collection):
         """Build a label mostly unique within a collection"""
-        map = {}
+        label_dict = {}
         for item in collection:
-            #map[item] = label(item, collection)
-            #map[item] = r"$\rm{%s}$" % item.name
             if item.label == "Data2D":
                 item.label = item.name
-            map[item] = item.label
-        return map
+            label_dict[item] = item.label
+        return label_dict
 
 
 class Data1D(Plottable):
     """
     Data plottable: scatter plot of x,y with errors in x and y.
     """
-    
+
     def __init__(self, x, y, dx=None, dy=None):
         """
         Draw points specified by x[i],y[i] in the current color/symbol.
@@ -1055,7 +1052,7 @@ class Data1D(Plottable):
         self.id = None
         self.zorder = 1
         self.hide_error = False
-      
+
     def render(self, plot, **kw):
         """
         Renders the plottable on the graph
@@ -1067,89 +1064,47 @@ class Data1D(Plottable):
             kw['markersize'] = self.markersize
             plot.interactive_points(self.view.x, self.view.y,
                                     dx=self.view.dx, dy=self.view.dy,
-              name=self.name, zorder=self.zorder, **kw)
+                                    name=self.name, zorder=self.zorder, **kw)
         else:
-            kw['id'] =  self.id
+            kw['id'] = self.id
             kw['hide_error'] = self.hide_error
             kw['symbol'] = self.symbol
             kw['color'] = self.custom_color
             kw['markersize'] = self.markersize
             plot.points(self.view.x, self.view.y, dx=self.view.dx,
-                dy=self.view.dy, zorder=self.zorder, 
-                marker=self.symbollist[self.symbol], **kw)
-       
+                        dy=self.view.dy, zorder=self.zorder,
+                        marker=self.symbollist[self.symbol], **kw)
+
     def changed(self):
         return False
 
     @classmethod
     def labels(cls, collection):
         """Build a label mostly unique within a collection"""
-        map = {}
+        label_dict = {}
         for item in collection:
-            #map[item] = label(item, collection)
-            #map[item] = r"$\rm{%s}$" % item.name
             if item.label == "data":
                 item.label = item.name
-            map[item] = item.label
-        return map
-    
-    
+            label_dict[item] = item.label
+        return label_dict
+
+
 class Theory1D(Plottable):
     """
     Theory plottable: line plot of x,y with confidence interval y.
-    
     """
     def __init__(self, x, y, dy=None):
         """
         Draw lines specified in x[i],y[i] in the current color/symbol.
         Confidence intervals in x are given by dx[i] or by (xlo[i],xhi[i])
         if the limits are asymmetric.
-        
+
         The title is the name that will show up on the legend.
         """
         Plottable.__init__(self)
-        msg = "Theory1D is no longer supported, please use Data1D and change"
-        msg += " symbol.\n"
+        msg = "Theory1D is no longer supported, please use Data1D and change symbol.\n"
         raise DeprecationWarning, msg
-        self.name = "theory"
-        self.label = "theory"
-        self.x = x
-        self.y = y
-        self.dy = dy
-        self.xaxis('', '')
-        self.yaxis('', '')
-        self.view = View(self.x, self.y, None, self.dy)
-        self.symbol = 0
-        self.id = None
-        self.zorder = 10
-        
-    def render(self, plot, **kw):
-        """
-        """
-        if self.interactive == True:
-            kw['id'] = self.id
-            plot.interactive_curve(self.view.x, self.view.y,
-                                   dy=self.view.dy,
-                                   name=self.name, zorder=self.zorder, **kw)
-        else:
-            kw['id'] = self.id
-            plot.curve(self.view.x, self.view.y, dy=self.view.dy, 
-                       zorder=self.zorder, **kw)
-            
-    def changed(self):
-        return False
-    
-    @classmethod
-    def labels(cls, collection):
-        """Build a label mostly unique within a collection"""
-        map = {}
-        for item in collection:
-            if item.label == "theory":
-                item.label = item.name
-            map[item] = item.label
-        return map
-   
-   
+
 class Fit1D(Plottable):
     """
     Fit plottable: composed of a data line plus a theory line.  This
@@ -1158,7 +1113,7 @@ class Fit1D(Plottable):
     one for the theory.
 
     The color of the data and theory will be shared.
-    
+
     """
     def __init__(self, data=None, theory=None):
         """
@@ -1193,7 +1148,7 @@ class Text(Plottable):
         self.text = text
         self.xpos = xpos
         self.ypos = ypos
-        
+
     def render(self, plot, **kw):
         """
         """
@@ -1205,9 +1160,8 @@ class Text(Plottable):
                           self.ypos,
                           self.text,
                           label=self.name,
-                          transform=xcoords,
-                          )
-            
+                          transform=xcoords)
+
     def setText(self, text):
         """Set the text string."""
         self.text = text
@@ -1229,7 +1183,7 @@ class Text(Plottable):
         ACCEPTS: float
         """
         self.ypos = y
-     
+
 
 # ---------------------------------------------------------------
 class Chisq(Plottable):
@@ -1243,11 +1197,10 @@ class Chisq(Plottable):
         """
         Plottable.__init__(self)
         self.name = "chisq"
-        #super( Chisq, self).__init__(None, None, None, None)
         self._chisq = chisq
         self.xpos = 0.5
         self.ypos = 0.9
-        
+
     def render(self, plot, **kw):
         """
         """
@@ -1259,12 +1212,12 @@ class Chisq(Plottable):
         from matplotlib import transforms
 
         xcoords = transforms.blended_transform_factory(plot.subplot.transAxes,
-                                                     plot.subplot.transAxes)
+                                                      plot.subplot.transAxes)
         plot.subplot.text(self.xpos,
                           self.ypos,
                           chisqTxt, label='chisq',
-                          transform=xcoords,)
-            
+                          transform=xcoords)
+
     def setChisq(self, chisq):
         """
         Set the chisq value.
@@ -1276,11 +1229,11 @@ class Chisq(Plottable):
 
 def sample_graph():
     import numpy as nx
-    
+
     # Construct a simple graph
     if False:
-        x = nx.array([1,2,3,4,5,6], 'd')
-        y = nx.array([4,5,6,5,4,5], 'd')
+        x = nx.array([1, 2, 3, 4, 5, 6], 'd')
+        y = nx.array([4, 5, 6, 5, 4, 5], 'd')
         dy = nx.array([0.2, 0.3, 0.1, 0.2, 0.9, 0.3])
     else:
         x = nx.linspace(0, 1., 10000)
@@ -1299,7 +1252,7 @@ def sample_graph():
 def demo_plotter(graph):
     import wx
     from pylab_plottables import Plotter
-    #from mplplotter import Plotter
+    # from mplplotter import Plotter
 
     # Make a frame to show it
     app = wx.PySimpleApp()
@@ -1309,22 +1262,22 @@ def demo_plotter(graph):
 
     # render the graph to the pylab plotter
     graph.render(plotter)
-    
-    class GraphUpdate:
+
+    class GraphUpdate(object):
         callnum = 0
-        
+
         def __init__(self, graph, plotter):
             self.graph, self.plotter = graph, plotter
-        
+
         def __call__(self):
             if self.graph.changed():
                 self.graph.render(self.plotter)
                 return True
             return False
-        
+
         def onIdle(self, event):
             self.callnum = self.callnum + 1
-            if self.__call__(): 
+            if self.__call__():
                 pass  # event.RequestMore()
     update = GraphUpdate(graph, plotter)
     frame.Bind(wx.EVT_IDLE, update.onIdle)

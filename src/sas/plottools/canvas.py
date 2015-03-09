@@ -4,9 +4,8 @@ it ovewrites some matplolib methods to allow printing on sys.platform=='win32'
 """
 import wx
 import sys
+import logging
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg
-from matplotlib.backends.backend_wxagg import _convert_agg_to_wx_bitmap
-from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backend_bases import MouseEvent, RendererBase
 from matplotlib.backends.backend_wx import GraphicsContextWx, PrintoutWx
 from matplotlib.backends.backend_wx import RendererWx
@@ -47,13 +46,13 @@ def OnPrintPage(self, page):
     self.canvas.draw()
     dc = self.GetDC()
     try:
-        (ppw, pph) = self.GetPPIPrinter()      # printer's pixels per in
+        (ppw, pph) = self.GetPPIPrinter()  # printer's pixels per in
     except:
         ppw = 1
         pph = 1
-    (pgw, pgh) = self.GetPageSizePixels()  # page size in pixels
-    (dcw, dch) = dc.GetSize()
-    (grw, grh) = self.canvas.GetSizeTuple()
+    (pgw, _) = self.GetPageSizePixels()  # page size in pixels
+    (dcw, _) = dc.GetSize()
+    (grw, _) = self.canvas.GetSizeTuple()
 
     # save current figure dpi resolution and bg color,
     # so that we can temporarily set them to the dpi of
@@ -77,7 +76,7 @@ def OnPrintPage(self, page):
     # page may need additional scaling on preview
     page_scale = 1.0
     if self.IsPreview():
-        page_scale = float(dcw)/pgw
+        page_scale = float(dcw) / pgw
 
     # get margin in pixels = (margin in in) * (pixels/in)
     top_margin = int(self.margin * pph * page_scale)
@@ -96,11 +95,11 @@ def OnPrintPage(self, page):
         try:
             dc.DrawBitmap(self.canvas.bitmap, (0, 0))
         except:
-            pass
+            logging.error(sys.exc_value)
 
     # restore original figure  resolution
     self.canvas.figure.set_facecolor(bgcolor)
-    ## used to be self.canvas.figure.dpi.set( fig_dpi)
+    # # used to be self.canvas.figure.dpi.set( fig_dpi)
     self.canvas.figure.dpi = fig_dpi
     self.canvas.draw()
     return True
@@ -120,7 +119,7 @@ class FigureCanvas(FigureCanvasWxAgg):
     def __init__(self, *args, **kw):
         super(FigureCanvas, self).__init__(*args, **kw)
         self._isRendered = False
-        
+
         # Create an timer for handling draw_idle requests
         # If there are events pending when the timer is
         # complete, reset the timer and continue.  The
@@ -135,7 +134,7 @@ class FigureCanvas(FigureCanvasWxAgg):
         self.ndraw = 0
         # Support for mouse wheel
         self.Bind(wx.EVT_MOUSEWHEEL, self._onMouseWheel)
-       
+
     def set_panel(self, panel):
         """
         Set axes
@@ -145,7 +144,7 @@ class FigureCanvas(FigureCanvasWxAgg):
         # set axes
         self.xaxis = panel.subplot.xaxis
         self.yaxis = panel.subplot.yaxis
-        
+
     def draw_idle(self, *args, **kwargs):
         """
         Render after a delay if no other render requests have been made.
@@ -164,7 +163,7 @@ class FigureCanvas(FigureCanvasWxAgg):
             # Draw plot, changes resizing too
             self.draw(*args, **kwargs)
             self.resizing = False
-            
+
     def _get_axes_switch(self):
         """
         """
@@ -183,14 +182,14 @@ class FigureCanvas(FigureCanvasWxAgg):
             self.panel.schedule_full_draw('append')
         # set the resizing back to default= False
         self.set_resizing(False)
-        
+
     def set_resizing(self, resizing=False):
         """
         Setting the resizing
         """
         self.resizing = resizing
         self.panel.set_resizing(False)
-             
+
     def draw(self, drawDC=None):
         """
         Render the figure using agg.
@@ -202,24 +201,21 @@ class FigureCanvas(FigureCanvasWxAgg):
         if self.IsShownOnScreen() and self.ndraw != 1:
             self._isRendered = True
             self._get_axes_switch()
-            #import time
-            #st = time.time()
+            # import time
+            # st = time.time()
             try:
                 fig.draw(self)
             except ValueError:
-                pass
-            #self.bitmap = _convert_agg_to_wx_bitmap(self.get_renderer(), None)
-            #self.gui_repaint(drawDC=drawDC)
-            #print "time", time.time() - st
+                logging.error(sys.exc_value)
         else:
             self._isRendered = False
         if self.ndraw <= 1:
             self.ndraw += 1
-        
+
     def _onMouseWheel(self, evt):
         """Translate mouse wheel events into matplotlib events"""
         # Determine mouse location
-        w, h = self.figure.canvas.get_width_height()
+        _, h = self.figure.canvas.get_width_height()
         x = evt.GetX()
         y = h - evt.GetY()
 
@@ -227,7 +223,7 @@ class FigureCanvas(FigureCanvasWxAgg):
         delta = evt.GetWheelDelta()
         rotation = evt.GetWheelRotation()
         rate = evt.GetLinesPerAction()
-        #print "delta,rotation,rate",delta,rotation,rate
+        # print "delta,rotation,rate",delta,rotation,rate
         step = rate * float(rotation) / delta
 
         # Convert to mpl event
@@ -248,14 +244,14 @@ class FigureCanvas(FigureCanvasWxAgg):
         self.callbacks.process(s, event)
         if step != 0:
             self.panel.is_zoomed = True
-               
+
     def _onRightButtonDown(self, evt):
         """
         Overload the right button down call back to avoid a problem
         with the context menu over matplotlib plots on linux.
-        
+
         :TODO: Investigate what the root cause of the problem is.
-        
+
         """
         if sys.platform == 'linux2' or self.panel.dimension == 3:
             evt.Skip()
@@ -270,4 +266,4 @@ class FigureCanvas(FigureCanvasWxAgg):
     # CRUFT: wx 3.0.0.0 on OS X doesn't release the mouse on leaving window
     def _onLeave(self, evt):
         if self.HasCapture(): self.ReleaseMouse()
-        super(FigureCanvas,self)._onLeave(evt)
+        super(FigureCanvas, self)._onLeave(evt)

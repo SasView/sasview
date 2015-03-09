@@ -20,8 +20,8 @@ class DialogPanel(ScrolledPanel):
     def __init__(self, *args, **kwds):
         ScrolledPanel.__init__(self, *args, **kwds)
         self.SetupScrolling()
-        
-        
+
+
 class BatchDataDialog(wx.Dialog):
     """
     The current design of Batch  fit allows only of type of data in the data
@@ -34,7 +34,7 @@ class BatchDataDialog(wx.Dialog):
         self.data_1d_selected = None
         self.data_2d_selected = None
         self._do_layout()
-   
+
     def _do_layout(self):
         """
         Draw the content of the current dialog window
@@ -42,7 +42,7 @@ class BatchDataDialog(wx.Dialog):
         vbox = wx.BoxSizer(wx.VERTICAL)
         box_description = wx.StaticBox(self, -1, str("Hint"))
         hint_sizer = wx.StaticBoxSizer(box_description, wx.VERTICAL)
-        selection_sizer = wx.GridBagSizer(5,5)
+        selection_sizer = wx.GridBagSizer(5, 5)
         button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.data_1d_selected = wx.RadioButton(self, -1, 'Data1D',
                                                 style=wx.RB_GROUP)
@@ -59,23 +59,23 @@ class BatchDataDialog(wx.Dialog):
         ix = 0
         iy = 0
         selection_sizer.Add(self.data_1d_selected, (iy, ix),
-                           (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                           (1, 1), wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         iy += 1
         selection_sizer.Add(self.data_2d_selected, (iy, ix),
-                           (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                           (1, 1), wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         #contruction the sizer contaning button
-        button_sizer.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        button_sizer.Add((20, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         button_sizer.Add(button_cancel, 0,
-                         wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+                         wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
         button_sizer.Add(button_OK, 0,
-                                wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
-        vbox.Add(hint_sizer, 0, wx.EXPAND|wx.ALL, 10)
-        vbox.Add(selection_sizer, 0, wx.TOP|wx.BOTTOM, 10)
-        vbox.Add(wx.StaticLine(self, -1),  0, wx.EXPAND, 0)
-        vbox.Add(button_sizer, 0, wx.TOP|wx.BOTTOM, 10)
+                                wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
+        vbox.Add(hint_sizer, 0, wx.EXPAND | wx.ALL, 10)
+        vbox.Add(selection_sizer, 0, wx.TOP | wx.BOTTOM, 10)
+        vbox.Add(wx.StaticLine(self, -1), 0, wx.EXPAND, 0)
+        vbox.Add(button_sizer, 0, wx.TOP | wx.BOTTOM, 10)
         self.SetSizer(vbox)
         self.Layout()
-        
+
     def get_data(self):
         """
         return 1 if  user requested Data1D , 2 if user requested Data2D
@@ -96,23 +96,23 @@ class DataDialog(wx.Dialog):
         self.SetTitle("Data Selection")
         self._max_data = nb_data
         self._nb_selected_data = nb_data
-        
+
         self.SetSize((WIDTH, HEIGHT))
         self.list_of_ctrl = []
         if not data_list:
             return
         select_data_text = " %s Data selected.\n" % str(self._nb_selected_data)
         self._data_text_ctrl = wx.StaticText(self, -1, str(select_data_text))
-                               
+
         self._data_text_ctrl.SetForegroundColour('blue')
         self._sizer_main = wx.BoxSizer(wx.VERTICAL)
         self._sizer_txt = wx.BoxSizer(wx.VERTICAL)
         self._sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         self._choice_sizer = wx.GridBagSizer(5, 5)
         self._panel = DialogPanel(self, style=wx.RAISED_BORDER,
-                               size=(WIDTH-20, HEIGHT/3))
+                               size=(WIDTH - 20, HEIGHT / 3))
         self.__do_layout(data_list, text=text)
-        
+
     def __do_layout(self, data_list, text=''):
         """
         layout the dialog
@@ -140,27 +140,27 @@ class DataDialog(wx.Dialog):
                 cb.SetValue(False)
             self.list_of_ctrl.append((cb, data_list[i]))
             self._choice_sizer.Add(cb, (iy, ix),
-                           (1, 1), wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                           (1, 1), wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
             iy += 1
         self._panel.SetSizer(self._choice_sizer)
         #add sizer
-        self._sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        self._sizer_button.Add((20, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         button_cancel = wx.Button(self, wx.ID_CANCEL, "Cancel")
         self._sizer_button.Add(button_cancel, 0,
-                          wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+                          wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
         button_OK = wx.Button(self, wx.ID_OK, "Ok")
         button_OK.SetFocus()
         self._sizer_button.Add(button_OK, 0,
-                                wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
+                                wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
         static_line = wx.StaticLine(self, -1)
-        self._sizer_txt.Add(self._panel, 0, wx.EXPAND|wx.ALL, 10)
-        self._sizer_main.Add(self._sizer_txt, 0, wx.EXPAND|wx.ALL, 10)
-        self._sizer_main.Add(self._data_text_ctrl, 0,  wx.EXPAND|wx.ALL, 10)
+        self._sizer_txt.Add(self._panel, 0, wx.EXPAND | wx.ALL, 10)
+        self._sizer_main.Add(self._sizer_txt, 0, wx.EXPAND | wx.ALL, 10)
+        self._sizer_main.Add(self._data_text_ctrl, 0, wx.EXPAND | wx.ALL, 10)
         self._sizer_main.Add(static_line, 0, wx.EXPAND, 0)
-        self._sizer_main.Add(self._sizer_button, 0, wx.EXPAND|wx.ALL, 10)
+        self._sizer_main.Add(self._sizer_button, 0, wx.EXPAND | wx.ALL, 10)
         self.SetSizer(self._sizer_main)
         self.Layout()
-        
+
     def get_data(self):
         """
         return the selected data
@@ -171,7 +171,7 @@ class DataDialog(wx.Dialog):
             if cb.GetValue():
                 temp.append(data)
         return temp
-    
+
     def _count_selected_data(self, event):
         """
         count selected data

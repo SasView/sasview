@@ -8,26 +8,26 @@ def map_getattr(classInstance, classFunc, *args):
     Take an instance of a class and a function name as a string.
     Execute class.function and return result
     """
-    return  getattr(classInstance,classFunc)(*args)
+    return  getattr(classInstance, classFunc)(*args)
 
 def map_apply(arguments):
     return apply(arguments[0], arguments[1:])
 
 class FitThread(CalcThread):
     """Thread performing the fit """
-    
-    def __init__(self, 
+
+    def __init__(self,
                  fn,
                  page_id,
                  handler,
                  batch_outputs,
                  batch_inputs=None,
                  pars=None,
-                 completefn = None,
-                 updatefn   = None,
-                 yieldtime  = 0.03,
-                 worktime   = 0.03,
-                 reset_flag = False):
+                 completefn=None,
+                 updatefn=None,
+                 yieldtime=0.03,
+                 worktime=0.03,
+                 reset_flag=False):
         CalcThread.__init__(self,
                  completefn,
                  updatefn,
@@ -43,27 +43,27 @@ class FitThread(CalcThread):
         self.updatefn = updatefn
         #Relative error desired in the sum of squares.
         self.reset_flag = reset_flag
-   
+
     def isquit(self):
         """
         :raise KeyboardInterrupt: when the thread is interrupted
-        
+
         """
         try:
             CalcThread.isquit(self)
         except KeyboardInterrupt:
             msg = "Fitting: terminated by the user."
             raise KeyboardInterrupt, msg
-       
+
     def compute(self):
         """
-        Perform a fit 
+        Perform a fit
         """
         msg = ""
         try:
             import copy
             list_handler = []
-            list_curr_thread = [] 
+            list_curr_thread = []
             list_reset_flag = []
             list_map_get_attr = []
             list_fit_function = []
@@ -77,30 +77,30 @@ class FitThread(CalcThread):
                 list_map_get_attr.append(map_getattr)
             #from multiprocessing import Pool
             inputs = zip(list_map_get_attr, self.fitter, list_fit_function,
-                         list_q, list_q, list_handler,list_curr_thread,
+                         list_q, list_q, list_handler, list_curr_thread,
                          list_reset_flag)
-            result =  map(map_apply, inputs)
-    
+            result = map(map_apply, inputs)
+
             self.complete(result=result,
                           batch_inputs=self.batch_inputs,
                           batch_outputs=self.batch_outputs,
                           page_id=self.page_id,
-                          pars = self.pars,
-                          elapsed=time.time()-self.starttime)
-           
+                          pars=self.pars,
+                          elapsed=time.time() - self.starttime)
+
         except KeyboardInterrupt, msg:
             # Thread was interrupted, just proceed and re-raise.
             # Real code should not print, but this is an example...
             #print "keyboard exception"
             #Stop on exception during fitting. Todo: need to put 
             #some mssg and reset progress bar.
-            
+
             if self.handler is not None:
                 self.handler.stop(msg=msg)
         except:
             import traceback
             if self.handler is not None:
                 self.handler.error(msg=traceback.format_exc())
-           
-        
-    
+
+
+

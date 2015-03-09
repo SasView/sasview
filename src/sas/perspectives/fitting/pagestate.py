@@ -1,6 +1,7 @@
 """
     Class that holds a fit page state
 """
+#TODO: Refactor code so we don't need to use getattr/setattr
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
@@ -34,59 +35,55 @@ from sas.dataloader.data_info import Aperture
 FITTING_NODE_NAME = 'fitting_plug_in'
 CANSAS_NS = "cansas1d/1.0"
 
-list_of_data_attributes = [["is_data", "is_data", "bool"],
-                      ["group_id", "data_group_id", "string"],
-                      ["data_name", "data_name", "string"],
-                      ["data_id", "data_id", "string"],
-                      ["name", "name", "string"],
-                      ["data_name", "data_name", "string"]]
-list_of_state_attributes = [["engine_type", "engine_type", "string"],
-                       ["qmin", "qmin", "float"],
-                      ["qmax", "qmax", "float"],
-                      ["npts", "npts", "float"],
-                      #["shape_rbutton", "shape_rbutton", "bool"],
-                      #["shape_indep_rbutton", "shape_indep_rbutton", "bool"],
-                      #["plugin_rbutton", "plugin_rbutton", "bool"],
-                      #["struct_rbutton", "struct_rbutton", "bool"],
-                      ["categorycombobox", "categorycombobox", "string"],
-                      ["formfactorcombobox", "formfactorcombobox", "string"],
-                      ["structurecombobox", "structurecombobox", "string"],
-                      ["multi_factor","multi_factor","float"],
-                      ["magnetic_on","magnetic_on", "bool"],
-                      ["enable_smearer","enable_smearer","bool"],
-                      ["disable_smearer","disable_smearer","bool"],
-                      ["pinhole_smearer","pinhole_smearer","bool"],
-                      ["slit_smearer","slit_smearer","bool"],
-                      ["enable_disp","enable_disp","bool"],
-                      ["disable_disp","disable_disp","bool"],
-                      ["dI_noweight","dI_noweight","bool"],
-                      ["dI_didata","dI_didata","bool"],
-                      ["dI_sqrdata","dI_sqrdata","bool"],
-                      ["dI_idata","dI_idata","bool"],
-                      ["enable2D","enable2D","bool"],
-                      ["cb1","cb1","bool"],
-                      ["tcChi","tcChi","float"],
-                      ["smearer", "smearer", "float"],
-                      ["smear_type","smear_type", "string"],
-                      ["dq_l", "dq_l", "string"],
-                      ["dq_r","dq_r", "string"],
-                      ["dx_max", "dx_max", "float"],
-                      ["dx_min","dx_min", "float"],
-                      ["dxl", "dxl", "float"],
-                      ["dxw","dxw", "float"]]
+LIST_OF_DATA_ATTRIBUTES = [["is_data", "is_data", "bool"],
+                           ["group_id", "data_group_id", "string"],
+                           ["data_name", "data_name", "string"],
+                           ["data_id", "data_id", "string"],
+                           ["name", "name", "string"],
+                           ["data_name", "data_name", "string"]]
+LIST_OF_STATE_ATTRIBUTES = [["engine_type", "engine_type", "string"],
+                            ["qmin", "qmin", "float"],
+                            ["qmax", "qmax", "float"],
+                            ["npts", "npts", "float"],
+                            ["categorycombobox", "categorycombobox", "string"],
+                            ["formfactorcombobox", "formfactorcombobox", "string"],
+                            ["structurecombobox", "structurecombobox", "string"],
+                            ["multi_factor", "multi_factor", "float"],
+                            ["magnetic_on", "magnetic_on", "bool"],
+                            ["enable_smearer", "enable_smearer", "bool"],
+                            ["disable_smearer", "disable_smearer", "bool"],
+                            ["pinhole_smearer", "pinhole_smearer", "bool"],
+                            ["slit_smearer", "slit_smearer", "bool"],
+                            ["enable_disp", "enable_disp", "bool"],
+                            ["disable_disp", "disable_disp", "bool"],
+                            ["dI_noweight", "dI_noweight", "bool"],
+                            ["dI_didata", "dI_didata", "bool"],
+                            ["dI_sqrdata", "dI_sqrdata", "bool"],
+                            ["dI_idata", "dI_idata", "bool"],
+                            ["enable2D", "enable2D", "bool"],
+                            ["cb1", "cb1", "bool"],
+                            ["tcChi", "tcChi", "float"],
+                            ["smearer", "smearer", "float"],
+                            ["smear_type", "smear_type", "string"],
+                            ["dq_l", "dq_l", "string"],
+                            ["dq_r", "dq_r", "string"],
+                            ["dx_max", "dx_max", "float"],
+                            ["dx_min", "dx_min", "float"],
+                            ["dxl", "dxl", "float"],
+                            ["dxw", "dxw", "float"]]
 
-list_of_model_attributes = [["values", "values"],
+LIST_OF_MODEL_ATTRIBUTES = [["values", "values"],
                             ["weights", "weights"]]
 
-list_of_obj_dic = [["disp_obj_dict", "_disp_obj_dict", "string"]]
+DISPERSION_LIST = [["disp_obj_dict", "_disp_obj_dict", "string"]]
 
-list_of_state_parameters = [["parameters", "parameters"],
+LIST_OF_STATE_PARAMETERS = [["parameters", "parameters"],
                             ["str_parameters", "str_parameters"],
                             ["orientation_parameters", "orientation_params"],
                             ["dispersity_parameters", "orientation_params_disp"],
                             ["fixed_param", "fixed_param"],
                             ["fittable_param", "fittable_param"]]
-list_of_data_2d_attr = [["xmin", "xmin", "float"],
+LIST_OF_DATA_2D_ATTR = [["xmin", "xmin", "float"],
                         ["xmax", "xmax", "float"],
                         ["ymin", "ymin", "float"],
                         ["ymax", "ymax", "float"],
@@ -96,25 +93,25 @@ list_of_data_2d_attr = [["xmin", "xmin", "float"],
                         ["_yunit", "_yunit", "string"],
                         ["_zaxis", "_zaxis", "string"],
                         ["_zunit", "_zunit", "string"]]
-list_of_data2d_values = [["qx_data", "qx_data", "float"],
-                         ["qy_data", "qy_data", "float"],
-                         ["dqx_data", "dqx_data", "float"],
-                         ["dqy_data", "dqy_data", "float"],
-                         ["data", "data", "float"],
-                         ["q_data", "q_data", "float"],
-                         ["err_data", "err_data", "float"],
-                         ["mask", "mask", "bool"]]
+LIST_OF_DATA_2D_VALUES = [["qx_data", "qx_data", "float"],
+                          ["qy_data", "qy_data", "float"],
+                          ["dqx_data", "dqx_data", "float"],
+                          ["dqy_data", "dqy_data", "float"],
+                          ["data", "data", "float"],
+                          ["q_data", "q_data", "float"],
+                          ["err_data", "err_data", "float"],
+                          ["mask", "mask", "bool"]]
 
 
 def parse_entry_helper(node, item):
     """
     Create a numpy list from value extrated from the node
-    
+
     :param node: node from each the value is stored
     :param item: list name of three strings.the two first are name of data
         attribute and the third one is the type of the value of that
         attribute. type can be string, float, bool, etc.
-    
+
     : return: numpy array
     """
     if node is not None:
@@ -123,7 +120,7 @@ def parse_entry_helper(node, item):
         elif item[2] == "bool":
             try:
                 return node.get(item[0]).strip() == "True"
-                
+
             except:
                 return None
         else:
@@ -131,8 +128,8 @@ def parse_entry_helper(node, item):
                 return float(node.get(item[0]))
             except:
                 return None
-            
-            
+
+
 class PageState(object):
     """
     Contains information to reconstruct a page of the fitpanel.
@@ -140,10 +137,10 @@ class PageState(object):
     def __init__(self, parent=None, model=None, data=None):
         """
         Initialize the current state
-        
+
         :param model: a selected model within a page
         :param data:
-        
+
         """
         self.file = None
         #Time of state creation
@@ -158,7 +155,7 @@ class PageState(object):
         #Is 2D
         self.is_2D = False
         self.images = None
-        
+
         #save additional information on data that dataloader.reader does not read
         self.is_data = None
         self.data_name = ""
@@ -171,10 +168,10 @@ class PageState(object):
         self.data_group_id = None
         if self.data is not None and hasattr(self.data, "group_id"):
             self.data_group_id = self.data.group_id
-        
+
         ## reset True change the state of exsiting button
         self.reset = False
-       
+
         #engine type
         self.engine_type = None
         # flag to allow data2D plot
@@ -224,7 +221,7 @@ class PageState(object):
         self.disp_cb_dict = {}
         self.values = {}
         self.weights = {}
-                    
+
         #contains link between a model and selected parameters to fit
         self.param_toFit = []
         ##dictionary of model type and model class
@@ -250,7 +247,7 @@ class PageState(object):
         #reset data range
         self.qmax_x = None
         self.qmin_x = None
-        
+
         self.npts = None
         self.name = ""
         self.multi_factor = None
@@ -268,12 +265,12 @@ class PageState(object):
         ## disperity selection
         self.enable_disp = False
         self.disable_disp = True
-       
+
         ## state of selected all check button
         self.cb1 = False
         ## store value of chisqr
         self.tcChi = None
-    
+
     def clone(self):
         """
         Create a new copy of the current object
@@ -291,20 +288,20 @@ class PageState(object):
         obj.is_data = self.is_data
         obj.model_list_box = copy.deepcopy(self.model_list_box)
         obj.engine_type = copy.deepcopy(self.engine_type)
-        
+
         obj.categorycombobox = self.categorycombobox
         obj.formfactorcombobox = self.formfactorcombobox
         obj.structurecombobox = self.structurecombobox
-        
+
         #obj.shape_rbutton = self.shape_rbutton
         #obj.shape_indep_rbutton = self.shape_indep_rbutton
         #obj.struct_rbutton = self.struct_rbutton
         #obj.plugin_rbutton = self.plugin_rbutton
-        
+
         obj.manager = self.manager
         obj.event_owner = self.event_owner
         obj.disp_list = copy.deepcopy(self.disp_list)
-        
+
         obj.enable2D = copy.deepcopy(self.enable2D)
         obj.parameters = copy.deepcopy(self.parameters)
         obj.str_parameters = copy.deepcopy(self.str_parameters)
@@ -315,7 +312,7 @@ class PageState(object):
         obj.enable_disp = copy.deepcopy(self.enable_disp)
         obj.disable_disp = copy.deepcopy(self.disable_disp)
         obj.tcChi = self.tcChi
-  
+
         if len(self._disp_obj_dict) > 0:
             for k, v in self._disp_obj_dict.iteritems():
                 obj._disp_obj_dict[k] = v
@@ -342,7 +339,7 @@ class PageState(object):
         obj.dx_max = copy.deepcopy(self.dx_max)
         obj.dx_min = copy.deepcopy(self.dx_min)
         obj.dxl = copy.deepcopy(self.dxl)
-        obj.dxw = copy.deepcopy(self.dxw)        
+        obj.dxw = copy.deepcopy(self.dxw)
         obj.disp_box = copy.deepcopy(self.disp_box)
         obj.qmin = copy.deepcopy(self.qmin)
         obj.qmax = copy.deepcopy(self.qmax)
@@ -351,13 +348,13 @@ class PageState(object):
         obj.npts = copy.deepcopy(self.npts)
         obj.cb1 = copy.deepcopy(self.cb1)
         obj.smearer = copy.deepcopy(self.smearer)
-        
+
         for name, state in self.saved_states.iteritems():
             copy_name = copy.deepcopy(name)
             copy_state = state.clone()
             obj.saved_states[copy_name] = copy_state
         return obj
-    
+
     def _repr_helper(self, list, rep):
         """
         Helper method to print a state
@@ -374,7 +371,7 @@ class PageState(object):
             rep += "maximum value : %s \n" % str(item[6][1])
             rep += "parameter unit: %s\n\n" % str(item[7])
         return rep
-    
+
     def __repr__(self):
         """
         output string for printing
@@ -396,16 +393,12 @@ class PageState(object):
             rep += "model name : %s\n" % m_name
         else:
             rep += "model name : None\n"
-        #rep += "model type (form factor) selected: %s\n" % self.shape_rbutton 
         rep += "multi_factor : %s\n" % str(self.multi_factor)
-        rep += "magnetic_on : %s\n"% str(self.magnetic_on)
+        rep += "magnetic_on : %s\n" % str(self.magnetic_on)
         rep += "model type (Category) selected: %s\n" % self.categorycombobox
-        #rep += "model type (shape independent) selected: %s\n" % self.shape_indep_rbutton
-        #rep += "model type (structure factor) selected: %s\n" % self.struct_rbutton
-        #rep += "model type (plug-in ) selected: %s\n" % self.plugin_rbutton
         rep += "data : %s\n" % str(self.data)
         rep += "Plotting Range: min: %s, max: %s, steps: %s\n" % (str(self.qmin),
-                                                str(self.qmax), str(self.npts))
+                                                                  str(self.qmax), str(self.npts))
         rep += "Dispersion selection : %s\n" % str(self.disp_box)
         rep += "Smearing enable : %s\n" % str(self.enable_smearer)
         rep += "Smearing disable : %s\n" % str(self.disable_smearer)
@@ -414,12 +407,12 @@ class PageState(object):
         rep += "Dispersity enable : %s\n" % str(self.enable_disp)
         rep += "Dispersity disable : %s\n" % str(self.disable_disp)
         rep += "Slit smearer enable: %s\n" % str(self.slit_smearer)
-        
+
         rep += "dI_noweight : %s\n" % str(self.dI_noweight)
         rep += "dI_didata : %s\n" % str(self.dI_didata)
         rep += "dI_sqrdata : %s\n" % str(self.dI_sqrdata)
         rep += "dI_idata : %s\n" % str(self.dI_idata)
-        
+
         rep += "2D enable : %s\n" % str(self.enable2D)
         rep += "All parameters checkbox selected: %s\n" % (self.cb1)
         rep += "Value of Chisqr : %s\n" % str(self.tcChi)
@@ -428,9 +421,9 @@ class PageState(object):
         rep += "dq_l  : %s\n" % self.dq_l
         rep += "dq_r  : %s\n" % self.dq_r
         rep += "dx_max  : %s\n" % str(self.dx_max)
-        rep += "dx_min : %s\n" % str(self.dx_min)  
+        rep += "dx_min : %s\n" % str(self.dx_min)
         rep += "dxl  : %s\n" % str(self.dxl)
-        rep += "dxw : %s\n" % str(self.dxw)    
+        rep += "dxw : %s\n" % str(self.dxw)
         rep += "model  : %s\n\n" % str(self.model)
         temp_parameters = []
         temp_fittable_param = []
@@ -449,22 +442,13 @@ class PageState(object):
             else:
                 temp_parameters = self.parameters
                 temp_fittable_param = self.fittable_param
-                
+
             rep += "number parameters(self.parameters): %s\n" % len(temp_parameters)
             rep = self._repr_helper(list=temp_parameters, rep=rep)
             rep += "number str_parameters(self.str_parameters): %s\n" % len(self.str_parameters)
             rep = self._repr_helper(list=self.str_parameters, rep=rep)
             rep += "number fittable_param(self.fittable_param): %s\n" % len(temp_fittable_param)
             rep = self._repr_helper(list=temp_fittable_param, rep=rep)
-            """
-            if is_2D:
-                rep += "number orientation parameters"
-                rep += "(self.orientation_params): %s\n"%len(self.orientation_params)
-                rep = self._repr_helper( list=self.orientation_params, rep=rep)
-                rep += "number dispersity parameters"
-                rep += "(self.orientation_params_disp): %s\n"%len(self.orientation_params_disp)
-                rep = self._repr_helper( list=self.orientation_params_disp, rep=rep)
-            """
         return rep
 
     def set_report_string(self):
@@ -480,7 +464,6 @@ class PageState(object):
         param_string = ""
         paramval_string = ""
         chi2_string = ""
-        multi_factor_string = ""
         q_range = ""
         strings = self.__repr__()
         lines = strings.split('\n')
@@ -493,7 +476,7 @@ class PageState(object):
             try:
                 value = content[1]
             except:
-                pass
+                logging.error(sys.exc_value)
             if name.count("State created"):
                 repo_time = "" + value
             if name.count("parameter name"):
@@ -507,28 +490,21 @@ class PageState(object):
                     param_string += value + ','
             if name == "value":
                 param_string += value + ','
-	    if name == "selected":
-		if value == u' False':
-		    fixed_parameter = True
-		else:
-		    fixed_parameter = False
+            if name == "selected":
+                if value == u' False':
+                    fixed_parameter = True
+                else:
+                    fixed_parameter = False
             if name == "error value":
-	        if fixed_parameter:
-		    param_string += '(fixed),'
-		else:
+                if fixed_parameter:
+                    param_string += '(fixed),'
+                else:
                     param_string += value + ','
             if name == "parameter unit":
                 param_string += value + ':'
             if name == "Value of Chisqr ":
                 chi2 = ("Chi2/Npts = " + value)
                 chi2_string = CENTRE % chi2
-            if name == "multi_factor ":
-                muti_factor = ("muti_factor = " + value)
-                muti_factor_string = CENTRE % muti_factor
-            if name == "magentic_on ":
-                magentic_on = ("magentic_on = " + value)
-                if string(value) == 'True':
-                    magentic_on_string = CENTRE % magentic_on
             if name == "Title":
                 if len(value.strip()) == 0:
                     continue
@@ -536,20 +512,20 @@ class PageState(object):
                 title_name = HEADER % title
             if name == "data ":
                 try:
-                    file = ("File name:" + content[2])
-                    file_name = CENTRE % file
+                    file_value = ("File name:" + content[2])
+                    file_name = CENTRE % file_value
                     if len(title) == 0:
                         title = content[2] + " [" + repo_time + "]"
                         title_name = HEADER % title
                 except:
-                    pass
+                    logging.error(sys.exc_value)
             if name == "model name ":
                 try:
                     modelname = "Model name:" + content[1]
                 except:
                     modelname = "Model name:" + " NAN"
                 model_name = CENTRE % modelname
-                 
+
             if name == "Plotting Range":
                 try:
                     q_range = content[1] + " = " + content[2] \
@@ -557,7 +533,7 @@ class PageState(object):
                     q_name = ("Q Range:    " + q_range)
                     q_range = CENTRE % q_name
                 except:
-                    pass
+                    logging.error(sys.exc_value)
         paramval = ""
         for lines in param_string.split(":"):
             line = lines.split(",")
@@ -571,16 +547,16 @@ class PageState(object):
                 if not paramval.count(param):
                     paramval += param + "\n"
                     paramval_string += CENTRE % param + "\n"
-        
+
         text_string = "\n\n\n" + title + "\n\n" + file + \
                       "\n" + q_name + \
                       "\n" + chi2 + \
                       "\n\n" + paramval
-        
+
         title_name = self._check_html_format(title_name)
         file_name = self._check_html_format(file_name)
         title = self._check_html_format(title)
-                                  
+
         html_string = title_name + "\n" + file_name + \
                                    "\n" + model_name + \
                                    "\n" + q_range + \
@@ -590,22 +566,22 @@ class PageState(object):
                                    "\n" + ELINE + \
                                    "\n" + FEET_1 % title + \
                                    "\n" + FEET_2
-                                                                      
+
         return html_string, text_string, title
-    
+
     def _check_html_format(self, name):
         """
         Check string '%' for html format
         """
         if name.count('%'):
             name = name.replace('%', '&#37')
-        
+
         return name
-    
+
     def report(self, figs=None, canvases=None):
         """
         Invoke report dialog panel
-        
+
         : param figs: list of pylab figures [list]
         """
         from sas.perspectives.fitting.report_dialog import ReportDialog
@@ -637,7 +613,7 @@ class PageState(object):
         report_list = [report_str, text_str, images]
         dialog = ReportDialog(report_list, None, -1, "")
         dialog.Show()
-        
+
     def _toXML_helper(self, thelist, element, newdoc):
         """
         Helper method to create xml file for saving state
@@ -655,19 +631,19 @@ class PageState(object):
             sub_element.setAttribute('maximum_value', str(item[6][1]))
             sub_element.setAttribute('unit', str(item[7]))
             element.appendChild(sub_element)
-        
+
     def toXML(self, file="fitting_state.fitv", doc=None, entry_node=None):
         """
         Writes the state of the InversionControl panel to file, as XML.
-        
+
         Compatible with standalone writing, or appending to an
         already existing XML document. In that case, the XML document
         is required. An optional entry node in the XML document may also be given.
-        
+
         :param file: file to write to
         :param doc: XML document object [optional]
         :param entry_node: XML node within the XML document at which we will append the data [optional]
-        
+
         """
         from xml.dom.minidom import getDOMImplementation
 
@@ -696,11 +672,11 @@ class PageState(object):
                     node_list = newdoc.getElementsByTagName(node_name)
                     entry_node = node_list.item(0)
                     entry_node.appendChild(top_element)
-                    
+
         attr = newdoc.createAttribute("version")
         attr.nodeValue = '1.0'
         top_element.setAttributeNode(attr)
-        
+
         # File name
         element = newdoc.createElement("filename")
         if self.file is not None:
@@ -708,7 +684,7 @@ class PageState(object):
         else:
             element.appendChild(newdoc.createTextNode(str(file)))
         top_element.appendChild(element)
-        
+
         element = newdoc.createElement("timestamp")
         element.appendChild(newdoc.createTextNode(time.ctime(self.timestamp)))
         attr = newdoc.createAttribute("epoch")
@@ -718,7 +694,7 @@ class PageState(object):
         # Inputs
         inputs = newdoc.createElement("Attributes")
         top_element.appendChild(inputs)
-       
+
         if self.data is not None and hasattr(self.data, "group_id"):
             self.data_group_id = self.data.group_id
         if self.data is not None and hasattr(self.data, "is_data"):
@@ -727,53 +703,49 @@ class PageState(object):
             self.data_name = self.data.name
         if self.data is not None and hasattr(self.data, "id"):
             self.data_id = self.data.id
-       
-        for item in list_of_data_attributes:
+
+        for item in LIST_OF_DATA_ATTRIBUTES:
             element = newdoc.createElement(item[0])
-            exec "element.setAttribute(item[0], str(self.%s))" % (item[1])
+            element.setAttribute(item[0], str(getattr(self, item[1])))
             inputs.appendChild(element)
-        
-        for item in list_of_state_attributes:
+
+        for item in LIST_OF_STATE_ATTRIBUTES:
             element = newdoc.createElement(item[0])
-            exec "element.setAttribute(item[0], str(self.%s))" % (item[1])
+            element.setAttribute(item[0], str(getattr(self, item[1])))
             inputs.appendChild(element)
-            
+
         # For self.values ={ disp_param_name: [vals,...],...}
         # and for self.weights ={ disp_param_name: [weights,...],...}
-        list = {}
-        for item in list_of_model_attributes:
+        value_list = {}
+        for item in LIST_OF_MODEL_ATTRIBUTES:
             element = newdoc.createElement(item[0])
-            exec "list = self.%s" % item[1]
-            for key, value in list.iteritems():
+            value_list = getattr(self, item[1])
+            for key, value in value_list.iteritems():
                 sub_element = newdoc.createElement(key)
                 sub_element.setAttribute('name', str(key))
                 for val in value:
-                    com = "sub_element.appendChild"
-                    com += "(newdoc.createTextNode(str(%s)))"
-                    exec com % val
-                   
+                    sub_element.appendChild(newdoc.createTextNode(str(val)))
+
                 element.appendChild(sub_element)
             inputs.appendChild(element)
-        
+
         # Create doc for the dictionary of self._disp_obj_dic
-        for item in list_of_obj_dic:
+        for item in DISPERSION_LIST:
             element = newdoc.createElement(item[0])
-            exec "list = self.%s" % item[1]
-            for key, val in list.iteritems():
+            value_list = getattr(self, item[1])
+            for key, val in value_list.iteritems():
                 value = repr(val)
                 sub_element = newdoc.createElement(key)
                 sub_element.setAttribute('name', str(key))
                 sub_element.setAttribute('value', str(value))
                 element.appendChild(sub_element)
             inputs.appendChild(element)
-                 
-        for item in list_of_state_parameters:
+
+        for item in LIST_OF_STATE_PARAMETERS:
             element = newdoc.createElement(item[0])
-            com = "self._toXML_helper(thelist=self.%s,"
-            com += " element=element, newdoc=newdoc)"
-            exec com % item[1]
+            self._toXML_helper(thelist=getattr(self, item[1]), element=element, newdoc=newdoc)
             inputs.appendChild(element)
-        
+
         # Save the file
         if doc is None:
             fd = open(file, 'w')
@@ -782,7 +754,7 @@ class PageState(object):
             return None
         else:
             return newdoc
-        
+
     def _fromXML_helper(self, node, list):
         """
         Helper function to write state to xml
@@ -832,27 +804,27 @@ class PageState(object):
                          [error_displayed, error_value],
                          [minimum_displayed, minimum_value],
                          [maximum_displayed, maximum_value], unit])
-       
+
     def fromXML(self, file=None, node=None):
         """
         Load fitting state from a file
-        
+
         :param file: .fitv file
         :param node: node of a XML document to read from
-        
+
         """
         if file is not None:
             msg = "PageState no longer supports non-CanSAS"
             msg += " format for fitting files"
             raise RuntimeError, msg
-            
+
         if node.get('version')and node.get('version') == '1.0':
-            
+
             # Get file name
             entry = get_content('ns:filename', node)
             if entry is not None:
                 self.file = entry.text.strip()
-                
+
             # Get time stamp
             entry = get_content('ns:timestamp', node)
             if entry is not None and entry.get('epoch'):
@@ -862,40 +834,29 @@ class PageState(object):
                     msg = "PageState.fromXML: Could not"
                     msg += " read timestamp\n %s" % sys.exc_value
                     logging.error(msg)
-            
+
             # Parse fitting attributes
             entry = get_content('ns:Attributes', node)
-            for item in list_of_data_attributes:
+            for item in LIST_OF_DATA_ATTRIBUTES:
                 node = get_content('ns:%s' % item[0], entry)
-                try:
-                    exec "self.%s = parse_entry_helper(node, item)" % item[0]
-                    
-                except:
-                    raise
+                setattr(self, item[0], parse_entry_helper(node, item))
 
             if entry is not None:
-                
-                for item in list_of_state_attributes:
+                for item in LIST_OF_STATE_ATTRIBUTES:
                     node = get_content('ns:%s' % item[0], entry)
-                    try:
-                        exec "self.%s = parse_entry_helper(node, item)" % \
-                                                                str(item[0])
-                    except:
-                        raise
-                    
-                for item in list_of_state_parameters:
+                    setattr(self, item[0], parse_entry_helper(node, item))
+
+                for item in LIST_OF_STATE_PARAMETERS:
                     node = get_content("ns:%s" % item[0], entry)
-                    exec "self._fromXML_helper(node=node, list=self.%s)" % \
-                                                                    item[1]
-                
+                    self._fromXML_helper(node=node, list=getattr(self, item[1]))
+
                 # Recover _disp_obj_dict from xml file
                 self._disp_obj_dict = {}
-                disp_model = None
-                for item in list_of_obj_dic:
+                for item in DISPERSION_LIST:
                     # Get node
                     node = get_content("ns:%s" % item[0], entry)
                     for attr in node:
-                        name = attr.get('name')
+                        name = str(attr.get('name'))
                         val = attr.get('value')
                         value = val.split(" instance")[0]
                         disp_name = value.split("<")[1]
@@ -906,15 +867,16 @@ class PageState(object):
                             com_name = disp_name.split(".")[3]
                             exec com % com_name
                             disp_model = disp()
-                            exec "self.%s['%s'] = com_name" % (item[1], name)
+                            attribute = getattr(self, item[1])
+                            attribute[name] = com_name
                         except:
-                            pass
-                        
+                            logging.error(sys.exc_value)
+
                 # get self.values and self.weights dic. if exists
-                for item in list_of_model_attributes:
+                for item in LIST_OF_MODEL_ATTRIBUTES:
                     node = get_content("ns:%s" % item[0], entry)
                     dic = {}
-                    list = []
+                    value_list = []
                     for par in node:
                         name = par.get('name')
                         values = par.text.split('\n')
@@ -922,13 +884,13 @@ class PageState(object):
                         for line in values:
                             try:
                                 val = float(line)
-                                list.append(val)
+                                value_list.append(val)
                             except:
                                 # pass if line is empty (it happens)
-                                pass
-                    dic[name] = numpy.array(list)
-                    exec "self.%s = dic" % item[1]
-                    
+                                logging.error(sys.exc_value)
+                    dic[name] = numpy.array(value_list)
+                    setattr(self, item[1], dic)
+
     def set_plot_state(self, figs, canvases):
         """
         Build image state that wx.html understand
@@ -942,11 +904,11 @@ class PageState(object):
         # Reset memory
         self.imgRAM = None
         wx.MemoryFSHandler()
-        
+
         # For no figures in the list, prepare empty plot
         if figs == None or len(figs) == 0:
             figs = [None]
-            
+
         # Loop over the list of figures
         # use wx.MemoryFSHandler
         self.imgRAM = wx.MemoryFSHandler()
@@ -954,20 +916,20 @@ class PageState(object):
             if figs != None:
                 ind = figs.index(fig)
                 canvas = canvases[ind]
-                
-            #store the image in wx.FileSystem Object 
+
+            #store the image in wx.FileSystem Object
             wx.FileSystem.AddHandler(wx.MemoryFSHandler())
-            
+
             # index of the fig
             ind = figs.index(fig)
-            
+
             #AddFile, image can be retrieved with 'memory:filename'
             self.imgRAM.AddFile('img_fit%s.png' % ind,
                                 canvas.bitmap, wx.BITMAP_TYPE_PNG)
-            
+
             #append figs
             images.append(fig)
-            
+
         return images
 
 
@@ -977,97 +939,98 @@ class Reader(CansasReader):
     """
     ## File type
     type_name = "Fitting"
-    
+
     ## Wildcards
     type = ["Fitting files (*.fitv)|*.fitv"
             "SASView file (*.svs)|*.svs"]
     ## List of allowed extensions
     ext = ['.fitv', '.FITV', '.svs', 'SVS']
-    
+
     def __init__(self, call_back=None, cansas=True):
         CansasReader.__init__(self)
         """
         Initialize the call-back method to be called
         after we load a file
-        
+
         :param call_back: call-back method
         :param cansas:  True = files will be written/read in CanSAS format
                         False = write CanSAS format
-            
+
         """
         ## Call back method to be executed after a file is read
         self.call_back = call_back
         ## CanSAS format flag
         self.cansas = cansas
         self.state = None
-        
+
     def get_state(self):
         return self.state
-        
+
     def read(self, path):
         """
         Load a new P(r) inversion state from file
-        
+
         :param path: file path
-        
+
         """
         if self.cansas == True:
             return self._read_cansas(path)
-     
+
     def _data2d_to_xml_doc(self, datainfo):
         """
         Create an XML document to contain the content of a Data2D
-        
+
         :param datainfo: Data2D object
-        
+
         """
         if not issubclass(datainfo.__class__, Data2D):
             raise RuntimeError, "The cansas writer expects a Data2D instance"
-        
+
         doc = xml.dom.minidom.Document()
         main_node = doc.createElement("SASroot")
         main_node.setAttribute("version", self.version)
         main_node.setAttribute("xmlns", "cansas1d/%s" % self.version)
         main_node.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-        main_node.setAttribute("xsi:schemaLocation", "cansas1d/%s http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd" % self.version)
-        
+        main_node.setAttribute("xsi:schemaLocation",
+                               "cansas1d/%s http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd" % self.version)
+
         doc.appendChild(main_node)
-        
+
         entry_node = doc.createElement("SASentry")
         main_node.appendChild(entry_node)
-       
+
         write_node(doc, entry_node, "Title", datainfo.title)
         if datainfo is not None:
             write_node(doc, entry_node, "data_class", datainfo.__class__.__name__)
         for item in datainfo.run:
             runname = {}
-            if datainfo.run_name.has_key(item) and len(str(datainfo.run_name[item]))>1:
-                runname = {'name': datainfo.run_name[item] }
+            if datainfo.run_name.has_key(item) and len(str(datainfo.run_name[item])) > 1:
+                runname = {'name': datainfo.run_name[item]}
             write_node(doc, entry_node, "Run", item, runname)
         # Data info
         new_node = doc.createElement("SASdata")
         entry_node.appendChild(new_node)
-        for item in list_of_data_2d_attr:
+        for item in LIST_OF_DATA_2D_ATTR:
             element = doc.createElement(item[0])
-            exec "element.setAttribute(item[0], str(datainfo.%s))" % (item[1])
+            element.setAttribute(item[0], str(getattr(datainfo, item[1])))
             new_node.appendChild(element)
-            
-        for item in list_of_data2d_values:
+
+        for item in LIST_OF_DATA_2D_VALUES:
             root_node = doc.createElement(item[0])
             new_node.appendChild(root_node)
             temp_list = None
-            exec "temp_list = datainfo.%s" % item[1]
+            temp_list = getattr(datainfo, item[1])
 
-            if temp_list is None or len(temp_list)== 0:
+            if temp_list is None or len(temp_list) == 0:
                 element = doc.createElement(item[0])
-                exec "element.appendChild(doc.createTextNode(str(%s)))" % temp_list
+                element.appendChild(doc.createTextNode(str(temp_list)))
                 root_node.appendChild(element)
             else:
                 for value in temp_list:
                     element = doc.createElement(item[0])
-                    exec "element.setAttribute(item[0], str(%s))" % value
+                    element.setAttribute(item[0], str(value))
                     root_node.appendChild(element)
-       
+
         # Sample info
         sample = doc.createElement("SASsample")
         if datainfo.sample.name is not None:
@@ -1079,10 +1042,10 @@ class Reader(CansasReader):
         write_node(doc, sample, "transmission", datainfo.sample.transmission)
         write_node(doc, sample, "temperature", datainfo.sample.temperature,
                    {"unit": datainfo.sample.temperature_unit})
-        
+
         for item in datainfo.sample.details:
             write_node(doc, sample, "details", item)
-        
+
         pos = doc.createElement("position")
         written = write_node(doc, pos, "x", datainfo.sample.position.x,
                              {"unit": datainfo.sample.position_unit})
@@ -1094,7 +1057,7 @@ class Reader(CansasReader):
                                        {"unit": datainfo.sample.position_unit})
         if written == True:
             sample.appendChild(pos)
-        
+
         ori = doc.createElement("orientation")
         written = write_node(doc, ori, "roll", datainfo.sample.orientation.x,
                              {"unit": datainfo.sample.orientation_unit})
@@ -1106,19 +1069,19 @@ class Reader(CansasReader):
                                        {"unit": datainfo.sample.orientation_unit})
         if written == True:
             sample.appendChild(ori)
-        
+
         # Instrument info
         instr = doc.createElement("SASinstrument")
         entry_node.appendChild(instr)
-        
+
         write_node(doc, instr, "name", datainfo.instrument)
-        
+
         #   Source
         source = doc.createElement("SASsource")
         if datainfo.source.name is not None:
             source.setAttribute("name", str(datainfo.source.name))
         instr.appendChild(source)
-        
+
         write_node(doc, source, "radiation", datainfo.source.radiation)
         write_node(doc, source, "beam_shape", datainfo.source.beam_shape)
         size = doc.createElement("beam_size")
@@ -1134,7 +1097,7 @@ class Reader(CansasReader):
                                        {"unit": datainfo.source.beam_size_unit})
         if written == True:
             source.appendChild(size)
-            
+
         write_node(doc, source, "wavelength", datainfo.source.wavelength,
                    {"unit": datainfo.source.wavelength_unit})
         write_node(doc, source, "wavelength_min",
@@ -1146,17 +1109,17 @@ class Reader(CansasReader):
         write_node(doc, source, "wavelength_spread",
                    datainfo.source.wavelength_spread,
                    {"unit": datainfo.source.wavelength_spread_unit})
-        
+
         #   Collimation
         for item in datainfo.collimation:
             coll = doc.createElement("SAScollimation")
             if item.name is not None:
                 coll.setAttribute("name", str(item.name))
             instr.appendChild(coll)
-            
+
             write_node(doc, coll, "length", item.length,
                        {"unit": item.length_unit})
-            
+
             for apert in item.aperture:
                 ap = doc.createElement("aperture")
                 if apert.name is not None:
@@ -1164,10 +1127,10 @@ class Reader(CansasReader):
                 if apert.type is not None:
                     ap.setAttribute("type", str(apert.type))
                 coll.appendChild(ap)
-                
+
                 write_node(doc, ap, "distance", apert.distance,
                            {"unit": apert.distance_unit})
-                
+
                 size = doc.createElement("size")
                 if apert.size_name is not None:
                     size.setAttribute("name", str(apert.size_name))
@@ -1191,7 +1154,7 @@ class Reader(CansasReader):
                                            {"unit": item.slit_length_unit})
             if written == True:
                 instr.appendChild(det)
-            
+
             off = doc.createElement("offset")
             written = write_node(doc, off, "x", item.offset.x,
                                  {"unit": item.offset_unit})
@@ -1201,7 +1164,7 @@ class Reader(CansasReader):
                                            {"unit": item.offset_unit})
             if written == True:
                 det.appendChild(off)
-            
+
             center = doc.createElement("beam_center")
             written = write_node(doc, center, "x", item.beam_center.x,
                                  {"unit": item.beam_center_unit})
@@ -1213,7 +1176,7 @@ class Reader(CansasReader):
                                            {"unit": item.beam_center_unit})
             if written == True:
                 det.appendChild(center)
-                
+
             pix = doc.createElement("pixel_size")
             written = write_node(doc, pix, "x", item.pixel_size.x,
                                  {"unit": item.pixel_size_unit})
@@ -1223,7 +1186,7 @@ class Reader(CansasReader):
                                            {"unit": item.pixel_size_unit})
             if written == True:
                 det.appendChild(pix)
-                
+
             ori = doc.createElement("orientation")
             written = write_node(doc, ori, "roll", item.orientation.x,
                                  {"unit": item.orientation_unit})
@@ -1234,7 +1197,7 @@ class Reader(CansasReader):
                                            {"unit": item.orientation_unit})
             if written == True:
                 det.appendChild(ori)
-                
+
         # Processes info
         for item in datainfo.process:
             node = doc.createElement("SASprocess")
@@ -1252,17 +1215,17 @@ class Reader(CansasReader):
         # Return the document, and the SASentry node associated with
         # the data we just wrote
         return doc, entry_node
-   
+
     def _parse_state(self, entry):
         """
         Read a fit result from an XML node
-        
+
         :param entry: XML node to read from
-        
+
         :return: PageState object
         """
         # Create an empty state
-        state = None   
+        state = None
         # Locate the P(r) node
         try:
             nodes = entry.xpath('ns:%s' % FITTING_NODE_NAME,
@@ -1271,20 +1234,20 @@ class Reader(CansasReader):
                 # Create an empty state
                 state = PageState()
                 state.fromXML(node=nodes[0])
-                
+
         except:
             logging.info("XML document does not contain fitting information.\n %s" % sys.exc_value)
-            
+
         return state
-      
+
     def _parse_save_state_entry(self, dom):
         """
         Parse a SASentry
-        
+
         :param node: SASentry node
-        
+
         :return: Data1D/Data2D object
-        
+
         """
         node = dom.xpath('ns:data_class', namespaces={'ns': CANSAS_NS})
         if not node or node[0].text.lstrip().rstrip() != "Data2D":
@@ -1304,15 +1267,15 @@ class Reader(CansasReader):
                 size_dx = size_dxl
                 numpy.trim_zeros(return_value.dxl)
                 numpy.trim_zeros(return_value.dxw)
-                            
+
             return return_value, _
-        
+
         #Parse 2D
         data_info = Data2D()
-        
+
         # Look up title
         self._store_content('ns:Title', dom, 'title', data_info)
-        
+
         # Look up run number
         nodes = dom.xpath('ns:Run', namespaces={'ns': CANSAS_NS})
         for item in nodes:
@@ -1322,7 +1285,7 @@ class Reader(CansasReader):
                     data_info.run.append(value)
                     if item.get('name') is not None:
                         data_info.run_name[value] = item.get('name')
-                           
+
         # Look up instrument name
         self._store_content('ns:SASinstrument/ns:name', dom,
                             'instrument', data_info)
@@ -1339,23 +1302,18 @@ class Reader(CansasReader):
                 err_mess = "cansas_reader.read: error processing entry notes\n  %s" % sys.exc_value
                 self.errors.append(err_mess)
                 logging.error(err_mess)
-        
+
         # Sample info ###################
         entry = get_content('ns:SASsample', dom)
         if entry is not None:
             data_info.sample.name = entry.get('name')
-            
-        self._store_content('ns:SASsample/ns:ID',
-                     dom, 'ID', data_info.sample)
-        self._store_float('ns:SASsample/ns:thickness',
-                     dom, 'thickness', data_info.sample)
-        self._store_float('ns:SASsample/ns:transmission',
-                     dom, 'transmission', data_info.sample)
-        self._store_float('ns:SASsample/ns:temperature',
-                     dom, 'temperature', data_info.sample)
-        
-        nodes = dom.xpath('ns:SASsample/ns:details',
-                          namespaces={'ns': CANSAS_NS})
+
+        self._store_content('ns:SASsample/ns:ID', dom, 'ID', data_info.sample)
+        self._store_float('ns:SASsample/ns:thickness', dom, 'thickness', data_info.sample)
+        self._store_float('ns:SASsample/ns:transmission', dom, 'transmission', data_info.sample)
+        self._store_float('ns:SASsample/ns:temperature', dom, 'temperature', data_info.sample)
+
+        nodes = dom.xpath('ns:SASsample/ns:details', namespaces={'ns': CANSAS_NS})
         for item in nodes:
             try:
                 if item.text is not None:
@@ -1366,53 +1324,50 @@ class Reader(CansasReader):
                 err_mess = "cansas_reader.read: error processing sample details\n  %s" % sys.exc_value
                 self.errors.append(err_mess)
                 logging.error(err_mess)
-        
+
         # Position (as a vector)
-        self._store_float('ns:SASsample/ns:position/ns:x',
-                     dom, 'position.x', data_info.sample)
-        self._store_float('ns:SASsample/ns:position/ns:y',
-                     dom, 'position.y', data_info.sample)
-        self._store_float('ns:SASsample/ns:position/ns:z',
-                     dom, 'position.z', data_info.sample)
-        
+        self._store_float('ns:SASsample/ns:position/ns:x', dom, 'position.x', data_info.sample)
+        self._store_float('ns:SASsample/ns:position/ns:y', dom, 'position.y', data_info.sample)
+        self._store_float('ns:SASsample/ns:position/ns:z', dom, 'position.z', data_info.sample)
+
         # Orientation (as a vector)
         self._store_float('ns:SASsample/ns:orientation/ns:roll',
-                     dom, 'orientation.x', data_info.sample)
+                          dom, 'orientation.x', data_info.sample)
         self._store_float('ns:SASsample/ns:orientation/ns:pitch',
-                     dom, 'orientation.y', data_info.sample)
+                          dom, 'orientation.y', data_info.sample)
         self._store_float('ns:SASsample/ns:orientation/ns:yaw',
-                     dom, 'orientation.z', data_info.sample)
-       
+                          dom, 'orientation.z', data_info.sample)
+
         # Source info ###################
         entry = get_content('ns:SASinstrument/ns:SASsource', dom)
         if entry is not None:
             data_info.source.name = entry.get('name')
-        
+
         self._store_content('ns:SASinstrument/ns:SASsource/ns:radiation',
-                     dom, 'radiation', data_info.source)
+                            dom, 'radiation', data_info.source)
         self._store_content('ns:SASinstrument/ns:SASsource/ns:beam_shape',
-                     dom, 'beam_shape', data_info.source)
+                            dom, 'beam_shape', data_info.source)
         self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength',
-                     dom, 'wavelength', data_info.source)
+                          dom, 'wavelength', data_info.source)
         self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_min',
-                     dom, 'wavelength_min', data_info.source)
+                          dom, 'wavelength_min', data_info.source)
         self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_max',
-                     dom, 'wavelength_max', data_info.source)
+                          dom, 'wavelength_max', data_info.source)
         self._store_float('ns:SASinstrument/ns:SASsource/ns:wavelength_spread',
-                     dom, 'wavelength_spread', data_info.source)
-        
+                          dom, 'wavelength_spread', data_info.source)
+
         # Beam size (as a vector)
         entry = get_content('ns:SASinstrument/ns:SASsource/ns:beam_size', dom)
         if entry is not None:
             data_info.source.beam_size_name = entry.get('name')
-            
+
         self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:x',
-                     dom, 'beam_size.x', data_info.source)
+                          dom, 'beam_size.x', data_info.source)
         self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:y',
-                     dom, 'beam_size.y', data_info.source)
+                          dom, 'beam_size.y', data_info.source)
         self._store_float('ns:SASinstrument/ns:SASsource/ns:beam_size/ns:z',
-                     dom, 'beam_size.z', data_info.source)
-        
+                          dom, 'beam_size.z', data_info.source)
+
         # Collimation info ###################
         nodes = dom.xpath('ns:SASinstrument/ns:SAScollimation',
                           namespaces={'ns': CANSAS_NS})
@@ -1421,46 +1376,46 @@ class Reader(CansasReader):
             if item.get('name') is not None:
                 collim.name = item.get('name')
             self._store_float('ns:length', item, 'length', collim)
-            
+
             # Look for apertures
             apert_list = item.xpath('ns:aperture',
                                     namespaces={'ns': CANSAS_NS})
             for apert in apert_list:
                 aperture = Aperture()
-                
+
                 # Get the name and type of the aperture
                 aperture.name = apert.get('name')
                 aperture.type = apert.get('type')
-                    
+
                 self._store_float('ns:distance', apert, 'distance', aperture)
-                
+
                 entry = get_content('ns:size', apert)
                 if entry is not None:
                     aperture.size_name = entry.get('name')
-                
+
                 self._store_float('ns:size/ns:x', apert, 'size.x', aperture)
                 self._store_float('ns:size/ns:y', apert, 'size.y', aperture)
                 self._store_float('ns:size/ns:z', apert, 'size.z', aperture)
-                
+
                 collim.aperture.append(aperture)
-                
+
             data_info.collimation.append(collim)
-        
+
         # Detector info ######################
         nodes = dom.xpath('ns:SASinstrument/ns:SASdetector',
                           namespaces={'ns': CANSAS_NS})
         for item in nodes:
-            
+
             detector = Detector()
-            
+
             self._store_content('ns:name', item, 'name', detector)
             self._store_float('ns:SDD', item, 'distance', detector)
-            
+
             # Detector offset (as a vector)
             self._store_float('ns:offset/ns:x', item, 'offset.x', detector)
             self._store_float('ns:offset/ns:y', item, 'offset.y', detector)
             self._store_float('ns:offset/ns:z', item, 'offset.z', detector)
-            
+
             # Detector orientation (as a vector)
             self._store_float('ns:orientation/ns:roll', item,
                               'orientation.x', detector)
@@ -1468,7 +1423,7 @@ class Reader(CansasReader):
                               'orientation.y', detector)
             self._store_float('ns:orientation/ns:yaw', item,
                               'orientation.z', detector)
-            
+
             # Beam center (as a vector)
             self._store_float('ns:beam_center/ns:x', item,
                               'beam_center.x', detector)
@@ -1476,7 +1431,7 @@ class Reader(CansasReader):
                               'beam_center.y', detector)
             self._store_float('ns:beam_center/ns:z', item,
                               'beam_center.z', detector)
-            
+
             # Pixel size (as a vector)
             self._store_float('ns:pixel_size/ns:x', item,
                               'pixel_size.x', detector)
@@ -1484,9 +1439,9 @@ class Reader(CansasReader):
                               'pixel_size.y', detector)
             self._store_float('ns:pixel_size/ns:z', item,
                               'pixel_size.z', detector)
-            
+
             self._store_float('ns:slit_length', item, 'slit_length', detector)
-            
+
             data_info.detector.append(detector)
 
         # Processes info ######################
@@ -1496,7 +1451,7 @@ class Reader(CansasReader):
             self._store_content('ns:name', item, 'name', process)
             self._store_content('ns:date', item, 'date', process)
             self._store_content('ns:description', item, 'description', process)
-            
+
             term_list = item.xpath('ns:term', namespaces={'ns': CANSAS_NS})
             for term in term_list:
                 try:
@@ -1510,51 +1465,51 @@ class Reader(CansasReader):
                     err_mess = "cansas_reader.read: error processing process term\n  %s" % sys.exc_value
                     self.errors.append(err_mess)
                     logging.error(err_mess)
-            
+
             note_list = item.xpath('ns:SASprocessnote',
                                    namespaces={'ns': CANSAS_NS})
             for note in note_list:
                 if note.text is not None:
                     process.notes.append(note.text.strip())
-            
+
             data_info.process.append(process)
-            
+
         # Data info ######################
         nodes = dom.xpath('ns:SASdata', namespaces={'ns': CANSAS_NS})
         if len(nodes) > 1:
             raise RuntimeError, "CanSAS reader is not compatible with multiple SASdata entries"
-       
+
         for entry in nodes:
-            for item in list_of_data_2d_attr:
+            for item in LIST_OF_DATA_2D_ATTR:
                 #get node
                 node = get_content('ns:%s' % item[0], entry)
-                exec "data_info.%s = parse_entry_helper(node, item)" % item[1]
-                    
-            for item in list_of_data2d_values:
+                setattr(data_info, item[1], parse_entry_helper(node, item))
+
+            for item in LIST_OF_DATA_2D_VALUES:
                 field = get_content('ns:%s' % item[0], entry)
-                list = []
+                value_list = []
                 if field is not None:
-                    list = [parse_entry_helper(node, item) for node in field]
-                if len(list) < 2:
-                    exec "data_info.%s = None" % item[0]
+                    value_list = [parse_entry_helper(node, item) for node in field]
+                if len(value_list) < 2:
+                    setattr(data_info, item[0], None)
                 else:
-                    exec "data_info.%s = numpy.array(list)" % item[0]
-        
+                    setattr(data_info, item[0], numpy.array(value_list))
+
         return data_info
 
     def _read_cansas(self, path):
         """
         Load data and P(r) information from a CanSAS XML file.
-        
+
         :param path: file path
-        
+
         :return: Data1D object if a single SASentry was found,
                     or a list of Data1D objects if multiple entries were found,
                     or None of nothing was found
-                    
+
         :raise RuntimeError: when the file can't be opened
         :raise ValueError: when the length of the data vectors are inconsistent
-        
+
         """
         output = []
         basename = os.path.basename(path)
@@ -1562,12 +1517,12 @@ class Reader(CansasReader):
         ext = extension.lower()
         try:
             if os.path.isfile(path):
-                
+
                 #TODO: eventually remove the check for .xml once
                 # the P(r) writer/reader is truly complete.
                 if  ext in self.ext or \
                     ext == '.xml':
-                    
+
                     tree = etree.parse(path, parser=etree.ETCompatXMLParser())
                     # Check the format version number
                     # Specifying the namespace will take care of the file format version
@@ -1580,7 +1535,7 @@ class Reader(CansasReader):
                         except:
                             raise
                         fitstate = self._parse_state(entry)
-                        
+
                         #state could be None when .svs file is loaded
                         #in this case, skip appending to output
                         if fitstate != None:
@@ -1607,10 +1562,10 @@ class Reader(CansasReader):
                         max_char = len(state.file)
                     original_fname = state.file[0:max_char]
                     state.file = original_fname + ' [' + time_str + ']'
-                     
+
                     if state is not None and state.is_data is not None:
-                        exec 'output[%d].is_data = state.is_data' % ind
-                     
+                        output[ind].is_data = state.is_data
+
                     output[ind].filename = state.file
                     state.data = output[ind]
                     state.data.name = output[ind].filename  # state.data_name
@@ -1628,20 +1583,18 @@ class Reader(CansasReader):
                                    datainfo=output[ind], format=ext)
                     self.state = state
                 return output
-              
         except:
             self.call_back(format=ext)
-            #self.state= state
             raise
-           
+
     def write(self, filename, datainfo=None, fitstate=None):
         """
         Write the content of a Data1D as a CanSAS XML file only for standalone
-        
+
         :param filename: name of the file to write
         :param datainfo: Data1D object
         :param fitstate: PageState object
-        
+
         """
         # Sanity check
         if self.cansas == True:
@@ -1650,17 +1603,17 @@ class Reader(CansasReader):
             # Write the XML document
         else:
             doc = fitstate.toXML(file=filename)
-        
+
         # Save the document no matter the type
         fd = open(filename, 'w')
         fd.write(doc.toprettyxml())
         fd.close()
-        
+
     def write_toXML(self, datainfo=None, state=None):
         """
         Write toXML, a helper for write(),
         could be used by guimanager._on_save()
-        
+
         : return: xml doc
         """
 
@@ -1676,7 +1629,7 @@ class Reader(CansasReader):
             if state.data.run_name == None or state.data.run_name == {}:
                 state.data.run = [str(state.data.name)]
                 state.data.run_name[0] = state.data.name
-            
+
             if issubclass(state.data.__class__,
                           sas.dataloader.data_info.Data1D):
                 data = state.data
@@ -1684,12 +1637,12 @@ class Reader(CansasReader):
             else:
                 data = state.data
                 doc, sasentry = self._data2d_to_xml_doc(data)
-            
+
         if state is not None:
             doc = state.toXML(doc=doc, file=data.filename, entry_node=sasentry)
-        
+
         return doc
-    
+
 # Simple html report templet
 HEADER = "<html>\n"
 HEADER += "<head>\n"
@@ -1735,7 +1688,7 @@ if __name__ == "__main__":
     state = PageState(parent=None)
     #state.toXML()
     """
-    
+
     file = open("test_state", "w")
     pickle.dump(state, file)
     print pickle.dumps(state)
@@ -1768,5 +1721,5 @@ if __name__ == "__main__":
     db['aastate5'] = pickle.dumps(state)
     db.keys().sort()
     print pickle.loads(db['state2'])
-  
+
     db.close()

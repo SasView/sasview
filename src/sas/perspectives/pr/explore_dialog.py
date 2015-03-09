@@ -2,7 +2,7 @@
 ################################################################################
 #This software was developed by the University of Tennessee as part of the
 #Distributed Data Analysis of Neutron Scattering Experiments (DANSE)
-#project funded by the US National Science Foundation. 
+#project funded by the US National Science Foundation.
 #
 #See the license text in license.txt
 #
@@ -15,15 +15,14 @@ of D_max value. User picks a number of points and a range of
 distances, then can toggle between inversion outputs and see
 their distribution as a function of D_max.
 """
-    
+
 
 import wx
 import numpy
-import math
 import logging
 import sys
 
-# Avoid Matplotlib complaining about the lack of legend on the plot 
+# Avoid Matplotlib complaining about the lack of legend on the plot
 import warnings
 warnings.simplefilter("ignore")
 
@@ -45,28 +44,28 @@ class OutputPlot(PlotPanel):
     Plot panel used to show the selected results as a function
     of D_max
     """
-    def __init__(self, d_min, d_max, parent, id = -1, color = None,\
-        dpi = None, style = wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
+    def __init__(self, d_min, d_max, parent, id= -1, color=None, \
+                 dpi=None, style=wx.NO_FULL_REPAINT_ON_RESIZE, **kwargs):
         """
         Initialization. The parameters added to PlotPanel are:
-        
+
         :param d_min: Minimum value of D_max to explore
         :param d_max: Maximum value of D_max to explore
-        
+
         """
-        PlotPanel.__init__(self, parent, id = id, style = style, **kwargs)
+        PlotPanel.__init__(self, parent, id=id, style=style, **kwargs)
 
         self.parent = parent
         self.min = d_min
         self.max = d_max
         self.npts = DEFAULT_NPTS
 
-        step = (self.max-self.min)/(self.npts-1)
-        self.x = numpy.arange(self.min, self.max+step*0.01, step)
+        step = (self.max - self.min) / (self.npts - 1)
+        self.x = numpy.arange(self.min, self.max + step * 0.01, step)
         dx = numpy.zeros(len(self.x))
         y = numpy.ones(len(self.x))
         dy = numpy.zeros(len(self.x))
- 
+
         # Plot area
         self.plot = Model1D(self.x, y=y, dy=dy)
         self.plot.name = DEFAULT_OUTPUT
@@ -75,10 +74,10 @@ class OutputPlot(PlotPanel):
         # Graph        
         self.graph = Graph()
         self.graph.xaxis("\\rm{D_{max}}", 'A')
-        self.graph.yaxis("\\rm{%s}" % DEFAULT_OUTPUT,"")
+        self.graph.yaxis("\\rm{%s}" % DEFAULT_OUTPUT, "")
         self.graph.add(self.plot)
         self.graph.render(self)
-        
+
         self.toolbar.DeleteToolByPos(0)
         self.toolbar.DeleteToolByPos(8)
         self.toolbar.Realize()
@@ -86,27 +85,27 @@ class OutputPlot(PlotPanel):
     def onContextMenu(self, event):
         """
         Default context menu for the plot panel
-        
+
         :TODO: Would be nice to add printing and log/linear scales.
-            The current verison of plottools no longer plays well with 
-            plots outside of guiframe. Guiframe team needs to fix this. 
+            The current verison of plottools no longer plays well with
+            plots outside of guiframe. Guiframe team needs to fix this.
         """
         # Slicer plot popup menu
-        id = wx.NewId()
+        wx_id = wx.NewId()
         slicerpop = wx.Menu()
-        slicerpop.Append(id, '&Save image', 'Save image as PNG')
-        wx.EVT_MENU(self, id, self.onSaveImage)
-        
-        id = wx.NewId()
+        slicerpop.Append(wx_id, '&Save image', 'Save image as PNG')
+        wx.EVT_MENU(self, wx_id, self.onSaveImage)
+
+        wx_id = wx.NewId()
         slicerpop.AppendSeparator()
-        slicerpop.Append(id, '&Reset Graph')
-        wx.EVT_MENU(self, id, self.onResetGraph)
-       
+        slicerpop.Append(wx_id, '&Reset Graph')
+        wx.EVT_MENU(self, wx_id, self.onResetGraph)
+
         pos = event.GetPosition()
         pos = self.ScreenToClient(pos)
         self.PopupMenu(slicerpop, pos)
 
-class Results:
+class Results(object):
     """
     Class to hold the inversion output parameters
     as a function of D_max
@@ -125,52 +124,52 @@ class Results:
         self.iq0 = []
         self.bck = []
         self.d_max = []
-        
+
         # Dictionary of outputs
         self.outputs = {}
-        self.outputs['Chi2/dof'] = ["\chi^2/dof", "a.u.", self.chi2]    
-        self.outputs['Oscillation parameter'] = ["Osc", "a.u.", self.osc]    
-        self.outputs['Positive fraction'] = ["P^+", "a.u.", self.pos]    
-        self.outputs['1-sigma positive fraction'] = ["P^+_{1\ \sigma}", 
-                                                     "a.u.", self.pos_err]    
-        self.outputs['Rg'] = ["R_g", "A", self.rg]    
-        self.outputs['I(q=0)'] = ["I(q=0)", "1/A", self.iq0]    
-        self.outputs['Background'] = ["Bck", "1/A", self.bck] 
-        
+        self.outputs['Chi2/dof'] = ["\chi^2/dof", "a.u.", self.chi2]
+        self.outputs['Oscillation parameter'] = ["Osc", "a.u.", self.osc]
+        self.outputs['Positive fraction'] = ["P^+", "a.u.", self.pos]
+        self.outputs['1-sigma positive fraction'] = ["P^+_{1\ \sigma}",
+                                                     "a.u.", self.pos_err]
+        self.outputs['Rg'] = ["R_g", "A", self.rg]
+        self.outputs['I(q=0)'] = ["I(q=0)", "1/A", self.iq0]
+        self.outputs['Background'] = ["Bck", "1/A", self.bck]
+
 class ExploreDialog(wx.Dialog):
     """
     The explorer dialog box. This dialog is meant to be
     invoked by the InversionControl class.
     """
-    
+
     def __init__(self, pr_state, nfunc, *args, **kwds):
         """
         Initialization. The parameters added to Dialog are:
-        
+
         :param pr_state: sas.pr.invertor.Invertor object
         :param nfunc: Number of terms in the expansion
-        
+
         """
-        kwds["style"] = wx.RESIZE_BORDER|wx.DEFAULT_DIALOG_STYLE
+        kwds["style"] = wx.RESIZE_BORDER | wx.DEFAULT_DIALOG_STYLE
         wx.Dialog.__init__(self, *args, **kwds)
-        
+
         # Initialize Results object
         self.results = Results()
-        
-        self.pr_state  = pr_state
-        self._default_min = 0.9*self.pr_state.d_max
-        self._default_max = 1.1*self.pr_state.d_max
-        self.nfunc     = nfunc
-        
+
+        self.pr_state = pr_state
+        self._default_min = 0.9 * self.pr_state.d_max
+        self._default_max = 1.1 * self.pr_state.d_max
+        self.nfunc = nfunc
+
         # Control for number of points
         self.npts_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
-                                   size=(60,20))
+                                   size=(60, 20))
         # Control for the minimum value of D_max
         self.dmin_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
-                                   size=(60,20))
+                                   size=(60, 20))
         # Control for the maximum value of D_max
         self.dmax_ctl = PrTextCtrl(self, -1, style=wx.TE_PROCESS_ENTER,
-                                   size=(60,20))
+                                   size=(60, 20))
 
         # Output selection box for the y axis
         self.output_box = None
@@ -178,41 +177,41 @@ class ExploreDialog(wx.Dialog):
         # Create the plot object
         self.plotpanel = OutputPlot(self._default_min, self._default_max,
                                     self, -1, style=wx.RAISED_BORDER)
-        
+
         # Create the layout of the dialog
         self.__do_layout()
         self.Fit()
-        
+
         # Calculate exploration results
         self._recalc()
         # Graph the default output curve
         self._plot_output()
-        
-    class Event:
+
+    class Event(object):
         """
         Class that holds the content of the form
         """
         ## Number of points to be plotted
-        npts   = 0
+        npts = 0
         ## Minimum value of D_max
-        dmin   = 0
+        dmin = 0
         ## Maximum value of D_max
-        dmax   = 0
-                
+        dmax = 0
+
     def _get_values(self, event=None):
         """
         Invoked when the user changes a value of the form.
         Check that the values are of the right type.
-        
-        :return: ExploreDialog.Event object if the content is good, 
+
+        :return: ExploreDialog.Event object if the content is good,
             None otherwise
         """
         # Flag to make sure that all values are good
         flag = True
-        
+
         # Empty ExploreDialog.Event content
         content_event = self.Event()
-        
+
         # Read each text control and make sure the type is valid
         # Let the user know if a type is invalid by changing the
         # background color of the control.
@@ -224,7 +223,7 @@ class ExploreDialog(wx.Dialog):
             flag = False
             self.npts_ctl.SetBackgroundColour("pink")
             self.npts_ctl.Refresh()
-            
+
         try:
             content_event.dmin = float(self.dmin_ctl.GetValue())
             self.dmin_ctl.SetBackgroundColour(wx.WHITE)
@@ -233,7 +232,7 @@ class ExploreDialog(wx.Dialog):
             flag = False
             self.dmin_ctl.SetBackgroundColour("pink")
             self.dmin_ctl.Refresh()
-        
+
         try:
             content_event.dmax = float(self.dmax_ctl.GetValue())
             self.dmax_ctl.SetBackgroundColour(wx.WHITE)
@@ -242,7 +241,7 @@ class ExploreDialog(wx.Dialog):
             flag = False
             self.dmax_ctl.SetBackgroundColour("pink")
             self.dmax_ctl.Refresh()
-        
+
         # If the content of the form is valid, return the content,
         # otherwise return None
         if flag:
@@ -251,38 +250,38 @@ class ExploreDialog(wx.Dialog):
             return content_event
         else:
             return None
-    
+
     def _plot_output(self, event=None):
         """
-        Invoked when a new output type is selected for plotting, 
+        Invoked when a new output type is selected for plotting,
         or when a new computation is finished.
         """
         # Get the output type selection
         output_type = self.output_box.GetString(self.output_box.GetSelection())
-        
+
         # If the selected output type is part of the results ojbect,
-        # display the results. 
+        # display the results.
         # Note: by design, the output type should always be part of the
         #       results object.
-        if self.results.outputs.has_key(output_type): 
+        if self.results.outputs.has_key(output_type):
             self.plotpanel.plot.x = self.results.d_max
             self.plotpanel.plot.y = self.results.outputs[output_type][2]
             self.plotpanel.plot.name = '_nolegend_'
             y_label = "\\rm{%s}" % self.results.outputs[output_type][0]
             self.plotpanel.graph.yaxis(y_label,
                                        self.results.outputs[output_type][1])
-            
+
             # Redraw
             self.plotpanel.graph.render(self.plotpanel)
             self.plotpanel.subplot.figure.canvas.draw_idle()
         else:
-            msg =  "ExploreDialog: the Results object's dictionary "
+            msg = "ExploreDialog: the Results object's dictionary "
             msg += "does not contain "
             msg += "the [%s] output type. This must be indicative of "
             msg += "a change in the " % str(output_type)
             msg += "ExploreDialog code."
             logging.error(msg)
-        
+
     def __do_layout(self):
         """
         Do the layout of the dialog
@@ -290,39 +289,39 @@ class ExploreDialog(wx.Dialog):
         # Dialog box properties
         self.SetTitle("D_max Explorer")
         self.SetSize((600, 595))
-        
+
         sizer_main = wx.BoxSizer(wx.VERTICAL)
         sizer_button = wx.BoxSizer(wx.HORIZONTAL)
         sizer_params = wx.GridBagSizer(5, 5)
 
         iy = 0
         ix = 0
-        label_npts  = wx.StaticText(self, -1, "Npts")
-        sizer_params.Add(label_npts, (iy, ix), (1, 1), 
-                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+        label_npts = wx.StaticText(self, -1, "Npts")
+        sizer_params.Add(label_npts, (iy, ix), (1, 1),
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         ix += 1
-        sizer_params.Add(self.npts_ctl,   (iy, ix), (1, 1), 
-                         wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer_params.Add(self.npts_ctl, (iy, ix), (1, 1),
+                         wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         self.npts_ctl.SetValue("%g" % DEFAULT_NPTS)
         self.npts_ctl.Bind(wx.EVT_KILL_FOCUS, self._recalc)
-        
+
         ix += 1
-        label_dmin   = wx.StaticText(self, -1, "Min Distance [A]")
+        label_dmin = wx.StaticText(self, -1, "Min Distance [A]")
         sizer_params.Add(label_dmin, (iy, ix), (1, 1),
-                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         ix += 1
         sizer_params.Add(self.dmin_ctl, (iy, ix), (1, 1),
-                         wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+                         wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         self.dmin_ctl.SetValue(str(self._default_min))
         self.dmin_ctl.Bind(wx.EVT_KILL_FOCUS, self._recalc)
-        
+
         ix += 1
         label_dmax = wx.StaticText(self, -1, "Max Distance [A]")
         sizer_params.Add(label_dmax, (iy, ix), (1, 1),
-                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 15)
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 15)
         ix += 1
-        sizer_params.Add(self.dmax_ctl,   (iy, ix), (1, 1),
-                         wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer_params.Add(self.dmax_ctl, (iy, ix), (1, 1),
+                         wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         self.dmax_ctl.SetValue(str(self._default_max))
         self.dmax_ctl.Bind(wx.EVT_KILL_FOCUS, self._recalc)
 
@@ -333,34 +332,34 @@ class ExploreDialog(wx.Dialog):
         for item in self.results.outputs.keys():
             self.output_box.Append(item, "")
         self.output_box.SetStringSelection(DEFAULT_OUTPUT)
-        
+
         output_sizer = wx.GridBagSizer(5, 5)
         output_sizer.Add(selection_msg, (0, 0), (1, 1),
-                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 10)
         output_sizer.Add(self.output_box, (0, 1), (1, 2),
-                         wx.LEFT|wx.EXPAND|wx.ADJUST_MINSIZE, 10)
-        
-        wx.EVT_COMBOBOX(self.output_box, -1, self._plot_output) 
+                         wx.LEFT | wx.EXPAND | wx.ADJUST_MINSIZE, 10)
+
+        wx.EVT_COMBOBOX(self.output_box, -1, self._plot_output)
         sizer_main.Add(output_sizer, 0, wx.EXPAND | wx.ALL, 10)
-        
+
         sizer_main.Add(self.plotpanel, 0, wx.EXPAND | wx.ALL, 10)
         sizer_main.SetItemMinSize(self.plotpanel, 400, 400)
-        
-        sizer_main.Add(sizer_params, 0, wx.EXPAND|wx.ALL, 10)
+
+        sizer_main.Add(sizer_params, 0, wx.EXPAND | wx.ALL, 10)
         static_line_3 = wx.StaticLine(self, -1)
         sizer_main.Add(static_line_3, 0, wx.EXPAND, 0)
-        
+
         # Bottom area with the close button
-        sizer_button.Add((20, 20), 1, wx.EXPAND|wx.ADJUST_MINSIZE, 0)
+        sizer_button.Add((20, 20), 1, wx.EXPAND | wx.ADJUST_MINSIZE, 0)
         button_OK = wx.Button(self, wx.ID_OK, "Close")
-        sizer_button.Add(button_OK, 0, wx.LEFT|wx.RIGHT|wx.ADJUST_MINSIZE, 10)
-        
-        sizer_main.Add(sizer_button, 0, wx.EXPAND|wx.BOTTOM|wx.TOP, 10)
+        sizer_button.Add(button_OK, 0, wx.LEFT | wx.RIGHT | wx.ADJUST_MINSIZE, 10)
+
+        sizer_main.Add(sizer_button, 0, wx.EXPAND | wx.BOTTOM | wx.TOP, 10)
         self.SetAutoLayout(True)
         self.SetSizer(sizer_main)
         self.Layout()
         self.Centre()
-        
+
         # Bind the Enter key to recalculation
         self.Bind(wx.EVT_TEXT_ENTER, self._recalc)
 
@@ -369,7 +368,7 @@ class ExploreDialog(wx.Dialog):
         Not implemented
         """
         pass
-    
+
     def _recalc(self, event=None):
         """
         Invoked when the user changed a value on the form.
@@ -380,26 +379,26 @@ class ExploreDialog(wx.Dialog):
         # If the content of the form is invalid, return and do nothing
         if content is None:
             return
-        
+
         # Results object to store the computation outputs.
         results = Results()
-        
+
         # Loop over d_max values
-        for i in range(content.npts): 
-            temp = (content.dmax - content.dmin)/(content.npts - 1.0)   
+        for i in range(content.npts):
+            temp = (content.dmax - content.dmin) / (content.npts - 1.0)
             d = content.dmin + i * temp
-                
+
             self.pr_state.d_max = d
             try:
-                out, cov = self.pr_state.invert(self.nfunc)   
-            
+                out, cov = self.pr_state.invert(self.nfunc)
+
                 # Store results
                 iq0 = self.pr_state.iq0(out)
                 rg = self.pr_state.rg(out)
                 pos = self.pr_state.get_positive(out)
                 pos_err = self.pr_state.get_pos_err(out, cov)
                 osc = self.pr_state.oscillations(out)
-            
+
                 results.d_max.append(self.pr_state.d_max)
                 results.bck.append(self.pr_state.background)
                 results.chi2.append(self.pr_state.chi2)
@@ -407,69 +406,14 @@ class ExploreDialog(wx.Dialog):
                 results.rg.append(rg)
                 results.pos.append(pos)
                 results.pos_err.append(pos_err)
-                results.osc.append(osc)           
+                results.osc.append(osc)
             except:
                 # This inversion failed, skip this D_max value
                 msg = "ExploreDialog: inversion failed "
                 msg += "for D_max=%s\n%s" % (str(d), sys.exc_value)
                 logging.error(msg)
-            
-        self.results = results            
-         
+
+        self.results = results
+
         # Plot the selected output
-        self._plot_output()   
-            
-##### testing code ############################################################
-"""
-Example: ::
-
-class MyApp(wx.App):
-    
-    #Test application used to invoke the ExploreDialog for testing
-   
-    def OnInit(self):
-        from inversion_state import Reader
-        from sas.pr.invertor import Invertor
-        wx.InitAllImageHandlers()
-        
-        def call_back(state, datainfo=None):
-            
-            #Dummy call-back method used by the P(r) 
-            #file reader.
-            
-            print state
-            
-        # Load test data
-        # This would normally be loaded by the application 
-        # of the P(r) plug-in.
-        r = Reader(call_back)
-        data = r.read("test_pr_data.prv")
-        pr_state = data.meta_data['prstate']
-        
-        # Create Invertor object for the data
-        # This would normally be assembled by the P(r) plug-in
-        pr = Invertor()
-        pr.d_max = pr_state.d_max
-        pr.alpha = pr_state.alpha
-        pr.q_min = pr_state.qmin
-        pr.q_max = pr_state.qmax
-        pr.x = data.x
-        pr.y = data.y
-        pr.err = data.y*0.1
-        pr.has_bck = False
-        pr.slit_height = pr_state.height
-        pr.slit_width = pr_state.width
-        
-        # Create the dialog
-        dialog = ExploreDialog(pr, 10, None, -1, "")
-        self.SetTopWindow(dialog)
-        dialog.ShowModal()
-        dialog.Destroy()
-
-        return 1
-
-if __name__ == "__main__":
-    app = MyApp(0)
-    app.MainLoop()
-    
-""" 
+        self._plot_output()
