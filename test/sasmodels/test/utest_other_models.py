@@ -898,11 +898,11 @@ class TestLamellarPSModel(unittest.TestCase):
         
     def test1D(self):
         """ Test 1D model for a LamellarPS Model"""
-        self.assertAlmostEquals(self.comp.run(0.001), 27899.30836, 1)
+        self.assertAlmostEquals(self.comp.run(0.001), 28895.13397, 1)
         
     def test1D_2(self):
         """ Test 2D model for a LamellarPS Model"""
-        self.assertAlmostEquals(self.comp.run([0.001, 1.3]),27899.30836, 1) 
+        self.assertAlmostEquals(self.comp.run([0.001, 1.3]),28895.13397, 1) 
     
     def testEval_1D(self):
         """ Test 1D model for a LamellarPS Model with evalDistribution"""
@@ -947,11 +947,11 @@ class TestLamellarPSHGModel(unittest.TestCase):
         
     def test1D(self):
         """ Test 1D model for a LamellarPSHG Model"""
-        self.assertAlmostEquals(self.comp.run(0.001),6831387.29466, 3)
+        self.assertAlmostEquals(self.comp.run(0.001),6838238.571488, 3)
         
     def test1D_2(self):
         """ Test 2D model for a LamellarPSHG Model"""
-        self.assertAlmostEquals(self.comp.run([0.001, 1.3]),6831387.29466,3)
+        self.assertAlmostEquals(self.comp.run([0.001, 1.3]),6838238.571488,3)
         
     def testEval_1D(self):
         """ Test 1D model for a LamellarPSHG Model with evalDistribution"""
