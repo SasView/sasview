@@ -67,7 +67,7 @@ static double LamellarPS_kernel(double dp[], double q)
   NNint = (int)NN;    //cast to an integer for the loop
   ii=0;
   Sq = 0.0;
-  for(ii=1;ii<(NNint-1);ii+=1) {
+  for(ii=1;ii<=(NNint-1);ii+=1) {
 
     fii = (double)ii;   //do I really need to do this?
 
