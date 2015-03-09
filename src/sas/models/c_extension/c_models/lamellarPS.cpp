@@ -143,8 +143,10 @@ double LamellarPSModel :: operator()(double q) {
   // Loop over short_edgeA weight points
   for(int i=0; i< (int)weights_spacing.size(); i++) {
     dp[1] = weights_spacing[i].value;
-    for(int j=0; j< (int)weights_spacing.size(); j++) {
-      dp[2] = weights_delta[i].value;
+    //for(int j=0; j< (int)weights_spacing.size(); j++) {    BUGS fixed March 2015
+    for(int j=0; j< (int)weights_delta.size(); j++) {
+      //dp[2] = weights_delta[i].value;        BUG
+      dp[2] = weights_delta[j].value;
 
       sum += weights_spacing[i].weight * weights_delta[j].weight * LamellarPS_kernel(dp, q);
       norm += weights_spacing[i].weight * weights_delta[j].weight;
