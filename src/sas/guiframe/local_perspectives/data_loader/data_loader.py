@@ -203,36 +203,38 @@ class Plugin(PluginBase):
                                                           error_message)
             except:
                 any_error = True
-        if any_error or error_message != "":
-            if error_message == "":
-                error = "Error: " + str(sys.exc_value) + "\n"
-                error += "while loading Data: \n%s\n" % str(p_file)
-                error_message = "The data file you selected could not be loaded.\n"
-                error_message += "Make sure the content of your file"
-                error_message += " is properly formatted.\n\n"
-                error_message += "When contacting the SasView team, mention the"
-                error_message += " following:\n%s" % str(error)
-            elif data_error:
-                base_message = "Errors occurred while loading {0}\n".format(p_file)
-                base_message += "The data file loaded but with errors.\n"
-                error_message = base_message + error_message
-            else:
-                error_message += "%s\n" % str(p_file)
-            info = "error"
+            if any_error or error_message != "":
+                if error_message == "":
+                    error = "Error: " + str(sys.exc_info()[1]) + "\n"
+                    error += "while loading Data: \n%s\n" % str(basename)
+                    error_message += "The data file you selected could not be loaded.\n"
+                    error_message += "Make sure the content of your file"
+                    error_message += " is properly formatted.\n\n"
+                    error_message += "When contacting the SasView team, mention the"
+                    error_message += " following:\n%s" % str(error)
+                elif data_error:
+                    base_message = "Errors occurred while loading "
+                    base_message += "{0}\n".format(basename)
+                    base_message += "The data file loaded but with errors.\n"
+                    error_message = base_message + error_message
+                else:
+                    error_message += "%s\n" % str(p_file)
+                info = "error"
+        
+        if any_error or error_message:
             self.load_update(output=output, message=error_message, info=info)
-
         else:
             message = "Loading Data Complete! "
         message += log_msg
         self.load_complete(output=output, error_message=error_message,
-                           message=message, path=path, info=info)
+                           message=message, path=path, info='warning')
 
     def load_update(self, output=None, message="", info="warning"):
         """
         print update on the status bar
         """
         if message != "":
-            wx.PostEvent(self.parent, StatusEvent(status=message, info='info',
+            wx.PostEvent(self.parent, StatusEvent(status=message, info=info,
                                                   type="progress"))
     def load_complete(self, output, message="", error_message="", path=None,
                       info="warning"):

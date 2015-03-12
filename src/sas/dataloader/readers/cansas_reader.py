@@ -104,8 +104,8 @@ class Reader(XMLreader):
     cansas_version = "1.0"
     base_ns = "{cansas1d/1.0}"
 
-    logging = []
-    errors = []
+    logging = None
+    errors = None
 
     type_name = "canSAS"
     ## Wildcards
@@ -119,7 +119,8 @@ class Reader(XMLreader):
 
     def __init__(self):
         ## List of errors
-        self.errors = []
+        self.errors = set()
+        self.logging = []
         self.encoding = None
 
 
@@ -251,7 +252,7 @@ class Reader(XMLreader):
         # Remove empty nodes, verify array sizes are correct
         for error in self.errors:
             data1d.errors.append(error)
-        del self.errors[:]
+        self.errors.clear()
         numpy.trim_zeros(data1d.x)
         numpy.trim_zeros(data1d.y)
         numpy.trim_zeros(data1d.dy)
@@ -300,6 +301,7 @@ class Reader(XMLreader):
         """
         attr = node.attrib
         value_unit = ''
+        err_msg = None
         if 'unit' in attr and new_current_level.get('unit') is not None:
             try:
                 local_unit = attr['unit']
@@ -321,7 +323,6 @@ class Reader(XMLreader):
                     else:
                         value_unit = local_unit
                         err_msg = "Unit converter is not available.\n"
-                        self.errors.append(err_msg)
                 else:
                     value_unit = local_unit
             except KeyError:
@@ -332,17 +333,17 @@ class Reader(XMLreader):
                             "\"expecting [{1}]\"" + \
                             ".format(data1d.{0})"
                 exec intermediate.format(unitname, "{0}", "{1}")
-                self.errors.append(err_msg)
                 value_unit = local_unit
             except:
                 print sys.exc_info()
                 err_msg = "CanSAS reader: unknown error converting "
                 err_msg += "\"{0}\" unit [{1}]"
                 err_msg = err_msg.format(tagname, local_unit)
-                self.errors.append(err_msg)
                 value_unit = local_unit
         elif 'unit' in attr:
             value_unit = attr['unit']
+        if err_msg:
+            self.errors.add(err_msg)
         node_value = "float({0})".format(node_value)
         return node_value, value_unit
 
@@ -354,7 +355,7 @@ class Reader(XMLreader):
         :param data1d: presumably a Data1D object
         """
         if data1d == None:
-            self.errors = []
+            self.errors = set()
             x_vals = numpy.empty(0)
             y_vals = numpy.empty(0)
             dx_vals = numpy.empty(0)
@@ -696,22 +697,22 @@ class Reader(XMLreader):
             point = self.create_element("Idata")
             node.append(point)
             self.write_node(point, "Q", datainfo.x[i],
-                            {'unit': datainfo.x_unit})
+                            {'unit': datainfo._xunit})
             if len(datainfo.y) >= i:
                 self.write_node(point, "I", datainfo.y[i],
-                                {'unit': datainfo.y_unit})
+                                {'unit': datainfo._yunit})
             if datainfo.dy != None and len(datainfo.dy) > i:
                 self.write_node(point, "Idev", datainfo.dy[i],
-                                {'unit': datainfo.y_unit})
+                                {'unit': datainfo._yunit})
             if datainfo.dx != None and len(datainfo.dx) > i:
                 self.write_node(point, "Qdev", datainfo.dx[i],
-                                {'unit': datainfo.x_unit})
+                                {'unit': datainfo._xunit})
             if datainfo.dxw != None and len(datainfo.dxw) > i:
                 self.write_node(point, "dQw", datainfo.dxw[i],
-                                {'unit': datainfo.x_unit})
+                                {'unit': datainfo._xunit})
             if datainfo.dxl != None and len(datainfo.dxl) > i:
                 self.write_node(point, "dQl", datainfo.dxl[i],
-                                {'unit': datainfo.x_unit})
+                                {'unit': datainfo._xunit})
 
     def _write_trans_spectrum(self, datainfo, entry_node):
         """
@@ -1168,7 +1169,7 @@ class Reader(XMLreader):
                             err_mess = "CanSAS reader: could not convert"
                             err_mess += " %s unit [%s]; expecting [%s]\n  %s" \
                                 % (variable, units, local_unit, exc_value)
-                            self.errors.append(err_mess)
+                            self.errors.add(err_mess)
                             if optional:
                                 logging.info(err_mess)
                             else:
@@ -1177,7 +1178,7 @@ class Reader(XMLreader):
                         err_mess = "CanSAS reader: unrecognized %s unit [%s];"\
                         % (variable, units)
                         err_mess += " expecting [%s]" % local_unit
-                        self.errors.append(err_mess)
+                        self.errors.add(err_mess)
                         if optional:
                             logging.info(err_mess)
                         else:
